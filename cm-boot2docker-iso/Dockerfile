@@ -4,7 +4,6 @@
 
 FROM boot2docker/boot2docker
 
-ADD build-iso.sh /build-iso.sh
 RUN sudo docker pull boot2docker/boot2docker && \
     echo "FROM boot2docker/boot2docker" > Dockerfile && \
     echo "ADD . $ROOTFS/data/" >> Dockerfile && \
