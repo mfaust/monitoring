@@ -12,6 +12,8 @@ ADD files/tomcat-installation-7.1.7-12.zip /tmp/tomcat-installation.zip
 RUN unzip /tmp/tomcat-installation.zip -d /tomcat && \
   rm -f /tmp/tomcat-installation.zip  && /tomcat/install.sh && rm -fr /tomcat
 
+#coremedia-preview-cae
+ADD files/blueprint.war /opt/coremedia/cm7-tomcat-installation/webapps/blueprint.war
 
 # supervisord
 RUN curl -s -L https://bootstrap.pypa.io/ez_setup.py | python
@@ -26,3 +28,5 @@ ENV CATALINA_TMPDIR /var/tmp/coremedia/cm7-preview-tomcat
 ENV CATALINA_BASE /opt/coremedia/cm7-preview-tomcat
 
 CMD ["/usr/bin/supervisord"]
+
+EXPOSE 8080
