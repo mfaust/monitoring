@@ -1,19 +1,28 @@
 FROM centos:6.6
 RUN yum -y -q upgrade
-RUN yum -y -q install curl
+RUN yum -y -q install curl unzip java-1.8.0-openjdk-headles tar sudo
 
-RUN yum -y -q install java-1.8.0-openjdk-headless
-
-RUN curl -s http://mirror.cc.columbia.edu/pub/software/apache/tomcat/tomcat-7/v7.0.61/bin/apache-tomcat-7.0.61.zip \
- -o tomcat.zip && \
- unzip tomcat.zip && \
- rm -f tomcat.zip && \
- ln -s apache-tomcat-7.0.61 /tomcat
-
+#consult-template
 RUN curl -s -L \
   https://github.com/hashicorp/consul-template/releases/download/v0.9.0/consul-template_0.9.0_linux_amd64.tar.gz | \
-  tar xz -C /usr/local && ln -s /usr/local/consul-template_0.9.0_linux_amd64 /consul-template
+  tar xz -C /usr/bin --strip-components=1
 
-COPY ./docker-entrypoint.sh /
-ENTRYPOINT ["/consul-template/consul-template"]
-CMD["--help"]
+#tomcat
+ADD files/tomcat-installation-7.1.7-12.zip /tmp/tomcat-installation.zip
+RUN unzip /tmp/tomcat-installation.zip -d /tomcat && \
+  rm -f /tmp/tomcat-installation.zip  && /tomcat/install.sh && rm -fr /tomcat
+
+
+# supervisord
+RUN wget http://peak.telecommunity.com/dist/ez_setup.py;python ez_setup.py
+RUN easy_install supervisor
+ADD files/supervisord.conf /etc/supervisord.conf
+
+#set catalina properties
+ENV CATALINA_PID /var/run/coremedia/cm7-preview-tomcat.pid
+ENV CATALINA_HOME /opt/coremedia/cm7-tomcat-installation
+ENV CATALINA_OUT /var/log/coremedia/cm7-preview-tomcat.out
+ENV CATALINA_TMPDIR /var/tmp/coremedia/cm7-preview-tomcat
+ENV CATALINA_BASE /opt/coremedia/cm7-preview-tomcat
+
+CMD ["/usr/bin/supervisord"]
