@@ -14,7 +14,7 @@ RUN unzip /tmp/tomcat-installation.zip -d /tomcat && \
 
 
 # supervisord
-RUN wget http://peak.telecommunity.com/dist/ez_setup.py;python ez_setup.py
+RUN curl -s -L https://bootstrap.pypa.io/ez_setup.py | python
 RUN easy_install supervisor
 ADD files/supervisord.conf /etc/supervisord.conf
 
