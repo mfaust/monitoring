@@ -26,6 +26,7 @@ ENV CATALINA_HOME /opt/coremedia/cm7-tomcat-installation
 ENV CATALINA_OUT /var/log/coremedia/cm7-preview-tomcat.out
 ENV CATALINA_TMPDIR /var/tmp/coremedia/cm7-preview-tomcat
 ENV CATALINA_BASE /opt/coremedia/cm7-preview-tomcat
+ENV CATALINA_OPTS -Dpropertieslocation=/application.properties
 
 CMD ["/usr/bin/supervisord"]
 
