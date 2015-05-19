@@ -3,7 +3,7 @@
 set -e
 set -x
 
-B2D_URL="https://github.com/boot2docker/boot2docker/releases/download/v1.6.0/boot2docker.iso"
+B2D_URL="https://github.com/boot2docker/boot2docker/releases/download/v1.6.2/boot2docker.iso"
 
 apt-get -y -q update
 apt-get install -y -q genisoimage wget p7zip-full cpio xz-utils
