@@ -24,3 +24,5 @@ RUN go get -u github.com/mitchellh/gox && \
     version=`./packer --version`_`git rev-parse --short=10 HEAD` && \
     echo $version > /tmp/packer_version && \
     zip /tmp/packer.zip *
+
+CMD ["cat", "/tmp/packer.zip"]
