@@ -14,17 +14,3 @@ RUN wget -q https://storage.googleapis.com/golang/go1.4.2.linux-amd64.tar.gz && 
     mv ./go /usr/local/
 
 RUN cd $GOROOT/src && GOOS=windows GOARCH=amd64 ./make.bash
-
-RUN go get -u github.com/mitchellh/gox && \
-    mkdir -p $GOPATH/src/github.com/mitchellh && \
-    cd $GOPATH/src/github.com/mitchellh/ && \
-    git clone https://github.com/mitchellh/packer.git && \
-    cd packer && \
-    make updatedeps && \
-    make dev && \
-    cd bin && \
-    version=`./packer --version`_`git rev-parse --short=10 HEAD` && \
-    echo $version > /tmp/packer_version && \
-    zip /tmp/packer.zip *
-
-CMD ["cat", "/tmp/packer.zip"]
