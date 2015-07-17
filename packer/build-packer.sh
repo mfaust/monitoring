@@ -3,6 +3,7 @@ mv /ws/packer-source $GOPATH/src/github.com/mitchellh/packer
 cd $GOPATH/src/github.com/mitchellh/packer
 
 go get -u github.com/mitchellh/gox
+gox -build-toolchain
 
 make updatedeps
 make dev
