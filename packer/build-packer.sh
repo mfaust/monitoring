@@ -1,12 +1,18 @@
 mkdir -p $GOPATH/src/github.com/mitchellh
-mv /ws/packer-source $GOPATH/src/github.com/mitchellh/packer
-cd $GOPATH/src/github.com/mitchellh/packer
+source_path=$GOPATH/src/github.com/mitchellh/packer
+mv /ws/packer-source $source_path
+cd $source_path
 
-go get -u github.com/mitchellh/gox
-gox -build-toolchain
+git checkout $BRANCH
 
-make updatedeps
-make dev
-cd bin
-version=`./packer --version`_`git rev-parse --short=10 HEAD`
-zip /ws/${version}_linux_amd64.zip *
+export XC_ARCH=amd64
+export XC_OS="linux darwin windows"
+
+$source_path/scripts/build.sh
+
+version=`$source_path/pkg/linux_amd64/packer --version`_`git rev-parse --short=10 HEAD`
+
+(cd $source_path/pkg/linux_amd64 && zip /ws/packer_${version}_linux_amd64.zip *)
+(cd $source_path/pkg/darwin_amd64 && zip /ws/packer_${version}_darwin_amd64.zip *)
+(cd $source_path/pkg/windows_amd64 && zip /ws/packer_${version}_windows_amd64.zip *)
+

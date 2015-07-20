@@ -13,4 +13,5 @@ RUN wget -q https://storage.googleapis.com/golang/go1.4.2.linux-amd64.tar.gz && 
     rm -rf go*.linux-amd64.tar.gz && \
     mv ./go /usr/local/
 
-RUN cd $GOROOT/src && GOOS=windows GOARCH=amd64 ./make.bash
+RUN go get -u github.com/mitchellh/gox && \
+    gox -build-toolchain
