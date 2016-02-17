@@ -41,6 +41,7 @@ RUN wget --quiet -O - https://packages.icinga.org/icinga.key | apt-key add - && 
     nagios-plugins \
     icingaweb2 \
     curl \
+    bc \
     jq \
     yajl-tools && \
   apt-get clean
