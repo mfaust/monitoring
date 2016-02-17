@@ -2,8 +2,8 @@
 
 #set -x
 
-export LC_ALL=en_US.UTF-8
-export LANG=en_US.UTF-8
+# export LC_ALL=en_US.UTF-8
+# export LANG=en_US.UTF-8
 
 # ----------------------------------------------------------------------------------------
 
@@ -72,21 +72,21 @@ buildUrl() {
   local job="${1}"
 
   STR_ARRAY=($(echo ${job} | sed -e 's|/|\n|g'))
-  
+
 #  echo ${#STR_ARRAY[@]}
-  
+
   if [ ${#STR_ARRAY[@]} -gt 1 ]
   then
     # Can the match and replacement strings be parameterized?
     match=${STR_ARRAY[0]}
     repl=${STR_ARRAY[0]}/job
-  
+
     url=${job/${match}/${repl}}
 
   else
     url="${job}"
   fi
-  
+
   echo ${url}
 }
 
@@ -94,11 +94,11 @@ buildUrl() {
 check() {
 
   color=$(curl ${curl_opts} https://${HOST}/job/${url}/api/json?pretty=true 2> /dev/null | jq --raw-output '.color')
-  
+
   echo "${color}"
-#   
+#
 # #  echo $result
-#   
+#
 #   if [ "${color}" == "blue" ]
 #   then
 #     status="OKAY"
@@ -115,7 +115,7 @@ check() {
 #     status="unknown"
 #     result=${STATE_UNKNOWN}
 #   fi
-#   
+#
 #   echo "${status} Job ${JOB} (${color})"
 #   exit ${result}
 }
@@ -123,7 +123,7 @@ check() {
 final() {
 
   local output="${1}"
-  
+
   if [ "${output}" == "blue" ]
   then
     status="OKAY"
@@ -140,9 +140,9 @@ final() {
   else
     status="unknown"
 #     result=${STATE_UNKNOWN}
-    JOBS_WARN="${JOBS_WARN} ${JOB}"    
+    JOBS_WARN="${JOBS_WARN} ${JOB}"
   fi
-  
+
   echo "${JOB} (${status})"
 }
 
@@ -156,7 +156,7 @@ run() {
   local countOKAY=0
   local countCRITICAL=0
   local countUNKNOWN=0
-  
+
   if [ ! -z ${JOB} ]
   then
     url=$(buildUrl ${JOB})
@@ -164,11 +164,11 @@ run() {
     msg=$(final ${result})
   fi
 
-  if [ ! -z ${JOBLIST} ] 
+  if [ ! -z ${JOBLIST} ]
   then
     # wandle den String in ein Array
-    array=(${JOBLIST//,/ }) 
-    
+    array=(${JOBLIST//,/ })
+
     for job in "${array[@]}"
     do
       JOB=${job}
@@ -177,16 +177,16 @@ run() {
       msg="${msg} $(final ${result}), "
     done
     msg=${msg::-2}
-    
+
     countFull=${#array[@]}
-    
+
 #     $message="${countOKAY} OKAY, ${countFull} Jenkins Jobs
   fi
-   
+
   countOKAY=$(echo "${msg}" | grep "OKAY" | wc -l )
   countCRITICAL=$(echo "${msg}" | grep "CRITICAL" | wc -l )
   countUNKNOWN=$(echo "${msg}" | grep "unknown" | wc -l )
-  
+
   if [ ${countCRITICAL} -gt 0 ]
   then
     status="CRITICAL"
@@ -194,17 +194,17 @@ run() {
   elif [ ${countUNKNOWN} -gt 0 ]
   then
     status="WARNING"
-    result=${STATE_WARNING}  
+    result=${STATE_WARNING}
   else
     status="OK"
     result=${STATE_OK}
   fi
-    
-#  echo "${JOB} => https://${HOST}/job/${url}/api/json?pretty=true" 
-  
-  echo "${status}  ${countFull} Jenkins Job(s)  (${msg})" 
-  exit ${result}  
-  
+
+#  echo "${JOB} => https://${HOST}/job/${url}/api/json?pretty=true"
+
+  echo "${status}  ${countFull} Jenkins Job(s)  (${msg})"
+  exit ${result}
+
 }
 
 # ----------------------------------------------------------------------------------------
@@ -281,7 +281,7 @@ exit 0
 # https://pc-ci.coremedia.com/job/packer/job/moebius-packer-ephemeral-ami
 # https://pc-ci.coremedia.com/job/packer/job/moebius-packer-minimal-centos7-vmware-iso
 # https://pc-ci.coremedia.com/job/packer/job/moebius-packer-minimal-vmware-iso
-# https://pc-ci.coremedia.com/job/packer/job/moebius-packer-oracle-12moebius-packer-oracle-12 
+# https://pc-ci.coremedia.com/job/packer/job/moebius-packer-oracle-12moebius-packer-oracle-12
 # https://pc-ci.coremedia.com/job/packer/job/moebius-packer-wcs-fep6-ci
 # https://pc-ci.coremedia.com/job/packer/job/moebius-packer-wcs-fep7-ci
 # https://pc-ci.coremedia.com/job/packer/job/moebius-packer-wcs-fep8-ci

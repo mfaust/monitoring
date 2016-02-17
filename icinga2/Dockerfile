@@ -5,7 +5,7 @@ FROM debian:jessie
 
 MAINTAINER Bodo Schulz
 
-LABEL version="0.5.1"
+LABEL version="0.5.3"
 
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -23,6 +23,7 @@ RUN apt-get -qq update && apt-get -qqy upgrade && \
       mailutils \
       vim \
       nano \
+      less \
       software-properties-common
 
 RUN wget --quiet -O - https://packages.icinga.org/icinga.key | apt-key add - && \

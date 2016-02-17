@@ -17,18 +17,28 @@ Build the Container
 
     sudo docker build -t icinga2 --rm=true --force-rm=true .
 
+    or
+
+    ./build.sh
 
 Start a new container and bind to host's port 80 and 5665 with using DNS 10.1.2.14 and 10.1.2.63
 
-    sudo docker run --dns=10.1.2.14 --dns=10.1.2.63 --publish=80:80 --publish=5665:5665 icinga2
+    sudo docker run --dns=10.1.2.14 --dns=10.1.2.63 --publish=80:80 --publish=5665:5665 --volume=${PWD}/shared/icinga2:/usr/local/share/icinga2  icinga2
 
-Start a new container and supply the icinga and icinga_web password
+    or
 
-    sudo docker run -e ICINGA_PASSWORD="icinga" -e ICINGA_WEB_PASSWORD="icinga_web" -t icinga2:latest
+    ./run.sh
+
+After start, the icinga2 Service are up and running (hopefully).
+Now you can add some Nodes via ReST-API
+
+    ./shared/bin/icinga-api.sh
+
+The Script add currently some Infrastructur Nodes (eg. pc-ci.coremedia.com, chef-server.coremedia.com and so on) with an set an small Service-Checks.
 
 ## Icinga Web 2
 
-Icinga Web 2 can be accessed at http://localhost/icingaweb2 with the credentials icingaadmin:icinga  
+Icinga Web 2 can be accessed at http://localhost/icingaweb2 with the credentials icingaadmin:icinga
 
 ## Environment variables & Volumes
 
@@ -45,3 +55,7 @@ DEBIAN_SYS_MAINT_PASSWORD
 /var/lib/mysql
 /var/lib/icinga2
 ```
+
+## NOTES
+
+All Checkresults, Checks and other modifications are *not persitent*!

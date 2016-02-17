@@ -14,8 +14,8 @@ STATE_CRITICAL=2
 STATE_UNKNOWN=3
 STATE_DEPENDENT=4
 
-export LC_ALL=en_US.UTF-8
-export LANG=en_US.UTF-8
+#export LC_ALL=en_US.UTF-8
+#export LANG=en_US.UTF-8
 
 PINGDOM_CREDENTIALS="engineering-tools@coremedia.com:F9i3vzl8WDl6cqTxDVb8cYUoAJ1RJyR2uAgwrW3L"
 
