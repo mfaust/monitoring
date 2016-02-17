@@ -20,8 +20,8 @@ addChefNode() {
   fi
 }
 
-if [ $(icinga2 feature list | grep "Enabled" | grep api | wc -l) -eq 1 ]
-then
+#if [ $(icinga2 feature list | grep "Enabled" | grep api | wc -l) -eq 1 ]
+#then
 
   addJenkinsNode "pc-ci.coremedia.com" "jenkins - pc-ci"
   addJenkinsNode "cm7-ci.coremedia.com" "jenkins - cm7-ci"
@@ -30,8 +30,8 @@ then
   addChefNode "chef-server.coremedia.com" "Chef"
   addChefNode "supermarket.coremedia.com" "Chef Supermarket"
 
-else
-  echo " => API feature not enabled"
-fi
+#else
+#  echo " => API feature not enabled"
+#fi
 
 exit 0
