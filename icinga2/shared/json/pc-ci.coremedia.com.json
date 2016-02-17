@@ -1,0 +1,9 @@
+{
+  "templates": ["generic-host"],
+  "attrs": {
+    "address": "pc-ci.coremedia.com",
+    "display_name": "jenkins - pc-ci",
+    "notes": "Jenkins",
+    "vars.type": "jenkins"
+  }
+}

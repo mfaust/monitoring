@@ -1,0 +1,9 @@
+{
+  "templates": ["generic-host"],
+  "attrs": {
+    "address": "supermarket.coremedia.com",
+    "display_name": "Chef Supermarket",
+    "notes": "Chef",
+    "vars.type": "chef"
+  }
+}
