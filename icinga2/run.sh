@@ -1,7 +1,6 @@
 #!/bin/bash
 
 set -e
-# set -x
 
 sudo docker run \
   --tty=false \
@@ -12,6 +11,9 @@ sudo docker run \
   --publish=5665:5665 \
   --volume=${PWD}/shared/icinga2:/usr/local/share/icinga2 \
   --name icinga2 \
-  bodsch-icinga2
+  --hostname=docker-icinga2-${USER}.coremedia.vm \
+  ${USER}-icinga2
 
 # EOF
+
+
