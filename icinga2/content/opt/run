@@ -4,7 +4,7 @@ set -e
 
 initfile=/etc/icinga2/run.init
 
-hostname="docker-icinga2"
+HOSTNAME="docker-icinga2"
 
 chmod 1777 /tmp
 
@@ -31,56 +31,31 @@ then
   ICINGA_WEB_PASSWORD=${ICINGA_WEB_PASSWORD:-$(pwgen -s 15 1)}
   ICINGAWEB2_PASSWORD=${ICINGAWEB2_PASSWORD:-$(pwgen -s 15 1)}
 
-  #icinga2 options
-  #icinga2-enable-feature ido-mysql >> /dev/null
-  echo " => Enabling icinga2 features."
-  if [[ -L /etc/icinga2/features-enabled/ido-mysql.conf ]]
-  then
-    echo "Symlink for /etc/icinga2/features-enabled/ido-mysql.conf exists already...skipping"
-  else
-    ln -s /etc/icinga2/features-available/ido-mysql.conf /etc/icinga2/features-enabled/ido-mysql.conf
-  fi
-
-  #icinga2-enable-feature livestatus >> /dev/null
-  if [[ -L /etc/icinga2/features-enabled/livestatus.conf ]]
-  then
-    echo "Symlink for /etc/icinga2/features-enabled/livestatus.conf exists already... skipping"
-  else
-    ln -s /etc/icinga2/features-available/livestatus.conf /etc/icinga2/features-enabled/livestatus.conf
-  fi
-
-  #icinga2-enable-feature compatlog >> /dev/null
-  if [[ -L /etc/icinga2/features-enabled/compatlog.conf ]]
-  then
-    echo "Symlink for /etc/icinga2/features-enabled/compatlog.conf exists already... skipping"
-  else
-    ln -s /etc/icinga2/features-available/compatlog.conf /etc/icinga2/features-enabled/compatlog.conf
-  fi
-
-  #icinga2-enable-feature command >> /dev/null
-  if [[ -L /etc/icinga2/features-enabled/command.conf ]]
-  then
-    echo "Symlink for /etc/icinga2/features-enabled/command.conf exists already...skipping"
-  else
-    ln -s /etc/icinga2/features-available/command.conf /etc/icinga2/features-enabled/command.conf
-  fi
+  # disable ssh-checks
+  sed -i -e "s,^.*\ vars.os\ \=\ .*,  //\ vars.os = \"Linux\",g" /etc/icinga2/conf.d/hosts.conf
 
   # enable icinga2 features if not already there
-#  icinga2 feature enable ido-mysql command livestatus compatlog
+  echo " => Enabling icinga2 features."
+  icinga2 feature enable ido-mysql command livestatus compatlog
 
   #icinga2 API cert - regenerate new private key and certificate when running in a new container
-  if [ ! -f /etc/icinga2/pki/${hostname}.key ]
+  if [ ! -f /etc/icinga2/pki/${HOSTNAME}.key ]
   then
-    echo " => Generating new private key and certificate for this container..."; \
-    icinga2 api setup; \
-    sed -i "s,^.*\ NodeName\ \=\ .*,const\ NodeName\ \=\ \"${hostname}\",g" /etc/icinga2/constants.conf; \
-    icinga2 pki new-cert --cn ${hostname} --key /etc/icinga2/pki/${hostname}.key --csr /etc/icinga2/pki/${hostname}.csr; \
-    icinga2 pki sign-csr --csr /etc/icinga2/pki/${hostname}.csr --cert /etc/icinga2/pki/${hostname}.crt; \
-    echo " => Finished cert generation";
+    echo " => Generating new private key and certificate for this container ${HOSTNAME} ..."
+
+    PKI_KEY="/etc/icinga2/pki/${HOSTNAME}.key"
+    PKI_CSR="/etc/icinga2/pki/${HOSTNAME}.csr"
+    PKI_CRT="/etc/icinga2/pki/${HOSTNAME}.crt"
+
+    icinga2 api setup
+    sed -i "s,^.*\ NodeName\ \=\ .*,const\ NodeName\ \=\ \"${HOSTNAME}\",g" /etc/icinga2/constants.conf
+    icinga2 pki new-cert --cn ${HOSTNAME} --key ${PKI_KEY} --csr ${PKI_CSR}
+    icinga2 pki sign-csr --csr ${PKI_CSR} --cert ${PKI_CRT}
+    echo " => Finished cert generation"
   fi
 
   usermod -a -G nagios www-data >> /dev/null
-  chfn -f "nagios at ${hostname}" nagios
+  chfn -f "nagios at ${HOSTNAME}" nagios
 
   update_user_password () {
     (
@@ -98,9 +73,9 @@ then
   then
     /etc/init.d/mysql start
   else
-    echo " => MySQL datadir is empty...initializing"
+    echo " => MySQL datadir is empty ... initializing"
     /usr/bin/mysql_install_db --user=mysql --basedir=/usr --datadir=/var/lib/mysql
-    echo " => Starting MySQL...ignore warning about debian-sys-maint user, it will be granted permissions momentarily"
+    echo " => Starting MySQL ... ignore warning about debian-sys-maint user, it will be granted permissions momentarily"
     /etc/init.d/mysql start
     sleep 5
     (
@@ -114,60 +89,45 @@ then
   update_user_password debian-sys-maint ${DEBIAN_SYS_MAINT_PASSWORD}
   sed -i 's,password\ \=\ .*,password\ \=\ '${DEBIAN_SYS_MAINT_PASSWORD}',g' /etc/mysql/debian.cnf
 
-  # icinga
+  ICINGAADMIN_PASSWORD=$(openssl passwd -1 "icinga")
+
   (
     echo "CREATE DATABASE IF NOT EXISTS icinga;"
-    echo "GRANT SELECT, INSERT, UPDATE, DELETE, DROP, CREATE VIEW, INDEX, EXECUTE ON icinga.* TO 'icinga'@'localhost' IDENTIFIED BY '${ICINGA_PASSWORD}';"
-    echo "quit"
-  ) |
-  mysql
-
-  mysql -f icinga < /usr/share/icinga2-ido-mysql/schema/mysql.sql >> /opt/icinga2-ido-mysql-schema.log 2>&1
-  sed -i 's,<resource name="icinga_pipe">.*</resource>,<resource name="icinga_pipe">/run/icinga2/cmd/icinga2.cmd</resource>,g' /etc/icinga-web/conf.d/access.xml
-  sed -i 's/password \= \".*\"/password \= \"'${IDO_PASSWORD}'\"/g' /etc/icinga2/features-available/ido-mysql.conf
-  sed -i 's/user =\ \".*\"/user =\ \"icinga2-ido-mysq\"/g' /etc/icinga2/features-available/ido-mysql.conf
-  sed -i 's/database =\ \".*\"/database =\ \"icinga2idomysql\"/g' /etc/icinga2/features-available/ido-mysql.conf
-
-  (
     echo "CREATE DATABASE IF NOT EXISTS icinga2idomysql;"
-    echo "GRANT SELECT, INSERT, UPDATE, DELETE, DROP, CREATE VIEW, INDEX, EXECUTE ON icinga2idomysql.* TO 'icinga2-ido-mysq'@'localhost' IDENTIFIED BY '${IDO_PASSWORD}';"
-    echo "quit"
-  ) |
-  mysql
-
-  mysql -f icinga2idomysql < /usr/share/dbconfig-common/data/icinga2-ido-mysql/install/mysql >> /opt/icinga2-ido-mysql-schema.log 2>&1
-
-  (
-    echo "CREATE DATABASE IF NOT EXISTS icinga_web;"
-    echo "GRANT SELECT, INSERT, UPDATE, DELETE, DROP, CREATE VIEW, INDEX, EXECUTE ON icinga_web.* TO 'icinga_web'@'localhost' IDENTIFIED BY '${ICINGA_WEB_PASSWORD}';"
-    echo "quit"
-  ) |
-  mysql
-#   mysql -f icinga_web < /usr/share/dbconfig-common/data/icinga-web/install/mysql >> /opt/icinga-web-schema.log 2>&1
-#   sed -i 's/mysql\:\/\/icinga_web\:.*\@localhost/mysql\:\/\/icinga_web\:'${ICINGA_WEB_PASSWORD}'\@localhost/g' /etc/icinga-web/conf.d/database-web.xml
-#   sed -i 's/mysql\:\/\/.*\@localhost\/icinga.*</mysql\:\/\/icinga2-ido-mysq:'${IDO_PASSWORD}'\@localhost\/icinga2idomysql</g' /etc/icinga-web/conf.d/database-ido.xml
-#   sed -i 's,mysql://icinga_web:.*@localhost,mysql://icinga_web:'${ICINGA_WEB_PASSWORD}'@localhost,g' /etc/icinga-web/conf.d/databases.xml
-#   sed -i 's,mysql://icinga:.*@localhost,mysql://icinga:'${ICINGA_PASSWORD}'@localhost,g' /etc/icinga-web/conf.d/databases.xml
-
-  #icingaweb2
-  (
     echo "CREATE DATABASE IF NOT EXISTS icingaweb2;"
+    echo "GRANT SELECT, INSERT, UPDATE, DELETE, DROP, CREATE VIEW, INDEX, EXECUTE ON icinga.* TO 'icinga'@'localhost' IDENTIFIED BY '${ICINGA_PASSWORD}';"
+    echo "GRANT SELECT, INSERT, UPDATE, DELETE, DROP, CREATE VIEW, INDEX, EXECUTE ON icinga2idomysql.* TO 'icinga2-ido-mysq'@'localhost' IDENTIFIED BY '${IDO_PASSWORD}';"
     echo "GRANT SELECT, INSERT, UPDATE, DELETE, DROP, CREATE VIEW, INDEX, EXECUTE ON icingaweb2.* TO 'icingaweb2'@'localhost' IDENTIFIED BY '${ICINGAWEB2_PASSWORD}';"
-    echo "quit"
-  ) |
-  mysql
+  ) | mysql
 
-  mysql -f icingaweb2 < /usr/share/icingaweb2/etc/schema/mysql.schema.sql >> /opt/icingaweb2-schema.log 2>&1
-  ICINGAADMIN_PASSWORD=$(openssl passwd -1 "icinga")
+  mysql -f icinga          < /usr/share/icinga2-ido-mysql/schema/mysql.sql                   >> /opt/icinga2-ido-mysql-schema.log 2>&1
+  mysql -f icinga2idomysql < /usr/share/dbconfig-common/data/icinga2-ido-mysql/install/mysql >> /opt/icinga2-ido-mysql-schema.log 2>&1
+  mysql -f icingaweb2      < /usr/share/icingaweb2/etc/schema/mysql.schema.sql               >> /opt/icingaweb2-schema.log 2>&1
+
   (
     echo "USE icingaweb2;"
     echo "INSERT IGNORE INTO icingaweb_user (name, active, password_hash) VALUES ('icingaadmin', 1, '${ICINGAADMIN_PASSWORD}');"
     echo "quit"
-  ) |
-  mysql
+  ) | mysql
 
-  if [[ -L /etc/icingaweb2/enabledModules/monitoring ]]; then echo "Symlink for /etc/icingaweb2/enabledModules/monitoring exists already...skipping"; else ln -s /etc/icingaweb2/modules/monitoring /etc/icingaweb2/enabledModules/monitoring; fi
-  if [[ -L /etc/icingaweb2/enabledModules/doc ]]; then echo "Symlink for /etc/icingaweb2/enabledModules/doc exists already...skipping"; else ln -s /etc/icingaweb2/modules/doc /etc/icingaweb2/enabledModules/doc; fi
+  sed -i 's/password \= \".*\"/password \= \"'${IDO_PASSWORD}'\"/g' /etc/icinga2/features-available/ido-mysql.conf
+  sed -i 's/user =\ \".*\"/user =\ \"icinga2-ido-mysq\"/g'          /etc/icinga2/features-available/ido-mysql.conf
+  sed -i 's/database =\ \".*\"/database =\ \"icinga2idomysql\"/g'   /etc/icinga2/features-available/ido-mysql.conf
+
+
+  if [[ -L /etc/icingaweb2/enabledModules/monitoring ]]
+  then
+    echo "Symlink for /etc/icingaweb2/enabledModules/monitoring exists already...skipping"
+  else
+    ln -s /etc/icingaweb2/modules/monitoring /etc/icingaweb2/enabledModules/monitoring
+  fi
+
+  if [[ -L /etc/icingaweb2/enabledModules/doc ]]
+  then
+    echo "Symlink for /etc/icingaweb2/enabledModules/doc exists already...skipping"
+  else
+    ln -s /etc/icingaweb2/modules/doc /etc/icingaweb2/enabledModules/doc
+  fi
 
   sed -i 's,icingaweb2_changeme,'${ICINGAWEB2_PASSWORD}',g' /etc/icingaweb2/resources.ini
   sed -i 's,icinga2-ido-mysq_changeme,'${IDO_PASSWORD}',g' /etc/icingaweb2/resources.ini
@@ -177,7 +137,7 @@ then
 
   /etc/init.d/mysql stop
 
-  echo -e "\n\n\n"
+  echo -e "\n"
   echo " ==================================================================="
   echo " MySQL user 'root' has no password but only allows local connections"
   echo " MySQL user 'debian-sys-maint' password set to ${DEBIAN_SYS_MAINT_PASSWORD}"
