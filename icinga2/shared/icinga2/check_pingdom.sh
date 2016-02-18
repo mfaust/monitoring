@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 TMP_DIR="/tmp"
 TMP_FILE="${TMP_DIR}/MONITOR_PINGDOM_DATA.tmp"
 MAX_CACHE_TIME=4
@@ -17,9 +16,21 @@ STATE_DEPENDENT=4
 #export LC_ALL=en_US.UTF-8
 #export LANG=en_US.UTF-8
 
-PINGDOM_CREDENTIALS="engineering-tools@coremedia.com:F9i3vzl8WDl6cqTxDVb8cYUoAJ1RJyR2uAgwrW3L"
+PINGDOM_USER=${PINGDOM_USER:-""}
+PINGDOM_PASS=${PINGDOM_PASS:-""}
+PINGDOM_API=${PINGDOM_API:-""}
 
-API_KEY="v9gp3wp9qrqzxip0buv8fbm8plu88iwk"
+if ( [ -z ${PINGDOM_USER} ] || [ -z ${PINGDOM_PASS} ] || [ -z ${PINGDOM_API} ] )
+then
+  echo "UNKNOWN - No Pingdom Credentials available!"
+
+  exit ${STATE_UNKNOWN}
+fi
+
+# --------------------------------------------------------------------------------------------------------
+
+PINGDOM_CREDENTIALS="${PINGDOM_USER}:${PINGDOM_PASS}"
+API_KEY="${PINGDOM_API}"
 
 # --------------------------------------------------------------------------------------------------------
 
@@ -29,8 +40,6 @@ buildCache() {
 }
 
 # --------------------------------------------------------------------------------------------------------
-
-
 
 run() {
 
@@ -63,88 +72,48 @@ run() {
 
     for m in up down paused
     do
-#      mode=${m}
       mode="$(cat ${TMP_FILE} | jq -c '.checks[] | select( .status | contains ('\"${m}\"') )' | wc -l)"
-      msg="${msg} ${mode} Hosts with Status '${m}' "
+
+      case ${m} in
+        "down")      status="CRITICAL"  ;;
+        *)           status="OKAY"      ;;
+      esac
+
+      msg="${msg} ${mode} Hosts with Status '${m}' (${status}) "
     done
 
-    msg="OK  ${msg}"
-    result=${STATE_OK}
+    countOKAY=$(echo "${msg}" | grep "OKAY" | wc -l )
+    countCRITICAL=$(echo "${msg}" | grep "CRITICAL" | wc -l )
+    countUNKNOWN=$(echo "${msg}" | grep "unknown" | wc -l )
 
+    if [ ${countCRITICAL} -gt 0 ]
+    then
+      status="CRITICAL"
+      result=${STATE_CRITICAL}
+    elif [ ${countUNKNOWN} -gt 0 ]
+    then
+      status="WARNING"
+      result=${STATE_WARNING}
+    else
+      status="OK"
+      result=${STATE_OK}
+    fi
+
+    msg="${status}  ${msg}"
+#    result=${STATE_OK}
 
   else
     msg="UNKNOWN  No Hosts with 'up', 'down' or 'paused' Status found!"
     result=${STATE_UNKNOWN}
   fi
 
-
-  echo ${msg}
+  echo "${msg}"
   exit ${result}
 }
 
 # --------------------------------------------------------------------------------------------------------
 
-
-
-
-# curl --user $PINGDOM_CREDENTIALS --request POST --data name=$NAME-studio --data type=http --data host=studio.helios.$NAME.cloud.perfect-chef.com --data encryption=true --data port=443 --header "App-Key: v9gp3wp9qrqzxip0buv8fbm8plu88iwk" https://api.pingdom.com/api/2.0/checks
-
-
-#curl --silent --user ${PINGDOM_CREDENTIALS} --header "App-Key: ${API_KEY}" --header 'Content-Type: application/json'  https://api.pingdom.com/api/2.0/checks | python -mjson.tool | jq -c '.checks[] | select( .status | contains ("up") )'
-#curl --silent --user ${PINGDOM_CREDENTIALS} --header "App-Key: ${API_KEY}" --header 'Content-Type: application/json'  https://api.pingdom.com/api/2.0/checks | python -mjson.tool | jq -c '.checks[] | select( .status | contains ("paused") )'
-
-foo() {
-# Parse parameters
-while [ $# -gt 0 ]
-do
-  case "${1}" in
-    -h|--help) shift
-      usage;
-      exit 0
-      ;;
-    -v|--version) shift
-      version;
-      exit 0
-      ;;
-    -H|--host)
-      shift
-      HOST="${1}"
-      ;;
-    -j|--job)
-      shift
-      JOB="${1}"
-      ;;
-    -l|--joblist)
-      shift
-      JOBLIST="${1}"
-      ;;
-    *)
-      echo "Unknown argument: '${1}'"
-      exit $STATE_UNKNOWN
-      ;;
-  esac
-shift
-done
-
-# Check that required argument (metric) was specified
-[ -z "${HOST}" ] && {
-  echo "Usage error: 'host' parameter missing"
-  usage
-  exit ${STATE_UNKNOWN}
-}
-
-( [ -z "${JOB}" ] && [ -z "${JOBLIST}" ] ) && {
-  echo "Usage error: 'job' or 'joblist' parameter missing"
-  usage
-  exit ${STATE_UNKNOWN}
-}
-
-}
-
-#----------------------------------------------------------------------------------------
-
 run
-
 
 exit 0
 

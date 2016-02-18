@@ -93,31 +93,16 @@ buildUrl() {
 
 check() {
 
-  color=$(curl ${curl_opts} https://${HOST}/job/${url}/api/json?pretty=true 2> /dev/null | jq --raw-output '.color')
+  local curl_opts="--connect-timeout 10 --max-time 20 --silent --location"
+
+  color=$(curl ${curl_opts} https://${HOST}/job/${url}/api/json?pretty=true 2> /dev/null | python -mjson.tool 2> /dev/null | jq --raw-output '.color' 2> /dev/null)
+
+  if [ -z "${color}" ]
+  then
+    color="darkblack"
+  fi
 
   echo "${color}"
-#
-# #  echo $result
-#
-#   if [ "${color}" == "blue" ]
-#   then
-#     status="OKAY"
-#     result=${STATE_OK}
-#   elif [ "${color}" == "red" ]
-#   then
-#     status="CRITICAL"
-#     result=${STATE_CRITICAL}
-#   elif [[ ${color} =~ .*_anime$ ]]
-#   then
-#     status="RUNNING"
-#     result=${STATE_OK}
-#   else
-#     status="unknown"
-#     result=${STATE_UNKNOWN}
-#   fi
-#
-#   echo "${status} Job ${JOB} (${color})"
-#   exit ${result}
 }
 
 final() {
@@ -132,8 +117,13 @@ final() {
   then
     status="CRITICAL"
 #     result=${STATE_CRITICAL}
-    JOBS_CRIT="${JOBS_CRIT} ${JOB}"
-  elif [[ ${color} =~ .*_anime$ ]]
+#    JOBS_CRIT="${JOBS_CRIT} ${JOB}"
+  elif [ "${output}" == "darkblack" ]
+  then
+    status="CRITICAL"
+#     result=${STATE_CRITICAL}
+#    JOBS_CRIT="${JOBS_CRIT} ${JOB}"
+  elif [[ ${output} =~ .*_anime ]]
   then
     status="RUNNING"
 #     result=${STATE_OK}
@@ -149,8 +139,6 @@ final() {
 # ----------------------------------------------------------------------------------------
 
 run() {
-
-  local curl_opts="--connect-timeout 10 --max-time 20 --verbose --location"
 
   local countFull=1
   local countOKAY=0
