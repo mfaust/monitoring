@@ -6,6 +6,9 @@ initfile=/etc/icinga2/run.init
 
 HOSTNAME="docker-icinga2"
 
+env | grep BLUEPRINT  > /etc/env.vars
+env | grep HOST_     >> /etc/env.vars
+
 chmod 1777 /tmp
 
 # chown directories and files that might be coming from volumes
