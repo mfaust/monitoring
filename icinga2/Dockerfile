@@ -28,12 +28,15 @@ RUN apt-get -qq update && \
     bash \
     sudo \
     procps \
+    fping \
+    cron \
     supervisor \
     pwgen \
     unzip \
     ssmtp \
     mailutils \
     nano \
+    nmap \
     php5-mysqlnd \
     php5-fpm \
     nginx \

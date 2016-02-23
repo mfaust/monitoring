@@ -1,6 +1,6 @@
 #!/bin/bash
 
 
-sudo docker build -t bodsch-icinga2 --rm=true --force-rm=true .
+sudo docker build --tag=${USER}-docker-icinga2 .
 
 # EOF
