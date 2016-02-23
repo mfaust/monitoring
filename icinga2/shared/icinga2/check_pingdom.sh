@@ -79,7 +79,10 @@ run() {
         *)           status="OKAY"      ;;
       esac
 
-      msg="${msg} ${mode} Hosts with Status '${m}' (${status}) "
+      if [ ${mode} -gt 0 ]
+      then
+        msg="${msg} ${mode} Hosts with Status '${m}' (${status}) "
+      fi
     done
 
     countOKAY=$(echo "${msg}" | grep "OKAY" | wc -l )
