@@ -8,13 +8,13 @@ GRAPHITE_HOST=${GRAPHITE_HOST:-localhost}
 GRAPHITE_PORT=${GRAPHITE_PORT:-8080}
 
 # wait for needed database
-while ! nc -z ${GRAPHITE_HOST} ${GRAPHITE_PORT}
-do
-  sleep 3s
-done
+#while ! nc -z ${GRAPHITE_HOST} ${GRAPHITE_PORT}
+#do
+#  sleep 3s
+#done
 
 # must start initdb and do other jobs well
-sleep 10s
+#sleep 10s
 
 # -------------------------------------------------------------------------------------------------
 
