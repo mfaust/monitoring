@@ -29,7 +29,7 @@ docker run \
   --env ICINGAADMIN_PASS=icinga \
   --env LIVESTATUS_HOST=${USER}-icinga2.docker \
   --env LIVESTATUS_PORT=6666 \
-  --dns=172.17.0.1 \
+  --dns=${DOCKER_DNS} \
   --hostname=${USER}-${TYPE} \
   --name ${CONTAINER_NAME} \
   ${TAG_NAME}

@@ -17,12 +17,10 @@ docker run \
   --publish=2003:2003 \
   --publish=7002:7002 \
   --publish=8088:8080 \
-  --dns=172.17.0.1 \
+  --dns=${DOCKER_DNS} \
   --hostname=${USER}-${TYPE} \
   --name ${CONTAINER_NAME} \
   ${TAG_NAME}
-
-[ -x /usr/local/bin/update-docker-dns.sh ] && sudo /usr/local/bin/update-docker-dns.sh
 
 # ---------------------------------------------------------------------------------------
 # EOF

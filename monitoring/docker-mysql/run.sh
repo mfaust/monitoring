@@ -17,12 +17,10 @@ docker run \
   --publish=33060:3306 \
   --env MYSQL_ROOT_PASSWORD=foo.bar.Z \
   --volume=${DATA_DIR}/${TYPE}:/app \
-  --dns=172.17.0.1 \
+  --dns=${DOCKER_DNS} \
   --hostname=${USER}-${TYPE} \
   --name ${CONTAINER_NAME} \
   ${TAG_NAME}
-
-[ -x /usr/local/bin/update-docker-dns.sh ] && sudo /usr/local/bin/update-docker-dns.sh
 
 # ---------------------------------------------------------------------------------------
 # EOF
