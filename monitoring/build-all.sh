@@ -11,7 +11,7 @@ do
     cd ${d}
     echo " => build Container '${d}' ..."
 
-    ./build.sh > /dev/null
+    ./build.sh
   fi
 
   echo -e "\n =========================================================== \n"
