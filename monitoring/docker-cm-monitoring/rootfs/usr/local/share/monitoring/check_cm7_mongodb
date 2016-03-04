@@ -1,0 +1,163 @@
+#!/bin/bash
+#
+# NRPE Check for Mongo Databases
+#
+
+# ----------------------------------------------------------------------------------------
+
+SCRIPTNAME=$(basename $0 .sh)
+VERSION="1.0.1"
+VDATE="07.07.2015"
+
+# ----------------------------------------------------------------------------------------
+
+NRPE_DEFAULTS="/usr/local/share/nrpe_defaults.sh"
+SERVICES="/usr/local/etc/services"
+
+[ -f "${NRPE_DEFAULTS}" ] && {
+  . ${NRPE_DEFAULTS}
+} || {
+  echo "nrpe defaults missing"
+  exit 1
+}
+
+[ -f "${SERVICES}" ] && {
+  . ${SERVICES}
+} || {
+  echo "services missing"
+  exit 1
+}
+
+# ----------------------------------------------------------------------------------------
+
+SERVER="01 02 03"
+URL="serverStatus"
+
+domain="$(facter domain)"
+
+if [ "${domain}" = "app.webstage.guj.de" ]
+then
+  env="stage"
+else
+  env="prod"
+fi
+
+# ----------------------------------------------------------------------------------------
+
+version() {
+
+  help_format_title="%-9s %s\n"
+
+  echo ""
+  printf  "$help_format_title" "NRPE-Check to Check MongoDB Connections"
+  echo ""
+  printf  "$help_format_title" " Version $VERSION ($VDATE)"
+  echo ""
+}
+
+usage() {
+
+  help_format_title="%-9s %s\n"
+  help_format_desc="%-9s %-10s %s\n"
+  help_format_example="%-9s %-30s %s\n"
+
+  version
+
+  printf  "$help_format_title" "Usage:" \
+          "$SCRIPTNAME [-h] [-v] [-f] [-w] [-c critical]"
+
+  printf  "$help_format_desc" "" \
+          "-h" ": Show this help"
+
+  printf  "$help_format_desc" "" \
+          "-v" ": Prints out the Version"
+
+
+  printf  "$help_format_desc" "" \
+          "-f" ": config-File [/usr/local/etc/ldap.cfg]"
+
+  printf  "$help_format_desc" "" \
+          "-w" ": Warn [10]"
+
+  printf  "$help_format_desc" "" \
+          "-c" ": Critical [0]"
+}
+
+# ----------------------------------------------------------------------------------------
+
+mgo_status() {
+
+  local file="${1}"
+
+  if [ -f ${file} ]
+  then
+    if [ $(stat -c %s ${file}) -eq 0 ]
+    then
+      host="---"
+      status="fail"
+    else
+      host="$(jq '.host' ${file} | tr -d '"' | sed -e "s|${domain}||g" -e 's|\-vi.||g' -e 's|web-cm-||g')"
+      status="$(jq '.ok' ${file} | tr -d '"') "
+
+      [ $(echo "${status}") -eq 0 ] && {
+        status="fail"
+      } || {
+        status="okay"
+      }
+    fi
+  else
+    host="---"
+    status="fail"
+  fi
+
+  result="${host}: ${status}"
+
+  echo "${result}"
+}
+
+run() {
+
+  for p in ${SERVER}
+  do
+    tmpfile="${SCRIPTNAME}--${p}--${URL}"
+    tmpfile="$(echo ${tmpfile} | tr -d '\/' | tr [A-Z] [a-z] | sed 's| ||g')"
+
+    tmpdir="${TMP_DIR}"
+
+    filename=${tmpdir}/${tmpfile}.tmp
+    headerfile=${tmpdir}/${tmpfile}.header
+    resultcodes=${headerfile}.resultcodes
+
+    curl_opts="--connect-timeout 10 --max-time 20 --silent --location --insecure --cookie test --dump-header ${headerfile}" ## --output ${filename}"
+
+    curl ${curl_opts} web-cm-mgodb-${env}-${p}-vi.${domain}:28017/${URL} | python -mjson.tool > ${filename} 2> /dev/null
+
+    result=$?
+  done
+
+  r_01="$(mgo_status ${tmpdir}/check_mgodb--01--serverstatus.tmp)"
+  r_02="$(mgo_status ${tmpdir}/check_mgodb--02--serverstatus.tmp)"
+  r_03="$(mgo_status ${tmpdir}/check_mgodb--03--serverstatus.tmp)"
+
+  if [ $(echo "${r_01}" "${r_02}" "${r_03}" | grep "fail" | wc -l ) -gt 0 ]
+  then
+    status="CRITICAL"
+    result=${STATE_CRITICAL}
+  else
+    status="OK"
+    result=${STATE_OK}
+  fi
+
+  echo "${status} - ${r_01}, ${r_02}, ${r_03}"
+
+  exit $result
+}
+
+# ----------------------------------------------------------------------------------------
+
+
+#----------------------------------------------------------------------------------------
+
+run
+
+# EOF

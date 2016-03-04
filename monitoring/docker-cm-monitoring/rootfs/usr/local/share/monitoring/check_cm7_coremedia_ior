@@ -1,0 +1,136 @@
+#!/bin/bash
+#
+# CM7-PORTS
+#
+#  prueft die erreichbarkeit des IOR eines Coremedia-Services
+#
+#
+
+# ----------------------------------------------------------------------------------------
+
+SCRIPTNAME=$(basename $0 .sh)
+VERSION="1.2.2"
+VDATE="11.03.2015"
+
+# ----------------------------------------------------------------------------------------
+
+[ -f /usr/local/share/nrpe_defaults.sh ] && . /usr/local/share/nrpe_defaults.sh
+
+HOST=
+PORT=
+TIMEOUT=10
+CURL=$(which curl)
+URL_PREFIX="http://"
+
+# ----------------------------------------------------------------------------------------
+
+version() {
+
+  help_format_title="\n%-9s %s\n"
+
+  printf  "${help_format_title}" "Nagios Plugin to check Coremedia IOR Services"
+  printf  "${help_format_title}" " Version ${VERSION} ($VDATE)"
+  echo ""
+}
+
+usage() {
+
+  help_format_title="%-9s %s\n"
+  help_format_desc="          %-10s %s\n"
+  help_format_example="%-9s %-30s %s\n"
+
+  version
+
+  printf  "${help_format_title}" \
+          "Usage:" \
+          "$SCRIPTNAME [-h] [-v] [-H Host] [-P Port]"
+
+  echo "Parameters description:"
+
+  printf  "${help_format_desc}" \
+          "-h|--help" ": Show this help"
+
+  printf  "${help_format_desc}" \
+          "-v|--version" ": Prints out the Version"
+
+  printf  "${help_format_desc}" \
+          "-H|--host" ": Hostname for IOR Test (FQDN) [localhost,web-cm-mls-prod-01-vi.app.webcloud.guj.de]"
+
+  printf  "${help_format_desc}" \
+          "-P|--port" ": Port for IOR Test [42080]"
+
+}
+
+# ----------------------------------------------------------------------------------------
+
+check_host() {
+
+  local EXITCODE
+
+  nc -z -w 10 ${HOST} ${PORT}
+
+  if [ $? -ne 0 ]
+  then
+    EXITCODE=1
+  else
+    EXITCODE=0
+  fi
+
+  return $EXITCODE
+}
+
+run() {
+
+  /usr/lib64/nagios/plugins/check_http -H ${HOST} -p ${PORT} -u /coremedia/ior -s "IOR:"
+
+  exit $?
+}
+
+# ----------------------------------------------------------------------------------------
+
+# Parse parameters
+while [ $# -gt 0 ]
+do
+  case "$1" in
+    -h|--help) hift
+      usage;
+      exit 0
+      ;;
+    -v|--version) shift
+      version;
+      exit 0
+      ;;
+    -H|--host) shift
+      HOST="${1}"
+      ;;
+    -P|--port) shift
+      PORT=${1}
+      ;;
+    *)  echo "Unknown argument: $1"
+      exit $STATE_UNKNOWN
+      ;;
+  esac
+shift
+done
+
+# Check that required argument (metric) was specified
+[ -z "${HOST}" ] && {
+  echo "Usage error: 'host' parameter missing"
+  exit ${STATE_UNKNOWN}
+}
+
+[ -z "${PORT}" ] && {
+  echo "Usage error: 'port' parameter missing"
+  exit ${STATE_UNKNOWN}
+}
+
+check_host > /dev/null || {
+  echo "CRITICAL: IOR on host '${HOST}' is not responding."
+  exit ${STATE_CRITICAL}
+}
+
+#----------------------------------------------------------------------------------------
+
+run
+
+# EOF

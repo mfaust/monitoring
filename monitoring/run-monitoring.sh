@@ -4,7 +4,7 @@
 
 SRC_BASE=${PWD}
 
-MONITORING_CONTAINER=" docker-mysql docker-jolokia docker-graphite docker-icinga2 docker-icingaweb2 docker-grafana docker-dashing"
+MONITORING_CONTAINER=" docker-mysql docker-jolokia docker-graphite docker-icinga2 docker-icingaweb2 docker-grafana docker-dashing docker-cm-monitoring"
 
 cd ${SRC_BASE}/docker-dnsmasq
 
@@ -34,12 +34,12 @@ do
 
     ./run.sh > /dev/null
 
-    sleep 2s
-
-    IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${CONTAINER_NAME})
-    NAME=$(docker inspect --format '{{ .Config.Hostname }}' ${CONTAINER_NAME})
-
-    echo "${IP}  ${NAME}.docker" >> ${DOCKER_ADDN_DIR}/dnsmasq.addn.docker
+#    sleep 2s
+#
+#    IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${CONTAINER_NAME})
+#    NAME=$(docker inspect --format '{{ .Config.Hostname }}' ${CONTAINER_NAME})
+#
+#    echo "${IP}  ${NAME}.docker" >> ${DOCKER_ADDN_DIR}/dnsmasq.addn.docker
 
   else
     echo "no run.sh found"
@@ -48,7 +48,12 @@ do
   echo -e "\n =========================================================== \n"
 done
 
-
+for CID in docker-dnsmasq ${MONITORING_CONTAINER} 
+do
+  IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${CID})
+  NAME=$(docker inspect --format '{{ .Config.Hostname }}' ${CID})
+  echo "${IP}  ${NAME}.${CONTAINER_DOMAIN}" >> ${DOCKER_ADDN_DIR}/dnsmasq.addn.docker
+done
 
 #  for CID in $(docker ps -q)
 #  do

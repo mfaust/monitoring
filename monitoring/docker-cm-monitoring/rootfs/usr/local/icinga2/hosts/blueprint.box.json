@@ -1,0 +1,22 @@
+{
+  "templates": ["generic-host"],
+  "attrs": {
+    "address": "192.168.252.100",
+    "display_name": "Blueprint Box",
+    "notes": "blueprint",
+    "vars" : {
+      "type" : "blueprint",
+      "contentfeeder" : "true",
+      "livefeeder" : "true",
+      "previewfeeder": "true",
+      "cms": "true",
+      "mls": "true",
+      "rls": "false",
+      "livecae": "true",
+      "previewcae": "false",
+      "studio": "true",
+      "solr": "true",
+      "wfs": "true"
+    }
+  }
+}
