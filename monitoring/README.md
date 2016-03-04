@@ -6,6 +6,10 @@ Basis ist ein funktionierendes Monitoring-System, welches auf jedem System ausge
 
 Das System ist so modular wie möglich aufgebaut, allerdings momentan noch in einem Proof-of-Concept Status.
 
+## Status
+
+Work-in-Progress
+
 ## Inhalt
 
  - docker-chefdk
