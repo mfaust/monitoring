@@ -2,7 +2,7 @@ FROM debian:jessie
 
 MAINTAINER Bodo Schulz <bodo@boone-schulz.de>
 
-LABEL version="0.9.2"
+LABEL version="0.9.8"
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm

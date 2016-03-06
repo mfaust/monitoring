@@ -16,7 +16,7 @@ docker run \
   --interactive \
   --tty \
   --detach \
-  --publish=5353:53 \
+  --publish=5353:53/udp \
   --volume=${DOCKER_ADDN_DIR}:/app \
   --hostname=${USER}-${TYPE} \
   --name ${CONTAINER_NAME} \
