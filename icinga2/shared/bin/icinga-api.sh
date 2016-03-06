@@ -4,6 +4,8 @@ set -e
 # set -x
 
 FILTER=
+ADDRESS=
+NAME=
 
 # ----------------------------------------------------------------------------------------
 
@@ -27,8 +29,11 @@ usage() {
   version
 
   printf  "$help_format_title" "Usage:"    "$SCRIPTNAME [-h] [-v]"
-  printf  "$help_format_desc"  ""    "-h"   ": Show this help"
-  printf  "$help_format_desc"  ""    "-v"   ": Prints out the Version"
+  printf  "$help_format_desc"  ""    "-h"         ": Show this help"
+  printf  "$help_format_desc"  ""    "-v"         ": Prints out the Version"
+  printf  "$help_format_desc"  ""    "--filter"   ": add Filter to add hosts"
+  printf  "$help_format_desc"  ""    "--address"  ": [optional] overwrite Hostname"
+  printf  "$help_format_desc"  ""    "--name"     ": [optional] overwrite Description"
 
 }
 
@@ -43,6 +48,25 @@ run() {
   for f in $(ls -1 ${PWD}/shared/json/hosts/${FILTER}*.json)
   do
     host=$(basename ${f} | sed 's|\.json||g')
+
+    if [ $(grep -c "%ADDRESS%" ${f}) -eq 1 ]
+    then
+      echo "found template file."
+      if ( [ -z ${ADDRESS} ] || [ -z ${NAME} ] )
+      then
+        echo "need --address AND --name entry .."
+        exit 2
+      else
+        cp ${f} /tmp/${ADDRESS}.json
+        sed -i "s|%ADDRESS%|${ADDRESS}|g" /tmp/${ADDRESS}.json
+        sed -i "s|%NAME%|${NAME}|g" /tmp/${ADDRESS}.json
+
+        host=${NAME}
+        f=/tmp/${ADDRESS}.json
+
+      fi
+
+    fi
 
     if [ $(curl ${curl_opts} -H 'Accept: application/json' -X GET "https://localhost:5665/v1/objects/hosts/${host}" | python -mjson.tool | jq --raw-output '.status' | grep "No objects found" | wc -l) -eq 1 ]
     then
@@ -73,6 +97,14 @@ do
       shift
       FILTER="${1}"
       ;;
+    --address)
+      shift
+      ADDRESS="${1}"
+      ;;
+    --name)
+      shift
+      NAME="${1}"
+      ;;
     *)  echo "Unknown argument: $1"
       exit $STATE_UNKNOWN
       ;;
@@ -85,3 +117,7 @@ done
 run
 
 exit 0
+
+# to add a service-check
+
+# curl ${curl_opts} -H 'Accept: application/json' -X PUT 'https://localhost:5665/v1/objects/services/blueprint.box!check_pingdom' --data @json/services/check_pingdom.json | python -mjson.tool
