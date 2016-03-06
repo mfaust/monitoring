@@ -50,12 +50,16 @@ done
 
 
 
-#  for CID in $(docker ps -q)
-#  do
-#    IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${CID})
-#    NAME=$(docker inspect --format '{{ .Config.Hostname }}' ${CID})
+for CID in $(docker ps -q)
+do
+  IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${CID})
+  NAME=$(docker inspect --format '{{ .Config.Hostname }}' ${CID})
+
+  tools/bin/icinga-api.sh --filter "docker-nod*" --address "${IP}" --name "${NAME}.${CONTAINER_DOMAIN}"
+
+
 #    echo "${IP}  ${NAME}.${CONTAINER_DOMAIN}" >> ${CONTAINER_HOSTS}
-#  done
+done
 
 #[ -x /usr/local/bin/update-docker-dns.sh ] && sudo /usr/local/bin/update-docker-dns.sh
 
