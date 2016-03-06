@@ -23,6 +23,8 @@ docker run \
   --env MYSQL_USER=root \
   --env MYSQL_PASS=foo.bar.Z \
   --env IDO_PASSWORD=xxxxxxxxx \
+  --env CARBON_HOST=${USER}-graphite.docker \
+  --env CARBON_PORT=2003 \
   --dns=${DOCKER_DNS} \
   --hostname=${USER}-${TYPE} \
   --name ${CONTAINER_NAME} \
