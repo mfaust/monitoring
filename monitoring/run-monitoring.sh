@@ -48,7 +48,7 @@ do
   echo -e "\n =========================================================== \n"
 done
 
-
+cd ${SRC_BASE}
 
 for CID in $(docker ps -q)
 do
