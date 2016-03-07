@@ -1,0 +1,622 @@
+#!/bin/bash
+#
+# CM7-PORTS
+#
+# Tomcat JMX Registry Port (RMI)
+#
+#
+
+# ----------------------------------------------------------------------------------------
+
+SCRIPTNAME=$(basename $0 .sh)
+VERSION="3.1.0"
+VDATE="23.02.2016"
+
+# ----------------------------------------------------------------------------------------
+
+TMP_DIR="/tmp"
+NRPE_DEFAULTS="/usr/local/share/nrpe_defaults.sh"
+SERVICES="/etc/cm-services"
+
+[ -f "${NRPE_DEFAULTS}" ] && {
+  . ${NRPE_DEFAULTS}
+} || {
+  STATE_OK=0
+  STATE_WARNING=1
+  STATE_CRITICAL=2
+  STATE_UNKNOWN=3
+  STATE_DEPENDENT=4
+}
+
+[ -f "${SERVICES}" ] && {
+  . ${SERVICES}
+} || {
+  echo "services missing"
+  exit 1
+}
+
+[ -f /etc/env.vars ] && . /etc/env.vars
+
+
+
+JQ=$(which jq)
+
+if [ -z ${JQ} ]
+then
+  echo "UNKNOWN - We need 'jq'! please run puppet agent again"
+
+  exit ${STATE_UNKNOW}
+fi
+
+# ----------------------------------------------------------------------------------------
+
+PORT=
+TMPDIR=
+RUNNING=false
+
+# ----------------------------------------------------------------------------------------
+
+version() {
+
+  help_format_title="%-9s %s\n"
+
+  echo ""
+  printf  "$help_format_title" "NRPE-Check for Coremedia Tools"
+  echo ""
+  printf  "$help_format_title" " Version $VERSION ($VDATE)"
+  echo ""
+}
+
+usage() {
+
+  help_format_title="%-9s %s\n"
+  help_format_desc="%-9s %-10s %s\n"
+  help_format_example="%-9s %-30s %s\n"
+
+  version
+
+  printf  "$help_format_title" "Usage:" \
+          "$SCRIPTNAME [-h] [-v] [-a application] [-A action]"
+
+  printf  "$help_format_desc"    ""  "-h" ": Show this help"
+  printf  "$help_format_desc"    ""  "-v" ": Prints out the Version"
+  printf  "$help_format_desc"    ""  "-H" ": Host with running Application"
+  printf  "$help_format_desc"    ""  "-a" ": The application you want to test [livecae, previewcae, studio, cms, rls, mls, solr, livefeeder, previewfeeder, importer, taxonomy]"
+  printf  "$help_format_desc"    ""  "-A" ": The action you want to take [HeapMemoryUsage,NonHeapMemoryUsage,Threading,State,ClassLoading]"
+  printf  "$help_format_desc"    ""  ""   "  For the Solr Tomcats you can use also: [LiveReplicationHandler,PreviewReplicationHandler,StudioReplicationHandler]"
+  printf  "$help_format_desc"    ""  ""   "  For the CAEFeeder Tomcats you can use also: [Count]"
+  printf  "$help_format_desc"    ""  ""   "  For the RLS Tomcats you can use also: [Replicator]"
+}
+
+# ----------------------------------------------------------------------------------------
+
+k2h() {
+  SLIST=",bytes,KB,MB,GB,TB,PB,EB,ZB,YB"
+  POWER=1
+  VAL=$( echo "scale=2; $1 * 1024 / 1" | bc)
+  VINT=$( echo $VAL / 1024 | bc )
+  while [ ! $VINT = "0" ]
+  do
+    let POWER=POWER+1
+    VAL=$( echo "scale=2; $VAL / 1024" | bc)
+    VINT=$( echo $VAL / 1024 | bc )
+  done
+  echo $VAL$( echo $SLIST | cut -f$POWER -d, )
+}
+
+round() {
+  echo $(printf %.$2f $(echo "scale=$2;(((10^$2)*$1)+0.5)/(10^$2)" | bc))
+}
+
+printResult() {
+
+  local filename="${1}"
+
+  if [ "${ACTION}" = "HeapMemoryUsage" ]
+  then
+
+    filename="${TMP_DIR}/${PORT}/Memory.result"
+
+    max=$(cat ${filename} | ${JQ} '.value.HeapMemoryUsage.max' | sed 's/"//g')
+    use=$(cat ${filename} | ${JQ} '.value.HeapMemoryUsage.used' | sed 's/"//g')
+
+    # in real memory
+    #  64 MiB  = 67108864
+    # 128 MiB  = 134217728
+    # 256 MiB  = 268435456
+    # 512 MiB  = 536870912
+#    max_warn=134217728    # max - 128 MB
+#    max_crit=67108864     # max -  64 MB
+#    diff=$(echo "${max} - ${use}" | bc)
+
+    # in percent
+    percent=$(( 100 * use / max ))
+    max_warn="80" # percent
+    max_crit="90"
+
+    #    x <= 75        = OKAY
+    #    x > 75 && < 80 = WARN
+    #    x >= 80        = CRIT
+
+    if ( [ ${percent} -eq ${max_warn} ] || [ ${percent} -lt ${max_warn} ] )
+    then
+      status="OK"
+      result=${STATE_OK}
+    elif ( [ ${percent} -gt ${max_warn} ] && [ ${percent} -lt ${max_crit} ] )
+    then
+      status="WARN"
+      result=${STATE_WARNING}
+    else
+      status="CRITICAL"
+      result=${STATE_CRITICAL}
+    fi
+
+    mem_max=$(k2h $(echo -e "${max}"))
+    mem_use=$(k2h $(echo -e "${use}"))
+
+    echo "${status} - ${ACTION}: ${percent}% used (Max: ${mem_max} - Used: ${mem_use})"
+    result=${result}
+
+  elif [ "${ACTION}" = "NonHeapMemoryUsage" ]
+  then
+
+    filename="${TMP_DIR}/${PORT}/Memory.result"
+
+    max=$(cat ${filename} | ${JQ} '.value.NonHeapMemoryUsage.max' | sed 's/"//g')
+    use=$(cat ${filename} | ${JQ} '.value.NonHeapMemoryUsage.used' | sed 's/"//g')
+
+    mem_max=$(k2h $(echo -e "${max}"))
+    mem_use=$(k2h $(echo -e "${use}"))
+
+    echo "${ACTION}: Max: ${mem_max} - Used: ${mem_use}"
+    result=${STATE_OK}
+
+  fi
+
+  if [ "${ACTION}" = "Threading" ]
+  then
+
+    filename="${TMP_DIR}/${PORT}/Threading.result"
+
+    threadsCurrent=$(cat ${filename} | ${JQ} '.value.activeCount' | sed 's/"//g')
+    threadsMax=$(cat ${filename} | ${JQ} '.value.maxThreads' | sed 's/"//g')
+
+    echo "Threads: Current: ${threadsCurrent} - Max: ${threadsMax}"
+    result=${STATE_OK}
+  fi
+
+  if [ "${ACTION}" = "State" ]
+  then
+
+    filename="${TMP_DIR}/${PORT}/Service.result"
+
+    value="$(cat ${filename} | ${JQ} '.value' | sed 's/"//g')"
+    status="$(cat ${filename} | ${JQ} '.status' | sed 's/"//g')"
+
+    echo "Status: ${status} - ${value}"
+
+    if [ "${status}" != "200" ]
+    then
+      result=${STATE_CRITICAL}
+    else
+      result=${STATE_OK}
+    fi
+  fi
+
+  if [ "${ACTION}" = "ClassLoading" ]
+  then
+
+    filename="${TMP_DIR}/${PORT}/ClassLoading.result"
+
+    loadedClassCount=$(cat ${filename} | ${JQ} '.value.LoadedClassCount' | sed 's/"//g')
+    loadedClassCountTotal=$(cat ${filename} | ${JQ} '.value.TotalLoadedClassCount' | sed 's/"//g')
+    unloadedClassCount=$(cat ${filename} | ${JQ} '.value.UnloadedClassCount' | sed 's/"//g')
+
+    echo "Loaded Classes: Current: ${loadedClassCount} - Total: ${loadedClassCountTotal} - Unloaded: ${unloadedClassCount}"
+
+  fi
+
+  if [ "${ACTION}" = "LiveReplicationHandler" -o "${ACTION}" = "PreviewReplicationHandler" -o "${ACTION}" = "StudioReplicationHandler" ]
+  then
+
+    filename="${TMP_DIR}/${PORT}/${JSON_GRP}.result"
+
+    errors=$(cat ${filename} | ${JQ} '.value.errors' | sed 's/"//g')
+    isMaster=$(cat ${filename} | ${JQ} '.value.isMaster' | sed 's/"//g')
+    isSlave=$(cat ${filename} | ${JQ} '.value.isSlave' | sed 's/"//g')
+    medianRequestTime=$(cat ${filename} | ${JQ} '.value.medianRequestTime' | sed 's/"//g')
+    requests=$(cat ${filename} | ${JQ} '.value.requests' | sed 's/"//g')
+
+    medianRequestTime=$(round ${medianRequestTime} 3)
+
+    echo "Solr Replication: Error: ${errors} - Master: ${isMaster} - Slave: ${isSlave} - requests: ${requests} - reqTime: ${medianRequestTime}"
+
+  fi
+
+  if [ "${ACTION}" = "Count" ]
+  then
+
+    filename="${TMP_DIR}/${PORT}/CMCAEFeederHealth.result"
+
+    if [ -f ${filename} ]
+    then
+      health="$(cat ${filename} | ${JQ} '.value.Healthy' | sed 's/"//g')"
+
+      WARN=2500
+      CRIT=10000
+
+      filename="${TMP_DIR}/${PORT}/CMCAEFeederProactiveEngine.result"
+
+      KeysCount="$(cat ${filename} | ${JQ} '.value.KeysCount' )"
+      ValuesCount="$(cat ${filename} | ${JQ} '.value.ValuesCount' )"
+      QueueProcessedPerSecond="$(cat ${filename} | ${JQ} '.value.QueueProcessedPerSecond' )"
+      QueueProcessedPerSecond="$(round ${QueueProcessedPerSecond} 3)"
+
+      CountDiff=$(echo "${KeysCount}-${ValuesCount}" | bc)
+
+      state_msg="${ValuesCount} Elements feeded. Must be ${KeysCount}. ${CountDiff} left , ${QueueProcessedPerSecond} per sec.  "
+
+      if [ "${health}" = "false" ]
+      then
+        echo "CRITICAL - NOT HEALTHY - ${state_msg}"
+        result=${STATE_CRITICAL}
+      else
+        health_msg="HEALTHY"
+
+        if ( [ ${CountDiff} -gt ${CRIT} ] )
+        then
+          echo "CRITICAL - ${health_msg} - ${state_msg}"
+          result=${STATE_CRITICAL}
+        elif ( [ ${CountDiff} -gt ${WARN} ] || [ ${CountDiff} -eq ${WARN} ] )
+        then
+          echo "WARNING - ${health_msg} - ${state_msg}"
+          result=${STATE_WARNING}
+        else
+          echo "OK - ${health_msg} - ${state_msg}"
+          result=${STATE_OK}
+        fi
+      fi
+    else
+      echo "UNKNOWN - No Result-File available"
+      result=${STATE_UNKNOWN}
+    fi
+  fi
+
+  if [ "${ACTION}" = "Replicator" ]
+  then
+
+    filename="${TMP_DIR}/${PORT}/CMRLSReplicator.result"
+
+    state=$(${JQ} '.value.ControllerState' ${filename} | sed 's/"//g')
+    completedCount=$(${JQ} '.value.CompletedCount' ${filename})
+    uncompletedCount=$(${JQ} '.value.UncompletedCount' ${filename})
+    incomingCount=$(${JQ} '.value.IncomingCount' ${filename})
+
+    enabled=$(${JQ} '.value.Enabled' ${filename})
+    connectionUp=$(${JQ} '.value.ConnectionUp' ${filename})
+    pipelineUp=$(${JQ} '.value.PipelineUp' ${filename})
+
+    if [ "${state}" != "running" ]
+    then
+      result=${STATE_CRITICAL}
+    else
+      if [ ${enabled} = false ]
+      then
+        result=${STATE_WARNING}
+      else
+        result=${STATE_OK}
+      fi
+    fi
+
+    echo "RLS Replicator: enabled: ${enabled} - connectionUp: ${connectionUp} - pipelineUp: ${pipelineUp}"
+
+  fi
+
+  exit ${result}
+
+}
+# ----------------------------------------------------------------------------------------
+
+prepare() {
+
+  local app="${1}"
+
+  if [ "${app}" = "cms" ] # dmz-cm-cms-prod-01-vi
+  then
+#    HOST=${HOST_CM7_CMS:-${BLUEPRINT_BOX}}
+    PORT="${CMS_RMI_REG}"
+
+  elif [ "${app}" = "mls" ]
+  then
+#    HOST=${HOST_CM7_MLS:-${BLUEPRINT_BOX}}
+    PORT="${MLS_RMI_REG}"
+
+  elif [ "${app}" = "rls" ]
+  then
+#    HOST=${HOST_CM7_RLS:-${BLUEPRINT_BOX}}
+    PORT="${RLS_RMI_REG}"
+
+  elif [ "${app}" = "livefeeder" ]
+  then
+#    HOST=${HOST_CM7_LIVEFEEDER=:-${BLUEPRINT_BOX}}
+    PORT="${FEEDER_LIVE_RMI_REG}"
+
+  elif [ "${app}" = "previewfeeder" ]
+  then
+#    HOST=${HOST_CM7_PREVIEWFEEDER=:-${BLUEPRINT_BOX}}
+    PORT="${FEEDER_PREV_RMI_REG}"
+
+  elif [ ${app} = "studio" ]
+  then
+#    HOST=${HOST_CM7_STUDIO=:-${BLUEPRINT_BOX}}
+    PORT=${STUDIO_RMI_REG}
+
+  elif [ "${app}" == "livecae" ]
+  then
+#    HOST=${HOST_CM7_LIVECAE=:-${BLUEPRINT_BOX}}
+    PORT="${CAE_RMI_REG}"
+
+  elif [ "${app}" == "previewcae" ]
+  then
+#    HOST=${HOST_CM7_PREVIEWCAE=:-${BLUEPRINT_BOX}}
+    PORT="${PREVIEW_RMI_REG}"
+
+    # - studio, solr-(master,slave), preview
+#     if [ "${app}" == "studio" ]
+#     then
+#       :
+#     elif [ "${app}" == "solr" ]
+#     then
+#       if [ $(netstat -tlnp | grep -c ${SOLR_MASTER_RMI_REG}) -gt 0 ]
+#       then
+#         PORT="${SOLR_MASTER_RMI_REG}"
+#         APPLICATION="cm7-solr-master"
+#       elif [ $(netstat -tlnp | grep -c ${SOLR_SLAVE_RMI_REG}) -gt 0 ]
+#       then
+#         PORT="${SOLR_SLAVE_RMI_REG}"
+#         APPLICATION="cm7-solr-slave"
+#       else
+#         PORT=
+#         APPLICATION=
+#       fi
+#     elif [ "${app}" == "preview" ]
+#     then
+#       PORT="${PREVIEW_RMI_REG}"
+#       APPLICATION="cm7-preview"
+#     else
+#       PORT=
+#       APPLICATION=
+#     fi
+#     # - rls, solr-(master,slave), caefeeder-live
+#   elif [ "${app}" = "solr" ]
+#   then
+#     if [ $(netstat -tlnp | grep -c ${SOLR_MASTER_RMI_REG}) -gt 0 ]
+#     then
+#       PORT="${SOLR_MASTER_RMI_REG}"
+#       APPLICATION="cm7-solr-master"
+#     elif [ $(netstat -tlnp | grep -c ${SOLR_SLAVE_RMI_REG}) -gt 0 ]
+#     then
+#       PORT="${SOLR_SLAVE_RMI_REG}"
+#       APPLICATION="cm7-solr-slave"
+#     else
+#       PORT=
+#       APPLICATION=
+#     fi
+#   elif [ "${app}" == "feeder" ]
+#   then
+#     PORT="${FEEDER_LIVE_RMI_REG}"
+#     APPLICATION="cm7-caefeeder-live"
+
+
+#  else
+#    PORT=
+#    APPLICATION=
+#  fi
+#   elif [[ ${HOSTNAME} =~ web-cm-feeder.* ]]
+#   then
+#     if [ "${app}" == "feeder" ]
+#     then
+#       PORT="${FEEDER_LIVE_RMI_REG}"
+#       APPLICATION="cm7-caefeeder-live"
+#     elif [ "${app}" == "solr" ]
+#     then
+#       if [ $(netstat -tlnp | grep -c ${SOLR_MASTER_RMI_REG}) -gt 0 ]
+#       then
+#         PORT="${SOLR_MASTER_RMI_REG}"
+#         APPLICATION="cm7-solr-master"
+#       elif [ $(netstat -tlnp | grep -c ${SOLR_SLAVE_RMI_REG}) -gt 0 ]
+#       then
+#         PORT="${SOLR_SLAVE_RMI_REG}"
+#         APPLICATION="cm7-solr-slave"
+#       else
+#         PORT=
+#         APPLICATION=
+#       fi
+#     fi
+#   elif [[ ${HOSTNAME} =~ .*feeder.* ]]
+#   then
+#     PORT="${FEEDER_PREV_RMI_REG}"
+#     APPLICATION="cm7-caefeeder-preview"
+#   elif [[ ${HOSTNAME} =~ .*cae.* ]]
+#   then
+#     # - cae, caeguj, caeprev
+#     if [[ ${HOSTNAME} =~ .*caeprev-.* ]]
+#     then
+#       # PREVIEW Tomcat
+#       PORT="${PREVIEW_RMI_REG}"
+#       APPLICATION="cm7-qac-preview"
+#     elif [[ ${HOSTNAME} =~ .*caeguj-.* ]]
+#     then
+#       # QAC CAE
+#       PORT="${CAE_RMI_REG}"
+#       APPLICATION="cm7-qac-delivery"
+#     else
+#       # 'Standard' CAE
+#       PORT="${CAE_RMI_REG}"
+#       APPLICATION="cm7-cae"
+#     fi
+#   elif [[ ${HOSTNAME} =~ .*importer.* ]]
+#   then
+#     if [ "${app}" == "importer" ]
+#     then
+#       PORT="${IMPORTER_RMI_REG}"
+#     elif [ "${app}" == "taxonomy" ]
+#     then
+#       PORT="${TAXONOMY_RMI_REG}"
+#     fi
+  else
+    PORT=
+    APPLICATION=
+  fi
+
+#   echo "-------------------"
+#   echo ${BLUEPRINT_BOX}
+#   set
+#   echo "${HOST} :: ${PORT}"
+#   echo "-------------------"
+#   exit 2
+
+
+  if [ ! -z ${PORT} ]
+  then
+
+    if [ $(fping -r1 ${HOST} | grep "is alive" | wc -l) -gt 0 ]
+    then
+      if [ $(nmap ${HOST} -p ${PORT}  | grep -c "tcp open") -gt 0 ]
+      then
+        RUNNING=true
+      else
+        RUNNING=false
+      fi
+    fi
+  else
+    RUNNING=false
+  fi
+}
+
+run() {
+
+  local check=
+  local json=
+
+  prepare "${APP}"
+
+  if [ ! -z ${PORT} ]
+  then
+#    if [ $(netstat -tlnp | grep -c ${PORT}) -gt 0 ]
+    if [ ${RUNNING} = true ]
+    then
+
+      printResult ${filename}
+
+    else
+      echo "ERROR - CoreMedia Service '${APP}' on Host '${HOST}' not running"
+      exit ${STATE_CRITICAL}
+    fi
+
+  else
+    echo "UNKNOWN - Service unknown"
+    exit ${STATE_UNKNOWN}
+  fi
+
+}
+
+# ----------------------------------------------------------------------------------------
+
+# Parse parameters
+while [ $# -gt 0 ]
+do
+  case "$1" in
+    -h|--help) shift
+      usage;
+      exit 0
+      ;;
+    -v|--version) shift
+      version;
+      exit 0
+      ;;
+    -H|--host) shift
+      HOST="${1}"
+      ;;
+    -a|--application) shift
+      APP="${1}"
+      ;;
+    -A|--action) shift
+      ACTION=${1}
+      ;;
+    *)  echo "Unknown argument: $1"
+      exit $STATE_UNKNOWN
+      ;;
+  esac
+shift
+done
+
+# ----------------------------------------------------------------------------------------
+
+# Check that required argument (metric) was specified
+
+[ -z "${HOST}" ] && {
+  echo "Usage error: 'host' parameter missing"
+  echo ""
+  usage
+  exit ${STATE_UNKNOWN}
+}
+
+[ -z "${APP}" ] && {
+  echo "Usage error: 'app' parameter missing"
+  echo ""
+  usage
+  exit ${STATE_UNKNOWN}
+} || {
+
+  case "${APP}" in
+    'cms')           :  ;;
+    'rls')           :  ;;
+    'mls')           :  ;;
+    'livefeeder')    :  ;;
+    'previewfeeder') :  ;;
+    'livecae')       :  ;;
+    'previewcae')    :  ;;
+#    'preview')       :  ;;
+    'studio')        :  ;;
+    'solr')          :  ;;
+    'importer')      :  ;;
+    'taxonomy')      :  ;;
+    *)
+      echo "ERROR - unknown CM7 Application '${APP}'"
+      exit ${STATE_CRITICAL}
+      ;;
+  esac
+}
+
+[ -z "${ACTION}" ] && {
+  echo "Usage error: 'action' parameter missing"
+  echo ""
+  usage
+  exit ${STATE_UNKNOWN}
+} || {
+
+  case "${ACTION}" in
+    'HeapMemoryUsage')           JSON_GRP="Memory"                           ;;
+    'NonHeapMemoryUsage')        JSON_GRP="Memory"                           ;;
+    'Threading')                 JSON_GRP="Threading"                        ;;
+    'State')                     JSON_GRP="Service"                          ;;
+    'ClassLoading')              JSON_GRP="ClassLoading"                     ;;
+    'LiveReplicationHandler')    JSON_GRP="SolrReplicationHandler.live"      ;;
+    'PreviewReplicationHandler') JSON_GRP="SolrReplicationHandler.preview"   ;;
+    'StudioReplicationHandler')  JSON_GRP="SolrReplicationHandler.studio"    ;;
+    'Count')                     JSON_GRP="CMCAEFeeder"                      ;;
+    'Replicator')                JSON_GRP="CMRLSReplicator"                  ;;
+    *)
+      echo "ERROR - unknown CM7 Action '${ACTION}'"
+      exit ${STATE_CRITICAL}
+  esac
+}
+
+# ----------------------------------------------------------------------------------------
+
+#----------------------------------------------------------------------------------------
+
+run
+
+# EOF

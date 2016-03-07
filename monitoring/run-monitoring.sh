@@ -33,14 +33,6 @@ do
     echo " => starting Container '${d}' named ${CONTAINER_NAME} ..."
 
     ./run.sh > /dev/null
-
-#    sleep 2s
-#
-#    IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${CONTAINER_NAME})
-#    NAME=$(docker inspect --format '{{ .Config.Hostname }}' ${CONTAINER_NAME})
-#
-#    echo "${IP}  ${NAME}.docker" >> ${DOCKER_ADDN_DIR}/dnsmasq.addn.docker
-
   else
     echo "no run.sh found"
   fi
@@ -55,12 +47,15 @@ do
   echo "${IP}  ${NAME}.${CONTAINER_DOMAIN}" >> ${DOCKER_ADDN_DIR}/dnsmasq.addn.docker
 done
 
-#  for CID in $(docker ps -q)
-#  do
-#    IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${CID})
-#    NAME=$(docker inspect --format '{{ .Config.Hostname }}' ${CID})
-#    echo "${IP}  ${NAME}.${CONTAINER_DOMAIN}" >> ${CONTAINER_HOSTS}
-#  done
+cd ${SRC_BASE}
+
+for CID in $(docker ps -q)
+do
+  IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${CID})
+  NAME=$(docker inspect --format '{{ .Config.Hostname }}' ${CID})
+
+  tools/bin/icinga-api.sh --filter "docker-nod*" --address "${IP}" --name "${NAME}.${CONTAINER_DOMAIN}"
+done
 
 #[ -x /usr/local/bin/update-docker-dns.sh ] && sudo /usr/local/bin/update-docker-dns.sh
 

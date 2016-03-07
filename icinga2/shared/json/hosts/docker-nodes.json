@@ -1,0 +1,10 @@
+{
+  "templates": ["generic-host"],
+  "attrs": {
+    "address": "%ADDRESS%",
+    "display_name": "%NAME%",
+    "vars" : {
+      "type" : "docker"
+    }
+  }
+}

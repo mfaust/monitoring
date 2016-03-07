@@ -16,13 +16,15 @@ docker run \
   --detach \
   --publish=5665:5665 \
   --publish=6666:6666 \
-  --volume=${PWD}/share/icinga2:/usr/local/share/icinga2 \
+  --volume=${PWD}/share/icinga2:/usr/local/monitoring \
   --link=${USER}-mysql:database \
   --env MYSQL_HOST=database \
   --env MYSQL_PORT=3306 \
   --env MYSQL_USER=root \
   --env MYSQL_PASS=foo.bar.Z \
   --env IDO_PASSWORD=xxxxxxxxx \
+  --env CARBON_HOST=${USER}-graphite.docker \
+  --env CARBON_PORT=2003 \
   --dns=${DOCKER_DNS} \
   --hostname=${USER}-${TYPE} \
   --name ${CONTAINER_NAME} \

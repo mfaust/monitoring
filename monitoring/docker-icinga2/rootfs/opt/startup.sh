@@ -7,6 +7,9 @@ MYSQL_PORT=${MYSQL_PORT:-""}
 MYSQL_USER=${MYSQL_USER:-"root"}
 MYSQL_PASS=${MYSQL_PASS:-""}
 
+CARBON_HOST=${CARBON_HOST:-""}
+CARBON_PORT=${CARBON_PORT:-2003}
+
 if [ -z ${MYSQL_HOST} ]
 then
   echo " [E] no '${MYSQL_HOST}' ..."
@@ -49,7 +52,16 @@ then
 
   chown nagios:nagios /etc/icinga2/features-available/ido-mysql.conf
 
-  # https://www.axxeo.de/blog/technisches/icinga2-livestatus-ueber-tcp.html
+  if [ ! -z ${CARBON_HOST} ]
+  then
+    icinga2 feature enable graphite
+
+    if [ -e /etc/icinga2/features-enabled/graphite.conf ]
+    then
+      sed -i "s,^.*\ //host\ =\ .*,  host\ =\ \"${CARBON_HOST}\",g" /etc/icinga2/features-enabled/graphite.conf
+      sed -i "s,^.*\ //port\ =\ .*,  port\ =\ \"${CARBON_PORT}\",g" /etc/icinga2/features-enabled/graphite.conf
+    fi
+  fi
 
   #icinga2 API cert - regenerate new private key and certificate when running in a new container
   if [ ! -f /etc/icinga2/pki/${HOSTNAME}.key ]
