@@ -14,9 +14,7 @@ docker run \
   --interactive \
   --tty \
   --detach \
-  --publish=8080:8080 \
-  --dns=${DOCKER_DNS} \
-  --hostname=${USER}-${TYPE} \
+  --hostname ${USER}-${TYPE} \
   --name ${CONTAINER_NAME} \
   ${TAG_NAME}
 
