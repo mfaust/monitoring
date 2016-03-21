@@ -1,0 +1,39 @@
+
+SECRET_KEY = 'AYGKXwz5gaH98MsSDlIviZKJLh4a9eucEu5iivdn'
+
+TIME_ZONE = 'Europe/Berlin'
+
+MEMCACHE_HOSTS = ['127.0.0.1:11211']
+
+CONF_DIR = '/app/graphite/conf'
+STORAGE_DIR = '/app/graphite/storage'
+CONTENT_DIR = '/app/graphite/webapp/content'
+
+# To further or fully customize the paths, modify the following. Note that the
+# default settings for each of these are relative to CONF_DIR and STORAGE_DIR
+#
+## Webapp config files
+DASHBOARD_CONF = '/app/graphite/conf/dashboard.conf'
+GRAPHTEMPLATES_CONF = '/app/graphite/conf/graphTemplates.conf'
+
+## Data directories
+# NOTE: If any directory is unreadable in DATA_DIRS it will break metric browsing
+WHISPER_DIR = '/app/graphite/storage/whisper'
+RRD_DIR = '/app/graphite/storage/rrd'
+DATA_DIRS = [WHISPER_DIR, RRD_DIR] # Default: set from the above variables
+LOG_DIR = '/app/graphite/storage/log/webapp'
+INDEX_FILE = '/app/graphite/storage/index'  # Search index file
+
+DATABASES = {
+  'default': {
+    'NAME': '%DBA_FILE%',
+    'ENGINE': 'django.db.backends.%DBA_ENGINE%',
+    'USER': '%DBA_USER%',
+    'PASSWORD': '%DBA_PASS%',
+    'HOST': '%DBA_HOST%',
+    'PORT': '%DBA_PORT%'
+  }
+}
+
+
+
