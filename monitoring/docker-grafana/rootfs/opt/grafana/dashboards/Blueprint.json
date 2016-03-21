@@ -10,7 +10,7 @@
   "sharedCrosshair": false,
   "rows": [
     {
-      "collapse": false,
+      "collapse": true,
       "editable": true,
       "height": "150px",
       "panels": [
@@ -142,6 +142,75 @@
           "aliasColors": {},
           "seriesOverrides": [],
           "links": []
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "graphite",
+          "editable": true,
+          "error": false,
+          "fill": 1,
+          "grid": {
+            "leftLogBase": 1,
+            "leftMax": null,
+            "leftMin": null,
+            "rightLogBase": 1,
+            "rightMax": null,
+            "rightMin": null,
+            "threshold1": null,
+            "threshold1Color": "rgba(216, 200, 27, 0.27)",
+            "threshold2": null,
+            "threshold2Color": "rgba(234, 112, 112, 0.22)"
+          },
+          "id": 15,
+          "isNew": true,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": false,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "connected",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "span": 6,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "refId": "C",
+              "target": "alias(collectd_192_168_252_100.CAE-blob_cache.cm7_counter-size, 'max')",
+              "textEditor": false
+            },
+            {
+              "refId": "A",
+              "target": "alias(collectd_192_168_252_100.CAE-blob_cache.cm7_counter-level, 'used')",
+              "textEditor": false
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "CAE BlobCache",
+          "tooltip": {
+            "shared": true,
+            "value_type": "cumulative"
+          },
+          "type": "graph",
+          "x-axis": true,
+          "y-axis": true,
+          "y_formats": [
+            "bytes",
+            "short"
+          ]
         }
       ],
       "title": "Row"
@@ -666,7 +735,7 @@
       "title": "New row",
       "height": "150px",
       "editable": true,
-      "collapse": false,
+      "collapse": true,
       "panels": [
         {
           "title": "CMS Query Pool",
@@ -985,6 +1054,6 @@
   },
   "refresh": "30s",
   "schemaVersion": 8,
-  "version": 25,
+  "version": 27,
   "links": []
 }
