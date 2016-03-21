@@ -73,6 +73,11 @@ run() {
       echo -n "add Host '${host}'   "
       curl --silent ${curl_opts} -H 'Accept: application/json' -X PUT "https://localhost:5665/v1/objects/hosts/${host}" --data @${f} | python -mjson.tool
       echo ".. done"
+    elif [ $(curl ${curl_opts} -H 'Accept: application/json' -X GET "https://localhost:5665/v1/objects/hosts?name=bschulz-mysql" | python -mjson.tool | jq --raw-output '.status') == 'null' ]
+    then
+      echo -n "add Host '${host}'   "
+      curl --silent ${curl_opts} -H 'Accept: application/json' -X PUT "https://localhost:5665/v1/objects/hosts/${host}" --data @${f} | python -mjson.tool
+      echo ".. done"
     else
       echo "Host ${host} already monitored"
     fi

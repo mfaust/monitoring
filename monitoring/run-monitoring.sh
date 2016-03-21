@@ -4,20 +4,76 @@
 
 SRC_BASE=${PWD}
 
-MONITORING_CONTAINER=" docker-mysql docker-jolokia docker-graphite docker-icinga2 docker-icingaweb2 docker-grafana docker-dashing docker-cm-monitoring"
+MONITORING_CONTAINER="docker-mysql docker-jolokia docker-graphite docker-icinga2 docker-icingaweb2 docker-grafana docker-dashing"
 
-cd ${SRC_BASE}/docker-dnsmasq
+DOCKER_DNS="172.17.0.1"
+DOCKER_ADDN_DIR="/tmp"
 
-. ./config.rc
+rm -f ${DOCKER_ADDN_DIR}/dnsmasq.addn.docker
 
-echo " => starting DNS Container '${CONTAINER_NAME}' ..."
+runDNSDocker() {
 
-./run.sh > /dev/null
+  cd ${SRC_BASE}/docker-dnsmasq
 
-IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${CONTAINER_NAME})
-NAME=$(docker inspect --format '{{ .Config.Hostname }}' ${CONTAINER_NAME})
+  . ./config.rc
 
-echo "starting Docker DNS with IP ${IP}"
+  echo " => starting DNS Container '${CONTAINER_NAME}' ..."
+
+  ./run.sh > /dev/null
+
+  IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${CONTAINER_NAME})
+  NAME=$(docker inspect --format '{{ .Config.Hostname }}' ${CONTAINER_NAME})
+
+  echo "starting Docker DNS with IP ${IP}"
+
+  export DOCKER_DNS=${IP}
+  export DOCKER_ADDN_DIR="/tmp"
+}
+
+
+runContainer() {
+
+  for d in ${MONITORING_CONTAINER}
+  do
+    if [ -x ${SRC_BASE}/${d}/run.sh ]
+    then
+      cd ${SRC_BASE}/${d}
+
+      . ./config.rc
+
+      echo " => starting Container '${d}' named ${CONTAINER_NAME} ..."
+
+      ./run.sh > /dev/null
+    else
+      echo "no run.sh found"
+    fi
+
+    echo -e "\n =========================================================== \n"
+  done
+
+  sleep 15s
+}
+
+runContainer
+
+cd ${SRC_BASE}
+
+for CID in $(docker ps -q)
+do
+  IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${CID})
+  NAME=$(docker inspect --format '{{ .Config.Hostname }}' ${CID})
+
+  echo " - '${IP}' - '${NAME}'"
+
+  echo "${IP}  ${NAME}" >> ${DOCKER_ADDN_DIR}/dnsmasq.addn.docker
+
+  tools/bin/icinga-api.sh --filter "docker-nod*" --address "${IP}" --name "${NAME}"
+done
+
+exit 0
+
+
+
 
 export DOCKER_DNS=${IP}
 export DOCKER_ADDN_DIR="/tmp"
