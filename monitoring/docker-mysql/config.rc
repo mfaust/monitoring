@@ -6,5 +6,3 @@ TAG_NAME="${USER}-docker-${TYPE}"
 CONTAINER_NAME="${USER}-${TYPE}"
 
 DATA_DIR="/srv/docker/data"
-
-DOCKER_DNS=${DOCKER_DNS:-172.17.0.1}
