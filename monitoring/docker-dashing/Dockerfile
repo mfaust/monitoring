@@ -1,8 +1,9 @@
-FROM alpine:3.3
+
+FROM alpine:edge
 
 MAINTAINER Bodo Schulz <bodo@boone-schulz.de>
 
-LABEL version="1.0.0"
+LABEL version="1.1.0"
 
 EXPOSE 3030
 
@@ -11,6 +12,10 @@ EXPOSE 3030
 RUN \
   apk --quiet update && \
   apk --quiet upgrade
+
+RUN \
+  rm -Rf /var/run && \
+  ln -s /run /var/run
 
 RUN \
   apk --quiet add \
@@ -24,17 +29,18 @@ RUN \
     supervisor
 
 RUN \
-  gem install --quiet bundle
-
-RUN \
+  gem install --quiet bundle && \
   gem install --quiet dashing
 
 RUN \
   mkdir /opt && \
   cd /opt && \
-  git clone --quiet https://github.com/Icinga/dashing-icinga2.git && \
-  cd /opt/dashing-icinga2 && \
-  bundle install
+  git clone --quiet https://github.com/Shopify/dashing.git && \
+  cd dashing && \
+  dashing new icinga2 && \
+  cd icinga2 && \
+  echo -e "\ngem 'rest-client'\n" >> Gemfile && \
+  bundle
 
 RUN \
   apk del --purge \
@@ -44,6 +50,8 @@ RUN \
   rm -rf /var/cache/apk/*
 
 ADD rootfs/ /
+
+WORKDIR /opt/dashing/icinga2
 
 CMD [ "/opt/startup.sh" ]
 
