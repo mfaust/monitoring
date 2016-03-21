@@ -1,55 +1,63 @@
-FROM debian:jessie
+
+FROM alpine:edge
 
 MAINTAINER Bodo Schulz <bodo@boone-schulz.de>
 
-LABEL version="0.9.8"
+LABEL version="1.0.0"
 
-ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
 
 EXPOSE 5665 6666
 
 # ---------------------------------------------------------------------------------------
 
-RUN apt-get -qq update && \
-  apt-get -qqy install \
-    ca-certificates \
-    wget \
-    software-properties-common && \
-  wget --quiet -O - https://packages.icinga.org/icinga.key | apt-key add - && \
-  echo "deb http://packages.icinga.org/debian icinga-jessie-snapshots main" >> /etc/apt/sources.list.d/icinga.list && \
-  apt-get -qq update && \
-  apt-get -qqy upgrade && \
-  apt-get -qqy dist-upgrade && \
-  apt-get -qqy install --no-install-recommends \
-    fping \
-    supervisor \
+RUN \
+  echo "@testing http://nl.alpinelinux.org/alpine/edge/testing" >>  /etc/apk/repositories
+
+RUN \
+  apk --quiet update && \
+  apk --quiet upgrade
+
+RUN \
+  rm -Rf /var/run && \
+  ln -s /run /var/run
+
+RUN \
+  apk --quiet add \
+    bash \
     pwgen \
+    supervisor \
+    fping \
     unzip \
-    ssmtp \
-    mailutils \
-    nano \
-    netcat \
+    netcat-openbsd \
     nmap \
-    mysql-client \
-    monitoring-plugins-basic \
-    monitoring-plugins-standard \
-    icinga2 \
-    icinga2-ido-mysql \
     curl \
     bc \
     jq \
-    yajl-tools && \
-  apt-get clean  && \
-  rm -rf /var/lib/apt/lists/*
+    yajl-tools \
+    ssmtp \
+    mailx \
+    mysql-client \
+    icinga2@testing \
+    monitoring-plugins@testing
+
+RUN \
+  cp /etc/icinga2/conf.d.example/* /etc/icinga2/conf.d/ && \
+  mkdir -p /run/icinga2 /run/icinga2/cmd
+
+RUN \
+  chmod u+s /bin/busybox
+
+RUN \
+  rm -rf /var/cache/apk/*
 
 ADD rootfs/ /
-
-RUN chmod u+x /opt/supervisor/*_supervisor
 
 VOLUME  ["/etc/icinga2", "/var/lib/icinga2", "/var/run/icinga2/cmd" ]
 
 # Initialize and run Supervisor
 CMD [ "/opt/startup.sh" ]
+
+
 
 # ---------------------------------------------------------------------------------------

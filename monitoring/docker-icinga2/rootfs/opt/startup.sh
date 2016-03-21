@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 initfile=/opt/run.init
 
@@ -12,7 +12,7 @@ CARBON_PORT=${CARBON_PORT:-2003}
 
 if [ -z ${MYSQL_HOST} ]
 then
-  echo " [E] no '${MYSQL_HOST}' ..."
+  echo " [E] no MYSQL_HOST var set ..."
   exit 1
 fi
 
@@ -29,28 +29,68 @@ sleep 10s
 
 # -------------------------------------------------------------------------------------------------
 
-env | grep BLUEPRINT  > /etc/env.vars
-env | grep HOST_     >> /etc/env.vars
+#env | grep BLUEPRINT  > /etc/env.vars
+#env | grep HOST_     >> /etc/env.vars
 
 chmod 1777 /tmp
 
-chown -R nagios:root   /etc/icinga2
-chown -R nagios:nagios /var/lib/icinga2
+USER=
+GROUP=
+
+for u in nagios icinga
+do
+  if [ "$(getent passwd ${u})" ]
+  then
+    USER="${u}"
+    break
+  fi
+done
+
+for g in nagios icinga
+do
+  if [ "$(getent group ${g})" ]
+  then
+    GROUP="${g}"
+    break
+  fi
+done
+
+if ( [ -z ${USER} ] || [ -z ${GROUP} ] )
+then
+  echo "No User/Group nagios/icinga found!"
+else
+  chown -R ${USER}:root     /etc/icinga2
+  chown -R ${USER}:${GROUP} /var/lib/icinga2
+fi
+
+if [ -f /etc/icinga2/icinga2.sysconfig ]
+then
+  . /etc/icinga2/icinga2.sysconfig
+
+#  ICINGA2_RUNasUSER=${ICINGA2_USER}
+#  ICINGA2_RUNasGROUP=${ICINGA2_GROUP}
+else
+  ICINGA2_RUN_DIR=$(/usr/sbin/icinga2 variable get RunDir)
+#  ICINGA2_RUNasUSER=$(/usr/sbin/icinga2 variable get RunAsUser)
+#  ICINGA2_RUNasGROUP=$(/usr/sbin/icinga2 variable get RunAsGroup)
+fi
+
+chown -R ${USER}:${GROUP} ${ICINGA2_RUN_DIR}/icinga2
 
 if [ ! -f "${initfile}" ]
 then
   # Passwords...
-
   IDO_PASSWORD=${IDO_PASSWORD:-$(pwgen -s 15 1)}
 
-  # disable ssh-checks
-  sed -i -e "s,^.*\ vars.os\ \=\ .*,  //\ vars.os = \"Linux\",g" /etc/icinga2/conf.d/hosts.conf
+  # remove var.os to disable ssh-checks
+  if [ -f /etc/icinga2/conf.d/hosts.conf ]
+  then
+    sed -i -e "s,^.*\ vars.os\ \=\ .*,  //\ vars.os = \"Linux\",g" /etc/icinga2/conf.d/hosts.conf
+  fi
 
   # enable icinga2 features if not already there
   echo " [i] Enabling icinga2 features."
-  icinga2 feature enable ido-mysql command livestatus compatlog
-
-  chown nagios:nagios /etc/icinga2/features-available/ido-mysql.conf
+  icinga2 feature enable ido-mysql command livestatus compatlog checker mainlog icingastatus
 
   if [ ! -z ${CARBON_HOST} ]
   then
@@ -62,6 +102,10 @@ then
       sed -i "s,^.*\ //port\ =\ .*,  port\ =\ \"${CARBON_PORT}\",g" /etc/icinga2/features-enabled/graphite.conf
     fi
   fi
+
+  chown ${USER}:${GROUP} /etc/icinga2/features-available/ido-mysql.conf
+
+  # https://www.axxeo.de/blog/technisches/icinga2-livestatus-ueber-tcp.html
 
   #icinga2 API cert - regenerate new private key and certificate when running in a new container
   if [ ! -f /etc/icinga2/pki/${HOSTNAME}.key ]
@@ -85,18 +129,17 @@ then
   ICINGAADMIN_PASSWORD=$(openssl passwd -1 "icinga")
 
   (
-    echo "create user 'icinga2'@'%' IDENTIFIED BY '${IDO_PASSWORD}';"
+    echo "--- create user 'icinga2'@'%' IDENTIFIED BY '${IDO_PASSWORD}';"
     echo "CREATE DATABASE IF NOT EXISTS icinga2;"
     echo "GRANT SELECT, INSERT, UPDATE, DELETE, DROP, CREATE VIEW, INDEX, EXECUTE ON icinga2.* TO 'icinga2'@'%' IDENTIFIED BY '${IDO_PASSWORD}';"
   ) | mysql ${mysql_opts}
 
   mysql ${mysql_opts} --force icinga2  < /usr/share/icinga2-ido-mysql/schema/mysql.sql                   >> /opt/icinga2-ido-mysql-schema.log 2>&1
-  mysql ${mysql_opts} --force icinga2  < /usr/share/dbconfig-common/data/icinga2-ido-mysql/install/mysql >> /opt/icinga2-ido-mysql-schema.log 2>&1
 
-  sed -i 's/host \= \".*\"/host \=\ \"'${MYSQL_HOST}'\"/g'             /etc/icinga2/features-available/ido-mysql.conf
-  sed -i 's/password \= \".*\"/password \= \"'${IDO_PASSWORD}'\"/g'    /etc/icinga2/features-available/ido-mysql.conf
-  sed -i 's/user =\ \".*\"/user =\ \"icinga2\"/g'                      /etc/icinga2/features-available/ido-mysql.conf
-  sed -i 's/database =\ \".*\"/database =\ \"icinga2\"/g'              /etc/icinga2/features-available/ido-mysql.conf
+  sed -i 's|//host \= \".*\"|host \=\ \"'${MYSQL_HOST}'\"|g'             /etc/icinga2/features-available/ido-mysql.conf
+  sed -i 's|//password \= \".*\"|password \= \"'${IDO_PASSWORD}'\"|g'    /etc/icinga2/features-available/ido-mysql.conf
+  sed -i 's|//user =\ \".*\"|user =\ \"icinga2\"|g'                      /etc/icinga2/features-available/ido-mysql.conf
+  sed -i 's|//database =\ \".*\"|database =\ \"icinga2\"|g'              /etc/icinga2/features-available/ido-mysql.conf
 
   touch ${initfile}
 
