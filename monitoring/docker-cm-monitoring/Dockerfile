@@ -1,4 +1,5 @@
-FROM alpine:3.3
+
+FROM alpine:edge
 
 MAINTAINER Bodo Schulz <bodo@boone-schulz.de>
 
@@ -19,10 +20,17 @@ RUN \
     python \
     curl \
     jq \
+    bc \
+    yajl-tools \
+    collectd \
+    fping \
     nmap
 
 RUN \
   rm -rf /var/cache/apk/*
+
+RUN \
+  mv /etc/collectd/collectd.conf /etc/collectd/collectd.conf.dist
 
 ADD rootfs/ /
 
