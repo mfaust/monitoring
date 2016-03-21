@@ -6,7 +6,7 @@
 
 # ----------------------------------------------------------------------------------------
 
-TEMPLATE_DIR="/usr/local/share/icinga2/json"
+TEMPLATE_DIR="/usr/local/share/monitoring/json"
 
 standardJMX="TomcatThreadPool Threading Service Memory ClassLoading GarbageCollector"
 
@@ -26,8 +26,10 @@ JMX_48099="${standardJMX} CMServer CMConnectionPool CMQueryPool CMStatisticsJobR
 JMX_49099="${standardJMX} CMCAECacheContentBeans CMCAEBlobCache" # cae
 
 # nach wie vielen Tagen soll der check neu gebaut werden
-MAX_JSON_TIME=4
+MAX_JSON_TIME=1
 
-JOLOKIA_PORT_CACHE="/tmp/jolokia.port.cache"
+JOLOKIA_PORT_CACHE=
+
+JOLOKIA_CACHE_BASE="/var/cache/monitoring"
 
 # ----------------------------------------------------------------------------------------
