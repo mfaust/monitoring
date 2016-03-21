@@ -8,19 +8,22 @@ then
   docker rm   ${CONTAINER_NAME} 2> /dev/null
 fi
 
+DOCKER_DBA_ROOT_PASS=${DOCKER_DBA_ROOT_PASS:-foo.bar.Z}
+DOCKER_DATA_DIR=${DOCKER_DATA_DIR:-${DATA_DIR}}
+
 # ---------------------------------------------------------------------------------------
 
 docker run \
   --interactive \
   --tty \
   --detach \
-  --publish=33060:3306 \
-  --env MYSQL_ROOT_PASSWORD=foo.bar.Z \
-  --volume=${DATA_DIR}/${TYPE}:/app \
-  --dns=${DOCKER_DNS} \
+  --env MYSQL_ROOT_PASSWORD=${DOCKER_DBA_ROOT_PASS} \
+  --volume=${DOCKER_DATA_DIR}/${TYPE}:/app \
   --hostname=${USER}-${TYPE} \
   --name ${CONTAINER_NAME} \
   ${TAG_NAME}
+
+# [ -x /usr/local/bin/update-docker-dns.sh ] && sudo /usr/local/bin/update-docker-dns.sh
 
 # ---------------------------------------------------------------------------------------
 # EOF
