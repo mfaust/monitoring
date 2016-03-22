@@ -85,7 +85,7 @@ getPorts() {
 
   local host="${1}"
   local PORTS=
-  local scan_ports=""
+  local scan_ports=
 
   if [ $(fping -r1 ${host} | grep "is alive" | wc -l) -gt 0 ]
   then
@@ -94,7 +94,6 @@ getPorts() {
     then
       # CM7-Port
       scan_ports="38099,40099,41099,42099,43099,44099,45099,46099,47099,48099,49099"
-#      PORTS="$(${NMAP} ${BLUEPRINT_BOX} -p T:38099,40099,41099,42099,43099,44099,45099,46099,47099,48099,49099 | grep "tcp open" | cut -d / -f 1)"
 
       cp /etc/cm7-services ${TMP_DIR}/cm-services
     else
@@ -106,6 +105,8 @@ getPorts() {
 
     PORTS="$(${NMAP} ${host} -p T:${scan_ports} | grep "tcp open" | cut -d / -f 1)"
   fi
+
+#   [ -f ${TMP_DIR}/cm-services ] && { source ${TMP_DIR}/cm-services } || { echo "no cm-services file found!" ; exit 2 }
 
   echo "PORTS=\"${PORTS}\"" > ${JOLOKIA_PORT_CACHE}
 }
@@ -140,6 +141,8 @@ checkJolokia() {
 buildChecks() {
 
   local host="${1}"
+
+#  TMP_DIR="${JOLOKIA_CACHE_BASE}/${!host}"
 
   for p in ${PORTS}
   do
@@ -210,6 +213,8 @@ runChecks() {
 
   local host="${1}"
 
+  . ${TMP_DIR}/cm-services
+
   for p in ${PORTS}
   do
 
@@ -275,7 +280,9 @@ run() {
     echo "skip checks ..."
   else
 
-    if [ -z ${CHECK_HOST} ]
+    echo "check_host '${CHECK_HOST}'"
+
+    if [ -z "${CHECK_HOST}" ]
     then
       if [ -f /etc/env.vars ]
       then
@@ -298,7 +305,12 @@ run() {
 
     for host in ${CHECK_HOST}
     do
-#       echo "${host} == ${!host}"
+      echo "${host} == ${!host}"
+
+      TMP_DIR="${JOLOKIA_CACHE_BASE}/${!host}"
+      echo " tmp_dir ${TMP_DIR}"
+
+#      continue
 
       if [ ${FORCE} = true ]
       then
@@ -386,12 +398,16 @@ do
       version
       exit 0
       ;;
-    -H|--HOST)
+    -H|--host)
       shift
       CHECK_HOST="${1}"
       ;;
     -D|--daemon)
       DAEMON=true
+      ;;
+    -H|--host)
+      shift
+
       ;;
     -f|--force)
       FORCE=true

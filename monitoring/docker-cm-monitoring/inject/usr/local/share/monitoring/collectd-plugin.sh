@@ -464,6 +464,8 @@ do
       continue
     fi
 
+    . ${SERVICES}
+
     if [ -f ${TMP_DIR}/PORT.cache ]
     then
 

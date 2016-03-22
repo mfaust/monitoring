@@ -1,7 +1,5 @@
 #
 
-. /etc/jolokia.rc
-
 # NEW_STYLE
 SOLR_RMI_REG=40099
 CMS_RMI_REG=40199
