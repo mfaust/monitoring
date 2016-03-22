@@ -95,9 +95,13 @@ getPorts() {
       # CM7-Port
       scan_ports="38099,40099,41099,42099,43099,44099,45099,46099,47099,48099,49099"
 #      PORTS="$(${NMAP} ${BLUEPRINT_BOX} -p T:38099,40099,41099,42099,43099,44099,45099,46099,47099,48099,49099 | grep "tcp open" | cut -d / -f 1)"
+
+      cp /etc/cm7-services ${TMP_DIR}/cm-services
     else
       # CMx-Port (new Deployment-schema)
       scan_ports="40099,40199,40299,40399,40499,40599,40699,40799,40899,40999,41099,41199,41299,41399,42099,42199,42299,42399,42499,42599,42699,42799,42899,42999"
+
+      cp /etc/cm14-services ${TMP_DIR}/cm-services
     fi
 
     PORTS="$(${NMAP} ${host} -p T:${scan_ports} | grep "tcp open" | cut -d / -f 1)"
@@ -296,6 +300,13 @@ run() {
     do
 #       echo "${host} == ${!host}"
 
+      if [ ${FORCE} = true ]
+      then
+        rm -rf ${JOLOKIA_CACHE_BASE}/${!host}
+
+        FORCE=false
+      fi
+
       if [ $(fping -r1 ${!host} | grep "is alive" | wc -l) -gt 0 ]
       then
         echo "host '${host}' is alive"
@@ -304,7 +315,7 @@ run() {
 
         [ -d ${TMP_DIR} ] || mkdir -p ${TMP_DIR}
 
-        JOLOKIA_PORT_CACHE="${TMP_DIR}/MONITOR_JOLOKIA.tmp"
+        JOLOKIA_PORT_CACHE="${TMP_DIR}/PORT.cache"
 
         if [ ! -f ${JOLOKIA_PORT_CACHE} ]
         then
@@ -312,7 +323,7 @@ run() {
           getPorts ${!host}
         else
 
-          if [ ${FORCE} = force ]
+          if [ ${FORCE} = true ]
           then
             filemtime=$(stat -c %Y ${JOLOKIA_PORT_CACHE})
             currtime=$(date +%s)
