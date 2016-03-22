@@ -6,25 +6,17 @@
 #
 # 2015-06-05
 # 2016-03-20
-#
+# 2016-03-22
 
 # -------------------------------------------------------------------------------------------------
 
 SCRIPTNAME=$(basename $0 .sh)
-VERSION="2.10.0"
+VERSION="2.10.2"
 VDATE="20.02.2016"
 
 # -------------------------------------------------------------------------------------------------
 
-SERVICES="/etc/cm-services"
 JOLOKIA_RC="/etc/jolokia.rc"
-
-[ -f "${SERVICES}" ] && {
-  . ${SERVICES}
-} || {
-  echo "services missing"
-  exit 1
-}
 
 [ -f "${JOLOKIA_RC}" ] && {
   . ${JOLOKIA_RC}
@@ -457,7 +449,6 @@ collectdPlugin_Solr() {
 
 while true
 do
-
 #  collectdPlugin_CMSUser
 
   for host in $(ls -1 ${JOLOKIA_CACHE_BASE})
@@ -466,18 +457,24 @@ do
 
     TMP_DIR=${JOLOKIA_CACHE_BASE}/${host}
 
-    echo  ${TMP_DIR}
+    if [ -e ${JOLOKIA_CACHE_BASE}/${host}/cm-services ]
+    then
+      SERVICES=${JOLOKIA_CACHE_BASE}/${host}/cm-services
+    else
+      continue
+    fi
 
-    if [ -f ${TMP_DIR}/MONITOR_JOLOKIA.tmp ]
+    if [ -f ${TMP_DIR}/PORT.cache ]
     then
 
-      . ${TMP_DIR}/MONITOR_JOLOKIA.tmp
+      . ${TMP_DIR}/PORT.cache
 
       for port in ${PORTS}
       do
-        service=$(grep ${port} ${SERVICES} | awk -F '=' '{ print($1) }' | sed 's/_RMI_REG//' | tr '[A-Z]' '[a-z]')
+        service=$(grep ${port} ${SERVICES} | awk -F '=' '{ print($1) }' | sed 's/_RMI_REG//')  ## | tr '[A-Z]' '[a-z]')
 
         dir="${TMP_DIR}/${port}"
+
         for i in $(ls -1 ${dir}/*.result)
         do
           check=$(basename ${i} | sed 's|.result||g')
@@ -504,12 +501,9 @@ do
               continue
               ;;
           esac
-
         done
-
       done
     fi
-
   done
 
   sleep "${INTERVAL}"
