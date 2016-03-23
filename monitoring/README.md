@@ -28,11 +28,11 @@ Ziel ist es, einen Container zu bekommen, der eine Basisinstallation von chedk z
 
 ### cocker-cm-monitoring
 
-Soll alle Coremediaspezifika beinhalten. Vor allem Scripte für Icinga und Grafana.
+Soll alle Coremediaspezifika beinhalten. Vor allem Scripte für Icinga, Grafana und Jolokia.
 
 ### docker-dashing
 
-[Dashing](http://dashing.io/) ist ein einfache Dashing-Framework, welches über [Widgets}(https://github.com/Shopify/dashing/wiki/Additional-Widgets) erweitert werden kann.
+[Dashing](http://dashing.io/) ist ein einfache Dashing-Framework, welches über [Widgets](https://github.com/Shopify/dashing/wiki/Additional-Widgets) erweitert werden kann.
 Das Dashing-Framework kann von verschiedenen Services Daten einsammeln und visualisieren.
 
 ### docker-grafana
@@ -44,8 +44,6 @@ Es können verschiedene Storage-Backends ([graphite](http://graphite.readthedocs
 ### docker-graphite
 
 Graphite ist das hier genutzte Storage-Backend für Grafana.
-
-**ACHTUNG** docker-graphite **muss** vom Docker-Host über Namen und Port zur Verfügung stehen!
 
 ### docker-icinga2
 
@@ -62,7 +60,7 @@ Mit [jolokia](https://jolokia.org/) hat man die Möglichkeiten, die MBeans eines
 
 ### docker-mysql
 
-Storage-Backend für Icinga2
+Storage-Backend für Icinga2, Graphite, Grafana.
 
 ## Kommunikation & Beziehungen
 
@@ -80,11 +78,14 @@ Die jeweiligen Frontends prüfen die Erreichbarkeit ihrer Backends und starten g
       - use: docker-icinga2: 5665
  - docker-grafana
       - serving: 3000 (http://localhost:3000)
-      - (use: docker-graphite)
+      - use: docker-mysql: 3306
+      - use: docker-graphite: 8080
  - docker-graphite
       - serving: 8080 (http://localhost:8080)
       - serving: 2003
       - serving: 7002
+      - use: docker-mysql: 3306
+      - use: lokales Filesystem 
  - docker-icinga2
       - serving: 5665
       - serving: 6666
@@ -102,4 +103,5 @@ Die jeweiligen Frontends prüfen die Erreichbarkeit ihrer Backends und starten g
 Die Idee für ein langfristiges Ziel wäre ein sich selbst konfigurierendes Monitoringsystem.
 Hier könnte der Einsatz von [consul](https://www.consul.io/) ein wichtige Schritt sein.
 
-
+## Schematischer Aufbau
+![schema](schema.jpg "Schematischer aufbau und Kommunikationsbeziehung")
