@@ -12,55 +12,65 @@ fi
 
 BLUEPRINT_BOX="192.168.252.100"
 
-HOST_CM7_CMS=${HOST_CM7_CMS:-${BLUEPRINT_BOX}}
-HOST_CM7_MLS=${HOST_CM7_MLS:-${BLUEPRINT_BOX}}
-HOST_CM7_RLS=${HOST_CM7_RLS:-${BLUEPRINT_BOX}}
-HOST_CM7_CONTENTFEEDER=${HOST_CM7_CONTENTFEEDER:-${BLUEPRINT_BOX}}
-HOST_CM7_LIVEFEEDER=${HOST_CM7_LIVEFEEDER:-${BLUEPRINT_BOX}}
-HOST_CM7_PREVIEWFEEDER=${HOST_CM7_PREVIEWFEEDER:-${BLUEPRINT_BOX}}
-HOST_CM7_LIVECAE=${HOST_CM7_LIVECAE:-${BLUEPRINT_BOX}}
-HOST_CM7_PREVIEWCAE=${HOST_CM7_PREVIEWCAE:-${BLUEPRINT_BOX}}
-HOST_CM7_STUDIO=${HOST_CM7_STUDIO:-${BLUEPRINT_BOX}}
-HOST_CM7_SOLR=${HOST_CM7_SOLR:-${BLUEPRINT_BOX}}
+HOST_CM_CMS=${HOST_CM_CMS:-${BLUEPRINT_BOX}}
+HOST_CM_MLS=${HOST_CM_MLS:-${BLUEPRINT_BOX}}
+HOST_CM_RLS=${HOST_CM_RLS:-${BLUEPRINT_BOX}}
+HOST_CM_WFS=${HOST_CM_WFS:-${BLUEPRINT_BOX}}
 HOST_DBA_CMS=${HOST_DBA_CMS:-${BLUEPRINT_BOX}}
 HOST_DBA_MLS=${HOST_DBA_MLS:-${BLUEPRINT_BOX}}
 HOST_DBA_RLS=${HOST_DBA_RLS:-${BLUEPRINT_BOX}}
+HOST_CM_FEEDER_CONTENT=${HOST_CM_FEEDER_CONTENT:-${BLUEPRINT_BOX}}
+HOST_CM_FEEDER_LIVE=${HOST_CM_FEEDER_LIVE:-${BLUEPRINT_BOX}}
+HOST_CM_FEEDER_PREV=${HOST_CM_FEEDER_PREV:-${BLUEPRINT_BOX}}
+HOST_CM_CAE_LIVE_1=${HOST_CM_CAE_LIVE_1:-${BLUEPRINT_BOX}}
+HOST_CM_CAE_LIVE_2=${HOST_CM_CAE_LIVE_2:-${BLUEPRINT_BOX}}
+HOST_CM_CAE_LIVE_3=${HOST_CM_CAE_LIVE_3:-${BLUEPRINT_BOX}}
+HOST_CM_CAE_LIVE_4=${HOST_CM_CAE_LIVE_4:-${BLUEPRINT_BOX}}
+HOST_CM_CAE_PREV=${HOST_CM_CAE_PREV:-${BLUEPRINT_BOX}}
+HOST_CM_STUDIO=${HOST_CM_STUDIO:-${BLUEPRINT_BOX}}
+HOST_CM_SOLR=${HOST_CM_SOLR:-${BLUEPRINT_BOX}}
+HOST_CM_USERCHANGES=${HOST_CM_USERCHANGES:-${BLUEPRINT_BOX}}
+HOST_CM_ELASTICWORKER=${HOST_CM_ELASTICWORKER:-${BLUEPRINT_BOX}}
+HOST_CM_ADOBE_DRIVE=${HOST_CM_ADOBE_DRIVE:-${BLUEPRINT_BOX}}
+HOST_CM_WEBDAV=${HOST_CM_WEBDAV:-${BLUEPRINT_BOX}}
+HOST_CM_SITEMANAGER=${HOST_CM_SITEMANAGER:-${BLUEPRINT_BOX}}
 
 # ---------------------------------------------------------------------------------------
 
+DOCKER_DNS=${DOCKER_DNS:-""}
 JOLOKIA_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${USER}-jolokia   2>/dev/null)
 GRAPHITE_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${USER}-graphite 2>/dev/null)
 ICINGA2_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${USER}-icinga    2>/dev/null)
 
-# [ -z ${DATABASE_IP} ] && { echo "No Database Container '${USER}-mysql' running!"; exit 1; }
-
-# DNS_CONTAINER="${USER}-dnsmasq"
-#
-# if [ $(docker inspect --format '{{ .State.Status }}' ${DNS_CONTAINER}) == running ]
-# then
-#   DOCKER_DNS=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${DNS_CONTAINER})
-# else
-#   DOCKER_DNS=localhost
-# fi
+# ---------------------------------------------------------------------------------------
 
 docker_opts=
 docker_opts="${docker_opts} --interactive"
 docker_opts="${docker_opts} --tty"
 docker_opts="${docker_opts} --hostname=${USER}-${TYPE}"
 docker_opts="${docker_opts} --name=${CONTAINER_NAME}"
-docker_opts="${docker_opts} --env HOST_CM7_CMS=${HOST_CM7_CMS}"
-docker_opts="${docker_opts} --env HOST_CM7_MLS=${HOST_CM7_MLS}"
-docker_opts="${docker_opts} --env HOST_CM7_RLS=${HOST_CM7_RLS}"
-docker_opts="${docker_opts} --env HOST_CM7_CONTENTFEEDER=${HOST_CM7_CONTENTFEEDER}"
-docker_opts="${docker_opts} --env HOST_CM7_LIVEFEEDER=${HOST_CM7_LIVEFEEDER}"
-docker_opts="${docker_opts} --env HOST_CM7_PREVIEWFEEDER=${HOST_CM7_PREVIEWFEEDER}"
-docker_opts="${docker_opts} --env HOST_CM7_LIVECAE=${HOST_CM7_LIVECAE}"
-docker_opts="${docker_opts} --env HOST_CM7_PREVIEWCAE=${HOST_CM7_PREVIEWCAE}"
-docker_opts="${docker_opts} --env HOST_CM7_STUDIO=${HOST_CM7_STUDIO}"
-docker_opts="${docker_opts} --env HOST_CM7_SOLR=${HOST_CM7_SOLR}"
+docker_opts="${docker_opts} --env HOST_CM_CMS=${HOST_CM_CMS}"
+docker_opts="${docker_opts} --env HOST_CM_MLS=${HOST_CM_MLS}"
+docker_opts="${docker_opts} --env HOST_CM_RLS=${HOST_CM_RLS}"
+docker_opts="${docker_opts} --env HOST_CM_WFS=${HOST_CM_WFS}"
 docker_opts="${docker_opts} --env HOST_DBA_CMS=${HOST_DBA_CMS}"
 docker_opts="${docker_opts} --env HOST_DBA_MLS=${HOST_DBA_MLS}"
 docker_opts="${docker_opts} --env HOST_DBA_RLS=${HOST_DBA_RLS}"
+docker_opts="${docker_opts} --env HOST_CM_FEEDER_CONTENT=${HOST_CM_FEEDER_CONTENT}"
+docker_opts="${docker_opts} --env HOST_CM_FEEDER_LIVE=${HOST_CM_FEEDER_LIVE}"
+docker_opts="${docker_opts} --env HOST_CM_FEEDER_PREV=${HOST_CM_FEEDER_PREV}"
+docker_opts="${docker_opts} --env HOST_CM_CAE_LIVE_1=${HOST_CM_CAE_LIVE_1}"
+docker_opts="${docker_opts} --env HOST_CM_CAE_LIVE_2=${HOST_CM_CAE_LIVE_2}"
+docker_opts="${docker_opts} --env HOST_CM_CAE_LIVE_3=${HOST_CM_CAE_LIVE_3}"
+docker_opts="${docker_opts} --env HOST_CM_CAE_LIVE_4=${HOST_CM_CAE_LIVE_4}"
+docker_opts="${docker_opts} --env HOST_CM_CAE_PREV=${HOST_CM_CAE_PREV}"
+docker_opts="${docker_opts} --env HOST_CM_STUDIO=${HOST_CM_STUDIO}"
+docker_opts="${docker_opts} --env HOST_CM_SOLR=${HOST_CM_SOLR}"
+docker_opts="${docker_opts} --env HOST_CM_USERCHANGES=${HOST_CM_USERCHANGES}"
+docker_opts="${docker_opts} --env HOST_CM_ELASTICWORKER=${HOST_CM_ELASTICWORKER}"
+docker_opts="${docker_opts} --env HOST_CM_ADOBE_DRIVE=${HOST_CM_ADOBE_DRIVE}"
+docker_opts="${docker_opts} --env HOST_CM_WEBDAV=${HOST_CM_WEBDAV}"
+docker_opts="${docker_opts} --env HOST_CM_SITEMANAGER=${HOST_CM_SITEMANAGER}"
 docker_opts="${docker_opts} --volume=${PWD}/inject/usr/local:/usr/local/"
 
 if [ ! -z ${ICINGA2_IP} ]
@@ -82,20 +92,17 @@ then
   docker_opts="${docker_opts} --link=${USER}-jolokia:jolokia"
 fi
 
+if [ ! -z ${DOCKER_DNS} ]
+then
+  docker_opts="${docker_opts} --dns ${DOCKER_DNS}"
+fi
+
 # ---------------------------------------------------------------------------------------
 
 docker run \
   ${docker_opts} \
   ${TAG_NAME} \
   /bin/bash
-
-# docker run \
-#   --interactive \
-#   --tty \
-#   --hostname=${USER}-${TYPE} \
-#   --name ${CONTAINER_NAME} \
-#   ${TAG_NAME} \
-#   /bin/bash
 
 # ---------------------------------------------------------------------------------------
 # EOF
