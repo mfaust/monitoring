@@ -8,14 +8,24 @@ then
   docker rm   ${CONTAINER_NAME} 2> /dev/null
 fi
 
+DOCKER_DNS=${DOCKER_DNS:-""}
+
+docker_opts=
+docker_opts="${docker_opts} --interactive"
+docker_opts="${docker_opts} --tty"
+docker_opts="${docker_opts} --detach"
+docker_opts="${docker_opts} --hostname=${USER}-${TYPE}"
+docker_opts="${docker_opts} --name=${CONTAINER_NAME}"
+
+if [ ! -z ${DOCKER_DNS} ]
+then
+  docker_opts="${docker_opts} --dns ${DOCKER_DNS}"
+fi
+
 # ---------------------------------------------------------------------------------------
 
 docker run \
-  --interactive \
-  --tty \
-  --detach \
-  --hostname ${USER}-${TYPE} \
-  --name ${CONTAINER_NAME} \
+  ${docker_opts} \
   ${TAG_NAME}
 
 # ---------------------------------------------------------------------------------------
