@@ -3,11 +3,13 @@
 #
 # version 2
 
+set +x
+
 # ----------------------------------------------------------------------------------------
 
 SCRIPTNAME=$(basename $0 .sh)
-VERSION="2.10.0"
-VDATE="21.03.2016"
+VERSION="2.15.0"
+VDATE="23.03.2016"
 
 # ----------------------------------------------------------------------------------------
 
@@ -34,9 +36,6 @@ STATE_DEPENDENT=4
 
 CHECK_HOST=
 PORT_STYLE="cm14"
-
-env | grep BLUEPRINT  > /etc/env.vars
-env | grep HOST_     >> /etc/env.vars
 
 NMAP=$(which nmap)
 
@@ -74,12 +73,34 @@ usage() {
   printf  "$help_format_desc"  ""    "-h"                 ": Show this help"
   printf  "$help_format_desc"  ""    "-v"                 ": Prints out the Version"
   printf  "$help_format_desc"  ""    "-D|--daemon"        ": start in Daemon-Mode (default: no daemon)"
+  printf  "$help_format_desc"  ""    "-i|--intervall"     ": in daemon Mode, you cant set the runtime intervall in seconds (default: 58sec)"
   printf  "$help_format_desc"  ""    "-f|--force"         ": regeneration Port-Cache every 30 Minutes (default: no force)"
   printf  "$help_format_desc"  ""    "-H|--host"          ": Hostname or IP (default: Environment Variable CHECK_HOST)"
   printf  "$help_format_desc"  ""    "-P|--old-portstyle" ": old port style for service discovery"
 }
 
 # --------------------------------------------------------------------------------------------------------------------
+
+getEnvironmentVars() {
+
+  if [ ! -f /etc/env.vars ]
+  then
+    env | grep BLUEPRINT     > /etc/env.vars
+    env | sort | grep HOST_ >> /etc/env.vars
+  else
+    filemtime=$(stat -c %Y /etc/env.vars)
+    currtime=$(date +%s)
+    diff=$(( (currtime - filemtime) / 86400 ))
+    if [ ${diff} -gt 4 ]
+    then
+      rm -f /etc/env.vars
+
+      env | grep BLUEPRINT     > /etc/env.vars
+      env | sort | grep HOST_ >> /etc/env.vars
+    fi
+  fi
+}
+
 
 getPorts() {
 
@@ -105,8 +126,6 @@ getPorts() {
 
     PORTS="$(${NMAP} ${host} -p T:${scan_ports} | grep "tcp open" | cut -d / -f 1)"
   fi
-
-#   [ -f ${TMP_DIR}/cm-services ] && { source ${TMP_DIR}/cm-services } || { echo "no cm-services file found!" ; exit 2 }
 
   echo "PORTS=\"${PORTS}\"" > ${JOLOKIA_PORT_CACHE}
 }
@@ -138,11 +157,42 @@ checkJolokia() {
 
 # ----------------------------------------------------------------------------------------
 
+checkHostAlive() {
+
+  local host="${1}"
+  local alive=false
+
+  HOST_ALIVE="${TMP_DIR}/alive"
+
+  if [ ! -f ${HOST_ALIVE} ]
+  then
+    if [ $(fping -r1 ${host} | grep "is alive" | wc -l) -gt 0 ]
+    then
+      touch ${HOST_ALIVE}
+      alive=true
+    else
+      alive=false
+    fi
+  else
+    filemtime=$(stat -c %Y ${HOST_ALIVE})
+    currtime=$(date +%s)
+    diff=$(( (currtime - filemtime) / 86400 ))
+    if [ ${diff} -gt 1 ]
+    then
+      rm -f ${HOST_ALIVE}
+
+      checkHostAlive
+    else
+      alive=true
+    fi
+  fi
+
+  echo $alive
+}
+
 buildChecks() {
 
   local host="${1}"
-
-#  TMP_DIR="${JOLOKIA_CACHE_BASE}/${!host}"
 
   for p in ${PORTS}
   do
@@ -154,7 +204,7 @@ buildChecks() {
 
       dir="${TMP_DIR}/${p}"
 
-      [ -d ${dir} ] || mkdir -vp ${dir}
+      [ -d ${dir} ] || mkdir -p ${dir}
 
       file_dst="${dir}/${c}.json"
 
@@ -221,7 +271,7 @@ runChecks() {
     dir="${TMP_DIR}/${p}"
     if [ ! -d ${dir} ]
     then
-      echo "build Checks .."
+#       echo "build Checks .."
       buildChecks ${host}
     fi
 
@@ -276,14 +326,17 @@ run() {
 
   if [ ${JOLOKIA_AVAILABLE} == false ]
   then
-    echo "needed jolokia service are not available"
-    echo "skip checks ..."
+    echo " [W] needed jolokia service are not available"
+    echo "     skip checks ..."
   else
 
-    echo "check_host '${CHECK_HOST}'"
+#    echo " [I] check_host '${CHECK_HOST}'"
 
     if [ -z "${CHECK_HOST}" ]
     then
+
+      getEnvironmentVars
+
       if [ -f /etc/env.vars ]
       then
 
@@ -291,98 +344,86 @@ run() {
 
         while read line
         do
-  #        echo $line
           host=$(echo ${line} | awk -F'=' '{print ( $1 ) }')
 
           CHECK_HOST="${CHECK_HOST} ${host}"
         done < /etc/env.vars
+
       fi
     else
       export BLUEPRINT_BOX=${CHECK_HOST}
       CHECK_HOST="BLUEPRINT_BOX"
     fi
 
-
     for host in ${CHECK_HOST}
     do
-      echo "${host} == ${!host}"
-
       TMP_DIR="${JOLOKIA_CACHE_BASE}/${!host}"
-      echo " tmp_dir ${TMP_DIR}"
-
-#      continue
 
       if [ ${FORCE} = true ]
       then
-        rm -rf ${JOLOKIA_CACHE_BASE}/${!host}
+        [ -d ${TMP_DIR} ] && rm -rf ${TMP_DIR}
 
+        # for DAEMON Mode
         FORCE=false
       fi
 
-      if [ $(fping -r1 ${!host} | grep "is alive" | wc -l) -gt 0 ]
+      [ -d ${TMP_DIR} ] || mkdir -p ${TMP_DIR}
+
+      JOLOKIA_PORT_CACHE="${TMP_DIR}/PORT.cache"
+      HOST_ALIVE="${TMP_DIR}/alive"
+
+      alive=$(checkHostAlive ${!host})
+
+      if [ ${alive} == true ]
       then
-        echo "host '${host}' is alive"
-
-        TMP_DIR="${JOLOKIA_CACHE_BASE}/${!host}"
-
-        [ -d ${TMP_DIR} ] || mkdir -p ${TMP_DIR}
-
-        JOLOKIA_PORT_CACHE="${TMP_DIR}/PORT.cache"
-
-        if [ ! -f ${JOLOKIA_PORT_CACHE} ]
+        if [ -d ${JOLOKIA_CACHE_BASE}/${!host} ]
         then
-          echo "no ports cache '${JOLOKIA_PORT_CACHE}' found"
-          getPorts ${!host}
-        else
-
-          if [ ${FORCE} = true ]
+          if [ ! -f ${JOLOKIA_PORT_CACHE} ]
           then
-            filemtime=$(stat -c %Y ${JOLOKIA_PORT_CACHE})
-            currtime=$(date +%s)
-            diff=$(( (currtime - filemtime) / 30 ))
+            getPorts ${!host}
+          else
 
-            if [ ${diff} -gt 30 ]
+            if [ ${FORCE} = true ]
             then
-              echo "port cache is older than 30 minutes"
+              filemtime=$(stat -c %Y ${JOLOKIA_PORT_CACHE})
+              currtime=$(date +%s)
+              diff=$(( (currtime - filemtime) / 30 ))
 
-              getPorts ${!host}
+              if [ ${diff} -gt 30 ]
+              then
+                getPorts ${!host}
+              fi
             fi
           fi
-        fi
 
-        . ${JOLOKIA_PORT_CACHE}
+          . ${JOLOKIA_PORT_CACHE}
 
-        if [ $(echo "${PORTS}" | wc -w) -eq 0 ]
-        then
-          echo "no valid ports found"
+          if [ $(echo "${PORTS}" | wc -w) -eq 0 ]
+          then
+            echo " [E] no valid ports found"
+            echo "     skip ..."
+            continue
+          fi
 
-          exit 2
-        fi
+          if [ ${DAEMON} = true ]
+          then
+            while true
+            do
+              runChecks ${!host}
 
-        if [ ${DAEMON} = true ]
-        then
-          while true
-          do
+              sleep "${RUN_INTERVAL}"
+            done
+          else
             runChecks ${!host}
-
-            sleep "${RUN_INTERVAL}"
-          done
-        else
-          runChecks ${!host}
+          fi
         fi
-
       else
-        echo "host '${host}' is not alive"
+        echo " [E] host '${host}' is not alive"
       fi
-
     done
+
   fi
-
 }
-
-
-
-# ----------------------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------------------
 
@@ -405,9 +446,9 @@ do
     -D|--daemon)
       DAEMON=true
       ;;
-    -H|--host)
+    -i|--intervall)
       shift
-
+      RUN_INTERVAL="${1}"
       ;;
     -f|--force)
       FORCE=true
