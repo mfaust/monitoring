@@ -82,7 +82,7 @@ collectdPlugin_Memory() {
   echo "PUTVAL ${HOSTNAME}/${service}-heap_memory/cm7_counter-used interval=${INTERVAL} N:${HeapMemUsed}"
 }
 
-  collectdPlugin_ClassLoading() {
+collectdPlugin_ClassLoading() {
 
   local result="${1}"
 
@@ -457,6 +457,8 @@ do
 
     TMP_DIR=${JOLOKIA_CACHE_BASE}/${host}
 
+#    echo ${TMP_DIR}
+
     if [ -e ${JOLOKIA_CACHE_BASE}/${host}/cm-services ]
     then
       SERVICES=${JOLOKIA_CACHE_BASE}/${host}/cm-services
@@ -473,13 +475,15 @@ do
 
       for port in ${PORTS}
       do
-        service=$(grep ${port} ${SERVICES} | awk -F '=' '{ print($1) }' | sed 's/_RMI_REG//')  ## | tr '[A-Z]' '[a-z]')
-
+        service=$(grep ${port} ${SERVICES} | grep -v JMX | awk -F '=' '{ print($1) }' | sed 's/_RMI_REG//')  ## | tr '[A-Z]' '[a-z]')
+#        echo " $port - $service"
         dir="${TMP_DIR}/${port}"
 
         for i in $(ls -1 ${dir}/*.result)
         do
           check=$(basename ${i} | sed 's|.result||g')
+
+#          echo " $check  - $i"
 
           case "${check}"
           in
@@ -499,7 +503,7 @@ do
             'CMContentDependencyInvalidator') collectdPlugin_CMFeederReplicator "${i}" ${port}  ;;
             'SolrReplicationHandler.live')    collectdPlugin_Solr "${i}" ${port}                ;;
             *)
-##              echo "no plugin found: ${i}"
+# ##              echo "no plugin found: ${i}"
               continue
               ;;
           esac
