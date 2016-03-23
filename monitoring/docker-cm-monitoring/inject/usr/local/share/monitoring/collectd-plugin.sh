@@ -11,8 +11,8 @@
 # -------------------------------------------------------------------------------------------------
 
 SCRIPTNAME=$(basename $0 .sh)
-VERSION="2.10.2"
-VDATE="20.02.2016"
+VERSION="2.11.0"
+VDATE="23.03.2016"
 
 # -------------------------------------------------------------------------------------------------
 
@@ -374,29 +374,6 @@ collectdPlugin_Solr() {
   ENV="prod"
   CORE="live"
 
-#   if [[ ${HOSTNAME} =~ .*prod.* ]]
-#   then
-#     # LIVE
-#     ENV="prod"
-#   else
-#     ENV="stage"
-#   fi
-#
-#   if [[ ${HOSTNAME} =~ ^web.* ]]
-#   then
-#     # LIVE
-#     CORE="live"
-#   elif [[ ${HOSTNAME} =~ ^dmz.* ]]
-#   then
-#     CORE="preview"
-#   fi
-
-#   file="${TMP_DIR}/${port}/solr.${CORE}.result"
-
-#   echo " ==> $result"
-#   echo " ==> $port"
-#   echo " ==> $file"
-
   if [ -f "${result}" ]
   then
 #    result="${TMP_DIR}/${port}/solr.${CORE}.result"
@@ -419,11 +396,17 @@ collectdPlugin_Solr() {
 
       [ "${masterIndex}" = "null" ]       && masterIndex=
       [ "${masterGeneration}" = "null" ]  && masterGeneration=
-      [ "${localIndex}" = "null" ]        && localIndex=
-      [ "${localGeneration}" = "null" ]   && localGeneration=
+      [ "${localIndex}" = "null" ] && {
+        echo "PUTNOTIF $HOSTNAME/${service}-${core}_core/cm7_counter-index message='N/A'"
+      } || {
+        echo "PUTVAL ${HOSTNAME}/${service}-${core}_core/cm7_counter-index interval=$INTERVAL N:${localIndex}"
+      }
 
-      echo "PUTVAL ${HOSTNAME}/${service}-${core}_core/cm7_counter-index interval=$INTERVAL N:${localIndex}"
-      echo "PUTVAL ${HOSTNAME}/${service}-${core}_core/cm7_counter-generation interval=$INTERVAL N:${localGeneration}"
+      [ "${localGeneration}" = "null" ] && {
+        echo "PUTNOTIF $HOSTNAME/${service}-${core}_core/cm7_counter-generation message='N/A'"
+      } || {
+        echo "PUTVAL ${HOSTNAME}/${service}-${core}_core/cm7_counter-generation interval=$INTERVAL N:${localGeneration}"
+      }
 
       if ( [ ! -z ${masterIndex} ] && [ ! -z ${localIndex} ] )
       then
@@ -468,12 +451,11 @@ do
 
     . ${SERVICES}
 
-    if [ -f ${TMP_DIR}/PORT.cache ]
-    then
+#    if [ -f ${TMP_DIR}/PORT.cache ]
+#    then
+#      . ${TMP_DIR}/PORT.cache
 
-      . ${TMP_DIR}/PORT.cache
-
-      for port in ${PORTS}
+      for port in $(find ${TMP_DIR}/* -type d -name 4???? -exec basename {} \;) ## ${PORTS}
       do
         service=$(grep ${port} ${SERVICES} | grep -v JMX | awk -F '=' '{ print($1) }' | sed 's/_RMI_REG//')  ## | tr '[A-Z]' '[a-z]')
 #        echo " $port - $service"
@@ -509,7 +491,7 @@ do
           esac
         done
       done
-    fi
+#    fi
   done
 
   sleep "${INTERVAL}"
