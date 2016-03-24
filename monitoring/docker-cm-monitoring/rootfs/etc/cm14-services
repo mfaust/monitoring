@@ -34,6 +34,7 @@ JMX_40199="${standardJMX} CMServer CMConnectionPool CMQueryPool CMStatisticsJobR
 JMX_40299="${standardJMX} CMServer CMConnectionPool CMQueryPool CMStatisticsJobResult CMStatisticsRepository CMStatisticsResourceCache CMStatisticsTextStore" # MLS
 JMX_40399="${standardJMX}" # WFS
 JMX_40499="${standardJMX} CMContentFeeder" # FEEDER_CONTENT
+JMX_40599="${standardJMX}" # USERCHANGES
 JMX_40699="${standardJMX}" # ELASTICWORKER
 JMX_40799="${standardJMX} CMCAEFeederHealth CMCAEFeederProactiveEngine CMContentDependencyInvalidator" # FEEDER_PREV
 JMX_40899="${standardJMX} CMCAEFeederHealth CMCAEFeederProactiveEngine CMContentDependencyInvalidator" # FEEDER_LIVE
