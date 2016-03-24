@@ -1,0 +1,12 @@
+---
+jenkins:
+  server:
+    'https://pc-ci.coremedia.com':
+      - 'vsphere-reports'
+      - 'seed'
+    'https://cm7-ci.coremedia.com':
+      - 'seed'
+      - 'license-builder-7.5'
+    'https://release-ci.coremedia.com':
+      - 'seed'
+

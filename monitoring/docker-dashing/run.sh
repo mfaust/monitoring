@@ -23,6 +23,7 @@ docker_opts="${docker_opts} --publish=3030:3030"
 docker_opts="${docker_opts} --hostname=${USER}-${TYPE}"
 docker_opts="${docker_opts} --name=${CONTAINER_NAME}"
 docker_opts="${docker_opts} --env AUTH_TOKEN=${DOCKER_DASHING_AUTH_TOKEN}"
+# docker_opts="${docker_opts} --volume=${PWD}/inject/opt:/opt"
 
 if [ ! -z ${ICINGA2_IP} ]
 then
@@ -40,6 +41,11 @@ if [ ! -z ${GRAPHITE_IP} ]
 then
   docker_opts="${docker_opts} --env GRAPHITE_HOST=${GRAPHITE_IP}"
   docker_opts="${docker_opts} --env GRAPHITE_PORT=8080"
+fi
+
+if [ ! -z ${DOCKER_DNS} ]
+then
+  docker_opts="${docker_opts} --dns ${DOCKER_DNS}"
 fi
 
 # ---------------------------------------------------------------------------------------

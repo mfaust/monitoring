@@ -40,6 +40,7 @@ RUN \
   dashing new icinga2 && \
   cd icinga2 && \
   echo -e "\ngem 'rest-client'\n" >> Gemfile && \
+  echo -e "gem 'dotenv'\n" >> Gemfile && \
   bundle
 
 RUN \
