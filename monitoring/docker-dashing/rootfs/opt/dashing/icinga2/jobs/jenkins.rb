@@ -51,7 +51,7 @@ end
 def get_url(url, auth = nil)
 
 #  puts " url : " + url.to_s
-  uri = URI.parse(url)
+  uri  = URI.parse(url)
   http = Net::HTTP.new(uri.host, uri.port)
 
   if uri.scheme == 'https'
@@ -75,15 +75,11 @@ end
 def get_jenkins_build_health( jenkings_server, build_id )
 
   url = "#{jenkings_server}/job/#{build_id}/api/json?tree=builds[status,timestamp,id,result,duration,url,fullDisplayName]"
-
 #   puts " url : " + url.to_s
-
   build_info         = get_url URI.encode( url )
-
   bi                 = build_info['builds']
 
   unless !bi.nil?
-
     bi       = {}
     bi["duration"]        = 0
     bi["fullDisplayName"] = ""
@@ -99,8 +95,8 @@ def get_jenkins_build_health( jenkings_server, build_id )
 
 #    puts " -> build with status "
 #    puts builds_with_status
-    puts " -> successful count  " + successful_count.to_s
-    puts " -> latest build      " + latest_build.to_s
+#    puts " -> successful count  " + successful_count.to_s
+#    puts " -> latest build      " + latest_build.to_s
 
   return {
     name: latest_build['fullDisplayName'],
@@ -118,7 +114,7 @@ end
 
 
 
-SCHEDULER.every '5s' do
+SCHEDULER.every '3m' do
 
   config["jenkins"].each do |server, builds|
 

@@ -3,7 +3,7 @@ FROM alpine:edge
 
 MAINTAINER Bodo Schulz <bodo@boone-schulz.de>
 
-LABEL version="1.1.0"
+LABEL version="1.2.0"
 
 EXPOSE 3030
 
@@ -39,9 +39,11 @@ RUN \
   cd dashing && \
   dashing new icinga2 && \
   cd icinga2 && \
-  echo -e "\ngem 'rest-client'\n" >> Gemfile && \
-  echo -e "gem 'dotenv'\n" >> Gemfile && \
-  bundle
+  echo -e "\n" >> Gemfile && \
+  echo "gem 'rest-client'"     >> Gemfile && \
+  echo "gem 'dotenv'"          >> Gemfile && \
+  echo "gem 'pingdom-faraday'" >> Gemfile && \
+  bundle update
 
 RUN \
   apk del --purge \
