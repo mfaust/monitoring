@@ -118,7 +118,7 @@ end
 
 
 
-SCHEDULER.every '20s' do
+SCHEDULER.every '5s' do
 
   config["jenkins"].each do |server, builds|
 
