@@ -3,8 +3,8 @@
 $(function() {
   // These settings override the defaults set in application.coffee. You can do this on a per dashboard basis.
 //  Dashing.gridsterLayout('[{"col":2,"row":1},{"col":1,"row":1},{"col":3,"row":1},{"col":2,"row":2},{"col":3,"row":2},{"col":1,"row":2},{"col":5,"row":1},{"col":4,"row":2},{"col":2,"row":3}]')
-  Dashing.widget_base_dimensions = [270, 240]
-  Dashing.numColumns = 6
+  Dashing.widget_base_dimensions = [320, 220]
+  Dashing.numColumns = 7
 });
 /*
 $(function() {
@@ -30,7 +30,7 @@ $(function() {
       <div data-view="Clock"></div>
       <i class="icon-time icon-background"></i>
     </li>
-    <li data-row="1" data-col="1" data-sizex="4" data-sizey="1">
+    <li data-row="1" data-col="1" data-sizex="5" data-sizey="1">
       <div data-id="chuck" data-view="Text" data-title="Team Facts"></div>
     </li>
     <li data-row="1" data-col="1" data-sizex="1" data-sizey="1">
@@ -39,53 +39,26 @@ $(function() {
     <!-- head -->
 
     <li data-row="1" data-col="1" data-sizex="1" data-sizey="2">
-      <div data-id="pingdom" data-view="Pingdom" data-title="Pingdom" data-cols="1"></div>
+      <div data-id="pingdom" data-view="Pingdom" data-title="Pingdom" data-cols="2"></div>
     </li>
 
-    
-
-    <!-- Down, Critical, Warning -->
-<!--
-    <li data-row="2" data-col="1" data-sizex="1" data-sizey="1">
-      <div data-id="icinga-overview" data-view="Simplemon" data-title="Overview" data-url="http://localhost/icinga/monitoring/tactical" ></div>
-    </li>
-    <li data-row="2" data-col="2" data-sizex="1" data-sizey="1">
-      <div data-id="icinga-host-down" data-view="Simplemon" data-title="Hosts Down"></div>
-    </li>
-    <li data-row="2" data-col="3" data-sizex="1" data-sizey="1">
-      <div data-id="icinga-service-critical" data-view="Simplemon" data-title="Services Critical"></div>
-    </li>
-    <li data-row="2" data-col="4" data-sizex="1" data-sizey="1">
-      <div data-id="icinga-service-warning" data-view="Simplemon" data-title="Services Warning"></div>
-    </li>
--->
-    <!-- graphite -->
-<!--
     <li data-row="1" data-col="1" data-sizex="1" data-sizey="1">
-        <div data-id="monitoring-ping-1min" data-view="Graph" data-title="Host1 Load 1min" data-moreinfo="Last 4h"></div>
-    </li>
--->
-    <!-- build -->
-<!--
-    <li data-row="2" data-col="1" data-sizex="1" data-sizey="1">
-      <div data-id="https://pc-ci.coremedia.com/seed" data-server="https://pc-ci.coremedia.com" data-view="BuildWindow"></div>
+      <div data-id="cloudformation" data-view="Cloudformation" data-title="CloudFormation" data-cols="2"></div>
     </li>
 
-    <li data-row="2" data-col="1" data-sizex="1" data-sizey="1">
-      <div data-id="https://cm7-ci.coremedia.com/seed" data-server="https://cm7-ci.coremedia.com" data-view="BuildWindow"></div>
+    <li data-row="1" data-col="1" data-sizex="4" data-sizey="1">
+      <div data-id="cloudwatch" data-view="Rickshawgraph" data-title="CloudWatch"
+        data-moreinfo=""
+        style="background-color:#333A52;"
+        data-renderer="line"
+        data-min="0"
+        data-max="5"
+        data-summary-method="none"
+        data-legend="true"
+        data-colors="rgba(192,132,255,1):rgba(96,170,255,1)"></div>
     </li>
 
-    <li data-row="2" data-col="1" data-sizex="1" data-sizey="1">
-      <div data-id="https://release-ci.coremedia.com/seed" data-server="https://release-ci.coremedia.com" data-view="BuildWindow"></div>
-    </li>
--->
-<!--
-    <li data-row="1" data-col="1" data-sizex="1" data-sizey="1">
-      <div data-id="https://pc-ci.coremedia.com/vsphere-reports" data-server="https://pc-ci.coremedia.com" data-view="BuildWindow"></div>
-    </li>
--->
     <!-- Jenkin master-14 pipeline -->
-
     <li data-row="1" data-col="1" data-sizex="2" data-sizey="1">
       <div data-id="https://cm7-ci.coremedia.com/master-14.0/job/build" data-server="https://cm7-ci.coremedia.com" data-view="BuildWindow"></div>
     </li>
@@ -105,37 +78,6 @@ $(function() {
     </li>
 
 
-<!--
-    <li data-row="1" data-col="1" data-sizex="1" data-sizey="1">
-        <div data-id="host2-load-1min" data-view="Meter" data-title="Host2 Load 1min" data-min="0" data-max="100" data-moreinfo="Last 4h"></div>
-    </li>
--->
-    <!-- sonar plugin -->
-<!--
-    <li data-row="1" data-col="1" data-sizex="1" data-sizey="1">
-      <div data-id="sonar" data-view="List" data-title="sonar stats" data-unordered="true" data-moreinfo="values as %"></div>
-    </li>
--->
-
-
-    <!-- Acknowledged -->
-<!--
-    <li data-row="3" data-col="1" data-sizex="1" data-sizey="1">
-      <div data-id="icinga-host-ack" data-view="Simplemon" data-title="Hosts Acknowledged"></div>
-    </li>
-    <li data-row="3" data-col="2" data-sizex="1" data-sizey="1">
-      <div data-id="icinga-service-ack" data-view="Simplemon" data-title="Services Acknowledged"></div>
-    </li>
--->
-    <!-- Downtime -->
-<!--
-    <li data-row="3" data-col="3" data-sizex="1" data-sizey="1">
-      <div data-id="icinga-host-downtime" data-view="Simplemon" data-title="Hosts in Downtime"></div>
-    </li>
-    <li data-row="3" data-col="4" data-sizex="1" data-sizey="1">
-      <div data-id="icinga-service-downtime" data-view="Simplemon" data-title="Services in Downtime"></div>
-    </li>
--->
   </ul>
 
 </div>
