@@ -6,33 +6,39 @@ api_key  = ENV['PINGDOM_API']  || ''
 user     = ENV['PINGDOM_USER'] || ''
 password = ENV['PINGDOM_PASS'] || ''
 
+if api_key.empty? or user.empty? or password.empty?
+  puts " => pingdom Job"
+  puts " [E] no valid configuration found!"
 
-SCHEDULER.every '1m', :first_in => 0 do
+else
 
-  client = Pingdom::Client.new :username => user, :password => password, :key => api_key
+  SCHEDULER.every '5m', :first_in => 0 do
 
-  if client.checks
+    client = Pingdom::Client.new :username => user, :password => password, :key => api_key
 
-    checks = client.checks.map { |check|
+    if client.checks
 
-      if check.status == 'up'
-        color = 'green'
-      else
-        color = 'red'
-      end
+      checks = client.checks.map { |check|
 
-      last_response = check.last_response_time.to_s + " ms"
+        if check.status == 'up'
+          color = 'green'
+        else
+          color = 'red'
+        end
 
-      {
-        name: check.name,
-        state: color,
-        lastRepsonseTime: last_response
+        last_response = check.last_response_time.to_s + " ms"
+
+        {
+          name: check.name,
+          state: color,
+          lastRepsonseTime: last_response
+        }
       }
-    }
 
-    checks.sort_by { |check| check['name'] }
+      checks.sort_by { |check| check['name'] }
 
-    send_event('pingdom', { checks: checks })
+      send_event('pingdom', { checks: checks })
+    end
   end
-end
 
+end
