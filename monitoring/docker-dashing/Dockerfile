@@ -20,6 +20,7 @@ RUN \
 RUN \
   apk --quiet add \
     build-base \
+    ca-certificates \
     git \
     nodejs \
     ruby-dev \
@@ -43,6 +44,7 @@ RUN \
   echo "gem 'rest-client'"     >> Gemfile && \
   echo "gem 'dotenv'"          >> Gemfile && \
   echo "gem 'pingdom-faraday'" >> Gemfile && \
+  echo "gem 'aws-sdk'"         >> Gemfile && \
   bundle update
 
 RUN \
