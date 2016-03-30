@@ -18,7 +18,7 @@ end
 
 @cCache = {}
 
-SCHEDULER.every '4m', :first_in => 0 do |job|
+SCHEDULER.every '2m', :first_in => 0 do |job|
 
   elb_latencies = Array.new
 
@@ -72,6 +72,6 @@ SCHEDULER.every '4m', :first_in => 0 do |job|
     elb_series.push elb_data
   end
 
-  send_event "cw-elb", { series: elb_series }
+  send_event "cloudwatch", { series: elb_series }
 
 end
