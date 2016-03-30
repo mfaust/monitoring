@@ -25,6 +25,19 @@ docker_opts="${docker_opts} --name=${CONTAINER_NAME}"
 docker_opts="${docker_opts} --env AUTH_TOKEN=${DOCKER_DASHING_AUTH_TOKEN}"
 # docker_opts="${docker_opts} --volume=${PWD}/inject/opt:/opt"
 
+if ( [ ! -z ${PINGDOM_USER} ] || [ ! -z ${PINGDOM_PASS} ] || [ ! -z ${PINGDOM_API} ] )
+then
+  docker_opts="${docker_opts} --env PINGDOM_USER=${PINGDOM_USER:-}"
+  docker_opts="${docker_opts} --env PINGDOM_PASS=${PINGDOM_PASS:-}"
+  docker_opts="${docker_opts} --env PINGDOM_API=${PINGDOM_API:-}"
+fi
+
+if ( [ ! -z ${AWS_ACCESS_KEY_ID} ] || [ ! -z ${AWS_SECRET_ACCESS_KEY} ] )
+then
+  docker_opts="${docker_opts} --env AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-}"
+  docker_opts="${docker_opts} --env AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-}"
+fi
+
 if [ ! -z ${ICINGA2_IP} ]
 then
   DOCKER_DASHING_API_USER=${DOCKER_DASHING_API_USER:-dashing}

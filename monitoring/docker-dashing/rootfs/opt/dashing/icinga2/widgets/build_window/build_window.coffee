@@ -1,3 +1,4 @@
+
 Batman.Filters.dateFormat = (date) ->
   if moment(date).isValid() then moment(date).fromNow() else date
 
