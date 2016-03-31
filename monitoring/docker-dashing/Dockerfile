@@ -7,6 +7,11 @@ LABEL version="1.2.0"
 
 EXPOSE 3030
 
+ENV DASHBOARD=coremedia
+ENV JQ_VERSION=2.2.2
+ENV JQUI_VERSION=1.11.4
+
+
 # ---------------------------------------------------------------------------------------
 
 RUN \
@@ -21,6 +26,7 @@ RUN \
   apk --quiet add \
     build-base \
     ca-certificates \
+    curl \
     git \
     nodejs \
     ruby-dev \
@@ -38,14 +44,23 @@ RUN \
   cd /opt && \
   git clone --quiet https://github.com/Shopify/dashing.git && \
   cd dashing && \
-  dashing new icinga2 && \
-  cd icinga2 && \
+  dashing new ${DASHBOARD} && \
+  cd ${DASHBOARD} && \
   echo -e "\n" >> Gemfile && \
   echo "gem 'rest-client'"     >> Gemfile && \
   echo "gem 'dotenv'"          >> Gemfile && \
   echo "gem 'pingdom-faraday'" >> Gemfile && \
   echo "gem 'aws-sdk'"         >> Gemfile && \
   bundle update
+
+RUN \
+  curl --silent https://code.jquery.com/jquery-${JQ_VERSION}.min.js > /usr/lib/ruby/gems/2.2.0/gems/dashing-1.3.4/javascripts/jquery.js && \
+  curl --silent http://jqueryui.com/resources/download/jquery-ui-${JQUI_VERSION}.zip > /tmp/jquery-ui-${JQUI_VERSION}.zip && \
+  cd /tmp && \
+  unzip jquery-ui-${JQUI_VERSION}.zip && \
+  cp /tmp/jquery-ui-${JQUI_VERSION}/*.min.js     /usr/lib/ruby/gems/2.2.0/gems/dashing-1.3.4/javascripts/ && \
+  cp /tmp/jquery-ui-${JQUI_VERSION}/*.min.css    /usr/lib/ruby/gems/2.2.0/gems/dashing-1.3.4/templates/project/assets/stylesheets/ && \
+  cp /tmp/jquery-ui-${JQUI_VERSION}/images/*     /usr/lib/ruby/gems/2.2.0/gems/dashing-1.3.4/templates/project/assets/images/
 
 RUN \
   apk del --purge \
@@ -56,7 +71,7 @@ RUN \
 
 ADD rootfs/ /
 
-WORKDIR /opt/dashing/icinga2
+WORKDIR /opt/dashing/${DASHBOARD}
 
 CMD [ "/opt/startup.sh" ]
 
