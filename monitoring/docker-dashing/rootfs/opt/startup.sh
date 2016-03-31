@@ -11,7 +11,9 @@ ICINGA2_DASHING_APIPASS=${ICINGA2_DASHING_APIPASS:-"icinga"}
 GRAPHITE_HOST=${GRAPHITE_HOST:-""}
 GRAPHITE_PORT=${GRAPHITE_PORT:-8080}
 
-DASHING_PATH="/opt/dashing/icinga2"
+DASHBOARD=${DASHBOARD:-coremedia}
+
+DASHING_PATH="/opt/dashing/${DASHBOARD}"
 CONFIG_FILE="${DASHING_PATH}/config.ru"
 
 # -------------------------------------------------------------------------------------------------
@@ -53,6 +55,19 @@ then
   else
     rm -f ${DASHING_PATH}/jobs/graphite.rb
   fi
+
+  if [ -z ${PINGDOM_USER} ]
+  then
+    echo "missing pingdom credentials, removing job .."
+    rm -f  ${DASHING_PATH}/job/pingdom.rb
+  fi
+
+  if [ -z ${AWS_ACCESS_KEY_ID} ]
+  then
+    echo "missing AWS credentials, removing jobs .."
+    rm -f  ${DASHING_PATH}/job/cloud*.rb
+  fi
+
 
   touch ${initfile}
 
