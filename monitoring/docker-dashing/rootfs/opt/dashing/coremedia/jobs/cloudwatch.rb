@@ -1,4 +1,6 @@
 # jobs/some_job.rb
+
+
 require './lib/cloudwatch'
 
 access_key     = ENV['AWS_ACCESS_KEY_ID']     || ''
@@ -20,8 +22,6 @@ end
 
 SCHEDULER.every '2m', :first_in => 0 do |job|
 
-  elb_latencies = Array.new
-
   c = @cCache[region]
 
   if not c
@@ -36,42 +36,52 @@ SCHEDULER.every '2m', :first_in => 0 do |job|
   iid         = nil
   state       = nil
   launch_time = nil
+  metric_data = Array.new
 
+  # get all described EC2 Instances
   c.describe_instances.each  do |instance|
 
     instance.reservations.each do |r|
 
-      if !r.instances.nil?
-        r.instances.each do |i|
+      r.instances.each do |i|
 
-          iname       = nil
-          iid         = i.instance_id
-          state       = i.state.name
-          launch_time = i.launch_time
-           if !i.tags.nil?
-             i.tags.each do |t|
-               if t.key == 'Name'
-                 iname = t.value
-               end
+        iname       = nil
+        iid         = i.instance_id
+        state       = i.state.name
+        launch_time = i.launch_time
+         if !i.tags.nil?
+           i.tags.each do |t|
+             if t.key == 'Name'
+               iname = t.value
              end
            end
-        end
+         end
       end
 
-      elb_latencies << {
+      metric_data << {
         name: iname, namespace: 'AWS/EC2', region: region , metric: 'CPUUtilization', type: :average, dimensions: [ { name: 'InstanceId', value: iid } ]
       }
     end
   end
 
-  elb_series = []
+  metrics_avg   = []
+  metrics_graph = []
 
-  elb_latencies.each do |item|
-    elb_data = cw.get_metric_data(item[:region], item[:namespace], item[:dimensions], item[:metric], item[:type], {})
-    elb_data[:name] = item[:name]
-    elb_series.push elb_data
+  metric_data.each do |item|
+
+    data_avg        = cw.get_last_metric_data( item[:region], item[:namespace], item[:dimensions], item[:metric], item[:type], {} )
+    data_avg[:name] = item[:name]
+    metrics_avg.push data_avg
+
+    data_graph        = cw.get_metric_data( item[:region], item[:namespace], item[:dimensions], item[:metric], item[:type], {} )
+    data_graph[:name] = item[:name]
+    metrics_graph.push data_graph
   end
 
-  send_event "cloudwatch", { series: elb_series }
+  # sorting for AVG and them revert them (highest above)
+  metrics_avg.sort!{ |a,b| a[:avg].to_i <=> b[:avg].to_i }.reverse!
+
+  send_event "simple_cloudwatch", { series: metrics_avg }
+  send_event "cloudwatch", { series: metrics_graph }
 
 end
