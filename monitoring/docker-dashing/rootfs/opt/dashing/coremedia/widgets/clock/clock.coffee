@@ -2,7 +2,7 @@
 class Dashing.Clock extends Dashing.Widget
 
   ready: ->
-    setInterval(@startTime, 500)
+    setInterval(@startTime, 1500)
 
   startTime: =>
     today = new Date()
@@ -21,7 +21,7 @@ class Dashing.Clock extends Dashing.Widget
 
   DateFormatter = ->
     weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-    months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+    months   = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
     pad = (n) ->
       if n < 10
         "0" + n
@@ -35,7 +35,7 @@ class Dashing.Clock extends Dashing.Widget
     normal: (date) ->
       month   = 1 + date.getMonth()
       weekday = weekdays[date.getDay()]
-      "#{weekday}, #{day}.#{month}.#{year}"
+      "#{weekday}, #{pad date.getDate()}.#{pad month}.#{date.getFullYear()}"
 
     verbose: (date) ->
       weekday = weekdays[date.getDay()]
