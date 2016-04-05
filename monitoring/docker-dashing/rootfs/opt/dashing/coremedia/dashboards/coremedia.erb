@@ -12,9 +12,6 @@
     <li data-row="1" data-col="1" data-sizex="5" data-sizey="1">
       <div data-id="chuck" data-view="Text" data-title="Team Facts"></div>
     </li>
-    <li data-row="1" data-col="1" data-sizex="1" data-sizey="1">
-      <div data-id="image" data-view="image" data-title="test-image"></div>
-    </li>
     <!-- head -->
 
     <li data-row="1" data-col="1" data-sizex="1" data-sizey="2">
@@ -25,33 +22,41 @@
       <div data-id="cloudformation" data-view="Cloudformation" data-title="CloudFormation" data-cols="2"></div>
     </li>
 
+    <li data-row="1" data-col="2" data-sizex="2" data-sizey="2">
+      <div data-id="simple_cloudwatch" data-view="Cloudwatch" data-title="CloudWatch" data-cols="2"></div>
+    </li>
+
     <li data-row="1" data-col="1" data-sizex="4" data-sizey="1">
       <div data-id="cloudwatch" data-view="Rickshawgraph" data-title="CloudWatch"
         data-moreinfo=""
         style="background-color:#333A52;"
         data-renderer="line"
+        data-color-scheme="near-rainbow"
         data-min="0"
-        data-max="5"
+        data-max="25"
         data-summary-method="none"
         data-legend="true"
         data-colors="rgba(192,132,255,1):rgba(96,170,255,1)"></div>
     </li>
 
+
     <!-- Jenkin master-14 pipeline -->
     <li data-row="1" data-col="1" data-sizex="2" data-sizey="1">
-      <div data-id="https://cm7-ci.coremedia.com/master-14.0/job/build" data-server="https://cm7-ci.coremedia.com" data-view="BuildWindow"></div>
+      <div data-id="https://pc-ci.coremedia.com/packer-ibm/job/wcs8-ci-staging" data-server="https://pc-ci.coremedia.com" data-view="BuildWindow"></div>
     </li>
-
+<!--
     <li data-row="1" data-col="1" data-sizex="2" data-sizey="1">
       <div data-id="https://cm7-ci.coremedia.com/master-14.0/job/tomcat/job/wcs-build" data-server="https://cm7-ci.coremedia.com" data-view="BuildWindow"></div>
     </li>
+-->
     <li data-row="1" data-col="1" data-sizex="2" data-sizey="1">
       <div data-id="https://cm7-ci.coremedia.com/master-14.0/job/tomcat/job/wcs-deploy" data-server="https://cm7-ci.coremedia.com" data-view="BuildWindow"></div>
     </li>
-
+<!--
     <li data-row="1" data-col="1" data-sizex="2" data-sizey="1">
       <div data-id="https://cm7-ci.coremedia.com/master-14.0/job/websphere/job/wcs-build" data-server="https://cm7-ci.coremedia.com" data-view="BuildWindow"></div>
     </li>
+-->
     <li data-row="1" data-col="1" data-sizex="2" data-sizey="1">
       <div data-id="https://cm7-ci.coremedia.com/master-14.0/job/websphere/job/wcs-deploy" data-server="https://cm7-ci.coremedia.com" data-view="BuildWindow"></div>
     </li>
