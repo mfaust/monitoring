@@ -63,6 +63,14 @@ RUN \
   cp /tmp/jquery-ui-${JQUI_VERSION}/images/*     /usr/lib/ruby/gems/2.2.0/gems/dashing-1.3.4/templates/project/assets/images/
 
 RUN \
+  rm -rf /tmp/jquery* && \
+  rm -rf /opt/dashing/${DASHBOARD}/jobs/buzzwords.rb && \
+  rm -rf /opt/dashing/${DASHBOARD}/jobs/convergence.rb && \
+  rm -rf /opt/dashing/${DASHBOARD}/jobs/sample.rb && \
+  rm -rf /opt/dashing/${DASHBOARD}/jobs/twitter.rb && \
+  rm -rf /opt/dashing/${DASHBOARD}/jobs/timeline.rb
+
+RUN \
   apk del --purge \
     git \
     build-base \
