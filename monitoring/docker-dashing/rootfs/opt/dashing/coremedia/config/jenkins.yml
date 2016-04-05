@@ -4,6 +4,7 @@ jenkins:
     'https://pc-ci.coremedia.com':
       - 'vsphere-reports'
       - 'seed'
+      - 'packer-ibm/job/wcs8-ci-staging'
     'https://cm7-ci.coremedia.com':
       - 'seed'
       - 'license-builder-7.5'
