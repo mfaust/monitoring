@@ -3,7 +3,7 @@ FROM alpine:edge
 
 MAINTAINER Bodo Schulz <bodo@boone-schulz.de>
 
-LABEL version="1.2.0"
+LABEL version="1.2.2"
 
 EXPOSE 3030
 
