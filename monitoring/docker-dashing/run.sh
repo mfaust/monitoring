@@ -15,8 +15,6 @@ GRAPHITE_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${USER}
 
 DOCKER_DASHING_AUTH_TOKEN=${DOCKER_DASHING_AUTH_TOKEN:-aqLiR3RQ84HnasDMbcuTUQKQj87KydL8ucf7pspJ}
 
-# [ -z ${ICINGA2_IP} ] && { echo "No Icinga2 Container '${USER}-icinga2' running!"; exit 1; }
-
 docker_opts=
 docker_opts="${docker_opts} --interactive"
 docker_opts="${docker_opts} --tty"
@@ -56,6 +54,13 @@ if [ ! -z ${GRAPHITE_IP} ]
 then
   docker_opts="${docker_opts} --env GRAPHITE_HOST=${GRAPHITE_IP}"
   docker_opts="${docker_opts} --env GRAPHITE_PORT=8080"
+fi
+
+if [ ! -z ${CHEF_KNIFE_RB} ]
+then
+  docker_opts="${docker_opts} --env CHEF_KNIFE_RB=${CHEF_KNIFE_RB}"
+  docker_opts="${docker_opts} --env USERNAME=${USER}"
+  docker_opts="${docker_opts} --volume /home/${USER}/.chef:/root/.chef:ro"
 fi
 
 if [ ! -z ${DOCKER_DNS} ]
