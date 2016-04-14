@@ -33,11 +33,12 @@ RUN \
     ruby-irb \
     ruby-io-console \
     ruby-rdoc \
+    libffi-dev \
     supervisor
 
 RUN \
   gem install --quiet bundle && \
-  gem install --quiet dashing
+  gem install dashing -v 1.3.4
 
 RUN \
   mkdir /opt && \
@@ -51,16 +52,22 @@ RUN \
   echo "gem 'dotenv'"          >> Gemfile && \
   echo "gem 'pingdom-faraday'" >> Gemfile && \
   echo "gem 'aws-sdk'"         >> Gemfile && \
+  echo "gem 'chef'"            >> Gemfile && \
+  echo "gem 'chef-config'"     >> Gemfile && \
+  echo "gem 'chef-api'"        >> Gemfile && \
   bundle update
 
 RUN \
-  curl --silent https://code.jquery.com/jquery-${JQ_VERSION}.min.js > /usr/lib/ruby/gems/2.2.0/gems/dashing-1.3.4/javascripts/jquery.js && \
+  ln -s /usr/lib/ruby/gems/2.2.0/gems/dashing-* /usr/lib/ruby/gems/2.2.0/gems/dashing
+
+RUN \
+  curl --silent https://code.jquery.com/jquery-${JQ_VERSION}.min.js > /usr/lib/ruby/gems/2.2.0/gems/dashing/javascripts/jquery.js && \
   curl --silent http://jqueryui.com/resources/download/jquery-ui-${JQUI_VERSION}.zip > /tmp/jquery-ui-${JQUI_VERSION}.zip && \
   cd /tmp && \
   unzip jquery-ui-${JQUI_VERSION}.zip && \
-  cp /tmp/jquery-ui-${JQUI_VERSION}/*.min.js     /usr/lib/ruby/gems/2.2.0/gems/dashing-1.3.4/javascripts/ && \
-  cp /tmp/jquery-ui-${JQUI_VERSION}/*.min.css    /usr/lib/ruby/gems/2.2.0/gems/dashing-1.3.4/templates/project/assets/stylesheets/ && \
-  cp /tmp/jquery-ui-${JQUI_VERSION}/images/*     /usr/lib/ruby/gems/2.2.0/gems/dashing-1.3.4/templates/project/assets/images/
+  cp /tmp/jquery-ui-${JQUI_VERSION}/*.min.js     /usr/lib/ruby/gems/2.2.0/gems/dashing/javascripts/ && \
+  cp /tmp/jquery-ui-${JQUI_VERSION}/*.min.css    /usr/lib/ruby/gems/2.2.0/gems/dashing/templates/project/assets/stylesheets/ && \
+  cp /tmp/jquery-ui-${JQUI_VERSION}/images/*     /usr/lib/ruby/gems/2.2.0/gems/dashing/templates/project/assets/images/
 
 RUN \
   rm -rf /tmp/jquery* && \
@@ -74,7 +81,8 @@ RUN \
   apk del --purge \
     git \
     build-base \
-    ruby-dev && \
+    ruby-dev \
+    libffi-dev && \
   rm -rf /var/cache/apk/*
 
 ADD rootfs/ /
