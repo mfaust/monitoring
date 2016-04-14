@@ -14,7 +14,8 @@ class ChefNodes
 
   def initialize( knifeRB = nil )
 
-    @log = Logger.new(STDOUT)
+    file = File.open( '/tmp/dashing-chefnodes.log', File::WRONLY | File::APPEND | File::CREAT )
+    @log = Logger.new( file, 'weekly', 1024000 )
     @log.level = Logger::DEBUG
     @log.datetime_format = "%Y-%m-%d %H:%M:%S"
     @log.formatter = proc do |severity, datetime, progname, msg|
