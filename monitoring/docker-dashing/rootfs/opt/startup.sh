@@ -68,6 +68,12 @@ then
     rm -f  ${DASHING_PATH}/job/cloud*.rb
   fi
 
+  if [ -z ${CHEF_KNIFE_RB} ]
+  then
+    echo "missing Chef credentials, removing jobs .."
+    rm -f  ${DASHING_PATH}/job/chef.rb
+  fi
+
 
   touch ${initfile}
 
