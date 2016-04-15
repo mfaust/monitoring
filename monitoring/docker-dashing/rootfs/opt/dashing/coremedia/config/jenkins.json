@@ -1,0 +1,31 @@
+{
+  "jenkins": {
+    "server": {
+      "https://pc-ci.coremedia.com": {
+        "description": "pc-ci",
+        "jobs": [
+          { "seed": { "description": "job-seed" } },
+          { "vsphere-reports": { "description": "job-vsphere-reports" } },
+          { "packer-ibm/job/wcs8-ci-staging": { "description": "job-packer-wcs8-staging" } }
+        ]
+      },
+      "https://cm7-ci.coremedia.com": {
+        "description": "cm7-ci",
+        "jobs": [
+          { "seed": { "description": "job-seed" } },
+          { "license-builder-7.5": { "description": "job-license-builder-7.5" } },
+          { "master-16/job/build": { "description": "job-master-16-build" } },
+          { "master-16/job/tomcat/job/wcs-deploy": { "description": "job-master-16-deploy-tomcat" } },
+          { "master-16/job/websphere/job/wcs-deploy": { "description": "job-master-16-deploy-websphere" } },
+          { "master-16/job/master/job/wcs-testsystem-08": { "description": "job-master-16-wcs-08-test" } }
+        ]
+      },
+      "https://release-ci.coremedia.com": {
+        "description": "release-ci",
+        "jobs": [
+          { "seed": { "description": "job-seed" } }
+        ]
+      }
+    }
+  }
+}
