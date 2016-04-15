@@ -72,7 +72,7 @@ class ChefNodes
       all_nodes << node
     end
 
-    @log.debug( 'we got ' + all_nodes.count.to_s + ' nodes' )
+    @log.debug( sprintf( 'we got %d nodes', all_nodes.count ) )
 
     return all_nodes
   end
@@ -81,73 +81,72 @@ class ChefNodes
   def filter( nodes )
 
     # entferne alle Nodes ohne IP
-    @log.debug( 'remove Nodes without IP Address' )
+#    @log.debug( 'remove Nodes without IP Address' )
     nodes.reject! { |i| i['ipaddress'].nil? }
 
     # entferne alle Nodes in 'excludePattern'
-    @log.debug( 'use exclude Filter' )
+#    @log.debug( 'use exclude Filter' )
     nodes.reject! { |i| i['name'] =~ /^#{@excludePattern}/i }
 
     # sortiere nach 'chef_environment' und 'ohai_time'
-    @log.debug( 'sort Nodes' )
+#    @log.debug( 'sort Nodes' )
     nodes.sort! { |a, b| [a['chef_environment'], a['ohai_time']] <=> [b['chef_environment'], b['ohai_time']] }
 
     # filtere alle Nodes aus, die unter unserem Schwellwert liegen
-    @log.debug( 'remove healthy nodes' )
+#    @log.debug( 'remove healthy nodes' )
     nodes.select! { |i| ( Time.now - Time.at( i['ohai_time'] ) ) > @critical_timespan }
 
-    @log.info( 'got Nodes for Environment \'test\'' )
+#    @log.info( 'got Nodes for Environment \'test\'' )
     @nodes_test   = testAvailability( environmentFilter( 'test'   , nodes ) )
 
-    @log.info( 'got Nodes for Environment \'staging\'' )
+#    @log.info( 'got Nodes for Environment \'staging\'' )
     @nodes_stage  = testAvailability( environmentFilter( 'staging', nodes ) )
 
-    @log.info( 'got Nodes for Environment \'stable\'' )
+#    @log.info( 'got Nodes for Environment \'stable\'' )
     @nodes_stable = testAvailability( environmentFilter( 'stable' , nodes ) )
 
   end
 
-
+  # filter nach environment
   def environmentFilter( env, nodes )
 
-    @log.debug( 'filter for Environment ' + env )
-
+    @log.debug( sprintf( 'filter for environment \'%s\'', env ) )
     return nodes.select { |i| i['chef_environment'] == env }
 
   end
 
-
+  # entfern nicht verfügbae Nodes aus der Liste
+  # die guten ins köpfchen, die schlechten ins kröpfchen
   def testAvailability( nodes )
 
     count = nodes.count
 
-    @log.debug( 'test availability of ' + count.to_s + ' nodes' )
+#    @log.debug( 'test availability of ' + count.to_s + ' nodes' )
+    @log.debug( sprintf( 'test availability of %d nodes', count ) )
 
     if( count == 0 )
-      @log.debug( '0 nodes are unhealty' )
+      @log.debug( '  0 nodes are unhealty' )
       return nodes
     end
 
-    nodes.delete_if { |x| nodeExists?( x['ipaddress'] ) == false }
+    nodes.delete_if { |x| nodeExists?( x['name'], x['ipaddress'] ) == false }
 
-    @log.debug( nodes.count.to_s + ' nodes are unhealty' )
+    @log.debug( sprintf( '  %d nodes are unhealty', nodes.count ) )
 
     return nodes
   end
 
-  # check if Node exists
+  # check if Node exists (simple ping)
   # result @bool
-  def nodeExists?( ip )
-
-    @log.debug( '  test ip ' + ip.to_s )
+  def nodeExists?( name, ip )
 
     # first, ping check
     if( system( 'ping -c1 -w1 ' + ip.to_s + ' > /dev/null' ) == true )
 
-      @log.debug( '    true' )
+      @log.debug( sprintf( '  node %-35s / %-13s are available', name.to_s, ip.to_s ) )
       return true
     else
-      @log.debug( '    false' )
+      @log.debug( sprintf( '  node %-35s / %-13s are NOT available', name.to_s, ip.to_s ) )
       return false
     end
 
