@@ -8,8 +8,8 @@ In diesem Dockercontainer stehen bislang folgende Jobs und widgets zur Verfügun
  - Jenkins
  - Icinga2 (work-in-progress)
  - Graphite (experimantal)
-
-
+ - ChefNodes
+ - AWS - CloudFormation / CloudWatch
 
 ## Pingdom
 Um das Pingdom Widget nutzen zu können, müssen folgende Umgebungsvariablen im Conteiner gesetzt sein:
@@ -22,4 +22,11 @@ Das Jenkins Widget wird über eine eigene yaml Datei im Verzeichniss ``config`` 
 
 ## Icinga2
 Das Icinga2 Widget wird über eine eigene yaml Datei im Verzeichniss ``config`` konfiguriert.
+
+## Chef
+Um das Chef Widget nutzen zu können, muss die Umgebungsvariable CHEF_KNIFE_RB gesetzt werden:
+    CHEF_KNIFE_RB=/root/.chef/knife.rb
+Damit wird das eigene `~/.chef` Verzeichniss **readonly** in den Container gemappt.
+
+## AWS
 
