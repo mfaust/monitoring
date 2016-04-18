@@ -5,10 +5,10 @@ require 'net/http'
 require 'json'
 require 'cgi'
 
-#The Internet Chuck Norris Database
+# The Internet Chuck Norris Database
 server = "http://api.icndb.com"
 
-#Id of the widget
+# Id of the widget
 id = "chuck"
 
 #Proxy details if you need them - see below
@@ -17,7 +17,7 @@ proxy_port = 8080
 proxy_user = 'XXXXXXX'
 proxy_pass = 'XXXXXXX'
 
-SCHEDULER.every '5m', :first_in => 0 do |job|
+SCHEDULER.every '10m', :first_in => 0 do |job|
 
     uri = URI("#{server}/jokes/random?limitTo=nerdy,explicit")
 
