@@ -30,6 +30,8 @@ class Icinga2
   attr_reader :hosts_ack
   attr_reader :hosts_downtime
 
+  attr_reader :status_hosts
+
   attr_reader :total_critical
   attr_reader :total_warning
 
@@ -39,16 +41,20 @@ class Icinga2
 
   def initialize( config_file )
 
-#    file = File.open( '/tmp/dashing-icinga2.log', File::WRONLY | File::APPEND | File::CREAT )
-#    @log = Logger.new( file, 'weekly', 1024000 )
-    @log = Logger.new( STDOUT )
+    file = File.open( '/tmp/dashing-icinga2.log', File::WRONLY | File::APPEND | File::CREAT )
+    @log = Logger.new( file, 'weekly', 1024000 )
+#    @log = Logger.new( STDOUT )
     @log.level = Logger::DEBUG
     @log.datetime_format = "%Y-%m-%d %H:%M:%S"
     @log.formatter = proc do |severity, datetime, progname, msg|
       "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
     end
 
+        @log.debug( sprintf( '  cfg   : %s', config_file ) )
+
     config_file = File.expand_path( config_file )
+
+        @log.debug( sprintf( '  cfg   : %s', config_file ) )
 
     begin
 
@@ -183,26 +189,28 @@ class Icinga2
         output       = host['attrs']['last_check_result']['output']
         state_changed = host['attrs']['last_state_change']
 
-        if( state = 0 )
+        if( state == 0 )
+          state_msg   = 'Okay'
           state_class = 'icinga2-status-ok'
-        elsif( state = 1 )
+        elsif( state == 1 )
+          state_msg   = 'WARNING'
           state_class = 'icinga2-status-warning'
           problem = 1
-        elsif( state = 2 )
+        elsif( state == 2 )
+          state_msg   = 'CRITICAL'
           state_class = 'icinga2-status-critical'
           problem = 1
         else
           state_class = 'icinga2-status-unknown'
         end
 
-        latest.push({ cols: [
-          { value: name,   class: 'icinga2-hostname' },
-          { value: state,  class: state_class },
-        ]})
-        latest.push({ cols: [
-          { value: Time.at( state_changed ).utc.strftime('%H:%M:%S'), class: 'icinga-duration', colspan: 2 },
-        ]})
+        latest.push(
+          { cols: [ { value: name,   class: 'icinga2-hostname' }, { value: state_msg,  class: state_class }, ] }
+        )
 
+        latest.push(
+          { cols: [ { value: Time.at( state_changed ).utc.strftime('%H:%M:%S'), class: 'icinga-duration', colspan: 2 }, ]}
+        )
 
         @log.debug( sprintf( '%-30s - %-30s - %s - %s', name, display_name, state, output ) )
 
@@ -210,8 +218,7 @@ class Icinga2
 
     end
 
-    @log.debug( JSON.pretty_generate( latest ) )
-
+#    @log.debug( JSON.pretty_generate( latest ) )
 #     latest_moreinfo = latest_counter.to_s + " problems"
 #     if latest_counter > 15
 #       latest_moreinfo += " | " + (latest_counter - 15).to_s + " not listed"
@@ -226,58 +233,14 @@ class Icinga2
   end
 
 
-  def criticalHosts()
+  def hostsChecks()
 
-    api_url     = sprintf( '%s/v1/objects/hosts?attrs=name&attrs=display_name&attrs=last_check_result&attrs=last_state_change', @api_url_base )
+    api_url     = sprintf( '%s/v1/objects/hosts?filter=host.state!=0&attrs=name&attrs=display_name&attrs=last_check_result&attrs=last_state_change', @api_url_base )
     rest_client = RestClient::Resource.new( URI.encode( api_url ), @options )
     data        = JSON.parse( rest_client.get( @headers ).body )
     result      = data['results']
 
-#     @log.debug( result.count )
-#
-#     @log.debug(
-#       JSON.pretty_generate(
-#            result
-#       )
-#     )
-
-    statusHosts( result )
-
-    result.each do |data|
-
-      if( data['attrs'] )
-
-
-
-#         name         = data['attrs']['name']
-#         display_name = data['attrs']['display_name']
-#         state        = data['attrs']['last_check_result']['state'].to_i
-#         output       = data['attrs']['last_check_result']['output']
-#
-#         @log.debug( sprintf( '%-30s - %-30s - %s - %s', name, display_name, state, output ) )
-
-      end
-
-    end
-
-#     if( result['attrs'] )
-#
-#       @log.debug(
-#         JSON.pretty_generate(
-#           result['attrs']
-#         )
-#       )
-#
-#       result['attrs'].each do |d|
-#
-# #         @log.debug( ' ----------------------- ' )
-# #         @log.debug( d )
-# #         @log.debug( ' ----------------------- ' )
-#
-#       end
-#    end
-
-    return result
+    return statusHosts( result )
 
   end
 
@@ -323,15 +286,7 @@ class Icinga2
     @total_warning      = services_warning
 
 
-
-    if( @hosts_down.to_int >= 1 )
-
-      @log.debug( sprintf( '%d hosts down', @hosts_down ) )
-
-      data = JSON.pretty_generate( criticalHosts() )
-#       @log.debug( data )
-
-    end
+    @status_hosts       = hostsChecks()
 
   end
 
@@ -339,14 +294,14 @@ end
 
 # EOF
 
- i = Icinga2.new( '../config/icinga2.json' )
-
- i.run
-
- puts " ----------------------------- "
-
- puts "uptime      : " + i.uptime.to_s
- puts "services ok : " + i.services_ok.to_s
- puts "hosts up    : " + i.hosts_up.to_s
- puts "hosts down  : " + i.hosts_down.to_s
+#  i = Icinga2.new( '../config/icinga2.json' )
+#
+#  i.run
+#
+#  puts " ----------------------------- "
+#
+#  puts "uptime      : " + i.uptime.to_s
+#  puts "services ok : " + i.services_ok.to_s
+#  puts "hosts up    : " + i.hosts_up.to_s
+#  puts "hosts down  : " + i.hosts_down.to_s
 
