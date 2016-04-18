@@ -29,14 +29,14 @@ then
   if [ ! -z ${ICINGA2_HOST} ]
   then
 
-    if [ -f ${DASHING_PATH}/config/icinga2.yml ]
+    if [ -f ${DASHING_PATH}/config/icinga2.json ]
     then
       sed -i \
         -e 's/%ICINGA2_HOST%/'${ICINGA2_HOST}'/g' \
         -e 's/%ICINGA2_PORT%/'${ICINGA2_PORT}'/g' \
         -e 's/%ICINGA2_DASHING_APIUSER%/'${ICINGA2_DASHING_APIUSER}'/g' \
         -e 's/%ICINGA2_DASHING_APIPASS%/'${ICINGA2_DASHING_APIPASS}'/g' \
-        ${DASHING_PATH}/config/icinga2.yml
+        ${DASHING_PATH}/config/icinga2.json
     fi
   else
     rm -f ${DASHING_PATH}/jobs/icinga2.rb
