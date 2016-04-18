@@ -15,12 +15,13 @@ Dashing.on 'ready', ->
 #  Dashing.numColumns ||= 4
 #
 #  contentWidth = (Dashing.widget_base_dimensions[0] + Dashing.widget_margins[0] * 2) * Dashing.numColumns
-
+  Dashing.debugMode = true
+  
 # use from: https://github.com/chillu/github-dashing/blob/development/assets/javascripts/application.coffee
   Dashing.widget_margins ||= [5, 5]
-  Dashing.numColumns ||= 7
+  Dashing.numColumns ||= 8
   widget_width = $(window).width()/Dashing.numColumns - Dashing.widget_margins[0]*(Dashing.numColumns-1)
-  Dashing.widget_base_dimensions ||= [widget_width, 100]
+  Dashing.widget_base_dimensions ||= [widget_width, 110]
 
   contentWidth = (Dashing.widget_base_dimensions[0] + Dashing.widget_margins[0] * 2) * Dashing.numColumns
 
