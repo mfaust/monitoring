@@ -1,12 +1,12 @@
 {
   "icinga2": {
     "server": {
-      "name": "192.168.110.2",
-      "port": "5665"
+      "name": "%ICINGA2_HOST%",
+      "port": "%ICINGA2_PORT%"
     },
     "api": {
-      "user": "api-admin",
-      "password": "5ea0e959a77d71e5"
+      "user": "%ICINGA2_DASHING_APIUSER%",
+      "password": "%ICINGA2_DASHING_APIPASS%"
     }
   }
 }
