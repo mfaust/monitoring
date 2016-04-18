@@ -17,7 +17,7 @@ proxy_port = 8080
 proxy_user = 'XXXXXXX'
 proxy_pass = 'XXXXXXX'
 
-SCHEDULER.every '3m', :first_in => 0 do |job|
+SCHEDULER.every '5m', :first_in => 0 do |job|
 
     uri = URI("#{server}/jokes/random?limitTo=nerdy,explicit")
 

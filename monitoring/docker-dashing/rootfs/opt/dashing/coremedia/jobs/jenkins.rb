@@ -10,7 +10,7 @@ require './lib/jenkins'
 
 j = Jenkins.new( 'config/jenkins.json' )
 
-SCHEDULER.every '1m' do
+SCHEDULER.every '3m' do
 
   single   = j.singleData
   single.sort!{ |a,b| a[:srv].to_s <=> b[:srv].to_s }

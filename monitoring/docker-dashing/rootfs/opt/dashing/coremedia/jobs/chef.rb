@@ -12,7 +12,7 @@ else
 
   cn = ChefNodes.new( knife_rb )
 
-  SCHEDULER.every '3m', :first_in => 0 do
+  SCHEDULER.every '5m', :first_in => 0 do
 
     cn.run
     test   = cn.status( 'test' ).count
