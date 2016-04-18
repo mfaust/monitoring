@@ -10,7 +10,11 @@ then
   docker rm   ${CONTAINER_NAME} 2> /dev/null
 fi
 
-ICINGA2_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${USER}-icinga2)
+if [ -z "${ICINGA2_HOST}" ]
+then
+  ICINGA2_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${USER}-icinga2)
+fi
+
 GRAPHITE_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${USER}-graphite)
 
 DOCKER_DASHING_AUTH_TOKEN=${DOCKER_DASHING_AUTH_TOKEN:-aqLiR3RQ84HnasDMbcuTUQKQj87KydL8ucf7pspJ}
@@ -38,7 +42,17 @@ then
   docker_opts="${docker_opts} --env AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-}"
 fi
 
-if [ ! -z ${ICINGA2_IP} ]
+if [ ! -z "${ICINGA2_HOST}" ]
+then
+  DOCKER_DASHING_API_USER=${DOCKER_DASHING_API_USER:-dashing}
+  DOCKER_DASHING_API_PASS=${DOCKER_DASHING_API_PASS:-icinga2ondashingr0xx}
+
+  docker_opts="${docker_opts} --env ICINGA2_HOST=${ICINGA2_HOST}"
+  docker_opts="${docker_opts} --env ICINGA2_PORT=5665"
+  docker_opts="${docker_opts} --env ICINGA2_DASHING_APIUSER=${ICINGA2_DASHING_APIUSER}"
+  docker_opts="${docker_opts} --env ICINGA2_DASHING_APIPASS=${ICINGA2_DASHING_APIPASS}"
+
+elif [ ! -z ${ICINGA2_IP} ]
 then
   DOCKER_DASHING_API_USER=${DOCKER_DASHING_API_USER:-dashing}
   DOCKER_DASHING_API_PASS=${DOCKER_DASHING_API_PASS:-icinga2ondashingr0xx}

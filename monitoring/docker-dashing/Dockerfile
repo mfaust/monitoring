@@ -25,6 +25,8 @@ RUN \
 RUN \
   apk --quiet add \
     build-base \
+    bash \
+    nano \
     ca-certificates \
     curl \
     git \

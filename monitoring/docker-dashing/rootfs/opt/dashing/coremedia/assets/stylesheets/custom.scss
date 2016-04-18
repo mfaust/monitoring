@@ -45,7 +45,8 @@ h2 .value-add {
 
   .widget {
     color: white;
-    background-color: #333 !important;
+    // background-color: #333 !important;
+    background-color: #333;
     padding: 0;
 
     .updated-at {
@@ -64,6 +65,11 @@ h2 .value-add {
     }
 
   }
+}
+
+.updated-at {
+  font-size: 0.85em;
+  bottom: 3px;
 }
 
 .widget {
@@ -242,17 +248,18 @@ h2 .value-add {
       color: $green;
     }
   }
+
 }
 
 h1, footer {
-  margin: 5px; // simulate widget spacing
-  padding: 5px;
+  margin: 3px; // simulate widget spacing
+  padding: 3px;
   text-align: center;
 }
 
 footer {
   color: rgba(255, 255, 255, 0.5);
-  font-size: 12px;
+  font-size: 0.85em;
   padding: 15px;
 
   a {

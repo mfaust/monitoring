@@ -1,0 +1,12 @@
+{
+  "icinga2": {
+    "server": {
+      "name": "192.168.110.2",
+      "port": "5665"
+    },
+    "api": {
+      "user": "api-admin",
+      "password": "5ea0e959a77d71e5"
+    }
+  }
+}

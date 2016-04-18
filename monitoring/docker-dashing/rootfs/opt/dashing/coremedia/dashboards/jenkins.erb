@@ -1,0 +1,86 @@
+
+<% content_for :title do %>Coremedia Dashboard<% end %>
+
+<div class="gridster highcontrast">
+
+  <ul>
+    <!-- head -->
+    <li data-row="1" data-col="1" data-sizex="1" data-sizey="2">
+      <div data-view="Clock"></div>
+      <i class="icon-time icon-background"></i>
+    </li>
+    <li data-row="1" data-col="1" data-sizex="5" data-sizey="1">
+      <div data-id="chuck" data-view="Text" data-title="Team Facts"></div>
+    </li>
+    <!-- head -->
+
+
+    <!-- Jenkin master-14 pipeline -->
+
+    <li data-row="1" data-col="1" data-sizex="1" data-sizey="1">
+      <div data-id="pc-ci#job-seed" data-server="https://pc-ci.coremedia.com" data-view="Jenkins" data-title="Jenkins"></div>
+    </li>
+
+    <li data-row="1" data-col="1" data-sizex="1" data-sizey="1">
+      <div data-id="cm7-ci#job-seed" data-server="https://cm7-ci.coremedia.com" data-view="Jenkins" data-title="Jenkins"></div>
+    </li>
+
+    <li data-row="1" data-col="1" data-sizex="1" data-sizey="1">
+      <div data-id="release-ci#job-seed" data-server="https://release-ci.coremedia.com" data-view="Jenkins" data-title="Jenkins"></div>
+    </li>
+
+
+  </ul>
+
+</div>
+
+<script type='text/javascript'>
+/*
+ $(function() {
+   Dashing.gridsterLayout('[{"col":1,"row":1,"size_x":1,"size_y":1},{"col":2,"row":1,"size_x":5,"size_y":1},{"col":4,"row":2,"size_x":1,"size_y":2},{"col":1,"row":2,"size_x":1,"size_y":1},{"col":2,"row":2,"size_x":2,"size_y":2},{"col":1,"row":4,"size_x":4,"size_y":1},{"col":5,"row":3,"size_x":2,"size_y":1},{"col":5,"row":2,"size_x":2,"size_y":1},{"col":1,"row":3,"size_x":1,"size_y":1}]')
+ });
+*/
+
+/*
+$(function() {
+  $('li').live('click', function(e){
+    var widget = $(this).find('.widget');
+    var url = widget.data('url');
+    window.open(url, '_blank')
+  });
+});
+
+
+$(function() {
+
+  $('div#cloudformation').on('mouseover', 'li.check', function() {
+
+    var base = $(this).closest('li');
+    var child = base.find('span.cfTooltip');
+    var text  = child.text();
+
+    base.hover(function(){
+      // Hover over code
+      var title = text; // $(this).attr('title');
+//      $(this).data('tipText', title).removeAttr('title');
+      $('<p class="tooltip"></p>').text( title ).appendTo( base ).fadeIn('slow');
+    }, function() {
+      // Hover out code
+//      $(this).attr('title', $(this).data('tipText'));
+      $('.tooltip').remove();
+    }).mousemove(function(e) {
+      var mousex = e.pageX + 20; //Get X coordinates
+      var mousey = e.pageY + 10; //Get Y coordinates
+      $('.tooltip').css({ top: mousey, left: mousex })
+    });
+
+    base.css('background', '#000');
+    base.css('opacity', '0.6' );
+  });
+
+});
+*/
+</script>
+
+<script type="text/javascript" src="/assets/moment.min.js"></script>
+<script type="text/javascript" src="/assets/timeknots-min.js"></script>

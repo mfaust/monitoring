@@ -1,0 +1,12 @@
+
+<h1 class="title" data-bind="status"></h1>
+<a data-bind-href="link"><h3 data-bind="name"></h3></a>
+<p data-showif="show-health">
+  <img data-bind-src="image"></img>
+  <strong data-bind="health"></strong>% <span class="small">of builds passed</span>
+</p>
+<p class="context-info">
+  <span data-showif="duration">Ran for <span data-bind="duration | durationFormat"></span>,</span>
+  <span data-showif="time" data-bind="time | dateFormat"></span>
+</p><br>
+<p class="updated-at" data-bind="updatedAtMessage"></p>

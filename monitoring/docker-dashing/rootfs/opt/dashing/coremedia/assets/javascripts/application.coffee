@@ -20,10 +20,9 @@ Dashing.on 'ready', ->
   Dashing.widget_margins ||= [5, 5]
   Dashing.numColumns ||= 7
   widget_width = $(window).width()/Dashing.numColumns - Dashing.widget_margins[0]*(Dashing.numColumns-1)
-  Dashing.widget_base_dimensions ||= [widget_width, 220]
+  Dashing.widget_base_dimensions ||= [widget_width, 100]
 
   contentWidth = (Dashing.widget_base_dimensions[0] + Dashing.widget_margins[0] * 2) * Dashing.numColumns
-
 
   Batman.setImmediate ->
     $('.gridster').width(contentWidth)
