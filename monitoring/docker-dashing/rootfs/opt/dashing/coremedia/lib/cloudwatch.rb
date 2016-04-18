@@ -5,9 +5,18 @@ require 'time'
 class Cloudwatch
 
   def initialize(options)
-      @access_key_id = options[:access_key_id]
-      @secret_access_key = options[:secret_access_key]
-      @clientCache = {}
+
+    file = File.open( '/tmp/dashing-chefnodes.log', File::WRONLY | File::APPEND | File::CREAT )
+    @log = Logger.new( file, 'weekly', 1024000 )
+    @log.level = Logger::INFO
+    @log.datetime_format = "%Y-%m-%d %H:%M:%S"
+    @log.formatter = proc do |severity, datetime, progname, msg|
+      "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
+    end
+
+    @access_key_id     = options[:access_key_id]
+    @secret_access_key = options[:secret_access_key]
+    @clientCache       = {}
   end
 
   def get_metric_data(region, namespace, dimensions,  metric_name, type=:average, options={})
@@ -51,7 +60,8 @@ class Cloudwatch
 
     if ((not result[:datapoints]) or (result[:datapoints].length == 0))
       # TODO: What kind of errors can I get back?
-      puts "\e[33mWarning: Got back no data for metric #{metric_name}\e[0m"
+      @log.warning( sprintf( 'Warning: Got back no data for metric \'%s\'', metric_name ) )
+#      puts "\e[33mWarning: Got back no data for metric #{metric_name}\e[0m"
       answer = nil
     else
       # Turn the result into a Rickshaw-style series
@@ -117,7 +127,8 @@ class Cloudwatch
 
     if ((not result[:datapoints]) or (result[:datapoints].length == 0))
         # TODO: What kind of errors can I get back?
-        puts "\e[33mWarning: Got back no data for metric #{metric_name}\e[0m"
+        @log.warning( sprintf( 'Warning: Got back no data for metric \'%s\'', metric_name ) )
+#        puts "\e[33mWarning: Got back no data for metric #{metric_name}\e[0m"
         answer = nil
     else
 
