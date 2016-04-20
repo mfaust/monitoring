@@ -1,8 +1,9 @@
 {
+  "dashboard": {
   "id": null,
   "title": "co7madv01",
   "originalTitle": "co7madv01",
-  "tags": [],
+  "tags": ["co7madv01","coremedia"],
   "style": "dark",
   "timezone": "browser",
   "editable": true,
@@ -1056,4 +1057,5 @@
   "schemaVersion": 8,
   "version": 27,
   "links": []
+}
 }

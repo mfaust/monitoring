@@ -59,7 +59,7 @@
           "targets": [
             {
               "refId": "C",
-              "target": "aliasByMetric(aliasSub(collectd.192-168-252-100.CAE-heap_memory.*, '(.*)-', ''))",
+              "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE-heap_memory.*, '(.*)-', ''))",
               "textEditor": false
             }
           ],
@@ -134,7 +134,7 @@
           "targets": [
             {
               "refId": "A",
-              "target": "aliasByMetric(aliasSub(collectd.192-168-252-100.MLS-heap_memory.*, '(.*)-', ''))",
+              "target": "aliasByMetric(aliasSub(collectd.%HOST%.MLS-heap_memory.*, '(.*)-', ''))",
               "textEditor": true,
               "hide": false
             }
@@ -188,12 +188,12 @@
           "targets": [
             {
               "refId": "C",
-              "target": "alias(collectd.192-168-252-100.CAE-blob_cache.cm7_counter-size, 'max')",
+              "target": "alias(collectd.%HOST%.CAE-blob_cache.cm7_counter-size, 'max')",
               "textEditor": false
             },
             {
               "refId": "A",
-              "target": "alias(collectd.192-168-252-100.CAE-blob_cache.cm7_counter-level, 'used')",
+              "target": "alias(collectd.%HOST%.CAE-blob_cache.cm7_counter-level, 'used')",
               "textEditor": false
             }
           ],
@@ -277,7 +277,7 @@
           "targets": [
             {
               "refId": "B",
-              "target": "aliasByMetric(aliasSub(collectd.192-168-252-100.FEEDER_LIVE-heap_memory.*, '(.*)-', ''))",
+              "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_LIVE-heap_memory.*, '(.*)-', ''))",
               "textEditor": false
             }
           ],
@@ -341,7 +341,7 @@
           "targets": [
             {
               "refId": "A",
-              "target": "collectd.192-168-252-100.FEEDER_LIVE-feeder.cm7_counter-diff",
+              "target": "collectd.%HOST%.FEEDER_LIVE-feeder.cm7_counter-diff",
               "textEditor": false
             }
           ],
@@ -365,7 +365,7 @@
           "targets": [
             {
               "refId": "A",
-              "target": "collectd.192-168-252-100.FEEDER_LIVE-feeder.cm7_counter-diff",
+              "target": "collectd.%HOST%.FEEDER_LIVE-feeder.cm7_counter-diff",
               "textEditor": true
             }
           ],
@@ -466,7 +466,7 @@
           "targets": [
             {
               "refId": "B",
-              "target": "aliasByMetric(aliasSub(collectd.192-168-252-100.FEEDER_PREV-heap_memory.*, '(.*)-', ''))",
+              "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_PREV-heap_memory.*, '(.*)-', ''))",
               "textEditor": false
             }
           ],
@@ -530,7 +530,7 @@
           "targets": [
             {
               "refId": "A",
-              "target": "collectd.192-168-252-100.FEEDER_PREV-feeder.cm7_counter-diff",
+              "target": "collectd.%HOST%.FEEDER_PREV-feeder.cm7_counter-diff",
               "textEditor": false
             }
           ],
@@ -554,7 +554,7 @@
           "targets": [
             {
               "refId": "A",
-              "target": "collectd.192-168-252-100.FEEDER_LIVE-feeder.cm7_counter-diff",
+              "target": "collectd.%HOST%.FEEDER_LIVE-feeder.cm7_counter-diff",
               "textEditor": true
             }
           ],
@@ -655,7 +655,7 @@
           "targets": [
             {
               "refId": "A",
-              "target": "aliasByMetric(aliasSub(collectd.192-168-252-100.STUDIO-heap_memory.*, '(.*)-', ''))",
+              "target": "aliasByMetric(aliasSub(collectd.%HOST%.STUDIO-heap_memory.*, '(.*)-', ''))",
               "textEditor": false,
               "hide": false
             }
@@ -720,7 +720,7 @@
           "targets": [
             {
               "refId": "A",
-              "target": "aliasByMetric(aliasSub(collectd.192-168-252-100.CMS-heap_memory.*, '(.*)-', ''))",
+              "target": "aliasByMetric(aliasSub(collectd.%HOST%.CMS-heap_memory.*, '(.*)-', ''))",
               "textEditor": true,
               "hide": false
             }
@@ -793,7 +793,7 @@
           "targets": [
             {
               "refId": "A",
-              "target": "aliasByMetric(aliasSub(collectd.192-168-252-100.CMS-query_pool.*, '(.*)-', ''))",
+              "target": "aliasByMetric(aliasSub(collectd.%HOST%.CMS-query_pool.*, '(.*)-', ''))",
               "textEditor": false
             }
           ],
@@ -858,7 +858,7 @@
           "targets": [
             {
               "refId": "A",
-              "target": "aliasByMetric(aliasSub(collectd.192-168-252-100.MLS-query_pool.*, '(.*)-', ''))",
+              "target": "aliasByMetric(aliasSub(collectd.%HOST%.MLS-query_pool.*, '(.*)-', ''))",
               "textEditor": false
             }
           ],
@@ -931,17 +931,17 @@
           "targets": [
             {
               "refId": "A",
-              "target": "alias(collectd.192-168-252-100.CMS-stats_repository_document_creation.cm7_counter-sum, 'document')",
+              "target": "alias(collectd.%HOST%.CMS-stats_repository_document_creation.cm7_counter-sum, 'document')",
               "textEditor": false
             },
             {
               "refId": "B",
-              "target": "alias(collectd.192-168-252-100.CMS-stats_repository_folder_creation.cm7_counter-sum, 'folder')",
+              "target": "alias(collectd.%HOST%.CMS-stats_repository_folder_creation.cm7_counter-sum, 'folder')",
               "textEditor": false
             },
             {
               "refId": "C",
-              "target": "alias(collectd.192-168-252-100.CMS-stats_repository_version_creation.cm7_counter-sum, 'version')",
+              "target": "alias(collectd.%HOST%.CMS-stats_repository_version_creation.cm7_counter-sum, 'version')",
               "textEditor": false
             }
           ],
@@ -1005,7 +1005,7 @@
           "targets": [
             {
               "refId": "A",
-              "target": "aliasByMetric(aliasSub(collectd.192-168-252-100.CMS-feeder.*, '.*-', ''))",
+              "target": "aliasByMetric(aliasSub(collectd.%HOST%.CMS-feeder.*, '.*-', ''))",
               "textEditor": false
             }
           ],
