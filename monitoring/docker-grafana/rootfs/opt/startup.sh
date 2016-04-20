@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -x
+
 initfile=/opt/run.init
 
 GRAPHITE_HOST=${GRAPHITE_HOST:-localhost}
@@ -31,37 +33,52 @@ handleDataSources() {
 
   curl_opts="--silent --user admin:admin"
 
-  datasource_count=$(curl ${curl_opts} 'http://localhost:3000/api/datasources' | json_reformat | grep -c "id")
+  datasources=$(curl ${curl_opts} 'http://localhost:3000/api/datasources')
+
+  datasource_count=$(echo ${datasources} | jq '.[].id' | wc -l)
 
   if [ ${datasource_count} -gt 0 ]
   then
-    for c in $(seq 1 ${datasource_count})
+
+    echo "update datasources ..."
+    for c in $(echo ${datasources} | jq '.[].id')
     do
       # get type and id - we need it later!
       data=$(curl ${curl_opts} http://localhost:3000/api/datasources/${c})
 
-      id=$(echo ${data} | jq  --raw-output '.id')
+      id=$(echo ${data} | jq --raw-output '.id')
       name=$(echo ${data} | jq --raw-output '.name')
       type=$(echo ${data} | jq --raw-output '.type')
+      default=$(echo ${data} | jq --raw-output '.isDefault')
 
+      # Update
       curl ${curl_opts} \
         --request PUT \
         --header 'Content-Type: application/json;charset=UTF-8' \
-        --data-binary "{\"name\":\"${name}\",\"type\":\"${type}\",\"access\":\"proxy\",\"url\":\"http://${GRAPHITE_HOST}:${GRAPHITE_PORT}\"}" \
+        --data-binary "{\"name\":\"${name}\",\"type\":\"${type}\",\"access\":\"proxy\",\"url\":\"http://${GRAPHITE_HOST}:${GRAPHITE_PORT}\",\"isDefault\":${default}}" \
         http://localhost:3000/api/datasources/${id}
 
+      echo " -------------------------------------------------------------------------"
     done
   else
     for i in graphite tags
     do
       cp /opt/grafana/datasource.tpl /opt/grafana/datasource-${i}.json
 
+      if [ "${i}" == "graphite" ]
+      then
+        GRAPHITE_DEFAULT="true"
+      else
+        GRAPHITE_DEFAULT="false"
+      fi
       sed -i \
         -e "s/%GRAPHITE_HOST%/${GRAPHITE_HOST}/" \
         -e "s/%GRAPHITE_PORT%/${GRAPHITE_PORT}/" \
         -e "s/%GRAPHITE_DATABASE%/${i}/" \
+        -e "s/%GRAPHITE_DEFAULT%/${GRAPHITE_DEFAULT}/" \
         /opt/grafana/datasource-${i}.json
 
+      # create
       curl ${curl_opts} \
         --request POST \
         --header 'Content-Type: application/json;charset=UTF-8' \
@@ -71,6 +88,39 @@ handleDataSources() {
   fi
 
   sleep 2s
+}
+
+handleDashboards() {
+
+  dashboard_dirs="/opt/grafana/data/dashboards"
+
+  curl_opts="--silent --user admin:admin"
+
+  data=$(curl ${curl_opts} -X GET http://localhost:3000/api/search?query=)
+
+  uid=$(echo "${data}" | jq --raw-output '.[].uri')
+
+  # first - delete
+  for i in ${uid}
+  do
+
+    echo "delete dashboard '${i}'"
+    curl ${curl_opts} -X DELETE http://localhost:3000/api/dashboards/${i}
+  done
+
+  for d in $(ls -1 ${dashboard_dirs}/*)
+  do
+
+    echo "create dashboard '${d}'"
+
+      curl ${curl_opts} \
+        --request POST \
+        --header 'Content-Type: application/json;charset=UTF-8' \
+        --data @${d} \
+        http://localhost:3000/api/dashboards/db/
+
+#    curl ${curl_opts} -X POST http://localhost:3000/api/dashboards/db/ -d @${d}
+  done
 }
 
 # -------------------------------------------------------------------------------------------------
@@ -136,6 +186,8 @@ then
 
   handleDataSources
 
+  handleDashboards
+
   killGrafana
 
   sleep 2s
@@ -148,6 +200,8 @@ then
   echo " You can use the Basic Auth Method to access the ReST-API:"
   echo "   curl http://admin:admin@localhost:3000/api/org"
   echo "   curl http://admin:admin@localhost:3000/api/datasources' -X POST -H 'Content-Type: application/json;charset=UTF-8' --data-binary '{"name":"localGraphite","type":"graphite","url":"http://192.168.99.100","access":"proxy","isDefault":false,"database":"asd"}'"
+  echo "   curl -X GET http://admin:admin@localhost:3000/api/search?query= | json_reformat"
+  echo "   curl -X DELETE http://admin:admin@localhost:3000/api/dashboards/db/${DASHBOARD}"
   echo " ==================================================================="
   echo ""
 fi
