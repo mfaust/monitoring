@@ -1,4 +1,5 @@
-# cloud Formation
+#
+# Chef Nodes
 
 require './lib/chefnodes'
 

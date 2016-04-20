@@ -1,14 +1,16 @@
 # lib/cloudwatch.rb
+
 require 'aws-sdk'
+require 'logger'
 require 'time'
 
 class Cloudwatch
 
   def initialize(options)
 
-    file = File.open( '/tmp/dashing-chefnodes.log', File::WRONLY | File::APPEND | File::CREAT )
+    file = File.open( '/tmp/dashing-cloudwatch.log', File::WRONLY | File::APPEND | File::CREAT )
     @log = Logger.new( file, 'weekly', 1024000 )
-    @log.level = Logger::INFO
+    @log.level = Logger::DEBUG
     @log.datetime_format = "%Y-%m-%d %H:%M:%S"
     @log.formatter = proc do |severity, datetime, progname, msg|
       "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
