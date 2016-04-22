@@ -11,12 +11,16 @@ WORKDIR /app
 VOLUME  /app
 
 RUN \
+  echo "@testing http://nl.alpinelinux.org/alpine/edge/testing" >>  /etc/apk/repositories
+
+RUN \
   apk --quiet update && \
   apk --quiet upgrade
 
 RUN \
   apk --quiet add \
     bash \
+    nano \
     python \
     curl \
     jq \
@@ -24,7 +28,8 @@ RUN \
     yajl-tools \
     collectd \
     fping \
-    nmap
+    nmap \
+    supervisor
 
 RUN \
   rm -rf /var/cache/apk/*
@@ -34,4 +39,5 @@ RUN \
 
 ADD rootfs/ /
 
-CMD [ '/bin/bash' ]
+# CMD [ '/bin/bash' ]
+ENTRYPOINT [ "/opt/startup.sh" ]

@@ -8,8 +8,8 @@
 # ----------------------------------------------------------------------------------------
 
 SCRIPTNAME=$(basename $0 .sh)
-VERSION="2.20.0"
-VDATE="24.03.2016"
+VERSION="2.20.1"
+VDATE="22.04.2016"
 
 # ----------------------------------------------------------------------------------------
 
@@ -240,6 +240,8 @@ runChecks() {
 
 worker() {
 
+  [ -d ${JOLOKIA_CACHE_BASE} ] || mkdir -p ${JOLOKIA_CACHE_BASE}
+
   for host in $(find ${JOLOKIA_CACHE_BASE} -type d -mindepth 1 -maxdepth 1 -exec basename {} \;)
   do
 
@@ -248,6 +250,8 @@ worker() {
     TMP_DIR="${JOLOKIA_CACHE_BASE}/${host}"
     JOLOKIA_PORT_CACHE="${JOLOKIA_CACHE_BASE}/${host}/PORT.cache"
     HOST_ALIVE="${JOLOKIA_CACHE_BASE}/${host}/alive"
+
+    [ -d ${TMP_DIR} ] || mkdir -p ${TMP_DIR}
 
     if [ -f ${HOST_ALIVE} ]
     then

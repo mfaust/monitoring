@@ -40,6 +40,7 @@ HOST_CM_SITEMANAGER=${HOST_CM_SITEMANAGER:-${BLUEPRINT_BOX}}
 DOCKER_DNS=${DOCKER_DNS:-""}
 JOLOKIA_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${USER}-jolokia   2>/dev/null)
 GRAPHITE_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${USER}-graphite 2>/dev/null)
+GRAFANA_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${USER}-grafana   2>/dev/null)
 ICINGA2_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${USER}-icinga    2>/dev/null)
 
 # ---------------------------------------------------------------------------------------
@@ -49,6 +50,7 @@ docker_opts="${docker_opts} --interactive"
 docker_opts="${docker_opts} --tty"
 docker_opts="${docker_opts} --hostname=${USER}-${TYPE}"
 docker_opts="${docker_opts} --name=${CONTAINER_NAME}"
+docker_opts="${docker_opts} --add-host=blueprint-box:192.168.252.100"
 docker_opts="${docker_opts} --env HOST_CM_CMS=${HOST_CM_CMS}"
 docker_opts="${docker_opts} --env HOST_CM_MLS=${HOST_CM_MLS}"
 docker_opts="${docker_opts} --env HOST_CM_RLS=${HOST_CM_RLS}"
@@ -84,6 +86,13 @@ then
   docker_opts="${docker_opts} --env GRAPHITE_HOST=${GRAPHITE_IP}"
   docker_opts="${docker_opts} --env GRAPHITE_PORT=${GRAPHITE_PORT}"
   docker_opts="${docker_opts} --link=${USER}-graphite:graphite"
+fi
+
+if [ ! -z ${GRAFANA_IP} ]
+then
+  docker_opts="${docker_opts} --env GRAFANA_HOST=${GRAFANA_IP}"
+  docker_opts="${docker_opts} --env GRAFANA_PORT=3000"
+  docker_opts="${docker_opts} --link=${USER}-grafana:grafana"
 fi
 
 if [ ! -z ${JOLOKIA_IP} ]

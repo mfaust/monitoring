@@ -3,6 +3,8 @@
 set -e
 # set -x
 
+ICINGA2_HOST=${ICINGA2_HOST:-localhost}
+
 FILTER=
 
 ICINGA_JSON_PATH="/usr/local/icinga2"
@@ -46,10 +48,10 @@ run() {
   do
     host=$(basename ${f} | sed 's|\.json||g')
 
-    if [ $(curl ${curl_opts} -H 'Accept: application/json' -X GET "https://localhost:5665/v1/objects/hosts/${host}" | python -mjson.tool | jq --raw-output '.status' | grep "No objects found" | wc -l) -eq 1 ]
+    if [ $(curl ${curl_opts} -H 'Accept: application/json' -X GET "https://${ICINGA2_HOST}:5665/v1/objects/hosts/${host}" | python -mjson.tool | jq --raw-output '.status' | grep "No objects found" | wc -l) -eq 1 ]
     then
       echo -n "add Host '${host}'   "
-      curl --silent ${curl_opts} -H 'Accept: application/json' -X PUT "https://localhost:5665/v1/objects/hosts/${host}" --data @${f} | python -mjson.tool
+      curl --silent ${curl_opts} -H 'Accept: application/json' -X PUT "https://${ICINGA2_HOST}:5665/v1/objects/hosts/${host}" --data @${f} | python -mjson.tool
       echo ".. done"
     else
       echo "Host ${host} already monitored"

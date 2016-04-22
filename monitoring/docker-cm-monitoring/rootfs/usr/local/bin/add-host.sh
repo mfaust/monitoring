@@ -122,58 +122,15 @@ getPorts() {
   echo "PORTS=\"${PORTS}\"" > ${JOLOKIA_PORT_CACHE}
 }
 
+
 addToGraphite() {
 
   local host="${1}"
   local tpl_dir="/usr/local/share/grafana/dashboards"
-  local curl_opts="--silent --user admin:admin"
 
-  if [ ${FORCE} != true ]
-  then
-    echo "delete dashboard for host '${host}'"
 
-    short_hostname=$(echo "${host}" | awk -F '.' '{print($1)}')
-    grafana_hostname=$(echo "${host}" | sed 's|\.|-|g')
-
-    data="$(curl ${curl_opts} -X GET "http://grafana:3000/api/search?query=&tag=${short_hostname}")"
-
-    uid=$(echo "${data}" | jq --raw-output '.[].uri')
-
-    for i in ${uid}
-    do
-
-      echo "delete dashboard '${i}'"
-      curl ${curl_opts} -X DELETE http://grafana:3000/api/dashboards/${i} > /dev/null
-    done
-  fi
-
-  echo "add grafana templates ..."
-  for tpl in $(ls -1 ${tpl_dir})
-  do
-    # "title": "Blueprint ContentServer",
-
-    [ -d /var/tmp/${short_hostname} ] || mkdir /var/tmp/${short_hostname}
-
-    cp  ${tpl_dir}/${tpl} /var/tmp/${short_hostname}/${tpl}
-
-    sed -i \
-      -e "s|%HOST%|${grafana_hostname}|g" \
-      -e "s|%SHORTHOST%|${short_hostname}|g" \
-      -e "s|%TAG%|${short_hostname}|g" \
-      /var/tmp/${short_hostname}/${tpl}
-
-    echo "create dashboard '${tpl}'"
-
-      curl ${curl_opts} \
-        --request POST \
-        --header 'Content-Type: application/json;charset=UTF-8' \
-        --data @/var/tmp/${short_hostname}/${tpl} \
-        http://grafana:3000/api/dashboards/db/ > /dev/null
-  done
 
 }
-
-
 
 run() {
 
@@ -203,8 +160,6 @@ run() {
         getPorts ${CHECK_HOST}
 
         addToGraphite ${CHECK_HOST}
-
-        supervisorctl restart all
       fi
     fi
   fi
