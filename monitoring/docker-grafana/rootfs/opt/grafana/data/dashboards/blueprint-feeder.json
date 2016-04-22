@@ -3,7 +3,10 @@
   "id": null,
   "title": "Blueprint Feeder",
   "originalTitle": "Blueprint Feeder",
-  "tags": ["blueprint","coremedia"],
+  "tags": [
+    "blueprint",
+    "coremedia"
+  ],
   "style": "dark",
   "timezone": "browser",
   "editable": true,
@@ -218,6 +221,90 @@
     {
       "collapse": false,
       "editable": true,
+      "height": "150px",
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": null,
+          "editable": true,
+          "error": false,
+          "fill": 3,
+          "grid": {
+            "threshold1": null,
+            "threshold1Color": "rgba(216, 200, 27, 0.27)",
+            "threshold2": null,
+            "threshold2Color": "rgba(234, 112, 112, 0.22)"
+          },
+          "id": 15,
+          "isNew": true,
+          "legend": {
+            "alignAsTable": true,
+            "avg": false,
+            "current": true,
+            "max": true,
+            "min": true,
+            "rightSide": true,
+            "show": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "connected",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "span": 12,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "refId": "A",
+              "target": "aliasByMetric(aliasSub(collectd.192-168-252-100.FEEDER_LIVE-garbage_collector.cm7_counter-duration, '(.*)-', ''))",
+              "textEditor": false
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Garbage Collector Duration",
+          "tooltip": {
+            "msResolution": false,
+            "shared": true,
+            "value_type": "cumulative"
+          },
+          "type": "graph",
+          "xaxis": {
+            "show": true
+          },
+          "yaxes": [
+            {
+              "format": "s",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ]
+        }
+      ],
+      "title": "New row"
+    },
+    {
+      "collapse": false,
+      "editable": true,
       "height": "200px",
       "panels": [
         {
@@ -419,6 +506,90 @@
         }
       ],
       "title": "New row"
+    },
+    {
+      "collapse": false,
+      "editable": true,
+      "height": "150px",
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": null,
+          "editable": true,
+          "error": false,
+          "fill": 3,
+          "grid": {
+            "threshold1": null,
+            "threshold1Color": "rgba(216, 200, 27, 0.27)",
+            "threshold2": null,
+            "threshold2Color": "rgba(234, 112, 112, 0.22)"
+          },
+          "id": 16,
+          "isNew": true,
+          "legend": {
+            "alignAsTable": true,
+            "avg": false,
+            "current": true,
+            "max": true,
+            "min": true,
+            "rightSide": true,
+            "show": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "connected",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "span": 12,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "refId": "A",
+              "target": "aliasByMetric(aliasSub(collectd.192-168-252-100.FEEDER_PREV-garbage_collector.cm7_counter-duration, '(.*)-', ''))",
+              "textEditor": false
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Garbage Collector Duration",
+          "tooltip": {
+            "msResolution": false,
+            "shared": true,
+            "value_type": "cumulative"
+          },
+          "type": "graph",
+          "xaxis": {
+            "show": true
+          },
+          "yaxes": [
+            {
+              "format": "s",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ]
+        }
+      ],
+      "title": "New row"
     }
   ],
   "time": {
@@ -459,7 +630,7 @@
   },
   "refresh": "30s",
   "schemaVersion": 12,
-  "version": 8,
+  "version": 3,
   "links": []
 }
 }

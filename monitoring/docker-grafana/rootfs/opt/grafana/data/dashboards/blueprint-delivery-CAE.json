@@ -1,9 +1,13 @@
 {
   "dashboard": {
+
   "id": null,
   "title": "Blueprint Delivery CAE",
   "originalTitle": "Blueprint Delivery CAE",
-  "tags": ["blueprint","coremedia"],
+  "tags": [
+    "blueprint",
+    "coremedia"
+  ],
   "style": "dark",
   "timezone": "browser",
   "editable": true,
@@ -138,6 +142,7 @@
           "steppedLine": false,
           "targets": [
             {
+              "hide": false,
               "refId": "C",
               "target": "alias(collectd.192-168-252-100.CAE-blob_cache.cm7_counter-size, 'max')",
               "textEditor": false
@@ -146,6 +151,10 @@
               "refId": "A",
               "target": "alias(collectd.192-168-252-100.CAE-blob_cache.cm7_counter-level, 'used')",
               "textEditor": false
+            },
+            {
+              "refId": "B",
+              "target": "alias(collectd.blueprint.filecount-cm7-delivery-tomcat.bytes, 'filesystem')"
             }
           ],
           "timeFrom": null,
@@ -252,6 +261,7 @@
               "textEditor": false
             },
             {
+              "hide": true,
               "refId": "F",
               "target": "aliasByMetric(aliasSub(collectd.192-168-252-100.CAE-content_beans.cm7_counter-capacity, '(.*)-', ''))",
               "textEditor": false
@@ -272,6 +282,90 @@
           "yaxes": [
             {
               "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ]
+        }
+      ],
+      "title": "New row"
+    },
+    {
+      "collapse": false,
+      "editable": true,
+      "height": "200px",
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": null,
+          "editable": true,
+          "error": false,
+          "fill": 3,
+          "grid": {
+            "threshold1": null,
+            "threshold1Color": "rgba(216, 200, 27, 0.27)",
+            "threshold2": null,
+            "threshold2Color": "rgba(234, 112, 112, 0.22)"
+          },
+          "id": 17,
+          "isNew": true,
+          "legend": {
+            "alignAsTable": true,
+            "avg": false,
+            "current": true,
+            "max": true,
+            "min": true,
+            "rightSide": true,
+            "show": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "connected",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "span": 12,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "refId": "A",
+              "target": "aliasByMetric(aliasSub(collectd.192-168-252-100.CAE-threading.*, '(.*)-', ''))",
+              "textEditor": false
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Threads",
+          "tooltip": {
+            "msResolution": false,
+            "shared": true,
+            "value_type": "cumulative"
+          },
+          "type": "graph",
+          "xaxis": {
+            "show": true
+          },
+          "yaxes": [
+            {
+              "format": "none",
               "label": null,
               "logBase": 1,
               "max": null,
@@ -330,7 +424,8 @@
   },
   "refresh": "30s",
   "schemaVersion": 12,
-  "version": 7,
+  "version": 4,
   "links": []
-}
+
+  }
 }
