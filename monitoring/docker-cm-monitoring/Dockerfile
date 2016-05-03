@@ -1,9 +1,9 @@
 
-FROM alpine:edge
+FROM docker-alpine-base:latest
 
-MAINTAINER Bodo Schulz <bodo@boone-schulz.de>
+MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
-LABEL version="0.9.2"
+LABEL version="0.10.0"
 
 # ---------------------------------------------------------------------------------------
 
@@ -11,25 +11,19 @@ WORKDIR /app
 VOLUME  /app
 
 RUN \
-  echo "@testing http://nl.alpinelinux.org/alpine/edge/testing" >>  /etc/apk/repositories
-
-RUN \
-  apk --quiet update && \
-  apk --quiet upgrade
+  apk --quiet update
 
 RUN \
   apk --quiet add \
     bash \
     nano \
     python \
-    curl \
     jq \
     bc \
     yajl-tools \
     collectd \
     fping \
-    nmap \
-    supervisor
+    nmap
 
 RUN \
   rm -rf /var/cache/apk/*
@@ -39,5 +33,4 @@ RUN \
 
 ADD rootfs/ /
 
-# CMD [ '/bin/bash' ]
 ENTRYPOINT [ "/opt/startup.sh" ]

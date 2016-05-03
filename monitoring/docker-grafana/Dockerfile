@@ -1,9 +1,9 @@
 
-FROM alpine:edge
+FROM docker-alpine-base:latest
 
-MAINTAINER Bodo Schulz <bodo@boone-schulz.de>
+MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
-LABEL version="2.0.0"
+LABEL version="2.2.0"
 
 # 3000: grafana (plain)
 EXPOSE 3000
@@ -14,12 +14,7 @@ ENV GO15VENDOREXPERIMENT=0
 # ---------------------------------------------------------------------------------------
 
 RUN \
-  apk --quiet update && \
-  apk --quiet upgrade
-
-RUN \
-  rm -Rf /var/run && \
-  ln -s /run /var/run
+  apk --quiet update
 
 RUN \
   apk --quiet add \
@@ -34,8 +29,7 @@ RUN \
     jq \
     yajl-tools \
     mysql-client \
-    sqlite \
-    supervisor
+    sqlite
 
 RUN \
   go get github.com/grafana/grafana || true

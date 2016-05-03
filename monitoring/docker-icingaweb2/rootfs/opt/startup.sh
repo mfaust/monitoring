@@ -53,7 +53,9 @@ then
     echo "GRANT SELECT, INSERT, UPDATE, DELETE, DROP, CREATE VIEW, INDEX, EXECUTE ON icingaweb2.* TO 'icingaweb2'@'%' IDENTIFIED BY '${ICINGAWEB2_PASSWORD}';"
   ) | mysql ${mysql_opts}
 
-  mysql ${mysql_opts} --force  icingaweb2      < /usr/share/icingaweb2/mysql.schema.sql               >> /opt/icingaweb2-schema.log 2>&1
+  SCHEMA_FILE="/usr/share/webapps/icingaweb2/etc/schema/mysql.schema.sql"
+
+  mysql ${mysql_opts} --force  icingaweb2      < ${SCHEMA_FILE}               >> /opt/icingaweb2-schema.log 2>&1
 
   (
     echo "USE icingaweb2;"

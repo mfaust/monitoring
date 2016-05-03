@@ -1,9 +1,9 @@
 
-FROM alpine:edge
+FROM docker-alpine-base:latest
 
-MAINTAINER Bodo Schulz <bodo@boone-schulz.de>
+MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
-LABEL version="1.2.2"
+LABEL version="1.3.0"
 
 EXPOSE 3030
 
@@ -11,39 +11,29 @@ ENV DASHBOARD=coremedia
 ENV JQ_VERSION=2.2.2
 ENV JQUI_VERSION=1.11.4
 
-
 # ---------------------------------------------------------------------------------------
 
 RUN \
-  apk --quiet update && \
-  apk --quiet upgrade
-
-RUN \
-  rm -Rf /var/run && \
-  ln -s /run /var/run
+  apk --quiet update
 
 RUN \
   apk --quiet add \
     build-base \
     bash \
     nano \
-    ca-certificates \
-    curl \
     git \
     nodejs \
     ruby-dev \
     ruby-irb \
     ruby-io-console \
     ruby-rdoc \
-    libffi-dev \
-    supervisor
+    libffi-dev
 
 RUN \
   gem install --quiet bundle && \
   gem install dashing -v 1.3.4
 
 RUN \
-  mkdir /opt && \
   cd /opt && \
   git clone --quiet https://github.com/Shopify/dashing.git && \
   cd dashing && \

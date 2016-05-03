@@ -1,14 +1,14 @@
 
-FROM alpine:edge
+FROM docker-alpine-base:latest
 
-MAINTAINER Bodo Schulz <bodo@boone-schulz.de>
+MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
-LABEL version="1.1.2"
+LABEL version="1.2.0"
 
 EXPOSE 8080
 
 ENV APACHE_MIRROR=mirror.synyx.de
-ENV TOMCAT_VERSION=8.0.32
+ENV TOMCAT_VERSION=8.5.0
 
 ENV CATALINA_HOME=/opt/tomcat
 ENV PATH $PATH:$CATALINA_HOME/bin
@@ -17,19 +17,13 @@ ENV JOLOKIA_VERSION=1.3.3
 # ---------------------------------------------------------------------------------------------------------------------
 
 RUN \
-  apk --quiet update && \
-  apk --quiet upgrade
-
-RUN \
-  rm -Rf /var/run && \
-  ln -s /run /var/run
+  apk --quiet update
 
 RUN \
   apk --quiet add \
-    curl \
-    ca-certificates \
-    openjdk8-jre-base && \
-  mkdir /opt && \
+    openjdk8-jre-base
+
+RUN \
   curl \
   --silent \
   --location \
@@ -63,3 +57,4 @@ RUN \
 ADD rootfs/opt/startup.sh /opt/startup.sh
 
 ENTRYPOINT [ "/opt/startup.sh" ]
+

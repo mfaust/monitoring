@@ -68,12 +68,15 @@ run() {
 
     fi
 
-    if [ $(curl ${curl_opts} -H 'Accept: application/json' -X GET "https://localhost:5665/v1/objects/hosts/${host}" | python -mjson.tool | jq --raw-output '.status' | grep "No objects found" | wc -l) -eq 1 ]
+    status_1=$(curl ${curl_opts} -H 'Accept: application/json' -X GET "https://localhost:5665/v1/objects/hosts/${host}" | python -mjson.tool | jq --raw-output '.status' | grep "No objects found" | wc -l)
+    status_2=$(curl ${curl_opts} -H 'Accept: application/json' -X GET "https://localhost:5665/v1/objects/hosts?name=${host}" | python -mjson.tool | jq --raw-output '.status')     
+
+    if [ ${status_1} -eq 1 ]
     then
       echo -n "add Host '${host}'   "
       curl --silent ${curl_opts} -H 'Accept: application/json' -X PUT "https://localhost:5665/v1/objects/hosts/${host}" --data @${f} | python -mjson.tool
       echo ".. done"
-    elif [ $(curl ${curl_opts} -H 'Accept: application/json' -X GET "https://localhost:5665/v1/objects/hosts?name=bschulz-mysql" | python -mjson.tool | jq --raw-output '.status') == 'null' ]
+    elif [ "${status_2}" == 'null' ]
     then
       echo -n "add Host '${host}'   "
       curl --silent ${curl_opts} -H 'Accept: application/json' -X PUT "https://localhost:5665/v1/objects/hosts/${host}" --data @${f} | python -mjson.tool

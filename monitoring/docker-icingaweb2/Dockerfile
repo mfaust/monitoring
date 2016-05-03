@@ -1,9 +1,9 @@
 
-FROM alpine:edge
+FROM docker-alpine-base:latest
 
-MAINTAINER Bodo Schulz <bodo@boone-schulz.de>
+MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
-LABEL version="1.0.1"
+LABEL version="1.2.0"
 
 ENV TERM xterm
 
@@ -12,23 +12,20 @@ EXPOSE 80
 # ---------------------------------------------------------------------------------------
 
 RUN \
-  echo "@testing http://nl.alpinelinux.org/alpine/edge/testing" >>  /etc/apk/repositories
-
-RUN \
-  apk --quiet update && \
-  apk --quiet upgrade
-
-RUN \
-  rm -Rf /var/run && \
-  ln -s /run /var/run
+  apk --quiet update 
 
 RUN \
   apk --quiet add \
     bash \
-    curl \
-    supervisor \
     pwgen \
-    netcat-openbsd \
+    netcat-openbsd
+
+RUN \
+  apk --verbose add \
+    icingaweb2
+
+RUN \
+  apk --verbose add \
     php-fpm \
     php-pdo \
     php-pdo_mysql \
@@ -38,8 +35,10 @@ RUN \
     php-json \
     nginx \
     mysql-client \
-    shadow@testing \
-    icingaweb2@testing &&\
+    shadow \
+    openssl
+
+RUN \
   rm -rf /var/cache/apk/*
 
 RUN \

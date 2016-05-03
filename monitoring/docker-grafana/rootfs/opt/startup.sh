@@ -108,19 +108,19 @@ handleDashboards() {
     curl ${curl_opts} -X DELETE http://localhost:3000/api/dashboards/${i}
   done
 
-  for d in $(ls -1 ${dashboard_dirs}/*)
-  do
-
-    echo "create dashboard '${d}'"
-
-      curl ${curl_opts} \
-        --request POST \
-        --header 'Content-Type: application/json;charset=UTF-8' \
-        --data @${d} \
-        http://localhost:3000/api/dashboards/db/
-
-#    curl ${curl_opts} -X POST http://localhost:3000/api/dashboards/db/ -d @${d}
-  done
+#   for d in $(ls -1 ${dashboard_dirs}/*)
+#   do
+#
+#     echo "create dashboard '${d}'"
+#
+#       curl ${curl_opts} \
+#         --request POST \
+#         --header 'Content-Type: application/json;charset=UTF-8' \
+#         --data @${d} \
+#         http://localhost:3000/api/dashboards/db/
+#
+# #    curl ${curl_opts} -X POST http://localhost:3000/api/dashboards/db/ -d @${d}
+#   done
 }
 
 # -------------------------------------------------------------------------------------------------

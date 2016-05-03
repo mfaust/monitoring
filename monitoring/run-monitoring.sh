@@ -6,8 +6,12 @@ SRC_BASE=${PWD}
 
 MONITORING_CONTAINER="docker-mysql docker-jolokia docker-graphite docker-icinga2 docker-icingaweb2 docker-grafana docker-dashing"
 
-DOCKER_DNS="172.17.0.1"
-DOCKER_ADDN_DIR="/tmp"
+# DOCKER_DNS="172.17.0.1"
+# DOCKER_ADDN_DIR="/tmp"
+
+DOCKER_DNS="10.1.2.63"
+
+export DOCKER_DNS
 
 rm -f ${DOCKER_ADDN_DIR}/dnsmasq.addn.docker
 
@@ -76,7 +80,7 @@ exit 0
 
 
 export DOCKER_DNS=${IP}
-export DOCKER_ADDN_DIR="/tmp"
+# export DOCKER_ADDN_DIR="/tmp"
 
 for d in ${MONITORING_CONTAINER}
 do
