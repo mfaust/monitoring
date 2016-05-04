@@ -189,7 +189,38 @@ class Jenkins
 
     end
 
+    data.sort!{ |a,b| a[:srv].to_s <=> b[:srv].to_s }
+
     return data
+
+  end
+
+  # reorganize Data Struct
+  # from   { :tag => $TAG, :srv => $SERVER, :result => { ... } }
+  # to     { :srv => $SERVER , :result => { ... } }
+  def reorganizeData( data = nil )
+
+    if( data == nil )
+
+      data = self.singleData
+    end
+
+#    @log.debug( data )
+
+    result = Array.new
+
+    data.each do |c|
+
+      new_hash = {}
+      c[:result][:tag]  = c[:tag]
+
+      new_hash[:srv]    = c[:srv]
+      new_hash[:result] = c[:result]
+
+      result << new_hash
+    end
+
+    return result
 
   end
 
