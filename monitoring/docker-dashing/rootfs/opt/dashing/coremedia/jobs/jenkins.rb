@@ -1,7 +1,7 @@
 #
 # dashing job for Jenkins
 #
-# Version 2.0
+# Version 2.1
 #
 # (c) 2016 Coremedia - Bodo Schulz <bodo.schulz@coremedia.com>
 #
@@ -19,5 +19,8 @@ SCHEDULER.every '3m' do
     send_event( d[:tag], d[:result] )
   end
 
+  send_event( 'jenkins-nodes', {
+    rows:     reorged
+  })
 
 end
