@@ -17,7 +17,7 @@
     </li>
 
     <!-- head -->
-    <li data-row="1" data-col="1" data-sizex="1" data-sizey="2">
+    <li data-row="1" data-col="1" data-sizex="1" data-sizey="3">
       <div data-id="pingdom" data-view="Pingdom" data-title="Pingdom" data-cols="2"></div>
     </li>
 
@@ -25,18 +25,18 @@
       <div data-id="cloudformation" data-view="Cloudformation" data-title="CloudFormation" data-cols="2"></div>
     </li>
 
-    <li data-row="1" data-col="2" data-sizex="2" data-sizey="2">
+    <li data-row="1" data-col="2" data-sizex="2" data-sizey="3">
       <div data-id="simple_cloudwatch" data-view="Cloudwatch" data-title="CloudWatch" data-cols="2"></div>
     </li>
 
-    <li data-row="1" data-col="1" data-sizex="6" data-sizey="2">
+    <li data-row="1" data-col="1" data-sizex="5" data-sizey="3">
       <div data-id="cloudwatch" data-view="Rickshawgraph" data-title="CloudWatch"
         data-moreinfo=""
         style="background-color:#333A52;"
         data-renderer="line"
         data-color-scheme="near-rainbow"
         data-min="0"
-        data-max="25"
+        data-max="30"
         data-summary-method="none"
         data-legend="true"
         data-colors="rgba(192,132,255,1):rgba(96,170,255,1)"></div>
@@ -44,7 +44,7 @@
 
 
     <!-- Jenkin master-14 pipeline -->
-
+<!--
     <li data-row="1" data-col="1" data-sizex="2" data-sizey="2">
       <div data-id="pc-ci#job-seed" data-server="https://pc-ci.coremedia.com" data-view="BuildWindow" data-title="Jenkins"></div>
     </li>
@@ -56,41 +56,36 @@
     <li data-row="1" data-col="1" data-sizex="1" data-sizey="2">
       <div data-id="release-ci#job-seed" data-server="https://release-ci.coremedia.com" data-view="Jenkins" data-title="Jenkins"></div>
     </li>
-
-
-<!--
-    <li data-row="1" data-col="1" data-sizex="2" data-sizey="1">
-      <div data-id="https://cm7-ci.coremedia.com/master-16/job/tomcat/job/wcs-build" data-server="https://cm7-ci.coremedia.com" data-view="BuildWindow"></div>
-    </li>
-
-    <li data-row="1" data-col="1" data-sizex="2" data-sizey="1">
-      <div data-id="https://cm7-ci.coremedia.com/master-16/job/tomcat/job/wcs-deploy" data-server="https://cm7-ci.coremedia.com" data-view="BuildWindow"></div>
-    </li>
-
-    <li data-row="1" data-col="1" data-sizex="2" data-sizey="1">
-      <div data-id="https://cm7-ci.coremedia.com/master-16/job/websphere/job/wcs-build" data-server="https://cm7-ci.coremedia.com" data-view="BuildWindow"></div>
-    </li>
-
-    <li data-row="1" data-col="1" data-sizex="2" data-sizey="1">
-      <div data-id="https://cm7-ci.coremedia.com/master-16/job/websphere/job/wcs-deploy" data-server="https://cm7-ci.coremedia.com" data-view="BuildWindow"></div>
-    </li>
 -->
-
 
     <li data-row="1" data-col="1" data-sizex="1" data-sizey="1">
       <div data-id="chef" data-view="List" data-unordered="true" data-title="ChefNodes" data-cols="1"></div>
     </li>
+
+    <li data-row="1" data-col="1" data-sizex="3" data-sizey="8">
+      <div data-id="jenkins-nodes" data-view="Table" data-title="Jenkins Nodes" class="jenkins-nodes"></div>
+    </li>
+
 
   </ul>
 
 </div>
 
 <script type='text/javascript'>
-/*
- $(function() {
-   Dashing.gridsterLayout('[{"col":1,"row":1,"size_x":1,"size_y":1},{"col":2,"row":1,"size_x":5,"size_y":1},{"col":4,"row":2,"size_x":1,"size_y":2},{"col":1,"row":2,"size_x":1,"size_y":1},{"col":2,"row":2,"size_x":2,"size_y":2},{"col":1,"row":4,"size_x":4,"size_y":1},{"col":5,"row":3,"size_x":2,"size_y":1},{"col":5,"row":2,"size_x":2,"size_y":1},{"col":1,"row":3,"size_x":1,"size_y":1}]')
- });
-*/
+  $(function() {
+    Dashing.gridsterLayout('[
+      {"col":1,"row":1,"size_x":1,"size_y":2},
+      {"col":2,"row":1,"size_x":6,"size_y":1},
+      {"col":8,"row":1,"size_x":1,"size_y":1},
+      {"col":4,"row":2,"size_x":1,"size_y":3},
+      {"col":5,"row":2,"size_x":1,"size_y":2},
+      {"col":2,"row":2,"size_x":2,"size_y":3},
+      {"col":1,"row":5,"size_x":5,"size_y":3},
+      {"col":1,"row":3,"size_x":1,"size_y":1},
+      {"col":6,"row":2,"size_x":3,"size_y":8}
+    ]')
+  });
+
 
 /*
 $(function() {
