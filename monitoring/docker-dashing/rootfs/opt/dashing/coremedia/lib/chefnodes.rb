@@ -5,7 +5,7 @@
 
 require 'rubygems'
 require 'chef/config'
-require "chef/server_api"
+require 'chef/server_api'
 require 'chef/search/query'
 
 # ----------------------------------------------------------------------------
@@ -67,7 +67,6 @@ class ChefNodes
 
     all_nodes = []
     q = Chef::Search::Query.new
-  #  Chef::Log.info("Sending query: #{@query}")
     q.search( :node, '*:*', opts ) do |node|
       all_nodes << node
     end

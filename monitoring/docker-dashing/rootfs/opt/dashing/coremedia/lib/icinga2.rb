@@ -218,7 +218,7 @@ class Icinga2
 
     end
 
-#    @log.debug( JSON.pretty_generate( latest ) )
+    @log.debug( JSON.pretty_generate( latest ) )
 #     latest_moreinfo = latest_counter.to_s + " problems"
 #     if latest_counter > 15
 #       latest_moreinfo += " | " + (latest_counter - 15).to_s + " not listed"
