@@ -127,9 +127,6 @@ addToGraphite() {
 
   local host="${1}"
   local tpl_dir="/usr/local/share/grafana/dashboards"
-
-
-
 }
 
 run() {

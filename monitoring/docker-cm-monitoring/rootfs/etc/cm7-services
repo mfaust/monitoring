@@ -1,7 +1,5 @@
 #
 
-. /etc/jolokia.rc
-
 # OLD_STYLE
 IMPORTER_RMI_REG=37099
 STUDIO_RMI_REG=40099

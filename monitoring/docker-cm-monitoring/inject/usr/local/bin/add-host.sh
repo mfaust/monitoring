@@ -122,6 +122,67 @@ getPorts() {
   echo "PORTS=\"${PORTS}\"" > ${JOLOKIA_PORT_CACHE}
 }
 
+verifyApplications() {
+
+  local host="${1}"
+
+  local file_tpl=
+  local file_dst=
+
+  if [ -f ${JOLOKIA_PORT_CACHE} ]
+  then
+    . ${JOLOKIA_PORT_CACHE}
+
+    for p in ${PORTS}
+    do
+      file_tpl="${TEMPLATE_DIR}/CM.json.tpl"
+      file_dst="/tmp/CM_${p}.json"
+
+      if [ -f ${file_tpl} ]
+      then
+        sed -e "s/localhost:%PORT%/${host}:${p}/g" ${file_tpl} > ${file_dst}
+
+        dst="$(echo ${file_dst} | sed 's/\.json/\.result/g')"
+        tmp="$(echo ${file_dst} | sed 's/\.json/\.tmp/g')"
+
+        touch ${tmp}
+
+        ionice -c2 nice -n19  curl --silent --request POST --data @${file_dst} http://${JOLOKIA_HOST}:8080/jolokia/ | json_reformat > ${tmp}
+
+        [ $(stat -c %s ${tmp}) -gt 0 ] && {
+          mv ${tmp} ${dst}
+        } || {
+          rm -f ${tmp}
+        }
+      fi
+    done
+
+    service_tmp_file="/tmp/cm-services.tmp"
+
+    touch ${service_tmp_file}
+
+    for f in $(ls -1 /tmp/CM_*.result)
+    do
+      port=$(echo ${f} | sed -e 's|/tmp/CM_||g' -e 's|.result||g' )
+      service="$(jq --raw-output .value.configFile.url ${f} | awk -F'/' '{ print( $4 ) }' | sed -e 's|cm7-||g' -e 's|-tomcat||g')"
+
+      echo "Port: ${port}  | service: ${service}"
+
+      cp /etc/cm-services/${service}.tpl /tmp
+      sed -i -e "s/%PORT%/${port}/g" /tmp/${service}.tpl
+
+      cat /tmp/${service}.tpl >> ${service_tmp_file}
+
+      rm -f /tmp/${service}.tpl
+    done
+
+    cp ${service_tmp_file} ${TMP_DIR}/cm-services
+  fi
+
+}
+
+# TODO:
+# split dashboard in services - see above
 addToGraphite() {
 
   local host="${1}"
@@ -202,12 +263,17 @@ run() {
       then
         getPorts ${CHECK_HOST}
 
+        verifyApplications ${CHECK_HOST}
+
         addToGraphite ${CHECK_HOST}
 
         supervisorctl restart all
       fi
     fi
   fi
+
+  rm -f /tmp/CM_*99*
+  rm -f /tmp/cm-services.tmp
 }
 
 # --------------------------------------------------------------------------------------------------------------------

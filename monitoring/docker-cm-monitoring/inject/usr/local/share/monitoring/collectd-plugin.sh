@@ -458,7 +458,7 @@ do
       for port in $(find ${TMP_DIR}/* -type d -name 4???? -exec basename {} \;) ## ${PORTS}
       do
         service=$(grep ${port} ${SERVICES} | grep -v JMX | awk -F '=' '{ print($1) }' | sed 's/_RMI_REG//')  ## | tr '[A-Z]' '[a-z]')
-#        echo " $port - $service"
+#         echo " $port - $service"
         dir="${TMP_DIR}/${port}"
 
         for i in $(ls -1 ${dir}/*.result)
