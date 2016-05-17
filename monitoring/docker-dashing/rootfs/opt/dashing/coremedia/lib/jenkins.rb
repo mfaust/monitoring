@@ -115,11 +115,11 @@ class Jenkins
 
     unless !bi.nil?
       bi                    = {}
-      bi['status']          = nil
+      bi['status']          = "FAILURE"
       bi["duration"]        = 0
       bi["fullDisplayName"] = ""
       bi["id"]              = "0"
-      bi["result"]          = "FAILURE"
+      bi["result"]          = {}
       bi["timestamp"]       = 0
       bi["url"]             = ""
     end
@@ -128,10 +128,19 @@ class Jenkins
 
     count              = builds_with_status.count
 
-    @log.debug( sprintf( 'we got %d results', count ) )
+#     @log.debug( sprintf( 'we got %d results', count ) )
 
     if( color == 'disabled' )
       @log.info( sprintf( 'Project %s is disabled', build_id ) )
+
+      return {
+        name:     "",
+        status:   'Disabled',
+        duration: "",
+        link:     "",
+        health:   "",
+        time:     ""
+      }
     end
 
     if( count == 0 )
@@ -166,7 +175,7 @@ class Jenkins
 
     return {
       name:      latest_build['fullDisplayName'],
-      status:    status, #latest_build['result'] == 'SUCCESS' ? 'Successful' : 'Failed',
+      status:    status,
       duration:  latest_build['duration'] / 1000,
       link:      latest_build['url'],
       health:    calculateHealth( successful_count, builds_with_status.count ),
@@ -236,7 +245,8 @@ class Jenkins
 
     end
 
-    data.sort!{ |a,b| a[:srv].to_s <=> b[:srv].to_s }
+    data.sort! { |a,b| a[:srv].to_s <=> b[:srv].to_s }
+    data.uniq! { |d| d[:tag] }
 
     return data
 
@@ -248,16 +258,14 @@ class Jenkins
   def reorganizeData( data = nil )
 
     if( data == nil )
-
       data = self.singleData
     end
 
-    result = Array.new
-    latest =[]
+    result      = Array.new
+    latest      = []
 
-      state_class = 'status-ok'
-      state_msg   = ''
-
+    state_class = 'status-ok'
+    state_msg   = ''
 
     data.each do |c|
 
@@ -279,12 +287,19 @@ class Jenkins
 
       if( status.downcase == 'successful' )
         state_class = 'status-ok'
+
+        # filter all successful nodes
+        if ( @config["jenkins"]['filterSuccessful'] == true )
+          next
+        end
       elsif( status.downcase == 'failed' )
         state_class = 'status-critical'
       elsif( status.downcase == 'aborted' )
         state_class = 'status-warning'
       elsif( status.downcase == 'unknown' )
         state_class = 'status-warning'
+      elsif( status.downcase == 'disabled' )
+        state_class = 'status-disabled'
       end
 
       if( health.to_int >= 80 )

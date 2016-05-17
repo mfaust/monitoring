@@ -1,7 +1,13 @@
 // ----------------------------------------------------------------------------
 // Sass declarations
 // ----------------------------------------------------------------------------
-$background-color:  #A0BC3B;
+// $background-color:  #A0BC3B;
+$background-color:  #12b0c5;
+$value-color:       #fff;
+
+$title-color:       rgba(255, 255, 255, 0.7);
+$label-color:       rgba(255, 255, 255, 0.7);
+$moreinfo-color:    rgba(255, 255, 255, 0.7);
 
 // ----------------------------------------------------------------------------
 // Widget-clock styles
@@ -9,6 +15,10 @@ $background-color:  #A0BC3B;
 .widget-cloudwatch {
 
   background-color: $background-color;
+
+  .title {
+    color: $title-color;
+  }
 
   .check {
     float: left;
@@ -18,14 +28,15 @@ $background-color:  #A0BC3B;
 
   .check[data-state="green"] {
   }
+
   .check[data-state="yellow"] {
     background-color: yellow;
     color:black;
   }
+
   .check[data-state="red"] {
     background-color: #B72126;
   }
-
 
   .check span {
     padding: 0px 4px;

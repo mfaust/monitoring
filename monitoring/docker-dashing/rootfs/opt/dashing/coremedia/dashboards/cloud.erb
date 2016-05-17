@@ -1,0 +1,44 @@
+
+<% content_for :title do %>Coremedia Dashboard<% end %>
+
+<div class="gridster highcontrast">
+
+  <ul>
+    <!-- head -->
+    <li data-row="1" data-col="1" data-sizex="1" data-sizey="2">
+      <div data-view="Clock"></div>
+      <i class="icon-time icon-background"></i>
+    </li>
+    <li data-row="1" data-col="1" data-sizex="6" data-sizey="1">
+      <div data-id="chuck" data-view="Text" data-title="Team Facts"></div>
+    </li>
+    <li data-row="1" data-col="1" data-sizex="1" data-sizey="1">
+      <div data-view="Image" data-image="/cm_logo_100px.png" style="background: transparent;"></div>
+    </li>
+
+    <li data-row="1" data-col="1" data-sizex="1" data-sizey="2">
+      <div data-id="cloudformation" data-view="Cloudformation" data-title="CloudFormation" data-cols="2"></div>
+    </li>
+
+    <li data-row="1" data-col="2" data-sizex="2" data-sizey="3">
+      <div data-id="simple_cloudwatch" data-view="Cloudwatch" data-title="CloudWatch" data-cols="2"></div>
+    </li>
+
+    <li data-row="1" data-col="1" data-sizex="5" data-sizey="3">
+      <div data-id="cloudwatch" data-view="Rickshawgraph" data-title="CloudWatch"
+        data-moreinfo=""
+        style="background-color:#333A52;"
+        data-renderer="line"
+        data-color-scheme="near-rainbow"
+        data-min="0"
+        data-max="30"
+        data-summary-method="none"
+        data-legend="true"
+        data-colors="rgba(192,132,255,1):rgba(96,170,255,1)"></div>
+    </li>
+
+  </ul>
+
+</div>
+
+<script type="text/javascript" src="/assets/moment.min.js"></script>

@@ -1,12 +1,12 @@
 {
   "jenkins": {
+    "filterSuccessful": true,
     "server": {
       "https://pc-ci.coremedia.com": {
         "description": "pc-ci",
         "jobs": [
           { "seed": { "description": "job-seed" } },
           { "vsphere-reports": { "description": "job-vsphere-reports" } },
-          { "packer-ibm/job/wcs8-ci-staging": { "description": "job-packer-wcs8-staging" } },
           { "cookbooks/job/coremedia-zookeeper-cookbook": { "description": "job-zookeeper-cookbook" } },
           { "job-node-stalker-plugin": { "description": "job-node-stalker" } },
           { "vsphere-reports": { "description": "job-vsphere-reports" } },
