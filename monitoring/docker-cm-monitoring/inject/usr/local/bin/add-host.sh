@@ -6,8 +6,8 @@
 # ----------------------------------------------------------------------------------------
 
 SCRIPTNAME=$(basename $0 .sh)
-VERSION="1.0.0"
-VDATE="24.03.2016"
+VERSION="2.0.0"
+VDATE="17.05.2016"
 
 # ----------------------------------------------------------------------------------------
 
@@ -55,7 +55,6 @@ usage() {
   printf  "$help_format_desc"  ""    "-v"                 ": Prints out the Version"
   printf  "$help_format_desc"  ""    "-f|--force"         ": regeneration all Host-Data (default: no force)"
   printf  "$help_format_desc"  ""    "-H|--host"          ": Hostname or IP"
-  printf  "$help_format_desc"  ""    "-P|--old-portstyle" ": old port style for service discovery"
 }
 
 # --------------------------------------------------------------------------------------------------------------------
@@ -103,18 +102,21 @@ getPorts() {
   if [ $(fping -r1 ${host} | grep "is alive" | wc -l) -gt 0 ]
   then
 
-    if [ "${PORT_STYLE}" == "cm7" ]
-    then
-      # CM7-Port
-      scan_ports="38099,40099,41099,42099,43099,44099,45099,46099,47099,48099,49099"
+#     if [ "${PORT_STYLE}" == "cm7" ]
+#     then
+#       # CM7-Port
+#       scan_ports="38099,40099,41099,42099,43099,44099,45099,46099,47099,48099,49099"
+#
+# #      cp /etc/cm7-services ${TMP_DIR}/cm-services
+#     else
+#       # CMx-Port (new Deployment-schema)
+#       scan_ports="40099,40199,40299,40399,40499,40599,40699,40799,40899,40999,41099,41199,41299,41399,42099,42199,42299,42399,42499,42599,42699,42799,42899,42999"
+#
+# #      cp /etc/cm14-services ${TMP_DIR}/cm-services
+#     fi
 
-      cp /etc/cm7-services ${TMP_DIR}/cm-services
-    else
-      # CMx-Port (new Deployment-schema)
-      scan_ports="40099,40199,40299,40399,40499,40599,40699,40799,40899,40999,41099,41199,41299,41399,42099,42199,42299,42399,42499,42599,42699,42799,42899,42999"
-
-      cp /etc/cm14-services ${TMP_DIR}/cm-services
-    fi
+    # known-ports ... for pre 16xx and current deployment
+    scan_ports="38099,40099,40199,40299,40399,40499,40599,40699,40799,40899,40999,41099,41199,41299,41399,42099,42199,42299,42399,42499,42599,42699,42799,42899,42999,43099,44099,45099,46099,47099,48099,49099"
 
     PORTS="$(${NMAP} ${host} -p T:${scan_ports} | grep "tcp open" | cut -d / -f 1)"
   fi
@@ -122,12 +124,65 @@ getPorts() {
   echo "PORTS=\"${PORTS}\"" > ${JOLOKIA_PORT_CACHE}
 }
 
-verifyApplications() {
+discoverApplications() {
+
+  local tmp_dir="${1}"
+  local p="${2}"
+
+  types="manager blueprint drive solr user-changes workflow elastic-worker coremedia contentfeeder caefeeder studio editor-webstart demodata-generator"
+
+  for t in ${types}
+  do
+#    echo "${p} ${t}"
+
+    file_dst="${tmp_dir}/CM_${p}-${t}.json"
+    dst="${tmp_dir}/CM_${p}.result"
+    tmp="${tmp_dir}/CM_${p}-${t}.tmp"
+
+    cp ${file_tpl} ${file_dst}
+
+    sed -i \
+      -e "s/%HOST%/${host}/g" \
+      -e "s/%PORT%/${p}/g" \
+      -e "s/%TYPE%/${t}/g" \
+      ${file_dst}
+
+    touch ${tmp}
+
+    ionice -c2 nice -n19  curl --silent --request POST --data @${file_dst} http://${JOLOKIA_HOST}:8080/jolokia/ | json_reformat > ${tmp}
+
+    [ $(stat -c %s ${tmp}) -gt 0 ] && {
+
+      status="$(jq --raw-output .status ${tmp})"
+
+      if [ ${status} == 200 ]
+      then
+#        echo "status 200 - take ${t}"
+        mv ${tmp} ${dst}
+        rm -f ${file_dst}
+#        sleep 3s
+        return
+
+      else
+        rm ${tmp}
+        rm ${file_dst}
+      fi
+    } || {
+      rm -f ${tmp}
+    }
+  done
+
+}
+
+
+discoverPorts() {
 
   local host="${1}"
 
   local file_tpl=
   local file_dst=
+
+  getPorts ${host}
 
   if [ -f ${JOLOKIA_PORT_CACHE} ]
   then
@@ -136,44 +191,94 @@ verifyApplications() {
     for p in ${PORTS}
     do
       file_tpl="${TEMPLATE_DIR}/CM.json.tpl"
-      file_dst="/tmp/CM_${p}.json"
+
+      tmp_dir="/tmp/${host}"
+
+      [ -d ${tmp_dir} ] || mkdir -p ${tmp_dir}
 
       if [ -f ${file_tpl} ]
       then
-        sed -e "s/localhost:%PORT%/${host}:${p}/g" ${file_tpl} > ${file_dst}
 
-        dst="$(echo ${file_dst} | sed 's/\.json/\.result/g')"
-        tmp="$(echo ${file_dst} | sed 's/\.json/\.tmp/g')"
+        # old school               //localhost/manager              => docBase
 
-        touch ${tmp}
+        # cae-live, cae-preview    //localhost/blueprint            => baseName, workDir, path
+        # adobe-drive              //localhost/drive                => baseName, workDir, path
+        # solr                     //localhost/solr                 => baseName, workDir, path
+        # user-changes             //localhost/user-changes         => baseName, workDir, path
+        # wfs                      //localhost/workflow             => baseName, workDir, path
+        # elastic-worker           //localhost/elastic-worker       => baseName, workDir, path
+        # mls, cms,                //localhost/coremedia            => configFile, workDir, path
+        # content-feeder           //localhost/contentfeeder        => baseName, workDir, path
+        # caefeeder-(preview,live) //localhost/caefeeder            => baseName, workDir, path
+        # studio                   //localhost/studio               => baseName, workDir, path
 
-        ionice -c2 nice -n19  curl --silent --request POST --data @${file_dst} http://${JOLOKIA_HOST}:8080/jolokia/ | json_reformat > ${tmp}
+        discoverApplications ${tmp_dir} ${p}
 
-        [ $(stat -c %s ${tmp}) -gt 0 ] && {
-          mv ${tmp} ${dst}
-        } || {
-          rm -f ${tmp}
-        }
       fi
+
     done
 
-    service_tmp_file="/tmp/cm-services.tmp"
+    service_tmp_file="${tmp_dir}/cm-services.tmp"
 
     touch ${service_tmp_file}
 
-    for f in $(ls -1 /tmp/CM_*.result)
+    for f in $(ls -1 ${tmp_dir}/CM_*.result)
     do
-      port=$(echo ${f} | sed -e 's|/tmp/CM_||g' -e 's|.result||g' )
-      service="$(jq --raw-output .value.configFile.url ${f} | awk -F'/' '{ print( $4 ) }' | sed -e 's|cm7-||g' -e 's|-tomcat||g')"
+#       echo -e "\n - analyze '${f}'"
+
+      port=$(echo ${f} | sed -e "s|${tmp_dir}/CM_||g" -e 's|.result||g' )
+
+      baseName=$(jq --raw-output .value.baseName ${f})
+      path=$(jq --raw-output .value.path ${f})
+
+      configFile=$(jq --raw-output .value.configFile.url ${f})
+
+      if ( [ "${baseName}" == "manager" ] || [ "${baseName}" == "coremedia" ] )
+      then
+        service="$(echo ${configFile} | awk -F'/' '{ print( $4 ) }' | sed -e 's|cm7-||g' -e 's|-tomcat||g')"
+      else
+        service="${baseName}"
+
+        cat >> ${tmp_dir}/CM_${port}_context.json << EOF
+{
+  "type" : "read",
+  "mbean" : "Catalina:type=Manager,context=${path},host=localhost",
+  "attribute" : [
+    "jvmRoute"
+  ],
+  "target" : { "url" : "service:jmx:rmi:///jndi/rmi://${host}:${port}/jmxrmi", }
+}
+EOF
+        ionice -c2 nice -n19  curl --silent --request POST --data @${tmp_dir}/CM_${port}_context.json http://${JOLOKIA_HOST}:8080/jolokia/ | json_reformat > ${tmp_dir}/CM_${port}_context.tmp
+
+        service="$(jq --raw-output .value.jvmRoute ${tmp_dir}/CM_${port}_context.tmp)"
+
+      fi
+
+      # service name normalize
+      case ${service} in
+        content-management-server)        service='cms' ;;
+        master-live-server)               service='mls' ;;
+        workflow|workflow-server)         service='wfs' ;;
+        replication-live-server)          service='rls' ;;
+        adobe-drive-server)               service='adobe-drive' ;;
+        solr-master|solr-slave)           service='solr' ;;
+        delivery|cae-live-*)              service='cae-live' ;;
+        # content-feeder | user-changes | elastic-worker
+        *)                                service=${service} ;;
+      esac
 
       echo "Port: ${port}  | service: ${service}"
 
-      cp /etc/cm-services/${service}.tpl /tmp
-      sed -i -e "s/%PORT%/${port}/g" /tmp/${service}.tpl
+      if [ -f /etc/cm-services/${service}.tpl ]
+      then
 
-      cat /tmp/${service}.tpl >> ${service_tmp_file}
+        cp /etc/cm-services/${service}.tpl ${tmp_dir}
+        sed -i -e "s/%PORT%/${port}/g" ${tmp_dir}/${service}.tpl
 
-      rm -f /tmp/${service}.tpl
+        cat ${tmp_dir}/${service}.tpl >> ${service_tmp_file}
+      fi
+
     done
 
     cp ${service_tmp_file} ${TMP_DIR}/cm-services
@@ -191,7 +296,7 @@ addToGraphite() {
 
   if [ ${FORCE} != true ]
   then
-    echo "delete dashboard for host '${host}'"
+#    echo "delete dashboard for host '${host}'"
 
     short_hostname=$(echo "${host}" | awk -F '.' '{print($1)}')
     grafana_hostname=$(echo "${host}" | sed 's|\.|-|g')
@@ -203,7 +308,7 @@ addToGraphite() {
     for i in ${uid}
     do
 
-      echo "delete dashboard '${i}'"
+#      echo "delete dashboard '${i}'"
       curl ${curl_opts} -X DELETE http://grafana:3000/api/dashboards/${i} > /dev/null
     done
   fi
@@ -238,6 +343,8 @@ addToGraphite() {
 
 run() {
 
+  echo -e "\n\n"
+
   TMP_DIR="${JOLOKIA_CACHE_BASE}/${CHECK_HOST}"
 
   if [ ${FORCE} = true ]
@@ -261,9 +368,7 @@ run() {
     then
       if [ ! -f ${JOLOKIA_PORT_CACHE} ]
       then
-        getPorts ${CHECK_HOST}
-
-        verifyApplications ${CHECK_HOST}
+        discoverPorts ${CHECK_HOST}
 
         addToGraphite ${CHECK_HOST}
 
@@ -272,8 +377,9 @@ run() {
     fi
   fi
 
-  rm -f /tmp/CM_*99*
-  rm -f /tmp/cm-services.tmp
+  rm -rf /tmp/${CHECK_HOST}
+
+  echo -e "\n\n"
 }
 
 # --------------------------------------------------------------------------------------------------------------------
@@ -296,9 +402,6 @@ do
       ;;
     -f|--force)
       FORCE=true
-      ;;
-    -P|--old-portstyle)
-      PORT_STYLE="cm7"
       ;;
     *)
       echo "Unknown argument: '${1}'"

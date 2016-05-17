@@ -1,0 +1,3 @@
+# CONTENT-FEEDER
+FEEDER_CONTENT=%PORT%
+JMX_%PORT%="${standardJMX} CMContentFeeder"

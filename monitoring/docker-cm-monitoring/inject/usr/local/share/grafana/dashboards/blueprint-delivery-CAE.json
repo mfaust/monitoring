@@ -57,13 +57,13 @@
           "targets": [
             {
               "refId": "C",
-              "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE-heap_memory.*, '(.*)-', ''))",
+              "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_LIVE-heap_memory.*, '(.*)-', ''))",
               "textEditor": false
             }
           ],
           "timeFrom": null,
           "timeShift": null,
-          "title": "CAE Heap Mem",
+          "title": "CAE LIVE Heap Mem",
           "tooltip": {
             "msResolution": false,
             "shared": true,
@@ -141,12 +141,12 @@
             {
               "hide": false,
               "refId": "C",
-              "target": "alias(collectd.%HOST%.CAE-blob_cache.cm7_counter-size, 'max')",
+              "target": "alias(collectd.%HOST%.CAE_LIVE-blob_cache.cm7_counter-size, 'max')",
               "textEditor": false
             },
             {
               "refId": "A",
-              "target": "alias(collectd.%HOST%.CAE-blob_cache.cm7_counter-level, 'used')",
+              "target": "alias(collectd.%HOST%.CAE_LIVE-blob_cache.cm7_counter-level, 'used')",
               "textEditor": false
             },
             {
@@ -156,7 +156,7 @@
           ],
           "timeFrom": null,
           "timeShift": null,
-          "title": "CAE BlobCache",
+          "title": "CAE LIVE BlobCache",
           "tooltip": {
             "msResolution": false,
             "shared": true,
@@ -234,33 +234,33 @@
           "targets": [
             {
               "refId": "A",
-              "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE-content_beans.cm7_counter-evaluated, '(.*)-', ''))",
+              "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_LIVE-content_beans.cm7_counter-evaluated, '(.*)-', ''))",
               "textEditor": false
             },
             {
               "refId": "B",
-              "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE-content_beans.cm7_counter-evicted, '(.*)-', ''))",
+              "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_LIVE-content_beans.cm7_counter-evicted, '(.*)-', ''))",
               "textEditor": false
             },
             {
               "refId": "C",
-              "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE-content_beans.cm7_counter-inserted, '(.*)-', ''))",
+              "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_LIVE-content_beans.cm7_counter-inserted, '(.*)-', ''))",
               "textEditor": false
             },
             {
               "refId": "D",
-              "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE-content_beans.cm7_counter-level, '(.*)-', ''))",
+              "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_LIVE-content_beans.cm7_counter-level, '(.*)-', ''))",
               "textEditor": false
             },
             {
               "refId": "E",
-              "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE-content_beans.cm7_counter-removed, '(.*)-', ''))",
+              "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_LIVE-content_beans.cm7_counter-removed, '(.*)-', ''))",
               "textEditor": false
             },
             {
               "hide": true,
               "refId": "F",
-              "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE-content_beans.cm7_counter-capacity, '(.*)-', ''))",
+              "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_LIVE-content_beans.cm7_counter-capacity, '(.*)-', ''))",
               "textEditor": false
             }
           ],
@@ -344,7 +344,7 @@
           "targets": [
             {
               "refId": "A",
-              "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE-threading.*, '(.*)-', ''))",
+              "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_LIVE-threading.*, '(.*)-', ''))",
               "textEditor": false
             }
           ],

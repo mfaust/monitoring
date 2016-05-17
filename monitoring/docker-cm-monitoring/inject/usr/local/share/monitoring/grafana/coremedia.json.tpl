@@ -1005,7 +1005,7 @@
           "targets": [
             {
               "refId": "A",
-              "target": "aliasByMetric(aliasSub(collectd.%HOST%.CMS-feeder.*, '.*-', ''))",
+              "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_CONTENT-feeder.*, '.*-', ''))",
               "textEditor": false
             }
           ],

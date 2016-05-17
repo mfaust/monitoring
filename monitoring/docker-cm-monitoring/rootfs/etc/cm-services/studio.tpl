@@ -1,3 +1,3 @@
 # STUDIO
-STUDIO_RMI_REG=%PORT%
+STUDIO=%PORT%
 JMX_%PORT%="${standardJMX} CMStudioCapConnection"

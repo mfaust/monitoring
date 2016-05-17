@@ -1,3 +1,3 @@
-# CAE_LIVE_1
-CAE=%PORT%
+# CAE_PREV
+CAE_PREV=%PORT%
 JMX_%PORT%="${standardJMX} CMCAEBlobCache CMCAECacheContentBeans"

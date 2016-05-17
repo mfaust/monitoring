@@ -1,3 +1,3 @@
 # FEEDER_PREV
-FEEDER_PREV_RMI_REG=%PORT%
+FEEDER_PREV=%PORT%
 JMX_%PORT%="${standardJMX} CMCAEFeederHealth CMCAEFeederProactiveEngine CMContentDependencyInvalidator"

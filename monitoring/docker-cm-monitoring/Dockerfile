@@ -3,7 +3,7 @@ FROM docker-alpine-base:latest
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
-LABEL version="0.10.0"
+LABEL version="1.0.1"
 
 # ---------------------------------------------------------------------------------------
 
@@ -11,7 +11,8 @@ WORKDIR /app
 VOLUME  /app
 
 RUN \
-  apk --quiet update
+  apk --quiet update && \
+  apk --quiet upgrade
 
 RUN \
   apk --quiet add \

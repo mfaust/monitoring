@@ -11,8 +11,8 @@
 # -------------------------------------------------------------------------------------------------
 
 SCRIPTNAME=$(basename $0 .sh)
-VERSION="2.11.0"
-VDATE="23.03.2016"
+VERSION="2.11.1"
+VDATE="17.05.2016"
 
 # -------------------------------------------------------------------------------------------------
 
@@ -208,6 +208,8 @@ collectdPlugin_CMCAEFeederProactiveEngine() {
 collectdPlugin_CMContentFeeder() {
 
   local result="${1}"
+
+  service="FEEDER_CONTENT"
 
   # CurrentPendingDocuments = Returns the number of documents in the currently feeded folder to re-index after rights rule changes.
   # IndexDocuments          = Returns the number of persisted documents in the last interval.
@@ -458,7 +460,14 @@ do
       for port in $(find ${TMP_DIR}/* -type d -name 4???? -exec basename {} \;) ## ${PORTS}
       do
         service=$(grep ${port} ${SERVICES} | grep -v JMX | awk -F '=' '{ print($1) }' | sed 's/_RMI_REG//')  ## | tr '[A-Z]' '[a-z]')
-#         echo " $port - $service"
+#        echo -e "\n $port - $service"
+
+        if [ -t "${service}" ]
+        then
+          echo "no service found for port '${host}:${port}'"
+          continue
+        fi
+
         dir="${TMP_DIR}/${port}"
 
         for i in $(ls -1 ${dir}/*.result)

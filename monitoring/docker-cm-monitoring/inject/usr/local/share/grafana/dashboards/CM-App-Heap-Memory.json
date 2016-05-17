@@ -51,7 +51,7 @@
           "renderer": "flot",
           "seriesOverrides": [
             {
-              "alias": "CAE-heap_memory"
+              "alias": "CAE-LIVE-heap_memory"
             }
           ],
           "span": 12,
@@ -133,9 +133,9 @@
         "current": {
           "isNone": true,
           "tags": [],
-          "text": "CAE-heap_memory + CMS-heap_memory",
+          "text": "CAE_LIVE-heap_memory + CMS-heap_memory",
           "value": [
-            "CAE-heap_memory",
+            "CAE_LIVE-heap_memory",
             "CMS-heap_memory"
           ]
         },
@@ -146,7 +146,7 @@
         "name": "heap_memory",
         "options": [
           {
-            "text": "CAE-heap_memory",
+            "text": "CAE_LIVE-heap_memory",
             "value": "CAE-heap_memory",
             "selected": true
           },

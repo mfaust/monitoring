@@ -60,13 +60,13 @@
           "targets": [
             {
               "refId": "C",
-              "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE-heap_memory.*, '(.*)-', ''))",
+              "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_LIVE-heap_memory.*, '(.*)-', ''))",
               "textEditor": false
             }
           ],
           "timeFrom": null,
           "timeShift": null,
-          "title": "CAE Heap Mem",
+          "title": "CAE LIVE Heap Mem",
           "tooltip": {
             "shared": true,
             "value_type": "cumulative"
@@ -189,18 +189,18 @@
           "targets": [
             {
               "refId": "C",
-              "target": "alias(collectd.%HOST%.CAE-blob_cache.cm7_counter-size, 'max')",
+              "target": "alias(collectd.%HOST%.CAE_LIVE-blob_cache.cm7_counter-size, 'max')",
               "textEditor": false
             },
             {
               "refId": "A",
-              "target": "alias(collectd.%HOST%.CAE-blob_cache.cm7_counter-level, 'used')",
+              "target": "alias(collectd.%HOST%.CAE_LIVE-blob_cache.cm7_counter-level, 'used')",
               "textEditor": false
             }
           ],
           "timeFrom": null,
           "timeShift": null,
-          "title": "CAE BlobCache",
+          "title": "CAE LIVE BlobCache",
           "tooltip": {
             "shared": true,
             "value_type": "cumulative"
@@ -1006,7 +1006,7 @@
           "targets": [
             {
               "refId": "A",
-              "target": "aliasByMetric(aliasSub(collectd.%HOST%.CMS-feeder.*, '.*-', ''))",
+              "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_CONTENT-feeder.*, '.*-', ''))",
               "textEditor": false
             }
           ],

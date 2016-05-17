@@ -1,8 +1,12 @@
 {
   "type" : "read",
-  "mbean" : "Catalina:j2eeType=WebModule,J2EEApplication=none,J2EEServer=none,name=//localhost/manager",
+  "mbean" : "Catalina:j2eeType=WebModule,J2EEApplication=none,J2EEServer=none,name=//localhost/%TYPE%",
   "attribute" : [
-    "configFile"
+    "docBase",
+    "configFile",
+    "baseName",
+    "workDir",
+    "path"
   ],
-  "target" : { "url" : "service:jmx:rmi:///jndi/rmi://localhost:%PORT%/jmxrmi", }
+  "target" : { "url" : "service:jmx:rmi:///jndi/rmi://%HOST%:%PORT%/jmxrmi", }
 }
