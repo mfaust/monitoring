@@ -91,7 +91,7 @@
           ]
         }
       ],
-      "title": "Row"
+      "title": "Heap Memory"
     },
     {
       "collapse": false,
@@ -184,7 +184,7 @@
           ]
         }
       ],
-      "title": "New row"
+      "title": "Blob Cache"
     },
     {
       "collapse": false,
@@ -296,7 +296,7 @@
           ]
         }
       ],
-      "title": "New row"
+      "title": "CAE Content Beans"
     },
     {
       "collapse": false,
@@ -380,7 +380,96 @@
           ]
         }
       ],
-      "title": "New row"
+      "title": "Tomcat Threads"
+    },
+    {
+      "collapse": false,
+      "editable": true,
+      "height": "200px",
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": null,
+          "editable": true,
+          "error": false,
+          "fill": 2,
+          "grid": {
+            "threshold1": null,
+            "threshold1Color": "rgba(216, 200, 27, 0.27)",
+            "threshold2": null,
+            "threshold2Color": "rgba(234, 112, 112, 0.22)"
+          },
+          "id": 18,
+          "isNew": true,
+          "legend": {
+            "alignAsTable": true,
+            "avg": false,
+            "current": true,
+            "max": false,
+            "min": false,
+            "rightSide": true,
+            "show": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "connected",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "span": 12,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "refId": "A",
+              "target": "alias(collectd.%HOST%.CAE_LIVE-heap_cache.cm7_counter-level, 'used')",
+              "textEditor": false
+            },
+            {
+              "refId": "B",
+              "target": "alias(collectd.%HOST%.CAE_LIVE-heap_cache.cm7_counter-size, 'max')",
+              "textEditor": false
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "UAPI Cache",
+          "tooltip": {
+            "msResolution": false,
+            "shared": true,
+            "value_type": "cumulative"
+          },
+          "type": "graph",
+          "xaxis": {
+            "show": false
+          },
+          "yaxes": [
+            {
+              "format": "bytes",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": false
+            }
+          ]
+        }
+      ],
+      "title": "UAPI Cache"
     }
   ],
   "time": {

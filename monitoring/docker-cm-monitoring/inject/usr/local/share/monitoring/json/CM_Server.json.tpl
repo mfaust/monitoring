@@ -6,8 +6,12 @@
     "ResourceCacheHits",
     "ResourceCacheEvicts",
     "ResourceCacheEntries",
+    "ResourceCacheInterval",
+    "ResourceCacheSize",
+    "RepositorySequenceNumber",
     "ConnectionCount",
-    "RunLevel"
+    "RunLevel",
+    "Uptime"
   ],
   "target" : { "url" : "service:jmx:rmi:///jndi/rmi://localhost:%PORT%/jmxrmi", }
 }

@@ -11,8 +11,8 @@
 # -------------------------------------------------------------------------------------------------
 
 SCRIPTNAME=$(basename $0 .sh)
-VERSION="2.11.1"
-VDATE="17.05.2016"
+VERSION="2.12.3"
+VDATE="18.05.2016"
 
 # -------------------------------------------------------------------------------------------------
 
@@ -158,13 +158,13 @@ collectdPlugin_CMCAEBlobCache() {
 
   local result="${1}"
 
-  local blobCacheSize=$(cat ${result} | jq '.value.BlobCacheSize')
-  local blobCacheLevel=$(cat ${result} | jq '.value.BlobCacheLevel')
-  local blobCacheFaults=$(cat ${result} | jq '.value.BlobCacheFaults')
+  local blobCacheSize=$(jq --raw-output '.value.BlobCacheSize' ${result})
+  local blobCacheLevel=$(jq --raw-output '.value.BlobCacheLevel' ${result})
+  local blobCacheFaults=$(jq --raw-output '.value.BlobCacheFaults' ${result})
 
-  local heapCacheSize=$(cat ${result} | jq '.value.HeapCacheSize')
-  local heapCacheLevel=$(cat ${result} | jq '.value.HeapCacheLevel')
-  local heapCacheFaults=$(cat ${result} | jq '.value.HeapCacheFaults')
+  local heapCacheSize=$(jq --raw-output '.value.HeapCacheSize' ${result})
+  local heapCacheLevel=$(jq --raw-output '.value.HeapCacheLevel' ${result})
+  local heapCacheFaults=$(jq --raw-output '.value.HeapCacheFaults' ${result})
 
   echo "PUTVAL $HOSTNAME/${service}-blob_cache/cm7_counter-size interval=$INTERVAL N:${blobCacheSize}"
   echo "PUTVAL $HOSTNAME/${service}-blob_cache/cm7_counter-level interval=$INTERVAL N:${blobCacheLevel}"
@@ -209,7 +209,7 @@ collectdPlugin_CMContentFeeder() {
 
   local result="${1}"
 
-  service="FEEDER_CONTENT"
+  local service="FEEDER_CONTENT"
 
   # CurrentPendingDocuments = Returns the number of documents in the currently feeded folder to re-index after rights rule changes.
   # IndexDocuments          = Returns the number of persisted documents in the last interval.
@@ -393,8 +393,8 @@ collectdPlugin_Solr() {
 
       local masterIndex=        #"$(curl --silent http://${SOLR_MASTER}:8000/${SOLR_MASTER_PORT}/${RESULT_FILE} | jq '.details.indexVersion')"
       local masterGeneration=   # "$(curl --silent http://${SOLR_MASTER}:8000/${SOLR_MASTER_PORT}/${RESULT_FILE} | jq '.details.generation')"
-      local localIndex="$(jq '.details.indexVersion' ${result})"
-      local localGeneration="$(jq '.details.generation' ${result})"
+      local localIndex="$(jq '.[0].value.indexVersion' ${result})"
+      local localGeneration="$(jq '.[0].value.generation' ${result})"
 
       [ "${masterIndex}" = "null" ]       && masterIndex=
       [ "${masterGeneration}" = "null" ]  && masterGeneration=
@@ -430,6 +430,38 @@ collectdPlugin_Solr() {
   fi
 }
 
+
+collectdPlugin_Mongo() {
+
+  local result="${1}"
+
+  if [ -f "${result}" ]
+  then
+    commands="authenticate buildInfo createIndexes delete drop find findAndModify insert listCollections mapReduce renameCollection update"
+
+    for i in $commands
+    do
+      data=$(sed -e 's|"\$|"|g' ${result} | jq --raw-output ".metrics.commands.${i}.total.numberLong")
+
+      echo "PUTVAL ${HOSTNAME}/${service}-commands/cm7_counter-${i} interval=$INTERVAL N:${data}"
+    done
+
+    bytes_read="$(jq --raw-output '.wiredTiger."block-manager"."bytes read"' ${result})"
+    bytes_written="$(jq --raw-output '.wiredTiger."block-manager"."bytes written"' ${result})"
+    blocks_read="$(jq --raw-output '.wiredTiger."block-manager"."blocks read"' ${result})"
+    blocks_written="$(jq --raw-output '.wiredTiger."block-manager"."blocks written"' ${result})"
+    io_total_read="$(jq --raw-output '.wiredTiger.connection."total read I/Os"' ${result})"
+    io_total_write="$(jq --raw-output '.wiredTiger.connection."total write I/Os"' ${result})"
+
+    echo "PUTVAL ${HOSTNAME}/${service}-blocks/cm7_counter-read interval=$INTERVAL N:${blocks_read}"
+    echo "PUTVAL ${HOSTNAME}/${service}-blocks/cm7_counter-write interval=$INTERVAL N:${blocks_written}"
+    echo "PUTVAL ${HOSTNAME}/${service}-bytes/bytes-read interval=$INTERVAL N:${bytes_read}"
+    echo "PUTVAL ${HOSTNAME}/${service}-bytes/bytes-write interval=$INTERVAL N:${bytes_written}"
+    echo "PUTVAL ${HOSTNAME}/${service}-io/cm7_counter-read interval=$INTERVAL N:${io_total_read}"
+    echo "PUTVAL ${HOSTNAME}/${service}-io/cm7_counter-write interval=$INTERVAL N:${io_total_write}"
+  fi
+}
+
 # ----------------------------------------------------------------------------------------------------
 
 while true
@@ -457,10 +489,16 @@ do
 #    then
 #      . ${TMP_DIR}/PORT.cache
 
-      for port in $(find ${TMP_DIR}/* -type d -name 4???? -exec basename {} \;) ## ${PORTS}
+      for port in $(find ${TMP_DIR}/* -type d -name ????? -exec basename {} \;) ## ${PORTS}
       do
-        service=$(grep ${port} ${SERVICES} | grep -v JMX | awk -F '=' '{ print($1) }' | sed 's/_RMI_REG//')  ## | tr '[A-Z]' '[a-z]')
-#        echo -e "\n $port - $service"
+        if [ ${port} == 28017 ]
+        then
+          service="MONGO"
+        else
+          service=$(grep ${port} ${SERVICES} | grep -v JMX | awk -F '=' '{ print($1) }' | sed 's/_RMI_REG//')  ## | tr '[A-Z]' '[a-z]')
+        fi
+
+#         echo -e "\n $port - $service"
 
         if [ -t "${service}" ]
         then
@@ -474,25 +512,31 @@ do
         do
           check=$(basename ${i} | sed 's|.result||g')
 
-#          echo " $check  - $i"
+#           echo " $check  - $i"
 
           case "${check}"
           in
-            'Memory')                         collectdPlugin_Memory "${i}"                      ;;
-            'ClassLoading')                   collectdPlugin_ClassLoading "${i}"                ;;
-            'Threading')                      collectdPlugin_Threading "${i}"                   ;;
-            'GarbageCollector')               collectdPlugin_GarbageCollector "${i}"            ;;
-            'CMCAEBlobCache')                 collectdPlugin_CMCAEBlobCache "${i}"              ;;
-            'CMCAECacheContentBeans')         collectdPlugin_CMCAECacheContentBeans "${i}"      ;;
-            'CMCAEFeederProactiveEngine')     collectdPlugin_CMCAEFeederProactiveEngine "${i}"  ;;
-            'CMConnectionPool')               collectdPlugin_CMConnectionPool "${i}"            ;;
-            'CMQueryPool')                    collectdPlugin_CMQueryPool "${i}"                 ;;
-            'CMStatisticsJobResult')          collectdPlugin_CMStatisticsJobResult "${i}"       ;;
-            'CMStatisticsRepository')         collectdPlugin_CMStatisticsRepository "${i}"      ;;
-            'CMContentFeeder')                collectdPlugin_CMContentFeeder "${i}"             ;;
-            'CMRLSReplicator')                collectdPlugin_CMRLSReplicator "${i}" ${port}     ;;
-            'CMContentDependencyInvalidator') collectdPlugin_CMFeederReplicator "${i}" ${port}  ;;
-            'SolrReplicationHandler.live')    collectdPlugin_Solr "${i}" ${port}                ;;
+            'Memory')                                       collectdPlugin_Memory "${i}"                      ;;
+            'ClassLoading')                                 collectdPlugin_ClassLoading "${i}"                ;;
+            'Threading')                                    collectdPlugin_Threading "${i}"                   ;;
+            'GarbageCollector')                             collectdPlugin_GarbageCollector "${i}"            ;;
+            'SolrReplicationHandler.live')                  collectdPlugin_Solr "${i}" ${port}                ;;
+            'mongodb')                                      collectdPlugin_Mongo "${i}"                       ;;
+            'CM_CapConnection_CAE')                         collectdPlugin_CMCAEBlobCache "${i}"              ;;
+            'CM_CapConnection_AdobeDrive')                  collectdPlugin_CMCAEBlobCache "${i}"              ;;
+            'CM_CapConnection_CAEFeeder')                   collectdPlugin_CMCAEBlobCache "${i}"              ;;
+            'CM_CapConnection_Studio')                      collectdPlugin_CMCAEBlobCache "${i}"              ;;
+            'CM_CapConnection_WFS')                         collectdPlugin_CMCAEBlobCache "${i}"              ;;
+            'CM_ContentBeans_CAE')                          collectdPlugin_CMCAECacheContentBeans "${i}"      ;;
+            'CM_CAEFeeder_ProactiveEngine')                 collectdPlugin_CMCAEFeederProactiveEngine "${i}"  ;;
+            'CM_ConnectionPool')                            collectdPlugin_CMConnectionPool "${i}"            ;;
+            'CM_QueryPool')                                 collectdPlugin_CMQueryPool "${i}"                 ;;
+            'CM_Statistics_JobResult')                      collectdPlugin_CMStatisticsJobResult "${i}"       ;;
+            'CM_Statistics_Repository')                     collectdPlugin_CMStatisticsRepository "${i}"      ;;
+            'CM_ContentFeeder')                             collectdPlugin_CMContentFeeder "${i}"             ;;
+            'CM_RLSReplicator')                             collectdPlugin_CMRLSReplicator "${i}" ${port}     ;;
+            'CM_CAEFeeder_ContentDependencyInvalidator')    collectdPlugin_CMFeederReplicator "${i}" ${port}  ;;
+
             *)
 # ##              echo "no plugin found: ${i}"
               continue

@@ -6,7 +6,7 @@
 # ----------------------------------------------------------------------------------------
 
 SCRIPTNAME=$(basename $0 .sh)
-VERSION="2.0.0"
+VERSION="2.0.2"
 VDATE="17.05.2016"
 
 # ----------------------------------------------------------------------------------------
@@ -116,7 +116,7 @@ getPorts() {
 #     fi
 
     # known-ports ... for pre 16xx and current deployment
-    scan_ports="38099,40099,40199,40299,40399,40499,40599,40699,40799,40899,40999,41099,41199,41299,41399,42099,42199,42299,42399,42499,42599,42699,42799,42899,42999,43099,44099,45099,46099,47099,48099,49099"
+    scan_ports="28017,38099,40099,40199,40299,40399,40499,40599,40699,40799,40899,40999,41099,41199,41299,41399,42099,42199,42299,42399,42499,42599,42699,42799,42899,42999,43099,44099,45099,46099,47099,48099,49099"
 
     PORTS="$(${NMAP} ${host} -p T:${scan_ports} | grep "tcp open" | cut -d / -f 1)"
   fi
@@ -129,7 +129,7 @@ discoverApplications() {
   local tmp_dir="${1}"
   local p="${2}"
 
-  types="manager blueprint drive solr user-changes workflow elastic-worker coremedia contentfeeder caefeeder studio editor-webstart demodata-generator"
+  types="manager blueprint drive solr user-changes workflow webdav elastic-worker coremedia contentfeeder caefeeder studio editor-webstart demodata-generator"
 
   for t in ${types}
   do
@@ -190,6 +190,12 @@ discoverPorts() {
 
     for p in ${PORTS}
     do
+      if [ ${p} == 28017 ]
+      then
+        echo "Port: ${p}  | service: mongod"
+
+      else
+
       file_tpl="${TEMPLATE_DIR}/CM.json.tpl"
 
       tmp_dir="/tmp/${host}"
@@ -214,6 +220,7 @@ discoverPorts() {
 
         discoverApplications ${tmp_dir} ${p}
 
+      fi
       fi
 
     done
@@ -314,26 +321,27 @@ addToGraphite() {
   fi
 
   echo "add grafana templates ..."
-  for tpl in $(ls -1 ${tpl_dir})
+  for tpl in $(ls -1 ${tpl_dir}/blueprint*.json)
   do
     # "title": "Blueprint ContentServer",
 
     [ -d /var/tmp/${short_hostname} ] || mkdir /var/tmp/${short_hostname}
 
-    cp  ${tpl_dir}/${tpl} /var/tmp/${short_hostname}/${tpl}
+#    cp  ${tpl_dir}/${tpl} /var/tmp/${short_hostname}/${tpl}
+    cp  ${tpl} /var/tmp/${short_hostname}/$(basename ${tpl})
 
     sed -i \
       -e "s|%HOST%|${grafana_hostname}|g" \
       -e "s|%SHORTHOST%|${short_hostname}|g" \
       -e "s|%TAG%|${short_hostname}|g" \
-      /var/tmp/${short_hostname}/${tpl}
+      /var/tmp/${short_hostname}/$(basename ${tpl})
 
-    echo "create dashboard '${tpl}'"
+    echo "create dashboard '$(basename ${tpl})'"
 
       curl ${curl_opts} \
         --request POST \
         --header 'Content-Type: application/json;charset=UTF-8' \
-        --data @/var/tmp/${short_hostname}/${tpl} \
+        --data @/var/tmp/${short_hostname}/$(basename ${tpl}) \
         http://grafana:3000/api/dashboards/db/ > /dev/null
   done
 
