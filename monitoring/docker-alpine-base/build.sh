@@ -2,6 +2,6 @@
 
 . config.rc
 
-docker build --tag=${TAG_NAME} .
+docker build --no-cache --tag=${TAG_NAME} .
 
 # EOF
