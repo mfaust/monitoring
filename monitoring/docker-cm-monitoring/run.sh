@@ -41,7 +41,7 @@ DOCKER_DNS=${DOCKER_DNS:-""}
 JOLOKIA_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${USER}-jolokia   2>/dev/null)
 GRAPHITE_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${USER}-graphite 2>/dev/null)
 GRAFANA_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${USER}-grafana   2>/dev/null)
-ICINGA2_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${USER}-icinga    2>/dev/null)
+ICINGA2_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${USER}-icinga2   2>/dev/null)
 
 # ---------------------------------------------------------------------------------------
 
@@ -50,7 +50,7 @@ docker_opts="${docker_opts} --interactive"
 docker_opts="${docker_opts} --tty"
 docker_opts="${docker_opts} --hostname=${USER}-${TYPE}"
 docker_opts="${docker_opts} --name=${CONTAINER_NAME}"
-docker_opts="${docker_opts} --add-host=blueprint-box:192.168.252.100"
+docker_opts="${docker_opts} --add-host=blueprint-box:${BLUEPRINT_BOX}"
 docker_opts="${docker_opts} --env HOST_CM_CMS=${HOST_CM_CMS}"
 docker_opts="${docker_opts} --env HOST_CM_MLS=${HOST_CM_MLS}"
 docker_opts="${docker_opts} --env HOST_CM_RLS=${HOST_CM_RLS}"
@@ -73,12 +73,15 @@ docker_opts="${docker_opts} --env HOST_CM_ELASTICWORKER=${HOST_CM_ELASTICWORKER}
 docker_opts="${docker_opts} --env HOST_CM_ADOBE_DRIVE=${HOST_CM_ADOBE_DRIVE}"
 docker_opts="${docker_opts} --env HOST_CM_WEBDAV=${HOST_CM_WEBDAV}"
 docker_opts="${docker_opts} --env HOST_CM_SITEMANAGER=${HOST_CM_SITEMANAGER}"
-docker_opts="${docker_opts} --volume=${PWD}/inject/usr/local:/usr/local/"
+# docker_opts="${docker_opts} --volume=${PWD}/inject/usr/local:/usr/local/"
 
 if [ ! -z ${ICINGA2_IP} ]
 then
   docker_opts="${docker_opts} --env ICINGA2_HOST=${ICINGA2_IP}"
-  docker_opts="${docker_opts} --link=${USER}-icinga:icinga"
+  docker_opts="${docker_opts} --env ICINGA2_API_PORT=${ICINGA2_API_PORT:-5665}"
+  docker_opts="${docker_opts} --env ICINGA2_API_USER=${ICINGA2_API_USER:-root}"
+  docker_opts="${docker_opts} --env ICINGA2_API_PASS=${ICINGA2_API_PASS:-icinga}"
+  docker_opts="${docker_opts} --link=${USER}-icinga2:icinga"
 fi
 
 if [ ! -z ${GRAPHITE_IP} ]

@@ -1,9 +1,0 @@
-{
-  "templates": ["generic-host"],
-  "attrs": {
-    "address": "api.pingdom.com",
-    "display_name": "Pingdom",
-    "notes": "Pingdom",
-    "vars.type": "pingdom"
-  }
-}

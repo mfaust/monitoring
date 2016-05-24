@@ -8,8 +8,8 @@
 # ----------------------------------------------------------------------------------------
 
 SCRIPTNAME=$(basename $0 .sh)
-VERSION="2.20.1"
-VDATE="22.04.2016"
+VERSION="2.20.2"
+VDATE="18.05.2016"
 
 # ----------------------------------------------------------------------------------------
 
@@ -118,7 +118,7 @@ buildChecks() {
 
     for c in ${!jmx}
     do
-      file_tpl="${TEMPLATE_DIR}/${c}.json.tpl"
+      file_tpl="${TEMPLATE_DIR}/jolokia/${c}.json.tpl"
 
       dir="${TMP_DIR}/${p}"
 
@@ -185,30 +185,40 @@ runChecks() {
 
   for p in ${PORTS}
   do
-
     dir="${TMP_DIR}/${p}"
-    if [ ! -d ${dir} ]
+
+    if [ ${p} == 28017 ]
     then
-      echo "build Checks .. ${dir}"
-      buildChecks ${host}
+
+      [ -d ${dir} ] || mkdir -vp ${dir}
+
+      ionice -c2 nice -n19  curl --silent ${host}:28017/serverStatus | python -mjson.tool > ${dir}/mongodb.result
+
+    else
+
+      if [ ! -d ${dir} ]
+      then
+        echo "build Checks .. ${dir}"
+        buildChecks ${host}
+      fi
+
+      for i in $(ls -1 ${dir}/*.json 2> /dev/null)
+      do
+        dst="$(echo ${i} | sed 's/\.json/\.result/g')"
+        tmp="$(echo ${i} | sed 's/\.json/\.tmp/g')"
+
+        touch ${tmp}
+
+        ionice -c2 nice -n19  curl --silent --request POST --data @${i} http://${JOLOKIA_HOST}:8080/jolokia/ | json_reformat > ${tmp}
+#        sleep 1s
+
+        [ $(stat -c %s ${tmp}) -gt 0 ] && {
+          mv ${tmp} ${dst}
+        } || {
+          rm -f ${tmp}
+        }
+      done
     fi
-
-    for i in $(ls -1 ${dir}/*.json 2> /dev/null)
-    do
-      dst="$(echo ${i} | sed 's/\.json/\.result/g')"
-      tmp="$(echo ${i} | sed 's/\.json/\.tmp/g')"
-
-      touch ${tmp}
-
-      ionice -c2 nice -n19  curl --silent --request POST --data @${i} http://${JOLOKIA_HOST}:8080/jolokia/ | json_reformat > ${tmp}
-#      sleep 1s
-
-      [ $(stat -c %s ${tmp}) -gt 0 ] && {
-        mv ${tmp} ${dst}
-      } || {
-        rm -f ${tmp}
-      }
-    done
 
 #     if ( [ ${p} -eq 44099 ] || [ ${p} -eq 45099 ] )
 #     then

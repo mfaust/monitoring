@@ -4,3 +4,5 @@ TYPE="cm-monitoring"
 
 TAG_NAME="${USER}-docker-${TYPE}"
 CONTAINER_NAME="${USER}-${TYPE}"
+
+export DOCKER_DNS="10.1.2.63"

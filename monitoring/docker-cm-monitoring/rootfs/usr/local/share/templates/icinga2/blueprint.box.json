@@ -13,10 +13,7 @@
       "mls": "true",
       "rls": "false",
       "livecae": "true",
-      "previewcae": "false",
-      "studio": "true",
-      "solr": "true",
-      "wfs": "true"
+      "previewcae": "false"
     }
   }
 }

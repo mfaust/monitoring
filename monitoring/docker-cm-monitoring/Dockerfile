@@ -20,11 +20,13 @@ RUN \
     nano \
     python \
     jq \
+    jo \
     bc \
     yajl-tools \
     collectd \
     fping \
-    nmap
+    nmap \
+    bind-tools
 
 RUN \
   rm -rf /var/cache/apk/*
