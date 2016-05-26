@@ -322,6 +322,18 @@ addToGraphite() {
 }
 
 
+addIcingaService() {
+
+  local name="${1}"
+  local template="${2}"
+  local curl_opts="-u ${ICINGA2_API_USER}:${ICINGA2_API_PASS} -k -s "
+
+  local url=$(printf 'https://%s:%s/v1/objects/services/%s!%s' ${ICINGA2_HOST} ${ICINGA2_API_PORT} "${host}" "${name}")
+
+  curl ${curl_opts} -v -H 'Accept: application/json' -X PUT ${url} --data @${TMP_DIR}/icinga2/${template}
+
+}
+
 addToIcinga() {
 
   if [ -z ${ICINGA2_HOST} ]
@@ -337,11 +349,11 @@ addToIcinga() {
   local services=$(grep '='  ${TMP_DIR}/cm-services  | grep -v standardJMX | sort)
   local vars=
 
-  local API_USER="root"
-  local API_PASS="icinga"
-  local curl_opts="-u ${API_USER}:${API_PASS} -k -s "
+  local curl_opts="-u ${ICINGA2_API_USER}:${ICINGA2_API_PASS} -k -s "
 
-  name=$(curl ${curl_opts} -H 'Accept: application/json' -X GET "https://${ICINGA2_HOST}:5665/v1/objects/hosts/${host}" | python -m json.tool | jq --raw-output '.results[0].attrs.name')
+  mkdir -p ${TMP_DIR}/icinga2
+
+  name=$(curl ${curl_opts} -H 'Accept: application/json' -X GET "https://${ICINGA2_HOST}:${ICINGA2_API_PORT}/v1/objects/hosts/${host}" | python -m json.tool | jq --raw-output '.results[0].attrs.name')
 
   if ( [ "${name}" == "${host}" ] && [ ${ICINGA2_REMOVE_HOST} == true ] )
   then
@@ -351,35 +363,117 @@ addToIcinga() {
      -H 'Accept: application/json' \
      -H 'X-HTTP-Method-Override: DELETE' \
      -X POST \
-     "https://${ICINGA2_HOST}:5665/v1/objects/hosts/${host}?cascade=1" | python -m json.tool
+     "https://${ICINGA2_HOST}:${ICINGA2_API_PORT}/v1/objects/hosts/${host}?cascade=1" | python -m json.tool
 
-     ICINGA2_REMOVE_HOST=
-     name=
+    ICINGA2_REMOVE_HOST=
+    name=
+
+    sleep 2s
   fi
-
-  sleep 2s
 
   for k in ${apps}
   do
     value=$( [ $(echo "${services}" | tr '[:upper:]' '[:lower:]' | grep -c ${k}) -gt 0 ] && { echo "true"; } || { echo "false"; } )
     vars="${vars} ${k}=${value}"
-
   done
 
-  tpl=$(jo -p templates[]="generic-host" attrs=$(jo  display_name=${host} address=${ip} vars=$(jo type=coremedia ${vars}) ))
+  tpl=$(jo -p templates[]="generic-host" attrs=$(jo  display_name=${host} address=${ip} vars=$(jo ${vars}) ))
 
-  echo "${tpl}" > ${TMP_DIR}/icinga2.json
+  echo "${tpl}" > ${TMP_DIR}/icinga2/host.json
 
   if ( [ -z ${name} ] || [ "${name}" == "null" ] )
   then
     echo -n "add Host '${host}'   "
-    curl ${curl_opts} -H 'Accept: application/json' -X PUT "https://${ICINGA2_HOST}:5665/v1/objects/hosts/${host}" --data @${TMP_DIR}/icinga2.json | python -mjson.tool
+    curl ${curl_opts} -H 'Accept: application/json' -X PUT "https://${ICINGA2_HOST}:${ICINGA2_API_PORT}/v1/objects/hosts/${host}" --data @${TMP_DIR}/icinga2/host.json | python -mjson.tool > /dev/null
     echo ".. done"
   else
     echo "Host ${host} already monitored"
   fi
 
+  echo "add Services for Host '${host}'"
+  for k in ${apps}
+  do
+    service=$(echo "${services}" | grep -i ${k} | cut -d '=' -f 1)
+    port=$(echo "${services}" | grep -i ${k} | cut -d '=' -f 2 | sed 's|99|80|g')
 
+    if [ $(jq ".attrs.vars.${k}" ${TMP_DIR}/icinga2/host.json) == true ]
+    then
+      case ${k} in
+        cms)
+
+          attrs="$(jo display_name="Check IOR against CMS" check_command=http host_name=${host} max_check_attempts=5 vars.http_port=${port} vars.http_uri=/coremedia/ior vars.http_string=IOR:)"
+          jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-ior-${k}.json
+
+          addIcingaService "check-cm-ior-2-${k}" service-ior-${k}.json
+
+          attrs="$(jo display_name="Check IOR against CMS" check_command=http host_name=${host} max_check_attempts=5 vars.http_port=${port} vars.http_uri=/coremedia/ior vars.http_string=IOR:)"
+
+          ;;
+        mls)
+          attrs="$(jo display_name="Check IOR against MLS" check_command=http host_name=${host} max_check_attempts=5 vars.http_port=${port} vars.http_uri=/coremedia/ior vars.http_string=IOR:)"
+          jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-ior-${k}.json
+
+          addIcingaService "check-cm-ior-2-${k}" service-ior-${k}.json
+          ;;
+        rls)
+          attrs="$(jo display_name="Check IOR against RLS" check_command=http host_name=${host} max_check_attempts=5 vars.http_port=${port} vars.http_uri=/coremedia/ior vars.http_string=IOR:)"
+          jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-ior-${k}.json
+
+          addIcingaService "check-cm-ior-2-${k}" service-ior-${k}.json
+          ;;
+        feeder_content)
+          attrs="$(jo display_name="Content Feeder" check_command=cm_feeder host_name=${host} max_check_attempts=5 vars.host=${host} vars.feeder=content)"
+          jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-${k}.json
+
+          addIcingaService "check-cm-feeder-content" service-${k}.json
+
+          ;;
+        feeder_live)
+          attrs="$(jo display_name="CAE Live Feeder" check_command=cm_feeder host_name=${host} max_check_attempts=5 vars.host=${host} vars.feeder=live)"
+          jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-${k}.json
+
+          addIcingaService "check-cm-feeder-live" service-${k}.json
+          ;;
+        feeder_prev)
+          attrs="$(jo display_name="CAE Preview Feeder" check_command=cm_feeder host_name=${host} max_check_attempts=5 vars.host=${host} vars.feeder=preview)"
+          jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-${k}.json
+
+          addIcingaService "check-cm-feeder-prev" service-${k}.json
+          ;;
+
+      esac
+    fi
+
+  done
+
+
+
+
+
+#  return
+
+
+
+
+
+  # URL
+  # url=$(printf 'https://%s:%s/v1/objects/services/%s!%s' $ICINGA2_HOST $ICINGA2_API_PORT "co7madv01.coremedia.com" "check-cm-ior-2-mls")
+
+  # Service Check
+  # attrs="$(jo display_name="Check IOR against MLS" check_command=check_http host_name=co7madv01.coremedia.com max_check_attempts=5 vars.http_port=30280 vars.http_uri=/coremedia/ior vars.http_string=IOR:)"
+  # jo -p templates[]="generic-service" attrs="${attrs}" > /tmp/icinga2-service.json
+
+  # jo -p templates[]="generic-service" attrs=$(jo name=check-cm-ior-2-mls check_command=nrpe host_name=172.17.0.9 max_check_attempts=5 check_interval=5m retry_interval=45s vars=$(jo nrpe_command=check_ior nrpe_arguments[]=co7madv01.coremedia.com nrpe_arguments[]=40280) ) > /root/icinga-service_2.json
+
+  # LIST
+  # curl ${curl_opts} -H 'Accept: application/json' 'https://172.17.0.5:5665/v1/objects/hosts' | python -m json.tool
+  # curl ${curl_opts} -H 'Accept: application/json' 'https://172.17.0.5:5665/v1/objects/services' | python -m json.tool
+
+  # DELETE Service
+  # curl ${curl_opts} -H 'Accept: application/json' -H 'X-HTTP-Method-Override: DELETE' -X POST -k "https://${ICINGA2_HOST}:5665/v1/objects/services/co7madv01.coremedia.com!check-cm-ior-2-mls" | python -m json.tool
+
+  # ADD Service
+  # curl ${curl_opts} -v -H 'Accept: application/json' -X PUT 'https://172.17.0.5:5665/v1/objects/services/co7madv01.coremedia.com!check-cm-ior-2-mls' --data @/root/icinga-service_2.json | python -m json.tool
 }
 
 

@@ -1,12 +1,17 @@
 #!/bin/bash
 
-. config.rc
+SCRIPT=$(readlink -f ${0})
+BASE=$(dirname "${SCRIPT}")
+
+. ${BASE}/config.rc
 
 if [ $(docker ps -a | grep ${CONTAINER_NAME} | awk '{print $NF}' | wc -l) -gt 0 ]
 then
   docker kill ${CONTAINER_NAME} 2> /dev/null
   docker rm   ${CONTAINER_NAME} 2> /dev/null
 fi
+
+DOCKER_DATA_DIR=${DOCKER_DATA_DIR:-${DATA_DIR}}
 
 # ---------------------------------------------------------------------------------------
 
@@ -74,6 +79,7 @@ docker_opts="${docker_opts} --env HOST_CM_ADOBE_DRIVE=${HOST_CM_ADOBE_DRIVE}"
 docker_opts="${docker_opts} --env HOST_CM_WEBDAV=${HOST_CM_WEBDAV}"
 docker_opts="${docker_opts} --env HOST_CM_SITEMANAGER=${HOST_CM_SITEMANAGER}"
 # docker_opts="${docker_opts} --volume=${PWD}/inject/usr/local:/usr/local/"
+docker_opts="${docker_opts} --volume=${DOCKER_DATA_DIR}/monitoring:/var/cache/monitoring"
 
 if [ ! -z ${ICINGA2_IP} ]
 then

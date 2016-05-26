@@ -26,6 +26,8 @@ RUN \
     collectd \
     fping \
     nmap \
+    monitoring-plugins \
+    nrpe \
     bind-tools
 
 RUN \
