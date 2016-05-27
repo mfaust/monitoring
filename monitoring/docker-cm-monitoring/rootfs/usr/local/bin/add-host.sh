@@ -330,7 +330,16 @@ addIcingaService() {
 
   local url=$(printf 'https://%s:%s/v1/objects/services/%s!%s' ${ICINGA2_HOST} ${ICINGA2_API_PORT} "${host}" "${name}")
 
-  curl ${curl_opts} -v -H 'Accept: application/json' -X PUT ${url} --data @${TMP_DIR}/icinga2/${template}
+  status=$(curl ${curl_opts} -H 'Accept: application/json' -X PUT ${url} --data @${TMP_DIR}/icinga2/${template} | python -m json.tool)
+  status_code=$(echo "${status}" | jq --raw-output '.results[0].code')
+
+  if [ "${status_code}" = "null" ]
+  then
+    echo ${status}
+  elif [ ${status_code} = "200" ]
+  then
+    echo " .. succesful"
+  fi
 
 }
 
@@ -384,68 +393,129 @@ addToIcinga() {
   if ( [ -z ${name} ] || [ "${name}" == "null" ] )
   then
     echo -n "add Host '${host}'   "
-    curl ${curl_opts} -H 'Accept: application/json' -X PUT "https://${ICINGA2_HOST}:${ICINGA2_API_PORT}/v1/objects/hosts/${host}" --data @${TMP_DIR}/icinga2/host.json | python -mjson.tool > /dev/null
-    echo ".. done"
+    status=$(curl ${curl_opts} -H 'Accept: application/json' -X PUT "https://${ICINGA2_HOST}:${ICINGA2_API_PORT}/v1/objects/hosts/${host}" --data @${TMP_DIR}/icinga2/host.json | python -mjson.tool)
+    status_code=$(echo "${status}" | jq --raw-output '.results[0].code')
+
+    if [ "${status_code}" = "null" ]
+    then
+      echo ${status}
+    elif [ ${status_code} = "200" ]
+    then
+      echo ".. done"
+    fi
+
   else
     echo "Host ${host} already monitored"
   fi
 
-  echo "add Services for Host '${host}'"
-  for k in ${apps}
-  do
-    service=$(echo "${services}" | grep -i ${k} | cut -d '=' -f 1)
-    port=$(echo "${services}" | grep -i ${k} | cut -d '=' -f 2 | sed 's|99|80|g')
+  if [ ${status_code} == "200" ]
+  then
 
-    if [ $(jq ".attrs.vars.${k}" ${TMP_DIR}/icinga2/host.json) == true ]
-    then
-      case ${k} in
-        cms)
+    echo "add Services for Host '${host}'"
+    for k in ${apps}
+    do
+      service=$(echo "${services}" | grep -i ${k} | cut -d '=' -f 1)
+      port_jmx=$(echo "${services}" | grep -i ${k} | cut -d '=' -f 2)
 
-          attrs="$(jo display_name="Check IOR against CMS" check_command=http host_name=${host} max_check_attempts=5 vars.http_port=${port} vars.http_uri=/coremedia/ior vars.http_string=IOR:)"
-          jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-ior-${k}.json
+      port=$(echo "${port_jmx}" | sed 's|99|80|g')
 
-          addIcingaService "check-cm-ior-2-${k}" service-ior-${k}.json
+      if [ $(jq ".attrs.vars.${k}" ${TMP_DIR}/icinga2/host.json) == true ]
+      then
+        case ${k} in
+          cms)
+            attrs="$(jo display_name="Check IOR against CMS" check_command=http host_name=${host} max_check_attempts=5 vars.http_port=${port} vars.http_uri=/coremedia/ior vars.http_string=IOR:)"
+            jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-ior-${k}.json
+            addIcingaService "check-cm-ior-2-${k}" service-ior-${k}.json
 
-          attrs="$(jo display_name="Check IOR against CMS" check_command=http host_name=${host} max_check_attempts=5 vars.http_port=${port} vars.http_uri=/coremedia/ior vars.http_string=IOR:)"
+            attrs="$(jo display_name="CMS Heap Mem" check_command=cm_memory max_check_attempts=5 host_name=${host} vars.host=${host} vars.port=${port_jmx} vars.memory=heap-mem)"
+            jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-heap-mem-${k}.json
+            addIcingaService "check-cm-heap-mem-${k}" service-heap-mem-${k}.json
+            ;;
+          mls)
+            attrs="$(jo display_name="Check IOR against MLS" check_command=http host_name=${host} max_check_attempts=5 vars.http_port=${port} vars.http_uri=/coremedia/ior vars.http_string=IOR:)"
+            jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-ior-${k}.json
+            addIcingaService "check-cm-ior-2-${k}" service-ior-${k}.json
 
-          ;;
-        mls)
-          attrs="$(jo display_name="Check IOR against MLS" check_command=http host_name=${host} max_check_attempts=5 vars.http_port=${port} vars.http_uri=/coremedia/ior vars.http_string=IOR:)"
-          jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-ior-${k}.json
+            attrs="$(jo display_name="MLS Heap Mem" check_command=cm_memory max_check_attempts=5 host_name=${host} vars.host=${host} vars.port=${port_jmx} vars.memory=heap-mem)"
+            jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-heap-mem-${k}.json
+            addIcingaService "check-cm-heap-mem-${k}" service-heap-mem-${k}.json
+            ;;
+          rls)
+            attrs="$(jo display_name="Check IOR against RLS" check_command=http host_name=${host} max_check_attempts=5 vars.http_port=${port} vars.http_uri=/coremedia/ior vars.http_string=IOR:)"
+            jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-ior-${k}.json
 
-          addIcingaService "check-cm-ior-2-${k}" service-ior-${k}.json
-          ;;
-        rls)
-          attrs="$(jo display_name="Check IOR against RLS" check_command=http host_name=${host} max_check_attempts=5 vars.http_port=${port} vars.http_uri=/coremedia/ior vars.http_string=IOR:)"
-          jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-ior-${k}.json
+            addIcingaService "check-cm-ior-2-${k}" service-ior-${k}.json
+            ;;
+          feeder_content)
+            attrs="$(jo display_name="Content Feeder" check_command=cm_feeder host_name=${host} max_check_attempts=5 vars.host=${host} vars.feeder=content)"
+            jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-${k}.json
+            addIcingaService "check-cm-feeder-content" service-${k}.json
 
-          addIcingaService "check-cm-ior-2-${k}" service-ior-${k}.json
-          ;;
-        feeder_content)
-          attrs="$(jo display_name="Content Feeder" check_command=cm_feeder host_name=${host} max_check_attempts=5 vars.host=${host} vars.feeder=content)"
-          jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-${k}.json
+            attrs="$(jo display_name="Content Feeder Heap Mem" check_command=cm_memory max_check_attempts=5 host_name=${host} vars.host=${host} vars.port=${port_jmx} vars.memory=heap-mem)"
+            jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-heap-mem-${k}.json
+            addIcingaService "check-cm-heap-mem-${k}" service-heap-mem-${k}.json
 
-          addIcingaService "check-cm-feeder-content" service-${k}.json
+            ;;
+          feeder_live)
+            attrs="$(jo display_name="CAE Live Feeder" check_command=cm_feeder host_name=${host} max_check_attempts=5 vars.host=${host} vars.feeder=live)"
+            jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-${k}.json
+            addIcingaService "check-cm-feeder-live" service-${k}.json
 
-          ;;
-        feeder_live)
-          attrs="$(jo display_name="CAE Live Feeder" check_command=cm_feeder host_name=${host} max_check_attempts=5 vars.host=${host} vars.feeder=live)"
-          jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-${k}.json
+            attrs="$(jo display_name="CAE Live Feeder Heap Mem" check_command=cm_memory max_check_attempts=5 host_name=${host} vars.host=${host} vars.port=${port_jmx} vars.memory=heap-mem)"
+            jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-heap-mem-${k}.json
+            addIcingaService "check-cm-heap-mem-${k}" service-heap-mem-${k}.json
 
-          addIcingaService "check-cm-feeder-live" service-${k}.json
-          ;;
-        feeder_prev)
-          attrs="$(jo display_name="CAE Preview Feeder" check_command=cm_feeder host_name=${host} max_check_attempts=5 vars.host=${host} vars.feeder=preview)"
-          jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-${k}.json
 
-          addIcingaService "check-cm-feeder-prev" service-${k}.json
-          ;;
+            ;;
+          feeder_prev)
+            attrs="$(jo display_name="CAE Preview Feeder" check_command=cm_feeder host_name=${host} max_check_attempts=5 vars.host=${host} vars.feeder=preview)"
+            jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-${k}.json
+            addIcingaService "check-cm-feeder-prev" service-${k}.json
 
-      esac
-    fi
+            attrs="$(jo display_name="CAE Preview Feeder Heap Mem" check_command=cm_memory max_check_attempts=5 host_name=${host} vars.host=${host} vars.port=${port_jmx} vars.memory=heap-mem)"
+            jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-heap-mem-${k}.json
+            addIcingaService "check-cm-heap-mem-${k}" service-heap-mem-${k}.json
 
-  done
+            ;;
 
+          cae_live)
+            attrs="$(jo display_name="CAE Live UAPI Cache" check_command=cm_cache max_check_attempts=5 host_name=${host} vars.host=${host} vars.port=${port_jmx} vars.cache=uapi-cache)"
+            jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-uapi-cache-${k}.json
+            addIcingaService "check-cm-uapi-cache-${k}" service-uapi-cache-${k}.json
+
+            attrs="$(jo display_name="CAE Live Blob Cache" check_command=cm_cache max_check_attempts=5 host_name=${host} vars.host=${host} vars.port=${port_jmx} vars.cache=blob-cache)"
+            jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-blob-cache-${k}.json
+            addIcingaService "check-cm-blob-cache-${k}" service-blob-cache-${k}.json
+
+            attrs="$(jo display_name="CAE Live Heap Mem" check_command=cm_memory max_check_attempts=5 host_name=${host} vars.host=${host} vars.port=${port_jmx} vars.memory=heap-mem)"
+            jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-heap-mem-${k}.json
+            addIcingaService "check-cm-heap-mem-${k}" service-heap-mem-${k}.json
+
+            ;;
+
+          cae_prev)
+            attrs="$(jo display_name="CAE Preview UAPI Cache" check_command=cm_cache max_check_attempts=5 host_name=${host} vars.host=${host} vars.port=${port_jmx} vars.cache=uapi-cache)"
+            jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-uapi-cache-${k}.json
+            addIcingaService "check-cm-uapi-cache-${k}" service-uapi-cache-${k}.json
+
+            attrs="$(jo display_name="CAE Preview Blob Cache" check_command=cm_cache max_check_attempts=5 host_name=${host} vars.host=${host} vars.port=${port_jmx} vars.cache=blob-cache)"
+            jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-blob-cache-${k}.json
+            addIcingaService "check-cm-blob-cache-${k}" service-blob-cache-${k}.json
+
+            attrs="$(jo display_name="CAE Preview Heap Mem" check_command=cm_memory max_check_attempts=5 host_name=${host} vars.host=${host} vars.port=${port_jmx} vars.memory=heap-mem)"
+            jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-heap-mem-${k}.json
+            addIcingaService "check-cm-heap-mem-${k}" service-heap-mem-${k}.json
+            ;;
+
+
+        esac
+      fi
+
+    done
+  else
+    echo "host nut succesful added"
+
+  fi
 
 
 
