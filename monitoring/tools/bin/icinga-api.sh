@@ -1,11 +1,14 @@
 #!/bin/bash
 
 set -e
-# set -x
+set -x
 
 FILTER=
 ADDRESS=
 NAME=
+
+PRG=$(readlink -f ${0})
+BIN=$(dirname "${PRG}")
 
 # ----------------------------------------------------------------------------------------
 
@@ -45,7 +48,7 @@ run() {
   API_PASS="icinga"
   curl_opts="-u ${API_USER}:${API_PASS} -k -s "
 
-  for f in $(ls -1 ${PWD}/tools/json/hosts/${FILTER}*.json)
+  for f in $(ls -1 $(readlink -f ${BIN}/../json/hosts/${FILTER}*.json))
   do
     host=$(basename ${f} | sed 's|\.json||g')
 

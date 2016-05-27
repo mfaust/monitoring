@@ -5,4 +5,4 @@ TYPE="mysql"
 TAG_NAME="${USER}-docker-${TYPE}"
 CONTAINER_NAME="${USER}-${TYPE}"
 
-DATA_DIR="/srv/docker/data"
+DATA_DIR="${DOCKER_DATA_DIR:-/srv/docker/data}"

@@ -26,13 +26,13 @@ RUN \
 
 RUN \
   apk --verbose add \
-    php-fpm \
-    php-pdo \
-    php-pdo_mysql \
-    php-xml \
-    php-dom \
-    php-mysqli \
-    php-json \
+    php5-fpm \
+    php5-pdo \
+    php5-pdo_mysql \
+    php5-xml \
+    php5-dom \
+    php5-mysqli \
+    php5-json \
     nginx \
     mysql-client \
     shadow \
