@@ -11,8 +11,8 @@
 # -------------------------------------------------------------------------------------------------
 
 SCRIPTNAME=$(basename $0 .sh)
-VERSION="2.12.3"
-VDATE="18.05.2016"
+VERSION="2.12.4"
+VDATE="30.05.2016"
 
 # -------------------------------------------------------------------------------------------------
 
@@ -75,11 +75,13 @@ collectdPlugin_Memory() {
 
   local result="${1}"
 
-  local HeapMemUsed="$(cat ${result} | jq '.value.HeapMemoryUsage.used')"
-  local HeapMemMax="$(cat ${result}  | jq '.value.HeapMemoryUsage.max')"
+  local HeapMemMax=$(jq --raw-output '.value.HeapMemoryUsage.max' ${result})
+  local HeapMemUsed=$(jq --raw-output '.value.HeapMemoryUsage.used' ${result})
+  local HeapMemCom=$(jq --raw-output '.value.HeapMemoryUsage.committed' ${result})
 
   echo "PUTVAL ${HOSTNAME}/${service}-heap_memory/cm7_counter-max interval=${INTERVAL} N:${HeapMemMax}"
   echo "PUTVAL ${HOSTNAME}/${service}-heap_memory/cm7_counter-used interval=${INTERVAL} N:${HeapMemUsed}"
+  echo "PUTVAL ${HOSTNAME}/${service}-heap_memory/cm7_counter-commited interval=${INTERVAL} N:${HeapMemCom}"
 }
 
 collectdPlugin_ClassLoading() {
