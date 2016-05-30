@@ -3,7 +3,7 @@ FROM docker-alpine-base:latest
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
-LABEL version="1.2.0"
+LABEL version="1.2.2"
 
 ENV TERM xterm
 
@@ -15,17 +15,15 @@ RUN \
   apk --quiet update 
 
 RUN \
-  apk --quiet add \
-    bash \
-    pwgen \
-    netcat-openbsd
-
-RUN \
-  apk --verbose add \
+  apk add \
     icingaweb2
 
 RUN \
-  apk --verbose add \
+  apk --quiet add \
+    bash \
+    git \
+    pwgen \
+    netcat-openbsd \
     php5-fpm \
     php5-pdo \
     php5-pdo_mysql \
@@ -36,9 +34,15 @@ RUN \
     nginx \
     mysql-client \
     shadow \
-    openssl
+    openssl 
+
+RUN \ 
+  cd /usr/share/webapps/icingaweb2/modules && \
+  git clone https://github.com/Icinga/icingaweb2-module-director.git director
 
 RUN \
+  apk del --purge \
+    git && \
   rm -rf /var/cache/apk/*
 
 RUN \
@@ -49,6 +53,13 @@ RUN \
   mkdir /var/log/php-fpm && \
   mkdir /etc/icingaweb2/modules && \
   mkdir /etc/icingaweb2/enabledModules
+
+RUN \
+  /usr/bin/icingacli module enable monitoring && \
+  /usr/bin/icingacli module enable setup && \
+  /usr/bin/icingacli module enable translation && \
+  /usr/bin/icingacli module enable doc && \
+  /usr/bin/icingacli module enable director
 
 ADD rootfs/ /
 

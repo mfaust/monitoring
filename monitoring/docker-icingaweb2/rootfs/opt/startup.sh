@@ -29,14 +29,12 @@ sleep 10s
 
 # -------------------------------------------------------------------------------------------------
 
-#env | grep BLUEPRINT  > /etc/env.vars
-#env | grep HOST_     >> /etc/env.vars
-
 chmod 1777 /tmp
 
 chown root:nginx   /etc/icingaweb2
 chmod 2770 /etc/icingaweb2
 chown -R nginx:nginx /etc/icingaweb2/*
+
 find /etc/icingaweb2 -type f -name "*.ini" -exec chmod 660 {} \;
 find /etc/icingaweb2 -type d -exec chmod 2770 {} \;
 
@@ -49,7 +47,7 @@ then
   ICINGAADMIN_PASS=$(openssl passwd -1 "icinga")
 
   (
-    echo "CREATE DATABASE IF NOT EXISTS icingaweb2;"
+    echo "CREATE DATABASE IF NOT EXISTS icingaweb2 DEFAULT CHARACTER SET 'utf8' DEFAULT COLLATE utf8_general_ci;"
     echo "GRANT SELECT, INSERT, UPDATE, DELETE, DROP, CREATE VIEW, INDEX, EXECUTE ON icingaweb2.* TO 'icingaweb2'@'%' IDENTIFIED BY '${ICINGAWEB2_PASSWORD}';"
   ) | mysql ${mysql_opts}
 
@@ -63,14 +61,16 @@ then
     echo "quit"
   ) | mysql ${mysql_opts}
 
-  mkdir -vp /etc/icingaweb2/enabledModules
+  # icingaweb director
+  (
+    echo "CREATE DATABASE IF NOT EXISTS director DEFAULT CHARACTER SET 'utf8' DEFAULT COLLATE utf8_general_ci;"
+    echo "GRANT ALL ON director.* TO 'director'@'%' IDENTIFIED BY '${ICINGAWEB2_PASSWORD}';"
+    echo "quit"
+  ) | mysql ${mysql_opts}
 
-  ln -s /usr/share/webapps/icingaweb2/modules/* /etc/icingaweb2/enabledModules/
+  SCHEMA_FILE="/usr/share/webapps/icingaweb2/modules/director/schema/mysql.sql"
 
-  for m in monitoring setup
-  do
-    /usr/bin/icingacli module enable ${m}
-  done
+  mysql ${mysql_opts} --force  director < ${SCHEMA_FILE}               >> /opt/icingaweb2-director.log 2>&1
 
   chown -R nginx:nginx /etc/icingaweb2/*
 
@@ -83,7 +83,6 @@ then
 
   sed -i 's,icingaadmin_changeme,'${ICINGAADMIN_USER}',g'   /etc/icingaweb2/roles.ini
 
-  mkdir -p /var/log/icingaweb2
   chown nginx:nginx /var/log/icingaweb2
 
   touch ${initfile}
@@ -97,7 +96,7 @@ then
 
 fi
 
-echo -e "\n Starting Supervisor.\n  You can safely CTRL-C and the container will continue to run with or without the -d (daemon) option\n\n"
+echo -e "\n Starting Supervisor.\n\n"
 
 if [ -f /etc/supervisord.conf ]
 then
