@@ -65,6 +65,8 @@ ADD rootfs/ /
 
 VOLUME  ["/etc/icingaweb2" ]
 
+WORKDIR '/etc/icingaweb2'
+
 # Initialize and run Supervisor
 ENTRYPOINT [ "/opt/startup.sh" ]
 

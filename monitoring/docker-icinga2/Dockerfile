@@ -29,11 +29,15 @@ RUN \
     mailx \
     mysql-client \
     icinga2 \
+    openssl \
     monitoring-plugins
 
 RUN \
   cp /etc/icinga2/conf.d.example/* /etc/icinga2/conf.d/ && \
   mkdir -p /run/icinga2 /run/icinga2/cmd
+
+RUN \
+  /usr/sbin/icinga2 feature enable ido-mysql command livestatus compatlog checker mainlog icingastatus
 
 RUN \
   chmod u+s /bin/busybox
@@ -44,6 +48,8 @@ RUN \
 ADD rootfs/ /
 
 VOLUME  ["/etc/icinga2", "/var/lib/icinga2", "/var/run/icinga2/cmd" ]
+
+WORKDIR '/etc/icinga2'
 
 # Initialize and run Supervisor
 CMD [ "/opt/startup.sh" ]

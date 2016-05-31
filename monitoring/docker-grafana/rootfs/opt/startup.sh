@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -x
+# set -x
 
 initfile=/opt/run.init
 
@@ -197,9 +197,7 @@ then
 
   handleDataSources
 
-  handleDashboards
-
-  insertPlugins
+#   handleDashboards
 
   killGrafana
 
@@ -210,9 +208,11 @@ then
   echo -e "\n"
   echo " ==================================================================="
   echo " Grafana DatabaseUser 'grafana' password set to '${DATABASE_GRAFANA_PASS}'"
+  echo ""
   echo " You can use the Basic Auth Method to access the ReST-API:"
   echo "   curl http://admin:admin@localhost:3000/api/org"
-  echo "   curl http://admin:admin@localhost:3000/api/datasources' -X POST -H 'Content-Type: application/json;charset=UTF-8' --data-binary '{"name":"localGraphite","type":"graphite","url":"http://192.168.99.100","access":"proxy","isDefault":false,"database":"asd"}'"
+  echo "   curl http://admin:admin@localhost:3000/api/datasources' -X POST -H 'Content-Type: application/json;charset=UTF-8' \\"
+  echo "     --data-binary '{"name":"localGraphite","type":"graphite","url":"http://192.168.99.100","access":"proxy","isDefault":false,"database":"asd"}'"
   echo "   curl -X GET http://admin:admin@localhost:3000/api/search?query= | json_reformat"
   echo "   curl -X DELETE http://admin:admin@localhost:3000/api/dashboards/db/${DASHBOARD}"
   echo " ==================================================================="

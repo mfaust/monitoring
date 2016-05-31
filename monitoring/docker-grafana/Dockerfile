@@ -3,7 +3,7 @@ FROM docker-alpine-base:latest
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
-LABEL version="2.2.0"
+LABEL version="2.3.0"
 
 # 3000: grafana (plain)
 EXPOSE 3000
@@ -24,7 +24,6 @@ RUN \
     git \
     mercurial \
     netcat-openbsd \
-    curl \
     pwgen \
     jq \
     yajl-tools \
@@ -45,14 +44,20 @@ RUN \
 
 RUN \
   mkdir -p /usr/share/grafana/bin/ && \
-  cp -av  $GOPATH/src/github.com/grafana/grafana/bin/grafana-cli    /usr/share/grafana/bin/ && \
-  cp -av  $GOPATH/src/github.com/grafana/grafana/bin/grafana-server /usr/share/grafana/bin/ && \
-  cp -arv $GOPATH/src/github.com/grafana/grafana/public_gen         /usr/share/grafana/public && \
-  cp -arv $GOPATH/src/github.com/grafana/grafana/conf               /usr/share/grafana/
+  cp -a  $GOPATH/src/github.com/grafana/grafana/bin/grafana-cli    /usr/share/grafana/bin/ && \
+  cp -a  $GOPATH/src/github.com/grafana/grafana/bin/grafana-server /usr/share/grafana/bin/ && \
+  cp -ar $GOPATH/src/github.com/grafana/grafana/public_gen         /usr/share/grafana/public && \
+  cp -ar $GOPATH/src/github.com/grafana/grafana/conf               /usr/share/grafana/
 
 RUN \
   mkdir /var/log/grafana && \
   mkdir /var/log/supervisor
+
+RUN \
+  /usr/share/grafana/bin/grafana-cli --pluginsDir "/usr/share/grafana/data/plugins" plugins install grafana-clock-panel && \
+  /usr/share/grafana/bin/grafana-cli --pluginsDir "/usr/share/grafana/data/plugins" plugins install grafana-piechart-panel && \
+  /usr/share/grafana/bin/grafana-cli --pluginsDir "/usr/share/grafana/data/plugins" plugins install grafana-simple-json-datasource && \
+  /usr/share/grafana/bin/grafana-cli --pluginsDir "/usr/share/grafana/data/plugins" plugins install raintank-worldping-app
 
 RUN \
   npm uninstall -g grunt-cli && \

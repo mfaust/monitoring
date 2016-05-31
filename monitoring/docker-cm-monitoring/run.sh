@@ -42,7 +42,6 @@ HOST_CM_SITEMANAGER=${HOST_CM_SITEMANAGER:-${BLUEPRINT_BOX}}
 
 # ---------------------------------------------------------------------------------------
 
-DOCKER_DNS=${DOCKER_DNS:-""}
 JOLOKIA_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${USER}-jolokia   2>/dev/null)
 GRAPHITE_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${USER}-graphite 2>/dev/null)
 GRAFANA_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${USER}-grafana   2>/dev/null)
@@ -55,6 +54,9 @@ docker_opts="${docker_opts} --interactive"
 docker_opts="${docker_opts} --tty"
 docker_opts="${docker_opts} --hostname=${USER}-${TYPE}"
 docker_opts="${docker_opts} --name=${CONTAINER_NAME}"
+docker_opts="${docker_opts} --volume /etc/localtime:/etc/localtime:ro"
+docker_opts="${docker_opts} --volume=${DOCKER_DATA_DIR}/monitoring:/var/cache/monitoring"
+# docker_opts="${docker_opts} --volume=${PWD}/inject/usr/local:/usr/local/"
 docker_opts="${docker_opts} --add-host=blueprint-box:${BLUEPRINT_BOX}"
 docker_opts="${docker_opts} --env HOST_CM_CMS=${HOST_CM_CMS}"
 docker_opts="${docker_opts} --env HOST_CM_MLS=${HOST_CM_MLS}"
@@ -78,8 +80,6 @@ docker_opts="${docker_opts} --env HOST_CM_ELASTICWORKER=${HOST_CM_ELASTICWORKER}
 docker_opts="${docker_opts} --env HOST_CM_ADOBE_DRIVE=${HOST_CM_ADOBE_DRIVE}"
 docker_opts="${docker_opts} --env HOST_CM_WEBDAV=${HOST_CM_WEBDAV}"
 docker_opts="${docker_opts} --env HOST_CM_SITEMANAGER=${HOST_CM_SITEMANAGER}"
-# docker_opts="${docker_opts} --volume=${PWD}/inject/usr/local:/usr/local/"
-docker_opts="${docker_opts} --volume=${DOCKER_DATA_DIR}/monitoring:/var/cache/monitoring"
 
 if [ ! -z ${ICINGA2_IP} ]
 then
@@ -110,9 +110,9 @@ then
   docker_opts="${docker_opts} --link=${USER}-jolokia:jolokia"
 fi
 
-if [ ! -z ${DOCKER_DNS} ]
+if [ ! -z=${DOCKER_DNS} ]
 then
-  docker_opts="${docker_opts} --dns ${DOCKER_DNS}"
+  docker_opts="${docker_opts} --dns=${DOCKER_DNS}"
 fi
 
 # ---------------------------------------------------------------------------------------

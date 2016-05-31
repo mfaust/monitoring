@@ -28,6 +28,7 @@ docker_opts="${docker_opts} --hostname=${USER}-${TYPE}"
 docker_opts="${docker_opts} --name=${CONTAINER_NAME}"
 docker_opts="${docker_opts} --env AUTH_TOKEN=${DOCKER_DASHING_AUTH_TOKEN}"
 # docker_opts="${docker_opts} --volume=${PWD}/inject/opt:/opt"
+docker_opts="${docker_opts} --volume /etc/localtime:/etc/localtime:ro"
 
 if ( [ ! -z ${PINGDOM_USER} ] || [ ! -z ${PINGDOM_PASS} ] || [ ! -z ${PINGDOM_API} ] )
 then
@@ -77,9 +78,9 @@ then
   docker_opts="${docker_opts} --volume /home/${USER}/.chef:/root/.chef:ro"
 fi
 
-if [ ! -z ${DOCKER_DNS} ]
+if [ ! -z=${DOCKER_DNS} ]
 then
-  docker_opts="${docker_opts} --dns ${DOCKER_DNS}"
+  docker_opts="${docker_opts} --dns=${DOCKER_DNS}"
 fi
 
 # ---------------------------------------------------------------------------------------

@@ -10,6 +10,7 @@ EXPOSE 3030
 ENV DASHBOARD=coremedia
 ENV JQ_VERSION=2.2.2
 ENV JQUI_VERSION=1.11.4
+ENV DASHING_VERSION=1.3.4
 
 # ---------------------------------------------------------------------------------------
 
@@ -31,7 +32,7 @@ RUN \
 
 RUN \
   gem install --quiet bundle && \
-  gem install dashing -v 1.3.4
+  gem install dashing -v ${DASHING_VERSION}
 
 RUN \
   cd /opt && \
@@ -50,16 +51,17 @@ RUN \
   bundle update
 
 RUN \
-  ln -s /usr/lib/ruby/gems/2.2.0/gems/dashing-* /usr/lib/ruby/gems/2.2.0/gems/dashing
+  ln -s $(ls -1 /usr/lib/ruby/gems) /usr/lib/ruby/gems/current && \
+  ln -s /usr/lib/ruby/gems/current/gems/dashing-${DASHING_VERSION} /usr/lib/ruby/gems/current/gems/dashing
 
 RUN \
-  curl --silent https://code.jquery.com/jquery-${JQ_VERSION}.min.js > /usr/lib/ruby/gems/2.2.0/gems/dashing/javascripts/jquery.js && \
+  curl --silent https://code.jquery.com/jquery-${JQ_VERSION}.min.js > /usr/lib/ruby/gems/current/gems/dashing/javascripts/jquery.js && \
   curl --silent http://jqueryui.com/resources/download/jquery-ui-${JQUI_VERSION}.zip > /tmp/jquery-ui-${JQUI_VERSION}.zip && \
   cd /tmp && \
   unzip jquery-ui-${JQUI_VERSION}.zip && \
-  cp /tmp/jquery-ui-${JQUI_VERSION}/*.min.js     /usr/lib/ruby/gems/2.2.0/gems/dashing/javascripts/ && \
-  cp /tmp/jquery-ui-${JQUI_VERSION}/*.min.css    /usr/lib/ruby/gems/2.2.0/gems/dashing/templates/project/assets/stylesheets/ && \
-  cp /tmp/jquery-ui-${JQUI_VERSION}/images/*     /usr/lib/ruby/gems/2.2.0/gems/dashing/templates/project/assets/images/
+  cp /tmp/jquery-ui-${JQUI_VERSION}/*.min.js     /usr/lib/ruby/gems/current/gems/dashing/javascripts/ && \
+  cp /tmp/jquery-ui-${JQUI_VERSION}/*.min.css    /usr/lib/ruby/gems/current/gems/dashing/templates/project/assets/stylesheets/ && \
+  cp /tmp/jquery-ui-${JQUI_VERSION}/images/*     /usr/lib/ruby/gems/current/gems/dashing/templates/project/assets/images/
 
 RUN \
   rm -rf /tmp/jquery* && \

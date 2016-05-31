@@ -22,27 +22,32 @@ DOCKER_ICINGAWEB_PASS=${DOCKER_ICINGAWEB_PASS:-T7CVdvA0mqzGN6pH5Ne4}
 
 # ---------------------------------------------------------------------------------------
 
+docker_opts="${docker_opts} --interactive"
+docker_opts="${docker_opts} --tty"
+docker_opts="${docker_opts} --detach"
+docker_opts="${docker_opts} --publish 80:80"
+docker_opts="${docker_opts} --hostname ${USER}-${TYPE}"
+docker_opts="${docker_opts} --name ${CONTAINER_NAME}"
+docker_opts="${docker_opts} --volume /etc/localtime:/etc/localtime:ro"
+docker_opts="${docker_opts} --volume ${PWD}/share/icinga2:/usr/local/share/icinga2"
+docker_opts="${docker_opts} --volumes-from ${USER}-icinga2"
+docker_opts="${docker_opts} --link ${USER}-mysql:database"
+docker_opts="${docker_opts} --link ${USER}-icinga2:icinga2"
+docker_opts="${docker_opts} --env MYSQL_HOST=${DATABASE_IP}"
+docker_opts="${docker_opts} --env MYSQL_PORT=3306"
+docker_opts="${docker_opts} --env MYSQL_USER=root"
+docker_opts="${docker_opts} --env MYSQL_PASS=${DOCKER_DBA_ROOT_PASS}"
+docker_opts="${docker_opts} --env IDO_PASSWORD=${DOCKER_IDO_PASS}"
+docker_opts="${docker_opts} --env ICINGAWEB2_PASSWORD=${DOCKER_ICINGAWEB_PASS}"
+docker_opts="${docker_opts} --env ICINGAADMIN_USER=icinga"
+docker_opts="${docker_opts} --env ICINGAADMIN_PASS=icinga"
+docker_opts="${docker_opts} --env LIVESTATUS_HOST=${ICINGA2_IP}"
+docker_opts="${docker_opts} --env LIVESTATUS_PORT=6666"
+
+# ---------------------------------------------------------------------------------------
+
 docker run \
-  --interactive \
-  --tty \
-  --detach \
-  --publish=80:80 \
-  --volume=${PWD}/share/icinga2:/usr/local/share/icinga2 \
-  --volumes-from ${USER}-icinga2 \
-  --link=${USER}-mysql:database \
-  --link=${USER}-icinga2:icinga2 \
-  --env MYSQL_HOST=${DATABASE_IP} \
-  --env MYSQL_PORT=3306 \
-  --env MYSQL_USER=root \
-  --env MYSQL_PASS=${DOCKER_DBA_ROOT_PASS} \
-  --env IDO_PASSWORD=${DOCKER_IDO_PASS} \
-  --env ICINGAWEB2_PASSWORD=${DOCKER_ICINGAWEB_PASS} \
-  --env ICINGAADMIN_USER=icinga \
-  --env ICINGAADMIN_PASS=icinga \
-  --env LIVESTATUS_HOST=${ICINGA2_IP} \
-  --env LIVESTATUS_PORT=6666 \
-  --hostname=${USER}-${TYPE} \
-  --name ${CONTAINER_NAME} \
+  ${docker_opts} \
   ${TAG_NAME}
 
 # ---------------------------------------------------------------------------------------

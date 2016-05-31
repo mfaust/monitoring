@@ -13,15 +13,6 @@ DATABASE_ROOT_PASS=${DATABASE_ROOT_PASS:-""}
 
 STORAGE_PATH=${STORAGE_PATH:-/app}
 
-# wait for needed database
-#while ! nc -z ${GRAPHITE_HOST} ${GRAPHITE_PORT}
-#do
-#  sleep 3s
-#done
-
-# must start initdb and do other jobs well
-#sleep 10s
-
 # -------------------------------------------------------------------------------------------------
 
 prepareStorage() {
@@ -37,10 +28,14 @@ prepareDatabase() {
 
   local CONFIG_FILE="/opt/graphite/webapp/graphite/local_settings.py"
 
-  if [ ! -f /opt/graphite/webapp/graphite/local_settings.py ]
+  if [ ! -f ${CONFIG_FILE} ]
   then
-    cp /opt/graphite/webapp/graphite/local_settings.py-DIST /opt/graphite/webapp/graphite/local_settings.py
+    cp ${CONFIG_FILE}-DIST ${CONFIG_FILE}
   fi
+
+  sed -i \
+    -e "s|%STORAGE_PATH%|${STORAGE_PATH}|g" \
+    ${CONFIG_FILE}
 
   if [ "${DATABASE_GRAPHITE_TYPE}" == "sqlite" ]
   then
@@ -120,13 +115,17 @@ then
 
   echo -e "\n"
   echo " ==================================================================="
-  echo " Graphite DatabaseUser 'graphite' password set to ${DATABASE_GRAPHITE_PASS}"
+  echo "  Database Type    : '${DATABASE_GRAPHITE_TYPE}'"
+  echo "  Database Host    : '${DATABASE_GRAPHITE_HOST}'"
+  echo "  Database User    : 'graphite'"
+  echo "  Database Password: '${DATABASE_GRAPHITE_PASS}'"
+  echo "  Storage Path     : '${STORAGE_PATH}'"
   echo " ==================================================================="
   echo ""
 
 fi
 
-echo -e "\n Starting Supervisor.\n  You can safely CTRL-C and the container will continue to run with or without the -d (daemon) option\n\n"
+echo -e "\n Starting Supervisor.\n\n"
 
 if [ -f /etc/supervisord.conf ]
 then

@@ -2,20 +2,52 @@
 
 # set -x
 
+[ -f config.rc ] && . config.rc
+
 SRC_BASE=${PWD}
 
-for d in $(find ${SRC_BASE} -mindepth 1 -maxdepth 1 -type d | sort)
-do
-  if [ -x ${d}/build.sh ]
-  then
-    cd ${d}
-    echo " => build Container '${d}' ..."
+MONITORING_CONTAINER="docker-alpine-base docker-mysql docker-jolokia docker-graphite docker-icinga2 docker-icingaweb2 docker-grafana docker-dashing docker-cm-monitoring"
 
-    ./build.sh
+createDataDir() {
+
+  if [ ! -z ${DOCKER_DATA_DIR} ]
+  then
+    mkdir -p ${DOCKER_DATA_DIR}
+  else
+    echo "please configure a 'DOCKER_DATA_DIR'!"
+    exit 1
+  fi
+}
+
+buildContainer() {
+
+  echo -e "\n"
+
+  for d in ${MONITORING_CONTAINER}
+  do
+    if [ -x ${SRC_BASE}/${d}/build.sh ]
+    then
+
+      cd ${SRC_BASE}/${d}
+
+      echo " => build Container '${d}' ..."
+
+      ./build.sh
+
+    else
+      echo "no build script for Container '${d}' found"
+    fi
 
     echo -e "\n =========================================================== \n"
-  fi
+  done
 
-done
+  echo -e " ... done\n\n"
+}
+
+createDataDir
+
+buildContainer
+
+exit 0
 
 # EOF

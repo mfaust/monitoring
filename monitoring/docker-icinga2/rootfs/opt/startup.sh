@@ -29,9 +29,6 @@ sleep 10s
 
 # -------------------------------------------------------------------------------------------------
 
-#env | grep BLUEPRINT  > /etc/env.vars
-#env | grep HOST_     >> /etc/env.vars
-
 chmod 1777 /tmp
 
 USER=
@@ -89,8 +86,8 @@ then
   fi
 
   # enable icinga2 features if not already there
-  echo " [i] Enabling icinga2 features."
-  icinga2 feature enable ido-mysql command livestatus compatlog checker mainlog icingastatus
+#  echo " [i] Enabling icinga2 features."
+#  icinga2 feature enable ido-mysql command livestatus compatlog checker mainlog icingastatus
 
   if [ ! -z ${CARBON_HOST} ]
   then
@@ -107,7 +104,12 @@ then
 
   # https://www.axxeo.de/blog/technisches/icinga2-livestatus-ueber-tcp.html
 
-  #icinga2 API cert - regenerate new private key and certificate when running in a new container
+  # icinga2 API cert - regenerate new private key and certificate when running in a new container
+  if [ -d /app/pki ]
+  then
+    cp -arv /app/pki /etc/icinga2/
+  fi
+
   if [ ! -f /etc/icinga2/pki/${HOSTNAME}.key ]
   then
     echo " [i] Generating new private key and certificate for this container ${HOSTNAME} ..."
@@ -120,6 +122,9 @@ then
     sed -i "s,^.*\ NodeName\ \=\ .*,const\ NodeName\ \=\ \"${HOSTNAME}\",g" /etc/icinga2/constants.conf
     icinga2 pki new-cert --cn ${HOSTNAME} --key ${PKI_KEY} --csr ${PKI_CSR}
     icinga2 pki sign-csr --csr ${PKI_CSR} --cert ${PKI_CRT}
+
+    cp -arv /etc/icinga2/pki /app
+
     echo " => Finished cert generation"
   fi
 
@@ -151,11 +156,11 @@ then
 
 fi
 
-echo -e "\n Starting Supervisor.\n  You can safely CTRL-C and the container will continue to run with or without the -d (daemon) option\n\n"
+echo -e "\n Starting Supervisor.\n\n"
 
 if [ -f /etc/supervisor.d/icinga2.ini ]
 then
-    /usr/bin/supervisord >> /dev/null
+    /usr/bin/supervisord -c /etc/supervisord.conf >> /dev/null
 else
   exec /bin/bash
 fi

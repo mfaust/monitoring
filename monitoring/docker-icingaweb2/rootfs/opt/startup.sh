@@ -62,15 +62,20 @@ then
   ) | mysql ${mysql_opts}
 
   # icingaweb director
-  (
-    echo "CREATE DATABASE IF NOT EXISTS director DEFAULT CHARACTER SET 'utf8' DEFAULT COLLATE utf8_general_ci;"
-    echo "GRANT ALL ON director.* TO 'director'@'%' IDENTIFIED BY '${ICINGAWEB2_PASSWORD}';"
-    echo "quit"
-  ) | mysql ${mysql_opts}
+  if [ -d /usr/share/webapps/icingaweb2/modules/director ]
+  then
 
-  SCHEMA_FILE="/usr/share/webapps/icingaweb2/modules/director/schema/mysql.sql"
+    (
+      echo "DROP DATABASE director;"
+      echo "CREATE DATABASE IF NOT EXISTS director DEFAULT CHARACTER SET 'utf8' DEFAULT COLLATE utf8_general_ci;"
+      echo "GRANT ALL ON director.* TO 'director'@'%' IDENTIFIED BY '${ICINGAWEB2_PASSWORD}';"
+      echo "quit"
+    ) | mysql ${mysql_opts}
 
-  mysql ${mysql_opts} --force  director < ${SCHEMA_FILE}               >> /opt/icingaweb2-director.log 2>&1
+    SCHEMA_FILE="/usr/share/webapps/icingaweb2/modules/director/schema/mysql.sql"
+
+    mysql ${mysql_opts} --force  director < ${SCHEMA_FILE}               >> /opt/icingaweb2-director.log 2>&1
+  fi
 
   chown -R nginx:nginx /etc/icingaweb2/*
 
@@ -89,8 +94,8 @@ then
 
   echo -e "\n"
   echo " ==================================================================="
-  echo " MySQL user 'icingaweb2' password set to ${ICINGAWEB2_PASSWORD}"
-  echo " IcingaWeb2 Adminuser '${ICINGAADMIN_USER}' password set to ${ICINGAADMIN_PASS}"
+  echo " MySQL user 'icingaweb2' password set to '${ICINGAWEB2_PASSWORD}'"
+  echo " IcingaWeb2 Adminuser '${ICINGAADMIN_USER}' password set to 'icinga'"
   echo " ==================================================================="
   echo ""
 
@@ -100,7 +105,7 @@ echo -e "\n Starting Supervisor.\n\n"
 
 if [ -f /etc/supervisord.conf ]
 then
-  /usr/bin/supervisord >> /dev/null
+  /usr/bin/supervisord -c /etc/supervisord.conf >> /dev/null
 else
   exec /bin/bash
 fi

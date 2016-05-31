@@ -17,21 +17,27 @@ DOCKER_DATA_DIR=${DOCKER_DATA_DIR:-${DATA_DIR}}
 
 # ---------------------------------------------------------------------------------------
 
+docker_opts=
+docker_opts="${docker_opts} --interactive"
+docker_opts="${docker_opts} --tty"
+docker_opts="${docker_opts} --detach"
+docker_opts="${docker_opts} --publish 2003:2003"
+docker_opts="${docker_opts} --publish 7002:7002"
+docker_opts="${docker_opts} --publish 8088:8080"
+docker_opts="${docker_opts} --hostname ${USER}-${TYPE}"
+docker_opts="${docker_opts} --name ${CONTAINER_NAME}"
+docker_opts="${docker_opts} --volume /etc/localtime:/etc/localtime:ro"
+docker_opts="${docker_opts} --env DATABASE_GRAPHITE_TYPE=mysql"
+docker_opts="${docker_opts} --env DATABASE_GRAPHITE_HOST=${DATABASE_IP}"
+docker_opts="${docker_opts} --env DATABASE_GRAPHITE_PORT=3306"
+docker_opts="${docker_opts} --env DATABASE_GRAPHITE_PASS=${DOCKER_GRAPHITE_DBA_PASS}"
+docker_opts="${docker_opts} --env DATABASE_ROOT_USER=root"
+docker_opts="${docker_opts} --env DATABASE_ROOT_PASS=${DOCKER_DBA_ROOT_PASS}"
+
+# ---------------------------------------------------------------------------------------
+
 docker run \
-  --interactive \
-  --tty \
-  --detach \
-  --env DATABASE_GRAPHITE_TYPE=mysql \
-  --env DATABASE_GRAPHITE_HOST=${DATABASE_IP} \
-  --env DATABASE_GRAPHITE_PORT=3306 \
-  --env DATABASE_ROOT_USER=root \
-  --env DATABASE_ROOT_PASS=${DOCKER_DBA_ROOT_PASS} \
-  --publish=2003:2003 \
-  --publish=7002:7002 \
-  --publish=8088:8080 \
-  --volume=${DOCKER_DATA_DIR}/${TYPE}:/app \
-  --hostname=${USER}-${TYPE} \
-  --name ${CONTAINER_NAME} \
+  ${docker_opts} \
   ${TAG_NAME}
 
 # ---------------------------------------------------------------------------------------

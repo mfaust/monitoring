@@ -2,18 +2,19 @@
 
 # set -x
 
+[ -d config.rc ] && . config.rc
+
 SRC_BASE=${PWD}
 
 MONITORING_CONTAINER="docker-mysql docker-jolokia docker-graphite docker-icinga2 docker-icingaweb2 docker-grafana docker-dashing"
-MONITOR_DOCKER_CONTAINER=false
 
 export DOCKER_DNS="10.1.2.63"
-export DATA_DIR="/srv/docker/data"
+# export DATA_DIR="/srv/docker/data"
 
-if [ ! -d ${DATA_DIR} ]
-then
-  mkdir -p ${DATA_DIR}
-fi
+#if [ ! -d ${DATA_DIR} ]
+#then
+#  mkdir -p ${DATA_DIR}
+#fi
 
 runContainer() {
 

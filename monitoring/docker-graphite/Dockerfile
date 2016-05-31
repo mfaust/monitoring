@@ -27,16 +27,18 @@ RUN \
     py-mysqldb \
     memcached \
     pwgen \
-    mysql-client && \
+    mysql-client
+
+RUN \
   pip install --upgrade pip && \
   pip install \
     pytz \
     Django==1.5 \
     python-memcached \
-    "django-tagging<0.4"
+    "django-tagging<0.4" && \
+  mkdir /src
 
 RUN \
-  mkdir /src && \
   git clone https://github.com/graphite-project/whisper.git      /src/whisper      && \
   cd /src/whisper      &&  git checkout 0.9.x &&  python setup.py install
 
@@ -52,7 +54,10 @@ RUN \
 RUN \
   apk del --purge \
     git && \
-    rm -rf /src/* /tmp/* /var/cache/apk/*
+  rm -rf /src && \
+  rm -rf /tmp/* && \
+  rm -rf /var/tmp/* && \
+  rm -rf /var/cache/apk/*
 
 ADD rootfs/ /
 
