@@ -12,9 +12,6 @@ DATABASE_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${USER}
 
 [ -z ${DATABASE_IP} ] && { echo "No Database Container '${USER}-mysql' running!"; exit 1; }
 
-DOCKER_DBA_ROOT_PASS=${DOCKER_DBA_ROOT_PASS:-foo.bar.Z}
-DOCKER_DATA_DIR=${DOCKER_DATA_DIR:-${DATA_DIR}}
-
 # ---------------------------------------------------------------------------------------
 
 docker_opts=

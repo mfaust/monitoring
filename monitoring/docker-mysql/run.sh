@@ -8,9 +8,6 @@ then
   docker rm   ${CONTAINER_NAME} 2> /dev/null
 fi
 
-DOCKER_DBA_ROOT_PASS=${DOCKER_DBA_ROOT_PASS:-foo.bar.Z}
-DOCKER_DATA_DIR=${DOCKER_DATA_DIR:-${DATA_DIR}}
-
 # ---------------------------------------------------------------------------------------
 
 docker_opts=

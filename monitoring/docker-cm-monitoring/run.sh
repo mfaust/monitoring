@@ -1,5 +1,6 @@
 #!/bin/bash
 
+set -x 
 SCRIPT=$(readlink -f ${0})
 BASE=$(dirname "${SCRIPT}")
 
@@ -10,8 +11,6 @@ then
   docker kill ${CONTAINER_NAME} 2> /dev/null
   docker rm   ${CONTAINER_NAME} 2> /dev/null
 fi
-
-DOCKER_DATA_DIR=${DOCKER_DATA_DIR:-${DATA_DIR}}
 
 # ---------------------------------------------------------------------------------------
 
@@ -47,15 +46,17 @@ GRAPHITE_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${USER}
 GRAFANA_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${USER}-grafana   2>/dev/null)
 ICINGA2_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${USER}-icinga2   2>/dev/null)
 
+[ -z ${DOCKER_DATA_DIR} ] && { echo "Var DOCKER_DATA_DIR not set!"; exit 1; }
+
 # ---------------------------------------------------------------------------------------
 
 docker_opts=
 docker_opts="${docker_opts} --interactive"
 docker_opts="${docker_opts} --tty"
 docker_opts="${docker_opts} --hostname=${USER}-${TYPE}"
-docker_opts="${docker_opts} --name=${CONTAINER_NAME}"
+docker_opts="${docker_opts} --name ${CONTAINER_NAME}"
 docker_opts="${docker_opts} --volume /etc/localtime:/etc/localtime:ro"
-docker_opts="${docker_opts} --volume=${DOCKER_DATA_DIR}/monitoring:/var/cache/monitoring"
+docker_opts="${docker_opts} --volume ${DOCKER_DATA_DIR}/monitoring:/var/cache/monitoring"
 # docker_opts="${docker_opts} --volume=${PWD}/inject/usr/local:/usr/local/"
 docker_opts="${docker_opts} --add-host=blueprint-box:${BLUEPRINT_BOX}"
 docker_opts="${docker_opts} --env HOST_CM_CMS=${HOST_CM_CMS}"
