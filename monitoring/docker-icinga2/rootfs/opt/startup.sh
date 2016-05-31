@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -x
+
 initfile=/opt/run.init
 
 MYSQL_HOST=${MYSQL_HOST:-""}
@@ -108,7 +110,11 @@ then
   if [ -d /app/pki ]
   then
     cp -arv /app/pki /etc/icinga2/
+
+    icinga2 feature enable api
   fi
+
+  sed -i "s,^.*\ NodeName\ \=\ .*,const\ NodeName\ \=\ \"${HOSTNAME}\",g" /etc/icinga2/constants.conf
 
   if [ ! -f /etc/icinga2/pki/${HOSTNAME}.key ]
   then
@@ -119,7 +125,6 @@ then
     PKI_CRT="/etc/icinga2/pki/${HOSTNAME}.crt"
 
     icinga2 api setup
-    sed -i "s,^.*\ NodeName\ \=\ .*,const\ NodeName\ \=\ \"${HOSTNAME}\",g" /etc/icinga2/constants.conf
     icinga2 pki new-cert --cn ${HOSTNAME} --key ${PKI_KEY} --csr ${PKI_CSR}
     icinga2 pki sign-csr --csr ${PKI_CSR} --cert ${PKI_CRT}
 
@@ -127,6 +132,11 @@ then
 
     echo " => Finished cert generation"
   fi
+
+#   icinga2 api setup
+#  sed -i "s,^.*\ NodeName\ \=\ .*,const\ NodeName\ \=\ \"${HOSTNAME}\",g" /etc/icinga2/constants.conf
+#  icinga2 pki new-cert --cn ${HOSTNAME} --key ${PKI_KEY} --csr ${PKI_CSR}
+#  icinga2 pki sign-csr --csr ${PKI_CSR} --cert ${PKI_CRT}
 
   echo " => Initializing databases and icinga2 configurations."
   echo " => This may take a few minutes"

@@ -110,7 +110,7 @@ then
   docker_opts="${docker_opts} --link=${USER}-jolokia:jolokia"
 fi
 
-if [ ! -z=${DOCKER_DNS} ]
+if [ ! -z ${DOCKER_DNS} ]
 then
   docker_opts="${docker_opts} --dns=${DOCKER_DNS}"
 fi

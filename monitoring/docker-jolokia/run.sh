@@ -16,7 +16,7 @@ docker_opts="${docker_opts} --hostname ${USER}-${TYPE}"
 docker_opts="${docker_opts} --name ${CONTAINER_NAME}"
 docker_opts="${docker_opts} --volume /etc/localtime:/etc/localtime:ro"
 
-if [ ! -z=${DOCKER_DNS} ]
+if [ ! -z ${DOCKER_DNS} ]
 then
   docker_opts="${docker_opts} --dns=${DOCKER_DNS}"
 fi

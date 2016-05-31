@@ -78,7 +78,7 @@ then
   docker_opts="${docker_opts} --volume /home/${USER}/.chef:/root/.chef:ro"
 fi
 
-if [ ! -z=${DOCKER_DNS} ]
+if [ ! -z ${DOCKER_DNS} ]
 then
   docker_opts="${docker_opts} --dns=${DOCKER_DNS}"
 fi

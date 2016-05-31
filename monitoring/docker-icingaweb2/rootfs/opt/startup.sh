@@ -66,7 +66,7 @@ then
   then
 
     (
-      echo "DROP DATABASE director;"
+      echo "DROP DATABASE IF EXISTS director;"
       echo "CREATE DATABASE IF NOT EXISTS director DEFAULT CHARACTER SET 'utf8' DEFAULT COLLATE utf8_general_ci;"
       echo "GRANT ALL ON director.* TO 'director'@'%' IDENTIFIED BY '${ICINGAWEB2_PASSWORD}';"
       echo "quit"

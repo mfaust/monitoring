@@ -6,8 +6,8 @@
 # ----------------------------------------------------------------------------------------
 
 SCRIPTNAME=$(basename $0 .sh)
-VERSION="2.1.2"
-VDATE="27.05.2016"
+VERSION="2.1.4"
+VDATE="31.05.2016"
 
 # ----------------------------------------------------------------------------------------
 
@@ -116,12 +116,12 @@ discoverApplications() {
   local tmp_dir="${1}"
   local p="${2}"
 
+  [ -d ${tmp_dir} ] || mkdir ${tmp_dir}
+
   types="manager blueprint drive solr user-changes workflow webdav elastic-worker coremedia contentfeeder caefeeder studio editor-webstart demodata-generator"
 
   for t in ${types}
   do
-#    echo "${p} ${t}"
-
     file_dst="${tmp_dir}/CM_${p}-${t}.json"
     dst="${tmp_dir}/CM_${p}.result"
     tmp="${tmp_dir}/CM_${p}-${t}.tmp"
@@ -299,23 +299,23 @@ addToGraphite() {
   do
     # "title": "Blueprint ContentServer",
 
-    [ -d /var/tmp/${short_hostname} ] || mkdir /var/tmp/${short_hostname}
+    [ -d ${TMP_DIR}/grafana ] || mkdir ${TMP_DIR}/grafana
 
 #    cp  ${tpl_dir}/${tpl} /var/tmp/${short_hostname}/${tpl}
-    cp  ${tpl} /var/tmp/${short_hostname}/$(basename ${tpl})
+    cp  ${tpl} ${TMP_DIR}/grafana/$(basename ${tpl})
 
     sed -i \
       -e "s|%HOST%|${grafana_hostname}|g" \
       -e "s|%SHORTHOST%|${short_hostname}|g" \
       -e "s|%TAG%|${short_hostname}|g" \
-      /var/tmp/${short_hostname}/$(basename ${tpl})
+      ${TMP_DIR}/grafana/$(basename ${tpl})
 
     echo "create dashboard '$(basename ${tpl})'"
 
       curl ${curl_opts} \
         --request POST \
         --header 'Content-Type: application/json;charset=UTF-8' \
-        --data @/var/tmp/${short_hostname}/$(basename ${tpl}) \
+        --data @${TMP_DIR}/grafana/$(basename ${tpl}) \
         http://grafana:3000/api/dashboards/db/ > /dev/null
   done
 
@@ -333,9 +333,11 @@ addIcingaService() {
   status=$(curl ${curl_opts} -H 'Accept: application/json' -X PUT ${url} --data @${TMP_DIR}/icinga2/${template} | python -m json.tool)
   status_code=$(echo "${status}" | jq --raw-output '.results[0].code')
 
+  echo -n "  add '${name}' "
+
   if [ "${status_code}" = "null" ]
   then
-    echo ${status}
+    echo "${status}"
   elif [ ${status_code} = "200" ]
   then
     echo " .. succesful"
@@ -379,8 +381,10 @@ addToIcinga() {
 
     sleep 2s
   fi
+ 
+  local tmp_apps="${apps}"
 
-  for k in ${apps}
+  for k in ${tmp_apps}
   do
     value=$( [ $(echo "${services}" | tr '[:upper:]' '[:lower:]' | grep -c ${k}) -gt 0 ] && { echo "true"; } || { echo "false"; } )
     vars="${vars} ${k}=${value}"
@@ -396,7 +400,10 @@ addToIcinga() {
     status=$(curl ${curl_opts} -H 'Accept: application/json' -X PUT "https://${ICINGA2_HOST}:${ICINGA2_API_PORT}/v1/objects/hosts/${host}" --data @${TMP_DIR}/icinga2/host.json | python -mjson.tool)
     status_code=$(echo "${status}" | jq --raw-output '.results[0].code')
 
-    if [ "${status_code}" = "null" ]
+    if [ -z "${status_code}" ]
+    then
+      echo ${status}
+    elif [ "${status_code}" = "null" ]
     then
       echo ${status}
     elif [ ${status_code} = "200" ]
@@ -408,11 +415,14 @@ addToIcinga() {
     echo "Host ${host} already monitored"
   fi
 
-  if [ ${status_code} == "200" ]
+  if ( [ ! -z "${status_code}" ] && [ ${status_code} = "200" ] )
   then
 
     echo "add Services for Host '${host}'"
-    for k in ${apps}
+
+    local tmp_apps="${apps}"
+
+    for k in ${tmp_apps}
     do
       service=$(echo "${services}" | grep -i ${k} | cut -d '=' -f 1)
       port_jmx=$(echo "${services}" | grep -i ${k} | cut -d '=' -f 2)
@@ -421,6 +431,7 @@ addToIcinga() {
 
       if [ $(jq ".attrs.vars.${k}" ${TMP_DIR}/icinga2/host.json) == true ]
       then
+
         case ${k} in
           cms)
             attrs="$(jo display_name="Check IOR against CMS" check_command=http host_name=${host} max_check_attempts=5 vars.http_port=${port} vars.http_uri=/coremedia/ior vars.http_string=IOR:)"
@@ -513,7 +524,7 @@ addToIcinga() {
 
     done
   else
-    echo "host nut succesful added"
+    echo "host not succesful added"
 
   fi
 

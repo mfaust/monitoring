@@ -3,7 +3,8 @@
 #
 
 # we need an functional DNS for resolve internal names
-export DOCKER_DNS=${DOCKER_DNS:-172.17.0.1}
+export DOCKER_DNS="10.1.2.63"
+# export DOCKER_DNS=${DOCKER_DNS:-172.17.0.1}
 
 # location of persistent Data
 #  mysql / graphite
