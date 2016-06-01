@@ -4,29 +4,28 @@ Minimal Image with OSS Nexus 2.xx
 
 Based on alpine:edge
 
-## Build
+## to build
 
- ```
- docker build --tag=docker-nexus .
- ```
- or
+    docker build --rm --tag docker-nexus .
 
- ```
- ./build.sh
- ```
+## to run
 
-## run
+    docker run -d -p 8081:8081 --name nexus docker-nexus
 
- ```
- docker run docker-nexus
- ```
- or
+## to test
 
- ```
- ./run.sh
- ```
+    curl http://localhost:8081/service/local/status
 
-## Ports
+## to determine the port that the container is listening on
 
-* 8081
+    docker ps nexus
+
+## to lock at logs
+
+    docker logs -f nexus 
+
+## to login
+
+Default credentials are: `admin` / `admin123`
+
 
