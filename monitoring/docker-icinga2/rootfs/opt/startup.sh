@@ -1,7 +1,5 @@
 #!/bin/sh
 
-set -x
-
 initfile=/opt/run.init
 
 MYSQL_HOST=${MYSQL_HOST:-""}

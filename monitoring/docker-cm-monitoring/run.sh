@@ -1,6 +1,5 @@
 #!/bin/bash
 
-set -x 
 SCRIPT=$(readlink -f ${0})
 BASE=$(dirname "${SCRIPT}")
 
