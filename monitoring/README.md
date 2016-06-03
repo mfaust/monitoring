@@ -12,6 +12,7 @@ Work-in-Progress
 
 ## Inhalt
 
+ - docker-nginx
  - docker-cm-monitoring
  - docker-dashing
  - docker-grafana
@@ -21,8 +22,11 @@ Work-in-Progress
  - docker-jolokia
  - docker-mysql
 
+### docker-nginx
 
-### cocker-cm-monitoring
+Stellt einen Webserver zur Verfügung, unter dem alle Services einfach über eine Webseite erreichbar sind.
+
+### docker-cm-monitoring
 
 Beinhaltet alle Coremediaspezifika. Vor allem Scripte für Icinga, Grafana und Jolokia.
 
@@ -44,6 +48,7 @@ Zur Zeit stehen für Coremedia folgende Widgets / Jobs zur Verfügung;
  - jenkins
  - icinga2
 
+Dies sind allerdings noch in Arbeit
 
 ### docker-grafana
 
@@ -123,7 +128,7 @@ Die Idee für ein langfristiges Ziel wäre ein sich selbst konfigurierendes Moni
 Hier könnte der Einsatz von [consul](https://www.consul.io/) ein wichtige Schritt sein.
 
 ## Schematischer Aufbau
-![schema](schema.jpg "Schematischer aufbau und Kommunikationsbeziehung")
+![schema](schema.png "Schematischer aufbau und Kommunikationsbeziehung")
 
 
 ## Nutzung
