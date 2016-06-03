@@ -6,7 +6,7 @@
 
 SRC_BASE=${PWD}
 
-MONITORING_CONTAINER="docker-mysql docker-jolokia docker-graphite docker-icinga2 docker-icingaweb2 docker-grafana docker-dashing"
+MONITORING_CONTAINER="docker-mysql docker-jolokia docker-graphite docker-icinga2 docker-icingaweb2 docker-grafana docker-dashing docker-nginx "
 
 export DOCKER_DNS="10.1.2.63"
 # export DATA_DIR="/srv/docker/data"

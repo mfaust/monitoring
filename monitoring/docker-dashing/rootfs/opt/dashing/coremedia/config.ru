@@ -3,8 +3,10 @@ require 'dashing'
 
 configure do
   set :auth_token, '%AUTH_TOKEN%'
-  set :default_dashboard, 'coremedia'
+  set :default_dashboard, 'dashing/coremedia'
 
+  set :assets_prefix, '/dashing/assets'
+  
   helpers do
     def protected!
      # Put any authentication code you want in here.
@@ -17,4 +19,5 @@ map Sinatra::Application.assets_prefix do
   run Sinatra::Application.sprockets
 end
 
-run Sinatra::Application
+# run Sinatra::Application
+run Rack::URLMap.new('/dashing' => Sinatra::Application)

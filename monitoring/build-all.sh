@@ -6,7 +6,7 @@
 
 SRC_BASE=${PWD}
 
-MONITORING_CONTAINER="docker-alpine-base docker-mysql docker-jolokia docker-graphite docker-icinga2 docker-icingaweb2 docker-grafana docker-dashing docker-cm-monitoring"
+MONITORING_CONTAINER="docker-alpine-base docker-nginx docker-mysql docker-jolokia docker-graphite docker-icinga2 docker-icingaweb2 docker-grafana docker-dashing docker-cm-monitoring"
 
 createDataDir() {
 

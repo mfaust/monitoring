@@ -8,6 +8,8 @@
 
 console.log("Yeah! The dashboard has started!")
 
+Batman.config.viewPrefix = 'dashing/views'
+
 Dashing.on 'ready', ->
 # ORIGINAL
 #  Dashing.widget_margins ||= [5, 5]
