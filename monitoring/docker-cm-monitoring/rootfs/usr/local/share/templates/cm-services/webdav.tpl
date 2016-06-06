@@ -1,3 +1,3 @@
 # WebDAV
 WEBDAV=%PORT%
-JMX_%PORT%="${standardJMX}"
+JMX_%PORT%="${standardJMX} "

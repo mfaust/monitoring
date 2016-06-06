@@ -1,3 +1,3 @@
 # ELASTIC-WORKER
 ELASTIC_WORKER=%PORT%
-JMX_%PORT%="${standardJMX}"
+JMX_%PORT%="${standardJMX} "
