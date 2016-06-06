@@ -6,8 +6,8 @@
 # ----------------------------------------------------------------------------------------
 
 SCRIPTNAME=$(basename $0 .sh)
-VERSION="2.1.4"
-VDATE="31.05.2016"
+VERSION="2.2.1"
+VDATE="06.06.2016"
 
 # ----------------------------------------------------------------------------------------
 
@@ -92,7 +92,6 @@ checkHostAlive() {
   echo $alive
 }
 
-
 getPorts() {
 
   local host="${1}"
@@ -160,7 +159,6 @@ discoverApplications() {
   done
 
 }
-
 
 discoverPorts() {
 
@@ -381,16 +379,26 @@ addToIcinga() {
 
     sleep 2s
   fi
- 
+
   local tmp_apps="${apps}"
 
   for k in ${tmp_apps}
   do
-    value=$( [ $(echo "${services}" | tr '[:upper:]' '[:lower:]' | grep -c ${k}) -gt 0 ] && { echo "true"; } || { echo "false"; } )
+    port_jmx=$(echo "${services}" | grep -i ${k} | cut -d '=' -f 2)
+    port_http=$(echo "${port_jmx}" | sed 's|99|80|g')
+
+
+    if [ $(echo "${services}" | tr '[:upper:]' '[:lower:]' | grep -c ${k}) -gt 0 ]
+    then
+      value=$(jo ip=${ip} port_http="${port_http}" port_jmx="${port_jmx}" running=true )
+    else
+      value=$(jo running=false)
+    fi
+
     vars="${vars} ${k}=${value}"
   done
 
-  tpl=$(jo -p templates[]="generic-host" attrs=$(jo  display_name=${host} address=${ip} vars=$(jo ${vars}) ))
+  tpl=$(jo -p templates[]="generic-host" attrs=$(jo  display_name=${host} address=${ip} vars=$(jo cm=$(jo ${vars})) ))
 
   echo "${tpl}" > ${TMP_DIR}/icinga2/host.json
 
@@ -429,7 +437,7 @@ addToIcinga() {
 
       port=$(echo "${port_jmx}" | sed 's|99|80|g')
 
-      if [ $(jq ".attrs.vars.${k}" ${TMP_DIR}/icinga2/host.json) == true ]
+      if [ $(jq ".attrs.vars.cm.${k}.running" ${TMP_DIR}/icinga2/host.json) == true ]
       then
 
         case ${k} in
@@ -636,5 +644,5 @@ done
 run
 
 exit 0
-# EOF
 
+# EOF

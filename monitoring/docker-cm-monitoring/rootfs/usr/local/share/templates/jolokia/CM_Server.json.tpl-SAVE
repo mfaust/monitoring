@@ -4,11 +4,13 @@
   "attribute" : [
     "AppDesc",
     "RunLevel",
+    "FutureRunLevel",
     "ResourceCacheHits",
     "ResourceCacheEvicts",
     "ResourceCacheEntries",
     "ResourceCacheInterval",
     "ResourceCacheSize",
+    "RepositorySequenceNumber",
     "ConnectionCount",
     "Uptime"
   ],
