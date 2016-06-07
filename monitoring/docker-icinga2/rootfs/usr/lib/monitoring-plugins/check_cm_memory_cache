@@ -8,8 +8,8 @@
 # ----------------------------------------------------------------------------------------
 
 SCRIPTNAME=$(basename $0 .sh)
-VERSION="2.0.2"
-VDATE="25.05.2016"
+VERSION="2.0.4"
+VDATE="07.06.2016"
 
 # ----------------------------------------------------------------------------------------
 
@@ -91,6 +91,7 @@ heapMem() {
 
   if [ -f ${file} ]
   then
+    [ $(stat -c %s ${file}) -eq 0 ] && { sleep 1s; }
 
     max=$(${JQ} --raw-output '.value.HeapMemoryUsage.max' ${file})
     use=$(${JQ} --raw-output '.value.HeapMemoryUsage.used' ${file})
@@ -107,8 +108,8 @@ heapMem() {
 
     # in percent
     percent=$(( 100 * use / com ))
-    max_warn="80" # percent
-    max_crit="90"
+    max_warn="85" # percent
+    max_crit="92"
 
     #    x <= 75        = OKAY
     #    x > 75 && < 80 = WARN
@@ -139,13 +140,13 @@ heapMem() {
   fi
 }
 
-
 permMem() {
 
   file="${TMP_DIR}/Memory.result"
 
   if [ -f ${file} ]
   then
+    [ $(stat -c %s ${file}) -eq 0 ] && { sleep 1s; }
 
     max=$(${JQ} --raw-output '.value.NonHeapMemoryUsage.max' ${file})
     use=$(${JQ} --raw-output '.value.NonHeapMemoryUsage.used' ${file})
@@ -162,8 +163,8 @@ permMem() {
 
     # in percent
     percent=$(( 100 * use / com ))
-    max_warn="80" # percent
-    max_crit="90"
+    max_warn="85" # percent
+    max_crit="92"
 
     #    x <= 75        = OKAY
     #    x > 75 && < 80 = WARN
@@ -211,6 +212,9 @@ uapiCache() {
 
   if [ -f ${file} ]
   then
+
+    [ $(stat -c %s ${file}) -eq 0 ] && { sleep 1s; }
+
     cacheSize=$(${JQ} --raw-output '.value.HeapCacheSize' ${file})
     cacheLevel=$(${JQ} --raw-output '.value.HeapCacheLevel' ${file})
 
@@ -225,8 +229,8 @@ uapiCache() {
 
     # in percent
     percent=$(( 100 * cacheLevel / cacheSize ))
-    max_warn="80" # percent
-    max_crit="90"
+    max_warn="85" # percent
+    max_crit="92"
 
     if ( [ ${percent} -eq ${max_warn} ] || [ ${percent} -lt ${max_warn} ] )
     then
@@ -252,7 +256,6 @@ uapiCache() {
   fi
 }
 
-
 blobCache() {
 
   local search="CM_CapConnection"
@@ -270,6 +273,8 @@ blobCache() {
 
   if [ -f ${file} ]
   then
+    [ $(stat -c %s ${file}) -eq 0 ] && { sleep 1s; }
+
     cacheSize=$(${JQ} --raw-output '.value.BlobCacheSize' ${file})
     cacheLevel=$(${JQ} --raw-output '.value.BlobCacheLevel' ${file})
 
@@ -284,8 +289,8 @@ blobCache() {
 
     # in percent
     percent=$(( 100 * cacheLevel / cacheSize ))
-    max_warn="80" # percent
-    max_crit="90"
+    max_warn="85" # percent
+    max_crit="92"
 
     if ( [ ${percent} -eq ${max_warn} ] || [ ${percent} -lt ${max_warn} ] )
     then
@@ -361,6 +366,23 @@ shift
 done
 
 #----------------------------------------------------------------------------------------
+[ -z "${HOST}" ] && {
+  echo "Usage error: parameter --host missing"
+  usage
+  exit ${STATE_UNKNOWN}
+}
+
+[ -z "${PORT}" ] && {
+  echo "Usage error: parameter --port missing"
+  usage
+  exit ${STATE_UNKNOWN}
+}
+
+[ -z "${MEMORY}" ] && {
+  echo "Usage error: parameter --memory missing"
+  usage
+  exit ${STATE_UNKNOWN}
+}
 
 run
 
