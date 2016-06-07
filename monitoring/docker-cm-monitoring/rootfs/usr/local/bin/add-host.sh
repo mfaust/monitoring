@@ -6,7 +6,7 @@
 # ----------------------------------------------------------------------------------------
 
 SCRIPTNAME=$(basename $0 .sh)
-VERSION="2.2.1"
+VERSION="2.3.0"
 VDATE="06.06.2016"
 
 # ----------------------------------------------------------------------------------------
@@ -177,10 +177,10 @@ discoverPorts() {
     do
       if [ ${p} == 3306 ]
       then
-        echo " Port: ${p}  | service: mysql"
+        echo "  Port: ${p}  | service: mysql"
       elif [ ${p} == 28017 ]
       then
-        echo " Port: ${p}  | service: mongod"
+        echo "  Port: ${p}  | service: mongod"
       else
 
         file_tpl="${TEMPLATE_DIR}/jolokia/CM.json.tpl"
@@ -247,7 +247,7 @@ EOF
         *)                                service=${service} ;;
       esac
 
-      echo "Port: ${port}  | service: ${service}"
+      echo "  Port: ${port}  | service: ${service}"
 
       if [ -f ${TEMPLATE_DIR}/cm-services/${service}.tpl ]
       then
@@ -292,7 +292,6 @@ addToGraphite() {
     done
   fi
 
-  echo "add grafana templates ..."
   for tpl in $(ls -1 ${tpl_dir}/blueprint*.json)
   do
     # "title": "Blueprint ContentServer",
@@ -308,7 +307,7 @@ addToGraphite() {
       -e "s|%TAG%|${short_hostname}|g" \
       ${TMP_DIR}/grafana/$(basename ${tpl})
 
-    echo "create dashboard '$(basename ${tpl})'"
+    echo "  create dashboard '$(basename ${tpl})'"
 
       curl ${curl_opts} \
         --request POST \
@@ -353,7 +352,7 @@ addToIcinga() {
 
   local host="${1}"
   local tpl_dir="${TEMPLATE_DIR}/icinga2"
-  local ip=$(host ${host} | cut -d ' ' -f 4)
+  local ip=$(fping -A ${host} | cut -d ' ' -f 1)
   local apps="cms mls rls wfs adobe_drive cae_live cae_prev elastic_worker feeder_content feeder_live feeder_prev site_manager solr studio user_changes webdav"
   local services=$(grep '='  ${TMP_DIR}/cm-services  | grep -v standardJMX | sort)
   local vars=
@@ -450,6 +449,7 @@ addToIcinga() {
             jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-heap-mem-${k}.json
             addIcingaService "check-cm-heap-mem-${k}" service-heap-mem-${k}.json
             ;;
+
           mls)
             attrs="$(jo display_name="Check IOR against MLS" check_command=http host_name=${host} max_check_attempts=5 vars.http_port=${port} vars.http_uri=/coremedia/ior vars.http_string=IOR:)"
             jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-ior-${k}.json
@@ -459,12 +459,57 @@ addToIcinga() {
             jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-heap-mem-${k}.json
             addIcingaService "check-cm-heap-mem-${k}" service-heap-mem-${k}.json
             ;;
+
           rls)
             attrs="$(jo display_name="Check IOR against RLS" check_command=http host_name=${host} max_check_attempts=5 vars.http_port=${port} vars.http_uri=/coremedia/ior vars.http_string=IOR:)"
             jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-ior-${k}.json
-
             addIcingaService "check-cm-ior-2-${k}" service-ior-${k}.json
             ;;
+
+          wfs)
+            attrs="$(jo display_name="WFS Heap Mem" check_command=cm_memory max_check_attempts=5 host_name=${host} vars.host=${host} vars.port=${port_jmx} vars.memory=heap-mem)"
+            jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-heap-mem-${k}.json
+            addIcingaService "check-cm-heap-mem-${k}" service-heap-mem-${k}.json
+
+            attrs="$(jo display_name="WFS UAPI Cache" check_command=cm_cache max_check_attempts=5 host_name=${host} vars.host=${host} vars.port=${port_jmx} vars.cache=uapi-cache)"
+            jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-uapi-cache-${k}.json
+            addIcingaService "check-cm-uapi-cache-${k}" service-uapi-cache-${k}.json
+            ;;
+
+          studio)
+            attrs="$(jo display_name="Studio UAPI Cache" check_command=cm_cache max_check_attempts=5 host_name=${host} vars.host=${host} vars.port=${port_jmx} vars.cache=uapi-cache)"
+            jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-uapi-cache-${k}.json
+            addIcingaService "check-cm-uapi-cache-${k}" service-uapi-cache-${k}.json
+
+            attrs="$(jo display_name="Studio Blob Cache" check_command=cm_cache max_check_attempts=5 host_name=${host} vars.host=${host} vars.port=${port_jmx} vars.cache=blob-cache)"
+            jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-blob-cache-${k}.json
+            addIcingaService "check-cm-blob-cache-${k}" service-blob-cache-${k}.json
+
+            attrs="$(jo display_name="Studio Heap Mem" check_command=cm_memory max_check_attempts=5 host_name=${host} vars.host=${host} vars.port=${port_jmx} vars.memory=heap-mem)"
+            jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-heap-mem-${k}.json
+            addIcingaService "check-cm-heap-mem-${k}" service-heap-mem-${k}.json
+            ;;
+
+          elastic_worker)
+            attrs="$(jo display_name="ElasticWorker Heap Mem" check_command=cm_memory max_check_attempts=5 host_name=${host} vars.host=${host} vars.port=${port_jmx} vars.memory=heap-mem)"
+            jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-heap-mem-${k}.json
+            addIcingaService "check-cm-heap-mem-${k}" service-heap-mem-${k}.json
+            ;;
+
+          user_changes)
+            attrs="$(jo display_name="User Changes UAPI Cache" check_command=cm_cache max_check_attempts=5 host_name=${host} vars.host=${host} vars.port=${port_jmx} vars.cache=uapi-cache)"
+            jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-uapi-cache-${k}.json
+            addIcingaService "check-cm-uapi-cache-${k}" service-uapi-cache-${k}.json
+
+            attrs="$(jo display_name="User Changes Blob Cache" check_command=cm_cache max_check_attempts=5 host_name=${host} vars.host=${host} vars.port=${port_jmx} vars.cache=blob-cache)"
+            jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-blob-cache-${k}.json
+            addIcingaService "check-cm-blob-cache-${k}" service-blob-cache-${k}.json
+
+            attrs="$(jo display_name="User Changes Heap Mem" check_command=cm_memory max_check_attempts=5 host_name=${host} vars.host=${host} vars.port=${port_jmx} vars.memory=heap-mem)"
+            jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-heap-mem-${k}.json
+            addIcingaService "check-cm-heap-mem-${k}" service-heap-mem-${k}.json
+            ;;
+
           feeder_content)
             attrs="$(jo display_name="Content Feeder" check_command=cm_feeder host_name=${host} max_check_attempts=5 vars.host=${host} vars.feeder=content)"
             jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-${k}.json
@@ -473,12 +518,20 @@ addToIcinga() {
             attrs="$(jo display_name="Content Feeder Heap Mem" check_command=cm_memory max_check_attempts=5 host_name=${host} vars.host=${host} vars.port=${port_jmx} vars.memory=heap-mem)"
             jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-heap-mem-${k}.json
             addIcingaService "check-cm-heap-mem-${k}" service-heap-mem-${k}.json
-
             ;;
+
           feeder_live)
             attrs="$(jo display_name="CAE Live Feeder" check_command=cm_feeder host_name=${host} max_check_attempts=5 vars.host=${host} vars.feeder=live)"
             jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-${k}.json
             addIcingaService "check-cm-feeder-live" service-${k}.json
+
+            attrs="$(jo display_name="CAE Live Feeder UAPI Cache" check_command=cm_cache max_check_attempts=5 host_name=${host} vars.host=${host} vars.port=${port_jmx} vars.cache=uapi-cache)"
+            jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-uapi-cache-${k}.json
+            addIcingaService "check-cm-uapi-cache-${k}" service-uapi-cache-${k}.json
+
+            attrs="$(jo display_name="CAE Live Feeder Blob Cache" check_command=cm_cache max_check_attempts=5 host_name=${host} vars.host=${host} vars.port=${port_jmx} vars.cache=blob-cache)"
+            jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-blob-cache-${k}.json
+            addIcingaService "check-cm-blob-cache-${k}" service-blob-cache-${k}.json
 
             attrs="$(jo display_name="CAE Live Feeder Heap Mem" check_command=cm_memory max_check_attempts=5 host_name=${host} vars.host=${host} vars.port=${port_jmx} vars.memory=heap-mem)"
             jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-heap-mem-${k}.json
@@ -490,6 +543,14 @@ addToIcinga() {
             attrs="$(jo display_name="CAE Preview Feeder" check_command=cm_feeder host_name=${host} max_check_attempts=5 vars.host=${host} vars.feeder=preview)"
             jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-${k}.json
             addIcingaService "check-cm-feeder-prev" service-${k}.json
+
+            attrs="$(jo display_name="CAE Preview Feeder UAPI Cache" check_command=cm_cache max_check_attempts=5 host_name=${host} vars.host=${host} vars.port=${port_jmx} vars.cache=uapi-cache)"
+            jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-uapi-cache-${k}.json
+            addIcingaService "check-cm-uapi-cache-${k}" service-uapi-cache-${k}.json
+
+            attrs="$(jo display_name="CAE Preview Feeder Blob Cache" check_command=cm_cache max_check_attempts=5 host_name=${host} vars.host=${host} vars.port=${port_jmx} vars.cache=blob-cache)"
+            jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-blob-cache-${k}.json
+            addIcingaService "check-cm-blob-cache-${k}" service-blob-cache-${k}.json
 
             attrs="$(jo display_name="CAE Preview Feeder Heap Mem" check_command=cm_memory max_check_attempts=5 host_name=${host} vars.host=${host} vars.port=${port_jmx} vars.memory=heap-mem)"
             jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-heap-mem-${k}.json
@@ -526,6 +587,21 @@ addToIcinga() {
             addIcingaService "check-cm-heap-mem-${k}" service-heap-mem-${k}.json
             ;;
 
+          solr)
+            attrs="$(jo display_name="Solr Status Live" check_command=cm_solr max_check_attempts=5 host_name=${host} vars.host=${host} vars.port=${port_jmx} vars.repl=live)"
+            jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-${k}-repl-live.json
+            addIcingaService "check-cm-solr-repl-live" service-${k}-repl-live.json
+
+            attrs="$(jo display_name="Solr Status Preview" check_command=cm_solr max_check_attempts=5 host_name=${host} vars.host=${host} vars.port=${port_jmx} vars.repl=preview)"
+            jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-${k}-repl-preview.json
+            addIcingaService "check-cm-solr-repl-preview" service-${k}-repl-preview.json
+
+            attrs="$(jo display_name="Solr Status Studio" check_command=cm_solr max_check_attempts=5 host_name=${host} vars.host=${host} vars.port=${port_jmx} vars.repl=studio)"
+            jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-${k}-repl-studio.json
+            addIcingaService "check-cm-solr-repl-studio" service-${k}-repl-studio.json
+
+
+            ;;
 
         esac
       fi
@@ -568,7 +644,7 @@ addToIcinga() {
 
 run() {
 
-  echo -e "\n\n"
+  echo -e "\n"
 
   TMP_DIR="${JOLOKIA_CACHE_BASE}/${CHECK_HOST}"
 
@@ -594,13 +670,17 @@ run() {
     then
       if [ ! -f ${JOLOKIA_PORT_CACHE} ]
       then
+        echo " - discover Applications"
         discoverPorts ${CHECK_HOST}
 
+        echo " - add Grafana Templates"
         addToGraphite ${CHECK_HOST}
 
+        echo " - add Icinga Templates"
         addToIcinga ${CHECK_HOST}
 
-        supervisorctl restart all
+
+        supervisorctl restart all > /dev/null
       fi
     fi
   fi

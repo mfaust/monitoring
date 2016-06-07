@@ -380,14 +380,10 @@ collectdPlugin_Solr() {
 
   if [ -f "${result}" ]
   then
-#    result="${TMP_DIR}/${port}/solr.${CORE}.result"
 
-#    SOLR_MASTER="cmstr-${ENV}-rls-01.svc.guj.de"
-#    SOLR_MASTER="cmstr-${ENV}-${CORE}-feeder.svc.guj.de"
-    RESULT_FILE="$(basename ${result})" ###   sed -e "s|${TMP_DIR}/${port}/||g")" ###  solr.${CORE}.result"
+    RESULT_FILE="$(basename ${result})"
 
     if [[ ${RESULT_FILE} =~ ^SolrReplicationHandler.*result ]]
-#    if ( [ "${result}" = "solr.live.result" ] || [ "${result}" = "solr.preview.result" ] || [ "${result}" = "solr.studio.result" ] )
     then
       core="$(echo "${RESULT_FILE}" | sed -e 's|SolrReplicationHandler.||g' -e 's|.result||g')"
       SOLR_MASTER_PORT="44099"
