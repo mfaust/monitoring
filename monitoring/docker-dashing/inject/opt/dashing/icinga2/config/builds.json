@@ -1,0 +1,16 @@
+{
+  "jenkins": {
+
+    "https://cm7-ci.coremedia.com": {
+      "builds": [
+        { "id": "1"    , "build_id": "Master-14.0" } ,
+        { "id": "2"    , "build_id": "Master-7.5" }
+      ]
+
+    },
+    "https://pc-ci.coremedia.com": {
+      "builds": [ { "id": "1", "build_id": "vsphere-reports" } ]
+
+    }
+  }
+}

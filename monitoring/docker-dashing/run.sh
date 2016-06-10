@@ -23,7 +23,7 @@ docker_opts=
 docker_opts="${docker_opts} --interactive"
 docker_opts="${docker_opts} --tty"
 docker_opts="${docker_opts} --detach"
-docker_opts="${docker_opts} --publish=3030:3030"
+# docker_opts="${docker_opts} --publish=3030:3030"
 docker_opts="${docker_opts} --hostname=${USER}-${TYPE}"
 docker_opts="${docker_opts} --name=${CONTAINER_NAME}"
 docker_opts="${docker_opts} --env AUTH_TOKEN=${DOCKER_DASHING_AUTH_TOKEN}"
