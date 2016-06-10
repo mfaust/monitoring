@@ -2,6 +2,8 @@
 # Configfile for the docker-based Monitoring Stack
 #
 
+export BLUEPRINT_BOX="192.168.252.100"
+
 # we need an functional DNS for resolve internal names
 export DOCKER_DNS="10.1.2.63"
 # export DOCKER_DNS=${DOCKER_DNS:-172.17.0.1}

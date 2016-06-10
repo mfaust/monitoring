@@ -6,8 +6,8 @@
 # ----------------------------------------------------------------------------------------
 
 SCRIPTNAME=$(basename $0 .sh)
-VERSION="2.3.0"
-VDATE="06.06.2016"
+VERSION="2.3.1"
+VDATE="09.06.2016"
 
 # ----------------------------------------------------------------------------------------
 
@@ -15,7 +15,7 @@ TMP_DIR=
 
 FORCE=false
 CHECK_HOST=
-PORT_STYLE="cm14"
+PORT_STYLE=
 
 NMAP=$(which nmap)
 
@@ -27,7 +27,6 @@ then
 fi
 
 . /etc/jolokia.rc
-
 
 # ----------------------------------------------------------------------------------------
 
@@ -169,9 +168,19 @@ discoverPorts() {
 
   getPorts ${host}
 
+
+  tmp_dir="/tmp/${host}"
+  [ -d ${tmp_dir} ] || mkdir -p ${tmp_dir}
+
   if [ -f ${JOLOKIA_PORT_CACHE} ]
   then
     . ${JOLOKIA_PORT_CACHE}
+
+    if [ -z "${PORTS}" ]
+    then
+      echo -e " no running Applications found\n"
+      exit 1
+    fi
 
     for p in ${PORTS}
     do
@@ -185,10 +194,6 @@ discoverPorts() {
 
         file_tpl="${TEMPLATE_DIR}/jolokia/CM.json.tpl"
 
-        tmp_dir="/tmp/${host}"
-
-        [ -d ${tmp_dir} ] || mkdir -p ${tmp_dir}
-
         if [ -f ${file_tpl} ]
         then
           discoverApplications ${tmp_dir} ${p}
@@ -201,7 +206,7 @@ discoverPorts() {
 
     touch ${service_tmp_file}
 
-    for f in $(ls -1 ${tmp_dir}/CM_*.result)
+    for f in $(ls -1 ${tmp_dir}/CM_*.result 2> /dev/null)
     do
 #       echo -e "\n - analyze '${f}'"
 
@@ -271,32 +276,41 @@ addToGraphite() {
 
   local host="${1}"
   local tpl_dir="${TEMPLATE_DIR}/grafana"
+
+  local ip=$(fping -A ${host} | cut -d ' ' -f 1)
+  local apps="cms mls rls wfs adobe_drive cae_live cae_prev elastic_worker feeder_content feeder_live feeder_prev site_manager solr studio user_changes webdav"
+  local services=$(grep '='  ${TMP_DIR}/cm-services  | grep -v standardJMX | sort)
+
   local curl_opts="--silent --user admin:admin"
+
+  local short_hostname=$(echo "${host}" | awk -F '.' '{print($1)}')
+  local grafana_hostname=$(echo "${host}" | sed 's|\.|-|g')
+
+  [ -d ${TMP_DIR}/grafana ] || mkdir ${TMP_DIR}/grafana
 
   if [ ${FORCE} != true ]
   then
-#    echo "delete dashboard for host '${host}'"
-
-    short_hostname=$(echo "${host}" | awk -F '.' '{print($1)}')
-    grafana_hostname=$(echo "${host}" | sed 's|\.|-|g')
-
     data="$(curl ${curl_opts} -X GET "http://grafana:3000/api/search?query=&tag=${short_hostname}")"
 
     uid=$(echo "${data}" | jq --raw-output '.[].uri')
 
     for i in ${uid}
     do
-
-#      echo "delete dashboard '${i}'"
       curl ${curl_opts} -X DELETE http://grafana:3000/api/dashboards/${i} > /dev/null
     done
   fi
 
-  for tpl in $(ls -1 ${tpl_dir}/blueprint*.json)
-  do
-    # "title": "Blueprint ContentServer",
+#   for a in ${apps}
+#   do
+#     if [ $(echo "${services}" | grep -ic ${k}) -gt 0 ]
+#     then
+#       :
+#
+#     fi
+#   done
 
-    [ -d ${TMP_DIR}/grafana ] || mkdir ${TMP_DIR}/grafana
+  for tpl in $(ls -1 ${tpl_dir}/cm*.json)
+  do
 
 #    cp  ${tpl_dir}/${tpl} /var/tmp/${short_hostname}/${tpl}
     cp  ${tpl} ${TMP_DIR}/grafana/$(basename ${tpl})
@@ -612,15 +626,6 @@ addToIcinga() {
 
   fi
 
-
-
-
-#  return
-
-
-
-
-
   # URL
   # url=$(printf 'https://%s:%s/v1/objects/services/%s!%s' $ICINGA2_HOST $ICINGA2_API_PORT "co7madv01.coremedia.com" "check-cm-ior-2-mls")
 
@@ -644,7 +649,7 @@ addToIcinga() {
 
 run() {
 
-  echo -e "\n"
+  echo ""
 
   TMP_DIR="${JOLOKIA_CACHE_BASE}/${CHECK_HOST}"
 
@@ -683,6 +688,8 @@ run() {
         supervisorctl restart all > /dev/null
       fi
     fi
+  else
+    echo "Host '${CHECK_HOST}' is not alive"
   fi
 
   rm -rf /tmp/${CHECK_HOST}
