@@ -60,6 +60,9 @@ RUN \
   /usr/share/grafana/bin/grafana-cli --pluginsDir "/usr/share/grafana/data/plugins" plugins install raintank-worldping-app
 
 RUN \
+  /usr/share/grafana/bin/grafana-cli --pluginsDir "/usr/share/grafana/data/plugins" plugins update-all
+
+RUN \
   npm uninstall -g grunt-cli && \
   npm cache clear && \
   go clean -i -r && \
