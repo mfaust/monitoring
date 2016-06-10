@@ -88,6 +88,8 @@ then
 
   sed -i 's,icingaadmin_changeme,'${ICINGAADMIN_USER}',g'   /etc/icingaweb2/roles.ini
 
+  sed -i 's|my.graphite.web|172.17.0.5:8080|g'              /etc/icingaweb2/modules/graphite/config.ini
+
   chown nginx:nginx /var/log/icingaweb2
 
   touch ${initfile}

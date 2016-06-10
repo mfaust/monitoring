@@ -12,7 +12,7 @@ EXPOSE 80
 # ---------------------------------------------------------------------------------------
 
 RUN \
-  apk --quiet update 
+  apk --quiet update
 
 RUN \
   apk add \
@@ -34,11 +34,19 @@ RUN \
     nginx \
     mysql-client \
     shadow \
-    openssl 
+    openssl
 
-RUN \ 
+RUN \
   cd /usr/share/webapps/icingaweb2/modules && \
   git clone https://github.com/Icinga/icingaweb2-module-director.git director
+
+RUN \
+  cd /usr/share/webapps/icingaweb2/modules && \
+  git clone https://github.com/Icinga/icingaweb2-module-graphite.git graphite
+
+RUN \
+  cd /usr/share/webapps/icingaweb2/modules && \
+  git clone https://github.com/Icinga/icingaweb2-module-generictts.git generictts
 
 RUN \
   apk del --purge \
@@ -52,6 +60,8 @@ RUN \
   mkdir /run/nginx && \
   mkdir /var/log/php-fpm && \
   mkdir /etc/icingaweb2/modules && \
+  mkdir /etc/icingaweb2/modules/graphite && \
+  mkdir /etc/icingaweb2/modules/generictts && \
   mkdir /etc/icingaweb2/enabledModules
 
 RUN \
@@ -59,7 +69,13 @@ RUN \
   /usr/bin/icingacli module enable setup && \
   /usr/bin/icingacli module enable translation && \
   /usr/bin/icingacli module enable doc && \
-  /usr/bin/icingacli module enable director
+  /usr/bin/icingacli module enable director && \
+  /usr/bin/icingacli module enable graphite && \
+  /usr/bin/icingacli module enable generictts
+
+RUN \
+  cp -R /usr/share/webapps/icingaweb2/modules/graphite/sample-config/icinga2/* /etc/icingaweb2/modules/graphite/ && \
+  chmod -R 2755 /etc/icingaweb2/modules/graphite
 
 ADD rootfs/ /
 
