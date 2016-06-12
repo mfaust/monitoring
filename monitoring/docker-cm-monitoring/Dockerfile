@@ -11,12 +11,19 @@ WORKDIR /app
 VOLUME  /app
 
 RUN \
-  apk --quiet update && \
-  apk --quiet upgrade
+  apk --verbose update && \
+  apk --verbose upgrade
 
 RUN \
-  apk --quiet add \
+  apk --verbose add \
+    build-base \
     bash \
+    ruby-dev \
+    ruby-irb \
+    ruby-io-console \
+    ruby-rdoc \
+    sqlite \
+    sqlite-dev \
     nano \
     python \
     jq \
@@ -27,11 +34,18 @@ RUN \
     fping \
     nmap \
     monitoring-plugins \
-    nrpe \
-    bind-tools
+    bind-tools \
+    zlib \
+    zlib-dev
 
-RUN \
-  rm -rf /var/cache/apk/*
+RUN \ 
+  gem install \
+    sqlite3 \
+    ruby-nmap \
+    jolokia
+
+#RUN \
+#  rm -rf /var/cache/apk/*
 
 RUN \
   mv /etc/collectd/collectd.conf /etc/collectd/collectd.conf.dist
