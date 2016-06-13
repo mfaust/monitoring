@@ -52,7 +52,12 @@ Ports = [3306,28017,38099,40099,40199,40299,40399,40499,40599,40699,40799,40899,
 d = new Discover( Host, Ports )
 
 
+class handleTemplates
 
+  Dir.chdir( dir )
+  Dir.glob( '*.tpl' ).select { |f| File.directory? f }
+
+end
 
 
 
@@ -266,6 +271,11 @@ table
  ports : id, id_host. port
  checks: id, id_host, id_ports, checks
 
+
+add     # add host
+list    # list hosts
+delete  # delete host
+reuse   # read database and create new json files
 
 
 
