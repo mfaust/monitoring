@@ -11,8 +11,8 @@
 # -------------------------------------------------------------------------------------------------
 
 SCRIPTNAME=$(basename $0 .sh)
-VERSION="2.12.4"
-VDATE="30.05.2016"
+VERSION="2.13.1"
+VDATE="16.06.2016"
 
 # -------------------------------------------------------------------------------------------------
 
@@ -26,7 +26,7 @@ JOLOKIA_RC="/etc/jolokia.rc"
 }
 
 HOSTNAME="${COLLECTD_HOSTNAME:-$(hostname -s)}"
-INTERVAL="${COLLECTD_INTERVAL:-45}"
+INTERVAL="${COLLECTD_INTERVAL:-20}"
 
 # -------------------------------------------------------------------------------------------------
 
@@ -75,13 +75,26 @@ collectdPlugin_Memory() {
 
   local result="${1}"
 
+  local HeapMemInit=$(jq --raw-output '.value.HeapMemoryUsage.init' ${result})
   local HeapMemMax=$(jq --raw-output '.value.HeapMemoryUsage.max' ${result})
   local HeapMemUsed=$(jq --raw-output '.value.HeapMemoryUsage.used' ${result})
   local HeapMemCom=$(jq --raw-output '.value.HeapMemoryUsage.committed' ${result})
 
+  local PermMemInit=$(jq --raw-output '.value.NonHeapMemoryUsage.init' ${result})
+  local PermMemMax=$(jq --raw-output '.value.NonHeapMemoryUsage.max' ${result})
+  local PermMemUsed=$(jq --raw-output '.value.NonHeapMemoryUsage.used' ${result})
+  local PermMemCom=$(jq --raw-output '.value.NonHeapMemoryUsage.committed' ${result})
+
+
+  echo "PUTVAL ${HOSTNAME}/${service}-heap_memory/cm7_counter-init interval=${INTERVAL} N:${HeapMemInit}"
   echo "PUTVAL ${HOSTNAME}/${service}-heap_memory/cm7_counter-max interval=${INTERVAL} N:${HeapMemMax}"
   echo "PUTVAL ${HOSTNAME}/${service}-heap_memory/cm7_counter-used interval=${INTERVAL} N:${HeapMemUsed}"
   echo "PUTVAL ${HOSTNAME}/${service}-heap_memory/cm7_counter-commited interval=${INTERVAL} N:${HeapMemCom}"
+
+  echo "PUTVAL ${HOSTNAME}/${service}-perm_memory/cm7_counter-init interval=${INTERVAL} N:${PermMemInit}"
+  echo "PUTVAL ${HOSTNAME}/${service}-perm_memory/cm7_counter-max interval=${INTERVAL} N:${PermMemMax}"
+  echo "PUTVAL ${HOSTNAME}/${service}-perm_memory/cm7_counter-used interval=${INTERVAL} N:${PermMemUsed}"
+  echo "PUTVAL ${HOSTNAME}/${service}-perm_memory/cm7_counter-commited interval=${INTERVAL} N:${PermMemCom}"
 }
 
 collectdPlugin_ClassLoading() {
@@ -230,11 +243,11 @@ collectdPlugin_CMConnectionPool() {
 
   local result="${1}"
 
-  local busy="$(cat ${result} | jq '.value.BusyConnections' )"
-  local idle="$(cat ${result} | jq '.value.IdleConnections' )"
-  local max="$(cat ${result} | jq '.value.MaxConnections' )"
-  local min="$(cat ${result} | jq '.value.MinConnections' )"
-  local open="$(cat ${result} | jq '.value.OpenConnections' )"
+  local busy=$(jq --raw-output '.value.BusyConnections' ${result})
+  local idle=$(jq --raw-output '.value.IdleConnections' ${result})
+  local max=$(jq --raw-output '.value.MaxConnections' ${result})
+  local min=$(jq --raw-output '.value.MinConnections' ${result})
+  local open=$(jq --raw-output '.value.OpenConnections' ${result})
 
   echo "PUTVAL $HOSTNAME/${service}-connection_pool/cm7_counter-busy interval=$INTERVAL N:${busy}"
   echo "PUTVAL $HOSTNAME/${service}-connection_pool/cm7_counter-idle interval=$INTERVAL N:${idle}"
@@ -275,23 +288,23 @@ collectdPlugin_CMStatisticsRepository() {
 
   local result="${1}"
 
-  local document_creations_avg="$(cat ${result}       | jq '.value.DocumentCreations_avg' )"
-  local document_creations_samples="$(cat ${result}   | jq '.value.DocumentCreations_samples' )"
-  local document_creations_sum="$(cat ${result}       | jq '.value.DocumentCreations_sum' )"
-  local document_rightchecks_avg="$(cat ${result}     | jq '.value.DocumentRightsChecks_avg' )"
-  local document_rightchecks_samples="$(cat ${result} | jq '.value.DocumentRightsChecks_samples' )"
-  local document_rightchecks_sum="$(cat ${result}     | jq '.value.DocumentRightsChecks_sum' )"
+  local document_creations_avg=$(jq --raw-output '.value.DocumentCreations_avg' ${result})
+  local document_creations_samples=$(jq --raw-output '.value.DocumentCreations_samples' ${result})
+  local document_creations_sum=$(jq --raw-output '.value.DocumentCreations_sum' ${result})
+  local document_rightchecks_avg=$(jq --raw-output '.value.DocumentRightsChecks_avg' ${result})
+  local document_rightchecks_samples=$(jq --raw-output '.value.DocumentRightsChecks_samples' ${result})
+  local document_rightchecks_sum=$(jq --raw-output '.value.DocumentRightsChecks_sum' ${result})
 
-  local folder_creations_avg="$(cat ${result}         | jq '.value.FolderCreations_avg' )"
-  local folder_creations_samples="$(cat ${result}     | jq '.value.FolderCreations_samples' )"
-  local folder_creations_sum="$(cat ${result}         | jq '.value.FolderCreations_sum' )"
-  local folder_rightchecks_avg="$(cat ${result}       | jq '.value.FolderRightsChecks_avg' )"
-  local folder_rightchecks_samples="$(cat ${result}   | jq '.value.FolderRightsChecks_samples' )"
-  local folder_rightchecks_sum="$(cat ${result}       | jq '.value.FolderRightsChecks_sum' )"
+  local folder_creations_avg=$(jq --raw-output '.value.FolderCreations_avg' ${result})
+  local folder_creations_samples=$(jq --raw-output '.value.FolderCreations_samples' ${result})
+  local folder_creations_sum=$(jq --raw-output '.value.FolderCreations_sum' ${result})
+  local folder_rightchecks_avg=$(jq --raw-output '.value.FolderRightsChecks_avg' ${result})
+  local folder_rightchecks_samples=$(jq --raw-output '.value.FolderRightsChecks_samples' ${result})
+  local folder_rightchecks_sum=$(jq --raw-output '.value.FolderRightsChecks_sum' ${result})
 
-  local version_creations_avg="$(cat ${result}        | jq '.value.VersionCreations_avg' )"
-  local version_creations_samples="$(cat ${result}    | jq '.value.VersionCreations_samples' )"
-  local version_creations_sum="$(cat ${result}        | jq '.value.VersionCreations_sum' )"
+  local version_creations_avg=$(jq --raw-output '.value.VersionCreations_avg' ${result})
+  local version_creations_samples=$(jq --raw-output '.value.VersionCreations_samples' ${result})
+  local version_creations_sum=$(jq --raw-output '.value.VersionCreations_sum' ${result})
 
   echo "PUTVAL $HOSTNAME/${service}-stats_repository_document_creation/cm7_counter-avg interval=$INTERVAL N:${document_creations_avg}"
   echo "PUTVAL $HOSTNAME/${service}-stats_repository_document_creation/cm7_counter-samples interval=$INTERVAL N:${document_creations_samples}"
@@ -444,19 +457,33 @@ collectdPlugin_Mongo() {
       echo "PUTVAL ${HOSTNAME}/${service}-commands/cm7_counter-${i} interval=$INTERVAL N:${data}"
     done
 
-    bytes_read="$(jq --raw-output '.wiredTiger."block-manager"."bytes read"' ${result})"
-    bytes_written="$(jq --raw-output '.wiredTiger."block-manager"."bytes written"' ${result})"
-    blocks_read="$(jq --raw-output '.wiredTiger."block-manager"."blocks read"' ${result})"
-    blocks_written="$(jq --raw-output '.wiredTiger."block-manager"."blocks written"' ${result})"
-    io_total_read="$(jq --raw-output '.wiredTiger.connection."total read I/Os"' ${result})"
-    io_total_write="$(jq --raw-output '.wiredTiger.connection."total write I/Os"' ${result})"
+    conn_available=$(jq --raw-output '.connections.available' ${result})
+    conn_current=$(jq --raw-output '.connections.current' ${result})
 
-    echo "PUTVAL ${HOSTNAME}/${service}-blocks/cm7_counter-read interval=$INTERVAL N:${blocks_read}"
-    echo "PUTVAL ${HOSTNAME}/${service}-blocks/cm7_counter-write interval=$INTERVAL N:${blocks_written}"
-    echo "PUTVAL ${HOSTNAME}/${service}-bytes/bytes-read interval=$INTERVAL N:${bytes_read}"
-    echo "PUTVAL ${HOSTNAME}/${service}-bytes/bytes-write interval=$INTERVAL N:${bytes_written}"
-    echo "PUTVAL ${HOSTNAME}/${service}-io/cm7_counter-read interval=$INTERVAL N:${io_total_read}"
-    echo "PUTVAL ${HOSTNAME}/${service}-io/cm7_counter-write interval=$INTERVAL N:${io_total_write}"
+    echo "PUTVAL ${HOSTNAME}/${service}-connections/cm7_counter-available interval=$INTERVAL N:${conn_available}"
+    echo "PUTVAL ${HOSTNAME}/${service}-connections/cm7_counter-current interval=$INTERVAL N:${conn_current}"
+
+
+    wired=$(jq --raw-output '.wiredTiger' ${result})
+
+    if [ "${wired}" != "null" ]
+    then
+
+      bytes_read="$(jq --raw-output '.wiredTiger."block-manager"."bytes read"' ${result})"
+      bytes_written="$(jq --raw-output '.wiredTiger."block-manager"."bytes written"' ${result})"
+      blocks_read="$(jq --raw-output '.wiredTiger."block-manager"."blocks read"' ${result})"
+      blocks_written="$(jq --raw-output '.wiredTiger."block-manager"."blocks written"' ${result})"
+      io_total_read="$(jq --raw-output '.wiredTiger.connection."total read I/Os"' ${result})"
+      io_total_write="$(jq --raw-output '.wiredTiger.connection."total write I/Os"' ${result})"
+
+      echo "PUTVAL ${HOSTNAME}/${service}-blocks/cm7_counter-read interval=$INTERVAL N:${blocks_read}"
+      echo "PUTVAL ${HOSTNAME}/${service}-blocks/cm7_counter-write interval=$INTERVAL N:${blocks_written}"
+      echo "PUTVAL ${HOSTNAME}/${service}-bytes/bytes-read interval=$INTERVAL N:${bytes_read}"
+      echo "PUTVAL ${HOSTNAME}/${service}-bytes/bytes-write interval=$INTERVAL N:${bytes_written}"
+      echo "PUTVAL ${HOSTNAME}/${service}-io/cm7_counter-read interval=$INTERVAL N:${io_total_read}"
+      echo "PUTVAL ${HOSTNAME}/${service}-io/cm7_counter-write interval=$INTERVAL N:${io_total_write}"
+    fi
+
   fi
 }
 
