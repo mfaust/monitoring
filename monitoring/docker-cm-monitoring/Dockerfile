@@ -3,7 +3,7 @@ FROM docker-alpine-base:latest
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
-LABEL version="1.0.1"
+LABEL version="1.2.1"
 
 # ---------------------------------------------------------------------------------------
 
@@ -11,11 +11,11 @@ WORKDIR /app
 VOLUME  /app
 
 RUN \
-  apk --verbose update && \
-  apk --verbose upgrade
+  apk --quiet update && \
+  apk --quiet upgrade
 
 RUN \
-  apk --verbose add \
+  apk --quiet add \
     build-base \
     bash \
     ruby-dev \
@@ -38,14 +38,14 @@ RUN \
     zlib \
     zlib-dev
 
-RUN \ 
+RUN \
   gem install \
     sqlite3 \
     ruby-nmap \
     jolokia
 
-#RUN \
-#  rm -rf /var/cache/apk/*
+RUN \
+  rm -rf /var/cache/apk/*
 
 RUN \
   mv /etc/collectd/collectd.conf /etc/collectd/collectd.conf.dist

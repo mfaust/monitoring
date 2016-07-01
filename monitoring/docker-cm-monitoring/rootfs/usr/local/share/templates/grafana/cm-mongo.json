@@ -226,7 +226,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(stdev(collectd.%HOST%.MONGO-commands.*, 5, 0.1), '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(stdev(collectd.%HOST%.MONGO-commands.*, 3, 0.1), '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -264,7 +264,91 @@
           }
         ],
         "title": "commands"
-      }
+      },
+
+    {
+      "title": "connections",
+      "height": "150px",
+      "editable": true,
+      "collapse": false,
+      "panels": [
+        {
+          "title": "Connections",
+          "error": false,
+          "span": 12,
+          "editable": true,
+          "type": "graph",
+          "isNew": true,
+          "id": 5,
+          "targets": [
+            {
+              "target": "aliasByMetric(aliasSub(collectd.%HOST%.MONGO-connections.*, '(.*)-', ''))",
+              "refId": "A",
+              "textEditor": true
+            }
+          ],
+          "datasource": null,
+          "renderer": "flot",
+          "yaxes": [
+            {
+              "label": null,
+              "show": true,
+              "logBase": 1,
+              "min": null,
+              "max": null,
+              "format": "none"
+            },
+            {
+              "label": null,
+              "show": false,
+              "logBase": 1,
+              "min": null,
+              "max": null,
+              "format": "short"
+            }
+          ],
+          "xaxis": {
+            "show": true
+          },
+          "grid": {
+            "threshold1": null,
+            "threshold2": null,
+            "threshold1Color": "rgba(216, 200, 27, 0.27)",
+            "threshold2Color": "rgba(234, 112, 112, 0.22)"
+          },
+          "lines": true,
+          "fill": 2,
+          "linewidth": 1,
+          "points": false,
+          "pointradius": 5,
+          "bars": false,
+          "stack": false,
+          "percentage": false,
+          "legend": {
+            "show": true,
+            "values": true,
+            "min": false,
+            "max": false,
+            "current": true,
+            "total": false,
+            "avg": false,
+            "rightSide": true,
+            "alignAsTable": true
+          },
+          "nullPointMode": "connected",
+          "steppedLine": false,
+          "tooltip": {
+            "value_type": "cumulative",
+            "shared": true,
+            "ordering": "alphabetical",
+            "msResolution": false
+          },
+          "timeFrom": null,
+          "timeShift": null,
+          "aliasColors": {},
+          "seriesOverrides": [],
+          "links": []
+        }
     ],
     "time": {
       "from": "now-3h",
