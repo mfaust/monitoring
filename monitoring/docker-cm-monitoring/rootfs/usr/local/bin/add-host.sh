@@ -6,8 +6,8 @@
 # ----------------------------------------------------------------------------------------
 
 SCRIPTNAME=$(basename $0 .sh)
-VERSION="2.3.1"
-VDATE="09.06.2016"
+VERSION="2.3.2"
+VDATE="01.07.2016"
 
 # ----------------------------------------------------------------------------------------
 
@@ -344,15 +344,15 @@ addIcingaService() {
   status=$(curl ${curl_opts} -H 'Accept: application/json' -X PUT ${url} --data @${TMP_DIR}/icinga2/${template} | python -m json.tool)
   status_code=$(echo "${status}" | jq --raw-output '.results[0].code')
 
-  echo -n "  add '${name}' "
+#  echo -n "  add '${name}' "
 
-  if [ "${status_code}" = "null" ]
-  then
-    echo "${status}"
-  elif [ ${status_code} = "200" ]
-  then
-    echo " .. succesful"
-  fi
+#   if [ "${status_code}" = "null" ]
+#   then
+#     echo "${status}"
+#   elif [ ${status_code} = "200" ]
+#   then
+#     echo " .. succesful"
+#   fi
 
 }
 
@@ -360,7 +360,7 @@ addToIcinga() {
 
   if [ -z ${ICINGA2_HOST} ]
   then
-    echo "no icinga2 host configured ... skip"
+    echo "  no icinga2 host configured ... skip"
     return
   fi
 
@@ -385,7 +385,7 @@ addToIcinga() {
      -H 'Accept: application/json' \
      -H 'X-HTTP-Method-Override: DELETE' \
      -X POST \
-     "https://${ICINGA2_HOST}:${ICINGA2_API_PORT}/v1/objects/hosts/${host}?cascade=1" | python -m json.tool
+     "https://${ICINGA2_HOST}:${ICINGA2_API_PORT}/v1/objects/hosts/${host}?cascade=1" | python -m json.tool > /dev/null
 
     ICINGA2_REMOVE_HOST=
     name=
@@ -417,7 +417,7 @@ addToIcinga() {
 
   if ( [ -z ${name} ] || [ "${name}" == "null" ] )
   then
-    echo -n "add Host '${host}'   "
+    echo -n "  add Host '${host}'   "
     status=$(curl ${curl_opts} -H 'Accept: application/json' -X PUT "https://${ICINGA2_HOST}:${ICINGA2_API_PORT}/v1/objects/hosts/${host}" --data @${TMP_DIR}/icinga2/host.json | python -mjson.tool)
     status_code=$(echo "${status}" | jq --raw-output '.results[0].code')
 
@@ -433,13 +433,13 @@ addToIcinga() {
     fi
 
   else
-    echo "Host ${host} already monitored"
+    echo "  Host ${host} already monitored"
   fi
 
   if ( [ ! -z "${status_code}" ] && [ ${status_code} = "200" ] )
   then
 
-    echo "add Services for Host '${host}'"
+    echo "  add Services for Host '${host}'"
 
     local tmp_apps="${apps}"
 
@@ -677,13 +677,15 @@ run() {
       then
         echo " - discover Applications"
         discoverPorts ${CHECK_HOST}
+        echo ""
 
         echo " - add Grafana Templates"
         addToGraphite ${CHECK_HOST}
+        echo ""
 
         echo " - add Icinga Templates"
         addToIcinga ${CHECK_HOST}
-
+        echo ""
 
         supervisorctl restart all > /dev/null
       fi
