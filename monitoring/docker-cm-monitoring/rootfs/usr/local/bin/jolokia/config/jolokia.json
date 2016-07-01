@@ -1,0 +1,110 @@
+{
+  "jolokia": {
+    "proxy": {
+      "server": "localhost",
+      "port": "8080"
+    },
+    "service": {
+      "tomcat": {
+        "description": "standard checks for every tomcat server",
+        "port": "",
+        "host": "",
+        "metrics": [
+          {
+            "name": "heap_memory_usage",
+            "mbean": "java.lang:type=Memory",
+            "attribute": "HeapMemoryUsage"
+          }, {
+            "name": "thread_count",
+            "mbean": "java.lang:type=Threading",
+            "attribute": "TotalStartedThreadCount,ThreadCount,DaemonThreadCount,PeakThreadCount"
+          }, {
+            "name": "class_count",
+            "mbean": "java.lang:type=ClassLoading",
+            "attribute": "LoadedClassCount,UnloadedClassCount,TotalLoadedClassCount"
+          },
+          {
+            "name": "GarbageCollector",
+            "type" : "read",
+            "mbean" : "java.lang:type=GarbageCollector,name=ParNew"
+          }
+        ]
+      },
+      "moebius-16-tomcat_adobe-drive": {
+        "description": "Adobe Drive",
+        "port": "41199",
+        "host": "moebius-16-tomcat",
+        "metrics": [ ]
+      },
+      "moebius-16-tomcat_caefeeder-live": {
+        "description": "CAE Feeder Live",
+        "port": "40899",
+        "host": "moebius-16-tomcat",
+        "metrics": [
+          {
+            "name": "caefeeder",
+            "mbean": "com.coremedia:type=ProactiveEngine,application=caefeeder",
+            "attribute": "KeysCount,ValuesCount,InvalidationCount,SendSuccessTimeLatest,PurgeTimeLatest,HeartBeat,QueueCapacity,QueueMaxSize,QueueProcessedPerSecond"
+          }
+        ]
+      },
+      "moebius-16-tomcat_caefeeder-preview": {
+        "description": "CAE Feeder Preview",
+        "port": "40799",
+        "host": "moebius-16-tomcat",
+        "metrics": [
+          {
+            "name": "caefeeder",
+            "mbean": "com.coremedia:type=ProactiveEngine,application=caefeeder",
+            "attribute": "KeysCount,ValuesCount,InvalidationCount,SendSuccessTimeLatest,PurgeTimeLatest,HeartBeat,QueueCapacity,QueueMaxSize,QueueProcessedPerSecond"
+          }
+        ]
+      },
+      "moebius-16-tomcat_cae-live": {
+        "description": "CAE Live",
+        "port": "42199",
+        "host": "moebius-16-tomcat",
+        "metrics": [
+          {
+            "name": "contentbeans",
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.blueprint.common.contentbeans.Page\",application=blueprint"
+          }, {
+            "name": "CapConnection",
+            "mbean": "com.coremedia:type=CapConnection,application=blueprint",
+            "attribute": "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions"
+          }
+        ]
+      },
+      "moebius-16-tomcat_cae-preview": {
+        "description": "CAE Preview",
+        "port": "40999",
+        "host": "moebius-16-tomcat",
+        "metrics": [
+          {
+            "name": "contentbeans",
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.blueprint.common.contentbeans.Page\",application=blueprint"
+          }, {
+            "name": "CapConnection",
+            "mbean": "com.coremedia:type=CapConnection,application=blueprint",
+            "attribute": "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions"
+          }
+        ]
+      },
+      "release-16-tomcat_cae-live": {
+        "description": "CAE Live",
+        "port": "42199",
+        "host": "release-16-tomcat",
+        "metrics": [
+          {
+            "name": "contentbeans",
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.blueprint.common.contentbeans.Page\",application=blueprint"
+          }, {
+            "name": "CapConnection",
+            "mbean": "com.coremedia:type=CapConnection,application=blueprint",
+            "attribute": "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions"
+          }
+        ]
+      }
+    }
+  }
+}
