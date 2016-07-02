@@ -1,5 +1,110 @@
 {
   "jolokia": {
+    "applications": {
+      "tomcat": {
+        "metrics": [
+          {
+            "name": "heap_memory_usage",
+            "mbean": "java.lang:type=Memory",
+            "attribute": "HeapMemoryUsage"
+          }, {
+            "name": "thread_count",
+            "mbean": "java.lang:type=Threading",
+            "attribute": "TotalStartedThreadCount,ThreadCount,DaemonThreadCount,PeakThreadCount"
+          }, {
+            "name": "class_count",
+            "mbean": "java.lang:type=ClassLoading",
+            "attribute": "LoadedClassCount,UnloadedClassCount,TotalLoadedClassCount"
+          },
+          {
+            "name": "GarbageCollector",
+            "type" : "read",
+            "mbean" : "java.lang:type=GarbageCollector,name=ParNew"
+          }
+        ]
+      },
+      "cae": {
+        "metrics": [
+          {
+            "name": "contentbeans",
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.blueprint.common.contentbeans.Page\",application=blueprint"
+          }, {
+            "name": "CapConnection",
+            "mbean": "com.coremedia:type=CapConnection,application=blueprint",
+            "attribute": "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions"
+          }
+        ]
+      },
+      "cae-live": {
+        "metrics": [
+          {
+            "name": "contentbeans",
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.blueprint.common.contentbeans.Page\",application=blueprint"
+          }, {
+            "name": "CapConnection",
+            "mbean": "com.coremedia:type=CapConnection,application=blueprint",
+            "attribute": "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions"
+          }
+        ]
+      },
+      "cae-preview": {
+        "metrics": [
+          {
+            "name": "contentbeans",
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.blueprint.common.contentbeans.Page\",application=blueprint"
+          }, {
+            "name": "CapConnection",
+            "mbean": "com.coremedia:type=CapConnection,application=blueprint",
+            "attribute": "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions"
+          }
+        ]
+      }
+    }
+  }
+}
+
+
+{
+  "jolokia":{
+    "proxy": {
+      "server": "localhost",
+      "port": "8080"
+    },
+    "host": {
+      "moebius-16-tomcat": {
+        "services": {
+          "cae-live-1": {
+            "description": "CAE Live",
+            "port": "42199",
+            "application": "cae"
+          },
+          "cae-live-2": {
+            "description": "CAE Live",
+            "port": "43199",
+            "application": "cae"
+          },
+          "cae-preview": {
+            "description": "CAE Preview",
+            "port": "40999"
+          },
+          "foo": {
+            "port": "2222",
+            "metrics" : {
+              "name": "bar",
+              "mbean": "java.lang:type=Memory",
+              "attribute": "HeapMemoryUsage"
+            }
+          }
+        }
+      },
+      "release-16-tomcat": {}
+    }
+  }
+}
+
+
+{
+  "jolokia": {
     "proxy": {
       "server": "localhost",
       "port": "8080"
