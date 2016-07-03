@@ -1,0 +1,68 @@
+{
+  "jolokia": {
+    "applications": {
+      "tomcat": {
+        "description": "standard checks for all tomcats",
+        "metrics": [
+          {
+            "name": "heap_memory_usage",
+            "mbean": "java.lang:type=Memory",
+            "attribute": "HeapMemoryUsage"
+          }, {
+            "name": "thread_count",
+            "mbean": "java.lang:type=Threading",
+            "attribute": "TotalStartedThreadCount,ThreadCount,DaemonThreadCount,PeakThreadCount"
+          }, {
+            "name": "class_count",
+            "mbean": "java.lang:type=ClassLoading",
+            "attribute": "LoadedClassCount,UnloadedClassCount,TotalLoadedClassCount"
+          },
+          {
+            "name": "GarbageCollector",
+            "type" : "read",
+            "mbean" : "java.lang:type=GarbageCollector,name=ParNew"
+          }
+        ]
+      },
+      "cae": {
+        "description": "checks for all CAE Services",
+        "metrics": [
+          {
+            "name": "contentbeans",
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.blueprint.common.contentbeans.Page\",application=blueprint"
+          }, {
+            "name": "CapConnection",
+            "mbean": "com.coremedia:type=CapConnection,application=blueprint",
+            "attribute": "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions"
+          }
+        ]
+      },
+      "cae-live": {
+        "description": "checks for the Live CAE Services",
+        "metrics": [
+          {
+            "name": "contentbeans",
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.blueprint.common.contentbeans.Page\",application=blueprint"
+          }, {
+            "name": "CapConnection",
+            "mbean": "com.coremedia:type=CapConnection,application=blueprint",
+            "attribute": "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions"
+          }
+        ]
+      },
+      "cae-preview": {
+        "description": "checks for the Preview CAE Services",
+        "metrics": [
+          {
+            "name": "contentbeans",
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.blueprint.common.contentbeans.Page\",application=blueprint"
+          }, {
+            "name": "CapConnection",
+            "mbean": "com.coremedia:type=CapConnection,application=blueprint",
+            "attribute": "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions"
+          }
+        ]
+      }
+    }
+  }
+}
