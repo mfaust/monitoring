@@ -130,7 +130,7 @@ class JolokiaClient
 
         service_count = d['services'] ? d['services'].count : 0
 
-        @log.debug( sprintf( "    - with %s services", service_count ) )
+#         @log.debug( sprintf( "    - with %s services", service_count ) )
 
         self.jolokiaService( h )
       end
@@ -156,10 +156,8 @@ class JolokiaClient
           @log.debug( sprintf( "      Port: %s", port ) )
         end
 
-        metrics = self.mergeChecks( host, k )
-#         @log.debug( JSON.pretty_generate( metrics ) )
+        metrics       = self.mergeChecks( host, k )
         mergedMetrics = self.jolokiaCreateBulkCheck( host, port, metrics )
-
         metricsResult = self.jolkiaSendChecks( mergedMetrics )
 
         self.saveResult( host, port, k, metricsResult )
@@ -172,9 +170,6 @@ class JolokiaClient
 
   # merge checks between aap_config_file and services
   def mergeChecks( host, services )
-
-#     @log.debug( sprintf( "      configured checks for Service %s on Host %s", services, host ) )
-#     @log.debug()
 
     result  = []
 
@@ -193,13 +188,6 @@ class JolokiaClient
     metrics_application  = @jolokiaApplications[application]   # metrics for the given 'application'  e.g. 'cae'
     metrics_service      = @jolokiaApplications[services]      # metrics for the giveb 'service-name' e.g. 'cae-preview'
 
-#     @log.debug( sprintf( "      %s", desc ) )
-#     @log.debug( sprintf( "        app   : %s", application ) )
-#     @log.debug( sprintf( "        metrics_inline      : %s", metrics_inline ) )
-#     @log.debug( sprintf( "        metrics_tomcat      : %s", metrics_tomcat ) )
-#     @log.debug( sprintf( "        metrics_application : %s", metrics_application ) )
-#     @log.debug( sprintf( "        metrics_service     : %s", metrics_service ) )
-
     metric_1 = {}
 
     # priority:
@@ -208,35 +196,16 @@ class JolokiaClient
     #   2. metrics from service name
     #   add metrics from inline
     if( application )
-      # aplication is set
-#       @log.debug( "        =>  use metrics from application" )
+      # aplication is set =>  use metrics from application
       if( metrics_application )
-        metric_1 = metrics_application  # ['metrics'] ? metrics_application['metrics'] : nil
+        metric_1 = metrics_application
       end
     else
-      # application is NOT set
-#       @log.debug( "  use metrics from service" )
+      # application is NOT set => use metrics from service
       if( metrics_service )
-        metric_1 = metrics_service  # ['metrics'] ? metrics_service['metrics'] : nil
+        metric_1 = metrics_service
       end
     end
-
-#     @log.debug( sprintf( "  inline      array: %s", metrics_inline.kind_of?(Array) ? "true" : "false" ) )
-#     @log.debug( sprintf( "              hash : %s", metrics_inline.kind_of?(Hash) ? "true" : "false" ) )
-#
-#     @log.debug( sprintf( "  tomcat      array: %s", metrics_tomcat.kind_of?(Array) ? "true" : "false" ) )
-#     @log.debug( sprintf( "              hash : %s", metrics_tomcat.kind_of?(Hash) ? "true" : "false" ) )
-#
-#     @log.debug( sprintf( "  application array: %s", metrics_application.kind_of?(Array) ? "true" : "false" ) )
-#     @log.debug( sprintf( "              hash : %s", metrics_application.kind_of?(Hash) ? "true" : "false" ) )
-#
-#     @log.debug( sprintf( "  service     array: %s", metrics_service.kind_of?(Array) ? "true" : "false" ) )
-#     @log.debug( sprintf( "              hash : %s", metrics_service.kind_of?(Hash) ? "true" : "false" ) )
-#
-#     @log.debug( sprintf( "  metric_1    array: %s", metric_1.kind_of?(Array) ? "true" : "false" ) )
-#     @log.debug( sprintf( "              hash : %s", metric_1.kind_of?(Hash) ? "true" : "false" ) )
-#
-#     @log.debug( sprintf( "        =   metric 1: %s", metric_1 ) )
 
     result.push( metrics_tomcat )
     if( metric_1 )
@@ -246,11 +215,6 @@ class JolokiaClient
     if( metrics_inline )
       result.push( metrics_inline )
     end
-#     @log.debug()
-
-#     @log.debug( sprintf( "  result      array: %s", result.kind_of?(Array) ? "true" : "false" ) )
-#     @log.debug( sprintf( "              hash : %s", result.kind_of?(Hash) ? "true" : "false" ) )
-#     @log.debug( sprintf( "      =   result: %s",  JSON.pretty_generate( result ) ) )
 
     return result
 
@@ -295,8 +259,6 @@ class JolokiaClient
           uri.request_uri,
           initheader = {'Content-Type' =>'application/json'}
         )
-
-        #        request.set_form_data( metrics )
         request.body = metrics.to_json
 
         response = Net::HTTP.start( uri.hostname, uri.port, use_ssl: uri.scheme == "https" ) do |http|
@@ -304,18 +266,58 @@ class JolokiaClient
         end
 
         result = JSON.pretty_generate( JSON.parse( response.body ) )
-
-        @log.debug( result )
-
       end
+    end
 
+    result = self.reorganizeData( result )
 
+    return JSON.pretty_generate( result )
+
+  end
+
+  # reorganize data to later simple find
+  def reorganizeData( data )
+
+    if( data == nil )
+      @log.error( "no data for reorganize" )
+      return
+    end
+
+    data    = JSON.parse( data )
+    result  = Array.new()
+
+    course_line = /
+      ^                   # Starting at the front of the string
+      (.*)type=           #
+      (?<type>.+\S)       #
+      $
+    /x
+
+    data.each do |c|
+
+      mbean      = c['request']['mbean']
+      request    = c['request']
+      value      = c['value']
+      timestamp  = c['timestamp']
+      status     = c['status']
+
+      parts      = mbean.match( course_line )
+      mbean_type = "#{parts['type']}".strip.tr('.', '')
+
+      result.push(
+        mbean_type.to_s => {
+          'status' => status,
+          'timestamp' => timestamp,
+          'request' => request,
+          'value'   => value
+        }
+      )
 
     end
 
     return result
-
   end
+
 
   #
   def saveResult( host, port, service, metricsResult )
@@ -337,10 +339,10 @@ class JolokiaClient
   # every check use an own request
   def jolokiaSingleCheck( host, port, check, metrics )
 
-      serverUrl = sprintf( "http://%s:%s/jolokia", @jolokiaProxyServer, @jolokiaProxyPort )
-      target = {
-        :url => sprintf( "service:jmx:rmi:///jndi/rmi://%s:%s/jmxrmi", host, port )
-      }
+    serverUrl = sprintf( "http://%s:%s/jolokia", @jolokiaProxyServer, @jolokiaProxyPort )
+    target = {
+      :url => sprintf( "service:jmx:rmi:///jndi/rmi://%s:%s/jmxrmi", host, port )
+    }
 
     if( ! check.empty? )
 
@@ -443,7 +445,7 @@ end
 
 j = JolokiaClient.new( 'config/application.json', 'config/jolokia.json' )
 
-j.jolokiaProxy
+# j.jolokiaProxy
 j.jolokiaHosts
 
 #j.jolokiaService
