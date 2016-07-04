@@ -29,20 +29,8 @@
         "metrics": [
           {
             "name": "contentbeans",
-            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.blueprint.common.contentbeans.Page\",application=blueprint"
-          }, {
-            "name": "CapConnection",
-            "mbean": "com.coremedia:type=CapConnection,application=blueprint",
-            "attribute": "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions"
-          }
-        ]
-      },
-      "cae-live": {
-        "description": "checks for the Live CAE Services",
-        "metrics": [
-          {
-            "name": "contentbeans",
-            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.blueprint.common.contentbeans.Page\",application=blueprint"
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.blueprint.common.contentbeans.Page\",application=blueprint",
+            "attribute": "Updated,Evaluated,Evicted,EvictionRate,Removed,AverageEvaluationTime,RemovalRate,Utilization,Capacity,InsertionRate,Level,Inserted,MissRate"
           }, {
             "name": "CapConnection",
             "mbean": "com.coremedia:type=CapConnection,application=blueprint",
@@ -60,6 +48,36 @@
             "name": "CapConnection",
             "mbean": "com.coremedia:type=CapConnection,application=blueprint",
             "attribute": "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions"
+          }
+        ]
+      },
+      "studio": {
+        "description": "check for the CM Studio",
+        "metrics": [
+          {
+            "name": "CapConnection for Studio",
+            "mbean": "com.coremedia:type=CapConnection,application=CoreMedia-Studio",
+            "attribute" : "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions"
+          }
+        ]
+      },
+      "content-feeder": {
+        "description": "The Content Feeder",
+        "metrics": [
+          {
+            "name": "feeder",
+            "mbean": "com.coremedia:application=contentfeeder,type=Feeder",
+            "attribute": "State,Uptime,CurrentPendingDocuments,IndexAverageBatchSendingTime,IndexDocuments,IndexContentDocuments,IndexBytes,PendingEvents,PendingFolders"
+          }
+        ]
+      },
+      "caefeeder": {
+        "description": "The CAE Feeder (Live and Preview)",
+        "metrics": [
+          {
+            "name": "caefeeder",
+            "mbean": "com.coremedia:type=ProactiveEngine,application=caefeeder",
+            "attribute": "KeysCount,ValuesCount,InvalidationCount,SendSuccessTimeLatest,PurgeTimeLatest,HeartBeat,QueueCapacity,QueueMaxSize,QueueProcessedPerSecond"
           }
         ]
       }

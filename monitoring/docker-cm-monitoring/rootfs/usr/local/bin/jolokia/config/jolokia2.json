@@ -1,0 +1,19 @@
+{
+  "jolokia":{
+    "proxy": {
+      "server": "localhost",
+      "port": "8080"
+    },
+    "host": {
+      "moebius-16-tomcat": {
+        "services": {
+          "cae-live-1": {
+            "description": "CAE Live",
+            "port": "42199",
+            "application": "cae"
+          }
+        }
+      }
+    }
+  }
+}

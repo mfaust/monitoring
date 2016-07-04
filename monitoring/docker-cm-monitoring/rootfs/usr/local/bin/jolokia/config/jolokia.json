@@ -12,27 +12,35 @@
             "port": "42199",
             "application": "cae"
           },
-          "cae-live-2": {
-            "description": "CAE Live",
-            "port": "43199",
-            "application": "cae"
-          },
           "cae-preview": {
             "description": "CAE Preview",
             "port": "40999",
-            "metrics" : [{
-              "name": "bar",
-              "mbean": "java.lang:type=Memory",
-              "attribute": "HeapMemoryUsage"
-            }]
+            "application": "cae"
+          },
+          "caefeeder-live": {
+            "description": "CAE Feeder Live",
+            "port": "40899",
+            "application": "caefeeder"
+          },
+          "caefeeder-preview": {
+            "description": "CAE Feeder Preview",
+            "port": "40799",
+            "application": "caefeeder"
           },
           "example-1": {
             "port": "2222",
-            "metrics" : [{
-              "name": "bar",
-              "mbean": "java.lang:type=Memory",
-              "attribute": "HeapMemoryUsage"
-            }]
+            "metrics" : [
+              {
+                "name": "bar",
+                "mbean": "java.lang:type=Memory",
+                "attribute": "HeapMemoryUsage"
+              },
+              {
+                "name": "bar",
+                "mbean": "java.lang:type=Memory",
+                "attribute": "HeapMemoryUsage"
+              }
+            ]
           },
           "example-2": {
             "port": "2223",
