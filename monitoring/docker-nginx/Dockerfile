@@ -1,9 +1,8 @@
-
-FROM docker-alpine-base:latest
+FROM bodsch/docker-alpine-base:latest
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
-LABEL version="1.0.0"
+LABEL version="1.0.1"
 
 ENV TERM xterm
 
@@ -12,18 +11,12 @@ EXPOSE 80
 # ---------------------------------------------------------------------------------------
 
 RUN \
-  apk --quiet update 
-
-RUN \
-  apk --quiet add \
+  apk --quiet --no-cache update && \
+  apk --quiet --no-cache add \
     bash \
-    nginx
-
-RUN \
+    nginx && \
+  mkdir /run/nginx && \
   rm -rf /var/cache/apk/*
-
-RUN \
-  mkdir /run/nginx
 
 ADD rootfs/ /
 

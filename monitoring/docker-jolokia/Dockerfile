@@ -1,9 +1,8 @@
-
-FROM docker-alpine-base:latest
+FROM bodsch/docker-alpine-base:latest
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
-LABEL version="1.2.0"
+LABEL version="1.2.1"
 
 EXPOSE 8080
 

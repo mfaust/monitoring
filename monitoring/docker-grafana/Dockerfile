@@ -1,9 +1,8 @@
-
-FROM docker-alpine-base:latest
+FROM bodsch/docker-alpine-base:latest
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
-LABEL version="2.3.0"
+LABEL version="2.3.1"
 
 # 3000: grafana (plain)
 EXPOSE 3000
@@ -14,55 +13,39 @@ ENV GO15VENDOREXPERIMENT=0
 # ---------------------------------------------------------------------------------------
 
 RUN \
-  apk --quiet update
-
-RUN \
-  apk --quiet add \
+  apk --quiet --no-cache update && \
+  apk --quiet --no-cache add \
     build-base \
     nodejs \
     go \
     git \
     mercurial \
     netcat-openbsd \
+    curl \
     pwgen \
     jq \
     yajl-tools \
     mysql-client \
-    sqlite
-
-RUN \
-  go get github.com/grafana/grafana || true
-
-RUN \
+    sqlite && \
+  go get github.com/grafana/grafana || true && \
   cd $GOPATH/src/github.com/grafana/grafana && \
   go run build.go setup && \
   $GOPATH/bin/godep restore && \
   go run build.go build && \
   npm install && \
   npm install -g grunt-cli && \
-  grunt
-
-RUN \
+  grunt && \
   mkdir -p /usr/share/grafana/bin/ && \
-  cp -a  $GOPATH/src/github.com/grafana/grafana/bin/grafana-cli    /usr/share/grafana/bin/ && \
-  cp -a  $GOPATH/src/github.com/grafana/grafana/bin/grafana-server /usr/share/grafana/bin/ && \
-  cp -ar $GOPATH/src/github.com/grafana/grafana/public_gen         /usr/share/grafana/public && \
-  cp -ar $GOPATH/src/github.com/grafana/grafana/conf               /usr/share/grafana/
-
-RUN \
+  cp -av  $GOPATH/src/github.com/grafana/grafana/bin/grafana-cli    /usr/share/grafana/bin/ && \
+  cp -av  $GOPATH/src/github.com/grafana/grafana/bin/grafana-server /usr/share/grafana/bin/ && \
+  cp -arv $GOPATH/src/github.com/grafana/grafana/public_gen         /usr/share/grafana/public && \
+  cp -arv $GOPATH/src/github.com/grafana/grafana/conf               /usr/share/grafana/ && \
   mkdir /var/log/grafana && \
-  mkdir /var/log/supervisor
-
-RUN \
+  mkdir /var/log/supervisor && \
   /usr/share/grafana/bin/grafana-cli --pluginsDir "/usr/share/grafana/data/plugins" plugins install grafana-clock-panel && \
   /usr/share/grafana/bin/grafana-cli --pluginsDir "/usr/share/grafana/data/plugins" plugins install grafana-piechart-panel && \
   /usr/share/grafana/bin/grafana-cli --pluginsDir "/usr/share/grafana/data/plugins" plugins install grafana-simple-json-datasource && \
-  /usr/share/grafana/bin/grafana-cli --pluginsDir "/usr/share/grafana/data/plugins" plugins install raintank-worldping-app
-
-RUN \
-  /usr/share/grafana/bin/grafana-cli --pluginsDir "/usr/share/grafana/data/plugins" plugins update-all
-
-RUN \
+  /usr/share/grafana/bin/grafana-cli --pluginsDir "/usr/share/grafana/data/plugins" plugins install raintank-worldping-app && \
   npm uninstall -g grunt-cli && \
   npm cache clear && \
   go clean -i -r && \
