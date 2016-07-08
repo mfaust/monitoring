@@ -15,6 +15,7 @@ docker_opts="${docker_opts} --detach"
 docker_opts="${docker_opts} --hostname ${USER}-${TYPE}"
 docker_opts="${docker_opts} --name ${CONTAINER_NAME}"
 docker_opts="${docker_opts} --volume /etc/localtime:/etc/localtime:ro"
+docker_opts="${docker_opts} --publish 8080:8080"
 
 if [ ! -z ${DOCKER_DNS} ]
 then

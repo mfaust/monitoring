@@ -53,8 +53,8 @@ a {
 }
 
 a, a:visited {
-  outline:none;
-  color:#1c4f64;
+/*  outline:none;
+  color:#1c4f64; */
 }
 
 a:hover{
