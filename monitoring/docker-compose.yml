@@ -12,7 +12,7 @@ services:
       - env/database.env
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ${DATA_DIR}:/app
+      - ~/.docker/data/mysql:/app
 
   icinga2:
     image: bodsch/docker-icinga2
