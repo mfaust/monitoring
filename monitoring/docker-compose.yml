@@ -1,0 +1,48 @@
+---
+# schema-version: 1.1
+# project_name: monitoring
+version: '2.0'
+services:
+  database:
+    image: bodsch/docker-mysql
+    container_name: database
+    restart: always
+    hostname: database
+    env_file:
+      - env/database.env
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${DATA_DIR}:/app
+
+  icinga2:
+    image: bodsch/docker-icinga2
+    container_name: icinga2
+    restart: always
+    hostname: icinga2
+    env_file:
+      - env/database.env
+      - env/icinga2.env
+    depends_on:
+      - database
+    ports:
+      - 5665:5665
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ~/.docker/data/icinga2:/app
+      - ~/.docker/data/monitoring:/var/cache/monitoring
+      - ~/.docker/share/icinga2:/usr/local/monitoring
+    links:
+      - database:database
+
+  icingaweb2:
+    image: bodsch/docker-icingaweb2
+    container_name: icingaweb2
+    restart: always
+    hostname: icingaweb2
+    env_file:
+      - env/database.env
+      - env/icingaweb2.env
+    ports:
+      - 80:80
+    links:
+      - database:monitoring-database
