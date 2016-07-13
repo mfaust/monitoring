@@ -4,7 +4,7 @@
 version: '2.0'
 services:
   database:
-    image: bodsch/docker-mysql:latest
+    image: bodsch/docker-mysql:1.5.1
 #    build: $HOME/src/private/docker-mysql
     container_name: database
     hostname: database
@@ -12,13 +12,29 @@ services:
       - env/database.env
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - $HOME/.docker/data:/srv
+      - ./data:/srv
+
+  nginx:
+    image: bodsch/docker-nginx:1.0.0
+    container_name: nginx
+    hostname: nginx
+    ports:
+      - 80:80
+    depends_on:
+      - database
+      - icingaweb2
+      - grafana
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./share/nginx/var/www:/var/www
+      - ./share/nginx/etc/nginx/modules.d:/etc/nginx/modules.d
+      - ./share/nginx/etc/nginx/sites-enabled:/etc/nginx/sites-enabled
+      - ./share/nginx/etc/nginx/nginx.conf:/etc/nginx/nginx.conf
+
 
   icinga2:
     image: bodsch/docker-icinga2:latest
-#    build: $HOME/src/private/docker-icinga2
     container_name: icinga2
-#    restart: always
     hostname: icinga2
     env_file:
       - env/database.env
@@ -29,17 +45,16 @@ services:
       - 5665:5665
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - $HOME/.docker/data:/srv
-      - $HOME/.docker/data/monitoring:/var/cache/monitoring
-      - $HOME/.docker/share/icinga2:/usr/local/monitoring
+      - ./data:/srv
+      - ./share/monitoring:/var/cache/monitoring
+      - ./share/icinga2/usr/local/monitoring:/usr/local/monitoring
+      - ./share/icinga2/etc/icinga2/objects:/etc/icinga2/objects
     links:
       - database:database
 
   icingaweb2:
-#    image: bodsch/docker-icinga2:latest
-    build: $HOME/src/private/docker-icingaweb2
-    container_name: icinga2
-#    restart: always
+    image: bodsch/docker-icingaweb2:latest
+    container_name: icingaweb2
     hostname: icingaweb2
     env_file:
       - env/database.env
@@ -47,7 +62,41 @@ services:
       - env/icingaweb2.env
     depends_on:
       - database
+      - icinga2
     volumes:
       - /etc/localtime:/etc/localtime:ro
+      - ./data:/srv
+      - ./share/icingaweb2:/usr/local/share
+    volumes_from:
+      - icinga2
     links:
       - database:database
+      - icinga2:icinga2
+
+  graphite:
+    image: bodsch/docker-graphite:latest
+    container_name: graphite
+    hostname: graphite
+    env_file:
+      - env/database.env
+      - env/graphite.env
+    depends_on:
+      - database
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./data:/srv
+
+  grafana:
+    image: bodsch/docker-grafana:latest
+    # build: /srv/docker/docker-grafana
+    container_name: grafana
+    hostname: grafana
+    env_file:
+      - env/database.env
+      - env/grafana.env
+    depends_on:
+      - database
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./data:/srv
+
