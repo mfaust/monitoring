@@ -1,0 +1,14 @@
+{
+  "name": "check-cm-livefeeder-count-elements",
+  "type" : "Service",
+  "attrs": {
+    "check_command": "check_coremedia_feeder",
+    "host_name" : "blueprint.box"
+    "max_check_attempts": "5",
+    "check_interval": "5m",
+    "retry_interval": "45s",
+    "vars" : {
+      "nrpe_command": "check_coremedia_feeder"
+    }
+  }
+}

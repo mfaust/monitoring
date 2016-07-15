@@ -1,0 +1,9 @@
+
+Welcome to CoreMedia Monitoring Project!
+
+This container holds many tools to handle some monitoring special things.
+
+Try the following
+ -> add-host.sh --host blueprint-box                 to add Host 'blueprint-box' to monitoring
+ -> add-host.sh --host blueprint-box --force         delete all cached check results and add Host 'blueprint-box' to monitoring again
+

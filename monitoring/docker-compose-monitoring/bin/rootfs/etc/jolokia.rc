@@ -1,0 +1,24 @@
+# configuration for our jolokia checks
+#
+# 22.02.2016 - Bodo Schulz
+#
+#
+
+# ----------------------------------------------------------------------------------------
+
+# location of jolokia templates
+TEMPLATE_DIR="/usr/local/share/templates"
+
+# standard tomcat checks
+standardJMX="TomcatThreadPool Threading Service Memory ClassLoading GarbageCollector"
+
+# nach wie vielen Tagen soll der check neu gebaut werden
+MAX_JSON_TIME=1
+
+#
+JOLOKIA_PORT_CACHE=
+
+# destination directory for cached monitoring results
+JOLOKIA_CACHE_BASE="/var/cache/monitoring"
+
+# ----------------------------------------------------------------------------------------

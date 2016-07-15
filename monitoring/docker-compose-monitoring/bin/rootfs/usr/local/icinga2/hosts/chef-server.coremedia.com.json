@@ -1,0 +1,9 @@
+{
+  "templates": ["generic-host"],
+  "attrs": {
+    "address": "chef-server.coremedia.com",
+    "display_name": "Chef Server",
+    "notes": "Chef",
+    "vars.type": "chef"
+  }
+}

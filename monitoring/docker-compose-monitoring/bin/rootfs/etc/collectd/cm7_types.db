@@ -1,0 +1,15 @@
+cm7_cache_evicted           value:GAUGE:0:U
+cm7_cache_operation         value:DERIVE:0:U
+cm7_cache_ratio             value:GAUGE:0:100
+cm7_cache_result            value:DERIVE:0:U
+cm7_cache_size              value:GAUGE:0:U
+cm7_cache_evaluated         value:GAUGE:0:U
+cm7_cache_inserted          value:GAUGE:0:U
+cm7_cache_removed           value:GAUGE:0:U
+
+cm7_cache_fault             value:DERIVE:0:U
+cm7_counter                 value:GAUGE:0:U
+
+varnish_counter             value:GAUGE:0:100
+
+mail_counter                value:COUNTER:0:65535
