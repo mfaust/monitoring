@@ -45,6 +45,11 @@ GRAPHITE_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${USER}
 GRAFANA_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${USER}-grafana   2>/dev/null)
 ICINGA2_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${USER}-icinga2   2>/dev/null)
 
+JOLOKIA_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' jolokia   2>/dev/null)
+GRAPHITE_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' graphite 2>/dev/null)
+GRAFANA_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' grafana   2>/dev/null)
+ICINGA2_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' icinga2-core   2>/dev/null)
+
 [ -z ${DOCKER_DATA_DIR} ] && { echo "Var DOCKER_DATA_DIR not set!"; exit 1; }
 
 # ---------------------------------------------------------------------------------------

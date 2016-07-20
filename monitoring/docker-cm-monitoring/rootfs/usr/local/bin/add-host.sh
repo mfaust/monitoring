@@ -28,6 +28,16 @@ fi
 
 . /etc/jolokia.rc
 
+JOLOKIA_HOST=${JOLOKIA_HOST:-jolokia}
+ICINGA2_HOST=${ICINGA2_HOST:-icinga2-core}
+
+ICINGA2_API_PORT=${ICINGA2_API_PORT:-5665}
+ICINGA2_API_USER=${ICINGA2_API_USER:-root}
+ICINGA2_API_PASS=${ICINGA2_API_PASS:-icinga}
+
+GRAFANA_HOST=${GRAFANA_HOST:-grafana}
+GRAFANA_PORT=${GRAFANA_PORT:-3000}
+
 # ----------------------------------------------------------------------------------------
 
 version() {
@@ -124,7 +134,7 @@ discoverApplications() {
     dst="${tmp_dir}/CM_${p}.result"
     tmp="${tmp_dir}/CM_${p}-${t}.tmp"
 
-    cp ${file_tpl} ${file_dst}
+    cp -a ${file_tpl} ${file_dst}
 
     sed -i \
       -e "s/%HOST%/${host}/g" \
@@ -551,8 +561,8 @@ addToIcinga() {
             jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-heap-mem-${k}.json
             addIcingaService "check-cm-heap-mem-${k}" service-heap-mem-${k}.json
 
-
             ;;
+
           feeder_prev)
             attrs="$(jo display_name="CAE Preview Feeder" check_command=cm_feeder host_name=${host} max_check_attempts=5 vars.host=${host} vars.feeder=preview)"
             jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-${k}.json

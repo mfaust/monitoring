@@ -11,8 +11,8 @@
 # -------------------------------------------------------------------------------------------------
 
 SCRIPTNAME=$(basename $0 .sh)
-VERSION="2.13.1"
-VDATE="16.06.2016"
+VERSION="2.13.2"
+VDATE="20.07.2016"
 
 # -------------------------------------------------------------------------------------------------
 
@@ -101,9 +101,9 @@ collectdPlugin_ClassLoading() {
 
   local result="${1}"
 
-  local loadedClass="$(cat ${result} | jq '.value.LoadedClassCount')"
-  local totalLoadedClass="$(cat ${result} | jq '.value.TotalLoadedClassCount')"
-  local unloadedClass="$(cat ${result} | jq '.value.UnloadedClassCount')"
+  local loadedClass="$(jq --raw-output '.value.LoadedClassCount' ${result})"
+  local totalLoadedClass="$(jq --raw-output '.value.TotalLoadedClassCount' ${result})"
+  local unloadedClass="$(jq --raw-output '.value.UnloadedClassCount' ${result})"
 
   echo "PUTVAL ${HOSTNAME}/${service}-class_loaded/cm7_counter-loaded interval=${INTERVAL} N:${loadedClass}"
   echo "PUTVAL ${HOSTNAME}/${service}-class_loaded/cm7_counter-total interval=${INTERVAL} N:${totalLoadedClass}"
@@ -154,12 +154,12 @@ collectdPlugin_CMCAECacheContentBeans() {
 
   local result="${1}"
 
-  local capacity=$(cat ${result} | jq '.value.Capacity')
-  local evaluated=$(cat ${result} | jq '.value.Evaluated')
-  local evicted=$(cat ${result} | jq '.value.Evicted')
-  local inserted=$(cat ${result} | jq '.value.Inserted')
-  local removed=$(cat ${result} | jq '.value.Removed')
-  local level=$(cat ${result} | jq '.value.Level')
+  local capacity=$(jq --raw-output '.value.Capacity' ${result})
+  local evaluated=$(jq --raw-output '.value.Evaluated' ${result})
+  local evicted=$(jq --raw-output '.value.Evicted' ${result})
+  local inserted=$(jq --raw-output '.value.Inserted' ${result})
+  local removed=$(jq --raw-output '.value.Removed' ${result})
+  local level=$(jq --raw-output '.value.Level' ${result})
 
   echo "PUTVAL ${HOSTNAME}/${service}-content_beans/cm7_counter-level interval=${INTERVAL} N:${level}"
   echo "PUTVAL ${HOSTNAME}/${service}-content_beans/cm7_counter-capacity interval=${INTERVAL} N:${capacity}"
@@ -275,9 +275,9 @@ collectdPlugin_CMStatisticsJobResult() {
 
   local result="${1}"
 
-  local failed="$(cat ${result} | jq '.value.Failed' )"
-  local success="$(cat ${result} | jq '.value.Successful' )"
-  local unrecover="$(cat ${result} | jq '.value.Unrecoverable' )"
+  local failed=$(jq --raw-output '.value.Failed' ${result})
+  local success=$(jq --raw-output '.value.Successful' ${result})
+  local unrecover=$(jq --raw-output '.value.Unrecoverable' ${result})
 
   echo "PUTVAL $HOSTNAME/${service}-stats_jobresult/cm7_counter-failed interval=$INTERVAL N:${failed}"
   echo "PUTVAL $HOSTNAME/${service}-stats_jobresult/cm7_counter-success interval=$INTERVAL N:${success}"
@@ -514,13 +514,13 @@ do
 #    then
 #      . ${TMP_DIR}/PORT.cache
 
-      for port in $(find ${TMP_DIR}/* -type d -name ????? -exec basename {} \;) ## ${PORTS}
+      for port in $(find ${TMP_DIR}/* -type d -name "?????" -exec basename '{}' \;) ## ${PORTS}
       do
         if [ ${port} == 28017 ]
         then
           service="MONGO"
         else
-          service=$(grep ${port} ${SERVICES} | grep -v JMX | awk -F '=' '{ print($1) }' | sed 's/_RMI_REG//')  ## | tr '[A-Z]' '[a-z]')
+          service=$(grep ${port} ${SERVICES} | grep -v JMX | uniq | awk -F '=' '{ print($1) }' | sed 's/_RMI_REG//')  ## | tr '[A-Z]' '[a-z]')
         fi
 
 #         echo -e "\n $port - $service"
