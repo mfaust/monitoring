@@ -5,7 +5,7 @@
       "port": "8080"
     },
     "host": {
-      "release-16-tomcat": {
+      "monitoring-16-01": {
         "services": {
           "content-management-server": {
             "description": "Content Management Server",
@@ -64,6 +64,14 @@
           "studio": {
             "description": "Studio",
             "port": "41099"
+          },
+          "solr-master": {
+            "description": "Solr Master",
+            "port": "40099",
+            "cores": [
+              "live", "preview", "studio"
+            ],
+            "application": "solr"
           }
         }
       }

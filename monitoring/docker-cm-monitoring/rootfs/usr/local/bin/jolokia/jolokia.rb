@@ -15,10 +15,10 @@ class JolokiaClient
 
   def initialize( app_config_file, config_file )
 
-    file = File.open( '/tmp/jolokia-client.log', File::WRONLY | File::APPEND | File::CREAT )
-    @log = Logger.new( file, 'weekly', 1024000 )
-#    @log = Logger.new( STDOUT )
-    @log.level = Logger::INFO
+#    file = File.open( '/tmp/jolokia-client.log', File::WRONLY | File::APPEND | File::CREAT )
+#    @log = Logger.new( file, 'weekly', 1024000 )
+    @log = Logger.new( STDOUT )
+    @log.level = Logger::DEBUG
     @log.datetime_format = "%Y-%m-%d %H:%M:%S"
     @log.formatter = proc do |severity, datetime, progname, msg|
       "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
@@ -120,6 +120,7 @@ class JolokiaClient
   end
 
   # list all defines Hosts they we monitoring
+  #  and starts there service Checks
   def jolokiaHosts
 
     if( @jolokiaHost != nil )
@@ -130,7 +131,7 @@ class JolokiaClient
 
         service_count = d['services'] ? d['services'].count : 0
 
-#         @log.debug( sprintf( "    - with %s services", service_count ) )
+#        @log.debug( sprintf( "    - with %s services", service_count ) )
 
         self.jolokiaService( h )
       end
@@ -140,6 +141,8 @@ class JolokiaClient
   end
 
   # list all Service Configuration
+  #   - merged all checks to one json
+  #   - send this merged merics to our jolokia
   def jolokiaService( host )
 
     if( @jolokiaHost[host]['services'] != nil )
@@ -150,39 +153,41 @@ class JolokiaClient
         port    = v['port']
         metrics = v['metrics']
 
-        @log.debug( sprintf( "    %s:%s   %s", service, port, desc ) )
+        @log.debug( sprintf( '    %s:%s       %s', service, port, desc ) )
 
 #         if( ! port.empty?  )
 #           @log.debug( sprintf( "      Port: %s", port ) )
 #         end
 
         metrics       = self.mergeChecks( host, service )
-        mergedMetrics = self.jolokiaCreateBulkCheck( host, port, metrics )
-        metricsResult = self.jolkiaSendChecks( mergedMetrics )
 
-        if( metricsResult != nil )
+#        mergedMetrics = self.jolokiaCreateBulkCheck( host, port, metrics )
+#        metricsResult = self.jolkiaSendChecks( mergedMetrics )
 
-          self.saveResult( host, port, service, metricsResult )
-
-          self.send2Influx( host, port, service, metricsResult )
-        end
+#        if( metricsResult != nil )
+#          self.saveResult( host, port, service, metricsResult )
+#
+##          self.send2Influx( host, port, service, metricsResult )
+#        end
       end
 
     end
 
   end
 
-  # merge checks between aap_config_file and services
+  # merge checks between app_config_file and services
   def mergeChecks( host, services )
 
     result  = []
 
     service              = @jolokiaHost[host]['services'][services]
+
+    @log.debug( service )
     desc                 = service['description'] ? service['description'] : services
     application          = service['application'] ? service['application'] : nil
+    solr_cores           = service['cores']       ? service['cores']       : nil
 
     if( service['metrics'] != nil )
-
       metrics_inline     = { "description" => sprintf( "inline metrics for %s", services ), "metrics" => service['metrics'] }
     else
       metrics_inline     = {}
@@ -192,6 +197,7 @@ class JolokiaClient
     metrics_application  = @jolokiaApplications[application]   # metrics for the given 'application'  e.g. 'cae'
     metrics_service      = @jolokiaApplications[services]      # metrics for the giveb 'service-name' e.g. 'cae-preview'
 
+
     metric_1 = {}
 
     # priority:
@@ -200,8 +206,44 @@ class JolokiaClient
     #   2. metrics from service name
     #   add metrics from inline
     if( application )
+
+      if( solr_cores != nil )
+        work = Array.new()
+#        work = Hash.new()
+        solr_cores.each do |core|
+
+          metric = Marshal.load( Marshal.dump( metrics_application ) )
+          if( metric['description'].include?( '%CORE%' ) )
+
+            metric['description'].sub!( '%CORE%', core )
+            metric['metrics'].each do |m|
+              m['mbean'].sub!( '%CORE%', core )
+            end
+            work.push( metric )
+#            work.concat( metric )
+          end
+        end
+
+        # Array -> Hash
+        # aaaber wir bekommen statt {},{},{} ein [{},{},{}]! :(
+
+        metrics_application = Marshal.load( Marshal.dump( work ) )
+
+#         work.flatten!
+#        @log.debug( JSON.pretty_generate( work ) )
+#        m = metrics_application.to_a
+#         m = metrics_application.to_s
+#         m.slice!(0).slice(0, -3).to_json
+
+#         @log.debug( '--------------------------------' )
+#         @log.debug( m )
+          @log.debug( JSON.pretty_generate( metrics_application ) )
+#         @log.debug( '--------------------------------' )
+      end
+
       # aplication is set =>  use metrics from application
       if( metrics_application )
+
         metric_1 = metrics_application
       end
     else
@@ -219,6 +261,8 @@ class JolokiaClient
     if( metrics_inline )
       result.push( metrics_inline )
     end
+
+    @log.debug( JSON.pretty_generate( result ) )
 
     return result
 
@@ -495,7 +539,7 @@ class JolokiaClient
             target: target
           )
 
-          @log.debug(  JSON.pretty_generate( response ) )
+          # @log.debug( JSON.pretty_generate( response ) )
 
         end
       end
@@ -510,7 +554,7 @@ class JolokiaClient
 
     if( data.count != 0 )
 
-      result = Array.new()
+      result  = Array.new()
       metrics = Hash.new()
 
       data.each do |m|
@@ -573,7 +617,7 @@ end
 
 
 
-j = JolokiaClient.new( '/tmp/config/application.json', '/tmp/config/jolokia.json' )
+j = JolokiaClient.new( 'config/application.json', 'config/jolokia.json' )
 
 # j.jolokiaProxy
 j.jolokiaHosts
