@@ -627,6 +627,16 @@ addToIcinga() {
 
             ;;
 
+          *)
+            attrs="$(jo display_name="nrpe load" check_command=check_nrpe arguments=[] max_check_attempts=5 host_name=${host} )"
+            attrs=$(echo ${attrs} | sed -e 's|\[\]|{"-H":"$address$", "-c": "check_users", "-t": "20"}|g')
+            jo -p templates[]="generic-service" attrs="${attrs}" > ${TMP_DIR}/icinga2/service-nrpe-load.json
+            addIcingaService "check-nrpe-load" service-nrpe-load.json
+
+            
+
+            ;;
+
         esac
       fi
 

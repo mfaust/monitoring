@@ -33,6 +33,7 @@ RUN \
     fping \
     nmap \
     monitoring-plugins \
+    nrpe-plugin \
     bind-tools \
     zlib \
     zlib-dev

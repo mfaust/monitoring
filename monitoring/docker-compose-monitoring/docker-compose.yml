@@ -110,22 +110,23 @@ services:
       - database:database
       - icinga2-core:icinga2
 
-  cm-monitoring:
-    build: ../docker-cm-monitoring
-    container_name: cm-monitoring
-    hostname: cm-monitoring
-    env_file:
-      - env/cm-monitoring.env
-    depends_on:
-      - jolokia
-      - icinga2-core
-      - grafana
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ./share/resolv.conf:/etc/resolv.conf:ro
-      - ./share/monitoring:/usr/local/monitoring
-    links:
-      - icinga2-core:icinga2
-      - jolokia:jolokia
-      - grafana:grafana
-
+#  cm-monitoring:
+#    build: ../docker-cm-monitoring
+#    container_name: cm-monitoring
+#    hostname: cm-monitoring
+#    env_file:
+#      - env/cm-monitoring.env
+#    depends_on:
+#      - jolokia
+#      - icinga2-core
+#      - grafana
+#    volumes:
+#      - /etc/localtime:/etc/localtime:ro
+#      - ./share/resolv.conf:/etc/resolv.conf:ro
+#      - ./share/monitoring:/usr/local/monitoring
+#    links:
+#      - icinga2-core:icinga2
+#      - jolokia:jolokia
+#      - grafana:grafana
+#
+#
