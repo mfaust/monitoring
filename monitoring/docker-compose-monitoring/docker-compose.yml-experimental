@@ -12,23 +12,6 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ./data:/srv
 
-  jolokia:
-    image: bodsch/docker-jolokia:latest
-    container_name: jolokia
-    hostname: jolokia
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ./share/resolv.conf:/etc/resolv.conf:ro
-    ports:
-      - 8080:8080
-
-  memcached:
-    image: bodsch/docker-memcached:latest
-    container_name: memcached
-    hostname: memcached
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-
   nginx:
     image: bodsch/docker-nginx:latest
     container_name: nginx
@@ -56,7 +39,6 @@ services:
       - env/graphite.env
     depends_on:
       - database
-      - memcached
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./data:/srv
@@ -74,11 +56,10 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ./data:/srv
 
-  icinga2-core:
+  icinga2:
     image: bodsch/docker-icinga2:latest
-    container_name: icinga2-core
-    restart: always
-    hostname: icinga2-core
+    container_name: icinga2
+    hostname: icinga2
     env_file:
       - env/database.env
       - env/icinga2.env
@@ -90,8 +71,8 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./data:/srv
-      - ./share/cache/monitoring:/var/cache/monitoring
-      - ./share/icinga2:/usr/local/monitoring
+      - ./share/monitoring:/var/cache/monitoring
+      - ./share/icinga2/usr/local/monitoring:/usr/local/monitoring
       - ./share/icinga2/etc/icinga2/objects:/etc/icinga2/objects
     links:
       - database:database
@@ -99,7 +80,6 @@ services:
   icingaweb2:
     image: bodsch/docker-icingaweb2:latest
     container_name: icingaweb2
-    restart: always
     hostname: icingaweb2
     env_file:
       - env/database.env
@@ -107,34 +87,47 @@ services:
       - env/icingaweb2.env
     depends_on:
       - database
-      - icinga2-core
+      - icinga2
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./data:/srv
       - ./share/icingaweb2:/usr/local/share
     volumes_from:
-      - icinga2-core
+      - icinga2
     links:
       - database:database
-      - icinga2-core:icinga2
+      - icinga2:icinga2
 
-#  cm-monitoring:
-#    build: ../docker-cm-monitoring
-#    container_name: cm-monitoring
-#    hostname: cm-monitoring
-#    env_file:
-#      - env/cm-monitoring.env
-#    depends_on:
-#      - jolokia
-#      - icinga2-core
-#      - grafana
-#    volumes:
-#      - /etc/localtime:/etc/localtime:ro
-#      - ./share/resolv.conf:/etc/resolv.conf:ro
-#      - ./share/monitoring:/usr/local/monitoring
-#    links:
-#      - icinga2-core:icinga2
-#      - jolokia:jolokia
-#      - grafana:grafana
-#
-#
+  jolokia:
+    image: bodsch/docker-jolokia:latest
+    container_name: jolokia
+    hostname: jolokia
+    dns:
+      - 172.17.0.1
+      - 172.17.0.3
+      - 141.1.1.1
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+
+  cm-monitoring:
+    build: ./../docker-cm-monitoring
+    container_name: cm-monitoring
+    hostname: cm-monitoring
+    dns:
+      - 172.17.0.1
+      - 172.17.0.3
+      - 141.1.1.1
+    env_file:
+      - env/monitoring.env
+    depends_on:
+      - icinga2
+      - grafana
+      - jolokia
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./share/icinga2/usr/local/monitoring:/usr/local/monitoring
+      - ./share/monitoring/usr/sbin:/usr/local/sbin
+    extra_hosts:
+      - 'blueprint-box:192.168.252.100'
+
+

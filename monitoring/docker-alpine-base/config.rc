@@ -1,4 +1,0 @@
-TYPE="alpine-base"
-
-TAG_NAME="docker-${TYPE}"
-CONTAINER_NAME="${TYPE}"
