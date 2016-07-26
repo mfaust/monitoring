@@ -1,10 +1,17 @@
 #!/usr/bin/ruby
+#
+#
+#
+#
 
-require 'sqlite3'
-require 'socket'
-require 'timeout'
+
+
+# require 'sqlite3'
+# require 'socket'
+# require 'timeout'
 require 'logger'
 require 'json'
+require 'fileutils'
 
 # -------------------------------------------------------------------------------------------------------------------
 
@@ -28,6 +35,40 @@ class Discover
     @jolokiaPort = 8080
 
     @information = Hash.new()
+
+    @known_ports = [
+      3306,     # mysql
+      5432,     # postrgres
+      28017,    # mongodb
+      38099,
+      40099,
+      40199,
+      40299,
+      40399,
+      40499,
+      40599,
+      40699,
+      40799,
+      40899,
+      40999,
+      41099,
+      41199,
+      41299,
+      41399,
+      42099,
+      42199,
+      42299,
+      42399,
+      42499,
+      42599,
+      42699,
+      42799,
+      42899,
+      42999,
+      43099,
+      44099,
+      45099
+    ]
 
   end
 
@@ -211,22 +252,50 @@ class Discover
     return service
   end
 
+  # delete the directory with all files inside
+  def deleteHost( host )
 
-  def run( host = nil, ports = [] )
+    dir_path  = sprintf( '%s/%s', @tmp_dir, host )
 
+    if( File.exist?( dir_path ) )
+      FileUtils.rm_r( dir_path )
+    end
+
+    return { 'status' => '200', 'message' => 'Host successful removed' }
+  end
+
+  # add Host and discovery applications
+  def addHost( host, ports = [], force = false )
+
+    # force delete
+    if( force == true )
+      self.deleteHost( host )
+    end
+
+    dir_path  = sprintf( '%s/%s', @tmp_dir, host )
+    file_name = 'discovery.json'
+
+    if( !File.exist?( dir_path ) )
+      Dir.mkdir( dir_path )
+    end
+
+    # our default known ports
+    if( ports.empty? )
+      ports = @known_ports
+    end
+
+    if( File.exist?( sprintf( '%s/%s', dir_path, file_name ) ) == true )
+      return { 'status' => '409', 'message' => 'Host already created' }
+    end
+
+    discover = Hash.new()
     services = Hash.new()
 
     open = false
 
     ports.each do |p|
 
-      if port_open?( host, p )
-#         @log.info( "[OPEN]: Port #{p} is open on host #{host}" )
-        open = true
-      else
-#         @log.debug( "[NOT OPEN]: Port #{p} is not open on host #{host}" )
-        open = false
-      end
+      open = port_open?( host, p )
 
       if( open == true )
 
@@ -238,9 +307,47 @@ class Discover
 
     end
 
-    @information = { host => 'services' => { services } }
+    discover = JSON.pretty_generate( { host => { 'services' => services } } )
 
-    @log.info( JSON.pretty_generate( @information ) )
+    File.open( sprintf( '%s/%s', dir_path, file_name ) , 'w' ) {|f| f.write( discover ) }
+
+    return { 'status' => '201', 'message' => 'Host successful created' }
+  end
+
+
+  def listHosts( host = nil )
+
+    hosts = Array.new()
+
+    if( host == nil )
+
+      Dir.chdir( @tmp_dir )
+      Dir.glob( "**" ) do |f|
+
+        if( FileTest.directory?( f ) )
+          hosts.push( File.basename( f ) )
+        end
+      end
+
+      hosts.sort!
+      return { 'status' => 200, 'hosts' => hosts }
+
+    else
+
+      dir_path  = sprintf( '%s/%s', @tmp_dir, host )
+      file_name = 'discovery.json'
+
+      if( File.exist?( sprintf( '%s/%s', dir_path, file_name ) ) == true )
+
+        file = File.read( sprintf( '%s/%s', dir_path, file_name ) )
+
+        return JSON.parse( file )
+      else
+
+        return { 'status' => 404, 'message' => 'No discovery File found' }
+      end
+
+    end
   end
 
 end

@@ -5,7 +5,7 @@ require 'sinatra/base'
 require 'logger'
 require 'json'
 
-require './lib/host'
+require './lib/discover'
 
 module Sinatra
   class Monitoring < Base
@@ -37,41 +37,41 @@ module Sinatra
       }.parse!( ARGV.dup )
     end
 
+    h = Discover.new()
+
     error do
       'Sorry there was a nasty error - ' + env['sinatra.error'].message
     end
 
     get '/' do
-      "here comes the monitoring ReST Interface ...\n"
+      content_type :json
+      h.listHosts().to_json
     end
 
     # get information about given 'host'
     get '/:host' do
-#      raise ' fooo'
-#      params[:host]
-      "Information about - '#{params[:host]}'"
+      content_type :json
+      h.listHosts( params[:host] ).to_json
     end
 
     # create new host
     post '/:host' do
-      "Create Host '#{params[:host]}'"
+      content_type :json
+      h.addHost( params[:host] ).to_json
+    end
 
-      ports = [3306,5432,28017,38099,40099,40199,40299,40399,40499,40599,40699,40799,40899,40999,41099,41199,41299,41399,42099,42199,42299,42399,42499,42599,42699,42799,42899,42999,43099,44099,45099]
-      h = Discover.new()
-      h.run( params[:host] , ports )
+    # create new host
+    post '/:host/:force' do
+      content_type :json
+      h.addHost( params[:host], [], true ).to_json
     end
 
     # delete a host
     delete '/:host' do
-      "Delete Host '#{params[:host]}'"
-
+      content_type :json
+      h.deleteHost( params[:host] ).to_json
     end
 
-    # push - change a host
-    push '/:host' do
-      "Change Host '#{params[:host]}'"
-
-    end
 
 
     run! if app_file == $0
