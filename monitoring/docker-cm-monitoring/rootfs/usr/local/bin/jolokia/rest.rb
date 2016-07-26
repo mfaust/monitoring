@@ -61,12 +61,17 @@ module Sinatra
       h.run( params[:host] , ports )
     end
 
+    # delete a host
     delete '/:host' do
       "Delete Host '#{params[:host]}'"
 
     end
 
+    # push - change a host
+    push '/:host' do
+      "Change Host '#{params[:host]}'"
 
+    end
 
 
     run! if app_file == $0

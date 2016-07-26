@@ -24,16 +24,18 @@ class Monitor
 #    @known_ports = [3306,5432,28017,38099,40099,40199,40299,40399,40499,40599,40699,40799,40899,40999,41099,41199,41299,41399,42099,42199,42299,42399,42499,42599,42699,42799,42899,42999,43099,44099,45099,46099,47099,48099,49099]
     @known_ports = [40099]
     @tmp_dir     = '/var/cache/monitoring'
+
+    self.databaseConnect
   end
 
   def databaseConnect
 
     begin
       @db = SQLite3::Database.new( @tmp_dir + '/database.db' )
-      @log.debug( @db.get_first_value 'SELECT SQLITE_VERSION()' )
+#      @log.debug( @db.get_first_value 'SELECT SQLITE_VERSION()' )
 
     rescue SQLite3::Exception => e
-      puts e.errno
+#      puts e.errno
       puts e.error
 
 #    ensure
@@ -77,12 +79,12 @@ class Monitor
 
   def createHostOnDatabase( host )
 
-    running = self.isRunning? ( host.to_str )
+#    running = self.isRunning? ( host.to_str )
 
     if @db
 
       begin
-        @db.execute "CREATE TABLE IF NOT EXISTS hosts   ( name string not null PRIMARY KEY, alive int )"
+        @db.execute "CREATE TABLE IF NOT EXISTS hosts   ( name string not null PRIMARY KEY, created string not null, updated string not null, alive int )"
 #        @db.execute "CREATE TABLE IF NOT EXISTS ports   ( id integer primary key autoincrement, host string not null, port int, status int, CONSTRAINT constraint_name unique( host, port ) )" # on conflict ignore )" # UNIQUE (col_name1, col_name2) ON CONFLICT REPLACE)
         @db.execute "CREATE TABLE IF NOT EXISTS ports   ( host string not null, port int, status int, CONSTRAINT constraint_name unique( host, port ) )" # on conflict ignore )" # UNIQUE (col_name1, col_name2) ON CONFLICT REPLACE)
         @db.execute "CREATE TABLE IF NOT EXISTS service ( id integer primary key autoincrement, host string not null, port int, service string, CONSTRAINT constraint_name unique( host, port, service ) )" # on conflict ignore )" # UNIQUE (col_name1, col_name2) ON CONFLICT REPLACE)
@@ -147,7 +149,22 @@ class Monitor
 
   def discoverApplication( host, port )
 
-    types = ['manager','blueprint','drive','solr','user-changes','workflow','webdav','elastic-worker','coremedia','contentfeeder','caefeeder','studio','editor-webstart','demodata-generator']
+    types = [
+      'manager',
+      'blueprint',
+      'drive',
+      'solr',
+      'user-changes',
+      'workflow',
+      'webdav',
+      'elastic-worker',
+      'coremedia',
+      'contentfeeder',
+      'caefeeder',
+      'studio',
+      'editor-webstart',
+      'demodata-generator'
+     ]
 #    types = ['coremedia','solr']
 
     if port == 3306 or port == 5432 or port == 28017
@@ -156,7 +173,7 @@ class Monitor
 
     types.each do |t|
 
-#       @log.debug( sprintf( 'check port %s for service %s', port.to_s, t.to_s  ) )
+      @log.debug( sprintf( 'check port %s for service %s', port.to_s, t.to_s  ) )
 
       hash1 = {
         :type => "read",
@@ -267,6 +284,8 @@ class Monitor
 
     if isRunning? ( host )
 
+      self.createHostOnDatabase( host )
+
       open = false
 
       ports.each do |p|
@@ -279,12 +298,11 @@ class Monitor
           open = false
         end
 
-        self.createPortsOnDatabase( host, p, open )
-
         if( open == true )
 
-          self.createHostOnDatabase( host )
+          self.createPortsOnDatabase( host, p, open )
         end
+
       end
 
     end
@@ -367,7 +385,7 @@ ports = [3306,5432,28017,38099,40099,40199,40299,40399,40499,40599,40699,40799,4
 
 
 m = Monitor.new()
-m.databaseConnect
+# m.databaseConnect
 m.run( host, ports )
 
 
