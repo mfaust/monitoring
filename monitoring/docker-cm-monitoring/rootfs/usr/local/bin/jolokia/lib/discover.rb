@@ -12,10 +12,14 @@
 require 'logger'
 require 'json'
 require 'fileutils'
+require 'net/http'
+require 'uri'
 
 # -------------------------------------------------------------------------------------------------------------------
 
 class Discover
+
+  attr_reader :status, :message, :services
 
   def initialize
 
@@ -121,10 +125,6 @@ class Discover
         service = 'mongodb'
       end
     else
-
-      require 'net/http'
-      require 'json'
-      require 'uri'
 
       uri          = URI.parse( sprintf( 'http://%s:%s', @jolokiaHost, @jolokiaPort ) )
       http         = Net::HTTP.new( uri.host, uri.port )
@@ -243,6 +243,8 @@ class Discover
         service = 'workflow-server'
       when 'delivery'
         service = 'cae-live-1'
+      when 'solr'
+        service = 'solr-master'
       end
 
     end
@@ -285,6 +287,10 @@ class Discover
     end
 
     if( File.exist?( sprintf( '%s/%s', dir_path, file_name ) ) == true )
+
+      @status  = 409
+      @message = 'Host already created'
+
       return { 'status' => '409', 'message' => 'Host already created' }
     end
 
@@ -307,9 +313,11 @@ class Discover
 
     end
 
-    discover = JSON.pretty_generate( { host => { 'services' => services } } )
+    File.open( sprintf( '%s/%s', dir_path, file_name ) , 'w' ) {|f| f.write( JSON.pretty_generate( services ) ) }
 
-    File.open( sprintf( '%s/%s', dir_path, file_name ) , 'w' ) {|f| f.write( discover ) }
+    @status  = 201
+    @message = 'Host successful created'
+    @services = services
 
     return { 'status' => '201', 'message' => 'Host successful created' }
   end

@@ -1,4 +1,10 @@
+#!/bin/ruby
 #
+# 28.08.2016 - Bodo Schulz
+#
+#
+# v0.5.3
+
 
 
 require 'sinatra/base'
@@ -56,8 +62,29 @@ module Sinatra
 
     # create new host
     post '/:host' do
+
+      host = params[:host]
+
       content_type :json
-      h.addHost( params[:host] ).to_json
+      status = h.addHost( host )
+# # #       puts h.status
+# # #       puts h.message
+# #       if( h.status == 201 )
+# #
+# # #         s = h.listHosts( host ).to_json
+# # #         puts s
+# #
+# #         services = h.services
+# #
+# #         puts services.keys
+# #
+# #         services.each do |s,v|
+# #           puts s
+# #           puts v['port']
+# #         end
+# #       end
+      response.status = h.status
+      status.to_json
     end
 
     # create new host
@@ -80,4 +107,4 @@ module Sinatra
 
 end
 
-
+# EOF
