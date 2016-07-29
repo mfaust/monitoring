@@ -15,21 +15,23 @@ require './lib/jolokia'
 # h.addHost( 'monitoring-16-01', [], true )
 
 r = JolokiaDataRaiser.new()
+r.applicationConfig( 'config/application.json' )
+r.serviceConfig( 'config/jolokia.json' )
+
+pid = fork do
+  stop = false
+  Signal.trap('INT') { stop = true }
+  until stop
+    # do your thing
+    r.run()
+    sleep(15)
+  end
+end
+
 
 # r.applicationConfig( 'config/application.json' )
 # r.serviceConfig( 'config/jolokia.json' )
-
-r.run( 'config/application.json', 'config/jolokia.json' )
-
-
-
-
-
-
-
-
-
-
+# r.run( 'config/application.json', 'config/jolokia.json' )
 
 exit 0
 

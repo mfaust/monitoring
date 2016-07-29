@@ -414,7 +414,7 @@ class JolokiaDataRaiser
 
     @monitoredServer.each do |h|
 
-      @log.debug( sprintf( '  Host: %s', h ) )
+      @log.info( sprintf( 'Host: %s', h ) )
 
       dir_path  = sprintf( '%s/%s', @cacheDirectory, h )
 
@@ -462,5 +462,7 @@ class JolokiaDataRaiser
 #    createBulkCheck( host, port, data )
 
   end
+
+
 
 end
