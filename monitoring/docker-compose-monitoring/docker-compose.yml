@@ -21,6 +21,8 @@ services:
       - ./share/resolv.conf:/etc/resolv.conf:ro
     ports:
       - 8080:8080
+    extra_hosts:
+      - 'blueprint-box:192.168.252.100'
 
   memcached:
     image: bodsch/docker-memcached:latest
@@ -89,9 +91,11 @@ services:
       - 6666:6666
     volumes:
       - /etc/localtime:/etc/localtime:ro
+      - ./share/resolv.conf:/etc/resolv.conf:ro
       - ./data:/srv
       - ./share/cache/monitoring:/var/cache/monitoring
       - ./share/icinga2:/usr/local/monitoring
+      - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_memory_cache:/usr/lib/monitoring-plugins/check_cm_memory_cache
       - ./share/icinga2/etc/icinga2/objects:/etc/icinga2/objects
     links:
       - database:database
