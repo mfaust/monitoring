@@ -1,17 +1,21 @@
-#!/bin/ruby
+#!/usr/bin/ruby
 #
-# 28.08.2016 - Bodo Schulz
+# 31.07.2016 - Bodo Schulz
 #
 #
-# v0.5.3
+# v0.5.4
 
+# -----------------------------------------------------------------------------
 
+lib_dir    = File.expand_path( '../../lib', __FILE__ )
+
+# -----------------------------------------------------------------------------
 
 require 'sinatra/base'
 require 'logger'
 require 'json'
 
-require './lib/discover'
+require sprintf( '%s/discover', lib_dir )
 
 module Sinatra
   class Monitoring < Base
@@ -24,7 +28,8 @@ module Sinatra
       Dir.mkdir( logDirectory ) unless File.exist?( logDirectory )
 
       file      = File.open( "#{logDirectory}/#{settings.environment}.log", File::WRONLY | File::APPEND | File::CREAT )
-      file.sync = true
+      file.sync = false
+
       use Rack::CommonLogger, file
     end
 
@@ -67,6 +72,7 @@ module Sinatra
 
       content_type :json
       status = h.addHost( host )
+
 # # #       puts h.status
 # # #       puts h.message
 # #       if( h.status == 201 )

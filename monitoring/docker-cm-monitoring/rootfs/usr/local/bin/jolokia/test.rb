@@ -10,9 +10,12 @@ require './lib/jolokia'
 # host = 'master-16-tomcat'
 # ports = [3306,5432,28017,38099,40099,40199,40299,40399,40499,40599,40699,40799,40899,40999,41099,41199,41299,41399,42099,42199,42299,42399,42499,42599,42699,42799,42899,42999,43099,44099,45099,46099,47099,49099]
 #
-# h = Discover.new()
-# h.addHost( '192.168.252.100' , [], true )
-# h.addHost( 'monitoring-16-01', [], true )
+h = Discover.new()
+h.addHost( '192.168.252.100', [], true  )
+# h.addHost( 'monitoring-16-01' )
+# h.addHost( 'blackbox' )
+
+exit 0
 
 r = JolokiaDataRaiser.new()
 r.applicationConfig( 'config/application.json' )

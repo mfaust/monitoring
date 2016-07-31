@@ -1,19 +1,20 @@
 #!/usr/bin/ruby
 #
+# 31.07.2016 - Bodo Schulz
 #
 #
-#
-
-
+# v0.7.1
+# -----------------------------------------------------------------------------
 
 # require 'sqlite3'
-# require 'socket'
-# require 'timeout'
+require 'socket'
+require 'timeout'
 require 'logger'
 require 'json'
 require 'fileutils'
 require 'net/http'
 require 'uri'
+require './lib/tools'
 
 # -------------------------------------------------------------------------------------------------------------------
 
@@ -23,10 +24,11 @@ class Discover
 
   def initialize
 
-#    file = File.open( '/tmp/monitor.log', File::WRONLY | File::APPEND | File::CREAT )
-#    @log = Logger.new( file, 'weekly', 1024000 )
-    @log = Logger.new( STDOUT )
-    @log.level = Logger::INFO
+    file = File.open( '/tmp/monitor-discovery.log', File::WRONLY | File::APPEND | File::CREAT )
+    file.sync = true
+    @log = Logger.new( file, 'weekly', 1024000 )
+#    @log = Logger.new( STDOUT )
+    @log.level = Logger::DEBUG
     @log.datetime_format = "%Y-%m-%d %H:%M:%S"
     @log.formatter = proc do |severity, datetime, progname, msg|
       "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
@@ -76,35 +78,17 @@ class Discover
 
   end
 
-  # check if Node exists (simple ping)
-  # result @bool
-  def isRunning? ( ip )
 
-    # first, ping check
-    if( system( 'ping -c1 -w1 ' + ip.to_s + ' > /dev/null' ) == true )
+  def jolokiaIsAvailable?()
 
-      @log.info( sprintf( '  node %-13s are available', ip.to_s ) )
-      return true
-    else
-      @log.info( sprintf( '  node %-13s are NOT available', ip.to_s ) )
+    # if our jolokia proxy available?
+    if( ! port_open?( @jolokiaHost, @jolokiaPort ) )
+      @log.error( 'jolokia service is not available!' )
+      @log.error( 'skip service discovery' )
       return false
     end
 
-  end
-
-  def port_open? ( ip, port, seconds = 1 )
-    # => checks if a port is open or not on a remote host
-    Timeout::timeout( seconds ) do
-      begin
-        TCPSocket.new( ip, port ).close
-        true
-      rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH, SocketError
-        false
-      end
-    end
-    rescue Timeout::Error
-      false
-
+    return true
   end
 
 
@@ -132,8 +116,6 @@ class Discover
       request      = Net::HTTP::Post.new( '/jolokia/' )
       request.add_field('Content-Type', 'application/json')
 
-      # send hash above
-
       # hash for the NEW Port-Schema
       hash = {
         :type => "read",
@@ -152,6 +134,8 @@ class Discover
         response     = http.request( request )
 
       rescue Timeout::Error, Errno::ECONNREFUSED, Errno::EINVAL, Errno::ECONNRESET, EOFError, Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError => error
+
+        @log.error( error )
 
         case error
         when Errno::ECONNREFUSED
@@ -261,13 +245,44 @@ class Discover
 
     if( File.exist?( dir_path ) )
       FileUtils.rm_r( dir_path )
+
+      @status = 200
+      @message = 'Host successful removed'
+      return { 'status' => '200', 'message' => 'Host successful removed' }
+    else
+
+      @status = 400
+      @message = 'Hosts not exists'
+      return { 'status' => '400', 'message' => 'Hosts not exists' }
     end
 
-    return { 'status' => '200', 'message' => 'Host successful removed' }
+
   end
 
   # add Host and discovery applications
   def addHost( host, ports = [], force = false )
+
+    if( !isRunning?( host ) )
+
+      @status  = 400
+      @message = 'Host not available'
+
+      return {
+        'status'  => @status,
+        'message' => @message
+      }
+    end
+
+    if( ! jolokiaIsAvailable?() )
+
+      @status  = 400
+      @message = 'Jolokia not available'
+
+      return {
+        'status'  => @status,
+        'message' => @message
+      }
+    end
 
     # force delete
     if( force == true )
@@ -302,6 +317,8 @@ class Discover
     ports.each do |p|
 
       open = port_open?( host, p )
+
+      @log.debug( sprintf( 'Host: %s | Port: %s   - status %s', host, p, open ) )
 
       if( open == true )
 
