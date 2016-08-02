@@ -2,6 +2,25 @@
 #
 #
 
+  # return a array of all monitored server
+  def monitoredServer( cacheDirectory )
+
+    server = Array.new()
+
+    Dir.chdir( cacheDirectory )
+    Dir.glob( "**" ) do |f|
+
+      if( FileTest.directory?( f ) )
+        server.push( File.basename( f ) )
+      end
+    end
+
+    server.sort!
+
+    return server
+  end
+
+
 
   # check if Node exists (simple ping)
   # result @bool

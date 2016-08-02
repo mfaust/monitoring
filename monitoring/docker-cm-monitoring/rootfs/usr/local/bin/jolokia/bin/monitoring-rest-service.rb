@@ -95,8 +95,15 @@ module Sinatra
 
     # create new host
     post '/:host/:force' do
+
+      host = params[:host]
+
       content_type :json
-      h.addHost( params[:host], [], true ).to_json
+      status = h.addHost( params[:host], [], true )
+
+      response.status = h.status
+      status.to_json
+
     end
 
     # delete a host
@@ -105,7 +112,18 @@ module Sinatra
       h.deleteHost( params[:host] ).to_json
     end
 
+    # create new host
+    post '/config/joloka' do
 
+      jolokia_host = params['host']
+      jolokia_port = params['port']
+
+      content_type :json
+#      status = h.addHost( host )
+
+
+
+    end
 
     run! if app_file == $0
 

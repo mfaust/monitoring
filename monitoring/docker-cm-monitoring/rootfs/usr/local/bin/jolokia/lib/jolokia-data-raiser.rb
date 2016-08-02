@@ -8,8 +8,9 @@
 require 'logger'
 require 'json'
 
-require './lib/tools'
 require './lib/jolokia_template'
+require './lib/tools'
+
 
 
 class JolokiaDataRaiser
@@ -21,22 +22,20 @@ class JolokiaDataRaiser
     file = File.open( '/tmp/monitor.log', File::WRONLY | File::APPEND | File::CREAT )
     @log = Logger.new( file, 'weekly', 1024000 )
 #    @log = Logger.new( STDOUT )
-    @log.level = Logger::INFO
+    @log.level = Logger::DEBUG
     @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
     @log.formatter = proc do |severity, datetime, progname, msg|
       "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
     end
 
-    @currentDirectory = File.expand_path( File.join( File.dirname( __FILE__ ) ) )
-    @cacheDirectory   = '/var/cache/monitoring'
+    @currentDirectory  = File.expand_path( File.join( File.dirname( __FILE__ ) ) )
+    @cacheDirectory    = '/var/cache/monitoring'
 
-    @jolokiaHost = 'localhost'
-    @jolokiaPort = 8080
+    @jolokiaPort       = 8080
+    @jolokiaHost       = 'localhost'
 
-    @appConfigFile  = ''
+    @appConfigFile     = ''
     @serviceConfigFile = ''
-
-    @monitoredServer = Array.new()
 
   end
 
@@ -51,20 +50,23 @@ class JolokiaDataRaiser
   end
 
 
-  # return a array of all monitored server
-  def monitoredServer()
-
-    Dir.chdir( @cacheDirectory )
-    Dir.glob( "**" ) do |f|
-
-      if( FileTest.directory?( f ) )
-        @monitoredServer.push( File.basename( f ) )
-      end
-    end
-
-    @monitoredServer.sort!
-
-  end
+#   # return a array of all monitored server
+#   def monitoredServer( cacheDirectory )
+#
+#     server = Array.new()
+#
+#     Dir.chdir( cacheDirectory )
+#     Dir.glob( "**" ) do |f|
+#
+#       if( FileTest.directory?( f ) )
+#         server.push( File.basename( f ) )
+#       end
+#     end
+#
+#     server.sort!
+#
+#     return server
+#   end
 
   # merge hashes of configured and discovered data
   def createHostConfig( data )
@@ -266,7 +268,7 @@ class JolokiaDataRaiser
       timestamp  = c['timestamp']
       status     = c['status']
 
-      if( mbean.include? 'module=' )
+      if( mbean.include?( 'module=' ) )
         regex = /
           ^                     # Starting at the front of the string
           (.*)                  #
@@ -286,7 +288,7 @@ class JolokiaDataRaiser
         mbeanType       = "#{parts['type']}".strip.tr( '. ', '' )
         mbean_type      = sprintf( '%s%s', mbeanType, mbeanPool )
 
-      elsif( mbean.include? 'bean=' )
+      elsif( mbean.include?( 'bean=' ) )
 
         regex = /
           ^                     # Starting at the front of the string
@@ -303,7 +305,8 @@ class JolokiaDataRaiser
         mbeanBean       = "#{parts['bean']}".strip.tr( '. ', '' )
         mbeanType       = "#{parts['type']}".strip.tr( '. ', '' )
         mbean_type      = sprintf( '%s%s', mbeanType, mbeanBean )
-      elsif( mbean.include? 'name=' )
+
+      elsif( mbean.include?( 'name=' ) )
         regex = /
           ^                     # Starting at the front of the string
           (.*)                  #
@@ -319,6 +322,26 @@ class JolokiaDataRaiser
         mbeanName       = "#{parts['name']}".strip.tr( '. ', '' )
         mbeanType       = "#{parts['type']}".strip.tr( '. ', '' )
         mbean_type      = sprintf( '%s%s', mbeanType, mbeanName )
+
+      elsif( mbean.include?( 'solr') )
+
+        regex = /
+          ^                     # Starting at the front of the string
+          solr\/                #
+          (?<core>.+[a-zA-Z]):  #
+          (.*)                  #
+          type=                 #
+          (?<type>.+[a-zA-Z])   #
+          $
+        /x
+
+        parts           = mbean.match( regex )
+        mbeanCore       = "#{parts['core']}".strip.tr( '. ', '' )
+        mbeanCore[0]    = mbeanCore[0].to_s.capitalize
+        mbeanType       = "#{parts['type']}".tr( '. /', '' )
+        mbeanType[0]    = mbeanType[0].to_s.capitalize
+        mbean_type      = sprintf( 'Solr%s%s', mbeanCore, mbeanType )
+
       else
         regex = /
           ^                     # Starting at the front of the string
@@ -405,14 +428,14 @@ class JolokiaDataRaiser
     # ----------------------------------------------------------------------------------------
 
     @log.debug( 'get monitored Servers' )
-    self.monitoredServer()
+    monitoredServer = monitoredServer( @cacheDirectory )
 
     file_name = 'discovery.json'
     save_file = 'mergedHostData.json'
 
     data = Hash.new()
 
-    @monitoredServer.each do |h|
+    monitoredServer.each do |h|
 
       @log.info( sprintf( 'Host: %s', h ) )
 
@@ -428,13 +451,17 @@ class JolokiaDataRaiser
 
         @log.debug( 'create Hostconfiguration' )
         d = self.createHostConfig( data )
-        @log.debug( 'merge Data between Propertie Files and discovered Services' )
+        @log.debug( 'merge Data between Property Files and discovered Services' )
         d = self.mergeData( d )
 
-#         @log.debug( JSON.pretty_generate( d ) )
+#        @log.debug( JSON.pretty_generate( d ) )
 
-#         merged = JSON.pretty_generate( d )
-#         File.open( sprintf( '%s/%s', dir_path, save_file ) , 'w' ) {|f| f.write( merged ) }
+        if( ! File.exist?( sprintf( '%s/%s', dir_path, save_file ) ) )
+
+          @log.debug( 'save merged data' )
+          merged = JSON.pretty_generate( d )
+          File.open( sprintf( '%s/%s', dir_path, save_file ) , 'w' ) {|f| f.write( merged ) }
+        end
 
         @log.debug( 'create bulk Data for Jolokia' )
         self.createBulkCheck( h, d )
@@ -449,7 +476,7 @@ class JolokiaDataRaiser
             self.sendChecks( f )
           end
 #          if( FileTest.directory?( f ) )
-#            @monitoredServer.push( File.basename( f ) )
+#            monitoredServer.push( File.basename( f ) )
 #          end
         end
       end
