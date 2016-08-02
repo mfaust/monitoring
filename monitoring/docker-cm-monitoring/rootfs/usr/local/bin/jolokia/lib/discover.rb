@@ -1,12 +1,11 @@
 #!/usr/bin/ruby
 #
-# 31.07.2016 - Bodo Schulz
+# 02.08.2016 - Bodo Schulz
 #
 #
-# v0.7.1
+# v0.7.4
 # -----------------------------------------------------------------------------
 
-# require 'sqlite3'
 require 'socket'
 require 'timeout'
 require 'logger'
@@ -75,6 +74,17 @@ class Discover
       44099,
       45099
     ]
+
+  end
+
+
+  def configure( options = {} )
+
+    if( options )
+      config = JSON.pretty_generate( options )
+
+      @log.debug( config )
+    end
 
   end
 
@@ -262,7 +272,20 @@ class Discover
   # add Host and discovery applications
   def addHost( host, ports = [], force = false )
 
-    if( !isRunning?( host ) )
+    # first, we check if our jolokia accessable
+    if( ! jolokiaIsAvailable?() )
+
+      @status  = 400
+      @message = 'Jolokia not available'
+
+      return {
+        'status'  => @status,
+        'message' => @message
+      }
+    end
+
+    # second, if the that we whant monitored, available
+    if( isRunning?( host ) == false )
 
       @status  = 400
       @message = 'Host not available'
@@ -273,15 +296,8 @@ class Discover
       }
     end
 
-    if( ! jolokiaIsAvailable?() )
-
-      @status  = 400
-      @message = 'Jolokia not available'
-
-      return {
-        'status'  => @status,
-        'message' => @message
-      }
+    if( force == true )
+      @log.info( 'use force mode' )
     end
 
     # force delete
@@ -350,29 +366,69 @@ class Discover
       Dir.glob( "**" ) do |f|
 
         if( FileTest.directory?( f ) )
-          hosts.push( File.basename( f ) )
+          hosts.push( hostInformation( f, File.basename( f ) ) )
         end
       end
 
-      hosts.sort!
-      return { 'status' => 200, 'hosts' => hosts }
+      hosts.sort!{ |a,b| a['name'] <=> b['name'] }
+
+      @status  = 200
+      @message = hosts
+
+      return {
+        'status' => @status,
+        'hosts'  => @message
+      }
 
     else
 
       dir_path  = sprintf( '%s/%s', @tmp_dir, host )
       file_name = 'discovery.json'
 
-      if( File.exist?( sprintf( '%s/%s', dir_path, file_name ) ) == true )
+      file      = sprintf( '%s/%s', dir_path, file_name )
 
-        file = File.read( sprintf( '%s/%s', dir_path, file_name ) )
+      if( File.exist?( file ) == true )
 
-        return JSON.parse( file )
+        data = File.read( file )
+
+        h              = hostInformation( file, File.basename( dir_path ) )
+        h['services' ] = JSON.parse( data )
+
+        @status  = 200
+        @message = h
+
+        return {
+          'status' => @status,
+          'hosts'  => @message
+        }
+
       else
 
-        return { 'status' => 404, 'message' => 'No discovery File found' }
+        @status  = 404
+        @message = 'No discovery File found'
+
+        return {
+          'status' => @status,
+          'hosts'  => @message
+        }
       end
 
     end
+  end
+
+
+  def hostInformation( file, host )
+
+    status = isRunning?( host )
+    age    = File.mtime( file ).strftime("%Y-%m-%d %H:%M:%S")
+
+    return {
+      host => {
+        'status' => status ? 'online' : 'offline',
+        'created' => age
+      }
+    }
+
   end
 
 end
