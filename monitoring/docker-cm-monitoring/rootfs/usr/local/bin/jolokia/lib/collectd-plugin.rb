@@ -1,6 +1,8 @@
 #
 #
 
+require 'filesize'
+
 # require './lib/collectd_plugin_graphite'
 
 
@@ -35,6 +37,52 @@ class CollecdPlugin
   end
 
 
+  def solrCore( mbean )
+
+    regex = /
+      ^                     # Starting at the front of the string
+      solr\/                #
+      (?<core>.+[a-zA-Z]):  #
+      (.*)                  #
+      type=                 #
+      (?<type>.+[a-zA-Z])   #
+      $
+    /x
+
+    parts          = mbean.match( regex )
+    return sprintf( '%s_core', "#{parts['core']}".strip.tr( '. ', '' ).downcase )
+
+  end
+
+
+  def normalizeService( service )
+
+    # normalize service names for grafana
+    case service
+    when 'content-management-server'
+      service = 'CMS'
+    when 'master-live-server'
+      service = 'MLS'
+    when 'repication-live-server'
+      service = 'RLS'
+    when 'workflow-server'
+      service = 'WFS'
+    when /^cae-live/
+      service = 'CAE_LIVE'
+#    when 'solr-master'
+#      service = 'SOLR_MASTER'
+#    when 'solr-slave'
+#      service = 'SOLR_SLAVE'
+    when 'caefeeder-live'
+      service = 'FEEDER_LIVE'
+    when 'caefeeder-preview'
+      service = 'FEEDER_PREV'
+    end
+
+    return service.tr('-', '_').upcase
+
+  end
+
   def ParseResult_Memory( data = {} )
 
     value  = data['value'] ? data['value'] : nil
@@ -63,9 +111,7 @@ class CollecdPlugin
         data.push( sprintf( format, @Host, @Service, type, 'committed', @interval, committed ) )
       end
 
-#       @log.debug( JSON.pretty_generate( data ) )
-
-      self.output( data )
+      return data
 
     end
 
@@ -88,82 +134,17 @@ class CollecdPlugin
 
     else
 
-
     end
 
-#       @log.debug( JSON.pretty_generate( data ) )
-
-      self.output( data )
+    return data
 
   end
 
 
   def ParseResult_ThreadPool( data = {} )
 
-    return
-
-    value  = data['value'] ? data['value'] : nil
-    format = 'PUTVAL %s/%s-%s/counter-%s interval=%s N:%s'
-    data   = []
-
-    if( value != nil )
-
-      peak   = value['PeakThreadCount']  ? value['PeakThreadCount']  : nil
-      count  = value['ThreadCount']      ? value['ThreadCount']      : nil
-
-#         "activeCount": 0,
-#         "queueSize": 0,
-#         "modelerType": "org.apache.catalina.core.StandardThreadExecutor",
-#         "largestPoolSize": 20,
-#         "poolSize": 20,
-#         "maxIdleTime": 60000,
-#         "threadPriority": 5,
-#         "daemon": true,
-#         "minSpareThreads": 20,
-#         "maxQueueSize": 2147483647,
-#         "stateName": "STARTED",
-#         "namePrefix": "catalina-exec-",
-#         "name": "tomcatThreadPool",
-#         "corePoolSize": 20,
-#         "completedTaskCount": 30,
-#         "maxThreads": 200,
-#         "prestartminSpareThreads": false,
-#         "threadRenewalDelay": 1000
-
-
-
-      data.push(
-        sprintf(
-          format,
-          @Host,
-          @Service,
-          'threading',
-          'peak',
-          10,
-          peak
-        )
-      )
-
-      data.push(
-        sprintf(
-          format,
-          @Host,
-          @Service,
-          'threading',
-          'count',
-          10,
-          count
-        )
-      )
-
-    else
-
-
-    end
-
-#       @log.debug( JSON.pretty_generate( data ) )
-
-      self.output( data )
+    # was für komische
+    # müssen wir klären
 
   end
 
@@ -189,9 +170,7 @@ class CollecdPlugin
 
     end
 
-#       @log.debug( JSON.pretty_generate( data ) )
-
-      self.output( data )
+    return data
 
   end
 
@@ -240,9 +219,7 @@ class CollecdPlugin
       end
     end
 
-#       @log.debug( JSON.pretty_generate( data ) )
-
-      self.output( data )
+    return data
 
   end
 
@@ -291,9 +268,7 @@ class CollecdPlugin
       end
     end
 
-#       @log.debug( JSON.pretty_generate( data ) )
-
-      self.output( data )
+    return data
 
   end
 
@@ -328,9 +303,7 @@ class CollecdPlugin
 
     end
 
-#       @log.debug( JSON.pretty_generate( data ) )
-
-      self.output( data )
+    return data
 
   end
 
@@ -362,23 +335,82 @@ class CollecdPlugin
 
     end
 
-#       @log.debug( JSON.pretty_generate( data ) )
-
-      self.output( data )
+    return data
 
   end
 
 
   def ParseResult_SolrReplication( data = {} )
 
-    @log.debug( data )
+    value  = data['value']            ? data['value']            : nil
+    mbean  = data['request']['mbean'] ? data['request']['mbean'] : nil
+
+    format = 'PUTVAL %s/%s-%s/counter-%s interval=%s N:%s'
+    data   = []
+
+    solrCore = self.solrCore( mbean )
+
+    if( value != nil )
+
+      generation        = value['generation']        ? value['generation']        : nil
+      isMaster          = value['isSlave']           ? value['isSlave']           : nil
+      isSlave           = value['isMaster']          ? value['isMaster']          : nil
+      indexVersion      = value['indexVersion']      ? value['indexVersion']      : nil
+      requests          = value['requests']          ? value['requests']          : nil
+      medianRequestTime = value['medianRequestTime'] ? value['medianRequestTime'] : nil
+      errors            = value['errors']            ? value['errors']            : nil
+      indexSize         = value['indexSize']         ? value['indexSize']         : nil
+      # achtung!
+      # indexSize ist irrsinnigerweise als human readable ausgeführt worden!
+      indexSize         = Filesize.from( indexSize ).to_i
+
+      data.push( sprintf( format, @Host, @Service, solrCore, 'index_size', @interval, indexSize.to_s ) )
+      data.push( sprintf( format, @Host, @Service, solrCore, 'index'     , @interval, indexVersion ) )
+      data.push( sprintf( format, @Host, @Service, solrCore, 'errors    ', @interval, errors ) )
+
+    end
+
+    return data
 
   end
 
 
   def ParseResult_SolrQueryResultCache( data = {} )
 
-    @log.debug( data )
+    value  = data['value']            ? data['value']            : nil
+    mbean  = data['request']['mbean'] ? data['request']['mbean'] : nil
+
+    format = 'PUTVAL %s/%s-%s/counter-%s interval=%s N:%s'
+    data   = []
+
+    solrCore = self.solrCore( mbean )
+
+    if( value != nil )
+
+      warmupTime           = value['warmupTime']           ? value['warmupTime']           : nil
+      lookups              = value['lookups']              ? value['lookups']              : nil
+      evictions            = value['evictions']            ? value['evictions']            : nil
+      inserts              = value['inserts']              ? value['inserts']              : nil
+      hits                 = value['hits']                 ? value['hits']                 : nil
+      size                 = value['size']                 ? value['size']                 : nil
+      hitratio             = value['hitratio']             ? value['hitratio']             : nil
+      cumulative_inserts   = value['cumulative_inserts']   ? value['cumulative_inserts']   : nil
+      cumulative_hits      = value['cumulative_hits']      ? value['cumulative_hits']      : nil
+      cumulative_evictions = value['cumulative_evictions'] ? value['cumulative_evictions'] : nil
+      cumulative_hitratio  = value['cumulative_hitratio']  ? value['cumulative_hitratio']  : nil
+      cumulative_lookups   = value['cumulative_lookups']   ? value['cumulative_lookups']   : nil
+
+      data.push( sprintf( format, @Host, @Service, solrCore, 'warmupTime'  , @interval, warmupTime ) )
+      data.push( sprintf( format, @Host, @Service, solrCore, 'lookups'     , @interval, lookups ) )
+      data.push( sprintf( format, @Host, @Service, solrCore, 'evictions'   , @interval, evictions ) )
+      data.push( sprintf( format, @Host, @Service, solrCore, 'inserts'     , @interval, inserts ) )
+      data.push( sprintf( format, @Host, @Service, solrCore, 'hits'        , @interval, hits ) )
+      data.push( sprintf( format, @Host, @Service, solrCore, 'size'        , @interval, size ) )
+      data.push( sprintf( format, @Host, @Service, solrCore, 'hitratio'    , @interval, hitratio ) )
+
+    end
+
+    return data
 
   end
 
@@ -408,9 +440,7 @@ class CollecdPlugin
 
     end
 
-#       @log.debug( JSON.pretty_generate( data ) )
-
-      self.output( data )
+    return data
 
   end
 
@@ -439,9 +469,7 @@ class CollecdPlugin
 
     end
 
-#       @log.debug( JSON.pretty_generate( data ) )
-
-      self.output( data )
+    return data
 
   end
 
@@ -474,9 +502,7 @@ class CollecdPlugin
 
     end
 
-#       @log.debug( JSON.pretty_generate( data ) )
-
-      self.output( data )
+    return data
 
   end
 
@@ -506,9 +532,7 @@ class CollecdPlugin
 
     end
 
-#       @log.debug( JSON.pretty_generate( data ) )
-
-      self.output( data )
+    return data
 
   end
 
@@ -549,11 +573,8 @@ class CollecdPlugin
   def run()
 
     monitoredServer = monitoredServer( @cacheDirectory )
-
-
-    dataFile = 'mergedHostData.json'
-
-    data = Hash.new()
+    dataFile        = 'mergedHostData.json'
+    data            = Hash.new()
 
     monitoredServer.each do |h|
 
@@ -573,12 +594,14 @@ class CollecdPlugin
 
           port = data['port']
 
-          @Service = service
+          @Service = self.normalizeService( service )
           @Port    = port
 
           bulkResults = sprintf( '%s/bulk_%s.result', dir_path, port )
 
           if( File.exist?( bulkResults ) == true )
+
+            graphiteOutput  = Array.new()
 
             bulk = JSON.parse( File.read( bulkResults ) )
 
@@ -588,34 +611,38 @@ class CollecdPlugin
 
                 case k
                 when 'Memory'
-                  self.ParseResult_Memory( v )
+                  graphiteOutput.push( self.ParseResult_Memory( v ) )
                 when 'Threading'
-                  self.ParseResult_Threading( v )
-                when 'ExecutortomcatThreadPool'
-                  self.ParseResult_ThreadPool( v )
+                  graphiteOutput.push( self.ParseResult_Threading( v ) )
+#                when 'ExecutortomcatThreadPool'
+#                  graphiteOutput.push( self.ParseResult_ThreadPool( v ) )
                 when 'ClassLoading'
-                  self.ParseResult_ClassLoading( v )
+                  graphiteOutput.push( self.ParseResult_ClassLoading( v ) )
                 when 'Server'
-                  self.ParseResult_Server( v )
+                  graphiteOutput.push( self.ParseResult_Server( v ) )
                 when 'CapConnection'
-                  self.ParseResult_CapConnection( v )
+                  graphiteOutput.push( self.ParseResult_CapConnection( v ) )
                 when 'StoreConnectionPool'
-                  self.ParseResult_ConnectionPool( v )
+                  graphiteOutput.push( self.ParseResult_ConnectionPool( v ) )
                 when 'StoreQueryPool'
-                  self.ParseResult_QueryPool( v )
+                  graphiteOutput.push( self.ParseResult_QueryPool( v ) )
                 when 'StatisticsJobResult'
-                  self.ParseResult_StatisticsJobResult( v )
+                  graphiteOutput.push( self.ParseResult_StatisticsJobResult( v ) )
                 when 'StatisticsResourceCache'
-                  self.ParseResult_StatisticsResourceCache( v )
+                  graphiteOutput.push( self.ParseResult_StatisticsResourceCache( v ) )
                 when 'GarbageCollectorParNew'
-                  self.ParseResult_GCParNew( v )
+                  graphiteOutput.push( self.ParseResult_GCParNew( v ) )
                 when 'GarbageCollectorConcurrentMarkSweep'
-                  self.ParseResult_GCConcurrentMarkSweep( v )
+                  graphiteOutput.push( self.ParseResult_GCConcurrentMarkSweep( v ) )
+                when /^Solr.*Replication/
+                  graphiteOutput.push( self.ParseResult_SolrReplication( v ) )
+                when /^Solr.*QueryResultCache/
+                  graphiteOutput.push( self.ParseResult_SolrQueryResultCache( v ) )
                 end
-
-
               end
             end
+
+            self.output( graphiteOutput )
 
           end
 

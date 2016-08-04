@@ -19,7 +19,7 @@ class JolokiaDataRaiser
 
   def initialize
 
-    file = File.open( '/tmp/monitor.log', File::WRONLY | File::APPEND | File::CREAT )
+    file = File.open( '/tmp/monitor-data-raiser.log', File::WRONLY | File::APPEND | File::CREAT )
     @log = Logger.new( file, 'weekly', 1024000 )
 #    @log = Logger.new( STDOUT )
     @log.level = Logger::DEBUG
@@ -237,14 +237,16 @@ class JolokiaDataRaiser
 
         result = response.body
       end
+
+      @log.debug( 'reorganize data for later use' )
+      result = JSON.pretty_generate( self.reorganizeData( result ) )
+
+      dir_path  = sprintf( '%s/%s', @cacheDirectory, dest_host )
+      save_file = sprintf( 'bulk_%s.result', dest_port )
+      File.open( sprintf( '%s/%s', dir_path, save_file ) , 'w' ) {|f| f.write( result ) }
+
     end
 
-    @log.debug( 'reorganize data for later use' )
-    result = JSON.pretty_generate( self.reorganizeData( result ) )
-
-    dir_path  = sprintf( '%s/%s', @cacheDirectory, dest_host )
-    save_file = sprintf( 'bulk_%s.result', dest_port )
-    File.open( sprintf( '%s/%s', dir_path, save_file ) , 'w' ) {|f| f.write( result ) }
   end
 
 

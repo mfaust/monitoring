@@ -15,24 +15,15 @@ def discover
   #
   h = Discover.new()
 
-  status = h.listHosts()
+#  puts h.listHosts()
+  puts h.listHosts( '192.168.252.100' )
 
-  puts status
-#   puts h.status
-#   puts h.message
-
-  status = h.listHosts( '192.168.252.100' )
-
-  puts status
-#   puts h.status
-#   puts h.message
-
-
-#  status = h.addHost( '192.168.252.100' )
+#  status = h.addHost( '192.168.252.100', [], true )
 #
 #  puts status
 #  puts h.status
 #  puts h.message
+
   # h.addHost( 'monitoring-16-01' )
   # h.addHost( 'blackbox' )
 
@@ -122,15 +113,13 @@ end
 
 def collectedPlugin()
 
-
-
   c = CollecdPlugin.new()
 
   c.run()
 
 end
 
-# dataRaiser
-
+discover
+dataRaiser
 collectedPlugin
 
