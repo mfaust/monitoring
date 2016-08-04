@@ -13,7 +13,7 @@ lib_dir    = File.expand_path( '../../lib', __FILE__ )
 application_config = sprintf( '%s/cm-application.json', config_dir )
 service_config     = sprintf( '%s/cm-service.json'    , config_dir )
 
-require sprintf( '%s/jolokia', lib_dir )
+require sprintf( '%s/jolokia-data-raiser', lib_dir )
 
 # -----------------------------------------------------------------------------
 
