@@ -23,7 +23,7 @@ class Discover
 
   def initialize
 
-    file = File.open( '/tmp/monitor-discovery.log', File::WRONLY | File::APPEND | File::CREAT )
+    file      = File.open( '/tmp/monitor-discovery.log', File::WRONLY | File::APPEND | File::CREAT )
     file.sync = true
     @log = Logger.new( file, 'weekly', 1024000 )
 #    @log = Logger.new( STDOUT )
@@ -326,7 +326,10 @@ class Discover
       @status  = 409
       @message = 'Host already created'
 
-      return { 'status' => '409', 'message' => 'Host already created' }
+      return {
+        'status'  => @status,
+        'message' => @message
+      }
     end
 
     discover = Hash.new()
@@ -356,7 +359,10 @@ class Discover
     @message = 'Host successful created'
     @services = services
 
-    return { 'status' => '201', 'message' => 'Host successful created' }
+    return {
+      'status'  => @status,
+      'message' => @message
+    }
   end
 
 
@@ -398,8 +404,9 @@ class Discover
         h              = hostInformation( file, File.basename( dir_path ) )
         h['services' ] = JSON.parse( data )
 
-        @status  = 200
-        @message = h
+        @status   = 200
+        @message  = h
+        @services = h['services']
 
         return {
           'status' => @status,

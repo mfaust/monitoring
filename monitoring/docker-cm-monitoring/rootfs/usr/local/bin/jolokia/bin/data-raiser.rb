@@ -17,17 +17,19 @@ require sprintf( '%s/jolokia-data-raiser', lib_dir )
 
 # -----------------------------------------------------------------------------
 
-r = JolokiaDataRaiser.new()
-
-r.applicationConfig( application_config )
-r.serviceConfig( service_config )
+r = JolokiaDataRaiser.new( application_config, service_config )
 
 # -----------------------------------------------------------------------------
 
 # now, fork a process and call the run() function every 15 seconds
 pid = fork do
   stop = false
-  Signal.trap('INT') { stop = true }
+
+  Signal.trap('INT')  { stop = true }
+  Signal.trap('HUP')  { stop = true }
+  Signal.trap('TERM') { stop = true }
+  Signal.trap('QUIT') { stop = true }
+
   until stop
     # do your thing
     r.run()

@@ -2,6 +2,9 @@
 #
 #
 
+require 'timeout'
+require 'socket'
+
   # return a array of all monitored server
   def monitoredServer( cacheDirectory )
 
@@ -39,6 +42,7 @@
   end
 
   def port_open? ( ip, port, seconds = 1 )
+
     # => checks if a port is open or not on a remote host
     Timeout::timeout( seconds ) do
       begin

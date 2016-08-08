@@ -5,24 +5,24 @@ require 'json'
 require './lib/discover'
 require './lib/jolokia-data-raiser'
 require './lib/collectd-plugin'
+require './lib/grafana'
 
 def discover
 
-  #
-  #
   # host = 'master-16-tomcat'
   # ports = [3306,5432,28017,38099,40099,40199,40299,40399,40499,40599,40699,40799,40899,40999,41099,41199,41299,41399,42099,42199,42299,42399,42499,42599,42699,42799,42899,42999,43099,44099,45099,46099,47099,49099]
   #
   h = Discover.new()
 
 #  puts h.listHosts()
-  puts h.listHosts( '192.168.252.100' )
+#  status =  h.listHosts( '192.168.252.100' )
 
+#  status = h.addHost( '192.168.252.100' )
 #  status = h.addHost( '192.168.252.100', [], true )
-#
+
 #  puts status
 #  puts h.status
-#  puts h.message
+ # puts h.message
 
   # h.addHost( 'monitoring-16-01' )
   # h.addHost( 'blackbox' )
@@ -31,9 +31,7 @@ end
 
 def dataRaiser()
 
-  r = JolokiaDataRaiser.new()
-  r.applicationConfig( 'config/cm-application.json' )
-  r.serviceConfig( 'config/cm-service.json' )
+  r = JolokiaDataRaiser.new( 'config/cm-application.json', 'config/cm-service.json' )
 
   r.run()
 
@@ -93,21 +91,56 @@ def icinga()
     }
   }
 
-
-
   i = Icinga2.new( 'localhost', 5665, 'root', 'icinga' )
+  status = i.listHost()
+  puts status
 
-  puts( i.applicationData() )
+  # d = Discover.new()
+  status = d.listHosts( '192.168.252.100' )
 
-  puts( '-----------------------------------------------------' )
-  puts( i.listHost( 'monitoring-16-01' ) )
-  # puts( i.deleteHost( 'monitoring-16-01' ) )
+  if( status.to_s != '' )
 
-  puts( i.addHost( 'monitoring-16-01', vars ) )
+    if( [200,201].include?( d.status ) )
 
-  i.addServices( 'monitoring-16-01', services )
+      services = d.services
 
-  puts( '-----------------------------------------------------' )
+      services.each do |s,v|
+
+        port = v['port'].to_s
+
+        services[s]['running'] = true
+
+        if( port.match( /^.[0-9][0-9]99$/ ) )
+          services[s]['port_jmx']  = services[s]['port']
+          services[s]['http_port'] = services[s]['port'].to_s.gsub( '99', '80')
+          services[s].delete( 'port' )
+        end
+      end
+    end
+
+    services['aws']  = false
+    services['nrpe'] = false
+
+#    puts JSON.pretty_generate( services )
+
+    puts( i.addHost( '192.168.252.100', services ) )
+
+  end
+
+#  puts( i.applicationData() )
+#  puts( i.listHost( '192.168.252.100' ) )
+
+#  puts( '-----------------------------------------------------' )
+#  puts( i.listHost( 'monitoring-16-01' ) )
+#  # puts( i.deleteHost( 'monitoring-16-01' ) )
+#
+#  puts( i.addHost( 'monitoring-16-01', vars ) )
+#
+#  i.addServices( 'monitoring-16-01', services )
+#
+#  puts( '-----------------------------------------------------' )
+#
+
 
 end
 
@@ -119,7 +152,26 @@ def collectedPlugin()
 
 end
 
-discover
-dataRaiser
+def grafana
+
+  options = {
+    'debug'   => true,
+    'timeout' => 3,
+    'ssl'     => false
+  }
+  g = Grafana::Client.new( 'localhost', 80, 'admin', 'admin', options )
+
+#   puts g.get_all_users()
+#   puts g.get_data_sources()
+
+end
+
+
+# discover
+# dataRaiser
 collectedPlugin
+# icinga
+
+grafana
+
 

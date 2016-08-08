@@ -7,6 +7,12 @@
 
 require 'logger'
 require 'json'
+require 'uri'
+require 'socket'
+require 'timeout'
+require 'fileutils'
+require 'net/http'
+
 
 require './lib/jolokia_template'
 require './lib/tools'
@@ -17,25 +23,40 @@ class JolokiaDataRaiser
 
   attr_reader :status, :message, :services
 
-  def initialize
+  def initialize( applicationConfig, serviceConfig )
 
-    file = File.open( '/tmp/monitor-data-raiser.log', File::WRONLY | File::APPEND | File::CREAT )
+    file      = File.open( '/tmp/monitor-data-raiser.log', File::WRONLY | File::APPEND | File::CREAT )
+    file.sync = true
     @log = Logger.new( file, 'weekly', 1024000 )
 #    @log = Logger.new( STDOUT )
-    @log.level = Logger::DEBUG
+    @log.level = Logger::INFO
     @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
     @log.formatter = proc do |severity, datetime, progname, msg|
       "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
     end
 
-    @currentDirectory  = File.expand_path( File.join( File.dirname( __FILE__ ) ) )
-    @cacheDirectory    = '/var/cache/monitoring'
+    @currentDirectory    = File.expand_path( File.join( File.dirname( __FILE__ ) ) )
+    @cacheDirectory      = '/var/cache/monitoring'
 
-    @jolokiaPort       = 8080
-    @jolokiaHost       = 'localhost'
+    @jolokiaPort         = 8080
+    @jolokiaHost         = 'localhost'
 
-    @appConfigFile     = ''
-    @serviceConfigFile = ''
+    @appConfigFile       = File.expand_path( applicationConfig )
+    @serviceConfigFile   = File.expand_path( serviceConfig )
+
+    @jolokiaApplications = nil
+    @serviceConfig       = nil
+
+    version              = '1.0.10'
+    date                 = '2016-08-05'
+
+    @log.info( '-----------------------------------------------------------------' )
+    @log.info( ' JolokiaDataRaiser' )
+    @log.info( "  Version #{version} (#{date})" )
+    @log.info( '  Copyright 2016 Coremedia' )
+    @log.info( "  cache directory located at #{@cacheDirectory}" )
+    @log.info( '-----------------------------------------------------------------' )
+    @log.info( '' )
 
   end
 
@@ -50,23 +71,26 @@ class JolokiaDataRaiser
   end
 
 
-#   # return a array of all monitored server
-#   def monitoredServer( cacheDirectory )
-#
-#     server = Array.new()
-#
-#     Dir.chdir( cacheDirectory )
-#     Dir.glob( "**" ) do |f|
-#
-#       if( FileTest.directory?( f ) )
-#         server.push( File.basename( f ) )
-#       end
-#     end
-#
-#     server.sort!
-#
-#     return server
-#   end
+  def logMark()
+
+    t      = Time.now
+    minute = t.min
+    second = t.sec
+
+    @wroteTick= false
+
+    if( [0,10,20,30,40,50].include?( minute ) and second < 27 )
+
+      if( @wroteTick == false )
+        @log.info( ' ----- TICK - TOCK ---- ' )
+      end
+      @wroteTick = true
+    else
+      @wroteTick = false
+    end
+
+  end
+
 
   # merge hashes of configured and discovered data
   def createHostConfig( data )
@@ -192,18 +216,18 @@ class JolokiaDataRaiser
   def sendChecks( file )
 
     result       = nil
-    serverUrl    = sprintf( "http://%s:%s/jolokia", @jolokiaHost, @jolokiaPort )
-
-    uri          = URI.parse( serverUrl )
-    http         = Net::HTTP.new( uri.host, uri.port )
 
     # if our jolokia proxy available?
     if( ! port_open?( @jolokiaHost, @jolokiaPort ) )
-      @log.error( sprintf( "The Port %s on Host %s ist not open!", @jolokiaPort, @jolokiaHost ) )
-      @log.error( "skip check" )
+      @log.error( sprintf( 'The Jolokia Service (%s:%s) are not available', @jolokiaHost, @jolokiaPort ) )
     else
 
-      data = JSON.parse( File.read( file ) )
+      serverUrl  = sprintf( "http://%s:%s/jolokia", @jolokiaHost, @jolokiaPort )
+
+      uri        = URI.parse( serverUrl )
+      http       = Net::HTTP.new( uri.host, uri.port )
+
+      data       = JSON.parse( File.read( file ) )
 
       # "service:jmx:rmi:///jndi/rmi://moebius-16-tomcat:2222/jmxrmi"
       course_line = /
@@ -221,8 +245,8 @@ class JolokiaDataRaiser
 
       # if our destination service (behind the jolokia proxy) available?
       if( ! port_open?( dest_host, dest_port ) )
-        @log.error( sprintf( "      => The Port %s on Host %s ist not open!", dest_port, dest_host ) )
-        @log.error( "      skip check" )
+
+        @log.error( sprintf( 'The Port %s on Host %s is not open, skip sending data', dest_port, dest_host ) )
       else
 
         request = Net::HTTP::Post.new(
@@ -236,15 +260,22 @@ class JolokiaDataRaiser
         end
 
         result = response.body
+
+        @log.debug( 'reorganize data for later use' )
+
+        begin
+          result = self.reorganizeData( result )
+          result = JSON.pretty_generate( result )
+
+          dir_path  = sprintf( '%s/%s', @cacheDirectory, dest_host )
+          save_file = sprintf( 'bulk_%s.result', dest_port )
+          File.open( sprintf( '%s/%s', dir_path, save_file ) , 'w' ) {|f| f.write( result ) }
+
+        rescue
+          @log.error( 'can\'t send data to jolokia service' )
+        end
+
       end
-
-      @log.debug( 'reorganize data for later use' )
-      result = JSON.pretty_generate( self.reorganizeData( result ) )
-
-      dir_path  = sprintf( '%s/%s', @cacheDirectory, dest_host )
-      save_file = sprintf( 'bulk_%s.result', dest_port )
-      File.open( sprintf( '%s/%s', dir_path, save_file ) , 'w' ) {|f| f.write( result ) }
-
     end
 
   end
@@ -386,45 +417,56 @@ class JolokiaDataRaiser
 
     # read Application Configuration
     # they define all standard checks
-    @log.debug( 'read defines of Application Properties' )
-    begin
+    if( @jolokiaApplications.to_s == '' )
 
-      if( File.exist?( @appConfigFile ) )
+      @log.debug( 'read defines of Application Properties' )
 
-        @config      = JSON.parse( File.read( @appConfigFile ) )
+      begin
 
-        if( @config['jolokia']['applications'] != nil )
-          @jolokiaApplications = @config['jolokia']['applications']
+        if( File.exist?( @appConfigFile ) )
+          @config      = JSON.parse( File.read( @appConfigFile ) )
+
+          if( @config['jolokia']['applications'] != nil )
+            @jolokiaApplications = @config['jolokia']['applications']
+          end
+
+        else
+          @log.error( sprintf( 'Application Config File %s not found!', @appConfigFile ) )
+          exit 1
         end
+      rescue JSON::ParserError => e
 
-      else
-        @log.error( sprintf( 'Application Config File %s not found!', @appConfigFile ) )
+        @log.error( 'wrong result (no json)')
+        @log.error( e )
         exit 1
       end
-    rescue JSON::ParserError => e
-
-      @log.error( 'wrong result (no json)')
-      @log.error( e )
-      exit 1
+    else
+      @log.debug( 'jolokiaApplications is set' )
     end
 
     # read Service Configuration
     #
-    @log.debug( 'read defines off Services Properties' )
-    begin
+    if( @serviceConfig.to_s == '' )
 
-      if( File.exist?( @serviceConfigFile ) )
-        @serviceConfig      = JSON.parse( File.read( @serviceConfigFile ) )
-      else
-        @log.error( sprintf( 'Config File %s not found!', @serviceConfigFile ) )
+      @log.debug( 'read defines off Services Properties' )
+
+      begin
+
+        if( File.exist?( @serviceConfigFile ) )
+          @serviceConfig      = JSON.parse( File.read( @serviceConfigFile ) )
+        else
+          @log.error( sprintf( 'Config File %s not found!', @serviceConfigFile ) )
+          exit 1
+        end
+
+      rescue JSON::ParserError => e
+
+        @log.error( 'wrong result (no json)')
+        @log.error( e )
         exit 1
       end
-
-    rescue JSON::ParserError => e
-
-      @log.error( 'wrong result (no json)')
-      @log.error( e )
-      exit 1
+    else
+      @log.debug( 'serviceConfig is set' )
     end
 
     # ----------------------------------------------------------------------------------------
@@ -483,6 +525,8 @@ class JolokiaDataRaiser
         end
       end
     end
+
+    self.logMark()
 
 
 #    json = JSON.pretty_generate( data )

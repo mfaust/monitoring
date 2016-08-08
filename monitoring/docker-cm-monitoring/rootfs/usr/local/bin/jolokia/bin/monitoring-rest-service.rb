@@ -28,7 +28,7 @@ module Sinatra
       Dir.mkdir( logDirectory ) unless File.exist?( logDirectory )
 
       file      = File.open( "#{logDirectory}/#{settings.environment}.log", File::WRONLY | File::APPEND | File::CREAT )
-      file.sync = false
+      file.sync = true
 
       use Rack::CommonLogger, file
     end
@@ -73,24 +73,25 @@ module Sinatra
       content_type :json
       status = h.addHost( host )
 
-# # #       puts h.status
-# # #       puts h.message
-# #       if( h.status == 201 )
-# #
-# # #         s = h.listHosts( host ).to_json
-# # #         puts s
-# #
-# #         services = h.services
-# #
-# #         puts services.keys
-# #
-# #         services.each do |s,v|
-# #           puts s
-# #           puts v['port']
-# #         end
-# #       end
-      response.status = h.status
-      status.to_json
+# #       puts h.status
+# #       puts h.message
+#       if( h.status == 201 )
+#
+# #         s = h.listHosts( host ).to_json
+# #         puts s
+#
+#         services = h.services
+#
+#         puts services.keys
+#
+#         services.each do |s,v|
+#           puts s
+#           puts v['port']
+#         end
+#       end
+
+#       response.status = h.status
+#       status.to_json
     end
 
     # create new host

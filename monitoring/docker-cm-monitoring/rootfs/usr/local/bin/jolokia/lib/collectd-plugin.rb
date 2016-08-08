@@ -1,7 +1,11 @@
 #
 #
 
+require 'logger'
+require 'json'
 require 'filesize'
+require './lib/tools'
+
 
 # require './lib/collectd_plugin_graphite'
 
@@ -83,6 +87,7 @@ class CollecdPlugin
 
   end
 
+
   def ParseResult_Memory( data = {} )
 
     value  = data['value'] ? data['value'] : nil
@@ -98,6 +103,8 @@ class CollecdPlugin
         used      = value[m]['used']
         committed = value[m]['committed']
 
+        percent   = ( 100 * used / committed )
+
         case m
         when 'HeapMemoryUsage'
           type = 'heap_memory'
@@ -105,10 +112,11 @@ class CollecdPlugin
           type = 'perm_memory'
         end
 
-        data.push( sprintf( format, @Host, @Service, type, 'init'     , @interval, init ) )
-        data.push( sprintf( format, @Host, @Service, type, 'max'      , @interval, max ) )
-        data.push( sprintf( format, @Host, @Service, type, 'used'     , @interval, used ) )
-        data.push( sprintf( format, @Host, @Service, type, 'committed', @interval, committed ) )
+        data.push( sprintf( format, @Host, @Service, type, 'init'        , @interval, init ) )
+        data.push( sprintf( format, @Host, @Service, type, 'max'         , @interval, max ) )
+        data.push( sprintf( format, @Host, @Service, type, 'used'        , @interval, used ) )
+        data.push( sprintf( format, @Host, @Service, type, 'used_percent', @interval, percent ) )
+        data.push( sprintf( format, @Host, @Service, type, 'committed'   , @interval, committed ) )
       end
 
       return data
@@ -291,12 +299,12 @@ class CollecdPlugin
       runlevel         = value['RunLevel']                  ? value['RunLevel']                  : nil
       uptime           = value['Uptime']                    ? value['Uptime']                    : nil
 
-      data.push( sprintf( format, @Host, @Service, 'server', 'cache-hits'     , @interval, cacheHits ) )
-      data.push( sprintf( format, @Host, @Service, 'server', 'cache-evicts'   , @interval, cacheEvicts ) )
-      data.push( sprintf( format, @Host, @Service, 'server', 'cache-entries'  , @interval, cacheEntries ) )
-      data.push( sprintf( format, @Host, @Service, 'server', 'cache-interval' , @interval, cacheInterval ) )
-      data.push( sprintf( format, @Host, @Service, 'server', 'cache-size'     , @interval, cacheSize ) )
-      data.push( sprintf( format, @Host, @Service, 'server', 'sequence-number', @interval, reqSeqNumber ) )
+      data.push( sprintf( format, @Host, @Service, 'server', 'cache_hits'     , @interval, cacheHits ) )
+      data.push( sprintf( format, @Host, @Service, 'server', 'cache_evicts'   , @interval, cacheEvicts ) )
+      data.push( sprintf( format, @Host, @Service, 'server', 'cache_entries'  , @interval, cacheEntries ) )
+      data.push( sprintf( format, @Host, @Service, 'server', 'cache_interval' , @interval, cacheInterval ) )
+      data.push( sprintf( format, @Host, @Service, 'server', 'cache_size'     , @interval, cacheSize ) )
+      data.push( sprintf( format, @Host, @Service, 'server', 'sequence_number', @interval, reqSeqNumber ) )
 
     else
 
@@ -319,16 +327,22 @@ class CollecdPlugin
       blobCacheSize    = value['BlobCacheSize']     ? value['BlobCacheSize']     : nil
       blobCacheLevel   = value['BlobCacheLevel']    ? value['BlobCacheLevel']    : nil
       blobCacheFaults  = value['BlobCacheFaults']   ? value['BlobCacheFaults']   : nil
+      blobCachePercent = ( 100 * blobCacheLevel.to_i / blobCacheSize.to_i ).to_i
+
       heapCacheSize    = value['HeapCacheSize']     ? value['HeapCacheSize']     : nil
       heapCacheLevel   = value['HeapCacheLevel']    ? value['HeapCacheLevel']    : nil
       heapCacheFaults  = value['HeapCacheFaults']   ? value['HeapCacheFaults']   : nil
+      heapCachePercent = ( 100 * heapCacheLevel.to_i / heapCacheSize.to_i ).to_i
 
-      data.push( sprintf( format, @Host, @Service, 'blob_cache', 'size' , @interval, blobCacheSize ) )
-      data.push( sprintf( format, @Host, @Service, 'blob_cache', 'level', @interval, blobCacheLevel ) )
-      data.push( sprintf( format, @Host, @Service, 'blob_cache', 'fault', @interval, blobCacheFaults ) )
-      data.push( sprintf( format, @Host, @Service, 'heap_cache', 'size' , @interval, heapCacheSize ) )
-      data.push( sprintf( format, @Host, @Service, 'heap_cache', 'level', @interval, heapCacheLevel ) )
-      data.push( sprintf( format, @Host, @Service, 'heap_cache', 'fault', @interval, heapCacheFaults ) )
+      data.push( sprintf( format, @Host, @Service, 'blob_cache', 'size'        , @interval, blobCacheSize ) )
+      data.push( sprintf( format, @Host, @Service, 'blob_cache', 'used'        , @interval, blobCacheLevel ) )
+      data.push( sprintf( format, @Host, @Service, 'blob_cache', 'fault'       , @interval, blobCacheFaults ) )
+      data.push( sprintf( format, @Host, @Service, 'blob_cache', 'used_percent', @interval, blobCachePercent ) )
+
+      data.push( sprintf( format, @Host, @Service, 'heap_cache', 'size'        , @interval, heapCacheSize ) )
+      data.push( sprintf( format, @Host, @Service, 'heap_cache', 'used'        , @interval, heapCacheLevel ) )
+      data.push( sprintf( format, @Host, @Service, 'heap_cache', 'fault'       , @interval, heapCacheFaults ) )
+      data.push( sprintf( format, @Host, @Service, 'heap_cache', 'used_percent', @interval, heapCachePercent ) )
 
     else
 
