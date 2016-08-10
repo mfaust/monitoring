@@ -39,17 +39,12 @@ class Grafana
     #TODO tmp and template dir as global var
     tmp_dir = "/tmp"
     tpl_dir = "../../share/templates/grafana"
+    FileUtils.mkdir_p("#{tmp_dir}/grafana")
 
     short_hostname = host.split(".").first
     grafana_hostname = host.gsub(".", "-")
 
-
-    if !Dir.exists?('/tmp/grafana')
-      %x(mkdir #{tmp_dir}/grafana)
-    end
-
-    templates_string = %x(ls -1 #{tpl_dir}/cm*.json)
-    templates = templates_string.split(" ")
+    templates = Dir["#{tpl_dir}/cm*.json"]
 
     @log.debug("Found Templates: #{templates}")
 
@@ -59,23 +54,24 @@ class Grafana
 
     templates.each do |tpl|
 
-      tpl_basename = %x(basename #{tpl}).strip
-      %x(cp #{tpl} #{tmp_dir}/grafana/#{tpl_basename})
-
-      system "sed -i \
-       -e \"s*%HOST%*#{grafana_hostname}*g\" \
-       -e \"s*%SHORTHOST%*#{short_hostname}*g\" \
-       -e \"s*%TAG%*#{short_hostname}*g\" \
-          #{tmp_dir}/grafana/#{tpl_basename}"
+      tpl_basename = File.basename(tpl).strip
 
       @log.debug("Creating dashboard #{tpl_basename} for host #{host}")
+
+      FileUtils.cp(tpl, "#{tmp_dir}/grafana/#{tpl_basename}")
+
+      tpl_file = File.read("#{tmp_dir}/grafana/#{tpl_basename}")
+
+      tpl_file.gsub! '%HOST%', grafana_hostname
+      tpl_file.gsub! '%SHORTHOST%', short_hostname
+      tpl_file.gsub! '%TAG%', short_hostname
 
       res = nil
       Net::HTTP.start(uri.host, uri.port) do |http|
         request = Net::HTTP::Post.new uri.request_uri
         request.add_field('Content-Type', 'application/json')
         request.basic_auth 'admin', 'admin'
-        request.body = File.read("#{tmp_dir}/grafana/#{tpl_basename}")
+        request.body = tpl_file
         res = http.request request
         @log.debug("Created dashboard #{tpl_basename} for host #{host}, ok: #{res.code}")
       end
