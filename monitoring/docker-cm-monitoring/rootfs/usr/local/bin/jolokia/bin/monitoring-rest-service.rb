@@ -74,6 +74,7 @@ module Sinatra
 
       content_type :json
       status = h.addHost( host )
+      g.addDashbards(params[:host])
 
 # #       puts h.status
 # #       puts h.message
@@ -103,6 +104,7 @@ module Sinatra
 
       content_type :json
       status = h.addHost( params[:host], [], true )
+      g.addDashbards(params[:host], true)
 
       response.status = h.status
       status.to_json

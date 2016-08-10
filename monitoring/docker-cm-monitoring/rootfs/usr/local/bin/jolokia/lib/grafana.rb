@@ -30,6 +30,58 @@ class Grafana
     end
   end
 
+  # add dashboards for a host
+  def addDashbards(host, recreate = false)
+    if recreate
+      deleteDashboards(host)
+    end
+
+    #TODO tmp and template dir as global var
+    tmp_dir = "/tmp"
+    tpl_dir = "../../share/templates/grafana"
+
+    short_hostname = host.split(".").first
+    grafana_hostname = host.gsub(".", "-")
+
+
+    if !Dir.exists?('/tmp/grafana')
+      %x(mkdir #{tmp_dir}/grafana)
+    end
+
+    templates_string = %x(ls -1 #{tpl_dir}/cm*.json)
+    templates = templates_string.split(" ")
+
+    @log.debug("Found Templates: #{templates}")
+
+    # TODO: Should be http://grafana:3000 but does not work, Error: Name or service not known
+    uri = URI("http://localhost/grafana/api/dashboards/db")
+    @log.debug("Grafana Uri: #{uri}")
+
+    templates.each do |tpl|
+
+      tpl_basename = %x(basename #{tpl}).strip
+      %x(cp #{tpl} #{tmp_dir}/grafana/#{tpl_basename})
+
+      system "sed -i \
+       -e \"s*%HOST%*#{grafana_hostname}*g\" \
+       -e \"s*%SHORTHOST%*#{short_hostname}*g\" \
+       -e \"s*%TAG%*#{short_hostname}*g\" \
+          #{tmp_dir}/grafana/#{tpl_basename}"
+
+      @log.debug("Creating dashboard #{tpl_basename} for host #{host}")
+
+      res = nil
+      Net::HTTP.start(uri.host, uri.port) do |http|
+        request = Net::HTTP::Post.new uri.request_uri
+        request.add_field('Content-Type', 'application/json')
+        request.basic_auth 'admin', 'admin'
+        request.body = File.read("#{tmp_dir}/grafana/#{tpl_basename}")
+        res = http.request request
+        @log.debug("Created dashboard #{tpl_basename} for host #{host}, ok: #{res.code}")
+      end
+
+    end
+  end
 
   # delete the dashboards for a host
   def deleteDashboards(host)
@@ -38,7 +90,6 @@ class Grafana
 
     # TODO: Should be http://grafana:3000 but does not work, Error: Name or service not known
     uri = URI("http://localhost/grafana/api/search?query=&tag=#{host}")
-
     @log.debug("Grafana Uri: #{uri}")
 
     res = nil
@@ -47,6 +98,11 @@ class Grafana
       request.basic_auth 'admin', 'admin'
       res = http.request request
       @log.debug("Get dashboards for host #{host} ok: #{res.code}")
+    end
+
+    if res.code != "200"
+      @log.debug("No dashboards found to delete")
+      return
     end
 
     resp_body = JSON.parse(res.body)
