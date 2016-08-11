@@ -58,6 +58,6 @@ RUN \
 
 ADD rootfs/ /
 
-CMD [ '/bin/bash' ]
+# CMD [ '/bin/bash' ]
 
-# ENTRYPOINT [ "/opt/startup.sh" ]
+ENTRYPOINT [ "/opt/startup.sh" ]

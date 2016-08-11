@@ -3,10 +3,12 @@
 # -------------------------------------------------------------------------------------------------
 
 # trap ctrl-c and call ctrl_c()
-trap ctrl_c INT
+trap ctrl_c SIGHUP SIGINT SIGTERM
 
 function ctrl_c() {
   echo "** Trapped CTRL-C"
+
+  exit 0
 }
 
 startSupervisor() {
@@ -23,9 +25,11 @@ startSupervisor() {
 
 run() {
 
+  startSupervisor
+
   cat /etc/motd
 
-  startSupervisor
+#  eval /bin/bash
 
   while true
   do
