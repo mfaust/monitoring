@@ -195,7 +195,7 @@
           {
             "name": "contentbeans",
             "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.blueprint.common.contentbeans.Page\",application=blueprint",
-            "attribute": "Updated,Evaluated,Evicted,EvictionRate,Removed,AverageEvaluationTime,RemovalRate,Utilization,Capacity,InsertionRate,Level,Inserted,MissRate"
+            "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted"
           }, {
             "name": "CapConnection",
             "mbean": "com.coremedia:type=CapConnection,application=blueprint",
