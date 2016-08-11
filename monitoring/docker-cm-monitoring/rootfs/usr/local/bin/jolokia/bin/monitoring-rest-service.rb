@@ -16,6 +16,7 @@ require 'logger'
 require 'json'
 
 require sprintf( '%s/discover', lib_dir )
+require sprintf( '%s/grafana', lib_dir )
 
 module Sinatra
   class Monitoring < Base
@@ -49,6 +50,7 @@ module Sinatra
     end
 
     h = Discover.new()
+    g = Grafana.new()
 
     error do
       'Sorry there was a nasty error - ' + env['sinatra.error'].message
@@ -72,6 +74,7 @@ module Sinatra
 
       content_type :json
       status = h.addHost( host )
+      g.addDashbards(params[:host])
 
 # #       puts h.status
 # #       puts h.message
@@ -101,6 +104,7 @@ module Sinatra
 
       content_type :json
       status = h.addHost( params[:host], [], true )
+      g.addDashbards(params[:host], true)
 
       response.status = h.status
       status.to_json
@@ -111,10 +115,11 @@ module Sinatra
     delete '/:host' do
       content_type :json
       h.deleteHost( params[:host] ).to_json
+      g.deleteDashboards(params[:host])
     end
 
     # create new host
-    post '/config/joloka' do
+    post '/config/jolokia' do
 
       jolokia_host = params['host']
       jolokia_port = params['port']
