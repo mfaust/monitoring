@@ -346,6 +346,33 @@ class CollecdPlugin
   end
 
 
+  def ParseResult_CacheClasses( data = {} )
+
+    value  = data['value'] ? data['value'] : nil
+    format = 'PUTVAL %s/%s-%s/cm7_counter-%s interval=%s N:%s'
+    data   = []
+
+    if( value != nil )
+      capacity  = value['Capacity']    ? value['Capacity']    : nil
+      evaluated = value['Evaluated']   ? value['Evaluated']   : nil
+      evicted   = value['Evicted']     ? value['Evicted']     : nil
+      inserted  = value['Inserted']    ? value['Inserted']    : nil
+      removed   = value['Removed']     ? value['Removed']     : nil
+      level     = value['Level']       ? value['Level']       : nil
+
+      data.push( sprintf( format, @Host, @Service, 'content_beans', 'level'     , @interval, level ) )
+      data.push( sprintf( format, @Host, @Service, 'content_beans', 'capacity'  , @interval, capacity ) )
+      data.push( sprintf( format, @Host, @Service, 'content_beans', 'evaluated' , @interval, evaluated ) )
+      data.push( sprintf( format, @Host, @Service, 'content_beans', 'evicted'   , @interval, evicted ) )
+      data.push( sprintf( format, @Host, @Service, 'content_beans', 'inserted'  , @interval, inserted ) )
+      data.push( sprintf( format, @Host, @Service, 'content_beans', 'removed'   , @interval, removed ) )
+    end
+
+    return data
+
+  end
+
+
   def ParseResult_ProactiveEngine( data = {} )
 
     value  = data['value'] ? data['value'] : nil
@@ -385,6 +412,9 @@ class CollecdPlugin
       heapCacheFaults  = value['HeapCacheFaults']   ? value['HeapCacheFaults']   : nil
       heapCachePercent = ( 100 * heapCacheLevel.to_i / heapCacheSize.to_i ).to_i
 
+      suSessions       = value['NumberOfSUSessions']   ? value['NumberOfSUSessions']   : nil
+
+
       data.push( sprintf( format, @Host, @Service, 'blob_cache', 'size'        , @interval, blobCacheSize ) )
       data.push( sprintf( format, @Host, @Service, 'blob_cache', 'used'        , @interval, blobCacheLevel ) )
       data.push( sprintf( format, @Host, @Service, 'blob_cache', 'fault'       , @interval, blobCacheFaults ) )
@@ -394,6 +424,8 @@ class CollecdPlugin
       data.push( sprintf( format, @Host, @Service, 'heap_cache', 'used'        , @interval, heapCacheLevel ) )
       data.push( sprintf( format, @Host, @Service, 'heap_cache', 'fault'       , @interval, heapCacheFaults ) )
       data.push( sprintf( format, @Host, @Service, 'heap_cache', 'used_percent', @interval, heapCachePercent ) )
+
+      data.push( sprintf( format, @Host, @Service, 'su_sessions', 'sessions'   , @interval, suSessions ) )
 
     else
 
@@ -691,6 +723,8 @@ class CollecdPlugin
                   graphiteOutput.push( self.ParseResult_ProactiveEngine( v ) )
                 when 'Feeder'
                   graphiteOutput.push( self.ParseResult_Feeder( v ) )
+                when 'CacheClasses'
+                  graphiteOutput.push( self.ParseResult_CacheClasses( v ) )
                 when 'CapConnection'
                   graphiteOutput.push( self.ParseResult_CapConnection( v ) )
                 when 'StoreConnectionPool'
