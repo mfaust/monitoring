@@ -2,12 +2,12 @@ FROM bodsch/docker-alpine-base:3.4
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
-LABEL version="1.2.2"
+LABEL version="1.2.4"
 
 # ---------------------------------------------------------------------------------------
 
-WORKDIR /app
-VOLUME  /app
+WORKDIR /srv
+VOLUME  /srv
 
 RUN \
   apk --quiet update && \
@@ -16,6 +16,7 @@ RUN \
 RUN \
   apk --quiet add \
     build-base \
+    imagemagick-dev \
     bash \
     ruby-dev \
     ruby-irb \
@@ -38,11 +39,16 @@ RUN \
     zlib \
     zlib-dev
 
-RUN \
-  gem install \
-    sqlite3 \
-    ruby-nmap \
-    jolokia
+ RUN \
+   gem install --no-rdoc --no-ri \
+     sqlite3 \
+     ruby-nmap \
+     json \
+     rest-client \
+     filesize \
+     fileutils \
+     sinatra \
+     thin
 
 RUN \
   rm -rf /var/cache/apk/*
@@ -52,4 +58,6 @@ RUN \
 
 ADD rootfs/ /
 
-ENTRYPOINT [ "/opt/startup.sh" ]
+CMD [ '/bin/bash' ]
+
+# ENTRYPOINT [ "/opt/startup.sh" ]

@@ -2,6 +2,11 @@
 require 'logger'
 require 'json'
 
+@config_dir   = File.expand_path( '../../config', __FILE__ )
+@template_dir = File.expand_path( '../templates', __FILE__ )
+@lib_dir      = File.expand_path( '../../lib', __FILE__ )
+
+
 require './lib/discover'
 require './lib/jolokia-data-raiser'
 require './lib/collectd-plugin'
@@ -157,9 +162,20 @@ def grafana
   options = {
     'debug'   => true,
     'timeout' => 3,
-    'ssl'     => false
+    'ssl'     => false,
+    'url_path' => '/grafana'
   }
+
   g = Grafana::Client.new( 'localhost', 80, 'admin', 'admin', options )
+
+#   puts g.get_home_dashboard()
+#   puts g.get_dashboard( 'API Created Dashboard' )
+  g.delete_dashboard( 'API Created Dashboard' )
+
+  d = g.importFromFile( sprintf( '%s/foo.json.tpl', @template_dir ), { 'host' => '192.168.252.100', 'tags' => [ 'foo', 'bar' ] } )
+  d = g.importFromFile( sprintf( '%s/foo.json.tpl', @template_dir ), { 'host' => 'blueprint-box', 'tags' => [ 'foo', 'bar' ] } )
+
+#   puts d
 
 #   puts g.get_all_users()
 #   puts g.get_data_sources()
@@ -167,11 +183,62 @@ def grafana
 end
 
 
+def dns( name )
+
+      require 'resolv'
+
+      puts( sprintf( "check host '%s'" , name ) )
+
+      fqdn = []
+
+      begin
+        timeout(5) do
+          begin
+            fqdn = Socket.gethostbyname( name ).first
+          rescue SocketError => e
+            fqdn = name
+#             puts( e )
+          end
+        end
+      rescue Timeout::Error
+        puts( 'Timed out!' )
+      end
+
+#      puts Socket.gethostbyname( params['host'] ).first
+
+begin
+  fqdn = Resolv.getname( fqdn )
+rescue
+#  puts "No hostname associated with #{fqdn}"
+
+end
+
+#      puts fqdn
+
+
+      dns = Resolv::DNS.new
+      begin
+        dns.getresources( fqdn, Resolv::DNS::Resource::IN::A ).collect do |r|
+          # puts r.address
+          # etc
+        end
+      rescue StandardError => ouch
+        puts ouch
+      end
+
+puts fqdn
+end
+
+
 # discover
 # dataRaiser
-collectedPlugin
+# collectedPlugin
 # icinga
 
-grafana
+# grafana
+
+dns('blueprint-box')
+dns('127.0.0.1')
+dns('192.168.252.100')
 
 
