@@ -1,9 +1,11 @@
+#!/usr/bin/ruby
+#
+# 11.08.2016 - Bodo Schulz
 #
 #
-#
-#
-#
-#
+# v1.0.14
+
+# -----------------------------------------------------------------------------
 
 require 'logger'
 require 'json'
@@ -13,33 +15,35 @@ require 'timeout'
 require 'fileutils'
 require 'net/http'
 
+require_relative 'jolokia_template'
+require_relative 'tools'
 
-require './lib/jolokia_template'
-require './lib/tools'
-
-
+# -----------------------------------------------------------------------------
 
 class JolokiaDataRaiser
 
   attr_reader :status, :message, :services
 
-  def initialize( applicationConfig, serviceConfig )
+  def initialize( settings = {}, applicationConfig, serviceConfig )
 
-    file      = File.open( '/tmp/monitor-data-raiser.log', File::WRONLY | File::APPEND | File::CREAT )
+    @logDirectory   = settings['log_dir']      ? settings['log_dir']      : '/tmp'
+    @cacheDirectory = settings['cache_dir']    ? settings['cache_dir']    : '/var/tmp/monitoring'
+    @jolokiaHost    = settings['jolokia_host'] ? settings['jolokia_host'] : 'localhost'
+    @jolokiaPort    = settings['jolokia_port'] ? settings['jolokia_port'] : 8080
+
+    logFile = sprintf( '%s/data-raiser.log', @logDirectory )
+
+    file      = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
     file.sync = true
     @log = Logger.new( file, 'weekly', 1024000 )
 #    @log = Logger.new( STDOUT )
-    @log.level = Logger::INFO
+    @log.level = Logger::DEBUG
     @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
     @log.formatter = proc do |severity, datetime, progname, msg|
       "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
     end
 
     @currentDirectory    = File.expand_path( File.join( File.dirname( __FILE__ ) ) )
-    @cacheDirectory      = '/var/cache/monitoring'
-
-    @jolokiaPort         = 8080
-    @jolokiaHost         = 'localhost'
 
     @appConfigFile       = File.expand_path( applicationConfig )
     @serviceConfigFile   = File.expand_path( serviceConfig )
@@ -47,8 +51,8 @@ class JolokiaDataRaiser
     @jolokiaApplications = nil
     @serviceConfig       = nil
 
-    version              = '1.0.10'
-    date                 = '2016-08-05'
+    version              = '1.0.14'
+    date                 = '2016-08-11'
 
     @log.info( '-----------------------------------------------------------------' )
     @log.info( ' JolokiaDataRaiser' )

@@ -5,4 +5,4 @@
 command        = /usr/local/bin/jolokia.sh --daemon
 stdout_logfile = /tmp/%(program_name)s.log
 stderr_logfile = /tmp/%(program_name)s.log
-autorestart    = true
+autorestart    = false

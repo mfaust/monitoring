@@ -42,11 +42,13 @@
     },
     "caefeeder-live": {
       "description": "CAEFeeder Live",
-      "port": 40899
+      "port": 40899,
+      "application": "caefeeder"
     },
     "caefeeder-preview": {
       "description": "CAEFeeder Preview",
-      "port": 40799
+      "port": 40799,
+      "application": "caefeeder"
     },
     "adobe-drive": {
       "description": "Adobe Drive",

@@ -1,14 +1,19 @@
+#!/usr/bin/ruby
+#
+# 11.08.2016 - Bodo Schulz
 #
 #
+# v0.9.0
+
+# -----------------------------------------------------------------------------
 
 require 'logger'
 require 'json'
 require 'filesize'
-require './lib/tools'
 
+require_relative 'tools'
 
-# require './lib/collectd_plugin_graphite'
-
+# -----------------------------------------------------------------------------
 
 class CollecdPlugin
 
@@ -208,20 +213,21 @@ class CollecdPlugin
             gc_type = 'after'
           end
 
-          ['Par Survivor Space', 'CMS Perm Gen', 'Code Cache', 'Par Eden Space', 'CMS Old Gen' ].each do |type|
+          ['Par Survivor Space', 'CMS Perm Gen', 'Code Cache', 'Par Eden Space', 'CMS Old Gen', 'Compressed Class Space', 'Metaspace' ].each do |type|
 
-            init      = lastGcInfo[gc][type]['init']      ? lastGcInfo[gc][type]['init']      : nil
-            committed = lastGcInfo[gc][type]['committed'] ? lastGcInfo[gc][type]['committed'] : nil
-            max       = lastGcInfo[gc][type]['max']       ? lastGcInfo[gc][type]['max']       : nil
-            used      = lastGcInfo[gc][type]['used']      ? lastGcInfo[gc][type]['used']      : nil
+            if( lastGcInfo[gc][type] )
+              init      = lastGcInfo[gc][type]['init']      ? lastGcInfo[gc][type]['init']      : nil
+              committed = lastGcInfo[gc][type]['committed'] ? lastGcInfo[gc][type]['committed'] : nil
+              max       = lastGcInfo[gc][type]['max']       ? lastGcInfo[gc][type]['max']       : nil
+              used      = lastGcInfo[gc][type]['used']      ? lastGcInfo[gc][type]['used']      : nil
 
-            type      = type.strip.tr( ' ', '_' ).downcase
+              type      = type.strip.tr( ' ', '_' ).downcase
 
-            data.push( sprintf( format, @Host, @Service, sprintf( 'gc_parnew_%s_%s', gc_type, type ), 'init'     , @interval, init ) )
-            data.push( sprintf( format, @Host, @Service, sprintf( 'gc_parnew_%s_%s', gc_type, type ), 'committed', @interval, committed ) )
-            data.push( sprintf( format, @Host, @Service, sprintf( 'gc_parnew_%s_%s', gc_type, type ), 'max'      , @interval, max ) )
-            data.push( sprintf( format, @Host, @Service, sprintf( 'gc_parnew_%s_%s', gc_type, type ), 'used'     , @interval, used ) )
-
+              data.push( sprintf( format, @Host, @Service, sprintf( 'gc_parnew_%s_%s', gc_type, type ), 'init'     , @interval, init ) )
+              data.push( sprintf( format, @Host, @Service, sprintf( 'gc_parnew_%s_%s', gc_type, type ), 'committed', @interval, committed ) )
+              data.push( sprintf( format, @Host, @Service, sprintf( 'gc_parnew_%s_%s', gc_type, type ), 'max'      , @interval, max ) )
+              data.push( sprintf( format, @Host, @Service, sprintf( 'gc_parnew_%s_%s', gc_type, type ), 'used'     , @interval, used ) )
+            end
          end
         end
       end
@@ -257,20 +263,21 @@ class CollecdPlugin
             gc_type = 'after'
           end
 
-          ['Par Survivor Space', 'CMS Perm Gen', 'Code Cache', 'Par Eden Space', 'CMS Old Gen' ].each do |type|
+          ['Par Survivor Space', 'CMS Perm Gen', 'Code Cache', 'Par Eden Space', 'CMS Old Gen', 'Compressed Class Space', 'Metaspace' ].each do |type|
 
-            init      = lastGcInfo[gc][type]['init']      ? lastGcInfo[gc][type]['init']      : nil
-            committed = lastGcInfo[gc][type]['committed'] ? lastGcInfo[gc][type]['committed'] : nil
-            max       = lastGcInfo[gc][type]['max']       ? lastGcInfo[gc][type]['max']       : nil
-            used      = lastGcInfo[gc][type]['used']      ? lastGcInfo[gc][type]['used']      : nil
+            if( lastGcInfo[gc][type] )
+              init      = lastGcInfo[gc][type]['init']      ? lastGcInfo[gc][type]['init']      : nil
+              committed = lastGcInfo[gc][type]['committed'] ? lastGcInfo[gc][type]['committed'] : nil
+              max       = lastGcInfo[gc][type]['max']       ? lastGcInfo[gc][type]['max']       : nil
+              used      = lastGcInfo[gc][type]['used']      ? lastGcInfo[gc][type]['used']      : nil
 
-            type      = type.strip.tr( ' ', '_' ).downcase
+              type      = type.strip.tr( ' ', '_' ).downcase
 
-            data.push( sprintf( format, @Host, @Service, sprintf( 'gc_markseep_%s_%s', gc_type, type ), 'init'     , @interval, init ) )
-            data.push( sprintf( format, @Host, @Service, sprintf( 'gc_markseep_%s_%s', gc_type, type ), 'committed', @interval, committed ) )
-            data.push( sprintf( format, @Host, @Service, sprintf( 'gc_markseep_%s_%s', gc_type, type ), 'max'      , @interval, max ) )
-            data.push( sprintf( format, @Host, @Service, sprintf( 'gc_markseep_%s_%s', gc_type, type ), 'used'     , @interval, used ) )
-
+              data.push( sprintf( format, @Host, @Service, sprintf( 'gc_markseep_%s_%s', gc_type, type ), 'init'     , @interval, init ) )
+              data.push( sprintf( format, @Host, @Service, sprintf( 'gc_markseep_%s_%s', gc_type, type ), 'committed', @interval, committed ) )
+              data.push( sprintf( format, @Host, @Service, sprintf( 'gc_markseep_%s_%s', gc_type, type ), 'max'      , @interval, max ) )
+              data.push( sprintf( format, @Host, @Service, sprintf( 'gc_markseep_%s_%s', gc_type, type ), 'used'     , @interval, used ) )
+            end
          end
         end
       end
@@ -612,6 +619,8 @@ class CollecdPlugin
           @Port    = port
 
           bulkResults = sprintf( '%s/bulk_%s.result', dir_path, port )
+
+          @log.debug( bulkResults )
 
           if( File.exist?( bulkResults ) == true )
 

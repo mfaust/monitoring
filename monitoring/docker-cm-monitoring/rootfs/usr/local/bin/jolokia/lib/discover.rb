@@ -13,7 +13,8 @@ require 'json'
 require 'fileutils'
 require 'net/http'
 require 'uri'
-require './lib/tools'
+
+require_relative 'tools'
 
 # -------------------------------------------------------------------------------------------------------------------
 
@@ -21,9 +22,16 @@ class Discover
 
   attr_reader :status, :message, :services
 
-  def initialize
+  def initialize( settings = {} )
 
-    file      = File.open( '/tmp/monitor-discovery.log', File::WRONLY | File::APPEND | File::CREAT )
+    @logDirectory   = settings['log_dir']      ? settings['log_dir']      : '/tmp'
+    @cacheDirectory = settings['cache_dir']    ? settings['cache_dir']    : '/var/tmp/monitoring'
+    @jolokiaHost    = settings['jolokia_host'] ? settings['jolokia_host'] : 'localhost'
+    @jolokiaPort    = settings['jolokia_port'] ? settings['jolokia_port'] : 8080
+
+    logFile = sprintf( '%s/discovery.log', @logDirectory )
+
+    file      = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
     file.sync = true
     @log = Logger.new( file, 'weekly', 1024000 )
 #    @log = Logger.new( STDOUT )
@@ -33,11 +41,11 @@ class Discover
       "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
     end
 
-    @tmp_dir     = '/var/cache/monitoring'
-    Dir.mkdir( @tmp_dir ) unless File.exist?( @tmp_dir )
+    @cacheDirectory     = @cacheDirectory
 
-    @jolokiaHost = 'localhost'
-    @jolokiaPort = 8080
+    if( ! File.exist?( @cacheDirectory ) )
+      Dir.mkdir( @cacheDirectory )
+    end
 
     @information = Hash.new()
 
@@ -255,7 +263,7 @@ class Discover
   # delete the directory with all files inside
   def deleteHost( host )
 
-    dir_path  = sprintf( '%s/%s', @tmp_dir, host )
+    dir_path  = sprintf( '%s/%s', @cacheDirectory, host )
 
     if( File.exist?( dir_path ) )
       FileUtils.rm_r( dir_path )
@@ -309,7 +317,7 @@ class Discover
       self.deleteHost( host )
     end
 
-    dir_path  = sprintf( '%s/%s', @tmp_dir, host )
+    dir_path  = sprintf( '%s/%s', @cacheDirectory, host )
     file_name = 'discovery.json'
 
     if( !File.exist?( dir_path ) )
@@ -372,7 +380,7 @@ class Discover
 
     if( host == nil )
 
-      Dir.chdir( @tmp_dir )
+      Dir.chdir( @cacheDirectory )
       Dir.glob( "**" ) do |f|
 
         if( FileTest.directory?( f ) )
@@ -392,7 +400,7 @@ class Discover
 
     else
 
-      dir_path  = sprintf( '%s/%s', @tmp_dir, host )
+      dir_path  = sprintf( '%s/%s', @cacheDirectory, host )
       file_name = 'discovery.json'
 
       file      = sprintf( '%s/%s', dir_path, file_name )

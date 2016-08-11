@@ -1,0 +1,13 @@
+---
+monitoring:
+  log_dir: /var/log/monitoring
+  cache_dir: /var/cache/monitoring
+  rest-service:
+    port: 45678
+    bind: 0.0.0.0
+  jolokia:
+    host: jolokia
+    port: 8080
+  grafana:
+    host: grafana
+    port: 3000
