@@ -3,6 +3,7 @@
 version: '2.0'
 services:
   database:
+    restart: always
     image: bodsch/docker-mysql:latest
     container_name: database
     hostname: database
@@ -13,6 +14,7 @@ services:
       - ./data:/srv
 
   jolokia:
+    restart: always
     image: bodsch/docker-jolokia:latest
     container_name: jolokia
     hostname: jolokia
@@ -25,6 +27,7 @@ services:
       - 'blueprint-box:192.168.252.100'
 
   memcached:
+    restart: always
     image: bodsch/docker-memcached:latest
     container_name: memcached
     hostname: memcached
@@ -32,6 +35,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
 
   nginx:
+    restart: always
     image: bodsch/docker-nginx:latest
     container_name: nginx
     hostname: nginx
@@ -52,6 +56,7 @@ services:
       - ./share/nginx/etc/nginx/modules.d/01-proxy-rest-service.conf:/etc/nginx/modules.d/01-proxy-rest-service.conf:ro
 
   graphite:
+    restart: always
     image: bodsch/docker-graphite:latest
     container_name: graphite
     hostname: graphite
@@ -68,6 +73,7 @@ services:
       - ./data:/srv
 
   grafana:
+    restart: always
     image: bodsch/docker-grafana:latest
     container_name: grafana
     hostname: grafana
@@ -81,9 +87,9 @@ services:
       - ./data:/srv
 
   icinga2-core:
+    restart: always
     image: bodsch/docker-icinga2:latest
     container_name: icinga2-core
-    restart: always
     hostname: icinga2-core
     env_file:
       - env/database.env
@@ -105,9 +111,9 @@ services:
       - database:database
 
   icingaweb2:
+    restart: always
     image: bodsch/docker-icingaweb2:latest
     container_name: icingaweb2
-    restart: always
     hostname: icingaweb2
     env_file:
       - env/database.env
@@ -127,6 +133,7 @@ services:
       - icinga2-core:icinga2
 
   cm-monitoring:
+    restart: always
     build: ../docker-cm-monitoring
     container_name: cm-monitoring
     hostname: cm-monitoring
