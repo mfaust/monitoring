@@ -1,8 +1,0 @@
-#
-
-TYPE="nginx"
-
-TAG_NAME="${USER}-docker-${TYPE}"
-CONTAINER_NAME="${USER}-${TYPE}"
-
-[ -f ../config.rc ] && . ../config.rc

@@ -1,8 +1,0 @@
-
-export AWS_ACCESS_KEY_ID=AKIAI6TU4LTYO6MCQBIA
-export AWS_SECRET_ACCESS_KEY=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
-export PINGDOM_PASS=F9i3vzl8WDl6cqTxDVb8cYUoAJ1RJyR2uAgwrW3L
-export PINGDOM_API=v9gp3wp9qrqzxip0buv8fbm8plu88iwk
-export PINGDOM_USER=engineering-tools@coremedia.com
-export DOCKER_DNS=10.1.2.63
-export CHEF_KNIFE_RB=/root/.chef/knife.rb

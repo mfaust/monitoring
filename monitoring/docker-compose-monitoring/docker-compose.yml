@@ -147,6 +147,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ./share/resolv.conf:/etc/resolv.conf:ro
       - ./share/monitoring:/usr/local/monitoring
+      - ./data:/srv
     links:
       - icinga2-core:icinga2
       - jolokia:jolokia
