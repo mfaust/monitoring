@@ -22,13 +22,15 @@ class Grafana
 
   def initialize( settings = {} )
 
-    @logDirectory   = settings['log_dir']      ? settings['log_dir']      : '/tmp'
-    @cacheDirectory = settings['cache_dir']    ? settings['cache_dir']    : '/var/tmp/monitoring'
+    @logDirectory      = settings['log_dir']      ? settings['log_dir']      : '/tmp'
+    @cacheDirectory    = settings['cache_dir']    ? settings['cache_dir']    : '/var/tmp/monitoring'
+    @templateDirectory = settings['template_dir'] ? settings['template_dir'] : '/var/tmp/templates'
+
     @grafanaHost    = settings['grafana_host'] ? settings['grafana_host'] : 'localhost'
     @grafanaPort    = settings['grafana_port'] ? settings['grafana_port'] : 3000
     @grafanaPath    = settings['grafana_path'] ? settings['grafana_path'] : nil
 
-    @grafanaURI     = sprintf( 'http://%s:%s/%s', @grafanaHost, @grafanaPort, @grafanaPath )
+    @grafanaURI     = sprintf( 'http://%s:%s%s', @grafanaHost, @grafanaPort, @grafanaPath )
 
     logFile = sprintf( '%s/grafana.log', @logDirectory )
 
@@ -42,10 +44,9 @@ class Grafana
     end
 
     #TODO tmp and template dir as global var
-    @tmp_dir = "/tmp"
-    @tpl_dir = "../../share/templates/grafana"
-    @cache_dir = "/var/cache/monitoring"
-    FileUtils.mkdir_p("#{@tmp_dir}/grafana")
+#     @tmp_dir = "/tmp"
+#     FileUtils.mkdir_p("#{@tmp_dir}/grafana")
+
   end
 
 
@@ -59,9 +60,8 @@ class Grafana
     @short_hostname = host.split(".").first
     @grafana_hostname = host.gsub(".", "-")
 
-    discovery_file = "#{@cache_dir}/#{host}/discovery.json"
-    merged_host_file = "#{@cache_dir}/#{host}/mergedHostData.json"
-
+    discovery_file   = sprintf( '%s/%s/discovery.json'     , @cacheDirectory, host )
+    merged_host_file = sprintf( '%s/%s/mergedHostData.json', @cacheDirectory, host )
 
     # determine services from discovery.json file, e.g. cae-live, master-live-server, caefeeder-live
     discovery_json = getJsonFromFile(discovery_file)
@@ -171,7 +171,7 @@ class Grafana
   def getTemplatePathsForServiceType(service_type)
     paths = Array.new
     @log.debug(service_type)
-    dirs = Dir["#{@tpl_dir}/service-types/#{service_type}"]
+    dirs = Dir["#{@templateDirectory}/service-types/#{service_type}"]
     @log.debug("Found dirs: #{dirs}")
     dirs.each do |dir|
       paths.push(*Dir["#{dir}/cm*.json"])
@@ -182,7 +182,7 @@ class Grafana
 
   def getTemplatePathsForService(serviceName)
     paths = Array.new
-    dirs = Dir["#{@tpl_dir}/services/#{serviceName}*"]
+    dirs = Dir["#{@templateDirectory}/services/#{serviceName}*"]
     @log.debug("Found dirs: #{dirs}")
     dirs.each do |dir|
       paths.push(*Dir["#{dir}/cm*.json"])
@@ -192,7 +192,7 @@ class Grafana
 
 
   def isAggregationTemplateAvailable(service_type)
-    base_file = Dir["#{@tpl_dir}/service-types/#{service_type}/aggregate*.json"]
+    base_file = Dir["#{@templateDirectory}/service-types/#{service_type}/aggregate*.json"]
     @log.debug("Found aggregation file #{base_file}")
     if base_file.length > 0
       return true
@@ -210,7 +210,7 @@ class Grafana
 
       @log.debug("Creating dashboard #{tpl_basename}")
 
-      aggregation_file = Dir["#{@tpl_dir}/service-types/#{service_type}/aggregate*.json"]
+      aggregation_file = Dir["#{@templateDirectory}/service-types/#{service_type}/aggregate*.json"]
       if aggregation_file.length > 0
         aggregation_file_json = getJsonFromFile(aggregation_file[0])
 
@@ -265,20 +265,31 @@ class Grafana
   def getJsonFromFile(filename)
 
     file = nil
-    i = 0
-    while i < 5
-      if (File.exist?(filename))
-        file = File.read(filename)
-        i = 5
-      else
-        sleep (5)
-        i = i + 1
-        @log.debug("Waiting for file #{filename} ... #{i}")
+
+    for y in 1..5
+      if( File.exist?( filename ) )
+        file = File.read( filename )
+        break
       end
+
+      sleep( 5 )
+      @log.debug("Waiting for file #{filename} ... #{y}")
     end
 
+#     i = 0
+#     while i < 5
+#       if (File.exist?(filename))
+#         file = File.read(filename)
+#         i = 5
+#       else
+#         sleep (5)
+#         i = i + 1
+#         @log.debug("Waiting for file #{filename} ... #{i}")
+#       end
+#     end
 
-    if !file
+
+    if( !file )
       @log.error(sprintf('File %s not found!', filename))
       exit 1
     end
