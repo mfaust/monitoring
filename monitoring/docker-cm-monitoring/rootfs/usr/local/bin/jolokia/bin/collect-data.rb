@@ -7,6 +7,8 @@
 
 # -----------------------------------------------------------------------------
 
+require 'yaml'
+
 lib_dir    = File.expand_path( '../../lib', __FILE__ )
 
 require sprintf( '%s/collectd-plugin', lib_dir )

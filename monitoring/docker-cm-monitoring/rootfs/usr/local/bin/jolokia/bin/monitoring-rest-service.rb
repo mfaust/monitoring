@@ -38,18 +38,20 @@ module Sinatra
 
         config = YAML.load_file( options[:config] )
 
-        @logDir           = config['monitoring']['log_dir']              ? config['monitoring']['log_dir']              : '/tmp/log'
-        @cacheDir         = config['monitoring']['cache_dir']            ? config['monitoring']['cache_dir']            : '/tmp/cache'
+        @logDir           = config['monitoring']['log_dir']                 ? config['monitoring']['log_dir']                  : '/tmp/log'
+        @cacheDir         = config['monitoring']['cache_dir']               ? config['monitoring']['cache_dir']                : '/tmp/cache'
 
-        @restService_port = config['monitoring']['rest-service']['port'] ? config['monitoring']['rest-service']['port'] : 4567
-        @restService_bind = config['monitoring']['rest-service']['bind'] ? config['monitoring']['rest-service']['bind'] : '0.0.0.0'
+        @restService_port = config['monitoring']['rest-service']['port']    ? config['monitoring']['rest-service']['port']     : 4567
+        @restService_bind = config['monitoring']['rest-service']['bind']    ? config['monitoring']['rest-service']['bind']     : '0.0.0.0'
 
-        @jolokia_host     = config['monitoring']['jolokia']['host']      ? config['monitoring']['jolokia']['host']      : 'localhost'
-        @jolokia_port     = config['monitoring']['jolokia']['port']      ? config['monitoring']['jolokia']['port']      : 8080
+        @jolokia_host     = config['monitoring']['jolokia']['host']         ? config['monitoring']['jolokia']['host']          : 'localhost'
+        @jolokia_port     = config['monitoring']['jolokia']['port']         ? config['monitoring']['jolokia']['port']          : 8080
 
-        @grafana_host     = config['monitoring']['grafana']['host']      ? config['monitoring']['grafana']['host']      : 'localhost'
-        @grafana_port     = config['monitoring']['grafana']['port']      ? config['monitoring']['grafana']['port']      : 3000
-        @grafana_path     = config['monitoring']['grafana']['path']      ? config['monitoring']['grafana']['path']      : nil
+        @grafana_host     = config['monitoring']['grafana']['host']         ? config['monitoring']['grafana']['host']          : 'localhost'
+        @grafana_port     = config['monitoring']['grafana']['port']         ? config['monitoring']['grafana']['port']          : 3000
+        @grafana_path     = config['monitoring']['grafana']['path']         ? config['monitoring']['grafana']['path']          : nil
+
+        @template_dir     = config['monitoring']['grafana']['template_dir'] ? config['monitoring']['grafana']['template_dir']  : '/var/tmp/templates'
 
       else
         puts "no configuration exists, use default settings"
@@ -66,6 +68,7 @@ module Sinatra
         @grafana_host     = 'localhost'
         @grafana_port     = 3000
         @grafana_path     = nil
+        @template_dir     = '/var/tmp/templates'
 
       end
 
@@ -92,7 +95,7 @@ module Sinatra
     set :port, @restService_port.to_i
 
     h = Discover.new( { 'log_dir' => @logDir, 'cache_dir' => @cacheDir, 'jolokia_host' => @jolokia_host, 'jolokia_port' => @jolokia_port } )
-    g = Grafana.new( { 'log_dir' => @logDir, 'cache_dir' => @cacheDir, 'grafana_host' => @grafana_host, 'grafana_port' => @grafana_port, 'grafana_path' => @grafana_path } )
+    g = Grafana.new( { 'log_dir' => @logDir, 'cache_dir' => @cacheDir, 'grafana_host' => @grafana_host, 'grafana_port' => @grafana_port, 'grafana_path' => @grafana_path, 'template_dir' => @template_dir } )
 
     error do
       'Sorry there was a nasty error - ' + env['sinatra.error'].message

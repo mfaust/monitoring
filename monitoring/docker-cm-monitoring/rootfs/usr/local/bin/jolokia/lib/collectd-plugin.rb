@@ -17,7 +17,7 @@ require_relative 'tools'
 
 class CollecdPlugin
 
-  attr_reader :status, @:message, :services
+  attr_reader :status, :message, :services
 
   def initialize( settings = {} )
 
@@ -45,7 +45,7 @@ class CollecdPlugin
     @log.info( "  Version #{version} (#{date})" )
     @log.info( '  Copyright 2016 Coremedia' )
     @log.info( "  cache directory located at #{@cacheDirectory}" )
-    @log.info( "  configured interval #{@interval}"
+    @log.info( "  configured interval #{@interval}" )
     @log.info( '-----------------------------------------------------------------' )
     @log.info( '' )
 
