@@ -1,10 +1,12 @@
 {
   "dashboard": {
-
     "id": null,
-    "title": "%SHORTHOST% Preview CAE",
-    "originalTitle": "%SHORTHOST% Preview CAE",
-    "tags": [ "%TAG%", "coremedia" ],
+    "title": "%SHORTHOST% Feeder Live",
+    "originalTitle": "%SHORTHOST% Feeder Live",
+    "tags": [
+      "%TAG%",
+      "coremedia"
+    ],
     "style": "dark",
     "timezone": "browser",
     "editable": true,
@@ -12,9 +14,31 @@
     "sharedCrosshair": false,
     "rows": [
       {
-        "collapse": false,
+        "title": "",
+        "height": "25px",
         "editable": true,
+        "collapse": false,
+        "panels": [
+          {
+            "title": "",
+            "error": false,
+            "span": 12,
+            "editable": true,
+            "type": "text",
+            "isNew": true,
+            "id": 19,
+            "mode": "html",
+            "content": "<h2><center>Live Feeder</center></h2>",
+            "links": [],
+            "transparent": true
+          }
+        ]
+      },
+      {
+        "title": "Heap Memory",
         "height": "150px",
+        "editable": true,
+        "collapse": false,
         "panels": [
           {
             "aliasColors": {},
@@ -22,25 +46,25 @@
             "datasource": "graphite",
             "editable": true,
             "error": false,
-            "fill": 1,
+            "fill": 2,
             "grid": {
               "threshold1": null,
               "threshold1Color": "rgba(216, 200, 27, 0.27)",
               "threshold2": null,
               "threshold2Color": "rgba(234, 112, 112, 0.22)"
             },
-            "id": 1,
+            "id": 2,
             "isNew": true,
             "legend": {
-              "alignAsTable": true,
               "avg": false,
               "current": true,
-              "max": true,
+              "max": false,
               "min": false,
-              "rightSide": true,
               "show": true,
               "total": false,
-              "values": true
+              "values": true,
+              "rightSide": true,
+              "alignAsTable": true
             },
             "lines": true,
             "linewidth": 1,
@@ -56,19 +80,19 @@
             "steppedLine": false,
             "targets": [
               {
-                "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_PREV-heap_memory.*, '(.*)-', ''))",
+                "refId": "B",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_LIVE-heap_memory.*, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
             "timeFrom": null,
             "timeShift": null,
-            "title": "Heap Mem",
+            "title": "Feeder Live Heap Mem",
             "tooltip": {
               "msResolution": false,
+              "ordering": "alphabetical",
               "shared": true,
-              "value_type": "cumulative",
-              "ordering": "alphabetical"
+              "value_type": "cumulative"
             },
             "type": "graph",
             "xaxis": {
@@ -91,8 +115,7 @@
               }
             ]
           }
-        ],
-        "title": "Heap Memory"
+        ]
       },
       {
         "collapse": false,
@@ -140,7 +163,7 @@
             "targets": [
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_PREV-perm_memory.*, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_LIVE-perm_memory.*, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -183,13 +206,183 @@
         "height": "150px",
         "panels": [
           {
-            "aliasColors": {},
-            "bars": false,
+            "cacheTimeout": null,
+            "colorBackground": true,
+            "colorValue": false,
+            "colors": [
+              "rgba(50, 172, 45, 0.97)",
+              "rgba(237, 129, 40, 0.89)",
+              "rgba(245, 54, 54, 0.9)"
+            ],
             "datasource": "graphite",
-            "decimals": null,
+            "decimals": 0,
             "editable": true,
             "error": false,
-            "fill": 1,
+            "format": "none",
+            "gauge": {
+              "maxValue": 100,
+              "minValue": 0,
+              "show": false,
+              "thresholdLabels": false,
+              "thresholdMarkers": true
+            },
+            "id": 12,
+            "interval": null,
+            "isNew": true,
+            "links": [],
+            "mappingType": 1,
+            "mappingTypes": [
+              {
+                "name": "value to text",
+                "value": 1
+              },
+              {
+                "name": "range to text",
+                "value": 2
+              }
+            ],
+            "maxDataPoints": 100,
+            "nullPointMode": "connected",
+            "nullText": null,
+            "postfix": "",
+            "postfixFontSize": "50%",
+            "prefix": "",
+            "prefixFontSize": "50%",
+            "rangeMaps": [
+              {
+                "from": "null",
+                "text": "N/A",
+                "to": "null"
+              }
+            ],
+            "span": 1,
+            "sparkline": {
+              "fillColor": "rgba(31, 118, 189, 0.18)",
+              "full": false,
+              "lineColor": "rgb(31, 120, 193)",
+              "show": false
+            },
+            "targets": [
+              {
+                "refId": "A",
+                "target": "collectd.%HOST%.FEEDER_LIVE-feeder.cm7_counter-diff",
+                "textEditor": false
+              }
+            ],
+            "thresholds": "50,80",
+            "title": "",
+            "type": "singlestat",
+            "valueFontSize": "80%",
+            "valueMaps": [
+              {
+                "op": "=",
+                "text": "N/A",
+                "value": "null"
+              }
+            ],
+            "valueName": "current"
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": null,
+            "decimals": 0,
+            "editable": true,
+            "error": false,
+            "fill": 2,
+            "grid": {
+              "threshold1": null,
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2": null,
+              "threshold2Color": "rgba(234, 112, 112, 0.22)"
+            },
+            "id": 11,
+            "isNew": true,
+            "legend": {
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "show": true,
+              "total": false,
+              "values": true,
+              "rightSide": true,
+              "alignAsTable": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "span": 11,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_LIVE-feeder.cm7_counter-diff, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "B",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_LIVE-feeder.cm7_counter-max, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_LIVE-feeder.cm7_counter-current, '(.*)-', ''))",
+                "textEditor": false
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "Live Feeder Elements",
+            "tooltip": {
+              "msResolution": false,
+              "ordering": "alphabetical",
+              "shared": true,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "none",
+                "logBase": 1,
+                "max": null,
+                "min": 0,
+                "show": true
+              },
+              {
+                "format": "short",
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": false
+              }
+            ]
+          }
+        ],
+        "title": "Feeder Elements"
+      },
+      {
+        "collapse": true,
+        "editable": true,
+        "height": "150px",
+        "panels": [
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": null,
+            "editable": true,
+            "error": false,
+            "fill": 3,
             "grid": {
               "threshold1": null,
               "threshold1Color": "rgba(216, 200, 27, 0.27)",
@@ -223,29 +416,19 @@
             "steppedLine": false,
             "targets": [
               {
-                "hide": false,
-                "refId": "C",
-                "target": "alias(collectd.%HOST%.CAE_PREV-blob_cache.cm7_counter-size, 'max')",
-                "textEditor": false
-              },
-              {
                 "refId": "A",
-                "target": "alias(collectd.%HOST%.CAE_PREV-blob_cache.cm7_counter-level, 'used')",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_LIVE-garbage_collector.cm7_counter-duration, '(.*)-', ''))",
                 "textEditor": false
-              },
-              {
-                "refId": "B",
-                "target": "alias(collectd.blueprint.filecount-cm7-delivery-tomcat.bytes, 'filesystem')"
               }
             ],
             "timeFrom": null,
             "timeShift": null,
-            "title": "BlobCache",
+            "title": "Garbage Collector Duration",
             "tooltip": {
               "msResolution": false,
+              "ordering": "alphabetical",
               "shared": true,
-              "value_type": "cumulative",
-              "ordering": "alphabetical"
+              "value_type": "cumulative"
             },
             "type": "graph",
             "xaxis": {
@@ -253,7 +436,8 @@
             },
             "yaxes": [
               {
-                "format": "bytes",
+                "format": "ms",
+                "label": null,
                 "logBase": 1,
                 "max": null,
                 "min": null,
@@ -261,6 +445,7 @@
               },
               {
                 "format": "short",
+                "label": null,
                 "logBase": 1,
                 "max": null,
                 "min": null,
@@ -269,7 +454,7 @@
             ]
           }
         ],
-        "title": "Blob Cache"
+        "title": "Garbage Collector"
       },
       {
         "collapse": false,
@@ -282,14 +467,14 @@
             "datasource": null,
             "editable": true,
             "error": false,
-            "fill": 2,
+            "fill": 3,
             "grid": {
               "threshold1": null,
               "threshold1Color": "rgba(216, 200, 27, 0.27)",
               "threshold2": null,
               "threshold2Color": "rgba(234, 112, 112, 0.22)"
             },
-            "id": 18,
+            "id": 17,
             "isNew": true,
             "legend": {
               "alignAsTable": true,
@@ -317,12 +502,12 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "alias(collectd.%HOST%.CAE_PREV-heap_cache.cm7_counter-level, 'used')",
+                "target": "alias(aliasSub(collectd.%HOST%.FEEDER_LIVE-heap_cache.cm7_counter-size, '(.*)-', ''), 'max')",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "alias(collectd.%HOST%.CAE_PREV-heap_cache.cm7_counter-size, 'max')",
+                "target": "alias(aliasSub(collectd.%HOST%.FEEDER_LIVE-heap_cache.cm7_counter-level, '(.*)-', ''), 'used')",
                 "textEditor": false
               }
             ],
@@ -331,9 +516,9 @@
             "title": "UAPI Cache",
             "tooltip": {
               "msResolution": false,
+              "ordering": "alphabetical",
               "shared": true,
-              "value_type": "cumulative",
-              "ordering": "alphabetical"
+              "value_type": "cumulative"
             },
             "type": "graph",
             "xaxis": {
@@ -354,211 +539,13 @@
                 "logBase": 1,
                 "max": null,
                 "min": null,
-                "show": false
+                "show": true
               }
             ]
           }
         ],
         "title": "UAPI Cache"
-      },
-      {
-        "collapse": false,
-        "editable": true,
-        "height": "150px",
-        "panels": [
-          {
-            "aliasColors": {},
-            "bars": false,
-            "datasource": null,
-            "editable": true,
-            "error": false,
-            "fill": 3,
-            "grid": {
-              "threshold1": null,
-              "threshold1Color": "rgba(216, 200, 27, 0.27)",
-              "threshold2": null,
-              "threshold2Color": "rgba(234, 112, 112, 0.22)"
-            },
-            "id": 17,
-            "isNew": true,
-            "legend": {
-              "alignAsTable": true,
-              "avg": false,
-              "current": true,
-              "max": true,
-              "min": true,
-              "rightSide": true,
-              "show": true,
-              "total": false,
-              "values": true
-            },
-            "lines": true,
-            "linewidth": 1,
-            "links": [],
-            "nullPointMode": "connected",
-            "percentage": false,
-            "pointradius": 5,
-            "points": false,
-            "renderer": "flot",
-            "seriesOverrides": [],
-            "span": 12,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
-              {
-                "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_PREV-threading.*, '(.*)-', ''))",
-                "textEditor": false
-              }
-            ],
-            "timeFrom": null,
-            "timeShift": null,
-            "title": "Threads",
-            "tooltip": {
-              "msResolution": false,
-              "shared": true,
-              "value_type": "cumulative",
-              "ordering": "alphabetical"
-            },
-            "type": "graph",
-            "xaxis": {
-              "show": true
-            },
-            "yaxes": [
-              {
-                "format": "none",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-              },
-              {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-              }
-            ]
-          }
-        ],
-        "title": "Tomcat Threads"
-      },
-      {
-      "collapse": false,
-      "editable": true,
-      "height": "200px",
-      "panels": [
-        {
-          "aliasColors": {},
-          "bars": false,
-          "datasource": "graphite",
-          "editable": true,
-          "error": false,
-          "fill": 1,
-          "grid": {
-            "threshold1": null,
-            "threshold1Color": "rgba(216, 200, 27, 0.27)",
-            "threshold2": null,
-            "threshold2Color": "rgba(234, 112, 112, 0.22)"
-          },
-          "id": 16,
-          "isNew": true,
-          "legend": {
-            "alignAsTable": true,
-            "avg": false,
-            "current": true,
-            "hideEmpty": false,
-            "hideZero": false,
-            "max": false,
-            "min": false,
-            "rightSide": true,
-            "show": true,
-            "total": false,
-            "values": true
-          },
-          "lines": true,
-          "linewidth": 1,
-          "links": [],
-          "nullPointMode": "connected",
-          "percentage": false,
-          "pointradius": 5,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "span": 12,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "refId": "A",
-              "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_PREV-content_beans.cm7_counter-evaluated, '(.*)-', ''))",
-              "textEditor": false
-            },
-            {
-              "refId": "B",
-              "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_PREV-content_beans.cm7_counter-evicted, '(.*)-', ''))",
-              "textEditor": false
-            },
-            {
-              "refId": "C",
-              "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_PREV-content_beans.cm7_counter-inserted, '(.*)-', ''))",
-              "textEditor": false
-            },
-            {
-              "refId": "D",
-              "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_PREV-content_beans.cm7_counter-level, '(.*)-', ''))",
-              "textEditor": false
-            },
-            {
-              "refId": "E",
-              "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_PREV-content_beans.cm7_counter-removed, '(.*)-', ''))",
-              "textEditor": false
-            },
-            {
-              "hide": true,
-              "refId": "F",
-              "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_PREV-content_beans.cm7_counter-capacity, '(.*)-', ''))",
-              "textEditor": false
-            }
-          ],
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "Content Beans",
-          "tooltip": {
-            "msResolution": false,
-            "shared": true,
-            "value_type": "cumulative",
-            "ordering": "alphabetical"
-          },
-          "type": "graph",
-          "xaxis": {
-            "show": true
-          },
-          "yaxes": [
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            }
-          ]
-        }
-      ],
-      "title": "CAE Content Beans"
-    }
+      }
     ],
     "time": {
       "from": "now-3h",
@@ -596,6 +583,5 @@
     "schemaVersion": 12,
     "version": 4,
     "links": []
-
   }
 }

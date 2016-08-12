@@ -14,15 +14,18 @@
     },
     "content-management-server": {
       "description": "Content Management Server",
-      "port": 40199
+      "port": 40199,
+      "application": "contentserver"
     },
     "master-live-server": {
       "description": "Master Live Server",
-      "port": 40299
+      "port": 40299,
+      "application": "contentserver"
     },
     "replication-live-server": {
       "description": "RLS",
-      "port": 42099
+      "port": 42099,
+      "application": "contentserver"
     },
     "workflow-server": {
       "description": "Workflow Server",

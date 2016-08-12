@@ -1,0 +1,53 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "%SHORTHOST% ContentServer",
+    "originalTitle": "%SHORTHOST% ContentServer",
+    "tags": [
+      "%TAG%",
+      "coremedia"
+    ],
+    "style": "dark",
+    "timezone": "browser",
+    "editable": true,
+    "hideControls": false,
+    "sharedCrosshair": false,
+    "rows": [],
+    "time": {
+      "from": "now-3h",
+      "to": "now"
+    },
+    "timepicker": {
+      "now": true,
+      "refresh_intervals": [
+        "10s",
+        "30s",
+        "1m",
+        "2m",
+        "4m",
+        "10m"
+      ],
+      "time_options": [
+        "5m",
+        "15m",
+        "1h",
+        "6h",
+        "12h",
+        "24h",
+        "2d",
+        "7d",
+        "30d"
+      ]
+    },
+    "templating": {
+      "list": []
+    },
+    "annotations": {
+      "list": []
+    },
+    "refresh": "30s",
+    "schemaVersion": 12,
+    "version": 4,
+    "links": []
+  }
+}

@@ -1,9 +1,12 @@
 {
   "dashboard": {
     "id": null,
-    "title": "%SHORTHOST% MongoDB",
-    "originalTitle": "%SHORTHOST% MongoDB",
-    "tags": [ "%TAG%", "coremedia" ],
+    "title": "%SHORTHOST% ContentServer RLS",
+    "originalTitle": "%SHORTHOST% ContentServer RLS",
+    "tags": [
+      "%TAG%",
+      "coremedia"
+    ],
     "style": "dark",
     "timezone": "browser",
     "editable": true,
@@ -13,87 +16,23 @@
       {
         "collapse": false,
         "editable": true,
-        "height": "150px",
+        "height": "25px",
         "panels": [
           {
-            "aliasColors": {},
-            "bars": false,
-            "datasource": null,
+            "content": "<h2><center>RLS</center></h2>",
             "editable": true,
             "error": false,
-            "fill": 2,
-            "grid": {
-              "threshold1": null,
-              "threshold1Color": "rgba(216, 200, 27, 0.27)",
-              "threshold2": null,
-              "threshold2Color": "rgba(234, 112, 112, 0.22)"
-            },
-            "id": 1,
+            "id": 13,
             "isNew": true,
-            "legend": {
-              "alignAsTable": true,
-              "avg": false,
-              "current": true,
-              "max": false,
-              "min": false,
-              "rightSide": true,
-              "show": true,
-              "total": false,
-              "values": true
-            },
-            "lines": true,
-            "linewidth": 1,
             "links": [],
-            "nullPointMode": "connected",
-            "percentage": false,
-            "pointradius": 5,
-            "points": false,
-            "renderer": "flot",
-            "seriesOverrides": [],
+            "mode": "html",
             "span": 12,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
-              {
-                "refId": "A",
-                "target": "aliasByMetric(aliasSub(stdev(collectd.%HOST%.MONGO-io.*, 5, 0.1), '(.*)-', ''))",
-                "textEditor": false
-              }
-            ],
-            "timeFrom": null,
-            "timeShift": null,
-            "title": "I/O",
-            "tooltip": {
-              "msResolution": false,
-              "ordering": "alphabetical",
-              "shared": true,
-              "value_type": "cumulative"
-            },
-            "type": "graph",
-            "xaxis": {
-              "show": true
-            },
-            "yaxes": [
-              {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-              },
-              {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-              }
-            ]
+            "title": "",
+            "transparent": true,
+            "type": "text"
           }
         ],
-        "title": "I/O"
+        "title": "New row"
       },
       {
         "collapse": false,
@@ -106,21 +45,21 @@
             "datasource": null,
             "editable": true,
             "error": false,
-            "fill": 2,
+            "fill": 3,
             "grid": {
               "threshold1": null,
               "threshold1Color": "rgba(216, 200, 27, 0.27)",
               "threshold2": null,
               "threshold2Color": "rgba(234, 112, 112, 0.22)"
             },
-            "id": 2,
+            "id": 14,
             "isNew": true,
             "legend": {
               "alignAsTable": true,
               "avg": false,
               "current": true,
-              "max": false,
-              "min": false,
+              "max": true,
+              "min": true,
               "rightSide": true,
               "show": true,
               "total": false,
@@ -140,14 +79,15 @@
             "steppedLine": false,
             "targets": [
               {
+                "hide": false,
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(stdev(collectd.%HOST%.MONGO-bytes.*, 5, 0.1), '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.RLS-heap_memory.*, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
             "timeFrom": null,
             "timeShift": null,
-            "title": "Traffic",
+            "title": "RLS Heap Mem",
             "tooltip": {
               "msResolution": false,
               "ordering": "alphabetical",
@@ -161,7 +101,6 @@
             "yaxes": [
               {
                 "format": "bytes",
-                "label": null,
                 "logBase": 1,
                 "max": null,
                 "min": null,
@@ -169,7 +108,6 @@
               },
               {
                 "format": "short",
-                "label": null,
                 "logBase": 1,
                 "max": null,
                 "min": null,
@@ -178,27 +116,111 @@
             ]
           }
         ],
-        "title": "traffic"
+        "title": "Heap Memory"
       },
       {
         "collapse": false,
         "editable": true,
-        "height": "350px",
+        "height": "150px",
         "panels": [
           {
             "aliasColors": {},
             "bars": false,
-            "datasource": null,
+            "datasource": "graphite",
             "editable": true,
             "error": false,
-            "fill": 2,
+            "fill": 1,
             "grid": {
               "threshold1": null,
               "threshold1Color": "rgba(216, 200, 27, 0.27)",
               "threshold2": null,
               "threshold2Color": "rgba(234, 112, 112, 0.22)"
             },
-            "id": 4,
+            "id": 15,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": true,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "span": 12,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.RLS-perm_memory.*, '(.*)-', ''))",
+                "textEditor": false
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "Heap Mem",
+            "tooltip": {
+              "msResolution": false,
+              "shared": true,
+              "value_type": "cumulative",
+              "ordering": "alphabetical"
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "bytes",
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ]
+          }
+        ],
+        "title": "Perm Memory"
+      },
+      {
+        "collapse": false,
+        "editable": true,
+        "height": "150px",
+        "panels": [
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "decimals": 0,
+            "editable": true,
+            "error": false,
+            "fill": 3,
+            "grid": {
+              "threshold1": null,
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2": null,
+              "threshold2Color": "rgba(234, 112, 112, 0.22)"
+            },
+            "id": 16,
             "isNew": true,
             "legend": {
               "alignAsTable": true,
@@ -216,7 +238,7 @@
             "links": [],
             "nullPointMode": "connected",
             "percentage": false,
-            "pointradius": 1,
+            "pointradius": 5,
             "points": false,
             "renderer": "flot",
             "seriesOverrides": [],
@@ -226,13 +248,13 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(stdev(collectd.%HOST%.MONGO-commands.*, 3, 0.1), '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.RLS-query_pool.*, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
             "timeFrom": null,
             "timeShift": null,
-            "title": "commands",
+            "title": "RLS Query Pool",
             "tooltip": {
               "msResolution": false,
               "ordering": "alphabetical",
@@ -246,7 +268,6 @@
             "yaxes": [
               {
                 "format": "none",
-                "label": null,
                 "logBase": 1,
                 "max": null,
                 "min": null,
@@ -254,7 +275,6 @@
               },
               {
                 "format": "short",
-                "label": null,
                 "logBase": 1,
                 "max": null,
                 "min": null,
@@ -263,98 +283,98 @@
             ]
           }
         ],
-        "title": "commands"
+        "title": "Query Pool"
       },
-
-    {
-      "title": "connections",
-      "height": "150px",
-      "editable": true,
-      "collapse": false,
-      "panels": [
-        {
-          "title": "Connections",
-          "error": false,
-          "span": 12,
-          "editable": true,
-          "type": "graph",
-          "isNew": true,
-          "id": 5,
-          "targets": [
-            {
-              "target": "aliasByMetric(aliasSub(collectd.%HOST%.MONGO-connections.*, '(.*)-', ''))",
-              "refId": "A",
-              "textEditor": true
-            }
-          ],
-          "datasource": null,
-          "renderer": "flot",
-          "yaxes": [
-            {
-              "label": null,
-              "show": true,
-              "logBase": 1,
-              "min": null,
-              "max": null,
-              "format": "none"
+      {
+        "collapse": false,
+        "editable": true,
+        "height": "150px",
+        "panels": [
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "editable": true,
+            "error": false,
+            "fill": 3,
+            "grid": {
+              "threshold1": null,
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2": null,
+              "threshold2Color": "rgba(234, 112, 112, 0.22)"
             },
-            {
-              "label": null,
-              "show": false,
-              "logBase": 1,
-              "min": null,
-              "max": null,
-              "format": "short"
-            }
-          ],
-          "xaxis": {
-            "show": true
-          },
-          "grid": {
-            "threshold1": null,
-            "threshold2": null,
-            "threshold1Color": "rgba(216, 200, 27, 0.27)",
-            "threshold2Color": "rgba(234, 112, 112, 0.22)"
-          },
-          "lines": true,
-          "fill": 2,
-          "linewidth": 1,
-          "points": false,
-          "pointradius": 5,
-          "bars": false,
-          "stack": false,
-          "percentage": false,
-          "legend": {
-            "show": true,
-            "values": true,
-            "min": false,
-            "max": false,
-            "current": true,
-            "total": false,
-            "avg": false,
-            "rightSide": true,
-            "alignAsTable": true
-          },
-          "nullPointMode": "connected",
-          "steppedLine": false,
-          "tooltip": {
-            "value_type": "cumulative",
-            "shared": true,
-            "ordering": "alphabetical",
-            "msResolution": false
-          },
-          "timeFrom": null,
-          "timeShift": null,
-          "aliasColors": {},
-          "seriesOverrides": [],
-          "links": []
-        }
+            "id": 17,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "span": 12,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.RLS-stats_jobresult.*, '(.*)-', ''))",
+                "textEditor": false
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "RLS stats creations",
+            "tooltip": {
+              "msResolution": false,
+              "ordering": "alphabetical",
+              "shared": true,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "none",
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ]
+          }
+        ],
+        "title": "statistics"
+      }
     ],
     "time": {
-      "from": "now-3h",
+      "from": "now-1h",
       "to": "now"
     },
     "timepicker": {
+      "now": true,
       "refresh_intervals": [
         "10s",
         "30s",
@@ -385,7 +405,7 @@
     },
     "refresh": "30s",
     "schemaVersion": 12,
-    "version": 0,
+    "version": 8,
     "links": []
   }
 }

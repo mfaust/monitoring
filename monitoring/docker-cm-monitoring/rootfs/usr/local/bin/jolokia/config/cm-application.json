@@ -31,6 +31,30 @@
         "description": "Content Management Server",
         "metrics": [
           {
+            "description": "Statistics about Publisher",
+            "mbean" : "com.coremedia:application=coremedia,module=Publisher,pool=PublisherMethods,type=Statistics"
+          }
+        ]
+      },
+      "master-live-server": {
+        "description": "Master Live Server",
+        "metrics": [
+        ]
+      },
+      "replication-live-server": {
+        "description": "Replication Live Server",
+        "metrics": [
+          {
+            "description": "Information about Replication between MLS and RLS",
+            "mbean" : "com.coremedia:type=Replicator,application=coremedia",
+            "attribute" : "ConnectionUp,ControllerState,Enabled,PipelineUp,IncomingCount,CompletedCount,UncompletedCount,LatestCompletedSequenceNumber,LatestCompletedArrival,LatestCompletionDuration,LatestIncomingSequenceNumber,LatestIncomingArrival"
+          }
+        ]
+      },
+      "contentserver": {
+        "description": "ContentServer",
+        "metrics": [
+          {
             "description": "Base Measurement Points for ALL Content Server",
             "mbean" : "com.coremedia:application=coremedia,type=Server",
             "attribute" : "RunLevel,ResourceCacheHits,ResourceCacheEvicts,ResourceCacheEntries,ResourceCacheInterval,ResourceCacheSize,RepositorySequenceNumber,ConnectionCount,RunLevel,Uptime"
@@ -44,79 +68,6 @@
             "attribute" : "IdleExecutors,RunningExecutors,WaitingQueries,MaxQueries"
           }, {
             "description": "Statistics about BlobStore",
-            "mbean" : "com.coremedia:application=coremedia,module=BlobStore,pool=BlobStoreMethods,type=Statistics"
-          }, {
-            "description": "Statistics pool StoreStatistics Job Result",
-            "mbean" : "com.coremedia:application=coremedia,module=StoreStatistics,pool=Job Result,type=Statistics"
-          }, {
-            "description": "Statistics about Publisher",
-            "mbean" : "com.coremedia:application=coremedia,module=Publisher,pool=PublisherMethods,type=Statistics"
-          },{
-            "description": "Statistics about Repository",
-            "mbean" : "com.coremedia:application=coremedia,module=RepositoryStatistics,pool=Resource,type=Statistics"
-          }, {
-            "description": "Statistics about ResourceCache",
-            "mbean" : "com.coremedia:application=coremedia,module=ResourceCacheStatistics,pool=ResourceCache,type=Statistics"
-          }, {
-            "description": "Statistics about TextStore",
-            "mbean" : "com.coremedia:application=coremedia,module=TextStore,pool=TextStoreMethods,type=Statistics"
-          }
-        ]
-      },
-      "master-live-server": {
-        "description": "Master Live Server",
-        "metrics": [
-          {
-            "description": "Base Measurement Points for ALL Content Server",
-            "mbean" : "com.coremedia:application=coremedia,type=Server",
-            "attribute" : "RunLevel,ResourceCacheHits,ResourceCacheEvicts,ResourceCacheEntries,ResourceCacheInterval,ResourceCacheSize,RepositorySequenceNumber,ConnectionCount,RunLevel,Uptime"
-          }, {
-            "description": "Connection Pool for DBA Connections",
-            "mbean" : "com.coremedia:application=coremedia,bean=ConnectionPool,type=Store",
-            "attribute" : "BusyConnections,OpenConnections,IdleConnections,MaxConnections,MinConnections"
-          }, {
-            "description": "Query Pool for DBA Connections",
-            "mbean" : "com.coremedia:application=coremedia,bean=QueryPool,type=Store",
-            "attribute" : "IdleExecutors,RunningExecutors,WaitingQueries,MaxQueries"
-          }, {
-            "description": "",
-            "mbean" : "com.coremedia:application=coremedia,module=BlobStore,pool=BlobStoreMethods,type=Statistics"
-          }, {
-            "description": "Statistics pool StoreStatistics Job Result",
-            "mbean" : "com.coremedia:application=coremedia,module=StoreStatistics,pool=Job Result,type=Statistics"
-          }, {
-            "description": "Statistics about Repository",
-            "mbean" : "com.coremedia:application=coremedia,module=RepositoryStatistics,pool=Resource,type=Statistics"
-          }, {
-            "description": "Statistics about ResourceCache",
-            "mbean" : "com.coremedia:application=coremedia,module=ResourceCacheStatistics,pool=ResourceCache,type=Statistics"
-          }, {
-            "description": "Statistics about TextStore",
-            "mbean" : "com.coremedia:application=coremedia,module=TextStore,pool=TextStoreMethods,type=Statistics"
-          }
-        ]
-      },
-      "replication-live-server": {
-        "description": "Replication Live Server",
-        "metrics": [
-          {
-            "description": "Base Measurement Points for ALL Content Server",
-            "mbean" : "com.coremedia:application=coremedia,type=Server",
-            "attribute" : "RunLevel,Uptime,ResourceCacheHits,ResourceCacheEvicts,ResourceCacheEntries,ResourceCacheInterval,ResourceCacheSize,RepositorySequenceNumber,ConnectionCount"
-          }, {
-            "description": "Connection Pool for DBA Connections",
-            "mbean" : "com.coremedia:application=coremedia,bean=ConnectionPool,type=Store",
-            "attribute" : "BusyConnections,OpenConnections,IdleConnections,MaxConnections,MinConnections"
-          }, {
-            "description": "Query Pool for DBA Connections",
-            "mbean" : "com.coremedia:application=coremedia,bean=QueryPool,type=Store",
-            "attribute" : "IdleExecutors,RunningExecutors,WaitingQueries,MaxQueries"
-          },{
-            "description": "Information about Replication between MLS and RLS",
-            "mbean" : "com.coremedia:type=Replicator,application=coremedia",
-            "attribute" : "ConnectionUp,ControllerState,Enabled,PipelineUp,IncomingCount,CompletedCount,UncompletedCount,LatestCompletedSequenceNumber,LatestCompletedArrival,LatestCompletionDuration,LatestIncomingSequenceNumber,LatestIncomingArrival"
-          }, {
-            "description": "",
             "mbean" : "com.coremedia:application=coremedia,module=BlobStore,pool=BlobStoreMethods,type=Statistics"
           }, {
             "description": "Statistics pool StoreStatistics Job Result",
