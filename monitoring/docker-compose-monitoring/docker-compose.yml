@@ -40,6 +40,7 @@ services:
     depends_on:
       - grafana
       - icingaweb2
+      - cm-monitoring
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./share/nginx/var/www:/var/www:ro
@@ -48,6 +49,7 @@ services:
       - ./share/nginx/etc/nginx/modules.d/00-restrictions.conf:/etc/nginx/modules.d/00-restrictions.conf:ro
       - ./share/nginx/etc/nginx/modules.d/01-proxy-grafana.conf:/etc/nginx/modules.d/01-proxy-grafana.conf:ro
       - ./share/nginx/etc/nginx/modules.d/01-proxy-icingaweb2.conf:/etc/nginx/modules.d/01-proxy-icingaweb2.conf:ro
+      - ./share/nginx/etc/nginx/modules.d/01-proxy-rest-service.conf:/etc/nginx/modules.d/01-proxy-rest-service.conf:ro
 
   graphite:
     image: bodsch/docker-graphite:latest
@@ -59,6 +61,8 @@ services:
     depends_on:
       - database
       - memcached
+    ports:
+      - 2003:2003
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./data:/srv
@@ -122,23 +126,21 @@ services:
       - database:database
       - icinga2-core:icinga2
 
-#  cm-monitoring:
-#    build: ../docker-cm-monitoring
-#    container_name: cm-monitoring
-#    hostname: cm-monitoring
-#    env_file:
-#      - env/cm-monitoring.env
-#    depends_on:
-#      - jolokia
-#      - icinga2-core
-#      - grafana
-#    volumes:
-#      - /etc/localtime:/etc/localtime:ro
-#      - ./share/resolv.conf:/etc/resolv.conf:ro
-#      - ./share/monitoring:/usr/local/monitoring
-#    links:
-#      - icinga2-core:icinga2
-#      - jolokia:jolokia
-#      - grafana:grafana
-#
-#
+  cm-monitoring:
+    build: ../docker-cm-monitoring
+    container_name: cm-monitoring
+    hostname: cm-monitoring
+    env_file:
+      - env/cm-monitoring.env
+    depends_on:
+      - jolokia
+      - icinga2-core
+      - grafana
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./share/resolv.conf:/etc/resolv.conf:ro
+      - ./share/monitoring:/usr/local/monitoring
+    links:
+      - icinga2-core:icinga2
+      - jolokia:jolokia
+      - grafana:grafana

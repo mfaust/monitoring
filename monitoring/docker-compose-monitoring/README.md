@@ -7,16 +7,16 @@ Es werden pre-compiled Container von [Docker Hub](https://hub.docker.com/r/bodsc
 
 Das Setup beinhaltet ein Set von mehreren Containern:
 
- - database
- - jolokia
- - memcached
- - nginx
- - graphite
- - grafana
- - icinga2-core
- - icingaweb2
+ - `database`
+ - `jolokia`
+ - `memcached`
+ - `nginx`
+ - `graphite`
+ - `grafana`
+ - `icinga2-core`
+ - `icingaweb2`
 
-Es muss zusätzlich noch der Docker Container ```docker-cm-monitoring``` gebaut und gestartet werden.
+Zusätzlich wird ein weiterer Docker Container (`cm-monitoring`) eingebunfen, der initial und bei jeder weiteren Änderung gebaut werden muß.
 
 
 ## nginx
@@ -32,7 +32,7 @@ Die Startseite lässt sich im lokalen Browser unter [localhost](http://localhost
 
 Es können verschiedene Storage-Backends ([graphite](http://graphite.readthedocs.org/en/latest/), [influxdb](https://influxdata.com/), [Elasticsearch](https://www.elastic.co/products/elasticsearch), [Cloudwatch](https://aws.amazon.com/de/cloudwatch/), [Prometeus](https://prometheus.io/), [OpenTSDB](http://opentsdb.net/) ) benutzt werden.
 
-In diesem Meta-Package wird ausschließlich graphite genutzt.
+In diesem Meta-Package wird ausschließlich `graphite` genutzt.
 
 Im lokalen Browser steht unter [grafana](http://localhost/grafana/) zur Verfügung.
 Die Login Daten lauten:
@@ -77,13 +77,13 @@ Dient als Storage-Backend für Icinga2, Graphite, Grafana.
 Beinhaltet alle Coremediaspezifika. Vor allem Scripte für Icinga, Grafana und Jolokia.
 
 In dem Container wird der zu monitorende Host in das System eingefügt.
-Er sollte generell als letzter Container gestartet werden und in einer `screen` Session laufen, da nach dem beenden dieses Containers alle darin laufenden Jobs beendet werden.
+ => TODO
 
 
 ## langfristiges Ziel
 
 Die Idee für ein langfristiges Ziel wäre ein sich selbst konfigurierendes Monitoringsystem.
-Hier könnte der Einsatz von [consul](https://www.consul.io/) ein wichtige Schritt sein.
+Hier könnte der Einsatz von [consul](https://www.consul.io/) ein wichtiger Schritt sein.
 
 
 ## Schematischer Aufbau
@@ -105,7 +105,7 @@ Und docker-compose:
 
 ## Nutzung
 
-Mit Hilfe von ```docker-compose``` wir der gesammte Stack so gestartet, dass alle Abhängigkeiten aufgelöst werden.
+Mit Hilfe von `docker-compose` wir der gesammte Stack so gestartet, dass alle Abhängigkeiten aufgelöst werden.
 
 Services, die von einander abhängig sind (z.B. eine verfügbare Datenbank) legen entsprechende Wartezeit ein und prüfen deren Verfügbarkeit.
 
@@ -116,16 +116,14 @@ Services, die von einander abhängig sind (z.B. eine verfügbare Datenbank) lege
     cd devops
     git checkout docker
     cd monitoring/docker-compose-monitoring
+    docker-compose build
     docker-compose up
-
-    cd ../docker-cm-monitoring
-    screen -S cm-mon
-    make
-    make run
 
 Nach dem erfolgreichen Start, kann über die Kommandozeile der zu monitende Host hinzugefügt werden:
 
     add-host --host $name
+
+    curl -X POST http://localhost/api/$name
 
 Das Script versicht ein auto-discovery durchzuführen um festzustellen, welche Anwendung auf den jeweiligen Port läuft und fügt anschließend Standardtemplates für grafana und icinga2 hinzu.
 
