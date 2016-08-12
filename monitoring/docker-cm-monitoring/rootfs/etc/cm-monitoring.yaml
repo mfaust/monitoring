@@ -11,3 +11,5 @@ monitoring:
   grafana:
     host: grafana
     port: 3000
+  collectd-plugin:
+    interval: 15

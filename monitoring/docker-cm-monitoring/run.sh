@@ -45,10 +45,12 @@ GRAPHITE_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${USER}
 GRAFANA_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${USER}-grafana   2>/dev/null)
 ICINGA2_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${USER}-icinga2   2>/dev/null)
 
-JOLOKIA_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' jolokia   2>/dev/null)
-GRAPHITE_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' graphite 2>/dev/null)
-GRAFANA_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' grafana   2>/dev/null)
-ICINGA2_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' icinga2-core   2>/dev/null)
+net=$(docker inspect --format '{{ .HostConfig.NetworkMode }}' jolokia)
+
+JOLOKIA_IP=$(docker inspect --format "{{ .NetworkSettings.Networks.${net}.IPAddress }}" jolokia   2>/dev/null)
+GRAPHITE_IP=$(docker inspect --format "{{ .NetworkSettings.Networks.${net}.IPAddress }}" graphite 2>/dev/null)
+GRAFANA_IP=$(docker inspect --format "{{ .NetworkSettings.Networks.${net}.IPAddress }}" grafana   2>/dev/null)
+ICINGA2_IP=$(docker inspect --format "{{ .NetworkSettings.Networks.${net}.IPAddress }}" icinga2-core   2>/dev/null)
 
 [ -z ${DOCKER_DATA_DIR} ] && { echo "Var DOCKER_DATA_DIR not set!"; exit 1; }
 
@@ -57,12 +59,16 @@ ICINGA2_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' icinga2-
 docker_opts=
 docker_opts="${docker_opts} --interactive"
 docker_opts="${docker_opts} --tty"
+docker_opts="${docker_opts} --detach"
 docker_opts="${docker_opts} --hostname=${USER}-${TYPE}"
 docker_opts="${docker_opts} --name ${CONTAINER_NAME}"
 docker_opts="${docker_opts} --volume /etc/localtime:/etc/localtime:ro"
+docker_opts="${docker_opts} --volume ${PWD}/../docker-compose-monitoring/share/resolv.conf:/etc/resolv.conf:ro"
 docker_opts="${docker_opts} --volume ${DOCKER_DATA_DIR}/monitoring:/var/cache/monitoring"
 docker_opts="${docker_opts} --volume ${PWD}/inject/usr/local/sbin:/usr/local/sbin"
 docker_opts="${docker_opts} --add-host=blueprint-box:${BLUEPRINT_BOX}"
+docker_opts="${docker_opts} --net ${net}"
+
 docker_opts="${docker_opts} --env HOST_CM_CMS=${HOST_CM_CMS}"
 docker_opts="${docker_opts} --env HOST_CM_MLS=${HOST_CM_MLS}"
 docker_opts="${docker_opts} --env HOST_CM_RLS=${HOST_CM_RLS}"
@@ -92,27 +98,27 @@ then
   docker_opts="${docker_opts} --env ICINGA2_API_PORT=${ICINGA2_API_PORT:-5665}"
   docker_opts="${docker_opts} --env ICINGA2_API_USER=${ICINGA2_API_USER:-root}"
   docker_opts="${docker_opts} --env ICINGA2_API_PASS=${ICINGA2_API_PASS:-icinga}"
-  docker_opts="${docker_opts} --link=${USER}-icinga2:icinga"
+#  docker_opts="${docker_opts} --link=icinga2-core:icinga"
 fi
 
 if [ ! -z ${GRAPHITE_IP} ]
 then
   docker_opts="${docker_opts} --env GRAPHITE_HOST=${GRAPHITE_IP}"
   docker_opts="${docker_opts} --env GRAPHITE_PORT=${GRAPHITE_PORT}"
-  docker_opts="${docker_opts} --link=${USER}-graphite:graphite"
+#  docker_opts="${docker_opts} --link=graphite:graphite"
 fi
 
 if [ ! -z ${GRAFANA_IP} ]
 then
   docker_opts="${docker_opts} --env GRAFANA_HOST=${GRAFANA_IP}"
   docker_opts="${docker_opts} --env GRAFANA_PORT=3000"
-  docker_opts="${docker_opts} --link=${USER}-grafana:grafana"
+#  docker_opts="${docker_opts} --link=grafana:grafana"
 fi
 
 if [ ! -z ${JOLOKIA_IP} ]
 then
   docker_opts="${docker_opts} --env JOLOKIA_HOST=${JOLOKIA_IP}"
-  docker_opts="${docker_opts} --link=${USER}-jolokia:jolokia"
+#  docker_opts="${docker_opts} --link=jolokia:jolokia"
 fi
 
 if [ ! -z ${DOCKER_DNS} ]

@@ -1,9 +1,9 @@
 #!/usr/bin/ruby
 #
-# 31.07.2016 - Bodo Schulz
+# 12.08.2016 - Bodo Schulz
 #
 #
-# v0.5.4
+# v0.5.5
 
 # -----------------------------------------------------------------------------
 
@@ -37,7 +37,6 @@ module Sinatra
       if( File.exist?( options[:config] ) )
 
         config = YAML.load_file( options[:config] )
-#         puts config.inspect
 
         @logDir           = config['monitoring']['log_dir']              ? config['monitoring']['log_dir']              : '/tmp/log'
         @cacheDir         = config['monitoring']['cache_dir']            ? config['monitoring']['cache_dir']            : '/tmp/cache'
@@ -55,8 +54,18 @@ module Sinatra
       else
         puts "no configuration exists, use default settings"
 
-        @jolokia_host = 'localhost'
-        @jolokia_port = 8080
+        @logDir           = '/tmp/log'
+        @cacheDir         = '/tmp/cache'
+
+        @restService_port = 4567
+        @restService_bind = '0.0.0.0'
+
+        @jolokia_host     = 'localhost'
+        @jolokia_port     = 8080
+
+        @grafana_host     = 'localhost'
+        @grafana_port     = 3000
+        @grafana_path     = nil
 
       end
 
@@ -81,18 +90,6 @@ module Sinatra
 
     set :bind, @restService_bind
     set :port, @restService_port.to_i
-#
-#    if( run? && ARGV.any? )
-#      require 'optparse'
-#
-#      OptionParser.new { |op|
-#        op.on('-x')        {       set :lock, true }
-#        op.on('-e env')    { |val| set :environment, val.to_sym }
-#        op.on('-s server') { |val| set :server, val }
-#        op.on('-p port')   { |val| set :port, val.to_i }
-#        op.on('-o addr')   { |val| set :bind, val }
-#      }.parse!( ARGV.dup )
-#    end
 
     h = Discover.new( { 'log_dir' => @logDir, 'cache_dir' => @cacheDir, 'jolokia_host' => @jolokia_host, 'jolokia_port' => @jolokia_port } )
     g = Grafana.new( { 'log_dir' => @logDir, 'cache_dir' => @cacheDir, 'grafana_host' => @grafana_host, 'grafana_port' => @grafana_port, 'grafana_path' => @grafana_path } )
@@ -141,23 +138,19 @@ module Sinatra
 
     # delete a host
     delete '/:host' do
-      content_type :json
-      h.deleteHost( params[:host] ).to_json
-      g.deleteDashboards(params[:host])
-    end
 
-    # create new host
-    post '/config/jolokia' do
-
-      jolokia_host = params['host']
-      jolokia_port = params['port']
+      host = params[:host]
 
       content_type :json
-#      status = h.addHost( host )
+      status = h.deleteHost( host ).to_json
+      g.deleteDashboards( host )
 
-
+      response.status = h.status
+      status.to_json
 
     end
+
+
 
     run! if app_file == $0
 

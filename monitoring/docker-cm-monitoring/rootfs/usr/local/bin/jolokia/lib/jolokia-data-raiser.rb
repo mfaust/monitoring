@@ -3,7 +3,7 @@
 # 11.08.2016 - Bodo Schulz
 #
 #
-# v1.0.14
+# v1.0.15
 
 # -----------------------------------------------------------------------------
 
@@ -26,10 +26,18 @@ class JolokiaDataRaiser
 
   def initialize( settings = {}, applicationConfig, serviceConfig )
 
-    @logDirectory   = settings['log_dir']      ? settings['log_dir']      : '/tmp'
-    @cacheDirectory = settings['cache_dir']    ? settings['cache_dir']    : '/var/tmp/monitoring'
+    @logDirectory   = settings['log_dir']      ? settings['log_dir']      : '/tmp/log'
+    @cacheDirectory = settings['cache_dir']    ? settings['cache_dir']    : '/tmp/cache'
     @jolokiaHost    = settings['jolokia_host'] ? settings['jolokia_host'] : 'localhost'
     @jolokiaPort    = settings['jolokia_port'] ? settings['jolokia_port'] : 8080
+
+    if( ! File.exist?( @logDirectory ) )
+      Dir.mkdir( @logDirectory )
+    end
+
+    if( ! File.exist?( @cacheDirectory ) )
+      Dir.mkdir( @cacheDirectory )
+    end
 
     logFile = sprintf( '%s/data-raiser.log', @logDirectory )
 
@@ -51,8 +59,8 @@ class JolokiaDataRaiser
     @jolokiaApplications = nil
     @serviceConfig       = nil
 
-    version              = '1.0.14'
-    date                 = '2016-08-11'
+    version              = '1.0.15'
+    date                 = '2016-08-12'
 
     @log.info( '-----------------------------------------------------------------' )
     @log.info( ' JolokiaDataRaiser' )
@@ -96,7 +104,7 @@ class JolokiaDataRaiser
   end
 
 
-  # merge hashes of configured and discovered data
+  # merge hashes of configured (cm-service.json) and discovered data (discovery.json)
   def createHostConfig( data )
 
     data.each do |d,v|
@@ -499,6 +507,7 @@ class JolokiaDataRaiser
 
         @log.debug( 'create Hostconfiguration' )
         d = self.createHostConfig( data )
+
         @log.debug( 'merge Data between Property Files and discovered Services' )
         d = self.mergeData( d )
 

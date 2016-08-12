@@ -1,9 +1,9 @@
 #!/usr/bin/ruby
 #
-# 02.08.2016 - Bodo Schulz
+# 12.08.2016 - Bodo Schulz
 #
 #
-# v0.7.4
+# v1.0.0
 # -----------------------------------------------------------------------------
 
 require 'socket'
@@ -40,8 +40,6 @@ class Discover
     @log.formatter = proc do |severity, datetime, progname, msg|
       "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
     end
-
-    @cacheDirectory     = @cacheDirectory
 
     if( ! File.exist?( @cacheDirectory ) )
       Dir.mkdir( @cacheDirectory )
@@ -86,6 +84,17 @@ class Discover
       48099,
       49099
     ]
+
+    version              = '1.0.0'
+    date                 = '2016-08-12'
+
+    @log.info( '-----------------------------------------------------------------' )
+    @log.info( ' CM Service Discover' )
+    @log.info( "  Version #{version} (#{date})" )
+    @log.info( '  Copyright 2016 Coremedia' )
+    @log.info( "  cache directory located at #{@cacheDirectory}" )
+    @log.info( '-----------------------------------------------------------------' )
+    @log.info( '' )
 
   end
 

@@ -4,6 +4,19 @@ Welcome to CoreMedia Monitoring Project!
 This container holds many tools to handle some monitoring special things.
 
 Try the following
- -> add-host.sh --host blueprint-box                 to add Host 'blueprint-box' to monitoring
- -> add-host.sh --host blueprint-box --force         delete all cached check results and add Host 'blueprint-box' to monitoring again
+  to *add* a Host to the Monitoring:
+    curl -X POST http://localhost/api/$hostname  (e.g. curl -X POST http://localhost/api/blueprint-box)
+  this will be creates a set of Grafana Dashboards too
+
+  to *adding force* (fist delete, then re adding)
+    curl -X POST http://localhost/api/$hostname/force
+
+  to *remove* a Host from Monitoring
+    curl -X DELETE http://localhost/api/$hostname
+
+  to *list all* Host in the Monitoring use this
+    curl http://localhost/api/
+
+  to *list one* Host
+    curl http://localhost/api/$hostname
 

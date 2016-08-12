@@ -1,9 +1,9 @@
 #!/usr/bin/ruby
 #
-# 31.07.2016 - Bodo Schulz
+# 12.08.2016 - Bodo Schulz
 #
 #
-# v0.5.4
+# v1.0.0
 
 # -----------------------------------------------------------------------------
 
@@ -17,15 +17,11 @@ service_config     = sprintf( '%s/cm-service.json'    , config_dir )
 
 require sprintf( '%s/jolokia-data-raiser', lib_dir )
 
-options = {
-  :log_dir   => '/var/log/monitoring',
-  :cache_dir => '/var/cache/monitoring',
-  :config    => '/etc/cm-monitoring.yaml'
-}
+config_file = '/etc/cm-monitoring.yaml'
 
-if( File.exist?( options[:config] ) )
+if( File.exist?( config_file ) )
 
-  config = YAML.load_file( options[:config] )
+  config = YAML.load_file( config_file )
 
   @logDir           = config['monitoring']['log_dir']              ? config['monitoring']['log_dir']              : '/tmp/log'
   @cacheDir         = config['monitoring']['cache_dir']            ? config['monitoring']['cache_dir']            : '/tmp/cache'
@@ -42,27 +38,33 @@ else
 
 end
 
+options = {
+  'log_dir'      => @logDir,
+  'cache_dir'    => @cacheDir,
+  'jolokia_host' => @jolokia_host,
+  'jolokia_port' => @jolokia_port
+}
+
 # -----------------------------------------------------------------------------
 
-r = JolokiaDataRaiser.new( { 'log_dir' => @logDir, 'cache_dir' => @cacheDir, 'jolokia_host' => @jolokia_host, 'jolokia_port' => @jolokia_port }, application_config, service_config )
+r = JolokiaDataRaiser.new( options, application_config, service_config )
 
 # -----------------------------------------------------------------------------
 
-# now, fork a process and call the run() function every 15 seconds
-# pid = fork do
-  stop = false
+# NEVER FORK THE PROCESS!
+# the used supervisord will control all
+stop = false
 
-  Signal.trap('INT')  { stop = true }
-  Signal.trap('HUP')  { stop = true }
-  Signal.trap('TERM') { stop = true }
-  Signal.trap('QUIT') { stop = true }
+Signal.trap('INT')  { stop = true }
+Signal.trap('HUP')  { stop = true }
+Signal.trap('TERM') { stop = true }
+Signal.trap('QUIT') { stop = true }
 
-  until stop
-    # do your thing
-    r.run()
-    sleep(15)
-  end
-# end
+until stop
+  # do your thing
+  r.run()
+  sleep(15)
+end
 
 # -----------------------------------------------------------------------------
 

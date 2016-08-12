@@ -1,9 +1,9 @@
 #!/usr/bin/ruby
 #
-# 11.08.2016 - Bodo Schulz
+# 12.08.2016 - Bodo Schulz
 #
 #
-# v0.9.2
+# v0.9.3
 
 # -----------------------------------------------------------------------------
 
@@ -17,11 +17,17 @@ require_relative 'tools'
 
 class CollecdPlugin
 
-  attr_reader :status, :message, :services
+  attr_reader :status, @:message, :services
 
-  def initialize
+  def initialize( settings = {} )
 
-    file = File.open( '/tmp/monitor-collectd.log', File::WRONLY | File::APPEND | File::CREAT )
+    @logDirectory   = settings['log_dir']      ? settings['log_dir']      : '/tmp'
+    @cacheDirectory = settings['cache_dir']    ? settings['cache_dir']    : '/var/tmp/monitoring'
+    @interval       = settings['interval']     ? settings['interval']     : 15
+
+    logFile = sprintf( '%s/collectd.log', @logDirectory )
+
+    file      = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
     file.sync = true
     @log = Logger.new( file, 'weekly', 1024000 )
 #    @log = Logger.new( STDOUT )
@@ -31,9 +37,18 @@ class CollecdPlugin
       "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
     end
 
-    @cacheDirectory = '/var/cache/monitoring'
+    version              = '1.0.0'
+    date                 = '2016-08-12'
 
-    @interval       = 10 # in seconds
+    @log.info( '-----------------------------------------------------------------' )
+    @log.info( ' CollectdPlugin' )
+    @log.info( "  Version #{version} (#{date})" )
+    @log.info( '  Copyright 2016 Coremedia' )
+    @log.info( "  cache directory located at #{@cacheDirectory}" )
+    @log.info( "  configured interval #{@interval}"
+    @log.info( '-----------------------------------------------------------------' )
+    @log.info( '' )
+
   end
 
 

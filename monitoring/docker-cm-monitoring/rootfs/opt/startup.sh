@@ -1,5 +1,8 @@
 #!/bin/bash
 
+set -e
+# set -x
+
 # -------------------------------------------------------------------------------------------------
 
 # trap ctrl-c and call ctrl_c()
@@ -28,8 +31,6 @@ run() {
   startSupervisor
 
   cat /etc/motd
-
-#  eval /bin/bash
 
   while true
   do
