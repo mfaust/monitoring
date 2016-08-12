@@ -46,9 +46,6 @@ class Grafana
     @tpl_dir = "../../share/templates/grafana"
     @cache_dir = "/var/cache/monitoring"
     FileUtils.mkdir_p("#{@tmp_dir}/grafana")
-    # TODO: Should be http://grafana:3000, Error: Name or service not known
-    @grafana_uri = URI( sprintf( '%s/api/dashboards/db', @grafanaURI ) )
-    @log.debug("Grafana Uri: #{uri}")
   end
 
 
@@ -73,7 +70,7 @@ class Grafana
     # determine type of service from mergedHostData.json file, e.g. cae, caefeeder, contentserver
     merged_host_json = getJsonFromFile(merged_host_file)
 
-    
+
     @log.debug("Found services: #{services}")
 
 
@@ -251,9 +248,11 @@ class Grafana
     tpl_file.gsub! '%SHORTHOST%', @short_hostname
     tpl_file.gsub! '%TAG%', @short_hostname
 
+    grafana_db_uri = URI( sprintf( '%s/api/dashboards/db', @grafanaURI ) )
+
     res = nil
-    Net::HTTP.start(@grafana_uri.host, @grafana_uri.port) do |http|
-      request = Net::HTTP::Post.new @grafana_uri.request_uri
+    Net::HTTP.start(grafana_db_uri.host, grafana_db_uri.port) do |http|
+      request = Net::HTTP::Post.new grafana_db_uri.request_uri
       request.add_field('Content-Type', 'application/json')
       request.basic_auth 'admin', 'admin'
       request.body = tpl_file
