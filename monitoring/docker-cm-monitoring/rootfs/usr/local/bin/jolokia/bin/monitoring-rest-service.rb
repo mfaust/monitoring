@@ -15,6 +15,7 @@ require 'sinatra/base'
 require 'logger'
 require 'json'
 require 'yaml'
+require 'fileutils'
 
 require sprintf( '%s/discover', lib_dir )
 require sprintf( '%s/grafana', lib_dir )
@@ -30,7 +31,7 @@ module Sinatra
 
     configure do
       enable :logging
-      disable :dump_errors
+#       disable :dump_errors
 
       set :environment, :production
 
@@ -38,7 +39,7 @@ module Sinatra
 
         config = YAML.load_file( options[:config] )
 
-        @logDir           = config['monitoring']['log_dir']                 ? config['monitoring']['log_dir']                  : '/tmp/log'
+        @logDirectory     = config['monitoring']['log_dir']                 ? config['monitoring']['log_dir']                  : '/tmp/log'
         @cacheDir         = config['monitoring']['cache_dir']               ? config['monitoring']['cache_dir']                : '/tmp/cache'
 
         @restService_port = config['monitoring']['rest-service']['port']    ? config['monitoring']['rest-service']['port']     : 4567
@@ -56,7 +57,7 @@ module Sinatra
       else
         puts "no configuration exists, use default settings"
 
-        @logDir           = '/tmp/log'
+        @logDirectory     = '/tmp/log'
         @cacheDir         = '/tmp/cache'
 
         @restService_port = 4567
@@ -72,15 +73,19 @@ module Sinatra
 
       end
 
-      if( ! File.exist?( @logDir ) )
-        Dir.mkdir( @logDir )
+      if( ! File.exist?( @logDirectory ) )
+        Dir.mkdir( @logDirectory )
       end
 
       if( ! File.exist?( @cacheDir ) )
         Dir.mkdir( @cacheDir )
       end
 
-      file      = File.open( sprintf( '%s/rest-service.log', @logDir ), File::WRONLY | File::APPEND | File::CREAT )
+      FileUtils.chmod( 1775, @logDirectory )
+      FileUtils.chmod( 0775, @cacheDir )
+      FileUtils.chown( 'nobody', 'nobody', @logDirectory )
+
+      file      = File.open( sprintf( '%s/rest-service.log', @logDirectory ), File::WRONLY | File::APPEND | File::CREAT )
       file.sync = true
 
       use Rack::CommonLogger, file
@@ -89,16 +94,19 @@ module Sinatra
 
     set :app_file, caller_files.first || $0
     set :run, Proc.new { $0 == app_file }
-    set :dump_errors, false
+    set :dump_errors, true
+    set :show_exceptions, true
 
     set :bind, @restService_bind
     set :port, @restService_port.to_i
 
-    h = Discover.new( { 'log_dir' => @logDir, 'cache_dir' => @cacheDir, 'jolokia_host' => @jolokia_host, 'jolokia_port' => @jolokia_port } )
-    g = Grafana.new( { 'log_dir' => @logDir, 'cache_dir' => @cacheDir, 'grafana_host' => @grafana_host, 'grafana_port' => @grafana_port, 'grafana_path' => @grafana_path, 'template_dir' => @template_dir } )
+    h = Discover.new( { 'log_dir' => @logDirectory, 'cache_dir' => @cacheDir, 'jolokia_host' => @jolokia_host, 'jolokia_port' => @jolokia_port } )
+    g = Grafana.new( { 'log_dir' => @logDirectory, 'cache_dir' => @cacheDir, 'grafana_host' => @grafana_host, 'grafana_port' => @grafana_port, 'grafana_path' => @grafana_path, 'template_dir' => @template_dir } )
 
     error do
-      'Sorry there was a nasty error - ' + env['sinatra.error'].message
+      msg = "ERROR\n\nThe monitoring-rest-service has nasty error - " + env['sinatra.error']
+
+      msg.message
     end
 
     get '/' do

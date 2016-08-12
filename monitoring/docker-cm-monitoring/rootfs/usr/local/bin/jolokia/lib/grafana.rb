@@ -294,7 +294,6 @@ class Grafana
       exit 1
     end
 
-
     begin
       json = JSON.parse(file)
     rescue JSON::ParserError => e

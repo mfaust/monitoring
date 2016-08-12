@@ -1,6 +1,15 @@
 ---
 # project_name: monitoring
 version: '2.0'
+
+networks:
+  mon:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 172.25.0.0/24
+
+
 services:
   database:
     restart: always
@@ -12,6 +21,9 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./data:/srv
+    networks:
+      mon:
+        ipv4_address: 172.25.0.10
 
   jolokia:
     restart: always
@@ -25,6 +37,9 @@ services:
       - 8080:8080
     extra_hosts:
       - 'blueprint-box:192.168.252.100'
+    networks:
+      mon:
+        ipv4_address: 172.25.0.11
 
   memcached:
     restart: always
@@ -33,6 +48,9 @@ services:
     hostname: memcached
     volumes:
       - /etc/localtime:/etc/localtime:ro
+    networks:
+      mon:
+        ipv4_address: 172.25.0.12
 
   nginx:
     restart: always
@@ -54,6 +72,9 @@ services:
       - ./share/nginx/etc/nginx/modules.d/01-proxy-grafana.conf:/etc/nginx/modules.d/01-proxy-grafana.conf:ro
       - ./share/nginx/etc/nginx/modules.d/01-proxy-icingaweb2.conf:/etc/nginx/modules.d/01-proxy-icingaweb2.conf:ro
       - ./share/nginx/etc/nginx/modules.d/01-proxy-rest-service.conf:/etc/nginx/modules.d/01-proxy-rest-service.conf:ro
+    networks:
+      mon:
+        ipv4_address: 172.25.0.15
 
   graphite:
     restart: always
@@ -71,6 +92,9 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./data:/srv
+    networks:
+      mon:
+        ipv4_address: 172.25.0.20
 
   grafana:
     restart: always
@@ -85,6 +109,9 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./data:/srv
+    networks:
+      mon:
+        ipv4_address: 172.25.0.21
 
   icinga2-core:
     restart: always
@@ -109,6 +136,9 @@ services:
       - ./share/icinga2/etc/icinga2/objects:/etc/icinga2/objects
     links:
       - database:database
+    networks:
+      mon:
+        ipv4_address: 172.25.0.30
 
   icingaweb2:
     restart: always
@@ -131,6 +161,9 @@ services:
     links:
       - database:database
       - icinga2-core:icinga2
+    networks:
+      mon:
+        ipv4_address: 172.25.0.31
 
   cm-monitoring:
     restart: always
@@ -146,9 +179,12 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./share/resolv.conf:/etc/resolv.conf:ro
-      - ./share/monitoring:/usr/local/monitoring
+      - ./data/monitoring:/var/cache/monitoring
       - ./data:/srv
     links:
       - icinga2-core:icinga2
       - jolokia:jolokia
       - grafana:grafana
+    networks:
+      mon:
+        ipv4_address: 172.25.0.40
