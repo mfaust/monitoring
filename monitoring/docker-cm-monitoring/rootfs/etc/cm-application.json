@@ -1,0 +1,182 @@
+{
+  "jolokia": {
+    "applications": {
+      "tomcat": {
+        "description": "standard checks for all tomcats",
+        "metrics": [
+          {
+            "description": "Heap Memory Usage",
+            "mbean": "java.lang:type=Memory"
+          }, {
+            "description": "Thread Count",
+            "mbean": "java.lang:type=Threading",
+            "attribute": "TotalStartedThreadCount,ThreadCount,DaemonThreadCount,PeakThreadCount"
+          }, {
+            "description": "Tomcat Thread Pool",
+            "mbean": "Catalina:type=Executor,name=tomcatThreadPool"
+          }, {
+            "description": "Class Loaded",
+            "mbean": "java.lang:type=ClassLoading",
+            "attribute": "LoadedClassCount,UnloadedClassCount,TotalLoadedClassCount"
+          }, {
+            "description": "GarbageCollector ParNew",
+            "mbean" : "java.lang:type=GarbageCollector,name=ParNew"
+          }, {
+            "description": "GarbageCollector ConcurrentMarkSweep",
+            "mbean": "java.lang:type=GarbageCollector,name=ConcurrentMarkSweep"
+          }
+        ]
+      },
+      "content-management-server": {
+        "description": "Content Management Server",
+        "metrics": [
+          {
+            "description": "Statistics about Publisher",
+            "mbean" : "com.coremedia:application=coremedia,module=Publisher,pool=PublisherMethods,type=Statistics"
+          }
+        ]
+      },
+      "master-live-server": {
+        "description": "Master Live Server",
+        "metrics": [
+        ]
+      },
+      "replication-live-server": {
+        "description": "Replication Live Server",
+        "metrics": [
+          {
+            "description": "Information about Replication between MLS and RLS",
+            "mbean" : "com.coremedia:type=Replicator,application=coremedia",
+            "attribute" : "ConnectionUp,ControllerState,Enabled,PipelineUp,IncomingCount,CompletedCount,UncompletedCount,LatestCompletedSequenceNumber,LatestCompletedArrival,LatestCompletionDuration,LatestIncomingSequenceNumber,LatestIncomingArrival"
+          }
+        ]
+      },
+      "contentserver": {
+        "description": "ContentServer",
+        "metrics": [
+          {
+            "description": "Base Measurement Points for ALL Content Server",
+            "mbean" : "com.coremedia:application=coremedia,type=Server",
+            "attribute" : "RunLevel,ResourceCacheHits,ResourceCacheEvicts,ResourceCacheEntries,ResourceCacheInterval,ResourceCacheSize,RepositorySequenceNumber,ConnectionCount,RunLevel,Uptime"
+          }, {
+            "description": "Connection Pool for DBA Connections",
+            "mbean" : "com.coremedia:application=coremedia,bean=ConnectionPool,type=Store",
+            "attribute" : "BusyConnections,OpenConnections,IdleConnections,MaxConnections,MinConnections"
+          }, {
+            "description": "Query Pool for DBA Connections",
+            "mbean" : "com.coremedia:application=coremedia,bean=QueryPool,type=Store",
+            "attribute" : "IdleExecutors,RunningExecutors,WaitingQueries,MaxQueries"
+          }, {
+            "description": "Statistics about BlobStore",
+            "mbean" : "com.coremedia:application=coremedia,module=BlobStore,pool=BlobStoreMethods,type=Statistics"
+          }, {
+            "description": "Statistics pool StoreStatistics Job Result",
+            "mbean" : "com.coremedia:application=coremedia,module=StoreStatistics,pool=Job Result,type=Statistics"
+          }, {
+            "description": "Statistics about Repository",
+            "mbean" : "com.coremedia:application=coremedia,module=RepositoryStatistics,pool=Resource,type=Statistics"
+          }, {
+            "description": "Statistics about ResourceCache",
+            "mbean" : "com.coremedia:application=coremedia,module=ResourceCacheStatistics,pool=ResourceCache,type=Statistics"
+          }, {
+            "description": "Statistics about TextStore",
+            "mbean" : "com.coremedia:application=coremedia,module=TextStore,pool=TextStoreMethods,type=Statistics"
+          }
+        ]
+      },
+      "workflow-server": {
+        "description": "",
+        "metrics": [
+          {
+            "name": "",
+            "description": "Base Measurement Points for ALL Content Server",
+            "mbean" : "com.coremedia:application=coremedia,type=Server",
+            "attribute" : "RunLevel,ResourceCacheHits,ResourceCacheEvicts,ResourceCacheEntries,ResourceCacheInterval,ResourceCacheSize,RepositorySequenceNumber,ConnectionCount,RunLevel,Uptime"
+          }, {
+            "mbean" : "com.coremedia:type=CapConnection,application=workflow",
+            "attribute" : "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions"
+          }
+        ]
+      },
+      "elastic-worker": {},
+      "user-changes": {},
+      "content-feeder": {
+        "description": "The Content Feeder",
+        "metrics": [
+          {
+            "name": "feeder",
+            "mbean": "com.coremedia:application=contentfeeder,type=Feeder",
+            "attribute": "State,Uptime,CurrentPendingDocuments,IndexAverageBatchSendingTime,IndexDocuments,IndexContentDocuments,IndexBytes,PendingEvents,PendingFolders"
+          }
+        ]
+      },
+      "caefeeder": {
+        "description": "The CAE Feeder (Live and Preview)",
+        "metrics": [
+          {
+            "name": "caefeeder",
+            "mbean": "com.coremedia:type=ProactiveEngine,application=caefeeder",
+            "attribute": "KeysCount,ValuesCount,InvalidationCount,SendSuccessTimeLatest,PurgeTimeLatest,HeartBeat,QueueCapacity,QueueMaxSize,QueueProcessedPerSecond"
+          }, {
+            "name": "DependencyInvalidator",
+            "mbean" : "com.coremedia:type=ContentDependencyInvalidator,application=caefeeder"
+          }, {
+            "name": "HealthStatus",
+            "mbean" : "com.coremedia:type=Health,application=caefeeder"
+          }, {
+            "mbean" : "com.coremedia:type=CapConnection,application=caefeeder",
+            "attribute": "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions"
+          }
+        ]
+      },
+      "adobe-drive": {
+        "description": "",
+        "metrics": [
+          {
+            "name": "",
+            "mbean": "com.coremedia:type=CapConnection,application=CoreMedia-Asset-Management-Adobe-Drive-Server",
+            "attribute": "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions"
+          }
+        ]
+      },
+      "sitemanager": {},
+      "cae": {
+        "description": "checks for all CAE Services",
+        "metrics": [
+          {
+            "name": "contentbeans",
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.blueprint.common.contentbeans.Page\",application=blueprint",
+            "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted"
+          }, {
+            "name": "CapConnection",
+            "mbean": "com.coremedia:type=CapConnection,application=blueprint",
+            "attribute": "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions"
+          }
+        ]
+      },
+      "studio": {
+        "description": "check for the CM Studio",
+        "metrics": [
+          {
+            "name": "CapConnection for Studio",
+            "mbean": "com.coremedia:type=CapConnection,application=CoreMedia-Studio",
+            "attribute" : "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions"
+          }
+        ]
+      },
+      "solr": {
+        "description": "Solr Standard Checks for Core %CORE%",
+        "metrics": [
+          {
+            "mbean": "solr/%CORE%:type=/replication,id=org.apache.solr.handler.ReplicationHandler",
+            "attribute" : "errors,isMaster,isSlave,requests,medianRequestTime,indexVersion,indexSize,generation"
+          }, {
+            "mbean": "solr/%CORE%:type=queryResultCache,id=org.apache.solr.search.LRUCache",
+            "attribute" : "cumulative_evictions,cumulative_hitratio,cumulative_hits,cumulative_inserts,cumulative_lookups,description,,evictions,hitratio,hits,inserts,lookups,size,warmupTime"
+          }
+        ]
+      }
+
+    }
+  }
+}

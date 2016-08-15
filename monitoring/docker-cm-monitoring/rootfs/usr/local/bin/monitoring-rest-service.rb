@@ -16,6 +16,7 @@ require 'logger'
 require 'json'
 require 'yaml'
 require 'fileutils'
+require 'resolve/hostname'
 
 require sprintf( '%s/discover', lib_dir )
 require sprintf( '%s/grafana', lib_dir )

@@ -45,6 +45,7 @@ RUN \
      ruby-nmap \
      json \
      ipaddress \
+     resolve-hostname \
      rest-client \
      filesize \
      fileutils \
