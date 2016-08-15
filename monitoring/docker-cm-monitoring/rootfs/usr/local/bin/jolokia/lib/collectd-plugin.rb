@@ -117,7 +117,7 @@ class CollecdPlugin
   def ParseResult_Memory( data = {} )
 
     value  = data['value'] ? data['value'] : nil
-    format = 'PUTVAL %s/%s-%s/cm7_counter-%s interval=%s N:%s'
+    format = 'PUTVAL %s/%s-%s/count-%s interval=%s N:%s'
     data   = []
 
     if( value != nil )
@@ -155,7 +155,7 @@ class CollecdPlugin
   def ParseResult_Threading( data = {} )
 
     value  = data['value'] ? data['value'] : nil
-    format = 'PUTVAL %s/%s-%s/cm7_counter-%s interval=%s N:%s'
+    format = 'PUTVAL %s/%s-%s/count-%s interval=%s N:%s'
     data   = []
 
     if( value != nil )
@@ -186,7 +186,7 @@ class CollecdPlugin
   def ParseResult_ClassLoading( data = {} )
 
     value  = data['value'] ? data['value'] : nil
-    format = 'PUTVAL %s/%s-%s/cm7_counter-%s interval=%s N:%s'
+    format = 'PUTVAL %s/%s-%s/count-%s interval=%s N:%s'
     data   = []
 
     if( value != nil )
@@ -212,7 +212,7 @@ class CollecdPlugin
   def ParseResult_GCParNew( data = {} )
 
     value  = data['value'] ? data['value'] : nil
-    format = 'PUTVAL %s/%s-%s/cm7_counter-%s interval=%s N:%s'
+    format = 'PUTVAL %s/%s-%s/count-%s interval=%s N:%s'
     data   = []
 
     if( value != nil )
@@ -262,7 +262,7 @@ class CollecdPlugin
   def ParseResult_GCConcurrentMarkSweep( data = {} )
 
     value  = data['value'] ? data['value'] : nil
-    format = 'PUTVAL %s/%s-%s/cm7_counter-%s interval=%s N:%s'
+    format = 'PUTVAL %s/%s-%s/count-%s interval=%s N:%s'
     data   = []
 
     if( value != nil )
@@ -312,7 +312,7 @@ class CollecdPlugin
   def ParseResult_Server( data = {} )
 
     value  = data['value'] ? data['value'] : nil
-    format = 'PUTVAL %s/%s-%s/cm7_counter-%s interval=%s N:%s'
+    format = 'PUTVAL %s/%s-%s/count-%s interval=%s N:%s'
     data   = []
 
     if( value != nil )
@@ -347,7 +347,7 @@ class CollecdPlugin
   def ParseResult_Feeder( data = {} )
 
     value  = data['value'] ? data['value'] : nil
-    format = 'PUTVAL %s/%s-%s/cm7_counter-%s interval=%s N:%s'
+    format = 'PUTVAL %s/%s-%s/count-%s interval=%s N:%s'
     data   = []
 
     if( value != nil )
@@ -370,7 +370,7 @@ class CollecdPlugin
   def ParseResult_CacheClasses( data = {} )
 
     value  = data['value'] ? data['value'] : nil
-    format = 'PUTVAL %s/%s-%s/cm7_counter-%s interval=%s N:%s'
+    format = 'PUTVAL %s/%s-%s/count-%s interval=%s N:%s'
     data   = []
 
     if( value != nil )
@@ -397,7 +397,7 @@ class CollecdPlugin
   def ParseResult_ProactiveEngine( data = {} )
 
     value  = data['value'] ? data['value'] : nil
-    format = 'PUTVAL %s/%s-%s/cm7_counter-%s interval=%s N:%s'
+    format = 'PUTVAL %s/%s-%s/count-%s interval=%s N:%s'
     data   = []
 
     if( value != nil )
@@ -418,7 +418,7 @@ class CollecdPlugin
   def ParseResult_CapConnection( data = {} )
 
     value  = data['value'] ? data['value'] : nil
-    format = 'PUTVAL %s/%s-%s/cm7_counter-%s interval=%s N:%s'
+    format = 'PUTVAL %s/%s-%s/count-%s interval=%s N:%s'
     data   = []
 
     if( value != nil )
@@ -463,7 +463,7 @@ class CollecdPlugin
     value  = data['value']            ? data['value']            : nil
     mbean  = data['request']['mbean'] ? data['request']['mbean'] : nil
 
-    format = 'PUTVAL %s/%s-%s/cm7_counter-%s interval=%s N:%s'
+    format = 'PUTVAL %s/%s-%s/count-%s interval=%s N:%s'
     data   = []
 
     solrCore = self.solrCore( mbean )
@@ -498,7 +498,7 @@ class CollecdPlugin
     value  = data['value']            ? data['value']            : nil
     mbean  = data['request']['mbean'] ? data['request']['mbean'] : nil
 
-    format = 'PUTVAL %s/%s-%s/cm7_counter-%s interval=%s N:%s'
+    format = 'PUTVAL %s/%s-%s/count-%s interval=%s N:%s'
     data   = []
 
     solrCore = self.solrCore( mbean )
@@ -536,7 +536,7 @@ class CollecdPlugin
   def ParseResult_ConnectionPool( data = {} )
 
     value  = data['value'] ? data['value'] : nil
-    format = 'PUTVAL %s/%s-%s/cm7_counter-%s interval=%s N:%s'
+    format = 'PUTVAL %s/%s-%s/count-%s interval=%s N:%s'
     data   = []
 
     if( value != nil )
@@ -566,7 +566,7 @@ class CollecdPlugin
   def ParseResult_QueryPool( data = {} )
 
     value  = data['value'] ? data['value'] : nil
-    format = 'PUTVAL %s/%s-%s/cm7_counter-%s interval=%s N:%s'
+    format = 'PUTVAL %s/%s-%s/count-%s interval=%s N:%s'
     data   = []
 
     if( value != nil )
@@ -603,7 +603,7 @@ class CollecdPlugin
   def ParseResult_StatisticsJobResult( data = {} )
 
     value  = data['value'] ? data['value'] : nil
-    format = 'PUTVAL %s/%s-%s/cm7_counter-%s interval=%s N:%s'
+    format = 'PUTVAL %s/%s-%s/count-%s interval=%s N:%s'
     data   = []
 
     if( value != nil )
@@ -628,7 +628,7 @@ class CollecdPlugin
   def ParseResult_StatisticsResourceCache( data = {} )
 
     value  = data['value'] ? data['value'] : nil
-    format = 'PUTVAL %s/%s-%s/cm7_counter-%s interval=%s N:%s'
+    format = 'PUTVAL %s/%s-%s/count-%s interval=%s N:%s'
     data   = []
 
     if( value != nil )

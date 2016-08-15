@@ -5,6 +5,20 @@
 require 'timeout'
 require 'socket'
 
+def isIp?( data )
+
+  require "ipaddress"
+
+  return IPAddress.valid?( data ) # "192.128.0.12"
+  #=> true
+
+  # IPAddress.valid? "192.128.0.260"
+  #=> false
+end
+
+#ValidIpAddressRegex = "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$";
+#ValidHostnameRegex = "^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$";
+
   # return a array of all monitored server
   def monitoredServer( cacheDirectory )
 

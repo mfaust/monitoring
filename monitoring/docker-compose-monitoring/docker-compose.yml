@@ -63,6 +63,11 @@ services:
       - grafana
       - icingaweb2
       - cm-monitoring
+    extra_hosts:
+      - 'jolokia:172.25.0.11'
+      - 'grafana:172.25.0.21'
+      - 'icingaweb2:172.25.0.31'
+      - 'cm-monitoring:172.25.0.40'
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./share/nginx/var/www:/var/www:ro
@@ -87,6 +92,9 @@ services:
     depends_on:
       - database
       - memcached
+    extra_hosts:
+      - 'database:172.25.0.10'
+      - 'memcached:172.25.0.11'
     ports:
       - 2003:2003
     volumes:
@@ -106,6 +114,8 @@ services:
       - env/grafana.env
     depends_on:
       - database
+    extra_hosts:
+      - 'database:172.25.0.10'
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./data:/srv
@@ -123,6 +133,8 @@ services:
       - env/icinga2.env
     depends_on:
       - database
+    extra_hosts:
+      - 'database:172.25.0.10'
     ports:
       - 5665:5665
       - 6666:6666
@@ -152,6 +164,9 @@ services:
     depends_on:
       - database
       - icinga2-core
+    extra_hosts:
+      - 'database:172.25.0.10'
+      - 'icinga2:172.25.0.30'
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./data:/srv
@@ -176,6 +191,11 @@ services:
       - jolokia
       - icinga2-core
       - grafana
+    extra_hosts:
+      - 'jolokia:172.25.0.11'
+      - 'grafana:172.25.0.21'
+      - 'icinga2:172.25.0.30'
+      - 'blueprint-box:192.168.252.100'
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./share/resolv.conf:/etc/resolv.conf:ro

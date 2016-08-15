@@ -44,6 +44,7 @@ RUN \
      sqlite3 \
      ruby-nmap \
      json \
+     ipaddress \
      rest-client \
      filesize \
      fileutils \
