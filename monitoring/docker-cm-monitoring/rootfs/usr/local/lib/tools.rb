@@ -62,28 +62,20 @@ end
     require 'resolve/hostname'
 
     begin
-      r  = Resolve::Hostname.new( :ttl => 320, :resolver_ttl => 120 )
+      r  = Resolve::Hostname.new( :ttl => 320, :resolver_ttl => 120, :system_resolver => true )
       ip = r.getaddress( name )
     rescue => e
       @log.debug( e )
-      return Socket.gethostbyname(name).first
+      ip = Socket.gethostbyname(name).first
     end
-
-    @log.debug( sprintf( ' => found IP :\'%s\'', ip ) )
 
     return ip
   end
 
 
-  def portOpen? ( ip, port, seconds = 1 )
+  def portOpen? ( name, port, seconds = 1 )
 
-    begin
-      r  = Resolve::Hostname.new( :ttl => 320, :resolver_ttl => 120 )
-      ip = r.getaddress( ip )
-    rescue => e
-      @log.debug( e )
-      return false
-    end
+    ip = dnsResolve( name )
 
     # => checks if a port is open or not on a remote host
     Timeout::timeout( seconds ) do
@@ -91,12 +83,12 @@ end
         TCPSocket.new( ip, port ).close
         return true
       rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH, SocketError => e
-        @log.error( e )
+#         @log.error( e )
         return false
       end
     end
     rescue Timeout::Error => e
-      @log.error( e )
+#       @log.error( e )
       return false
   end
 

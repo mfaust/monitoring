@@ -4,6 +4,8 @@ MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 LABEL version="1.2.4"
 
+ENV TERM=xterm
+
 # ---------------------------------------------------------------------------------------
 
 WORKDIR /srv

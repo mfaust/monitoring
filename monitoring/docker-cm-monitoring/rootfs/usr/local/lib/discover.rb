@@ -306,8 +306,10 @@ class Discover
       }
     end
 
+    ip = dnsResolve( host )
+
     # second, if the that we whant monitored, available
-    if( isRunning?( host ) == false )
+    if( isRunning?( ip ) == false )
 
       @status  = 400
       @message = 'Host not available'
@@ -357,7 +359,7 @@ class Discover
 
     ports.each do |p|
 
-      open = portOpen?( host, p )
+      open = portOpen?( ip, p )
 
       @log.debug( sprintf( 'Host: %s | Port: %s   - status %s', host, p, open ) )
 

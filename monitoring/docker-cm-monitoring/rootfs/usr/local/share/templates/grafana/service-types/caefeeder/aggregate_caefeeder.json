@@ -3,10 +3,7 @@
     "id": null,
     "title": "%SHORTHOST% Feeder",
     "originalTitle": "%SHORTHOST% Feeder",
-    "tags": [
-      "%TAG%",
-      "coremedia"
-    ],
+    "tags": [ "%TAG%", "feeder", "coremedia" ],
     "style": "dark",
     "timezone": "browser",
     "editable": true,
@@ -45,7 +42,7 @@
     "annotations": {
       "list": []
     },
-    "refresh": "30s",
+    "refresh": "1m",
     "schemaVersion": 12,
     "version": 4,
     "links": []

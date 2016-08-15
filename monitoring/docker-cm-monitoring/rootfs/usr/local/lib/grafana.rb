@@ -288,10 +288,26 @@ class Grafana
         aggregation_file_json = getJsonFromFile(aggregation_file[0])
 
         fragments.each do |fragment|
-          fragment_file = File.read(fragment)
-          fragment_json = JSON.parse(fragment_file)
-          fragment_json["dashboard"]["rows"].each do |item|
-            aggregation_file_json["dashboard"]["rows"] << item
+
+          if( File.exists?( fragment ) )
+
+            @log.error( sprintf( 'read fragment \'%s\'', fragment ) )
+
+            fragment_file = File.read(fragment)
+            fragment_json = JSON.parse(fragment_file)
+
+            if( fragment_json['dashboard'] and fragment_json['dashboard']['rows'] )
+
+              if( fragment_json["dashboard"]["rows"] )
+                fragment_json["dashboard"]["rows"].each do |item|
+                  aggregation_file_json["dashboard"]["rows"] << item
+                end
+              end
+
+            end
+
+          else
+            @log.error( sprintf( "File '%s' not exists", fragment ) )
           end
         end
         merged_template = JSON.generate(aggregation_file_json)
