@@ -177,6 +177,7 @@ class JolokiaDataRaiser
 
       v['metrics'].compact!   # remove 'nil' from array
       v['metrics'].flatten!   # clean up and reduce depth
+      v['metrics'].uniq!      # remove duplicates
 
     end
 

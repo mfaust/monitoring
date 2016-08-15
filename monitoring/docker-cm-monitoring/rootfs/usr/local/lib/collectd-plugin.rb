@@ -93,7 +93,7 @@ class CollecdPlugin
       service = 'CMS'
     when 'master-live-server'
       service = 'MLS'
-    when 'repication-live-server'
+    when 'replication-live-server'
       service = 'RLS'
     when 'workflow-server'
       service = 'WFS'

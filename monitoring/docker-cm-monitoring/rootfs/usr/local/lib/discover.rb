@@ -254,7 +254,7 @@ class Discover
       when 'mls'
         service = 'master-live-server'
       when 'rls'
-        service = 'repication-live-server'
+        service = 'replication-live-server'
       when 'wfs'
         service = 'workflow-server'
       when 'delivery'
