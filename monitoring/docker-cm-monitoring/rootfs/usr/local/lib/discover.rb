@@ -114,7 +114,7 @@ class Discover
   def jolokiaIsAvailable?()
 
     # if our jolokia proxy available?
-    if( ! port_open?( @jolokiaHost, @jolokiaPort ) )
+    if( ! portOpen?( @jolokiaHost, @jolokiaPort ) )
       @log.error( 'jolokia service is not available!' )
       @log.error( 'skip service discovery' )
       return false
@@ -357,7 +357,7 @@ class Discover
 
     ports.each do |p|
 
-      open = port_open?( host, p )
+      open = portOpen?( host, p )
 
       @log.debug( sprintf( 'Host: %s | Port: %s   - status %s', host, p, open ) )
 

@@ -231,7 +231,7 @@ class JolokiaDataRaiser
     result       = nil
 
     # if our jolokia proxy available?
-    if( ! port_open?( @jolokiaHost, @jolokiaPort ) )
+    if( ! portOpen?( @jolokiaHost, @jolokiaPort ) )
       @log.error( sprintf( 'The Jolokia Service (%s:%s) are not available', @jolokiaHost, @jolokiaPort ) )
     else
 
@@ -257,7 +257,7 @@ class JolokiaDataRaiser
       dest_port = "#{parts['port']}".strip
 
       # if our destination service (behind the jolokia proxy) available?
-      if( ! port_open?( dest_host, dest_port ) )
+      if( ! portOpen?( dest_host, dest_port ) )
 
         @log.error( sprintf( 'The Port %s on Host %s is not open, skip sending data', dest_port, dest_host ) )
       else
