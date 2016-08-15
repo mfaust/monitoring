@@ -4,6 +4,7 @@
 # ----------------------------------------------------------------------------
 
 require 'logger'
+require 'resolv-replace.rb'
 require 'net/http'
 require 'json'
 require 'uri'

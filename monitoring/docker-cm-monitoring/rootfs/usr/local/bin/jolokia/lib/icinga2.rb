@@ -8,6 +8,7 @@ require 'rest-client'
 require 'openssl'
 require 'logger'
 require 'json'
+require 'resolv-replace.rb'
 require 'net/http'
 require 'uri'
 

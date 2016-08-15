@@ -185,6 +185,7 @@ end
 
 def jolokia1()
 
+  require 'resolv-replace.rb'
   require 'net/http'
   require 'json'
   require 'uri'

@@ -175,6 +175,7 @@ class Monitor
 
 #       @log.debug( JSON.generate( hash1 ) )
 
+      require 'resolv-replace.rb'
       require 'net/http'
       require 'json'
       require 'uri'

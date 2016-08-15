@@ -11,6 +11,7 @@ require 'timeout'
 require 'logger'
 require 'json'
 require 'fileutils'
+require 'resolv-replace.rb'
 require 'net/http'
 require 'uri'
 

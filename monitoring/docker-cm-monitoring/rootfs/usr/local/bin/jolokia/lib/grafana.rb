@@ -11,6 +11,7 @@ require 'timeout'
 require 'logger'
 require 'json'
 require 'fileutils'
+require 'resolv-replace.rb'
 require 'net/http'
 require 'uri'
 
@@ -52,6 +53,8 @@ class Grafana
 
   # add dashboards for a host
   def addDashbards(host, recreate = false)
+
+    @log.debug("Adding dashboards for host #{host}, recreate: #{recreate}")
 
     if recreate
       deleteDashboards(host)
@@ -158,7 +161,6 @@ class Grafana
       @log.debug("Deleting Grafana Dashboards: #{dashboards}")
 
       dashboards.each do |i|
-        # TODO: Should be http://grafana:3000 but does not work, Error: Name or service not known
         uri = URI( sprintf( '%s/api/dashboards/%s', @grafanaURI, i ) ) #  "http://localhost/grafana/api/dashboards/#{i}")
         Net::HTTP.start(uri.host, uri.port) do |http|
           request = Net::HTTP::Delete.new(uri.path)
@@ -177,7 +179,6 @@ class Grafana
 
     @log.debug( sprintf( 'Search dashboards with tag %s', tag ) )
 
-    # TODO: Should be http://grafana:3000 but does not work, Error: Name or service not known
     uri = URI( sprintf( '%s/api/search?query=&tag=%s', @grafanaURI, tag ) )
 
     @log.debug("Grafana Uri: #{uri}")

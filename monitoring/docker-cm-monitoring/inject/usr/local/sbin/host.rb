@@ -1,5 +1,7 @@
 #!/usr/bin/ruby
 
+# OBSOLETE
+
 require 'sqlite3'
 require 'socket'
 require 'timeout'

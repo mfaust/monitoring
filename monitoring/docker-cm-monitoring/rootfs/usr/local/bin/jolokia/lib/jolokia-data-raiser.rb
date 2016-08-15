@@ -13,6 +13,7 @@ require 'uri'
 require 'socket'
 require 'timeout'
 require 'fileutils'
+require 'resolv-replace.rb'
 require 'net/http'
 
 require_relative 'jolokia_template'
