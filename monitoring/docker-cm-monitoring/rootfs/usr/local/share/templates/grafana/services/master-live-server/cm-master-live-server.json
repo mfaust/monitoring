@@ -3,10 +3,7 @@
     "id": null,
     "title": "%SHORTHOST% ContentServer MLS",
     "originalTitle": "%SHORTHOST% ContentServer MLS",
-    "tags": [
-      "%TAG%",
-      "coremedia"
-    ],
+    "tags": [ "%TAG%", "content-server", "coremedia" ],
     "style": "dark",
     "timezone": "browser",
     "editable": true,
@@ -22,7 +19,7 @@
             "content": "<h2><center>MLS</center></h2>",
             "editable": true,
             "error": false,
-            "id": 7,
+            "id": 11,
             "isNew": true,
             "links": [],
             "mode": "html",
@@ -40,6 +37,81 @@
         "height": "150px",
         "panels": [
           {
+            "title": "used percent",
+            "error": false,
+            "span": 1,
+            "editable": true,
+            "type": "singlestat",
+            "isNew": true,
+            "id": 12,
+            "targets": [
+              {
+                "target": "collectd.%HOST%.MLS-heap_memory.count-used_percent",
+                "refId": "A"
+              }
+            ],
+            "links": [],
+            "datasource": "graphite",
+            "maxDataPoints": 100,
+            "interval": null,
+            "cacheTimeout": null,
+            "format": "none",
+            "prefix": "",
+            "postfix": " %",
+            "nullText": null,
+            "valueMaps": [
+              {
+                "value": "null",
+                "op": "=",
+                "text": "N/A"
+              }
+            ],
+            "mappingTypes": [
+              {
+                "name": "value to text",
+                "value": 1
+              },
+              {
+                "name": "range to text",
+                "value": 2
+              }
+            ],
+            "rangeMaps": [
+              {
+                "from": "null",
+                "to": "null",
+                "text": "N/A"
+              }
+            ],
+            "mappingType": 1,
+            "nullPointMode": "connected",
+            "valueName": "current",
+            "prefixFontSize": "50%",
+            "valueFontSize": "80%",
+            "postfixFontSize": "50%",
+            "thresholds": "85,95",
+            "colorBackground": false,
+            "colorValue": false,
+            "colors": [
+              "rgba(50, 172, 45, 0.97)",
+              "rgba(237, 129, 40, 0.89)",
+              "rgba(245, 54, 54, 0.9)"
+            ],
+            "sparkline": {
+              "show": true,
+              "full": false,
+              "lineColor": "rgb(31, 120, 193)",
+              "fillColor": "rgba(31, 118, 189, 0.18)"
+            },
+            "gauge": {
+              "show": true,
+              "minValue": 0,
+              "maxValue": 100,
+              "thresholdMarkers": true,
+              "thresholdLabels": false
+            }
+          },
+          {
             "aliasColors": {},
             "bars": false,
             "datasource": "graphite",
@@ -52,97 +124,13 @@
               "threshold2": null,
               "threshold2Color": "rgba(234, 112, 112, 0.22)"
             },
-            "id": 8,
+            "id": 13,
             "isNew": true,
             "legend": {
               "alignAsTable": true,
               "avg": false,
               "current": true,
-              "max": true,
-              "min": true,
-              "rightSide": true,
-              "show": true,
-              "total": false,
-              "values": true
-            },
-            "lines": true,
-            "linewidth": 1,
-            "links": [],
-            "nullPointMode": "connected",
-            "percentage": false,
-            "pointradius": 5,
-            "points": false,
-            "renderer": "flot",
-            "seriesOverrides": [],
-            "span": 12,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
-              {
-                "hide": false,
-                "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MLS-heap_memory.*, '(.*)-', ''))",
-                "textEditor": false
-              }
-            ],
-            "timeFrom": null,
-            "timeShift": null,
-            "title": "MLS Heap Mem",
-            "tooltip": {
-              "msResolution": false,
-              "ordering": "alphabetical",
-              "shared": true,
-              "value_type": "cumulative"
-            },
-            "type": "graph",
-            "xaxis": {
-              "show": true
-            },
-            "yaxes": [
-              {
-                "format": "bytes",
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-              },
-              {
-                "format": "short",
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-              }
-            ]
-          }
-        ],
-        "title": "heap memory"
-      },
-      {
-        "collapse": false,
-        "editable": true,
-        "height": "150px",
-        "panels": [
-          {
-            "aliasColors": {},
-            "bars": false,
-            "datasource": "graphite",
-            "editable": true,
-            "error": false,
-            "fill": 1,
-            "grid": {
-              "threshold1": null,
-              "threshold1Color": "rgba(216, 200, 27, 0.27)",
-              "threshold2": null,
-              "threshold2Color": "rgba(234, 112, 112, 0.22)"
-            },
-            "id": 9,
-            "isNew": true,
-            "legend": {
-              "alignAsTable": true,
-              "avg": false,
-              "current": true,
-              "max": true,
+              "max": false,
               "min": false,
               "rightSide": true,
               "show": true,
@@ -158,24 +146,38 @@
             "points": false,
             "renderer": "flot",
             "seriesOverrides": [],
-            "span": 12,
+            "span": 11,
             "stack": false,
             "steppedLine": false,
             "targets": [
               {
+                "hide": false,
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MLS-heap_memory.count-max, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "hide": false,
+                "refId": "B",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MLS-heap_memory.count-committed, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "hide": false,
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MLS-perm_memory.*, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MLS-heap_memory.count-used, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
             "timeFrom": null,
             "timeShift": null,
-            "title": "Heap Mem",
+            "title": "Heap Memory",
             "tooltip": {
               "msResolution": false,
+              "ordering": "alphabetical",
               "shared": true,
               "value_type": "cumulative",
-              "ordering": "alphabetical"
+              "sort": 0
             },
             "type": "graph",
             "xaxis": {
@@ -194,9 +196,175 @@
                 "logBase": 1,
                 "max": null,
                 "min": null,
-                "show": true
+                "show": false
               }
-            ]
+            ],
+            "decimals": 2
+          }
+        ],
+        "title": "Heap Memory"
+      },
+      {
+        "collapse": false,
+        "editable": true,
+        "height": "150px",
+        "panels": [
+          {
+            "title": "percent used",
+            "error": false,
+            "span": 1,
+            "editable": true,
+            "type": "singlestat",
+            "isNew": true,
+            "id": 14,
+            "targets": [
+              {
+                "target": "collectd.%HOST%.MLS-perm_memory.count-used_percent",
+                "refId": "A"
+              }
+            ],
+            "links": [],
+            "datasource": "graphite",
+            "maxDataPoints": 100,
+            "interval": null,
+            "cacheTimeout": null,
+            "format": "none",
+            "prefix": "",
+            "postfix": " %",
+            "nullText": null,
+            "valueMaps": [
+              {
+                "value": "null",
+                "op": "=",
+                "text": "N/A"
+              }
+            ],
+            "mappingTypes": [
+              {
+                "name": "value to text",
+                "value": 1
+              },
+              {
+                "name": "range to text",
+                "value": 2
+              }
+            ],
+            "rangeMaps": [
+              {
+                "from": "null",
+                "to": "null",
+                "text": "N/A"
+              }
+            ],
+            "mappingType": 1,
+            "nullPointMode": "connected",
+            "valueName": "current",
+            "prefixFontSize": "50%",
+            "valueFontSize": "80%",
+            "postfixFontSize": "50%",
+            "thresholds": "90,95",
+            "colorBackground": false,
+            "colorValue": false,
+            "colors": [
+              "rgba(50, 172, 45, 0.97)",
+              "rgba(237, 129, 40, 0.89)",
+              "rgba(245, 54, 54, 0.9)"
+            ],
+            "sparkline": {
+              "show": true,
+              "full": false,
+              "lineColor": "rgb(31, 120, 193)",
+              "fillColor": "rgba(31, 118, 189, 0.18)"
+            },
+            "gauge": {
+              "show": true,
+              "minValue": 0,
+              "maxValue": 100,
+              "thresholdMarkers": true,
+              "thresholdLabels": false
+            }
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "editable": true,
+            "error": false,
+            "fill": 1,
+            "grid": {
+              "threshold1": null,
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2": null,
+              "threshold2Color": "rgba(234, 112, 112, 0.22)"
+            },
+            "id": 15,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "span": 11,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MLS-perm_memory.count-committed, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MLS-perm_memory.count-used, '(.*)-', ''))",
+                "textEditor": false
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "Heap Memory",
+            "tooltip": {
+              "msResolution": false,
+              "ordering": "alphabetical",
+              "shared": true,
+              "value_type": "cumulative",
+              "sort": 0
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "bytes",
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": false
+              }
+            ],
+            "decimals": 2
           }
         ],
         "title": "Perm Memory"
@@ -213,14 +381,15 @@
             "decimals": 0,
             "editable": true,
             "error": false,
-            "fill": 2,
+            "fill": 3,
             "grid": {
               "threshold1": null,
               "threshold1Color": "rgba(216, 200, 27, 0.27)",
               "threshold2": null,
-              "threshold2Color": "rgba(234, 112, 112, 0.22)"
+              "threshold2Color": "rgba(234, 112, 112, 0.22)",
+              "thresholdLine": false
             },
-            "id": 10,
+            "id": 16,
             "isNew": true,
             "legend": {
               "alignAsTable": true,
@@ -254,12 +423,97 @@
             ],
             "timeFrom": null,
             "timeShift": null,
-            "title": "MLS Query Pool",
+            "title": "Query Pool",
             "tooltip": {
               "msResolution": false,
               "ordering": "alphabetical",
               "shared": true,
-              "value_type": "cumulative"
+              "value_type": "cumulative",
+              "sort": 0
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "none",
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": false
+              }
+            ]
+          }
+        ],
+        "title": "Query Pool"
+      },
+      {
+        "collapse": false,
+        "editable": true,
+        "height": "200px",
+        "panels": [
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "editable": true,
+            "error": false,
+            "fill": 3,
+            "grid": {
+              "threshold1": null,
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2": null,
+              "threshold2Color": "rgba(234, 112, 112, 0.22)"
+            },
+            "id": 17,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "span": 12,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MLS-stats_resourcecache.*, '(.*)-', ''))",
+                "textEditor": false
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "Statistic Resourcecache",
+            "tooltip": {
+              "msResolution": false,
+              "ordering": "alphabetical",
+              "shared": true,
+              "value_type": "cumulative",
+              "sort": 0
             },
             "type": "graph",
             "xaxis": {
@@ -283,7 +537,7 @@
             ]
           }
         ],
-        "title": "query pool"
+        "title": "statistics"
       },
       {
         "collapse": false,
@@ -293,18 +547,17 @@
           {
             "aliasColors": {},
             "bars": false,
-            "datasource": null,
-            "decimals": 0,
+            "datasource": "graphite",
             "editable": true,
             "error": false,
-            "fill": 2,
+            "fill": 3,
             "grid": {
               "threshold1": null,
               "threshold1Color": "rgba(216, 200, 27, 0.27)",
               "threshold2": null,
               "threshold2Color": "rgba(234, 112, 112, 0.22)"
             },
-            "id": 11,
+            "id": 18,
             "isNew": true,
             "legend": {
               "alignAsTable": true,
@@ -338,12 +591,13 @@
             ],
             "timeFrom": null,
             "timeShift": null,
-            "title": "MLS statics Jobresult",
+            "title": "Statistic Jobresult",
             "tooltip": {
               "msResolution": false,
               "ordering": "alphabetical",
               "shared": true,
-              "value_type": "cumulative"
+              "value_type": "cumulative",
+              "sort": 0
             },
             "type": "graph",
             "xaxis": {
@@ -352,7 +606,6 @@
             "yaxes": [
               {
                 "format": "none",
-                "label": null,
                 "logBase": 1,
                 "max": null,
                 "min": null,
@@ -360,7 +613,6 @@
               },
               {
                 "format": "short",
-                "label": null,
                 "logBase": 1,
                 "max": null,
                 "min": null,
@@ -369,27 +621,29 @@
             ]
           }
         ],
-        "title": "statistics jobs"
+        "title": "statistics"
       },
       {
-        "collapse": false,
-        "editable": true,
+        "title": "Content Feeder",
         "height": "150px",
+        "editable": true,
+        "collapse": false,
         "panels": [
           {
             "aliasColors": {},
             "bars": false,
-            "datasource": null,
+            "datasource": "graphite",
+            "decimals": 0,
             "editable": true,
             "error": false,
-            "fill": 2,
+            "fill": 3,
             "grid": {
               "threshold1": null,
               "threshold1Color": "rgba(216, 200, 27, 0.27)",
               "threshold2": null,
               "threshold2Color": "rgba(234, 112, 112, 0.22)"
             },
-            "id": 12,
+            "id": 19,
             "isNew": true,
             "legend": {
               "alignAsTable": true,
@@ -417,33 +671,19 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "alias(collectd.%HOST%.MLS-stats_repository_document_creation.cm7_counter-sum, 'document creation')",
-                "textEditor": false
-              },
-              {
-                "refId": "B",
-                "target": "alias(collectd.%HOST%.MLS-stats_repository_document_rightchecks.cm7_counter-sum, 'document rightchecks')",
-                "textEditor": false
-              },
-              {
-                "refId": "C",
-                "target": "alias(collectd.%HOST%.MLS-stats_repository_folder_creation.cm7_counter-sum, 'folder creation')",
-                "textEditor": false
-              },
-              {
-                "refId": "D",
-                "target": "alias(collectd.%HOST%.MLS-stats_repository_folder_rightchecks_sum.cm7_counter-sum, 'folder rightchecks')",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CONTENT_FEEDER-server.*, '.*-', ''))",
                 "textEditor": false
               }
             ],
             "timeFrom": null,
             "timeShift": null,
-            "title": "MLS Statistics Repository",
+            "title": "MLS Feeder",
             "tooltip": {
               "msResolution": false,
               "ordering": "alphabetical",
               "shared": true,
-              "value_type": "cumulative"
+              "value_type": "cumulative",
+              "sort": 0
             },
             "type": "graph",
             "xaxis": {
@@ -452,7 +692,6 @@
             "yaxes": [
               {
                 "format": "none",
-                "label": null,
                 "logBase": 1,
                 "max": null,
                 "min": null,
@@ -460,7 +699,6 @@
               },
               {
                 "format": "short",
-                "label": null,
                 "logBase": 1,
                 "max": null,
                 "min": null,
@@ -468,12 +706,11 @@
               }
             ]
           }
-        ],
-        "title": "statistics repository"
+        ]
       }
     ],
     "time": {
-      "from": "now-1h",
+      "from": "now-3h",
       "to": "now"
     },
     "timepicker": {
@@ -490,12 +727,10 @@
         "5m",
         "15m",
         "1h",
-        "3h",
         "6h",
         "12h",
         "24h",
         "2d",
-        "5d",
         "7d",
         "30d"
       ]
@@ -506,9 +741,9 @@
     "annotations": {
       "list": []
     },
-    "refresh": "30s",
+    "refresh": "1m",
     "schemaVersion": 12,
-    "version": 8,
+    "version": 4,
     "links": []
   }
 }

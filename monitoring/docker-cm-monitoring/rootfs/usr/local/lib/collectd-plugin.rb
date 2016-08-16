@@ -80,7 +80,7 @@ class CollecdPlugin
     /x
 
     parts          = mbean.match( regex )
-    return sprintf( '%s_core', "#{parts['core']}".strip.tr( '. ', '' ).downcase )
+    return sprintf( 'core_%s', "#{parts['core']}".strip.tr( '. ', '' ).downcase )
 
   end
 
@@ -99,10 +99,14 @@ class CollecdPlugin
       service = 'WFS'
     when /^cae-live/
       service = 'CAE_LIVE'
+    when /^cae-preview/
+      service = 'CAE_PREV'
 #    when 'solr-master'
 #      service = 'SOLR_MASTER'
 #    when 'solr-slave'
 #      service = 'SOLR_SLAVE'
+    when 'content-feeder'
+      service = 'FEEDER_CONTENT'
     when 'caefeeder-live'
       service = 'FEEDER_LIVE'
     when 'caefeeder-preview'
@@ -641,7 +645,7 @@ class CollecdPlugin
 
       data.push( sprintf( format, @Host, @Service, solrCore, 'index_size', @interval, indexSize.to_s ) )
       data.push( sprintf( format, @Host, @Service, solrCore, 'index'     , @interval, indexVersion ) )
-      data.push( sprintf( format, @Host, @Service, solrCore, 'errors    ', @interval, errors ) )
+      data.push( sprintf( format, @Host, @Service, solrCore, 'errors'    , @interval, errors ) )
 
     end
 

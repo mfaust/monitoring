@@ -2,8 +2,7 @@
   "dashboard": {
     "id": null,
     "title": "%SHORTHOST% Delivery CAE",
-    "originalTitle": "%SHORTHOST% Delivery CAE",
-    "tags": [ "%TAG%", "coremedia" ],
+    "tags": [ "%TAG%", "cae", "coremedia" ],
     "style": "dark",
     "timezone": "browser",
     "editable": true,
@@ -16,25 +15,101 @@
         "height": "150px",
         "panels": [
           {
-            "aliasColors": {},
-            "bars": false,
+            "cacheTimeout": null,
+            "colorBackground": false,
+            "colorValue": false,
+            "colors": [
+              "rgba(50, 172, 45, 0.97)",
+              "rgba(237, 129, 40, 0.89)",
+              "rgba(245, 54, 54, 0.9)"
+            ],
             "datasource": "graphite",
             "editable": true,
             "error": false,
-            "fill": 1,
+            "format": "none",
+            "gauge": {
+              "maxValue": 100,
+              "minValue": 0,
+              "show": true,
+              "thresholdLabels": false,
+              "thresholdMarkers": true
+            },
+            "id": 1,
+            "interval": null,
+            "isNew": true,
+            "links": [],
+            "mappingType": 1,
+            "mappingTypes": [
+              {
+                "name": "value to text",
+                "value": 1
+              },
+              {
+                "name": "range to text",
+                "value": 2
+              }
+            ],
+            "maxDataPoints": 100,
+            "nullPointMode": "connected",
+            "nullText": null,
+            "postfix": " %",
+            "postfixFontSize": "70%",
+            "prefix": "",
+            "prefixFontSize": "50%",
+            "rangeMaps": [
+              {
+                "from": "null",
+                "text": "N/A",
+                "to": "null"
+              }
+            ],
+            "span": 1,
+            "sparkline": {
+              "fillColor": "rgba(31, 118, 189, 0.18)",
+              "full": false,
+              "lineColor": "rgb(31, 120, 193)",
+              "show": true
+            },
+            "targets": [
+              {
+                "refId": "A",
+                "target": "collectd.%HOST%.CAE_LIVE-heap_memory.count-used_percent"
+              }
+            ],
+            "thresholds": "85,93",
+            "title": "percent used",
+            "type": "singlestat",
+            "valueFontSize": "80%",
+            "valueMaps": [
+              {
+                "op": "=",
+                "text": "N/A",
+                "value": "null"
+              }
+            ],
+            "valueName": "current"
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "decimals": 2,
+            "editable": true,
+            "error": false,
+            "fill": 2,
             "grid": {
               "threshold1": null,
               "threshold1Color": "rgba(216, 200, 27, 0.27)",
               "threshold2": null,
               "threshold2Color": "rgba(234, 112, 112, 0.22)"
             },
-            "id": 1,
+            "id": 2,
             "isNew": true,
             "legend": {
               "alignAsTable": true,
               "avg": false,
               "current": true,
-              "max": true,
+              "max": false,
               "min": false,
               "rightSide": true,
               "show": true,
@@ -50,24 +125,35 @@
             "points": false,
             "renderer": "flot",
             "seriesOverrides": [],
-            "span": 12,
+            "span": 11,
             "stack": false,
             "steppedLine": false,
             "targets": [
               {
+                "refId": "B",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_LIVE-heap_memory.count-max, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_LIVE-heap_memory.count-committed, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_LIVE-heap_memory.*, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_LIVE-heap_memory.count-used, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
             "timeFrom": null,
             "timeShift": null,
-            "title": "Heap Mem",
+            "title": "Heap Memory",
             "tooltip": {
               "msResolution": false,
+              "ordering": "alphabetical",
               "shared": true,
-              "value_type": "cumulative",
-              "ordering": "alphabetical"
+              "sort": 0,
+              "value_type": "cumulative"
             },
             "type": "graph",
             "xaxis": {
@@ -99,104 +185,95 @@
         "height": "150px",
         "panels": [
           {
-            "aliasColors": {},
-            "bars": false,
+            "cacheTimeout": null,
+            "colorBackground": false,
+            "colorValue": false,
+            "colors": [
+              "rgba(50, 172, 45, 0.97)",
+              "rgba(237, 129, 40, 0.89)",
+              "rgba(245, 54, 54, 0.9)"
+            ],
             "datasource": "graphite",
             "editable": true,
             "error": false,
-            "fill": 1,
-            "grid": {
-              "threshold1": null,
-              "threshold1Color": "rgba(216, 200, 27, 0.27)",
-              "threshold2": null,
-              "threshold2Color": "rgba(234, 112, 112, 0.22)"
-            },
-            "id": 1,
-            "isNew": true,
-            "legend": {
-              "alignAsTable": true,
-              "avg": false,
-              "current": true,
-              "max": true,
-              "min": false,
-              "rightSide": true,
+            "format": "none",
+            "gauge": {
+              "maxValue": 100,
+              "minValue": 0,
               "show": true,
-              "total": false,
-              "values": true
+              "thresholdLabels": false,
+              "thresholdMarkers": true
             },
-            "lines": true,
-            "linewidth": 1,
+            "id": 3,
+            "interval": null,
+            "isNew": true,
             "links": [],
-            "nullPointMode": "connected",
-            "percentage": false,
-            "pointradius": 5,
-            "points": false,
-            "renderer": "flot",
-            "seriesOverrides": [],
-            "span": 12,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
+            "mappingType": 1,
+            "mappingTypes": [
               {
-                "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_LIVE-perm_memory.*, '(.*)-', ''))",
-                "textEditor": false
-              }
-            ],
-            "timeFrom": null,
-            "timeShift": null,
-            "title": "Heap Mem",
-            "tooltip": {
-              "msResolution": false,
-              "shared": true,
-              "value_type": "cumulative",
-              "ordering": "alphabetical"
-            },
-            "type": "graph",
-            "xaxis": {
-              "show": true
-            },
-            "yaxes": [
-              {
-                "format": "bytes",
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
+                "name": "value to text",
+                "value": 1
               },
               {
-                "format": "short",
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
+                "name": "range to text",
+                "value": 2
               }
-            ]
-          }
-        ],
-        "title": "Perm Memory"
-      },
-
-      {
-        "collapse": false,
-        "editable": true,
-        "height": "150px",
-        "panels": [
+            ],
+            "maxDataPoints": 100,
+            "nullPointMode": "connected",
+            "nullText": null,
+            "postfix": " %",
+            "postfixFontSize": "70%",
+            "prefix": "",
+            "prefixFontSize": "50%",
+            "rangeMaps": [
+              {
+                "from": "null",
+                "text": "N/A",
+                "to": "null"
+              }
+            ],
+            "span": 1,
+            "sparkline": {
+              "fillColor": "rgba(31, 118, 189, 0.18)",
+              "full": false,
+              "lineColor": "rgb(31, 120, 193)",
+              "show": true
+            },
+            "targets": [
+              {
+                "refId": "A",
+                "target": "collectd.%HOST%.CAE_LIVE-perm_memory.count-used_percent"
+              }
+            ],
+            "thresholds": "90,95",
+            "title": "percent used",
+            "type": "singlestat",
+            "valueFontSize": "80%",
+            "valueMaps": [
+              {
+                "op": "=",
+                "text": "N/A",
+                "value": "null"
+              }
+            ],
+            "valueName": "current"
+          },
           {
             "aliasColors": {},
             "bars": false,
             "datasource": "graphite",
-            "decimals": null,
+            "decimals": 2,
             "editable": true,
             "error": false,
-            "fill": 1,
+            "fill": 2,
             "grid": {
               "threshold1": null,
               "threshold1Color": "rgba(216, 200, 27, 0.27)",
               "threshold2": null,
               "threshold2Color": "rgba(234, 112, 112, 0.22)"
             },
-            "id": 15,
+            "id": 4,
             "isNew": true,
             "legend": {
               "alignAsTable": true,
@@ -218,24 +295,440 @@
             "points": false,
             "renderer": "flot",
             "seriesOverrides": [],
+            "span": 11,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_LIVE-perm_memory.count-committed, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_LIVE-perm_memory.count-used, '(.*)-', ''))",
+                "textEditor": false
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "Perm Memory",
+            "tooltip": {
+              "msResolution": false,
+              "ordering": "alphabetical",
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "bytes",
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": false
+              }
+            ]
+          }
+        ],
+        "title": "Perm Memory"
+      },
+      {
+        "collapse": false,
+        "editable": true,
+        "height": "150px",
+        "panels": [
+          {
+            "aliasColors": {},
+            "bars": false,
+            "cacheTimeout": "",
+            "datasource": "graphite",
+            "decimals": 2,
+            "editable": true,
+            "error": false,
+            "fill": 3,
+            "grid": {
+              "threshold1": null,
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2": null,
+              "threshold2Color": "rgba(234, 112, 112, 0.22)"
+            },
+            "id": 5,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "maxDataPoints": "",
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
             "span": 12,
             "stack": false,
             "steppedLine": false,
             "targets": [
               {
-                "hide": false,
-                "refId": "C",
-                "target": "alias(collectd.%HOST%.CAE_LIVE-blob_cache.cm7_counter-size, 'max')",
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_LIVE-gc_duration.count-duration, '(.*)-', ''))",
                 "textEditor": false
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "Garbage Collector Duration",
+            "tooltip": {
+              "msResolution": false,
+              "ordering": "alphabetical",
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "ms",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
               },
               {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ]
+          }
+        ],
+        "title": "Garbage Collector"
+      },
+      {
+        "collapse": false,
+        "editable": true,
+        "height": "150px",
+        "panels": [
+          {
+            "cacheTimeout": null,
+            "colorBackground": false,
+            "colorValue": false,
+            "colors": [
+              "rgba(50, 172, 45, 0.97)",
+              "rgba(237, 129, 40, 0.89)",
+              "rgba(245, 54, 54, 0.9)"
+            ],
+            "datasource": "graphite",
+            "editable": true,
+            "error": false,
+            "format": "none",
+            "gauge": {
+              "maxValue": 100,
+              "minValue": 0,
+              "show": true,
+              "thresholdLabels": false,
+              "thresholdMarkers": true
+            },
+            "id": 6,
+            "interval": null,
+            "isNew": true,
+            "links": [],
+            "mappingType": 1,
+            "mappingTypes": [
+              {
+                "name": "value to text",
+                "value": 1
+              },
+              {
+                "name": "range to text",
+                "value": 2
+              }
+            ],
+            "maxDataPoints": 100,
+            "nullPointMode": "connected",
+            "nullText": null,
+            "postfix": " %",
+            "postfixFontSize": "50%",
+            "prefix": "",
+            "prefixFontSize": "50%",
+            "rangeMaps": [
+              {
+                "from": "null",
+                "text": "N/A",
+                "to": "null"
+              }
+            ],
+            "span": 1,
+            "sparkline": {
+              "fillColor": "rgba(31, 118, 189, 0.18)",
+              "full": false,
+              "lineColor": "rgb(31, 120, 193)",
+              "show": true
+            },
+            "targets": [
+              {
                 "refId": "A",
-                "target": "alias(collectd.%HOST%.CAE_LIVE-blob_cache.cm7_counter-level, 'used')",
+                "target": "collectd.%HOST%.CAE_LIVE-heap_cache.count-used_percent"
+              }
+            ],
+            "thresholds": "85,95",
+            "title": "used percent",
+            "type": "singlestat",
+            "valueFontSize": "80%",
+            "valueMaps": [
+              {
+                "op": "=",
+                "text": "N/A",
+                "value": "null"
+              }
+            ],
+            "valueName": "current"
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "decimals": 2,
+            "editable": true,
+            "error": false,
+            "fill": 3,
+            "grid": {
+              "threshold1": null,
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2": null,
+              "threshold2Color": "rgba(234, 112, 112, 0.22)"
+            },
+            "id": 7,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "span": 11,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "alias(aliasSub(collectd.%HOST%.CAE_LIVE-heap_cache.count-size, '(.*)-', ''), 'max')",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "alias(collectd.blueprint.filecount-cm7-delivery-tomcat.bytes, 'filesystem')"
+                "target": "alias(aliasSub(collectd.%HOST%.CAE_LIVE-heap_cache.count-used, '(.*)-', ''), 'used')",
+                "textEditor": false
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "UAPI Cache",
+            "tooltip": {
+              "msResolution": false,
+              "ordering": "alphabetical",
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "bytes",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ]
+          }
+        ],
+        "title": "UAPI Cache"
+      },
+      {
+        "collapse": false,
+        "editable": true,
+        "height": "150px",
+        "panels": [
+          {
+            "cacheTimeout": null,
+            "colorBackground": false,
+            "colorValue": false,
+            "colors": [
+              "rgba(50, 172, 45, 0.97)",
+              "rgba(237, 129, 40, 0.89)",
+              "rgba(245, 54, 54, 0.9)"
+            ],
+            "datasource": "graphite",
+            "editable": true,
+            "error": false,
+            "format": "none",
+            "gauge": {
+              "maxValue": 100,
+              "minValue": 0,
+              "show": true,
+              "thresholdLabels": false,
+              "thresholdMarkers": true
+            },
+            "id": 10,
+            "interval": null,
+            "isNew": true,
+            "links": [],
+            "mappingType": 1,
+            "mappingTypes": [
+              {
+                "name": "value to text",
+                "value": 1
+              },
+              {
+                "name": "range to text",
+                "value": 2
+              }
+            ],
+            "maxDataPoints": 100,
+            "nullPointMode": "connected",
+            "nullText": null,
+            "postfix": " %",
+            "postfixFontSize": "50%",
+            "prefix": "",
+            "prefixFontSize": "50%",
+            "rangeMaps": [
+              {
+                "from": "null",
+                "text": "N/A",
+                "to": "null"
+              }
+            ],
+            "span": 1,
+            "sparkline": {
+              "fillColor": "rgba(31, 118, 189, 0.18)",
+              "full": false,
+              "lineColor": "rgb(31, 120, 193)",
+              "show": false
+            },
+            "targets": [
+              {
+                "refId": "A",
+                "target": "collectd.%HOST%.CAE_LIVE-blob_cache.count-used_percent"
+              }
+            ],
+            "thresholds": "85,90",
+            "title": "percent used",
+            "type": "singlestat",
+            "valueFontSize": "80%",
+            "valueMaps": [
+              {
+                "op": "=",
+                "text": "N/A",
+                "value": "null"
+              }
+            ],
+            "valueName": "current"
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "decimals": 2,
+            "editable": true,
+            "error": false,
+            "fill": 3,
+            "grid": {
+              "threshold1": null,
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2": null,
+              "threshold2Color": "rgba(234, 112, 112, 0.22)"
+            },
+            "id": 8,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "span": 11,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "B",
+                "target": "alias(collectd.%HOST%.CAE_LIVE-blob_cache.count-size, 'max')",
+                "textEditor": false
+              },
+              {
+                "refId": "A",
+                "target": "alias(collectd.%HOST%.CAE_LIVE-blob_cache.count-used, 'used')",
+                "textEditor": false
               }
             ],
             "timeFrom": null,
@@ -243,9 +736,10 @@
             "title": "BlobCache",
             "tooltip": {
               "msResolution": false,
+              "ordering": "alphabetical",
               "shared": true,
-              "value_type": "cumulative",
-              "ordering": "alphabetical"
+              "sort": 0,
+              "value_type": "cumulative"
             },
             "type": "graph",
             "xaxis": {
@@ -274,27 +768,29 @@
       {
         "collapse": false,
         "editable": true,
-        "height": "150px",
+        "height": "200px",
         "panels": [
           {
             "aliasColors": {},
             "bars": false,
-            "datasource": null,
+            "datasource": "graphite",
             "editable": true,
             "error": false,
-            "fill": 2,
+            "fill": 1,
             "grid": {
               "threshold1": null,
               "threshold1Color": "rgba(216, 200, 27, 0.27)",
               "threshold2": null,
               "threshold2Color": "rgba(234, 112, 112, 0.22)"
             },
-            "id": 18,
+            "id": 9,
             "isNew": true,
             "legend": {
               "alignAsTable": true,
               "avg": false,
               "current": true,
+              "hideEmpty": false,
+              "hideZero": false,
               "max": false,
               "min": false,
               "rightSide": true,
@@ -317,23 +813,45 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "alias(collectd.%HOST%.CAE_LIVE-heap_cache.cm7_counter-level, 'used')",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_LIVE-content_beans.count-evaluated, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "alias(collectd.%HOST%.CAE_LIVE-heap_cache.cm7_counter-size, 'max')",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_LIVE-content_beans.count-evicted, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_LIVE-content_beans.count-inserted, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "D",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_LIVE-content_beans.count-level, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "E",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_LIVE-content_beans.count-removed, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "hide": true,
+                "refId": "F",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_LIVE-content_beans.count-capacity, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
             "timeFrom": null,
             "timeShift": null,
-            "title": "UAPI Cache",
+            "title": "Content Beans",
             "tooltip": {
               "msResolution": false,
+              "ordering": "alphabetical",
               "shared": true,
-              "value_type": "cumulative",
-              "ordering": "alphabetical"
+              "sort": 0,
+              "value_type": "cumulative"
             },
             "type": "graph",
             "xaxis": {
@@ -341,7 +859,7 @@
             },
             "yaxes": [
               {
-                "format": "bytes",
+                "format": "short",
                 "label": null,
                 "logBase": 1,
                 "max": null,
@@ -354,22 +872,98 @@
                 "logBase": 1,
                 "max": null,
                 "min": null,
-                "show": false
+                "show": true
               }
             ]
           }
         ],
-        "title": "UAPI Cache"
+        "title": "CAE Content Beans"
       },
       {
         "collapse": false,
         "editable": true,
-        "height": "150px",
+        "height": "100px",
         "panels": [
+          {
+            "cacheTimeout": null,
+            "colorBackground": false,
+            "colorValue": false,
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(237, 129, 40, 0.89)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "datasource": "graphite",
+            "editable": true,
+            "error": false,
+            "format": "none",
+            "gauge": {
+              "maxValue": 100,
+              "minValue": 0,
+              "show": false,
+              "thresholdLabels": false,
+              "thresholdMarkers": true
+            },
+            "id": 11,
+            "interval": null,
+            "isNew": true,
+            "links": [],
+            "mappingType": 1,
+            "mappingTypes": [
+              {
+                "name": "value to text",
+                "value": 1
+              },
+              {
+                "name": "range to text",
+                "value": 2
+              }
+            ],
+            "maxDataPoints": 100,
+            "nullPointMode": "connected",
+            "nullText": null,
+            "postfix": "",
+            "postfixFontSize": "50%",
+            "prefix": "",
+            "prefixFontSize": "50%",
+            "rangeMaps": [
+              {
+                "from": "null",
+                "text": "N/A",
+                "to": "null"
+              }
+            ],
+            "span": 1,
+            "sparkline": {
+              "fillColor": "rgba(31, 118, 189, 0.18)",
+              "full": false,
+              "lineColor": "rgb(31, 120, 193)",
+              "show": false
+            },
+            "targets": [
+              {
+                "refId": "A",
+                "target": "collectd.%HOST%.CAE_LIVE-su_sessions.count-sessions"
+              }
+            ],
+            "thresholds": "",
+            "title": "Lightweight Sessions",
+            "type": "singlestat",
+            "valueFontSize": "80%",
+            "valueMaps": [
+              {
+                "op": "=",
+                "text": "N/A",
+                "value": "null"
+              }
+            ],
+            "valueName": "avg"
+          },
           {
             "aliasColors": {},
             "bars": false,
-            "datasource": null,
+            "datasource": "graphite",
+            "decimals": 0,
             "editable": true,
             "error": false,
             "fill": 3,
@@ -379,14 +973,14 @@
               "threshold2": null,
               "threshold2Color": "rgba(234, 112, 112, 0.22)"
             },
-            "id": 17,
+            "id": 12,
             "isNew": true,
             "legend": {
               "alignAsTable": true,
               "avg": false,
               "current": true,
-              "max": true,
-              "min": true,
+              "max": false,
+              "min": false,
               "rightSide": true,
               "show": true,
               "total": false,
@@ -401,24 +995,24 @@
             "points": false,
             "renderer": "flot",
             "seriesOverrides": [],
-            "span": 12,
+            "span": 11,
             "stack": false,
             "steppedLine": false,
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_LIVE-threading.*, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_LIVE-su_sessions.count-sessions, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
             "timeFrom": null,
             "timeShift": null,
-            "title": "Threads",
+            "title": "Lightweight Sessions",
             "tooltip": {
               "msResolution": false,
               "shared": true,
-              "value_type": "cumulative",
-              "ordering": "alphabetical"
+              "sort": 0,
+              "value_type": "cumulative"
             },
             "type": "graph",
             "xaxis": {
@@ -439,126 +1033,13 @@
                 "logBase": 1,
                 "max": null,
                 "min": null,
-                "show": true
+                "show": false
               }
             ]
           }
         ],
-        "title": "Tomcat Threads"
-      },
-      {
-      "collapse": false,
-      "editable": true,
-      "height": "200px",
-      "panels": [
-        {
-          "aliasColors": {},
-          "bars": false,
-          "datasource": "graphite",
-          "editable": true,
-          "error": false,
-          "fill": 1,
-          "grid": {
-            "threshold1": null,
-            "threshold1Color": "rgba(216, 200, 27, 0.27)",
-            "threshold2": null,
-            "threshold2Color": "rgba(234, 112, 112, 0.22)"
-          },
-          "id": 16,
-          "isNew": true,
-          "legend": {
-            "alignAsTable": true,
-            "avg": false,
-            "current": true,
-            "hideEmpty": false,
-            "hideZero": false,
-            "max": false,
-            "min": false,
-            "rightSide": true,
-            "show": true,
-            "total": false,
-            "values": true
-          },
-          "lines": true,
-          "linewidth": 1,
-          "links": [],
-          "nullPointMode": "connected",
-          "percentage": false,
-          "pointradius": 5,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "span": 12,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "refId": "A",
-              "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_LIVE-content_beans.cm7_counter-evaluated, '(.*)-', ''))",
-              "textEditor": false
-            },
-            {
-              "refId": "B",
-              "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_LIVE-content_beans.cm7_counter-evicted, '(.*)-', ''))",
-              "textEditor": false
-            },
-            {
-              "refId": "C",
-              "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_LIVE-content_beans.cm7_counter-inserted, '(.*)-', ''))",
-              "textEditor": false
-            },
-            {
-              "refId": "D",
-              "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_LIVE-content_beans.cm7_counter-level, '(.*)-', ''))",
-              "textEditor": false
-            },
-            {
-              "refId": "E",
-              "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_LIVE-content_beans.cm7_counter-removed, '(.*)-', ''))",
-              "textEditor": false
-            },
-            {
-              "hide": true,
-              "refId": "F",
-              "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_LIVE-content_beans.cm7_counter-capacity, '(.*)-', ''))",
-              "textEditor": false
-            }
-          ],
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "Content Beans",
-          "tooltip": {
-            "msResolution": false,
-            "shared": true,
-            "value_type": "cumulative",
-            "ordering": "alphabetical"
-          },
-          "type": "graph",
-          "xaxis": {
-            "show": true
-          },
-          "yaxes": [
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            }
-          ]
-        }
-      ],
-      "title": "CAE Content Beans"
-    }
+        "title": "New row"
+      }
     ],
     "time": {
       "from": "now-3h",
@@ -592,9 +1073,10 @@
     "annotations": {
       "list": []
     },
-    "refresh": "30s",
+    "refresh": "1m",
     "schemaVersion": 12,
-    "version": 4,
-    "links": []
+    "version": 12,
+    "links": [],
+    "gnetId": null
   }
 }

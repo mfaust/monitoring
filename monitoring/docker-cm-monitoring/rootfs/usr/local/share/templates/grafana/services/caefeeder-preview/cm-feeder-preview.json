@@ -108,7 +108,7 @@
                 "value": "null"
               }
             ],
-            "valueName": "avg"
+            "valueName": "current"
           },
           {
             "aliasColors": {},
@@ -278,7 +278,7 @@
                 "value": "null"
               }
             ],
-            "valueName": "avg"
+            "valueName": "current"
           },
           {
             "aliasColors": {},
@@ -678,7 +678,7 @@
             ],
             "mappingType": 1,
             "nullPointMode": "connected",
-            "valueName": "avg",
+            "valueName": "current",
             "prefixFontSize": "50%",
             "valueFontSize": "80%",
             "postfixFontSize": "50%",

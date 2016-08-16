@@ -172,7 +172,7 @@
             "attribute" : "errors,isMaster,isSlave,requests,medianRequestTime,indexVersion,indexSize,generation"
           }, {
             "mbean": "solr/%CORE%:type=queryResultCache,id=org.apache.solr.search.LRUCache",
-            "attribute" : "cumulative_evictions,cumulative_hitratio,cumulative_hits,cumulative_inserts,cumulative_lookups,description,,evictions,hitratio,hits,inserts,lookups,size,warmupTime"
+            "attribute" : "cumulative_evictions,cumulative_hitratio,cumulative_hits,cumulative_inserts,cumulative_lookups,description,evictions,hitratio,hits,inserts,lookups,size,warmupTime"
           }
         ]
       }

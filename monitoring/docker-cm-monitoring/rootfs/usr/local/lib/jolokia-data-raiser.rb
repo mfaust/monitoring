@@ -16,7 +16,6 @@ require 'fileutils'
 # require 'resolv-replace.rb'
 require 'net/http'
 
-require_relative 'jolokia_template'
 require_relative 'tools'
 
 # -----------------------------------------------------------------------------
@@ -46,7 +45,7 @@ class JolokiaDataRaiser
     file.sync = true
     @log = Logger.new( file, 'weekly', 1024000 )
 #    @log = Logger.new( STDOUT )
-    @log.level = Logger::INFO
+    @log.level = Logger::DEBUG
     @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
     @log.formatter = proc do |severity, datetime, progname, msg|
       "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
@@ -226,6 +225,35 @@ class JolokiaDataRaiser
   end
 
 
+  def jolokiaTemplate( params = {} )
+
+    mbean       = params['mbean']
+    server_name = params['server_name']
+    server_port = params['server_port']
+
+    target = {
+      "type" => "read",
+      "mbean" => "#{mbean}",
+      "target" => {
+        "url" => "service:jmx:rmi:///jndi/rmi://#{server_name}:#{server_port}/jmxrmi",
+      }
+    }
+
+    attributes = []
+
+    if( params['attributes'] != nil )
+      params['attributes'].split(',').each do |t|
+        attributes.push( t.to_s )
+      end
+
+      target['attribute'] = attributes
+    end
+
+    return target
+
+  end
+
+
   # create an bulkset over all checks
   def createBulkCheck( host, data )
 
@@ -253,7 +281,7 @@ class JolokiaDataRaiser
           'server_port' => port
         }
 
-        template = JolokiaTemplate.singleTemplate( properties )
+        template = self.jolokiaTemplate( properties )
 
         result.push( template )
 
@@ -472,56 +500,46 @@ class JolokiaDataRaiser
 
     # read Application Configuration
     # they define all standard checks
-    if( @jolokiaApplications.to_s == '' )
+    @log.debug( 'read defines of Application Properties' )
 
-      @log.debug( 'read defines of Application Properties' )
+    begin
 
-      begin
+      if( File.exist?( @appConfigFile ) )
+        @config      = JSON.parse( File.read( @appConfigFile ) )
 
-        if( File.exist?( @appConfigFile ) )
-          @config      = JSON.parse( File.read( @appConfigFile ) )
-
-          if( @config['jolokia']['applications'] != nil )
-            @jolokiaApplications = @config['jolokia']['applications']
-          end
-
-        else
-          @log.error( sprintf( 'Application Config File %s not found!', @appConfigFile ) )
-          exit 1
+        if( @config['jolokia']['applications'] != nil )
+          @jolokiaApplications = @config['jolokia']['applications']
         end
-      rescue JSON::ParserError => e
 
-        @log.error( 'wrong result (no json)')
-        @log.error( e )
+      else
+        @log.error( sprintf( 'Application Config File %s not found!', @appConfigFile ) )
         exit 1
       end
-    else
-      @log.debug( 'jolokiaApplications is set' )
+    rescue JSON::ParserError => e
+
+      @log.error( 'wrong result (no json)')
+      @log.error( e )
+      exit 1
     end
 
     # read Service Configuration
     #
-    if( @serviceConfig.to_s == '' )
+    @log.debug( 'read defines off Services Properties' )
 
-      @log.debug( 'read defines off Services Properties' )
+    begin
 
-      begin
-
-        if( File.exist?( @serviceConfigFile ) )
-          @serviceConfig      = JSON.parse( File.read( @serviceConfigFile ) )
-        else
-          @log.error( sprintf( 'Config File %s not found!', @serviceConfigFile ) )
-          exit 1
-        end
-
-      rescue JSON::ParserError => e
-
-        @log.error( 'wrong result (no json)')
-        @log.error( e )
+      if( File.exist?( @serviceConfigFile ) )
+        @serviceConfig      = JSON.parse( File.read( @serviceConfigFile ) )
+      else
+        @log.error( sprintf( 'Config File %s not found!', @serviceConfigFile ) )
         exit 1
       end
-    else
-      @log.debug( 'serviceConfig is set' )
+
+    rescue JSON::ParserError => e
+
+      @log.error( 'wrong result (no json)')
+      @log.error( e )
+      exit 1
     end
 
     # ----------------------------------------------------------------------------------------

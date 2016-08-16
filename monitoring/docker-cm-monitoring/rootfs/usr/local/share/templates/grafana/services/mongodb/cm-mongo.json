@@ -3,10 +3,7 @@
     "id": null,
     "title": "%SHORTHOST% MongoDB",
     "originalTitle": "%SHORTHOST% MongoDB",
-    "tags": [
-      "%TAG%",
-      "coremedia"
-    ],
+    "tags": [ "%TAG%", "mongodb", "coremedia" ],
     "style": "dark",
     "timezone": "browser",
     "editable": true,
@@ -21,10 +18,10 @@
           {
             "aliasColors": {},
             "bars": false,
-            "datasource": null,
+            "datasource": "graphite",
             "editable": true,
             "error": false,
-            "fill": 2,
+            "fill": 3,
             "grid": {
               "threshold1": null,
               "threshold1Color": "rgba(216, 200, 27, 0.27)",
@@ -52,25 +49,36 @@
             "pointradius": 5,
             "points": false,
             "renderer": "flot",
-            "seriesOverrides": [],
+            "seriesOverrides": [
+              {
+                "alias": "out",
+                "transform": "negative-Y"
+              }
+            ],
             "span": 12,
             "stack": false,
             "steppedLine": false,
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(stdev(collectd.%HOST%.MONGO-io.*, 5, 0.1), '(.*)-', ''))",
+                "target": "aliasByMetric(alias(perSecond(aliasSub(collectd.%HOST%.MONGODB-network.bytes-out, '(.*)-', '')), 'out'))",
+                "textEditor": false
+              },
+              {
+                "refId": "B",
+                "target": "aliasByMetric(alias(perSecond(aliasSub(collectd.%HOST%.MONGODB-network.bytes-in, '(.*)-', '')), 'in'))",
                 "textEditor": false
               }
             ],
             "timeFrom": null,
             "timeShift": null,
-            "title": "I/O",
+            "title": "Network I/O",
             "tooltip": {
               "msResolution": false,
               "ordering": "alphabetical",
               "shared": true,
-              "value_type": "cumulative"
+              "value_type": "cumulative",
+              "sort": 0
             },
             "type": "graph",
             "xaxis": {
@@ -78,7 +86,7 @@
             },
             "yaxes": [
               {
-                "format": "short",
+                "format": "bytes",
                 "label": null,
                 "logBase": 1,
                 "max": null,
@@ -91,9 +99,10 @@
                 "logBase": 1,
                 "max": null,
                 "min": null,
-                "show": true
+                "show": false
               }
-            ]
+            ],
+            "decimals": 2
           }
         ],
         "title": "I/O"
@@ -106,7 +115,7 @@
           {
             "aliasColors": {},
             "bars": false,
-            "datasource": null,
+            "datasource": "graphite",
             "editable": true,
             "error": false,
             "fill": 2,
@@ -144,18 +153,24 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(stdev(collectd.%HOST%.MONGO-bytes.*, 5, 0.1), '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MONGODB-heap_memory.count-size, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "B",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MONGODB-heap_memory.count-used, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
             "timeFrom": null,
             "timeShift": null,
-            "title": "Traffic",
+            "title": "Heap Memory",
             "tooltip": {
               "msResolution": false,
               "ordering": "alphabetical",
               "shared": true,
-              "value_type": "cumulative"
+              "value_type": "cumulative",
+              "sort": 0
             },
             "type": "graph",
             "xaxis": {
@@ -191,7 +206,7 @@
           {
             "aliasColors": {},
             "bars": false,
-            "datasource": null,
+            "datasource": "graphite",
             "editable": true,
             "error": false,
             "fill": 2,
@@ -229,7 +244,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(stdev(collectd.%HOST%.MONGO-commands.*, 3, 0.1), '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(stdev(collectd.%HOST%.MONGODB-commands.*, 3, 0.1), '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -240,7 +255,8 @@
               "msResolution": false,
               "ordering": "alphabetical",
               "shared": true,
-              "value_type": "cumulative"
+              "value_type": "cumulative",
+              "sort": 0
             },
             "type": "graph",
             "xaxis": {
@@ -269,27 +285,113 @@
         "title": "commands"
       },
       {
-        "title": "connections",
+        "collapse": false,
+        "editable": true,
         "height": "150px",
+        "panels": [
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "editable": true,
+            "error": false,
+            "fill": 2,
+            "grid": {
+              "threshold1": null,
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2": null,
+              "threshold2Color": "rgba(234, 112, 112, 0.22)"
+            },
+            "id": 5,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "span": 12,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MONGODB-connections.*, '(.*)-', ''))",
+                "textEditor": false
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "Connections",
+            "tooltip": {
+              "msResolution": false,
+              "ordering": "alphabetical",
+              "shared": true,
+              "value_type": "cumulative",
+              "sort": 0
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "none",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": false
+              }
+            ]
+          }
+        ],
+        "title": "connections"
+      },
+      {
+        "title": "New row",
+        "height": "200px",
         "editable": true,
         "collapse": false,
         "panels": [
           {
-            "title": "Connections",
+            "title": "Asserts",
             "error": false,
             "span": 12,
             "editable": true,
             "type": "graph",
             "isNew": true,
-            "id": 5,
+            "id": 6,
             "targets": [
               {
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MONGO-connections.*, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MONGODB-asserts.*, '(.*)-', ''))",
                 "refId": "A",
-                "textEditor": true
+                "textEditor": false
               }
             ],
-            "datasource": null,
+            "datasource": "graphite",
             "renderer": "flot",
             "yaxes": [
               {
@@ -319,7 +421,7 @@
               "threshold2Color": "rgba(234, 112, 112, 0.22)"
             },
             "lines": true,
-            "fill": 2,
+            "fill": 3,
             "linewidth": 1,
             "points": false,
             "pointradius": 5,
@@ -334,15 +436,15 @@
               "current": true,
               "total": false,
               "avg": false,
-              "rightSide": true,
-              "alignAsTable": true
+              "alignAsTable": true,
+              "rightSide": true
             },
             "nullPointMode": "connected",
             "steppedLine": false,
             "tooltip": {
               "value_type": "cumulative",
               "shared": true,
-              "ordering": "alphabetical",
+              "sort": 0,
               "msResolution": false
             },
             "timeFrom": null,
@@ -387,7 +489,7 @@
     "annotations": {
       "list": []
     },
-    "refresh": "30s",
+    "refresh": "1m",
     "schemaVersion": 12,
     "version": 0,
     "links": []
