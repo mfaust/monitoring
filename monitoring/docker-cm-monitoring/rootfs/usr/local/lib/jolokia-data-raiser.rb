@@ -3,7 +3,7 @@
 # 12.08.2016 - Bodo Schulz
 #
 #
-# v1.0.16
+# v1.0.17
 
 # -----------------------------------------------------------------------------
 
@@ -60,8 +60,8 @@ class JolokiaDataRaiser
     @jolokiaApplications = nil
     @serviceConfig       = nil
 
-    version              = '1.0.16'
-    date                 = '2016-08-12'
+    version              = '1.0.17'
+    date                 = '2016-08-16'
 
     @log.info( '-----------------------------------------------------------------' )
     @log.info( ' JolokiaDataRaiser' )
@@ -104,6 +104,48 @@ class JolokiaDataRaiser
 
   end
 
+
+  def mongoDBData( host, data = {} )
+
+    port = data['port'] ? data['port'] : nil
+    if( port != nil )
+
+      serverUrl  = sprintf( 'http://%s:%s/serverStatus', host, port )
+
+      uri        = URI.parse( serverUrl )
+      http       = Net::HTTP.new( uri.host, uri.port )
+      request    = Net::HTTP::Get.new( uri.request_uri )
+      request.add_field('Content-Type', 'application/json')
+
+      begin
+
+        response     = http.request( request )
+
+      rescue Timeout::Error, Errno::ECONNREFUSED, Errno::EINVAL, Errno::ECONNRESET, EOFError, Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError => error
+
+        @log.error( error )
+
+        case error
+        when Errno::ECONNREFUSED
+          @log.error( 'connection refused' )
+        when Errno::ECONNRESET
+          @log.error( 'connection reset' )
+        end
+      else
+
+        dir_path        = sprintf( '%s/%s', @cacheDirectory, host )
+        save_file       = sprintf( 'bulk_%s.result', port )
+
+        hash            = Hash.new()
+        array           = Array.new()
+        hash['mongodb'] =  JSON.parse( response.body )
+        array.push( hash )
+
+        File.open( sprintf( '%s/%s', dir_path, save_file ) , 'w' ) {|f| f.write( JSON.pretty_generate( array ) ) }
+      end
+
+    end
+  end
 
   # merge hashes of configured (cm-service.json) and discovered data (discovery.json)
   def createHostConfig( data )
@@ -505,6 +547,13 @@ class JolokiaDataRaiser
 #        @log.debug( file )
 
         data = JSON.parse( File.read( file ) )
+
+        # TODO
+        # create data for mySQL, Postgres
+        #
+        if( data['mongodb'] )
+          self.mongoDBData( h, data['mongodb'] )
+        end
 
         @log.debug( 'create Hostconfiguration' )
         d = self.createHostConfig( data )

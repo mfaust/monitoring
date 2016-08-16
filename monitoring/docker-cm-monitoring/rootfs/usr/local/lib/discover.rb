@@ -37,7 +37,7 @@ class Discover
     @log = Logger.new( file, 'weekly', 1024000 )
 #    @log = Logger.new( STDOUT )
     @log.level = Logger::DEBUG
-    @log.datetime_format = "%Y-%m-%d %H:%M:%S"
+    @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
     @log.formatter = proc do |severity, datetime, progname, msg|
       "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
     end

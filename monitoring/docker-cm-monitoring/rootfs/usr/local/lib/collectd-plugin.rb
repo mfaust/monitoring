@@ -1,9 +1,9 @@
 #!/usr/bin/ruby
 #
-# 12.08.2016 - Bodo Schulz
+# 16.08.2016 - Bodo Schulz
 #
 #
-# v1.0.1
+# v1.0.2
 
 # -----------------------------------------------------------------------------
 
@@ -33,7 +33,7 @@ class CollecdPlugin
     @log = Logger.new( file, 'weekly', 1024000 )
 #    @log = Logger.new( STDOUT )
     @log.level = Logger::INFO
-    @log.datetime_format = "%Y-%m-%d %H:%M:%S"
+    @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
     @log.formatter = proc do |severity, datetime, progname, msg|
       "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
     end
@@ -43,8 +43,8 @@ class CollecdPlugin
       FileUtils.chown( 'nobody', 'nobody', logFile )
     end
 
-    version              = '1.0.1'
-    date                 = '2016-08-12'
+    version              = '1.0.2'
+    date                 = '2016-08-16'
 
     @log.info( '-----------------------------------------------------------------' )
     @log.info( ' CollectdPlugin' )
@@ -111,6 +111,163 @@ class CollecdPlugin
 
     return service.tr('-', '_').upcase
 
+  end
+
+
+  def ParseResult_mongoDB( value = {} )
+
+    format = 'PUTVAL %s/%s-%s/count-%s interval=%s N:%s'
+    data   = []
+
+    if( value != nil )
+
+      uptime         = value['uptime']
+
+      asserts        = value['asserts']       ? value['asserts']       : nil
+      connections    = value['connections']   ? value['connections']   : nil
+      network        = value['network']       ? value['network']       : nil
+      opcounters     = value['opcounters']    ? value['opcounters']    : nil
+      tcmalloc       = value['tcmalloc']      ? value['tcmalloc']      : nil
+      storageEngine  = value['storageEngine'] ? value['storageEngine'] : nil
+      metrics        = value['metrics']       ? value['metrics']       : nil
+
+      data.push( sprintf( 'PUTVAL %s/%s-%s/%s interval=%s N:%s', @Host, @Service, 'uptime', 'uptime'   , @interval, uptime ) )
+
+      if( asserts != nil )
+        regular   = asserts['regular']   ? asserts['regular'] : nil
+        warning   = asserts['warning']   ? asserts['warning'] : nil
+        message   = asserts['msg']       ? asserts['msg'] : nil
+        user      = asserts['user']      ? asserts['user'] : nil
+        rollovers = asserts['rollovers'] ? asserts['rollovers'] : nil
+
+        data.push( sprintf( format, @Host, @Service, 'asserts', 'regular'   , @interval, regular ) )
+        data.push( sprintf( format, @Host, @Service, 'asserts', 'warning'   , @interval, warning ) )
+        data.push( sprintf( format, @Host, @Service, 'asserts', 'message'   , @interval, message ) )
+        data.push( sprintf( format, @Host, @Service, 'asserts', 'user'      , @interval, user ) )
+        data.push( sprintf( format, @Host, @Service, 'asserts', 'rollovers' , @interval, rollovers ) )
+      end
+
+      if( connections != nil )
+        current        = connections['current']       ? connections['current'] : nil
+        available      = connections['available']     ? connections['available'] : nil
+        totalCreated   = connections['totalCreated']  ? connections['totalCreated'] : nil
+
+        if( totalCreated )
+          totalCreated = totalCreated['$numberLong']  ? totalCreated['$numberLong'] : nil
+        end
+
+        data.push( sprintf( format, @Host, @Service, 'connections', 'current'     , @interval, current ) )
+        data.push( sprintf( format, @Host, @Service, 'connections', 'available'   , @interval, available ) )
+        data.push( sprintf( format, @Host, @Service, 'connections', 'totalCreated', @interval, totalCreated ) )
+      end
+
+      if( network != nil )
+        bytesIn   = network['bytesIn']      ? network['bytesIn']      : nil
+        bytesOut  = network['bytesOut']     ? network['bytesOut']     : nil
+        requests  = network['numRequests']  ? network['numRequests']  : nil
+        bytesIn   = bytesIn['$numberLong']  ? bytesIn['$numberLong']  : nil
+        bytesOut  = bytesOut['$numberLong'] ? bytesOut['$numberLong'] : nil
+        requests  = requests['$numberLong'] ? requests['$numberLong'] : nil
+
+        data.push( sprintf( 'PUTVAL %s/%s-%s/%s interval=%s N:%s', @Host, @Service, 'network', 'bytes-in', @interval, bytesIn ) )
+        data.push( sprintf( 'PUTVAL %s/%s-%s/%s interval=%s N:%s', @Host, @Service, 'network', 'bytes-out', @interval, bytesOut ) )
+        data.push( sprintf( 'PUTVAL %s/%s-%s/%s interval=%s N:%s', @Host, @Service, 'network', 'total_requests' , @interval, requests ) )
+      end
+
+      if( opcounters != nil )
+        insert  = opcounters['insert']  ? opcounters['insert']  : nil
+        query   = opcounters['query']   ? opcounters['query']   : nil
+        update  = opcounters['update']  ? opcounters['update']  : nil
+        delete  = opcounters['delete']  ? opcounters['delete']  : nil
+        getmore = opcounters['getmore'] ? opcounters['getmore'] : nil
+        command = opcounters['command'] ? opcounters['command'] : nil
+
+        data.push( sprintf( format, @Host, @Service, 'opcounters', 'insert'  , @interval, insert ) )
+        data.push( sprintf( format, @Host, @Service, 'opcounters', 'query'   , @interval, query ) )
+        data.push( sprintf( format, @Host, @Service, 'opcounters', 'update'  , @interval, update ) )
+        data.push( sprintf( format, @Host, @Service, 'opcounters', 'delete'  , @interval, delete ) )
+        data.push( sprintf( format, @Host, @Service, 'opcounters', 'getmore' , @interval, getmore ) )
+        data.push( sprintf( format, @Host, @Service, 'opcounters', 'command' , @interval, command ) )
+      end
+
+      if( tcmalloc != nil )
+        generic = tcmalloc['generic']  ? tcmalloc['generic'] : nil
+        malloc  = tcmalloc['tcmalloc'] ? tcmalloc['tcmalloc'] : nil
+
+        heapSize         = generic['heap_size']               ? generic['heap_size'] : nil
+        heapUsed         = generic['current_allocated_bytes'] ? generic['current_allocated_bytes'] : nil # Bytes in use by application
+
+        percent   = ( 100 * heapUsed / heapSize )
+
+        pageMapFree      = tcmalloc['pageheap_free_bytes']              ? tcmalloc['pageheap_free_bytes']              : nil  # Bytes in page heap freelist
+        centralCacheFree = tcmalloc['central_cache_free_bytes' ]        ? tcmalloc['central_cache_free_bytes' ]        : nil  # Bytes in central cache freelist
+        transferCacheFee = tcmalloc['transfer_cache_free_bytes']        ? tcmalloc['transfer_cache_free_bytes']        : nil  # Bytes in transfer cache freelist
+        threadCacheSize  = tcmalloc['current_total_thread_cache_bytes'] ? tcmalloc['current_total_thread_cache_bytes'] : nil  # Bytes in thread cache freelists
+        threadCacheFree  = tcmalloc['thread_cache_free_bytes']          ? tcmalloc['thread_cache_free_bytes']          : nil  #
+#        maxThreadCache   = tcmalloc['max_total_thread_cache_bytes']     ? tcmalloc['max_total_thread_cache_bytes']     : nil  #
+#        maxThreadCache   = maxThreadCache['$numberLong']                ? maxThreadCache['$numberLong']                : nil  #
+
+        data.push( sprintf( format, @Host, @Service, 'heap_memory', 'size' , @interval, heapSize ) )
+        data.push( sprintf( format, @Host, @Service, 'heap_memory', 'used' , @interval, heapUsed ) )
+        data.push( sprintf( format, @Host, @Service, 'heap_memory', 'used_percent', @interval, percent ) )
+
+        data.push( sprintf( format, @Host, @Service, 'cache', 'central_free' , @interval, centralCacheFree ) )
+        data.push( sprintf( format, @Host, @Service, 'cache', 'transfer_free', @interval, transferCacheFee ) )
+#        data.push( sprintf( format, @Host, @Service, 'cache', 'thread_size'  , @interval, maxThreadCache ) )
+        data.push( sprintf( format, @Host, @Service, 'cache', 'thread_used'  , @interval, threadCacheSize ) )
+        data.push( sprintf( format, @Host, @Service, 'cache', 'thread_free'  , @interval, threadCacheFree ) )
+
+      end
+
+      if( storageEngine != nil )
+
+        storageEngine  = storageEngine['name'] ? storageEngine['name'] : nil
+
+        if( storageEngine != nil )
+
+          storage = value[storageEngine] ? value[storageEngine] : nil
+
+          if( storage != nil )
+
+            blockManager = storage['block-manager'] ? storage['block-manager']  : nil
+            connection   = storage['connection']    ? storage['connection']     : nil
+
+            storageBytesRead           = blockManager['bytes read']         ? blockManager['bytes read']         : nil
+            storageBytesWritten        = blockManager['bytes written']      ? blockManager['bytes written']      : nil
+            storageBlocksRead          = blockManager['blocks read']        ? blockManager['blocks read']        : nil
+            storageBlocksWritten       = blockManager['blocks written']     ? blockManager['blocks written']     : nil
+
+            storageConnectionIORead    = connection['total read I/Os']      ? connection['total read I/Os']      : nil
+            storageConnectionIOWrite   = connection['total write I/Os']     ? connection['total write I/Os']     : nil
+            storageConnectionFilesOpen = connection['files currently open'] ? connection['files currently open'] : nil
+
+            data.push( sprintf( 'PUTVAL %s/%s-%s/%s interval=%s N:%s', @Host, @Service, 'bytes', 'bytes-read', @interval , storageBytesRead ) )
+            data.push( sprintf( 'PUTVAL %s/%s-%s/%s interval=%s N:%s', @Host, @Service, 'bytes', 'bytes-write', @interval, storageBytesWritten ) )
+            data.push( sprintf( format, @Host, @Service, 'blocks', 'read'  , @interval, storageBlocksRead ) )
+            data.push( sprintf( format, @Host, @Service, 'blocks', 'write' , @interval, storageBlocksWritten ) )
+
+            data.push( sprintf( 'PUTVAL %s/%s-%s/%s interval=%s N:%s', @Host, @Service, 'io', 'io_octets-read', @interval , storageConnectionIORead ) )
+            data.push( sprintf( 'PUTVAL %s/%s-%s/%s interval=%s N:%s', @Host, @Service, 'io', 'io_octets-write', @interval, storageConnectionIOWrite ) )
+
+            data.push( sprintf( format, @Host, @Service, 'files', 'open', @interval, storageConnectionFilesOpen ) )
+          end
+        end
+      end
+
+      if( metrics != nil )
+        ['authenticate','buildInfo','createIndexes','delete','drop','find','findAndModify','insert','listCollections','mapReduce','renameCollection','update'].each do |m|
+
+          cmd = metrics['commands'][m] ? metrics['commands'][m] : nil
+          if( cmd != nil )
+            d = cmd['total']['$numberLong'] ? cmd['total']['$numberLong']  : nil
+            data.push( sprintf( format, @Host, @Service, 'commands', m , @interval, d ) )
+          end
+        end
+      end
+
+      return data
+
+    end
   end
 
 
@@ -730,6 +887,8 @@ class CollecdPlugin
               result.each do |k,v|
 
                 case k
+                when 'mongodb'
+                  graphiteOutput.push( self.ParseResult_mongoDB( v ) )
                 when 'Memory'
                   graphiteOutput.push( self.ParseResult_Memory( v ) )
                 when 'Threading'
