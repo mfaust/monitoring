@@ -51,6 +51,19 @@ class Grafana
   end
 
 
+  def shortHostname( hostname )
+
+    if( ! isIp?( hostname ) )
+      shortHostname   = hostname.split( '.' ).first
+    else
+      shortHostname   = hostname
+    end
+
+    return shortHostname
+
+  end
+
+
   # add dashboards for a host
   def addDashbards(host, recreate = false)
 
@@ -60,13 +73,9 @@ class Grafana
       deleteDashboards(host)
     end
 
-    if( ! isIp?( host ) )
-      @shortHostname   = host.split( '.' ).first
-    else
-      @shortHostname   = host
-    end
-
+    @shortHostname   = self.shortHostname( host )
     @grafanaHostname = host.gsub( '.', '-' )
+
     discovery_file   = sprintf( '%s/%s/discovery.json'     , @cacheDirectory, host )
     merged_host_file = sprintf( '%s/%s/mergedHostData.json', @cacheDirectory, host )
 
@@ -74,6 +83,8 @@ class Grafana
     discovery_json = getJsonFromFile( discovery_file )
 
     if( discovery_json != nil )
+
+      self.generateOverviewTemplate()
 
       services       = discovery_json.keys
 
@@ -115,7 +126,7 @@ class Grafana
 
       @log.debug( "Found Template paths: #{template_paths} and aggregation template paths #{aggregation_map}" )
 
-      generateAggregatedTemplates( aggregation_map )
+#      generateAggregatedTemplates( aggregation_map )
       generateServiceTemplates( template_paths )
     end
   end
@@ -271,6 +282,14 @@ class Grafana
   end
 
 
+  def generateOverviewTemplate()
+
+    tpl  = self.getJsonFromFile( sprintf( '%s/cm-overview.json', @templateDirectory ) )
+
+    self.sendTemplateToGrafana( JSON.generate( tpl ) )
+
+  end
+
   def generateAggregatedTemplates(aggregated_templates)
 
     aggregated_templates.each do |service_type, fragments|
@@ -333,6 +352,7 @@ class Grafana
 
 
   def sendTemplateToGrafana(tpl_file)
+
     tpl_file.gsub! '%HOST%', @grafanaHostname
     tpl_file.gsub! '%SHORTHOST%', @shortHostname
     tpl_file.gsub! '%TAG%', @shortHostname
