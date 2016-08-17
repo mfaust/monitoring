@@ -3,7 +3,7 @@
     "id": null,
     "title": "%SHORTHOST% User Changes Webapp",
     "originalTitle": "%SHORTHOST% User Changes Webapp",
-    "tags": [ "%TAG%", "coremedia" ],
+    "tags": [ "%TAG%" ],
     "style": "dark",
     "timezone": "browser",
     "editable": true,

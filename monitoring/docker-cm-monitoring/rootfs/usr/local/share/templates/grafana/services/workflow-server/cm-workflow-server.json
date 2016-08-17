@@ -3,7 +3,7 @@
     "id": null,
     "title": "%SHORTHOST% ContentServer WFS",
     "originalTitle": "%SHORTHOST% ContentServer WFS",
-    "tags": [ "%TAG%", "content-server", "coremedia" ],
+    "tags": [ "%TAG%", "content-server" ],
     "style": "dark",
     "timezone": "browser",
     "editable": true,

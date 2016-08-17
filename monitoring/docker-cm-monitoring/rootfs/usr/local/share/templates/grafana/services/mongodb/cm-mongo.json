@@ -3,7 +3,7 @@
     "id": null,
     "title": "%SHORTHOST% MongoDB",
     "originalTitle": "%SHORTHOST% MongoDB",
-    "tags": [ "%TAG%", "mongodb", "coremedia" ],
+    "tags": [ "%TAG%", "mongodb" ],
     "style": "dark",
     "timezone": "browser",
     "editable": true,

@@ -2,7 +2,7 @@
   "dashboard": {
     "id": null,
     "title": "%SHORTHOST% Delivery CAE",
-    "tags": [ "%TAG%", "cae", "coremedia" ],
+    "tags": [ "%TAG%", "cae" ],
     "style": "dark",
     "timezone": "browser",
     "editable": true,

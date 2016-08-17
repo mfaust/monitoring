@@ -3,7 +3,7 @@
     "id": null,
     "title": "%SHORTHOST% Elastic Worker",
     "originalTitle": "%SHORTHOST% Elastic Worker",
-    "tags": [ "%TAG%", "coremedia" ],
+    "tags": [ "%TAG%" ],
     "style": "dark",
     "timezone": "browser",
     "editable": true,

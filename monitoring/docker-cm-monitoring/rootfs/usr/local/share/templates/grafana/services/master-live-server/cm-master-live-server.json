@@ -3,7 +3,7 @@
     "id": null,
     "title": "%SHORTHOST% ContentServer MLS",
     "originalTitle": "%SHORTHOST% ContentServer MLS",
-    "tags": [ "%TAG%", "content-server", "coremedia" ],
+    "tags": [ "%TAG%", "content-server" ],
     "style": "dark",
     "timezone": "browser",
     "editable": true,

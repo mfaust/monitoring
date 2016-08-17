@@ -3,7 +3,7 @@
     "id": null,
     "title": "%SHORTHOST% Content Feeder",
     "originalTitle": "%SHORTHOST% Content Feeder",
-    "tags": [ "%TAG%", "feeder", "coremedia" ],
+    "tags": [ "%TAG%", "feeder" ],
     "style": "dark",
     "timezone": "browser",
     "editable": true,

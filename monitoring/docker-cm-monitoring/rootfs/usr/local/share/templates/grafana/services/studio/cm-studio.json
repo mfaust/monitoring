@@ -3,7 +3,7 @@
     "id": null,
     "title": "%SHORTHOST% Studio",
     "originalTitle": "%SHORTHOST% Studio",
-    "tags": [ "%TAG%", "studio", "coremedia" ],
+    "tags": [ "%TAG%", "studio" ],
     "style": "dark",
     "timezone": "browser",
     "editable": true,

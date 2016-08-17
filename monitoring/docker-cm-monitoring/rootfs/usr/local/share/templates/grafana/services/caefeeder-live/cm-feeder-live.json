@@ -2,7 +2,7 @@
   "dashboard": {
     "id": null,
     "title": "%SHORTHOST% Feeder Live",
-    "tags": [ "%TAG%", "feeder", "coremedia" ],
+    "tags": [ "%TAG%", "feeder" ],
     "style": "dark",
     "timezone": "browser",
     "editable": true,
