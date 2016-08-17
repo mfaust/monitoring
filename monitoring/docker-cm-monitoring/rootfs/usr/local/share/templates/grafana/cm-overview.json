@@ -86,7 +86,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.CMS-heap_memory.count-used_percent"
+                "target": "collectd.%HOST%.CMS-Memory-heap_memory.count-used_percent"
               }
             ],
             "thresholds": "85,95",
@@ -161,7 +161,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.CMS-perm_memory.count-used_percent"
+                "target": "collectd.%HOST%.CMS-Memory-perm_memory.count-used_percent"
               }
             ],
             "thresholds": "85,95",
@@ -187,7 +187,7 @@
             "id": 4,
             "targets": [
               {
-                "target": "collectd.%HOST%.CMS-gc_duration.count-duration",
+                "target": "collectd.%HOST%.CMS-GCParNew-gc_duration.count-duration",
                 "refId": "A"
               }
             ],
@@ -331,7 +331,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.MLS-heap_memory.count-used_percent"
+                "target": "collectd.%HOST%.MLS-Memory-heap_memory.count-used_percent"
               }
             ],
             "thresholds": "85,95",
@@ -406,7 +406,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.MLS-perm_memory.count-used_percent"
+                "target": "collectd.%HOST%.MLS-Memory-perm_memory.count-used_percent"
               }
             ],
             "thresholds": "85,95",
@@ -432,7 +432,7 @@
             "id": 8,
             "targets": [
               {
-                "target": "collectd.%HOST%.MLS-gc_duration.count-duration",
+                "target": "collectd.%HOST%.MLS-GCParNew-gc_duration.count-duration",
                 "refId": "A"
               }
             ],
@@ -507,7 +507,7 @@
             "id": 9,
             "targets": [
               {
-                "target": "collectd.%HOST%.MLS-server.count-sequence_number",
+                "target": "collectd.%HOST%.MLS-Server-server.count-sequence_number",
                 "refId": "A",
                 "hide": false
               }
@@ -652,7 +652,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.RLS-heap_memory.count-used_percent"
+                "target": "collectd.%HOST%.RLS-Memory-heap_memory.count-used_percent"
               }
             ],
             "thresholds": "85,95",
@@ -727,7 +727,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.RLS-perm_memory.count-used_percent"
+                "target": "collectd.%HOST%.RLS-Memory-perm_memory.count-used_percent"
               }
             ],
             "thresholds": "85,95",
@@ -753,7 +753,7 @@
             "id": 13,
             "targets": [
               {
-                "target": "collectd.%HOST%.RLS-gc_duration.count-duration",
+                "target": "collectd.%HOST%.RLS-GCParNew-gc_duration.count-duration",
                 "refId": "A"
               }
             ],
@@ -828,7 +828,7 @@
             "id": 14,
             "targets": [
               {
-                "target": "collectd.%HOST%.RLS-server.count-sequence_number",
+                "target": "collectd.%HOST%.RLS-Server-server.count-sequence_number",
                 "refId": "A",
                 "hide": false
               }
@@ -904,12 +904,12 @@
             "id": 15,
             "targets": [
               {
-                "target": "collectd.%HOST%.MLS-server.count-sequence_number",
+                "target": "collectd.%HOST%.MLS-Server-server.count-sequence_number",
                 "refId": "A",
                 "hide": true
               },
               {
-                "target": "collectd.%HOST%.RLS-server.count-sequence_number",
+                "target": "collectd.%HOST%.RLS-Server-server.count-sequence_number",
                 "refId": "B",
                 "hide": true
               },
@@ -1064,7 +1064,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.WFS-heap_memory.count-used_percent"
+                "target": "collectd.%HOST%.WFS-Memory-heap_memory.count-used_percent"
               }
             ],
             "thresholds": "85,95",
@@ -1139,7 +1139,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.WFS-perm_memory.count-used_percent"
+                "target": "collectd.%HOST%.WFS-Memory-perm_memory.count-used_percent"
               }
             ],
             "thresholds": "85,95",
@@ -1165,7 +1165,7 @@
             "id": 19,
             "targets": [
               {
-                "target": "collectd.%HOST%.WFS-gc_duration.count-duration",
+                "target": "collectd.%HOST%.WFS-GCParNew-gc_duration.count-duration",
                 "refId": "A"
               }
             ],
@@ -1309,7 +1309,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.FEEDER_LIVE-heap_memory.count-used_percent"
+                "target": "collectd.%HOST%.FEEDER_LIVE-Memory-heap_memory.count-used_percent"
               }
             ],
             "thresholds": "85,95",
@@ -1384,7 +1384,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.FEEDER_LIVE-perm_memory.count-used_percent"
+                "target": "collectd.%HOST%.FEEDER_LIVE-Memory-perm_memory.count-used_percent"
               }
             ],
             "thresholds": "85,95",
@@ -1410,7 +1410,7 @@
             "id": 23,
             "targets": [
               {
-                "target": "collectd.%HOST%.FEEDER_LIVE-gc_duration.count-duration",
+                "target": "collectd.%HOST%.FEEDER_LIVE-GCParNew-gc_duration.count-duration",
                 "refId": "A"
               }
             ],
@@ -1485,7 +1485,7 @@
             "id": 24,
             "targets": [
               {
-                "target": "collectd.%HOST%.FEEDER_LIVE-heap_cache.count-used_percent",
+                "target": "collectd.%HOST%.FEEDER_LIVE-CapConnection-heap_cache.count-used_percent",
                 "refId": "A"
               }
             ],
@@ -1560,7 +1560,7 @@
             "id": 25,
             "targets": [
               {
-                "target": "collectd.%HOST%.FEEDER_LIVE-feeder.count-diff",
+                "target": "collectd.%HOST%.FEEDER_LIVE-ProactiveEngine-feeder.count-diff",
                 "refId": "A"
               }
             ],
@@ -1704,7 +1704,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.FEEDER_PREV-heap_memory.count-used_percent"
+                "target": "collectd.%HOST%.FEEDER_PREV-Memory-heap_memory.count-used_percent"
               }
             ],
             "thresholds": "85,95",
@@ -1779,7 +1779,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.FEEDER_PREV-perm_memory.count-used_percent"
+                "target": "collectd.%HOST%.FEEDER_PREV-Memory-perm_memory.count-used_percent"
               }
             ],
             "thresholds": "85,95",
@@ -1805,7 +1805,7 @@
             "id": 29,
             "targets": [
               {
-                "target": "collectd.%HOST%.FEEDER_PREV-gc_duration.count-duration",
+                "target": "collectd.%HOST%.FEEDER_PREV-GCParNew-gc_duration.count-duration",
                 "refId": "A"
               }
             ],
@@ -1880,7 +1880,7 @@
             "id": 30,
             "targets": [
               {
-                "target": "collectd.%HOST%.FEEDER_PREV-heap_cache.count-used_percent",
+                "target": "collectd.%HOST%.FEEDER_PREV-CapConnection-heap_cache.count-used_percent",
                 "refId": "A"
               }
             ],
@@ -1955,7 +1955,7 @@
             "id": 31,
             "targets": [
               {
-                "target": "collectd.%HOST%.FEEDER_PREV-feeder.count-diff",
+                "target": "collectd.%HOST%.FEEDER_PREV-ProactiveEngine-feeder.count-diff",
                 "refId": "A"
               }
             ],
@@ -2099,7 +2099,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.CAE_LIVE-heap_memory.count-used_percent"
+                "target": "collectd.%HOST%.CAE_LIVE-Memory-heap_memory.count-used_percent"
               }
             ],
             "thresholds": "85,95",
@@ -2174,7 +2174,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.CAE_LIVE-perm_memory.count-used_percent"
+                "target": "collectd.%HOST%.CAE_LIVE-Memory-perm_memory.count-used_percent"
               }
             ],
             "thresholds": "85,95",
@@ -2200,7 +2200,7 @@
             "id": 35,
             "targets": [
               {
-                "target": "collectd.%HOST%.CAE_LIVE-gc_duration.count-duration",
+                "target": "collectd.%HOST%.CAE_LIVE-GCParNew-gc_duration.count-duration",
                 "refId": "A"
               }
             ],
@@ -2275,7 +2275,7 @@
             "id": 36,
             "targets": [
               {
-                "target": "collectd.%HOST%.CAE_LIVE-heap_cache.count-used_percent",
+                "target": "collectd.%HOST%.CAE_LIVE-CapConnection-heap_cache.count-used_percent",
                 "refId": "A"
               }
             ],
@@ -2350,7 +2350,7 @@
             "id": 37,
             "targets": [
               {
-                "target": "collectd.%HOST%.CAE_LIVE-blob_cache.count-used_percent",
+                "target": "collectd.%HOST%.CAE_LIVE-CapConnection-blob_cache.count-used_percent",
                 "refId": "A"
               }
             ],
@@ -2494,7 +2494,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.CAE_PREV-heap_memory.count-used_percent"
+                "target": "collectd.%HOST%.CAE_PREV-Memory-heap_memory.count-used_percent"
               }
             ],
             "thresholds": "85,95",
@@ -2569,7 +2569,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.CAE_PREV-perm_memory.count-used_percent"
+                "target": "collectd.%HOST%.CAE_PREV-Memory-perm_memory.count-used_percent"
               }
             ],
             "thresholds": "85,95",
@@ -2595,7 +2595,7 @@
             "id": 41,
             "targets": [
               {
-                "target": "collectd.%HOST%.CAE_PREV-gc_duration.count-duration",
+                "target": "collectd.%HOST%.CAE_PREV-GCParNew-gc_duration.count-duration",
                 "refId": "A"
               }
             ],
@@ -2670,7 +2670,7 @@
             "id": 42,
             "targets": [
               {
-                "target": "collectd.%HOST%.CAE_PREV-heap_cache.count-used_percent",
+                "target": "collectd.%HOST%.CAE_PREV-CapConnection-heap_cache.count-used_percent",
                 "refId": "A"
               }
             ],
@@ -2745,7 +2745,7 @@
             "id": 43,
             "targets": [
               {
-                "target": "collectd.%HOST%.CAE_PREV-blob_cache.count-used_percent",
+                "target": "collectd.%HOST%.CAE_PREV-CapConnection-blob_cache.count-used_percent",
                 "refId": "A"
               }
             ],
