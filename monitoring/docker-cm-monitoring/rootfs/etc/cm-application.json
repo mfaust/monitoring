@@ -99,7 +99,16 @@
         ]
       },
       "elastic-worker": {},
-      "user-changes": {},
+      "user-changes": {
+        "description": "The Content Feeder",
+        "metrics": [
+          {
+            "name": "CapConnection",
+            "mbean": "com.coremedia:type=CapConnection,application=user-changes",
+            "attribute": "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions"
+          }
+        ]
+      },
       "content-feeder": {
         "description": "The Content Feeder",
         "metrics": [
@@ -107,6 +116,10 @@
             "name": "feeder",
             "mbean": "com.coremedia:application=contentfeeder,type=Feeder",
             "attribute": "State,Uptime,CurrentPendingDocuments,IndexAverageBatchSendingTime,IndexDocuments,IndexContentDocuments,IndexBytes,PendingEvents,PendingFolders"
+          }, {
+            "name": "CapConnection",
+            "mbean": "com.coremedia:type=CapConnection,application=contentfeeder",
+            "attribute": "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions"
           }
         ]
       },
@@ -133,7 +146,7 @@
         "description": "",
         "metrics": [
           {
-            "name": "",
+            "name": "CapConnection",
             "mbean": "com.coremedia:type=CapConnection,application=CoreMedia-Asset-Management-Adobe-Drive-Server",
             "attribute": "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions"
           }
@@ -172,6 +185,9 @@
             "attribute" : "errors,isMaster,isSlave,requests,medianRequestTime,indexVersion,indexSize,generation"
           }, {
             "mbean": "solr/%CORE%:type=queryResultCache,id=org.apache.solr.search.LRUCache",
+            "attribute" : "cumulative_evictions,cumulative_hitratio,cumulative_hits,cumulative_inserts,cumulative_lookups,description,evictions,hitratio,hits,inserts,lookups,size,warmupTime"
+          }, {
+            "mbean": "solr/%CORE%:type=documentCache,id=org.apache.solr.search.LRUCache",
             "attribute" : "cumulative_evictions,cumulative_hitratio,cumulative_hits,cumulative_inserts,cumulative_lookups,description,evictions,hitratio,hits,inserts,lookups,size,warmupTime"
           }
         ]

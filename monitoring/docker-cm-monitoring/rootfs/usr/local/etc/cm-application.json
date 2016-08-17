@@ -107,6 +107,10 @@
             "name": "feeder",
             "mbean": "com.coremedia:application=contentfeeder,type=Feeder",
             "attribute": "State,Uptime,CurrentPendingDocuments,IndexAverageBatchSendingTime,IndexDocuments,IndexContentDocuments,IndexBytes,PendingEvents,PendingFolders"
+          }, {
+            "name": "CapConnection",
+            "mbean": "com.coremedia:type=CapConnection,application=contentfeeder",
+            "attribute": "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions"
           }
         ]
       },
