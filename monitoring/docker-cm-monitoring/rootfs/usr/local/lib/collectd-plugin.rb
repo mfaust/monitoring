@@ -580,6 +580,7 @@ class CollecdPlugin
 
     value  = data['value'] ? data['value'] : nil
     format = 'PUTVAL %s/%s-%s/count-%s interval=%s N:%s'
+    format2 = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
     data   = []
 
     if( value != nil )
@@ -608,6 +609,20 @@ class CollecdPlugin
       data.push( sprintf( format, @Host, @Service, 'heap_cache', 'used_percent', @interval, heapCachePercent ) )
 
       data.push( sprintf( format, @Host, @Service, 'su_sessions', 'sessions'   , @interval, suSessions ) )
+
+      ###########################################
+      mbean = 'CapConnection'
+      data.push( sprintf( format2, @Host, @Service, mbean, 'blob_cache', 'size'        , @interval, blobCacheSize ) )
+      data.push( sprintf( format2, @Host, @Service, mbean, 'blob_cache', 'used'        , @interval, blobCacheLevel ) )
+      data.push( sprintf( format2, @Host, @Service, mbean, 'blob_cache', 'fault'       , @interval, blobCacheFaults ) )
+      data.push( sprintf( format2, @Host, @Service, mbean, 'blob_cache', 'used_percent', @interval, blobCachePercent ) )
+
+      data.push( sprintf( format2, @Host, @Service, mbean, 'heap_cache', 'size'        , @interval, heapCacheSize ) )
+      data.push( sprintf( format2, @Host, @Service, mbean, 'heap_cache', 'used'        , @interval, heapCacheLevel ) )
+      data.push( sprintf( format2, @Host, @Service, mbean, 'heap_cache', 'fault'       , @interval, heapCacheFaults ) )
+      data.push( sprintf( format2, @Host, @Service, mbean, 'heap_cache', 'used_percent', @interval, heapCachePercent ) )
+
+      data.push( sprintf( format2, @Host, @Service, mbean, 'su_sessions', 'sessions'   , @interval, suSessions ) )
 
     else
 

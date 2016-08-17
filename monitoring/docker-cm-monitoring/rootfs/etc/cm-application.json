@@ -98,9 +98,17 @@
           }
         ]
       },
-      "elastic-worker": {},
+      "elastic-worker": {
+        "description": "The Elastic Worker",
+        "metrics": [
+          {
+            "name": "CapConnection",
+            "mbean": "com.coremedia:type=CapConnection,application=elastic-worker",
+            "attribute": "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions"
+          }
+        ]},
       "user-changes": {
-        "description": "The Content Feeder",
+        "description": "The User Changes Webapp",
         "metrics": [
           {
             "name": "CapConnection",

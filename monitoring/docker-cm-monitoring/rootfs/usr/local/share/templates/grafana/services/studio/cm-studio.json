@@ -1,9 +1,9 @@
 {
   "dashboard": {
     "id": null,
-    "title": "%SHORTHOST% Preview CAE",
-    "originalTitle": "%SHORTHOST% Preview CAE",
-    "tags": [ "%TAG%", "cae", "coremedia" ],
+    "title": "%SHORTHOST% Studio",
+    "originalTitle": "%SHORTHOST% Studio",
+    "tags": [ "%TAG%", "studio", "coremedia" ],
     "style": "dark",
     "timezone": "browser",
     "editable": true,
@@ -74,7 +74,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.CAE_PREV-heap_memory.count-used_percent"
+                "target": "collectd.%HOST%.STUDIO-heap_memory.count-used_percent"
               }
             ],
             "thresholds": "85,93",
@@ -132,17 +132,17 @@
             "targets": [
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_PREV-heap_memory.count-max, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.STUDIO-heap_memory.count-max, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_PREV-heap_memory.count-committed, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.STUDIO-heap_memory.count-committed, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_PREV-heap_memory.count-used, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.STUDIO-heap_memory.count-used, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -244,7 +244,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.CAE_PREV-perm_memory.count-used_percent"
+                "target": "collectd.%HOST%.STUDIO-perm_memory.count-used_percent"
               }
             ],
             "thresholds": "90,95",
@@ -302,12 +302,12 @@
             "targets": [
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_PREV-perm_memory.count-committed, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.STUDIO-perm_memory.count-committed, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_PREV-perm_memory.count-used, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.STUDIO-perm_memory.count-used, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -394,7 +394,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_PREV-gc_duration.count-duration, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.STUDIO-gc_duration.count-duration, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -498,7 +498,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.CAE_PREV-heap_cache.count-used_percent"
+                "target": "collectd.%HOST%.STUDIO-CapConnection-heap_cache.count-used_percent"
               }
             ],
             "thresholds": "85,95",
@@ -556,12 +556,12 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "alias(aliasSub(collectd.%HOST%.CAE_PREV-heap_cache.count-size, '(.*)-', ''), 'max')",
+                "target": "alias(aliasSub(collectd.%HOST%.STUDIO-CapConnection-heap_cache.count-size, '(.*)-', ''), 'max')",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "alias(aliasSub(collectd.%HOST%.CAE_PREV-heap_cache.count-used, '(.*)-', ''), 'used')",
+                "target": "alias(aliasSub(collectd.%HOST%.STUDIO-CapConnection-heap_cache.count-used, '(.*)-', ''), 'used')",
                 "textEditor": false
               }
             ],
@@ -665,7 +665,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.CAE_PREV-blob_cache.count-used_percent"
+                "target": "collectd.%HOST%.STUDIO-CapConnection-blob_cache.count-used_percent"
               }
             ],
             "thresholds": "85,90",
@@ -723,12 +723,12 @@
             "targets": [
               {
                 "refId": "B",
-                "target": "alias(collectd.%HOST%.CAE_PREV-blob_cache.count-size, 'max')",
+                "target": "alias(collectd.%HOST%.STUDIO-CapConnection-blob_cache.count-size, 'max')",
                 "textEditor": false
               },
               {
                 "refId": "A",
-                "target": "alias(collectd.%HOST%.CAE_PREV-blob_cache.count-used, 'used')",
+                "target": "alias(collectd.%HOST%.STUDIO-CapConnection-blob_cache.count-used, 'used')",
                 "textEditor": false
               }
             ],
@@ -765,120 +765,6 @@
           }
         ],
         "title": "Blob Cache"
-      },
-      {
-        "collapse": false,
-        "editable": true,
-        "height": "200px",
-        "panels": [
-          {
-            "aliasColors": {},
-            "bars": false,
-            "datasource": "graphite",
-            "editable": true,
-            "error": false,
-            "fill": 1,
-            "grid": {
-              "threshold1": null,
-              "threshold1Color": "rgba(216, 200, 27, 0.27)",
-              "threshold2": null,
-              "threshold2Color": "rgba(234, 112, 112, 0.22)"
-            },
-            "id": 10,
-            "isNew": true,
-            "legend": {
-              "alignAsTable": true,
-              "avg": false,
-              "current": true,
-              "hideEmpty": false,
-              "hideZero": false,
-              "max": false,
-              "min": false,
-              "rightSide": true,
-              "show": true,
-              "total": false,
-              "values": true
-            },
-            "lines": true,
-            "linewidth": 1,
-            "links": [],
-            "nullPointMode": "connected",
-            "percentage": false,
-            "pointradius": 5,
-            "points": false,
-            "renderer": "flot",
-            "seriesOverrides": [],
-            "span": 12,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
-              {
-                "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_PREV-content_beans.count-evaluated, '(.*)-', ''))",
-                "textEditor": false
-              },
-              {
-                "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_PREV-content_beans.count-evicted, '(.*)-', ''))",
-                "textEditor": false
-              },
-              {
-                "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_PREV-content_beans.count-inserted, '(.*)-', ''))",
-                "textEditor": false
-              },
-              {
-                "refId": "D",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_PREV-content_beans.count-level, '(.*)-', ''))",
-                "textEditor": false
-              },
-              {
-                "refId": "E",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_PREV-content_beans.count-removed, '(.*)-', ''))",
-                "textEditor": false
-              },
-              {
-                "hide": true,
-                "refId": "F",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_PREV-content_beans.count-capacity, '(.*)-', ''))",
-                "textEditor": false
-              }
-            ],
-            "timeFrom": null,
-            "timeShift": null,
-            "title": "Content Beans",
-            "tooltip": {
-              "msResolution": false,
-              "ordering": "alphabetical",
-              "shared": true,
-              "sort": 0,
-              "value_type": "cumulative"
-            },
-            "type": "graph",
-            "xaxis": {
-              "show": true
-            },
-            "yaxes": [
-              {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-              },
-              {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-              }
-            ]
-          }
-        ],
-        "title": "CAE Content Beans"
       },
       {
         "collapse": false,
@@ -944,7 +830,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.CAE_PREV-su_sessions.count-sessions"
+                "target": "collectd.%HOST%.STUDIO-CapConnection-su_sessions.count-sessions"
               }
             ],
             "thresholds": "",
@@ -958,7 +844,7 @@
                 "value": "null"
               }
             ],
-            "valueName": "avg"
+            "valueName": "current"
           },
           {
             "aliasColors": {},
@@ -1002,7 +888,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_PREV-su_sessions.count-sessions, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.STUDIO-CapConnection-su_sessions.count-sessions, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
