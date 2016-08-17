@@ -74,7 +74,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.STUDIO-heap_memory.count-used_percent"
+                "target": "collectd.%HOST%.STUDIO-Memory-heap_memory.count-used_percent"
               }
             ],
             "thresholds": "85,93",
@@ -132,17 +132,17 @@
             "targets": [
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.STUDIO-heap_memory.count-max, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.STUDIO-Memory-heap_memory.count-max, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.STUDIO-heap_memory.count-committed, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.STUDIO-Memory-heap_memory.count-committed, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.STUDIO-heap_memory.count-used, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.STUDIO-Memory-heap_memory.count-used, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -244,7 +244,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.STUDIO-perm_memory.count-used_percent"
+                "target": "collectd.%HOST%.STUDIO-Memory-perm_memory.count-used_percent"
               }
             ],
             "thresholds": "90,95",
@@ -302,12 +302,12 @@
             "targets": [
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.STUDIO-perm_memory.count-committed, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.STUDIO-Memory-perm_memory.count-committed, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.STUDIO-perm_memory.count-used, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.STUDIO-Memory-perm_memory.count-used, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -394,7 +394,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.STUDIO-gc_duration.count-duration, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.STUDIO-GCParNew-gc_duration.count-duration, '(.*)-', ''))",
                 "textEditor": false
               }
             ],

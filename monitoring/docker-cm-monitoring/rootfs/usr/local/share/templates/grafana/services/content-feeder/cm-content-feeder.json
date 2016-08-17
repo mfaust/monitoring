@@ -46,7 +46,7 @@
             "id": 2,
             "targets": [
               {
-                "target": "collectd.%HOST%.FEEDER_CONTENT-heap_memory.count-used_percent",
+                "target": "collectd.%HOST%.FEEDER_CONTENT-Memory-heap_memory.count-used_percent",
                 "refId": "A"
               }
             ],
@@ -153,19 +153,19 @@
               {
                 "hide": false,
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_CONTENT-heap_memory.count-max, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_CONTENT-Memory-heap_memory.count-max, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "hide": false,
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_CONTENT-heap_memory.count-committed, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_CONTENT-Memory-heap_memory.count-committed, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "hide": false,
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_CONTENT-heap_memory.count-used, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_CONTENT-Memory-heap_memory.count-used, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -219,7 +219,7 @@
             "id": 4,
             "targets": [
               {
-                "target": "collectd.%HOST%.FEEDER_CONTENT-perm_memory.count-used_percent",
+                "target": "collectd.%HOST%.FEEDER_CONTENT-Memory-perm_memory.count-used_percent",
                 "refId": "A"
               }
             ],
@@ -328,12 +328,12 @@
             "targets": [
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_CONTENT-perm_memory.count-committed, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_CONTENT-Memory-perm_memory.count-committed, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_CONTENT-perm_memory.count-used, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_CONTENT-Memory-perm_memory.count-used, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -421,7 +421,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_CONTENT-gc_duration.count-duration, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_CONTENT-GCParNew-gc_duration.count-duration, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -525,7 +525,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.FEEDER_CONTENT-heap_cache.count-used_percent"
+                "target": "collectd.%HOST%.FEEDER_CONTENT-CapConnection-heap_cache.count-used_percent"
               }
             ],
             "thresholds": "85,95",
@@ -583,12 +583,12 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "alias(aliasSub(collectd.%HOST%.FEEDER_CONTENT-heap_cache.count-size, '(.*)-', ''), 'max')",
+                "target": "alias(aliasSub(collectd.%HOST%.FEEDER_CONTENT-CapConnection-heap_cache.count-size, '(.*)-', ''), 'max')",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "alias(aliasSub(collectd.%HOST%.FEEDER_CONTENT-heap_cache.count-used, '(.*)-', ''), 'used')",
+                "target": "alias(aliasSub(collectd.%HOST%.FEEDER_CONTENT-CapConnection-heap_cache.count-used, '(.*)-', ''), 'used')",
                 "textEditor": false
               }
             ],
@@ -692,7 +692,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.FEEDER_CONTENT-server.count-pending_events"
+                "target": "collectd.%HOST%.FEEDER_CONTENT-Feeder-server.count-pending_events"
               }
             ],
             "thresholds": "",
@@ -767,7 +767,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.FEEDER_CONTENT-server.count-current_pending_documents"
+                "target": "collectd.%HOST%.FEEDER_CONTENT-Feeder-server.count-current_pending_documents"
               }
             ],
             "thresholds": "",
@@ -826,23 +826,23 @@
               {
                 "hide": true,
                 "refId": "A",
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.FEEDER_CONTENT-server.count-current_pending_documents, '.*-', ''), 'Pending Documents'))",
+                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.FEEDER_CONTENT-Feeder-server.count-current_pending_documents, '.*-', ''), 'Pending Documents'))",
                 "textEditor": false
               },
               {
                 "hide": true,
                 "refId": "B",
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.FEEDER_CONTENT-server.count-pending_events, '.*-', ''), 'Pending Events'))",
+                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.FEEDER_CONTENT-Feeder-server.count-pending_events, '.*-', ''), 'Pending Events'))",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.FEEDER_CONTENT-server.count-index_content_documents, '.*-', ''), 'Indexed Content Documents'))",
+                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.FEEDER_CONTENT-Feeder-server.count-index_content_documents, '.*-', ''), 'Indexed Content Documents'))",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.FEEDER_CONTENT-server.count-index_documents, '.*-', ''), 'Indexed Documents'))",
+                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.FEEDER_CONTENT-Feeder-server.count-index_documents, '.*-', ''), 'Indexed Documents'))",
                 "textEditor": false
               }
             ],
