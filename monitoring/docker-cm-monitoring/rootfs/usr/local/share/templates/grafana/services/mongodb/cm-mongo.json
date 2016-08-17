@@ -216,7 +216,7 @@
               "threshold2": null,
               "threshold2Color": "rgba(234, 112, 112, 0.22)"
             },
-            "id": 4,
+            "id": 3,
             "isNew": true,
             "legend": {
               "alignAsTable": true,
@@ -302,7 +302,7 @@
               "threshold2": null,
               "threshold2Color": "rgba(234, 112, 112, 0.22)"
             },
-            "id": 5,
+            "id": 4,
             "isNew": true,
             "legend": {
               "alignAsTable": true,
@@ -383,7 +383,7 @@
             "editable": true,
             "type": "graph",
             "isNew": true,
-            "id": 6,
+            "id": 5,
             "targets": [
               {
                 "target": "aliasByMetric(aliasSub(collectd.%HOST%.MONGODB-asserts.*, '(.*)-', ''))",

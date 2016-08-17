@@ -625,7 +625,7 @@
               "thresholdLabels": false,
               "thresholdMarkers": true
             },
-            "id": 10,
+            "id": 8,
             "interval": null,
             "isNew": true,
             "links": [],
@@ -694,7 +694,7 @@
               "threshold2": null,
               "threshold2Color": "rgba(234, 112, 112, 0.22)"
             },
-            "id": 8,
+            "id": 9,
             "isNew": true,
             "legend": {
               "alignAsTable": true,
@@ -783,7 +783,7 @@
               "threshold2": null,
               "threshold2Color": "rgba(234, 112, 112, 0.22)"
             },
-            "id": 9,
+            "id": 10,
             "isNew": true,
             "legend": {
               "alignAsTable": true,

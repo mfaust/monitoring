@@ -392,7 +392,7 @@
               "threshold2": null,
               "threshold2Color": "rgba(234, 112, 112, 0.22)"
             },
-            "id": 5,
+            "id": 6,
             "isNew": true,
             "legend": {
               "alignAsTable": true,
@@ -486,7 +486,7 @@
               "thresholdLabels": false,
               "thresholdMarkers": true
             },
-            "id": 6,
+            "id": 7,
             "interval": null,
             "isNew": true,
             "links": [],
@@ -555,7 +555,7 @@
               "threshold2": null,
               "threshold2Color": "rgba(234, 112, 112, 0.22)"
             },
-            "id": 7,
+            "id": 8,
             "isNew": true,
             "legend": {
               "alignAsTable": true,
@@ -653,7 +653,7 @@
               "thresholdLabels": false,
               "thresholdMarkers": true
             },
-            "id": 7,
+            "id": 9,
             "interval": null,
             "isNew": true,
             "links": [],
@@ -728,7 +728,7 @@
               "thresholdLabels": false,
               "thresholdMarkers": true
             },
-            "id": 8,
+            "id": 10,
             "interval": null,
             "isNew": true,
             "links": [],
@@ -797,7 +797,7 @@
               "threshold2": null,
               "threshold2Color": "rgba(234, 112, 112, 0.22)"
             },
-            "id": 9,
+            "id": 11,
             "isNew": true,
             "legend": {
               "alignAsTable": true,

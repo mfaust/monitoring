@@ -18,7 +18,7 @@
             "content": "<h2><center>Live Feeder</center></h2>",
             "editable": true,
             "error": false,
-            "id": 39,
+            "id": 1,
             "isNew": true,
             "links": [],
             "mode": "html",
@@ -55,7 +55,7 @@
               "thresholdLabels": false,
               "thresholdMarkers": true
             },
-            "id": 30,
+            "id": 2,
             "interval": null,
             "isNew": true,
             "links": [],
@@ -124,7 +124,7 @@
               "threshold2": null,
               "threshold2Color": "rgba(234, 112, 112, 0.22)"
             },
-            "id": 31,
+            "id": 3,
             "isNew": true,
             "legend": {
               "alignAsTable": true,
@@ -225,7 +225,7 @@
               "thresholdLabels": false,
               "thresholdMarkers": true
             },
-            "id": 32,
+            "id": 4,
             "interval": null,
             "isNew": true,
             "links": [],
@@ -294,7 +294,7 @@
               "threshold2": null,
               "threshold2Color": "rgba(234, 112, 112, 0.22)"
             },
-            "id": 33,
+            "id": 5,
             "isNew": true,
             "legend": {
               "alignAsTable": true,
@@ -391,7 +391,7 @@
               "thresholdLabels": false,
               "thresholdMarkers": true
             },
-            "id": 34,
+            "id": 6,
             "interval": null,
             "isNew": true,
             "links": [],
@@ -461,7 +461,7 @@
               "threshold2": null,
               "threshold2Color": "rgba(234, 112, 112, 0.22)"
             },
-            "id": 35,
+            "id": 7,
             "isNew": true,
             "legend": {
               "alignAsTable": true,
@@ -555,7 +555,7 @@
               "threshold2": null,
               "threshold2Color": "rgba(234, 112, 112, 0.22)"
             },
-            "id": 36,
+            "id": 8,
             "isNew": true,
             "legend": {
               "alignAsTable": true,
@@ -636,7 +636,7 @@
             "editable": true,
             "type": "singlestat",
             "isNew": true,
-            "id": 37,
+            "id": 9,
             "targets": [
               {
                 "target": "collectd.%HOST%.FEEDER_LIVE-heap_cache.count-used_percent",
@@ -717,7 +717,7 @@
               "threshold2": null,
               "threshold2Color": "rgba(234, 112, 112, 0.22)"
             },
-            "id": 38,
+            "id": 10,
             "isNew": true,
             "legend": {
               "alignAsTable": true,
