@@ -430,7 +430,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.FEEDER_PREV-Feeder-feeder.count-diff",
+                "target": "collectd.%HOST%.FEEDER_PREV-ProactiveEngine-feeder.count-diff",
                 "textEditor": false
               }
             ],
