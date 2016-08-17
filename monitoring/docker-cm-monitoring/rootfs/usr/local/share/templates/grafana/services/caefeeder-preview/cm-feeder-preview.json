@@ -94,7 +94,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.FEEDER_PREV-heap_memory.count-used_percent"
+                "target": "collectd.%HOST%.FEEDER_PREV-Memory-heap_memory.count-used_percent"
               }
             ],
             "thresholds": "85,93",
@@ -152,17 +152,17 @@
             "targets": [
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_PREV-heap_memory.count-max, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_PREV-Memory-heap_memory.count-max, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_PREV-heap_memory.count-committed, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_PREV-Memory-heap_memory.count-committed, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_PREV-heap_memory.count-used, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_PREV-Memory-heap_memory.count-used, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -264,7 +264,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.FEEDER_PREV-perm_memory.count-used_percent"
+                "target": "collectd.%HOST%.FEEDER_PREV-Memory-perm_memory.count-used_percent"
               }
             ],
             "thresholds": "90,95",
@@ -322,12 +322,12 @@
             "targets": [
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_PREV-perm_memory.count-committed, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_PREV-Memory-perm_memory.count-committed, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_PREV-perm_memory.count-used, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_PREV-Memory-perm_memory.count-used, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -430,7 +430,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.FEEDER_PREV-feeder.count-diff",
+                "target": "collectd.%HOST%.FEEDER_PREV-Feeder-feeder.count-diff",
                 "textEditor": false
               }
             ],
@@ -489,17 +489,17 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_PREV-feeder.count-diff, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_PREV-ProactiveEngine-feeder.count-diff, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_PREV-feeder.count-max, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_PREV-ProactiveEngine-feeder.count-max, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_PREV-feeder.count-current, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_PREV-ProactiveEngine-feeder.count-current, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -583,7 +583,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_PREV-gc_duration.count-duration, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_PREV-GCParNew-gc_duration.count-duration, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -639,7 +639,7 @@
             "id": 39,
             "targets": [
               {
-                "target": "collectd.%HOST%.FEEDER_PREV-heap_cache.count-used_percent",
+                "target": "collectd.%HOST%.FEEDER_PREV-CapConnection-heap_cache.count-used_percent",
                 "refId": "A"
               }
             ],
@@ -745,12 +745,12 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "alias(aliasSub(collectd.%HOST%.FEEDER_PREV-heap_cache.count-size, '(.*)-', ''), 'max')",
+                "target": "alias(aliasSub(collectd.%HOST%.FEEDER_PREV-CapConnection-heap_cache.count-size, '(.*)-', ''), 'max')",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "alias(aliasSub(collectd.%HOST%.FEEDER_PREV-heap_cache.count-used, '(.*)-', ''), 'used')",
+                "target": "alias(aliasSub(collectd.%HOST%.FEEDER_PREV-CapConnection-heap_cache.count-used, '(.*)-', ''), 'used')",
                 "textEditor": false
               }
             ],

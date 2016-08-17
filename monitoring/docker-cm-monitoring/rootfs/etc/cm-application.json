@@ -57,7 +57,7 @@
           {
             "description": "Base Measurement Points for ALL Content Server",
             "mbean" : "com.coremedia:application=coremedia,type=Server",
-            "attribute" : "RunLevel,ResourceCacheHits,ResourceCacheEvicts,ResourceCacheEntries,ResourceCacheInterval,ResourceCacheSize,RepositorySequenceNumber,ConnectionCount,RunLevel,Uptime"
+            "attribute" : "RunLevel,ResourceCacheHits,ResourceCacheEvicts,ResourceCacheEntries,ResourceCacheInterval,ResourceCacheSize,RepositorySequenceNumber,ConnectionCount,Uptime"
           }, {
             "description": "Connection Pool for DBA Connections",
             "mbean" : "com.coremedia:application=coremedia,bean=ConnectionPool,type=Store",
@@ -88,11 +88,6 @@
         "description": "",
         "metrics": [
           {
-            "name": "",
-            "description": "Base Measurement Points for ALL Content Server",
-            "mbean" : "com.coremedia:application=coremedia,type=Server",
-            "attribute" : "RunLevel,ResourceCacheHits,ResourceCacheEvicts,ResourceCacheEntries,ResourceCacheInterval,ResourceCacheSize,RepositorySequenceNumber,ConnectionCount,RunLevel,Uptime"
-          }, {
             "mbean" : "com.coremedia:type=CapConnection,application=workflow",
             "attribute" : "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions"
           }

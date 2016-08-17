@@ -277,8 +277,9 @@ class CollecdPlugin
 
   def ParseResult_Memory( data = {} )
 
+    mbean = 'Memory'
     value  = data['value'] ? data['value'] : nil
-    format = 'PUTVAL %s/%s-%s/count-%s interval=%s N:%s'
+    format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
     data   = []
 
     if( value != nil )
@@ -299,11 +300,11 @@ class CollecdPlugin
           type = 'perm_memory'
         end
 
-        data.push( sprintf( format, @Host, @Service, type, 'init'        , @interval, init ) )
-        data.push( sprintf( format, @Host, @Service, type, 'max'         , @interval, max ) )
-        data.push( sprintf( format, @Host, @Service, type, 'used'        , @interval, used ) )
-        data.push( sprintf( format, @Host, @Service, type, 'used_percent', @interval, percent ) )
-        data.push( sprintf( format, @Host, @Service, type, 'committed'   , @interval, committed ) )
+        data.push( sprintf( format, @Host, @Service, mbean, type, 'init'        , @interval, init ) )
+        data.push( sprintf( format, @Host, @Service, mbean, type, 'max'         , @interval, max ) )
+        data.push( sprintf( format, @Host, @Service, mbean, type, 'used'        , @interval, used ) )
+        data.push( sprintf( format, @Host, @Service, mbean, type, 'used_percent', @interval, percent ) )
+        data.push( sprintf( format, @Host, @Service, mbean, type, 'committed'   , @interval, committed ) )
       end
 
       return data
@@ -315,8 +316,9 @@ class CollecdPlugin
 
   def ParseResult_Threading( data = {} )
 
+    mbean = 'Threading'
     value  = data['value'] ? data['value'] : nil
-    format = 'PUTVAL %s/%s-%s/count-%s interval=%s N:%s'
+    format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
     data   = []
 
     if( value != nil )
@@ -324,8 +326,8 @@ class CollecdPlugin
       peak   = value['PeakThreadCount']  ? value['PeakThreadCount']  : nil
       count  = value['ThreadCount']      ? value['ThreadCount']      : nil
 
-      data.push( sprintf( format, @Host, @Service, 'threading', 'peak' , @interval, peak ) )
-      data.push( sprintf( format, @Host, @Service, 'threading', 'count', @interval, count ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'threading', 'peak' , @interval, peak ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'threading', 'count', @interval, count ) )
 
     else
 
@@ -346,8 +348,9 @@ class CollecdPlugin
 
   def ParseResult_ClassLoading( data = {} )
 
+    mbean = 'ClassLoading'
     value  = data['value'] ? data['value'] : nil
-    format = 'PUTVAL %s/%s-%s/count-%s interval=%s N:%s'
+    format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
     data   = []
 
     if( value != nil )
@@ -356,9 +359,9 @@ class CollecdPlugin
       totalLoaded = value['TotalLoadedClassCount'] ? value['TotalLoadedClassCount'] : nil
       unloaded    = value['UnloadedClassCount']    ? value['UnloadedClassCount']    : nil
 
-      data.push( sprintf( format, @Host, @Service, 'class_loading', 'loaded'  , @interval, loaded ) )
-      data.push( sprintf( format, @Host, @Service, 'class_loading', 'total'   , @interval, totalLoaded ) )
-      data.push( sprintf( format, @Host, @Service, 'class_loading', 'unloaded', @interval, unloaded ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'class_loading', 'loaded'  , @interval, loaded ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'class_loading', 'total'   , @interval, totalLoaded ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'class_loading', 'unloaded', @interval, unloaded ) )
 
     else
 
@@ -372,8 +375,9 @@ class CollecdPlugin
 
   def ParseResult_GCParNew( data = {} )
 
+    mbean = 'GCParNew'
     value  = data['value'] ? data['value'] : nil
-    format = 'PUTVAL %s/%s-%s/count-%s interval=%s N:%s'
+    format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
     data   = []
 
     if( value != nil )
@@ -384,7 +388,7 @@ class CollecdPlugin
 
         duration      = lastGcInfo['duration']      ? lastGcInfo['duration']      : nil
 
-        data.push( sprintf( format, @Host, @Service, sprintf( 'gc_%s', 'duration' ), 'duration'     , @interval, duration ) )
+        data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_%s', 'duration' ), 'duration'     , @interval, duration ) )
 
         ['memoryUsageBeforeGc', 'memoryUsageAfterGc'].each do |gc|
 
@@ -405,10 +409,10 @@ class CollecdPlugin
 
               type      = type.strip.tr( ' ', '_' ).downcase
 
-              data.push( sprintf( format, @Host, @Service, sprintf( 'gc_parnew_%s_%s', gc_type, type ), 'init'     , @interval, init ) )
-              data.push( sprintf( format, @Host, @Service, sprintf( 'gc_parnew_%s_%s', gc_type, type ), 'committed', @interval, committed ) )
-              data.push( sprintf( format, @Host, @Service, sprintf( 'gc_parnew_%s_%s', gc_type, type ), 'max'      , @interval, max ) )
-              data.push( sprintf( format, @Host, @Service, sprintf( 'gc_parnew_%s_%s', gc_type, type ), 'used'     , @interval, used ) )
+              data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_parnew_%s_%s', gc_type, type ), 'init'     , @interval, init ) )
+              data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_parnew_%s_%s', gc_type, type ), 'committed', @interval, committed ) )
+              data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_parnew_%s_%s', gc_type, type ), 'max'      , @interval, max ) )
+              data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_parnew_%s_%s', gc_type, type ), 'used'     , @interval, used ) )
             end
          end
         end
@@ -422,8 +426,9 @@ class CollecdPlugin
 
   def ParseResult_GCConcurrentMarkSweep( data = {} )
 
+    mbean = 'GCConcurrentMarkSweep';
     value  = data['value'] ? data['value'] : nil
-    format = 'PUTVAL %s/%s-%s/count-%s interval=%s N:%s'
+    format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
     data   = []
 
     if( value != nil )
@@ -434,7 +439,7 @@ class CollecdPlugin
 
         duration      = lastGcInfo['duration']      ? lastGcInfo['duration']      : nil
 
-        data.push( sprintf( format, @Host, @Service, sprintf( 'gc_%s', 'duration' ), 'duration'     , @interval, duration ) )
+        data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_%s', 'duration' ), 'duration'     , @interval, duration ) )
 
         ['memoryUsageBeforeGc', 'memoryUsageAfterGc'].each do |gc|
 
@@ -455,10 +460,10 @@ class CollecdPlugin
 
               type      = type.strip.tr( ' ', '_' ).downcase
 
-              data.push( sprintf( format, @Host, @Service, sprintf( 'gc_markseep_%s_%s', gc_type, type ), 'init'     , @interval, init ) )
-              data.push( sprintf( format, @Host, @Service, sprintf( 'gc_markseep_%s_%s', gc_type, type ), 'committed', @interval, committed ) )
-              data.push( sprintf( format, @Host, @Service, sprintf( 'gc_markseep_%s_%s', gc_type, type ), 'max'      , @interval, max ) )
-              data.push( sprintf( format, @Host, @Service, sprintf( 'gc_markseep_%s_%s', gc_type, type ), 'used'     , @interval, used ) )
+              data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_markseep_%s_%s', gc_type, type ), 'init'     , @interval, init ) )
+              data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_markseep_%s_%s', gc_type, type ), 'committed', @interval, committed ) )
+              data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_markseep_%s_%s', gc_type, type ), 'max'      , @interval, max ) )
+              data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_markseep_%s_%s', gc_type, type ), 'used'     , @interval, used ) )
             end
          end
         end
@@ -472,8 +477,9 @@ class CollecdPlugin
 
   def ParseResult_Server( data = {} )
 
+    mbean = 'Server'
     value  = data['value'] ? data['value'] : nil
-    format = 'PUTVAL %s/%s-%s/count-%s interval=%s N:%s'
+    format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
     data   = []
 
     if( value != nil )
@@ -488,12 +494,12 @@ class CollecdPlugin
       runlevel         = value['RunLevel']                  ? value['RunLevel']                  : nil
       uptime           = value['Uptime']                    ? value['Uptime']                    : nil
 
-      data.push( sprintf( format, @Host, @Service, 'server', 'cache_hits'     , @interval, cacheHits ) )
-      data.push( sprintf( format, @Host, @Service, 'server', 'cache_evicts'   , @interval, cacheEvicts ) )
-      data.push( sprintf( format, @Host, @Service, 'server', 'cache_entries'  , @interval, cacheEntries ) )
-      data.push( sprintf( format, @Host, @Service, 'server', 'cache_interval' , @interval, cacheInterval ) )
-      data.push( sprintf( format, @Host, @Service, 'server', 'cache_size'     , @interval, cacheSize ) )
-      data.push( sprintf( format, @Host, @Service, 'server', 'sequence_number', @interval, reqSeqNumber ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'server', 'cache_hits'     , @interval, cacheHits ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'server', 'cache_evicts'   , @interval, cacheEvicts ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'server', 'cache_entries'  , @interval, cacheEntries ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'server', 'cache_interval' , @interval, cacheInterval ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'server', 'cache_size'     , @interval, cacheSize ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'server', 'sequence_number', @interval, reqSeqNumber ) )
 
     else
 
@@ -507,8 +513,9 @@ class CollecdPlugin
 
   def ParseResult_Feeder( data = {} )
 
+    mbean = 'Feeder'
     value  = data['value'] ? data['value'] : nil
-    format = 'PUTVAL %s/%s-%s/count-%s interval=%s N:%s'
+    format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
     data   = []
 
     if( value != nil )
@@ -517,10 +524,10 @@ class CollecdPlugin
       indexContentDocuments   = value['IndexContentDocuments']      ? value['IndexContentDocuments']      : nil
       currentPendingDocuments = value['CurrentPendingDocuments']    ? value['CurrentPendingDocuments']    : nil
 
-      data.push( sprintf( format, @Host, @Service, 'server', 'pending_events'            , @interval, pendingEvents ) )
-      data.push( sprintf( format, @Host, @Service, 'server', 'index_documents'           , @interval, indexDocuments ) )
-      data.push( sprintf( format, @Host, @Service, 'server', 'index_content_documents'   , @interval, indexContentDocuments ) )
-      data.push( sprintf( format, @Host, @Service, 'server', 'current_pending_documents' , @interval, currentPendingDocuments ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'server', 'pending_events'            , @interval, pendingEvents ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'server', 'index_documents'           , @interval, indexDocuments ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'server', 'index_content_documents'   , @interval, indexContentDocuments ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'server', 'current_pending_documents' , @interval, currentPendingDocuments ) )
     end
 
     return data
@@ -530,8 +537,9 @@ class CollecdPlugin
 
   def ParseResult_CacheClasses( data = {} )
 
+    mbean = 'CacheClasses'
     value  = data['value'] ? data['value'] : nil
-    format = 'PUTVAL %s/%s-%s/count-%s interval=%s N:%s'
+    format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
     data   = []
 
     if( value != nil )
@@ -542,12 +550,12 @@ class CollecdPlugin
       removed   = value['Removed']     ? value['Removed']     : nil
       level     = value['Level']       ? value['Level']       : nil
 
-      data.push( sprintf( format, @Host, @Service, 'content_beans', 'level'     , @interval, level ) )
-      data.push( sprintf( format, @Host, @Service, 'content_beans', 'capacity'  , @interval, capacity ) )
-      data.push( sprintf( format, @Host, @Service, 'content_beans', 'evaluated' , @interval, evaluated ) )
-      data.push( sprintf( format, @Host, @Service, 'content_beans', 'evicted'   , @interval, evicted ) )
-      data.push( sprintf( format, @Host, @Service, 'content_beans', 'inserted'  , @interval, inserted ) )
-      data.push( sprintf( format, @Host, @Service, 'content_beans', 'removed'   , @interval, removed ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'content_beans', 'level'     , @interval, level ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'content_beans', 'capacity'  , @interval, capacity ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'content_beans', 'evaluated' , @interval, evaluated ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'content_beans', 'evicted'   , @interval, evicted ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'content_beans', 'inserted'  , @interval, inserted ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'content_beans', 'removed'   , @interval, removed ) )
     end
 
     return data
@@ -557,8 +565,9 @@ class CollecdPlugin
 
   def ParseResult_ProactiveEngine( data = {} )
 
+    mbean = 'ProactiveEngine'
     value  = data['value'] ? data['value'] : nil
-    format = 'PUTVAL %s/%s-%s/count-%s interval=%s N:%s'
+    format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
     data   = []
 
     if( value != nil )
@@ -567,9 +576,9 @@ class CollecdPlugin
       currentEntries = value['ValuesCount']   ? value['ValuesCount']   : 0  # current feeder entries
       diffEntries    = ( maxEntries - currentEntries ).to_i
 
-      data.push( sprintf( format, @Host, @Service, 'feeder', 'max'      , @interval, maxEntries ) )
-      data.push( sprintf( format, @Host, @Service, 'feeder', 'current'  , @interval, currentEntries ) )
-      data.push( sprintf( format, @Host, @Service, 'feeder', 'diff'     , @interval, diffEntries ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'feeder', 'max'      , @interval, maxEntries ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'feeder', 'current'  , @interval, currentEntries ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'feeder', 'diff'     , @interval, diffEntries ) )
     end
 
     return data
@@ -578,9 +587,9 @@ class CollecdPlugin
 
   def ParseResult_CapConnection( data = {} )
 
+    mbean = 'CapConnection'
     value  = data['value'] ? data['value'] : nil
-    format = 'PUTVAL %s/%s-%s/count-%s interval=%s N:%s'
-    format2 = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
+    format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
     data   = []
 
     if( value != nil )
@@ -597,32 +606,17 @@ class CollecdPlugin
 
       suSessions       = value['NumberOfSUSessions']   ? value['NumberOfSUSessions']   : nil
 
+      data.push( sprintf( format, @Host, @Service, mbean, 'blob_cache', 'size'        , @interval, blobCacheSize ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'blob_cache', 'used'        , @interval, blobCacheLevel ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'blob_cache', 'fault'       , @interval, blobCacheFaults ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'blob_cache', 'used_percent', @interval, blobCachePercent ) )
 
-      data.push( sprintf( format, @Host, @Service, 'blob_cache', 'size'        , @interval, blobCacheSize ) )
-      data.push( sprintf( format, @Host, @Service, 'blob_cache', 'used'        , @interval, blobCacheLevel ) )
-      data.push( sprintf( format, @Host, @Service, 'blob_cache', 'fault'       , @interval, blobCacheFaults ) )
-      data.push( sprintf( format, @Host, @Service, 'blob_cache', 'used_percent', @interval, blobCachePercent ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'heap_cache', 'size'        , @interval, heapCacheSize ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'heap_cache', 'used'        , @interval, heapCacheLevel ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'heap_cache', 'fault'       , @interval, heapCacheFaults ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'heap_cache', 'used_percent', @interval, heapCachePercent ) )
 
-      data.push( sprintf( format, @Host, @Service, 'heap_cache', 'size'        , @interval, heapCacheSize ) )
-      data.push( sprintf( format, @Host, @Service, 'heap_cache', 'used'        , @interval, heapCacheLevel ) )
-      data.push( sprintf( format, @Host, @Service, 'heap_cache', 'fault'       , @interval, heapCacheFaults ) )
-      data.push( sprintf( format, @Host, @Service, 'heap_cache', 'used_percent', @interval, heapCachePercent ) )
-
-      data.push( sprintf( format, @Host, @Service, 'su_sessions', 'sessions'   , @interval, suSessions ) )
-
-      ###########################################
-      mbean = 'CapConnection'
-      data.push( sprintf( format2, @Host, @Service, mbean, 'blob_cache', 'size'        , @interval, blobCacheSize ) )
-      data.push( sprintf( format2, @Host, @Service, mbean, 'blob_cache', 'used'        , @interval, blobCacheLevel ) )
-      data.push( sprintf( format2, @Host, @Service, mbean, 'blob_cache', 'fault'       , @interval, blobCacheFaults ) )
-      data.push( sprintf( format2, @Host, @Service, mbean, 'blob_cache', 'used_percent', @interval, blobCachePercent ) )
-
-      data.push( sprintf( format2, @Host, @Service, mbean, 'heap_cache', 'size'        , @interval, heapCacheSize ) )
-      data.push( sprintf( format2, @Host, @Service, mbean, 'heap_cache', 'used'        , @interval, heapCacheLevel ) )
-      data.push( sprintf( format2, @Host, @Service, mbean, 'heap_cache', 'fault'       , @interval, heapCacheFaults ) )
-      data.push( sprintf( format2, @Host, @Service, mbean, 'heap_cache', 'used_percent', @interval, heapCachePercent ) )
-
-      data.push( sprintf( format2, @Host, @Service, mbean, 'su_sessions', 'sessions'   , @interval, suSessions ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'su_sessions', 'sessions'   , @interval, suSessions ) )
 
     else
 
@@ -711,8 +705,9 @@ class CollecdPlugin
 
   def ParseResult_ConnectionPool( data = {} )
 
+    mbean = 'ConnectionPool'
     value  = data['value'] ? data['value'] : nil
-    format = 'PUTVAL %s/%s-%s/count-%s interval=%s N:%s'
+    format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
     data   = []
 
     if( value != nil )
@@ -723,11 +718,11 @@ class CollecdPlugin
       busy   = value['BusyConnections']  ? value['BusyConnections']  : nil
       min    = value['MinConnections']   ? value['MinConnections']   : nil
 
-      data.push( sprintf( format, @Host, @Service, 'connection_pool', 'open', @interval, open ) )
-      data.push( sprintf( format, @Host, @Service, 'connection_pool', 'max' , @interval, max ) )
-      data.push( sprintf( format, @Host, @Service, 'connection_pool', 'idle', @interval, idle ) )
-      data.push( sprintf( format, @Host, @Service, 'connection_pool', 'busy', @interval, busy ) )
-      data.push( sprintf( format, @Host, @Service, 'connection_pool', 'min' , @interval, min ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'connection_pool', 'open', @interval, open ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'connection_pool', 'max' , @interval, max ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'connection_pool', 'idle', @interval, idle ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'connection_pool', 'busy', @interval, busy ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'connection_pool', 'min' , @interval, min ) )
 
     else
 
@@ -741,8 +736,9 @@ class CollecdPlugin
 
   def ParseResult_QueryPool( data = {} )
 
+    mbean = 'QueryPool'
     value  = data['value'] ? data['value'] : nil
-    format = 'PUTVAL %s/%s-%s/count-%s interval=%s N:%s'
+    format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
     data   = []
 
     if( value != nil )
@@ -753,10 +749,10 @@ class CollecdPlugin
       queriesWaiting   = value['WaitingQueries']   ? value['WaitingQueries']   : nil
 
 
-      data.push( sprintf( format, @Host, @Service, 'query_pool', 'executors_running', @interval, executorsRunning ) )
-      data.push( sprintf( format, @Host, @Service, 'query_pool', 'executors_idle'   , @interval, executorsIdle ) )
-      data.push( sprintf( format, @Host, @Service, 'query_pool', 'queries_max'      , @interval, queriesMax ) )
-      data.push( sprintf( format, @Host, @Service, 'query_pool', 'queries_waiting'  , @interval, queriesWaiting ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'query_pool', 'executors_running', @interval, executorsRunning ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'query_pool', 'executors_idle'   , @interval, executorsIdle ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'query_pool', 'queries_max'      , @interval, queriesMax ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'query_pool', 'queries_waiting'  , @interval, queriesWaiting ) )
 
     else
 
@@ -778,8 +774,9 @@ class CollecdPlugin
 
   def ParseResult_StatisticsJobResult( data = {} )
 
+    mbean = 'StatisticsJobResult'
     value  = data['value'] ? data['value'] : nil
-    format = 'PUTVAL %s/%s-%s/count-%s interval=%s N:%s'
+    format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
     data   = []
 
     if( value != nil )
@@ -788,9 +785,9 @@ class CollecdPlugin
       successful    = value['Successful']    ? value['Successful']    : nil
       unrecoverable = value['Unrecoverable'] ? value['Unrecoverable'] : nil
 
-      data.push( sprintf( format, @Host, @Service, 'stats_jobresult', 'failed'       , @interval, failed ) )
-      data.push( sprintf( format, @Host, @Service, 'stats_jobresult', 'successful'   , @interval, successful ) )
-      data.push( sprintf( format, @Host, @Service, 'stats_jobresult', 'unrecoverable', @interval, unrecoverable ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'stats_jobresult', 'failed'       , @interval, failed ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'stats_jobresult', 'successful'   , @interval, successful ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'stats_jobresult', 'unrecoverable', @interval, unrecoverable ) )
 
     else
 
@@ -803,8 +800,9 @@ class CollecdPlugin
 
   def ParseResult_StatisticsResourceCache( data = {} )
 
+    mbean = 'StatisticsResourceCache'
     value  = data['value'] ? data['value'] : nil
-    format = 'PUTVAL %s/%s-%s/count-%s interval=%s N:%s'
+    format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
     data   = []
 
     if( value != nil )
@@ -816,11 +814,11 @@ class CollecdPlugin
       hits     = value['CacheHits']     ? value['CacheHits']     : nil
 
 
-      data.push( sprintf( format, @Host, @Service, 'stats_resourcecache', 'size'   , @interval, size ) )
-      data.push( sprintf( format, @Host, @Service, 'stats_resourcecache', 'removed', @interval, removed ) )
-      data.push( sprintf( format, @Host, @Service, 'stats_resourcecache', 'faults' , @interval, faults ) )
-      data.push( sprintf( format, @Host, @Service, 'stats_resourcecache', 'misses' , @interval, misses ) )
-      data.push( sprintf( format, @Host, @Service, 'stats_resourcecache', 'hits'   , @interval, hits ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'stats_resourcecache', 'size'   , @interval, size ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'stats_resourcecache', 'removed', @interval, removed ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'stats_resourcecache', 'faults' , @interval, faults ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'stats_resourcecache', 'misses' , @interval, misses ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'stats_resourcecache', 'hits'   , @interval, hits ) )
 
     else
 

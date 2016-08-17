@@ -46,7 +46,7 @@
             "id": 2,
             "targets": [
               {
-                "target": "collectd.%HOST%.CMS-heap_memory.count-used_percent",
+                "target": "collectd.%HOST%.CMS-Memory-heap_memory.count-used_percent",
                 "refId": "A"
               }
             ],
@@ -153,19 +153,19 @@
               {
                 "hide": false,
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CMS-heap_memory.count-max, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CMS-Memory-heap_memory.count-max, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "hide": false,
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CMS-heap_memory.count-committed, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CMS-Memory-heap_memory.count-committed, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "hide": false,
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CMS-heap_memory.count-used, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CMS-Memory-heap_memory.count-used, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -219,7 +219,7 @@
             "id": 4,
             "targets": [
               {
-                "target": "collectd.%HOST%.CMS-perm_memory.count-used_percent",
+                "target": "collectd.%HOST%.CMS-Memory-perm_memory.count-used_percent",
                 "refId": "A"
               }
             ],
@@ -325,12 +325,12 @@
             "targets": [
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CMS-perm_memory.count-committed, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CMS-Memory-perm_memory.count-committed, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CMS-perm_memory.count-used, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CMS-Memory-perm_memory.count-used, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -417,7 +417,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CMS-query_pool.*, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CMS-QueryPool-query_pool.*, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -501,7 +501,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CMS-stats_resourcecache.*, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CMS-StatisticsResourceCache-stats_resourcecache.*, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -585,7 +585,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CMS-stats_jobresult.*, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CMS-StatisticsJobResult-stats_jobresult.*, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -639,17 +639,17 @@
             "id": 9,
             "targets": [
               {
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.CMS-server.count-cache_entries, '(.*)-', ''), 'entries'))",
+                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.CMS-Server-server.count-cache_entries, '(.*)-', ''), 'entries'))",
                 "refId": "A",
                 "textEditor": false
               },
               {
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.CMS-server.count-cache_evicts, '(.*)-', ''), 'evicts'))",
+                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.CMS-Server-server.count-cache_evicts, '(.*)-', ''), 'evicts'))",
                 "refId": "B",
                 "textEditor": false
               },
               {
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.CMS-server.count-cache_hits, '(.*)-', ''), 'hits'))",
+                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.CMS-Server-server.count-cache_hits, '(.*)-', ''), 'hits'))",
                 "refId": "C",
                 "textEditor": false
               }
@@ -726,7 +726,7 @@
             "id": 10,
             "targets": [
               {
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.CMS-server.count-cache_size, '(.*)-', ''), 'Cache Size'))",
+                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.CMS-Server-server.count-cache_size, '(.*)-', ''), 'Cache Size'))",
                 "refId": "A",
                 "textEditor": false
               }

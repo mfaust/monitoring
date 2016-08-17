@@ -46,7 +46,7 @@
             "id": 31,
             "targets": [
               {
-                "target": "collectd.%HOST%.MLS-heap_memory.count-used_percent",
+                "target": "collectd.%HOST%.MLS-Memory-heap_memory.count-used_percent",
                 "refId": "A"
               }
             ],
@@ -153,19 +153,19 @@
               {
                 "hide": false,
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MLS-heap_memory.count-max, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MLS-Memory-heap_memory.count-max, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "hide": false,
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MLS-heap_memory.count-committed, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MLS-Memory-heap_memory.count-committed, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "hide": false,
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MLS-heap_memory.count-used, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MLS-Memory-heap_memory.count-used, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -219,7 +219,7 @@
             "id": 33,
             "targets": [
               {
-                "target": "collectd.%HOST%.MLS-perm_memory.count-used_percent",
+                "target": "collectd.%HOST%.MLS-Memory-perm_memory.count-used_percent",
                 "refId": "A"
               }
             ],
@@ -325,12 +325,12 @@
             "targets": [
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MLS-perm_memory.count-committed, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MLS-Memory-perm_memory.count-committed, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MLS-perm_memory.count-used, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MLS-Memory-perm_memory.count-used, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -417,7 +417,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MLS-query_pool.*, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MLS-QueryPool-query_pool.*, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -501,7 +501,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MLS-stats_resourcecache.*, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MLS-StatisticsResourceCache-stats_resourcecache.*, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -585,7 +585,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MLS-stats_jobresult.*, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MLS-StatisticsJobResult-stats_jobresult.*, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -639,17 +639,17 @@
             "id": 38,
             "targets": [
               {
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.MLS-server.count-cache_entries, '(.*)-', ''), 'entries'))",
+                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.MLS-Server-server.count-cache_entries, '(.*)-', ''), 'entries'))",
                 "refId": "A",
                 "textEditor": false
               },
               {
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.MLS-server.count-cache_evicts, '(.*)-', ''), 'evicts'))",
+                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.MLS-Server-server.count-cache_evicts, '(.*)-', ''), 'evicts'))",
                 "refId": "B",
                 "textEditor": false
               },
               {
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.MLS-server.count-cache_hits, '(.*)-', ''), 'hits'))",
+                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.MLS-Server-server.count-cache_hits, '(.*)-', ''), 'hits'))",
                 "refId": "C",
                 "textEditor": false
               }
@@ -726,7 +726,7 @@
             "id": 39,
             "targets": [
               {
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.MLS-server.count-cache_size, '(.*)-', ''), 'Cache Size'))",
+                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.MLS-Server-server.count-cache_size, '(.*)-', ''), 'Cache Size'))",
                 "refId": "A",
                 "textEditor": false
               }
