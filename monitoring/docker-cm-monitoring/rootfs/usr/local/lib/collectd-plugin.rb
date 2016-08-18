@@ -460,10 +460,10 @@ class CollecdPlugin
 
               type      = type.strip.tr( ' ', '_' ).downcase
 
-              data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_markseep_%s_%s', gc_type, type ), 'init'     , @interval, init ) )
-              data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_markseep_%s_%s', gc_type, type ), 'committed', @interval, committed ) )
-              data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_markseep_%s_%s', gc_type, type ), 'max'      , @interval, max ) )
-              data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_markseep_%s_%s', gc_type, type ), 'used'     , @interval, used ) )
+              data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_markwseep_%s_%s', gc_type, type ), 'init'     , @interval, init ) )
+              data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_markwseep_%s_%s', gc_type, type ), 'committed', @interval, committed ) )
+              data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_markwseep_%s_%s', gc_type, type ), 'max'      , @interval, max ) )
+              data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_markwseep_%s_%s', gc_type, type ), 'used'     , @interval, used ) )
             end
          end
         end
