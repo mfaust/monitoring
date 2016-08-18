@@ -16,6 +16,7 @@ require 'net/http'
 require 'uri'
 
 require_relative 'tools'
+require_relative 'grafana/dashboard_template'
 
 # -------------------------------------------------------------------------------------------------------------------
 
@@ -27,13 +28,13 @@ class Grafana
     @cacheDirectory    = settings['cache_dir']    ? settings['cache_dir']    : '/var/tmp/monitoring'
     @templateDirectory = settings['template_dir'] ? settings['template_dir'] : '/var/tmp/templates'
 
-    @grafanaHost    = settings['grafana_host'] ? settings['grafana_host'] : 'localhost'
-    @grafanaPort    = settings['grafana_port'] ? settings['grafana_port'] : 3000
-    @grafanaPath    = settings['grafana_path'] ? settings['grafana_path'] : nil
+    @grafanaHost       = settings['grafana_host'] ? settings['grafana_host'] : 'localhost'
+    @grafanaPort       = settings['grafana_port'] ? settings['grafana_port'] : 3000
+    @grafanaPath       = settings['grafana_path'] ? settings['grafana_path'] : nil
 
-    @grafanaURI     = sprintf( 'http://%s:%s%s', @grafanaHost, @grafanaPort, @grafanaPath )
+    @grafanaURI        = sprintf( 'http://%s:%s%s', @grafanaHost, @grafanaPort, @grafanaPath )
 
-    logFile = sprintf( '%s/grafana.log', @logDirectory )
+    logFile            = sprintf( '%s/grafana.log', @logDirectory )
 
     file      = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
     file.sync = true
@@ -43,6 +44,8 @@ class Grafana
     @log.formatter = proc do |severity, datetime, progname, msg|
       "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
     end
+
+#     include Grafana::DashboardTemplate
 
     #TODO tmp and template dir as global var
 #     @tmp_dir = "/tmp"
@@ -63,7 +66,6 @@ class Grafana
 
   end
 
-
   # add dashboards for a host
   def addDashbards(host, recreate = false)
 
@@ -76,58 +78,60 @@ class Grafana
     @shortHostname   = self.shortHostname( host )
     @grafanaHostname = host.gsub( '.', '-' )
 
-    discovery_file   = sprintf( '%s/%s/discovery.json'     , @cacheDirectory, host )
-    merged_host_file = sprintf( '%s/%s/mergedHostData.json', @cacheDirectory, host )
+    discoveryFile    = sprintf( '%s/%s/discovery.json'     , @cacheDirectory, host )
+    mergedHostFile   = sprintf( '%s/%s/mergedHostData.json', @cacheDirectory, host )
 
     # determine services from discovery.json file, e.g. cae-live, master-live-server, caefeeder-live
-    discovery_json = getJsonFromFile( discovery_file )
+    discoveryJson = getJsonFromFile( discoveryFile )
 
-    if( discovery_json != nil )
+    if( discoveryJson != nil )
 
-      self.generateOverviewTemplate()
+      services       = discoveryJson.keys
 
-      services       = discovery_json.keys
+      self.generateOverviewTemplate( services )
 
       # determine type of service from mergedHostData.json file, e.g. cae, caefeeder, contentserver
-      merged_host_json = getJsonFromFile(merged_host_file)
+      merged_host_json = getJsonFromFile(mergedHostFile)
 
       @log.debug("Found services: #{services}")
 
-      template_paths = Array.new
-      aggregation_map = Hash.new
+      templatePaths  = Array.new()
+      aggregationMap = Hash.new()
 
       services.each do |service|
-        paths = Array.new
+
+        paths = Array.new()
+
         @log.debug("Searching templates paths for service: #{service}")
 
         # cae-live-1 -> cae-live
-        service_name = removePostfix(service)
+        serviceName = removePostfix(service)
 
         # get templates for service
-        paths.push(*getTemplatePathsForService(service_name))
+        paths.push(*getTemplatePathsForService(serviceName))
 
         # get templates for service type
-        service_type = merged_host_json[service]["application"]
-        if service_type
-          paths.push(*getTemplatePathsForServiceType(service_type))
+        serviceType = merged_host_json[service]["application"]
+        if serviceType
+          paths.push(*getTemplatePathsForServiceType(serviceType))
         end
 
-        template_paths.push(*paths)
+        templatePaths.push(*paths)
 
-        if( service_type && isAggregationTemplateAvailable(service_type) )
-          if( !aggregation_map[service_type] )
-            aggregation_map[service_type] = Array.new
+        if( serviceType && isAggregationTemplateAvailable(serviceType) )
+          if( !aggregationMap[serviceType] )
+            aggregationMap[serviceType] = Array.new
           end
 
-          aggregation_map[service_type].push(*paths)
+          aggregationMap[serviceType].push(*paths)
         end
 
       end
 
-      @log.debug( "Found Template paths: #{template_paths} and aggregation template paths #{aggregation_map}" )
+      @log.debug( "Found Template paths: #{templatePaths} and aggregation template paths #{aggregationMap}" )
 
-#      generateAggregatedTemplates( aggregation_map )
-      generateServiceTemplates( template_paths )
+#      generateAggregatedTemplates( aggregationMap )
+      generateServiceTemplates( templatePaths )
     end
   end
 
@@ -136,26 +140,6 @@ class Grafana
   def deleteDashboards( host )
 
     @log.debug("Deleting dashboards for host #{host}")
-#
-#     # TODO: Should be http://grafana:3000 but does not work, Error: Name or service not known
-#     uri = URI( sprintf( '%s/api/search?query=&tag=%s', @grafanaURI, host ) ) #"http://localhost/grafana/api/search?query=&tag=#{host}")
-#     @log.debug("Grafana Uri: #{uri}")
-#
-#     response = nil
-#     Net::HTTP.start(uri.host, uri.port) do |http|
-#       request = Net::HTTP::Get.new uri.request_uri
-#       request.basic_auth 'admin', 'admin'
-#       response = http.request request
-#       @log.debug("Get dashboards for host #{host} ok: #{response.code}")
-#     end
-#
-#     if response.code != "200"
-#       @log.debug("No dashboards found to delete")
-#       return
-#     end
-#
-#     resp_body = JSON.parse(response.body)
-#     dashboards = resp_body.collect { |item| item['uri'] }
 
     dashboards = self.searchDashboards( host )
 
@@ -220,24 +204,29 @@ class Grafana
 
   #cae-live-1 -> cae-live
   def removePostfix(service)
-    if service =~ /\d/
-      last_part = service.split("-").last
-      service = service.chomp("-#{last_part}")
-      @log.debug("Chomped service: #{service}")
+
+    if( service =~ /\d/ )
+
+      lastPart = service.split("-").last
+      service  = service.chomp("-#{lastPart}")
+#       @log.debug("Chomped service: #{service}")
     end
+
     return service
+
   end
 
 
-  def getTemplatePathsForServiceType(service_type)
+  def getTemplatePathsForServiceType(serviceType)
 
     paths = Array.new()
-#    @log.debug(service_type)
-    dirs  = Dir["#{@templateDirectory}/service-types/#{service_type}"]
+#    @log.debug(serviceType)
+    dirs  = Dir["#{@templateDirectory}/service-types/#{serviceType}"]
     count = dirs.count()
 
     if( count != 0 )
-      @log.debug("Found dirs: #{dirs}")
+
+#       @log.debug("Found dirs: #{dirs}")
       dirs.each do |dir|
         paths.push(*Dir["#{dir}/cm*.json"])
       end
@@ -254,7 +243,8 @@ class Grafana
     count = dirs.count()
 
     if( count != 0 )
-      @log.debug("Found dirs: #{dirs}")
+
+#       @log.debug("Found dirs: #{dirs}")
       dirs.each do |dir|
         paths.push(*Dir["#{dir}/cm*.json"])
       end
@@ -264,9 +254,9 @@ class Grafana
   end
 
 
-  def isAggregationTemplateAvailable( service_type )
+  def isAggregationTemplateAvailable( serviceType )
 
-    baseFile = Dir["#{@templateDirectory}/service-types/#{service_type}/aggregate*.json"]
+    baseFile = Dir["#{@templateDirectory}/service-types/#{serviceType}/aggregate*.json"]
     count    = baseFile.count()
 
     if( count != 0 )
@@ -282,29 +272,88 @@ class Grafana
   end
 
 
-  def generateOverviewTemplate()
+  def generateOverviewTemplate( services )
 
-    tpl  = self.getJsonFromFile( sprintf( '%s/cm-overview.json', @templateDirectory ) )
+    rows = Array.new()
 
-    self.sendTemplateToGrafana( JSON.generate( tpl ) )
+    # TODO
+    # sorting
+    services.each do |service|
+
+      service  = self.removePostfix( service )
+      template = sprintf( '%s/overview/%s.tpl', @templateDirectory, service )
+
+      if( File.exist?( template ) )
+        tpl = File.read( template )
+
+        rows << tpl
+      end
+    end
+
+    rows = rows.join(',')
+
+    template = %(
+      {
+        "dashboard": {
+          "id": null,
+          "title": "%SHORTHOST% - Overview",
+          "originalTitle": "%SHORTHOST% - Overview",
+          "tags": [ "%TAG%" ],
+          "style": "dark",
+          "timezone": "browser",
+          "editable": true,
+          "hideControls": false,
+          "sharedCrosshair": false,
+          "rows": [
+            #{rows}
+          ],
+          "time": {
+            "from": "now-5m",
+            "to": "now"
+          },
+          "timepicker": {
+            "refresh_intervals": [ "30s", "1m", "2m", "10m" ],
+            "time_options": [ "5m", "15m" ]
+          },
+          "templating": {
+            "list": []
+          },
+          "annotations": {
+            "list": []
+          },
+          "refresh": "1m",
+          "schemaVersion": 12,
+          "version": 0,
+          "links": []
+        }
+      }
+    )
+
+    if( validJson?( json ) )
+
+      @log.debug( 'send to grafana' )
+      sendTemplateToGrafana( json )
+    else
+      @log.debug( 'no valid JSON' )
+    end
 
   end
 
-  def generateAggregatedTemplates(aggregated_templates)
+  def generateAggregatedTemplates(aggregatedTemplates)
 
-    aggregated_templates.each do |service_type, fragments|
+    aggregatedTemplates.each do |serviceType, fragments|
 
-      @log.debug("Aggregating templates for '#{service_type}' with #{fragments}")
+      @log.debug("Aggregating templates for '#{serviceType}' with #{fragments}")
 
-      tpl_basename = service_type
+      templateBasename = serviceType
 
-      @log.debug("Creating dashboard '#{tpl_basename}'")
+      @log.debug("Creating dashboard '#{templateBasename}'")
 
-      aggregation_file = Dir["#{@templateDirectory}/service-types/#{service_type}/aggregate*.json"]
+      aggregationFile = Dir["#{@templateDirectory}/service-types/#{serviceType}/aggregate*.json"]
 
-      if( aggregation_file.length > 0 )
+      if( aggregationFile.length > 0 )
 
-        aggregation_file_json = getJsonFromFile(aggregation_file[0])
+        aggregationFileJson = getJsonFromFile(aggregationFile[0])
 
         fragments.each do |fragment|
 
@@ -312,14 +361,14 @@ class Grafana
 
             @log.error( sprintf( 'read fragment \'%s\'', fragment ) )
 
-            fragment_file = File.read(fragment)
-            fragment_json = JSON.parse(fragment_file)
+            fragmentFile = File.read(fragment)
+            fragmentJson = JSON.parse(fragmentFile)
 
-            if( fragment_json['dashboard'] and fragment_json['dashboard']['rows'] )
+            if( fragmentJson['dashboard'] and fragmentJson['dashboard']['rows'] )
 
-              if( fragment_json["dashboard"]["rows"] )
-                fragment_json["dashboard"]["rows"].each do |item|
-                  aggregation_file_json["dashboard"]["rows"] << item
+              if( fragmentJson["dashboard"]["rows"] )
+                fragmentJson["dashboard"]["rows"].each do |item|
+                  aggregationFileJson["dashboard"]["rows"] << item
                 end
               end
 
@@ -329,43 +378,44 @@ class Grafana
             @log.error( sprintf( "File '%s' not exists", fragment ) )
           end
         end
-        merged_template = JSON.generate(aggregation_file_json)
+        mergedTemplate = JSON.generate(aggregationFileJson)
       end
 
-      sendTemplateToGrafana( merged_template )
+      sendTemplateToGrafana( mergedTemplate )
 
     end
   end
 
 
   def generateServiceTemplates(templates)
+
     templates.each do |tpl|
 
       @log.debug("Creating dashboard #{File.basename(tpl).strip}")
 
-      tpl_file = File.read(tpl)
+      templateFile = File.read(tpl)
 
-      sendTemplateToGrafana(tpl_file)
+      sendTemplateToGrafana(templateFile)
 
     end
   end
 
 
-  def sendTemplateToGrafana(tpl_file)
+  def sendTemplateToGrafana(templateFile)
 
-    tpl_file.gsub! '%HOST%', @grafanaHostname
-    tpl_file.gsub! '%SHORTHOST%', @shortHostname
-    tpl_file.gsub! '%TAG%', @shortHostname
+    templateFile.gsub!( '%HOST%'     , @grafanaHostname )
+    templateFile.gsub!( '%SHORTHOST%', @shortHostname )
+    templateFile.gsub!( '%TAG%'      , @shortHostname )
 
-    grafana_db_uri = URI( sprintf( '%s/api/dashboards/db', @grafanaURI ) )
+    grafanaDbUri = URI( sprintf( '%s/api/dashboards/db', @grafanaURI ) )
 
     response = nil
-    Net::HTTP.start(grafana_db_uri.host, grafana_db_uri.port) do |http|
-      request = Net::HTTP::Post.new grafana_db_uri.request_uri
+    Net::HTTP.start(grafanaDbUri.host, grafanaDbUri.port) do |http|
+      request = Net::HTTP::Post.new grafanaDbUri.request_uri
       request.add_field('Content-Type', 'application/json')
       request.basic_auth 'admin', 'admin'
-      request.body = tpl_file
-      response = http.request request
+      request.body = templateFile
+      response     = http.request request
       @log.debug("Created dashboard, ok: #{response.code}")
     end
   end
