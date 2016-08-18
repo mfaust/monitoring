@@ -1,14 +1,19 @@
       {
+        "collapse": false,
+        "editable": true,
         "height": "100px",
-        "title": "CMS",
         "panels": [
           {
-            "id": 1,
-            "title": "",
-            "type": "text",
-            "span": 1,
             "content": "<h2><center><bold>CMS</bold></center></h2>",
-            "mode": "html"
+            "editable": true,
+            "error": false,
+            "id": 1,
+            "isNew": true,
+            "links": [],
+            "mode": "html",
+            "span": 1,
+            "title": "",
+            "type": "text"
           },
           {
             "id": 2,
@@ -182,4 +187,5 @@
             }
           }
         ],
+        "title": "CMS"
       }
