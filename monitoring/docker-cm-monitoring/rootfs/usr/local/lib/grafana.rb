@@ -16,7 +16,6 @@ require 'net/http'
 require 'uri'
 
 require_relative 'tools'
-require_relative 'grafana/dashboard_template'
 
 # -------------------------------------------------------------------------------------------------------------------
 
@@ -275,17 +274,37 @@ class Grafana
   def generateOverviewTemplate( services )
 
     rows = Array.new()
+    dir  = Array.new()
 
-    # TODO
-    # sorting
-    services.each do |service|
+    regex = /
+      ^                      # Starting at the front of the string
+      \d\d-                   # 2 digit
+      (?<service>.+[a-zA-Z]) # service name
+      \.tpl                   #
+    /x
+
+    Dir.chdir( sprintf( '%s/overview', @templateDirectory )  )
+
+    dirs = Dir.glob( "**.tpl" )
+    dirs = dirs.sort_by{ |a,b| a <=> b }.reverse
+    dirs.each do |f|
+
+      if( f =~ regex )
+        part = f.match(regex)
+        dir << "#{part['service']}".strip
+      end
+    end
+
+    intersect = services & dir
+
+    intersect.each do |service|
 
       service  = self.removePostfix( service )
-      template = sprintf( '%s/overview/%s.tpl', @templateDirectory, service )
+      template = Dir.glob( sprintf( '%s/overview/**%s.tpl', @templateDirectory, service ) ).first
 
       if( File.exist?( template ) )
-        tpl = File.read( template )
 
+        tpl = File.read( template )
         rows << tpl
       end
     end
@@ -329,15 +348,21 @@ class Grafana
       }
     )
 
-    if( validJson?( json ) )
+    # TODO
+    # recreate ID's
+
+    if( validJson?( template ) )
+
+      # @log.debug( JSON.pretty_generate( JSON.parse( template ) ) )
 
       @log.debug( 'send to grafana' )
-      sendTemplateToGrafana( json )
+      sendTemplateToGrafana( template )
     else
       @log.debug( 'no valid JSON' )
     end
 
   end
+
 
   def generateAggregatedTemplates(aggregatedTemplates)
 
