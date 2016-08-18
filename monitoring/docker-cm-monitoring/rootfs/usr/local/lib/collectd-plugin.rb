@@ -630,13 +630,15 @@ class CollecdPlugin
 
   def ParseResult_SolrReplication( data = {} )
 
-    value  = data['value']            ? data['value']            : nil
-    mbean  = data['request']['mbean'] ? data['request']['mbean'] : nil
+    mbean = 'Replication'
 
-    format = 'PUTVAL %s/%s-%s/count-%s interval=%s N:%s'
+    value      = data['value']            ? data['value']            : nil
+    solrMbean  = data['request']['mbean'] ? data['request']['mbean'] : nil
+
+    format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
     data   = []
 
-    solrCore = self.solrCore( mbean )
+    solrCore = self.solrCore( solrMbean )
 
     if( value != nil )
 
@@ -652,9 +654,9 @@ class CollecdPlugin
       # indexSize ist irrsinnigerweise als human readable ausgeführt worden!
       indexSize         = Filesize.from( indexSize ).to_i
 
-      data.push( sprintf( format, @Host, @Service, solrCore, 'index_size', @interval, indexSize.to_s ) )
-      data.push( sprintf( format, @Host, @Service, solrCore, 'index'     , @interval, indexVersion ) )
-      data.push( sprintf( format, @Host, @Service, solrCore, 'errors'    , @interval, errors ) )
+      data.push( sprintf( format, @Host, @Service, solrCore, mbean, 'index_size', @interval, indexSize.to_s ) )
+      data.push( sprintf( format, @Host, @Service, solrCore, mbean, 'index'     , @interval, indexVersion ) )
+      data.push( sprintf( format, @Host, @Service, solrCore, mbean, 'errors'    , @interval, errors ) )
 
     end
 
@@ -665,13 +667,15 @@ class CollecdPlugin
 
   def ParseResult_SolrQueryResultCache( data = {} )
 
-    value  = data['value']            ? data['value']            : nil
-    mbean  = data['request']['mbean'] ? data['request']['mbean'] : nil
+    mbean = 'QueryResultCache'
 
-    format = 'PUTVAL %s/%s-%s/count-%s interval=%s N:%s'
+    value      = data['value']            ? data['value']            : nil
+    solrMbean  = data['request']['mbean'] ? data['request']['mbean'] : nil
+
+    format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
     data   = []
 
-    solrCore = self.solrCore( mbean )
+    solrCore = self.solrCore( solrMbean )
 
     if( value != nil )
 
@@ -688,13 +692,13 @@ class CollecdPlugin
       cumulative_hitratio  = value['cumulative_hitratio']  ? value['cumulative_hitratio']  : nil
       cumulative_lookups   = value['cumulative_lookups']   ? value['cumulative_lookups']   : nil
 
-      data.push( sprintf( format, @Host, @Service, solrCore, 'warmupTime'  , @interval, warmupTime ) )
-      data.push( sprintf( format, @Host, @Service, solrCore, 'lookups'     , @interval, lookups ) )
-      data.push( sprintf( format, @Host, @Service, solrCore, 'evictions'   , @interval, evictions ) )
-      data.push( sprintf( format, @Host, @Service, solrCore, 'inserts'     , @interval, inserts ) )
-      data.push( sprintf( format, @Host, @Service, solrCore, 'hits'        , @interval, hits ) )
-      data.push( sprintf( format, @Host, @Service, solrCore, 'size'        , @interval, size ) )
-      data.push( sprintf( format, @Host, @Service, solrCore, 'hitratio'    , @interval, hitratio ) )
+      data.push( sprintf( format, @Host, @Service, solrCore, mbean, 'warmupTime'  , @interval, warmupTime ) )
+      data.push( sprintf( format, @Host, @Service, solrCore, mbean, 'lookups'     , @interval, lookups ) )
+      data.push( sprintf( format, @Host, @Service, solrCore, mbean, 'evictions'   , @interval, evictions ) )
+      data.push( sprintf( format, @Host, @Service, solrCore, mbean, 'inserts'     , @interval, inserts ) )
+      data.push( sprintf( format, @Host, @Service, solrCore, mbean, 'hits'        , @interval, hits ) )
+      data.push( sprintf( format, @Host, @Service, solrCore, mbean, 'size'        , @interval, size ) )
+      data.push( sprintf( format, @Host, @Service, solrCore, mbean, 'hitratio'    , @interval, hitratio ) )
 
     end
 
@@ -702,6 +706,78 @@ class CollecdPlugin
 
   end
 
+  def ParseResult_SolrDocumentCache( data = {} )
+
+    mbean = 'DocumentCache'
+
+    value      = data['value']            ? data['value']            : nil
+    solrMbean  = data['request']['mbean'] ? data['request']['mbean'] : nil
+
+    format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
+    data   = []
+
+    solrCore = self.solrCore( solrMbean )
+
+    if( value != nil )
+
+      warmupTime           = value['warmupTime']           ? value['warmupTime']           : nil
+      lookups              = value['lookups']              ? value['lookups']              : nil
+      evictions            = value['evictions']            ? value['evictions']            : nil
+      inserts              = value['inserts']              ? value['inserts']              : nil
+      hits                 = value['hits']                 ? value['hits']                 : nil
+      size                 = value['size']                 ? value['size']                 : nil
+      hitratio             = value['hitratio']             ? value['hitratio']             : nil
+      cumulative_inserts   = value['cumulative_inserts']   ? value['cumulative_inserts']   : nil
+      cumulative_hits      = value['cumulative_hits']      ? value['cumulative_hits']      : nil
+      cumulative_evictions = value['cumulative_evictions'] ? value['cumulative_evictions'] : nil
+      cumulative_hitratio  = value['cumulative_hitratio']  ? value['cumulative_hitratio']  : nil
+      cumulative_lookups   = value['cumulative_lookups']   ? value['cumulative_lookups']   : nil
+
+      data.push( sprintf( format, @Host, @Service, solrCore, mbean, 'warmupTime'  , @interval, warmupTime ) )
+      data.push( sprintf( format, @Host, @Service, solrCore, mbean, 'lookups'     , @interval, lookups ) )
+      data.push( sprintf( format, @Host, @Service, solrCore, mbean, 'evictions'   , @interval, evictions ) )
+      data.push( sprintf( format, @Host, @Service, solrCore, mbean, 'inserts'     , @interval, inserts ) )
+      data.push( sprintf( format, @Host, @Service, solrCore, mbean, 'hits'        , @interval, hits ) )
+      data.push( sprintf( format, @Host, @Service, solrCore, mbean, 'size'        , @interval, size ) )
+      data.push( sprintf( format, @Host, @Service, solrCore, mbean, 'hitratio'    , @interval, hitratio ) )
+
+    end
+
+    return data
+
+  end
+
+  def ParseResult_SolrSelect( data = {} )
+
+    mbean = 'Select'
+
+    value      = data['value']            ? data['value']            : nil
+    solrMbean  = data['request']['mbean'] ? data['request']['mbean'] : nil
+
+    format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
+    data   = []
+
+    solrCore = self.solrCore( solrMbean )
+
+    if( value != nil )
+
+      avgRequestsPerSecond   = value['avgRequestsPerSecond']   ? value['avgRequestsPerSecond'] : nil
+      avgTimePerRequest      = value['avgTimePerRequest']      ? value['avgTimePerRequest']    : nil
+      medianRequestTime      = value['medianRequestTime']      ? value['medianRequestTime']    : nil
+      requests               = value['requests']               ? value['requests']             : nil
+      timeouts               = value['timeouts']               ? value['timeouts']             : nil
+      errors                 = value['errors']                 ? value['errors']               : nil
+
+      data.push( sprintf( format, @Host, @Service, solrCore, mbean, 'avgRequestsPerSecond'  , @interval, avgRequestsPerSecond ) )
+      data.push( sprintf( format, @Host, @Service, solrCore, mbean, 'avgTimePerRequest'     , @interval, avgTimePerRequest ) )
+      data.push( sprintf( format, @Host, @Service, solrCore, mbean, 'medianRequestTime'     , @interval, medianRequestTime ) )
+      data.push( sprintf( format, @Host, @Service, solrCore, mbean, 'requests'              , @interval, requests ) )
+      data.push( sprintf( format, @Host, @Service, solrCore, mbean, 'timeouts'              , @interval, timeouts ) )
+      data.push( sprintf( format, @Host, @Service, solrCore, mbean, 'errors'                , @interval, errors ) )
+
+    end
+
+  end
 
   def ParseResult_ConnectionPool( data = {} )
 
@@ -940,6 +1016,10 @@ class CollecdPlugin
                   graphiteOutput.push( self.ParseResult_SolrReplication( v ) )
                 when /^Solr.*QueryResultCache/
                   graphiteOutput.push( self.ParseResult_SolrQueryResultCache( v ) )
+                when /^Solr.*DocumentCache/
+                  graphiteOutput.push( self.ParseResult_SolrDocumentCache( v ) )
+                when /^Solr.*Select/
+                  graphiteOutput.push( self.ParseResult_SolrSelect( v ) )
                 end
               end
             end

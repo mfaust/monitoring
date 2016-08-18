@@ -192,6 +192,9 @@
           }, {
             "mbean": "solr/%CORE%:type=documentCache,id=org.apache.solr.search.LRUCache",
             "attribute" : "cumulative_evictions,cumulative_hitratio,cumulative_hits,cumulative_inserts,cumulative_lookups,description,evictions,hitratio,hits,inserts,lookups,size,warmupTime"
+          }, {
+            "mbean": "solr/%CORE%:type=/select,id=org.apache.solr.handler.component.SearchHandler",
+            "attribute" : "avgRequestsPerSecond,avgTimePerRequest,medianRequestTime,requests,timeouts,errors"
           }
         ]
       }

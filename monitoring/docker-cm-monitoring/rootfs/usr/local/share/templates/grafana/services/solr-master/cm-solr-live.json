@@ -1,0 +1,1176 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "%SHORTHOST% Solr Master Live",
+    "originalTitle": "%SHORTHOST% Solr Master Live",
+    "tags": [ "%TAG%"],
+    "style": "dark",
+    "timezone": "browser",
+    "editable": true,
+    "hideControls": false,
+    "sharedCrosshair": false,
+    "rows": [
+      {
+        "collapse": false,
+        "editable": true,
+        "height": "25px",
+        "panels": [
+          {
+            "content": "<h2><center>SOLR Master Live</center></h2>",
+            "editable": true,
+            "error": false,
+            "id": 1,
+            "isNew": true,
+            "links": [],
+            "mode": "html",
+            "span": 12,
+            "title": "",
+            "transparent": true,
+            "type": "text"
+          }
+        ],
+        "title": "New row"
+      },
+      {
+        "collapse": false,
+        "editable": true,
+        "height": "150px",
+        "panels": [
+          {
+            "title": "used percent",
+            "error": false,
+            "span": 1,
+            "editable": true,
+            "type": "singlestat",
+            "isNew": true,
+            "id": 2,
+            "targets": [
+              {
+                "target": "collectd.%HOST%.SOLR_MASTER-Memory-heap_memory.count-used_percent",
+                "refId": "A"
+              }
+            ],
+            "links": [],
+            "datasource": "graphite",
+            "maxDataPoints": 100,
+            "interval": null,
+            "cacheTimeout": null,
+            "format": "none",
+            "prefix": "",
+            "postfix": " %",
+            "nullText": null,
+            "valueMaps": [
+              {
+                "value": "null",
+                "op": "=",
+                "text": "N/A"
+              }
+            ],
+            "mappingTypes": [
+              {
+                "name": "value to text",
+                "value": 1
+              },
+              {
+                "name": "range to text",
+                "value": 2
+              }
+            ],
+            "rangeMaps": [
+              {
+                "from": "null",
+                "to": "null",
+                "text": "N/A"
+              }
+            ],
+            "mappingType": 1,
+            "nullPointMode": "connected",
+            "valueName": "current",
+            "prefixFontSize": "50%",
+            "valueFontSize": "80%",
+            "postfixFontSize": "50%",
+            "thresholds": "85,95",
+            "colorBackground": false,
+            "colorValue": false,
+            "colors": [
+              "rgba(50, 172, 45, 0.97)",
+              "rgba(237, 129, 40, 0.89)",
+              "rgba(245, 54, 54, 0.9)"
+            ],
+            "sparkline": {
+              "show": true,
+              "full": false,
+              "lineColor": "rgb(31, 120, 193)",
+              "fillColor": "rgba(31, 118, 189, 0.18)"
+            },
+            "gauge": {
+              "show": true,
+              "minValue": 0,
+              "maxValue": 100,
+              "thresholdMarkers": true,
+              "thresholdLabels": false
+            }
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "editable": true,
+            "error": false,
+            "fill": 3,
+            "grid": {
+              "threshold1": null,
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2": null,
+              "threshold2Color": "rgba(234, 112, 112, 0.22)"
+            },
+            "id": 3,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "span": 11,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "hide": false,
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.SOLR_MASTER-Memory-heap_memory.count-max, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "hide": false,
+                "refId": "B",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.SOLR_MASTER-Memory-heap_memory.count-committed, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "hide": false,
+                "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.SOLR_MASTER-Memory-heap_memory.count-used, '(.*)-', ''))",
+                "textEditor": false
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "Heap Memory",
+            "tooltip": {
+              "msResolution": false,
+              "ordering": "alphabetical",
+              "shared": true,
+              "value_type": "cumulative",
+              "sort": 0
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "bytes",
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": false
+              }
+            ],
+            "decimals": 2
+          }
+        ],
+        "title": "Heap Memory"
+      },
+      {
+        "collapse": false,
+        "editable": true,
+        "height": "150px",
+        "panels": [
+          {
+            "title": "percent used",
+            "error": false,
+            "span": 1,
+            "editable": true,
+            "type": "singlestat",
+            "isNew": true,
+            "id": 4,
+            "targets": [
+              {
+                "target": "collectd.%HOST%.SOLR_MASTER-Memory-perm_memory.count-used_percent",
+                "refId": "A"
+              }
+            ],
+            "links": [],
+            "datasource": "graphite",
+            "maxDataPoints": 100,
+            "interval": null,
+            "cacheTimeout": null,
+            "format": "none",
+            "prefix": "",
+            "postfix": " %",
+            "nullText": null,
+            "valueMaps": [
+              {
+                "value": "null",
+                "op": "=",
+                "text": "N/A"
+              }
+            ],
+            "mappingTypes": [
+              {
+                "name": "value to text",
+                "value": 1
+              },
+              {
+                "name": "range to text",
+                "value": 2
+              }
+            ],
+            "rangeMaps": [
+              {
+                "from": "null",
+                "to": "null",
+                "text": "N/A"
+              }
+            ],
+            "mappingType": 1,
+            "nullPointMode": "connected",
+            "valueName": "current",
+            "prefixFontSize": "50%",
+            "valueFontSize": "80%",
+            "postfixFontSize": "50%",
+            "thresholds": "90,95",
+            "colorBackground": false,
+            "colorValue": false,
+            "colors": [
+              "rgba(50, 172, 45, 0.97)",
+              "rgba(237, 129, 40, 0.89)",
+              "rgba(245, 54, 54, 0.9)"
+            ],
+            "sparkline": {
+              "show": true,
+              "full": false,
+              "lineColor": "rgb(31, 120, 193)",
+              "fillColor": "rgba(31, 118, 189, 0.18)"
+            },
+            "gauge": {
+              "show": true,
+              "minValue": 0,
+              "maxValue": 100,
+              "thresholdMarkers": true,
+              "thresholdLabels": false
+            }
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "editable": true,
+            "error": false,
+            "fill": 1,
+            "grid": {
+              "threshold1": null,
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2": null,
+              "threshold2Color": "rgba(234, 112, 112, 0.22)"
+            },
+            "id": 5,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "span": 11,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.SOLR_MASTER-Memory-perm_memory.count-committed, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.SOLR_MASTER-Memory-perm_memory.count-used, '(.*)-', ''))",
+                "textEditor": false
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "Perm Memory",
+            "tooltip": {
+              "msResolution": false,
+              "ordering": "alphabetical",
+              "shared": true,
+              "value_type": "cumulative",
+              "sort": 0
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "bytes",
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": false
+              }
+            ],
+            "decimals": 2
+          }
+        ],
+        "title": "Perm Memory"
+      },
+      {
+        "collapse": false,
+        "editable": true,
+        "height": "150px",
+        "panels": [
+          {
+            "aliasColors": {},
+            "bars": false,
+            "cacheTimeout": "",
+            "datasource": "graphite",
+            "decimals": 2,
+            "editable": true,
+            "error": false,
+            "fill": 3,
+            "grid": {
+              "threshold1": null,
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2": null,
+              "threshold2Color": "rgba(234, 112, 112, 0.22)"
+            },
+            "id": 6,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "maxDataPoints": "",
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "span": 12,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.SOLR_MASTER-GCParNew-gc_duration.count-duration, '(.*)-', ''))",
+                "textEditor": false
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "Garbage Collector Duration",
+            "tooltip": {
+              "msResolution": false,
+              "ordering": "alphabetical",
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "ms",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ]
+          }
+        ],
+        "title": "Garbage Collector"
+      },
+      {
+        "collapse": false,
+        "editable": true,
+        "height": "25px",
+        "panels": [
+          {
+            "content": "<h3><center>Live Index</center></h3>",
+            "editable": true,
+            "error": false,
+            "id": 10,
+            "isNew": true,
+            "links": [],
+            "mode": "html",
+            "span": 12,
+            "title": "",
+            "transparent": true,
+            "type": "text"
+          }
+        ],
+        "title": "New row"
+      },
+      {
+        "title": "Live QueryResultCache index size",
+        "height": "250px",
+        "editable": true,
+        "collapse": false,
+        "panels": [
+          {
+            "title": "Live QueryResultCache Index Size",
+            "error": false,
+            "span": 12,
+            "editable": true,
+            "type": "graph",
+            "isNew": true,
+            "id": 7,
+            "targets": [
+              {
+                "target": "collectd.%HOST%.SOLR_MASTER-core_live-QueryResultCache.count-size",
+                "refId": "A"
+              }
+            ],
+            "datasource": null,
+            "renderer": "flot",
+            "yaxes": [
+              {
+                "label": null,
+                "show": true,
+                "logBase": 1,
+                "min": null,
+                "max": null,
+                "format": "bytes"
+              },
+              {
+                "label": null,
+                "show": true,
+                "logBase": 1,
+                "min": null,
+                "max": null,
+                "format": "short"
+              }
+            ],
+            "xaxis": {
+              "show": true
+            },
+            "grid": {
+              "threshold1": null,
+              "threshold2": null,
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2Color": "rgba(234, 112, 112, 0.22)"
+            },
+            "lines": true,
+            "fill": 1,
+            "linewidth": 2,
+            "points": false,
+            "pointradius": 5,
+            "bars": false,
+            "stack": false,
+            "percentage": false,
+            "legend": {
+              "show": true,
+              "values": false,
+              "min": false,
+              "max": false,
+              "current": false,
+              "total": false,
+              "avg": false
+            },
+            "nullPointMode": "connected",
+            "steppedLine": false,
+            "tooltip": {
+              "value_type": "cumulative",
+              "shared": true,
+              "sort": 0,
+              "msResolution": false
+            },
+            "timeFrom": null,
+            "timeShift": null,
+            "aliasColors": {},
+            "seriesOverrides": [],
+            "links": []
+          }
+        ]
+      },
+      {
+        "title": "Live QueryResultCache Hits",
+        "height": "250px",
+        "editable": true,
+        "collapse": false,
+        "panels": [
+          {
+            "title": "Live QueryResultCache Hits",
+            "error": false,
+            "span": 12,
+            "editable": true,
+            "type": "graph",
+            "isNew": true,
+            "id": 8,
+            "targets": [
+              {
+                "target": "collectd.%HOST%.SOLR_MASTER-core_live-QueryResultCache.count-hits",
+                "refId": "A"
+              }
+            ],
+            "datasource": null,
+            "renderer": "flot",
+            "yaxes": [
+              {
+                "label": null,
+                "show": true,
+                "logBase": 1,
+                "min": null,
+                "max": null,
+                "format": "short"
+              },
+              {
+                "label": null,
+                "show": true,
+                "logBase": 1,
+                "min": null,
+                "max": null,
+                "format": "short"
+              }
+            ],
+            "xaxis": {
+              "show": true
+            },
+            "grid": {
+              "threshold1": null,
+              "threshold2": null,
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2Color": "rgba(234, 112, 112, 0.22)"
+            },
+            "lines": true,
+            "fill": 1,
+            "linewidth": 2,
+            "points": false,
+            "pointradius": 5,
+            "bars": false,
+            "stack": false,
+            "percentage": false,
+            "legend": {
+              "show": true,
+              "values": false,
+              "min": false,
+              "max": false,
+              "current": false,
+              "total": false,
+              "avg": false
+            },
+            "nullPointMode": "connected",
+            "steppedLine": false,
+            "tooltip": {
+              "value_type": "cumulative",
+              "shared": true,
+              "sort": 0,
+              "msResolution": false
+            },
+            "timeFrom": null,
+            "timeShift": null,
+            "aliasColors": {},
+            "seriesOverrides": [],
+            "links": []
+          }
+        ]
+      },
+      {
+        "title": "Live QueryResultCache Hitratio",
+        "height": "250px",
+        "editable": true,
+        "collapse": false,
+        "panels": [
+          {
+            "title": "Live QueryResultCache Hitratio",
+            "error": false,
+            "span": 12,
+            "editable": true,
+            "type": "graph",
+            "isNew": true,
+            "id": 9,
+            "targets": [
+              {
+                "target": "collectd.%HOST%.SOLR_MASTER-core_live-QueryResultCache.count-hitratio",
+                "refId": "A"
+              }
+            ],
+            "datasource": null,
+            "renderer": "flot",
+            "yaxes": [
+              {
+                "label": null,
+                "show": true,
+                "logBase": 1,
+                "min": null,
+                "max": null,
+                "format": "short"
+              },
+              {
+                "label": null,
+                "show": true,
+                "logBase": 1,
+                "min": null,
+                "max": null,
+                "format": "short"
+              }
+            ],
+            "xaxis": {
+              "show": true
+            },
+            "grid": {
+              "threshold1": null,
+              "threshold2": null,
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2Color": "rgba(234, 112, 112, 0.22)"
+            },
+            "lines": true,
+            "fill": 1,
+            "linewidth": 2,
+            "points": false,
+            "pointradius": 5,
+            "bars": false,
+            "stack": false,
+            "percentage": false,
+            "legend": {
+              "show": true,
+              "values": false,
+              "min": false,
+              "max": false,
+              "current": false,
+              "total": false,
+              "avg": false
+            },
+            "nullPointMode": "connected",
+            "steppedLine": false,
+            "tooltip": {
+              "value_type": "cumulative",
+              "shared": true,
+              "sort": 0,
+              "msResolution": false
+            },
+            "timeFrom": null,
+            "timeShift": null,
+            "aliasColors": {},
+            "seriesOverrides": [],
+            "links": []
+          }
+        ]
+      },
+      {
+        "title": "Live DocumentCache Index size",
+        "height": "250px",
+        "editable": true,
+        "collapse": false,
+        "panels": [
+          {
+            "title": "Live DocumentCache Index Size",
+            "error": false,
+            "span": 12,
+            "editable": true,
+            "type": "graph",
+            "isNew": true,
+            "id": 10,
+            "targets": [
+              {
+                "target": "collectd.%HOST%.SOLR_MASTER-core_live-DocumentCache.count-size",
+                "refId": "A"
+              }
+            ],
+            "datasource": null,
+            "renderer": "flot",
+            "yaxes": [
+              {
+                "label": null,
+                "show": true,
+                "logBase": 1,
+                "min": null,
+                "max": null,
+                "format": "bytes"
+              },
+              {
+                "label": null,
+                "show": true,
+                "logBase": 1,
+                "min": null,
+                "max": null,
+                "format": "short"
+              }
+            ],
+            "xaxis": {
+              "show": true
+            },
+            "grid": {
+              "threshold1": null,
+              "threshold2": null,
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2Color": "rgba(234, 112, 112, 0.22)"
+            },
+            "lines": true,
+            "fill": 1,
+            "linewidth": 2,
+            "points": false,
+            "pointradius": 5,
+            "bars": false,
+            "stack": false,
+            "percentage": false,
+            "legend": {
+              "show": true,
+              "values": false,
+              "min": false,
+              "max": false,
+              "current": false,
+              "total": false,
+              "avg": false
+            },
+            "nullPointMode": "connected",
+            "steppedLine": false,
+            "tooltip": {
+              "value_type": "cumulative",
+              "shared": true,
+              "sort": 0,
+              "msResolution": false
+            },
+            "timeFrom": null,
+            "timeShift": null,
+            "aliasColors": {},
+            "seriesOverrides": [],
+            "links": []
+          }
+        ]
+      },
+      {
+        "title": "Live DocumentCache Hits",
+        "height": "250px",
+        "editable": true,
+        "collapse": false,
+        "panels": [
+          {
+            "title": "Live DocumentCache Hits",
+            "error": false,
+            "span": 11,
+            "editable": true,
+            "type": "graph",
+            "isNew": true,
+            "id": 11,
+            "targets": [
+              {
+                "target": "collectd.%HOST%.SOLR_MASTER-core_live-DocumentCache.count-hits",
+                "refId": "A"
+              }
+            ],
+            "datasource": null,
+            "renderer": "flot",
+            "yaxes": [
+              {
+                "label": null,
+                "show": true,
+                "logBase": 1,
+                "min": null,
+                "max": null,
+                "format": "short"
+              },
+              {
+                "label": null,
+                "show": true,
+                "logBase": 1,
+                "min": null,
+                "max": null,
+                "format": "short"
+              }
+            ],
+            "xaxis": {
+              "show": true
+            },
+            "grid": {
+              "threshold1": null,
+              "threshold2": null,
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2Color": "rgba(234, 112, 112, 0.22)"
+            },
+            "lines": true,
+            "fill": 1,
+            "linewidth": 2,
+            "points": false,
+            "pointradius": 5,
+            "bars": false,
+            "stack": false,
+            "percentage": false,
+            "legend": {
+              "show": true,
+              "values": false,
+              "min": false,
+              "max": false,
+              "current": false,
+              "total": false,
+              "avg": false
+            },
+            "nullPointMode": "connected",
+            "steppedLine": false,
+            "tooltip": {
+              "value_type": "cumulative",
+              "shared": true,
+              "sort": 0,
+              "msResolution": false
+            },
+            "timeFrom": null,
+            "timeShift": null,
+            "aliasColors": {},
+            "seriesOverrides": [],
+            "links": []
+          }
+        ]
+      },
+      {
+        "title": "Live DocumentCache Hitratio",
+        "height": "250px",
+        "editable": true,
+        "collapse": false,
+        "panels": [
+          {
+            "title": "Live Hitratio",
+            "error": false,
+            "span": 12,
+            "editable": true,
+            "type": "graph",
+            "isNew": true,
+            "id": 12,
+            "targets": [
+              {
+                "target": "collectd.%HOST%.SOLR_MASTER-core_live-DocumentCache.count-hitratio",
+                "refId": "A"
+              }
+            ],
+            "datasource": null,
+            "renderer": "flot",
+            "yaxes": [
+              {
+                "label": null,
+                "show": true,
+                "logBase": 1,
+                "min": null,
+                "max": null,
+                "format": "short"
+              },
+              {
+                "label": null,
+                "show": true,
+                "logBase": 1,
+                "min": null,
+                "max": null,
+                "format": "short"
+              }
+            ],
+            "xaxis": {
+              "show": true
+            },
+            "grid": {
+              "threshold1": null,
+              "threshold2": null,
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2Color": "rgba(234, 112, 112, 0.22)"
+            },
+            "lines": true,
+            "fill": 1,
+            "linewidth": 2,
+            "points": false,
+            "pointradius": 5,
+            "bars": false,
+            "stack": false,
+            "percentage": false,
+            "legend": {
+              "show": true,
+              "values": false,
+              "min": false,
+              "max": false,
+              "current": false,
+              "total": false,
+              "avg": false
+            },
+            "nullPointMode": "connected",
+            "steppedLine": false,
+            "tooltip": {
+              "value_type": "cumulative",
+              "shared": true,
+              "sort": 0,
+              "msResolution": false
+            },
+            "timeFrom": null,
+            "timeShift": null,
+            "aliasColors": {},
+            "seriesOverrides": [],
+            "links": []
+          }
+        ]
+      },
+      {
+        "collapse": false,
+        "editable": true,
+        "height": "250px",
+        "panels": [
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": null,
+            "editable": true,
+            "error": false,
+            "fill": 1,
+            "grid": {
+              "threshold1": null,
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2": null,
+              "threshold2Color": "rgba(234, 112, 112, 0.22)"
+            },
+            "id": 13,
+            "isNew": true,
+            "legend": {
+              "avg": false,
+              "current": false,
+              "max": false,
+              "min": false,
+              "show": true,
+              "total": false,
+              "values": false
+            },
+            "lines": true,
+            "linewidth": 2,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "span": 12,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "collectd.%HOST%.SOLR_MASTER-core_live-Select.count-avgTimePerRequest"
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "Live Average time per request",
+            "tooltip": {
+              "msResolution": false,
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "ms",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ]
+          }
+        ],
+        "title": "Live average time per request"
+      },
+      {
+        "collapse": false,
+        "editable": true,
+        "height": "250px",
+        "panels": [
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": null,
+            "editable": true,
+            "error": false,
+            "fill": 1,
+            "grid": {
+              "threshold1": null,
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2": null,
+              "threshold2Color": "rgba(234, 112, 112, 0.22)"
+            },
+            "id": 14,
+            "isNew": true,
+            "legend": {
+              "avg": false,
+              "current": false,
+              "max": false,
+              "min": false,
+              "show": true,
+              "total": false,
+              "values": false
+            },
+            "lines": true,
+            "linewidth": 2,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "span": 12,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "collectd.%HOST%.SOLR_MASTER-core_live-Select.count-errors"
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "Live Index Errors",
+            "tooltip": {
+              "msResolution": false,
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "ms",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ]
+          }
+        ],
+        "title": "Live index errors"
+      }
+    ],
+    "time": {
+      "from": "now-3h",
+      "to": "now"
+    },
+    "timepicker": {
+      "now": true,
+      "refresh_intervals": [
+        "10s",
+        "30s",
+        "1m",
+        "2m",
+        "4m",
+        "10m"
+      ],
+      "time_options": [
+        "5m",
+        "15m",
+        "1h",
+        "6h",
+        "12h",
+        "24h",
+        "2d",
+        "7d",
+        "30d"
+      ]
+    },
+    "templating": {
+      "list": []
+    },
+    "annotations": {
+      "list": []
+    },
+    "refresh": "1m",
+    "schemaVersion": 12,
+    "version": 4,
+    "links": []
+  }
+}
