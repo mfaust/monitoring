@@ -4,7 +4,7 @@
         "height": "100px",
         "panels": [
           {
-            "content": "<h2><center><bold>CAE Preview</bold></center></h2>",
+            "content": "<h2><center><bold>Elastic Worker</bold></center></h2>",
             "editable": true,
             "error": false,
             "id": 45,
@@ -74,7 +74,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.CAE_PREV-Memory-heap_memory.count-used_percent"
+                "target": "collectd.%HOST%.ELASTIC_WORKER-Memory-heap_memory.count-used_percent"
               }
             ],
             "thresholds": "85,95",
@@ -149,7 +149,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.CAE_PREV-Memory-perm_memory.count-used_percent"
+                "target": "collectd.%HOST%.ELASTIC_WORKER-Memory-perm_memory.count-used_percent"
               }
             ],
             "thresholds": "85,95",
@@ -175,7 +175,7 @@
             "id": 48,
             "targets": [
               {
-                "target": "collectd.%HOST%.CAE_PREV-GCParNew-gc_duration.count-duration",
+                "target": "collectd.%HOST%.ELASTIC_WORKER-GCParNew-gc_duration.count-duration",
                 "refId": "A"
               }
             ],
@@ -250,7 +250,7 @@
             "id": 49,
             "targets": [
               {
-                "target": "collectd.%HOST%.CAE_PREV-CapConnection-heap_cache.count-used_percent",
+                "target": "collectd.%HOST%.ELASTIC_WORKER-CapConnection-heap_cache.count-used_percent",
                 "refId": "A"
               }
             ],
@@ -325,7 +325,7 @@
             "id": 50,
             "targets": [
               {
-                "target": "collectd.%HOST%.CAE_PREV-CapConnection-blob_cache.count-used_percent",
+                "target": "collectd.%HOST%.ELASTIC_WORKER-CapConnection-blob_cache.count-used_percent",
                 "refId": "A"
               }
             ],
@@ -400,7 +400,7 @@
             "id": 50,
             "targets": [
               {
-                "target": "collectd.monitoring-16-01.CAE_PREV-CapConnection-su_sessions.count-sessions",
+                "target": "collectd.monitoring-16-01.ELASTIC_WORKER-CapConnection-su_sessions.count-sessions",
                 "refId": "A"
               }
             ],
@@ -466,5 +466,5 @@
             }
           }
         ],
-        "title": "CAE Preview"
+        "title": "Elastic Worker"
       }
