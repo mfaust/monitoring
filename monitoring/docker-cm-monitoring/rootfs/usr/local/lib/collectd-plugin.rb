@@ -84,40 +84,6 @@ class CollecdPlugin
 
   end
 
-
-  def normalizeService( service )
-
-    # normalize service names for grafana
-    case service
-    when 'content-management-server'
-      service = 'CMS'
-    when 'master-live-server'
-      service = 'MLS'
-    when 'replication-live-server'
-      service = 'RLS'
-    when 'workflow-server'
-      service = 'WFS'
-    when /^cae-live/
-      service = 'CAE_LIVE'
-    when /^cae-preview/
-      service = 'CAE_PREV'
-#    when 'solr-master'
-#      service = 'SOLR_MASTER'
-#    when 'solr-slave'
-#      service = 'SOLR_SLAVE'
-    when 'content-feeder'
-      service = 'FEEDER_CONTENT'
-    when 'caefeeder-live'
-      service = 'FEEDER_LIVE'
-    when 'caefeeder-preview'
-      service = 'FEEDER_PREV'
-    end
-
-    return service.tr('-', '_').upcase
-
-  end
-
-
   def ParseResult_mongoDB( value = {} )
 
     format = 'PUTVAL %s/%s-%s/count-%s interval=%s N:%s'

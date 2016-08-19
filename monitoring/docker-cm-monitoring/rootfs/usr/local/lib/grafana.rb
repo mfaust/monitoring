@@ -94,12 +94,9 @@ class Grafana
 
       @log.debug("Found services: #{services}")
 
-      templatePaths  = Array.new()
-      #aggregationMap = Hash.new()
-
       services.each do |service|
-
-        paths = Array.new()
+        serviceTemplatePaths = Array.new()
+        additionalTemplatePaths = Array.new()
 
         @log.debug("Searching templates paths for service: #{service}")
 
@@ -107,30 +104,22 @@ class Grafana
         serviceName = removePostfix(service)
 
         # get templates for service
-        paths.push(*getTemplatePathsForService(serviceName))
+        serviceTemplatePaths = *getTemplatePathsForService(serviceName)
+
+        if (!['mongodb','postgres'].include? serviceName)
+          additionalTemplatePaths.push(*getTemplatePathsForService("tomcat"))
+        end
 
         # get templates for service type
         serviceType = merged_host_json[service]["application"]
         if serviceType
-          paths.push(*getTemplatePathsForServiceType(serviceType))
+          additionalTemplatePaths.push(*getTemplatePathsForServiceType(serviceType))
         end
 
-        templatePaths.push(*paths)
-
-        #if( serviceType && isAggregationTemplateAvailable(serviceType) )
-        #  if( !aggregationMap[serviceType] )
-        #    aggregationMap[serviceType] = Array.new
-        #  end
-
-        #  aggregationMap[serviceType].push(*paths)
-        #end
-
+        @log.debug( "Found Template paths: #{serviceTemplatePaths}, #{additionalTemplatePaths}")
+        generateServiceTemplate( serviceName, serviceTemplatePaths, additionalTemplatePaths )
       end
 
-      @log.debug( "Found Template paths: #{templatePaths}")
-
-#      generateAggregatedTemplates( aggregationMap )
-      generateServiceTemplates( templatePaths )
     end
   end
 
@@ -253,24 +242,6 @@ class Grafana
   end
 
 
-  def isAggregationTemplateAvailable( serviceType )
-
-    baseFile = Dir["#{@templateDirectory}/service-types/#{serviceType}/aggregate*.json"]
-    count    = baseFile.count()
-
-    if( count != 0 )
-
-      @log.debug("Found aggregation file #{baseFile}")
-
-#       if( baseFile.length > 0 )
-        return true
-#       end
-    end
-
-    return false
-  end
-
-
   def generateOverviewTemplate( services )
 
     rows = Array.new()
@@ -387,69 +358,38 @@ class Grafana
   end
 
 
-  def generateAggregatedTemplates(aggregatedTemplates)
+  def generateServiceTemplate(serviceName, serviceTemplatePaths, additionalTemplatePaths)
 
-    aggregatedTemplates.each do |serviceType, fragments|
-
-      @log.debug("Aggregating templates for '#{serviceType}' with #{fragments}")
-
-      templateBasename = serviceType
-
-      @log.debug("Creating dashboard '#{templateBasename}'")
-
-      aggregationFile = Dir["#{@templateDirectory}/service-types/#{serviceType}/aggregate*.json"]
-
-      if( aggregationFile.length > 0 )
-
-        aggregationFileJson = getJsonFromFile(aggregationFile[0])
-
-        fragments.each do |fragment|
-
-          if( File.exists?( fragment ) )
-
-            @log.error( sprintf( 'read fragment \'%s\'', fragment ) )
-
-            fragmentFile = File.read(fragment)
-            fragmentJson = JSON.parse(fragmentFile)
-
-            if( fragmentJson['dashboard'] and fragmentJson['dashboard']['rows'] )
-
-              if( fragmentJson["dashboard"]["rows"] )
-                fragmentJson["dashboard"]["rows"].each do |item|
-                  aggregationFileJson["dashboard"]["rows"] << item
-                end
-              end
-
-            end
-
-          else
-            @log.error( sprintf( "File '%s' not exists", fragment ) )
-          end
-        end
-        mergedTemplate = JSON.generate(aggregationFileJson)
-      end
-
-      sendTemplateToGrafana( mergedTemplate )
-
-    end
-  end
-
-
-  def generateServiceTemplates(templates)
-
-    templates.each do |tpl|
+    serviceTemplatePaths.each do |tpl|
 
       @log.debug("Creating dashboard #{File.basename(tpl).strip}")
 
       templateFile = File.read(tpl)
+      templateJson = JSON.parse(templateFile)
 
-      sendTemplateToGrafana(templateFile)
+      if (templateJson['dashboard'] and templateJson['dashboard']['rows'])
+        rows = templateJson["dashboard"]["rows"]
+
+        additionalTemplatePaths.each do |additionalTemplate|
+
+          additionalTemplateFile = File.read(additionalTemplate)
+          additionalTemplateJson = JSON.parse(additionalTemplateFile)
+
+          if (additionalTemplateJson["dashboard"]["rows"])
+            templateJson["dashboard"]["rows"] = additionalTemplateJson["dashboard"]["rows"].concat(rows)
+          end
+
+        end
+
+      end
+
+      sendTemplateToGrafana(JSON.generate(templateJson), normalizeService(serviceName))
 
     end
   end
 
 
-  def sendTemplateToGrafana(templateFile)
+  def sendTemplateToGrafana(templateFile, serviceName = nil)
 
     templateFile = regenerateGrafanaTemplateIDs(templateFile)
 
@@ -460,6 +400,9 @@ class Grafana
     templateFile.gsub!( '%HOST%'     , @grafanaHostname )
     templateFile.gsub!( '%SHORTHOST%', @shortHostname )
     templateFile.gsub!( '%TAG%'      , @shortHostname )
+    if (serviceName)
+      templateFile.gsub!( '%SERVICE%'  , serviceName )
+    end
 
     grafanaDbUri = URI( sprintf( '%s/api/dashboards/db', @grafanaURI ) )
 
