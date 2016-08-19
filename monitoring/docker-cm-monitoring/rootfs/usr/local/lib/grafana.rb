@@ -95,7 +95,7 @@ class Grafana
       @log.debug("Found services: #{services}")
 
       templatePaths  = Array.new()
-      aggregationMap = Hash.new()
+      #aggregationMap = Hash.new()
 
       services.each do |service|
 
@@ -117,17 +117,17 @@ class Grafana
 
         templatePaths.push(*paths)
 
-        if( serviceType && isAggregationTemplateAvailable(serviceType) )
-          if( !aggregationMap[serviceType] )
-            aggregationMap[serviceType] = Array.new
-          end
+        #if( serviceType && isAggregationTemplateAvailable(serviceType) )
+        #  if( !aggregationMap[serviceType] )
+        #    aggregationMap[serviceType] = Array.new
+        #  end
 
-          aggregationMap[serviceType].push(*paths)
-        end
+        #  aggregationMap[serviceType].push(*paths)
+        #end
 
       end
 
-      @log.debug( "Found Template paths: #{templatePaths} and aggregation template paths #{aggregationMap}" )
+      @log.debug( "Found Template paths: #{templatePaths}")
 
 #      generateAggregatedTemplates( aggregationMap )
       generateServiceTemplates( templatePaths )
