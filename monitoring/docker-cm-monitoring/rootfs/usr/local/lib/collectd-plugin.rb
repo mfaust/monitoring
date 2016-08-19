@@ -1008,7 +1008,7 @@ class CollecdPlugin
 
           port = data['port']
 
-          @Service = self.normalizeService( service )
+          @Service = normalizeService( service )
           @Port    = port
 
           bulkResults = sprintf( '%s/bulk_%s.result', dir_path, port )
