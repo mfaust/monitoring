@@ -39,12 +39,8 @@ RUN \
     nrpe-plugin \
     bind-tools \
     zlib \
-    zlib-dev
-
- RUN \
+    zlib-dev && \
    gem install --no-rdoc --no-ri \
-     sqlite3 \
-     ruby-nmap \
      json \
      ipaddress \
      resolve-hostname \

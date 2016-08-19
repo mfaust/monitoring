@@ -14,7 +14,7 @@ lib_dir    = File.expand_path( '../../lib', __FILE__ )
 application_config = '/etc/cm-application.json'
 service_config     = '/etc/cm-service.json'
 
-require sprintf( '%s/jolokia-data-raiser', lib_dir )
+require sprintf( '%s/data-collector', lib_dir )
 
 config_file = '/etc/cm-monitoring.yaml'
 
@@ -46,7 +46,7 @@ options = {
 
 # -----------------------------------------------------------------------------
 
-r = JolokiaDataRaiser.new( options, application_config, service_config )
+r = DataCollector.new( options, application_config, service_config )
 
 # -----------------------------------------------------------------------------
 

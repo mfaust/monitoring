@@ -18,7 +18,7 @@ require_relative 'tools'
 
 class CollecdPlugin
 
-  attr_reader :status, :message, :services
+#  attr_reader :status, :message, :services
 
   def initialize( settings = {} )
 
@@ -83,6 +83,7 @@ class CollecdPlugin
     return sprintf( 'core_%s', "#{parts['core']}".strip.tr( '. ', '' ).downcase )
 
   end
+
 
   def ParseResult_mongoDB( value = {} )
 
@@ -240,6 +241,7 @@ class CollecdPlugin
     end
   end
 
+
   def ParseResult_Runtime( data = {} )
 
     mbean = 'Runtime'
@@ -266,6 +268,7 @@ class CollecdPlugin
 
     return data
   end
+
 
   def ParseResult_Memory( data = {} )
 
@@ -563,7 +566,6 @@ class CollecdPlugin
 
   end
 
-
   # Check for the CAEFeeder
   def ParseResult_ProactiveEngine( data = {} )
 
@@ -752,6 +754,7 @@ class CollecdPlugin
 
   end
 
+
   def ParseResult_SolrDocumentCache( data = {} )
 
     mbean = 'DocumentCache'
@@ -793,6 +796,7 @@ class CollecdPlugin
 
   end
 
+
   def ParseResult_SolrSelect( data = {} )
 
     mbean = 'Select'
@@ -824,6 +828,7 @@ class CollecdPlugin
     end
 
   end
+
 
   def ParseResult_ConnectionPool( data = {} )
 

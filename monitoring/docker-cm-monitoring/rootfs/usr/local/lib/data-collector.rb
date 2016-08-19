@@ -20,9 +20,9 @@ require_relative 'tools'
 
 # -----------------------------------------------------------------------------
 
-class JolokiaDataRaiser
+class DataCollector
 
-  attr_reader :status, :message, :services
+  attr_reader :status, :message, :services, :reDiscovery
 
   def initialize( settings = {}, applicationConfig, serviceConfig )
 
@@ -39,7 +39,7 @@ class JolokiaDataRaiser
       Dir.mkdir( @cacheDirectory )
     end
 
-    logFile = sprintf( '%s/data-raiser.log', @logDirectory )
+    logFile = sprintf( '%s/data-collector.log', @logDirectory )
 
     file      = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
     file.sync = true
@@ -63,7 +63,7 @@ class JolokiaDataRaiser
     date                 = '2016-08-16'
 
     @log.info( '-----------------------------------------------------------------' )
-    @log.info( ' JolokiaDataRaiser' )
+    @log.info( ' CoreMedia - DataCollector' )
     @log.info( "  Version #{version} (#{date})" )
     @log.info( '  Copyright 2016 Coremedia' )
     @log.info( "  cache directory located at #{@cacheDirectory}" )
@@ -81,6 +81,73 @@ class JolokiaDataRaiser
   def serviceConfig( serviceConfig )
     @serviceConfigFile = File.expand_path( serviceConfig )
   end
+
+
+  def readConfiguration()
+
+    # read Application Configuration
+    # they define all standard checks
+    @log.debug( 'read defines of Application Properties' )
+
+    begin
+
+      if( File.exist?( @appConfigFile ) )
+        @config      = JSON.parse( File.read( @appConfigFile ) )
+
+        if( @config['jolokia']['applications'] != nil )
+          @jolokiaApplications = @config['jolokia']['applications']
+        end
+
+      else
+        @log.error( sprintf( 'Application Config File %s not found!', @appConfigFile ) )
+        exit 1
+      end
+    rescue JSON::ParserError => e
+
+      @log.error( 'wrong result (no json)')
+      @log.error( e )
+      exit 1
+    end
+
+    # read Service Configuration
+    #
+    @log.debug( 'read defines off Services Properties' )
+
+    begin
+
+      if( File.exist?( @serviceConfigFile ) )
+        @serviceConfig      = JSON.parse( File.read( @serviceConfigFile ) )
+      else
+        @log.error( sprintf( 'Config File %s not found!', @serviceConfigFile ) )
+        exit 1
+      end
+
+    rescue JSON::ParserError => e
+
+      @log.error( 'wrong result (no json)')
+      @log.error( e )
+      exit 1
+    end
+
+
+  end
+
+
+  def checkdiscoveryFileAge( f )
+
+    @log.debug( f )
+    @log.debug( File.mtime( f ).strftime("%Y-%m-%d %H:%M:%S") )
+    @log.debug( Time.now() )
+    @log.debug( Time.now() - ( 60*10 ) )
+
+    if( File.mtime(f) < ( Time.now() - ( 60*10 ) ) )
+      @log.debug( '  - trigger service discover' )
+      @reDiscovery = true
+    else
+      @reDiscovery = false
+    end
+  end
+
 
 
   def logMark()
@@ -132,7 +199,7 @@ class JolokiaDataRaiser
         end
       else
 
-        dir_path        = sprintf( '%s/%s', @cacheDirectory, host )
+        cachedHostDirectory        = sprintf( '%s/%s', @cacheDirectory, host )
         save_file       = sprintf( 'bulk_%s.result', port )
 
         hash            = Hash.new()
@@ -140,7 +207,7 @@ class JolokiaDataRaiser
         hash['mongodb'] =  JSON.parse( response.body )
         array.push( hash )
 
-        File.open( sprintf( '%s/%s', dir_path, save_file ) , 'w' ) {|f| f.write( JSON.pretty_generate( array ) ) }
+        File.open( sprintf( '%s/%s', cachedHostDirectory, save_file ) , 'w' ) {|f| f.write( JSON.pretty_generate( array ) ) }
       end
 
     end
@@ -257,7 +324,7 @@ class JolokiaDataRaiser
   # create an bulkset over all checks
   def createBulkCheck( host, data )
 
-    dir_path  = sprintf( '%s/%s', @cacheDirectory, host )
+    cachedHostDirectory  = sprintf( '%s/%s', @cacheDirectory, host )
 
     result  = Array.new()
 
@@ -288,7 +355,7 @@ class JolokiaDataRaiser
       end
 
       file_data = JSON.pretty_generate( result )
-      File.open( sprintf( '%s/%s', dir_path, save_file ) , 'w' ) {|f| f.write( file_data ) }
+      File.open( sprintf( '%s/%s', cachedHostDirectory, save_file ) , 'w' ) {|f| f.write( file_data ) }
 
       result = []
 
@@ -350,9 +417,9 @@ class JolokiaDataRaiser
           result = self.reorganizeData( result )
           result = JSON.pretty_generate( result )
 
-          dir_path  = sprintf( '%s/%s', @cacheDirectory, dest_host )
+          cachedHostDirectory  = sprintf( '%s/%s', @cacheDirectory, dest_host )
           save_file = sprintf( 'bulk_%s.result', dest_port )
-          File.open( sprintf( '%s/%s', dir_path, save_file ) , 'w' ) {|f| f.write( result ) }
+          File.open( sprintf( '%s/%s', cachedHostDirectory, save_file ) , 'w' ) {|f| f.write( result ) }
 
         rescue
           @log.error( 'can\'t send data to jolokia service' )
@@ -498,57 +565,15 @@ class JolokiaDataRaiser
       self.serviceConfig( serviceConfig )
     end
 
-    # read Application Configuration
-    # they define all standard checks
-    @log.debug( 'read defines of Application Properties' )
-
-    begin
-
-      if( File.exist?( @appConfigFile ) )
-        @config      = JSON.parse( File.read( @appConfigFile ) )
-
-        if( @config['jolokia']['applications'] != nil )
-          @jolokiaApplications = @config['jolokia']['applications']
-        end
-
-      else
-        @log.error( sprintf( 'Application Config File %s not found!', @appConfigFile ) )
-        exit 1
-      end
-    rescue JSON::ParserError => e
-
-      @log.error( 'wrong result (no json)')
-      @log.error( e )
-      exit 1
-    end
-
-    # read Service Configuration
-    #
-    @log.debug( 'read defines off Services Properties' )
-
-    begin
-
-      if( File.exist?( @serviceConfigFile ) )
-        @serviceConfig      = JSON.parse( File.read( @serviceConfigFile ) )
-      else
-        @log.error( sprintf( 'Config File %s not found!', @serviceConfigFile ) )
-        exit 1
-      end
-
-    rescue JSON::ParserError => e
-
-      @log.error( 'wrong result (no json)')
-      @log.error( e )
-      exit 1
-    end
+    self.readConfiguration()
 
     # ----------------------------------------------------------------------------------------
 
     @log.debug( 'get monitored Servers' )
     monitoredServer = monitoredServer( @cacheDirectory )
 
-    file_name = 'discovery.json'
-    save_file = 'mergedHostData.json'
+    discoveryFile = 'discovery.json'
+    mergedDataFile = 'mergedHostData.json'
 
     data = Hash.new()
 
@@ -556,12 +581,13 @@ class JolokiaDataRaiser
 
       @log.info( sprintf( 'Host: %s', h ) )
 
-      dir_path  = sprintf( '%s/%s', @cacheDirectory, h )
+      cachedHostDirectory  = sprintf( '%s/%s', @cacheDirectory, h )
 
-      file = sprintf( '%s/%s', dir_path, file_name )
+      file = sprintf( '%s/%s', cachedHostDirectory, discoveryFile )
 
       if( File.exist?( file ) == true )
 
+        self.checkdiscoveryFileAge( file )
 #        @log.debug( file )
 
         data = JSON.parse( File.read( file ) )
@@ -581,17 +607,17 @@ class JolokiaDataRaiser
 
 #        @log.debug( JSON.pretty_generate( d ) )
 
-        if( ! File.exist?( sprintf( '%s/%s', dir_path, save_file ) ) )
+        if( ! File.exist?( sprintf( '%s/%s', cachedHostDirectory, mergedDataFile ) ) )
 
           @log.debug( 'save merged data' )
           merged = JSON.pretty_generate( d )
-          File.open( sprintf( '%s/%s', dir_path, save_file ) , 'w' ) {|f| f.write( merged ) }
+          File.open( sprintf( '%s/%s', cachedHostDirectory, mergedDataFile ) , 'w' ) {|f| f.write( merged ) }
         end
 
         @log.debug( 'create bulk Data for Jolokia' )
         self.createBulkCheck( h, d )
 
-        Dir.chdir( dir_path )
+        Dir.chdir( cachedHostDirectory )
         Dir.glob( "bulk_**.json" ) do |f|
 
           if( File.exist?( f ) == true )

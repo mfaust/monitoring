@@ -155,13 +155,25 @@ module Sinatra
 
       content_type :json
       status = h.deleteHost( host ).to_json
-      g.deleteDashboards( host )
 
       response.status = h.status
       status.to_json
 
     end
 
+    # delete a host and there dashboards
+    delete '/:host/:force' do
+
+      host = params[:host]
+
+      content_type :json
+      status = h.deleteHost( host ).to_json
+      g.deleteDashboards( host )
+
+      response.status = h.status
+      status.to_json
+
+    end
 
 
     run! if app_file == $0
