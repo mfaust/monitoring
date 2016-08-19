@@ -295,7 +295,11 @@ class Grafana
       end
     end
 
-    intersect = services & dir
+    intersect = dir & services
+
+    @log.debug( " templates: #{dirs}" )
+    @log.debug( " services : #{services}" )
+    @log.debug( " use      : #{intersect}" )
 
     intersect.each do |service|
 
