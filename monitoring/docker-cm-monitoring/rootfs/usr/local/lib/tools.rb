@@ -27,6 +27,43 @@ def validJson?( json )
   end
 end
 
+def regenerateGrafanaTemplateIDs( json )
+
+  if( validJson?( json ) )
+
+    tpl = JSON.parse( json )
+
+    rows = tpl['dashboard']['rows'] ? tpl['dashboard']['rows'] : nil
+
+    if( rows != nil )
+
+#      @log.debug( sprintf( ' => found %d rows', rows.count ) )
+
+      counter = 1
+      idCounter = 10
+      rows.each_with_index do |r, counter|
+
+#        @log.debug( sprintf( ' row  %d', counter ) )
+
+        panel = r['panels'] ? r['panels'] : nil
+#        @log.debug( sprintf( '   => with %d widgets', panel.count ) )
+
+        panel.each do |p|
+          p['id']   = idCounter
+          idCounter = idCounter+1
+        end
+      end
+    end
+
+    return JSON.generate( tpl )
+  else
+
+    return false
+  end
+
+end
+
+
   # return a array of all monitored server
   def monitoredServer( cacheDirectory )
 

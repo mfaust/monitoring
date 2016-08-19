@@ -357,10 +357,29 @@ class Grafana
 
     if( validJson?( template ) )
 
-      # @log.debug( JSON.pretty_generate( JSON.parse( template ) ) )
+      tpl = regenerateGrafanaTemplateIDs( template )
+# 
+#       tpl  = JSON.parse( template )
+#       rows = tpl['dashboard']['rows'] ? tpl['dashboard']['rows'] : nil
+#
+#       if( rows != nil )
+#
+#         @log.debug( sprintf( ' => found %d rows', rows.count ) )
+#
+#         counter = 1
+#         rows.each_with_index do |r, counter|
+#
+#           @log.debug( sprintf( ' row  %d', counter ) )
+#
+#           panel = r['panels'] ? r['panels'] : nil
+#
+#           @log.debug( panel )
+#
+#
+#         end
 
       @log.debug( 'send to grafana' )
-      sendTemplateToGrafana( template )
+      sendTemplateToGrafana( tpl )
     else
       @log.debug( 'no valid JSON' )
     end
