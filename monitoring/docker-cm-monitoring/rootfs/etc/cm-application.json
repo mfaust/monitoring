@@ -24,6 +24,14 @@
           }, {
             "description": "GarbageCollector ConcurrentMarkSweep",
             "mbean": "java.lang:type=GarbageCollector,name=ConcurrentMarkSweep"
+          }, {
+            "description": "information about the Operating System",
+            "mbean": "java.lang:type=OperatingSystem",
+            "attribute": "AvailableProcessors,MaxFileDescriptorCount,OpenFileDescriptorCount,TotalPhysicalMemorySize,UsedPhysicalMemorySize,FreePhysicalMemorySize,TotalSwapSpaceSize,UsedSwapSpaceSize,FreeSwapSpaceSize"
+          }, {
+            "description": "information about the Runtime System",
+            "mbean": "java.lang:type=Runtime",
+            "attribute": "Uptime,StartTime"
           }
         ]
       },
@@ -85,7 +93,7 @@
         ]
       },
       "workflow-server": {
-        "description": "",
+        "description": "Workflow Server",
         "metrics": [
           {
             "mbean" : "com.coremedia:type=CapConnection,application=workflow",
@@ -146,7 +154,7 @@
         ]
       },
       "adobe-drive": {
-        "description": "",
+        "description": "Adobe Drive Server",
         "metrics": [
           {
             "name": "CapConnection",
@@ -155,7 +163,11 @@
           }
         ]
       },
-      "sitemanager": {},
+      "sitemanager": {
+        "description": "Site Manger - single Application to provide the old FAT Client",
+        "metrics": [
+        ]
+      },
       "cae": {
         "description": "checks for all CAE Services",
         "metrics": [
