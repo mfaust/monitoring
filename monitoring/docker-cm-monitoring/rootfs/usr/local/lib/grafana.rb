@@ -357,7 +357,7 @@ class Grafana
 
     if( validJson?( template ) )
 
-      tpl = regenerateGrafanaTemplateIDs( template )
+#      tpl = regenerateGrafanaTemplateIDs( template )
 # 
 #       tpl  = JSON.parse( template )
 #       rows = tpl['dashboard']['rows'] ? tpl['dashboard']['rows'] : nil
@@ -379,7 +379,7 @@ class Grafana
 #         end
 
       @log.debug( 'send to grafana' )
-      sendTemplateToGrafana( tpl )
+      sendTemplateToGrafana( template )
     else
       @log.debug( 'no valid JSON' )
     end
@@ -454,6 +454,12 @@ class Grafana
     templateFile.gsub!( '%HOST%'     , @grafanaHostname )
     templateFile.gsub!( '%SHORTHOST%', @shortHostname )
     templateFile.gsub!( '%TAG%'      , @shortHostname )
+
+    templateFile = regenerateGrafanaTemplateIDs(templateFile)
+
+    if (!templateFile)
+      @log.debug("Cannot create dashboard, invalid json")
+    end
 
     grafanaDbUri = URI( sprintf( '%s/api/dashboards/db', @grafanaURI ) )
 
