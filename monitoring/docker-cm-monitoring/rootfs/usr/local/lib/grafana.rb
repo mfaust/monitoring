@@ -451,15 +451,15 @@ class Grafana
 
   def sendTemplateToGrafana(templateFile)
 
-    templateFile.gsub!( '%HOST%'     , @grafanaHostname )
-    templateFile.gsub!( '%SHORTHOST%', @shortHostname )
-    templateFile.gsub!( '%TAG%'      , @shortHostname )
-
     templateFile = regenerateGrafanaTemplateIDs(templateFile)
 
     if (!templateFile)
       @log.debug("Cannot create dashboard, invalid json")
     end
+
+    templateFile.gsub!( '%HOST%'     , @grafanaHostname )
+    templateFile.gsub!( '%SHORTHOST%', @shortHostname )
+    templateFile.gsub!( '%TAG%'      , @shortHostname )
 
     grafanaDbUri = URI( sprintf( '%s/api/dashboards/db', @grafanaURI ) )
 
