@@ -16,6 +16,37 @@
             "type": "text"
           },
           {
+            "title": "Uptime",
+            "error": false,
+            "span": 1,
+            "editable": true,
+            "type": "singlestat",
+            "isNew": true,
+            "id": 70,
+            "targets": [
+              {
+                "target": "collectd.%HOST%.RLS-Runtime-uptime.uptime",
+                "refId": "A",
+                "textEditor": false
+              }
+            ],
+            "links": [],
+            "datasource": "graphite",
+            "maxDataPoints": 100,
+            "interval": null,
+            "cacheTimeout": null,
+            "format": "ms",
+            "nullText": null,
+            "mappingType": 1,
+            "nullPointMode": "connected",
+            "valueName": "current",
+            "valueFontSize": "70%",
+            "thresholds": "",
+            "colorBackground": false,
+            "colorValue": false,
+            "decimals": 0
+          },
+          {
             "cacheTimeout": null,
             "colorBackground": true,
             "colorValue": false,
@@ -92,7 +123,7 @@
           },
           {
             "cacheTimeout": null,
-            "colorBackground": true,
+            "colorBackground": false,
             "colorValue": false,
             "colors": [
               "rgba(50, 172, 45, 0.97)",

@@ -16,7 +16,7 @@ Das Setup beinhaltet ein Set von mehreren Containern:
  - `icinga2-core`
  - `icingaweb2`
 
-Zusätzlich wird ein weiterer Docker Container (`cm-monitoring`) eingebunfen, der initial und bei jeder weiteren Änderung gebaut werden muß.
+Zusätzlich wird ein weiterer Docker Container (`cm-monitoring`) eingebunden, der initial und bei jeder weiteren Änderung gebaut werden muß.
 
 
 ## nginx

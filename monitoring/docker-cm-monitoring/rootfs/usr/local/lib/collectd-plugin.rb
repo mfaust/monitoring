@@ -274,6 +274,32 @@ class CollecdPlugin
     end
   end
 
+  def ParseResult_Runtime( data = {} )
+
+    mbean = 'Runtime'
+    value  = data['value'] ? data['value'] : nil
+    format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
+    data   = []
+
+    if( value != nil )
+
+      uptime   = value['Uptime']    ? value['Uptime']    : nil
+      start    = value['StartTime'] ? value['StartTime'] : nil
+
+      data.push( sprintf( 'PUTVAL %s/%s-%s-%s/uptime interval=%s N:%s', @Host, @Service, mbean, 'uptime'   , @interval, uptime ) )
+      data.push( sprintf( 'PUTVAL %s/%s-%s-%s/gauge interval=%s N:%s' , @Host, @Service, mbean, 'starttime', @interval, start ) )
+
+    else
+
+      format.gsub!( 'PUTVAL'          , 'PUTNOTIF' )
+      format.gsub!( 'interval=%s N:%s', "message='N/A'" )
+
+      data.push( sprintf( format, @Host, @Service, mbean, 'uptime' ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'starttime' ) )
+    end
+
+    return data
+  end
 
   def ParseResult_Memory( data = {} )
 
@@ -306,10 +332,19 @@ class CollecdPlugin
         data.push( sprintf( format, @Host, @Service, mbean, type, 'used_percent', @interval, percent ) )
         data.push( sprintf( format, @Host, @Service, mbean, type, 'committed'   , @interval, committed ) )
       end
+    else
 
-      return data
+      format.gsub!( 'PUTVAL'          , 'PUTNOTIF' )
+      format.gsub!( 'interval=%s N:%s', "message='N/A'" )
 
+      data.push( sprintf( format, @Host, @Service, mbean, type, 'init' ) )
+      data.push( sprintf( format, @Host, @Service, mbean, type, 'max' ) )
+      data.push( sprintf( format, @Host, @Service, mbean, type, 'used' ) )
+      data.push( sprintf( format, @Host, @Service, mbean, type, 'used_percent' ) )
+      data.push( sprintf( format, @Host, @Service, mbean, type, 'committed') )
     end
+
+    return data
 
   end
 
@@ -563,8 +598,31 @@ class CollecdPlugin
   end
 
 
+  # Check for the CAEFeeder
   def ParseResult_ProactiveEngine( data = {} )
 
+    # TODO check first
+
+#    {
+#      "Health": {
+#        "status": 200,
+#        "timestamp": 1471618816,
+#        "request": {
+#          "mbean": "com.coremedia:application=caefeeder,type=Health",
+#          "type": "read",
+#          "target": {
+#            "url": "service:jmx:rmi:///jndi/rmi://monitoring-16-01:40899/jmxrmi"
+#          }
+#        },
+#        "value": {
+#          "MaximumQueueExceededDuration": 900000,
+#          "Healthy": true,
+#          "MaximumHeartBeat": 300000,
+#          "MaximumQueueUtilization": 0.95
+#        }
+#      }
+#    },
+    # --------------------------------------------------------------------------------------------
     mbean = 'ProactiveEngine'
     value  = data['value'] ? data['value'] : nil
     format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
@@ -579,6 +637,15 @@ class CollecdPlugin
       data.push( sprintf( format, @Host, @Service, mbean, 'feeder', 'max'      , @interval, maxEntries ) )
       data.push( sprintf( format, @Host, @Service, mbean, 'feeder', 'current'  , @interval, currentEntries ) )
       data.push( sprintf( format, @Host, @Service, mbean, 'feeder', 'diff'     , @interval, diffEntries ) )
+
+    else
+
+      format.gsub!( 'PUTVAL'          , 'PUTNOTIF' )
+      format.gsub!( 'interval=%s N:%s', "message='N/A'" )
+
+      data.push( sprintf( format, @Host, @Service, mbean, 'feeder', 'max' ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'feeder', 'current' ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'feeder', 'diff' ) )
     end
 
     return data
@@ -620,7 +687,20 @@ class CollecdPlugin
 
     else
 
+      format.gsub!( 'PUTVAL'          , 'PUTNOTIF' )
+      format.gsub!( 'interval=%s N:%s', "message='N/A'" )
 
+      data.push( sprintf( format, @Host, @Service, mbean, 'blob_cache', 'size' ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'blob_cache', 'used' ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'blob_cache', 'fault' ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'blob_cache', 'used_percent' ) )
+
+      data.push( sprintf( format, @Host, @Service, mbean, 'heap_cache', 'size' ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'heap_cache', 'used' ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'heap_cache', 'fault' ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'heap_cache', 'used_percent' ) )
+
+      data.push( sprintf( format, @Host, @Service, mbean, 'su_sessions', 'sessions' ) )
     end
 
     return data
@@ -982,6 +1062,8 @@ class CollecdPlugin
                 case k
                 when 'mongodb'
                   graphiteOutput.push( self.ParseResult_mongoDB( v ) )
+                when 'Runtime'
+                  graphiteOutput.push( self.ParseResult_Runtime( v ) )
                 when 'Memory'
                   graphiteOutput.push( self.ParseResult_Memory( v ) )
                 when 'Threading'

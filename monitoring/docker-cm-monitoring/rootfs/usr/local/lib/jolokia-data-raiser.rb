@@ -344,7 +344,7 @@ class JolokiaDataRaiser
 
         result = response.body
 
-        @log.debug( 'reorganize data for later use' )
+#         @log.debug( 'reorganize data for later use' )
 
         begin
           result = self.reorganizeData( result )
@@ -595,25 +595,13 @@ class JolokiaDataRaiser
         Dir.glob( "bulk_**.json" ) do |f|
 
           if( File.exist?( f ) == true )
-#             @log.debug( f )
-
-            @log.debug( 'send data to Jolokia' )
             self.sendChecks( f )
           end
-#          if( FileTest.directory?( f ) )
-#            monitoredServer.push( File.basename( f ) )
-#          end
         end
       end
     end
 
     self.logMark()
-
-
-#    json = JSON.pretty_generate( data )
-#    File.open( sprintf( '%s/%s', dir_path, file_name ) , 'w' ) {|f| f.write( metricsResult ) }
-
-#    createBulkCheck( host, port, data )
 
   end
 
