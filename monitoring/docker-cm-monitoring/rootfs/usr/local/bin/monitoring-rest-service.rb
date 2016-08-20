@@ -22,7 +22,7 @@ require sprintf( '%s/discover', lib_dir )
 require sprintf( '%s/grafana', lib_dir )
 
 module Sinatra
-  class Monitoring < Base
+  class MonitoringRest < Base
 
     options = {
       :log_dir   => '/var/log/monitoring',

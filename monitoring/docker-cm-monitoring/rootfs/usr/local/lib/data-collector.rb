@@ -133,7 +133,7 @@ class DataCollector
   end
 
 
-  def checkdiscoveryFileAge( f )
+  def checkDiscoveryFileAge( f )
 
     @log.debug( f )
     @log.debug( File.mtime( f ).strftime("%Y-%m-%d %H:%M:%S") )
@@ -587,7 +587,10 @@ class DataCollector
 
       if( File.exist?( file ) == true )
 
-        self.checkdiscoveryFileAge( file )
+        if( self.checkDiscoveryFileAge( file ) == true )
+
+          # re.start the service discovery
+        end
 #        @log.debug( file )
 
         data = JSON.parse( File.read( file ) )

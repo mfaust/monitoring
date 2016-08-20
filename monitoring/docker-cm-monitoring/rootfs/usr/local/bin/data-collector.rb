@@ -11,8 +11,8 @@ require 'yaml'
 
 lib_dir    = File.expand_path( '../../lib', __FILE__ )
 
-application_config = '/etc/cm-application.json'
-service_config     = '/etc/cm-service.json'
+applicationConfigFile = '/etc/cm-application.json'
+serviceConfigFile     = '/etc/cm-service.json'
 
 require sprintf( '%s/data-collector', lib_dir )
 
@@ -26,27 +26,32 @@ if( File.exist?( config_file ) )
   @cacheDir         = config['monitoring']['cache_dir']            ? config['monitoring']['cache_dir']            : '/tmp/cache'
   @jolokia_host     = config['monitoring']['jolokia']['host']      ? config['monitoring']['jolokia']['host']      : 'localhost'
   @jolokia_port     = config['monitoring']['jolokia']['port']      ? config['monitoring']['jolokia']['port']      : 8080
+  @scanDiscovery    = config['monitoring']['data-collector']['scan-discovery'] ? config['monitoring']['data-collector']['scan-discovery'] : '10m'
 
 else
   puts "no configuration exists, use default settings"
 
-  @logDir       = '/tmp/log'
-  @cacheDir     = '/tmp/cache'
-  @jolokia_host = 'localhost'
-  @jolokia_port = 8080
+  @logDir        = '/tmp/log'
+  @cacheDir      = '/tmp/cache'
+  @jolokia_host  = 'localhost'
+  @jolokia_port  = 8080
+  @scanDiscovery = '10m'
 
 end
 
 options = {
-  'log_dir'      => @logDir,
-  'cache_dir'    => @cacheDir,
-  'jolokia_host' => @jolokia_host,
-  'jolokia_port' => @jolokia_port
+  'log_dir'               => @logDir,
+  'cache_dir'             => @cacheDir,
+  'jolokia_host'          => @jolokia_host,
+  'jolokia_port'          => @jolokia_port,
+  'scanDiscovery'         => @scanDiscovery,
+  'applicationConfigFile' => applicationConfigFile,
+  'serviceConfigFile'     => serviceConfigFile
 }
 
 # -----------------------------------------------------------------------------
 
-r = DataCollector.new( options, application_config, service_config )
+r = DataCollector.new( options, applicationConfigFile, serviceConfigFile )
 
 # -----------------------------------------------------------------------------
 
