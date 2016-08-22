@@ -1,9 +1,9 @@
 #!/usr/bin/ruby
 #
-# 16.08.2016 - Bodo Schulz
+# 22.08.2016 - Bodo Schulz
 #
 #
-# v1.0.2
+# v1.0.3
 
 # -----------------------------------------------------------------------------
 
@@ -497,6 +497,7 @@ class CollecdPlugin
       connectionCount  = value['ConnectionCount']           ? value['ConnectionCount']           : nil
       runlevel         = value['RunLevel']                  ? value['RunLevel']                  : nil
       uptime           = value['Uptime']                    ? value['Uptime']                    : nil
+      serviceInfos     = value['ServiceInfos']              ? value['ServiceInfos']              : nil
 
       data.push( sprintf( format, @Host, @Service, mbean, 'server', 'cache_hits'     , @interval, cacheHits ) )
       data.push( sprintf( format, @Host, @Service, mbean, 'server', 'cache_evicts'   , @interval, cacheEvicts ) )
@@ -504,6 +505,35 @@ class CollecdPlugin
       data.push( sprintf( format, @Host, @Service, mbean, 'server', 'cache_interval' , @interval, cacheInterval ) )
       data.push( sprintf( format, @Host, @Service, mbean, 'server', 'cache_size'     , @interval, cacheSize ) )
       data.push( sprintf( format, @Host, @Service, mbean, 'server', 'sequence_number', @interval, reqSeqNumber ) )
+
+      if( serviceInfos != nil )
+
+        format = 'PUTVAL %s/%s-%s-%s-%s/count-%s interval=%s N:%s'
+
+        @log.debug( sprintf( 'serviceInfos' ) )
+        serviceInfos.each do |s,v|
+
+          enabled = v['enabled'] ? v['enabled'] : false
+
+          if( enabled == true )
+
+            named          = v['named']         ? v['named']         : 0
+            namedMax       = v['maxnamed']      ? v['maxnamed']      : 0
+            namedDiff      = namedMax - named
+            concurrent     = v['concurrent']    ? v['concurrent']    : 0
+            concurrentMax  = v['maxconcurrent'] ? v['maxconcurrent'] : 0
+            concurrentDiff = concurrentMax - concurrent
+
+
+            data.push( sprintf( format, @Host, @Service, mbean, 'service_info', s , 'named'          , @interval, named ) )
+            data.push( sprintf( format, @Host, @Service, mbean, 'service_info', s , 'named_max'      , @interval, namedMax ) )
+            data.push( sprintf( format, @Host, @Service, mbean, 'service_info', s , 'named_diff'     , @interval, namedDiff ) )
+            data.push( sprintf( format, @Host, @Service, mbean, 'service_info', s , 'concurrent'     , @interval, concurrent ) )
+            data.push( sprintf( format, @Host, @Service, mbean, 'service_info', s , 'concurrent_max' , @interval, concurrentMax ) )
+            data.push( sprintf( format, @Host, @Service, mbean, 'service_info', s , 'concurrent_diff', @interval, concurrentDiff ) )
+          end
+        end
+      end
 
     else
 
