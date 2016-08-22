@@ -124,7 +124,7 @@ class  MysqlStatus
 
   def run()
 
-    @sequel = db_connect
+    @sequel = self.connect()
 
     begin
       rows = @sequel[ @mysqlQuery ].to_hash( :Variable_name,:Value )
