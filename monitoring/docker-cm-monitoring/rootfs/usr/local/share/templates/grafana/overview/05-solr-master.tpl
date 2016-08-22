@@ -4,10 +4,10 @@
         "height": "100px",
         "panels": [
           {
-            "content": "<h3><center><bold>Studio</bold></center></h3>",
+            "content": "<h3><center><bold>Solr Master</bold></center></h3>",
             "editable": true,
             "error": false,
-            "id": 45,
+            "id": 16,
             "isNew": true,
             "links": [],
             "mode": "html",
@@ -25,7 +25,7 @@
             "id": 70,
             "targets": [
               {
-                "target": "collectd.%HOST%.STUDIO-Runtime-uptime.uptime",
+                "target": "collectd.%HOST%.SOLR_MASTER-Runtime-uptime.uptime",
                 "refId": "A",
                 "textEditor": false
               }
@@ -66,7 +66,7 @@
               "thresholdLabels": false,
               "thresholdMarkers": true
             },
-            "id": 46,
+            "id": 17,
             "interval": null,
             "isNew": true,
             "links": [],
@@ -105,7 +105,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.STUDIO-Memory-heap_memory.count-used_percent"
+                "target": "collectd.%HOST%.SOLR_MASTER-Memory-heap_memory.count-used_percent"
               }
             ],
             "thresholds": "85,95",
@@ -141,7 +141,7 @@
               "thresholdLabels": false,
               "thresholdMarkers": true
             },
-            "id": 47,
+            "id": 18,
             "interval": null,
             "isNew": true,
             "links": [],
@@ -180,7 +180,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.STUDIO-Memory-perm_memory.count-used_percent"
+                "target": "collectd.%HOST%.SOLR_MASTER-Memory-perm_memory.count-used_percent"
               }
             ],
             "thresholds": "85,95",
@@ -203,10 +203,10 @@
             "editable": true,
             "type": "singlestat",
             "isNew": true,
-            "id": 48,
+            "id": 19,
             "targets": [
               {
-                "target": "collectd.%HOST%.STUDIO-GCParNew-gc_duration.count-duration",
+                "target": "collectd.%HOST%.SOLR_MASTER-GCParNew-gc_duration.count-duration",
                 "refId": "A"
               }
             ],
@@ -270,232 +270,7 @@
               "thresholdMarkers": true,
               "thresholdLabels": false
             }
-          },
-          {
-            "title": "used UAPI Cache",
-            "error": false,
-            "span": 1,
-            "editable": true,
-            "type": "singlestat",
-            "isNew": true,
-            "id": 49,
-            "targets": [
-              {
-                "target": "collectd.%HOST%.STUDIO-CapConnection-heap_cache.count-used_percent",
-                "refId": "A"
-              }
-            ],
-            "links": [],
-            "datasource": "graphite",
-            "maxDataPoints": 100,
-            "interval": null,
-            "cacheTimeout": null,
-            "format": "none",
-            "prefix": "",
-            "postfix": " %",
-            "nullText": null,
-            "valueMaps": [
-              {
-                "value": "null",
-                "op": "=",
-                "text": "N/A"
-              }
-            ],
-            "mappingTypes": [
-              {
-                "name": "value to text",
-                "value": 1
-              },
-              {
-                "name": "range to text",
-                "value": 2
-              }
-            ],
-            "rangeMaps": [
-              {
-                "from": "null",
-                "to": "null",
-                "text": "N/A"
-              }
-            ],
-            "mappingType": 1,
-            "nullPointMode": "connected",
-            "valueName": "current",
-            "prefixFontSize": "50%",
-            "valueFontSize": "80%",
-            "postfixFontSize": "70%",
-            "thresholds": "",
-            "colorBackground": false,
-            "colorValue": false,
-            "colors": [
-              "rgba(245, 54, 54, 0.9)",
-              "rgba(237, 129, 40, 0.89)",
-              "rgba(50, 172, 45, 0.97)"
-            ],
-            "sparkline": {
-              "show": false,
-              "full": false,
-              "lineColor": "rgb(31, 120, 193)",
-              "fillColor": "rgba(31, 118, 189, 0.18)"
-            },
-            "gauge": {
-              "show": false,
-              "minValue": 0,
-              "maxValue": 100,
-              "thresholdMarkers": true,
-              "thresholdLabels": false
-            }
-          },
-          {
-            "title": "used Blob Cache",
-            "error": false,
-            "span": 1,
-            "editable": true,
-            "type": "singlestat",
-            "isNew": true,
-            "id": 50,
-            "targets": [
-              {
-                "target": "collectd.%HOST%.STUDIO-CapConnection-blob_cache.count-used_percent",
-                "refId": "A"
-              }
-            ],
-            "links": [],
-            "datasource": "graphite",
-            "maxDataPoints": 100,
-            "interval": null,
-            "cacheTimeout": null,
-            "format": "none",
-            "prefix": "",
-            "postfix": " %",
-            "nullText": null,
-            "valueMaps": [
-              {
-                "value": "null",
-                "op": "=",
-                "text": "N/A"
-              }
-            ],
-            "mappingTypes": [
-              {
-                "name": "value to text",
-                "value": 1
-              },
-              {
-                "name": "range to text",
-                "value": 2
-              }
-            ],
-            "rangeMaps": [
-              {
-                "from": "null",
-                "to": "null",
-                "text": "N/A"
-              }
-            ],
-            "mappingType": 1,
-            "nullPointMode": "connected",
-            "valueName": "current",
-            "prefixFontSize": "50%",
-            "valueFontSize": "80%",
-            "postfixFontSize": "70%",
-            "thresholds": "90,95",
-            "colorBackground": true,
-            "colorValue": false,
-            "colors": [
-              "rgba(50, 172, 45, 0.97)",
-              "rgba(237, 129, 40, 0.89)",
-              "rgba(245, 54, 54, 0.9)"
-            ],
-            "sparkline": {
-              "show": false,
-              "full": false,
-              "lineColor": "rgb(31, 120, 193)",
-              "fillColor": "rgba(31, 118, 189, 0.18)"
-            },
-            "gauge": {
-              "show": false,
-              "minValue": 0,
-              "maxValue": 100,
-              "thresholdMarkers": true,
-              "thresholdLabels": false
-            }
-          },
-          {
-            "title": "Lightweight Session",
-            "error": false,
-            "span": 1,
-            "editable": true,
-            "type": "singlestat",
-            "isNew": true,
-            "id": 50,
-            "targets": [
-              {
-                "target": "collectd.monitoring-16-01.STUDIO-CapConnection-su_sessions.count-sessions",
-                "refId": "A"
-              }
-            ],
-            "links": [],
-            "datasource": "graphite",
-            "maxDataPoints": 100,
-            "interval": null,
-            "cacheTimeout": null,
-            "format": "none",
-            "prefix": "",
-            "postfix": "",
-            "nullText": null,
-            "valueMaps": [
-              {
-                "value": "null",
-                "op": "=",
-                "text": "N/A"
-              }
-            ],
-            "mappingTypes": [
-              {
-                "name": "value to text",
-                "value": 1
-              },
-              {
-                "name": "range to text",
-                "value": 2
-              }
-            ],
-            "rangeMaps": [
-              {
-                "from": "null",
-                "to": "null",
-                "text": "N/A"
-              }
-            ],
-            "mappingType": 1,
-            "nullPointMode": "connected",
-            "valueName": "current",
-            "prefixFontSize": "50%",
-            "valueFontSize": "80%",
-            "postfixFontSize": "70%",
-            "thresholds": "",
-            "colorBackground": false,
-            "colorValue": false,
-            "colors": [
-              "rgba(50, 172, 45, 0.97)",
-              "rgba(237, 129, 40, 0.89)",
-              "rgba(245, 54, 54, 0.9)"
-            ],
-            "sparkline": {
-              "show": false,
-              "full": false,
-              "lineColor": "rgb(31, 120, 193)",
-              "fillColor": "rgba(31, 118, 189, 0.18)"
-            },
-            "gauge": {
-              "show": false,
-              "minValue": 0,
-              "maxValue": 100,
-              "thresholdMarkers": true,
-              "thresholdLabels": false
-            }
           }
         ],
-        "title": "Studio"
+        "title": "SOLR_MASTER"
       }

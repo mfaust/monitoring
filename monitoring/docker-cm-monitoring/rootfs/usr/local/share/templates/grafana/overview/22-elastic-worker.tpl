@@ -4,7 +4,7 @@
         "height": "100px",
         "panels": [
           {
-            "content": "<h2><center><bold>Elastic Worker</bold></center></h2>",
+            "content": "<h3><center><bold>Elastic Worker</bold></center></h3>",
             "editable": true,
             "error": false,
             "id": 45,

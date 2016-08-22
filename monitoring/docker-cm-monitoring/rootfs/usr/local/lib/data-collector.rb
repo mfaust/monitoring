@@ -16,6 +16,7 @@ require 'fileutils'
 # require 'resolv-replace.rb'
 require 'net/http'
 
+require_relative 'discover'
 require_relative 'tools'
 
 # -----------------------------------------------------------------------------
@@ -84,6 +85,8 @@ class DataCollector
     @log.info( "  cache directory located at #{@cacheDirectory}" )
     @log.info( '-----------------------------------------------------------------' )
     @log.info( '' )
+
+    @discovery = ServiceDiscovery.new( @settings )
 
   end
 
@@ -629,9 +632,7 @@ class DataCollector
         if( self.checkDiscoveryFileAge( file ) == true )
 
           # re.start the service discovery
-
-          discovery = ServiceDiscovery.new( @settings )
-          discovery.refreshHost( h )
+          @discovery.refreshHost( h )
 
         end
 #        @log.debug( file )

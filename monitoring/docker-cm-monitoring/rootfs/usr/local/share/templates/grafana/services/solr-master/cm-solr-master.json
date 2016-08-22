@@ -16,7 +16,7 @@
         "height": "25px",
         "panels": [
           {
-            "content": "<h2><center>Solr Master Live Index</center></h2>",
+            "content": "<h3><center>Solr Master Live Index</center></h3>",
             "editable": true,
             "error": false,
             "id": 10,
@@ -32,13 +32,13 @@
         "title": "New row"
       },
       {
-        "title": "Live QueryResultCache index size",
-        "height": "250px",
+        "title": "Query Result - Cache Index Size",
+        "height": "200px",
         "editable": true,
         "collapse": false,
         "panels": [
           {
-            "title": "Live QueryResultCache Index Size",
+            "title": "Query Result - Cache Index Size",
             "error": false,
             "span": 12,
             "editable": true,
@@ -47,8 +47,16 @@
             "id": 7,
             "targets": [
               {
-                "target": "collectd.%HOST%.SOLR_MASTER-core_live-QueryResultCache.count-size",
-                "refId": "A"
+                "hide": true,
+                "refId": "A",
+                "target": "aliasSub(collectd.%HOST%.SOLR_MASTER-core_live-QueryResultCache.count-size, '(.*)-', '')",
+                "textEditor": true
+              },
+              {
+                "hide": false,
+                "refId": "C",
+                "target": "aliasSub(aliasSub(aliasByNode(collectd.%HOST%.SOLR_MASTER-$core-QueryResultCache.count-size, 2), '(.*)-(.*)', '\\1'),'(.*)-', '')",
+                "textEditor": false
               }
             ],
             "datasource": null,
@@ -81,21 +89,23 @@
               "threshold2Color": "rgba(234, 112, 112, 0.22)"
             },
             "lines": true,
-            "fill": 1,
-            "linewidth": 2,
+            "fill": 3,
+            "linewidth": 1,
             "points": false,
             "pointradius": 5,
             "bars": false,
             "stack": false,
             "percentage": false,
             "legend": {
-              "show": true,
-              "values": false,
-              "min": false,
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
               "max": false,
-              "current": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
               "total": false,
-              "avg": false
+              "values": true
             },
             "nullPointMode": "connected",
             "steppedLine": false,
@@ -114,13 +124,13 @@
         ]
       },
       {
-        "title": "Live QueryResultCache Hits",
-        "height": "250px",
+        "title": "Query Result - Cache Hits",
+        "height": "200px",
         "editable": true,
         "collapse": false,
         "panels": [
           {
-            "title": "Live QueryResultCache Hits",
+            "title": "Query Result - Cache Hits",
             "error": false,
             "span": 12,
             "editable": true,
@@ -129,8 +139,14 @@
             "id": 8,
             "targets": [
               {
-                "target": "collectd.%HOST%.SOLR_MASTER-core_live-QueryResultCache.count-hits",
-                "refId": "A"
+                "hide": true,
+                "refId": "A",
+                "target": "aliasSub(collectd.%HOST%.SOLR_MASTER-core_live-QueryResultCache.count-hits, '(.*)-', '')"
+              },
+              {
+                "refId": "B",
+                "target": "aliasSub(aliasSub(aliasByNode(collectd.%HOST%.SOLR_MASTER-$core-QueryResultCache.count-hits, 2), '(.*)-(.*)', '\\1'),'(.*)-', '')",
+                "textEditor": false
               }
             ],
             "datasource": null,
@@ -163,21 +179,23 @@
               "threshold2Color": "rgba(234, 112, 112, 0.22)"
             },
             "lines": true,
-            "fill": 1,
-            "linewidth": 2,
+            "fill": 3,
+            "linewidth": 1,
             "points": false,
             "pointradius": 5,
             "bars": false,
             "stack": false,
             "percentage": false,
             "legend": {
-              "show": true,
-              "values": false,
-              "min": false,
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
               "max": false,
-              "current": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
               "total": false,
-              "avg": false
+              "values": true
             },
             "nullPointMode": "connected",
             "steppedLine": false,
@@ -196,13 +214,13 @@
         ]
       },
       {
-        "title": "Live QueryResultCache Hitratio",
-        "height": "250px",
+        "title": "Query Result - Cache Hitratio",
+        "height": "200px",
         "editable": true,
         "collapse": false,
         "panels": [
           {
-            "title": "Live QueryResultCache Hitratio",
+            "title": "Query Result - Cache Hitratio",
             "error": false,
             "span": 12,
             "editable": true,
@@ -211,8 +229,14 @@
             "id": 9,
             "targets": [
               {
-                "target": "collectd.%HOST%.SOLR_MASTER-core_live-QueryResultCache.count-hitratio",
-                "refId": "A"
+                "hide": true,
+                "refId": "A",
+                "target": "aliasSub(collectd.%HOST%.SOLR_MASTER-core_live-QueryResultCache.count-hitratio, '(.*)-', '')"
+              },
+              {
+                "refId": "B",
+                "target": "aliasSub(aliasSub(aliasByNode(collectd.%HOST%.SOLR_MASTER-$core-QueryResultCache.count-hitratio, 2), '(.*)-(.*)', '\\1'),'(.*)-', '')",
+                "textEditor": true
               }
             ],
             "datasource": null,
@@ -245,21 +269,23 @@
               "threshold2Color": "rgba(234, 112, 112, 0.22)"
             },
             "lines": true,
-            "fill": 1,
-            "linewidth": 2,
+            "fill": 3,
+            "linewidth": 1,
             "points": false,
             "pointradius": 5,
             "bars": false,
             "stack": false,
             "percentage": false,
             "legend": {
-              "show": true,
-              "values": false,
-              "min": false,
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
               "max": false,
-              "current": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
               "total": false,
-              "avg": false
+              "values": true
             },
             "nullPointMode": "connected",
             "steppedLine": false,
@@ -278,13 +304,13 @@
         ]
       },
       {
-        "title": "Live DocumentCache Index size",
-        "height": "250px",
+        "title": "Document Cache - Index size",
+        "height": "200px",
         "editable": true,
         "collapse": false,
         "panels": [
           {
-            "title": "Live DocumentCache Index Size",
+            "title": "Document Cache - Index size",
             "error": false,
             "span": 12,
             "editable": true,
@@ -293,8 +319,14 @@
             "id": 10,
             "targets": [
               {
-                "target": "collectd.%HOST%.SOLR_MASTER-core_live-DocumentCache.count-size",
-                "refId": "A"
+                "hide": true,
+                "refId": "A",
+                "target": "aliasSub(collectd.%HOST%.SOLR_MASTER-core_live-DocumentCache.count-size, '(.*)-', '')"
+              },
+              {
+                "refId": "B",
+                "target": "aliasSub(aliasSub(aliasByNode(collectd.%HOST%.SOLR_MASTER-$core-DocumentCache.count-size, 2), '(.*)-(.*)', '\\1'),'(.*)-', '')",
+                "textEditor": true
               }
             ],
             "datasource": null,
@@ -327,21 +359,23 @@
               "threshold2Color": "rgba(234, 112, 112, 0.22)"
             },
             "lines": true,
-            "fill": 1,
-            "linewidth": 2,
+            "fill": 3,
+            "linewidth": 1,
             "points": false,
             "pointradius": 5,
             "bars": false,
             "stack": false,
             "percentage": false,
             "legend": {
-              "show": true,
-              "values": false,
-              "min": false,
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
               "max": false,
-              "current": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
               "total": false,
-              "avg": false
+              "values": true
             },
             "nullPointMode": "connected",
             "steppedLine": false,
@@ -360,23 +394,29 @@
         ]
       },
       {
-        "title": "Live DocumentCache Hits",
-        "height": "250px",
+        "title": "Document Cache - Hits",
+        "height": "200px",
         "editable": true,
         "collapse": false,
         "panels": [
           {
-            "title": "Live DocumentCache Hits",
+            "title": "Document Cache - Hits",
             "error": false,
-            "span": 11,
+            "span": 12,
             "editable": true,
             "type": "graph",
             "isNew": true,
             "id": 11,
             "targets": [
               {
-                "target": "collectd.%HOST%.SOLR_MASTER-core_live-DocumentCache.count-hits",
-                "refId": "A"
+                "hide": true,
+                "refId": "A",
+                "target": "aliasSub(collectd.%HOST%.SOLR_MASTER-core_live-DocumentCache.count-hits, '(.*)-', '')"
+              },
+              {
+                "refId": "B",
+                "target": "aliasSub(aliasSub(aliasByNode(collectd.%HOST%.SOLR_MASTER-$core-DocumentCache.count-hits, 2), '(.*)-(.*)', '\\1'),'(.*)-', '')",
+                "textEditor": false
               }
             ],
             "datasource": null,
@@ -409,21 +449,23 @@
               "threshold2Color": "rgba(234, 112, 112, 0.22)"
             },
             "lines": true,
-            "fill": 1,
-            "linewidth": 2,
+            "fill": 3,
+            "linewidth": 1,
             "points": false,
             "pointradius": 5,
             "bars": false,
             "stack": false,
             "percentage": false,
             "legend": {
-              "show": true,
-              "values": false,
-              "min": false,
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
               "max": false,
-              "current": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
               "total": false,
-              "avg": false
+              "values": true
             },
             "nullPointMode": "connected",
             "steppedLine": false,
@@ -442,13 +484,13 @@
         ]
       },
       {
-        "title": "Live DocumentCache Hitratio",
-        "height": "250px",
+        "title": "Document Cache - Hitratio",
+        "height": "200px",
         "editable": true,
         "collapse": false,
         "panels": [
           {
-            "title": "Live Hitratio",
+            "title": "Document Cache - Hitratio",
             "error": false,
             "span": 12,
             "editable": true,
@@ -457,8 +499,14 @@
             "id": 12,
             "targets": [
               {
-                "target": "collectd.%HOST%.SOLR_MASTER-core_live-DocumentCache.count-hitratio",
-                "refId": "A"
+                "hide": true,
+                "refId": "A",
+                "target": "aliasSub(collectd.%HOST%.SOLR_MASTER-core_live-DocumentCache.count-hitratio, '(.*)-', '')"
+              },
+              {
+                "refId": "B",
+                "target": "aliasSub(aliasSub(aliasByNode(collectd.%HOST%.SOLR_MASTER-$core-DocumentCache.count-hitratio, 2), '(.*)-(.*)', '\\1'),'(.*)-', '')",
+                "textEditor": true
               }
             ],
             "datasource": null,
@@ -491,21 +539,23 @@
               "threshold2Color": "rgba(234, 112, 112, 0.22)"
             },
             "lines": true,
-            "fill": 1,
-            "linewidth": 2,
+            "fill": 3,
+            "linewidth": 1,
             "points": false,
             "pointradius": 5,
             "bars": false,
             "stack": false,
             "percentage": false,
             "legend": {
-              "show": true,
-              "values": false,
-              "min": false,
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
               "max": false,
-              "current": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
               "total": false,
-              "avg": false
+              "values": true
             },
             "nullPointMode": "connected",
             "steppedLine": false,
@@ -526,7 +576,7 @@
       {
         "collapse": false,
         "editable": true,
-        "height": "250px",
+        "height": "200px",
         "panels": [
           {
             "aliasColors": {},
@@ -534,7 +584,7 @@
             "datasource": null,
             "editable": true,
             "error": false,
-            "fill": 1,
+            "fill": 3,
             "grid": {
               "threshold1": null,
               "threshold1Color": "rgba(216, 200, 27, 0.27)",
@@ -544,16 +594,18 @@
             "id": 13,
             "isNew": true,
             "legend": {
+              "alignAsTable": true,
               "avg": false,
-              "current": false,
+              "current": true,
               "max": false,
               "min": false,
+              "rightSide": true,
               "show": true,
               "total": false,
-              "values": false
+              "values": true
             },
             "lines": true,
-            "linewidth": 2,
+            "linewidth": 1,
             "links": [],
             "nullPointMode": "connected",
             "percentage": false,
@@ -566,13 +618,19 @@
             "steppedLine": false,
             "targets": [
               {
+                "hide": true,
                 "refId": "A",
-                "target": "collectd.%HOST%.SOLR_MASTER-core_live-Select.count-avgTimePerRequest"
+                "target": "alias(aliasSub(collectd.%HOST%.SOLR_MASTER-core_live-Select.count-avgTimePerRequest, '(.*)-', ''), 'time p. request')"
+              },
+              {
+                "refId": "B",
+                "target": "aliasSub(aliasSub(aliasByNode(collectd.%HOST%.SOLR_MASTER-$core-Select.count-avgTimePerRequest, 2), '(.*)-(.*)', '\\1'), '(.*)-', '')",
+                "textEditor": false
               }
             ],
             "timeFrom": null,
             "timeShift": null,
-            "title": "Live Average time per request",
+            "title": "Select - average time per request",
             "tooltip": {
               "msResolution": false,
               "shared": true,
@@ -603,12 +661,12 @@
             ]
           }
         ],
-        "title": "Live average time per request"
+        "title": "Select - average time per request"
       },
       {
         "collapse": false,
         "editable": true,
-        "height": "250px",
+        "height": "200px",
         "panels": [
           {
             "aliasColors": {},
@@ -616,7 +674,7 @@
             "datasource": null,
             "editable": true,
             "error": false,
-            "fill": 1,
+            "fill": 3,
             "grid": {
               "threshold1": null,
               "threshold1Color": "rgba(216, 200, 27, 0.27)",
@@ -626,16 +684,18 @@
             "id": 14,
             "isNew": true,
             "legend": {
+              "alignAsTable": true,
               "avg": false,
-              "current": false,
+              "current": true,
               "max": false,
               "min": false,
+              "rightSide": true,
               "show": true,
               "total": false,
-              "values": false
+              "values": true
             },
             "lines": true,
-            "linewidth": 2,
+            "linewidth": 1,
             "links": [],
             "nullPointMode": "connected",
             "percentage": false,
@@ -648,13 +708,19 @@
             "steppedLine": false,
             "targets": [
               {
+                "hide": true,
                 "refId": "A",
-                "target": "collectd.%HOST%.SOLR_MASTER-core_live-Select.count-errors"
+                "target": "aliasSub(collectd.%HOST%.SOLR_MASTER-core_live-Select.count-errors, '(.*)-', '')"
+              },
+              {
+                "refId": "B",
+                "target": "aliasSub(aliasSub(aliasByNode(collectd.%HOST%.SOLR_MASTER-$core-Select.count-errors, 2), '(.*)-(.*)', '\\1'), '(.*)-', '')",
+                "textEditor": true
               }
             ],
             "timeFrom": null,
             "timeShift": null,
-            "title": "Live Index Errors",
+            "title": "Select - Index Errors",
             "tooltip": {
               "msResolution": false,
               "shared": true,
@@ -685,7 +751,7 @@
             ]
           }
         ],
-        "title": "Live index errors"
+        "title": "Select - Index Errors"
       }
     ],
     "time": {
@@ -715,7 +781,24 @@
       ]
     },
     "templating": {
-      "list": []
+      "list": [
+        {
+          "current": {},
+          "datasource": "graphite",
+          "hide": 0,
+          "includeAll": true,
+          "multi": true,
+          "name": "core",
+          "options": [],
+          "query": "*.*.SOLR_MASTER-core_*",
+          "refresh": 1,
+          "regex": "/.*-(core_.*)-.*/",
+          "tagValuesQuery": "collectd.*.SOLR_MASTER-core*",
+          "tagsQuery": "solr",
+          "type": "query",
+          "useTags": false
+        }
+      ]
     },
     "annotations": {
       "list": []
