@@ -229,6 +229,29 @@ class DataCollector
     end
   end
 
+
+  def mysqlData( host, data = {} )
+
+    user = data['user'] ? data['user'] : nil
+    pass = data['pass'] ? data['pass'] : nil
+    port = data['port'] ? data['port'] : nil
+
+    if( port != nil )
+
+      settings = {
+        'log_dir' => @logDirectory,
+        'mysqlHost' => host,
+        'mysqlUser' => 'coremedia',
+        'mysqlPass' => 'coremedia'
+      }
+
+      mysql = MysqlStatus( settings )
+      mysq.run()
+
+    end
+
+  end
+
   # merge hashes of configured (cm-service.json) and discovered data (discovery.json)
   def createHostConfig( data )
 
@@ -607,8 +630,8 @@ class DataCollector
 
           # re.start the service discovery
 
-          serviceDiscovery = ServiceDiscovery.new( @settings )
-          serviceDiscovery.refreshHost( h )
+          discovery = ServiceDiscovery.new( @settings )
+          discovery.refreshHost( h )
 
         end
 #        @log.debug( file )
@@ -620,6 +643,10 @@ class DataCollector
         #
         if( data['mongodb'] )
           self.mongoDBData( h, data['mongodb'] )
+        end
+
+        if( data['mysql'] )
+          self.mysqlData( h, data['mysql'] )
         end
 
         @log.debug( 'create Hostconfiguration' )

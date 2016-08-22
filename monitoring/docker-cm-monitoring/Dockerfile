@@ -41,6 +41,7 @@ RUN \
      ipaddress \
      resolve-hostname \
      rest-client \
+     sequel \
      filesize \
      fileutils \
      sinatra \

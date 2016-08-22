@@ -51,7 +51,7 @@ options = {
 
 # -----------------------------------------------------------------------------
 
-r = DataCollector.new( options, applicationConfigFile, serviceConfigFile )
+r = DataCollector.new( options )
 
 # -----------------------------------------------------------------------------
 

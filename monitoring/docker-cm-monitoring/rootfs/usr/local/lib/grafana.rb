@@ -11,10 +11,10 @@ require 'timeout'
 require 'logger'
 require 'json'
 require 'fileutils'
-# require 'resolv-replace.rb'
 require 'net/http'
 require 'uri'
 
+require_relative 'discover'
 require_relative 'tools'
 
 # -------------------------------------------------------------------------------------------------------------------
@@ -43,8 +43,6 @@ class Grafana
     @log.formatter = proc do |severity, datetime, progname, msg|
       "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
     end
-
-#     include Grafana::DashboardTemplate
 
     #TODO tmp and template dir as global var
 #     @tmp_dir = "/tmp"
@@ -268,9 +266,9 @@ class Grafana
 
     intersect = dir & services
 
-    @log.debug( " templates: #{dirs}" )
-    @log.debug( " services : #{services}" )
-    @log.debug( " use      : #{intersect}" )
+#     @log.debug( " templates: #{dirs}" )
+#     @log.debug( " services : #{services}" )
+#     @log.debug( " use      : #{intersect}" )
 
     intersect.each do |service|
 
@@ -292,7 +290,7 @@ class Grafana
           "id": null,
           "title": "%SHORTHOST% - Overview",
           "originalTitle": "%SHORTHOST% - Overview",
-          "tags": [ "%TAG%" ],
+          "tags": [ "%TAG%", "overview" ],
           "style": "dark",
           "timezone": "browser",
           "editable": true,
@@ -327,32 +325,7 @@ class Grafana
     # recreate ID's
 
     if( validJson?( template ) )
-
-#      tpl = regenerateGrafanaTemplateIDs( template )
-# 
-#       tpl  = JSON.parse( template )
-#       rows = tpl['dashboard']['rows'] ? tpl['dashboard']['rows'] : nil
-#
-#       if( rows != nil )
-#
-#         @log.debug( sprintf( ' => found %d rows', rows.count ) )
-#
-#         counter = 1
-#         rows.each_with_index do |r, counter|
-#
-#           @log.debug( sprintf( ' row  %d', counter ) )
-#
-#           panel = r['panels'] ? r['panels'] : nil
-#
-#           @log.debug( panel )
-#
-#
-#         end
-
-      @log.debug( 'send to grafana' )
       sendTemplateToGrafana( template )
-    else
-      @log.debug( 'no valid JSON' )
     end
 
   end
