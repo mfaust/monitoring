@@ -101,7 +101,7 @@ module Sinatra
     set :bind, @restService_bind
     set :port, @restService_port.to_i
 
-    h = Discover.new( { 'log_dir' => @logDirectory, 'cache_dir' => @cacheDir, 'jolokia_host' => @jolokia_host, 'jolokia_port' => @jolokia_port } )
+    h = ServiceDiscovery.new( { 'log_dir' => @logDirectory, 'cache_dir' => @cacheDir, 'jolokia_host' => @jolokia_host, 'jolokia_port' => @jolokia_port } )
     g = Grafana.new( { 'log_dir' => @logDirectory, 'cache_dir' => @cacheDir, 'grafana_host' => @grafana_host, 'grafana_port' => @grafana_port, 'grafana_path' => @grafana_path, 'template_dir' => @template_dir } )
 
     error do

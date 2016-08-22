@@ -24,12 +24,14 @@ class DataCollector
 
   attr_reader :status, :message, :services, :reDiscovery
 
-  def initialize( settings = {}, applicationConfig, serviceConfig )
+  def initialize( settings = {} )
 
-    @logDirectory   = settings['log_dir']      ? settings['log_dir']      : '/tmp/log'
-    @cacheDirectory = settings['cache_dir']    ? settings['cache_dir']    : '/tmp/cache'
-    @jolokiaHost    = settings['jolokia_host'] ? settings['jolokia_host'] : 'localhost'
-    @jolokiaPort    = settings['jolokia_port'] ? settings['jolokia_port'] : 8080
+    @logDirectory      = settings['log_dir']               ? settings['log_dir']               : '/tmp/log'
+    @cacheDirectory    = settings['cache_dir']             ? settings['cache_dir']             : '/tmp/cache'
+    @jolokiaHost       = settings['jolokia_host']          ? settings['jolokia_host']          : 'localhost'
+    @jolokiaPort       = settings['jolokia_port']          ? settings['jolokia_port']          : 8080
+    applicationConfig  = settings['applicationConfigFile'] ? settings['applicationConfigFile'] : nil
+    serviceConfig      = settings['serviceConfigFile']     ? settings['serviceConfigFile']     : nil
 
     if( ! File.exist?( @logDirectory ) )
       Dir.mkdir( @logDirectory )
@@ -51,11 +53,24 @@ class DataCollector
       "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
     end
 
-    @currentDirectory    = File.expand_path( File.join( File.dirname( __FILE__ ) ) )
 
-    @appConfigFile       = File.expand_path( applicationConfig )
-    @serviceConfigFile   = File.expand_path( serviceConfig )
+    if( applicationConfig == nil or serviceConfig == nil )
+      msg = 'no Configuration File given'
+      puts msg
+      @log.error( msg )
 
+      exit 1
+    end
+
+    self.applicationConfig( applicationConfig )
+    self.serviceConfig( serviceConfig )
+
+#     @currentDirectory    = File.expand_path( File.join( File.dirname( __FILE__ ) ) )
+
+#     @appConfigFile       = File.expand_path( applicationConfig )
+#     @serviceConfigFile   = File.expand_path( serviceConfig )
+
+    @settings            = settings
     @jolokiaApplications = nil
     @serviceConfig       = nil
 
@@ -146,8 +161,9 @@ class DataCollector
     else
       @reDiscovery = false
     end
-  end
 
+    return @reDiscovery
+  end
 
 
   def logMark()
@@ -590,6 +606,10 @@ class DataCollector
         if( self.checkDiscoveryFileAge( file ) == true )
 
           # re.start the service discovery
+
+          serviceDiscovery = ServiceDiscovery.new( @settings )
+          serviceDiscovery.refreshHost( h )
+
         end
 #        @log.debug( file )
 

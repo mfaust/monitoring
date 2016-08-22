@@ -19,7 +19,7 @@ require_relative 'tools'
 
 # -------------------------------------------------------------------------------------------------------------------
 
-class Discover
+class ServiceDiscovery
 
   attr_reader :status, :message, :services
 
@@ -30,7 +30,7 @@ class Discover
     @jolokiaHost    = settings['jolokia_host'] ? settings['jolokia_host'] : 'localhost'
     @jolokiaPort    = settings['jolokia_port'] ? settings['jolokia_port'] : 8080
 
-    logFile = sprintf( '%s/discovery.log', @logDirectory )
+    logFile = sprintf( '%s/service-discovery.log', @logDirectory )
 
     file      = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
     file.sync = true
@@ -320,12 +320,10 @@ class Discover
       }
     end
 
-    if( force == true )
-      @log.info( 'use force mode' )
-    end
-
     # force delete
     if( force == true )
+
+      @log.info( 'use force mode' )
       self.deleteHost( host )
     end
 
@@ -383,6 +381,26 @@ class Discover
       'status'  => @status,
       'message' => @message
     }
+  end
+
+
+  def refreshHost( host )
+
+    ip = dnsResolve( host )
+
+    # second, if the that we whant monitored, available
+    if( isRunning?( ip ) == false )
+
+      @status  = 400
+      @message = 'Host not available'
+
+      return {
+        'status'  => @status,
+        'message' => @message
+      }
+    end
+
+
   end
 
 
