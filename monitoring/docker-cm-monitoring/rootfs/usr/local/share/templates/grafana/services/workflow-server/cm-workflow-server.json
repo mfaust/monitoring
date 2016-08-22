@@ -1,8 +1,8 @@
 {
   "dashboard": {
     "id": null,
-    "title": "%SHORTHOST% ContentServer WFS",
-    "originalTitle": "%SHORTHOST% ContentServer WFS",
+    "title": "%SHORTHOST% Workflow Server",
+    "originalTitle": "%SHORTHOST% Workflow Server",
     "tags": [ "%TAG%", "content-server" ],
     "style": "dark",
     "timezone": "browser",
