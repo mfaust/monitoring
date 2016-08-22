@@ -1,0 +1,247 @@
+      {
+        "collapse": false,
+        "editable": true,
+        "height": "150px",
+        "panels": [
+          {
+            "cacheTimeout": null,
+            "colorBackground": false,
+            "colorValue": false,
+            "datasource": "graphite",
+            "editable": true,
+            "error": false,
+            "format": "none",
+            "id": 1,
+            "interval": null,
+            "isNew": true,
+            "links": [],
+            "nullPointMode": "connected",
+            "span": 1,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "collectd.%HOST%.%SERVICE%-Server-service_info-feeder.count-concurrent_diff"
+              }
+            ],
+            "thresholds": "",
+            "title": "Feeder Concurent",
+            "type": "singlestat",
+            "valueName": "current"
+          },
+          {
+            "cacheTimeout": null,
+            "colorBackground": false,
+            "colorValue": false,
+            "datasource": "graphite",
+            "editable": true,
+            "error": false,
+            "format": "none",
+            "id": 2,
+            "interval": null,
+            "isNew": true,
+            "links": [],
+            "nullPointMode": "connected",
+            "span": 1,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "collectd.%HOST%.%SERVICE%-Server-service_info-feeder.count-named_diff"
+              }
+            ],
+            "thresholds": "",
+            "title": "Feeder Named",
+            "type": "singlestat",
+            "valueName": "current"
+          },
+          {
+            "content": "",
+            "editable": true,
+            "error": false,
+            "id": 3,
+            "isNew": true,
+            "links": [],
+            "mode": "html",
+            "span": 1,
+            "title": "",
+            "transparent": true,
+            "type": "text"
+          },
+          {
+            "cacheTimeout": null,
+            "colorBackground": false,
+            "colorValue": false,
+            "datasource": "graphite",
+            "editable": true,
+            "error": false,
+            "format": "none",
+            "id": 4,
+            "interval": null,
+            "isNew": true,
+            "links": [],
+            "nullPointMode": "connected",
+            "span": 1,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "collectd.%HOST%.%SERVICE%-Server-service_info-publisher.count-concurrent_diff"
+              }
+            ],
+            "thresholds": "",
+            "title": "Publischer Concurent",
+            "type": "singlestat",
+            "valueName": "current"
+          },
+          {
+            "cacheTimeout": null,
+            "colorBackground": false,
+            "colorValue": false,
+            "datasource": "graphite",
+            "editable": true,
+            "error": false,
+            "format": "none",
+            "id": 5,
+            "interval": null,
+            "isNew": true,
+            "links": [],
+            "nullPointMode": "connected",
+            "span": 1,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "collectd.%HOST%.%SERVICE%-Server-service_info-publisher.count-named_diff"
+              }
+            ],
+            "thresholds": "",
+            "title": "Publischer Named",
+            "type": "singlestat",
+            "valueName": "current"
+          },
+          {
+            "content": "",
+            "editable": true,
+            "error": false,
+            "id": 6,
+            "isNew": true,
+            "links": [],
+            "mode": "html",
+            "span": 1,
+            "title": "",
+            "transparent": true,
+            "type": "text"
+          },
+          {
+            "cacheTimeout": null,
+            "colorBackground": false,
+            "colorValue": false,
+            "datasource": "graphite",
+            "editable": true,
+            "error": false,
+            "format": "none",
+            "id": 7,
+            "interval": null,
+            "isNew": true,
+            "links": [],
+            "nullPointMode": "connected",
+            "span": 1,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "collectd.%HOST%.%SERVICE%-Server-service_info-replicator.count-concurrent_diff"
+              }
+            ],
+            "thresholds": "",
+            "title": "Replicator Concurent",
+            "type": "singlestat",
+            "valueName": "current"
+          },
+          {
+            "cacheTimeout": null,
+            "colorBackground": false,
+            "colorValue": false,
+            "datasource": "graphite",
+            "editable": true,
+            "error": false,
+            "format": "none",
+            "id": 8,
+            "interval": null,
+            "isNew": true,
+            "links": [],
+            "nullPointMode": "connected",
+            "span": 1,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "collectd.%HOST%.%SERVICE%-Server-service_info-replicator.count-named_diff"
+              }
+            ],
+            "thresholds": "",
+            "title": "Replicator Named",
+            "type": "singlestat",
+            "valueName": "current"
+          },
+          {
+            "content": "",
+            "editable": true,
+            "error": false,
+            "id": 9,
+            "isNew": true,
+            "links": [],
+            "mode": "html",
+            "span": 1,
+            "title": "",
+            "transparent": true,
+            "type": "text"
+          },
+          {
+            "cacheTimeout": null,
+            "colorBackground": false,
+            "colorValue": false,
+            "datasource": "graphite",
+            "editable": true,
+            "error": false,
+            "format": "none",
+            "id": 10,
+            "interval": null,
+            "isNew": true,
+            "links": [],
+            "nullPointMode": "connected",
+            "span": 1,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "collectd.%HOST%.%SERVICE%-Server-service_info-system.count-concurrent_diff"
+              }
+            ],
+            "thresholds": "",
+            "title": "System Concurent",
+            "type": "singlestat",
+            "valueName": "current"
+          },
+          {
+            "cacheTimeout": null,
+            "colorBackground": false,
+            "colorValue": false,
+            "datasource": "graphite",
+            "editable": true,
+            "error": false,
+            "format": "none",
+            "id": 11,
+            "interval": null,
+            "isNew": true,
+            "links": [],
+            "nullPointMode": "connected",
+            "span": 1,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "collectd.%HOST%.%SERVICE%-Server-service_info-system.count-named_diff"
+              }
+            ],
+            "thresholds": "",
+            "title": "System Named",
+            "type": "singlestat",
+            "valueName": "current"
+          }
+        ],
+        "title": "Row"
+      }

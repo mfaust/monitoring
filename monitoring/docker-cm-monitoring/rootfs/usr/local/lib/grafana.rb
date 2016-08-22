@@ -86,6 +86,7 @@ class Grafana
       services       = discoveryJson.keys
 
       self.generateOverviewTemplate( services )
+#      self.generateLicenseTemplate( services )
 
       # determine type of service from mergedHostData.json file, e.g. cae, caefeeder, contentserver
       merged_host_json = getJsonFromFile(mergedHostFile)
@@ -330,6 +331,50 @@ class Grafana
 
   end
 
+
+  def generateLicenseTemplate( services )
+
+    rows = Array.new()
+    contentServers = ['content-management-server', 'master-live-server', 'replication-live-server']
+
+    intersect      = contentServers & services
+
+    @log.debug( " contentServers: #{contentServers}" )
+    @log.debug( " services      : #{services}" )
+    @log.debug( " use           : #{intersect}" )
+
+    template = sprintf( '%s/licenses/licenses-part.json', @templateDirectory )
+
+    intersect.each do |service|
+
+      if( File.exist?( template ) )
+
+        tpl = File.read( template )
+
+        tpl.gsub!( '%SERVICE%', normalizeService( service ) )
+
+        rows << tpl
+      end
+
+    end
+
+    rows = rows.join(',')
+
+    @log.debug( rows )
+
+    templateFile = File.read( sprintf( '%s/licenses/licenses-template.json', @templateDirectory ) )
+    templateJson = JSON.parse( templateFile )
+
+    if( templateJson['dashboard'] and templateJson['dashboard']['rows'] )
+
+      templateRows = templateJson["dashboard"]["rows"]
+
+      templateJson["dashboard"]["rows"] = templateRows.concat(rows)
+
+    end
+
+    sendTemplateToGrafana( JSON.generate( templateJson ) )
+  end
 
   def generateServiceTemplate(serviceName, serviceTemplatePaths, additionalTemplatePaths)
 
