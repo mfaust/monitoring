@@ -498,6 +498,7 @@ class CollecdPlugin
       runlevel         = value['RunLevel']                  ? value['RunLevel']                  : nil
       uptime           = value['Uptime']                    ? value['Uptime']                    : nil
       serviceInfos     = value['ServiceInfos']              ? value['ServiceInfos']              : nil
+      licenseInfos     = value['LicenseInfos']              ? value['LicenseInfos']              : nil
 
       data.push( sprintf( format, @Host, @Service, mbean, 'server', 'cache_hits'     , @interval, cacheHits ) )
       data.push( sprintf( format, @Host, @Service, mbean, 'server', 'cache_evicts'   , @interval, cacheEvicts ) )
@@ -533,6 +534,26 @@ class CollecdPlugin
             data.push( sprintf( format, @Host, @Service, mbean, 'service_info', s , 'concurrent_diff', @interval, concurrentDiff ) )
           end
         end
+
+        if (licenseInfos != nil)
+
+          format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
+
+          validFrom          = licenseInfos['validFrom']
+          validFromDate      = licenseInfos['validFromDate']
+          validUntilSoft     = licenseInfos['validUntilSoft']
+          validUntilSoftDate = licenseInfos['validUntilSoftDate']
+          validUntilHard     = licenseInfos['validUntilHard']
+          validUntilHardDate = licenseInfos['validUntilHardDate']
+
+          data.push( sprintf( format, @Host, @Service, mbean, 'license_info', 'valid_from'            , @interval, validFrom ) )
+          data.push( sprintf( format, @Host, @Service, mbean, 'license_info', 'valid_from_date'       , @interval, validFromDate ) )
+          data.push( sprintf( format, @Host, @Service, mbean, 'license_info', 'valid_until_soft'      , @interval, validUntilSoft ) )
+          data.push( sprintf( format, @Host, @Service, mbean, 'license_info', 'valid_until_soft_date' , @interval, validUntilSoftDate ) )
+          data.push( sprintf( format, @Host, @Service, mbean, 'license_info', 'valid_until_hard'      , @interval, validUntilHard ) )
+          data.push( sprintf( format, @Host, @Service, mbean, 'license_info', 'valid_until_hard_date' , @interval, validUntilHardDate ) )
+        end
+        
       end
 
     else
