@@ -1,8 +1,8 @@
 {
   "dashboard": {
     "id": null,
-    "title": "%SHORTHOST% Solr Master Live",
-    "originalTitle": "%SHORTHOST% Solr Master Live",
+    "title": "%SHORTHOST% Solr Master",
+    "originalTitle": "%SHORTHOST% Solr Master",
     "tags": [ "%TAG%"],
     "style": "dark",
     "timezone": "browser",
@@ -16,7 +16,7 @@
         "height": "25px",
         "panels": [
           {
-            "content": "<h3><center>Solr Master Live Index</center></h3>",
+            "content": "<h3><center>Solr Master</center></h3>",
             "editable": true,
             "error": false,
             "id": 10,
