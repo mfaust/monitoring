@@ -37,11 +37,13 @@ RUN \
     zlib \
     zlib-dev && \
    gem install --no-rdoc --no-ri \
+     bigdecimal \
      json \
      ipaddress \
      resolve-hostname \
      rest-client \
      sequel \
+     time_difference \
      filesize \
      fileutils \
      sinatra \

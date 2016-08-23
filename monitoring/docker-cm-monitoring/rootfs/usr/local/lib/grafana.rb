@@ -86,15 +86,15 @@ class Grafana
       services       = discoveryJson.keys
 
       self.generateOverviewTemplate( services )
-#      self.generateLicenseTemplate( services )
+      self.generateLicenseTemplate( services )
 
       # determine type of service from mergedHostData.json file, e.g. cae, caefeeder, contentserver
-      merged_host_json = getJsonFromFile(mergedHostFile)
+      mergedHostJson = getJsonFromFile(mergedHostFile)
 
       @log.debug("Found services: #{services}")
 
       services.each do |service|
-        serviceTemplatePaths = Array.new()
+        serviceTemplatePaths    = Array.new()
         additionalTemplatePaths = Array.new()
 
         @log.debug("Searching templates paths for service: #{service}")
@@ -110,13 +110,19 @@ class Grafana
         end
 
         # get templates for service type
-        serviceType = merged_host_json[service]["application"]
-        if serviceType
-          additionalTemplatePaths.push(*getTemplatePathsForServiceType(serviceType))
+        if( mergedHostJson != nil )
+
+          serviceType = mergedHostJson[service]["application"]
+          if( serviceType )
+            additionalTemplatePaths.push(*getTemplatePathsForServiceType(serviceType))
+          end
+        else
+          @log.error( sprintf( 'file %s doesnt exists', mergedHostFile ) )
         end
 
         @log.debug( "Found Template paths: #{serviceTemplatePaths}, #{additionalTemplatePaths}")
         generateServiceTemplate( serviceName, serviceTemplatePaths, additionalTemplatePaths )
+
       end
 
     end
@@ -267,9 +273,9 @@ class Grafana
 
     intersect = dir & services
 
-#     @log.debug( " templates: #{dirs}" )
-#     @log.debug( " services : #{services}" )
-#     @log.debug( " use      : #{intersect}" )
+     @log.debug( " templates: #{dirs}" )
+     @log.debug( " services : #{services}" )
+     @log.debug( " use      : #{intersect}" )
 
     intersect.each do |service|
 
@@ -322,9 +328,6 @@ class Grafana
       }
     )
 
-    # TODO
-    # recreate ID's
-
     if( validJson?( template ) )
       sendTemplateToGrafana( template )
     end
@@ -339,41 +342,92 @@ class Grafana
 
     intersect      = contentServers & services
 
-    @log.debug( " contentServers: #{contentServers}" )
-    @log.debug( " services      : #{services}" )
-    @log.debug( " use           : #{intersect}" )
+     @log.debug( " contentServers: #{contentServers}" )
+     @log.debug( " services      : #{services}" )
+     @log.debug( " use           : #{intersect}" )
 
-    template = sprintf( '%s/licenses/licenses-part.json', @templateDirectory )
+    licenseHead  = sprintf( '%s/licenses/licenses-head.json', @templateDirectory )
+    licenseUntil = sprintf( '%s/licenses/licenses-until.json', @templateDirectory )
+    licensePart  = sprintf( '%s/licenses/licenses-part.json', @templateDirectory )
 
     intersect.each do |service|
 
-      if( File.exist?( template ) )
+      if( File.exist?( licenseUntil ) )
 
-        tpl = File.read( template )
+        tpl = File.read( licenseUntil )
 
         tpl.gsub!( '%SERVICE%', normalizeService( service ) )
 
         rows << tpl
       end
+    end
 
+    if( File.exist?( licenseHead ) )
+      rows << File.read( licenseHead )
+    end
+
+    intersect.each do |service|
+
+      if( File.exist?( licensePart ) )
+
+        tpl = File.read( licensePart )
+
+        tpl.gsub!( '%SERVICE%', normalizeService( service ) )
+
+        if( service == 'replication-live-server' )
+
+          tpl.gsub!( 'service_info-publisher' , 'service_info-webserver' )
+          tpl.gsub!( 'Publischer', 'Webserver' )
+
+        end
+
+        rows << tpl
+      end
     end
 
     rows = rows.join(',')
 
-    @log.debug( rows )
+    template = %(
+      {
+        "dashboard": {
+          "id": null,
+          "title": "%SHORTHOST% - Licenses",
+          "originalTitle": "%SHORTHOST% - Licenses",
+          "tags": [ "%TAG%", "licenses" ],
+          "style": "dark",
+          "timezone": "browser",
+          "editable": true,
+          "hideControls": false,
+          "sharedCrosshair": false,
+          "rows": [
+            #{rows}
+          ],
+          "time": {
+            "from": "now-2m",
+            "to": "now"
+          },
+          "timepicker": {
+            "refresh_intervals": [ "1m", "2m", "10m" ],
+            "time_options": [ "2m", "15m" ]
+          },
+          "templating": {
+            "list": []
+          },
+          "annotations": {
+            "list": []
+          },
+          "refresh": "2m",
+          "schemaVersion": 12,
+          "version": 0,
+          "links": []
+        }
+      }
+    )
 
-    templateFile = File.read( sprintf( '%s/licenses/licenses-template.json', @templateDirectory ) )
-    templateJson = JSON.parse( templateFile )
-
-    if( templateJson['dashboard'] and templateJson['dashboard']['rows'] )
-
-      templateRows = templateJson["dashboard"]["rows"]
-
-      templateJson["dashboard"]["rows"] = templateRows.concat(rows)
-
+    if( validJson?( template ) )
+      sendTemplateToGrafana( template )
     end
 
-    sendTemplateToGrafana( JSON.generate( templateJson ) )
   end
 
   def generateServiceTemplate(serviceName, serviceTemplatePaths, additionalTemplatePaths)

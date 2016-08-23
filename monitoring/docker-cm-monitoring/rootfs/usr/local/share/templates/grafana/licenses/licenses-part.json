@@ -1,8 +1,21 @@
       {
         "collapse": false,
         "editable": true,
-        "height": "150px",
+        "height": "100px",
         "panels": [
+          {
+            "content": "<h3><center>%SERVICE%</center</h3>",
+            "editable": true,
+            "error": false,
+            "id": 3,
+            "isNew": true,
+            "links": [],
+            "mode": "html",
+            "span": 1,
+            "title": "",
+            "transparent": true,
+            "type": "text"
+          },
           {
             "cacheTimeout": null,
             "colorBackground": false,
@@ -24,7 +37,7 @@
               }
             ],
             "thresholds": "",
-            "title": "Feeder Concurent",
+            "title": "Feeder",
             "type": "singlestat",
             "valueName": "current"
           },
@@ -49,7 +62,7 @@
               }
             ],
             "thresholds": "",
-            "title": "Feeder Named",
+            "title": "Feeder",
             "type": "singlestat",
             "valueName": "current"
           },
@@ -87,7 +100,7 @@
               }
             ],
             "thresholds": "",
-            "title": "Publischer Concurent",
+            "title": "Publischer",
             "type": "singlestat",
             "valueName": "current"
           },
@@ -112,7 +125,7 @@
               }
             ],
             "thresholds": "",
-            "title": "Publischer Named",
+            "title": "Publischer",
             "type": "singlestat",
             "valueName": "current"
           },
@@ -150,7 +163,7 @@
               }
             ],
             "thresholds": "",
-            "title": "Replicator Concurent",
+            "title": "Replicator",
             "type": "singlestat",
             "valueName": "current"
           },
@@ -175,7 +188,7 @@
               }
             ],
             "thresholds": "",
-            "title": "Replicator Named",
+            "title": "Replicator",
             "type": "singlestat",
             "valueName": "current"
           },
@@ -213,7 +226,7 @@
               }
             ],
             "thresholds": "",
-            "title": "System Concurent",
+            "title": "System",
             "type": "singlestat",
             "valueName": "current"
           },
@@ -238,7 +251,7 @@
               }
             ],
             "thresholds": "",
-            "title": "System Named",
+            "title": "System",
             "type": "singlestat",
             "valueName": "current"
           }

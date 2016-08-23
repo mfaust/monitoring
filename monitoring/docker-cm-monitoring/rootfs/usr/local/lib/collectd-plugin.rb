@@ -1,12 +1,15 @@
 #!/usr/bin/ruby
 #
-# 22.08.2016 - Bodo Schulz
+# 23.08.2016 - Bodo Schulz
 #
 #
-# v1.0.3
+# v1.0.4
 
 # -----------------------------------------------------------------------------
 
+require 'time'
+require 'date'
+require 'time_difference'
 require 'logger'
 require 'json'
 require 'filesize'
@@ -43,8 +46,8 @@ class CollecdPlugin
       FileUtils.chown( 'nobody', 'nobody', logFile )
     end
 
-    version              = '1.0.2'
-    date                 = '2016-08-16'
+    version              = '1.0.4'
+    date                 = '2016-08-23'
 
     @log.info( '-----------------------------------------------------------------' )
     @log.info( ' CollectdPlugin' )
@@ -486,6 +489,21 @@ class CollecdPlugin
     format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
     data   = []
 
+
+    def timeParser( today, finalDate )
+
+      final      = Date.parse( finalDate )
+      finalTime  = Time.new( final.year, final.month, final.day )
+      difference = TimeDifference.between( today, finalTime ).in_each_component
+
+      return {
+        :years  => difference[:years].ceil,
+        :months => difference[:months].ceil,
+        :weeks  => difference[:weeks].ceil,
+        :days   => difference[:days].ceil
+      }
+    end
+
     if( value != nil )
 
       cacheHits        = value['ResourceCacheHits']         ? value['ResourceCacheHits']         : nil
@@ -525,7 +543,6 @@ class CollecdPlugin
             concurrentMax  = v['maxconcurrent'] ? v['maxconcurrent'] : 0
             concurrentDiff = concurrentMax - concurrent
 
-
             data.push( sprintf( format, @Host, @Service, mbean, 'service_info', s , 'named'          , @interval, named ) )
             data.push( sprintf( format, @Host, @Service, mbean, 'service_info', s , 'named_max'      , @interval, namedMax ) )
             data.push( sprintf( format, @Host, @Service, mbean, 'service_info', s , 'named_diff'     , @interval, namedDiff ) )
@@ -534,28 +551,50 @@ class CollecdPlugin
             data.push( sprintf( format, @Host, @Service, mbean, 'service_info', s , 'concurrent_diff', @interval, concurrentDiff ) )
           end
         end
-
-        if (licenseInfos != nil)
-
-          format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
-
-          validFrom          = licenseInfos['validFrom']
-          validFromDate      = licenseInfos['validFromDate']
-          validUntilSoft     = licenseInfos['validUntilSoft']
-          validUntilSoftDate = licenseInfos['validUntilSoftDate']
-          validUntilHard     = licenseInfos['validUntilHard']
-          validUntilHardDate = licenseInfos['validUntilHardDate']
-
-          data.push( sprintf( format, @Host, @Service, mbean, 'license_info', 'valid_from'            , @interval, validFrom ) )
-          data.push( sprintf( format, @Host, @Service, mbean, 'license_info', 'valid_from_date'       , @interval, validFromDate ) )
-          data.push( sprintf( format, @Host, @Service, mbean, 'license_info', 'valid_until_soft'      , @interval, validUntilSoft ) )
-          data.push( sprintf( format, @Host, @Service, mbean, 'license_info', 'valid_until_soft_date' , @interval, validUntilSoftDate ) )
-          data.push( sprintf( format, @Host, @Service, mbean, 'license_info', 'valid_until_hard'      , @interval, validUntilHard ) )
-          data.push( sprintf( format, @Host, @Service, mbean, 'license_info', 'valid_until_hard_date' , @interval, validUntilHardDate ) )
-        end
-        
       end
 
+      if( licenseInfos != nil )
+
+        format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
+        t      = Date.parse( Time.now().to_s )
+        today  = Time.new( t.year, t.month, t.day )
+
+#        validFrom          = licenseInfos['validFrom']           ? licenseInfos['validFrom']          : nil
+        validUntilSoft     = licenseInfos['validUntilSoft']      ? licenseInfos['validUntilSoft']     : nil
+        validUntilHard     = licenseInfos['validUntilHard']      ? licenseInfos['validUntilHard']     : nil
+
+#        validFromDate      = licenseInfos['validFromDate']       ? licenseInfos['validFromDate']      : nil
+        validUntilSoftDate = licenseInfos['validUntilSoftDate']  ? licenseInfos['validUntilSoftDate'] : nil
+        validUntilHardDate = licenseInfos['validUntilHardDate']  ? licenseInfos['validUntilHardDate'] : nil
+
+        data.push( sprintf( format, @Host, @Service, mbean, 'license_until_soft', 'raw'      , @interval, validUntilSoft ) )
+        data.push( sprintf( format, @Host, @Service, mbean, 'license_until_hard', 'raw'      , @interval, validUntilHard ) )
+
+        if( validUntilSoftDate != nil )
+
+          x                   = timeParser( today, validUntilSoftDate )
+          validUntilSoftMonth = x[:months].ceil
+          validUntilSoftWeek  = x[:weeks].ceil
+          validUntilSoftDays  = x[:days].ceil
+
+          data.push( sprintf( format, @Host, @Service, mbean, 'license_until_soft', 'months' , @interval, validUntilSoftMonth ) )
+          data.push( sprintf( format, @Host, @Service, mbean, 'license_until_soft', 'weeks'  , @interval, validUntilSoftWeek ) )
+          data.push( sprintf( format, @Host, @Service, mbean, 'license_until_soft', 'days'   , @interval, validUntilSoftDays ) )
+
+        end
+
+        if( validUntilHardDate != nil )
+
+          x                   = timeParser( today, validUntilHardDate )
+          validUntilHardMonth = x[:months].ceil
+          validUntilHardWeek  = x[:weeks].ceil
+          validUntilHardDays  = x[:days].ceil
+
+          data.push( sprintf( format, @Host, @Service, mbean, 'license_until_hard', 'months' , @interval, validUntilHardMonth ) )
+          data.push( sprintf( format, @Host, @Service, mbean, 'license_until_hard', 'weeks'  , @interval, validUntilHardWeek ) )
+          data.push( sprintf( format, @Host, @Service, mbean, 'license_until_hard', 'days'   , @interval, validUntilHardDays ) )
+        end
+      end
     else
 
 

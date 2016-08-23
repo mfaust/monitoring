@@ -248,8 +248,9 @@ class DataCollector
         'mysqlPass' => 'coremedia'
       }
 
-      mysql = MysqlStatus( settings )
-      mysq.run()
+#      require_relative 'mysql-status'
+#      mysql = MysqlStatus.new( settings )
+#      mysql.run()
 
     end
 
