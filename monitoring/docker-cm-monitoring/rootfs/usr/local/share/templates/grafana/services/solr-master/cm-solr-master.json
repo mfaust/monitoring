@@ -48,19 +48,20 @@
             "targets": [
               {
                 "hide": true,
-                "refId": "A",
+                "refId": "B",
                 "target": "aliasSub(collectd.%HOST%.SOLR_MASTER-core_live-QueryResultCache.count-size, '(.*)-', '')",
                 "textEditor": true
               },
               {
                 "hide": false,
-                "refId": "C",
+                "refId": "a",
                 "target": "aliasSub(aliasSub(aliasByNode(collectd.%HOST%.SOLR_MASTER-$core-QueryResultCache.count-size, 2), '(.*)-(.*)', '\\1'),'(.*)-', '')",
                 "textEditor": false
               }
             ],
             "datasource": null,
             "renderer": "flot",
+            "decimals": 1,
             "yaxes": [
               {
                 "label": null,
@@ -140,17 +141,18 @@
             "targets": [
               {
                 "hide": true,
-                "refId": "A",
+                "refId": "B",
                 "target": "aliasSub(collectd.%HOST%.SOLR_MASTER-core_live-QueryResultCache.count-hits, '(.*)-', '')"
               },
               {
-                "refId": "B",
+                "refId": "A",
                 "target": "aliasSub(aliasSub(aliasByNode(collectd.%HOST%.SOLR_MASTER-$core-QueryResultCache.count-hits, 2), '(.*)-(.*)', '\\1'),'(.*)-', '')",
                 "textEditor": false
               }
             ],
             "datasource": null,
             "renderer": "flot",
+            "decimals": 1,
             "yaxes": [
               {
                 "label": null,
@@ -241,6 +243,7 @@
             ],
             "datasource": null,
             "renderer": "flot",
+            "decimals": 1,
             "yaxes": [
               {
                 "label": null,
@@ -320,17 +323,18 @@
             "targets": [
               {
                 "hide": true,
-                "refId": "A",
+                "refId": "B",
                 "target": "aliasSub(collectd.%HOST%.SOLR_MASTER-core_live-DocumentCache.count-size, '(.*)-', '')"
               },
               {
-                "refId": "B",
+                "refId": "A",
                 "target": "aliasSub(aliasSub(aliasByNode(collectd.%HOST%.SOLR_MASTER-$core-DocumentCache.count-size, 2), '(.*)-(.*)', '\\1'),'(.*)-', '')",
                 "textEditor": true
               }
             ],
             "datasource": null,
             "renderer": "flot",
+            "decimals": 1,
             "yaxes": [
               {
                 "label": null,
@@ -410,17 +414,18 @@
             "targets": [
               {
                 "hide": true,
-                "refId": "A",
+                "refId": "B",
                 "target": "aliasSub(collectd.%HOST%.SOLR_MASTER-core_live-DocumentCache.count-hits, '(.*)-', '')"
               },
               {
-                "refId": "B",
+                "refId": "A",
                 "target": "aliasSub(aliasSub(aliasByNode(collectd.%HOST%.SOLR_MASTER-$core-DocumentCache.count-hits, 2), '(.*)-(.*)', '\\1'),'(.*)-', '')",
                 "textEditor": false
               }
             ],
             "datasource": null,
             "renderer": "flot",
+            "decimals": 1,
             "yaxes": [
               {
                 "label": null,
@@ -500,17 +505,18 @@
             "targets": [
               {
                 "hide": true,
-                "refId": "A",
+                "refId": "B",
                 "target": "aliasSub(collectd.%HOST%.SOLR_MASTER-core_live-DocumentCache.count-hitratio, '(.*)-', '')"
               },
               {
-                "refId": "B",
+                "refId": "A",
                 "target": "aliasSub(aliasSub(aliasByNode(collectd.%HOST%.SOLR_MASTER-$core-DocumentCache.count-hitratio, 2), '(.*)-(.*)', '\\1'),'(.*)-', '')",
                 "textEditor": true
               }
             ],
             "datasource": null,
             "renderer": "flot",
+            "decimals": 1,
             "yaxes": [
               {
                 "label": null,
@@ -612,6 +618,7 @@
             "pointradius": 5,
             "points": false,
             "renderer": "flot",
+            "decimals": 1,
             "seriesOverrides": [],
             "span": 12,
             "stack": false,
@@ -619,11 +626,11 @@
             "targets": [
               {
                 "hide": true,
-                "refId": "A",
+                "refId": "B",
                 "target": "alias(aliasSub(collectd.%HOST%.SOLR_MASTER-core_live-Select.count-avgTimePerRequest, '(.*)-', ''), 'time p. request')"
               },
               {
-                "refId": "B",
+                "refId": "A",
                 "target": "aliasSub(aliasSub(aliasByNode(collectd.%HOST%.SOLR_MASTER-$core-Select.count-avgTimePerRequest, 2), '(.*)-(.*)', '\\1'), '(.*)-', '')",
                 "textEditor": false
               }
@@ -702,6 +709,7 @@
             "pointradius": 5,
             "points": false,
             "renderer": "flot",
+            "decimals": 1,
             "seriesOverrides": [],
             "span": 12,
             "stack": false,
@@ -709,11 +717,11 @@
             "targets": [
               {
                 "hide": true,
-                "refId": "A",
+                "refId": "B",
                 "target": "aliasSub(collectd.%HOST%.SOLR_MASTER-core_live-Select.count-errors, '(.*)-', '')"
               },
               {
-                "refId": "B",
+                "refId": "A",
                 "target": "aliasSub(aliasSub(aliasByNode(collectd.%HOST%.SOLR_MASTER-$core-Select.count-errors, 2), '(.*)-(.*)', '\\1'), '(.*)-', '')",
                 "textEditor": true
               }
