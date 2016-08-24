@@ -56,6 +56,7 @@ class Grafana
 
   end
 
+
   def shortHostname( hostname )
 
     if( ! isIp?( hostname ) )

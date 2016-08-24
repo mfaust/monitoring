@@ -16,7 +16,7 @@
             "type": "text"
           },
           {
-            "title": "Uptime",
+            "title": "Service Uptime",
             "error": false,
             "span": 1,
             "editable": true,
