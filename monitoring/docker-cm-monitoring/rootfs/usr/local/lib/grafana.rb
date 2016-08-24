@@ -43,13 +43,6 @@ class Grafana
     @log.formatter = proc do |severity, datetime, progname, msg|
       "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
     end
-
-
-
-    #TODO tmp and template dir as global var
-#     @tmp_dir = "/tmp"
-#     FileUtils.mkdir_p("#{@tmp_dir}/grafana")
-
   end
 
 
@@ -76,24 +69,53 @@ class Grafana
   end
 
 
-  def supportMbean?( mbean, key = nil )
+  def supportMbean?( filename, mbean, key = nil )
 
-    result         = false
-    mergedHostJson = getJsonFromFile( @mergedHostFile )
+    result = false
 
-    mbeanExists    = mergedHostJson[ mbean ] ? mergedHostJson[ mbean ] : nil
+    if( File.exist?( filename ) )
 
-    if( mbeanExists != nil and key == nil )
+      file = File.read( filename )
 
-      result = true
-    elsif( mbeanExists != nil and key != nil )
+      begin
+        json = JSON.parse( file )
+      rescue JSON::ParserError => e
+        @log.error('wrong result (no json)')
+        @log.error(e)
 
-      keyExists = mbeanExists[ key ] ? mbeanExists[ key ]  : nil
+        return false
+      end
 
-      result    = keyExists != nil ? true : false
+      service      = json.detect { |s| s[mbean] }
+      mbeanExists  = service[ mbean ] ? service[ mbean ] : nil
+
+      if( mbeanExists != nil and key == nil )
+
+        result = true
+      elsif( mbeanExists != nil and key != nil )
+
+        keyExists = mbeanExists['value'][ key ] ? mbeanExists['value'][ key ]  : nil
+
+        result    = keyExists != nil ? true : false
+      end
+
     end
 
     return result
+  end
+
+
+  def applicationPort( application )
+
+    port = nil
+    mergedHostJson = getJsonFromFile( @mergedHostFile )
+
+    s = mergedHostJson[application] ? mergedHostJson[application] : nil
+    if( s != nil )
+      port = s['port'] ? s['port'] : nil
+    end
+
+    return port
   end
 
   # add dashboards for a host
@@ -113,12 +135,11 @@ class Grafana
     if( discoveryJson != nil )
 
       services       = discoveryJson.keys
+      # determine type of service from mergedHostData.json file, e.g. cae, caefeeder, contentserver
+      mergedHostJson = getJsonFromFile( @mergedHostFile )
 
       self.generateOverviewTemplate( services )
-      self.generateLicenseTemplate( services )
-
-      # determine type of service from mergedHostData.json file, e.g. cae, caefeeder, contentserver
-      mergedHostJson = getJsonFromFile(@mergedHostFile)
+      self.generateLicenseTemplate( host, services )
 
       @log.debug("Found services: #{services}")
 
@@ -365,34 +386,43 @@ class Grafana
   end
 
 
-  def generateLicenseTemplate( services )
+  def generateLicenseTemplate( host, services )
 
-    if( self.supportMbean?( 'Service', 'ServiceInfos' ) == false or self.supportMbean?( 'Service', 'LicenseInfos' ) == false )
-      return
-    end
-
-    rows = Array.new()
+    rows           = Array.new()
     contentServers = ['content-management-server', 'master-live-server', 'replication-live-server']
-
     intersect      = contentServers & services
 
-     @log.debug( " contentServers: #{contentServers}" )
-     @log.debug( " services      : #{services}" )
-     @log.debug( " use           : #{intersect}" )
+#     @log.debug( " contentServers: #{contentServers}" )
+#     @log.debug( " services      : #{services}" )
+#     @log.debug( " use           : #{intersect}" )
 
-    licenseHead  = sprintf( '%s/licenses/licenses-head.json', @templateDirectory )
-    licenseUntil = sprintf( '%s/licenses/licenses-until.json', @templateDirectory )
-    licensePart  = sprintf( '%s/licenses/licenses-part.json', @templateDirectory )
+    licenseHead    = sprintf( '%s/licenses/licenses-head.json' , @templateDirectory )
+    licenseUntil   = sprintf( '%s/licenses/licenses-until.json', @templateDirectory )
+    licensePart    = sprintf( '%s/licenses/licenses-part.json' , @templateDirectory )
+
+    def beanAvailable?( host,service, beanKey )
+
+      mergedHostJson = getJsonFromFile( @mergedHostFile )
+
+      port = self.applicationPort( service )
+      file = sprintf( '%s/%s/bulk_%s.result', @cacheDirectory, host, port )
+
+      return self.supportMbean?( file, 'Server', beanKey )
+    end
 
     intersect.each do |service|
 
-      if( File.exist?( licenseUntil ) )
+      if( self.beanAvailable?( host, service, 'ServiceInfos' ) == true )
 
-        tpl = File.read( licenseUntil )
+        if( File.exist?( licenseUntil ) )
 
-        tpl.gsub!( '%SERVICE%', normalizeService( service ) )
+          tpl = File.read( licenseUntil )
 
-        rows << tpl
+          tpl.gsub!( '%SERVICE%', normalizeService( service ) )
+
+          rows << tpl
+        end
+
       end
     end
 
