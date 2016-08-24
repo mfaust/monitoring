@@ -246,6 +246,43 @@ class Grafana
 
   end
 
+  # add Annotation to named host
+  def addAnnotation( host, annotation )
+
+    @log.debug( "add Annotation" )
+
+
+    # annotations werden direct in die graphite geschrieben
+    # curl -v -H 'Accept: application/json' -X POST http://localhost:8081/tags/ -d '{"what": "API Call", "tags": "monitoring-16-01", "data":"Jeff plays too much Ingress"}'
+
+    uri = URI( sprintf( '%s/api/annotations/tags/', @grafanaURI ) ) #  "http://localhost/grafana/api/dashboards/#{i}")
+
+    data = {
+      'title' => host,
+      'tag'   => annotation
+    }
+
+
+    response = nil
+    Net::HTTP.start( uri.host, uri.port ) do |http|
+      request = Net::HTTP::Post.new( uri.request_uri )
+
+      request.set_form_data( data )
+      request.add_field('Content-Type', 'application/json')
+      request.basic_auth 'admin', 'admin'
+
+      response     = http.request( request )
+
+      @log.debug("Created dashboard, ok: #{response.code}")
+    end
+
+
+#     curl -X POST https://YOUR-API-KEY@api.hostedgraphite.com/api/v1/annotations/events/ -d \
+#      "&title=New Super-duper Feature"\
+#      "&tag=deployment"\
+#      "&tag=feature"
+
+  end
 
   #cae-live-1 -> cae-live
   def removePostfix(service)

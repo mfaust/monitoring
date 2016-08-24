@@ -175,6 +175,15 @@ module Sinatra
 
     end
 
+    post '/a/:host/:annotation' do
+
+      host = params[:host]
+      anot = params[:annotation]
+
+      g.addAnnotation( host, anot )
+
+    end
+
 
     run! if app_file == $0
 

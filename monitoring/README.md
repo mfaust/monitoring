@@ -2,7 +2,7 @@
 
 Das ist ein Meta-Verzeichniss, welches mehrere - durchaus voneinander abhängige - Dockercontainer enthält.
 
-Ziel ist ein funktionierendes Monitoring-System, welches auf jedem System ausgerollt werden kann. 
+Ziel ist ein funktionierendes Monitoring-System, welches auf jedem System ausgerollt werden kann.
 
 Das System ist so modular wie möglich aufgebaut, allerdings momentan noch in einem Proof-of-Concept Status.
 
@@ -88,7 +88,7 @@ Storage-Backend für Icinga2, Graphite, Grafana.
 ## Kommunikation & Beziehungen
 
 Die Storage-Engines (mysql und graphite) sollten jeweils als erstes gestartet werden.
-Die jeweiligen Frontends prüfen die Erreichbarkeit ihrer Backends und starten ggf. zeitversetzt. 
+Die jeweiligen Frontends prüfen die Erreichbarkeit ihrer Backends und starten ggf. zeitversetzt.
 
 **Portüberschneidungen müssen beim Start der Dockercontainer berücksichtigt werden!**
 
@@ -109,12 +109,12 @@ Die jeweiligen Frontends prüfen die Erreichbarkeit ihrer Backends und starten g
       - serving: 2003
       - serving: 7002
       - use: docker-mysql: 3306
-      - use: lokales Filesystem 
+      - use: lokales Filesystem
  - docker-icinga2
       - serving: 5665
       - serving: 6666
       - use: docker-mysql: 3306
-      - use: lokales Filesystem 
+      - use: lokales Filesystem
  - docker-icingaweb2
       - serving: 80 (http://localhost/icinga)
       - use: docker-mysql: 3306
@@ -145,11 +145,44 @@ Durch `run-monitoring.sh` werden alle Container für das Monitoring System gesta
 
 Nach dem erfolgreichen Start, kann über die Kommandozeile der zu monitende Host hinzugefügt werden:
 
-    add-host --host $name 
+    add-host --host $name
 
 Das Script versicht ein auto-discovery durchzuführen um festzustellen, welche Anwendung auf den jeweiligen Port läuft und fügt anschließend Standardtemplates für grafana und icinga2 hinzu.
 
 
-   
+# MBeans
 
- 
+
+| Type | CMS | MLS | RLS | WFS | CAE | Studio | Elastic-Worker | User-Changes | Content-Feeder | CAE-Feeder | Adobe-Drive |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| CapConnection                     | | | |x|x|x|x|x| | |x| | |
+| Server                            |x|x|x|x| | | | | | | | | |
+| Store (ConnectionPool, QueryPool) |x|x|x| | | | | | | | | | |
+| Statistics                        |x|x|x| | | | | | | | | | |
+| WFS Statistics                    | | | |x| | | | | | | | | |
+| Cache                             | | | | |x| | | | | | | | |
+| Replicator                        | | |x| | | | | | | | | | |
+| Feeder                            | | | | | | | | |x| | | | |
+| ContentDependencyInvalidator      | | | | | | | | | |x| | | |
+| ProactiveEngine                   | | | | | | | | | |x| | | |
+| Health                            | | | | | | | | | |x| | | |
+
+
+
+
+| mbeans | attribute | description |
+|---|---|---|
+| java.lang:type=Memory| * | Memory Settings |
+| java.lang:type=Threading | TotalStartedThreadCount |
+| | ThreadCount |
+| | DaemonThreadCount |
+| | PeakThreadCount |
+| Catalina:type=Executor,name=tomcatThreadPool | * |
+| java.lang:type=ClassLoading | LoadedClassCount |
+| | UnloadedClassCount |
+| | TotalLoadedClassCount |
+| java.lang:type=GarbageCollector,name=ParNew| * | Garbage Collector |
+| java.lang:type=GarbageCollector,name=ConcurrentMarkSweep| * | Garbage Collector |
+
+
+
