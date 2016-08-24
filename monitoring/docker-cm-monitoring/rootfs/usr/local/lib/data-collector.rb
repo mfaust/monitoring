@@ -299,7 +299,8 @@ class DataCollector
 
   def mergeData( data = {} )
 
-    metrics_tomcat       = @jolokiaApplications['tomcat']      # standard metrics for Tomcat
+    tomcatApplication = Marshal.load( Marshal.dump( @config['jolokia']['applications'] ) )
+    metricsTomcat     = tomcatApplication['tomcat']      # standard metrics for Tomcat
 
     data.each do |d,v|
 
@@ -311,19 +312,22 @@ class DataCollector
 
       if( application )
 
+        applicationMetrics = tomcatApplication[application]['metrics']
+
         if( solr_cores != nil )
-          v['metrics'].push( self.mergeSolrCores( @jolokiaApplications[application]['metrics'], solr_cores ) )
+          v['metrics'].push( self.mergeSolrCores( applicationMetrics , solr_cores ) )
         end
 
-        @jolokiaApplications[application]['metrics'].delete_if {|key| key['mbean'].match( '%CORE%' ) }
+        # remove unneeded Templates
+        tomcatApplication[application]['metrics'].delete_if {|key| key['mbean'].match( '%CORE%' ) }
 
-        v['metrics'].push( metrics_tomcat['metrics'] )
-        v['metrics'].push( @jolokiaApplications[application]['metrics'] )
+        v['metrics'].push( metricsTomcat['metrics'] )
+        v['metrics'].push( applicationMetrics )
       end
 
-      if( @jolokiaApplications[d] )
-        v['metrics'].push( metrics_tomcat['metrics'] )
-        v['metrics'].push( @jolokiaApplications[d]['metrics'] )
+      if( tomcatApplication[d] )
+        v['metrics'].push( metricsTomcat['metrics'] )
+        v['metrics'].push( tomcatApplication[d]['metrics'] )
       end
 
       v['metrics'].compact!   # remove 'nil' from array
@@ -464,7 +468,8 @@ class DataCollector
           save_file = sprintf( 'bulk_%s.result', dest_port )
           File.open( sprintf( '%s/%s', cachedHostDirectory, save_file ) , 'w' ) {|f| f.write( result ) }
 
-        rescue
+        rescue => e
+          @log.error( e )
           @log.error( 'can\'t send data to jolokia service' )
         end
 
@@ -615,8 +620,8 @@ class DataCollector
     @log.debug( 'get monitored Servers' )
     monitoredServer = monitoredServer( @cacheDirectory )
 
-    discoveryFile = 'discovery.json'
-    mergedDataFile = 'mergedHostData.json'
+    discoveryFile   = 'discovery.json'
+    mergedDataFile  = 'mergedHostData.json'
 
     data = Hash.new()
 
@@ -653,6 +658,8 @@ class DataCollector
 
         @log.debug( 'create Hostconfiguration' )
         d = self.createHostConfig( data )
+
+        File.open( sprintf( '%s/%s', cachedHostDirectory, discoveryFile ) , 'w' ) { |f| f.write( JSON.pretty_generate( d ) ) }
 
         @log.debug( 'merge Data between Property Files and discovered Services' )
         d = self.mergeData( d )

@@ -44,12 +44,24 @@ class Grafana
       "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
     end
 
+
+
     #TODO tmp and template dir as global var
 #     @tmp_dir = "/tmp"
 #     FileUtils.mkdir_p("#{@tmp_dir}/grafana")
 
   end
 
+
+  def prepare( host )
+
+    @shortHostname    = self.shortHostname( host )
+    @grafanaHostname  = host.gsub( '.', '-' )
+
+    @discoveryFile    = sprintf( '%s/%s/discovery.json'     , @cacheDirectory, host )
+    @mergedHostFile   = sprintf( '%s/%s/mergedHostData.json', @cacheDirectory, host )
+
+  end
 
   def shortHostname( hostname )
 
@@ -63,23 +75,40 @@ class Grafana
 
   end
 
+
+  def supportMbean?( mbean, key = nil )
+
+    result         = false
+    mergedHostJson = getJsonFromFile( @mergedHostFile )
+
+    mbeanExists    = mergedHostJson[ mbean ] ? mergedHostJson[ mbean ] : nil
+
+    if( mbeanExists != nil and key == nil )
+
+      result = true
+    elsif( mbeanExists != nil and key != nil )
+
+      keyExists = mbeanExists[ key ] ? mbeanExists[ key ]  : nil
+
+      result    = keyExists != nil ? true : false
+    end
+
+    return result
+  end
+
   # add dashboards for a host
   def addDashbards(host, recreate = false)
 
     @log.debug("Adding dashboards for host #{host}, recreate: #{recreate}")
 
-    if recreate
-      deleteDashboards(host)
+    if( recreate )
+      deleteDashboards( host )
     end
 
-    @shortHostname   = self.shortHostname( host )
-    @grafanaHostname = host.gsub( '.', '-' )
-
-    discoveryFile    = sprintf( '%s/%s/discovery.json'     , @cacheDirectory, host )
-    mergedHostFile   = sprintf( '%s/%s/mergedHostData.json', @cacheDirectory, host )
+    self.prepare( host )
 
     # determine services from discovery.json file, e.g. cae-live, master-live-server, caefeeder-live
-    discoveryJson = getJsonFromFile( discoveryFile )
+    discoveryJson = getJsonFromFile( @discoveryFile )
 
     if( discoveryJson != nil )
 
@@ -89,11 +118,12 @@ class Grafana
       self.generateLicenseTemplate( services )
 
       # determine type of service from mergedHostData.json file, e.g. cae, caefeeder, contentserver
-      mergedHostJson = getJsonFromFile(mergedHostFile)
+      mergedHostJson = getJsonFromFile(@mergedHostFile)
 
       @log.debug("Found services: #{services}")
 
       services.each do |service|
+
         serviceTemplatePaths    = Array.new()
         additionalTemplatePaths = Array.new()
 
@@ -117,7 +147,7 @@ class Grafana
             additionalTemplatePaths.push(*getTemplatePathsForServiceType(serviceType))
           end
         else
-          @log.error( sprintf( 'file %s doesnt exists', mergedHostFile ) )
+          @log.error( sprintf( 'file %s doesnt exists', @mergedHostFile ) )
         end
 
         @log.debug( "Found Template paths: #{serviceTemplatePaths}, #{additionalTemplatePaths}")
@@ -337,6 +367,10 @@ class Grafana
 
   def generateLicenseTemplate( services )
 
+    if( self.supportMbean?( 'Service', 'ServiceInfos' ) == false or self.supportMbean?( 'Service', 'LicenseInfos' ) == false )
+      return
+    end
+
     rows = Array.new()
     contentServers = ['content-management-server', 'master-live-server', 'replication-live-server']
 
@@ -429,6 +463,7 @@ class Grafana
     end
 
   end
+
 
   def generateServiceTemplate(serviceName, serviceTemplatePaths, additionalTemplatePaths)
 

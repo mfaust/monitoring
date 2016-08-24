@@ -109,7 +109,8 @@
             "mbean": "com.coremedia:type=CapConnection,application=elastic-worker",
             "attribute": "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions"
           }
-        ]},
+        ]
+      },
       "user-changes": {
         "description": "The User Changes Webapp",
         "metrics": [
@@ -209,8 +210,12 @@
             "attribute" : "avgRequestsPerSecond,avgTimePerRequest,medianRequestTime,requests,timeouts,errors"
           }
         ]
+      },
+      "webdav": {
+        "description": "Webdav",
+        "metrics": [
+        ]
       }
-
     }
   }
 }

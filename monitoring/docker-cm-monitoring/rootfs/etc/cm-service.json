@@ -66,9 +66,14 @@
       "port": 42199,
       "application": "cae"
     },
+    "cae-live-2": {
+      "description": "CAE Live 2",
+      "port": 42299,
+      "application": "cae"
+    },
     "cae-preview": {
       "description": "CAE Preview",
-      "port": 42199,
+      "port": 40999,
       "application": "cae"
     },
     "studio": {
@@ -78,13 +83,21 @@
     "solr-master": {
       "description": "Solr Master",
       "port": 40099,
-      "cores": [
-        "live", "preview", "studio"
-      ],
+      "cores": [ "live", "preview", "studio" ],
+      "application": "solr"
+    },
+    "solr-slave": {
+      "description": "Solr Slave",
+      "port": 40099,
+      "cores": [ "live", "preview", "studio" ],
       "application": "solr"
     },
     "adobe-drive-server": {
       "description": "Adobe Drive Server"
+    },
+    "webdav": {
+      "description": "WebDAV",
+      "port": 41299
     }
   }
 }
