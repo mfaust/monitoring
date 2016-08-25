@@ -533,12 +533,15 @@ class CollecdPlugin
               max       = lastGcInfo[gc][type]['max']       ? lastGcInfo[gc][type]['max']       : nil
               used      = lastGcInfo[gc][type]['used']      ? lastGcInfo[gc][type]['used']      : nil
 
+              percent   = ( 100 * used / committed )
+
               type      = type.strip.tr( ' ', '_' ).downcase
 
-              data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_parnew_%s_%s', gc_type, type ), 'init'     , @interval, init ) )
-              data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_parnew_%s_%s', gc_type, type ), 'committed', @interval, committed ) )
-              data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_parnew_%s_%s', gc_type, type ), 'max'      , @interval, max ) )
-              data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_parnew_%s_%s', gc_type, type ), 'used'     , @interval, used ) )
+              data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_parnew_%s_%s', gc_type, type ), 'init'        , @interval, init ) )
+              data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_parnew_%s_%s', gc_type, type ), 'committed'   , @interval, committed ) )
+              data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_parnew_%s_%s', gc_type, type ), 'max'         , @interval, max ) )
+              data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_parnew_%s_%s', gc_type, type ), 'used'        , @interval, used ) )
+              data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_parnew_%s_%s', gc_type, type ), 'used_percent', @interval, percent ) )
             end
          end
         end

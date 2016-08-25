@@ -26,12 +26,38 @@
             "mbean": "java.lang:type=GarbageCollector,name=ConcurrentMarkSweep"
           }, {
             "description": "information about the Operating System",
-            "mbean": "java.lang:type=OperatingSystem",
-            "attribute": "AvailableProcessors,MaxFileDescriptorCount,OpenFileDescriptorCount,TotalPhysicalMemorySize,UsedPhysicalMemorySize,FreePhysicalMemorySize,TotalSwapSpaceSize,UsedSwapSpaceSize,FreeSwapSpaceSize"
+            "mbean": "java.lang:type=OperatingSystem"
           }, {
             "description": "information about the Runtime System",
             "mbean": "java.lang:type=Runtime",
             "attribute": "Uptime,StartTime"
+          }, {
+            "description": "Information about GC Old Gen (HEAP)",
+            "mbean": "java.lang:type=MemoryPool,name=CMS Old Gen",
+            "attribute": "Usage"
+          }, {
+            "description": "Information about GC Code Cache (NON HEAP)",
+            "mbean": "java.lang:type=MemoryPool,name=Code Cache",
+            "attribute": "Usage"
+          }, {
+            "description": "Information about GC Class Space (NON HEAP)",
+            "mbean": "java.lang:type=MemoryPool,name=Compressed Class Space",
+            "attribute": "Usage"
+          }, {
+            "description": "Information about GC Metaspace (NON HEAP)",
+            "mbean": "java.lang:type=MemoryPool,name=Metaspace",
+            "attribute": "Usage"
+          }, {
+            "description": "Information about GC Eden Space (HEAP)",
+            "mbean": "java.lang:type=MemoryPool,name=Par Eden Space",
+            "attribute": "Usage"
+          }, {
+            "description": "Information about GC Survivor Space (HEAP)",
+            "mbean": "java.lang:type=MemoryPool,name=Par Survivor Space",
+            "attribute": "Usage"
+          }, {
+            "description": "Information about GC Aggregator",
+            "mbean": "com.sun.management:type=GarbageCollectionAggregator"
           }
         ]
       },
