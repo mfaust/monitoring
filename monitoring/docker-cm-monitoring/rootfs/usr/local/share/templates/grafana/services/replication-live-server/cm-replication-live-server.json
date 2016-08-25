@@ -133,12 +133,12 @@
             "id": 100,
             "targets": [
               {
-                "target": "collectd.monitoring-16-01.MLS-Server-server.count-sequence_number",
+                "target": "collectd.%HOST%.MLS-Server-server.count-sequence_number",
                 "refId": "A",
                 "hide": true
               },
               {
-                "target": "collectd.monitoring-16-01.RLS-Server-server.count-sequence_number",
+                "target": "collectd.%HOST%.RLS-Server-server.count-sequence_number",
                 "refId": "B",
                 "hide": true
               },

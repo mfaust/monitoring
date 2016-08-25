@@ -431,7 +431,7 @@
             "id": 50,
             "targets": [
               {
-                "target": "collectd.monitoring-16-01.CAE_LIVE-CapConnection-su_sessions.count-sessions",
+                "target": "collectd.%HOST%.CAE_LIVE-CapConnection-su_sessions.count-sessions",
                 "refId": "A"
               }
             ],
