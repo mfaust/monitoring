@@ -234,39 +234,50 @@ class CollecdPlugin
       end
 
       if( metrics != nil )
-        ['authenticate','buildInfo','createIndexes','delete','drop','find','findAndModify','insert','listCollections','mapReduce','renameCollection','update'].each do |m|
 
-          cmd = metrics['commands'][m] ? metrics['commands'][m] : nil
-          if( cmd != nil )
-            d = cmd['total']['$numberLong'] ? cmd['total']['$numberLong']  : nil
-            data.push( sprintf( format, @Host, @Service, 'commands', m , @interval, d ) )
+        commands = metrics['commands'] ? metrics['commands'] : nil
+
+        if( commands != nil )
+
+          ['authenticate','buildInfo','createIndexes','delete','drop','find','findAndModify','insert','listCollections','mapReduce','renameCollection','update'].each do |m|
+
+            cmd = commands[m] ? commands[m] : nil
+
+            if( cmd != nil )
+              d = cmd['total']['$numberLong'] ? cmd['total']['$numberLong']  : nil
+
+              data.push( sprintf( format, @Host, @Service, 'commands', m , @interval, d ) )
+            end
           end
-        end
 
 
-        currentOp = metrics['commands']['currentOp'] ? metrics['commands']['currentOp'] : nil
-        if (currentOp != nil)
+          currentOp = commands['currentOp'] ? commands['currentOp'] : nil
 
-          total = currentOp['total']['$numberLong'] ? currentOp['total']['$numberLong'] : nil
-          failed = currentOp['failed']['$numberLong'] ? currentOp['failed']['$numberLong'] : nil
+          if (currentOp != nil)
 
-          data.push(sprintf(format, @Host, @Service, 'currentOp', "total",  @interval, total))
-          data.push(sprintf(format, @Host, @Service, 'currentOp', "failed", @interval, failed))
+            total  = currentOp['total']['$numberLong']  ? currentOp['total']['$numberLong']  : nil
+            failed = currentOp['failed']['$numberLong'] ? currentOp['failed']['$numberLong'] : nil
+
+            data.push( sprintf( format, @Host, @Service, 'currentOp', 'total',  @interval, total ) )
+            data.push( sprintf( format, @Host, @Service, 'currentOp', 'failed', @interval, failed ) )
+          end
+
         end
 
         cursor = metrics['cursor'] ? metrics['cursor'] : nil
         if (cursor != nil)
-          cursorOpen = cursor['open'] ? cursor['open'] : nil
+          cursorOpen     = cursor['open']     ? cursor['open']     : nil
           cursorTimedOut = cursor['timedOut'] ? cursor['timedOut'] : nil
 
-          if (cursorOpen != nil && cursorTimedOut != nil)
-          openNoTimeout = cursorOpen['noTimeout']['$numberLong'] ? cursorOpen['noTimeout']['$numberLong'] : nil
-          openTotal = cursorOpen['total']['$numberLong'] ? cursorOpen['total']['$numberLong'] : nil
-          timedOut = cursorTimedOut['$numberLong'] ? cursorTimedOut['$numberLong'] : nil
+          if( cursorOpen != nil && cursorTimedOut != nil )
 
-          data.push(sprintf(format, @Host, @Service, 'cursor', "open-total",      @interval, openTotal))
-          data.push(sprintf(format, @Host, @Service, 'cursor', "open-no-timeout", @interval, openNoTimeout))
-          data.push(sprintf(format, @Host, @Service, 'cursor', "timed-out",       @interval, timedOut))
+            openNoTimeout = cursorOpen['noTimeout']['$numberLong'] ? cursorOpen['noTimeout']['$numberLong'] : nil
+            openTotal     = cursorOpen['total']['$numberLong']     ? cursorOpen['total']['$numberLong']     : nil
+            timedOut      = cursorTimedOut['$numberLong']          ? cursorTimedOut['$numberLong']          : nil
+
+            data.push( sprintf( format, @Host, @Service, 'cursor', 'open-total',      @interval, openTotal ) )
+            data.push( sprintf( format, @Host, @Service, 'cursor', 'open-no-timeout', @interval, openNoTimeout ) )
+            data.push( sprintf( format, @Host, @Service, 'cursor', 'timed-out',       @interval, timedOut ) )
           end
 
         end
