@@ -104,6 +104,11 @@ class CollecdPlugin
       tcmalloc       = value['tcmalloc']      ? value['tcmalloc']      : nil
       storageEngine  = value['storageEngine'] ? value['storageEngine'] : nil
       metrics        = value['metrics']       ? value['metrics']       : nil
+      mem            = value['mem']           ? value['mem']           : nil
+      extraInfo      = value['extra_info']    ? value['extra_info']    : nil
+      wiredTiger     = value['wiredTiger']    ? value['wiredTiger']    : nil
+      globalLock     = value['globalLock']    ? value['globalLock']    : nil
+
 
       data.push( sprintf( 'PUTVAL %s/%s-%s/%s interval=%s N:%s', @Host, @Service, 'uptime', 'uptime'   , @interval, uptime ) )
 
@@ -236,6 +241,120 @@ class CollecdPlugin
             d = cmd['total']['$numberLong'] ? cmd['total']['$numberLong']  : nil
             data.push( sprintf( format, @Host, @Service, 'commands', m , @interval, d ) )
           end
+        end
+
+
+        currentOp = metrics['commands']['currentOp'] ? metrics['commands']['currentOp'] : nil
+        if (currentOp != nil)
+
+          total = currentOp['total']['$numberLong'] ? currentOp['total']['$numberLong'] : nil
+          failed = currentOp['failed']['$numberLong'] ? currentOp['failed']['$numberLong'] : nil
+
+          data.push(sprintf(format, @Host, @Service, 'currentOp', "total",  @interval, total))
+          data.push(sprintf(format, @Host, @Service, 'currentOp', "failed", @interval, failed))
+        end
+
+        cursor = metrics['cursor'] ? metrics['cursor'] : nil
+        if (cursor != nil)
+          cursorOpen = cursor['open'] ? cursor['open'] : nil
+          cursorTimedOut = cursor['timedOut'] ? cursor['timedOut'] : nil
+
+          if (cursorOpen != nil && cursorTimedOut != nil)
+          openNoTimeout = cursorOpen['noTimeout']['$numberLong'] ? cursorOpen['noTimeout']['$numberLong'] : nil
+          openTotal = cursorOpen['total']['$numberLong'] ? cursorOpen['total']['$numberLong'] : nil
+          timedOut = cursorTimedOut['$numberLong'] ? cursorTimedOut['$numberLong'] : nil
+
+          data.push(sprintf(format, @Host, @Service, 'cursor', "open-total",      @interval, openTotal))
+          data.push(sprintf(format, @Host, @Service, 'cursor', "open-no-timeout", @interval, openNoTimeout))
+          data.push(sprintf(format, @Host, @Service, 'cursor', "timed-out",       @interval, timedOut))
+          end
+
+        end
+
+      end
+
+      if (mem != nil)
+
+        virtual        = mem['virtual']       ? mem['virtual']  : nil
+        resident       = mem['resident']      ? mem['resident'] : nil
+
+        data.push( sprintf( format, @Host, @Service, 'mem', 'virtual'    , @interval, virtual ) )
+        data.push( sprintf( format, @Host, @Service, 'mem', 'resident'   , @interval, resident ) )
+      end
+
+      if (extraInfo != nil)
+
+        pageFaults        = extraInfo['page_faults']       ? extraInfo['page_faults']  : nil
+
+        data.push( sprintf( format, @Host, @Service, 'extraInfo', 'pageFaults' , @interval, pageFaults ) )
+      end
+
+      if (wiredTiger != nil)
+
+        wiredTigerCache = wiredTiger['cache'] ? wiredTiger['cache'] : nil
+        if (wiredTigerCache)
+          bytes         = wiredTigerCache['bytes currently in the cache']      ? wiredTigerCache['bytes currently in the cache']      : nil
+          maximum       = wiredTigerCache['maximum bytes configured']          ? wiredTigerCache['maximum bytes configured']          : nil
+          tracked       = wiredTigerCache['tracked dirty bytes in the cache']  ? wiredTigerCache['tracked dirty bytes in the cache']  : nil
+          unmodified    = wiredTigerCache['unmodified pages evicted']          ? wiredTigerCache['unmodified pages evicted']          : nil
+          modified      = wiredTigerCache['modified pages evicted']            ? wiredTigerCache['modified pages evicted']            : nil
+
+          data.push( sprintf( format, @Host, @Service, 'wiredTigerCache', 'bytes'      , @interval, bytes ) )
+          data.push( sprintf( format, @Host, @Service, 'wiredTigerCache', 'maximum'    , @interval, maximum ) )
+          data.push( sprintf( format, @Host, @Service, 'wiredTigerCache', 'tracked'    , @interval, tracked ) )
+          data.push( sprintf( format, @Host, @Service, 'wiredTigerCache', 'unmodified' , @interval, unmodified ) )
+          data.push( sprintf( format, @Host, @Service, 'wiredTigerCache', 'modified'   , @interval, modified ) )
+        end
+
+
+        concurrentTransactions = wiredTiger['concurrentTransactions'] ? wiredTiger['concurrentTransactions'] : nil
+
+        if (concurrentTransactions)
+          read        = concurrentTransactions['read']       ? concurrentTransactions['read']     : nil
+          write       = concurrentTransactions['write']      ? concurrentTransactions['write']    : nil
+
+          if (read != nil && write != nil)
+
+            readOut          = read['out']         ? read['out']       : nil
+            readAvailable    = read['available']   ? read['available'] : nil
+
+            writeOut         = write['out']        ? write['out']       : nil
+            writeAvailable   = write['available']  ? write['available'] : nil
+
+            data.push( sprintf( format, @Host, @Service, 'wiredTigerConcurrentTransactions', 'readOut'          , @interval, readOut ) )
+            data.push( sprintf( format, @Host, @Service, 'wiredTigerConcurrentTransactions', 'readAvailable'    , @interval, readAvailable ) )
+            data.push( sprintf( format, @Host, @Service, 'wiredTigerConcurrentTransactions', 'writeOut'         , @interval, writeOut ) )
+            data.push( sprintf( format, @Host, @Service, 'wiredTigerConcurrentTransactions', 'writeAvailable'   , @interval, writeAvailable ) )
+          end
+
+        end
+      end
+
+      if (globalLock != nil)
+        currentQueue = globalLock['currentQueue'] ? globalLock['currentQueue'] : nil
+
+        if (currentQueue)
+          readers       = currentQueue['readers']    ? currentQueue['readers']  : nil
+          writers       = currentQueue['writers']    ? currentQueue['writers']  : nil
+          total         = currentQueue['total']      ? currentQueue['total']    : nil
+
+          data.push( sprintf( format, @Host, @Service, 'globalLockCurrentQueue', 'readers'    , @interval, readers ) )
+          data.push( sprintf( format, @Host, @Service, 'globalLockCurrentQueue', 'writers'    , @interval, writers ) )
+          data.push( sprintf( format, @Host, @Service, 'globalLockCurrentQueue', 'total'      , @interval, total ) )
+
+        end
+
+        activeClients = globalLock['activeClients'] ? globalLock['activeClients'] : nil
+
+        if (currentQueue)
+          readers       = activeClients['readers']    ? activeClients['readers']  : nil
+          writers       = activeClients['writers']    ? activeClients['writers']  : nil
+          total       = activeClients['total']      ? activeClients['total']    : nil
+
+          data.push( sprintf( format, @Host, @Service, 'globalLockActiveClients', 'readers'    , @interval, readers ) )
+          data.push( sprintf( format, @Host, @Service, 'globalLockActiveClients', 'writers'    , @interval, writers ) )
+          data.push( sprintf( format, @Host, @Service, 'globalLockActiveClients', 'total'      , @interval, total ) )
+
         end
       end
 

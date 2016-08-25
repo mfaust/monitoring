@@ -479,7 +479,7 @@ class Grafana
         if( service == 'replication-live-server' )
 
           tpl.gsub!( 'service_info-publisher' , 'service_info-webserver' )
-          tpl.gsub!( 'Publischer', 'Webserver' )
+          tpl.gsub!( 'Publisher', 'Webserver' )
 
         end
 

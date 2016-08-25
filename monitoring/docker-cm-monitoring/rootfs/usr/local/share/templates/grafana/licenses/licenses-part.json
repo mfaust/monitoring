@@ -100,7 +100,7 @@
               }
             ],
             "thresholds": "",
-            "title": "Publischer",
+            "title": "Publisher",
             "type": "singlestat",
             "valueName": "current"
           },
@@ -125,7 +125,7 @@
               }
             ],
             "thresholds": "",
-            "title": "Publischer",
+            "title": "Publisher",
             "type": "singlestat",
             "valueName": "current"
           },
