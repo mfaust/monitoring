@@ -378,7 +378,7 @@
           {
             "aliasColors": {},
             "bars": false,
-            "datasource": "${DS_GRAPHITE}",
+            "datasource": "graphite",
             "editable": true,
             "error": false,
             "fill": 3,
@@ -464,7 +464,7 @@
           {
             "aliasColors": {},
             "bars": false,
-            "datasource": "${DS_GRAPHITE}",
+            "datasource": "graphite",
             "editable": true,
             "error": false,
             "fill": 3,
@@ -549,7 +549,7 @@
           {
             "aliasColors": {},
             "bars": false,
-            "datasource": "${DS_GRAPHITE}",
+            "datasource": "graphite",
             "editable": true,
             "error": false,
             "fill": 3,
@@ -635,7 +635,7 @@
           {
             "aliasColors": {},
             "bars": false,
-            "datasource": "${DS_GRAPHITE}",
+            "datasource": "graphite",
             "editable": true,
             "error": false,
             "fill": 3,
@@ -729,7 +729,7 @@
           {
             "aliasColors": {},
             "bars": false,
-            "datasource": "${DS_GRAPHITE}",
+            "datasource": "graphite",
             "editable": true,
             "error": false,
             "fill": 3,
@@ -815,7 +815,7 @@
           {
             "aliasColors": {},
             "bars": false,
-            "datasource": "${DS_GRAPHITE}",
+            "datasource": "graphite",
             "editable": true,
             "error": false,
             "fill": 3,
@@ -908,7 +908,7 @@
           {
             "aliasColors": {},
             "bars": false,
-            "datasource": "${DS_GRAPHITE}",
+            "datasource": "graphite",
             "editable": true,
             "error": false,
             "fill": 3,
@@ -997,7 +997,7 @@
           {
             "aliasColors": {},
             "bars": false,
-            "datasource": "${DS_GRAPHITE}",
+            "datasource": "graphite",
             "editable": true,
             "error": false,
             "fill": 3,
@@ -1083,7 +1083,7 @@
           {
             "aliasColors": {},
             "bars": false,
-            "datasource": "${DS_GRAPHITE}",
+            "datasource": "graphite",
             "editable": true,
             "error": false,
             "fill": 3,
@@ -1121,7 +1121,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MONGODB-globalLockCurrentQueue.*, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MONGODB-globalLockActiveClients.*, '(.*)-', ''))",
                 "textEditor": true
               }
             ],
@@ -1169,7 +1169,7 @@
           {
             "aliasColors": {},
             "bars": false,
-            "datasource": "${DS_GRAPHITE}",
+            "datasource": "graphite",
             "editable": true,
             "error": false,
             "fill": 3,
