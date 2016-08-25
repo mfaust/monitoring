@@ -388,7 +388,7 @@
             "id": 10,
             "targets": [
               {
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.CMS-Server-server.count-cache_size, '(.*)-', ''), 'Cache Size'))",
+                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.CMS-Server-server.count-cache_size, '(.*)-', ''), 'Number of entries'))",
                 "refId": "A",
                 "textEditor": false
               }
@@ -402,7 +402,7 @@
                 "logBase": 1,
                 "min": null,
                 "max": null,
-                "format": "bytes"
+                "format": "none"
               },
               {
                 "label": null,
