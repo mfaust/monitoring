@@ -470,24 +470,33 @@ class Grafana
 
     intersect.each do |service|
 
-      if( File.exist?( licensePart ) )
+      if( self.beanAvailable?( host, service, 'LicenseInfos' ) == true )
 
-        tpl = File.read( licensePart )
+        if( File.exist?( licensePart ) )
 
-        tpl.gsub!( '%SERVICE%', normalizeService( service ) )
+          tpl = File.read( licensePart )
 
-        if( service == 'replication-live-server' )
+          tpl.gsub!( '%SERVICE%', normalizeService( service ) )
 
-          tpl.gsub!( 'service_info-publisher' , 'service_info-webserver' )
-          tpl.gsub!( 'Publisher', 'Webserver' )
+          if( service == 'replication-live-server' )
 
+            tpl.gsub!( 'service_info-publisher' , 'service_info-webserver' )
+            tpl.gsub!( 'Publisher', 'Webserver' )
+
+          end
+
+          rows << tpl
         end
-
-        rows << tpl
       end
     end
 
     rows = rows.join(',')
+
+    if( rows.count() < 2 )
+
+      @log.debug( 'We has no Information about Lizenses' )
+      return
+    end
 
     template = %(
       {
