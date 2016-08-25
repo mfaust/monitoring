@@ -244,7 +244,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(stdev(collectd.%HOST%.MONGODB-commands.*, 3, 0.1), '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(perSecond(aliasSub(collectd.%HOST%.MONGODB-commands.*, '(.*)-', '')), '^perSecond\\((.*)\\)$', '\\1'))",
                 "textEditor": false
               }
             ],
@@ -371,983 +371,881 @@
         "title": "connections"
       },
       {
-        "title": "New row",
+        "collapse": false,
+        "editable": true,
         "height": "200px",
-        "editable": true,
-        "collapse": false,
         "panels": [
           {
-            "title": "Asserts",
-            "error": false,
-            "span": 12,
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "${DS_GRAPHITE}",
             "editable": true,
-            "type": "graph",
-            "isNew": true,
-            "id": 5,
-            "targets": [
-              {
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MONGODB-asserts.*, '(.*)-', ''))",
-                "refId": "A",
-                "textEditor": false
-              }
-            ],
-            "datasource": "graphite",
-            "renderer": "flot",
-            "yaxes": [
-              {
-                "label": null,
-                "show": true,
-                "logBase": 1,
-                "min": null,
-                "max": null,
-                "format": "none"
-              },
-              {
-                "label": null,
-                "show": false,
-                "logBase": 1,
-                "min": null,
-                "max": null,
-                "format": "short"
-              }
-            ],
-            "xaxis": {
-              "show": true
-            },
-            "grid": {
-              "threshold1": null,
-              "threshold2": null,
-              "threshold1Color": "rgba(216, 200, 27, 0.27)",
-              "threshold2Color": "rgba(234, 112, 112, 0.22)"
-            },
-            "lines": true,
+            "error": false,
             "fill": 3,
-            "linewidth": 1,
-            "points": false,
-            "pointradius": 5,
-            "bars": false,
-            "stack": false,
-            "percentage": false,
+            "grid": {
+              "threshold1": null,
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2": null,
+              "threshold2Color": "rgba(234, 112, 112, 0.22)"
+            },
+            "id": 14,
+            "isNew": true,
             "legend": {
-              "show": true,
-              "values": true,
-              "min": false,
-              "max": false,
+              "alignAsTable": true,
+              "avg": false,
               "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
               "total": false,
-              "avg": false,
-              "alignAsTable": true,
-              "rightSide": true
-            },
-            "nullPointMode": "connected",
-            "steppedLine": false,
-            "tooltip": {
-              "value_type": "cumulative",
-              "shared": true,
-              "sort": 0,
-              "msResolution": false
-            },
-            "timeFrom": null,
-            "timeShift": null,
-            "aliasColors": {},
-            "seriesOverrides": [],
-            "links": []
-          }
-        ]
-      },
-      {
-        "title": "New row",
-        "height": "250px",
-        "editable": true,
-        "collapse": false,
-        "panels": [
-          {
-            "title": "Page Faults",
-            "error": false,
-            "span": 12,
-            "editable": true,
-            "type": "graph",
-            "isNew": true,
-            "id": 15,
-            "targets": [
-              {
-                "target": "alias(collectd.%HOST%.MONGODB-extraInfo.count-pageFaults, 'pageFaults')",
-                "refId": "A"
-              }
-            ],
-            "datasource": null,
-            "renderer": "flot",
-            "yaxes": [
-              {
-                "label": null,
-                "show": true,
-                "logBase": 1,
-                "min": null,
-                "max": null,
-                "format": "short"
-              },
-              {
-                "label": null,
-                "show": true,
-                "logBase": 1,
-                "min": null,
-                "max": null,
-                "format": "short"
-              }
-            ],
-            "xaxis": {
-              "show": true
-            },
-            "grid": {
-              "threshold1": null,
-              "threshold2": null,
-              "threshold1Color": "rgba(216, 200, 27, 0.27)",
-              "threshold2Color": "rgba(234, 112, 112, 0.22)"
+              "values": true
             },
             "lines": true,
-            "fill": 1,
-            "linewidth": 2,
-            "points": false,
-            "pointradius": 5,
-            "bars": false,
-            "stack": false,
-            "percentage": false,
-            "legend": {
-              "show": true,
-              "values": false,
-              "min": false,
-              "max": false,
-              "current": false,
-              "total": false,
-              "avg": false,
-              "rightSide": true,
-              "alignAsTable": true
-            },
+            "linewidth": 1,
+            "links": [],
             "nullPointMode": "connected",
-            "steppedLine": false,
-            "tooltip": {
-              "value_type": "cumulative",
-              "shared": true,
-              "sort": 0,
-              "msResolution": false
-            },
-            "timeFrom": null,
-            "timeShift": null,
-            "aliasColors": {},
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
             "seriesOverrides": [],
-            "links": []
-          }
-        ]
-      },
-      {
-        "title": "New row",
-        "height": "250px",
-        "editable": true,
-        "collapse": false,
-        "panels": [
-          {
-            "title": "Memory Use",
-            "error": false,
             "span": 12,
-            "editable": true,
-            "type": "graph",
-            "isNew": true,
-            "id": 16,
+            "stack": false,
+            "steppedLine": false,
             "targets": [
               {
-                "target": "alias(collectd.%HOST%.MONGODB-mem.count-resident, 'resident')",
                 "refId": "A",
-                "textEditor": false
-              },
-              {
-                "target": "alias(collectd.%HOST%.MONGODB-mem.count-virtual, 'virtual')",
-                "refId": "B",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MONGODB-asserts.*, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
-            "datasource": null,
-            "renderer": "flot",
-            "yaxes": [
-              {
-                "label": null,
-                "show": true,
-                "logBase": 1,
-                "min": null,
-                "max": null,
-                "format": "bytes"
-              },
-              {
-                "label": null,
-                "show": true,
-                "logBase": 1,
-                "min": null,
-                "max": null,
-                "format": "short"
-              }
-            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "Asserts",
+            "tooltip": {
+              "msResolution": false,
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
             "xaxis": {
               "show": true
             },
+            "yaxes": [
+              {
+                "format": "none",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": false
+              }
+            ],
+            "decimals": 0
+          }
+        ],
+        "title": "New row"
+      },
+      {
+        "collapse": false,
+        "editable": true,
+        "height": "150px",
+        "panels": [
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "${DS_GRAPHITE}",
+            "editable": true,
+            "error": false,
+            "fill": 3,
             "grid": {
               "threshold1": null,
-              "threshold2": null,
               "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2": null,
               "threshold2Color": "rgba(234, 112, 112, 0.22)"
             },
-            "lines": true,
-            "fill": 1,
-            "linewidth": 2,
-            "points": false,
-            "pointradius": 5,
-            "bars": false,
-            "stack": false,
-            "percentage": false,
+            "id": 15,
+            "isNew": true,
             "legend": {
-              "show": true,
-              "values": false,
-              "min": false,
-              "max": false,
-              "current": false,
-              "total": false,
-              "avg": false,
               "alignAsTable": true,
-              "rightSide": true
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
             },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
             "nullPointMode": "connected",
-            "steppedLine": false,
-            "tooltip": {
-              "value_type": "cumulative",
-              "shared": true,
-              "sort": 0,
-              "msResolution": false
-            },
-            "timeFrom": null,
-            "timeShift": null,
-            "aliasColors": {},
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
             "seriesOverrides": [],
-            "links": []
-          }
-        ]
-      },
-      {
-        "title": "New row",
-        "height": "250px",
-        "editable": true,
-        "collapse": false,
-        "panels": [
-          {
-            "title": "Wired Tiger Locking Performance Read",
-            "error": false,
             "span": 12,
-            "editable": true,
-            "type": "graph",
-            "isNew": true,
-            "id": 17,
+            "stack": false,
+            "steppedLine": false,
             "targets": [
               {
-                "target": "alias(collectd.%HOST%.MONGODB-wiredTigerConcurrentTransactions.count-readAvailable, 'read_available')",
-                "refId": "A"
-              },
-              {
-                "target": "alias(collectd.%HOST%.MONGODB-wiredTigerConcurrentTransactions.count-readOut, 'read_out')",
-                "refId": "B"
+                "refId": "A",
+                "target": "alias(collectd.%HOST%.MONGODB-extraInfo.count-pageFaults, 'pageFaults')"
               }
             ],
-            "datasource": null,
-            "renderer": "flot",
-            "yaxes": [
-              {
-                "label": null,
-                "show": true,
-                "logBase": 1,
-                "min": null,
-                "max": null,
-                "format": "short"
-              },
-              {
-                "label": null,
-                "show": true,
-                "logBase": 1,
-                "min": null,
-                "max": null,
-                "format": "short"
-              }
-            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "Page Faults",
+            "tooltip": {
+              "msResolution": false,
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
             "xaxis": {
               "show": true
             },
-            "grid": {
-              "threshold1": null,
-              "threshold2": null,
-              "threshold1Color": "rgba(216, 200, 27, 0.27)",
-              "threshold2Color": "rgba(234, 112, 112, 0.22)"
-            },
-            "lines": true,
-            "fill": 1,
-            "linewidth": 2,
-            "points": false,
-            "pointradius": 5,
-            "bars": false,
-            "stack": false,
-            "percentage": false,
-            "legend": {
-              "show": true,
-              "values": false,
-              "min": false,
-              "max": false,
-              "current": false,
-              "total": false,
-              "avg": false,
-              "rightSide": true,
-              "alignAsTable": true
-            },
-            "nullPointMode": "connected",
-            "steppedLine": false,
-            "tooltip": {
-              "value_type": "cumulative",
-              "shared": true,
-              "sort": 0,
-              "msResolution": false
-            },
-            "timeFrom": null,
-            "timeShift": null,
-            "aliasColors": {},
-            "seriesOverrides": [],
-            "links": []
-          }
-        ]
-      },
-      {
-        "title": "New row",
-        "height": "250px",
-        "editable": true,
-        "collapse": false,
-        "panels": [
-          {
-            "title": "Wired Tiger Locking Performance Write",
-            "error": false,
-            "span": 12,
-            "editable": true,
-            "type": "graph",
-            "isNew": true,
-            "id": 17,
-            "targets": [
-              {
-                "target": "alias(collectd.%HOST%.MONGODB-wiredTigerConcurrentTransactions.count-writeAvailable, 'write_available')",
-                "refId": "A"
-              },
-              {
-                "target": "alias(collectd.%HOST%.MONGODB-wiredTigerConcurrentTransactions.count-writeOut, 'write_out')",
-                "refId": "B"
-              }
-            ],
-            "datasource": null,
-            "renderer": "flot",
             "yaxes": [
               {
+                "format": "none",
                 "label": null,
-                "show": true,
                 "logBase": 1,
-                "min": null,
                 "max": null,
-                "format": "short"
+                "min": null,
+                "show": true
               },
               {
+                "format": "short",
                 "label": null,
-                "show": true,
                 "logBase": 1,
-                "min": null,
                 "max": null,
-                "format": "short"
+                "min": null,
+                "show": false
               }
             ],
+            "decimals": 0
+          }
+        ],
+        "title": "New row"
+      },
+      {
+        "collapse": false,
+        "editable": true,
+        "height": "150px",
+        "panels": [
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "${DS_GRAPHITE}",
+            "editable": true,
+            "error": false,
+            "fill": 3,
+            "grid": {
+              "threshold1": null,
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2": null,
+              "threshold2Color": "rgba(234, 112, 112, 0.22)"
+            },
+            "id": 16,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "span": 12,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MONGODB-mem.*, '(.*)-', ''))",
+                "textEditor": false
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "Memory Use",
+            "tooltip": {
+              "msResolution": false,
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
             "xaxis": {
               "show": true
             },
-            "grid": {
-              "threshold1": null,
-              "threshold2": null,
-              "threshold1Color": "rgba(216, 200, 27, 0.27)",
-              "threshold2Color": "rgba(234, 112, 112, 0.22)"
-            },
-            "lines": true,
-            "fill": 1,
-            "linewidth": 2,
-            "points": false,
-            "pointradius": 5,
-            "bars": false,
-            "stack": false,
-            "percentage": false,
-            "legend": {
-              "show": true,
-              "values": false,
-              "min": false,
-              "max": false,
-              "current": false,
-              "total": false,
-              "avg": false,
-              "rightSide": true,
-              "alignAsTable": true
-            },
-            "nullPointMode": "connected",
-            "steppedLine": false,
-            "tooltip": {
-              "value_type": "cumulative",
-              "shared": true,
-              "sort": 0,
-              "msResolution": false
-            },
-            "timeFrom": null,
-            "timeShift": null,
-            "aliasColors": {},
-            "seriesOverrides": [],
-            "links": []
+            "yaxes": [
+              {
+                "format": "bytes",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": false
+              }
+            ],
+            "decimals": 0
           }
-        ]
+        ],
+        "title": "New row"
       },
       {
-        "title": "New row",
-        "height": "250px",
-        "editable": true,
         "collapse": false,
+        "editable": true,
+        "height": "150px",
         "panels": [
           {
-            "title": "Current Ops",
-            "error": false,
-            "span": 12,
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "${DS_GRAPHITE}",
             "editable": true,
-            "type": "graph",
+            "error": false,
+            "fill": 3,
+            "grid": {
+              "threshold1": null,
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2": null,
+              "threshold2Color": "rgba(234, 112, 112, 0.22)"
+            },
+            "id": 17,
             "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [
+              {
+                "alias": "writeAvailable",
+                "transform": "negative-Y"
+              },
+              {
+                "alias": "writeOut",
+                "transform": "negative-Y"
+              }
+            ],
+            "span": 12,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MONGODB-wiredTigerConcurrentTransactions.*, '(.*)-', ''))",
+                "textEditor": true
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "Wired Tiger Locking Performance Read / Write",
+            "tooltip": {
+              "msResolution": false,
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "none",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": false
+              }
+            ]
+          }
+        ],
+        "title": "New row"
+      },
+      {
+        "collapse": false,
+        "editable": true,
+        "height": "150px",
+        "panels": [
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "${DS_GRAPHITE}",
+            "editable": true,
+            "error": false,
+            "fill": 3,
+            "grid": {
+              "threshold1": null,
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2": null,
+              "threshold2Color": "rgba(234, 112, 112, 0.22)"
+            },
             "id": 19,
-            "targets": [
-              {
-                "target": "alias(collectd.%HOST%.MONGODB-currentOp.count-failed, 'failed')",
-                "refId": "A"
-              },
-              {
-                "target": "alias(collectd.%HOST%.MONGODB-currentOp.count-total, 'total')",
-                "refId": "B"
-              }
-            ],
-            "datasource": null,
-            "renderer": "flot",
-            "yaxes": [
-              {
-                "label": null,
-                "show": true,
-                "logBase": 1,
-                "min": null,
-                "max": null,
-                "format": "short"
-              },
-              {
-                "label": null,
-                "show": true,
-                "logBase": 1,
-                "min": null,
-                "max": null,
-                "format": "short"
-              }
-            ],
-            "xaxis": {
-              "show": true
-            },
-            "grid": {
-              "threshold1": null,
-              "threshold2": null,
-              "threshold1Color": "rgba(216, 200, 27, 0.27)",
-              "threshold2Color": "rgba(234, 112, 112, 0.22)"
-            },
-            "lines": true,
-            "fill": 1,
-            "linewidth": 2,
-            "points": false,
-            "pointradius": 5,
-            "bars": false,
-            "stack": false,
-            "percentage": false,
+            "isNew": true,
             "legend": {
-              "show": true,
-              "values": false,
-              "min": false,
-              "max": false,
-              "current": false,
-              "total": false,
+              "alignAsTable": true,
               "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
               "rightSide": true,
-              "alignAsTable": true
+              "show": true,
+              "total": false,
+              "values": true
             },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
             "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "span": 12,
+            "stack": false,
             "steppedLine": false,
-            "tooltip": {
-              "value_type": "cumulative",
-              "shared": true,
-              "sort": 0,
-              "msResolution": false
-            },
+            "targets": [
+              {
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MONGODB-currentOp.*, '(.*)-', ''))",
+                "textEditor": true
+              }
+            ],
             "timeFrom": null,
             "timeShift": null,
-            "aliasColors": {},
-            "seriesOverrides": [],
-            "links": []
+            "title": "Current Ops",
+            "tooltip": {
+              "msResolution": false,
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "none",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": false
+              }
+            ],
+            "decimals": 0
           }
-        ]
+        ],
+        "title": "New row"
       },
       {
-        "title": "New row",
-        "height": "250px",
-        "editable": true,
         "collapse": false,
+        "editable": true,
+        "height": "150px",
         "panels": [
           {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "${DS_GRAPHITE}",
+            "editable": true,
+            "error": false,
+            "fill": 3,
+            "grid": {
+              "threshold1": null,
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2": null,
+              "threshold2Color": "rgba(234, 112, 112, 0.22)"
+            },
+            "id": 20,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "span": 12,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "alias(collectd.%HOST%.MONGODB-wiredTigerCache.count-bytes, 'count')"
+              },
+              {
+                "refId": "B",
+                "target": "alias(collectd.%HOST%.MONGODB-wiredTigerCache.count-maximum, 'max')"
+              },
+              {
+                "refId": "C",
+                "target": "alias(collectd.%HOST%.MONGODB-wiredTigerCache.count-tracked, 'tracked')"
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
             "title": "Wired Tiger Cache Usage",
-            "error": false,
-            "span": 12,
-            "editable": true,
+            "tooltip": {
+              "msResolution": false,
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
             "type": "graph",
-            "isNew": true,
-            "id": 20,
-            "targets": [
-              {
-                "target": "alias(collectd.%HOST%.MONGODB-wiredTigerCache.count-bytes, 'count')",
-                "refId": "A"
-              },
-              {
-                "target": "alias(collectd.%HOST%.MONGODB-wiredTigerCache.count-maximum, 'max')",
-                "refId": "B"
-              },
-              {
-                "target": "alias(collectd.%HOST%.MONGODB-wiredTigerCache.count-tracked, 'tracked')",
-                "refId": "C"
-              }
-            ],
-            "datasource": null,
-            "renderer": "flot",
-            "yaxes": [
-              {
-                "label": null,
-                "show": true,
-                "logBase": 1,
-                "min": null,
-                "max": null,
-                "format": "short"
-              },
-              {
-                "label": null,
-                "show": true,
-                "logBase": 1,
-                "min": null,
-                "max": null,
-                "format": "short"
-              }
-            ],
             "xaxis": {
               "show": true
             },
-            "grid": {
-              "threshold1": null,
-              "threshold2": null,
-              "threshold1Color": "rgba(216, 200, 27, 0.27)",
-              "threshold2Color": "rgba(234, 112, 112, 0.22)"
-            },
-            "lines": true,
-            "fill": 1,
-            "linewidth": 2,
-            "points": false,
-            "pointradius": 5,
-            "bars": false,
-            "stack": false,
-            "percentage": false,
-            "legend": {
-              "show": true,
-              "values": false,
-              "min": false,
-              "max": false,
-              "current": false,
-              "total": false,
-              "avg": false,
-              "alignAsTable": true,
-              "rightSide": true
-            },
-            "nullPointMode": "connected",
-            "steppedLine": false,
-            "tooltip": {
-              "value_type": "cumulative",
-              "shared": true,
-              "sort": 0,
-              "msResolution": false
-            },
-            "timeFrom": null,
-            "timeShift": null,
-            "aliasColors": {},
-            "seriesOverrides": [],
-            "links": []
-          }
-        ]
-      },
-      {
-        "title": "New row",
-        "height": "250px",
-        "editable": true,
-        "collapse": false,
-        "panels": [
-          {
-            "title": "Wired Tiger Cache Pages",
-            "error": false,
-            "span": 12,
-            "editable": true,
-            "type": "graph",
-            "isNew": true,
-            "id": 20,
-            "targets": [
-              {
-                "target": "alias(collectd.%HOST%.MONGODB-wiredTigerCache.count-modified, 'modified pages')",
-                "refId": "C"
-              },
-              {
-                "target": "alias(collectd.%HOST%.MONGODB-wiredTigerCache.count-unmodified, 'unmodified pages')",
-                "refId": "D"
-              }
-            ],
-            "datasource": null,
-            "renderer": "flot",
             "yaxes": [
               {
+                "format": "bytes",
                 "label": null,
-                "show": true,
                 "logBase": 1,
-                "min": null,
                 "max": null,
-                "format": "short"
+                "min": null,
+                "show": true
               },
               {
+                "format": "short",
                 "label": null,
-                "show": true,
                 "logBase": 1,
-                "min": null,
                 "max": null,
-                "format": "short"
+                "min": null,
+                "show": false
               }
             ],
-            "xaxis": {
-              "show": true
-            },
-            "grid": {
-              "threshold1": null,
-              "threshold2": null,
-              "threshold1Color": "rgba(216, 200, 27, 0.27)",
-              "threshold2Color": "rgba(234, 112, 112, 0.22)"
-            },
-            "lines": true,
-            "fill": 1,
-            "linewidth": 2,
-            "points": false,
-            "pointradius": 5,
-            "bars": false,
-            "stack": false,
-            "percentage": false,
-            "legend": {
-              "show": true,
-              "values": false,
-              "min": false,
-              "max": false,
-              "current": false,
-              "total": false,
-              "avg": false,
-              "alignAsTable": true,
-              "rightSide": true
-            },
-            "nullPointMode": "connected",
-            "steppedLine": false,
-            "tooltip": {
-              "value_type": "cumulative",
-              "shared": true,
-              "sort": 0,
-              "msResolution": false
-            },
-            "timeFrom": null,
-            "timeShift": null,
-            "aliasColors": {},
-            "seriesOverrides": [],
-            "links": []
+            "decimals": 1
           }
-        ]
+        ],
+        "title": "New row"
       },
       {
-        "title": "New row",
-        "height": "250px",
-        "editable": true,
         "collapse": false,
+        "editable": true,
+        "height": "150px",
         "panels": [
           {
-            "title": "Cursor",
-            "error": false,
-            "span": 12,
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "${DS_GRAPHITE}",
             "editable": true,
-            "type": "graph",
-            "isNew": true,
+            "error": false,
+            "fill": 3,
+            "grid": {
+              "threshold1": null,
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2": null,
+              "threshold2Color": "rgba(234, 112, 112, 0.22)"
+            },
             "id": 21,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "span": 12,
+            "stack": false,
+            "steppedLine": false,
             "targets": [
               {
-                "target": "alias(collectd.%HOST%.MONGODB-cursor.count-open-no-timeout, 'no timeout')",
-                "refId": "A"
+                "refId": "C",
+                "target": "alias(collectd.%HOST%.MONGODB-wiredTigerCache.count-modified, 'modified pages')"
               },
               {
-                "target": "alias(collectd.%HOST%.MONGODB-cursor.count-open-total, 'total')",
-                "refId": "B"
-              },
-              {
-                "target": "alias(collectd.%HOST%.MONGODB-cursor.count-timed-out, 'timed out')",
-                "refId": "C"
+                "refId": "D",
+                "target": "alias(collectd.%HOST%.MONGODB-wiredTigerCache.count-unmodified, 'unmodified pages')"
               }
             ],
-            "datasource": null,
-            "renderer": "flot",
-            "yaxes": [
-              {
-                "label": null,
-                "show": true,
-                "logBase": 1,
-                "min": null,
-                "max": null,
-                "format": "short"
-              },
-              {
-                "label": null,
-                "show": true,
-                "logBase": 1,
-                "min": null,
-                "max": null,
-                "format": "short"
-              }
-            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "Wired Tiger Cache Pages",
+            "tooltip": {
+              "msResolution": false,
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
             "xaxis": {
               "show": true
             },
-            "grid": {
-              "threshold1": null,
-              "threshold2": null,
-              "threshold1Color": "rgba(216, 200, 27, 0.27)",
-              "threshold2Color": "rgba(234, 112, 112, 0.22)"
-            },
-            "lines": true,
-            "fill": 1,
-            "linewidth": 2,
-            "points": false,
-            "pointradius": 5,
-            "bars": false,
-            "stack": false,
-            "percentage": false,
-            "legend": {
-              "show": true,
-              "values": false,
-              "min": false,
-              "max": false,
-              "current": false,
-              "total": false,
-              "avg": false,
-              "alignAsTable": true,
-              "rightSide": true
-            },
-            "nullPointMode": "connected",
-            "steppedLine": false,
-            "tooltip": {
-              "value_type": "cumulative",
-              "shared": true,
-              "sort": 0,
-              "msResolution": false
-            },
-            "timeFrom": null,
-            "timeShift": null,
-            "aliasColors": {},
-            "seriesOverrides": [],
-            "links": []
+            "yaxes": [
+              {
+                "format": "none",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": false
+              }
+            ],
+            "decimals": 0
           }
-        ]
+        ],
+        "title": "New row"
       },
       {
-        "title": "New row",
-        "height": "250px",
-        "editable": true,
         "collapse": false,
+        "editable": true,
+        "height": "150px",
         "panels": [
           {
-            "title": "Global Lock Active Clients",
-            "error": false,
-            "span": 12,
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "${DS_GRAPHITE}",
             "editable": true,
-            "type": "graph",
+            "error": false,
+            "fill": 3,
+            "grid": {
+              "threshold1": null,
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2": null,
+              "threshold2Color": "rgba(234, 112, 112, 0.22)"
+            },
+            "id": 22,
             "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "span": 12,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MONGODB-cursor.*, '(.*)-', ''))",
+                "textEditor": false
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "Cursor",
+            "tooltip": {
+              "msResolution": false,
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "none",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": false
+              }
+            ],
+            "decimals": 0
+          }
+        ],
+        "title": "New row"
+      },
+      {
+        "collapse": false,
+        "editable": true,
+        "height": "150px",
+        "panels": [
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "${DS_GRAPHITE}",
+            "editable": true,
+            "error": false,
+            "fill": 3,
+            "grid": {
+              "threshold1": null,
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2": null,
+              "threshold2Color": "rgba(234, 112, 112, 0.22)"
+            },
             "id": 23,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "span": 12,
+            "stack": false,
+            "steppedLine": false,
             "targets": [
               {
-                "target": "alias(collectd.%HOST%.MONGODB-globalLockCurrentQueue.count-readers, 'readers')",
-                "refId": "A"
-              },
-              {
-                "target": "alias(collectd.%HOST%.MONGODB-globalLockCurrentQueue.count-writers, 'writers')",
-                "refId": "B"
-              },
-              {
-                "target": "alias(collectd.%HOST%.MONGODB-globalLockCurrentQueue.count-total, 'total')",
-                "refId": "C"
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MONGODB-globalLockCurrentQueue.*, '(.*)-', ''))",
+                "textEditor": true
               }
             ],
-            "datasource": null,
-            "renderer": "flot",
-            "yaxes": [
-              {
-                "label": null,
-                "show": true,
-                "logBase": 1,
-                "min": null,
-                "max": null,
-                "format": "short"
-              },
-              {
-                "label": null,
-                "show": true,
-                "logBase": 1,
-                "min": null,
-                "max": null,
-                "format": "short"
-              }
-            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "Global Lock Active Clients",
+            "tooltip": {
+              "msResolution": false,
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
             "xaxis": {
               "show": true
             },
-            "grid": {
-              "threshold1": null,
-              "threshold2": null,
-              "threshold1Color": "rgba(216, 200, 27, 0.27)",
-              "threshold2Color": "rgba(234, 112, 112, 0.22)"
-            },
-            "lines": true,
-            "fill": 1,
-            "linewidth": 2,
-            "points": false,
-            "pointradius": 5,
-            "bars": false,
-            "stack": false,
-            "percentage": false,
-            "legend": {
-              "show": true,
-              "values": false,
-              "min": false,
-              "max": false,
-              "current": false,
-              "total": false,
-              "avg": false,
-              "alignAsTable": true,
-              "rightSide": true
-            },
-            "nullPointMode": "connected",
-            "steppedLine": false,
-            "tooltip": {
-              "value_type": "cumulative",
-              "shared": true,
-              "sort": 0,
-              "msResolution": false
-            },
-            "timeFrom": null,
-            "timeShift": null,
-            "aliasColors": {},
-            "seriesOverrides": [],
-            "links": []
+            "yaxes": [
+              {
+                "format": "none",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": false
+              }
+            ],
+            "decimals": 0
           }
-        ]
+        ],
+        "title": "New row"
       },
       {
-        "title": "New row",
-        "height": "250px",
-        "editable": true,
         "collapse": false,
+        "editable": true,
+        "height": "150px",
         "panels": [
           {
-            "title": "Global Lock Current Queue",
-            "error": false,
-            "span": 12,
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "${DS_GRAPHITE}",
             "editable": true,
-            "type": "graph",
-            "isNew": true,
+            "error": false,
+            "fill": 3,
+            "grid": {
+              "threshold1": null,
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2": null,
+              "threshold2Color": "rgba(234, 112, 112, 0.22)"
+            },
             "id": 24,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "span": 12,
+            "stack": false,
+            "steppedLine": false,
             "targets": [
               {
-                "target": "alias(collectd.%HOST%.MONGODB-globalLockCurrentQueue.count-readers, 'readers')",
-                "refId": "A"
-              },
-              {
-                "target": "alias(collectd.%HOST%.MONGODB-globalLockCurrentQueue.count-writers, 'writers')",
-                "refId": "B"
-              },
-              {
-                "target": "alias(collectd.%HOST%.MONGODB-globalLockCurrentQueue.count-total, 'total')",
-                "refId": "C"
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MONGODB-globalLockCurrentQueue.*, '(.*)-', ''))",
+                "textEditor": false
               }
             ],
-            "datasource": null,
-            "renderer": "flot",
-            "yaxes": [
-              {
-                "label": null,
-                "show": true,
-                "logBase": 1,
-                "min": null,
-                "max": null,
-                "format": "short"
-              },
-              {
-                "label": null,
-                "show": true,
-                "logBase": 1,
-                "min": null,
-                "max": null,
-                "format": "short"
-              }
-            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "Global Lock Current Queue",
+            "tooltip": {
+              "msResolution": false,
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
             "xaxis": {
               "show": true
             },
-            "grid": {
-              "threshold1": null,
-              "threshold2": null,
-              "threshold1Color": "rgba(216, 200, 27, 0.27)",
-              "threshold2Color": "rgba(234, 112, 112, 0.22)"
-            },
-            "lines": true,
-            "fill": 1,
-            "linewidth": 2,
-            "points": false,
-            "pointradius": 5,
-            "bars": false,
-            "stack": false,
-            "percentage": false,
-            "legend": {
-              "show": true,
-              "values": false,
-              "min": false,
-              "max": false,
-              "current": false,
-              "total": false,
-              "avg": false,
-              "alignAsTable": true,
-              "rightSide": true
-            },
-            "nullPointMode": "connected",
-            "steppedLine": false,
-            "tooltip": {
-              "value_type": "cumulative",
-              "shared": true,
-              "sort": 0,
-              "msResolution": false
-            },
-            "timeFrom": null,
-            "timeShift": null,
-            "aliasColors": {},
-            "seriesOverrides": [],
-            "links": []
+            "yaxes": [
+              {
+                "format": "none",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ],
+            "decimals": 0
           }
-        ]
+        ],
+        "title": "New row"
       }
     ],
     "time": {
