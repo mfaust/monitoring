@@ -273,21 +273,25 @@ class ServiceDiscovery
   # delete the directory with all files inside
   def deleteHost( host )
 
+    @log.info( sprintf( 'delete Host \'%s\'',  host ) )
     dir_path  = sprintf( '%s/%s', @cacheDirectory, host )
 
     if( File.exist?( dir_path ) )
+
       FileUtils.rm_r( dir_path )
 
-      @status = 200
+      @status  = 200
       @message = 'Host successful removed'
-      return { 'status' => '200', 'message' => 'Host successful removed' }
     else
 
-      @status = 400
+      @status  = 400
       @message = 'Hosts not exists'
-      return { 'status' => '400', 'message' => 'Hosts not exists' }
     end
 
+    return {
+      'status'  => @status,
+      'message' => @message
+    }
 
   end
 

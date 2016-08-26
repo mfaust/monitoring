@@ -100,12 +100,22 @@ class Grafana
       service      = json.detect { |s| s[mbean] }
       mbeanExists  = service[ mbean ] ? service[ mbean ] : nil
 
+      if( mbeanExists['status'].to_i != 200 )
+        return false
+      end
+
       if( mbeanExists != nil and key == nil )
 
         result = true
       elsif( mbeanExists != nil and key != nil )
 
-        keyExists = mbeanExists['value'][ key ] ? mbeanExists['value'][ key ]  : nil
+        mbeanValue = mbeanExists['value'] ? mbeanExists['value'] : nil
+
+        if( mbeanValue == nil )
+          return false
+        end
+
+        keyExists = mbeanValue[ key ] ? mbeanValue[ key ]  : nil
 
         result    = keyExists != nil ? true : false
       end
@@ -151,6 +161,7 @@ class Grafana
 
       self.generateOverviewTemplate( services )
       self.generateLicenseTemplate( host, services )
+      self.addNamedTemplate( 'cm-memory-pool.json' )
 
       @log.debug("Found services: #{services}")
 
@@ -592,7 +603,21 @@ class Grafana
   end
 
 
-  def sendTemplateToGrafana(templateFile, serviceName = nil)
+  def addNamedTemplate( name )
+
+    filename = sprintf( '%s/%s', @templateDirectory, name )
+
+    if( File.exist?( filename ) )
+
+      file = File.read( filename )
+
+      self.sendTemplateToGrafana( file )
+
+    end
+  end
+
+
+  def sendTemplateToGrafana( templateFile, serviceName = nil )
 
     templateFile = regenerateGrafanaTemplateIDs(templateFile)
 

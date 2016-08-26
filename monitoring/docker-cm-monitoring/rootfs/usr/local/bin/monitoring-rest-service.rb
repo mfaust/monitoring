@@ -18,6 +18,8 @@ require 'yaml'
 require 'fileutils'
 require 'resolve/hostname'
 
+#require_relative 'discover'
+#require_relative 'tools'
 require sprintf( '%s/discover', lib_dir )
 require sprintf( '%s/grafana', lib_dir )
 
@@ -154,7 +156,7 @@ module Sinatra
       host = params[:host]
 
       content_type :json
-      status = h.deleteHost( host ).to_json
+      status = h.deleteHost( host )
 
       response.status = h.status
       status.to_json
@@ -167,7 +169,7 @@ module Sinatra
       host = params[:host]
 
       content_type :json
-      status = h.deleteHost( host ).to_json
+      status = h.deleteHost( host )
       g.deleteDashboards( host )
 
       response.status = h.status
