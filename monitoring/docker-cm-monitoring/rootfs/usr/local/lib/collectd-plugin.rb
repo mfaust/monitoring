@@ -1,9 +1,9 @@
 #!/usr/bin/ruby
 #
-# 23.08.2016 - Bodo Schulz
+# 26.08.2016 - Bodo Schulz
 #
 #
-# v1.0.4
+# v1.0.5
 
 # -----------------------------------------------------------------------------
 
@@ -46,8 +46,8 @@ class CollecdPlugin
       FileUtils.chown( 'nobody', 'nobody', logFile )
     end
 
-    version              = '1.0.4'
-    date                 = '2016-08-23'
+    version              = '1.0.5'
+    date                 = '2016-08-26'
 
     @log.info( '-----------------------------------------------------------------' )
     @log.info( ' CollectdPlugin' )
@@ -532,43 +532,35 @@ class CollecdPlugin
         /x
 
         parts           = mbean.match( regex )
-        mbeanName       = "#{parts['name']}".strip.tr( '. ', '' )
-        mbeanType       = "#{parts['type']}".strip.tr( '. ', '' )
+        mbeanName       = "#{parts['name']}" # .strip.tr( '. ', '' )
+        mbeanType       = "#{parts['type']}" # .strip.tr( '. ', '' )
 
       return mbeanName
     end
 
     if( value != nil )
 
-      [ 'MemoryPoolCMSOldGen', 'MemoryPoolCodeCache', 'MemoryPoolCompressedClassSpace', 'MemoryPoolMetaspace', 'MemoryPoolParEdenSpace', 'MemoryPoolParSurvivorSpace' ].each do |m|
+      bean      = request['mbean'] ? request['mbean'] : nil
+      usage     = value['Usage']   ? value['Usage']   : nil
+      mbeanName = beanName( bean )
 
-        memoryPoolType = request[m] ? value[m] : nil
-        if( memoryPoolType != nil )
+      if( usage != nil )
 
-          mbean     = memoryPoolType['request']['mbean'] ? memoryPoolType['request']['mbean'] : nil
-          usage     = memoryPoolType['value']['Usage']   ?  memoryPoolType['value']['Usage']  : nil
-          mbeanName = beanName( mbean )
+        init      = usage['init']
+        max       = usage['max']
+        used      = usage['used']
+        committed = usage['committed']
 
-          if( usage != nil )
+        percent   = ( 100 * used / committed )
 
-            init      = value[m]['init']
-            max       = value[m]['max']
-            used      = value[m]['used']
-            committed = value[m]['committed']
+        mbeanName      = mbeanName.strip.tr( ' ', '_' )
 
-            percent   = ( 100 * used / committed )
-
-            mbeanName      = mbeanName.strip.tr( ' ', '_' )  # .downcase
-
-            data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_%s', type ), 'init'        , @interval, init ) )
-            data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_%s', type ), 'committed'   , @interval, committed ) )
-            data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_%s', type ), 'max'         , @interval, max ) )
-            data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_%s', type ), 'used'        , @interval, used ) )
-            data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_%s', type ), 'used_percent', @interval, percent ) )
-          end
-        end
+        data.push( sprintf( format, @Host, @Service, mbean, mbeanName, 'init'        , @interval, init ) )
+        data.push( sprintf( format, @Host, @Service, mbean, mbeanName, 'committed'   , @interval, committed ) )
+        data.push( sprintf( format, @Host, @Service, mbean, mbeanName, 'max'         , @interval, max ) )
+        data.push( sprintf( format, @Host, @Service, mbean, mbeanName, 'used'        , @interval, used ) )
+        data.push( sprintf( format, @Host, @Service, mbean, mbeanName, 'used_percent', @interval, percent ) )
       end
-
     end
 
     return data
@@ -1325,10 +1317,15 @@ class CollecdPlugin
                 when 'Memory'
                   graphiteOutput.push( self.ParseResult_Memory( v ) )
                 when 'MemoryPoolCMSOldGen'
+                  graphiteOutput.push( self.ParseResult_MemoryPool( v ) )
                 when 'MemoryPoolCodeCache'
+                  graphiteOutput.push( self.ParseResult_MemoryPool( v ) )
                 when 'MemoryPoolCompressedClassSpace'
+                  graphiteOutput.push( self.ParseResult_MemoryPool( v ) )
                 when 'MemoryPoolMetaspace'
+                  graphiteOutput.push( self.ParseResult_MemoryPool( v ) )
                 when 'MemoryPoolParEdenSpace'
+                  graphiteOutput.push( self.ParseResult_MemoryPool( v ) )
                 when 'MemoryPoolParSurvivorSpace'
                   graphiteOutput.push( self.ParseResult_MemoryPool( v ) )
                 when 'Threading'
