@@ -388,7 +388,7 @@
             "id": 39,
             "targets": [
               {
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.MLS-Server-server.count-cache_size, '(.*)-', ''), 'Cache Size'))",
+                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.MLS-Server-server.count-cache_size, '(.*)-', ''), 'Entries'))",
                 "refId": "A",
                 "textEditor": false
               }
