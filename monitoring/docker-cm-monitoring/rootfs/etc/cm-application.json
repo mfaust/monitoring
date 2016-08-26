@@ -57,7 +57,8 @@
             "attribute": "Usage"
           }, {
             "description": "Information about GC Aggregator",
-            "mbean": "com.sun.management:type=GarbageCollectionAggregator"
+            "mbean": "com.sun.management:type=GarbageCollectionAggregator",
+            "attribute": "LastGcInfo"
           }
         ]
       },

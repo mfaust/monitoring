@@ -554,9 +554,17 @@
     "templating": {
       "list": []
     },
-    "annotations": {
-      "list": []
-    },
+  "annotations": {
+    "list": [
+      {
+        "datasource": "events",
+        "enable": true,
+        "iconColor": "rgba(255, 96, 96, 1)",
+        "name": "annotation",
+        "tags": "%HOST%"
+      }
+    ]
+  },
     "refresh": "30s",
     "schemaVersion": 12,
     "version": 4,

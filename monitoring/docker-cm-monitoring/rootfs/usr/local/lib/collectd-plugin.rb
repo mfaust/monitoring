@@ -499,6 +499,71 @@ class CollecdPlugin
   end
 
 
+  def ParseResult_MemoryPool( data = {} )
+
+    mbean   = 'MemoryPool'
+    value   = data['value']   ? data['value']   : nil
+    request = data['request'] ? data['request'] : nil
+    format  = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
+    data    = []
+
+    def beanName( mbean )
+
+        regex = /
+          ^                     # Starting at the front of the string
+          (.*)                  #
+          name=                 #
+          (?<name>.+[a-zA-Z])   #
+          (.*),                 #
+          type=                 #
+          (?<type>.+[a-zA-Z])   #
+          $
+        /x
+
+        parts           = mbean.match( regex )
+        mbeanName       = "#{parts['name']}".strip.tr( '. ', '' )
+        mbeanType       = "#{parts['type']}".strip.tr( '. ', '' )
+
+      return mbeanName
+    end
+
+    if( value != nil )
+
+      [ 'MemoryPoolCMSOldGen', 'MemoryPoolCodeCache', 'MemoryPoolCompressedClassSpace', 'MemoryPoolMetaspace', 'MemoryPoolParEdenSpace', 'MemoryPoolParSurvivorSpace' ].each do |m|
+
+        memoryPoolType = request[m] ? value[m] : nil
+        if( memoryPoolType != nil )
+
+          mbean     = memoryPoolType['request']['mbean'] ? memoryPoolType['request']['mbean'] : nil
+          usage     = memoryPoolType['value']['Usage']   ?  memoryPoolType['value']['Usage']  : nil
+          mbeanName = beanName( mbean )
+
+          if( usage != nil )
+
+            init      = value[m]['init']
+            max       = value[m]['max']
+            used      = value[m]['used']
+            committed = value[m]['committed']
+
+            percent   = ( 100 * used / committed )
+
+            mbeanName      = mbeanName.strip.tr( ' ', '_' )  # .downcase
+
+            data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_%s', type ), 'init'        , @interval, init ) )
+            data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_%s', type ), 'committed'   , @interval, committed ) )
+            data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_%s', type ), 'max'         , @interval, max ) )
+            data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_%s', type ), 'used'        , @interval, used ) )
+            data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_%s', type ), 'used_percent', @interval, percent ) )
+          end
+        end
+      end
+
+    end
+
+    return data
+  end
+
+
   def ParseResult_GCParNew( data = {} )
 
     mbean = 'GCParNew'
@@ -610,7 +675,6 @@ class CollecdPlugin
     value  = data['value'] ? data['value'] : nil
     format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
     data   = []
-
 
     def timeParser( today, finalDate )
 
@@ -1249,6 +1313,13 @@ class CollecdPlugin
                   graphiteOutput.push( self.ParseResult_Runtime( v ) )
                 when 'Memory'
                   graphiteOutput.push( self.ParseResult_Memory( v ) )
+                when 'MemoryPoolCMSOldGen'
+                when 'MemoryPoolCodeCache'
+                when 'MemoryPoolCompressedClassSpace'
+                when 'MemoryPoolMetaspace'
+                when 'MemoryPoolParEdenSpace'
+                when 'MemoryPoolParSurvivorSpace'
+                  graphiteOutput.push( self.ParseResult_MemoryPool( v ) )
                 when 'Threading'
                   graphiteOutput.push( self.ParseResult_Threading( v ) )
 #                when 'ExecutortomcatThreadPool'

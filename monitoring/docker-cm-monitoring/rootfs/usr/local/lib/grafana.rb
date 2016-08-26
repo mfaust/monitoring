@@ -253,7 +253,12 @@ class Grafana
 
 
     # annotations werden direct in die graphite geschrieben
-    # curl -v -H 'Accept: application/json' -X POST http://localhost:8081/tags/ -d '{"what": "API Call", "tags": "monitoring-16-01", "data":"Jeff plays too much Ingress"}'
+    # POST
+    # curl -v -H 'Accept: application/json' -X POST http://localhost:8081/events/ -d '{ "what": "annotions test", "tags": "monitoring-16-01.test",  "data": "test another adding annotion for <b>WTF</b>" }'
+
+    # GET
+    # curl  'http://admin:admin@localhost/grafana/api/datasources/proxy/2/events/get_data?from=-12h&until=now&tags=monitoring-16-01'
+
 
     uri = URI( sprintf( '%s/api/annotations/tags/', @grafanaURI ) ) #  "http://localhost/grafana/api/dashboards/#{i}")
 

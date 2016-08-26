@@ -150,7 +150,7 @@ Nach dem erfolgreichen Start, kann über die Kommandozeile der zu monitende Host
 Das Script versicht ein auto-discovery durchzuführen um festzustellen, welche Anwendung auf den jeweiligen Port läuft und fügt anschließend Standardtemplates für grafana und icinga2 hinzu.
 
 
-# MBeans
+# JMX Beans
 
 
 | Type | CMS | MLS | RLS | WFS | CAE | Studio | Elastic-Worker | User-Changes | Content-Feeder | CAE-Feeder | Adobe-Drive |
