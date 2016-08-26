@@ -388,7 +388,7 @@
             "id": 10,
             "targets": [
               {
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.CMS-Server-server.count-cache_size, '(.*)-', ''), 'Number of entries'))",
+                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.CMS-Server-server.count-cache_size, '(.*)-', ''), 'Entries'))",
                 "refId": "A",
                 "textEditor": false
               }
