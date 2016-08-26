@@ -38,7 +38,7 @@ class Grafana
     file      = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
     file.sync = true
     @log = Logger.new(file, 'weekly', 1024000)
-    @log.level = Logger::DEBUG
+    @log.level = Logger::INFO
     @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
     @log.formatter = proc do |severity, datetime, progname, msg|
       "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
@@ -74,9 +74,19 @@ class Grafana
 
     result = false
 
-    if( File.exist?( filename ) )
+    for y in 1..10
 
-      file = File.read( filename )
+      if( File.exist?( filename ) )
+        file = File.read( filename )
+        break
+      end
+
+      sleep( 3 )
+      @log.debug("Waiting for file #{filename} ... #{y}")
+
+    end
+
+    if( file )
 
       begin
         json = JSON.parse( file )
@@ -122,7 +132,7 @@ class Grafana
   # add dashboards for a host
   def addDashbards(host, recreate = false)
 
-    @log.debug("Adding dashboards for host #{host}, recreate: #{recreate}")
+    @log.info("Adding dashboards for host #{host}, recreate: #{recreate}")
 
     if( recreate )
       deleteDashboards( host )
@@ -198,7 +208,7 @@ class Grafana
         return
       end
 
-      @log.debug("Deleting Grafana Dashboards: #{dashboards}")
+#      @log.debug("Deleting Grafana Dashboards: #{dashboards}")
 
       dashboards.each do |i|
         uri = URI( sprintf( '%s/api/dashboards/%s', @grafanaURI, i ) ) #  "http://localhost/grafana/api/dashboards/#{i}")
@@ -206,7 +216,7 @@ class Grafana
           request = Net::HTTP::Delete.new(uri.path)
           request.basic_auth 'admin', 'admin'
           response = http.request request
-          @log.debug("Deleted Dashboard #{i}, ok: #{response.code}")
+          @log.debug( "  Deleted Dashboard #{i}, ok: #{response.code}" )
         end
       end
 
@@ -221,7 +231,7 @@ class Grafana
 
     uri = URI( sprintf( '%s/api/search?query=&tag=%s', @grafanaURI, tag ) )
 
-    @log.debug("Grafana Uri: #{uri}")
+#    @log.debug("Grafana Uri: #{uri}")
 
     response = nil
 
@@ -343,6 +353,8 @@ class Grafana
 
   def generateOverviewTemplate( services )
 
+    @log.info( 'create Overview Templates' )
+
     rows = Array.new()
     dir  = Array.new()
 
@@ -431,6 +443,8 @@ class Grafana
 
   def generateLicenseTemplate( host, services )
 
+    @log.info( 'create License Templates' )
+
     rows           = Array.new()
     contentServers = ['content-management-server', 'master-live-server', 'replication-live-server']
     intersect      = contentServers & services
@@ -495,13 +509,13 @@ class Grafana
       end
     end
 
-    rows = rows.join(',')
-
-    if( rows.count() < 2 )
-
-      @log.debug( 'We has no Information about Lizenses' )
+    if( rows.count == 1 )
+      # only the license Head is into the array
+      @log.debug( 'We had no Information about Lizenses' )
       return
     end
+
+    rows = rows.join(',')
 
     template = %(
       {
@@ -551,7 +565,7 @@ class Grafana
 
     serviceTemplatePaths.each do |tpl|
 
-      @log.debug("Creating dashboard #{File.basename(tpl).strip}")
+      @log.info( sprintf( 'Creating dashboard %s', File.basename(tpl).strip ) )
 
       templateFile = File.read(tpl)
       templateJson = JSON.parse(templateFile)
@@ -582,8 +596,9 @@ class Grafana
 
     templateFile = regenerateGrafanaTemplateIDs(templateFile)
 
-    if (!templateFile)
-      @log.debug("Cannot create dashboard, invalid json")
+    if( !templateFile )
+      @log.error( "Cannot create dashboard, invalid json" )
+      return
     end
 
     templateFile.gsub!( '%HOST%'     , @grafanaHostname )
@@ -602,23 +617,27 @@ class Grafana
       request.basic_auth 'admin', 'admin'
       request.body = templateFile
       response     = http.request request
-      @log.debug("Created dashboard, ok: #{response.code}")
+
+      # TODO
+      # Errorhandling
+      @log.info( sprintf( ' [%s] - Successful',  response.code ) )
+
     end
   end
 
 
-  def getJsonFromFile(filename)
+  def getJsonFromFile( filename )
 
     file = nil
 
-    for y in 1..5
+    for y in 1..10
       if( File.exist?( filename ) )
         file = File.read( filename )
         break
       end
 
-      sleep( 5 )
-      @log.debug("Waiting for file #{filename} ... #{y}")
+      sleep( 3 )
+      @log.debug( "  Waiting for file #{filename} ... #{y}" )
     end
 
     if( !file )
