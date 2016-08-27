@@ -1,9 +1,9 @@
 #!/usr/bin/ruby
 #
-# 12.08.2016 - Bodo Schulz
+# 27.08.2016 - Bodo Schulz
 #
 #
-# v1.0.17
+# v1.1.0
 
 # -----------------------------------------------------------------------------
 
@@ -13,7 +13,6 @@ require 'uri'
 require 'socket'
 require 'timeout'
 require 'fileutils'
-# require 'resolv-replace.rb'
 require 'net/http'
 
 require_relative 'discover'
@@ -64,19 +63,12 @@ class DataCollector
     end
 
     self.applicationConfig( applicationConfig )
-    self.serviceConfig( serviceConfig )
-
-#     @currentDirectory    = File.expand_path( File.join( File.dirname( __FILE__ ) ) )
-
-#     @appConfigFile       = File.expand_path( applicationConfig )
-#     @serviceConfigFile   = File.expand_path( serviceConfig )
 
     @settings            = settings
     @jolokiaApplications = nil
-    @serviceConfig       = nil
 
-    version              = '1.0.17'
-    date                 = '2016-08-16'
+    version              = '1.1.0'
+    date                 = '2016-08-27'
 
     @log.info( '-----------------------------------------------------------------' )
     @log.info( ' CoreMedia - DataCollector' )
@@ -93,11 +85,6 @@ class DataCollector
 
   def applicationConfig( applicationConfig )
     @appConfigFile  = File.expand_path( applicationConfig )
-  end
-
-
-  def serviceConfig( serviceConfig )
-    @serviceConfigFile = File.expand_path( serviceConfig )
   end
 
 
@@ -126,27 +113,6 @@ class DataCollector
       @log.error( e )
       exit 1
     end
-
-    # read Service Configuration
-    #
-    @log.debug( 'read defines off Services Properties' )
-
-    begin
-
-      if( File.exist?( @serviceConfigFile ) )
-        @serviceConfig      = JSON.parse( File.read( @serviceConfigFile ) )
-      else
-        @log.error( sprintf( 'Config File %s not found!', @serviceConfigFile ) )
-        exit 1
-      end
-
-    rescue JSON::ParserError => e
-
-      @log.error( 'wrong result (no json)')
-      @log.error( e )
-      exit 1
-    end
-
 
   end
 
@@ -253,24 +219,6 @@ class DataCollector
 #      mysql.run()
 
     end
-
-  end
-
-  # merge hashes of configured (cm-service.json) and discovered data (discovery.json)
-  def createHostConfig( data )
-
-    data.each do |d,v|
-
-      # merge data between discovered Services and our base configuration,
-      # the dicovered ports are IMPORTANT
-      if( @serviceConfig['services'][d] )
-        data[d].merge!( @serviceConfig['services'][d] ) { |key, port| port }
-      else
-        @log.debug( sprintf( 'missing entry \'%s\'', d ) )
-      end
-    end
-
-    return data
 
   end
 
@@ -656,15 +604,9 @@ class DataCollector
           self.mysqlData( h, data['mysql'] )
         end
 
-        @log.debug( 'create Hostconfiguration' )
-        d = self.createHostConfig( data )
-
-        File.open( sprintf( '%s/%s', cachedHostDirectory, discoveryFile ) , 'w' ) { |f| f.write( JSON.pretty_generate( d ) ) }
-
         @log.debug( 'merge Data between Property Files and discovered Services' )
-        d = self.mergeData( d )
+        d = self.mergeData( data )
 
-#        @log.debug( JSON.pretty_generate( d ) )
 
         if( ! File.exist?( sprintf( '%s/%s', cachedHostDirectory, mergedDataFile ) ) )
 

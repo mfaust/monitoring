@@ -1,9 +1,9 @@
 #!/usr/bin/ruby
 #
-# 12.08.2016 - Bodo Schulz
+# 27.08.2016 - Bodo Schulz
 #
 #
-# v0.5.5
+# v1.0.0
 
 # -----------------------------------------------------------------------------
 
@@ -103,8 +103,27 @@ module Sinatra
     set :bind, @restService_bind
     set :port, @restService_port.to_i
 
-    h = ServiceDiscovery.new( { 'log_dir' => @logDirectory, 'cache_dir' => @cacheDir, 'jolokia_host' => @jolokia_host, 'jolokia_port' => @jolokia_port } )
-    g = Grafana.new( { 'log_dir' => @logDirectory, 'cache_dir' => @cacheDir, 'grafana_host' => @grafana_host, 'grafana_port' => @grafana_port, 'grafana_path' => @grafana_path, 'template_dir' => @template_dir } )
+
+    serviceDiscoveryOptions = {
+      'log_dir'               => @logDir,
+      'cache_dir'             => @cacheDir,
+      'jolokia_host'          => @jolokia_host,
+      'jolokia_port'          => @jolokia_port,
+      'scanDiscovery'         => @scanDiscovery,
+      'serviceConfigFile'     => '/etc/cm-service.json'
+    }
+
+    grafanaOptions = {
+      'log_dir'               => @logDir,
+      'cache_dir'             => @cacheDir,
+      'jolokia_host'          => @jolokia_host,
+      'jolokia_port'          => @jolokia_port,
+      'grafana_path'          => @grafana_path,
+      'template_dir'          => @template_dir
+    }
+
+    h = ServiceDiscovery.new( serviceDiscoveryOptions ) # { 'log_dir' => @logDirectory, 'cache_dir' => @cacheDir, 'jolokia_host' => @jolokia_host, 'jolokia_port' => @jolokia_port } )
+    g = Grafana.new( grafanaOptions )                   # { 'log_dir' => @logDirectory, 'cache_dir' => @cacheDir, 'grafana_host' => @grafana_host, 'grafana_port' => @grafana_port, 'grafana_path' => @grafana_path, 'template_dir' => @template_dir } )
 
     error do
       msg = "ERROR\n\nThe monitoring-rest-service has nasty error - " + env['sinatra.error']

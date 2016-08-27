@@ -1,9 +1,9 @@
 #!/usr/bin/ruby
 #
-# 12.08.2016 - Bodo Schulz
+# 27.08.2016 - Bodo Schulz
 #
 #
-# v1.0.1
+# v1.1.0
 # -----------------------------------------------------------------------------
 
 require 'socket'
@@ -25,10 +25,12 @@ class ServiceDiscovery
 
   def initialize( settings = {} )
 
-    @logDirectory   = settings['log_dir']      ? settings['log_dir']      : '/tmp'
-    @cacheDirectory = settings['cache_dir']    ? settings['cache_dir']    : '/var/tmp/monitoring'
-    @jolokiaHost    = settings['jolokia_host'] ? settings['jolokia_host'] : 'localhost'
-    @jolokiaPort    = settings['jolokia_port'] ? settings['jolokia_port'] : 8080
+    @logDirectory      = settings['log_dir']           ? settings['log_dir']           : '/tmp'
+    @cacheDirectory    = settings['cache_dir']         ? settings['cache_dir']         : '/var/tmp/monitoring'
+    @jolokiaHost       = settings['jolokia_host']      ? settings['jolokia_host']      : 'localhost'
+    @jolokiaPort       = settings['jolokia_port']      ? settings['jolokia_port']      : 8080
+    @serviceConfigFile = settings['serviceConfigFile'] ? settings['serviceConfigFile'] : nil
+
 
     logFile = sprintf( '%s/service-discovery.log', @logDirectory )
 
@@ -86,8 +88,8 @@ class ServiceDiscovery
       49099
     ]
 
-    version              = '1.0.1'
-    date                 = '2016-08-12'
+    version              = '1.1.0'
+    date                 = '2016-08-27'
 
     @log.info( '-----------------------------------------------------------------' )
     @log.info( ' CM Service Discovery' )
@@ -97,8 +99,40 @@ class ServiceDiscovery
     @log.info( '-----------------------------------------------------------------' )
     @log.info( '' )
 
+    self.readConfigurations()
   end
 
+
+  def readConfigurations()
+
+    # read Service Configuration
+    #
+    @log.info( 'read defines of Services Properties' )
+
+    if( @serviceConfigFile == nil )
+      @log.error( 'missing service config file' )
+      exit 1
+    end
+
+    begin
+
+      if( File.exist?( @serviceConfigFile ) )
+        @serviceConfig      = JSON.parse( File.read( @serviceConfigFile ) )
+      else
+        @log.error( sprintf( 'Config File %s not found!', @serviceConfigFile ) )
+        exit 1
+      end
+
+    rescue JSON::ParserError => e
+
+      @log.error( 'wrong result (no json)')
+      @log.error( e )
+      exit 1
+    end
+
+
+
+  end
 
   def configure( options = {} )
 
@@ -270,6 +304,25 @@ class ServiceDiscovery
     return service
   end
 
+
+  # merge hashes of configured (cm-service.json) and discovered data (discovery.json)
+  def createHostConfig( data )
+
+    data.each do |d,v|
+
+      # merge data between discovered Services and our base configuration,
+      # the dicovered ports are IMPORTANT
+      if( @serviceConfig['services'][d] )
+        data[d].merge!( @serviceConfig['services'][d] ) { |key, port| port }
+      else
+        @log.debug( sprintf( 'missing entry \'%s\'', d ) )
+      end
+    end
+
+    return data
+
+  end
+
   # delete the directory with all files inside
   def deleteHost( host )
 
@@ -374,6 +427,11 @@ class ServiceDiscovery
       end
 
     end
+
+    # merge discovered services with cm-services.json
+    services = self.createHostConfig( services )
+
+#     @log.debug ( d )
 
     File.open( sprintf( '%s/%s', dir_path, file_name ) , 'w' ) {|f| f.write( JSON.pretty_generate( services ) ) }
 
