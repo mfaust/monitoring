@@ -332,10 +332,10 @@ class CollecdPlugin
             writeOut         = write['out']        ? write['out']       : nil
             writeAvailable   = write['available']  ? write['available'] : nil
 
-            data.push( sprintf( format, @Host, @Service, 'wiredTigerConcurrentTransactions', 'readOut'          , @interval, readOut ) )
-            data.push( sprintf( format, @Host, @Service, 'wiredTigerConcurrentTransactions', 'readAvailable'    , @interval, readAvailable ) )
-            data.push( sprintf( format, @Host, @Service, 'wiredTigerConcurrentTransactions', 'writeOut'         , @interval, writeOut ) )
-            data.push( sprintf( format, @Host, @Service, 'wiredTigerConcurrentTransactions', 'writeAvailable'   , @interval, writeAvailable ) )
+            data.push( sprintf( format, @Host, @Service, 'wiredTigerConcTrans', 'readOut'          , @interval, readOut ) )
+            data.push( sprintf( format, @Host, @Service, 'wiredTigerConcTrans', 'readAvailable'    , @interval, readAvailable ) )
+            data.push( sprintf( format, @Host, @Service, 'wiredTigerConcTrans', 'writeOut'         , @interval, writeOut ) )
+            data.push( sprintf( format, @Host, @Service, 'wiredTigerConcTrans', 'writeAvailable'   , @interval, writeAvailable ) )
           end
 
         end
