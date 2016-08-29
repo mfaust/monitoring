@@ -125,6 +125,13 @@ Nach dem erfolgreichen Start, kann über die Kommandozeile der zu monitende Host
 
 Das Script versicht ein auto-discovery durchzuführen um festzustellen, welche Anwendung auf den jeweiligen Port läuft und fügt anschließend Standardtemplates für grafana und icinga2 hinzu.
 
+## Annotations
+
+    curl -X POST http://localhost/api/a/node/create/$name
+    curl -X POST http://localhost/api/a/node/destroy/$name
+    curl -X POST http://localhost/api/a/loadtest/start/$name
+    curl -X POST http://localhost/api/a/loadtest/stop/$name
+
 
 ## Weiterentwicklung
 
