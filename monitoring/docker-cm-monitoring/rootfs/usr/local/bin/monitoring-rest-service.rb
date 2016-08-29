@@ -84,7 +84,7 @@ module Sinatra
         Dir.mkdir( @cacheDir )
       end
 
-      FileUtils.chmod( 1775, @logDirectory
+      FileUtils.chmod( 1775, @logDirectory )
       FileUtils.chmod( 0775, @cacheDir )
       FileUtils.chown( 'nobody', 'nobody', @logDirectory )
 

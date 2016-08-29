@@ -378,7 +378,14 @@ class CollecdPlugin
   def ParseResult_Runtime( data = {} )
 
     mbean = 'Runtime'
-    value  = data['value'] ? data['value'] : nil
+    status = data['status'] ? data['status'] : 505
+
+    if( status.to_i != 200 )
+      @log.error( sprintf( ' -> Host: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, mbean, status ) )
+      return
+    end
+
+    value  = data['value']  ? data['value']  : nil
     format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
     data   = []
 
@@ -406,6 +413,13 @@ class CollecdPlugin
   def ParseResult_Memory( data = {} )
 
     mbean = 'Memory'
+    status = data['status'] ? data['status'] : 505
+
+    if( status.to_i != 200 )
+      @log.error( sprintf( ' -> Host: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, mbean, status ) )
+      return
+    end
+
     value  = data['value'] ? data['value'] : nil
     format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
     data   = []
@@ -454,6 +468,13 @@ class CollecdPlugin
   def ParseResult_Threading( data = {} )
 
     mbean = 'Threading'
+    status = data['status'] ? data['status'] : 505
+
+    if( status.to_i != 200 )
+      @log.error( sprintf( ' -> Host: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, mbean, status ) )
+      return
+    end
+
     value  = data['value'] ? data['value'] : nil
     format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
     data   = []
@@ -486,6 +507,13 @@ class CollecdPlugin
   def ParseResult_ClassLoading( data = {} )
 
     mbean = 'ClassLoading'
+    status = data['status'] ? data['status'] : 505
+
+    if( status.to_i != 200 )
+      @log.error( sprintf( ' -> Host: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, mbean, status ) )
+      return
+    end
+
     value  = data['value'] ? data['value'] : nil
     format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
     data   = []
@@ -513,6 +541,13 @@ class CollecdPlugin
   def ParseResult_MemoryPool( data = {} )
 
     mbean   = 'MemoryPool'
+    status = data['status'] ? data['status'] : 505
+
+    if( status.to_i != 200 )
+      @log.error( sprintf( ' -> Host: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, mbean, status ) )
+      return
+    end
+
     value   = data['value']   ? data['value']   : nil
     request = data['request'] ? data['request'] : nil
     format  = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
@@ -570,6 +605,13 @@ class CollecdPlugin
   def ParseResult_GCParNew( data = {} )
 
     mbean = 'GCParNew'
+    status = data['status'] ? data['status'] : 505
+
+    if( status.to_i != 200 )
+      @log.error( sprintf( ' -> Host: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, mbean, status ) )
+      return
+    end
+
     value  = data['value'] ? data['value'] : nil
     format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
     data   = []
@@ -584,35 +626,38 @@ class CollecdPlugin
 
         data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_%s', 'duration' ), 'duration'     , @interval, duration ) )
 
-        ['memoryUsageBeforeGc', 'memoryUsageAfterGc'].each do |gc|
+        # currently not needed
+        # activate if you need
+#        ['memoryUsageBeforeGc', 'memoryUsageAfterGc'].each do |gc|
+#
+#          case gc
+#          when 'memoryUsageBeforeGc'
+#            gc_type = 'before'
+#          when 'memoryUsageAfterGc'
+#            gc_type = 'after'
+#          end
+#
+#          ['Par Survivor Space', 'CMS Perm Gen', 'Code Cache', 'Par Eden Space', 'CMS Old Gen', 'Compressed Class Space', 'Metaspace' ].each do |type|
+#
+#            if( lastGcInfo[gc][type] )
+#              init      = lastGcInfo[gc][type]['init']      ? lastGcInfo[gc][type]['init']      : nil
+#              committed = lastGcInfo[gc][type]['committed'] ? lastGcInfo[gc][type]['committed'] : nil
+#              max       = lastGcInfo[gc][type]['max']       ? lastGcInfo[gc][type]['max']       : nil
+#              used      = lastGcInfo[gc][type]['used']      ? lastGcInfo[gc][type]['used']      : nil
+#
+#              percent   = ( 100 * used / committed )
+#
+#              type      = type.strip.tr( ' ', '_' ).downcase
+#
+#              data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_parnew_%s_%s', gc_type, type ), 'init'        , @interval, init ) )
+#              data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_parnew_%s_%s', gc_type, type ), 'committed'   , @interval, committed ) )
+#              data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_parnew_%s_%s', gc_type, type ), 'max'         , @interval, max ) )
+#              data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_parnew_%s_%s', gc_type, type ), 'used'        , @interval, used ) )
+#              data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_parnew_%s_%s', gc_type, type ), 'used_percent', @interval, percent ) )
+#            end
+#         end
+#        end
 
-          case gc
-          when 'memoryUsageBeforeGc'
-            gc_type = 'before'
-          when 'memoryUsageAfterGc'
-            gc_type = 'after'
-          end
-
-          ['Par Survivor Space', 'CMS Perm Gen', 'Code Cache', 'Par Eden Space', 'CMS Old Gen', 'Compressed Class Space', 'Metaspace' ].each do |type|
-
-            if( lastGcInfo[gc][type] )
-              init      = lastGcInfo[gc][type]['init']      ? lastGcInfo[gc][type]['init']      : nil
-              committed = lastGcInfo[gc][type]['committed'] ? lastGcInfo[gc][type]['committed'] : nil
-              max       = lastGcInfo[gc][type]['max']       ? lastGcInfo[gc][type]['max']       : nil
-              used      = lastGcInfo[gc][type]['used']      ? lastGcInfo[gc][type]['used']      : nil
-
-              percent   = ( 100 * used / committed )
-
-              type      = type.strip.tr( ' ', '_' ).downcase
-
-              data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_parnew_%s_%s', gc_type, type ), 'init'        , @interval, init ) )
-              data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_parnew_%s_%s', gc_type, type ), 'committed'   , @interval, committed ) )
-              data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_parnew_%s_%s', gc_type, type ), 'max'         , @interval, max ) )
-              data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_parnew_%s_%s', gc_type, type ), 'used'        , @interval, used ) )
-              data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_parnew_%s_%s', gc_type, type ), 'used_percent', @interval, percent ) )
-            end
-         end
-        end
       end
     end
 
@@ -623,7 +668,14 @@ class CollecdPlugin
 
   def ParseResult_GCConcurrentMarkSweep( data = {} )
 
-    mbean = 'GCConcurrentMarkSweep';
+    mbean = 'GCConcurrentMarkSweep'
+    status = data['status'] ? data['status'] : 505
+
+    if( status.to_i != 200 )
+      @log.error( sprintf( ' -> Host: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, mbean, status ) )
+      return
+    end
+
     value  = data['value'] ? data['value'] : nil
     format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
     data   = []
@@ -638,32 +690,35 @@ class CollecdPlugin
 
         data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_%s', 'duration' ), 'duration'     , @interval, duration ) )
 
-        ['memoryUsageBeforeGc', 'memoryUsageAfterGc'].each do |gc|
+        # currently not needed
+        # activate if you need
+#        ['memoryUsageBeforeGc', 'memoryUsageAfterGc'].each do |gc|
+#
+#          case gc
+#          when 'memoryUsageBeforeGc'
+#            gc_type = 'before'
+#          when 'memoryUsageAfterGc'
+#            gc_type = 'after'
+#          end
+#
+#          ['Par Survivor Space', 'CMS Perm Gen', 'Code Cache', 'Par Eden Space', 'CMS Old Gen', 'Compressed Class Space', 'Metaspace' ].each do |type|
+#
+#            if( lastGcInfo[gc][type] )
+#              init      = lastGcInfo[gc][type]['init']      ? lastGcInfo[gc][type]['init']      : nil
+#              committed = lastGcInfo[gc][type]['committed'] ? lastGcInfo[gc][type]['committed'] : nil
+#              max       = lastGcInfo[gc][type]['max']       ? lastGcInfo[gc][type]['max']       : nil
+#              used      = lastGcInfo[gc][type]['used']      ? lastGcInfo[gc][type]['used']      : nil
+#
+#              type      = type.strip.tr( ' ', '_' ).downcase
+#
+#              data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_markwseep_%s_%s', gc_type, type ), 'init'     , @interval, init ) )
+#              data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_markwseep_%s_%s', gc_type, type ), 'committed', @interval, committed ) )
+#              data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_markwseep_%s_%s', gc_type, type ), 'max'      , @interval, max ) )
+#              data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_markwseep_%s_%s', gc_type, type ), 'used'     , @interval, used ) )
+#            end
+#          end
+#        end
 
-          case gc
-          when 'memoryUsageBeforeGc'
-            gc_type = 'before'
-          when 'memoryUsageAfterGc'
-            gc_type = 'after'
-          end
-
-          ['Par Survivor Space', 'CMS Perm Gen', 'Code Cache', 'Par Eden Space', 'CMS Old Gen', 'Compressed Class Space', 'Metaspace' ].each do |type|
-
-            if( lastGcInfo[gc][type] )
-              init      = lastGcInfo[gc][type]['init']      ? lastGcInfo[gc][type]['init']      : nil
-              committed = lastGcInfo[gc][type]['committed'] ? lastGcInfo[gc][type]['committed'] : nil
-              max       = lastGcInfo[gc][type]['max']       ? lastGcInfo[gc][type]['max']       : nil
-              used      = lastGcInfo[gc][type]['used']      ? lastGcInfo[gc][type]['used']      : nil
-
-              type      = type.strip.tr( ' ', '_' ).downcase
-
-              data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_markwseep_%s_%s', gc_type, type ), 'init'     , @interval, init ) )
-              data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_markwseep_%s_%s', gc_type, type ), 'committed', @interval, committed ) )
-              data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_markwseep_%s_%s', gc_type, type ), 'max'      , @interval, max ) )
-              data.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_markwseep_%s_%s', gc_type, type ), 'used'     , @interval, used ) )
-            end
-         end
-        end
       end
     end
 
@@ -675,6 +730,13 @@ class CollecdPlugin
   def ParseResult_Server( data = {} )
 
     mbean = 'Server'
+    status = data['status'] ? data['status'] : 505
+
+    if( status.to_i != 200 )
+      @log.error( sprintf( ' -> Host: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, mbean, status ) )
+      return
+    end
+
     value  = data['value'] ? data['value'] : nil
     format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
     data   = []
@@ -797,6 +859,13 @@ class CollecdPlugin
   def ParseResult_Feeder( data = {} )
 
     mbean = 'Feeder'
+    status = data['status'] ? data['status'] : 505
+
+    if( status.to_i != 200 )
+      @log.error( sprintf( ' -> Host: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, mbean, status ) )
+      return
+    end
+
     value  = data['value'] ? data['value'] : nil
     format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
     data   = []
@@ -821,6 +890,13 @@ class CollecdPlugin
   def ParseResult_CacheClasses( data = {} )
 
     mbean = 'CacheClasses'
+    status = data['status'] ? data['status'] : 505
+
+    if( status.to_i != 200 )
+      @log.error( sprintf( ' -> Host: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, mbean, status ) )
+      return
+    end
+
     value  = data['value'] ? data['value'] : nil
     format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
     data   = []
@@ -845,32 +921,50 @@ class CollecdPlugin
 
   end
 
+
+  def ParseResult_Health( data = {} )
+
+    mbean  = 'Health'
+    format = 'PUTVAL %s/%s-%s-%s/absolute-%s interval=%s N:%s'
+
+    status = data['status'] ? data['status'] : 505
+
+    if( status.to_i != 200 )
+      @log.error( sprintf( ' -> Host: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, mbean, status ) )
+
+      data.push( sprintf( format, @Host, @Service, mbean, 'feeder', 'healthy', @interval, false ) )
+
+      return
+    end
+
+    value  = data['value'] ? data['value'] : nil
+
+    data   = []
+
+    if( value != nil )
+
+      healthy = value['Healthy'] ? value['Healthy'] : false
+
+      data.push( sprintf( format, @Host, @Service, mbean, 'feeder', 'healthy', @interval, healthy.to_b ) )
+
+    else
+      data.push( sprintf( format, @Host, @Service, mbean, 'feeder', 'healthy', @interval, false ) )
+    end
+
+    return data
+  end
+
   # Check for the CAEFeeder
   def ParseResult_ProactiveEngine( data = {} )
 
-    # TODO check first
-
-#    {
-#      "Health": {
-#        "status": 200,
-#        "timestamp": 1471618816,
-#        "request": {
-#          "mbean": "com.coremedia:application=caefeeder,type=Health",
-#          "type": "read",
-#          "target": {
-#            "url": "service:jmx:rmi:///jndi/rmi://monitoring-16-01:40899/jmxrmi"
-#          }
-#        },
-#        "value": {
-#          "MaximumQueueExceededDuration": 900000,
-#          "Healthy": true,
-#          "MaximumHeartBeat": 300000,
-#          "MaximumQueueUtilization": 0.95
-#        }
-#      }
-#    },
-    # --------------------------------------------------------------------------------------------
     mbean = 'ProactiveEngine'
+    status = data['status'] ? data['status'] : 505
+
+    if( status.to_i != 200 )
+      @log.error( sprintf( ' -> Host: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, mbean, status ) )
+      return
+    end
+
     value  = data['value'] ? data['value'] : nil
     format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
     data   = []
@@ -902,6 +996,13 @@ class CollecdPlugin
   def ParseResult_CapConnection( data = {} )
 
     mbean = 'CapConnection'
+    status = data['status'] ? data['status'] : 505
+
+    if( status.to_i != 200 )
+      @log.error( sprintf( ' -> Host: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, mbean, status ) )
+      return
+    end
+
     value  = data['value'] ? data['value'] : nil
     format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
     data   = []
@@ -958,6 +1059,12 @@ class CollecdPlugin
   def ParseResult_SolrReplication( data = {} )
 
     mbean = 'Replication'
+    status = data['status'] ? data['status'] : 505
+
+    if( status.to_i != 200 )
+      @log.error( sprintf( ' -> Host: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, mbean, status ) )
+      return
+    end
 
     value      = data['value']            ? data['value']            : nil
     solrMbean  = data['request']['mbean'] ? data['request']['mbean'] : nil
@@ -995,6 +1102,12 @@ class CollecdPlugin
   def ParseResult_SolrQueryResultCache( data = {} )
 
     mbean = 'QueryResultCache'
+    status = data['status'] ? data['status'] : 505
+
+    if( status.to_i != 200 )
+      @log.error( sprintf( ' -> Host: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, mbean, status ) )
+      return
+    end
 
     value      = data['value']            ? data['value']            : nil
     solrMbean  = data['request']['mbean'] ? data['request']['mbean'] : nil
@@ -1037,6 +1150,12 @@ class CollecdPlugin
   def ParseResult_SolrDocumentCache( data = {} )
 
     mbean = 'DocumentCache'
+    status = data['status'] ? data['status'] : 505
+
+    if( status.to_i != 200 )
+      @log.error( sprintf( ' -> Host: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, mbean, status ) )
+      return
+    end
 
     value      = data['value']            ? data['value']            : nil
     solrMbean  = data['request']['mbean'] ? data['request']['mbean'] : nil
@@ -1079,6 +1198,12 @@ class CollecdPlugin
   def ParseResult_SolrSelect( data = {} )
 
     mbean = 'Select'
+    status = data['status'] ? data['status'] : 505
+
+    if( status.to_i != 200 )
+      @log.error( sprintf( ' -> Host: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, mbean, status ) )
+      return
+    end
 
     value      = data['value']            ? data['value']            : nil
     solrMbean  = data['request']['mbean'] ? data['request']['mbean'] : nil
@@ -1112,6 +1237,13 @@ class CollecdPlugin
   def ParseResult_ConnectionPool( data = {} )
 
     mbean = 'ConnectionPool'
+    status = data['status'] ? data['status'] : 505
+
+    if( status.to_i != 200 )
+      @log.error( sprintf( ' -> Host: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, mbean, status ) )
+      return
+    end
+
     value  = data['value'] ? data['value'] : nil
     format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
     data   = []
@@ -1143,6 +1275,13 @@ class CollecdPlugin
   def ParseResult_QueryPool( data = {} )
 
     mbean = 'QueryPool'
+    status = data['status'] ? data['status'] : 505
+
+    if( status.to_i != 200 )
+      @log.error( sprintf( ' -> Host: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, mbean, status ) )
+      return
+    end
+
     value  = data['value'] ? data['value'] : nil
     format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
     data   = []
@@ -1181,6 +1320,13 @@ class CollecdPlugin
   def ParseResult_StatisticsJobResult( data = {} )
 
     mbean = 'StatisticsJobResult'
+    status = data['status'] ? data['status'] : 505
+
+    if( status.to_i != 200 )
+      @log.error( sprintf( ' -> Host: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, mbean, status ) )
+      return
+    end
+
     value  = data['value'] ? data['value'] : nil
     format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
     data   = []
@@ -1207,6 +1353,13 @@ class CollecdPlugin
   def ParseResult_StatisticsResourceCache( data = {} )
 
     mbean = 'StatisticsResourceCache'
+    status = data['status'] ? data['status'] : 505
+
+    if( status.to_i != 200 )
+      @log.error( sprintf( ' -> Host: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, mbean, status ) )
+      return
+    end
+
     value  = data['value'] ? data['value'] : nil
     format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
     data   = []
@@ -1336,6 +1489,8 @@ class CollecdPlugin
                   graphiteOutput.push( self.ParseResult_ClassLoading( v ) )
                 when 'Server'
                   graphiteOutput.push( self.ParseResult_Server( v ) )
+                when 'Health'
+                  graphiteOutput.push( self.ParseResult_Health( v ) )
                 when 'ProactiveEngine'
                   graphiteOutput.push( self.ParseResult_ProactiveEngine( v ) )
                 when 'Feeder'
