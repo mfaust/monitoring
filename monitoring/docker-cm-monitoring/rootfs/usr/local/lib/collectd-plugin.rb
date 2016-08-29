@@ -381,7 +381,7 @@ class CollecdPlugin
     status = data['status'] ? data['status'] : 505
 
     if( status.to_i != 200 )
-      @log.error( sprintf( ' -> Host: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, mbean, status ) )
+      @log.error( sprintf( ' -> Host: \'%s\' - Service: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, @Service, mbean, status ) )
       return
     end
 
@@ -416,7 +416,7 @@ class CollecdPlugin
     status = data['status'] ? data['status'] : 505
 
     if( status.to_i != 200 )
-      @log.error( sprintf( ' -> Host: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, mbean, status ) )
+      @log.error( sprintf( ' -> Host: \'%s\' - Service: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, @Service, mbean, status ) )
       return
     end
 
@@ -471,7 +471,7 @@ class CollecdPlugin
     status = data['status'] ? data['status'] : 505
 
     if( status.to_i != 200 )
-      @log.error( sprintf( ' -> Host: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, mbean, status ) )
+      @log.error( sprintf( ' -> Host: \'%s\' - Service: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, @Service, mbean, status ) )
       return
     end
 
@@ -510,7 +510,7 @@ class CollecdPlugin
     status = data['status'] ? data['status'] : 505
 
     if( status.to_i != 200 )
-      @log.error( sprintf( ' -> Host: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, mbean, status ) )
+      @log.error( sprintf( ' -> Host: \'%s\' - Service: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, @Service, mbean, status ) )
       return
     end
 
@@ -544,7 +544,7 @@ class CollecdPlugin
     status = data['status'] ? data['status'] : 505
 
     if( status.to_i != 200 )
-      @log.error( sprintf( ' -> Host: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, mbean, status ) )
+      @log.error( sprintf( ' -> Host: \'%s\' - Service: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, @Service, mbean, status ) )
       return
     end
 
@@ -608,7 +608,7 @@ class CollecdPlugin
     status = data['status'] ? data['status'] : 505
 
     if( status.to_i != 200 )
-      @log.error( sprintf( ' -> Host: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, mbean, status ) )
+      @log.error( sprintf( ' -> Host: \'%s\' - Service: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, @Service, mbean, status ) )
       return
     end
 
@@ -672,7 +672,7 @@ class CollecdPlugin
     status = data['status'] ? data['status'] : 505
 
     if( status.to_i != 200 )
-      @log.error( sprintf( ' -> Host: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, mbean, status ) )
+      @log.error( sprintf( ' -> Host: \'%s\' - Service: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, @Service, mbean, status ) )
       return
     end
 
@@ -733,7 +733,7 @@ class CollecdPlugin
     status = data['status'] ? data['status'] : 505
 
     if( status.to_i != 200 )
-      @log.error( sprintf( ' -> Host: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, mbean, status ) )
+      @log.error( sprintf( ' -> Host: \'%s\' - Service: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, @Service, mbean, status ) )
       return
     end
 
@@ -862,7 +862,7 @@ class CollecdPlugin
     status = data['status'] ? data['status'] : 505
 
     if( status.to_i != 200 )
-      @log.error( sprintf( ' -> Host: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, mbean, status ) )
+      @log.error( sprintf( ' -> Host: \'%s\' - Service: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, @Service, mbean, status ) )
       return
     end
 
@@ -893,7 +893,7 @@ class CollecdPlugin
     status = data['status'] ? data['status'] : 505
 
     if( status.to_i != 200 )
-      @log.error( sprintf( ' -> Host: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, mbean, status ) )
+      @log.error( sprintf( ' -> Host: \'%s\' - Service: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, @Service, mbean, status ) )
       return
     end
 
@@ -930,7 +930,7 @@ class CollecdPlugin
     status = data['status'] ? data['status'] : 505
 
     if( status.to_i != 200 )
-      @log.error( sprintf( ' -> Host: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, mbean, status ) )
+      @log.error( sprintf( ' -> Host: \'%s\' - Service: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, @Service, mbean, status ) )
 
       data.push( sprintf( format, @Host, @Service, mbean, 'feeder', 'healthy', @interval, 1 ) )
 
@@ -960,7 +960,7 @@ class CollecdPlugin
     status = data['status'] ? data['status'] : 505
 
     if( status.to_i != 200 )
-      @log.error( sprintf( ' -> Host: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, mbean, status ) )
+      @log.error( sprintf( ' -> Host: \'%s\' - Service: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, @Service, mbean, status ) )
       return
     end
 
@@ -998,7 +998,7 @@ class CollecdPlugin
     status = data['status'] ? data['status'] : 505
 
     if( status.to_i != 200 )
-      @log.error( sprintf( ' -> Host: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, mbean, status ) )
+      @log.error( sprintf( ' -> Host: \'%s\' - Service: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, @Service, mbean, status ) )
       return
     end
 
@@ -1061,7 +1061,7 @@ class CollecdPlugin
     status = data['status'] ? data['status'] : 505
 
     if( status.to_i != 200 )
-      @log.error( sprintf( ' -> Host: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, mbean, status ) )
+      @log.error( sprintf( ' -> Host: \'%s\' - Service: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, @Service, mbean, status ) )
       return
     end
 
@@ -1104,7 +1104,7 @@ class CollecdPlugin
     status = data['status'] ? data['status'] : 505
 
     if( status.to_i != 200 )
-      @log.error( sprintf( ' -> Host: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, mbean, status ) )
+      @log.error( sprintf( ' -> Host: \'%s\' - Service: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, @Service, mbean, status ) )
       return
     end
 
@@ -1152,7 +1152,7 @@ class CollecdPlugin
     status = data['status'] ? data['status'] : 505
 
     if( status.to_i != 200 )
-      @log.error( sprintf( ' -> Host: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, mbean, status ) )
+      @log.error( sprintf( ' -> Host: \'%s\' - Service: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, @Service, mbean, status ) )
       return
     end
 
@@ -1200,7 +1200,7 @@ class CollecdPlugin
     status = data['status'] ? data['status'] : 505
 
     if( status.to_i != 200 )
-      @log.error( sprintf( ' -> Host: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, mbean, status ) )
+      @log.error( sprintf( ' -> Host: \'%s\' - Service: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, @Service, mbean, status ) )
       return
     end
 
@@ -1239,7 +1239,7 @@ class CollecdPlugin
     status = data['status'] ? data['status'] : 505
 
     if( status.to_i != 200 )
-      @log.error( sprintf( ' -> Host: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, mbean, status ) )
+      @log.error( sprintf( ' -> Host: \'%s\' - Service: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, @Service, mbean, status ) )
       return
     end
 
@@ -1277,7 +1277,7 @@ class CollecdPlugin
     status = data['status'] ? data['status'] : 505
 
     if( status.to_i != 200 )
-      @log.error( sprintf( ' -> Host: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, mbean, status ) )
+      @log.error( sprintf( ' -> Host: \'%s\' - Service: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, @Service, mbean, status ) )
       return
     end
 
@@ -1322,7 +1322,7 @@ class CollecdPlugin
     status = data['status'] ? data['status'] : 505
 
     if( status.to_i != 200 )
-      @log.error( sprintf( ' -> Host: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, mbean, status ) )
+      @log.error( sprintf( ' -> Host: \'%s\' - Service: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, @Service, mbean, status ) )
       return
     end
 
@@ -1355,7 +1355,7 @@ class CollecdPlugin
     status = data['status'] ? data['status'] : 505
 
     if( status.to_i != 200 )
-      @log.error( sprintf( ' -> Host: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, mbean, status ) )
+      @log.error( sprintf( ' -> Host: \'%s\' - Service: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, @Service, mbean, status ) )
       return
     end
 
