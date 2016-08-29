@@ -142,10 +142,34 @@ module Sinatra
       h.listHosts( params[:host] ).to_json
     end
 
-    # create new host
+    # create new host - without grafana dashboards
+    post '/h/:host' do
+
+      host = params[:host]
+
+      content_type :json
+      status          = h.addHost( host )
+      response.status = h.status
+      status.to_json
+    end
+
+    # create new host - without grafana dashboards
+    post '/h/:host/:services' do
+
+      host     = params[:host]
+      services = params[:services]
+
+#      content_type :json
+#      status          = h.addHost( host )
+#      response.status = h.status
+#      status.to_json
+    end
+
+    # create new host - with grafana dashboards
     post '/:host' do
 
       host = params[:host]
+#       puts( "OBSOLETE! please use http://localhost/h/#{host}" )
 
       content_type :json
       status = h.addHost( host )

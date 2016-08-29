@@ -193,7 +193,7 @@ class Grafana
           @log.error( sprintf( 'file %s doesnt exists', @mergedHostFile ) )
         end
 
-        @log.debug( "Found Template paths: #{serviceTemplatePaths}, #{additionalTemplatePaths}")
+#         @log.debug( "Found Template paths: #{serviceTemplatePaths}, #{additionalTemplatePaths}")
         generateServiceTemplate( serviceName, serviceTemplatePaths, additionalTemplatePaths )
 
       end
@@ -368,11 +368,16 @@ class Grafana
 
     rows = Array.new()
     dir  = Array.new()
+    srv  = Array.new()
+
+    services.each do |s|
+      srv << self.removePostfix( s )
+    end
 
     regex = /
-      ^                      # Starting at the front of the string
+      ^                       # Starting at the front of the string
       \d\d-                   # 2 digit
-      (?<service>.+[a-zA-Z]) # service name
+      (?<service>.+[a-zA-Z])  # service name
       \.tpl                   #
     /x
 
@@ -388,11 +393,7 @@ class Grafana
       end
     end
 
-    intersect = dir & services
-
-     @log.debug( " templates: #{dirs}" )
-     @log.debug( " services : #{services}" )
-     @log.debug( " use      : #{intersect}" )
+    intersect = dir & srv
 
     intersect.each do |service|
 
@@ -405,6 +406,10 @@ class Grafana
         rows << tpl
       end
     end
+
+    @log.debug( " templates: #{dirs}" )
+    @log.debug( " services : #{srv}" )
+    @log.debug( " use      : #{intersect}" )
 
     rows = rows.join(',')
 
@@ -522,7 +527,7 @@ class Grafana
 
     if( rows.count == 1 )
       # only the license Head is into the array
-      @log.debug( 'We had no Information about Lizenses' )
+      @log.info( 'We had no Information about Lizenses' )
       return
     end
 
