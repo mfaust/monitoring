@@ -400,7 +400,22 @@
       "list": []
     },
     "annotations": {
-      "list": []
+      "list": [
+        {
+          "datasource": "events",
+          "enable": true,
+          "iconColor": "rgb(93, 227, 12)",
+          "name": "create & destroy",
+          "tags": "node %HOST%"
+        },
+        {
+          "name": "Load Tests",
+          "datasource": "events",
+          "iconColor": "rgb(26, 196, 220)",
+          "enable": true,
+          "tags": "loadtest %HOST%"
+        }
+      ]
     },
     "refresh": "1m",
     "schemaVersion": 12,

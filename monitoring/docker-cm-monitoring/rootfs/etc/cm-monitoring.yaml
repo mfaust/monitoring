@@ -12,6 +12,11 @@ monitoring:
     host: grafana
     port: 3000
     template_dir: /usr/local/share/templates/grafana
+  graphite:
+    host: graphite
+    port: 2003
+    http-port: 8081
+    fix-timezone: true
   collectd-plugin:
     interval: 15
   data-collector:

@@ -21,7 +21,8 @@ require 'resolve/hostname'
 #require_relative 'discover'
 #require_relative 'tools'
 require sprintf( '%s/discover', lib_dir )
-require sprintf( '%s/grafana', lib_dir )
+require sprintf( '%s/grafana' , lib_dir )
+require sprintf( '%s/graphite', lib_dir )
 
 module Sinatra
   class MonitoringRest < Base
@@ -54,6 +55,15 @@ module Sinatra
         @grafana_host     = config['monitoring']['grafana']['host']         ? config['monitoring']['grafana']['host']          : 'localhost'
         @grafana_port     = config['monitoring']['grafana']['port']         ? config['monitoring']['grafana']['port']          : 3000
         @grafana_path     = config['monitoring']['grafana']['path']         ? config['monitoring']['grafana']['path']          : nil
+
+        graphite = config['monitoring']['graphite'] ? config['monitoring']['graphite'] : nil
+
+        if( graphite != nil )
+          @graphiteHost        = graphite['host']         ? graphite['host']         : 'localhost'
+          @graphitePort        = graphite['port']         ? graphite['port']         : 2003
+          @graphiteHttpPort    = graphite['http-port']    ? graphite['http-port']    : 8080
+          @graphiteFixTimezone = graphite['fix-timezone'] ? graphite['fix-timezone'] : true
+        end
 
         @template_dir     = config['monitoring']['grafana']['template_dir'] ? config['monitoring']['grafana']['template_dir']  : '/var/tmp/templates'
 
@@ -122,8 +132,16 @@ module Sinatra
       'template_dir'          => @template_dir
     }
 
-    h = ServiceDiscovery.new( serviceDiscoveryOptions ) # { 'log_dir' => @logDirectory, 'cache_dir' => @cacheDir, 'jolokia_host' => @jolokia_host, 'jolokia_port' => @jolokia_port } )
-    g = Grafana.new( grafanaOptions )                   # { 'log_dir' => @logDirectory, 'cache_dir' => @cacheDir, 'grafana_host' => @grafana_host, 'grafana_port' => @grafana_port, 'grafana_path' => @grafana_path, 'template_dir' => @template_dir } )
+    graphiteOptions = {
+      'logDirectory'          => @logDirectory,
+      'graphiteHost'          => @graphiteHost,
+      'graphiteHttpPort'      => @graphiteHttpPort,
+      'graphitePort'          => @graphitePort
+    }
+
+    h = ServiceDiscovery.new( serviceDiscoveryOptions )
+    g = Grafana.new( grafanaOptions )
+    graphite = GraphiteAnnotions::Client.new( graphiteOptions )
 
     error do
       msg = "ERROR\n\nThe monitoring-rest-service has nasty error - " + env['sinatra.error']
@@ -218,12 +236,49 @@ module Sinatra
 
     end
 
-    post '/a/:host/:annotation' do
+    # annotations ....
+    #  Host [create|destroy]
+    post '/a/node/:type/:host' do
 
       host = params[:host]
-      anot = params[:annotation]
+      type = params[:type]
 
-      g.addAnnotation( host, anot )
+      case type
+      when 'create'
+        graphite.nodeCreatedAnnotation( host )
+      when 'destroy'
+        graphite.nodeDestroyedAnnotation( host )
+      else
+        puts "The Type #{type} for Node Annotation are NOT supported! Please use 'create' or 'destroy'"
+
+      end
+
+    end
+
+    # Loadtests [start|stop]
+    post '/a/loadtest/:type/:host' do
+
+      host = params[:host]
+      type = params[:type]
+
+      case type
+      when 'start'
+        graphite.loadTestStartAnnotation( host )
+      when 'stop'
+        graphite.loadTestStopAnnotation( host )
+      else
+        puts "The Type #{type} for Loadtest Annotation are NOT supported! Please use 'start' or 'stop'"
+      end
+
+    end
+
+    #
+    post '/a/start/:host/:annotation' do
+
+    end
+
+    #
+    post '/a/stop/:host/:annotation' do
 
     end
 
