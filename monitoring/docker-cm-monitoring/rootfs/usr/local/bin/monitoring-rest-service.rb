@@ -84,7 +84,7 @@ module Sinatra
         Dir.mkdir( @cacheDir )
       end
 
-      FileUtils.chmod( 1775, @logDirectory )
+      FileUtils.chmod( 1775, @logDirectory
       FileUtils.chmod( 0775, @cacheDir )
       FileUtils.chown( 'nobody', 'nobody', @logDirectory )
 
@@ -105,7 +105,7 @@ module Sinatra
 
 
     serviceDiscoveryOptions = {
-      'log_dir'               => @logDir,
+      'log_dir'               => @logDirectory,
       'cache_dir'             => @cacheDir,
       'jolokia_host'          => @jolokia_host,
       'jolokia_port'          => @jolokia_port,
@@ -114,10 +114,10 @@ module Sinatra
     }
 
     grafanaOptions = {
-      'log_dir'               => @logDir,
+      'log_dir'               => @logDirectory,
       'cache_dir'             => @cacheDir,
-      'jolokia_host'          => @jolokia_host,
-      'jolokia_port'          => @jolokia_port,
+      'grafana_host'          => @grafana_host,
+      'grafana_port'          => @grafana_port,
       'grafana_path'          => @grafana_path,
       'template_dir'          => @template_dir
     }
@@ -169,10 +169,8 @@ module Sinatra
     post '/:host' do
 
       host = params[:host]
-#       puts( "OBSOLETE! please use http://localhost/h/#{host}" )
-
       content_type :json
-      status = h.addHost( host )
+      status          = h.addHost( host )
       g.addDashbards( host )
 
       response.status = h.status
