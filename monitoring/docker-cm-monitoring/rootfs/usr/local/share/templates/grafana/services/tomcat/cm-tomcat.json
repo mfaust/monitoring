@@ -37,81 +37,6 @@
         "height": "150px",
         "panels": [
           {
-            "title": "used percent",
-            "error": false,
-            "span": 1,
-            "editable": true,
-            "type": "singlestat",
-            "isNew": true,
-            "id": 71,
-            "targets": [
-              {
-                "target": "collectd.%HOST%.%SERVICE%-Memory-heap_memory.count-used_percent",
-                "refId": "A"
-              }
-            ],
-            "links": [],
-            "datasource": "graphite",
-            "maxDataPoints": 100,
-            "interval": null,
-            "cacheTimeout": null,
-            "format": "none",
-            "prefix": "",
-            "postfix": " %",
-            "nullText": null,
-            "valueMaps": [
-              {
-                "value": "null",
-                "op": "=",
-                "text": "N/A"
-              }
-            ],
-            "mappingTypes": [
-              {
-                "name": "value to text",
-                "value": 1
-              },
-              {
-                "name": "range to text",
-                "value": 2
-              }
-            ],
-            "rangeMaps": [
-              {
-                "from": "null",
-                "to": "null",
-                "text": "N/A"
-              }
-            ],
-            "mappingType": 1,
-            "nullPointMode": "connected",
-            "valueName": "current",
-            "prefixFontSize": "50%",
-            "valueFontSize": "80%",
-            "postfixFontSize": "50%",
-            "thresholds": "85,95",
-            "colorBackground": false,
-            "colorValue": false,
-            "colors": [
-              "rgba(50, 172, 45, 0.97)",
-              "rgba(237, 129, 40, 0.89)",
-              "rgba(245, 54, 54, 0.9)"
-            ],
-            "sparkline": {
-              "show": true,
-              "full": false,
-              "lineColor": "rgb(31, 120, 193)",
-              "fillColor": "rgba(31, 118, 189, 0.18)"
-            },
-            "gauge": {
-              "show": true,
-              "minValue": 0,
-              "maxValue": 100,
-              "thresholdMarkers": true,
-              "thresholdLabels": false
-            }
-          },
-          {
             "aliasColors": {},
             "bars": false,
             "datasource": "graphite",
@@ -146,7 +71,7 @@
             "points": false,
             "renderer": "flot",
             "seriesOverrides": [],
-            "span": 11,
+            "span": 12,
             "stack": false,
             "steppedLine": false,
             "targets": [
@@ -205,85 +130,10 @@
         "title": "Heap Memory"
       },
       {
-        "collapse": false,
+        "collapse": true,
         "editable": true,
         "height": "150px",
         "panels": [
-          {
-            "title": "percent used",
-            "error": false,
-            "span": 1,
-            "editable": true,
-            "type": "singlestat",
-            "isNew": true,
-            "id": 73,
-            "targets": [
-              {
-                "target": "collectd.%HOST%.%SERVICE%-Memory-perm_memory.count-used_percent",
-                "refId": "A"
-              }
-            ],
-            "links": [],
-            "datasource": "graphite",
-            "maxDataPoints": 100,
-            "interval": null,
-            "cacheTimeout": null,
-            "format": "none",
-            "prefix": "",
-            "postfix": " %",
-            "nullText": null,
-            "valueMaps": [
-              {
-                "value": "null",
-                "op": "=",
-                "text": "N/A"
-              }
-            ],
-            "mappingTypes": [
-              {
-                "name": "value to text",
-                "value": 1
-              },
-              {
-                "name": "range to text",
-                "value": 2
-              }
-            ],
-            "rangeMaps": [
-              {
-                "from": "null",
-                "to": "null",
-                "text": "N/A"
-              }
-            ],
-            "mappingType": 1,
-            "nullPointMode": "connected",
-            "valueName": "current",
-            "prefixFontSize": "50%",
-            "valueFontSize": "80%",
-            "postfixFontSize": "50%",
-            "thresholds": "90,95",
-            "colorBackground": false,
-            "colorValue": false,
-            "colors": [
-              "rgba(50, 172, 45, 0.97)",
-              "rgba(237, 129, 40, 0.89)",
-              "rgba(245, 54, 54, 0.9)"
-            ],
-            "sparkline": {
-              "show": true,
-              "full": false,
-              "lineColor": "rgb(31, 120, 193)",
-              "fillColor": "rgba(31, 118, 189, 0.18)"
-            },
-            "gauge": {
-              "show": true,
-              "minValue": 0,
-              "maxValue": 100,
-              "thresholdMarkers": true,
-              "thresholdLabels": false
-            }
-          },
           {
             "aliasColors": {},
             "bars": false,
@@ -319,7 +169,7 @@
             "points": false,
             "renderer": "flot",
             "seriesOverrides": [],
-            "span": 11,
+            "span": 12,
             "stack": false,
             "steppedLine": false,
             "targets": [
@@ -418,7 +268,12 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.%SERVICE%-GCParNew-gc_duration.count-duration, '(.*)-', ''))",
+                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.%SERVICE%-GCParNew-gc_duration.count-duration, '(.*)-', ''), 'Par New'))",
+                "textEditor": false
+              },
+              {
+                "refId": "B",
+                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.%SERVICE%-GCConcurrentMarkSweep-gc_duration.count-duration, '(.*)-', ''), 'Con Mark Sweep'))",
                 "textEditor": false
               }
             ],

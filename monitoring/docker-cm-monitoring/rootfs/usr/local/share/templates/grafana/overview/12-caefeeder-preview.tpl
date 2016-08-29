@@ -386,6 +386,7 @@
                 "value": 2
               }
             ],
+            "valueFontSize": "50%",
             "mappingType": 1,
             "nullPointMode": "connected",
             "valueName": "current",

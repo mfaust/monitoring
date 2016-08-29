@@ -932,7 +932,7 @@ class CollecdPlugin
     if( status.to_i != 200 )
       @log.error( sprintf( ' -> Host: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, mbean, status ) )
 
-      data.push( sprintf( format, @Host, @Service, mbean, 'feeder', 'healthy', @interval, false ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'feeder', 'healthy', @interval, 1 ) )
 
       return
     end
@@ -943,12 +943,11 @@ class CollecdPlugin
 
     if( value != nil )
 
-      healthy = value['Healthy'] ? value['Healthy'] : false
+      healthy = value['Healthy'] == true ? 0 : 1
 
-      data.push( sprintf( format, @Host, @Service, mbean, 'feeder', 'healthy', @interval, healthy.to_b ) )
-
+      data.push( sprintf( format, @Host, @Service, mbean, 'feeder', 'healthy', @interval, healthy ) )
     else
-      data.push( sprintf( format, @Host, @Service, mbean, 'feeder', 'healthy', @interval, false ) )
+      data.push( sprintf( format, @Host, @Service, mbean, 'feeder', 'healthy', @interval, 1 ) )
     end
 
     return data
