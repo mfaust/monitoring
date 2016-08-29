@@ -198,13 +198,55 @@
         "description": "checks for all CAE Services",
         "metrics": [
           {
-            "name": "contentbeans",
-            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.blueprint.common.contentbeans.Page\",application=blueprint",
-            "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted"
-          }, {
             "name": "CapConnection",
             "mbean": "com.coremedia:type=CapConnection,application=blueprint",
             "attribute": "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions"
+          }, {
+            "name": "Tomcat Manager",
+            "mbean": "Catalina:type=Manager,context=/blueprint,host=localhost",
+            "attribute": "activeSessions"
+          }, {
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"DIGEST\",application=blueprint",
+            "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
+          }, {
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.blueprint.assets.contentbeans.AMAsset\",application=blueprint",
+            "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
+          }, {
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.blueprint.cae.layout.ContentBeanBackedPageGridPlacement\",application=blueprint",
+            "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
+          }, {
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.blueprint.cae.layout.PageGridImpl\",application=blueprint",
+            "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
+          }, {
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.blueprint.cae.search.solr.SolrQueryCacheKey\",application=blueprint",
+            "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
+          }, {
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.blueprint.common.contentbeans.Page\",application=blueprint",
+            "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
+          }, {
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.cae.aspect.Aspect\",application=blueprint",
+            "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
+          }, {
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.cap.disk\",application=blueprint",
+            "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
+          }, {
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.cap.heap\",application=blueprint",
+            "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
+          }, {
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.cap.unlimited\",application=blueprint",
+            "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
+          }, {
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.objectserver.dataviews.AssumesIdentity\",application=blueprint",
+            "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
+          }, {
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.objectserver.view.ViewLookup\",application=blueprint",
+            "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
+          }, {
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.transform.image.java2d.LoadedImageCacheKey\",application=blueprint",
+            "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
+          }, {
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"java.lang.Object\",application=blueprint",
+            "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
           }
         ]
       },

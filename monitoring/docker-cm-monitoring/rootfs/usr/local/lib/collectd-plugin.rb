@@ -887,9 +887,10 @@ class CollecdPlugin
   end
 
 
-  def ParseResult_CacheClasses( data = {} )
-
+  def ParseResult_CacheClasses( key, data = {} )
     mbean = 'CacheClasses'
+    cacheClass = key.gsub('CacheClasses', '')
+
     status = data['status'] ? data['status'] : 505
 
     if( status.to_i != 200 )
@@ -908,13 +909,16 @@ class CollecdPlugin
       inserted  = value['Inserted']    ? value['Inserted']    : nil
       removed   = value['Removed']     ? value['Removed']     : nil
       level     = value['Level']       ? value['Level']       : nil
+      missRate  = value['MissRate']    ? value['MissRate']    : nil
 
-      data.push( sprintf( format, @Host, @Service, mbean, 'content_beans', 'level'     , @interval, level ) )
-      data.push( sprintf( format, @Host, @Service, mbean, 'content_beans', 'capacity'  , @interval, capacity ) )
-      data.push( sprintf( format, @Host, @Service, mbean, 'content_beans', 'evaluated' , @interval, evaluated ) )
-      data.push( sprintf( format, @Host, @Service, mbean, 'content_beans', 'evicted'   , @interval, evicted ) )
-      data.push( sprintf( format, @Host, @Service, mbean, 'content_beans', 'inserted'  , @interval, inserted ) )
-      data.push( sprintf( format, @Host, @Service, mbean, 'content_beans', 'removed'   , @interval, removed ) )
+      data.push( sprintf( format, @Host, @Service, mbean, cacheClass, 'evaluated' , @interval, evaluated ) )
+      data.push( sprintf( format, @Host, @Service, mbean, cacheClass, 'evicted'   , @interval, evicted ) )
+      data.push( sprintf( format, @Host, @Service, mbean, cacheClass, 'inserted'  , @interval, inserted ) )
+      data.push( sprintf( format, @Host, @Service, mbean, cacheClass, 'removed'   , @interval, removed ) )
+
+      data.push( sprintf( format, @Host, @Service, mbean, cacheClass, 'level'     , @interval, level ) )
+      data.push( sprintf( format, @Host, @Service, mbean, cacheClass, 'capacity'  , @interval, capacity ) )
+      data.push( sprintf( format, @Host, @Service, mbean, cacheClass, 'missRate'  , @interval, missRate ) )
     end
 
     return data
@@ -1460,7 +1464,6 @@ class CollecdPlugin
             bulk.each do |result|
 
               result.each do |k,v|
-
                 case k
                 when 'mongodb'
                   graphiteOutput.push( self.ParseResult_mongoDB( v ) )
@@ -1494,8 +1497,8 @@ class CollecdPlugin
                   graphiteOutput.push( self.ParseResult_ProactiveEngine( v ) )
                 when 'Feeder'
                   graphiteOutput.push( self.ParseResult_Feeder( v ) )
-                when 'CacheClasses'
-                  graphiteOutput.push( self.ParseResult_CacheClasses( v ) )
+                when /^CacheClasses/
+                  graphiteOutput.push( self.ParseResult_CacheClasses( k, v ) )
                 when 'CapConnection'
                   graphiteOutput.push( self.ParseResult_CapConnection( v ) )
                 when 'StoreConnectionPool'
