@@ -682,7 +682,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MONGODB-wiredTigerConcurrentTransactions.*, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MONGODB-wiredTigerConcTrans.*, '(.*)-', ''))",
                 "textEditor": true
               }
             ],
