@@ -189,7 +189,7 @@ class DataCollector
 
         hash            = Hash.new()
         array           = Array.new()
-        hash['mongodb'] =  JSON.parse( response.body )
+        hash['mongodb'] = JSON.parse( response.body )
         array.push( hash )
 
         File.open( sprintf( '%s/%s', cachedHostDirectory, save_file ) , 'w' ) {|f| f.write( JSON.pretty_generate( array ) ) }
@@ -207,16 +207,56 @@ class DataCollector
 
     if( port != nil )
 
+      cachedHostDirectory   = sprintf( '%s/%s', @cacheDirectory, host )
+      save_file             = sprintf( 'bulk_%s.result', port )
+
+      # TODO
+      # we need an low-level-priv User for Monitoring!
       settings = {
-        'log_dir' => @logDirectory,
+        'log_dir'   => @logDirectory,
         'mysqlHost' => host,
-        'mysqlUser' => 'coremedia',
-        'mysqlPass' => 'coremedia'
+        'mysqlUser' => 'cm_management',
+        'mysqlPass' => 'cm_management'
       }
 
-#      require_relative 'mysql-status'
-#      mysql = MysqlStatus.new( settings )
-#      mysql.run()
+      require_relative 'mysql-status'
+      if( ! @mysql )
+        @mysql = MysqlStatus.new( settings )
+      end
+
+      hash            = Hash.new()
+      array           = Array.new()
+      hash['mysql']   = JSON.parse( @mysql.run() )
+
+      array.push( hash )
+
+      File.open( sprintf( '%s/%s', cachedHostDirectory, save_file ) , 'w' ) {|f| f.write( JSON.pretty_generate( array ) ) }
+    end
+
+  end
+
+
+  def postgresData( host, data = {} )
+
+    # WiP and nore sure
+    return
+
+    user = data['user'] ? data['user'] : nil
+    pass = data['pass'] ? data['pass'] : nil
+    port = data['port'] ? data['port'] : nil
+
+    if( port != nil )
+
+      settings = {
+        'log_dir'      => @logDirectory,
+        'postgresHost' => host,
+        'postgresUser' => 'coremedia',
+        'postgresPass' => 'coremedia'
+      }
+
+      require_relative 'postgres-status'
+      pgsql = PostgresStatus.new( settings )
+      pgsql.run()
 
     end
 
@@ -611,6 +651,10 @@ class DataCollector
 
         if( data['mysql'] )
           self.mysqlData( h, data['mysql'] )
+        end
+
+        if( data['postgres'] )
+          self.postgresData( h, data['postgres'] )
         end
 
         @log.debug( 'merge Data between Property Files and discovered Services' )

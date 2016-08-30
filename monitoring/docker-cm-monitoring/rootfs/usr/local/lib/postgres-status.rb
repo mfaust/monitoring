@@ -5,18 +5,18 @@
 require 'pg'
 
 
-class  postgresStatus
+class  PostgresStatus
 
   attr_accessor :postgresHost, :postgresPort, :postgresUser, :postgresUser
 
   def initialize( settings = {} )
 
-    @logDirectory      = settings['log_dir']   ? settings['log_dir']   : '/tmp'
-    @postgresHost         = settings['postgresHost'] ? settings['postgresHost'] : 'localhost'
-    @postgresPort         = settings['postgresPort'] ? settings['postgresPort'] : 5432
-    @postgresUser         = settings['postgresUser'] ? settings['postgresUser'] : 'root'
-    @postgresPass         = settings['postgresPass'] ? settings['postgresPass'] : ''
-    @postgresDBName       = settings['postgresDBName'] ? settings['postgresDBName'] : 'test'
+    @logDirectory      = settings['log_dir']        ? settings['log_dir']        : '/tmp'
+    @postgresHost      = settings['postgresHost']   ? settings['postgresHost']   : 'localhost'
+    @postgresPort      = settings['postgresPort']   ? settings['postgresPort']   : 5432
+    @postgresUser      = settings['postgresUser']   ? settings['postgresUser']   : 'root'
+    @postgresPass      = settings['postgresPass']   ? settings['postgresPass']   : ''
+    @postgresDBName    = settings['postgresDBName'] ? settings['postgresDBName'] : 'test'
 
     logFile            = sprintf( '%s/postgres-status.log', @logDirectory )
 

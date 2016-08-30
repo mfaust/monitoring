@@ -2,7 +2,7 @@
 #
 #
 
-require 'sequel'
+require 'mysql2'
 
 
 class  MysqlStatus
@@ -29,36 +29,28 @@ class  MysqlStatus
       "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
     end
 
+    @relative = false
+
+    self.connect()
 
   end
 
   def connect()
-    params = {
-      :host     => @mysqlHost,
-      :user     => @mysqlUser,
-      :port     => @mysqlPort,
-      :password => @mysqlPass
-    }
 
-    if( @socket )
-      params[:socket] = @socket
+    begin
+      @client = Mysql2::Client.new(
+        :host     => @mysqlHost,
+        :username => @mysqlUser,
+        :password => @mysqlPass,
+        :encoding => 'utf8'
+      )
+
+    rescue Exception => e
+      @log.error( "An error occurred #{e}" )
     end
 
-    @sequel = Sequel.mysql( params )
   end
 
-  # get the real hostname of the MySQL Server that we are connected to
-  def mysqlHostname
-    @mysql_hostname = @sequel["SELECT @@hostname;"].first[:@@hostname]
-  end
-
-  def headerRows
-    @sequel[@query].to_hash(:Variable_name,:Value).keys
-  end
-
-  def outputHeader(rows)
-    @rf.puts(header) if @rf && @outputfn
-  end
 
   def calculateRelative(rows)
     result = {}
@@ -82,7 +74,7 @@ class  MysqlStatus
     numeric?(value) ? value.to_i : value
   end
 
-  def valuesToNumeric ( h )
+  def valuesToNumeric( h )
     Hash[h.map { |k,v| [ k, toNumeric(v)] }]
   end
 
@@ -121,21 +113,35 @@ class  MysqlStatus
          Uptime_since_flush_status ].include? key
   end
 
+  def toJson( data )
+
+    h = Hash.new()
+
+    data.each do |k|
+
+      # "Variable_name"=>"Innodb_buffer_pool_pages_free", "Value"=>"1"
+      h[k['Variable_name']] =  k['Value']
+    end
+
+    return h
+
+  end
+
 
   def run()
 
-    @sequel = self.connect()
-
     begin
-      rows = @sequel[ @mysqlQuery ].to_hash( :Variable_name,:Value )
-      rows = self.valuesToNumeric(rows)
-      rows = self.calculateRelative(rows) if @relative
-      rows = self.scaleValues(rows)
-#      output_query(rows) unless first_run && @relative
 
-      @log.debug( row )
+      rs = @client.query( @mysqlQuery )
+
+      rows = self.toJson( rs )
+      rows = self.valuesToNumeric( rows )
+      rows = self.scaleValues( rows )
+
+      return rows.to_json
+
     rescue Exception => e
-      STDERR.puts "An error occurred #{e}"
+      @log.error( "An error occurred #{e}" )
     end
 
   end

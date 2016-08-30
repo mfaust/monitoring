@@ -17,6 +17,7 @@ RUN \
   apk --quiet  --no-cache add \
     build-base \
     imagemagick-dev \
+    mysql-dev \
     bash \
     ruby-dev \
     ruby-irb \
@@ -42,7 +43,7 @@ RUN \
      ipaddress \
      resolve-hostname \
      rest-client \
-     sequel \
+     mysql2 \
      time_difference \
      filesize \
      fileutils \
