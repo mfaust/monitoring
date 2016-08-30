@@ -179,8 +179,8 @@ class Grafana
         # get templates for service
         serviceTemplatePaths = *getTemplatePathsForService(serviceName)
 
-        if (!['mongodb','postgres'].include? serviceName)
-          additionalTemplatePaths.push(*getTemplatePathsForService("tomcat"))
+        if( !['mongodb', 'mysql', 'postgres'].include? serviceName )
+          additionalTemplatePaths.push( *getTemplatePathsForService("tomcat") )
         end
 
         # get templates for service type
@@ -268,48 +268,6 @@ class Grafana
 
   end
 
-  # add Annotation to named host
-  def addAnnotation( host, annotation )
-
-    @log.debug( "add Annotation" )
-
-
-    # annotations werden direct in die graphite geschrieben
-    # POST
-    # curl -v -H 'Accept: application/json' -X POST http://localhost:8081/events/ -d '{ "what": "annotions test", "tags": "monitoring-16-01.test",  "data": "test another adding annotion for <b>WTF</b>" }'
-
-    # GET
-    # curl  'http://admin:admin@localhost/grafana/api/datasources/proxy/2/events/get_data?from=-12h&until=now&tags=monitoring-16-01'
-
-
-    uri = URI( sprintf( '%s/api/annotations/tags/', @grafanaURI ) ) #  "http://localhost/grafana/api/dashboards/#{i}")
-
-    data = {
-      'title' => host,
-      'tag'   => annotation
-    }
-
-
-    response = nil
-    Net::HTTP.start( uri.host, uri.port ) do |http|
-      request = Net::HTTP::Post.new( uri.request_uri )
-
-      request.set_form_data( data )
-      request.add_field('Content-Type', 'application/json')
-      request.basic_auth 'admin', 'admin'
-
-      response     = http.request( request )
-
-      @log.debug("Created dashboard, ok: #{response.code}")
-    end
-
-
-#     curl -X POST https://YOUR-API-KEY@api.hostedgraphite.com/api/v1/annotations/events/ -d \
-#      "&title=New Super-duper Feature"\
-#      "&tag=deployment"\
-#      "&tag=feature"
-
-  end
 
   #cae-live-1 -> cae-live
   def removePostfix(service)
@@ -578,7 +536,7 @@ class Grafana
   end
 
 
-  def generateServiceTemplate(serviceName, serviceTemplatePaths, additionalTemplatePaths)
+  def generateServiceTemplate( serviceName, serviceTemplatePaths, additionalTemplatePaths )
 
     serviceTemplatePaths.each do |tpl|
 
@@ -588,6 +546,7 @@ class Grafana
       templateJson = JSON.parse(templateFile)
 
       if (templateJson['dashboard'] and templateJson['dashboard']['rows'])
+
         rows = templateJson["dashboard"]["rows"]
 
         additionalTemplatePaths.each do |additionalTemplate|

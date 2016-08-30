@@ -381,6 +381,8 @@ class CollecdPlugin
 
     if( value != nil )
 
+      # READ THIS : http://dev.mysql.com/doc/refman/5.7/en/server-status-variables.html
+
       bytesReceived                   = value['Bytes_received']             ? value['Bytes_received']             : nil
       bytesSent                       = value['Bytes_sent']                 ? value['Bytes_sent']                 : nil
       connections                     = value['Connections']                ? value['Connections']                : nil
@@ -479,9 +481,9 @@ class CollecdPlugin
       data.push( sprintf( format ,  @Host, @Service, 'innodb_buffer_pool', 'count', 'read_requests'      , @interval, innodbBufferPoolReadRequests ) )
 
       data.push( sprintf( format ,  @Host, @Service, 'innodb_page' , 'count', 'size'                     , @interval, innodbPageSize ) )
-      data.push( sprintf( format ,  @Host, @Service, 'innodb_pages', 'count', 'pages_created'            , @interval, innodbPagesCreated ) )
-      data.push( sprintf( format ,  @Host, @Service, 'innodb_pages', 'count', 'pages_read'               , @interval, innodbPagesRead ) )
-      data.push( sprintf( format ,  @Host, @Service, 'innodb_pages', 'count', 'pages_written'            , @interval, innodbPagesWritten ) )
+      data.push( sprintf( format ,  @Host, @Service, 'innodb_pages', 'count', 'created'                  , @interval, innodbPagesCreated ) )
+      data.push( sprintf( format ,  @Host, @Service, 'innodb_pages', 'count', 'read'                     , @interval, innodbPagesRead ) )
+      data.push( sprintf( format ,  @Host, @Service, 'innodb_pages', 'count', 'written'                  , @interval, innodbPagesWritten ) )
 
       data.push( sprintf( format ,  @Host, @Service, 'innodb_rows', 'count', 'deleted'                   , @interval, innodbRowsDeleted ) )
       data.push( sprintf( format ,  @Host, @Service, 'innodb_rows', 'count', 'inserted'                  , @interval, innodbRowsInserted ) )

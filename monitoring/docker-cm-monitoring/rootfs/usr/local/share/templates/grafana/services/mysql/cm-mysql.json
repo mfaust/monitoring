@@ -1,9 +1,9 @@
 {
   "dashboard": {
     "id": null,
-    "title": "%SHORTHOST% - Memory Pools",
-    "originalTitle": "%SHORTHOST% - Memory Pools",
-    "tags": [ "%TAG%" ],
+    "title": "%SHORTHOST% - MySQL",
+    "originalTitle": "%SHORTHOST% - MySQL",
+    "tags": [ "%TAG%", "database", "mysql" ],
     "style": "dark",
     "timezone": "browser",
     "editable": true,
@@ -19,7 +19,6 @@
             "aliasColors": {},
             "bars": false,
             "datasource": "graphite",
-            "decimals": 0,
             "editable": true,
             "error": false,
             "fill": 3,
@@ -50,30 +49,31 @@
             "pointradius": 5,
             "points": false,
             "renderer": "flot",
-            "seriesOverrides": [],
+            "seriesOverrides": [
+              {
+                "alias": "out",
+                "transform": "negative-Y"
+              }
+            ],
             "span": 12,
             "stack": false,
             "steppedLine": false,
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-MemoryPool-CMS_Old_Gen.count-committed, '(.*)-', ''))",
+                "target": "aliasByMetric(alias(perSecond(aliasSub(collectd.%HOST%.MYSQL-network.bytes-in, '(.*)-', '')), 'in'))",
                 "textEditor": false
               },
               {
+                "hide": false,
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-MemoryPool-CMS_Old_Gen.count-max, '(.*)-', ''))",
-                "textEditor": false
-              },
-              {
-                "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-MemoryPool-CMS_Old_Gen.count-used, '(.*)-', ''))",
+                "target": "aliasByMetric(alias(perSecond(aliasSub(collectd.%HOST%.MYSQL-network.bytes-out, '(.*)-', '')), 'out'))",
                 "textEditor": false
               }
             ],
             "timeFrom": null,
             "timeShift": null,
-            "title": "CMS Old Gen",
+            "title": "Network",
             "tooltip": {
               "msResolution": false,
               "shared": true,
@@ -99,12 +99,12 @@
                 "logBase": 1,
                 "max": null,
                 "min": null,
-                "show": true
+                "show": false
               }
             ]
           }
         ],
-        "title": "CMS Old Gen"
+        "title": "Network"
       },
       {
         "collapse": false,
@@ -115,7 +115,6 @@
             "aliasColors": {},
             "bars": false,
             "datasource": "graphite",
-            "decimals": 0,
             "editable": true,
             "error": false,
             "fill": 3,
@@ -153,23 +152,13 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-MemoryPool-Code_Cache.count-committed, '(.*)-', ''))",
-                "textEditor": false
-              },
-              {
-                "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-MemoryPool-Code_Cache.count-max, '(.*)-', ''))",
-                "textEditor": false
-              },
-              {
-                "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-MemoryPool-Code_Cache.count-used, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MYSQL-threads.*, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
             "timeFrom": null,
             "timeShift": null,
-            "title": "Code Cache",
+            "title": "Threads",
             "tooltip": {
               "msResolution": false,
               "shared": true,
@@ -182,7 +171,7 @@
             },
             "yaxes": [
               {
-                "format": "bytes",
+                "format": "none",
                 "label": null,
                 "logBase": 1,
                 "max": null,
@@ -195,23 +184,22 @@
                 "logBase": 1,
                 "max": null,
                 "min": null,
-                "show": true
+                "show": false
               }
             ]
           }
         ],
-        "title": "Code Cache"
+        "title": "Threads"
       },
       {
         "collapse": false,
         "editable": true,
-        "height": "150px",
+        "height": "250px",
         "panels": [
           {
             "aliasColors": {},
             "bars": false,
             "datasource": "graphite",
-            "decimals": 0,
             "editable": true,
             "error": false,
             "fill": 3,
@@ -249,23 +237,13 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-MemoryPool-Compressed_Class_Space.count-committed, '(.*)-', ''))",
-                "textEditor": false
-              },
-              {
-                "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-MemoryPool-Compressed_Class_Space.count-max, '(.*)-', ''))",
-                "textEditor": false
-              },
-              {
-                "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-MemoryPool-Compressed_Class_Space.count-used, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MYSQL-qcache.*, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
             "timeFrom": null,
             "timeShift": null,
-            "title": "Compressed Class Space",
+            "title": "Query Cache",
             "tooltip": {
               "msResolution": false,
               "shared": true,
@@ -278,11 +256,11 @@
             },
             "yaxes": [
               {
-                "format": "bytes",
+                "format": "none",
                 "label": null,
                 "logBase": 1,
                 "max": null,
-                "min": null,
+                "min": 0,
                 "show": true
               },
               {
@@ -296,7 +274,7 @@
             ]
           }
         ],
-        "title": "Compressed Class Space"
+        "title": "Query Cache"
       },
       {
         "collapse": false,
@@ -307,7 +285,6 @@
             "aliasColors": {},
             "bars": false,
             "datasource": "graphite",
-            "decimals": 0,
             "editable": true,
             "error": false,
             "fill": 3,
@@ -332,42 +309,39 @@
             },
             "lines": true,
             "linewidth": 1,
-            "links": [],
             "nullPointMode": "connected",
             "percentage": false,
             "pointradius": 5,
             "points": false,
             "renderer": "flot",
-            "seriesOverrides": [],
+            "seriesOverrides": [
+              {
+                "alias": "size",
+                "yaxis": 2
+              }
+            ],
             "span": 12,
             "stack": false,
             "steppedLine": false,
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-MemoryPool-Metaspace.count-committed, '(.*)-', ''))",
-                "textEditor": false
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MYSQL-innodb_pages.*, '(.*)-', ''))"
               },
               {
-                "hide": true,
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-MemoryPool-Metaspace.count-max, '(.*)-', ''))",
-                "textEditor": false
-              },
-              {
-                "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-MemoryPool-Metaspace.count-used, '(.*)-', ''))",
-                "textEditor": false
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MYSQL-innodb_page.count-size, '(.*)-', ''))",
+                "hide": true
               }
             ],
             "timeFrom": null,
             "timeShift": null,
-            "title": "Metaspace",
+            "title": "InnoDB Pages",
             "tooltip": {
               "msResolution": false,
               "shared": true,
               "sort": 0,
-              "value_type": "cumulative"
+              "value_type": "individual"
             },
             "type": "graph",
             "xaxis": {
@@ -375,7 +349,7 @@
             },
             "yaxes": [
               {
-                "format": "bytes",
+                "format": "none",
                 "label": null,
                 "logBase": 1,
                 "max": null,
@@ -383,28 +357,30 @@
                 "show": true
               },
               {
-                "format": "short",
-                "label": null,
+                "format": "bytes",
+                "label": "",
                 "logBase": 1,
                 "max": null,
-                "min": null,
+                "min": 0,
                 "show": true
               }
-            ]
+            ],
+            "decimals": 0,
+            "links": []
           }
         ],
-        "title": "Metaspace"
+        "title": "InnoDB Pages"
       },
       {
-        "collapse": false,
-        "editable": true,
+        "title": "InnoDB Rows",
         "height": "150px",
+        "editable": true,
+        "collapse": false,
         "panels": [
           {
             "aliasColors": {},
             "bars": false,
             "datasource": "graphite",
-            "decimals": 0,
             "editable": true,
             "error": false,
             "fill": 3,
@@ -429,7 +405,6 @@
             },
             "lines": true,
             "linewidth": 1,
-            "links": [],
             "nullPointMode": "connected",
             "percentage": false,
             "pointradius": 5,
@@ -442,28 +417,18 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-MemoryPool-Par_Eden_Space.count-committed, '(.*)-', ''))",
-                "textEditor": false
-              },
-              {
-                "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-MemoryPool-Par_Eden_Space.count-max, '(.*)-', ''))",
-                "textEditor": false
-              },
-              {
-                "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-MemoryPool-Par_Eden_Space.count-used, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MYSQL-innodb_rows.*, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
             "timeFrom": null,
             "timeShift": null,
-            "title": "Par Eden Space",
+            "title": "InnoDB Rows",
             "tooltip": {
               "msResolution": false,
               "shared": true,
               "sort": 0,
-              "value_type": "cumulative"
+              "value_type": "individual"
             },
             "type": "graph",
             "xaxis": {
@@ -471,7 +436,7 @@
             },
             "yaxes": [
               {
-                "format": "bytes",
+                "format": "none",
                 "label": null,
                 "logBase": 1,
                 "max": null,
@@ -479,28 +444,28 @@
                 "show": true
               },
               {
-                "format": "short",
-                "label": null,
+                "format": "bytes",
+                "label": "",
                 "logBase": 1,
                 "max": null,
                 "min": null,
                 "show": true
               }
-            ]
+            ],
+            "links": []
           }
-        ],
-        "title": "Par Eden Space"
+        ]
       },
       {
-        "collapse": false,
-        "editable": true,
+        "title": "InnoDB Buffer Pool Bytes",
         "height": "150px",
+        "editable": true,
+        "collapse": false,
         "panels": [
           {
             "aliasColors": {},
             "bars": false,
             "datasource": "graphite",
-            "decimals": 0,
             "editable": true,
             "error": false,
             "fill": 3,
@@ -525,7 +490,6 @@
             },
             "lines": true,
             "linewidth": 1,
-            "links": [],
             "nullPointMode": "connected",
             "percentage": false,
             "pointradius": 5,
@@ -538,28 +502,18 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-MemoryPool-Par_Survivor_Space.count-committed, '(.*)-', ''))",
-                "textEditor": false
-              },
-              {
-                "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-MemoryPool-Par_Survivor_Space.count-max, '(.*)-', ''))",
-                "textEditor": false
-              },
-              {
-                "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-MemoryPool-Par_Survivor_Space.count-used, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MYSQL-innodb_buffer_pool.count-bytes_*, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
             "timeFrom": null,
             "timeShift": null,
-            "title": "Par Suvivor Space",
+            "title": "InnoDB Buffer Pool Bytes",
             "tooltip": {
               "msResolution": false,
               "shared": true,
               "sort": 0,
-              "value_type": "cumulative"
+              "value_type": "individual"
             },
             "type": "graph",
             "xaxis": {
@@ -575,17 +529,94 @@
                 "show": true
               },
               {
-                "format": "short",
-                "label": null,
+                "format": "bytes",
+                "label": "",
                 "logBase": 1,
                 "max": null,
                 "min": null,
                 "show": true
               }
-            ]
+            ],
+            "links": []
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "editable": true,
+            "error": false,
+            "fill": 3,
+            "grid": {
+              "threshold1": null,
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2": null,
+              "threshold2Color": "rgba(234, 112, 112, 0.22)"
+            },
+            "id": 7,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "span": 12,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MYSQL-innodb_buffer_pool.count-pages_*, '(.*)-', ''))",
+                "textEditor": false
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "InnoDB Buffer Pages",
+            "tooltip": {
+              "msResolution": false,
+              "shared": true,
+              "sort": 0,
+              "value_type": "individual"
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "none",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "bytes",
+                "label": "",
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ],
+            "links": []
           }
-        ],
-        "title": "Par Survivor Space"
+        ]
       }
     ],
     "time": {
@@ -616,21 +647,6 @@
     },
     "templating": {
       "list": [
-        {
-          "current": {},
-          "datasource": "graphite",
-          "hide": 0,
-          "includeAll": false,
-          "multi": false,
-          "name": "service",
-          "options": [],
-          "query": "*.*.*MemoryPool-*",
-          "refresh": 1,
-          "regex": "/(.*)-MemoryPool*/",
-          "tags": [],
-          "type": "query",
-          "useTags": true
-        }
       ]
     },
     "annotations": {
