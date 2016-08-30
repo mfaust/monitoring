@@ -3,7 +3,7 @@
     "id": null,
     "title": "%SHORTHOST% - Memory Pools",
     "originalTitle": "%SHORTHOST% - Memory Pools",
-    "tags": [ "%TAG%", "studio" ],
+    "tags": [ "%TAG%" ],
     "style": "dark",
     "timezone": "browser",
     "editable": true,
