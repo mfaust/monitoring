@@ -162,6 +162,7 @@ class Grafana
       self.generateOverviewTemplate( services )
       self.generateLicenseTemplate( host, services )
       self.addNamedTemplate( 'cm-memory-pool.json' )
+      self.addNamedTemplate( 'cm-cae-cache-classes.json' )
 
       @log.debug("Found services: #{services}")
 
