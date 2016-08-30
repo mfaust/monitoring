@@ -123,6 +123,17 @@ class  MysqlStatus
       h[k['Variable_name']] =  k['Value']
     end
 
+    # TODO
+    # group-by
+#    i = h.select { |k| k[/Innodb.*/] }
+#    c = h.select { |k| k[/Com_.*/] }
+#
+#    h.reject! { |k| k =~ /Innodb.*/ }
+#    h.reject! { |k| k =~ /Com_.*/ }
+#
+#    h['Innodb'] = i
+#    h['Com'] = c
+
     return h
 
   end
