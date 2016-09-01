@@ -442,7 +442,13 @@ class DataCollector
         request.body = data.to_json
 
         response = Net::HTTP.start( uri.hostname, uri.port, use_ssl: uri.scheme == "https" ) do |http|
-          http.request(request)
+          begin
+            http.request(request)
+          rescue Exception => e
+            @log.warn("Cannot execute request to #{uri.request_uri}, cause: #{e}")
+            @log.debug("Cannot execute request to #{uri.request_uri}, cause: #{e}, request body: #{request.body}")
+            return
+          end
         end
 
         result = response.body

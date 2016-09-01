@@ -79,6 +79,8 @@ end
 
     server.sort!
 
+    @log.debug("Monitored server: #{server}")
+
     return server
   end
 
