@@ -108,16 +108,16 @@ class Grafana
 
         result = true
       elsif( mbeanExists != nil and key != nil )
-
         mbeanValue = mbeanExists['value'] ? mbeanExists['value'] : nil
-
         if( mbeanValue == nil )
           return false
         end
 
-        keyExists = mbeanValue[ key ] ? mbeanValue[ key ]  : nil
-
-        result    = keyExists != nil ? true : false
+        attribute = mbeanValue[ key ] ? mbeanValue[ key ]  : nil
+        if ( attribute == nil || (attribute.include?'ERROR'))
+          return false
+        end
+        return true
       end
 
     end
@@ -191,7 +191,7 @@ class Grafana
             additionalTemplatePaths.push(*getTemplatePathsForServiceType(serviceType))
           end
         else
-          @log.error( sprintf( 'file %s doesnt exists', @mergedHostFile ) )
+          @log.error( sprintf( 'file %s doesnt exist', @mergedHostFile ) )
         end
 
 #         @log.debug( "Found Template paths: #{serviceTemplatePaths}, #{additionalTemplatePaths}")
@@ -444,7 +444,7 @@ class Grafana
 
     intersect.each do |service|
 
-      if( self.beanAvailable?( host, service, 'ServiceInfos' ) == true )
+      if( self.beanAvailable?( host, service, 'LicenseInfos' ) == true )
 
         if( File.exist?( licenseUntil ) )
 
@@ -464,7 +464,7 @@ class Grafana
 
     intersect.each do |service|
 
-      if( self.beanAvailable?( host, service, 'LicenseInfos' ) == true )
+      if( self.beanAvailable?( host, service, 'ServiceInfos' ) == true )
 
         if( File.exist?( licensePart ) )
 

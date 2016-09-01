@@ -338,7 +338,8 @@ class DataCollector
       "mbean" => "#{mbean}",
       "target" => {
         "url" => "service:jmx:rmi:///jndi/rmi://#{server_name}:#{server_port}/jmxrmi",
-      }
+      },
+      "config" => { "ignoreErrors" => true }
     }
 
     attributes = []
