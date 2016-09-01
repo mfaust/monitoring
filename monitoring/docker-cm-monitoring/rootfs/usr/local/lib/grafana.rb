@@ -434,8 +434,6 @@ class Grafana
 
     def beanAvailable?( host,service, beanKey )
 
-      mergedHostJson = getJsonFromFile( @mergedHostFile )
-
       port = self.applicationPort( service )
       file = sprintf( '%s/%s/bulk_%s.result', @cacheDirectory, host, port )
 

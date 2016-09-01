@@ -441,7 +441,8 @@ class DataCollector
         )
         request.body = data.to_json
 
-        response = Net::HTTP.start( uri.hostname, uri.port, use_ssl: uri.scheme == "https" ) do |http|
+        #Default read timeout is 60 secs
+        response = Net::HTTP.start( uri.hostname, uri.port, use_ssl: uri.scheme == "https", :read_timeout => 5 ) do |http|
           begin
             http.request(request)
           rescue Exception => e
