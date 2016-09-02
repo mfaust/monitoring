@@ -98,6 +98,11 @@ class Grafana
       end
 
       service      = json.detect { |s| s[mbean] }
+
+      if (service == nil)
+        return false
+      end
+
       mbeanExists  = service[ mbean ] ? service[ mbean ] : nil
 
       if( mbeanExists['status'].to_i != 200 )
@@ -432,12 +437,28 @@ class Grafana
     licenseUntil   = sprintf( '%s/licenses/licenses-until.json', @templateDirectory )
     licensePart    = sprintf( '%s/licenses/licenses-part.json' , @templateDirectory )
 
-    def beanAvailable?( host,service, beanKey )
+    def beanAvailable?(host, service, beanKey)
 
-      port = self.applicationPort( service )
-      file = sprintf( '%s/%s/bulk_%s.result', @cacheDirectory, host, port )
+      port = self.applicationPort(service)
 
-      return self.supportMbean?( file, 'Server', beanKey )
+      fileName = sprintf("%s/%s/bulk_*%s*server.json.result", @cacheDirectory, host, port)
+
+      for y in 1..10
+
+        files = Dir.glob(fileName)
+
+        if (files != nil && files.length > 0)
+
+          return self.supportMbean?(files[0], 'Server', beanKey)
+          break
+
+        end
+
+        sleep( 3 )
+        @log.debug( "  Waiting for file #{fileName} ... #{y}" )
+      end
+
+      return false
     end
 
     intersect.each do |service|
@@ -484,7 +505,7 @@ class Grafana
 
     if( rows.count == 1 )
       # only the license Head is into the array
-      @log.info( 'We had no Information about Lizenses' )
+      @log.info( 'We have no information about Licenses' )
       return
     end
 
