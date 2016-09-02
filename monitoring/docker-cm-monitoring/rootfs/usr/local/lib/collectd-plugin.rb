@@ -1057,6 +1057,7 @@ class CollecdPlugin
     if( status.to_i != 200 )
       @log.error( sprintf( ' -> Host: \'%s\' - Service: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, @Service, mbean, status ) )
 
+      data = []
       data.push( sprintf( format, @Host, @Service, mbean, 'feeder', 'healthy', @interval, 1 ) )
 
       return
@@ -1210,6 +1211,9 @@ class CollecdPlugin
       indexSize         = value['indexSize']         ? value['indexSize']         : nil
       # achtung!
       # indexSize ist irrsinnigerweise als human readable ausgeführt worden!
+      if (indexSize != nil && (indexSize.include?'bytes'))
+        indexSize = indexSize.gsub!'ytes',''
+      end
       indexSize         = Filesize.from( indexSize ).to_i
 
       data.push( sprintf( format, @Host, @Service, solrCore, mbean, 'index_size', @interval, indexSize.to_s ) )
