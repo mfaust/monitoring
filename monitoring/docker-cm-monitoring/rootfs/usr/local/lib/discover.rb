@@ -162,17 +162,17 @@ class ServiceDiscovery
 
     @log.debug( sprintf( 'check port %s for service ', port.to_s  ) )
 
-    service = ''
+    services = Array.new
 
     if( port == 3306 or port == 5432 or port == 28017 )
 
       case port
       when 3306
-        service = 'mysql'
+        services.push('mysql')
       when 5432
-        service = 'postgres'
+        services.push('postgres')
       when 28017
-        service = 'mongodb'
+        services.push('mongodb')
       end
     else
 
@@ -221,26 +221,53 @@ class ServiceDiscovery
 
             @log.debug( 'old style' )
 
-            hash = {
-              :type => "read",
-              :mbean => "Catalina:type=Engine",
-              :attribute => [
-                'baseDir'
-              ],
-              :target => {
-                :url => sprintf( "service:jmx:rmi:///jndi/rmi://%s:%s/jmxrmi", host, port )
-              }
+            apps = {
+                :type => "read",
+                :mbean => "Catalina:type=Manager,context=*,host=*",
+                :target => {
+                    :url => sprintf( "service:jmx:rmi:///jndi/rmi://%s:%s/jmxrmi", host, port )
+                }
             }
-
-            request.body = JSON.generate( hash )
+            request.body = JSON.generate( apps )
             response     = http.request( request )
-            body         = JSON.parse( response.body )
+            appsBody         = JSON.parse( response.body )
 
-            if( body['status'] == 200 )
+            contextsMap = appsBody['value']
 
-              baseDir   = body['value']['baseDir'] ? body['value']['baseDir'] : nil
+            regex = /context=(.*?),/
+            contextsMap.each do |context,v|
 
-              regex = /
+              part = context.match(regex)
+
+              if (part != nil && part.length > 1)
+                appName = part[1].gsub('/','')
+                services.push(appName)
+              end
+            end
+
+            #coremedia = cms, mls, rls? caefeeder = caefeeder-preview, cae-feeder-live?
+            if ((services.include?'coremedia') || (services.include?'caefeeder'))
+
+              hash = {
+                  :type => "read",
+                  :mbean => "Catalina:type=Engine",
+                  :attribute => [
+                      'baseDir'
+                  ],
+                  :target => {
+                      :url => sprintf("service:jmx:rmi:///jndi/rmi://%s:%s/jmxrmi", host, port)
+                  }
+              }
+
+              request.body = JSON.generate(hash)
+              response = http.request(request)
+              body = JSON.parse(response.body)
+
+              if (body['status'] == 200)
+
+                baseDir = body['value']['baseDir'] ? body['value']['baseDir'] : nil
+
+                regex = /
                 ^                           # Starting at the front of the string
                 (.*)                        #
                 \/cm7-                      #
@@ -249,7 +276,50 @@ class ServiceDiscovery
                 $
               /x
 
-              parts           = baseDir.match( regex )
+                parts = baseDir.match(regex)
+
+
+                if (parts)
+                  service = "#{parts['service']}".strip.tr('. ', '')
+                  services.delete("coremedia")
+                  services.delete("caefeeder")
+                  services.push(service)
+
+                  @log.debug(sprintf('  => %s', service))
+                else
+                  @log.error('unknown')
+                end
+              end
+            end
+
+            #blueprint = cae-preview or delivery?
+            if (services.include?'blueprint')
+              hash = {
+                  :type => "read",
+                  :mbean => "Catalina:type=Engine",
+                  :attribute => [
+                      'jvmRoute'
+                  ],
+                  :target => {
+                      :url => sprintf("service:jmx:rmi:///jndi/rmi://%s:%s/jmxrmi", host, port)
+                  }
+              }
+
+              request.body = JSON.generate(hash)
+              response = http.request(request)
+              body = JSON.parse(response.body)
+
+              if (body['status'] == 200)
+
+                jvmRoute = body['value']['jvmRoute'] ? body['value']['jvmRoute'] : nil
+                if ((jvmRoute != nil) && (jvmRoute.include?'studio'))
+                  services.delete("blueprint")
+                  services.push("cae-preview")
+                else
+                  services.delete("blueprint")
+                  services.push("delivery")
+                end
+              end
             end
 
           else
@@ -264,15 +334,16 @@ class ServiceDiscovery
               $
             /x
 
-            parts           = classPath.match( regex )
-          end
+            parts = classPath.match(regex)
 
-          if( parts )
-            service         = "#{parts['service']}".strip.tr( '. ', '' )
+            if (parts)
+              service = "#{parts['service']}".strip.tr('. ', '')
+              services.push(service)
 
-            @log.debug( sprintf( '  => %s', service ) )
-          else
-            @log.error( 'unknown' )
+              @log.debug(sprintf('  => %s', service))
+            else
+              @log.error('unknown')
+            end
           end
 
         else
@@ -281,27 +352,34 @@ class ServiceDiscovery
 
       end
 
-      # normalize service names
-      case service
-      when 'cms'
-        service = 'content-management-server'
-      when 'mls'
-        service = 'master-live-server'
-      when 'rls'
-        service = 'replication-live-server'
-      when 'wfs'
-        service = 'workflow-server'
-      when 'delivery'
-        service = 'cae-live-1'
-      when 'solr'
-        service = 'solr-master'
-      end
+      services.map! {|service|
+
+        # normalize service names
+        case service
+          when 'cms'
+            'content-management-server'
+          when 'mls'
+            'master-live-server'
+          when 'rls'
+            'replication-live-server'
+          when 'wfs'
+            'workflow-server'
+          when 'delivery'
+            'cae-live-1'
+          when 'solr'
+            'solr-master'
+          when 'contentfeeder'
+            'content-feeder'
+          when 'workflow'
+            'workflow-server'
+          else
+            service
+        end
+      }
 
     end
 
-    # services.merge!( { name => { 'port' => p } } )
-
-    return service
+    return services
   end
 
 
@@ -420,9 +498,11 @@ class ServiceDiscovery
 
       if( open == true )
 
-        name = self.discoverApplication( host, p )
+        names = self.discoverApplication( host, p )
 
-        services.merge!( { name => { 'port' => p } } )
+        names.each do |name|
+          services.merge!( { name => { 'port' => p } } )
+        end
 
       end
 

@@ -185,7 +185,7 @@ class DataCollector
       else
 
         cachedHostDirectory        = sprintf( '%s/%s', @cacheDirectory, host )
-        save_file       = sprintf( 'bulk_%s.result', port )
+        save_file       = sprintf( 'bulk_%s_mongodb.result', port )
 
         hash            = Hash.new()
         array           = Array.new()
@@ -208,7 +208,7 @@ class DataCollector
     if( port != nil )
 
       cachedHostDirectory   = sprintf( '%s/%s', @cacheDirectory, host )
-      save_file             = sprintf( 'bulk_%s.result', port )
+      save_file             = sprintf( 'bulk_%s_mysql.result', port )
 
       # TODO
       # we need an low-level-priv User for Monitoring!
@@ -398,7 +398,7 @@ class DataCollector
     end
   end
 
-  # send chek to our jolokia
+  # send check to our jolokia
   def sendChecks( file )
 
     result       = nil
@@ -458,10 +458,11 @@ class DataCollector
 
         begin
           result = self.reorganizeData( result )
+
           result = JSON.pretty_generate( result )
 
           cachedHostDirectory  = sprintf( '%s/%s', @cacheDirectory, dest_host )
-          save_file = sprintf( 'bulk_%s.result', dest_port )
+          save_file = sprintf( "#{file}.result")
           File.open( sprintf( '%s/%s', cachedHostDirectory, save_file ) , 'w' ) {|f| f.write( result ) }
 
         rescue => e

@@ -1552,112 +1552,103 @@ class CollecdPlugin
   def run()
 
     monitoredServer = monitoredServer( @cacheDirectory )
-    dataFile        = 'mergedHostData.json'
     data            = Hash.new()
 
     monitoredServer.each do |h|
 
       @Host = h
 
-      @log.info( sprintf( 'Host: %s', h ) )
+      @log.info(sprintf('Host: %s', h))
 
-      dir_path  = sprintf( '%s/%s', @cacheDirectory, h )
+      dir_path = sprintf('%s/%s', @cacheDirectory, h)
 
-      file = sprintf( '%s/%s', dir_path, dataFile )
+      Dir.chdir(dir_path)
 
-      if( File.exist?( file ) == true )
+      resultFiles = Dir.glob("**.result")
 
-        data = JSON.parse( File.read( file ) )
+      @log.debug("ResultFiles: #{resultFiles}")
 
-        data.each do |service, data|
+      resultFiles.each do |file|
 
-          port = data['port']
+        data = JSON.parse(File.read(file))
 
-          @Service = normalizeService( service )
-          @Port    = port
+        service = file.split('.').first.split('_').last
 
-          bulkResults = sprintf( '%s/bulk_%s.result', dir_path, port )
+        @Service = normalizeService(service)
 
-          @log.debug( bulkResults )
+        graphiteOutput = Array.new()
 
-          if( File.exist?( bulkResults ) == true )
+        data.each do |result|
 
-            graphiteOutput  = Array.new()
+          result.each do |k, v|
 
-            bulk = JSON.parse( File.read( bulkResults ) )
-
-            bulk.each do |result|
-
-              result.each do |k,v|
-                case k
-                when 'mongodb'
-                  graphiteOutput.push( self.ParseResult_mongoDB( v ) )
-                when 'mysql'
-                  graphiteOutput.push( self.ParseResult_mySQL( v ) )
-                when 'Runtime'
-                  graphiteOutput.push( self.ParseResult_Runtime( v ) )
-                when 'Memory'
-                  graphiteOutput.push( self.ParseResult_Memory( v ) )
-                when 'MemoryPoolCMSOldGen'
-                  graphiteOutput.push( self.ParseResult_MemoryPool( v ) )
-                when 'MemoryPoolCodeCache'
-                  graphiteOutput.push( self.ParseResult_MemoryPool( v ) )
-                when 'MemoryPoolCompressedClassSpace'
-                  graphiteOutput.push( self.ParseResult_MemoryPool( v ) )
-                when 'MemoryPoolMetaspace'
-                  graphiteOutput.push( self.ParseResult_MemoryPool( v ) )
-                when 'MemoryPoolParEdenSpace'
-                  graphiteOutput.push( self.ParseResult_MemoryPool( v ) )
-                when 'MemoryPoolParSurvivorSpace'
-                  graphiteOutput.push( self.ParseResult_MemoryPool( v ) )
-                when 'Threading'
-                  graphiteOutput.push( self.ParseResult_Threading( v ) )
+            case k
+              when 'mongodb'
+                graphiteOutput.push(self.ParseResult_mongoDB(v))
+              when 'mysql'
+                graphiteOutput.push(self.ParseResult_mySQL(v))
+              when 'Runtime'
+                graphiteOutput.push(self.ParseResult_Runtime(v))
+              when 'Memory'
+                graphiteOutput.push(self.ParseResult_Memory(v))
+              when 'MemoryPoolCMSOldGen'
+                graphiteOutput.push(self.ParseResult_MemoryPool(v))
+              when 'MemoryPoolCodeCache'
+                graphiteOutput.push(self.ParseResult_MemoryPool(v))
+              when 'MemoryPoolCompressedClassSpace'
+                graphiteOutput.push(self.ParseResult_MemoryPool(v))
+              when 'MemoryPoolMetaspace'
+                graphiteOutput.push(self.ParseResult_MemoryPool(v))
+              when 'MemoryPoolParEdenSpace'
+                graphiteOutput.push(self.ParseResult_MemoryPool(v))
+              when 'MemoryPoolParSurvivorSpace'
+                graphiteOutput.push(self.ParseResult_MemoryPool(v))
+              when 'Threading'
+                graphiteOutput.push(self.ParseResult_Threading(v))
 #                when 'ExecutortomcatThreadPool'
 #                  graphiteOutput.push( self.ParseResult_ThreadPool( v ) )
-                when 'ClassLoading'
-                  graphiteOutput.push( self.ParseResult_ClassLoading( v ) )
-                when 'Server'
-                  graphiteOutput.push( self.ParseResult_Server( v ) )
-                when 'Health'
-                  graphiteOutput.push( self.ParseResult_Health( v ) )
-                when 'ProactiveEngine'
-                  graphiteOutput.push( self.ParseResult_ProactiveEngine( v ) )
-                when 'Feeder'
-                  graphiteOutput.push( self.ParseResult_Feeder( v ) )
-                when /^CacheClasses/
-                  graphiteOutput.push( self.ParseResult_CacheClasses( k, v ) )
-                when 'CapConnection'
-                  graphiteOutput.push( self.ParseResult_CapConnection( v ) )
-                when 'StoreConnectionPool'
-                  graphiteOutput.push( self.ParseResult_ConnectionPool( v ) )
-                when 'StoreQueryPool'
-                  graphiteOutput.push( self.ParseResult_QueryPool( v ) )
-                when 'StatisticsJobResult'
-                  graphiteOutput.push( self.ParseResult_StatisticsJobResult( v ) )
-                when 'StatisticsResourceCache'
-                  graphiteOutput.push( self.ParseResult_StatisticsResourceCache( v ) )
-                when 'GarbageCollectorParNew'
-                  graphiteOutput.push( self.ParseResult_GCParNew( v ) )
-                when 'GarbageCollectorConcurrentMarkSweep'
-                  graphiteOutput.push( self.ParseResult_GCConcurrentMarkSweep( v ) )
-                when /^Solr.*Replication/
-                  graphiteOutput.push( self.ParseResult_SolrReplication( v ) )
-                when /^Solr.*QueryResultCache/
-                  graphiteOutput.push( self.ParseResult_SolrQueryResultCache( v ) )
-                when /^Solr.*DocumentCache/
-                  graphiteOutput.push( self.ParseResult_SolrDocumentCache( v ) )
-                when /^Solr.*Select/
-                  graphiteOutput.push( self.ParseResult_SolrSelect( v ) )
-                end
-              end
+              when 'ClassLoading'
+                graphiteOutput.push(self.ParseResult_ClassLoading(v))
+              when 'Server'
+                graphiteOutput.push(self.ParseResult_Server(v))
+              when 'Health'
+                graphiteOutput.push(self.ParseResult_Health(v))
+              when 'ProactiveEngine'
+                graphiteOutput.push(self.ParseResult_ProactiveEngine(v))
+              when 'Feeder'
+                graphiteOutput.push(self.ParseResult_Feeder(v))
+              when /^CacheClasses/
+                graphiteOutput.push(self.ParseResult_CacheClasses(k, v))
+              when 'CapConnection'
+                graphiteOutput.push(self.ParseResult_CapConnection(v))
+              when 'StoreConnectionPool'
+                graphiteOutput.push(self.ParseResult_ConnectionPool(v))
+              when 'StoreQueryPool'
+                graphiteOutput.push(self.ParseResult_QueryPool(v))
+              when 'StatisticsJobResult'
+                graphiteOutput.push(self.ParseResult_StatisticsJobResult(v))
+              when 'StatisticsResourceCache'
+                graphiteOutput.push(self.ParseResult_StatisticsResourceCache(v))
+              when 'GarbageCollectorParNew'
+                graphiteOutput.push(self.ParseResult_GCParNew(v))
+              when 'GarbageCollectorConcurrentMarkSweep'
+                graphiteOutput.push(self.ParseResult_GCConcurrentMarkSweep(v))
+              when /^Solr.*Replication/
+                graphiteOutput.push(self.ParseResult_SolrReplication(v))
+              when /^Solr.*QueryResultCache/
+                graphiteOutput.push(self.ParseResult_SolrQueryResultCache(v))
+              when /^Solr.*DocumentCache/
+                graphiteOutput.push(self.ParseResult_SolrDocumentCache(v))
+              when /^Solr.*Select/
+                graphiteOutput.push(self.ParseResult_SolrSelect(v))
             end
-
-            self.output( graphiteOutput )
-
           end
-
         end
+
+        self.output(graphiteOutput)
+
       end
+
     end
 
   end
