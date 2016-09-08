@@ -202,7 +202,7 @@ module Sinatra
 
       content_type :json
       status = h.addHost( host, [], true )
-      g.addDashbards( host, true)
+      g.addDashbards( host, true )
 
       response.status = h.status
       status.to_json
@@ -235,6 +235,19 @@ module Sinatra
       status.to_json
 
     end
+
+    # dashboards
+    # recreate all dashboards for the given host
+    post '/d/:host/:force' do
+
+      host = params[:host]
+
+      content_type :json
+
+      g.addDashbards( host, true )
+
+    end
+
 
     # annotations ....
     #  Host [create|destroy]

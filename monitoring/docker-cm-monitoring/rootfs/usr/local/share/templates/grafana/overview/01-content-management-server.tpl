@@ -44,7 +44,14 @@
             "thresholds": "",
             "colorBackground": false,
             "colorValue": false,
-            "decimals": 0
+            "decimals": 0,
+            "valueMaps": [
+              {
+                "value": "0",
+                "op": "=",
+                "text": "OFFLINE"
+              }
+            ]
           },
           {
             "id": 2,
@@ -141,6 +148,69 @@
               "thresholdMarkers": true,
               "thresholdLabels": false
             }
+          },
+          {
+            "title": "",
+            "error": false,
+            "span": 1,
+            "editable": true,
+            "type": "singlestat",
+            "isNew": true,
+            "id": 85,
+            "targets": [
+              {
+                "target": "collectd.%HOST%.CMS-Server-server.count-runlevel",
+                "refId": "A"
+              }
+            ],
+            "links": [],
+            "datasource": null,
+            "maxDataPoints": 100,
+            "interval": null,
+            "cacheTimeout": null,
+            "format": "none",
+            "prefix": "",
+            "postfix": "",
+            "nullText": null,
+            "valueMaps": [
+              {
+                "value": "0",
+                "op": "=",
+                "text": "Offline"
+              },
+              {
+                "value": "1",
+                "op": "=",
+                "text": "Online"
+              },
+              {
+                "value": "10",
+                "op": "=",
+                "text": "Maintenance"
+              },
+              {
+                "value": "11",
+                "op": "=",
+                "text": "Administration"
+              }
+            ],
+            "mappingTypes": [
+              {
+                "name": "value to text",
+                "value": 1
+              },
+              {
+                "name": "range to text",
+                "value": 2
+              }
+            ],
+            "mappingType": 1,
+            "nullPointMode": "connected",
+            "valueName": "current",
+            "valueFontSize": "50%",
+            "thresholds": "",
+            "colorBackground": false,
+            "colorValue": false
           }
         ],
         "title": "CMS"

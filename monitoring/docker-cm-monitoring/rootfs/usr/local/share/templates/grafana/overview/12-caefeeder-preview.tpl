@@ -44,7 +44,14 @@
             "thresholds": "",
             "colorBackground": false,
             "colorValue": false,
-            "decimals": 0
+            "decimals": 0,
+            "valueMaps": [
+              {
+                "value": "0",
+                "op": "=",
+                "text": "OFFLINE"
+              }
+            ]
           },
           {
             "cacheTimeout": null,
@@ -281,7 +288,7 @@
             "id": 22,
             "targets": [
               {
-                "target": "collectd.%HOST%.FEEDER_PREV-Health-feeder.absolute-healthy",
+                "target": "collectd.%HOST%.FEEDER_PREV-Health-feeder.gauge-healthy",
                 "refId": "A"
               }
             ],

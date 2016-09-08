@@ -44,7 +44,14 @@
             "thresholds": "",
             "colorBackground": false,
             "colorValue": false,
-            "decimals": 0
+            "decimals": 0,
+            "valueMaps": [
+              {
+                "value": "0",
+                "op": "=",
+                "text": "OFFLINE"
+              }
+            ]
           },
           {
             "id": 2,
