@@ -483,7 +483,6 @@ class DataCollector
 
   end
 
-
   # reorganize data to later simple find
   def reorganizeData( data )
 
@@ -616,8 +615,158 @@ class DataCollector
   end
 
 
+  # to reduce i/o we work better in memory ...
+  def createBulkCheck2( data )
+
+    hosts  = data.keys
+
+    hosts.each do |h|
+
+      result = Array.new()
+      @log.debug( sprintf( 'create bulk checks for \'%s\'', h ) )
+
+      services = data[h][:data] ? data[h][:data] : nil
+
+      if( services != nil )
+
+        @log.debug( sprintf( '%d services found', services.count ) )
+#        @log.debug( services.keys )
+
+        services.each do |s,v|
+
+          port    = v['port']
+          metrics = v['metrics']
+
+          if( metrics.count == 0 )
+            next
+          end
+
+          bulk    = Array.new()
+
+          metrics.each do |e|
+
+            properties = {
+              'mbean'       => e['mbean'],
+              'attributes'  => e['attribute'] ? e['attribute'] : nil,
+              'server_name' => h,
+              'server_port' => port
+            }
+
+            template = self.jolokiaTemplate( properties )
+
+            bulk.push( template )
+          end
+
+          if( bulk.count != 0 )
+            result.push( port => bulk )
+          end
+        end
+      end
+
+      array = Array.new()
+      array.push( { :host => h, :services => services.keys, :ports => result } )
+
+      @log.debug( JSON.pretty_generate( array ) )
+
+
+      self.sendChecksToJolokia( array )
+
+    end
+
+  end
+
+
+  def sendChecksToJolokia( data )
+
+    data.each do |d|
+
+      ports = d[:ports] ? d[:ports] : nil
+
+      if( ports != nil )
+
+#        @log.debug( ports.class.to_s )
+
+        ports.each do |p|
+
+          p.each do |v,i|
+
+            @log.debug( sprintf( '%d checks for port %d found', i.count, v ) )
+#            @log.debug( '-------------' )
+#            @log.debug( v )
+#            @log.debug(i)
+#            @log.debug( '-------------' )
+
+            i.each do |check|
+              @log.debug( check )
+
+            end
+          end
+
+        end
+
+#        ports.each_with_index {|val, index| @log.debug( "#{val} => #{index}" ) }
+
+      end
+
+    end
+
+  end
+
+  # merge Data
+  def buildMergedData( host )
+
+    cachedHostDirectory  = sprintf( '%s/%s', @cacheDirectory, host )
+
+    discoveryFile        = 'discovery.json'
+    mergedDataFile       = 'mergedHostData.json'
+
+    file = sprintf( '%s/%s', cachedHostDirectory, mergedDataFile )
+
+    data = Hash.new()
+
+    if( ! File.exist?( file ) )
+
+      @log.debug( 'build merged data' )
+
+      data = JSON.parse( File.read( sprintf( '%s/%s', cachedHostDirectory, discoveryFile ) ) )
+
+      # TODO
+      # create data for mySQL, Postgres
+      #
+      if( data['mongodb'] )
+        self.mongoDBData( host, data['mongodb'] )
+      end
+
+      if( data['mysql'] )
+        self.mysqlData( host, data['mysql'] )
+      end
+
+      if( data['postgres'] )
+        self.postgresData( host, data['postgres'] )
+      end
+
+      @log.debug( 'merge Data between Property Files and discovered Services' )
+      d = self.mergeData( data )
+
+      @log.debug( 'save merged data' )
+      result = JSON.pretty_generate( d )
+      File.open( file , 'w' ) {|f| f.write( result ) }
+
+    else
+
+      @log.debug( 'read merged data' )
+
+      result = JSON.parse( File.read( file ) )
+    end
+
+    return result
+
+  end
+
 
   def run( applicationConfig = nil, serviceConfig = nil )
+
+    nextStep = false
 
     if( applicationConfig != nil )
       self.applicationConfig( applicationConfig )
@@ -696,7 +845,28 @@ class DataCollector
             self.sendChecks( f )
           end
         end
+
+
+        if( nextStep == true )
+
+
+        d = buildMergedData( h )
+
+        data[h] = {
+          :data      => d,
+          :timestamp => Time.now().to_i
+        }
+
+        end
+
+
       end
+    end
+
+    if( nextStep == true )
+
+      self.createBulkCheck2( data )
+
     end
 
     self.logMark()
