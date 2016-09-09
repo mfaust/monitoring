@@ -663,11 +663,13 @@ class DataCollector
         end
       end
 
+      result.flatten!
+
       array = Array.new()
-      array.push( { :host => h, :services => services.keys, :ports => result } )
+      array.push( { :timestamp => Time.now().to_i, :host => h, :services => services.keys, :ports => ports, :checks => result } )
+      array.flatten!
 
       @log.debug( JSON.pretty_generate( array ) )
-
 
       self.sendChecksToJolokia( array )
 
@@ -678,34 +680,90 @@ class DataCollector
 
   def sendChecksToJolokia( data )
 
+    if( portOpen?( @jolokiaHost, @jolokiaPort ) == false )
+      @log.error( sprintf( 'The Jolokia Service (%s:%s) are not available', @jolokiaHost, @jolokiaPort ) )
+
+      return
+    end
+
+    # "service:jmx:rmi:///jndi/rmi://moebius-16-tomcat:2222/jmxrmi"
+    regex = /
+      ^                   # Starting at the front of the string
+      (.*):\/\/           # all after the douple slashes
+      (?<host>.+\S)       # our hostname
+      :                   # seperator between host and port
+      (?<port>\d+)        # our port
+    /x
+
+      serverUrl  = sprintf( "http://%s:%s/jolokia", @jolokiaHost, @jolokiaPort )
+
+      uri        = URI.parse( serverUrl )
+      http       = Net::HTTP.new( uri.host, uri.port )
+
     data.each do |d|
 
-      ports = d[:ports] ? d[:ports] : nil
+      checks = d[:checks] ? d[:checks] : nil
 
-      if( ports != nil )
+      if( checks != nil )
 
-#        @log.debug( ports.class.to_s )
+        checks.each do |c|
 
-        ports.each do |p|
-
-          p.each do |v,i|
+          c.each do |v,i|
 
             @log.debug( sprintf( '%d checks for port %d found', i.count, v ) )
-#            @log.debug( '-------------' )
-#            @log.debug( v )
-#            @log.debug(i)
-#            @log.debug( '-------------' )
+            @log.debug( JSON.pretty_generate( i ) )
 
-            i.each do |check|
-              @log.debug( check )
+            # prepare
+            targetUrl = i[0]['target']['url']
+            parts     = targetUrl.match( regex )
+            destHost  = "#{parts['host']}".strip
+            destPort  = "#{parts['port']}".strip
 
+            @log.debug( sprintf( 'check Port %s on Host %s for sending data', destPort, destHost ) )
+
+            if( ! portOpen?( destHost, destPort ) )
+
+              @log.error( sprintf( 'The Port %s on Host %s is not open, skip sending data', destPort, destHost ) )
+            else
+
+              request = Net::HTTP::Post.new(
+                uri.request_uri,
+                initheader = { 'Content-Type' =>'application/json' }
+              )
+              request.body = i.to_json
+
+              #Default read timeout is 60 secs
+              response = Net::HTTP.start( uri.hostname, uri.port, use_ssl: uri.scheme == "https", :read_timeout => 5 ) do |http|
+                begin
+                  http.request( request )
+                rescue Exception => e
+                  @log.warn( "Cannot execute request to #{uri.request_uri}, cause: #{e}" )
+                  @log.debug( "Cannot execute request to #{uri.request_uri}, cause: #{e}, request body: #{request.body}" )
+                  return
+                end
+              end
+
+              result = response.body
+
+#               @log.debug( 'reorganize data for later use' )
+
+              begin
+                result = self.reorganizeData( result )
+
+                result = JSON.pretty_generate( result )
+
+                cachedHostDirectory  = sprintf( '%s/%s', @cacheDirectory, destHost )
+                save_file = sprintf( "#{file}.result")
+                File.open( sprintf( '%s/%s', cachedHostDirectory, save_file ) , 'w' ) {|f| f.write( result ) }
+
+              rescue => e
+                @log.error( e )
+                @log.error( 'can\'t send data to jolokia service' )
+              end
             end
+
           end
-
         end
-
-#        ports.each_with_index {|val, index| @log.debug( "#{val} => #{index}" ) }
-
       end
 
     end
@@ -766,7 +824,7 @@ class DataCollector
 
   def run( applicationConfig = nil, serviceConfig = nil )
 
-    nextStep = false
+    future = false
 
     if( applicationConfig != nil )
       self.applicationConfig( applicationConfig )
@@ -807,55 +865,55 @@ class DataCollector
 
 #        @log.debug( file )
 
-        data = JSON.parse( File.read( file ) )
-
-        # TODO
-        # create data for mySQL, Postgres
-        #
-        if( data['mongodb'] )
-          self.mongoDBData( h, data['mongodb'] )
-        end
-
-        if( data['mysql'] )
-          self.mysqlData( h, data['mysql'] )
-        end
-
-        if( data['postgres'] )
-          self.postgresData( h, data['postgres'] )
-        end
-
-        @log.debug( 'merge Data between Property Files and discovered Services' )
-        d = self.mergeData( data )
-
-
-        if( ! File.exist?( sprintf( '%s/%s', cachedHostDirectory, mergedDataFile ) ) )
-
-          @log.debug( 'save merged data' )
-          merged = JSON.pretty_generate( d )
-          File.open( sprintf( '%s/%s', cachedHostDirectory, mergedDataFile ) , 'w' ) {|f| f.write( merged ) }
-        end
-
-        @log.debug( 'create bulk Data for Jolokia' )
-        self.createBulkCheck( h, d )
-
-        Dir.chdir( cachedHostDirectory )
-        Dir.glob( "bulk_**.json" ) do |f|
-
-          if( File.exist?( f ) == true )
-            self.sendChecks( f )
-          end
-        end
-
-
-        if( nextStep == true )
+#        data = JSON.parse( File.read( file ) )
+#
+#        # TODO
+#        # create data for mySQL, Postgres
+#        #
+#        if( data['mongodb'] )
+#          self.mongoDBData( h, data['mongodb'] )
+#        end
+#
+#        if( data['mysql'] )
+#          self.mysqlData( h, data['mysql'] )
+#        end
+#
+#        if( data['postgres'] )
+#          self.postgresData( h, data['postgres'] )
+#        end
+#
+#        @log.debug( 'merge Data between Property Files and discovered Services' )
+#        d = self.mergeData( data )
+#
+#
+#        if( ! File.exist?( sprintf( '%s/%s', cachedHostDirectory, mergedDataFile ) ) )
+#
+#          @log.debug( 'save merged data' )
+#          merged = JSON.pretty_generate( d )
+#          File.open( sprintf( '%s/%s', cachedHostDirectory, mergedDataFile ) , 'w' ) {|f| f.write( merged ) }
+#        end
+#
+#        @log.debug( 'create bulk Data for Jolokia' )
+#        self.createBulkCheck( h, d )
+#
+#        Dir.chdir( cachedHostDirectory )
+#        Dir.glob( "bulk_**.json" ) do |f|
+#
+#          if( File.exist?( f ) == true )
+#            self.sendChecks( f )
+#          end
+#        end
 
 
-        d = buildMergedData( h )
+        if( future == true )
 
-        data[h] = {
-          :data      => d,
-          :timestamp => Time.now().to_i
-        }
+
+          d = buildMergedData( h )
+
+          data[h] = {
+            :data      => d,
+            :timestamp => Time.now().to_i
+          }
 
         end
 
@@ -863,7 +921,7 @@ class DataCollector
       end
     end
 
-    if( nextStep == true )
+    if( future == true )
 
       self.createBulkCheck2( data )
 
