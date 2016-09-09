@@ -60,30 +60,6 @@
           }
         ]
       },
-      "content-management-server": {
-        "description": "Content Management Server",
-        "metrics": [
-          {
-            "description": "Statistics about Publisher",
-            "mbean" : "com.coremedia:application=coremedia,module=Publisher,pool=PublisherMethods,type=Statistics"
-          }
-        ]
-      },
-      "master-live-server": {
-        "description": "Master Live Server",
-        "metrics": [
-        ]
-      },
-      "replication-live-server": {
-        "description": "Replication Live Server",
-        "metrics": [
-          {
-            "description": "Information about Replication between MLS and RLS",
-            "mbean" : "com.coremedia:type=Replicator,application=coremedia",
-            "attribute" : "ConnectionUp,ControllerState,Enabled,PipelineUp,IncomingCount,CompletedCount,UncompletedCount,LatestCompletedSequenceNumber,LatestCompletedArrival,LatestCompletionDuration,LatestIncomingSequenceNumber,LatestIncomingArrival"
-          }
-        ]
-      },
       "contentserver": {
         "description": "ContentServer",
         "metrics": [
@@ -114,6 +90,30 @@
           }, {
             "description": "Statistics about TextStore",
             "mbean" : "com.coremedia:application=coremedia,module=TextStore,pool=TextStoreMethods,type=Statistics"
+          }
+        ]
+      },
+      "content-management-server": {
+        "description": "Content Management Server",
+        "metrics": [
+          {
+            "description": "Statistics about Publisher",
+            "mbean" : "com.coremedia:application=coremedia,module=Publisher,pool=PublisherMethods,type=Statistics"
+          }
+        ]
+      },
+      "master-live-server": {
+        "description": "Master Live Server",
+        "metrics": [
+        ]
+      },
+      "replication-live-server": {
+        "description": "Replication Live Server",
+        "metrics": [
+          {
+            "description": "Information about Replication between MLS and RLS",
+            "mbean" : "com.coremedia:type=Replicator,application=coremedia",
+            "attribute" : "ConnectionUp,ControllerState,Enabled,PipelineUp,IncomingCount,CompletedCount,UncompletedCount,LatestCompletedSequenceNumber,LatestCompletedArrival,LatestCompletionDuration,LatestIncomingSequenceNumber,LatestIncomingArrival"
           }
         ]
       },
@@ -189,10 +189,23 @@
           }
         ]
       },
+      "adobe-drive-server": {
+        "description": "Adobe Drive Server",
+        "metrics": [
+          {
+            "name": "CapConnection",
+            "mbean": "com.coremedia:type=CapConnection,application=CoreMedia-Asset-Management-Adobe-Drive-Server",
+            "attribute": "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions"
+          }
+        ]
+      },
       "sitemanager": {
         "description": "Site Manger - single Application to provide the old FAT Client",
-        "metrics": [
-        ]
+        "metrics": []
+      },
+      "editor-webstart": {
+        "description": "Editor Webstart - single Application to provide the old FAT Client",
+        "metrics": []
       },
       "cae": {
         "description": "checks for all CAE Services",

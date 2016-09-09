@@ -446,8 +446,8 @@ class CollecdPlugin
         activeClients = globalLock['activeClients'] ? globalLock['activeClients'] : nil
 
         if (currentQueue)
-          readers       = activeClients['readers']    ? activeClients['readers']  : nil
-          writers       = activeClients['writers']    ? activeClients['writers']  : nil
+          readers     = activeClients['readers']    ? activeClients['readers']  : nil
+          writers     = activeClients['writers']    ? activeClients['writers']  : nil
           total       = activeClients['total']      ? activeClients['total']    : nil
 
           result.push( sprintf( format, @Host, @Service, 'globalLockActiveClients', 'readers'    , @interval, readers ) )

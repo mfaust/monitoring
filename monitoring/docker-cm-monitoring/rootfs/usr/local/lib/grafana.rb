@@ -184,7 +184,7 @@ class Grafana
         # get templates for service
         serviceTemplatePaths = *getTemplatePathsForService(serviceName)
 
-        if( !['mongodb', 'mysql', 'postgres'].include? serviceName )
+        if( !['mongodb', 'mysql', 'postgres'].include?( serviceName ) )
           additionalTemplatePaths.push( *getTemplatePathsForService("tomcat") )
         end
 

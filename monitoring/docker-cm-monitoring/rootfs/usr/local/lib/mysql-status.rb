@@ -141,15 +141,24 @@ class  MysqlStatus
 
   def run()
 
+    if( !@client )
+      self.connect()
+    end
+
     begin
 
       rs = @client.query( @mysqlQuery )
 
-      rows = self.toJson( rs )
-      rows = self.valuesToNumeric( rows )
-      rows = self.scaleValues( rows )
+      if( rs )
 
-      return rows.to_json
+        rows = self.toJson( rs )
+        rows = self.valuesToNumeric( rows )
+        rows = self.scaleValues( rows )
+
+        return rows.to_json
+      else
+        return false
+      end
 
     rescue Exception => e
       @log.error( "An error occurred #{e}" )

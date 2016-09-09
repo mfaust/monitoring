@@ -172,15 +172,17 @@ class DataCollector
 
         response     = http.request( request )
 
-      rescue Timeout::Error, Errno::ECONNREFUSED, Errno::EINVAL, Errno::ECONNRESET, EOFError, Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError => error
+      rescue Timeout::Error, Errno::EHOSTUNREACH, Errno::ECONNREFUSED, Errno::EINVAL, Errno::ECONNRESET, EOFError, Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError => error
 
         @log.error( error )
 
         case error
+        when Errno::EHOSTUNREACH
+          @log.error( 'Host unreachable' )
         when Errno::ECONNREFUSED
-          @log.error( 'connection refused' )
+          @log.error( 'Connection refused' )
         when Errno::ECONNRESET
-          @log.error( 'connection reset' )
+          @log.error( 'Connection reset' )
         end
       else
 
@@ -226,7 +228,13 @@ class DataCollector
 
       hash            = Hash.new()
       array           = Array.new()
-      hash['mysql']   = JSON.parse( @mysql.run() )
+      mysqlData       = @mysql.run()
+
+      if( mysqlData == false )
+        mysqlData   = {}
+      end
+
+      hash['mysql']   = JSON.parse( mysqlData )
 
       array.push( hash )
 
@@ -647,6 +655,7 @@ class DataCollector
           @discovery.refreshHost( h )
 
         end
+
 #        @log.debug( file )
 
         data = JSON.parse( File.read( file ) )

@@ -93,10 +93,10 @@ end
     # first, ping check
     if( system( 'ping -c1 -w1 ' + ip.to_s + ' > /dev/null' ) == true )
 
-      @log.info( sprintf( 'node %-13s is available', ip.to_s ) )
+#       @log.info( sprintf( 'node %-13s is available', ip.to_s ) )
       return true
     else
-      @log.info( sprintf( 'node %-13s is NOT available', ip.to_s ) )
+#       @log.info( sprintf( 'node %-13s is NOT available', ip.to_s ) )
       return false
     end
 

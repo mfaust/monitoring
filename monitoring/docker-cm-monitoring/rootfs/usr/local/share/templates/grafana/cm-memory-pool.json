@@ -50,7 +50,13 @@
             "pointradius": 5,
             "points": false,
             "renderer": "flot",
-            "seriesOverrides": [],
+            "seriesOverrides": [
+              {
+                "alias": "percent",
+                "yaxis": 2,
+                "color": "#CFFAFF"
+              }
+            ],
             "span": 12,
             "stack": false,
             "steppedLine": false,
@@ -68,6 +74,11 @@
               {
                 "refId": "C",
                 "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-MemoryPool-CMS_Old_Gen.count-used, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "D",
+                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.$service-MemoryPool-CMS_Old_Gen.count-used_percent, '(.*)-', ''), 'percent'))",
                 "textEditor": false
               }
             ],
@@ -94,8 +105,8 @@
                 "show": true
               },
               {
-                "format": "short",
-                "label": null,
+                "format": "none",
+                "label": "used in %",
                 "logBase": 1,
                 "max": null,
                 "min": null,
@@ -146,7 +157,13 @@
             "pointradius": 5,
             "points": false,
             "renderer": "flot",
-            "seriesOverrides": [],
+            "seriesOverrides": [
+              {
+                "alias": "percent",
+                "yaxis": 2,
+                "color": "#CFFAFF"
+              }
+            ],
             "span": 12,
             "stack": false,
             "steppedLine": false,
@@ -164,6 +181,11 @@
               {
                 "refId": "C",
                 "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-MemoryPool-Code_Cache.count-used, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "D",
+                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.$service-MemoryPool-Code_Cache.count-used_percent, '(.*)-', ''), 'percent'))",
                 "textEditor": false
               }
             ],
@@ -190,8 +212,8 @@
                 "show": true
               },
               {
-                "format": "short",
-                "label": null,
+                "format": "none",
+                "label": "used in %",
                 "logBase": 1,
                 "max": null,
                 "min": null,
@@ -242,7 +264,13 @@
             "pointradius": 5,
             "points": false,
             "renderer": "flot",
-            "seriesOverrides": [],
+            "seriesOverrides": [
+              {
+                "alias": "percent",
+                "yaxis": 2,
+                "color": "#CFFAFF"
+              }
+            ],
             "span": 12,
             "stack": false,
             "steppedLine": false,
@@ -260,6 +288,11 @@
               {
                 "refId": "C",
                 "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-MemoryPool-Compressed_Class_Space.count-used, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "D",
+                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.$service-MemoryPool-Compressed_Class_Space.count-used_percent, '(.*)-', ''), 'percent'))",
                 "textEditor": false
               }
             ],
@@ -286,8 +319,8 @@
                 "show": true
               },
               {
-                "format": "short",
-                "label": null,
+                "format": "none",
+                "label": "used in %",
                 "logBase": 1,
                 "max": null,
                 "min": null,
@@ -338,7 +371,13 @@
             "pointradius": 5,
             "points": false,
             "renderer": "flot",
-            "seriesOverrides": [],
+            "seriesOverrides": [
+              {
+                "alias": "percent",
+                "yaxis": 2,
+                "color": "#CFFAFF"
+              }
+            ],
             "span": 12,
             "stack": false,
             "steppedLine": false,
@@ -357,6 +396,11 @@
               {
                 "refId": "C",
                 "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-MemoryPool-Metaspace.count-used, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "D",
+                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.$service-MemoryPool-Metaspace.count-used_percent, '(.*)-', ''), 'percent'))",
                 "textEditor": false
               }
             ],
@@ -383,8 +427,8 @@
                 "show": true
               },
               {
-                "format": "short",
-                "label": null,
+                "format": "none",
+                "label": "used in %",
                 "logBase": 1,
                 "max": null,
                 "min": null,
@@ -435,7 +479,13 @@
             "pointradius": 5,
             "points": false,
             "renderer": "flot",
-            "seriesOverrides": [],
+            "seriesOverrides": [
+              {
+                "alias": "percent",
+                "yaxis": 2,
+                "color": "#CFFAFF"
+              }
+            ],
             "span": 12,
             "stack": false,
             "steppedLine": false,
@@ -453,6 +503,11 @@
               {
                 "refId": "C",
                 "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-MemoryPool-Par_Eden_Space.count-used, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "D",
+                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.$service-MemoryPool-Par_Eden_Space.count-used_percent, '(.*)-', ''), 'percent'))",
                 "textEditor": false
               }
             ],
@@ -479,8 +534,8 @@
                 "show": true
               },
               {
-                "format": "short",
-                "label": null,
+                "format": "none",
+                "label": "used in %",
                 "logBase": 1,
                 "max": null,
                 "min": null,
@@ -531,7 +586,13 @@
             "pointradius": 5,
             "points": false,
             "renderer": "flot",
-            "seriesOverrides": [],
+            "seriesOverrides": [
+              {
+                "alias": "percent",
+                "yaxis": 2,
+                "color": "#CFFAFF"
+              }
+            ],
             "span": 12,
             "stack": false,
             "steppedLine": false,
@@ -549,6 +610,11 @@
               {
                 "refId": "C",
                 "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-MemoryPool-Par_Survivor_Space.count-used, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "D",
+                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.$service-MemoryPool-Par_Survivor_Space.count-used_percent, '(.*)-', ''), 'percent'))",
                 "textEditor": false
               }
             ],
@@ -575,8 +641,8 @@
                 "show": true
               },
               {
-                "format": "short",
-                "label": null,
+                "format": "none",
+                "label": "used in %",
                 "logBase": 1,
                 "max": null,
                 "min": null,

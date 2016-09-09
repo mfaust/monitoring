@@ -12,74 +12,6 @@
       "description": "MongoDB",
       "port": 28017
     },
-    "content-management-server": {
-      "description": "Content Management Server",
-      "port": 40199,
-      "application": "contentserver"
-    },
-    "master-live-server": {
-      "description": "Master Live Server",
-      "port": 40299,
-      "application": "contentserver"
-    },
-    "replication-live-server": {
-      "description": "RLS",
-      "port": 42099,
-      "application": "contentserver"
-    },
-    "workflow-server": {
-      "description": "Workflow Server",
-      "port": 40399
-    },
-    "elastic-worker": {
-      "description": "Elastic Worker",
-      "port": 40699
-    },
-    "user-changes": {
-      "description": "User Changes",
-      "port": 40599
-    },
-    "content-feeder": {
-      "description": "Content Feeder",
-      "port": 40499
-    },
-    "caefeeder-live": {
-      "description": "CAEFeeder Live",
-      "port": 40899,
-      "application": "caefeeder"
-    },
-    "caefeeder-preview": {
-      "description": "CAEFeeder Preview",
-      "port": 40799,
-      "application": "caefeeder"
-    },
-    "adobe-drive": {
-      "description": "Adobe Drive",
-      "port": 41199
-    },
-    "sitemanager": {
-      "description": "Site Manager",
-      "port": 41399
-    },
-    "cae-live-1": {
-      "description": "CAE Live 1",
-      "port": 42199,
-      "application": "cae"
-    },
-    "cae-live-2": {
-      "description": "CAE Live 2",
-      "port": 42299,
-      "application": "cae"
-    },
-    "cae-preview": {
-      "description": "CAE Preview",
-      "port": 40999,
-      "application": "cae"
-    },
-    "studio": {
-      "description": "Studio",
-      "port": 41099
-    },
     "solr-master": {
       "description": "Solr Master",
       "port": 40099,
@@ -92,12 +24,94 @@
       "cores": [ "live", "preview", "studio" ],
       "application": "solr"
     },
+    "editor-webstart": {
+      "description": "Editor Webstart",
+      "port": 40099
+    },
+    "content-management-server": {
+      "description": "Content Management Server",
+      "port": 40199,
+      "application": "contentserver"
+    },
+    "master-live-server": {
+      "description": "Master Live Server",
+      "port": 40299,
+      "application": "contentserver"
+    },
+    "workflow-server": {
+      "description": "Workflow Server",
+      "port": 40399
+    },
+    "content-feeder": {
+      "description": "Content Feeder",
+      "port": 40499
+    },
+    "user-changes": {
+      "description": "User Changes",
+      "port": 40599
+    },
+    "elastic-worker": {
+      "description": "Elastic Worker",
+      "port": 40699
+    },
+    "caefeeder-preview": {
+      "description": "CAEFeeder Preview",
+      "port": 40799,
+      "application": "caefeeder"
+    },
+    "caefeeder-live": {
+      "description": "CAEFeeder Live",
+      "port": 40899,
+      "application": "caefeeder"
+    },
+    "cae-preview": {
+      "description": "CAE Preview",
+      "port": 40999,
+      "application": "cae"
+    },
+    "studio": {
+      "description": "Studio",
+      "port": 41099
+    },
+    "adobe-drive": {
+      "description": "Adobe Drive",
+      "port": 41199
+    },
     "adobe-drive-server": {
-      "description": "Adobe Drive Server"
+      "description": "Adobe Drive Server",
+      "port": 41199
     },
     "webdav": {
       "description": "WebDAV",
       "port": 41299
+    },
+    "sitemanager": {
+      "description": "Site Manager",
+      "port": 41399
+    },
+    "replication-live-server": {
+      "description": "RLS",
+      "port": 42099,
+      "application": "contentserver"
+    },
+    "cae-live-1": {
+      "description": "CAE Live 1",
+      "port": 42199,
+      "application": "cae"
+    },
+    "cae-live-2": {
+      "description": "CAE Live 2",
+      "port": 42299,
+      "application": "cae"
+    },
+    "cae-live-3": {
+      "description": "CAE Live 3",
+      "port": 42399,
+      "application": "cae"
+    },
+    "workflow-server": {
+      "description": "Workflow Server",
+      "port": 49099
     }
   }
 }

@@ -1,9 +1,9 @@
 #!/usr/bin/ruby
 #
-# 27.08.2016 - Bodo Schulz
+# 09.09.2016 - Bodo Schulz
 #
 #
-# v1.1.0
+# v1.2.0
 # -----------------------------------------------------------------------------
 
 require 'socket'
@@ -11,7 +11,6 @@ require 'timeout'
 require 'logger'
 require 'json'
 require 'fileutils'
-# require 'resolv-replace.rb'
 require 'net/http'
 require 'uri'
 
@@ -88,8 +87,8 @@ class ServiceDiscovery
       49099
     ]
 
-    version              = '1.1.0'
-    date                 = '2016-08-27'
+    version              = '1.2.0'
+    date                 = '2016-09.09'
 
     @log.info( '-----------------------------------------------------------------' )
     @log.info( ' CM Service Discovery' )
@@ -134,6 +133,7 @@ class ServiceDiscovery
 
   end
 
+
   def configure( options = {} )
 
     if( options )
@@ -160,7 +160,7 @@ class ServiceDiscovery
 
   def discoverApplication( host, port )
 
-    @log.debug( sprintf( 'check port %s for service ', port.to_s  ) )
+    @log.debug( sprintf( 'check port %s for services', port.to_s  ) )
 
     services = Array.new
 
@@ -183,6 +183,7 @@ class ServiceDiscovery
       request.add_field('Content-Type', 'application/json')
 
       # hash for the NEW Port-Schema
+      # since cm160x every application runs in his own container with unique port schema
       hash = {
         :type => "read",
         :mbean => "java.lang:type=Runtime",
@@ -213,115 +214,133 @@ class ServiceDiscovery
 
         body         = JSON.parse( response.body )
 
+#         @log.debug( JSON.pretty_generate( body ) )
+
         if( body['status'] == 200 )
 
           classPath  = body['value']['ClassPath'] ? body['value']['ClassPath'] : nil
 
+          # OLD styled Application can handle more than one application
+          # e.g. studio and cae-preview or content-management-server and content-feeder and solr-master
           if( classPath.include?( 'cm7-tomcat-installation' ) )
 
-            @log.debug( 'old style' )
+            @log.debug( 'found pre cm160x Portstyle (‎possibly cm7.x)' )
 
             apps = {
-                :type => "read",
-                :mbean => "Catalina:type=Manager,context=*,host=*",
-                :target => {
-                    :url => sprintf( "service:jmx:rmi:///jndi/rmi://%s:%s/jmxrmi", host, port )
-                }
+              :type   => "read",
+              :mbean  => "Catalina:type=Manager,context=*,host=*",
+              :target => {
+                :url => sprintf( "service:jmx:rmi:///jndi/rmi://%s:%s/jmxrmi", host, port )
+              }
             }
             request.body = JSON.generate( apps )
             response     = http.request( request )
-            appsBody         = JSON.parse( response.body )
+            appsBody     = JSON.parse( response.body )
 
-            contextsMap = appsBody['value']
+#            @log.debug( JSON.pretty_generate( appsBody ) )
+
+            contextsMap  = appsBody['value']
 
             regex = /context=(.*?),/
             contextsMap.each do |context,v|
 
-              part = context.match(regex)
+              part = context.match( regex )
 
-              if (part != nil && part.length > 1)
-                appName = part[1].gsub('/','')
-                services.push(appName)
+              if( part != nil && part.length > 1 )
+
+                appName = part[1].gsub!( '/', '' )
+
+                if( appName == 'manager' )
+                  # skip 'manager'
+                  next
+                end
+
+#                 @log.debug( sprintf( ' - ‎recognized application: %s', appName ) )
+                services.push( appName )
               end
             end
 
-            #coremedia = cms, mls, rls? caefeeder = caefeeder-preview, cae-feeder-live?
-            if ((services.include?'coremedia') || (services.include?'caefeeder'))
+            # coremedia = cms, mls, rls?
+            # caefeeder = caefeeder-preview, cae-feeder-live?
+            if( ( services.include?( 'coremedia' ) ) || ( services.include?( 'caefeeder' ) ) )
 
               hash = {
-                  :type => "read",
-                  :mbean => "Catalina:type=Engine",
-                  :attribute => [
-                      'baseDir'
-                  ],
-                  :target => {
-                      :url => sprintf("service:jmx:rmi:///jndi/rmi://%s:%s/jmxrmi", host, port)
-                  }
+                :type      => "read",
+                :mbean     => "Catalina:type=Engine",
+                :attribute => [ 'baseDir' ],
+                :target    => {
+                  :url => sprintf("service:jmx:rmi:///jndi/rmi://%s:%s/jmxrmi", host, port)
+                }
               }
 
-              request.body = JSON.generate(hash)
-              response = http.request(request)
-              body = JSON.parse(response.body)
+              request.body = JSON.generate( hash )
+              response     = http.request( request )
+              body         = JSON.parse( response.body )
 
-              if (body['status'] == 200)
+              if( body['status'].to_i == 200 )
 
                 baseDir = body['value']['baseDir'] ? body['value']['baseDir'] : nil
 
                 regex = /
-                ^                           # Starting at the front of the string
-                (.*)                        #
-                \/cm7-                      #
-                (?<service>.+[a-zA-Z0-9-])  #
-                (.*)-tomcat                 #
-                $
-              /x
+                  ^                           # Starting at the front of the string
+                  (.*)                        #
+                  \/cm7-                      #
+                  (?<service>.+[a-zA-Z0-9-])  #
+                  (.*)-tomcat                 #
+                  $
+                /x
 
-                parts = baseDir.match(regex)
+                parts = baseDir.match( regex )
 
-
-                if (parts)
+                if( parts )
                   service = "#{parts['service']}".strip.tr('. ', '')
-                  services.delete("coremedia")
-                  services.delete("caefeeder")
-                  services.push(service)
+                  services.delete( "coremedia" )
+                  services.delete( "caefeeder" )
+                  services.push( service )
 
-                  @log.debug(sprintf('  => %s', service))
+#                  @log.debug( sprintf( '  => %s', service ) )
                 else
-                  @log.error('unknown')
+                  @log.error( 'unknown error' )
+                  @log.error( parts )
                 end
+              else
+                @log.error( sprintf( 'response status %d', body['status'].to_i ) )
               end
             end
 
-            #blueprint = cae-preview or delivery?
-            if (services.include?'blueprint')
+            # blueprint = cae-preview or delivery?editor
+            if( services.include?( 'blueprint' ) )
+
               hash = {
-                  :type => "read",
-                  :mbean => "Catalina:type=Engine",
-                  :attribute => [
-                      'jvmRoute'
-                  ],
-                  :target => {
-                      :url => sprintf("service:jmx:rmi:///jndi/rmi://%s:%s/jmxrmi", host, port)
-                  }
+                :type      => "read",
+                :mbean     => "Catalina:type=Engine",
+                :attribute => [ 'jvmRoute' ],
+                :target    => {
+                  :url => sprintf("service:jmx:rmi:///jndi/rmi://%s:%s/jmxrmi", host, port)
+                }
               }
 
               request.body = JSON.generate(hash)
-              response = http.request(request)
-              body = JSON.parse(response.body)
+              response     = http.request(request)
+              body         = JSON.parse(response.body)
 
-              if (body['status'] == 200)
+              if( body['status'].to_i == 200 )
 
                 jvmRoute = body['value']['jvmRoute'] ? body['value']['jvmRoute'] : nil
-                if ((jvmRoute != nil) && (jvmRoute.include?'studio'))
-                  services.delete("blueprint")
-                  services.push("cae-preview")
+
+                if( ( jvmRoute != nil ) && ( jvmRoute.include?( 'studio' ) ) )
+                  services.delete( "blueprint" )
+                  services.push( "cae-preview" )
                 else
-                  services.delete("blueprint")
-                  services.push("delivery")
+                  services.delete( "blueprint" )
+                  services.push( "delivery" )
                 end
+              else
+                @log.error( sprintf( 'response status %d', body['status'].to_i ) )
               end
             end
 
+          # all others
           else
 
             regex = /
@@ -334,15 +353,16 @@ class ServiceDiscovery
               $
             /x
 
-            parts = classPath.match(regex)
+            parts = classPath.match( regex )
 
-            if (parts)
+            if( parts )
               service = "#{parts['service']}".strip.tr('. ', '')
-              services.push(service)
+              services.push( service )
 
-              @log.debug(sprintf('  => %s', service))
+#               @log.debug( sprintf( '  => %s', service ) )
             else
-              @log.error('unknown')
+              @log.error( 'unknown error' )
+              @log.error( parts )
             end
           end
 
@@ -352,9 +372,9 @@ class ServiceDiscovery
 
       end
 
+      # normalize service names
       services.map! {|service|
 
-        # normalize service names
         case service
           when 'cms'
             'content-management-server'
@@ -378,6 +398,8 @@ class ServiceDiscovery
       }
 
     end
+
+#    @log.debug( "final services #{services}" )
 
     return services
   end
@@ -428,6 +450,8 @@ class ServiceDiscovery
 
   # add Host and discovery applications
   def addHost( host, ports = [], force = false )
+
+    @log.debug( 'addHost' )
 
     # first, we check if our jolokia accessable
     if( ! jolokiaIsAvailable?() )
@@ -513,7 +537,7 @@ class ServiceDiscovery
 
 #     @log.debug ( d )
 
-    File.open( sprintf( '%s/%s', dir_path, file_name ) , 'w' ) {|f| f.write( JSON.pretty_generate( services ) ) }
+    File.open( sprintf( '%s/%s', dir_path, file_name ) , 'w' ) { |f| f.write( JSON.pretty_generate( services ) ) }
 
     @status  = 201
     @message = 'Host successful created'
