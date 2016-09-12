@@ -629,7 +629,7 @@ class DataCollector
 
       if( services != nil )
 
-        @log.debug( sprintf( '%d services found', services.count ) )
+        @log.info( sprintf( '%d services found', services.count ) )
 #        @log.debug( services.keys )
 
         services.each do |s,v|
@@ -666,10 +666,10 @@ class DataCollector
       result.flatten!
 
       array = Array.new()
-      array.push( { :timestamp => Time.now().to_i, :host => h, :services => services.keys, :ports => ports, :checks => result } )
+      array.push( { :timestamp => Time.now().to_i, :host => h, :services => services.keys, :checks => result } )
       array.flatten!
 
-      @log.debug( JSON.pretty_generate( array ) )
+#       @log.debug( JSON.pretty_generate( array ) )
 
       self.sendChecksToJolokia( array )
 
@@ -695,23 +695,28 @@ class DataCollector
       (?<port>\d+)        # our port
     /x
 
-      serverUrl  = sprintf( "http://%s:%s/jolokia", @jolokiaHost, @jolokiaPort )
+    serverUrl  = sprintf( "http://%s:%s/jolokia", @jolokiaHost, @jolokiaPort )
 
-      uri        = URI.parse( serverUrl )
-      http       = Net::HTTP.new( uri.host, uri.port )
+    uri        = URI.parse( serverUrl )
+    http       = Net::HTTP.new( uri.host, uri.port )
+
+    array = Array.new()
 
     data.each do |d|
 
-      checks = d[:checks] ? d[:checks] : nil
+      hostname = d[:hostname] ? d[:hostname] : nil
+      checks   = d[:checks]   ? d[:checks]   : nil
 
       if( checks != nil )
 
         checks.each do |c|
 
+          a = Array.new()
+
           c.each do |v,i|
 
-            @log.debug( sprintf( '%d checks for port %d found', i.count, v ) )
-            @log.debug( JSON.pretty_generate( i ) )
+            @log.info( sprintf( '%d checks for port %d found', i.count, v ) )
+#             @log.debug( JSON.pretty_generate( i ) )
 
             # prepare
             targetUrl = i[0]['target']['url']
@@ -748,25 +753,33 @@ class DataCollector
 #               @log.debug( 'reorganize data for later use' )
 
               begin
+
                 result = self.reorganizeData( result )
 
                 result = JSON.pretty_generate( result )
 
-                cachedHostDirectory  = sprintf( '%s/%s', @cacheDirectory, destHost )
-                save_file = sprintf( "#{file}.result")
-                File.open( sprintf( '%s/%s', cachedHostDirectory, save_file ) , 'w' ) {|f| f.write( result ) }
+                a.push( v => JSON.parse( result ) )
+
+#                 cachedHostDirectory  = sprintf( '%s/%s', @cacheDirectory, destHost )
+#                 save_file = sprintf( "#{file}.result")
+#                 File.open( sprintf( '%s/%s', cachedHostDirectory, save_file ) , 'w' ) {|f| f.write( result ) }
 
               rescue => e
                 @log.error( e )
                 @log.error( 'can\'t send data to jolokia service' )
               end
             end
-
           end
-        end
-      end
 
+          log.debug( JSON.pretty_generate( a ) )
+
+        end
+
+      end
     end
+
+    array.push( { :timestamp => Time.now().to_i, hostname => a } )
+#     @log.debug( JSON.pretty_generate( array ) )
 
   end
 
@@ -824,7 +837,7 @@ class DataCollector
 
   def run( applicationConfig = nil, serviceConfig = nil )
 
-    future = false
+    future = true
 
     if( applicationConfig != nil )
       self.applicationConfig( applicationConfig )
@@ -856,12 +869,12 @@ class DataCollector
 
       if( File.exist?( file ) == true )
 
-        if( self.checkDiscoveryFileAge( file ) == true )
-
-          # re.start the service discovery
-          @discovery.refreshHost( h )
-
-        end
+#         if( self.checkDiscoveryFileAge( file ) == true )
+#
+#           # re.start the service discovery
+#           @discovery.refreshHost( h )
+#
+#         end
 
 #        @log.debug( file )
 
