@@ -634,6 +634,10 @@ class Grafana
       # TODO
       # Errorhandling
       if( responseCode != 200 )
+        # 200 – Created
+        # 400 – Errors (invalid json, missing or invalid fields, etc)
+        # 401 – Unauthorized
+        # 412 – Precondition failed
         @log.error( sprintf( ' [%s] - Error', responseCode ) )
       end
 

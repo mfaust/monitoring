@@ -653,7 +653,7 @@ class DataCollector
 
       services = data[h][:data] ? data[h][:data] : nil
 
-      @log.info( sprintf( '%d services found', services.count ) )
+      @log.debug( sprintf( '%d services found', services.count ) )
 
       services.each do |s,v|
 
@@ -745,7 +745,7 @@ class DataCollector
 
       c.each do |v,i|
 
-        @log.info( sprintf( '%d checks for service %s found', i.count, v ) )
+        @log.debug( sprintf( '%d checks for service %s found', i.count, v ) )
 
         if( ! i[0]['target'] )
 

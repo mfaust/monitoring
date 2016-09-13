@@ -4,7 +4,7 @@
         "height": "100px",
         "panels": [
           {
-            "content": "<h3><center><bold><a href=\"/grafana/dashboard/db/%HOST%-solr-master\">Solr Master</a></bold></center></h3>",
+            "content": "<h3><center><bold><a href=\"/grafana/dashboard/db/%SHORTHOST%-solr-master\">Solr Master</a></bold></center></h3>",
             "editable": true,
             "error": false,
             "id": 16,
