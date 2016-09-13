@@ -70,61 +70,49 @@ class Grafana
   end
 
 
-  def supportMbean?( filename, mbean, key = nil )
+  def supportMbean?( data, service, mbean, key = nil )
 
     result = false
 
-    for y in 1..10
+    s   = data[service] ? data[service] : nil
 
-      if( File.exist?( filename ) )
-        file = File.read( filename )
-        break
-      end
-
-      sleep( 3 )
-      @log.debug("Waiting for file #{filename} ... #{y}")
-
+    if( s == nil )
+      @log.debug( sprintf( 'no service %s found', service ) )
+      return false
     end
 
-    if( file )
+    mbeanExists  = s.detect { |s| s[mbean] }
 
-      begin
-        json = JSON.parse( file )
-      rescue JSON::ParserError => e
-        @log.error('wrong result (no json)')
-        @log.error(e)
+    if( mbeanExists == nil )
+      @log.debug( sprintf( 'no mbean %s found', mbean ) )
+      return false
+    end
 
+    mbeanExists  = mbeanExists[mbean]    ? mbeanExists[mbean]    : nil
+    mbeanStatus  = mbeanExists['status'] ? mbeanExists['status'] : 999
+
+    if( mbeanStatus.to_i != 200 )
+
+      @log.debug( sprintf( 'mbean %s found, but status %d', mbean, mbeanStatus ) )
+      return false
+    end
+
+    if( mbeanExists != nil && key == nil )
+
+      result = true
+    elsif( mbeanExists != nil && key != nil )
+
+      mbeanValue = mbeanExists['value'] ? mbeanExists['value'] : nil
+      if( mbeanValue == nil )
         return false
       end
 
-      service      = json.detect { |s| s[mbean] }
+      attribute = mbeanValue[ key ] ? mbeanValue[ key ]  : nil
+      if( attribute == nil || ( attribute.include?( 'ERROR' ) ) )
 
-      if (service == nil)
         return false
       end
-
-      mbeanExists  = service[ mbean ] ? service[ mbean ] : nil
-
-      if( mbeanExists['status'].to_i != 200 )
-        return false
-      end
-
-      if( mbeanExists != nil and key == nil )
-
-        result = true
-      elsif( mbeanExists != nil and key != nil )
-        mbeanValue = mbeanExists['value'] ? mbeanExists['value'] : nil
-        if( mbeanValue == nil )
-          return false
-        end
-
-        attribute = mbeanValue[ key ] ? mbeanValue[ key ]  : nil
-        if ( attribute == nil || (attribute.include?'ERROR'))
-          return false
-        end
-        return true
-      end
-
+      return true
     end
 
     return result
@@ -176,7 +164,7 @@ class Grafana
         serviceTemplatePaths    = Array.new()
         additionalTemplatePaths = Array.new()
 
-        @log.debug("Searching templates paths for service: #{service}")
+#         @log.debug("Searching templates paths for service: #{service}")
 
         # cae-live-1 -> cae-live
         serviceName = removePostfix(service)
@@ -437,33 +425,46 @@ class Grafana
     licenseUntil   = sprintf( '%s/licenses/licenses-until.json', @templateDirectory )
     licensePart    = sprintf( '%s/licenses/licenses-part.json' , @templateDirectory )
 
-    def beanAvailable?(host, service, beanKey)
+    def beanAvailable?( host, service, beanKey )
 
-      port = self.applicationPort(service)
+      port = self.applicationPort( service )
 
-      fileName = sprintf("%s/%s/bulk_*%s*server.json.result", @cacheDirectory, host, port)
+      fileName = sprintf( "%s/%s/monitoring.result", @cacheDirectory, host )
 
       for y in 1..10
 
-        files = Dir.glob(fileName)
-
-        if (files != nil && files.length > 0)
-
-          return self.supportMbean?(files[0], 'Server', beanKey)
+        if( File.exist?( fileName ) )
+          sleep( 1 )
+          file = File.read( fileName )
           break
-
         end
 
+        @log.debug( sprintf( 'Waiting for file %s ... %d', fileName, y ) )
         sleep( 3 )
-        @log.debug( "  Waiting for file #{fileName} ... #{y}" )
       end
 
-      return false
+      if( file )
+
+        begin
+          json   = JSON.parse( file )
+          result = self.supportMbean?( json, service, 'Server', beanKey )
+        rescue JSON::ParserError => e
+
+          @log.error('wrong result (no json)')
+          @log.error(e)
+
+          result = false
+        end
+      end
+
+      return result
     end
 
     intersect.each do |service|
 
       if( self.beanAvailable?( host, service, 'LicenseInfos' ) == true )
+
+        @log.info( sprintf( 'found License Information for Service %s', service ) )
 
         if( File.exist?( licenseUntil ) )
 
@@ -484,6 +485,8 @@ class Grafana
     intersect.each do |service|
 
       if( self.beanAvailable?( host, service, 'ServiceInfos' ) == true )
+
+        @log.info( sprintf( 'found Service Information for Service %s', service ) )
 
         if( File.exist?( licensePart ) )
 
@@ -626,10 +629,13 @@ class Grafana
       request.basic_auth 'admin', 'admin'
       request.body = templateFile
       response     = http.request request
+      responseCode = response.code.to_i
 
       # TODO
       # Errorhandling
-      @log.info( sprintf( ' [%s] - Successful',  response.code ) )
+      if( responseCode != 200 )
+        @log.error( sprintf( ' [%s] - Error', responseCode ) )
+      end
 
     end
   end

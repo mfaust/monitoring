@@ -31,22 +31,23 @@ class  MysqlStatus
 
     @relative = false
 
-    self.connect()
-
   end
 
   def connect()
 
     begin
       @client = Mysql2::Client.new(
-        :host     => @mysqlHost,
-        :username => @mysqlUser,
-        :password => @mysqlPass,
-        :encoding => 'utf8'
+        :host            => @mysqlHost,
+        :username        => @mysqlUser,
+        :password        => @mysqlPass,
+        :encoding        => 'utf8',
+        :reconnect       => true,
+        :read_timeout    => 5,
+        :connect_timeout => 5
       )
 
     rescue Exception => e
-      @log.error( "An error occurred #{e}" )
+      @log.error( "An error occurred for connection: #{e}" )
     end
 
   end
@@ -161,7 +162,8 @@ class  MysqlStatus
       end
 
     rescue Exception => e
-      @log.error( "An error occurred #{e}" )
+      @log.error( "An error occurred for query: #{e}" )
+      return false
     end
 
   end
