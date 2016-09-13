@@ -4,7 +4,7 @@
         "height": "100px",
         "panels": [
           {
-            "content": "<h3><center><bold><a href=\"/grafana/dashboard/db/%HOST%-mongodb\">MongoDB</a></bold></center></h3>",
+            "content": "<h3><center><bold><a href=\"/grafana/dashboard/db/%HOST%-mysql\">MySQL</a></bold></center></h3>",
             "editable": true,
             "error": false,
             "id": 1,
@@ -25,7 +25,7 @@
             "id": 70,
             "targets": [
               {
-                "target": "collectd.%HOST%.MONGODB-uptime.uptime",
+                "target": "collectd.%HOST%.MYSQL-uptime.uptime",
                 "refId": "A",
                 "textEditor": false
               }
@@ -52,28 +52,7 @@
                 "text": "OFFLINE"
               }
             ]
-          },
-          {
-            "id": 2,
-            "title": "used Heap Memory",
-            "type": "singlestat",
-            "span": 1,
-            "colorBackground": true,
-            "colors": [ "rgba(50, 172, 45, 0.97)", "rgba(237, 129, 40, 0.89)", "rgba(245, 54, 54, 0.9)" ],
-            "datasource": "graphite",
-            "format": "none",
-            "postfix": " %",
-            "postfixFontSize": "80%",
-            "targets": [
-              {
-                "refId": "A",
-                "target": "collectd.%HOST%.MONGODB-heap_memory.count-used_percent"
-              }
-            ],
-            "thresholds": "85,95",
-            "valueFontSize": "100%",
-            "valueName": "current"
           }
         ],
-        "title": "MongoDB"
+        "title": "MYSQL"
       }

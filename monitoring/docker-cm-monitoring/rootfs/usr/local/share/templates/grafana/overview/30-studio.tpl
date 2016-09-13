@@ -4,7 +4,7 @@
         "height": "100px",
         "panels": [
           {
-            "content": "<h3><center><bold>Studio</bold></center></h3>",
+            "content": "<h3><center><bold><a href=\"/grafana/dashboard/db/%HOST%-studio\">Studio</a></bold></center></h3>",
             "editable": true,
             "error": false,
             "id": 45,

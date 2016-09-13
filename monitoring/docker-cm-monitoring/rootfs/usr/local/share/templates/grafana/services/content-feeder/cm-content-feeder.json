@@ -179,7 +179,7 @@
             ],
             "timeFrom": null,
             "timeShift": null,
-            "title": "Content Feeder",
+            "title": "Indexed Documents",
             "tooltip": {
               "msResolution": false,
               "ordering": "alphabetical",
@@ -259,7 +259,7 @@
             ],
             "timeFrom": null,
             "timeShift": null,
-            "title": "Content Feeder",
+            "title": "Pending Documents / Events",
             "tooltip": {
               "msResolution": false,
               "ordering": "alphabetical",
