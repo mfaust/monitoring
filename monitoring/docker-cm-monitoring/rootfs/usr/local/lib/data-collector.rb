@@ -1,9 +1,9 @@
 #!/usr/bin/ruby
 #
-# 27.08.2016 - Bodo Schulz
+# 13.09.2016 - Bodo Schulz
 #
 #
-# v1.1.0
+# v1.2.1
 
 # -----------------------------------------------------------------------------
 
@@ -47,7 +47,7 @@ class DataCollector
     file.sync = true
     @log = Logger.new( file, 'weekly', 1024000 )
 #    @log = Logger.new( STDOUT )
-    @log.level = Logger::DEBUG
+    @log.level = Logger::INFO
     @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
     @log.formatter = proc do |severity, datetime, progname, msg|
       "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
@@ -63,12 +63,13 @@ class DataCollector
     end
 
     self.applicationConfig( applicationConfig )
+    self.readConfiguration()
 
     @settings            = settings
     @jolokiaApplications = nil
 
-    version              = '1.1.0'
-    date                 = '2016-08-27'
+    version              = '1.2.1'
+    date                 = '2016-09-13'
 
     @log.info( '-----------------------------------------------------------------' )
     @log.info( ' CoreMedia - DataCollector' )
@@ -78,7 +79,7 @@ class DataCollector
     @log.info( '-----------------------------------------------------------------' )
     @log.info( '' )
 
-    @discovery = ServiceDiscovery.new( @settings )
+#     @discovery = ServiceDiscovery.new( @settings )
 
   end
 
@@ -158,7 +159,8 @@ class DataCollector
 
   def mongoDBData( host, data = {} )
 
-    port = data['port'] ? data['port'] : nil
+    port = data['port'] ? data['port'] : 28017
+
     if( port != nil )
 
       serverUrl  = sprintf( 'http://%s:%s/serverStatus', host, port )
@@ -186,15 +188,9 @@ class DataCollector
         end
       else
 
-        cachedHostDirectory        = sprintf( '%s/%s', @cacheDirectory, host )
-        save_file       = sprintf( 'bulk_%s_mongodb.result', port )
+        data            = JSON.parse( response.body )
 
-        hash            = Hash.new()
-        array           = Array.new()
-        hash['mongodb'] = JSON.parse( response.body )
-        array.push( hash )
-
-        File.open( sprintf( '%s/%s', cachedHostDirectory, save_file ) , 'w' ) {|f| f.write( JSON.pretty_generate( array ) ) }
+        return data
       end
 
     end
@@ -203,22 +199,19 @@ class DataCollector
 
   def mysqlData( host, data = {} )
 
-    user = data['user'] ? data['user'] : nil
-    pass = data['pass'] ? data['pass'] : nil
-    port = data['port'] ? data['port'] : nil
+    user = data['user'] ? data['user'] : 'cm_management'
+    pass = data['pass'] ? data['pass'] : 'cm_management'
+    port = data['port'] ? data['port'] : 3306
 
     if( port != nil )
-
-      cachedHostDirectory   = sprintf( '%s/%s', @cacheDirectory, host )
-      save_file             = sprintf( 'bulk_%s_mysql.result', port )
 
       # TODO
       # we need an low-level-priv User for Monitoring!
       settings = {
         'log_dir'   => @logDirectory,
         'mysqlHost' => host,
-        'mysqlUser' => 'cm_management',
-        'mysqlPass' => 'cm_management'
+        'mysqlUser' => user,
+        'mysqlPass' => pass
       }
 
       require_relative 'mysql-status'
@@ -231,14 +224,13 @@ class DataCollector
       mysqlData       = @mysql.run()
 
       if( mysqlData == false )
-        mysqlData   = {}
+        mysqlData   = JSON.generate( { :status => 500 } )
       end
 
-      hash['mysql']   = JSON.parse( mysqlData )
+      data           = JSON.parse( mysqlData )
 
-      array.push( hash )
+      return data
 
-      File.open( sprintf( '%s/%s', cachedHostDirectory, save_file ) , 'w' ) {|f| f.write( JSON.pretty_generate( array ) ) }
     end
 
   end
@@ -335,7 +327,7 @@ class DataCollector
   end
 
 
-  def jolokiaTemplate( params = {} )
+  def jolokiaTemplateOBSOLETE( params = {} )
 
     mbean       = params['mbean']
     server_name = params['server_name']
@@ -366,7 +358,7 @@ class DataCollector
 
 
   # create an bulkset over all checks
-  def createBulkCheck( host, data )
+  def createBulkCheckOBSOLETE( host, data )
 
     cachedHostDirectory  = sprintf( '%s/%s', @cacheDirectory, host )
 
@@ -407,7 +399,7 @@ class DataCollector
   end
 
   # send check to our jolokia
-  def sendChecks( file )
+  def sendChecksOBSOLETE( file )
 
     result       = nil
 
@@ -482,7 +474,6 @@ class DataCollector
     end
 
   end
-
 
   # reorganize data to later simple find
   def reorganizeData( data )
@@ -616,20 +607,248 @@ class DataCollector
   end
 
 
+  def checkHostAndService( targetUrl )
 
-  def run( applicationConfig = nil, serviceConfig = nil )
+    result = false
+    # "service:jmx:rmi:///jndi/rmi://moebius-16-tomcat:2222/jmxrmi"
+    regex = /
+      ^                   # Starting at the front of the string
+      (.*):\/\/           # all after the douple slashes
+      (?<host>.+\S)       # our hostname
+      :                   # seperator between host and port
+      (?<port>\d+)        # our port
+    /x
 
-    if( applicationConfig != nil )
-      self.applicationConfig( applicationConfig )
+    # prepare
+    parts     = targetUrl.match( regex )
+    destHost  = "#{parts['host']}".strip
+    destPort  = "#{parts['port']}".strip
+
+    @log.debug( sprintf( 'check Port %s on Host %s for sending data', destPort, destHost ) )
+
+    result = portOpen?( destHost, destPort )
+
+    if( result == false )
+      @log.error( sprintf( 'The Port %s on Host %s is not open, skip sending data', destPort, destHost ) )
     end
 
-    if( serviceConfig != nil )
-      self.serviceConfig( serviceConfig )
+    return result
+
+  end
+
+  # to reduce i/o we work better in memory ...
+  def createBulkCheck( data )
+
+    hosts  = data.keys
+    checks = Array.new()
+    array  = Array.new()
+
+    result = {
+      :timestamp   => Time.now().to_i
+    }
+
+    hosts.each do |h|
+
+      @log.debug( sprintf( 'create bulk checks for \'%s\'', h ) )
+
+      services = data[h][:data] ? data[h][:data] : nil
+
+      @log.info( sprintf( '%d services found', services.count ) )
+
+      services.each do |s,v|
+
+        @log.debug( sprintf( '  - %s', s ) )
+
+        port    = v['port']
+        metrics = v['metrics']
+        bulk    = Array.new()
+
+        if( metrics.count == 0 )
+          case s
+          when 'mysql'
+            # MySQL
+            bulk.push( '' )
+          when 'mongodb'
+            # MongoDB
+            bulk.push( '' )
+          when 'postgres'
+            # Postgres
+          else
+            # all others
+          end
+        else
+
+          metrics.each do |e|
+
+            target = {
+              "type"   => "read",
+              "mbean"  => "#{e['mbean']}",
+              "target" => { "url" => sprintf( "service:jmx:rmi:///jndi/rmi://%s:%s/jmxrmi", h, port ) },
+              "config" => { "ignoreErrors" => true }
+            }
+
+            attributes = []
+            if( e['attribute'] )
+              e['attribute'].split(',').each do |t|
+                attributes.push( t.to_s )
+              end
+
+              target['attribute'] = attributes
+            end
+
+            bulk.push( target )
+          end
+
+        end
+
+        if( bulk.count != 0 )
+          checks.push( { s => bulk.flatten } )
+        end
+      end
+
+      checks.flatten!
+
+      result[:hostname] = h
+      result[:services] = *services.keys
+      result[:checks]   = *checks
+
+      self.sendChecksToJolokia( result )
+
+      checks.clear()
+      result.clear()
+    end
+  end
+
+
+  def sendChecksToJolokia( data )
+
+    if( portOpen?( @jolokiaHost, @jolokiaPort ) == false )
+      @log.error( sprintf( 'The Jolokia Service (%s:%s) are not available', @jolokiaHost, @jolokiaPort ) )
+
+      return
     end
 
-    self.readConfiguration()
+    serverUrl  = sprintf( "http://%s:%s/jolokia", @jolokiaHost, @jolokiaPort )
 
-    # ----------------------------------------------------------------------------------------
+    uri        = URI.parse( serverUrl )
+    http       = Net::HTTP.new( uri.host, uri.port )
+
+    hostname = data[:hostname] ? data[:hostname] : nil
+    checks   = data[:checks]   ? data[:checks]   : nil
+
+    result = {
+      :hostname  => hostname,
+      :timestamp => Time.now().to_i
+    }
+
+    checks.each do |c|
+
+      c.each do |v,i|
+
+        @log.info( sprintf( '%d checks for service %s found', i.count, v ) )
+
+        if( ! i[0]['target'] )
+
+          case v
+          when 'mysql'
+            # MySQL
+            result[v] = self.mysqlData( hostname )
+          when 'mongodb'
+            # MongoDB
+            result[v] = self.mongoDBData( hostname )
+          when 'postgres'
+            # Postgres
+          else
+            # all others
+          end
+
+        else
+
+          targetUrl = i[0]['target']['url']
+
+          if( self.checkHostAndService( targetUrl ) == true )
+
+            request = Net::HTTP::Post.new(
+              uri.request_uri,
+              initheader = { 'Content-Type' =>'application/json' }
+            )
+            request.body = i.to_json
+
+            # default read timeout is 60 secs
+            response = Net::HTTP.start( uri.hostname, uri.port, use_ssl: uri.scheme == "https", :read_timeout => 5 ) do |http|
+              begin
+                http.request( request )
+              rescue Exception => e
+
+                msg = 'Cannot execute request to %s, cause: %s'
+                @log.warn( sprintf( msg, uri.request_uri, e ) )
+                @log.debug( sprintf( ' -> request body: %s', request.body ) )
+                return
+              end
+            end
+
+            result[v] = self.reorganizeData( response.body )
+
+            tmpResultFile = sprintf( '%s/%s/monitoring.tmp'    , @cacheDirectory, hostname )
+            resultFile    = sprintf( '%s/%s/monitoring.result' , @cacheDirectory, hostname )
+
+            File.open( tmpResultFile , 'w' ) { |f| f.write( JSON.generate( result ) ) }
+            File.rename( tmpResultFile, resultFile )
+
+          end
+        end
+      end
+    end
+  end
+
+  # merge Data
+  def buildMergedData( host )
+
+    discoveryFile        = sprintf( '%s/%s/discovery.json'     , @cacheDirectory, host )
+    mergedDataFile       = sprintf( '%s/%s/mergedHostData.json', @cacheDirectory, host )
+
+    if( File.exist?( mergedDataFile ) )
+
+      @log.debug( 'read merged data' )
+      result = JSON.parse( File.read( mergedDataFile ) )
+
+    else
+
+      @log.debug( 'build merged data' )
+
+      data = JSON.parse( File.read( discoveryFile ) )
+
+      # TODO
+      # create data for mySQL, Postgres
+      #
+      if( data['mongodb'] )
+        self.mongoDBData( host, data['mongodb'] )
+      end
+
+      if( data['mysql'] )
+        self.mysqlData( host, data['mysql'] )
+      end
+
+      if( data['postgres'] )
+        self.postgresData( host, data['postgres'] )
+      end
+
+      @log.debug( 'merge Data between Property Files and discovered Services' )
+      d = self.mergeData( data )
+
+      @log.debug( 'save merged data' )
+      result = JSON.generate( d )
+
+      File.open( mergedDataFile , 'w' ) { |f| f.write( result ) }
+
+    end
+
+    return result
+
+  end
+
+
+  def run()
 
     @log.debug( 'get monitored Servers' )
     monitoredServer = monitoredServer( @cacheDirectory )
@@ -649,55 +868,24 @@ class DataCollector
 
       if( File.exist?( file ) == true )
 
-        if( self.checkDiscoveryFileAge( file ) == true )
+#         if( self.checkDiscoveryFileAge( file ) == true )
+#
+#           # re.start the service discovery
+#           @discovery.refreshHost( h )
+#
+#         end
 
-          # re.start the service discovery
-          @discovery.refreshHost( h )
+        d = buildMergedData( h )
 
-        end
+        data[h] = {
+          :data      => d,
+          :timestamp => Time.now().to_i
+        }
 
-#        @log.debug( file )
-
-        data = JSON.parse( File.read( file ) )
-
-        # TODO
-        # create data for mySQL, Postgres
-        #
-        if( data['mongodb'] )
-          self.mongoDBData( h, data['mongodb'] )
-        end
-
-        if( data['mysql'] )
-          self.mysqlData( h, data['mysql'] )
-        end
-
-        if( data['postgres'] )
-          self.postgresData( h, data['postgres'] )
-        end
-
-        @log.debug( 'merge Data between Property Files and discovered Services' )
-        d = self.mergeData( data )
-
-
-        if( ! File.exist?( sprintf( '%s/%s', cachedHostDirectory, mergedDataFile ) ) )
-
-          @log.debug( 'save merged data' )
-          merged = JSON.pretty_generate( d )
-          File.open( sprintf( '%s/%s', cachedHostDirectory, mergedDataFile ) , 'w' ) {|f| f.write( merged ) }
-        end
-
-        @log.debug( 'create bulk Data for Jolokia' )
-        self.createBulkCheck( h, d )
-
-        Dir.chdir( cachedHostDirectory )
-        Dir.glob( "bulk_**.json" ) do |f|
-
-          if( File.exist?( f ) == true )
-            self.sendChecks( f )
-          end
-        end
       end
     end
+
+    self.createBulkCheck( data )
 
     self.logMark()
 

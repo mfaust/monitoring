@@ -1,9 +1,9 @@
 #!/usr/bin/ruby
 #
-# 09.09.2016 - Bodo Schulz
+# 13.09.2016 - Bodo Schulz
 #
 #
-# v1.2.0
+# v1.2.3
 # -----------------------------------------------------------------------------
 
 require 'socket'
@@ -87,8 +87,8 @@ class ServiceDiscovery
       49099
     ]
 
-    version              = '1.2.0'
-    date                 = '2016-09.09'
+    version              = '1.2.3'
+    date                 = '2016-09-13'
 
     @log.info( '-----------------------------------------------------------------' )
     @log.info( ' CM Service Discovery' )
@@ -160,7 +160,7 @@ class ServiceDiscovery
 
   def discoverApplication( host, port )
 
-    @log.debug( sprintf( 'check port %s for services', port.to_s  ) )
+    @log.debug( 'discover Application ...' )
 
     services = Array.new
 
@@ -451,7 +451,7 @@ class ServiceDiscovery
   # add Host and discovery applications
   def addHost( host, ports = [], force = false )
 
-    @log.debug( 'addHost' )
+    @log.info( "Adding host #{host}, force: #{force}")
 
     # first, we check if our jolokia accessable
     if( ! jolokiaIsAvailable?() )
@@ -481,8 +481,6 @@ class ServiceDiscovery
 
     # force delete
     if( force == true )
-
-      @log.info( 'use force mode' )
       self.deleteHost( host )
     end
 

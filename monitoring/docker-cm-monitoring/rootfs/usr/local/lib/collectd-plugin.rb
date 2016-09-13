@@ -1,6 +1,6 @@
 #!/usr/bin/ruby
 #
-# 08.09.2016 - Bodo Schulz
+# 13.09.2016 - Bodo Schulz
 #
 #
 # v1.2.3
@@ -52,8 +52,8 @@ class CollecdPlugin
       FileUtils.chown( 'nobody', 'nobody', logFile )
     end
 
-    version              = '1.0.5'
-    date                 = '2016-08-26'
+    version              = '1.1.1'
+    date                 = '2016-09-13'
 
     @log.info( '-----------------------------------------------------------------' )
     @log.info( ' CollectdPlugin' )
@@ -1545,101 +1545,110 @@ class CollecdPlugin
   def run()
 
     monitoredServer = monitoredServer( @cacheDirectory )
-    data            = Hash.new()
+#     data            = Hash.new()
 
     monitoredServer.each do |h|
 
       @Host = h
 
-      @log.info(sprintf('Host: %s', h))
+      @log.info( sprintf( 'Host: %s', h ) )
 
-      dir_path = sprintf('%s/%s', @cacheDirectory, h)
+      resultFile = sprintf( '%s/%s/monitoring.result', @cacheDirectory, h )
 
-      Dir.chdir(dir_path)
+      if( File.exists?( resultFile ) )
 
-      resultFiles = Dir.glob("**.result")
-
-#      @log.debug("ResultFiles: #{resultFiles}")
-
-      resultFiles.each do |file|
-
-        data = JSON.parse(File.read(file))
-
-        service = file.split('.').first.split('_').last
-
-        @Service = normalizeService(service)
+        data = JSON.parse( File.read( resultFile ) )
 
         graphiteOutput = Array.new()
 
-        data.each do |result|
+        hostname  = data[:hostname]  ? data[:hostname]  : nil
+        timestamp = data[:timestamp] ? data[:timestamp] : nil
+        keys      = data.keys
+        keys      -= ['hostname', 'timestamp']
 
-          result.each do |k, v|
+        @log.debug( keys )
 
-            case k
-              when 'mongodb'
-                graphiteOutput.push(self.ParseResult_mongoDB(v))
-              when 'mysql'
-                graphiteOutput.push(self.ParseResult_mySQL(v))
-              when 'Runtime'
-                graphiteOutput.push(self.ParseResult_Runtime(v))
-              when 'Memory'
-                graphiteOutput.push(self.ParseResult_Memory(v))
-              when 'MemoryPoolCMSOldGen'
-                graphiteOutput.push(self.ParseResult_MemoryPool(v))
-              when 'MemoryPoolCodeCache'
-                graphiteOutput.push(self.ParseResult_MemoryPool(v))
-              when 'MemoryPoolCompressedClassSpace'
-                graphiteOutput.push(self.ParseResult_MemoryPool(v))
-              when 'MemoryPoolMetaspace'
-                graphiteOutput.push(self.ParseResult_MemoryPool(v))
-              when 'MemoryPoolParEdenSpace'
-                graphiteOutput.push(self.ParseResult_MemoryPool(v))
-              when 'MemoryPoolParSurvivorSpace'
-                graphiteOutput.push(self.ParseResult_MemoryPool(v))
-              when 'Threading'
-                graphiteOutput.push(self.ParseResult_Threading(v))
-#                when 'ExecutortomcatThreadPool'
-#                  graphiteOutput.push( self.ParseResult_ThreadPool( v ) )
-              when 'ClassLoading'
-                graphiteOutput.push(self.ParseResult_ClassLoading(v))
-              when 'Server'
-                graphiteOutput.push(self.ParseResult_Server(v))
-              when 'Health'
-                graphiteOutput.push(self.ParseResult_Health(v))
-              when 'ProactiveEngine'
-                graphiteOutput.push(self.ParseResult_ProactiveEngine(v))
-              when 'Feeder'
-                graphiteOutput.push(self.ParseResult_Feeder(v))
-              when /^CacheClasses/
-                graphiteOutput.push(self.ParseResult_CacheClasses(k, v))
-              when 'CapConnection'
-                graphiteOutput.push(self.ParseResult_CapConnection(v))
-              when 'StoreConnectionPool'
-                graphiteOutput.push(self.ParseResult_ConnectionPool(v))
-              when 'StoreQueryPool'
-                graphiteOutput.push(self.ParseResult_QueryPool(v))
-              when 'StatisticsJobResult'
-                graphiteOutput.push(self.ParseResult_StatisticsJobResult(v))
-              when 'StatisticsResourceCache'
-                graphiteOutput.push(self.ParseResult_StatisticsResourceCache(v))
-              when 'GarbageCollectorParNew'
-                graphiteOutput.push(self.ParseResult_GCParNew(v))
-              when 'GarbageCollectorConcurrentMarkSweep'
-                graphiteOutput.push(self.ParseResult_GCConcurrentMarkSweep(v))
-              when /^Solr.*Replication/
-                graphiteOutput.push(self.ParseResult_SolrReplication(v))
-              when /^Solr.*QueryResultCache/
-                graphiteOutput.push(self.ParseResult_SolrQueryResultCache(v))
-              when /^Solr.*DocumentCache/
-                graphiteOutput.push(self.ParseResult_SolrDocumentCache(v))
-              when /^Solr.*Select/
-                graphiteOutput.push(self.ParseResult_SolrSelect(v))
+        keys.each do |service|
+
+          @Service = normalizeService( service )
+
+          results = data[service]
+
+          case service
+          when 'mongodb'
+            graphiteOutput.push( self.ParseResult_mongoDB( results ) )
+          when 'mysql'
+            graphiteOutput.push( self.ParseResult_mySQL( results ) )
+          else
+            @log.debug( service )
+
+            results.each do |r|
+
+              r.each do |k,v|
+
+                case k
+                when 'Runtime'
+                  graphiteOutput.push( self.ParseResult_Runtime( v ) )
+                when 'Memory'
+                  graphiteOutput.push(self.ParseResult_Memory(v))
+                when 'MemoryPoolCMSOldGen'
+                  graphiteOutput.push(self.ParseResult_MemoryPool(v))
+                when 'MemoryPoolCodeCache'
+                  graphiteOutput.push(self.ParseResult_MemoryPool(v))
+                when 'MemoryPoolCompressedClassSpace'
+                  graphiteOutput.push(self.ParseResult_MemoryPool(v))
+                when 'MemoryPoolMetaspace'
+                  graphiteOutput.push(self.ParseResult_MemoryPool(v))
+                when 'MemoryPoolParEdenSpace'
+                  graphiteOutput.push(self.ParseResult_MemoryPool(v))
+                when 'MemoryPoolParSurvivorSpace'
+                  graphiteOutput.push(self.ParseResult_MemoryPool(v))
+                when 'Threading'
+                  graphiteOutput.push(self.ParseResult_Threading(v))
+  #                when 'ExecutortomcatThreadPool'
+  #                  graphiteOutput.push( self.ParseResult_ThreadPool( v ) )
+                when 'ClassLoading'
+                  graphiteOutput.push(self.ParseResult_ClassLoading(v))
+                when 'Server'
+                  graphiteOutput.push(self.ParseResult_Server(v))
+                when 'Health'
+                  graphiteOutput.push(self.ParseResult_Health(v))
+                when 'ProactiveEngine'
+                  graphiteOutput.push(self.ParseResult_ProactiveEngine(v))
+                when 'Feeder'
+                  graphiteOutput.push(self.ParseResult_Feeder(v))
+                when /^CacheClasses/
+                  graphiteOutput.push(self.ParseResult_CacheClasses(k, v))
+                when 'CapConnection'
+                  graphiteOutput.push(self.ParseResult_CapConnection(v))
+                when 'StoreConnectionPool'
+                  graphiteOutput.push(self.ParseResult_ConnectionPool(v))
+                when 'StoreQueryPool'
+                  graphiteOutput.push(self.ParseResult_QueryPool(v))
+                when 'StatisticsJobResult'
+                  graphiteOutput.push(self.ParseResult_StatisticsJobResult(v))
+                when 'StatisticsResourceCache'
+                  graphiteOutput.push(self.ParseResult_StatisticsResourceCache(v))
+                when 'GarbageCollectorParNew'
+                  graphiteOutput.push(self.ParseResult_GCParNew(v))
+                when 'GarbageCollectorConcurrentMarkSweep'
+                  graphiteOutput.push(self.ParseResult_GCConcurrentMarkSweep(v))
+                when /^Solr.*Replication/
+                  graphiteOutput.push(self.ParseResult_SolrReplication(v))
+                when /^Solr.*QueryResultCache/
+                  graphiteOutput.push(self.ParseResult_SolrQueryResultCache(v))
+                when /^Solr.*DocumentCache/
+                  graphiteOutput.push(self.ParseResult_SolrDocumentCache(v))
+                when /^Solr.*Select/
+                  graphiteOutput.push(self.ParseResult_SolrSelect(v))
+                end
+
+              end
             end
           end
         end
 
         self.output( graphiteOutput )
-
       end
 
     end
