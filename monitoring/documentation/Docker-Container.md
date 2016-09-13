@@ -89,7 +89,7 @@ Services, die von einander abhängig sind (z.B. eine Datenbank) legen entspreche
 
     cd ~
     git clone -b docker git@github.com:CoreMedia/devops.git ~/monitoring/
-    cd ~/monitoring/docker-compose-monitoring
+    cd ~/monitoring/monitoring/docker-compose-monitoring
     docker-compose build
     docker-compose up -d
 
@@ -99,7 +99,7 @@ Das Script versicht ein auto-discovery durchzuführen um festzustellen, welche A
 
 ## Stop
 
-    cd ~/devops/monitoring/docker-compose-monitoring
+    cd ~/monitoring/monitoring/docker-compose-monitoring
     docker-compose down
 
 ## persistente Daten
