@@ -16,87 +16,18 @@ Im Verzeichniss `docker-compose-monitoring` befindet sich ein entsprechende Comp
 
 Es werden pre-compiled Container von [Docker Hub](https://hub.docker.com/r/bodsch/) benutzt um möglichst den lokalen Compilevorgang zu reduzieren.
 
-Das Setup beinhaltet ein Set von mehreren Containern:
-
- - `database`
- - `jolokia`
- - `memcached`
- - `nginx`
- - `graphite`
- - `grafana`
- - `icinga2-core`
- - `icingaweb2`
-
 Zusätzlich wird ein weiterer Docker Container (`cm-monitoring`) eingebunden, der initial und bei jeder weiteren Änderung gebaut werden muß.
-
-
-## nginx
-
-Stellt einen Webserver zur Verfügung, unter dem alle Services einfach über eine Webseite erreichbar sind.
-
-Die Startseite lässt sich im lokalen Browser unter [localhost](http://localhost) erreichen.
-
-
-## grafana
-
-[Grafana](http://grafana.org/) ist ein Web-UI um Grafen in Echtzeit darstellen zu können.
-
-Es können verschiedene Storage-Backends ([graphite](http://graphite.readthedocs.org/en/latest/), [influxdb](https://influxdata.com/), [Elasticsearch](https://www.elastic.co/products/elasticsearch), [Cloudwatch](https://aws.amazon.com/de/cloudwatch/), [Prometeus](https://prometheus.io/), [OpenTSDB](http://opentsdb.net/) ) benutzt werden.
-
-In diesem Meta-Package wird ausschließlich `graphite` genutzt.
-
-Im lokalen Browser steht unter [grafana](http://localhost/grafana/) zur Verfügung.
-Die Login Daten lauten:
- admin:admin
-
-
-## graphite
-
-Graphite ist das hier genutzte Storage-Backend für Grafana.
-
-
-## icinga2-core
-
-[Icinga2](https://www.icinga.org/products/icinga-2/) ist der Monitoring-Host, welches Host- und Servicechecks ausführt.
-
-
-## icingaweb2
-
-Das [Webfrontend](https://www.icinga.org/products/screenshots/icinga-web-2/) für Icinga2.
-
-Im lokalen Browser steht unter [icingaweb2](http://localhost/icinga/) zur Verfügung.
-Die Login Daten lauten:
- icinga:icinga
-
-
-## jolokia
-
-Eine jmx2json Bridge.
-
-Mit [jolokia](https://jolokia.org/) hat man die Möglichkeiten, die MBeans eines Tomcats über JMX abzufragen und die Ergebnisse in json lesbar zu bekommen.
-
-
-## database
-
-Docker Container mit einer mySQL Datenbank.
-
-Dient als Storage-Backend für Icinga2, Graphite, Grafana.
-
-
-## cm-monitoring
-
-Beinhaltet alle Coremediaspezifika. Vor allem Scripte für Icinga, Grafana und Jolokia.
-
-In dem Container wird der zu monitorende Host in das System eingefügt.
-
-
-## Schematischer Aufbau
-![schema](assetts/cm-grafana.png "Schematischer Aufbau und Kommunikationsbeziehung")
 
 
 ## Vorraussetzung
 
 In jedem Fall ist eine funktionierende DNS Auflösung sehr, sehr (sehr^10) hilfreich!
+
+Der Zugriff auf die Ports xxx99 sollte gewährleistet sein.
+
+Sollten `mysql` und `mongodb` ebenfalls ins Monitoring aufgenommen werden, müssen deren Ports ebenfalls erreichbar sein.
+
+**Hinweis** Das Überwachen der `mysql` ist aktuell noch in einem sehr frühen Stadium, kann also zu Problemen führen!
 
 
 ## Vorbereitungen & benötigte Software
@@ -112,50 +43,22 @@ Und docker-compose:
  - [docker-compose](https://docs.docker.com/compose/install/)
 
 
-## Nutzung
-
-Mit Hilfe von `docker-compose` wir der gesammte Stack so gestartet, dass alle Abhängigkeiten aufgelöst werden.
-
-Services, die von einander abhängig sind (z.B. eine verfügbare Datenbank) legen entsprechende Wartezeit ein und prüfen deren Verfügbarkeit.
-
-
-## Start
-
-    cd ~
-    git clone git@github.com:CoreMedia/devops.git
-    cd devops
-    git checkout docker
-    cd monitoring/docker-compose-monitoring
-    docker-compose build
-    docker-compose up -d
-
-Nach dem erfolgreichen Start, kann über die Kommandozeile der zu monitorende Host hinzugefügt werden:
-
-
-
-Das Script versicht ein auto-discovery durchzuführen um festzustellen, welche Anwendung auf den jeweiligen Port läuft und fügt anschließend Standardtemplates für grafana und icinga2 hinzu.
-
-## Stop
-
-    cd ~
-    cd ~/devops/monitoring/docker-compose-monitoring
-    docker-compose down
-
 ## API
 
 Wir haben versucht, möglichst alles über eine API aufrufbar zu bekommen:
 
 | Aufruf | Beschreibung |
-`curl http://localhost/api`                                | Zeigt alle dem Monitoring bekannten Hosts
-`curl http://localhost/api/$name`                          | Zeigt Alle Informationen zum Host an
-`curl -X POST http://localhost/api/$name`                  | Fügt einen Host zum Monitoring hinzu und erstellt eine Set von vor definierten Grafana Dashboards
-`curl -X POST http://localhost/api/$name/force`            | Fügt einen Host zum Monitoring hinzu, löscht aber vorher alle Autodiscovery Daten und Dashboards
-`curl -X DELETE http://localhost/api/$name`                | Löscht einen Host aus dem Monitoring, erhält aber die Grafana Dashboards
-`curl -X DELETE http://localhost/api/$name/force`          | Löscht einen Host aus dem Monitoring, inkl. der Grafana Dashboards
-`curl -X POST http://localhost/api/a/node/create/$name`    | Erstellt eine Annotation das der Hosts neu erstellt wurde
-`curl -X POST http://localhost/api/a/node/destroy/$name`   | Erstellt eine Annotation das der Hosts gelöscht wurde
-`curl -X POST http://localhost/api/a/loadtest/start/$name` | Erstellt eine Annotation für das starten eines Lasttests
-`curl -X POST http://localhost/api/a/loadtest/stop/$name`  | Erstellt eine Annotation für das beenden eines Lasttests
+| ------ | ------------- |
+| `curl http://localhost/api`                                | Zeigt alle dem Monitoring bekannten Hosts |
+| `curl http://localhost/api/$name`                          | Zeigt Alle Informationen zum Host an |
+| `curl -X POST http://localhost/api/$name`                  | Fügt einen Host zum Monitoring hinzu und erstellt eine Set von vor definierten Grafana Dashboards |
+| `curl -X POST http://localhost/api/$name/force`            | Fügt einen Host zum Monitoring hinzu, löscht aber vorher alle Autodiscovery Daten und Dashboards |
+| `curl -X DELETE http://localhost/api/$name`                | Löscht einen Host aus dem Monitoring, erhält aber die Grafana Dashboards |
+| `curl -X DELETE http://localhost/api/$name/force`          | Löscht einen Host aus dem Monitoring, inkl. der Grafana Dashboards |
+| `curl -X POST http://localhost/api/a/node/create/$name`    | Erstellt eine Annotation das der Hosts neu erstellt wurde |
+| `curl -X POST http://localhost/api/a/node/destroy/$name`   | Erstellt eine Annotation das der Hosts gelöscht wurde |
+| `curl -X POST http://localhost/api/a/loadtest/start/$name` | Erstellt eine Annotation für das starten eines Lasttests |
+| `curl -X POST http://localhost/api/a/loadtest/stop/$name`  | Erstellt eine Annotation für das beenden eines Lasttests |
 
 
 ## Eigene Anpassungen

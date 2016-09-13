@@ -13,6 +13,7 @@ Example:
 
 
 ### Tomcat Standard Checks
+
 | mbeans | attribute | description |
 |---|---|---|
 | `java.lang:type=Memory`    | * | Memory Settings |
@@ -28,6 +29,7 @@ Example:
 | `java.lang:type=GarbageCollector,name=ConcurrentMarkSweep` | * | Garbage Collector |
 
 ### Coremedia JMX Beans
+
 | Type | CMS | MLS | RLS | WFS | CAE | Studio | Elastic-Worker | User-Changes | Content-Feeder | CAE-Feeder | Adobe-Drive |
 |--------------------------------| :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: |
 | CapConnection                  | | | |x|x|x|x|x| | |x| | |
@@ -43,16 +45,19 @@ Example:
 | Health                         | | | | | | | | | |x| | | |
 
 ### Content-Management-Server
+
 | mbeans | attribute | description | ok | warning | critical |
 |---|---|---|---|---|---|
 |   |   |   |   |   |   |
 
 ### Master Live Server
+
 | mbeans | attribute | description | ok | warning | critical |
 |---|---|---|---|---|---|
 |   |   |   |   |   |   |
 
 ### Replication Live Server
+
 | mbeans | attribute | description | ok | warning | critical |
 |---|---|---|---|---|---|
 | `com.coremedia:type=Replicator,application=coremedia` | ConnectionUp  |   |   |   |   |
@@ -69,6 +74,7 @@ Example:
 | | LatestIncomingArrival         |   |   |   |   |   |
 
 ### Workflow Server
+
 | mbeans | attribute | description | ok | warning | critical |
 |---|---|---|---|---|---|
 | `com.coremedia:type=CapConnection,application=workflow` | BlobCacheSize  |  max. Größe des Blobcaches  |   |   |   |
@@ -80,41 +86,49 @@ Example:
 | | NumberOfSUSessions | Anzahl der aktiven Lightweight Session  |   |   |   |
 
 ### Elastic Worker
+
 | mbeans | attribute | description | ok | warning | critical |
 |---|---|---|---|---|---|
 | `com.coremedia:type=CapConnection,application=elastic-worker` |   |   |   |   |   |
 
 ### User Changes
+
 | mbeans | attribute | description | ok | warning | critical |
 |---|---|---|---|---|---|
 | `com.coremedia:type=CapConnection,application=user-changes` |   |   |   |   |   |
 
 ### Content Feeder
+
 | mbeans | attribute | description | ok | warning | critical |
 |---|---|---|---|---|---|
 |   |   |   |   |   |   |
 
 ### CAE Feeder
+
 | mbeans | attribute | description | ok | warning | critical |
 |---|---|---|---|---|---|
 |   |   |   |   |   |   |
 
 ### Adobe Drive
+
 | mbeans | attribute | description | ok | warning | critical |
 |---|---|---|---|---|---|
 |   |   |   |   |   |   |
 
 ### Sitemanager
+
 | mbeans | attribute | description | ok | warning | critical |
 |---|---|---|---|---|---|
 |   |   |   |   |   |   |
 
 ### CAE
+
 | mbeans | attribute | description | ok | warning | critical |
 |---|---|---|---|---|---|
 |   |   |   |   |   |   |
 
 ### Studio
+
 | mbeans | attribute | description | ok | warning | critical |
 |---|---|---|---|---|---|
 | `com.coremedia:type=CapConnection,application=CoreMedia-Studio` | BlobCacheSize  |  max. Größe des Blobcaches  |   |   |   |
@@ -127,12 +141,15 @@ Example:
 
 
 ### Solr
+
 | mbeans | attribute | description | ok | warning | critical |
 |---|---|---|---|---|---|
 |   |   |   |   |   |   |
 
 ### Attributes, thresholds and description
+
 [Base Measurement Points for ALL Content Servers](https://documentation.coremedia.com/dxp8/7.5.42-10/manuals/contentserver-en/webhelp/content/ManagedProperties.html)
+
 | mbeans | attribute | description | ok | warning | critical |
 |---|---|---|---|---|---|
 | `com.coremedia:type=Server,application=xxx` | RunLevel | The current run level of the Content Server (offline, online, maintenance, administration) |   |   |   |
@@ -147,6 +164,7 @@ Example:
 
 Connection Pool for DBA Connections
 (**TODO, JMX description available**)
+
 | mbeans | attribute | description | ok | warning | critical |
 |---|---|---|---|---|---|
 | `com.coremedia:type=Store,bean=ConnectionPool,application=xxx` | BusyConnections  |   |   |   |   |
@@ -157,6 +175,7 @@ Connection Pool for DBA Connections
 
 
 (**TODO, JMX description available**)
+
 | mbeans | attribute | description | ok | warning | critical |
 |---|---|---|---|---|---|
 | `com.coremedia:type=Store,bean=QueryPool,application=xxx` | IdleExecutors  |   |   |   |   |
@@ -165,6 +184,7 @@ Connection Pool for DBA Connections
 |   | MaxQueries  |   |   |   |   |
 
 (**TODO, JMX description available**)
+
 | mbeans | attribute | description | ok | warning | critical |
 |---|---|---|---|---|---|
 | `com.coremedia:type=CapConnection,application=xxx` | BlobCacheSize  |   |   |   |   |
@@ -178,6 +198,7 @@ Connection Pool for DBA Connections
 [Analyzing the Replicator State](https://documentation.coremedia.com/dxp8/7.5.42-10/manuals/contentserver-en/webhelp/content/AnalyzingtheReplicatorState.html)
 [Managed Properties](https://documentation.coremedia.com/dxp8/7.5.42-10/manuals/contentserver-en/webhelp/content/ManagedProperties.html)
 (**TODO, JMX description available**)
+
 | mbeans | attribute | description | ok | warning | critical |
 |---|---|---|---|---|---|
 | `com.coremedia:type=Replicator,application=coremedia` | ConnectionUp  |   |   |   |   |
@@ -195,6 +216,7 @@ Connection Pool for DBA Connections
 
 [CAE Feeder](https://documentation.coremedia.com/dxp8/7.5.42-10/manuals/search-en/webhelp/content/CAEFeederJMX.html)
 (**TODO, JMX description available**)
+
 | mbeans | attribute | description | ok | warning | critical |
 |---|---|---|---|---|---|
 | `com.coremedia:type=ProactiveEngine,application=caefeeder` | KeysCount  |   |   |   |   |
@@ -208,17 +230,20 @@ Connection Pool for DBA Connections
 |   | QueueProcessedPerSecond  |   |   |   |   |
 
 (**TODO, JMX description available**)
+
 | mbeans | attribute | description | ok | warning | critical |
 |---|---|---|---|---|---|
 | `com.coremedia:type=ContentDependencyInvalidator,application=caefeeder` |   |   |   |   |   |
 
 [Health Manager](https://releases.coremedia.com/dxp8/7.5.42-10/distribution/apidocs/com/coremedia/cap/persistentcache/proactive/HealthManager.html)
 (**TODO, JMX description available**)
+
 | mbeans | attribute | description | ok | warning | critical |
 |---|---|---|---|---|---|
 | `com.coremedia:type=Health,application=caefeeder` |   |   |   |   |   |
 
 (**TODO, JMX description available**)
+
 | mbeans | attribute | description | ok | warning | critical |
 |---|---|---|---|---|---|
 | `com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.blueprint.common.contentbeans.Page\",application=blueprint` | Updated  |   |   |   |   |
@@ -237,6 +262,7 @@ Connection Pool for DBA Connections
 
 [Content Feeder](https://documentation.coremedia.com/dxp8/7.5.42-10/manuals/search-en/webhelp/content/ContentFeederJMX.html)
 (**TODO, JMX description available**)
+
 | mbeans | attribute | description | ok | warning | critical |
 |---|---|---|---|---|---|
 | `com.coremedia:type=Feeder,application=contentfeeder` | State  |   |   |   |   |
@@ -250,6 +276,7 @@ Connection Pool for DBA Connections
 |   | PendingFolders  |   |   |   |   |
 
 [Will not be documented](https://documentation.coremedia.com/dxp8/7.5.42-10/manuals/contentserver-en/webhelp/content/ManagedProperties.html)
+
 | mbeans | attribute | description | ok | warning | critical |
 |---|---|---|---|---|---|
 | `com.coremedia:type=Statistics,module=BlobStore,pool=BlobStoreMethods,application=xxx` |   |   |   |   |   |
