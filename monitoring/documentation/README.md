@@ -1,7 +1,18 @@
-docker-compose-monitoring
-=========================
+Coremedia Monitoring
+====================
 
-Compose File für ein komplettes Monitoring Setup.
+Das Coremedia Monitoring basiert auf mehrere - durchaus voneinander abhängige - Dockercontainer.
+
+Ziel ist ein funktionierendes Monitoring-System, welches auf jedem System ausgerollt werden kann.
+
+
+# Status
+
+Work-in-Progress
+
+# Docker Compose
+
+Im Verzeichniss `docker-compose-monitoring` befindet sich ein entsprechende Compose File für ein komplettes Monitoring Setup.
 
 Es werden pre-compiled Container von [Docker Hub](https://hub.docker.com/r/bodsch/) benutzt um möglichst den lokalen Compilevorgang zu reduzieren.
 
@@ -77,17 +88,15 @@ Dient als Storage-Backend für Icinga2, Graphite, Grafana.
 Beinhaltet alle Coremediaspezifika. Vor allem Scripte für Icinga, Grafana und Jolokia.
 
 In dem Container wird der zu monitorende Host in das System eingefügt.
- => TODO
-
-
-## langfristiges Ziel
-
-Die Idee für ein langfristiges Ziel wäre ein sich selbst konfigurierendes Monitoringsystem.
-Hier könnte der Einsatz von [consul](https://www.consul.io/) ein wichtiger Schritt sein.
 
 
 ## Schematischer Aufbau
-![schema](schema.png "Schematischer aufbau und Kommunikationsbeziehung")
+![schema](assetts/cm-grafana.png "Schematischer Aufbau und Kommunikationsbeziehung")
+
+
+## Vorraussetzung
+
+In jedem Fall ist eine funktionierende DNS Auflösung sehr, sehr (sehr^10) hilfreich!
 
 
 ## Vorbereitungen & benötigte Software
@@ -112,25 +121,59 @@ Services, die von einander abhängig sind (z.B. eine verfügbare Datenbank) lege
 
 ## Start
 
+    cd ~
     git clone git@github.com:CoreMedia/devops.git
     cd devops
     git checkout docker
     cd monitoring/docker-compose-monitoring
     docker-compose build
-    docker-compose up
+    docker-compose up -d
 
-Nach dem erfolgreichen Start, kann über die Kommandozeile der zu monitende Host hinzugefügt werden:
+Nach dem erfolgreichen Start, kann über die Kommandozeile der zu monitorende Host hinzugefügt werden:
 
-    curl -X POST http://localhost/api/$name
+
 
 Das Script versicht ein auto-discovery durchzuführen um festzustellen, welche Anwendung auf den jeweiligen Port läuft und fügt anschließend Standardtemplates für grafana und icinga2 hinzu.
 
-## Annotations
+## Stop
 
-    curl -X POST http://localhost/api/a/node/create/$name
-    curl -X POST http://localhost/api/a/node/destroy/$name
-    curl -X POST http://localhost/api/a/loadtest/start/$name
-    curl -X POST http://localhost/api/a/loadtest/stop/$name
+    cd ~
+    cd ~/devops/monitoring/docker-compose-monitoring
+    docker-compose down
+
+## API
+
+Wir haben versucht, möglichst alles über eine API aufrufbar zu bekommen:
+
+| Aufruf | Beschreibung |
+`curl http://localhost/api`                                | Zeigt alle dem Monitoring bekannten Hosts
+`curl http://localhost/api/$name`                          | Zeigt Alle Informationen zum Host an
+`curl -X POST http://localhost/api/$name`                  | Fügt einen Host zum Monitoring hinzu und erstellt eine Set von vor definierten Grafana Dashboards
+`curl -X POST http://localhost/api/$name/force`            | Fügt einen Host zum Monitoring hinzu, löscht aber vorher alle Autodiscovery Daten und Dashboards
+`curl -X DELETE http://localhost/api/$name`                | Löscht einen Host aus dem Monitoring, erhält aber die Grafana Dashboards
+`curl -X DELETE http://localhost/api/$name/force`          | Löscht einen Host aus dem Monitoring, inkl. der Grafana Dashboards
+`curl -X POST http://localhost/api/a/node/create/$name`    | Erstellt eine Annotation das der Hosts neu erstellt wurde
+`curl -X POST http://localhost/api/a/node/destroy/$name`   | Erstellt eine Annotation das der Hosts gelöscht wurde
+`curl -X POST http://localhost/api/a/loadtest/start/$name` | Erstellt eine Annotation für das starten eines Lasttests
+`curl -X POST http://localhost/api/a/loadtest/stop/$name`  | Erstellt eine Annotation für das beenden eines Lasttests
+
+
+## Eigene Anpassungen
+
+Im Verzeichniss `~/devops/monitoring/docker-compose-monitoring/share` befinden sich alle Dateien, die beim erstellen des `cm-monitoring` Containers in diesen hinein kopiert werden.
+
+### Anpassung für die DNS Auflösung
+
+Für die Anpassung der DNS Auflösung muß die Datei `resolv.conf` angepasst werden.
+
+### Dashboards
+
+Alle Dashboards, die automatisch hinzugefügt werden, befinden sich im Verzeichniss `~/devops/monitoring/docker-cm-monitoring/rootfs/usr/local/share/templates/grafana`
+
+**Mein Vorschlag für größere Änderungen beim Kunden**
+
+Kopiert das Verzeichniss `docker-cm-monitoring` (z.b. `docker-guj-monitoring`) und passt das `docker-compose.yml` File an.
+
 
 
 ## Weiterentwicklung

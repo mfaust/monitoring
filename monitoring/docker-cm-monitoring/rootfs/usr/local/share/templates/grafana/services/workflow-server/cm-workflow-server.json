@@ -3,7 +3,7 @@
     "id": null,
     "title": "%SHORTHOST% Workflow Server",
     "originalTitle": "%SHORTHOST% Workflow Server",
-    "tags": [ "%TAG%", "content-server" ],
+    "tags": [ "%TAG%" ],
     "style": "dark",
     "timezone": "browser",
     "editable": true,
