@@ -1,9 +1,9 @@
 #!/usr/bin/ruby
 #
-# 13.09.2016 - Bodo Schulz
+# 14.09.2016 - Bodo Schulz
 #
 #
-# v1.2.3
+# v1.2.4
 
 # -----------------------------------------------------------------------------
 
@@ -52,8 +52,8 @@ class CollecdPlugin
       FileUtils.chown( 'nobody', 'nobody', logFile )
     end
 
-    version              = '1.1.1'
-    date                 = '2016-09-13'
+    version              = '1.2.4'
+    date                 = '2016-09-14'
 
     @log.info( '-----------------------------------------------------------------' )
     @log.info( ' CollectdPlugin' )
@@ -946,10 +946,10 @@ class CollecdPlugin
           runlevel = 0
         when 'online'
           runlevel = 1
-        when 'maintenance'
-          runlevel = 10
         when 'administration'
           runlevel = 11
+      else
+        runlevel = 0
       end
 
       if( serviceInfos != nil )
