@@ -1,28 +1,27 @@
 #!/usr/bin/ruby
 #
-# 20.08.2016 - Bodo Schulz
+# 14.09.2016 - Bodo Schulz
 #
 #
-# v0.0.1
+# v0.0.3
 
 # -----------------------------------------------------------------------------
 
 require 'yaml'
 
-require_relative 'discover'
-require_relative 'grafana'
-require_relative 'tools'
+require_relative '../lib/discover'
+require_relative '../lib/grafana'
+require_relative '../lib/graphite'
+require_relative '../lib/icinga2'
+require_relative '../lib/tools'
 
-config_file = '/etc/cm-monitoring.yaml'
+@config_file = '/etc/cm-monitoring.yaml'
 
-if( File.exist?( config_file ) )
+if( File.exist?( @config_file ) )
 
-  config = YAML.load_file( config_file )
+  config = YAML.load_file( @config_file )
 
-  @logDir    = config['monitoring']['log_dir']              ? config['monitoring']['log_dir']              : '/tmp/log'
-  @cacheDir  = config['monitoring']['cache_dir']            ? config['monitoring']['cache_dir']            : '/tmp/cache'
-
-  @interval  = config['monitoring']['collectd-plugin']['interval'] ? config['monitoring']['collectd-plugin']['interval'] : 15
+  @logDir    = config['monitoring']['log_dir'] ? config['monitoring']['log_dir'] : '/tmp/log'
 
 else
   puts "no configuration exists"
@@ -52,10 +51,12 @@ class Monitoring
     self.readConfigFile()
 
     serviceDiscoverConfig = {
-      'log_dir'      => @logDirectory,
-      'cache_dir'    => @cacheDir,
-      'jolokia_host' => @jolokia_host,
-      'jolokia_port' => @jolokia_port
+      'log_dir'            => @logDirectory,
+      'cache_dir'          => @cacheDir,
+      'jolokia_host'       => @jolokia_host,
+      'jolokia_port'       => @jolokia_port,
+      'scanDiscovery'      => @scanDiscovery,
+      'serviceConfigFile'  => '/etc/cm-service.json'
     }
 
     grafanaConfig = {
@@ -67,19 +68,36 @@ class Monitoring
       'template_dir' => @template_dir
     }
 
-    @discoveryService = Discover.new( serviceDiscoverConfig )
+    icingaConfig = {
+      'logDirectory'  => @logDirectory,
+      'icingaHost'    => @icingaHost,
+      'icingaPort'    => @icingaPort,
+      'icingaApiUser' => @icingaApiUser,
+      'icingaApiPass' => @icingaApiPass
+    }
+
+    graphiteOptions = {
+      'logDirectory'          => @logDirectory,
+      'graphiteHost'          => @graphiteHost,
+      'graphiteHttpPort'      => @graphiteHttpPort,
+      'graphitePort'          => @graphitePort
+    }
+
+    @serviceDiscovery = ServiceDiscovery.new( serviceDiscoverConfig )
     @grafana          = Grafana.new( grafanaConfig )
+    @icinga           = Icinga2.new( icingaConfig )
+    @graphite         = GraphiteAnnotions::Client.new( graphiteOptions )
 
   end
 
 
   def readConfigFile()
 
-    configFile = '/etc/cm-monitoring.yaml'
+#     configFile = '/etc/cm-monitoring.yaml'
+#
+#     if( File.exist?( configFile ) )
 
-    if( File.exist?( options[:config] ) )
-
-      config = YAML.load_file( options[:config] )
+      config = YAML.load_file( @configFile )
 
       @logDirectory     = config['monitoring']['log_dir']                 ? config['monitoring']['log_dir']                  : '/tmp/log'
       @cacheDir         = config['monitoring']['cache_dir']               ? config['monitoring']['cache_dir']                : '/tmp/cache'
@@ -91,24 +109,29 @@ class Monitoring
       @grafana_port     = config['monitoring']['grafana']['port']         ? config['monitoring']['grafana']['port']          : 3000
       @grafana_path     = config['monitoring']['grafana']['path']         ? config['monitoring']['grafana']['path']          : nil
 
+      @icingaHost       = config['monitoring']['icinga']['host']          ? config['monitoring']['icinga']['host']           : 'localhost'
+      @icingaPort       = config['monitoring']['icinga']['port']          ? config['monitoring']['icinga']['port']           : 5665
+      @icingaApiUser    = config['monitoring']['icinga']['api']['user']   ? config['monitoring']['icinga']['api']['user']    : 'icinga'
+      @icingaApiPass    = config['monitoring']['icinga']['api']['pass']   ? config['monitoring']['icinga']['api']['pass']    : 'icinga'
+
       @template_dir     = config['monitoring']['grafana']['template_dir'] ? config['monitoring']['grafana']['template_dir']  : '/var/tmp/templates'
 
-    else
-
-      @log.info( 'no configuration exists, use default settings' )
-
-      @logDirectory     = '/tmp/log'
-      @cacheDir         = '/tmp/cache'
-
-      @jolokia_host     = 'localhost'
-      @jolokia_port     = 8080
-
-      @grafana_host     = 'localhost'
-      @grafana_port     = 3000
-      @grafana_path     = nil
-      @template_dir     = '/var/tmp/templates'
-
-    end
+#     else
+#
+#       @log.info( 'no configuration exists, use default settings' )
+#
+#       @logDirectory     = '/tmp/log'
+#       @cacheDir         = '/tmp/cache'
+#
+#       @jolokia_host     = 'localhost'
+#       @jolokia_port     = 8080
+#
+#       @grafana_host     = 'localhost'
+#       @grafana_port     = 3000
+#       @grafana_path     = nil
+#       @template_dir     = '/var/tmp/templates'
+#
+#     end
 
 
   end
@@ -118,12 +141,18 @@ class Monitoring
 
     if( host.to_s != '' )
 
-      result = @discoveryService.addHost( host, [], force )
-      status = @discoveryService.status
+      icingaResult = @icinga.addHost( host )
+      icingaStatus = @icinga.status
+
+      return  icingaResult
+
+      result = @serviceDiscovery.addHost( host, [], force )
+      status = @serviceDiscovery.status
 
       if( status == 200 )
 
         @grafana.addDashbards( host, force )
+
 
       end
 
@@ -143,8 +172,13 @@ class Monitoring
 
     if( host.to_s != '' )
 
-      result = @discoveryService.deleteHost( host )
-      status = @discoveryService.status
+      icingaResult = @icinga.deleteHost( host )
+      icingaStatus = @icinga.status
+
+      return  icingaResult
+
+      result = @serviceDiscovery.deleteHost( host )
+      status = @serviceDiscovery.status
 
       if( status == 200 and force == true )
 
@@ -162,12 +196,21 @@ class Monitoring
   end
 
 
-  def listHost( host = '' )
+  def listHost( host = nil )
 
-    return @discoveryService.listHosts( host )
+    return @serviceDiscovery.listHosts( host )
 
   end
 
 end
+
+# ------------------------------------------------------------------------------------------
+
+m = Monitoring.new()
+
+puts m.listHost()
+puts m.addHost( 'blueprint-box' )
+puts m.removeHost( 'blueprint-box' )
+
 
 # EOF

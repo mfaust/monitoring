@@ -15,9 +15,15 @@ monitoring:
   graphite:
     host: graphite
     port: 2003
-    http-port: 8081
+    http-port: 8080
     fix-timezone: true
   collectd-plugin:
     interval: 15
   data-collector:
     scan-discovery: 10m
+  icinga:
+    host: icinga2-core
+    port: 5665
+    api:
+      user: root
+      pass: icinga
