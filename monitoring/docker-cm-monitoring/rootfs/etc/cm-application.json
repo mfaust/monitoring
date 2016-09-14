@@ -260,6 +260,72 @@
           }, {
             "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"java.lang.Object\",application=blueprint",
             "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
+          }, {
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.Availability\",application=blueprint",
+            "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
+          }, {
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.Category\",application=blueprint",
+            "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
+          }, {
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.CommerceUser\",application=blueprint",
+            "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
+          }, {
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.Contract\",application=blueprint",
+            "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
+          }, {
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.ContractIdsByUser\",application=blueprint",
+            "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
+          }, {
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.ContractByUser\",application=blueprint",
+            "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
+          }, {
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.DynamicPrice\",application=blueprint",
+            "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
+          }, {
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.MarketingSpot\",application=blueprint",
+            "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
+          }, {
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.MarketingSpots\",application=blueprint",
+            "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
+          }, {
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.PreviewToken\",application=blueprint",
+            "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
+          }, {
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.Product\",application=blueprint",
+            "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
+          }, {
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.ProductsByCategory\",application=blueprint",
+            "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
+          }, {
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.Segment\",application=blueprint",
+            "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
+          }, {
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.Segments\",application=blueprint",
+            "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
+          }, {
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.SegmentsByUser\",application=blueprint",
+            "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
+          }, {
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.StaticPrice\",application=blueprint",
+            "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
+          }, {
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.StoreInfo\",application=blueprint",
+            "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
+          }, {
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.SubCategories\",application=blueprint",
+            "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
+          }, {
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.TopCategories\",application=blueprint",
+            "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
+          }, {
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.UserIsLoggedIn\",application=blueprint",
+            "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
+          }, {
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.Workspaces\",application=blueprint",
+            "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
+          }, {
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.fragment.resolver.SearchTermExternalReferenceResolver\",application=blueprint",
+            "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
           }
         ]
       },

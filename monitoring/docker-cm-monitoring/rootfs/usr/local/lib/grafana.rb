@@ -119,6 +119,42 @@ class Grafana
   end
 
 
+  def beanAvailable?( host, service, bean, key = nil )
+
+    port = self.applicationPort( service )
+
+    fileName = sprintf( "%s/%s/monitoring.result", @cacheDirectory, host )
+
+    for y in 1..10
+
+      if( File.exist?( fileName ) )
+        sleep( 1 )
+        file = File.read( fileName )
+        break
+      end
+
+      @log.debug( sprintf( 'Waiting for file %s ... %d', fileName, y ) )
+      sleep( 3 )
+    end
+
+    if( file )
+
+      begin
+        json   = JSON.parse( file )
+        result = self.supportMbean?( json, service, bean, key )
+      rescue JSON::ParserError => e
+
+        @log.error('wrong result (no json)')
+        @log.error(e)
+
+        result = false
+      end
+    end
+
+    return result
+  end
+
+
   def applicationPort( application )
 
     port = nil
@@ -156,6 +192,11 @@ class Grafana
       self.generateLicenseTemplate( host, services )
       self.addNamedTemplate( 'cm-memory-pool.json' )
       self.addNamedTemplate( 'cm-cae-cache-classes.json' )
+
+      if( self.beanAvailable?( host, 'cae-preview', 'CacheClassesIBMAvailability' ) == true )
+
+        self.addNamedTemplate( 'cm-cae-cache-classes-ibm.json' )
+      end
 
       @log.debug("Found services: #{services}")
 
@@ -425,44 +466,9 @@ class Grafana
     licenseUntil   = sprintf( '%s/licenses/licenses-until.json', @templateDirectory )
     licensePart    = sprintf( '%s/licenses/licenses-part.json' , @templateDirectory )
 
-    def beanAvailable?( host, service, beanKey )
-
-      port = self.applicationPort( service )
-
-      fileName = sprintf( "%s/%s/monitoring.result", @cacheDirectory, host )
-
-      for y in 1..10
-
-        if( File.exist?( fileName ) )
-          sleep( 1 )
-          file = File.read( fileName )
-          break
-        end
-
-        @log.debug( sprintf( 'Waiting for file %s ... %d', fileName, y ) )
-        sleep( 3 )
-      end
-
-      if( file )
-
-        begin
-          json   = JSON.parse( file )
-          result = self.supportMbean?( json, service, 'Server', beanKey )
-        rescue JSON::ParserError => e
-
-          @log.error('wrong result (no json)')
-          @log.error(e)
-
-          result = false
-        end
-      end
-
-      return result
-    end
-
     intersect.each do |service|
 
-      if( self.beanAvailable?( host, service, 'LicenseInfos' ) == true )
+      if( self.beanAvailable?( host, service, 'Server', 'LicenseInfos' ) == true )
 
         @log.info( sprintf( 'found License Information for Service %s', service ) )
 
@@ -484,7 +490,7 @@ class Grafana
 
     intersect.each do |service|
 
-      if( self.beanAvailable?( host, service, 'ServiceInfos' ) == true )
+      if( self.beanAvailable?( host, service, 'Server', 'ServiceInfos' ) == true )
 
         @log.info( sprintf( 'found Service Information for Service %s', service ) )
 

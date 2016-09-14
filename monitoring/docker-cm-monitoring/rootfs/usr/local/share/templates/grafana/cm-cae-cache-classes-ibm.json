@@ -1,0 +1,2362 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "%SHORTHOST% - Cache Classes (IBM)",
+    "tags": [ "%TAG%" ],
+    "style": "dark",
+    "timezone": "browser",
+    "editable": true,
+    "hideControls": false,
+    "sharedCrosshair": false,
+    "rows": [
+      {
+        "title": "New row",
+        "height": "180px",
+        "editable": true,
+        "collapse": false,
+        "panels": [
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "decimals": 0,
+            "editable": true,
+            "error": false,
+            "fill": 3,
+            "grid": {},
+            "id": 24,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [
+              {
+                "alias": "missRate",
+                "color": "#CFFAFF",
+                "yaxis": 2
+              }
+            ],
+            "span": 6,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMAvailability.count-capacity, '(.*)-', ''))",
+                "textEditor": true
+              },
+              {
+                "refId": "B",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMAvailability.count-level, '(.*)-', ''))",
+                "textEditor": true
+              },
+              {
+                "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMAvailability.count-missRate, '(.*)-', ''))",
+                "textEditor": true
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "IBM Availability",
+            "tooltip": {
+              "msResolution": false,
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ],
+            "thresholds": [],
+            "alert": {
+              "warn": {
+                "op": ">"
+              },
+              "crit": {
+                "op": ">"
+              }
+            },
+            "alerting": {}
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "decimals": 0,
+            "editable": true,
+            "error": false,
+            "fill": 3,
+            "grid": {},
+            "id": 25,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [
+              {
+                "alias": "missRate",
+                "color": "#CFFAFF",
+                "yaxis": 2
+              }
+            ],
+            "span": 6,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMCategory.count-capacity, '(.*)-', ''))",
+                "textEditor": true
+              },
+              {
+                "refId": "B",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMCategory.count-level, '(.*)-', ''))",
+                "textEditor": true
+              },
+              {
+                "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMCategory.count-missRate, '(.*)-', ''))",
+                "textEditor": true
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "IBM Category",
+            "tooltip": {
+              "msResolution": false,
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ],
+            "thresholds": [],
+            "alert": {
+              "warn": {
+                "op": ">"
+              },
+              "crit": {
+                "op": ">"
+              }
+            },
+            "alerting": {}
+          }
+        ]
+      },
+      {
+        "title": "New row",
+        "height": "180px",
+        "editable": true,
+        "collapse": false,
+        "panels": [
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "decimals": 0,
+            "editable": true,
+            "error": false,
+            "fill": 3,
+            "grid": {},
+            "id": 26,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [
+              {
+                "alias": "missRate",
+                "color": "#CFFAFF",
+                "yaxis": 2
+              }
+            ],
+            "span": 6,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMCommerceUser.count-capacity, '(.*)-', ''))",
+                "textEditor": true
+              },
+              {
+                "refId": "B",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMCommerceUser.count-level, '(.*)-', ''))",
+                "textEditor": true
+              },
+              {
+                "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMCommerceUser.count-missRate, '(.*)-', ''))",
+                "textEditor": true
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "IBM CommerceUser",
+            "tooltip": {
+              "msResolution": false,
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ],
+            "thresholds": [],
+            "alert": {
+              "warn": {
+                "op": ">"
+              },
+              "crit": {
+                "op": ">"
+              }
+            },
+            "alerting": {}
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "decimals": 0,
+            "editable": true,
+            "error": false,
+            "fill": 3,
+            "grid": {},
+            "id": 27,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [
+              {
+                "alias": "missRate",
+                "color": "#CFFAFF",
+                "yaxis": 2
+              }
+            ],
+            "span": 6,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMContract.count-capacity, '(.*)-', ''))",
+                "textEditor": true
+              },
+              {
+                "refId": "B",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMContract.count-level, '(.*)-', ''))",
+                "textEditor": true
+              },
+              {
+                "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMContract.count-missRate, '(.*)-', ''))",
+                "textEditor": true
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "IBM Contract",
+            "tooltip": {
+              "msResolution": false,
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ],
+            "thresholds": [],
+            "alert": {
+              "warn": {
+                "op": ">"
+              },
+              "crit": {
+                "op": ">"
+              }
+            },
+            "alerting": {}
+          }
+        ]
+      },
+      {
+        "title": "New row",
+        "height": "180px",
+        "editable": true,
+        "collapse": false,
+        "panels": [
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "decimals": 0,
+            "editable": true,
+            "error": false,
+            "fill": 3,
+            "grid": {},
+            "id": 28,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [
+              {
+                "alias": "missRate",
+                "color": "#CFFAFF",
+                "yaxis": 2
+              }
+            ],
+            "span": 6,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMContractIdsByUser.count-capacity, '(.*)-', ''))",
+                "textEditor": true
+              },
+              {
+                "refId": "B",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMContractIdsByUser.count-level, '(.*)-', ''))",
+                "textEditor": true
+              },
+              {
+                "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMContractIdsByUser.count-missRate, '(.*)-', ''))",
+                "textEditor": true
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "IBM ContractIds by User",
+            "tooltip": {
+              "msResolution": false,
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ],
+            "thresholds": [],
+            "alert": {
+              "warn": {
+                "op": ">"
+              },
+              "crit": {
+                "op": ">"
+              }
+            },
+            "alerting": {}
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "decimals": 0,
+            "editable": true,
+            "error": false,
+            "fill": 3,
+            "grid": {},
+            "id": 29,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [
+              {
+                "alias": "missRate",
+                "color": "#CFFAFF",
+                "yaxis": 2
+              }
+            ],
+            "span": 6,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMContractByUser.count-capacity, '(.*)-', ''))",
+                "textEditor": true
+              },
+              {
+                "refId": "B",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMContractByUser.count-level, '(.*)-', ''))",
+                "textEditor": true
+              },
+              {
+                "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMContractByUser.count-missRate, '(.*)-', ''))",
+                "textEditor": true
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "IBM Contract by User",
+            "tooltip": {
+              "msResolution": false,
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ],
+            "thresholds": [],
+            "alert": {
+              "warn": {
+                "op": ">"
+              },
+              "crit": {
+                "op": ">"
+              }
+            },
+            "alerting": {}
+          }
+        ]
+      },
+      {
+        "title": "New row",
+        "height": "180px",
+        "editable": true,
+        "collapse": false,
+        "panels": [
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "decimals": 0,
+            "editable": true,
+            "error": false,
+            "fill": 3,
+            "grid": {},
+            "id": 30,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [
+              {
+                "alias": "missRate",
+                "color": "#CFFAFF",
+                "yaxis": 2
+              }
+            ],
+            "span": 6,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMDynamicPrice.count-capacity, '(.*)-', ''))",
+                "textEditor": true
+              },
+              {
+                "refId": "B",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMDynamicPrice.count-level, '(.*)-', ''))",
+                "textEditor": true
+              },
+              {
+                "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMDynamicPrice.count-missRate, '(.*)-', ''))",
+                "textEditor": true
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "IBM Dynamic Price",
+            "tooltip": {
+              "msResolution": false,
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ],
+            "thresholds": [],
+            "alert": {
+              "warn": {
+                "op": ">"
+              },
+              "crit": {
+                "op": ">"
+              }
+            },
+            "alerting": {}
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "decimals": 0,
+            "editable": true,
+            "error": false,
+            "fill": 3,
+            "grid": {},
+            "id": 31,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [
+              {
+                "alias": "missRate",
+                "color": "#CFFAFF",
+                "yaxis": 2
+              }
+            ],
+            "span": 6,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMMarketingSpot.count-capacity, '(.*)-', ''))",
+                "textEditor": true
+              },
+              {
+                "refId": "B",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMMarketingSpot.count-level, '(.*)-', ''))",
+                "textEditor": true
+              },
+              {
+                "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMMarketingSpot.count-missRate, '(.*)-', ''))",
+                "textEditor": true
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "IBM Marketing Spot",
+            "tooltip": {
+              "msResolution": false,
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ],
+            "thresholds": [],
+            "alert": {
+              "warn": {
+                "op": ">"
+              },
+              "crit": {
+                "op": ">"
+              }
+            },
+            "alerting": {}
+          }
+        ]
+      },
+      {
+        "title": "New row",
+        "height": "180px",
+        "editable": true,
+        "collapse": false,
+        "panels": [
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "decimals": 0,
+            "editable": true,
+            "error": false,
+            "fill": 3,
+            "grid": {},
+            "id": 32,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [
+              {
+                "alias": "missRate",
+                "color": "#CFFAFF",
+                "yaxis": 2
+              }
+            ],
+            "span": 6,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMMarketingSpots.count-capacity, '(.*)-', ''))",
+                "textEditor": true
+              },
+              {
+                "refId": "B",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMMarketingSpots.count-level, '(.*)-', ''))",
+                "textEditor": true
+              },
+              {
+                "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMMarketingSpots.count-missRate, '(.*)-', ''))",
+                "textEditor": true
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "IBM Marketing Spots",
+            "tooltip": {
+              "msResolution": false,
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ],
+            "thresholds": [],
+            "alert": {
+              "warn": {
+                "op": ">"
+              },
+              "crit": {
+                "op": ">"
+              }
+            },
+            "alerting": {}
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "decimals": 0,
+            "editable": true,
+            "error": false,
+            "fill": 3,
+            "grid": {},
+            "id": 33,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [
+              {
+                "alias": "missRate",
+                "color": "#CFFAFF",
+                "yaxis": 2
+              }
+            ],
+            "span": 6,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMPreviewToken.count-capacity, '(.*)-', ''))",
+                "textEditor": true
+              },
+              {
+                "refId": "B",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMPreviewToken.count-level, '(.*)-', ''))",
+                "textEditor": true
+              },
+              {
+                "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMPreviewToken.count-missRate, '(.*)-', ''))",
+                "textEditor": true
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "IBM Preview Token",
+            "tooltip": {
+              "msResolution": false,
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ],
+            "thresholds": [],
+            "alert": {
+              "warn": {
+                "op": ">"
+              },
+              "crit": {
+                "op": ">"
+              }
+            },
+            "alerting": {}
+          }
+        ]
+      },
+      {
+        "title": "New row",
+        "height": "180px",
+        "editable": true,
+        "collapse": false,
+        "panels": [
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "decimals": 0,
+            "editable": true,
+            "error": false,
+            "fill": 3,
+            "grid": {},
+            "id": 34,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [
+              {
+                "alias": "missRate",
+                "color": "#CFFAFF",
+                "yaxis": 2
+              }
+            ],
+            "span": 6,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMProduct.count-capacity, '(.*)-', ''))",
+                "textEditor": true
+              },
+              {
+                "refId": "B",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMProduct.count-level, '(.*)-', ''))",
+                "textEditor": true
+              },
+              {
+                "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMProduct.count-missRate, '(.*)-', ''))",
+                "textEditor": true
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "IBM Product",
+            "tooltip": {
+              "msResolution": false,
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ],
+            "thresholds": [],
+            "alert": {
+              "warn": {
+                "op": ">"
+              },
+              "crit": {
+                "op": ">"
+              }
+            },
+            "alerting": {}
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "decimals": 0,
+            "editable": true,
+            "error": false,
+            "fill": 3,
+            "grid": {},
+            "id": 35,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [
+              {
+                "alias": "missRate",
+                "color": "#CFFAFF",
+                "yaxis": 2
+              }
+            ],
+            "span": 6,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMProductsByCategory.count-capacity, '(.*)-', ''))",
+                "textEditor": true
+              },
+              {
+                "refId": "B",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMProductsByCategory.count-level, '(.*)-', ''))",
+                "textEditor": true
+              },
+              {
+                "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMProductsByCategory.count-missRate, '(.*)-', ''))",
+                "textEditor": true
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "IBM Products by Category",
+            "tooltip": {
+              "msResolution": false,
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ],
+            "thresholds": [],
+            "alert": {
+              "warn": {
+                "op": ">"
+              },
+              "crit": {
+                "op": ">"
+              }
+            },
+            "alerting": {}
+          }
+        ]
+      },
+      {
+        "title": "New row",
+        "height": "180px",
+        "editable": true,
+        "collapse": false,
+        "panels": [
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "decimals": 0,
+            "editable": true,
+            "error": false,
+            "fill": 3,
+            "grid": {},
+            "id": 36,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [
+              {
+                "alias": "missRate",
+                "color": "#CFFAFF",
+                "yaxis": 2
+              }
+            ],
+            "span": 6,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMSegment.count-capacity, '(.*)-', ''))",
+                "textEditor": true
+              },
+              {
+                "refId": "B",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMSegment.count-level, '(.*)-', ''))",
+                "textEditor": true
+              },
+              {
+                "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMSegment.count-missRate, '(.*)-', ''))",
+                "textEditor": true
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "IBM Segment",
+            "tooltip": {
+              "msResolution": false,
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ],
+            "thresholds": [],
+            "alert": {
+              "warn": {
+                "op": ">"
+              },
+              "crit": {
+                "op": ">"
+              }
+            },
+            "alerting": {}
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "decimals": 0,
+            "editable": true,
+            "error": false,
+            "fill": 3,
+            "grid": {},
+            "id": 37,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [
+              {
+                "alias": "missRate",
+                "color": "#CFFAFF",
+                "yaxis": 2
+              }
+            ],
+            "span": 6,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMSegments.count-capacity, '(.*)-', ''))",
+                "textEditor": true
+              },
+              {
+                "refId": "B",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMSegments.count-level, '(.*)-', ''))",
+                "textEditor": true
+              },
+              {
+                "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMSegments.count-missRate, '(.*)-', ''))",
+                "textEditor": true
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "IBM Segments",
+            "tooltip": {
+              "msResolution": false,
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ],
+            "thresholds": [],
+            "alert": {
+              "warn": {
+                "op": ">"
+              },
+              "crit": {
+                "op": ">"
+              }
+            },
+            "alerting": {}
+          }
+        ]
+      },
+      {
+        "title": "New row",
+        "height": "180px",
+        "editable": true,
+        "collapse": false,
+        "panels": [
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "decimals": 0,
+            "editable": true,
+            "error": false,
+            "fill": 3,
+            "grid": {},
+            "id": 38,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [
+              {
+                "alias": "missRate",
+                "color": "#CFFAFF",
+                "yaxis": 2
+              }
+            ],
+            "span": 6,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMSegmentsByUser.count-capacity, '(.*)-', ''))",
+                "textEditor": true
+              },
+              {
+                "refId": "B",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMSegmentsByUser.count-level, '(.*)-', ''))",
+                "textEditor": true
+              },
+              {
+                "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMSegmentsByUser.count-missRate, '(.*)-', ''))",
+                "textEditor": true
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "IBM Segments by User",
+            "tooltip": {
+              "msResolution": false,
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ],
+            "thresholds": [],
+            "alert": {
+              "warn": {
+                "op": ">"
+              },
+              "crit": {
+                "op": ">"
+              }
+            },
+            "alerting": {}
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "decimals": 0,
+            "editable": true,
+            "error": false,
+            "fill": 3,
+            "grid": {},
+            "id": 39,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [
+              {
+                "alias": "missRate",
+                "color": "#CFFAFF",
+                "yaxis": 2
+              }
+            ],
+            "span": 6,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMStaticPrice.count-capacity, '(.*)-', ''))",
+                "textEditor": true
+              },
+              {
+                "refId": "B",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMStaticPrice.count-level, '(.*)-', ''))",
+                "textEditor": true
+              },
+              {
+                "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMStaticPrice.count-missRate, '(.*)-', ''))",
+                "textEditor": true
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "IBM Static Price",
+            "tooltip": {
+              "msResolution": false,
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ],
+            "thresholds": [],
+            "alert": {
+              "warn": {
+                "op": ">"
+              },
+              "crit": {
+                "op": ">"
+              }
+            },
+            "alerting": {}
+          }
+        ]
+      },
+      {
+        "title": "New row",
+        "height": "180px",
+        "editable": true,
+        "collapse": false,
+        "panels": [
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "decimals": 0,
+            "editable": true,
+            "error": false,
+            "fill": 3,
+            "grid": {},
+            "id": 40,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [
+              {
+                "alias": "missRate",
+                "color": "#CFFAFF",
+                "yaxis": 2
+              }
+            ],
+            "span": 6,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMStoreInfo.count-capacity, '(.*)-', ''))",
+                "textEditor": true
+              },
+              {
+                "refId": "B",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMStoreInfo.count-level, '(.*)-', ''))",
+                "textEditor": true
+              },
+              {
+                "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMStoreInfo.count-missRate, '(.*)-', ''))",
+                "textEditor": true
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "IBM Store Info",
+            "tooltip": {
+              "msResolution": false,
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ],
+            "thresholds": [],
+            "alert": {
+              "warn": {
+                "op": ">"
+              },
+              "crit": {
+                "op": ">"
+              }
+            },
+            "alerting": {}
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "decimals": 0,
+            "editable": true,
+            "error": false,
+            "fill": 3,
+            "grid": {},
+            "id": 41,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [
+              {
+                "alias": "missRate",
+                "color": "#CFFAFF",
+                "yaxis": 2
+              }
+            ],
+            "span": 6,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMSubCategories.count-capacity, '(.*)-', ''))",
+                "textEditor": true
+              },
+              {
+                "refId": "B",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMSubCategories.count-level, '(.*)-', ''))",
+                "textEditor": true
+              },
+              {
+                "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMSubCategories.count-missRate, '(.*)-', ''))",
+                "textEditor": true
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "IBM SubCategories",
+            "tooltip": {
+              "msResolution": false,
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ],
+            "thresholds": [],
+            "alert": {
+              "warn": {
+                "op": ">"
+              },
+              "crit": {
+                "op": ">"
+              }
+            },
+            "alerting": {}
+          }
+        ]
+      },
+      {
+        "title": "New row",
+        "height": "180px",
+        "editable": true,
+        "collapse": false,
+        "panels": [
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "decimals": 0,
+            "editable": true,
+            "error": false,
+            "fill": 3,
+            "grid": {},
+            "id": 42,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [
+              {
+                "alias": "missRate",
+                "color": "#CFFAFF",
+                "yaxis": 2
+              }
+            ],
+            "span": 6,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMTopCategories.count-capacity, '(.*)-', ''))",
+                "textEditor": true
+              },
+              {
+                "refId": "B",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMTopCategories.count-level, '(.*)-', ''))",
+                "textEditor": true
+              },
+              {
+                "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMTopCategories.count-missRate, '(.*)-', ''))",
+                "textEditor": true
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "IBM TopCategories",
+            "tooltip": {
+              "msResolution": false,
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ],
+            "thresholds": [],
+            "alert": {
+              "warn": {
+                "op": ">"
+              },
+              "crit": {
+                "op": ">"
+              }
+            },
+            "alerting": {}
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "decimals": 0,
+            "editable": true,
+            "error": false,
+            "fill": 3,
+            "grid": {},
+            "id": 43,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [
+              {
+                "alias": "missRate",
+                "color": "#CFFAFF",
+                "yaxis": 2
+              }
+            ],
+            "span": 6,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMUserIsLoggedIn.count-capacity, '(.*)-', ''))",
+                "textEditor": true
+              },
+              {
+                "refId": "B",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMUserIsLoggedIn.count-level, '(.*)-', ''))",
+                "textEditor": true
+              },
+              {
+                "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMUserIsLoggedIn.count-missRate, '(.*)-', ''))",
+                "textEditor": true
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "IBM User is LoggedIn",
+            "tooltip": {
+              "msResolution": false,
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ],
+            "thresholds": [],
+            "alert": {
+              "warn": {
+                "op": ">"
+              },
+              "crit": {
+                "op": ">"
+              }
+            },
+            "alerting": {}
+          }
+        ]
+      },
+      {
+        "title": "New row",
+        "height": "180px",
+        "editable": true,
+        "collapse": false,
+        "panels": [
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "decimals": 0,
+            "editable": true,
+            "error": false,
+            "fill": 3,
+            "grid": {},
+            "id": 44,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [
+              {
+                "alias": "missRate",
+                "color": "#CFFAFF",
+                "yaxis": 2
+              }
+            ],
+            "span": 6,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMWorkspaces.count-capacity, '(.*)-', ''))",
+                "textEditor": true
+              },
+              {
+                "refId": "B",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMWorkspaces.count-level, '(.*)-', ''))",
+                "textEditor": true
+              },
+              {
+                "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-IBMWorkspaces.count-missRate, '(.*)-', ''))",
+                "textEditor": true
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "IBM Workspaces",
+            "tooltip": {
+              "msResolution": false,
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ],
+            "thresholds": [],
+            "alert": {
+              "warn": {
+                "op": ">"
+              },
+              "crit": {
+                "op": ">"
+              }
+            },
+            "alerting": {}
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "decimals": 0,
+            "editable": true,
+            "error": false,
+            "fill": 3,
+            "grid": {},
+            "id": 45,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [
+              {
+                "alias": "missRate",
+                "color": "#CFFAFF",
+                "yaxis": 2
+              }
+            ],
+            "span": 6,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-SearchTermExternalReferenceResolver.count-capacity, '(.*)-', ''))",
+                "textEditor": true
+              },
+              {
+                "refId": "B",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-SearchTermExternalReferenceResolver.count-level, '(.*)-', ''))",
+                "textEditor": true
+              },
+              {
+                "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-SearchTermExternalReferenceResolver.count-missRate, '(.*)-', ''))",
+                "textEditor": true
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "Fragment Resolver SearchTerm External Reference Resolver",
+            "tooltip": {
+              "msResolution": false,
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ],
+            "thresholds": [],
+            "alert": {
+              "warn": {
+                "op": ">"
+              },
+              "crit": {
+                "op": ">"
+              }
+            },
+            "alerting": {}
+          }
+        ]
+      }
+    ],
+    "time": {
+      "from": "now-3h",
+      "to": "now"
+    },
+    "timepicker": {
+      "now": true,
+      "refresh_intervals": [
+        "10s",
+        "30s",
+        "1m",
+        "2m",
+        "4m",
+        "10m"
+      ],
+      "time_options": [
+        "5m",
+        "15m",
+        "1h",
+        "6h",
+        "12h",
+        "24h",
+        "2d",
+        "7d",
+        "30d"
+      ]
+    },
+    "templating": {
+      "list": [
+        {
+          "current": {
+            "text": "LIVE",
+            "value": "LIVE"
+          },
+          "datasource": "graphite",
+          "hide": 0,
+          "includeAll": false,
+          "multi": false,
+          "name": "service",
+          "options": [
+            {
+              "text": "LIVE",
+              "value": "LIVE",
+              "selected": true
+            },
+            {
+              "text": "PREV",
+              "value": "PREV",
+              "selected": false
+            }
+          ],
+          "query": "*.*.*CacheClasses*",
+          "refresh": 1,
+          "regex": "/CAE_(.*)-CacheClasses*/",
+          "tags": [],
+          "type": "query",
+          "useTags": true,
+          "label": "CAE"
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "datasource": "events",
+          "enable": true,
+          "iconColor": "rgb(93, 227, 12)",
+          "name": "create & destroy",
+          "tags": "node %HOST%"
+        },
+        {
+          "name": "Load Tests",
+          "datasource": "events",
+          "iconColor": "rgb(26, 196, 220)",
+          "enable": true,
+          "tags": "loadtest %HOST%"
+        }
+      ]
+    },
+    "refresh": "1m",
+    "schemaVersion": 12,
+    "version": 4,
+    "links": []
+  }
+}

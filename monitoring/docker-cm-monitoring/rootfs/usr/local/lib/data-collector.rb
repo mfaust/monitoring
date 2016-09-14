@@ -495,14 +495,27 @@ class DataCollector
       timestamp  = c['timestamp']
       status     = c['status']
 
-      if(mbean.include?( 'Cache.Classes' ))
+      if( mbean.include?( 'Cache.Classes' ) )
         regex = /
           CacheClass=
           "(?<type>.+[a-zA-Z])"
           /x
         parts           = mbean.match( regex )
-        cacheClass       = "#{parts['type']}".split('.').last
-        mbean_type = "CacheClasses#{cacheClass}"
+#        cacheClass      = "#{parts['type']}".split('.').last.capitalize
+#        mbean_type      = sprintf( 'CacheClasses%s', cacheClass )
+
+        cacheClass      = parts['type'].to_s
+
+        if( cacheClass.include?( 'ecommerce.ibm' ) )
+          format   = 'CacheClassesIBM%s'
+        else
+          format   = 'CacheClasses%s'
+        end
+
+        cacheClass     = cacheClass.split('.').last
+        cacheClass[0]  = cacheClass[0].to_s.capitalize
+        mbean_type     = sprintf( format, cacheClass )
+
 
       elsif( mbean.include?( 'module=' ) )
         regex = /
