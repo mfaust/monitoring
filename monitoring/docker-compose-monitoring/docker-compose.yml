@@ -83,7 +83,7 @@ services:
 
   graphite:
     restart: always
-    image: bodsch/docker-graphite:latest
+    image: bodsch/docker-graphite:1609-01
     container_name: graphite
     hostname: graphite
     env_file:

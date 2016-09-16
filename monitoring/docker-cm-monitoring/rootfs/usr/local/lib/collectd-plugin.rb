@@ -610,6 +610,232 @@ class CollecdPlugin
   end
 
 
+  def ParseResult_OperatingSystem( data = {} )
+
+    result    = []
+    mbean     = 'OperatingSystem'
+    format    = 'PUTVAL %s/%s-%s-%s/%s interval=%s N:%s'
+    value     = data['value']     ? data['value']     : nil
+
+    # defaults
+    TotalPhysicalMemorySize    = 0
+    FreePhysicalMemorySize     = 0
+    CommittedVirtualMemorySize = 0
+    TotalSwapSpaceSize         = 0
+    FreeSwapSpaceSize          = 0
+    SystemLoadAverage          = 0
+    SystemCpuLoad              = 0
+    MaxFileDescriptorCount     = 0
+    OpenFileDescriptorCount    = 0
+    AvailableProcessors        = 0
+
+    if( self.checkBean‎Consistency( mbean, data ) == true && value != nil )
+
+      uptime   = value['Uptime']    ? value['Uptime']    : nil
+      start    = value['StartTime'] ? value['StartTime'] : nil
+
+    end
+
+    result.push( sprintf( format, @Host, @Service, mbean, 'uptime'   , 'uptime', @interval, uptime ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'starttime', 'gauge' , @interval, start ) )
+
+    return result
+
+
+
+
+#             "value" : {
+#                "TotalPhysicalMemorySize" : 10317664256,
+#                "SystemLoadAverage" : 9.23,
+#                "Arch" : "amd64",
+#                "ProcessCpuLoad" : 0.00165745856353591,
+#                "MaxFileDescriptorCount" : 4096,
+#                "AvailableProcessors" : 2,
+#                "OpenFileDescriptorCount" : 82,
+#                "FreePhysicalMemorySize" : 138825728,
+#                "TotalSwapSpaceSize" : 0,
+#                "ObjectName" : {
+#                   "objectName" : "java.lang:type=OperatingSystem"
+#                },
+#                "CommittedVirtualMemorySize" : 3045675008,
+#                "Name" : "Linux",
+#                "Version" : "3.10.0-327.22.2.el7.x86_64",
+#                "ProcessCpuTime" : 277100000000,
+#                "SystemCpuLoad" : 0.986195472114854,
+#                "FreeSwapSpaceSize" : 0
+#             },
+
+
+
+  end
+
+  def ParseResult_TomcatManager( data = {} )
+
+    result    = []
+    mbean     = 'Manager'
+    format    = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
+    value     = data['value']     ? data['value']     : nil
+
+    # defaults
+    processingTime          = 0       # Time spent doing housekeeping and expiration
+    duplicates              = 0       # Number of duplicated session ids generated
+    maxActiveSessions       = 0       # The maximum number of active Sessions allowed, or -1 for no limit
+    sessionMaxAliveTime     = 0       # Longest time an expired session had been alive
+    maxInactiveInterval     = 3600    # The default maximum inactive interval for Sessions created by this Manager
+    sessionExpireRate       = 0       # Session expiration rate in sessions per minute
+    sessionAverageAliveTime = 0       # Average time an expired session had been alive
+    rejectedSessions        = 0       # Number of sessions we rejected due to maxActive beeing reached
+    processExpiresFrequency = 0       # The frequency of the manager checks (expiration and passivation)
+    activeSessions          = 0       # Number of active sessions at this moment
+    sessionCreateRate       = 0       # Session creation rate in sessions per minute
+    expiredSessions         = 0       # Number of sessions that expired ( doesn't include explicit invalidations )
+    sessionCounter          = 0       # Total number of sessions created by this manager
+    maxActive               = 0       # Maximum number of active sessions so far
+
+    if( self.checkBean‎Consistency( mbean, data ) == true && value != nil )
+
+      value = value.values.first
+
+      duplicates              = value['duplicates']               ? value['duplicates']              : nil
+      maxActiveSessions       = value['maxActiveSessions']        ? value['maxActiveSessions']       : nil
+      sessionMaxAliveTime     = value['sessionMaxAliveTime']      ? value['sessionMaxAliveTime']     : nil
+      processingTime          = value['processingTime']           ? value['processingTime']          : nil
+      maxInactiveInterval     = value['maxInactiveInterval']      ? value['maxInactiveInterval']     : nil
+      sessionExpireRate       = value['sessionExpireRate']        ? value['sessionExpireRate']       : nil
+      sessionAverageAliveTime = value['sessionAverageAliveTime']  ? value['sessionAverageAliveTime'] : nil
+      rejectedSessions        = value['rejectedSessions']         ? value['rejectedSessions']        : nil
+      processExpiresFrequency = value['processExpiresFrequency']  ? value['processExpiresFrequency'] : nil
+      activeSessions          = value['activeSessions']           ? value['activeSessions']          : nil
+      sessionCreateRate       = value['sessionCreateRate']        ? value['sessionCreateRate']       : nil
+      expiredSessions         = value['expiredSessions']          ? value['expiredSessions']         : nil
+      sessionCounter          = value['sessionCounter']           ? value['sessionCounter']          : nil
+      maxActive               = value['maxActive']                ? value['maxActive']               : nil
+
+    end
+
+    result.push( sprintf( format, @Host, @Service, mbean, 'processing', 'time'              , @interval, processingTime ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'sessions'  , 'count'             , @interval, sessionCounter ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'sessions'  , 'expired'           , @interval, expiredSessions ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'sessions'  , 'alive_avg'         , @interval, sessionAverageAliveTime ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'sessions'  , 'rejected'          , @interval, rejectedSessions ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'sessions'  , 'duplicates'        , @interval, duplicates ) )
+
+    if( maxActiveSessions.to_i != -1 )
+      result.push( sprintf( format, @Host, @Service, mbean, 'sessions'  , 'max_active_allowed', @interval, maxActiveSessions ) )
+    end
+    result.push( sprintf( format, @Host, @Service, mbean, 'sessions'  , 'max_alive'         , @interval, sessionMaxAliveTime ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'sessions'  , 'expire_rate'       , @interval, sessionExpireRate ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'sessions'  , 'create_rate'       , @interval, sessionCreateRate ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'sessions'  , 'max_active'        , @interval, maxActive ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'sessions'  , 'expire_freq'       , @interval, processExpiresFrequency ) )
+
+    return result
+  end
+
+
+  def ParseResult_DataViewFactory( data = {} )
+
+    result    = []
+    mbean     = 'DataViewFactory'
+    format    = 'PUTVAL %s/%s-%s/count-%s interval=%s N:%s'
+    value     = data['value']     ? data['value']     : nil
+
+    # defaults
+    lookups      = 0
+    computed     = 0
+    cached       = 0
+    invalidated  = 0
+    evicted      = 0
+    activeTime   = 0
+    totalTime    = 0
+
+    if( self.checkBean‎Consistency( mbean, data ) == true && value != nil )
+
+      lookups      = value['NumberOfDataViewLookups']       ? value['NumberOfDataViewLookups']       : nil
+      computed     = value['NumberOfComputedDataViews']     ? value['NumberOfComputedDataViews']     : nil
+      cached       = value['NumberOfCachedDataViews']       ? value['NumberOfCachedDataViews']       : nil
+      invalidated  = value['NumberOfInvalidatedDataViews']  ? value['NumberOfInvalidatedDataViews']  : nil
+      evicted      = value['NumberOfEvictedDataViews']      ? value['NumberOfEvictedDataViews']      : nil
+      activeTime   = value['ActiveTimeOfComputedDataViews'] ? value['ActiveTimeOfComputedDataViews'] : nil
+      totalTime    = value['TotalTimeOfComputedDataViews']  ? value['TotalTimeOfComputedDataViews']  : nil
+
+    end
+
+    result.push( sprintf( format, @Host, @Service, mbean, 'lookups'     , @interval, lookups ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'computed'    , @interval, computed ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'cached'      , @interval, cached ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'invalidated' , @interval, invalidated ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'evicted'     , @interval, evicted ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'activeTime'  , @interval, activeTime ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'totalTime'   , @interval, totalTime ) )
+
+    return result
+
+  end
+
+
+  def ParseResult_TransformedBlobCacheManager( data = {} )
+
+    result    = []
+    mbean     = 'TransformedBlobCacheManager'
+    format    = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
+    value     = data['value']     ? data['value']     : nil
+
+    # defaults
+    cacheSize          = 0   # set the cache size in bytes
+    cacheLevel         = 0   # cache level in bytes
+    cacheInitialLevel  = 0   # initial cache level in bytes
+    newGenCacheSize    = 0   # cache size of new generation folder in bytes
+    newGenLevel        = 0   # cache level of the new generation in bytes
+    newGenInitialLevel = 0   # initial cache level of the new generation in bytes
+    oldGenLevel        = 0   # cache level of the old generation in bytes
+    oldGenInitialLevel = 0   # initial cache level of the old generation level in bytes
+    faultSizeSum       = 0   # sum of sizes in bytes of all blobs faulted since system start
+    faultCount         = 0   # count of faults since system start
+    recallSizeSum      = 0   # sum of sizes in bytes of all blobs recalled since system start
+    recallCount        = 0   # count of recalls since system start
+    rotateCount        = 0   # count of rotates since system start
+    accessCount        = 0   # count of accesses since system start
+
+    if( self.checkBean‎Consistency( mbean, data ) == true && value != nil )
+
+      cacheSize               = value['CacheSize']                 ? value['CacheSize']                 : nil
+      cacheLevel              = value['Level']                     ? value['Level']                     : nil
+      cacheInitialLevel       = value['InitialLevel']              ? value['InitialLevel']              : nil
+      newGenCacheSize         = value['NewGenerationCacheSize']    ? value['NewGenerationCacheSize']    : nil
+      newGenCacheLevel        = value['NewGenerationLevel']        ? value['NewGenerationLevel']        : nil
+      newGenCacheInitialLevel = value['NewGenerationInitialLevel'] ? value['NewGenerationInitialLevel'] : nil
+      oldGenCacheLevel        = value['OldGenerationLevel']        ? value['OldGenerationLevel']        : nil
+      oldGenCacheInitialLevel = value['OldGenerationInitialLevel'] ? value['OldGenerationInitialLevel'] : nil
+      faultSize               = value['FaultSizeSum']              ? value['FaultSizeSum']              : nil
+      fault                   = value['FaultCount']                ? value['FaultCount']                : nil
+      recallSize              = value['RecallSizeSum']             ? value['RecallSizeSum']             : nil
+      recall                  = value['RecallCount']               ? value['RecallCount']               : nil
+      rotate                  = value['RotateCount']               ? value['RotateCount']               : nil
+      access                  = value['AccessCount']               ? value['AccessCount']               : nil
+
+    end
+
+    result.push( sprintf( format, @Host, @Service, mbean, 'cache'       , 'size'          , @interval, cacheSize ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'cache'       , 'level'         , @interval, cacheLevel ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'cache'       , 'initial_level' , @interval, cacheInitialLevel ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'newGen_cache', 'size'          , @interval, newGenCacheSize ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'newGen_cache', 'level'         , @interval, newGenCacheLevel ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'newGen_cache', 'initial_level' , @interval, newGenCacheInitialLevel ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'oldGen_cache', 'level'         , @interval, oldGenCacheLevel ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'oldGen_cache', 'initial_level' , @interval, oldGenCacheInitialLevel ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'fault'       , 'count'         , @interval, fault ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'fault'       , 'size'          , @interval, faultSize ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'recall'      , 'count'         , @interval, recall ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'recall'      , 'size'          , @interval, recallSize ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'rotate'      , 'count'         , @interval, rotate ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'access'      , 'count'         , @interval, access ) )
+
+    return result
+
+  end
+
+
   def ParseResult_Memory( data = {} )
 
     result = []
@@ -1589,6 +1815,17 @@ class CollecdPlugin
                 case k
                 when 'Runtime'
                   graphiteOutput.push( self.ParseResult_Runtime( v ) )
+                when 'OperatingSystem'
+                  graphiteOutput.push( self.ParseResult_OperatingSystem( v ) )
+                when 'Manager'
+                  graphiteOutput.push( self.ParseResult_TomcatManager( v ) )
+                when 'DataViewFactory'
+                  graphiteOutput.push( self.ParseResult_DataViewFactory( v ) )
+
+                # currently disabled
+                # need information or discusion about it
+#                when 'TransformedBlobCacheManager'
+#                  graphiteOutput.push( self.ParseResult_TransformedBlobCacheManager( v ) )
                 when 'Memory'
                   graphiteOutput.push(self.ParseResult_Memory(v))
                 when 'MemoryPoolCMSOldGen'
@@ -1605,7 +1842,7 @@ class CollecdPlugin
                   graphiteOutput.push(self.ParseResult_MemoryPool(v))
                 when 'Threading'
                   graphiteOutput.push(self.ParseResult_Threading(v))
-  #                when 'ExecutortomcatThreadPool'
+  #                when 'ThreadPool'
   #                  graphiteOutput.push( self.ParseResult_ThreadPool( v ) )
                 when 'ClassLoading'
                   graphiteOutput.push(self.ParseResult_ClassLoading(v))
