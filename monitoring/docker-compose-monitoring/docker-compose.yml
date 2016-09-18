@@ -80,6 +80,23 @@ services:
     networks:
       mon:
         ipv4_address: 172.25.0.15
+ 
+  carbon-relay:
+    restart: always
+    image: bodsch/docker-carbon-c-relay:latest
+    container_name: carbon-relay
+    hostname: carbon-relay
+    env_file:
+      - env/graphite.env
+    depends_on:
+      - graphite
+    ports:
+      - 2003:2003
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      mon:
+        ipv4_address: 172.25.0.20
 
   graphite:
     restart: always
@@ -96,7 +113,6 @@ services:
       - 'database:172.25.0.10'
       - 'memcached:172.25.0.11'
     ports:
-      - 2003:2003
       - 7002:7002
       - 8081:8080
     volumes:
@@ -104,8 +120,8 @@ services:
       - ./data:/srv
     networks:
       mon:
-        ipv4_address: 172.25.0.20
-
+        ipv4_address: 172.25.0.21
+ 
   grafana:
     restart: always
     image: bodsch/docker-grafana:latest
@@ -123,7 +139,7 @@ services:
       - ./data:/srv
     networks:
       mon:
-        ipv4_address: 172.25.0.21
+        ipv4_address: 172.25.0.22
 
   icinga2-core:
     restart: always
