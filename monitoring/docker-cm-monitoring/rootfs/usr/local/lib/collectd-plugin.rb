@@ -618,26 +618,24 @@ class CollecdPlugin
     value     = data['value']     ? data['value']     : nil
 
     # defaults
-    TotalPhysicalMemorySize    = 0
-    FreePhysicalMemorySize     = 0
-    CommittedVirtualMemorySize = 0
-    TotalSwapSpaceSize         = 0
-    FreeSwapSpaceSize          = 0
-    SystemLoadAverage          = 0
-    SystemCpuLoad              = 0
-    MaxFileDescriptorCount     = 0
-    OpenFileDescriptorCount    = 0
-    AvailableProcessors        = 0
+    physicalMemorySizeTotal    = 0
+    physicalMemorySizeFree     = 0
+    virtualMemorySizeCommitted = 0
+    swapSpaceSizeTotal         = 0
+    swapSpaceSizeFree          = 0
+    systemLoadAverage          = 0
+    systemCpuLoad              = 0
+    fileDescriptorCountMax     = 0
+    fileDescriptorCountOpen    = 0
+    vvailableProcessors        = 0
 
     if( self.checkBean‎Consistency( mbean, data ) == true && value != nil )
 
-      uptime   = value['Uptime']    ? value['Uptime']    : nil
-      start    = value['StartTime'] ? value['StartTime'] : nil
 
     end
 
-    result.push( sprintf( format, @Host, @Service, mbean, 'uptime'   , 'uptime', @interval, uptime ) )
-    result.push( sprintf( format, @Host, @Service, mbean, 'starttime', 'gauge' , @interval, start ) )
+#     result.push( sprintf( format, @Host, @Service, mbean, 'uptime'   , 'uptime', @interval, uptime ) )
+#     result.push( sprintf( format, @Host, @Service, mbean, 'starttime', 'gauge' , @interval, start ) )
 
     return result
 

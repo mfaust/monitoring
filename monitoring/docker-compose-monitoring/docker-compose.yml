@@ -65,7 +65,8 @@ services:
       - cm-monitoring
     extra_hosts:
       - 'jolokia:172.25.0.11'
-      - 'grafana:172.25.0.21'
+      - 'graphite:172.25.0.21'
+      - 'grafana:172.25.0.22'
       - 'icingaweb2:172.25.0.31'
       - 'cm-monitoring:172.25.0.40'
     volumes:
@@ -212,7 +213,8 @@ services:
       - grafana
     extra_hosts:
       - 'jolokia:172.25.0.11'
-      - 'grafana:172.25.0.21'
+      - 'graphite:172.25.0.21'
+      - 'grafana:172.25.0.22'
       - 'icinga2:172.25.0.30'
       - 'blueprint-box:192.168.252.100'
     volumes:
