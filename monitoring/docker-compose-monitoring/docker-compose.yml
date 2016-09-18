@@ -75,12 +75,13 @@ services:
       - ./share/nginx/etc/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./share/nginx/etc/nginx/modules.d/00-restrictions.conf:/etc/nginx/modules.d/00-restrictions.conf:ro
       - ./share/nginx/etc/nginx/modules.d/01-proxy-grafana.conf:/etc/nginx/modules.d/01-proxy-grafana.conf:ro
+      - ./share/nginx/etc/nginx/modules.d/01-proxy-graphite.conf:/etc/nginx/modules.d/01-proxy-graphite.conf:rw
       - ./share/nginx/etc/nginx/modules.d/01-proxy-icingaweb2.conf:/etc/nginx/modules.d/01-proxy-icingaweb2.conf:ro
       - ./share/nginx/etc/nginx/modules.d/01-proxy-rest-service.conf:/etc/nginx/modules.d/01-proxy-rest-service.conf:ro
     networks:
       mon:
         ipv4_address: 172.25.0.15
- 
+
   carbon-relay:
     restart: always
     image: bodsch/docker-carbon-c-relay:latest
@@ -121,7 +122,7 @@ services:
     networks:
       mon:
         ipv4_address: 172.25.0.21
- 
+
   grafana:
     restart: always
     image: bodsch/docker-grafana:latest
