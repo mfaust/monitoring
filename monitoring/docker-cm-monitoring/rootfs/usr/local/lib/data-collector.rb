@@ -33,6 +33,8 @@ class DataCollector
     applicationConfig  = settings['applicationConfigFile'] ? settings['applicationConfigFile'] : nil
     serviceConfig      = settings['serviceConfigFile']     ? settings['serviceConfigFile']     : nil
 
+    @DEBUG             = false
+
     if( ! File.exist?( @logDirectory ) )
       Dir.mkdir( @logDirectory )
     end
@@ -78,8 +80,6 @@ class DataCollector
     @log.info( "  cache directory located at #{@cacheDirectory}" )
     @log.info( '-----------------------------------------------------------------' )
     @log.info( '' )
-
-#     @discovery = ServiceDiscovery.new( @settings )
 
   end
 
@@ -778,6 +778,13 @@ class DataCollector
         else
 
           targetUrl = i[0]['target']['url']
+
+          if( @DEBUG == true )
+
+            tmpFile = sprintf( '%s/%s/request-%s.json'    , @cacheDirectory, hostname,v )
+            File.open( tmpFile , 'w' ) { |f| f.write( JSON.pretty_generate( i ) ) }
+
+          end
 
           if( self.checkHostAndService( targetUrl ) == true )
 

@@ -598,6 +598,8 @@ class CollecdPlugin
 
     if( self.checkBean‎Consistency( mbean, data ) == true && value != nil )
 
+#       value = value.values.first
+
       uptime   = value['Uptime']    ? value['Uptime']    : nil
       start    = value['StartTime'] ? value['StartTime'] : nil
 
@@ -631,7 +633,7 @@ class CollecdPlugin
 
     if( self.checkBean‎Consistency( mbean, data ) == true && value != nil )
 
-
+#       value = value.values.first
     end
 
 #     result.push( sprintf( format, @Host, @Service, mbean, 'uptime'   , 'uptime', @interval, uptime ) )
@@ -666,6 +668,7 @@ class CollecdPlugin
 
 
   end
+
 
   def ParseResult_TomcatManager( data = {} )
 
@@ -749,6 +752,8 @@ class CollecdPlugin
 
     if( self.checkBean‎Consistency( mbean, data ) == true && value != nil )
 
+      value = value.values.first
+
       lookups      = value['NumberOfDataViewLookups']       ? value['NumberOfDataViewLookups']       : nil
       computed     = value['NumberOfComputedDataViews']     ? value['NumberOfComputedDataViews']     : nil
       cached       = value['NumberOfCachedDataViews']       ? value['NumberOfCachedDataViews']       : nil
@@ -796,6 +801,8 @@ class CollecdPlugin
     accessCount        = 0   # count of accesses since system start
 
     if( self.checkBean‎Consistency( mbean, data ) == true && value != nil )
+
+      value = value.values.first
 
       cacheSize               = value['CacheSize']                 ? value['CacheSize']                 : nil
       cacheLevel              = value['Level']                     ? value['Level']                     : nil
@@ -866,6 +873,8 @@ class CollecdPlugin
 
     if( self.checkBean‎Consistency( mbean, data ) == true && value != nil )
 
+#       value = value.values.first
+
       memoryTypes.each do |m|
 
         init      = value[m]['init']
@@ -916,6 +925,8 @@ class CollecdPlugin
 
     if( self.checkBean‎Consistency( mbean, data ) == true && value != nil )
 
+#       value = value.values.first
+
       peak   = value['PeakThreadCount']  ? value['PeakThreadCount']  : 0
       count  = value['ThreadCount']      ? value['ThreadCount']      : 0
 
@@ -950,6 +961,8 @@ class CollecdPlugin
     unloaded    = 0
 
     if( self.checkBean‎Consistency( mbean, data ) == true && value != nil )
+
+#       value = value.values.first
 
       loaded      = value['LoadedClassCount']      ? value['LoadedClassCount']      : nil
       totalLoaded = value['TotalLoadedClassCount'] ? value['TotalLoadedClassCount'] : nil
@@ -987,12 +1000,16 @@ class CollecdPlugin
 
     if( self.checkBean‎Consistency( mbean, data ) == true && value != nil && usage != nil )
 
-      init      = usage['init']
-      max       = usage['max']
-      used      = usage['used']
-      committed = usage['committed']
+      init      = usage['init']       ? usage['init']      : nil
+      max       = usage['max']        ? usage['max']       : nil
+      used      = usage['used']       ? usage['used']      : nil
+      committed = usage['committed']  ? usage['committed'] : nil
 
-      percent   = ( 100 * used / committed )
+      if( max != -1 )
+        percent   = ( 100 * used / max )
+      else
+        percent   = ( 100 * used / committed )
+      end
 
     end
 
@@ -1014,6 +1031,8 @@ class CollecdPlugin
     value  = data['value'] ? data['value'] : nil
 
     if( self.checkBean‎Consistency( mbean, data ) == true && value != nil )
+
+#       value = value.values.first
 
       lastGcInfo = value['LastGcInfo'] ? value['LastGcInfo']      : nil
 
@@ -1072,6 +1091,8 @@ class CollecdPlugin
 
     if( self.checkBean‎Consistency( mbean, data ) == true && value != nil )
 
+#       value = value.values.first
+
       lastGcInfo = value['LastGcInfo'] ? value['LastGcInfo']      : nil
 
       if( lastGcInfo != nil )
@@ -1123,20 +1144,19 @@ class CollecdPlugin
     mbean        = 'Server'
     format       = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
     value        = data['value']  ? data['value']  : nil
-    serviceInfos = ( value != nil && value['ServiceInfos'] ) ? value['ServiceInfos'] : nil
-    licenseInfos = ( value != nil && value['LicenseInfos'] ) ? value['LicenseInfos'] : nil
 
     # defaults
-    cacheHits        = 0
-    cacheEvicts      = 0
-    cacheEntries     = 0
-    cacheInterval    = 0
-    cacheSize        = 0
-    reqSeqNumber     = nil
-    connectionCount  = 0
-    runlevel         = nil
-    uptime           = nil
-
+    cacheHits       = 0
+    cacheEvicts     = 0
+    cacheEntries    = 0
+    cacheInterval   = 0
+    cacheSize       = 0
+    reqSeqNumber    = nil
+    connectionCount = 0
+    runlevel        = nil
+    uptime          = nil
+    serviceInfos    = nil
+    licenseInfos    = nil
 
     def timeParser( today, finalDate )
 
@@ -1155,6 +1175,8 @@ class CollecdPlugin
 
     if( self.checkBean‎Consistency( mbean, data ) == true && value != nil )
 
+      value = value.values.first
+
       cacheHits        = value['ResourceCacheHits']         ? value['ResourceCacheHits']         : nil
       cacheEvicts      = value['ResourceCacheEvicts']       ? value['ResourceCacheEvicts']       : nil
       cacheEntries     = value['ResourceCacheEntries']      ? value['ResourceCacheEntries']      : nil
@@ -1164,6 +1186,8 @@ class CollecdPlugin
       connectionCount  = value['ConnectionCount']           ? value['ConnectionCount']           : nil
       runlevel         = value['RunLevel']                  ? value['RunLevel']                  : nil
       uptime           = value['Uptime']                    ? value['Uptime']                    : nil
+      serviceInfos     = value['ServiceInfos']              ? value['ServiceInfos']              : nil
+      licenseInfos     = value['LicenseInfos']              ? value['LicenseInfos']              : nil
 
       case runlevel.downcase
         when 'offline'
@@ -1245,6 +1269,8 @@ class CollecdPlugin
 
     end
 
+    format       = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
+
     result.push( sprintf( format, @Host, @Service, mbean, 'server', 'cache_hits'      , @interval, cacheHits ) )
     result.push( sprintf( format, @Host, @Service, mbean, 'server', 'cache_evicts'    , @interval, cacheEvicts ) )
     result.push( sprintf( format, @Host, @Service, mbean, 'server', 'cache_entries'   , @interval, cacheEntries ) )
@@ -1274,6 +1300,8 @@ class CollecdPlugin
     currentPendingDocuments = 0
 
     if( self.checkBean‎Consistency( mbean, data ) == true && value != nil )
+
+      value = value.values.first
 
       pendingEvents           = value['PendingEvents']              ? value['PendingEvents']              : nil
       indexDocuments          = value['IndexDocuments']             ? value['IndexDocuments']             : nil
@@ -1311,6 +1339,8 @@ class CollecdPlugin
 
     if( self.checkBean‎Consistency( mbean, data ) == true && value != nil )
 
+      value = value.values.first
+
       capacity  = value['Capacity']    ? value['Capacity']    : nil
       evaluated = value['Evaluated']   ? value['Evaluated']   : nil
       evicted   = value['Evicted']     ? value['Evicted']     : nil
@@ -1347,6 +1377,8 @@ class CollecdPlugin
 
     if( self.checkBean‎Consistency( mbean, data ) == true && value != nil )
 
+      value = value.values.first
+
       healthy = value['Healthy'] == true ? 0 : 1
 
     end
@@ -1370,6 +1402,8 @@ class CollecdPlugin
     diffEntries    = 0
 
     if( self.checkBean‎Consistency( mbean, data ) == true && value != nil )
+
+      value = value.values.first
 
       maxEntries     = value['KeysCount']     ? value['KeysCount']     : 0  # max feeder entries
       currentEntries = value['ValuesCount']   ? value['ValuesCount']   : 0  # current feeder entries
@@ -1404,6 +1438,8 @@ class CollecdPlugin
     suSessions       = 0
 
     if( self.checkBean‎Consistency( mbean, data ) == true && value != nil )
+
+      value = value.values.first
 
       blobCacheSize    = value['BlobCacheSize']        ? value['BlobCacheSize']      : nil
       blobCacheLevel   = value['BlobCacheLevel']       ? value['BlobCacheLevel']     : nil
@@ -1458,6 +1494,8 @@ class CollecdPlugin
 
     if( self.checkBean‎Consistency( mbean, data ) == true && value != nil )
 
+#      value = value.values.first
+
       generation        = value['generation']        ? value['generation']        : nil
       isMaster          = value['isSlave']           ? value['isSlave']           : nil
       isSlave           = value['isMaster']          ? value['isMaster']          : nil
@@ -1508,6 +1546,8 @@ class CollecdPlugin
     cumulative_lookups   = 0
 
     if( self.checkBean‎Consistency( mbean, data ) == true && value != nil )
+
+#      value = value.values.first
 
       warmupTime           = value['warmupTime']           ? value['warmupTime']           : nil
       lookups              = value['lookups']              ? value['lookups']              : nil
@@ -1574,6 +1614,8 @@ class CollecdPlugin
 
     if( self.checkBean‎Consistency( mbean, data ) == true && value != nil )
 
+#      value = value.values.first
+
       avgRequestsPerSecond   = value['avgRequestsPerSecond']   ? value['avgRequestsPerSecond'] : nil
       avgTimePerRequest      = value['avgTimePerRequest']      ? value['avgTimePerRequest']    : nil
       medianRequestTime      = value['medianRequestTime']      ? value['medianRequestTime']    : nil
@@ -1610,6 +1652,8 @@ class CollecdPlugin
 
     if( self.checkBean‎Consistency( mbean, data ) == true && value != nil )
 
+      value = value.values.first
+
       open   = value['OpenConnections']  ? value['OpenConnections']  : nil
       max    = value['MaxConnections']   ? value['MaxConnections']   : nil
       idle   = value['IdleConnections']  ? value['IdleConnections']  : nil
@@ -1643,6 +1687,8 @@ class CollecdPlugin
     queriesWaiting   = 0
 
     if( self.checkBean‎Consistency( mbean, data ) == true && value != nil )
+
+      value = value.values.first
 
       executorsRunning = value['RunningExecutors'] ? value['RunningExecutors'] : nil
       executorsIdle    = value['IdleExecutors']    ? value['IdleExecutors']    : nil
@@ -1683,6 +1729,8 @@ class CollecdPlugin
 
     if( self.checkBean‎Consistency( mbean, data ) == true && value != nil )
 
+      value = value.values.first
+
       failed        = value['Failed']        ? value['Failed']        : nil
       successful    = value['Successful']    ? value['Successful']    : nil
       unrecoverable = value['Unrecoverable'] ? value['Unrecoverable'] : nil
@@ -1713,6 +1761,8 @@ class CollecdPlugin
     hits     = 0
 
     if( self.checkBean‎Consistency( mbean, data ) == true && value != nil )
+
+      value = value.values.first
 
       size     = value['CacheSize']     ? value['CacheSize']     : nil
       removed  = value['CacheRemoved']  ? value['CacheRemoved']  : nil
