@@ -69,31 +69,31 @@
         "metrics": [
           {
             "description": "Base Measurement Points for ALL Content Server",
-            "mbean" : "com.coremedia:application=coremedia,type=Server",
+            "mbean" : "com.coremedia:application=*,type=Server",
             "attribute" : "RunLevel,ResourceCacheHits,ResourceCacheEvicts,ResourceCacheEntries,ResourceCacheInterval,ResourceCacheSize,RepositorySequenceNumber,ConnectionCount,Uptime,ServiceInfos,LicenseInfos"
           }, {
             "description": "Connection Pool for DBA Connections",
-            "mbean" : "com.coremedia:application=coremedia,bean=ConnectionPool,type=Store",
+            "mbean" : "com.coremedia:application=*,bean=ConnectionPool,type=Store",
             "attribute" : "BusyConnections,OpenConnections,IdleConnections,MaxConnections,MinConnections"
           }, {
             "description": "Query Pool for DBA Connections",
-            "mbean" : "com.coremedia:application=coremedia,bean=QueryPool,type=Store",
+            "mbean" : "com.coremedia:application=*,bean=QueryPool,type=Store",
             "attribute" : "IdleExecutors,RunningExecutors,WaitingQueries,MaxQueries"
           }, {
             "description": "Statistics about BlobStore",
-            "mbean" : "com.coremedia:application=coremedia,module=BlobStore,pool=BlobStoreMethods,type=Statistics"
+            "mbean" : "com.coremedia:application=*,module=BlobStore,pool=BlobStoreMethods,type=Statistics"
           }, {
             "description": "Statistics pool StoreStatistics Job Result",
-            "mbean" : "com.coremedia:application=coremedia,module=StoreStatistics,pool=Job Result,type=Statistics"
+            "mbean" : "com.coremedia:application=*,module=StoreStatistics,pool=Job Result,type=Statistics"
           }, {
             "description": "Statistics about Repository",
-            "mbean" : "com.coremedia:application=coremedia,module=RepositoryStatistics,pool=Resource,type=Statistics"
+            "mbean" : "com.coremedia:application=*,module=RepositoryStatistics,pool=Resource,type=Statistics"
           }, {
             "description": "Statistics about ResourceCache",
-            "mbean" : "com.coremedia:application=coremedia,module=ResourceCacheStatistics,pool=ResourceCache,type=Statistics"
+            "mbean" : "com.coremedia:application=*,module=ResourceCacheStatistics,pool=ResourceCache,type=Statistics"
           }, {
             "description": "Statistics about TextStore",
-            "mbean" : "com.coremedia:application=coremedia,module=TextStore,pool=TextStoreMethods,type=Statistics"
+            "mbean" : "com.coremedia:application=*,module=TextStore,pool=TextStoreMethods,type=Statistics"
           }
         ]
       },
@@ -102,7 +102,7 @@
         "metrics": [
           {
             "description": "Statistics about Publisher",
-            "mbean" : "com.coremedia:application=coremedia,module=Publisher,pool=PublisherMethods,type=Statistics"
+            "mbean" : "com.coremedia:module=Publisher,pool=PublisherMethods,type=Statistics,application=*"
           }
         ]
       },
@@ -116,7 +116,7 @@
         "metrics": [
           {
             "description": "Information about Replication between MLS and RLS",
-            "mbean" : "com.coremedia:type=Replicator,application=coremedia",
+            "mbean" : "com.coremedia:type=Replicator,application=*",
             "attribute" : "ConnectionUp,ControllerState,Enabled,PipelineUp,IncomingCount,CompletedCount,UncompletedCount,LatestCompletedSequenceNumber,LatestCompletedArrival,LatestCompletionDuration,LatestIncomingSequenceNumber,LatestIncomingArrival"
           }
         ]
@@ -125,7 +125,7 @@
         "description": "Workflow Server",
         "metrics": [
           {
-            "mbean" : "com.coremedia:type=CapConnection,application=workflow",
+            "mbean" : "com.coremedia:type=CapConnection,application=*",
             "attribute" : "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions"
           }
         ]
@@ -135,7 +135,7 @@
         "metrics": [
           {
             "name": "CapConnection",
-            "mbean": "com.coremedia:type=CapConnection,application=elastic-worker",
+            "mbean": "com.coremedia:type=CapConnection,application=*",
             "attribute": "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions"
           }
         ]
@@ -145,7 +145,7 @@
         "metrics": [
           {
             "name": "CapConnection",
-            "mbean": "com.coremedia:type=CapConnection,application=user-changes",
+            "mbean": "com.coremedia:type=CapConnection,application=*",
             "attribute": "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions"
           }
         ]
@@ -155,11 +155,11 @@
         "metrics": [
           {
             "name": "feeder",
-            "mbean": "com.coremedia:application=contentfeeder,type=Feeder",
+            "mbean": "com.coremedia:type=Feeder,application=*",
             "attribute": "State,Uptime,CurrentPendingDocuments,IndexAverageBatchSendingTime,IndexDocuments,IndexContentDocuments,IndexBytes,PendingEvents,PendingFolders"
           }, {
             "name": "CapConnection",
-            "mbean": "com.coremedia:type=CapConnection,application=contentfeeder",
+            "mbean": "com.coremedia:type=CapConnection,application=*",
             "attribute": "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions"
           }
         ]
@@ -168,18 +168,30 @@
         "description": "The CAE Feeder (Live and Preview)",
         "metrics": [
           {
+            "description" : "ProactiveEngine management component",
             "name": "caefeeder",
-            "mbean": "com.coremedia:type=ProactiveEngine,application=caefeeder",
+            "mbean": "com.coremedia:type=ProactiveEngine,application=*",
             "attribute": "KeysCount,ValuesCount,InvalidationCount,SendSuccessTimeLatest,PurgeTimeLatest,HeartBeat,QueueCapacity,QueueMaxSize,QueueProcessedPerSecond"
           }, {
+            "description" : "ContentDependencyInvalidator",
             "name": "DependencyInvalidator",
-            "mbean" : "com.coremedia:type=ContentDependencyInvalidator,application=caefeeder"
+            "mbean" : "com.coremedia:type=ContentDependencyInvalidator,application=*"
           }, {
+            "description" : "Health management component",
             "name": "HealthStatus",
-            "mbean" : "com.coremedia:type=Health,application=caefeeder"
+            "mbean" : "com.coremedia:type=Health,application=*"
           }, {
-            "mbean" : "com.coremedia:type=CapConnection,application=caefeeder",
+            "description" : "the management interface for the CapConnection to allow its configuration and profiling",
+            "mbean" : "com.coremedia:type=CapConnection,application=*",
             "attribute": "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions"
+          }, {
+            "description": "Provided statistics for the persistent blob cache",
+            "mbean": "com.coremedia:type=TransformedBlobCacheManager,application=*",
+            "attribute": "AccessCount,CacheSize,FaultCount,FaultSizeSum,InitialLevel,Level,NewGenerationCacheSize,NewGenerationInitialLevel,NewGenerationLevel,OldGenerationInitialLevel,OldGenerationLevel,RecallCount,RecallSizeSum,RotateCount"
+          }, {
+            "description" : "Receiver that is connected to the feeder",
+            "mbean" : "com.coremedia:type=Receiver,application=*",
+            "attribute" : "AddProcessedCount,AddReceivedCount,InitializeProcessedCount,InitializeReceivedCount,ProcessedCount,ReceivedCount,RemoveProcessedCount,RemoveReceivedCount,UpdateProcessedCount,UpdateReceivedCount"
           }
         ]
       },
@@ -188,7 +200,7 @@
         "metrics": [
           {
             "name": "CapConnection",
-            "mbean": "com.coremedia:type=CapConnection,application=CoreMedia-Asset-Management-Adobe-Drive-Server",
+            "mbean": "com.coremedia:type=CapConnection,application=*",
             "attribute": "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions"
           }
         ]
@@ -198,7 +210,7 @@
         "metrics": [
           {
             "name": "CapConnection",
-            "mbean": "com.coremedia:type=CapConnection,application=CoreMedia-Asset-Management-Adobe-Drive-Server",
+            "mbean": "com.coremedia:type=CapConnection,application=*",
             "attribute": "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions"
           }
         ]
@@ -216,121 +228,121 @@
         "metrics": [
           {
             "name": "CapConnection",
-            "mbean": "com.coremedia:type=CapConnection,application=blueprint",
+            "mbean": "com.coremedia:type=CapConnection,application=*",
             "attribute": "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions"
           }, {
-            "mbean": "com.coremedia:type=DataViewFactory,application=blueprint",
+            "mbean": "com.coremedia:type=DataViewFactory,application=*",
             "attribute": "ActiveTimeOfComputedDataViews,NumberOfCachedDataViews,NumberOfComputedDataViews,NumberOfDataViewLookups,NumberOfEvictedDataViews,NumberOfInvalidatedDataViews,TotalTimeOfComputedDataViews"
           }, {
-            "mbean": "com.coremedia:type=TransformedBlobCacheManager,application=blueprint",
+            "mbean": "com.coremedia:type=TransformedBlobCacheManager,application=*",
             "attribute": "AccessCount,CacheSize,FaultCount,FaultSizeSum,InitialLevel,Level,NewGenerationCacheSize,NewGenerationInitialLevel,NewGenerationLevel,OldGenerationInitialLevel,OldGenerationLevel,RecallCount,RecallSizeSum,RotateCount"
           }, {
-            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"DIGEST\",application=blueprint",
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"DIGEST\",application=*",
             "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
           }, {
-            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.blueprint.assets.contentbeans.AMAsset\",application=blueprint",
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.blueprint.assets.contentbeans.AMAsset\",application=*",
             "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
           }, {
-            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.blueprint.cae.layout.ContentBeanBackedPageGridPlacement\",application=blueprint",
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.blueprint.cae.layout.ContentBeanBackedPageGridPlacement\",application=*",
             "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
           }, {
-            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.blueprint.cae.layout.PageGridImpl\",application=blueprint",
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.blueprint.cae.layout.PageGridImpl\",application=*",
             "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
           }, {
-            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.blueprint.cae.search.solr.SolrQueryCacheKey\",application=blueprint",
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.blueprint.cae.search.solr.SolrQueryCacheKey\",application=*",
             "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
           }, {
-            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.blueprint.common.contentbeans.Page\",application=blueprint",
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.blueprint.common.contentbeans.Page\",application=*",
             "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
           }, {
-            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.cae.aspect.Aspect\",application=blueprint",
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.cae.aspect.Aspect\",application=*",
             "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
           }, {
-            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.cap.disk\",application=blueprint",
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.cap.disk\",application=*",
             "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
           }, {
-            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.cap.heap\",application=blueprint",
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.cap.heap\",application=*",
             "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
           }, {
-            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.cap.unlimited\",application=blueprint",
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.cap.unlimited\",application=*",
             "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
           }, {
-            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.objectserver.dataviews.AssumesIdentity\",application=blueprint",
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.objectserver.dataviews.AssumesIdentity\",application=*",
             "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
           }, {
-            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.objectserver.view.ViewLookup\",application=blueprint",
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.objectserver.view.ViewLookup\",application=*",
             "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
           }, {
-            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.transform.image.java2d.LoadedImageCacheKey\",application=blueprint",
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.transform.image.java2d.LoadedImageCacheKey\",application=*",
             "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
           }, {
-            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"java.lang.Object\",application=blueprint",
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"java.lang.Object\",application=*",
             "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
           }, {
-            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.Availability\",application=blueprint",
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.Availability\",application=*",
             "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
           }, {
-            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.Category\",application=blueprint",
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.Category\",application=*",
             "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
           }, {
-            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.CommerceUser\",application=blueprint",
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.CommerceUser\",application=*",
             "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
           }, {
-            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.Contract\",application=blueprint",
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.Contract\",application=*",
             "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
           }, {
-            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.ContractIdsByUser\",application=blueprint",
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.ContractIdsByUser\",application=*",
             "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
           }, {
-            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.ContractByUser\",application=blueprint",
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.ContractByUser\",application=*",
             "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
           }, {
-            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.DynamicPrice\",application=blueprint",
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.DynamicPrice\",application=*",
             "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
           }, {
-            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.MarketingSpot\",application=blueprint",
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.MarketingSpot\",application=*",
             "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
           }, {
-            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.MarketingSpots\",application=blueprint",
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.MarketingSpots\",application=*",
             "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
           }, {
-            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.PreviewToken\",application=blueprint",
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.PreviewToken\",application=*",
             "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
           }, {
-            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.Product\",application=blueprint",
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.Product\",application=*",
             "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
           }, {
-            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.ProductsByCategory\",application=blueprint",
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.ProductsByCategory\",application=*",
             "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
           }, {
-            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.Segment\",application=blueprint",
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.Segment\",application=*",
             "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
           }, {
-            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.Segments\",application=blueprint",
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.Segments\",application=*",
             "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
           }, {
-            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.SegmentsByUser\",application=blueprint",
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.SegmentsByUser\",application=*",
             "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
           }, {
-            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.StaticPrice\",application=blueprint",
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.StaticPrice\",application=*",
             "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
           }, {
-            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.StoreInfo\",application=blueprint",
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.StoreInfo\",application=*",
             "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
           }, {
-            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.SubCategories\",application=blueprint",
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.SubCategories\",application=*",
             "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
           }, {
-            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.TopCategories\",application=blueprint",
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.TopCategories\",application=*",
             "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
           }, {
-            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.UserIsLoggedIn\",application=blueprint",
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.UserIsLoggedIn\",application=*",
             "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
           }, {
-            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.Workspaces\",application=blueprint",
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.Workspaces\",application=*",
             "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
           }, {
-            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.fragment.resolver.SearchTermExternalReferenceResolver\",application=blueprint",
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.fragment.resolver.SearchTermExternalReferenceResolver\",application=*",
             "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
           }
         ]
@@ -340,7 +352,7 @@
         "metrics": [
           {
             "name": "CapConnection for Studio",
-            "mbean": "com.coremedia:type=CapConnection,application=CoreMedia-Studio",
+            "mbean": "com.coremedia:type=CapConnection,application=*",
             "attribute" : "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions"
           }
         ]

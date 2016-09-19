@@ -326,7 +326,7 @@
             "bars": false,
             "cacheTimeout": "",
             "datasource": "graphite",
-            "decimals": 2,
+            "decimals": 0,
             "editable": true,
             "error": false,
             "fill": 3,
@@ -366,7 +366,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.%SERVICE%-Threading-threading.count-count, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.%SERVICE%-Threading-threading.*, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -416,7 +416,7 @@
             "bars": false,
             "cacheTimeout": "",
             "datasource": "graphite",
-            "decimals": 2,
+            "decimals": 0,
             "editable": true,
             "error": false,
             "fill": 3,
