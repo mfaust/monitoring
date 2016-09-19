@@ -9,7 +9,6 @@ networks:
       config:
       - subnet: 172.25.0.0/24
 
-
 services:
   database:
     restart: always
@@ -83,23 +82,6 @@ services:
       mon:
         ipv4_address: 172.25.0.15
 
-  carbon-relay:
-    restart: always
-    image: bodsch/docker-carbon-c-relay:latest
-    container_name: carbon-relay
-    hostname: carbon-relay
-    env_file:
-      - env/graphite.env
-    depends_on:
-      - graphite
-    ports:
-      - 2003:2003
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-    networks:
-      mon:
-        ipv4_address: 172.25.0.20
-
   graphite:
     restart: always
     image: bodsch/docker-graphite:1609-01
@@ -115,6 +97,7 @@ services:
       - 'database:172.25.0.10'
       - 'memcached:172.25.0.11'
     ports:
+      - 2003:2003
       - 7002:7002
       - 8081:8080
     volumes:

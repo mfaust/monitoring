@@ -697,7 +697,7 @@ class DataCollector
               "type"   => "read",
               "mbean"  => "#{e['mbean']}",
               "target" => { "url" => sprintf( "service:jmx:rmi:///jndi/rmi://%s:%s/jmxrmi", h, port ) },
-              "config" => { "ignoreErrors" => true }
+              "config" => { "ignoreErrors" => true, "ifModifiedSince" => true, "canonicalNaming" => true }
             }
 
             attributes = []
@@ -788,7 +788,7 @@ class DataCollector
             request.body = i.to_json
 
             # default read timeout is 60 secs
-            response = Net::HTTP.start( uri.hostname, uri.port, use_ssl: uri.scheme == "https", :read_timeout => 5 ) do |http|
+            response = Net::HTTP.start( uri.hostname, uri.port, use_ssl: uri.scheme == "https", :read_timeout => 8 ) do |http|
               begin
                 http.request( request )
               rescue Exception => e
@@ -814,7 +814,8 @@ class DataCollector
     end
   end
 
-  # merge Data
+  # merge Data between Property Files and discovered Services
+  # creates mergedHostData.json for every Node
   def buildMergedData( host )
 
     discoveryFile        = sprintf( '%s/%s/discovery.json'     , @cacheDirectory, host )
