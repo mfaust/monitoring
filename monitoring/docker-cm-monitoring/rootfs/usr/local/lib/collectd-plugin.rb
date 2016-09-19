@@ -1269,6 +1269,8 @@ class CollecdPlugin
 
     end
 
+    format       = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
+
     result.push( sprintf( format, @Host, @Service, mbean, 'server', 'cache_hits'      , @interval, cacheHits ) )
     result.push( sprintf( format, @Host, @Service, mbean, 'server', 'cache_evicts'    , @interval, cacheEvicts ) )
     result.push( sprintf( format, @Host, @Service, mbean, 'server', 'cache_entries'   , @interval, cacheEntries ) )
