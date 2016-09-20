@@ -1160,15 +1160,13 @@ class CollecdPlugin
 
     def timeParser( today, finalDate )
 
-      final      = Date.parse( finalDate )
-      finalTime  = Time.new( final.year, final.month, final.day )
-      difference = TimeDifference.between( today, finalTime ).in_each_component
+      difference = TimeDifference.between( today, finalDate ).in_each_component
 
       return {
-        :years  => difference[:years].ceil,
-        :months => difference[:months].ceil,
-        :weeks  => difference[:weeks].ceil,
-        :days   => difference[:days].ceil
+        :years  => difference[:years].round,
+        :months => difference[:months].round,
+        :weeks  => difference[:weeks].round,
+        :days   => difference[:days].round
       }
     end
 
@@ -1235,18 +1233,16 @@ class CollecdPlugin
 
         validUntilSoft     = licenseInfos['validUntilSoft']      ? licenseInfos['validUntilSoft']     : nil
         validUntilHard     = licenseInfos['validUntilHard']      ? licenseInfos['validUntilHard']     : nil
-        validUntilSoftDate = licenseInfos['validUntilSoftDate']  ? licenseInfos['validUntilSoftDate'] : nil
-        validUntilHardDate = licenseInfos['validUntilHardDate']  ? licenseInfos['validUntilHardDate'] : nil
 
-        result.push( sprintf( format, @Host, @Service, mbean, 'license_until_soft', 'raw'      , @interval, validUntilSoft ) )
-        result.push( sprintf( format, @Host, @Service, mbean, 'license_until_hard', 'raw'      , @interval, validUntilHard ) )
+        result.push( sprintf( format, @Host, @Service, mbean, 'license_until_soft', 'raw'      , @interval, validUntilSoft / 1000 ) )
+        result.push( sprintf( format, @Host, @Service, mbean, 'license_until_hard', 'raw'      , @interval, validUntilHard / 1000 ) )
 
-        if( validUntilSoftDate != nil )
+        if( validUntilSoft != nil )
 
-          x                   = timeParser( today, validUntilSoftDate )
-          validUntilSoftMonth = x[:months].ceil
-          validUntilSoftWeek  = x[:weeks].ceil
-          validUntilSoftDays  = x[:days].ceil
+          x                   = timeParser( today, Time.at( validUntilSoft / 1000 ) )
+          validUntilSoftMonth = x[:months]
+          validUntilSoftWeek  = x[:weeks]
+          validUntilSoftDays  = x[:days]
 
           result.push( sprintf( format, @Host, @Service, mbean, 'license_until_soft', 'months' , @interval, validUntilSoftMonth ) )
           result.push( sprintf( format, @Host, @Service, mbean, 'license_until_soft', 'weeks'  , @interval, validUntilSoftWeek ) )
@@ -1254,12 +1250,12 @@ class CollecdPlugin
 
         end
 
-        if( validUntilHardDate != nil )
+        if( validUntilHard != nil )
 
-          x                   = timeParser( today, validUntilHardDate )
-          validUntilHardMonth = x[:months].ceil
-          validUntilHardWeek  = x[:weeks].ceil
-          validUntilHardDays  = x[:days].ceil
+          x                   = timeParser( today, Time.at( validUntilHard / 1000 ) )
+          validUntilHardMonth = x[:months]
+          validUntilHardWeek  = x[:weeks]
+          validUntilHardDays  = x[:days]
 
           result.push( sprintf( format, @Host, @Service, mbean, 'license_until_hard', 'months' , @interval, validUntilHardMonth ) )
           result.push( sprintf( format, @Host, @Service, mbean, 'license_until_hard', 'weeks'  , @interval, validUntilHardWeek ) )

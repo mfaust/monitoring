@@ -1,6 +1,6 @@
     {
-      "title": "License Until",
-      "height": "100px",
+      "title": "License Until for %SERVICE%",
+      "height": "80px",
       "editable": true,
       "collapse": false,
       "panels": [
@@ -13,7 +13,7 @@
           "isNew": true,
           "id": 65,
           "mode": "html",
-          "content": "",
+          "content": "<h3><center>%SERVICE%</center</h3>",
           "transparent": true
         },
         {
@@ -25,56 +25,8 @@
           "isNew": true,
           "id": 67,
           "mode": "html",
-          "content": "<center><h3>%SERVICE%</h3><h4>License Until\n\n<strong>Soft</strong></h4></center>",
+          "content": "<center><h4>License Until\n\n<strong>Soft</strong></h4></center>",
           "transparent": true
-        },
-        {
-          "title": "Month",
-          "error": false,
-          "span": 1,
-          "editable": true,
-          "type": "singlestat",
-          "isNew": true,
-          "id": 62,
-          "targets": [
-            {
-              "target": "collectd.%HOST%.%SERVICE%-Server-license_until_soft.count-months",
-              "refId": "A"
-            }
-          ],
-          "links": [],
-          "datasource": "graphite",
-          "format": "none",
-          "mappingType": 1,
-          "nullPointMode": "connected",
-          "valueName": "current",
-          "valueFontSize": "100%",
-          "colorBackground": false,
-          "colorValue": false
-        },
-        {
-          "title": "Weeks",
-          "error": false,
-          "span": 1,
-          "editable": true,
-          "type": "singlestat",
-          "isNew": true,
-          "id": 63,
-          "targets": [
-            {
-              "target": "collectd.%HOST%.%SERVICE%-Server-license_until_soft.count-weeks",
-              "refId": "A"
-            }
-          ],
-          "links": [],
-          "datasource": "graphite",
-          "format": "none",
-          "mappingType": 1,
-          "nullPointMode": "connected",
-          "valueName": "current",
-          "valueFontSize": "100%",
-          "colorBackground": false,
-          "colorValue": false
         },
         {
           "title": "Days",
@@ -107,6 +59,54 @@
           ]
         },
         {
+          "title": "Weeks",
+          "error": false,
+          "span": 1,
+          "editable": true,
+          "type": "singlestat",
+          "isNew": true,
+          "id": 63,
+          "targets": [
+            {
+              "target": "collectd.%HOST%.%SERVICE%-Server-license_until_soft.count-weeks",
+              "refId": "A"
+            }
+          ],
+          "links": [],
+          "datasource": "graphite",
+          "format": "none",
+          "mappingType": 1,
+          "nullPointMode": "connected",
+          "valueName": "current",
+          "valueFontSize": "100%",
+          "colorBackground": false,
+          "colorValue": false
+        },
+        {
+          "title": "Month",
+          "error": false,
+          "span": 1,
+          "editable": true,
+          "type": "singlestat",
+          "isNew": true,
+          "id": 62,
+          "targets": [
+            {
+              "target": "collectd.%HOST%.%SERVICE%-Server-license_until_soft.count-months",
+              "refId": "A"
+            }
+          ],
+          "links": [],
+          "datasource": "graphite",
+          "format": "none",
+          "mappingType": 1,
+          "nullPointMode": "connected",
+          "valueName": "current",
+          "valueFontSize": "100%",
+          "colorBackground": false,
+          "colorValue": false
+        },
+        {
           "content": "",
           "editable": true,
           "error": false,
@@ -128,7 +128,7 @@
           "isNew": true,
           "id": 66,
           "mode": "html",
-          "content": "<center><h3>%SERVICE%</h3><h4>License Until\n\n<strong>Hard</strong></h4></center>",
+          "content": "<center><h4>License Until\n\n<strong>Hard</strong></h4></center>",
           "transparent": true
         },
         {

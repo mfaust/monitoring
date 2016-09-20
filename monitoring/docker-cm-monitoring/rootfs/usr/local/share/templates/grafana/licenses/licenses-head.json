@@ -13,7 +13,7 @@
             "isNew": true,
             "id": 88,
             "mode": "html",
-            "content": "<br>\n<h3>Current <strong>available</strong> Licenses for selected services</h3>",
+            "content": "<br>\n<h3><center>Current <strong>available</strong> Licenses for selected services</center></h3>",
             "transparent": true
           }
         ]

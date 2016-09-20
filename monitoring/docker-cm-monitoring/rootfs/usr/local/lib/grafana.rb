@@ -21,6 +21,10 @@ require_relative 'tools'
 
 class Grafana
 
+  attr_reader :version
+  attr_reader :status
+  attr_reader :message
+
   def initialize( settings = {} )
 
     @logDirectory      = settings['log_dir']      ? settings['log_dir']      : '/tmp'
@@ -38,7 +42,7 @@ class Grafana
     file      = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
     file.sync = true
     @log = Logger.new(file, 'weekly', 1024000)
-    @log.level = Logger::INFO
+    @log.level = Logger::DEBUG
     @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
     @log.formatter = proc do |severity, datetime, progname, msg|
       "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
@@ -83,6 +87,8 @@ class Grafana
 
     mbeanExists  = s.detect { |s| s[mbean] }
 
+    @log.debug( mbeanExists )
+
     if( mbeanExists == nil )
       @log.debug( sprintf( 'no mbean %s found', mbean ) )
       return false
@@ -90,6 +96,9 @@ class Grafana
 
     mbeanExists  = mbeanExists[mbean]    ? mbeanExists[mbean]    : nil
     mbeanStatus  = mbeanExists['status'] ? mbeanExists['status'] : 999
+
+    @log.debug( mbeanExists )
+    @log.debug( mbeanStatus )
 
     if( mbeanStatus.to_i != 200 )
 
@@ -102,12 +111,20 @@ class Grafana
       result = true
     elsif( mbeanExists != nil && key != nil )
 
+      @log.debug( sprintf( 'look for key %s', key ) )
+
       mbeanValue = mbeanExists['value'] ? mbeanExists['value'] : nil
+
       if( mbeanValue == nil )
         return false
       end
 
+      if( mbeanValue.class.to_s == 'Hash' )
+        mbeanValue = mbeanValue.values.first
+      end
+
       attribute = mbeanValue[ key ] ? mbeanValue[ key ]  : nil
+
       if( attribute == nil || ( attribute.include?( 'ERROR' ) ) )
 
         return false
@@ -185,6 +202,8 @@ class Grafana
     if( discoveryJson != nil )
 
       services       = discoveryJson.keys
+      @log.debug("Found services: #{services}")
+
       # determine type of service from mergedHostData.json file, e.g. cae, caefeeder, contentserver
       mergedHostJson = getJsonFromFile( @mergedHostFile )
 
@@ -198,8 +217,6 @@ class Grafana
         self.addNamedTemplate( 'cm-cae-cache-classes-ibm.json' )
       end
 
-      @log.debug("Found services: #{services}")
-
       services.each do |service|
 
         serviceTemplatePaths    = Array.new()
@@ -208,28 +225,29 @@ class Grafana
 #         @log.debug("Searching templates paths for service: #{service}")
 
         # cae-live-1 -> cae-live
-        serviceName = removePostfix(service)
+        serviceName = self.removePostfix( service )
 
         # get templates for service
-        serviceTemplatePaths = *getTemplatePathsForService(serviceName)
+        serviceTemplatePaths = *self.getTemplatePathsForService(serviceName)
 
-        if( !['mongodb', 'mysql', 'postgres'].include?( serviceName ) )
-          additionalTemplatePaths.push( *getTemplatePathsForService("tomcat") )
+        if( ! ['mongodb', 'mysql', 'postgres'].include?( serviceName ) )
+          additionalTemplatePaths.push( *self.getTemplatePathsForService( 'tomcat' ) )
         end
 
         # get templates for service type
         if( mergedHostJson != nil )
 
           serviceType = mergedHostJson[service]["application"]
+
           if( serviceType )
-            additionalTemplatePaths.push(*getTemplatePathsForServiceType(serviceType))
+            additionalTemplatePaths.push( *self.getTemplatePathsForServiceType( serviceType ) )
           end
         else
           @log.error( sprintf( 'file %s doesnt exist', @mergedHostFile ) )
         end
 
 #         @log.debug( "Found Template paths: #{serviceTemplatePaths}, #{additionalTemplatePaths}")
-        generateServiceTemplate( serviceName, serviceTemplatePaths, additionalTemplatePaths )
+        self.generateServiceTemplate( serviceName, serviceTemplatePaths, additionalTemplatePaths )
 
       end
 
@@ -303,8 +321,8 @@ class Grafana
   end
 
 
-  #cae-live-1 -> cae-live
-  def removePostfix(service)
+  # cae-live-1 -> cae-live
+  def removePostfix( service )
 
     if( service =~ /\d/ )
 

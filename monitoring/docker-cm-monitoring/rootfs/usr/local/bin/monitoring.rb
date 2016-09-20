@@ -93,46 +93,24 @@ class Monitoring
 
   def readConfigFile()
 
-#     configFile = '/etc/cm-monitoring.yaml'
-#
-#     if( File.exist?( configFile ) )
+    config = YAML.load_file( @configFile )
 
-      config = YAML.load_file( @configFile )
+    @logDirectory     = config['monitoring']['log_dir']                 ? config['monitoring']['log_dir']                  : '/tmp/log'
+    @cacheDir         = config['monitoring']['cache_dir']               ? config['monitoring']['cache_dir']                : '/tmp/cache'
 
-      @logDirectory     = config['monitoring']['log_dir']                 ? config['monitoring']['log_dir']                  : '/tmp/log'
-      @cacheDir         = config['monitoring']['cache_dir']               ? config['monitoring']['cache_dir']                : '/tmp/cache'
+    @jolokia_host     = config['monitoring']['jolokia']['host']         ? config['monitoring']['jolokia']['host']          : 'localhost'
+    @jolokia_port     = config['monitoring']['jolokia']['port']         ? config['monitoring']['jolokia']['port']          : 8080
 
-      @jolokia_host     = config['monitoring']['jolokia']['host']         ? config['monitoring']['jolokia']['host']          : 'localhost'
-      @jolokia_port     = config['monitoring']['jolokia']['port']         ? config['monitoring']['jolokia']['port']          : 8080
+    @grafana_host     = config['monitoring']['grafana']['host']         ? config['monitoring']['grafana']['host']          : 'localhost'
+    @grafana_port     = config['monitoring']['grafana']['port']         ? config['monitoring']['grafana']['port']          : 3000
+    @grafana_path     = config['monitoring']['grafana']['path']         ? config['monitoring']['grafana']['path']          : nil
 
-      @grafana_host     = config['monitoring']['grafana']['host']         ? config['monitoring']['grafana']['host']          : 'localhost'
-      @grafana_port     = config['monitoring']['grafana']['port']         ? config['monitoring']['grafana']['port']          : 3000
-      @grafana_path     = config['monitoring']['grafana']['path']         ? config['monitoring']['grafana']['path']          : nil
+    @icingaHost       = config['monitoring']['icinga']['host']          ? config['monitoring']['icinga']['host']           : 'localhost'
+    @icingaPort       = config['monitoring']['icinga']['port']          ? config['monitoring']['icinga']['port']           : 5665
+    @icingaApiUser    = config['monitoring']['icinga']['api']['user']   ? config['monitoring']['icinga']['api']['user']    : 'icinga'
+    @icingaApiPass    = config['monitoring']['icinga']['api']['pass']   ? config['monitoring']['icinga']['api']['pass']    : 'icinga'
 
-      @icingaHost       = config['monitoring']['icinga']['host']          ? config['monitoring']['icinga']['host']           : 'localhost'
-      @icingaPort       = config['monitoring']['icinga']['port']          ? config['monitoring']['icinga']['port']           : 5665
-      @icingaApiUser    = config['monitoring']['icinga']['api']['user']   ? config['monitoring']['icinga']['api']['user']    : 'icinga'
-      @icingaApiPass    = config['monitoring']['icinga']['api']['pass']   ? config['monitoring']['icinga']['api']['pass']    : 'icinga'
-
-      @template_dir     = config['monitoring']['grafana']['template_dir'] ? config['monitoring']['grafana']['template_dir']  : '/var/tmp/templates'
-
-#     else
-#
-#       @log.info( 'no configuration exists, use default settings' )
-#
-#       @logDirectory     = '/tmp/log'
-#       @cacheDir         = '/tmp/cache'
-#
-#       @jolokia_host     = 'localhost'
-#       @jolokia_port     = 8080
-#
-#       @grafana_host     = 'localhost'
-#       @grafana_port     = 3000
-#       @grafana_path     = nil
-#       @template_dir     = '/var/tmp/templates'
-#
-#     end
-
+    @template_dir     = config['monitoring']['grafana']['template_dir'] ? config['monitoring']['grafana']['template_dir']  : '/var/tmp/templates'
 
   end
 
@@ -141,21 +119,21 @@ class Monitoring
 
     if( host.to_s != '' )
 
-      icingaResult = @icinga.addHost( host )
-      icingaStatus = @icinga.status
+      discoveryResult = @serviceDiscovery.addHost( host, [], force )
+      discoveryStatus = @serviceDiscovery.status
 
-      return  icingaResult
+      if( discoveryStatus == 200 )
 
-      result = @serviceDiscovery.addHost( host, [], force )
-      status = @serviceDiscovery.status
+        icingaResult = @icinga.addHost( host )
+        icingaStatus = @icinga.status
 
-      if( status == 200 )
-
+        
         @grafana.addDashbards( host, force )
-
 
       end
 
+      @status  = 200
+      @message = 'host successfuly added'
 
     else
 
