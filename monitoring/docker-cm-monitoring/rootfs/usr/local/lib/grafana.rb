@@ -121,7 +121,7 @@ class Grafana
 
       attribute = mbeanValue[ key ] ? mbeanValue[ key ]  : nil
 
-      if( attribute == nil || ( attribute.include?( 'ERROR' ) ) )
+      if( attribute == nil || ( attribute.is_a?(String) && attribute.include?( 'ERROR' ) ) )
 
         return false
       end
@@ -489,7 +489,7 @@ class Grafana
 
     intersect.each do |service|
 
-      if( self.beanAvailable?( host, service, 'Server', 'LicenseInfos' ) == true )
+      if( self.beanAvailable?( host, service, 'Server', 'LicenseValidUntilHard' ) == true )
 
         @log.info( sprintf( 'found License Information for Service %s', service ) )
 

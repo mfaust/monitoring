@@ -1146,17 +1146,19 @@ class CollecdPlugin
     value        = data['value']  ? data['value']  : nil
 
     # defaults
-    cacheHits       = 0
-    cacheEvicts     = 0
-    cacheEntries    = 0
-    cacheInterval   = 0
-    cacheSize       = 0
-    reqSeqNumber    = nil
-    connectionCount = 0
-    runlevel        = nil
-    uptime          = nil
-    serviceInfos    = nil
-    licenseInfos    = nil
+    cacheHits             = 0
+    cacheEvicts           = 0
+    cacheEntries          = 0
+    cacheInterval         = 0
+    cacheSize             = 0
+    reqSeqNumber          = nil
+    connectionCount       = 0
+    runlevel              = nil
+    uptime                = nil
+    serviceInfos          = nil
+    licenseValidFrom      = nil
+    licenseValidUntilSoft = nil
+    licenseValidUntilHard = nil
 
     def timeParser( today, finalDate )
 
@@ -1175,17 +1177,19 @@ class CollecdPlugin
 
       value = value.values.first
 
-      cacheHits        = value['ResourceCacheHits']         ? value['ResourceCacheHits']         : nil
-      cacheEvicts      = value['ResourceCacheEvicts']       ? value['ResourceCacheEvicts']       : nil
-      cacheEntries     = value['ResourceCacheEntries']      ? value['ResourceCacheEntries']      : nil
-      cacheInterval    = value['ResourceCacheInterval']     ? value['ResourceCacheInterval']     : nil
-      cacheSize        = value['ResourceCacheSize']         ? value['ResourceCacheSize']         : nil
-      reqSeqNumber     = value['RepositorySequenceNumber']  ? value['RepositorySequenceNumber']  : nil
-      connectionCount  = value['ConnectionCount']           ? value['ConnectionCount']           : nil
-      runlevel         = value['RunLevel']                  ? value['RunLevel']                  : nil
-      uptime           = value['Uptime']                    ? value['Uptime']                    : nil
-      serviceInfos     = value['ServiceInfos']              ? value['ServiceInfos']              : nil
-      licenseInfos     = value['LicenseInfos']              ? value['LicenseInfos']              : nil
+      cacheHits             = value['ResourceCacheHits']        ? value['ResourceCacheHits']         : nil
+      cacheEvicts           = value['ResourceCacheEvicts']      ? value['ResourceCacheEvicts']       : nil
+      cacheEntries          = value['ResourceCacheEntries']     ? value['ResourceCacheEntries']      : nil
+      cacheInterval         = value['ResourceCacheInterval']    ? value['ResourceCacheInterval']     : nil
+      cacheSize             = value['ResourceCacheSize']        ? value['ResourceCacheSize']         : nil
+      reqSeqNumber          = value['RepositorySequenceNumber'] ? value['RepositorySequenceNumber']  : nil
+      connectionCount       = value['ConnectionCount']          ? value['ConnectionCount']           : nil
+      runlevel              = value['RunLevel']                 ? value['RunLevel']                  : nil
+      uptime                = value['Uptime']                   ? value['Uptime']                    : nil
+      serviceInfos          = value['ServiceInfos']             ? value['ServiceInfos']              : nil
+      licenseValidFrom      = value['LicenseValidFrom']         ? value['LicenseValidFrom']          : nil
+      licenseValidUntilSoft = value['LicenseValidUntilSoft']    ? value['LicenseValidUntilSoft']     : nil
+      licenseValidUntilHard = value['LicenseValidUntilHard']    ? value['LicenseValidUntilHard']     : nil
 
       case runlevel.downcase
         when 'offline'
@@ -1225,21 +1229,24 @@ class CollecdPlugin
         end
       end
 
-      if( licenseInfos != nil )
+      if( licenseValidFrom != nil || licenseValidUntilSoft != nil || licenseValidUntilHard != nil)
 
         format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
         t      = Date.parse( Time.now().to_s )
         today  = Time.new( t.year, t.month, t.day )
 
-        validUntilSoft     = licenseInfos['validUntilSoft']      ? licenseInfos['validUntilSoft']     : nil
-        validUntilHard     = licenseInfos['validUntilHard']      ? licenseInfos['validUntilHard']     : nil
+        if( licenseValidFrom != nil )
 
-        result.push( sprintf( format, @Host, @Service, mbean, 'license_until_soft', 'raw'      , @interval, validUntilSoft / 1000 ) )
-        result.push( sprintf( format, @Host, @Service, mbean, 'license_until_hard', 'raw'      , @interval, validUntilHard / 1000 ) )
+          result.push( sprintf( format, @Host, @Service, mbean, 'license_from', 'raw'      , @interval, licenseValidFrom / 1000 ) )
 
-        if( validUntilSoft != nil )
+        end
 
-          x                   = timeParser( today, Time.at( validUntilSoft / 1000 ) )
+
+        if( licenseValidUntilSoft != nil )
+
+          result.push( sprintf( format, @Host, @Service, mbean, 'license_until_soft', 'raw'      , @interval, licenseValidUntilSoft / 1000 ) )
+
+          x                   = timeParser( today, Time.at( licenseValidUntilSoft / 1000 ) )
           validUntilSoftMonth = x[:months]
           validUntilSoftWeek  = x[:weeks]
           validUntilSoftDays  = x[:days]
@@ -1250,9 +1257,11 @@ class CollecdPlugin
 
         end
 
-        if( validUntilHard != nil )
+        if( licenseValidUntilHard != nil )
 
-          x                   = timeParser( today, Time.at( validUntilHard / 1000 ) )
+          result.push( sprintf( format, @Host, @Service, mbean, 'license_until_hard', 'raw'      , @interval, licenseValidUntilHard / 1000 ) )
+
+          x                   = timeParser( today, Time.at( licenseValidUntilHard / 1000 ) )
           validUntilHardMonth = x[:months]
           validUntilHardWeek  = x[:weeks]
           validUntilHardDays  = x[:days]
