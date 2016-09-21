@@ -294,7 +294,7 @@
             "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.ContractIdsByUser\",application=*",
             "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
           }, {
-            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.ContractByUser\",application=*",
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.ContractsByUser\",application=*",
             "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
           }, {
             "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.livecontext.ecommerce.ibm.cache.DynamicPrice\",application=*",

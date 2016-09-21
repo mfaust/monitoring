@@ -1,8 +1,8 @@
-FROM bodsch/docker-alpine-base:3.4
+FROM bodsch/docker-alpine-base:1609-01
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
-LABEL version="1.2.4"
+LABEL version="1.3.0"
 
 ENV TERM=xterm
 
@@ -14,7 +14,7 @@ VOLUME  /srv
 RUN \
   apk --quiet --no-cache update && \
   apk --quiet --no-cache upgrade && \
-  apk --quiet  --no-cache add \
+  apk --quiet --no-cache add \
     build-base \
     imagemagick-dev \
     mysql-dev \

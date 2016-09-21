@@ -2326,7 +2326,7 @@
               "selected": false
             }
           ],
-          "query": "*.*.*CacheClasses*",
+          "query": "*.%HOST%.*CacheClasses*",
           "refresh": 1,
           "regex": "/CAE_(.*)-CacheClasses*/",
           "tags": [],

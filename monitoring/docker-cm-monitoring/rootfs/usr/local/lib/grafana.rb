@@ -87,8 +87,6 @@ class Grafana
 
     mbeanExists  = s.detect { |s| s[mbean] }
 
-    @log.debug( mbeanExists )
-
     if( mbeanExists == nil )
       @log.debug( sprintf( 'no mbean %s found', mbean ) )
       return false
@@ -96,9 +94,6 @@ class Grafana
 
     mbeanExists  = mbeanExists[mbean]    ? mbeanExists[mbean]    : nil
     mbeanStatus  = mbeanExists['status'] ? mbeanExists['status'] : 999
-
-    @log.debug( mbeanExists )
-    @log.debug( mbeanStatus )
 
     if( mbeanStatus.to_i != 200 )
 

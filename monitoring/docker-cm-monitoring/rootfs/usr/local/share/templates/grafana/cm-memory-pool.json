@@ -690,7 +690,7 @@
           "multi": false,
           "name": "service",
           "options": [],
-          "query": "*.*.*MemoryPool-*",
+          "query": "*.%HOST%.[A-Z]*MemoryPool-*",
           "refresh": 1,
           "regex": "/(.*)-MemoryPool*/",
           "tags": [],
