@@ -55,8 +55,9 @@ class Grafana
     @shortHostname    = self.shortHostname( host )
     @grafanaHostname  = host.gsub( '.', '-' )
 
-    @discoveryFile    = sprintf( '%s/%s/discovery.json'     , @cacheDirectory, host )
-    @mergedHostFile   = sprintf( '%s/%s/mergedHostData.json', @cacheDirectory, host )
+    @discoveryFile    = sprintf( '%s/%s/discovery.json'         , @cacheDirectory, host )
+    @mergedHostFile   = sprintf( '%s/%s/mergedHostData.json'    , @cacheDirectory, host )
+    @monitoringResultFile   = sprintf( '%s/%s/monitoring.result', @cacheDirectory, host )
 
   end
 
@@ -198,6 +199,13 @@ class Grafana
 
       services       = discoveryJson.keys
       @log.debug("Found services: #{services}")
+
+      @monitoringResultJson = getJsonFromFile(@monitoringResultFile)
+
+      if ( @monitoringResultJson == nil )
+        @log.error("No monitoring.result file found. Exiting.")
+        return nil
+      end
 
       # determine type of service from mergedHostData.json file, e.g. cae, caefeeder, contentserver
       mergedHostJson = getJsonFromFile( @mergedHostFile )

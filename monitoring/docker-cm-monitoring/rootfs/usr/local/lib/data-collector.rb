@@ -855,12 +855,13 @@ class DataCollector
       end
 
       @log.debug( 'merge Data between Property Files and discovered Services' )
-      d = self.mergeData( data )
+      result = self.mergeData( data )
 
       @log.debug( 'save merged data' )
-      result = JSON.generate( d )
 
-      File.open( mergedDataFile , 'w' ) { |f| f.write( result ) }
+      resultJson = JSON.generate( result )
+
+      File.open( mergedDataFile , 'w' ) { |f| f.write( resultJson ) }
 
     end
 
