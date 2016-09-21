@@ -15,11 +15,11 @@ require_relative '../lib/graphite'
 require_relative '../lib/icinga2'
 require_relative '../lib/tools'
 
-@config_file = '/etc/cm-monitoring.yaml'
+configFile = '/etc/cm-monitoring.yaml'
 
-if( File.exist?( @config_file ) )
+if( File.exist?( configFile ) )
 
-  config = YAML.load_file( @config_file )
+  config = YAML.load_file( configFile )
 
   @logDir    = config['monitoring']['log_dir'] ? config['monitoring']['log_dir'] : '/tmp/log'
 
@@ -47,6 +47,8 @@ class Monitoring
     @log.formatter = proc do |severity, datetime, progname, msg|
       "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
     end
+
+    @configFile = '/etc/cm-monitoring.yaml'
 
     self.readConfigFile()
 
@@ -119,16 +121,32 @@ class Monitoring
 
     if( host.to_s != '' )
 
-      discoveryResult = @serviceDiscovery.addHost( host, [], force )
-      discoveryStatus = @serviceDiscovery.status
+      discoveryResult   = @serviceDiscovery.addHost( host, [], force )
+      discoveryStatus   = @serviceDiscovery.status
+      discoveryServices = @serviceDiscovery.listHosts( host )
 
-      if( discoveryStatus == 200 )
+      # TODO
+      # discoveryStatus auswerten!
 
-        icingaResult = @icinga.addHost( host )
+      if( discoveryStatus == 201 )
+
+        services = ( discoveryServices['hosts'] && discoveryServices['hosts']['services'] ) ? discoveryServices['hosts']['services'] : nil
+
+        services.each do |s|
+          s.last.reject! { |k| k == 'description' }
+          s.last.reject! { |k| k == 'application' }
+        end
+
+        cm = Hash.new()
+        cm = { 'cm' => services }
+
+        icingaResult = @icinga.addHost( host, cm )
         icingaStatus = @icinga.status
 
-        
-        @grafana.addDashbards( host, force )
+        @log.debug( icingaResult )
+        @log.debug( icingaStatus )
+
+#        @grafana.addDashbards( host, force )
 
       end
 
@@ -187,8 +205,9 @@ end
 m = Monitoring.new()
 
 puts m.listHost()
-puts m.addHost( 'blueprint-box' )
-puts m.removeHost( 'blueprint-box' )
+puts m.removeHost( 'monitoring-16-01' )
+puts m.addHost( 'monitoring-16-01' )
+# puts m.removeHost( 'blueprint-box' )
 
 
 # EOF

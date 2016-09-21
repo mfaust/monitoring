@@ -132,6 +132,9 @@ class Icinga2
       payload['attrs']['vars'] = vars
     end
 
+    @log.debug( JSON.pretty_generate( payload ) )
+
+
     restClient = RestClient::Resource.new(
       URI.encode( sprintf( '%s/v1/objects/hosts/%s', @icingaApiUrlBase, host ) ),
       @options
@@ -179,7 +182,8 @@ class Icinga2
 
   end
 
-
+  # TODO
+  # funktioniert nur, wenn der Host bereits existiert
   def deleteHost( host )
 
     status      = 0
@@ -207,6 +211,8 @@ class Icinga2
       end
     rescue RestClient::ExceptionWithResponse => e
 
+      # TODO
+      # bessere fehlerbehandlung, hier kommt es immer mal wieder zu problemen!
       error  = JSON.parse( e.response )
       result = error['results'][0] ? error['results'][0] : error
 
