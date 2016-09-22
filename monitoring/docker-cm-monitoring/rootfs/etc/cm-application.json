@@ -237,6 +237,9 @@
             "mbean": "com.coremedia:type=TransformedBlobCacheManager,application=*",
             "attribute": "AccessCount,CacheSize,FaultCount,FaultSizeSum,InitialLevel,Level,NewGenerationCacheSize,NewGenerationInitialLevel,NewGenerationLevel,OldGenerationInitialLevel,OldGenerationLevel,RecallCount,RecallSizeSum,RotateCount"
           }, {
+            "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"ALWAYS_STAY_IN_CACHE\",application=*",
+            "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
+          }, {
             "mbean": "com.coremedia:type=Cache.Classes,CacheClass=\"DIGEST\",application=*",
             "attribute": "Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate"
           }, {
