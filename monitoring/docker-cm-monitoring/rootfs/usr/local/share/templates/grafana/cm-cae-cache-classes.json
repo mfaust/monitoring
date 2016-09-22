@@ -73,6 +73,16 @@
               },
               {
                 "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-AMAsset.count-evicted, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "D",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-AMAsset.count-removed, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "E",
                 "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-AMAsset.count-missRate, '(.*)-', ''))",
                 "textEditor": false
               }
@@ -167,6 +177,16 @@
               },
               {
                 "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-ContentBeanBackedPageGridPlacement.count-evicted, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "D",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-ContentBeanBackedPageGridPlacement.count-removed, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "E",
                 "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-ContentBeanBackedPageGridPlacement.count-missRate, '(.*)-', ''))",
                 "textEditor": false
               }
@@ -268,6 +288,16 @@
               },
               {
                 "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-PageGridImpl.count-evicted, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "D",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-PageGridImpl.count-removed, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "E",
                 "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-PageGridImpl.count-missRate, '(.*)-', ''))",
                 "textEditor": false
               }
@@ -362,6 +392,16 @@
               },
               {
                 "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-SolrQueryCacheKey.count-evicted, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "D",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-SolrQueryCacheKey.count-removed, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "E",
                 "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-SolrQueryCacheKey.count-missRate, '(.*)-', ''))",
                 "textEditor": false
               }
@@ -463,6 +503,16 @@
               },
               {
                 "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-Page.count-evicted, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "D",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-Page.count-removed, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "E",
                 "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-Page.count-missRate, '(.*)-', ''))",
                 "textEditor": false
               }
@@ -557,6 +607,16 @@
               },
               {
                 "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-Aspect.count-evicted, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "D",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-Aspect.count-removed, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "E",
                 "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-Aspect.count-missRate, '(.*)-', ''))",
                 "textEditor": false
               }
@@ -658,6 +718,16 @@
               },
               {
                 "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-ViewLookup.count-evicted, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "D",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-ViewLookup.count-removed, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "E",
                 "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-ViewLookup.count-missRate, '(.*)-', ''))",
                 "textEditor": false
               }
@@ -752,6 +822,16 @@
               },
               {
                 "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-LoadedImageCacheKey.count-evicted, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "D",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-LoadedImageCacheKey.count-removed, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "E",
                 "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-LoadedImageCacheKey.count-missRate, '(.*)-', ''))",
                 "textEditor": false
               }
@@ -853,6 +933,16 @@
               },
               {
                 "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-Object.count-evicted, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "D",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-Object.count-removed, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "E",
                 "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-Object.count-missRate, '(.*)-', ''))",
                 "textEditor": false
               }
@@ -947,6 +1037,16 @@
               },
               {
                 "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-AssumesIdentity.count-evicted, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "D",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-AssumesIdentity.count-removed, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "E",
                 "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-AssumesIdentity.count-missRate, '(.*)-', ''))",
                 "textEditor": false
               }
@@ -1048,6 +1148,16 @@
               },
               {
                 "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-Unlimited.count-evicted, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "D",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-Unlimited.count-removed, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "E",
                 "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-Unlimited.count-missRate, '(.*)-', ''))",
                 "textEditor": false
               }
@@ -1142,6 +1252,16 @@
               },
               {
                 "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-DIGEST.count-evicted, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "D",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-DIGEST.count-removed, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "E",
                 "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-DIGEST.count-missRate, '(.*)-', ''))",
                 "textEditor": false
               }
@@ -1243,6 +1363,16 @@
               },
               {
                 "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-Disk.count-evicted, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "D",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-Disk.count-removed, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "E",
                 "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-Disk.count-missRate, '(.*)-', ''))",
                 "textEditor": false
               }
@@ -1337,6 +1467,16 @@
               },
               {
                 "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-Heap.count-evicted, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "D",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-Heap.count-removed, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "E",
                 "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-Heap.count-missRate, '(.*)-', ''))",
                 "textEditor": false
               }

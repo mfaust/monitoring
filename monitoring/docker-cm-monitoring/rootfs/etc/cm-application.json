@@ -70,7 +70,7 @@
           {
             "description": "Base Measurement Points for ALL Content Server",
             "mbean" : "com.coremedia:application=*,type=Server",
-            "attribute" : "RunLevel,ResourceCacheHits,ResourceCacheEvicts,ResourceCacheEntries,ResourceCacheInterval,ResourceCacheSize,RepositorySequenceNumber,ConnectionCount,Uptime,ServiceInfos,LicenseValidFrom,LicenseValidUntilSoft,LicenseValidUntilHard"
+            "attribute" : "RunLevel,ResourceCacheHits,ResourceCacheEvicts,ResourceCacheEntries,ResourceCacheInterval,ResourceCacheSize,RepositorySequenceNumber,ConnectionCount,Uptime,ServiceInfos,LicenseValidFrom,LicenseValidUntilHard,LicenseValidUntilSoft"
           }, {
             "description": "Connection Pool for DBA Connections",
             "mbean" : "com.coremedia:application=*,bean=ConnectionPool,type=Store",
