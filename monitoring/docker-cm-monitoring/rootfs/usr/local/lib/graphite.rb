@@ -93,7 +93,7 @@ module GraphiteAnnotions
 
     def nodeCreatedAnnotation( host )
 
-      tag  = sprintf( 'node,%s', host )
+      tag  = sprintf( '%s created', host )
       data = sprintf( 'Node <b>%s</b> created (%s)', host, Time.now().strftime( '%Y-%m-%d %H:%M:%S' ))
 
       self.annotion( 'node created', tag, data )
@@ -102,16 +102,16 @@ module GraphiteAnnotions
 
     def nodeDestroyedAnnotation( host )
 
-      tag  = sprintf( 'node,%s', host )
+      tag  = sprintf( '%s destroyed', host )
       data = sprintf( 'Node <b>%s</b> destroyed (%s)', host, Time.now().strftime( '%Y-%m-%d %H:%M:%S' ))
 
-      self.annotion( 'node destroyed', host, data )
+      self.annotion( 'node destroyed', tag, data )
 
     end
 
     def startAnnotation( host, data )
 
-      tag = sprintf( 'start,%s', host )
+      tag = sprintf( '%s start', host )
 
       self.annotion( 'starting', host, data )
 
@@ -119,7 +119,7 @@ module GraphiteAnnotions
 
     def stopAnnotation( host, data )
 
-      tag = sprintf( 'stop,%s', host )
+      tag = sprintf( '%s stop', host )
 
       self.annotion( 'stopping', host, data )
 
@@ -127,19 +127,19 @@ module GraphiteAnnotions
 
     def loadTestStartAnnotation( host )
 
-      tag  = sprintf( 'loadtest,%s', host )
+      tag  = sprintf( '%s loadtest', host )
       data = sprintf( 'Load Test for Node <b>%s</b> started (%s)', host, Time.now().strftime( '%Y-%m-%d %H:%M:%S' ) )
 
-      self.annotion( 'load test start', host, data )
+      self.annotion( 'load test start', tag, data )
 
     end
 
     def loadTestStopAnnotation( host )
 
-      tag  = sprintf( 'loadtest,%s', host )
+      tag  = sprintf( '%s loadtest', host )
       data = sprintf( 'Load Test for Node <b>%s</b> ended (%s)', host, Time.now().strftime( '%Y-%m-%d %H:%M:%S' ) )
 
-      self.annotion( 'load test end', host, data )
+      self.annotion( 'load test end', tag, data )
 
     end
 
