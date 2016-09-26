@@ -791,18 +791,42 @@
     "templating": {
       "list": [
         {
-          "current": {},
+          "current": {
+            "text": "All",
+            "value": "$__all"
+          },
           "datasource": "graphite",
           "hide": 0,
           "includeAll": true,
           "multi": true,
           "name": "core",
-          "options": [],
-          "query": "*.*.SOLR_MASTER-core_*",
+          "options": [
+            {
+              "text": "All",
+              "value": "$__all",
+              "selected": true
+            },
+            {
+              "text": "core_live",
+              "value": "core_live",
+              "selected": false
+            },
+            {
+              "text": "core_preview",
+              "value": "core_preview",
+              "selected": false
+            },
+            {
+              "text": "core_studio",
+              "value": "core_studio",
+              "selected": false
+            }
+          ],
+          "query": "*.%HOST%.SOLR_MASTER-core_*",
           "refresh": 1,
           "regex": "/.*-(core_.*)-.*/",
-          "tagValuesQuery": "collectd.*.SOLR_MASTER-core*",
-          "tagsQuery": "solr",
+          "tagValuesQuery": null,
+          "tagsQuery": null,
           "type": "query",
           "useTags": false
         }
