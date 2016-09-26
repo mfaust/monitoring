@@ -1,0 +1,62 @@
+
+Vagrant.configure(2) do |config|
+
+  # vagrant-cachier plugin
+  if Vagrant.has_plugin?('vagrant-cachier')
+    # http://fgrehm.viewdocs.io/vagrant-cachier/usage
+    config.cache.auto_detect = true
+    config.cache.scope = :machine
+    config.omnibus.cache_packages = true
+  else
+    puts 'INFO:  To speed up the provisioning, you should use the vagrant-cachier plugin. Install via:'
+    puts '       vagrant plugin install vagrant-cachier --plugin-version ">= 1.2.0"'
+  end
+
+  config.vm.box = "coremedia/base7"
+  config.vm.box_version = "~> 2.3.0"
+
+  config.user.defaults = {
+    "vm" => {
+      "ssh_port" => "2222",
+      "memory" => "1024",
+      "cpu" => "2",
+      "name" => "monitoring-box",
+      "name_prefix" => "",
+      "ip" => "192.168.252.200",
+      # use blueprint-box as tld if you want to set aliases in your host file
+      "tld" => "192.168.252.200.xip.io"
+      # add mappings using nugrant
+      #'synced_folders' => [{ 'host' => './boxes/target/shared', 'guest' => '/shared' }]
+    },
+    "proxy" => {
+      "url" => nil,
+      "username" => nil,
+      "password" => nil
+    },
+    'yum' => {
+      'mirrors' => {
+        'base' => 'http://mirrorlist.centos.org/?release=$releasever&arch=$basearch&repo=os',
+        'mongodb' => nil,
+        'mysql' => nil
+      }
+    }
+  }
+  config.vm.synced_folder "./", "/vagrant", :disabled => true
+  config.vm.network "private_network", :ip => config.user.vm.ip , :name => 'vboxnet0', :adapter => 2
+
+
+  config.vm.define :monitoring do |monitoring_config|
+    monitoring_config.vm.hostname = config.user.vm.name
+
+    monitoring_config.vm.provider "virtualbox" do |v|
+      v.name = "#{config.user.vm.name_prefix}#{config.user.vm.name}"
+      v.memory = config.user.vm.memory
+      v.customize ["modifyvm", :id, "--cpus", config.user.vm.cpu]
+      v.customize ["storagectl", :id, "--name", "SATA Controller", "--hostiocache", "on"]
+    end
+
+    monitoring_config.vm.provision "shell", :path => "install.sh" 
+   
+  end
+
+end
