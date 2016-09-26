@@ -78,12 +78,12 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "alias(aliasSub(collectd.%HOST%.ADOBE_DRIVE-CapConnection-heap_cache.count-size, '(.*)-', ''), 'max')",
+                "target": "alias(aliasSub(collectd.%HOST%.ADOBE_DRIVE_SERVER-CapConnection-heap_cache.count-size, '(.*)-', ''), 'max')",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "alias(aliasSub(collectd.%HOST%.ADOBE_DRIVE-CapConnection-heap_cache.count-used, '(.*)-', ''), 'used')",
+                "target": "alias(aliasSub(collectd.%HOST%.ADOBE_DRIVE_SERVER-CapConnection-heap_cache.count-used, '(.*)-', ''), 'used')",
                 "textEditor": false
               }
             ],
@@ -170,12 +170,12 @@
             "targets": [
               {
                 "refId": "B",
-                "target": "alias(collectd.%HOST%.ADOBE_DRIVE-CapConnection-blob_cache.count-size, 'max')",
+                "target": "alias(collectd.%HOST%.ADOBE_DRIVE_SERVER-CapConnection-blob_cache.count-size, 'max')",
                 "textEditor": false
               },
               {
                 "refId": "A",
-                "target": "alias(collectd.%HOST%.ADOBE_DRIVE-CapConnection-blob_cache.count-used, 'used')",
+                "target": "alias(collectd.%HOST%.ADOBE_DRIVE_SERVER-CapConnection-blob_cache.count-used, 'used')",
                 "textEditor": false
               }
             ],
