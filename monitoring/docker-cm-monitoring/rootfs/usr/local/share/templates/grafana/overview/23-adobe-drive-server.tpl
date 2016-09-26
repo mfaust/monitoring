@@ -4,7 +4,7 @@
         "height": "100px",
         "panels": [
           {
-            "content": "<h3><center><bold><a href=\"/grafana/dashboard/db/%SHORTHOST%-adobe-drive-server\">Adove Drive</a></bold></center></h3>",
+            "content": "<h3><center><bold><a href=\"/grafana/dashboard/db/%SHORTHOST%-adobe-drive-server\">Adobe Drive</a></bold></center></h3>",
             "editable": true,
             "error": false,
             "id": 45,
