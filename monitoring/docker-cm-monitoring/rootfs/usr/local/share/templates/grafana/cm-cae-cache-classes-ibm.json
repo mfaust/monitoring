@@ -35,7 +35,8 @@
               "rightSide": true,
               "show": true,
               "total": false,
-              "values": true
+              "values": true,
+              "sideWidth": 200
             },
             "lines": true,
             "linewidth": 1,
@@ -154,7 +155,8 @@
               "rightSide": true,
               "show": true,
               "total": false,
-              "values": true
+              "values": true,
+              "sideWidth": 200
             },
             "lines": true,
             "linewidth": 1,
@@ -281,7 +283,8 @@
               "rightSide": true,
               "show": true,
               "total": false,
-              "values": true
+              "values": true,
+              "sideWidth": 200
             },
             "lines": true,
             "linewidth": 1,
@@ -400,7 +403,8 @@
               "rightSide": true,
               "show": true,
               "total": false,
-              "values": true
+              "values": true,
+              "sideWidth": 200
             },
             "lines": true,
             "linewidth": 1,
@@ -527,7 +531,8 @@
               "rightSide": true,
               "show": true,
               "total": false,
-              "values": true
+              "values": true,
+              "sideWidth": 200
             },
             "lines": true,
             "linewidth": 1,
@@ -646,7 +651,8 @@
               "rightSide": true,
               "show": true,
               "total": false,
-              "values": true
+              "values": true,
+              "sideWidth": 200
             },
             "lines": true,
             "linewidth": 1,
@@ -773,7 +779,8 @@
               "rightSide": true,
               "show": true,
               "total": false,
-              "values": true
+              "values": true,
+              "sideWidth": 200
             },
             "lines": true,
             "linewidth": 1,
@@ -892,7 +899,8 @@
               "rightSide": true,
               "show": true,
               "total": false,
-              "values": true
+              "values": true,
+              "sideWidth": 200
             },
             "lines": true,
             "linewidth": 1,
@@ -1019,7 +1027,8 @@
               "rightSide": true,
               "show": true,
               "total": false,
-              "values": true
+              "values": true,
+              "sideWidth": 200
             },
             "lines": true,
             "linewidth": 1,
@@ -1138,7 +1147,8 @@
               "rightSide": true,
               "show": true,
               "total": false,
-              "values": true
+              "values": true,
+              "sideWidth": 200
             },
             "lines": true,
             "linewidth": 1,
@@ -1265,7 +1275,8 @@
               "rightSide": true,
               "show": true,
               "total": false,
-              "values": true
+              "values": true,
+              "sideWidth": 200
             },
             "lines": true,
             "linewidth": 1,
@@ -1384,7 +1395,8 @@
               "rightSide": true,
               "show": true,
               "total": false,
-              "values": true
+              "values": true,
+              "sideWidth": 200
             },
             "lines": true,
             "linewidth": 1,
@@ -1511,7 +1523,8 @@
               "rightSide": true,
               "show": true,
               "total": false,
-              "values": true
+              "values": true,
+              "sideWidth": 200
             },
             "lines": true,
             "linewidth": 1,
@@ -1630,7 +1643,8 @@
               "rightSide": true,
               "show": true,
               "total": false,
-              "values": true
+              "values": true,
+              "sideWidth": 200
             },
             "lines": true,
             "linewidth": 1,
@@ -1757,7 +1771,8 @@
               "rightSide": true,
               "show": true,
               "total": false,
-              "values": true
+              "values": true,
+              "sideWidth": 200
             },
             "lines": true,
             "linewidth": 1,
@@ -1876,7 +1891,8 @@
               "rightSide": true,
               "show": true,
               "total": false,
-              "values": true
+              "values": true,
+              "sideWidth": 200
             },
             "lines": true,
             "linewidth": 1,
@@ -2003,7 +2019,8 @@
               "rightSide": true,
               "show": true,
               "total": false,
-              "values": true
+              "values": true,
+              "sideWidth": 200
             },
             "lines": true,
             "linewidth": 1,
@@ -2122,7 +2139,8 @@
               "rightSide": true,
               "show": true,
               "total": false,
-              "values": true
+              "values": true,
+              "sideWidth": 200
             },
             "lines": true,
             "linewidth": 1,
@@ -2249,7 +2267,8 @@
               "rightSide": true,
               "show": true,
               "total": false,
-              "values": true
+              "values": true,
+              "sideWidth": 200
             },
             "lines": true,
             "linewidth": 1,
@@ -2368,7 +2387,8 @@
               "rightSide": true,
               "show": true,
               "total": false,
-              "values": true
+              "values": true,
+              "sideWidth": 200
             },
             "lines": true,
             "linewidth": 1,
@@ -2495,7 +2515,8 @@
               "rightSide": true,
               "show": true,
               "total": false,
-              "values": true
+              "values": true,
+              "sideWidth": 200
             },
             "lines": true,
             "linewidth": 1,
@@ -2614,7 +2635,8 @@
               "rightSide": true,
               "show": true,
               "total": false,
-              "values": true
+              "values": true,
+              "sideWidth": 200
             },
             "lines": true,
             "linewidth": 1,

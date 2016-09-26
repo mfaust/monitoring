@@ -170,11 +170,11 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.FEEDER_CONTENT-Feeder-server.count-index_content_documents, '.*-', ''), 'Indexed Content Documents'))"
+                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.FEEDER_CONTENT-Feeder-server.count-index_content_documents, '.*-', ''), 'Content Documents'))"
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.FEEDER_CONTENT-Feeder-server.count-index_documents, '.*-', ''), 'Indexed Documents'))"
+                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.FEEDER_CONTENT-Feeder-server.count-index_documents, '.*-', ''), 'Documents'))"
               }
             ],
             "timeFrom": null,

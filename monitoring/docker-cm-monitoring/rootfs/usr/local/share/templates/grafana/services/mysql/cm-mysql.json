@@ -39,7 +39,8 @@
               "rightSide": true,
               "show": true,
               "total": false,
-              "values": true
+              "values": true,
+              "sideWidth": 150
             },
             "lines": true,
             "linewidth": 1,
@@ -135,7 +136,8 @@
               "rightSide": true,
               "show": true,
               "total": false,
-              "values": true
+              "values": true,
+              "sideWidth": 150
             },
             "lines": true,
             "linewidth": 1,
@@ -220,7 +222,8 @@
               "rightSide": true,
               "show": true,
               "total": false,
-              "values": true
+              "values": true,
+              "sideWidth": 150
             },
             "lines": true,
             "linewidth": 1,
@@ -305,7 +308,8 @@
               "rightSide": true,
               "show": true,
               "total": false,
-              "values": true
+              "values": true,
+              "sideWidth": 150
             },
             "lines": true,
             "linewidth": 1,
@@ -326,12 +330,9 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MYSQL-innodb_pages.*, '(.*)-', ''))"
-              },
-              {
-                "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MYSQL-innodb_page.count-size, '(.*)-', ''))",
-                "hide": true
+                "target": "aliasByMetric(aliasSub(perSecond(aliasSub(collectd.%HOST%.MYSQL-innodb_pages.*, '(.*)-', '')), '^perSecond\\((.*)\\)$', '\\1'))",
+                "hide": false,
+                "textEditor": false
               }
             ],
             "timeFrom": null,
@@ -401,7 +402,8 @@
               "rightSide": true,
               "show": true,
               "total": false,
-              "values": true
+              "values": true,
+              "sideWidth": 150
             },
             "lines": true,
             "linewidth": 1,
@@ -417,7 +419,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MYSQL-innodb_rows.*, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(perSecond(aliasSub(collectd.%HOST%.MYSQL-innodb_rows.*, '(.*)-', '')), '^perSecond\\((.*)\\)$', '\\1'))",
                 "textEditor": false
               }
             ],
@@ -486,7 +488,8 @@
               "rightSide": true,
               "show": true,
               "total": false,
-              "values": true
+              "values": true,
+              "sideWidth": 150
             },
             "lines": true,
             "linewidth": 1,
@@ -502,7 +505,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MYSQL-innodb_buffer_pool.count-bytes_*, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(aliasSub(collectd.%HOST%.MYSQL-innodb_buffer_pool.count-bytes_*, '(.*)-', ''), 'bytes_(.*)', '\\1'))",
                 "textEditor": false
               }
             ],
@@ -538,7 +541,15 @@
               }
             ],
             "links": []
-          },
+          }
+        ]
+      },
+      {
+        "title": "InnoDB Buffer Pool Count Pages",
+        "height": "200px",
+        "editable": true,
+        "collapse": false,
+        "panels": [
           {
             "aliasColors": {},
             "bars": false,
@@ -546,13 +557,8 @@
             "editable": true,
             "error": false,
             "fill": 3,
-            "grid": {
-              "threshold1": null,
-              "threshold1Color": "rgba(216, 200, 27, 0.27)",
-              "threshold2": null,
-              "threshold2Color": "rgba(234, 112, 112, 0.22)"
-            },
-            "id": 7,
+            "grid": {},
+            "id": 16,
             "isNew": true,
             "legend": {
               "alignAsTable": true,
@@ -562,11 +568,13 @@
               "min": false,
               "rightSide": true,
               "show": true,
+              "sideWidth": 150,
               "total": false,
               "values": true
             },
             "lines": true,
             "linewidth": 1,
+            "links": [],
             "nullPointMode": "connected",
             "percentage": false,
             "pointradius": 5,
@@ -579,13 +587,13 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MYSQL-innodb_buffer_pool.count-pages_*, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(aliasSub(perSecond(aliasSub(collectd.%HOST%.MYSQL-innodb_buffer_pool.count-pages_*, '(.*)-', '')), '^perSecond\\((.*)\\)$', '\\1'), 'pages_(.*)', '\\1'))",
                 "textEditor": false
               }
             ],
             "timeFrom": null,
             "timeShift": null,
-            "title": "InnoDB Buffer Pages",
+            "title": "InnoDB Buffer Pool Count Pages",
             "tooltip": {
               "msResolution": false,
               "shared": true,
@@ -614,7 +622,7 @@
                 "show": true
               }
             ],
-            "links": []
+            "thresholds": []
           }
         ]
       }

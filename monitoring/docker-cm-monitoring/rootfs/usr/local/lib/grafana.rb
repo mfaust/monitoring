@@ -431,7 +431,7 @@ class Grafana
       {
         "dashboard": {
           "id": null,
-          "title": "%SHORTHOST% - Overview",
+          "title": "%SHORTHOST% -- Overview",
           "originalTitle": "%SHORTHOST% - Overview",
           "tags": [ "%TAG%", "overview" ],
           "style": "dark",
@@ -443,12 +443,12 @@ class Grafana
             #{rows}
           ],
           "time": {
-            "from": "now-5m",
+            "from": "now-3m",
             "to": "now"
           },
           "timepicker": {
-            "refresh_intervals": [ "30s", "1m", "2m", "10m" ],
-            "time_options": [ "5m", "15m" ]
+            "refresh_intervals": [ "1m", "2m" ],
+            "time_options": [ "3m", "5m", "15m" ]
           },
           "templating": {
             "list": []

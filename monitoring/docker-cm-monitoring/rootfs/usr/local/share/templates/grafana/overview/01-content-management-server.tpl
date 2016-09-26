@@ -75,79 +75,34 @@
             "valueName": "current"
           },
           {
-            "title": "GC Duration",
+            "title": "License until",
             "error": false,
             "span": 1,
             "editable": true,
             "type": "singlestat",
             "isNew": true,
-            "id": 4,
+            "id": 63,
             "targets": [
               {
-                "target": "collectd.%HOST%.CMS-GCParNew-gc_duration.count-duration",
+                "target": "collectd.%HOST%.CMS-Server-license_until_hard.count-days",
                 "refId": "A"
               }
             ],
+            "thresholds": "20,10",
             "links": [],
             "datasource": "graphite",
-            "maxDataPoints": 100,
-            "interval": null,
-            "cacheTimeout": null,
-            "format": "ms",
-            "prefix": "",
-            "postfix": "",
-            "nullText": null,
-            "valueMaps": [
-              {
-                "value": "null",
-                "op": "=",
-                "text": "N/A"
-              }
-            ],
-            "mappingTypes": [
-              {
-                "name": "value to text",
-                "value": 1
-              },
-              {
-                "name": "range to text",
-                "value": 2
-              }
-            ],
-            "rangeMaps": [
-              {
-                "from": "null",
-                "to": "null",
-                "text": "N/A"
-              }
-            ],
+            "format": "none",
             "mappingType": 1,
             "nullPointMode": "connected",
             "valueName": "current",
-            "prefixFontSize": "50%",
-            "valueFontSize": "80%",
-            "postfixFontSize": "50%",
-            "thresholds": "",
+            "valueFontSize": "100%",
             "colorBackground": false,
-            "colorValue": false,
+            "colorValue": true,
             "colors": [
               "rgba(245, 54, 54, 0.9)",
               "rgba(237, 129, 40, 0.89)",
               "rgba(50, 172, 45, 0.97)"
-            ],
-            "sparkline": {
-              "show": false,
-              "full": false,
-              "lineColor": "rgb(31, 120, 193)",
-              "fillColor": "rgba(31, 118, 189, 0.18)"
-            },
-            "gauge": {
-              "show": false,
-              "minValue": 0,
-              "maxValue": 100,
-              "thresholdMarkers": true,
-              "thresholdLabels": false
-            }
+            ]
           },
           {
             "title": "",

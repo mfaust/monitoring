@@ -222,7 +222,7 @@
         "title": "Perm Memory"
       },
       {
-        "collapse": false,
+        "collapse": true,
         "editable": true,
         "height": "150px",
         "panels": [
