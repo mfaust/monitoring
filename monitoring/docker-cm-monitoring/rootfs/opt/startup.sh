@@ -3,6 +3,9 @@
 set -e
 # set -x
 
+GRAPHITE_HOST=${GRAPHITE_HOST:-graphite}
+GRAPHITE_PORT=${GRAPHITE_PORT:-2003}
+
 # -------------------------------------------------------------------------------------------------
 
 # trap ctrl-c and call ctrl_c()
@@ -12,6 +15,17 @@ function ctrl_c() {
   echo "** Trapped CTRL-C"
 
   exit 0
+}
+
+cfgFile="/etc/collectd/collectd.conf"
+
+createConfig() {
+
+  sed -i \
+    -e "s/%GRAPHITE_HOST%/${GRAPHITE_HOST}/" \
+    -e "s/%GRAPHITE_PORT%/${GRAPHITE_PORT}/" \
+    ${cfgFile}
+
 }
 
 startSupervisor() {
@@ -27,6 +41,8 @@ startSupervisor() {
 }
 
 run() {
+
+  createConfig
 
   startSupervisor
 

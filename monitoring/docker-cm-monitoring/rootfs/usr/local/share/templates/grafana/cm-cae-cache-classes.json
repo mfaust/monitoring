@@ -53,8 +53,18 @@
             "seriesOverrides": [
               {
                 "alias": "missRate",
-                "yaxis": 2,
-                "color": "#CFFAFF"
+                "color": "#CFFAFF",
+                "yaxis": 2
+              },
+              {
+                "alias": "removed",
+                "color": "#1F78C1",
+                "yaxis": 2
+              },
+              {
+                "alias": "evicted",
+                "color": "#BF1B00",
+                "yaxis": 2
               }
             ],
             "span": 6,
@@ -73,6 +83,16 @@
               },
               {
                 "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-AMAsset.count-evicted, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "D",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-AMAsset.count-removed, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "E",
                 "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-AMAsset.count-missRate, '(.*)-', ''))",
                 "textEditor": false
               }
@@ -147,8 +167,18 @@
             "seriesOverrides": [
               {
                 "alias": "missRate",
-                "yaxis": 2,
-                "color": "#CFFAFF"
+                "color": "#CFFAFF",
+                "yaxis": 2
+              },
+              {
+                "alias": "removed",
+                "color": "#1F78C1",
+                "yaxis": 2
+              },
+              {
+                "alias": "evicted",
+                "color": "#BF1B00",
+                "yaxis": 2
               }
             ],
             "span": 6,
@@ -167,6 +197,16 @@
               },
               {
                 "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-ContentBeanBackedPageGridPlacement.count-evicted, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "D",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-ContentBeanBackedPageGridPlacement.count-removed, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "E",
                 "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-ContentBeanBackedPageGridPlacement.count-missRate, '(.*)-', ''))",
                 "textEditor": false
               }
@@ -248,8 +288,18 @@
             "seriesOverrides": [
               {
                 "alias": "missRate",
-                "yaxis": 2,
-                "color": "#CFFAFF"
+                "color": "#CFFAFF",
+                "yaxis": 2
+              },
+              {
+                "alias": "removed",
+                "color": "#1F78C1",
+                "yaxis": 2
+              },
+              {
+                "alias": "evicted",
+                "color": "#BF1B00",
+                "yaxis": 2
               }
             ],
             "span": 6,
@@ -268,6 +318,16 @@
               },
               {
                 "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-PageGridImpl.count-evicted, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "D",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-PageGridImpl.count-removed, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "E",
                 "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-PageGridImpl.count-missRate, '(.*)-', ''))",
                 "textEditor": false
               }
@@ -342,8 +402,18 @@
             "seriesOverrides": [
               {
                 "alias": "missRate",
-                "yaxis": 2,
-                "color": "#CFFAFF"
+                "color": "#CFFAFF",
+                "yaxis": 2
+              },
+              {
+                "alias": "removed",
+                "color": "#1F78C1",
+                "yaxis": 2
+              },
+              {
+                "alias": "evicted",
+                "color": "#BF1B00",
+                "yaxis": 2
               }
             ],
             "span": 6,
@@ -362,6 +432,16 @@
               },
               {
                 "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-SolrQueryCacheKey.count-evicted, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "D",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-SolrQueryCacheKey.count-removed, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "E",
                 "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-SolrQueryCacheKey.count-missRate, '(.*)-', ''))",
                 "textEditor": false
               }
@@ -443,8 +523,18 @@
             "seriesOverrides": [
               {
                 "alias": "missRate",
-                "yaxis": 2,
-                "color": "#CFFAFF"
+                "color": "#CFFAFF",
+                "yaxis": 2
+              },
+              {
+                "alias": "removed",
+                "color": "#1F78C1",
+                "yaxis": 2
+              },
+              {
+                "alias": "evicted",
+                "color": "#BF1B00",
+                "yaxis": 2
               }
             ],
             "span": 6,
@@ -463,6 +553,16 @@
               },
               {
                 "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-Page.count-evicted, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "D",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-Page.count-removed, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "E",
                 "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-Page.count-missRate, '(.*)-', ''))",
                 "textEditor": false
               }
@@ -537,8 +637,18 @@
             "seriesOverrides": [
               {
                 "alias": "missRate",
-                "yaxis": 2,
-                "color": "#CFFAFF"
+                "color": "#CFFAFF",
+                "yaxis": 2
+              },
+              {
+                "alias": "removed",
+                "color": "#1F78C1",
+                "yaxis": 2
+              },
+              {
+                "alias": "evicted",
+                "color": "#BF1B00",
+                "yaxis": 2
               }
             ],
             "span": 6,
@@ -557,6 +667,16 @@
               },
               {
                 "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-Aspect.count-evicted, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "D",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-Aspect.count-removed, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "E",
                 "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-Aspect.count-missRate, '(.*)-', ''))",
                 "textEditor": false
               }
@@ -638,8 +758,18 @@
             "seriesOverrides": [
               {
                 "alias": "missRate",
-                "yaxis": 2,
-                "color": "#CFFAFF"
+                "color": "#CFFAFF",
+                "yaxis": 2
+              },
+              {
+                "alias": "removed",
+                "color": "#1F78C1",
+                "yaxis": 2
+              },
+              {
+                "alias": "evicted",
+                "color": "#BF1B00",
+                "yaxis": 2
               }
             ],
             "span": 6,
@@ -658,6 +788,16 @@
               },
               {
                 "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-ViewLookup.count-evicted, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "D",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-ViewLookup.count-removed, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "E",
                 "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-ViewLookup.count-missRate, '(.*)-', ''))",
                 "textEditor": false
               }
@@ -732,8 +872,18 @@
             "seriesOverrides": [
               {
                 "alias": "missRate",
-                "yaxis": 2,
-                "color": "#CFFAFF"
+                "color": "#CFFAFF",
+                "yaxis": 2
+              },
+              {
+                "alias": "removed",
+                "color": "#1F78C1",
+                "yaxis": 2
+              },
+              {
+                "alias": "evicted",
+                "color": "#BF1B00",
+                "yaxis": 2
               }
             ],
             "span": 6,
@@ -752,6 +902,16 @@
               },
               {
                 "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-LoadedImageCacheKey.count-evicted, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "D",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-LoadedImageCacheKey.count-removed, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "E",
                 "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-LoadedImageCacheKey.count-missRate, '(.*)-', ''))",
                 "textEditor": false
               }
@@ -833,8 +993,18 @@
             "seriesOverrides": [
               {
                 "alias": "missRate",
-                "yaxis": 2,
-                "color": "#CFFAFF"
+                "color": "#CFFAFF",
+                "yaxis": 2
+              },
+              {
+                "alias": "removed",
+                "color": "#1F78C1",
+                "yaxis": 2
+              },
+              {
+                "alias": "evicted",
+                "color": "#BF1B00",
+                "yaxis": 2
               }
             ],
             "span": 6,
@@ -853,6 +1023,16 @@
               },
               {
                 "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-Object.count-evicted, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "D",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-Object.count-removed, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "E",
                 "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-Object.count-missRate, '(.*)-', ''))",
                 "textEditor": false
               }
@@ -927,8 +1107,18 @@
             "seriesOverrides": [
               {
                 "alias": "missRate",
-                "yaxis": 2,
-                "color": "#CFFAFF"
+                "color": "#CFFAFF",
+                "yaxis": 2
+              },
+              {
+                "alias": "removed",
+                "color": "#1F78C1",
+                "yaxis": 2
+              },
+              {
+                "alias": "evicted",
+                "color": "#BF1B00",
+                "yaxis": 2
               }
             ],
             "span": 6,
@@ -947,6 +1137,16 @@
               },
               {
                 "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-AssumesIdentity.count-evicted, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "D",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-AssumesIdentity.count-removed, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "E",
                 "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-AssumesIdentity.count-missRate, '(.*)-', ''))",
                 "textEditor": false
               }
@@ -1028,8 +1228,488 @@
             "seriesOverrides": [
               {
                 "alias": "missRate",
-                "yaxis": 2,
-                "color": "#CFFAFF"
+                "color": "#CFFAFF",
+                "yaxis": 2
+              },
+              {
+                "alias": "removed",
+                "color": "#1F78C1",
+                "yaxis": 2
+              },
+              {
+                "alias": "evicted",
+                "color": "#BF1B00",
+                "yaxis": 2
+              }
+            ],
+            "span": 6,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-AssumesIdentity.count-capacity, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "B",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-AssumesIdentity.count-level, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-AssumesIdentity.count-evicted, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "D",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-AssumesIdentity.count-removed, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "E",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-AssumesIdentity.count-missRate, '(.*)-', ''))",
+                "textEditor": false
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "Assumes Identity",
+            "tooltip": {
+              "msResolution": false,
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ]
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "decimals": 0,
+            "editable": true,
+            "error": false,
+            "fill": 3,
+            "grid": {
+              "threshold1": null,
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2": null,
+              "threshold2Color": "rgba(234, 112, 112, 0.22)"
+            },
+            "id": 10,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [
+              {
+                "alias": "missRate",
+                "color": "#CFFAFF",
+                "yaxis": 2
+              },
+              {
+                "alias": "removed",
+                "color": "#1F78C1",
+                "yaxis": 2
+              },
+              {
+                "alias": "evicted",
+                "color": "#BF1B00",
+                "yaxis": 2
+              }
+            ],
+            "span": 6,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-DIGEST.count-capacity, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "B",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-DIGEST.count-level, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-DIGEST.count-evicted, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "D",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-DIGEST.count-removed, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "E",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-DIGEST.count-missRate, '(.*)-', ''))",
+                "textEditor": false
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "Digest",
+            "tooltip": {
+              "msResolution": false,
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "collapse": false,
+        "editable": true,
+        "height": "180px",
+        "panels": [
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "decimals": 0,
+            "editable": true,
+            "error": false,
+            "fill": 3,
+            "grid": {
+              "threshold1": null,
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2": null,
+              "threshold2Color": "rgba(234, 112, 112, 0.22)"
+            },
+            "id": 10,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [
+              {
+                "alias": "missRate",
+                "color": "#CFFAFF",
+                "yaxis": 2
+              },
+              {
+                "alias": "removed",
+                "color": "#1F78C1",
+                "yaxis": 2
+              },
+              {
+                "alias": "evicted",
+                "color": "#BF1B00",
+                "yaxis": 2
+              }
+            ],
+            "span": 6,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-Disk.count-capacity, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "B",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-Disk.count-level, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-Disk.count-evicted, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "D",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-Disk.count-removed, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "E",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-Disk.count-missRate, '(.*)-', ''))",
+                "textEditor": false
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "Disk",
+            "tooltip": {
+              "msResolution": false,
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ]
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "decimals": 0,
+            "editable": true,
+            "error": false,
+            "fill": 3,
+            "grid": {
+              "threshold1": null,
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2": null,
+              "threshold2Color": "rgba(234, 112, 112, 0.22)"
+            },
+            "id": 10,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [
+              {
+                "alias": "missRate",
+                "color": "#CFFAFF",
+                "yaxis": 2
+              },
+              {
+                "alias": "removed",
+                "color": "#1F78C1",
+                "yaxis": 2
+              },
+              {
+                "alias": "evicted",
+                "color": "#BF1B00",
+                "yaxis": 2
+              }
+            ],
+            "span": 6,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-Heap.count-capacity, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "B",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-Heap.count-level, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-Heap.count-evicted, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "D",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-Heap.count-removed, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "E",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-Heap.count-missRate, '(.*)-', ''))",
+                "textEditor": false
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "Heap",
+            "tooltip": {
+              "msResolution": false,
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "collapse": false,
+        "editable": true,
+        "height": "180px",
+        "panels": [
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "decimals": 0,
+            "editable": true,
+            "error": false,
+            "fill": 3,
+            "grid": {
+              "threshold1": null,
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2": null,
+              "threshold2Color": "rgba(234, 112, 112, 0.22)"
+            },
+            "id": 10,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [
+              {
+                "alias": "missRate",
+                "color": "#CFFAFF",
+                "yaxis": 2
+              },
+              {
+                "alias": "removed",
+                "color": "#1F78C1",
+                "yaxis": 2
+              },
+              {
+                "alias": "evicted",
+                "color": "#BF1B00",
+                "yaxis": 2
               }
             ],
             "span": 6,
@@ -1048,6 +1728,16 @@
               },
               {
                 "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-Unlimited.count-evicted, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "D",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-Unlimited.count-removed, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "E",
                 "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-Unlimited.count-missRate, '(.*)-', ''))",
                 "textEditor": false
               }
@@ -1132,218 +1822,33 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-DIGEST.count-capacity, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-ALWAYS_STAY_IN_CACHE.count-capacity, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-DIGEST.count-level, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-ALWAYS_STAY_IN_CACHE.count-level, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-DIGEST.count-missRate, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-ALWAYS_STAY_IN_CACHE.count-evicted, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "D",
+                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-ALWAYS_STAY_IN_CACHE.count-removed, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "E",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-ALWAYS_STAY_IN_CACHE.count-missRate, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
             "timeFrom": null,
             "timeShift": null,
-            "title": "DIGEST",
-            "tooltip": {
-              "msResolution": false,
-              "shared": true,
-              "sort": 0,
-              "value_type": "cumulative"
-            },
-            "type": "graph",
-            "xaxis": {
-              "show": true
-            },
-            "yaxes": [
-              {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-              },
-              {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "collapse": false,
-        "editable": true,
-        "height": "180px",
-        "panels": [
-          {
-            "aliasColors": {},
-            "bars": false,
-            "datasource": "graphite",
-            "decimals": 0,
-            "editable": true,
-            "error": false,
-            "fill": 3,
-            "grid": {
-              "threshold1": null,
-              "threshold1Color": "rgba(216, 200, 27, 0.27)",
-              "threshold2": null,
-              "threshold2Color": "rgba(234, 112, 112, 0.22)"
-            },
-            "id": 10,
-            "isNew": true,
-            "legend": {
-              "alignAsTable": true,
-              "avg": false,
-              "current": true,
-              "max": false,
-              "min": false,
-              "rightSide": true,
-              "show": true,
-              "total": false,
-              "values": true
-            },
-            "lines": true,
-            "linewidth": 1,
-            "links": [],
-            "nullPointMode": "connected",
-            "percentage": false,
-            "pointradius": 5,
-            "points": false,
-            "renderer": "flot",
-            "seriesOverrides": [
-              {
-                "alias": "missRate",
-                "yaxis": 2,
-                "color": "#CFFAFF"
-              }
-            ],
-            "span": 6,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
-              {
-                "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-Disk.count-capacity, '(.*)-', ''))",
-                "textEditor": false
-              },
-              {
-                "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-Disk.count-level, '(.*)-', ''))",
-                "textEditor": false
-              },
-              {
-                "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-Disk.count-missRate, '(.*)-', ''))",
-                "textEditor": false
-              }
-            ],
-            "timeFrom": null,
-            "timeShift": null,
-            "title": "Disk",
-            "tooltip": {
-              "msResolution": false,
-              "shared": true,
-              "sort": 0,
-              "value_type": "cumulative"
-            },
-            "type": "graph",
-            "xaxis": {
-              "show": true
-            },
-            "yaxes": [
-              {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-              },
-              {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-              }
-            ]
-          },
-          {
-            "aliasColors": {},
-            "bars": false,
-            "datasource": "graphite",
-            "decimals": 0,
-            "editable": true,
-            "error": false,
-            "fill": 3,
-            "grid": {
-              "threshold1": null,
-              "threshold1Color": "rgba(216, 200, 27, 0.27)",
-              "threshold2": null,
-              "threshold2Color": "rgba(234, 112, 112, 0.22)"
-            },
-            "id": 10,
-            "isNew": true,
-            "legend": {
-              "alignAsTable": true,
-              "avg": false,
-              "current": true,
-              "max": false,
-              "min": false,
-              "rightSide": true,
-              "show": true,
-              "total": false,
-              "values": true
-            },
-            "lines": true,
-            "linewidth": 1,
-            "links": [],
-            "nullPointMode": "connected",
-            "percentage": false,
-            "pointradius": 5,
-            "points": false,
-            "renderer": "flot",
-            "seriesOverrides": [
-              {
-                "alias": "missRate",
-                "yaxis": 2,
-                "color": "#CFFAFF"
-              }
-            ],
-            "span": 6,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
-              {
-                "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-Heap.count-capacity, '(.*)-', ''))",
-                "textEditor": false
-              },
-              {
-                "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-Heap.count-level, '(.*)-', ''))",
-                "textEditor": false
-              },
-              {
-                "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-Heap.count-missRate, '(.*)-', ''))",
-                "textEditor": false
-              }
-            ],
-            "timeFrom": null,
-            "timeShift": null,
-            "title": "Heap",
+            "title": "Always stay in cache",
             "tooltip": {
               "msResolution": false,
               "shared": true,

@@ -9,7 +9,6 @@ networks:
       config:
       - subnet: 172.25.0.0/24
 
-
 services:
   database:
     restart: always
@@ -65,7 +64,7 @@ services:
       - cm-monitoring
     extra_hosts:
       - 'jolokia:172.25.0.11'
-      - 'grafana:172.25.0.21'
+      - 'grafana:172.25.0.22'
       - 'icingaweb2:172.25.0.31'
       - 'cm-monitoring:172.25.0.40'
     volumes:
@@ -80,6 +79,28 @@ services:
     networks:
       mon:
         ipv4_address: 172.25.0.15
+
+  # support a carbon-relay container
+  # we have now a second 'carbon-relay-ng' for testing
+  carbon-relay:
+    restart: always
+    image: bodsch/docker-carbon-c-relay:latest
+    container_name: carbon-relay
+    hostname: carbon-relay
+    ports:
+      - 2003:2003
+    env_file:
+      - env/carbon-relay.env
+    depends_on:
+      - graphite
+    extra_hosts:
+      - 'graphite:172.25.0.21'
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./share/carbon-relay/etc/supervisor.d/carbon-relay.ini:/etc/supervisor.d/carbon-relay.ini:ro
+    networks:
+      mon:
+        ipv4_address: 172.25.0.20
 
   graphite:
     restart: always
@@ -96,15 +117,15 @@ services:
       - 'database:172.25.0.10'
       - 'memcached:172.25.0.11'
     ports:
-      - 2003:2003
+#      - 2003:2003
       - 7002:7002
-      - 8081:8080
+#      - 8081:8080
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./data:/srv
     networks:
       mon:
-        ipv4_address: 172.25.0.20
+        ipv4_address: 172.25.0.21
 
   grafana:
     restart: always
@@ -123,7 +144,7 @@ services:
       - ./data:/srv
     networks:
       mon:
-        ipv4_address: 172.25.0.21
+        ipv4_address: 172.25.0.22
 
   icinga2-core:
     restart: always
@@ -195,7 +216,8 @@ services:
       - grafana
     extra_hosts:
       - 'jolokia:172.25.0.11'
-      - 'grafana:172.25.0.21'
+      - 'carbon-relay:172.25.0.20'
+      - 'grafana:172.25.0.22'
       - 'icinga2:172.25.0.30'
       - 'blueprint-box:192.168.252.100'
     volumes:
