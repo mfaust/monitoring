@@ -75,36 +75,6 @@
             "valueName": "current"
           },
           {
-            "title": "License until",
-            "error": false,
-            "span": 1,
-            "editable": true,
-            "type": "singlestat",
-            "isNew": true,
-            "id": 63,
-            "targets": [
-              {
-                "target": "collectd.%HOST%.CMS-Server-license_until_hard.count-days",
-                "refId": "A"
-              }
-            ],
-            "thresholds": "20,10",
-            "links": [],
-            "datasource": "graphite",
-            "format": "none",
-            "mappingType": 1,
-            "nullPointMode": "connected",
-            "valueName": "current",
-            "valueFontSize": "100%",
-            "colorBackground": false,
-            "colorValue": true,
-            "colors": [
-              "rgba(245, 54, 54, 0.9)",
-              "rgba(237, 129, 40, 0.89)",
-              "rgba(50, 172, 45, 0.97)"
-            ]
-          },
-          {
             "title": "",
             "error": false,
             "span": 1,
@@ -166,6 +136,36 @@
             "thresholds": "",
             "colorBackground": false,
             "colorValue": false
+          },
+          {
+            "title": "License until",
+            "error": false,
+            "span": 1,
+            "editable": true,
+            "type": "singlestat",
+            "isNew": true,
+            "id": 63,
+            "targets": [
+              {
+                "target": "collectd.%HOST%.CMS-Server-license_until_hard.count-days",
+                "refId": "A"
+              }
+            ],
+            "thresholds": "20,10",
+            "links": [],
+            "datasource": "graphite",
+            "format": "none",
+            "mappingType": 1,
+            "nullPointMode": "connected",
+            "valueName": "current",
+            "valueFontSize": "100%",
+            "colorBackground": false,
+            "colorValue": true,
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(237, 129, 40, 0.89)",
+              "rgba(50, 172, 45, 0.97)"
+            ]
           }
         ],
         "title": "CMS"

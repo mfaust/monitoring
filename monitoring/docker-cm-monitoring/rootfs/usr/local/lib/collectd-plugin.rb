@@ -1441,6 +1441,7 @@ class CollecdPlugin
     heapCacheFaults  = 0
     heapCachePercent = 0
     suSessions       = 0
+    open             = -1 #0: false, 1: true, -1: N/A
 
     if( self.checkBean‎Consistency( mbean, data ) == true && value != nil )
 
@@ -1458,6 +1459,10 @@ class CollecdPlugin
 
       suSessions       = value['NumberOfSUSessions']   ? value['NumberOfSUSessions'] : nil
 
+      connectionOpen   = (value['Open']  != nil)       ? value['Open']               : nil
+      if ( connectionOpen != nil )
+        open           = connectionOpen ? 1 : 0
+      end
     end
 
     result.push( sprintf( format, @Host, @Service, mbean, 'blob_cache', 'size'        , @interval, blobCacheSize ) )
@@ -1471,6 +1476,7 @@ class CollecdPlugin
     result.push( sprintf( format, @Host, @Service, mbean, 'heap_cache', 'used_percent', @interval, heapCachePercent ) )
 
     result.push( sprintf( format, @Host, @Service, mbean, 'su_sessions', 'sessions'   , @interval, suSessions ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'open'       , 'open'       , @interval, open ) )
 
     return result
 

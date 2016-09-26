@@ -129,6 +129,91 @@
             "valueName": "current"
           },
           {
+            "cacheTimeout": null,
+            "colorBackground": true,
+            "colorValue": false,
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "datasource": "graphite",
+            "editable": true,
+            "error": false,
+            "format": "none",
+            "gauge": {
+              "maxValue": 100,
+              "minValue": 0,
+              "show": false,
+              "thresholdLabels": false,
+              "thresholdMarkers": true
+            },
+            "id": 27,
+            "interval": null,
+            "isNew": true,
+            "links": [],
+            "mappingType": 1,
+            "mappingTypes": [
+              {
+                "name": "value to text",
+                "value": 1
+              },
+              {
+                "name": "range to text",
+                "value": 2
+              }
+            ],
+            "maxDataPoints": 100,
+            "nullPointMode": "connected",
+            "nullText": null,
+            "postfix": "",
+            "postfixFontSize": "70%",
+            "prefix": "",
+            "prefixFontSize": "50%",
+            "rangeMaps": [
+              {
+                "from": "null",
+                "text": "N/A",
+                "to": "null"
+              }
+            ],
+            "span": 1,
+            "sparkline": {
+              "fillColor": "rgba(31, 118, 189, 0.18)",
+              "full": false,
+              "lineColor": "rgb(31, 120, 193)",
+              "show": false
+            },
+            "targets": [
+              {
+                "refId": "A",
+                "target": "collectd.monitoring-16-01.ADOBE_DRIVE-CapConnection-open.count-open"
+              }
+            ],
+            "thresholds": "0,1",
+            "title": "CapConnection",
+            "type": "singlestat",
+            "valueFontSize": "80%",
+            "valueMaps": [
+              {
+                "op": "=",
+                "text": "closed",
+                "value": "0"
+              },
+              {
+                "value": "1",
+                "op": "=",
+                "text": "open"
+              },
+              {
+                "value": "99",
+                "op": "=",
+                "text": "N/A"
+              }
+            ],
+            "valueName": "current"
+          },
+          {
             "title": "used UAPI Cache",
             "error": false,
             "span": 1,

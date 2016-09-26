@@ -126,7 +126,7 @@
         "metrics": [
           {
             "mbean" : "com.coremedia:type=CapConnection,application=*",
-            "attribute" : "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions"
+            "attribute" : "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open"
           }
         ]
       },
@@ -136,7 +136,7 @@
           {
             "name": "CapConnection",
             "mbean": "com.coremedia:type=CapConnection,application=*",
-            "attribute": "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions"
+            "attribute": "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open"
           }
         ]
       },
@@ -146,7 +146,7 @@
           {
             "name": "CapConnection",
             "mbean": "com.coremedia:type=CapConnection,application=*",
-            "attribute": "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions"
+            "attribute": "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open"
           }
         ]
       },
@@ -160,7 +160,7 @@
           }, {
             "name": "CapConnection",
             "mbean": "com.coremedia:type=CapConnection,application=*",
-            "attribute": "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions"
+            "attribute": "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open"
           }
         ]
       },
@@ -183,7 +183,7 @@
           }, {
             "description" : "the management interface for the CapConnection to allow its configuration and profiling",
             "mbean" : "com.coremedia:type=CapConnection,application=*",
-            "attribute": "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions"
+            "attribute": "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open"
           }, {
             "description": "Provided statistics for the persistent blob cache",
             "mbean": "com.coremedia:type=TransformedBlobCacheManager,application=*",
@@ -201,7 +201,7 @@
           {
             "name": "CapConnection",
             "mbean": "com.coremedia:type=CapConnection,application=*",
-            "attribute": "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions"
+            "attribute": "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open"
           }
         ]
       },
@@ -211,7 +211,7 @@
           {
             "name": "CapConnection",
             "mbean": "com.coremedia:type=CapConnection,application=*",
-            "attribute": "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions"
+            "attribute": "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open"
           }
         ]
       },
@@ -229,7 +229,7 @@
           {
             "name": "CapConnection",
             "mbean": "com.coremedia:type=CapConnection,application=*",
-            "attribute": "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions"
+            "attribute": "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open"
           }, {
             "mbean": "com.coremedia:type=DataViewFactory,application=*",
             "attribute": "ActiveTimeOfComputedDataViews,NumberOfCachedDataViews,NumberOfComputedDataViews,NumberOfDataViewLookups,NumberOfEvictedDataViews,NumberOfInvalidatedDataViews,TotalTimeOfComputedDataViews"
@@ -356,7 +356,7 @@
           {
             "name": "CapConnection for Studio",
             "mbean": "com.coremedia:type=CapConnection,application=*",
-            "attribute" : "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions"
+            "attribute" : "BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open"
           }
         ]
       },
