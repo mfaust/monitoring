@@ -1405,20 +1405,36 @@ class CollecdPlugin
     maxEntries     = 0
     currentEntries = 0
     diffEntries    = 0
+    invalidations  = 0
+    heartbeat      = 0
+    queueCapacity  = 0
+    queueMaxSize   = 0
+    queueSize      = 0
 
     if( self.checkBean‎Consistency( mbean, data ) == true && value != nil )
 
       value = value.values.first
 
-      maxEntries     = value['KeysCount']     ? value['KeysCount']     : 0  # max feeder entries
-      currentEntries = value['ValuesCount']   ? value['ValuesCount']   : 0  # current feeder entries
+      maxEntries     = value['KeysCount']         ? value['KeysCount']         : 0  # Number of (active) keys
+      currentEntries = value['ValuesCount']       ? value['ValuesCount']       : 0  # Number of (valid) values. It is less or equal to 'keysCount'
       diffEntries    = ( maxEntries - currentEntries ).to_i
+
+      invalidations  = value['InvalidationCount'] ? value['InvalidationCount'] : nil  # Number of invalidations which have been received
+      heartbeat      = value['HeartBeat']         ? value['HeartBeat']         : nil  # The heartbeat of this service: Milliseconds between now and the latest activity. A low value indicates that the service is alive. An constantly increasing value might be caused by a 'sick' or dead service
+      queueCapacity  = value['QueueCapacity']     ? value['QueueCapacity']     : nil  # The queue's capacity: Maximum number of items which can be enqueued
+      queueMaxSize   = value['QueueMaxSize']      ? value['QueueMaxSize']      : nil  # Maximum number of items which had been waiting in the queue
+      queueSize      = value['QueueSize']         ? value['QueueSize']         : nil  # Number of items waiting in the queue for being processed. Less or equal than 'queueCapacity'. Zero means that ProactiveEngine is idle.
 
     end
 
-    result.push( sprintf( format, @Host, @Service, mbean, 'feeder', 'max'      , @interval, maxEntries ) )
-    result.push( sprintf( format, @Host, @Service, mbean, 'feeder', 'current'  , @interval, currentEntries ) )
-    result.push( sprintf( format, @Host, @Service, mbean, 'feeder', 'diff'     , @interval, diffEntries ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'feeder', 'max'          , @interval, maxEntries ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'feeder', 'current'      , @interval, currentEntries ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'feeder', 'diff'         , @interval, diffEntries ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'feeder', 'invalidations', @interval, invalidations ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'feeder', 'heartbeat'    , @interval, heartbeat ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'queue' , 'diff'         , @interval, queueCapacity ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'queue' , 'max'          , @interval, queueMaxSize ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'queue' , 'current'      , @interval, queueSize ) )
 
     return result
   end

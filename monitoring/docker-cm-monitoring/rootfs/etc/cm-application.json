@@ -171,7 +171,7 @@
             "description" : "ProactiveEngine management component",
             "name": "caefeeder",
             "mbean": "com.coremedia:type=ProactiveEngine,application=*",
-            "attribute": "KeysCount,ValuesCount,InvalidationCount,SendSuccessTimeLatest,PurgeTimeLatest,HeartBeat,QueueCapacity,QueueMaxSize,QueueProcessedPerSecond"
+            "attribute": "KeysCount,ValuesCount,InvalidationCount,SendSuccessTimeLatest,PurgeTimeLatest,HeartBeat,QueueCapacity,QueueMaxSize,QueueSize,QueueProcessedPerSecond"
           }, {
             "description" : "ContentDependencyInvalidator",
             "name": "DependencyInvalidator",

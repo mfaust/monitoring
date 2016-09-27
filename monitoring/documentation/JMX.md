@@ -246,7 +246,7 @@ Connection Pool for DBA Connections
 
 | mbeans | attribute | description |
 |---|---|---|
-| `com.coremedia:type=Cache.Classes,CacheClass=\"com.coremedia.blueprint.common.contentbeans.Page\",application=blueprint` | Updated  |   |
+| `com.coremedia:type=Cache.Classes,CacheClass=\"*\",application=blueprint` | Updated  |   |
 |   | Evaluated              |   |
 |   | Evicted                |   |
 |   | EvictionRate           |   |
