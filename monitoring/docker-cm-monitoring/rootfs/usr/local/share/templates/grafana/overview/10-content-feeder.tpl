@@ -129,6 +129,18 @@
             "valueName": "current"
           },
           {
+            "content": "",
+            "editable": true,
+            "error": false,
+            "id": 20,
+            "isNew": true,
+            "links": [],
+            "mode": "html",
+            "span": 1,
+            "title": "",
+            "type": "text"
+          },
+          {
             "title": "used UAPI Cache",
             "error": false,
             "span": 1,

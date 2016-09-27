@@ -25,7 +25,7 @@
             "id": 70,
             "targets": [
               {
-                "target": "collectd.%HOST%.ADOBE_DRIVE-Runtime-uptime.uptime",
+                "target": "collectd.%HOST%.ADOBE_DRIVE_SERVER-Runtime-uptime.uptime",
                 "refId": "A",
                 "textEditor": false
               }
@@ -112,7 +112,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.ADOBE_DRIVE-Memory-heap_memory.count-used_percent"
+                "target": "collectd.%HOST%.ADOBE_DRIVE_SERVER-Memory-heap_memory.count-used_percent"
               }
             ],
             "thresholds": "85,95",
@@ -187,7 +187,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.monitoring-16-01.ADOBE_DRIVE-CapConnection-open.count-open"
+                "target": "collectd.monitoring-16-01.ADOBE_DRIVE_SERVER-CapConnection-open.count-open"
               }
             ],
             "thresholds": "0,1",
@@ -223,7 +223,7 @@
             "id": 49,
             "targets": [
               {
-                "target": "collectd.%HOST%.ADOBE_DRIVE-CapConnection-heap_cache.count-used_percent",
+                "target": "collectd.%HOST%.ADOBE_DRIVE_SERVER-CapConnection-heap_cache.count-used_percent",
                 "refId": "A"
               }
             ],
@@ -298,7 +298,7 @@
             "id": 50,
             "targets": [
               {
-                "target": "collectd.%HOST%.ADOBE_DRIVE-CapConnection-blob_cache.count-used_percent",
+                "target": "collectd.%HOST%.ADOBE_DRIVE_SERVER-CapConnection-blob_cache.count-used_percent",
                 "refId": "A"
               }
             ],
@@ -373,7 +373,7 @@
             "id": 50,
             "targets": [
               {
-                "target": "collectd.%HOST%.ADOBE_DRIVE-CapConnection-su_sessions.count-sessions",
+                "target": "collectd.%HOST%.ADOBE_DRIVE_SERVER-CapConnection-su_sessions.count-sessions",
                 "refId": "A"
               }
             ],

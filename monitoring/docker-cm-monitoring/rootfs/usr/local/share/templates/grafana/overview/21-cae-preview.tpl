@@ -187,7 +187,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.monitoring-16-01.CAE_PREVIEW-CapConnection-open.count-open"
+                "target": "collectd.%HOST%.CAE_PREV-CapConnection-open.count-open"
               }
             ],
             "thresholds": "0,1",
@@ -214,16 +214,16 @@
             "valueName": "current"
           },
           {
-            "title": "GC Duration",
+            "title": "used UAPI Cache",
             "error": false,
             "span": 1,
             "editable": true,
             "type": "singlestat",
             "isNew": true,
-            "id": 48,
+            "id": 43,
             "targets": [
               {
-                "target": "collectd.%HOST%.CAE_PREV-GCParNew-gc_duration.count-duration",
+                "target": "collectd.%HOST%.CAE_PREV-CapConnection-heap_cache.count-used_percent",
                 "refId": "A"
               }
             ],
@@ -232,9 +232,9 @@
             "maxDataPoints": 100,
             "interval": null,
             "cacheTimeout": null,
-            "format": "ms",
+            "format": "none",
             "prefix": "",
-            "postfix": "",
+            "postfix": " %",
             "nullText": null,
             "valueMaps": [
               {
@@ -265,7 +265,7 @@
             "valueName": "current",
             "prefixFontSize": "50%",
             "valueFontSize": "80%",
-            "postfixFontSize": "50%",
+            "postfixFontSize": "70%",
             "thresholds": "",
             "colorBackground": false,
             "colorValue": false,
