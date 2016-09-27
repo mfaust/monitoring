@@ -132,13 +132,14 @@
             "content": "",
             "editable": true,
             "error": false,
-            "id": 20,
+            "id": 40,
             "isNew": true,
             "links": [],
-            "mode": "html",
+            "mode": "text",
             "span": 1,
             "title": "",
-            "type": "text"
+            "type": "text",
+            "transparent": true
           },
           {
             "title": "used UAPI Cache",
