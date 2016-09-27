@@ -29,6 +29,13 @@ Daher sind die folgenden Werte eher ein initialer Richtwert.
 
 Die Feeder müssen einen Healthstatus von 'HEALTHY' liefern, sonst ist deren Funktionalität nicht gegeben.
 
+### HeartBeat
+
+| green | yellow | red |
+|:---:|:---:|:---:|
+| < 10 ms | 10 ms:60 s | > 60 s |
+
+
 
 ## Sequenznumbers
 
@@ -38,4 +45,12 @@ Die Differenz der Sequenzen zwischen MLS und RLS sollte nicht zu groß werden.
 |:---:|:---:|:---:|
 | < 100 | 100:300 | > 300 |
 
+
+## CapConnection
+
+Eine CapConnection wird von Clients genutzt, die eine Verbindung zu einem Content-Server aufbauen.
+
+| green | yellow | red |
+|:---:|:---:|:---:|
+| open |    | closed |
 
