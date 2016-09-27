@@ -214,59 +214,6 @@
             "valueName": "current"
           },
           {
-            "title": "",
-            "error": false,
-            "span": 1,
-            "editable": true,
-            "type": "singlestat",
-            "isNew": true,
-            "id": 22,
-            "targets": [
-              {
-                "target": "collectd.%HOST%.FEEDER_PREV-Health-feeder.gauge-healthy",
-                "refId": "A"
-              }
-            ],
-            "links": [],
-            "datasource": "graphite",
-            "format": "none",
-            "nullText": null,
-            "valueMaps": [
-              {
-                "value": "0",
-                "op": "=",
-                "text": "HEALTHY"
-              },
-              {
-                "value": "1",
-                "op": "=",
-                "text": "NOT HEALTHY"
-              }
-            ],
-            "mappingTypes": [
-              {
-                "name": "value to text",
-                "value": 1
-              },
-              {
-                "name": "range to text",
-                "value": 2
-              }
-            ],
-            "valueFontSize": "50%",
-            "mappingType": 1,
-            "nullPointMode": "connected",
-            "valueName": "current",
-            "thresholds": "0,0,1",
-            "colorBackground": false,
-            "colorValue": true,
-            "colors": [
-              "rgba(245, 54, 54, 0.9)",
-              "rgba(237, 129, 40, 0.89)",
-              "rgba(50, 172, 45, 0.97)"
-            ]
-          },
-          {
             "title": "used UAPI Cache",
             "error": false,
             "span": 1,
@@ -415,6 +362,59 @@
               "thresholdMarkers": true,
               "thresholdLabels": false
             }
+          },
+          {
+            "title": "",
+            "error": false,
+            "span": 1,
+            "editable": true,
+            "type": "singlestat",
+            "isNew": true,
+            "id": 22,
+            "targets": [
+              {
+                "target": "collectd.%HOST%.FEEDER_PREV-Health-feeder.gauge-healthy",
+                "refId": "A"
+              }
+            ],
+            "links": [],
+            "datasource": "graphite",
+            "format": "none",
+            "nullText": null,
+            "valueMaps": [
+              {
+                "value": "0",
+                "op": "=",
+                "text": "HEALTHY"
+              },
+              {
+                "value": "1",
+                "op": "=",
+                "text": "NOT HEALTHY"
+              }
+            ],
+            "mappingTypes": [
+              {
+                "name": "value to text",
+                "value": 1
+              },
+              {
+                "name": "range to text",
+                "value": 2
+              }
+            ],
+            "valueFontSize": "50%",
+            "mappingType": 1,
+            "nullPointMode": "connected",
+            "valueName": "current",
+            "thresholds": "0,0,1",
+            "colorBackground": false,
+            "colorValue": true,
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(237, 129, 40, 0.89)",
+              "rgba(50, 172, 45, 0.97)"
+            ]
           },
           {
             "title": "HeartBeat",
