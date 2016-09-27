@@ -1432,9 +1432,9 @@ class CollecdPlugin
     result.push( sprintf( format, @Host, @Service, mbean, 'feeder', 'diff'         , @interval, diffEntries ) )
     result.push( sprintf( format, @Host, @Service, mbean, 'feeder', 'invalidations', @interval, invalidations ) )
     result.push( sprintf( format, @Host, @Service, mbean, 'feeder', 'heartbeat'    , @interval, heartbeat ) )
-    result.push( sprintf( format, @Host, @Service, mbean, 'queue' , 'diff'         , @interval, queueCapacity ) )
-    result.push( sprintf( format, @Host, @Service, mbean, 'queue' , 'max'          , @interval, queueMaxSize ) )
-    result.push( sprintf( format, @Host, @Service, mbean, 'queue' , 'current'      , @interval, queueSize ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'queue' , 'capacity'     , @interval, queueCapacity ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'queue' , 'max_waiting'  , @interval, queueMaxSize ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'queue' , 'waiting'      , @interval, queueSize ) )
 
     return result
   end

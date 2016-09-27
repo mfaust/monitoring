@@ -79,6 +79,24 @@
                 "refId": "A",
                 "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_PREV-ProactiveEngine-feeder.count-diff, '(.*)-', ''))",
                 "textEditor": false
+              },
+              {
+                "refId": "B",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_PREV-ProactiveEngine-feeder.count-current, '(.*)-', ''))",
+                "textEditor": false,
+                "hide": true
+              },
+              {
+                "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_PREV-ProactiveEngine-feeder.count-max, '(.*)-', ''))",
+                "textEditor": false,
+                "hide": true
+              },
+              {
+                "refId": "D",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_PREV-ProactiveEngine-feeder.count-invalidations, '(.*)-', ''))",
+                "textEditor": false,
+                "hide": true
               }
             ],
             "timeFrom": null,
@@ -206,6 +224,168 @@
           }
         ],
         "title": "UAPI Cache"
+      },
+      {
+        "title": "Heart Beat",
+        "height": "150px",
+        "editable": true,
+        "collapse": false,
+        "panels": [
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "decimals": 0,
+            "editable": true,
+            "error": false,
+            "fill": 3,
+            "grid": {},
+            "id": 19,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "span": 12,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_PREV-ProactiveEngine-feeder.count-heartbeat, '(.*)-', ''))",
+                "textEditor": false
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "Heart Beat",
+            "tooltip": {
+              "msResolution": false,
+              "ordering": "alphabetical",
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "ms",
+                "logBase": 1,
+                "max": null,
+                "min": 0,
+                "show": true
+              },
+              {
+                "format": "short",
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": false
+              }
+            ],
+            "thresholds": []
+          }
+        ]
+      },
+      {
+        "title": "Queue",
+        "height": "150px",
+        "editable": true,
+        "collapse": false,
+        "panels": [
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "decimals": 0,
+            "editable": true,
+            "error": false,
+            "fill": 3,
+            "grid": {},
+            "id": 20,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "span": 12,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_PREV-ProactiveEngine-queue.count-*, '(.*)-', ''))",
+                "textEditor": true
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "Queue",
+            "tooltip": {
+              "msResolution": false,
+              "ordering": "alphabetical",
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "none",
+                "logBase": 1,
+                "max": null,
+                "min": 0,
+                "show": true
+              },
+              {
+                "format": "short",
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": false
+              }
+            ],
+            "thresholds": []
+          }
+        ]
       }
     ],
     "time": {
