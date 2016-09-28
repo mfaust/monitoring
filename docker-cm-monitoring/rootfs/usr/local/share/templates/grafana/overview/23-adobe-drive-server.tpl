@@ -364,7 +364,7 @@
             }
           },
           {
-            "title": "Lightweight Session",
+            "title": "Lightweight Sessions",
             "error": false,
             "span": 1,
             "editable": true,

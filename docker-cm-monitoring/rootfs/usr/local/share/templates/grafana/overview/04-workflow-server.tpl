@@ -362,6 +362,81 @@
               "thresholdMarkers": true,
               "thresholdLabels": false
             }
+          },
+          {
+            "title": "Lightweight Sessions",
+            "error": false,
+            "span": 1,
+            "editable": true,
+            "type": "singlestat",
+            "isNew": true,
+            "id": 50,
+            "targets": [
+              {
+                "target": "collectd.%HOST%.WFS-CapConnection-su_sessions.count-sessions",
+                "refId": "A"
+              }
+            ],
+            "links": [],
+            "datasource": "graphite",
+            "maxDataPoints": 100,
+            "interval": null,
+            "cacheTimeout": null,
+            "format": "none",
+            "prefix": "",
+            "postfix": "",
+            "nullText": null,
+            "valueMaps": [
+              {
+                "value": "null",
+                "op": "=",
+                "text": "N/A"
+              }
+            ],
+            "mappingTypes": [
+              {
+                "name": "value to text",
+                "value": 1
+              },
+              {
+                "name": "range to text",
+                "value": 2
+              }
+            ],
+            "rangeMaps": [
+              {
+                "from": "null",
+                "to": "null",
+                "text": "N/A"
+              }
+            ],
+            "mappingType": 1,
+            "nullPointMode": "connected",
+            "valueName": "current",
+            "prefixFontSize": "50%",
+            "valueFontSize": "80%",
+            "postfixFontSize": "70%",
+            "thresholds": "",
+            "colorBackground": false,
+            "colorValue": false,
+            "colors": [
+              "rgba(50, 172, 45, 0.97)",
+              "rgba(237, 129, 40, 0.89)",
+              "rgba(245, 54, 54, 0.9)"
+            ],
+            "sparkline": {
+              "show": false,
+              "full": false,
+              "lineColor": "rgb(31, 120, 193)",
+              "fillColor": "rgba(31, 118, 189, 0.18)"
+            },
+            "gauge": {
+              "show": false,
+              "minValue": 0,
+              "maxValue": 100,
+              "thresholdMarkers": true,
+              "thresholdLabels": false
+            }
           }
         ],
         "title": "WFS"

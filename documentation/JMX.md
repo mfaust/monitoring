@@ -83,7 +83,7 @@ Example:
 | | HeapCacheSize      | Größe des UAPI Caches                   |
 | | HeapCacheLevel     |                                         |
 | | HeapCacheFaults    |                                         |
-| | NumberOfSUSessions | Anzahl der aktiven Lightweight Session  |
+| | NumberOfSUSessions | Anzahl der aktiven Lightweight Sessions |
 
 ### Elastic Worker
 
