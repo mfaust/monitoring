@@ -160,13 +160,21 @@ class Icinga2
     rescue RestClient::ExceptionWithResponse => e
 
       error  = JSON.parse( e.response )
-      result = error['results'][0] ? error['results'][0] : error
 
-      @log.debug( result )
+      if( error['results'] )
 
-      status      = result['code'].to_i
+        result  = error['results'][0] ? error['results'][0] : error
+        status  = result['code'].to_i
+        message = result['status']
+      else
+
+        status  = error['error'].to_i
+        message = error['status']
+      end
+
+      status      = status
       name        = host
-      message     = result['status']
+      message     = message
 
     end
 
@@ -214,13 +222,21 @@ class Icinga2
       # TODO
       # bessere fehlerbehandlung, hier kommt es immer mal wieder zu problemen!
       error  = JSON.parse( e.response )
-      result = error['results'][0] ? error['results'][0] : error
 
-      @log.debug( result )
+      if( error['results'] )
 
-      status      = result['code'].to_i
+        result  = error['results'][0] ? error['results'][0] : error
+        status  = result['code'].to_i
+        message = result['status']
+      else
+
+        status  = error['error'].to_i
+        message = error['status']
+      end
+
+      status      = status
       name        = host
-      message     = result['status']
+      message     = message
 
     end
 

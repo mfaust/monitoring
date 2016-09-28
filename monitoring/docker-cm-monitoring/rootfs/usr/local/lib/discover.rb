@@ -637,7 +637,7 @@ class ServiceDiscovery
 
     return {
       host => {
-        'status' => status ? 'online' : 'offline',
+        'status'  => status ? 'online' : 'offline',
         'created' => age
       }
     }

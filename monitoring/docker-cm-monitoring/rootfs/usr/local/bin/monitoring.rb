@@ -121,12 +121,30 @@ class Monitoring
 
     if( host.to_s != '' )
 
+      if( force == true )
+
+        @log.info( sprintf( 'remove %s from monitoring', host ) )
+
+        icingaResult = @icinga.deleteHost( host )
+        icingaStatus = @icinga.status
+
+        grafanaResult = @grafana.deleteDashboards( host )
+        grafanaStatus = @grafana.status
+
+      end
+
+
       discoveryResult   = @serviceDiscovery.addHost( host, [], force )
       discoveryStatus   = @serviceDiscovery.status
       discoveryServices = @serviceDiscovery.listHosts( host )
 
+
+
       # TODO
       # discoveryStatus auswerten!
+
+@log.debug( discoveryResult )
+@log.debug( discoveryStatus )
 
       if( discoveryStatus == 201 )
 
@@ -147,6 +165,7 @@ class Monitoring
         @log.debug( icingaStatus )
 
 #        @grafana.addDashbards( host, force )
+      elsif( discoveryStatus == 409 )
 
       end
 

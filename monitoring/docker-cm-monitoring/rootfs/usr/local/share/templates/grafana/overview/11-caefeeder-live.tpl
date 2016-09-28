@@ -390,7 +390,7 @@
               {
                 "value": "0",
                 "op": "=",
-                "text": "NOT HEALTHY"
+                "text": "UNHEALTHY"
               },
               {
                 "value": "-1",
@@ -408,7 +408,7 @@
                 "value": 2
               }
             ],
-            "valueFontSize": "50%",
+            "valueFontSize": "70%",
             "mappingType": 1,
             "nullPointMode": "connected",
             "valueName": "current",
