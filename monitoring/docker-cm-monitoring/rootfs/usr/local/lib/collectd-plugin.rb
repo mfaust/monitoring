@@ -120,8 +120,6 @@ class CollecdPlugin
 
   def beanTimeout?( timestamp )
 
-    @log.debug( 'beanTimeout' )
-
     result = false
     quorum = 1 # in minutes
 
@@ -1383,7 +1381,6 @@ class CollecdPlugin
     if( self.checkBean‎Consistency( mbean, data ) == true && value != nil )
 
       value = value.values.first
-
 
       healthy   = value['Healthy']  ? value['Healthy'] : nil
       if ( healthy != nil )

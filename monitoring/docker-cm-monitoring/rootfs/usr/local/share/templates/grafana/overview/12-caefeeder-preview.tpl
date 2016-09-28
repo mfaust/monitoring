@@ -383,14 +383,19 @@
             "nullText": null,
             "valueMaps": [
               {
-                "value": "0",
+                "value": "1",
                 "op": "=",
                 "text": "HEALTHY"
               },
               {
-                "value": "1",
+                "value": "0",
                 "op": "=",
                 "text": "NOT HEALTHY"
+              },
+              {
+                "value": "-1",
+                "op": "=",
+                "text": "N/A"
               }
             ],
             "mappingTypes": [
@@ -407,12 +412,12 @@
             "mappingType": 1,
             "nullPointMode": "connected",
             "valueName": "current",
-            "thresholds": "0,0,1",
-            "colorBackground": false,
-            "colorValue": true,
+            "thresholds": "0,1",
+            "colorBackground": true,
+            "colorValue": false,
             "colors": [
               "rgba(245, 54, 54, 0.9)",
-              "rgba(237, 129, 40, 0.89)",
+              "rgba(245, 54, 54, 0.9)",
               "rgba(50, 172, 45, 0.97)"
             ]
           },
