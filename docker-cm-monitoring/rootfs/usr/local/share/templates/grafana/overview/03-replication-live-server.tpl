@@ -192,7 +192,7 @@
             "colorValue": false
           },
           {
-            "title": "License until",
+            "title": "License [days]",
             "error": false,
             "span": 1,
             "editable": true,
