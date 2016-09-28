@@ -3,7 +3,7 @@
 # 14.09.2016 - Bodo Schulz
 #
 #
-# v0.0.3
+# v0.5.0
 
 # -----------------------------------------------------------------------------
 
@@ -35,6 +35,8 @@ class Monitoring
   attr_reader :status, :message, :services
 
   def initialize( settings = {} )
+
+    @logDirectory      = settings['log_dir']           ? settings['log_dir']           : '/tmp'
 
     logFile = sprintf( '%s/monitoring.log', @logDirectory )
 
@@ -85,6 +87,16 @@ class Monitoring
       'graphitePort'          => @graphitePort
     }
 
+    version              = '0.5.0'
+    date                 = '2016-09-28'
+
+    @log.info( '-----------------------------------------------------------------' )
+    @log.info( ' CM Monitoring Service' )
+    @log.info( "  Version #{version} (#{date})" )
+    @log.info( '  Copyright 2016 Coremedia' )
+    @log.info( '-----------------------------------------------------------------' )
+    @log.info( '' )
+
     @serviceDiscovery = ServiceDiscovery.new( serviceDiscoverConfig )
     @grafana          = Grafana.new( grafanaConfig )
     @icinga           = Icinga2.new( icingaConfig )
@@ -131,24 +143,28 @@ class Monitoring
         grafanaResult = @grafana.deleteDashboards( host )
         grafanaStatus = @grafana.status
 
+        discoveryResult   = @serviceDiscovery.deleteHost( host )
+        discoveryStatus   = @serviceDiscovery.status
+
+        @log.debug( icingaResult )
+        @log.debug( grafanaResult )
+        @log.debug( discoveryResult )
+
       end
 
-
-      discoveryResult   = @serviceDiscovery.addHost( host, [], force )
+      discoveryResult   = @serviceDiscovery.addHost( host )
       discoveryStatus   = @serviceDiscovery.status
       discoveryServices = @serviceDiscovery.listHosts( host )
-
-
 
       # TODO
       # discoveryStatus auswerten!
 
-@log.debug( discoveryResult )
-@log.debug( discoveryStatus )
+# @log.debug( discoveryResult )
+# @log.debug( discoveryStatus )
 
       if( discoveryStatus == 201 )
 
-        services = ( discoveryServices['hosts'] && discoveryServices['hosts']['services'] ) ? discoveryServices['hosts']['services'] : nil
+        services = ( discoveryServices[:hosts] && discoveryServices[:hosts]['services'] ) ? discoveryServices[:hosts]['services'] : nil
 
         services.each do |s|
           s.last.reject! { |k| k == 'description' }
@@ -161,24 +177,29 @@ class Monitoring
         icingaResult = @icinga.addHost( host, cm )
         icingaStatus = @icinga.status
 
-        @log.debug( icingaResult )
-        @log.debug( icingaStatus )
+        grafanaResult = @grafana.addDashbards( host )
+        grafanaStatus = @grafana.status
 
-#        @grafana.addDashbards( host, force )
+        status  = 200
+        message = 'host successfuly added'
+
       elsif( discoveryStatus == 409 )
 
+        status  = discoveryStatus
+        message = discoveryResult['message'] ? discoveryResult['message'] : 'Host already created'
       end
-
-      @status  = 200
-      @message = 'host successfuly added'
 
     else
 
-      return {
-        :status  => 400,
-        :message => 'need hostname to add to monitoring'
-      }
+      status  = 400
+      message = 'need hostname to add to monitoring'
+
     end
+
+    return {
+      :status  => status,
+      :message => message
+    }
 
   end
 
@@ -187,19 +208,22 @@ class Monitoring
 
     if( host.to_s != '' )
 
-      icingaResult = @icinga.deleteHost( host )
-      icingaStatus = @icinga.status
+      grafanaResult = 0
 
-      return  icingaResult
+      icingaResult    = @icinga.deleteHost( host )
+      icingaStatus    = @icinga.status
 
-      result = @serviceDiscovery.deleteHost( host )
-      status = @serviceDiscovery.status
+      discoveryResult = @serviceDiscovery.deleteHost( host )
+      discoveryStatus = @serviceDiscovery.status
 
-      if( status == 200 and force == true )
-
-        @grafana.deleteDashboards( host )
-
+      if( discoveryStatus == 200 and force == true )
+        grafanaResult = @grafana.deleteDashboards( host )
       end
+
+      @log.debug( icingaStatus )
+      @log.debug( discoveryStatus )
+      @log.debug( grafanaResult )
+
     else
 
       return {
@@ -211,9 +235,54 @@ class Monitoring
   end
 
 
-  def listHost( host = nil )
+  def listHost( host )
 
-    return @serviceDiscovery.listHosts( host )
+    if( host.to_s != '' )
+
+      icingaResult    = @icinga.listHost( host )
+      grafanaResult   = @grafana.listDashboards( host )
+      discoveryResult = @serviceDiscovery.listHosts( host )
+
+      grafanaDashboardCount = 0
+      discoveryCreated      = 'unknown'
+      discoveryOnline       = 'unknown'
+
+      icingaStatus          = icingaResult[:status]    ? icingaResult[:status]    : 400
+
+      grafanaStatus         = grafanaResult[:status]   ? grafanaResult[:status]   : 400
+
+      if( grafanaStatus != 400 )
+        grafanaDashboardCount = grafanaResult[:count]   ? grafanaResult[:count]   : 0
+      end
+
+      discoveryStatus       = discoveryResult[:status] ? discoveryResult[:status] : 400
+
+      if( discoveryStatus != 400 )
+
+        discoverHost        = discoveryResult[:hosts] ? discoveryResult[:hosts] : nil
+
+        if( discoverHost != nil )
+          discoveryCreated      = discoverHost[host][:created] ? discoverHost[host][:created] : 'unknown'
+          discoveryOnline       = discoverHost[host][:status]  ? discoverHost[host][:status]  : 'unknown'
+        end
+
+      end
+
+      return {
+        host.to_s => {
+          :icinga    => { :status => icingaStatus },
+          :grafana   => { :status => grafanaStatus, :count => grafanaDashboardCount },
+          :discovery => { :status => discoveryStatus, :created => discoveryCreated, :online => discoveryOnline }
+        }
+      }
+
+    else
+
+      return {
+        :status  => 400,
+        :message => 'need hostname to list entries from monitoring'
+      }
+    end
 
   end
 
@@ -221,10 +290,14 @@ end
 
 # ------------------------------------------------------------------------------------------
 
-m = Monitoring.new()
+options = {
+ 'log_dir'               => @logDir
+}
 
-puts m.listHost()
-puts m.removeHost( 'monitoring-16-01' )
+m = Monitoring.new( options )
+
+puts m.listHost( 'monitoring-16-01' )
+# puts m.removeHost( 'monitoring-16-01' )
 puts m.addHost( 'monitoring-16-01' )
 # puts m.removeHost( 'blueprint-box' )
 

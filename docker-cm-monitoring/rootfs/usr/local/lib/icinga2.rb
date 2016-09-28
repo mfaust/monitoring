@@ -34,7 +34,7 @@ class Icinga2
     file.sync = true
     @log = Logger.new( file, 'weekly', 1024000 )
 #    @log = Logger.new( STDOUT )
-    @log.level = Logger::DEBUG
+    @log.level = Logger::INFO
     @log.datetime_format = "%Y-%m-%d %H:%M:%S"
     @log.formatter = proc do |severity, datetime, progname, msg|
       "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
@@ -42,6 +42,17 @@ class Icinga2
 
     @icingaApiUrlBase = sprintf( 'https://%s:%d', @icingaHost, @icingaPort )
     @nodeName         = Socket.gethostbyname( Socket.gethostname ).first
+
+
+    version              = '1.1.0'
+    date                 = '2016-09-28'
+
+    @log.info( '-----------------------------------------------------------------' )
+    @log.info( ' Icinga2 Management' )
+    @log.info( "  Version #{version} (#{date})" )
+    @log.info( '  Copyright 2016 Bodo Schulz' )
+    @log.info( '-----------------------------------------------------------------' )
+    @log.info( '' )
 
     @log.debug( sprintf( '  server   : %s', @icingaHost ) )
     @log.debug( sprintf( '  port     : %s', @icingaPort ) )
@@ -117,6 +128,8 @@ class Icinga2
     name        = host
     message     = 'undefined'
 
+    @headers['X-HTTP-Method-Override'] = 'PUT'
+
     # build FQDN
     fqdn = Socket.gethostbyname( host ).first
 
@@ -132,8 +145,7 @@ class Icinga2
       payload['attrs']['vars'] = vars
     end
 
-    @log.debug( JSON.pretty_generate( payload ) )
-
+#    @log.debug( JSON.pretty_generate( payload ) )
 
     restClient = RestClient::Resource.new(
       URI.encode( sprintf( '%s/v1/objects/hosts/%s', @icingaApiUrlBase, host ) ),
@@ -257,6 +269,8 @@ class Icinga2
 
     code        = nil
     result      = {}
+
+    @headers.delete( 'X-HTTP-Method-Override' )
 
     restClient = RestClient::Resource.new(
       URI.encode( sprintf( '%s/v1/objects/hosts/%s', @icingaApiUrlBase, host ) ),

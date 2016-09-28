@@ -3,7 +3,7 @@
 # 13.09.2016 - Bodo Schulz
 #
 #
-# v1.2.3
+# v1.2.4
 # -----------------------------------------------------------------------------
 
 require 'socket'
@@ -37,7 +37,7 @@ class ServiceDiscovery
     file.sync = true
     @log = Logger.new( file, 'weekly', 1024000 )
 #    @log = Logger.new( STDOUT )
-    @log.level = Logger::DEBUG
+    @log.level = Logger::INFO
     @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
     @log.formatter = proc do |severity, datetime, progname, msg|
       "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
@@ -87,8 +87,8 @@ class ServiceDiscovery
       49099
     ]
 
-    version              = '1.2.3'
-    date                 = '2016-09-13'
+    version              = '1.2.4'
+    date                 = '2016-09-28'
 
     @log.info( '-----------------------------------------------------------------' )
     @log.info( ' CM Service Discovery' )
@@ -442,8 +442,8 @@ class ServiceDiscovery
     end
 
     return {
-      'status'  => @status,
-      'message' => @message
+      :status  => @status,
+      :message => @message
     }
 
   end
@@ -456,12 +456,12 @@ class ServiceDiscovery
     # first, we check if our jolokia accessable
     if( ! jolokiaIsAvailable?() )
 
-      @status  = 400
-      @message = 'Jolokia not available'
+      status  = 400
+      message = 'Jolokia not available'
 
       return {
-        'status'  => @status,
-        'message' => @message
+        :status  => status,
+        :message => message
       }
     end
 
@@ -470,12 +470,12 @@ class ServiceDiscovery
     # second, if the that we whant monitored, available
     if( isRunning?( ip ) == false )
 
-      @status  = 400
-      @message = 'Host not available'
+      status  = 400
+      message = 'Host not available'
 
       return {
-        'status'  => @status,
-        'message' => @message
+        :status  => status,
+        :message => message
       }
     end
 
@@ -498,12 +498,12 @@ class ServiceDiscovery
 
     if( File.exist?( sprintf( '%s/%s', dir_path, file_name ) ) == true )
 
-      @status  = 409
-      @message = 'Host already created'
+      status  = 409
+      message = 'Host already created'
 
       return {
-        'status'  => @status,
-        'message' => @message
+        :status  => status,
+        :message => message
       }
     end
 
@@ -537,13 +537,14 @@ class ServiceDiscovery
 
     File.open( sprintf( '%s/%s', dir_path, file_name ) , 'w' ) { |f| f.write( JSON.pretty_generate( services ) ) }
 
-    @status  = 201
-    @message = 'Host successful created'
+    status  = 201
+    message = 'Host successful created'
+
     @services = services
 
     return {
-      'status'  => @status,
-      'message' => @message
+      :status  => status,
+      :message => message
     }
   end
 
@@ -559,8 +560,8 @@ class ServiceDiscovery
       @message = 'Host not available'
 
       return {
-        'status'  => @status,
-        'message' => @message
+        :status  => @status,
+        :message => @message
       }
     end
 
@@ -584,12 +585,12 @@ class ServiceDiscovery
 
       hosts.sort!{ |a,b| a['name'] <=> b['name'] }
 
-      @status  = 200
-      @message = hosts
+      status  = 200
+      message = hosts
 
       return {
-        'status' => @status,
-        'hosts'  => @message
+        :status  => status,
+        :hosts   => message
       }
 
     else
@@ -606,23 +607,24 @@ class ServiceDiscovery
         h              = hostInformation( file, File.basename( dir_path ) )
         h['services' ] = JSON.parse( data )
 
-        @status   = 200
-        @message  = h
+        status   = 200
+        message  = h
         @services = h['services']
 
         return {
-          'status' => @status,
-          'hosts'  => @message
+          :status  => status,
+          :hosts   => message
         }
 
       else
 
-        @status  = 404
-        @message = 'No discovery File found'
+        status  = 404
+        message = 'No discovery File found'
 
         return {
-          'status' => @status,
-          'hosts'  => @message
+          :status  => status,
+          :hosts   => nil,
+          :message => message
         }
       end
 
@@ -637,8 +639,8 @@ class ServiceDiscovery
 
     return {
       host => {
-        'status'  => status ? 'online' : 'offline',
-        'created' => age
+        :status  => status ? 'online' : 'offline',
+        :created => age
       }
     }
 

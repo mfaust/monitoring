@@ -3,7 +3,7 @@
 # 08.08.2016 - fpanteko
 #
 #
-# v0.7.4
+# v1.1.0
 # -----------------------------------------------------------------------------
 
 require 'socket'
@@ -42,11 +42,22 @@ class Grafana
     file      = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
     file.sync = true
     @log = Logger.new(file, 'weekly', 1024000)
-    @log.level = Logger::DEBUG
+    @log.level = Logger::INFO
     @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
     @log.formatter = proc do |severity, datetime, progname, msg|
       "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
     end
+
+    version              = '1.1.0'
+    date                 = '2016-09-28'
+
+    @log.info( '-----------------------------------------------------------------' )
+    @log.info( ' CM Grafana Dashboard Management' )
+    @log.info( "  Version #{version} (#{date})" )
+    @log.info( '  Copyright 2016 Coremedia' )
+    @log.info( '-----------------------------------------------------------------' )
+    @log.info( '' )
+
   end
 
 
@@ -255,6 +266,31 @@ class Grafana
       end
 
     end
+
+    dashboards = self.searchDashboards( host )
+    count      = 0
+
+    if( dashboards != false )
+
+      count = dashboards.count()
+
+      status  = 200
+      message = sprintf( '%d dashboards added', count )
+    else
+      status  = 500
+      message = 'Error for adding Dashboads'
+    end
+
+    @status = status
+
+    result = {
+      :status      => status,
+      :name        => host,
+      :message     => message
+    }
+
+    return result
+
   end
 
 
@@ -272,33 +308,66 @@ class Grafana
       @log.debug( sprintf( 'found %d dashboards for delete', count ) )
 
       if( count.to_i == 0 )
-        return
-      end
 
-#      @log.debug("Deleting Grafana Dashboards: #{dashboards}")
+        status  = 204
+        message = 'No Dashboards found'
+      else
 
-      dashboards.each do |i|
-        uri = URI( sprintf( '%s/api/dashboards/%s', @grafanaURI, i ) ) #  "http://localhost/grafana/api/dashboards/#{i}")
-        Net::HTTP.start(uri.host, uri.port) do |http|
-          request = Net::HTTP::Delete.new(uri.path)
-          request.basic_auth 'admin', 'admin'
-          response = http.request request
-          @log.debug( "  Deleted Dashboard #{i}, ok: #{response.code}" )
+        dashboards.each do |i|
+
+          uri = URI( sprintf( '%s/api/dashboards/%s', @grafanaURI, i ) )
+
+          begin
+            Net::HTTP.start( uri.host, uri.port ) do |http|
+              request = Net::HTTP::Delete.new( uri.path )
+              request.basic_auth( 'admin', 'admin' )
+
+              response     = http.request( request )
+              responseCode = response.code.to_i
+
+              # TODO
+              # Errorhandling
+              if( responseCode != 200 )
+                # 200 – Created
+                # 400 – Errors (invalid json, missing or invalid fields, etc)
+                # 401 – Unauthorized
+                # 412 – Precondition failed
+                @log.error( sprintf( ' [%s] - Error', responseCode ) )
+              end
+            end
+
+            status  = 200
+            message = sprintf( '%d dashboards deleted', count )
+          rescue Exception => e
+            @log.error( e )
+            @log.error( e.backtrace )
+
+            status  = 404
+            message = sprintf( 'internal error: %s', e )
+          end
         end
       end
-
     end
+
+    @status = status
+
+    result = {
+      :status      => status,
+      :name        => host,
+      :message     => message
+    }
+
+    return result
+
   end
 
 
-  # delete the dashboards for a host
+  # list dashboards with tag
   def searchDashboards( tag )
 
     @log.debug( sprintf( 'Search dashboards with tag %s', tag ) )
 
     uri = URI( sprintf( '%s/api/search?query=&tag=%s', @grafanaURI, tag ) )
-
-#    @log.debug("Grafana Uri: #{uri}")
 
     response = nil
 
@@ -323,6 +392,22 @@ class Grafana
 
   end
 
+
+  def listDashboards( tag )
+
+    data = self.searchDashboards( tag )
+
+    data.each do |d|
+      d.gsub!( sprintf( 'db/%s-', tag )  ,'' )
+    end
+
+    return {
+      :status     => 200,
+      :count      => data.count,
+      :dashboards => data
+    }
+
+  end
 
   # cae-live-1 -> cae-live
   def removePostfix( service )
@@ -611,7 +696,7 @@ class Grafana
 
       end
 
-      sendTemplateToGrafana(JSON.generate(templateJson), normalizeService(serviceName))
+      self.sendTemplateToGrafana( JSON.generate( templateJson ), normalizeService( serviceName ) )
 
     end
   end
