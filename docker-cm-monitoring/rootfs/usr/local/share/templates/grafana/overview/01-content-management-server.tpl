@@ -75,7 +75,7 @@
             "valueName": "current"
           },
           {
-            "title": "",
+            "title": "Runlevel",
             "error": false,
             "span": 1,
             "editable": true,
