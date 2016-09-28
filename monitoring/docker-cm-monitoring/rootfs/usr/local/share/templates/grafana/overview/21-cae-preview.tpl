@@ -206,7 +206,7 @@
                 "text": "open"
               },
               {
-                "value": "99",
+                "value": "-1",
                 "op": "=",
                 "text": "N/A"
               }

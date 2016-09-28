@@ -1378,13 +1378,17 @@ class CollecdPlugin
     value  = data['value']  ? data['value']  : nil
 
     # defaults
-    healthy = 1
+    healthy = -1 # 0: false, 1: true, -1: N/A
 
     if( self.checkBean‎Consistency( mbean, data ) == true && value != nil )
 
       value = value.values.first
 
-      healthy = value['Healthy'] == true ? 0 : 1
+
+      healthy   = value['Healthy']  ? value['Healthy'] : nil
+      if ( healthy != nil )
+        healthy           = healthy == true ? 1 : 0
+      end
 
     end
 
@@ -1457,7 +1461,7 @@ class CollecdPlugin
     heapCacheFaults  = 0
     heapCachePercent = 0
     suSessions       = 0
-    open             = -1 #0: false, 1: true, -1: N/A
+    open             = -1 # 0: false, 1: true, -1: N/A
 
     if( self.checkBean‎Consistency( mbean, data ) == true && value != nil )
 
