@@ -33,7 +33,7 @@ def regenerateGrafanaTemplateIDs( json )
 
     tpl = JSON.parse( json )
 
-    rows = tpl['dashboard']['rows'] ? tpl['dashboard']['rows'] : nil
+    rows = ( tpl['dashboard'] && tpl['dashboard']['rows'] ) ? tpl['dashboard']['rows'] : nil
 
     if( rows != nil )
 
@@ -50,7 +50,7 @@ def regenerateGrafanaTemplateIDs( json )
 
         panel.each do |p|
           p['id']   = idCounter
-          idCounter = idCounter+1
+          idCounter = idCounter+1 # idCounter +=1 ??
         end
       end
     end
