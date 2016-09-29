@@ -26,7 +26,7 @@ module GraphiteAnnotions
       @graphitePort     = settings['graphitePort']     ? settings['graphitePort']     : 2003
       @graphitePath     = settings['graphitePath']     ? settings['graphitePath']     : nil
 
-      @graphiteURI      = sprintf( 'http://%s:%s%s', @graphiteHost, @graphiteHttpPort, @graphitePath )
+      @graphiteURI      = sprintf( 'http://%s:%s%s/events/', @graphiteHost, @graphiteHttpPort, @graphitePath )
 
       logFile = sprintf( '%s/graphite.log', @logDirectory )
 
@@ -71,12 +71,11 @@ module GraphiteAnnotions
       str  = Time.now()
 
       # add 2h to fix a f*cking bug in django
-      str = str + (60 * 60 * 2)
+      # with Version 1.9 we dont need this ... UASY
+      # str = str + (60 * 60 * 2)
 
       @log.debug( str.to_s )
       _when = Time.parse(str.to_s).to_i
-
-#       uri    = sprintf( 'http://%s:%s/events/', @graphiteHost, @graphiteHttpPort )
 
       uri = URI( @graphiteURI )
 
@@ -87,21 +86,35 @@ module GraphiteAnnotions
         'data' => data
       }
 
-#       @log.debug( uri )
-      @log.debug( data )
-
       response = nil
-      Net::HTTP.start( uri.host, uri.port ) do |http|
-        request = Net::HTTP::Post.new( uri.request_uri )
 
-#        request.set_form_data( data )
-        request.add_field('Content-Type', 'application/json')
-        request.body = JSON.generate( data )
-#        request.basic_auth 'admin', 'admin'
+      begin
+        Net::HTTP.start( uri.host, uri.port ) do |http|
+          request = Net::HTTP::Post.new( uri.request_uri )
 
-        response     = http.request( request )
+#          request.set_form_data( data )
+          request.add_field('Content-Type', 'application/json')
+          request.body = JSON.generate( data )
+#          request.basic_auth 'admin', 'admin'
 
-        @log.debug( "response: #{response.code}" )
+          response     = http.request( request )
+
+          # TODO
+          # Errorhandling
+          if( responseCode != 200 )
+            # 200 – Created
+            # 400 – Errors (invalid json, missing or invalid fields, etc)
+            # 401 – Unauthorized
+            # 412 – Precondition failed
+            @log.error( sprintf( ' [%s] - Error', responseCode ) )
+          end
+        end
+      rescue Exception => e
+        @log.error( e )
+        @log.error( e.backtrace )
+
+        status  = 404
+        message = sprintf( 'internal error: %s', e )
       end
 
     end
@@ -114,15 +127,15 @@ module GraphiteAnnotions
       descr    = String.new()
       time     = Time.now().strftime( '%Y-%m-%d %H:%M:%S' )
 
-      tag[] << host
+      tag << host
 
       case type
       when 'create'
-        tag[] << 'created'
+        tag << 'created'
         message = sprintf( 'Node <b>%s</b> created (%s)', host, time )
         descr   = 'node created'
       when 'destroy'
-        tag[] << 'destroyed'
+        tag << 'destroyed'
         message = sprintf( 'Node <b>%s</b> destroyed (%s)', host, time )
         descr   = 'node destroyed'
       end
@@ -139,8 +152,8 @@ module GraphiteAnnotions
       descr    = String.new()
       time     = Time.now().strftime( '%Y-%m-%d %H:%M:%S' )
 
-      tag[] << host
-      tag[] << 'loadtest'
+      tag << host
+      tag << 'loadtest'
 
       case type
       when 'start'
@@ -165,8 +178,8 @@ module GraphiteAnnotions
       descr    = String.new()
       time     = Time.now().strftime( '%Y-%m-%d %H:%M:%S' )
 
-      tag[] << host
-      tag[] << 'deployment'
+      tag << host
+      tag << 'deployment'
 
       message = sprintf( 'Deployment on Node <b>%s</b> started (%s)', host, time )
 
@@ -183,7 +196,7 @@ module GraphiteAnnotions
       message  = String.new()
       time     = Time.now().strftime( '%Y-%m-%d %H:%M:%S' )
 
-      tag[] << host
+      tag << host
       tag.push( customTags )
 
       message = sprintf( '%s <b>%s</b> (%s)', descr, host, time )

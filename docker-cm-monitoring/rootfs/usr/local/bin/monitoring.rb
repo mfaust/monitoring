@@ -155,6 +155,8 @@ class Monitoring
         @log.debug( grafanaResult )
         @log.debug( discoveryResult )
 
+        @log.info( 'done' )
+
       end
 
       discoveryResult   = @serviceDiscovery.addHost( host )
@@ -167,7 +169,7 @@ class Monitoring
 # @log.debug( discoveryResult )
 # @log.debug( discoveryStatus )
 
-      if( discoveryStatus == 201 )
+      if( discoveryStatus == 200 || discoveryStatus == 201 )
 
         services = ( discoveryServices[:hosts] && discoveryServices[:hosts]['services'] ) ? discoveryServices[:hosts]['services'] : nil
 

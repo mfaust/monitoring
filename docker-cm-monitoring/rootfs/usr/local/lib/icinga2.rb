@@ -51,6 +51,7 @@ class Icinga2
     @log.info( ' Icinga2 Management' )
     @log.info( "  Version #{version} (#{date})" )
     @log.info( '  Copyright 2016 Bodo Schulz' )
+    @log.info( "  Backendsystem #{ @graphiteURI}" )
     @log.info( '-----------------------------------------------------------------' )
     @log.info( '' )
 
