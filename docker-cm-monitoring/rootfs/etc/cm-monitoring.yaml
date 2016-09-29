@@ -13,7 +13,7 @@ monitoring:
     port: 3000
     template_dir: /usr/local/share/templates/grafana
   graphite:
-    host: localhost
+    host: nginx
     port: 2003
     http-port: 80
     fix-timezone: true
