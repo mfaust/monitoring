@@ -124,6 +124,11 @@ class Monitoring
     @icingaApiUser    = config['monitoring']['icinga']['api']['user']   ? config['monitoring']['icinga']['api']['user']    : 'icinga'
     @icingaApiPass    = config['monitoring']['icinga']['api']['pass']   ? config['monitoring']['icinga']['api']['pass']    : 'icinga'
 
+    @graphiteHost     = config['monitoring']['graphite']['host']         ? config['monitoring']['graphite']['host']        : 'localhost'
+    @graphiteHttpPort = config['monitoring']['graphite']['http-port']    ? config['monitoring']['graphite']['http-port']   : 80
+    @graphitePort     = config['monitoring']['graphite']['port']         ? config['monitoring']['graphite']['port']        : 2003
+    @graphitePath     = config['monitoring']['graphite']['path']         ? config['monitoring']['graphite']['path']        : nil
+
     @template_dir     = config['monitoring']['grafana']['template_dir'] ? config['monitoring']['grafana']['template_dir']  : '/var/tmp/templates'
 
   end
@@ -286,6 +291,25 @@ class Monitoring
 
   end
 
+
+  def addAnnotation( host, type, descr = '', message = '', customTags = [] )
+
+    case type
+    when 'create'
+      @graphite.nodeAnnotation( host, type )
+    when 'destroy'
+      @graphite.nodeAnnotation( host, type )
+    when 'start'
+      @graphite.loadtestAnnotation( host, type )
+    when 'stop'
+      @graphite.loadtestAnnotation( host, type )
+    when 'deployment'
+      @graphite.deploymentAnnotation( host, message )
+    else
+      @graphite.generalAnnotation( host, descr, message, customTags )
+    end
+
+  end
 end
 
 # ------------------------------------------------------------------------------------------
@@ -297,6 +321,8 @@ options = {
 m = Monitoring.new( options )
 
 puts m.listHost( 'monitoring-16-01' )
+
+m.addAnnotation( 'monitoring-16-01', 'create' )
 # puts m.removeHost( 'monitoring-16-01' )
 puts m.addHost( 'monitoring-16-01' )
 # puts m.removeHost( 'blueprint-box' )

@@ -1,14 +1,20 @@
+#!/usr/bin/ruby
+#
+#  28.08.2016 - bodsch
 #
 #
-#
-#
+# v1.1.0
+# -----------------------------------------------------------------------------
 
 require 'logger'
 require 'net/http'
 require 'uri'
 require 'time'
 
+# -------------------------------------------------------------------------------------------------------------------
+
 module GraphiteAnnotions
+
   class Client
 
     def initialize( settings = {} )
@@ -18,6 +24,9 @@ module GraphiteAnnotions
       @graphiteHost     = settings['graphiteHost']     ? settings['graphiteHost']     : 'localhost'
       @graphiteHttpPort = settings['graphiteHttpPort'] ? settings['graphiteHttpPort'] : 8081
       @graphitePort     = settings['graphitePort']     ? settings['graphitePort']     : 2003
+      @graphitePath     = settings['graphitePath']     ? settings['graphitePath']     : nil
+
+      @graphiteURI      = sprintf( 'http://%s:%s%s', @graphiteHost, @graphiteHttpPort, @graphitePath )
 
       logFile = sprintf( '%s/graphite.log', @logDirectory )
 
@@ -31,13 +40,14 @@ module GraphiteAnnotions
         "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
       end
 
-      version              = '0.0.5'
-      date                 = '2016-08-29'
+      version              = '0.1.0'
+      date                 = '2016-09-29'
 
       @log.info( '-----------------------------------------------------------------' )
       @log.info( ' CoreMedia - Graphite' )
       @log.info( "  Version #{version} (#{date})" )
       @log.info( '  Copyright 2016 Coremedia' )
+      @log.info( "  Backendsystem #{ @graphiteURI}" )
       @log.info( '-----------------------------------------------------------------' )
       @log.info( '' )
 
@@ -47,11 +57,16 @@ module GraphiteAnnotions
 
     # annotations werden direct in die graphite geschrieben
     # POST
-    # curl -v -H 'Accept: application/json' -X POST http://localhost:8081/events/  \
-    # -d '{ "what": "annotions test", "tags": "monitoring-16-01.test",  "data": "test another adding annotion for <b>WTF</b>" }'
+    # curl -v -H 'Accept: application/json' -X POST \
+    #   http://localhost:8081/events/  \
+    #   -d '{ "what": "annotions test", "tags": ["monitoring-16-01"], "data": "test another adding annotion for <b>WTF</b>" }'
+    #
+    # curl -v -H 'Accept: application/json' -X POST \
+    #   http://monitoring-16-build/graphite/events/ \
+    #   -d '{ "what": "annotions test", "tags": ["monitoring-16-01","loadtest"],  "data": "test another adding annotion for <b>WTF</b>" }'
 
     # GET
-    # curl  'http://admin:admin@localhost/grafana/api/datasources/proxy/2/events/get_data?from=-12h&until=now&tags=monitoring-16-01'
+    # curl  'http://admin:admin@localhost/grafana/api/datasources/proxy/2/events/get_data?from=-12h&until=now&tags=monitoring-16-01%20created&intersection'
 
       str  = Time.now()
 
@@ -61,9 +76,9 @@ module GraphiteAnnotions
       @log.debug( str.to_s )
       _when = Time.parse(str.to_s).to_i
 
-      uri    = sprintf( 'http://%s:%s/events/', @graphiteHost, @graphiteHttpPort )
+#       uri    = sprintf( 'http://%s:%s/events/', @graphiteHost, @graphiteHttpPort )
 
-      uri = URI( uri )
+      uri = URI( @graphiteURI )
 
       data = {
         'what' => what,
@@ -91,10 +106,98 @@ module GraphiteAnnotions
 
     end
 
+
+    def nodeAnnotation( host, type )
+
+      tag      = Array.new()
+      message  = String.new()
+      descr    = String.new()
+      time     = Time.now().strftime( '%Y-%m-%d %H:%M:%S' )
+
+      tag[] << host
+
+      case type
+      when 'create'
+        tag[] << 'created'
+        message = sprintf( 'Node <b>%s</b> created (%s)', host, time )
+        descr   = 'node created'
+      when 'destroy'
+        tag[] << 'destroyed'
+        message = sprintf( 'Node <b>%s</b> destroyed (%s)', host, time )
+        descr   = 'node destroyed'
+      end
+
+      self.annotion( descr, tag, message )
+
+    end
+
+
+    def loadtestAnnotation( host, type )
+
+      tag      = Array.new()
+      message  = String.new()
+      descr    = String.new()
+      time     = Time.now().strftime( '%Y-%m-%d %H:%M:%S' )
+
+      tag[] << host
+      tag[] << 'loadtest'
+
+      case type
+      when 'start'
+
+        message = sprintf( 'Loadtest for Node <b>%s</b> started (%s)', host, time )
+        descr   = 'loadtest start'
+      when 'stop'
+
+        message = sprintf( 'Loadtest for Node <b>%s</b> ended (%s)', host, time )
+        descr   = 'loadtest end'
+      end
+
+      self.annotion( descr, tag, message )
+
+    end
+
+
+    def deploymentAnnotation( host, message )
+
+      tag      = Array.new()
+      message  = String.new()
+      descr    = String.new()
+      time     = Time.now().strftime( '%Y-%m-%d %H:%M:%S' )
+
+      tag[] << host
+      tag[] << 'deployment'
+
+      message = sprintf( 'Deployment on Node <b>%s</b> started (%s)', host, time )
+
+      descr   = 'Deployment start'
+
+      self.annotion( descr, tag, message )
+
+    end
+
+
+    def generalAnnotation( host, descr, message, customTags = [] )
+
+      tag      = Array.new()
+      message  = String.new()
+      time     = Time.now().strftime( '%Y-%m-%d %H:%M:%S' )
+
+      tag[] << host
+      tag.push( customTags )
+
+      message = sprintf( '%s <b>%s</b> (%s)', descr, host, time )
+
+      descr   = host
+
+      self.annotion( descr, tag, message )
+
+    end
+
     def nodeCreatedAnnotation( host )
 
       tag  = sprintf( '%s created', host )
-      data = sprintf( 'Node <b>%s</b> created (%s)', host, Time.now().strftime( '%Y-%m-%d %H:%M:%S' ))
+      data = sprintf( 'Node <b>%s</b> created (%s)', host, Time.now().strftime( '%Y-%m-%d %H:%M:%S' ) )
 
       self.annotion( 'node created', tag, data )
 
