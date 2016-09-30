@@ -6,7 +6,12 @@
 
 class MBean
 
-  def self.bean( host, service, bean, key = nil )
+  def self.cacheDirectory( dir )
+    @cacheDirectory = dir
+  end
+
+
+  def self.bean( host, service, mbean, key = nil )
 
     fileName = sprintf( "%s/%s/monitoring.result", @cacheDirectory, host )
 
@@ -18,7 +23,7 @@ class MBean
         break
       end
 
-      @log.debug( sprintf( 'Waiting for file %s ... %d', fileName, y ) )
+      puts ( sprintf( 'Waiting for file %s ... %d', fileName, y ) )
       sleep( 3 )
     end
 
@@ -30,14 +35,14 @@ class MBean
         s   = data[service] ? data[service] : nil
 
         if( s == nil )
-          @log.debug( sprintf( 'no service %s found', service ) )
+          puts ( sprintf( 'no service %s found', service ) )
           return false
         end
 
         mbeanExists  = s.detect { |s| s[mbean] }
 
         if( mbeanExists == nil )
-          @log.debug( sprintf( 'no mbean %s found', mbean ) )
+          puts ( sprintf( 'no mbean %s found', mbean ) )
           return false
         end
 
@@ -48,7 +53,7 @@ class MBean
 
         if( mbeanStatus.to_i != 200 )
 
-          @log.debug( sprintf( 'mbean %s found, but status %d', mbean, mbeanStatus ) )
+          puts ( sprintf( 'mbean %s found, but status %d', mbean, mbeanStatus ) )
           return false
         end
 
@@ -57,7 +62,7 @@ class MBean
           result = true
         elsif( mbeanExists != nil && key != nil )
 
-          @log.debug( sprintf( 'look for key %s', key ) )
+          puts ( sprintf( 'look for key %s', key ) )
 
           mbeanValue = mbeanExists['value'] ? mbeanExists['value'] : nil
 
@@ -101,14 +106,14 @@ class MBean
     s   = data[service] ? data[service] : nil
 
     if( s == nil )
-      @log.debug( sprintf( 'no service %s found', service ) )
+      puts ( sprintf( 'no service %s found', service ) )
       return false
     end
 
     mbeanExists  = s.detect { |s| s[mbean] }
 
     if( mbeanExists == nil )
-      @log.debug( sprintf( 'no mbean %s found', mbean ) )
+      puts ( sprintf( 'no mbean %s found', mbean ) )
       return false
     end
 
@@ -117,7 +122,7 @@ class MBean
 
     if( mbeanStatus.to_i != 200 )
 
-      @log.debug( sprintf( 'mbean %s found, but status %d', mbean, mbeanStatus ) )
+      puts ( sprintf( 'mbean %s found, but status %d', mbean, mbeanStatus ) )
       return false
     end
 
@@ -126,7 +131,7 @@ class MBean
       result = true
     elsif( mbeanExists != nil && key != nil )
 
-      @log.debug( sprintf( 'look for key %s', key ) )
+      puts ( sprintf( 'look for key %s', key ) )
 
       mbeanValue = mbeanExists['value'] ? mbeanExists['value'] : nil
 
@@ -163,7 +168,7 @@ class MBean
         break
       end
 
-      @log.debug( sprintf( 'Waiting for file %s ... %d', fileName, y ) )
+      puts ( sprintf( 'Waiting for file %s ... %d', fileName, y ) )
       sleep( 3 )
     end
 
@@ -223,9 +228,9 @@ class MBean
 
       if( difference > quorum + 1 )
 
-        @log.debug( sprintf( ' now       : %s', n.to_datetime.strftime("%d %m %Y %H:%M:%S") ) )
-        @log.debug( sprintf( ' timestamp : %s', t.to_datetime.strftime("%d %m %Y %H:%M:%S") ) )
-        @log.debug( sprintf( ' difference: %d', difference ) )
+        puts ( sprintf( ' now       : %s', n.to_datetime.strftime("%d %m %Y %H:%M:%S") ) )
+        puts ( sprintf( ' timestamp : %s', t.to_datetime.strftime("%d %m %Y %H:%M:%S") ) )
+        puts ( sprintf( ' difference: %d', difference ) )
 
         result = true
       end

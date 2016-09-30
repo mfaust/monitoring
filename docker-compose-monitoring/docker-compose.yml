@@ -148,6 +148,7 @@ services:
       - ./data/monitoring:/var/cache/monitoring
       - ./share/icinga2:/usr/local/monitoring
       - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_memory_cache:/usr/lib/monitoring-plugins/check_cm_memory_cache
+      - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_feeder_status.rb:/usr/lib/monitoring-plugins/check_cm_feeder_status
       - ./share/icinga2/etc/icinga2/objects:/etc/icinga2/objects
     links:
       - database:database
