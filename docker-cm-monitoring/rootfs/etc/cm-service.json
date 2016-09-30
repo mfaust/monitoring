@@ -31,11 +31,15 @@
     "content-management-server": {
       "description": "Content Management Server",
       "port": 40199,
+      "port_http": 40180,
+      "ior": true,
       "application": "contentserver"
     },
     "master-live-server": {
       "description": "Master Live Server",
       "port": 40299,
+      "port_http": 40280,
+      "ior": true,
       "application": "contentserver"
     },
     "workflow-server": {
@@ -44,7 +48,8 @@
     },
     "content-feeder": {
       "description": "Content Feeder",
-      "port": 40499
+      "port": 40499,
+      "feeder": "content"
     },
     "user-changes": {
       "description": "User Changes",
@@ -57,11 +62,13 @@
     "caefeeder-preview": {
       "description": "CAEFeeder Preview",
       "port": 40799,
+      "feeder": "preview",
       "application": "caefeeder"
     },
     "caefeeder-live": {
       "description": "CAEFeeder Live",
       "port": 40899,
+      "feeder": "live",
       "application": "caefeeder"
     },
     "cae-preview": {
@@ -92,6 +99,8 @@
     "replication-live-server": {
       "description": "RLS",
       "port": 42099,
+      "port_http": 42080,
+      "ior": true,
       "application": "contentserver"
     },
     "cae-live-1": {

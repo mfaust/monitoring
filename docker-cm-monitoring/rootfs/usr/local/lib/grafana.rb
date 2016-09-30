@@ -145,7 +145,7 @@ class Grafana
 
   def beanAvailable?( host, service, bean, key = nil )
 
-    port = self.applicationPort( service )
+#     port = self.applicationPort( service )
 
     fileName = sprintf( "%s/%s/monitoring.result", @cacheDirectory, host )
 

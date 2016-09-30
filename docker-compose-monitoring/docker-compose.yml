@@ -145,7 +145,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ./share/resolv.conf:/etc/resolv.conf:ro
       - ./data:/srv
-      - ./share/cache/monitoring:/var/cache/monitoring
+      - ./data/monitoring:/var/cache/monitoring
       - ./share/icinga2:/usr/local/monitoring
       - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_memory_cache:/usr/lib/monitoring-plugins/check_cm_memory_cache
       - ./share/icinga2/etc/icinga2/objects:/etc/icinga2/objects

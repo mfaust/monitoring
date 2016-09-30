@@ -6,7 +6,7 @@
 
 class MBean
 
-  def self.bean( host, service, bean )
+  def self.bean( host, service, bean, key = nil )
 
     fileName = sprintf( "%s/%s/monitoring.result", @cacheDirectory, host )
 
@@ -46,6 +46,39 @@ class MBean
 
         return mbeanExists
 
+        if( mbeanStatus.to_i != 200 )
+
+          @log.debug( sprintf( 'mbean %s found, but status %d', mbean, mbeanStatus ) )
+          return false
+        end
+
+        if( mbeanExists != nil && key == nil )
+
+          result = true
+        elsif( mbeanExists != nil && key != nil )
+
+          @log.debug( sprintf( 'look for key %s', key ) )
+
+          mbeanValue = mbeanExists['value'] ? mbeanExists['value'] : nil
+
+          if( mbeanValue == nil )
+            return false
+          end
+
+          if( mbeanValue.class.to_s == 'Hash' )
+            mbeanValue = mbeanValue.values.first
+          end
+
+          attribute = mbeanValue[ key ] ? mbeanValue[ key ]  : nil
+
+          if( attribute == nil || ( attribute.is_a?(String) && attribute.include?( 'ERROR' ) ) )
+
+            return false
+          end
+
+        end
+
+#        result = self.supportMbean?( json, service, bean, key )
       rescue JSON::ParserError => e
 
         @log.error('wrong result (no json)')
