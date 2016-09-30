@@ -42,7 +42,7 @@ class Grafana
     file      = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
     file.sync = true
     @log = Logger.new(file, 'weekly', 1024000)
-    @log.level = Logger::INFO
+    @log.level = Logger::DEBUG
     @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
     @log.formatter = proc do |severity, datetime, progname, msg|
       "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
@@ -315,6 +315,11 @@ class Grafana
 
         dashboards.each do |i|
 
+          if ( (i.include?"group") && (!host.include?"group") )
+            # Don't delete group templates except if deletion is forced
+            next
+          end
+
           uri = URI( sprintf( '%s/api/dashboards/%s', @grafanaURI, i ) )
 
           begin
@@ -368,8 +373,6 @@ class Grafana
     @log.debug( sprintf( 'Search dashboards with tag %s', tag ) )
 
     uri = URI( sprintf( '%s/api/search?query=&tag=%s', @grafanaURI, tag ) )
-
-    response = nil
 
     http     = Net::HTTP.new( uri.host, uri.port )
     request  = Net::HTTP::Get.new( uri.request_uri )
@@ -462,8 +465,53 @@ class Grafana
 
 
   def generateOverviewTemplate( services )
+    @log.info( 'Create Overview Template' )
+    rows = getOverviewTemplateRows(services)
+    rows = rows.join(',')
+    template = %(
+      {
+        "dashboard": {
+          "id": null,
+          "title": "%SHORTHOST% -- Overview",
+          "originalTitle": "%SHORTHOST% - Overview",
+          "tags": [ "%TAG%", "overview" ],
+          "style": "dark",
+          "timezone": "browser",
+          "editable": true,
+          "hideControls": false,
+          "sharedCrosshair": false,
+          "rows": [
+            #{rows}
+          ],
+          "time": {
+            "from": "now-3m",
+            "to": "now"
+          },
+          "timepicker": {
+            "refresh_intervals": [ "1m", "2m" ],
+            "time_options": [ "3m", "5m", "15m" ]
+          },
+          "templating": {
+            "list": []
+          },
+          "annotations": {
+            "list": []
+          },
+          "refresh": "1m",
+          "schemaVersion": 12,
+          "version": 0,
+          "links": []
+        }
+      }
+    )
 
-    @log.info( 'create Overview Templates' )
+    if( validJson?( template ) )
+      sendTemplateToGrafana( template )
+    end
+
+  end
+
+  def getOverviewTemplateRows(services)
 
     rows = Array.new()
     dir  = Array.new()
@@ -510,51 +558,9 @@ class Grafana
     @log.debug( " services : #{srv}" )
     @log.debug( " use      : #{intersect}" )
 
-    rows = rows.join(',')
-
-    template = %(
-      {
-        "dashboard": {
-          "id": null,
-          "title": "%SHORTHOST% -- Overview",
-          "originalTitle": "%SHORTHOST% - Overview",
-          "tags": [ "%TAG%", "overview" ],
-          "style": "dark",
-          "timezone": "browser",
-          "editable": true,
-          "hideControls": false,
-          "sharedCrosshair": false,
-          "rows": [
-            #{rows}
-          ],
-          "time": {
-            "from": "now-3m",
-            "to": "now"
-          },
-          "timepicker": {
-            "refresh_intervals": [ "1m", "2m" ],
-            "time_options": [ "3m", "5m", "15m" ]
-          },
-          "templating": {
-            "list": []
-          },
-          "annotations": {
-            "list": []
-          },
-          "refresh": "1m",
-          "schemaVersion": 12,
-          "version": 0,
-          "links": []
-        }
-      }
-    )
-
-    if( validJson?( template ) )
-      sendTemplateToGrafana( template )
-    end
+    return rows
 
   end
-
 
   def generateLicenseTemplate( host, services )
 
@@ -786,6 +792,144 @@ class Grafana
 
     return json
   end
+
+  def addGroupOverview( hosts, force = false )
+    @log.info("Create Group Overview for #{hosts}")
+
+    if (force)
+      deleteDashboards("group")
+    end
+
+    rows = Array.new()
+
+    hosts.each do |host|
+
+      self.prepare( host )
+
+      templateRows = Array.new()
+
+      discoveryFile = sprintf('%s/%s/discovery.json', @cacheDirectory, host)
+      discoveryJson = getJsonFromFile(discoveryFile)
+
+      if (discoveryJson == nil)
+
+        @log.error("No discovery.json for host #{host}")
+        result = {
+            :status      => 500,
+            :name        => host,
+            :message     => "Unknown host. Please add host to monitoring."
+        }
+        return result
+
+      else
+        services = discoveryJson.keys
+        templateRows = getOverviewTemplateRows(services)
+
+        grafanaHost= host
+        grafanaHost.gsub('.', '-')
+
+        templateRows.each do |row|
+          row.gsub!('%SHORTHOST%', self.shortHostname(host))
+          row.gsub!('%HOST%', grafanaHost)
+        end
+
+        titleRow = %(
+          {
+            "collapse": false,
+            "editable": true,
+            "height": "25px",
+            "panels": [
+              {
+                "content": "<h2><left><bold>#{self.shortHostname(host)}</bold></left></h2>",
+                "editable": true,
+                "error": false,
+                "id": 70,
+                "isNew": true,
+                "links": [],
+                "mode": "html",
+                "span": 2,
+                "title": "",
+                "transparent": true,
+                "type": "text"
+              }
+            ],
+            "title": ""
+          }
+        )
+        rows.push(titleRow)
+        rows.push(templateRows).flatten!
+      end
+    end
+
+    rows = rows.join(',')
+
+    template = %(
+      {
+        "dashboard": {
+          "id": null,
+          "title": "Group",
+          "originalTitle": "Group -- %SHORTHOST% - Overview",
+          "tags": [ %TAG% ],
+          "style": "dark",
+          "timezone": "browser",
+          "editable": true,
+          "hideControls": false,
+          "sharedCrosshair": false,
+          "rows": [
+            #{rows}
+          ],
+          "time": {
+            "from": "now-3m",
+            "to": "now"
+          },
+          "timepicker": {
+            "refresh_intervals": [ "1m", "2m" ],
+            "time_options": [ "3m", "5m", "15m" ]
+          },
+          "templating": {
+            "list": []
+          },
+          "annotations": {
+            "list": []
+          },
+          "refresh": "1m",
+          "schemaVersion": 12,
+          "version": 0,
+          "links": []
+        }
+      }
+    )
+
+    shortHosts = ""
+    tags = "\"overview\""
+
+    hosts.each do |host|
+      shortHosts = shortHosts + " " + self.shortHostname( host )
+      tags = tags + ",\"" + self.shortHostname( host ) + "\""
+    end
+
+    if hosts.length > 1
+      tags = tags + ",\"group\""
+    end
+
+    template.gsub!( '%SHORTHOST%', shortHosts )
+    template.gsub!( '%TAG%'      , tags )
+
+    if( validJson?( template ) )
+      sendTemplateToGrafana( template )
+    end
+
+    result = {
+        :status      => 200,
+        :name        => hosts,
+        :message     => "OK"
+    }
+
+    return result
+
+  end
+
+
 
 end
 

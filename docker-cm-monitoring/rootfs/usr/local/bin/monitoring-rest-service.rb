@@ -183,6 +183,36 @@ module Sinatra
 #      status.to_json
     end
 
+    # create new host
+    post '/g/:hosts' do
+
+      hostsParam = params[:hosts]
+      hosts = hostsParam.split('+')
+
+      content_type :json
+
+      result = g.addGroupOverview( hosts )
+
+      response.status = result[:status]
+      result.to_json
+
+    end
+
+    # create new host
+    post '/g/:hosts/force' do
+
+      hostsParam = params[:hosts]
+      hosts = hostsParam.split('+')
+
+      content_type :json
+
+      result = g.addGroupOverview( hosts, true )
+
+      response.status = result[:status]
+      result.to_json
+
+    end
+
     # create new host - with grafana dashboards
     post '/:host' do
 

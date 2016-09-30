@@ -23,6 +23,7 @@ def validJson?( json )
     JSON.parse( json )
     return true
   rescue JSON::ParserError => e
+    @log.info("Json parse error: #{e}")
     return false
   end
 end

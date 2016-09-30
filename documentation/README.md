@@ -1,7 +1,7 @@
 Coremedia Monitoring
 ====================
 
-Das Coremedia Monitoring basiert auf mehrere - durchaus voneinander abhängige - Dockercontainer.
+Das Coremedia Monitoring basiert auf mehreren - durchaus voneinander abhängigen - Dockercontainer.
 
 Ziel ist ein funktionierendes Monitoring-System, welches auf jedem System ausgerollt werden kann.
 
@@ -12,14 +12,14 @@ Work-in-Progress
 
 # Docker Compose
 
-Im Verzeichniss `docker-compose-monitoring` befindet sich ein entsprechende Compose File für ein komplettes Monitoring Setup.
+Im Verzeichniss `docker-compose-monitoring` befindet sich ein entsprechendes Compose File für ein komplettes Monitoring Setup.
 
-Es werden pre-compiled Container von [Docker Hub](https://hub.docker.com/r/bodsch/) benutzt um möglichst den lokalen Compilevorgang zu reduzieren.
+Es werden pre-compiled Container von [Docker Hub](https://hub.docker.com/r/bodsch/) benutzt, um möglichst den lokalen Compilevorgang zu reduzieren.
 
 Zusätzlich wird ein weiterer Docker Container (`cm-monitoring`) eingebunden, der initial und bei jeder weiteren Änderung gebaut werden muß.
 
 
-## Vorraussetzung
+## Voraussetzung
 
 In jedem Fall ist eine funktionierende DNS Auflösung sehr, sehr (sehr^10) hilfreich!
 
@@ -59,11 +59,12 @@ Wir haben versucht, möglichst alles über eine API aufrufbar zu bekommen:
 | `curl -X POST http://localhost/api/a/node/destroy/$name`   | Erstellt eine Annotation das der Hosts gelöscht wurde |
 | `curl -X POST http://localhost/api/a/loadtest/start/$name` | Erstellt eine Annotation für das starten eines Lasttests |
 | `curl -X POST http://localhost/api/a/loadtest/stop/$name`  | Erstellt eine Annotation für das beenden eines Lasttests |
-
+| `curl -X POST http://localhost/api/g/$names`               | Fügt ein Übersichtsdashboard für eine Gruppe von Hosts hinzu. Die Hostnames werden durch + verbunden. Die Hosts müssen dem Monitoring bereits hinzugefügt worden sein. |
+| `curl -X POST http://localhost/api/g/$names/force`         | Fügt ein Übersichtsdashboard für eine Gruppe von Hosts hinzu, löscht vorher das Dashboard. Die Hostnames werden durch + verbunden. Die Hosts müssen dem Monitoring bereits hinzugefügt worden sein. |
 
 ## Eigene Anpassungen
 
-Im Verzeichniss `~/devops/monitoring/docker-compose-monitoring/share` befinden sich alle Dateien, die beim erstellen des `cm-monitoring` Containers in diesen hinein kopiert werden.
+Im Verzeichnis `~/devops/monitoring/docker-compose-monitoring/share` befinden sich alle Dateien, die beim Erstellen des `cm-monitoring` Containers in diesen hinein kopiert werden.
 
 ### Anpassung für die DNS Auflösung
 
@@ -71,11 +72,11 @@ Für die Anpassung der DNS Auflösung muß die Datei `resolv.conf` angepasst wer
 
 ### Dashboards
 
-Alle Dashboards, die automatisch hinzugefügt werden, befinden sich im Verzeichniss `~/devops/monitoring/docker-cm-monitoring/rootfs/usr/local/share/templates/grafana`
+Alle Dashboards, die automatisch hinzugefügt werden, befinden sich im Verzeichnis `~/devops/monitoring/docker-cm-monitoring/rootfs/usr/local/share/templates/grafana`
 
 **Mein Vorschlag für größere Änderungen beim Kunden**
 
-Kopiert das Verzeichniss `docker-cm-monitoring` (z.b. `docker-guj-monitoring`) und passt das `docker-compose.yml` File an.
+Kopiert das Verzeichnis `docker-cm-monitoring` (z.b. `docker-guj-monitoring`) und passt das `docker-compose.yml` File an.
 
 
 
