@@ -22,10 +22,14 @@ if( File.exist?( config_file ) )
 
   config = YAML.load_file( config_file )
 
-  @logDir           = config['monitoring']['log_dir']              ? config['monitoring']['log_dir']              : '/tmp/log'
-  @cacheDir         = config['monitoring']['cache_dir']            ? config['monitoring']['cache_dir']            : '/tmp/cache'
-  @jolokia_host     = config['monitoring']['jolokia']['host']      ? config['monitoring']['jolokia']['host']      : 'localhost'
-  @jolokia_port     = config['monitoring']['jolokia']['port']      ? config['monitoring']['jolokia']['port']      : 8080
+  @logDir           = config['monitoring']['log_dir']              ? config['monitoring']['log_dir']          : '/tmp/log'
+  @cacheDir         = config['monitoring']['cache_dir']            ? config['monitoring']['cache_dir']        : '/tmp/cache'
+  @jolokia_host     = config['monitoring']['jolokia']['host']      ? config['monitoring']['jolokia']['host']  : 'localhost'
+  @jolokia_port     = config['monitoring']['jolokia']['port']      ? config['monitoring']['jolokia']['port']  : 8080
+
+  @memcacheHost     = ENV['MEMCACHE_HOST']                         ? ENV['MEMCACHE_HOST']                     : nil
+  @memcachePort     = ENV['MEMCACHE_PORT']                         ? ENV['MEMCACHE_PORT']                     : nil
+
   @scanDiscovery    = config['monitoring']['data-collector']['scan-discovery'] ? config['monitoring']['data-collector']['scan-discovery'] : '10m'
 
 else
@@ -44,6 +48,8 @@ options = {
   'cache_dir'             => @cacheDir,
   'jolokia_host'          => @jolokia_host,
   'jolokia_port'          => @jolokia_port,
+  'memcacheHost'          => @memcacheHost,
+  'memcachePort'          => @memcachePort,
   'scanDiscovery'         => @scanDiscovery,
   'applicationConfigFile' => applicationConfigFile,
   'serviceConfigFile'     => serviceConfigFile

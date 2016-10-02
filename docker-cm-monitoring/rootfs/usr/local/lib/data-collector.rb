@@ -30,10 +30,14 @@ class DataCollector
     @cacheDirectory    = settings['cache_dir']             ? settings['cache_dir']             : '/tmp/cache'
     @jolokiaHost       = settings['jolokia_host']          ? settings['jolokia_host']          : 'localhost'
     @jolokiaPort       = settings['jolokia_port']          ? settings['jolokia_port']          : 8080
+    @memcacheHost      = settings['memcacheHost']          ? settings['memcacheHost']          : nil
+    @memcachePort      = settings['memcachePort']          ? settings['memcachePort']          : nil
+
     applicationConfig  = settings['applicationConfigFile'] ? settings['applicationConfigFile'] : nil
     serviceConfig      = settings['serviceConfigFile']     ? settings['serviceConfigFile']     : nil
 
-    @DEBUG             = false
+    @supportMemcache   = false
+    @DEBUG             = true
 
     if( ! File.exist?( @logDirectory ) )
       Dir.mkdir( @logDirectory )
@@ -64,6 +68,23 @@ class DataCollector
       exit 1
     end
 
+    if( @memcacheHost != nil && @memcachePort != nil )
+
+      # enable Memcache Support
+
+      require 'dalli'
+
+      memcacheOptions = {
+        :compress   => true,
+        :expires_in => 2       # expire after 2 minutes
+      }
+
+      @mc = Dalli::Client.new( sprintf( '%s:%s', @memcacheHost, @memcachePort ), memcacheOptions )
+
+      @supportMemcache = true
+
+    end
+
     self.applicationConfig( applicationConfig )
     self.readConfiguration()
 
@@ -78,6 +99,12 @@ class DataCollector
     @log.info( "  Version #{version} (#{date})" )
     @log.info( '  Copyright 2016 Coremedia' )
     @log.info( "  cache directory located at #{@cacheDirectory}" )
+
+    if( @supportMemcache == true )
+      @log.info( "  Memcache Support enabled" )
+      @log.info( "  Memcache Server #{@memcacheHost}:#{@memcachePort}" )
+    end
+
     @log.info( '-----------------------------------------------------------------' )
     @log.info( '' )
 
@@ -259,6 +286,12 @@ class DataCollector
       pgsql.run()
 
     end
+
+  end
+
+
+  def internalMemcacheData( host )
+
 
   end
 
@@ -779,6 +812,17 @@ class DataCollector
 
           targetUrl = i[0]['target']['url']
 
+          if( @supportMemcache == true )
+
+            key = sprintf( 'request__%s__%s', hostname, v )
+            @mc.set( key, i )
+
+            if( @DEBUG == true )
+              @log.debug( @mc.stats( :items ) )
+            end
+
+          end
+
           if( @DEBUG == true )
 
             tmpFile = sprintf( '%s/%s/request-%s.json'    , @cacheDirectory, hostname,v )
@@ -814,6 +858,17 @@ class DataCollector
 
             File.open( tmpResultFile , 'w' ) { |f| f.write( JSON.generate( result ) ) }
             File.rename( tmpResultFile, resultFile )
+
+            if( @supportMemcache == true )
+
+              key = sprintf( 'result__%s', hostname )
+              @mc.set( key, result )
+
+              if( @DEBUG == true )
+                @log.debug( @mc.stats( :items ) )
+              end
+
+            end
 
           end
         end
