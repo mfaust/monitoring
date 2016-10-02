@@ -3,7 +3,7 @@
 # 14.09.2016 - Bodo Schulz
 #
 #
-# v1.2.4
+# v1.3.0
 
 # -----------------------------------------------------------------------------
 
@@ -33,6 +33,8 @@ class CollecdPlugin
 
     @logDirectory   = settings['log_dir']      ? settings['log_dir']      : '/tmp'
     @cacheDirectory = settings['cache_dir']    ? settings['cache_dir']    : '/var/tmp/monitoring'
+    @memcacheHost   = settings['memcacheHost'] ? settings['memcacheHost'] : nil
+    @memcachePort   = settings['memcachePort'] ? settings['memcachePort'] : nil
     @interval       = settings['interval']     ? settings['interval']     : 15
 
     logFile = sprintf( '%s/collectd.log', @logDirectory )
@@ -52,8 +54,27 @@ class CollecdPlugin
       FileUtils.chown( 'nobody', 'nobody', logFile )
     end
 
-    version              = '1.2.4'
-    date                 = '2016-09-14'
+    if( @memcacheHost != nil && @memcachePort != nil )
+
+      # enable Memcache Support
+
+      require 'dalli'
+
+      memcacheOptions = {
+        :compress   => true,
+        :namespace  => 'monitoring',
+        :expires_in => 0
+      }
+
+      @mc = Dalli::Client.new( sprintf( '%s:%s', @memcacheHost, @memcachePort ), memcacheOptions )
+
+      @supportMemcache = true
+
+    end
+
+
+    version              = '1.3.0'
+    date                 = '2016-10-02'
 
     @log.info( '-----------------------------------------------------------------' )
     @log.info( ' CollectdPlugin' )
@@ -61,6 +82,12 @@ class CollecdPlugin
     @log.info( '  Copyright 2016 Coremedia' )
     @log.info( "  cache directory located at #{@cacheDirectory}" )
     @log.info( "  configured interval #{@interval}" )
+
+    if( @supportMemcache == true )
+      @log.info( "  Memcache Support enabled" )
+      @log.info( "  Memcache Server #{@memcacheHost}:#{@memcachePort}" )
+    end
+
     @log.info( '-----------------------------------------------------------------' )
     @log.info( '' )
 
@@ -1852,8 +1879,50 @@ class CollecdPlugin
     monitoredServer.each do |h|
 
       @Host = h
+      graphiteOutput = Array.new()
 
       @log.info( sprintf( 'Host: %s', h ) )
+
+      if( @supportMemcache == true )
+
+#        @log.debug( JSON.pretty_generate( @mc.stats() ) )
+
+        resultFile = sprintf( '%s/%s/discovery.json', @cacheDirectory, h )
+
+        if( File.exists?( resultFile ) )
+
+          data = JSON.parse( File.read( resultFile ) )
+
+#          @log.debug( JSON.pretty_generate( data ) )
+
+          data.each do |service, d|
+
+            @log.debug( service )
+
+            port        = d['port']        ? d['port']        : nil
+            description = d['description'] ? d['description'] : nil
+
+            @log.info( sprintf( '  Service: %s', service ) )
+
+            key         = sprintf( 'result__%s__%s', h, service )
+            @log.debug( key )
+
+            result      = @mc.get( key )
+
+            if( result != nil )
+
+              result.each do |r, v|
+                @log.debug( r )
+              end
+#              @log.debug( JSON.pretty_generate( result ) )
+
+
+            end
+          end
+        end
+      else
+
+
 
       resultFile = sprintf( '%s/%s/monitoring.result', @cacheDirectory, h )
 
@@ -1861,7 +1930,7 @@ class CollecdPlugin
 
         data = JSON.parse( File.read( resultFile ) )
 
-        graphiteOutput = Array.new()
+
 
         hostname  = data[:hostname]  ? data[:hostname]  : nil
         timestamp = data[:timestamp] ? data[:timestamp] : nil
@@ -1962,6 +2031,8 @@ class CollecdPlugin
         end
 
         self.output( graphiteOutput )
+      end
+
       end
 
     end

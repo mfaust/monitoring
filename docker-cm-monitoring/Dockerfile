@@ -15,9 +15,9 @@ WORKDIR /srv
 VOLUME  /srv
 
 RUN \
-  apk --quiet --cache update && \
-  apk --quiet --cache upgrade && \
-  apk --quiet --cache add \
+  apk --quiet --no-cache update && \
+  apk --quiet --no-cache upgrade && \
+  apk --quiet --no-cache add \
     build-base \
     imagemagick-dev \
     mysql-dev \
