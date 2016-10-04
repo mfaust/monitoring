@@ -44,7 +44,7 @@ module GraphiteAnnotions
       date                 = '2016-10-04'
 
       @log.info( '-----------------------------------------------------------------' )
-      @log.info( ' CoreMedia - Graphite' )
+      @log.info( ' CoreMedia - Graphite Client' )
       @log.info( "  Version #{version} (#{date})" )
       @log.info( '  Copyright 2016 Coremedia' )
       @log.info( "  Backendsystem #{ @graphiteURI}" )

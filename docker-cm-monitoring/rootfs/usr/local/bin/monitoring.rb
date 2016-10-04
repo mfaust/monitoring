@@ -95,7 +95,7 @@ class Monitoring
     date                 = '2016-10-04'
 
     @log.info( '-----------------------------------------------------------------' )
-    @log.info( ' CM Monitoring Service' )
+    @log.info( ' CoreMedia - Monitoring Service' )
     @log.info( "  Version #{version} (#{date})" )
     @log.info( '  Copyright 2016 Coremedia' )
     @log.info( '-----------------------------------------------------------------' )

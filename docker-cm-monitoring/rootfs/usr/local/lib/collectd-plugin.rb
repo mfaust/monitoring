@@ -43,7 +43,7 @@ class CollecdPlugin
     file.sync = true
     @log = Logger.new( file, 'weekly', 1024000 )
 #    @log = Logger.new( STDOUT )
-    @log.level = Logger::DEBUG
+    @log.level = Logger::INFO
     @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
     @log.formatter = proc do |severity, datetime, progname, msg|
       "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
@@ -77,7 +77,7 @@ class CollecdPlugin
     date                 = '2016-10-04'
 
     @log.info( '-----------------------------------------------------------------' )
-    @log.info( ' CollectdPlugin' )
+    @log.info( ' CoreMedia - CollectdPlugin' )
     @log.info( "  Version #{version} (#{date})" )
     @log.info( '  Copyright 2016 Coremedia' )
     @log.info( "  cache directory located at #{@cacheDirectory}" )
