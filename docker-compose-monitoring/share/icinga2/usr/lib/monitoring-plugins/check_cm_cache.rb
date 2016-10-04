@@ -71,62 +71,26 @@ class Icinga2Check_CM_Cache
       MBean.memcache( @memcacheHost, @memcachePort )
     end
 
-    self.validate( cache )
+    @host = self.shortHostname( @host )
 
-    case cache
-    when 'uapi-cache'
-      self.uapiCache()
-    when 'blob-cache'
-      self.blobCache()
-    end
+    self.check( cache )
 
   end
+
 
   def shortHostname( hostname )
 
-    shortHostname   = hostname.split( '.' ).first
-
-    return shortHostname
+    return hostname.split( '.' ).first
 
   end
 
 
-  def validate( cache )
-
-#     # uapi-cache,blob-cache
-#     case cache
-#     when 'uapi-cache'
-#       @feederServer = 'caefeeder-preview'
-#     when 'blob-cache'
-#       @feederServer = 'content-feeder'
-#     else
-#       puts sprintf( 'Coremedia Feeder - unknown feeder type %s', @feeder )
-#       exit STATE_CRITICAL
-#     end
-
-    @host = self.shortHostname( @host )
-
-  end
-
-class Integer
-  def to_filesize
-    {
-      'B'  => 1024,
-      'KB' => 1024 * 1024,
-      'MB' => 1024 * 1024 * 1024,
-      'GB' => 1024 * 1024 * 1024 * 1024,
-      'TB' => 1024 * 1024 * 1024 * 1024 * 1024
-    }.each_pair { |e, s| return "#{(self.to_f / (s / 1024)).round(2)}#{e}" if self < s }
-  end
-end
-
-
-  def uapiCache()
+  def check( type )
 
     # TODO
     # make it configurable
-    warning  = 85
-    critical = 95
+    warning  = 95
+    critical = 98
 
     # get our bean
     data = MBean.bean( @host, @application, 'CapConnection' )
@@ -136,16 +100,28 @@ end
     dataValue     = ( data != nil && data['value'] ) ? data['value'] : nil
     dataValue     = dataValue.values.first
 
-    @log.debug( dataValue )
+    case type
+    when 'uapi-cache'
+      type          = 'UAPI'
+      cacheSize     = dataValue['HeapCacheSize']  ? dataValue['HeapCacheSize']  : nil
+      cacheLevel    = dataValue['HeapCacheLevel'] ? dataValue['HeapCacheLevel'] : nil
+    when 'blob-cache'
+      type          = 'BLOB'
+      cacheSize     = dataValue['BlobCacheSize']  ? dataValue['BlobCacheSize']  : nil
+      cacheLevel    = dataValue['BlobCacheLevel'] ? dataValue['BlobCacheLevel'] : nil
+    else
 
-    heapCacheSize  = dataValue['HeapCacheSize']  ? dataValue['HeapCacheSize']  : nil
-    heapCacheLevel = dataValue['HeapCacheLevel'] ? dataValue['HeapCacheLevel'] : nil
-    heapCachePercent = ( 100 * heapCacheLevel.to_i / heapCacheSize.to_i ).to_i
+      puts sprintf( 'UNKNOWN - Cache not available' )
+      exit STATE_UNKNOWN
+    end
 
-    if( heapCachePercent == warning || heapCachePercent <= warning )
+    percent  = ( 100 * cacheLevel.to_i / cacheSize.to_i ).to_i
+
+
+    if( percent == warning || percent <= warning )
       status   = 'OK'
       exitCode = STATE_OK
-    elsif( heapCachePercent >= warning && heapCachePercent <= critical )
+    elsif( percent >= warning && percent <= critical )
       status   = 'WARNING'
       exitCode = STATE_WARNING
     else
@@ -153,16 +129,11 @@ end
       exitCode = STATE_CRITICAL
     end
 
-    puts sprintf( '%s - UAPI Cache: %d%% used (Used: %s - Max: %s )', status, heapCachePercent, heapCacheLevel.to_filesize, heapCacheSize.to_filesize )
+    puts sprintf( '%s - %s Cache: %d%% used (Used: %s - Max: %s )', status, type, percent, cacheSize.to_filesize, cacheLevel.to_filesize )
     exit exitCode
 
   end
 
-
-  def blobCache()
-
-
-  end
 
 end
 

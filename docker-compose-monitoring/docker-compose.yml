@@ -152,7 +152,8 @@ services:
       - ../docker-cm-monitoring/rootfs/usr/local/lib/mbean.rb:/usr/local/lib/mbean.rb:ro
       - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_memory_cache:/usr/lib/monitoring-plugins/check_cm_memory_cache:ro
       - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_feeder_status.rb:/usr/lib/monitoring-plugins/check_cm_feeder_status:ro
-      - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_caches.rb:/usr/lib/monitoring-plugins/check_cm_cache
+      - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_cache.rb:/usr/lib/monitoring-plugins/check_cm_cache:ro
+      - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_memory.rb:/usr/lib/monitoring-plugins/check_cm_memory
       - ./share/icinga2/etc/icinga2/objects:/etc/icinga2/objects
     links:
       - database:database
