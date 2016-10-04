@@ -1911,8 +1911,17 @@ class CollecdPlugin
 
             if( result != nil )
 
-              result.each do |r, v|
-                @log.debug( r )
+              result.each do |r|
+
+                key    = r.keys
+                values = r.values
+
+                case key
+                when 'Runtime'
+                  graphiteOutput.push( self.ParseResult_Runtime( values ) )
+                end
+
+
               end
 #              @log.debug( JSON.pretty_generate( result ) )
 
