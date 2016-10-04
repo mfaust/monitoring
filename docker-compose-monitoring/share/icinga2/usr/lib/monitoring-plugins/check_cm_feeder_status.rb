@@ -12,7 +12,7 @@ require_relative '/usr/local/monitoring/mbean.rb'
 class Icinga2Check_CM_Feeder
 
   STATE_OK        = 0
-  STATE_warningING   = 1
+  STATE_WARNING   = 1
   STATE_CRITICAL  = 2
   STATE_UNKNOWN   = 3
   STATE_DEPENDENT = 4
