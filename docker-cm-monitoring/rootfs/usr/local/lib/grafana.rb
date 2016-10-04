@@ -34,8 +34,11 @@ class Grafana
     @grafanaHost       = settings['grafana_host'] ? settings['grafana_host'] : 'localhost'
     @grafanaPort       = settings['grafana_port'] ? settings['grafana_port'] : 3000
     @grafanaPath       = settings['grafana_path'] ? settings['grafana_path'] : nil
+    @memcacheHost      = settings['memcacheHost'] ? settings['memcacheHost'] : nil
+    @memcachePort      = settings['memcachePort'] ? settings['memcachePort'] : nil
 
     @grafanaURI        = sprintf( 'http://%s:%s%s', @grafanaHost, @grafanaPort, @grafanaPath )
+    @supportMemcache   = false
 
     logFile            = sprintf( '%s/grafana.log', @logDirectory )
 
@@ -48,13 +51,37 @@ class Grafana
       "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
     end
 
-    version              = '1.1.0'
-    date                 = '2016-09-28'
+    if( @memcacheHost != nil && @memcachePort != nil )
+
+      # enable Memcache Support
+
+      require 'dalli'
+
+      memcacheOptions = {
+        :compress   => true,
+        :namespace  => 'monitoring',
+        :expires_in => 0
+      }
+
+      @mc = Dalli::Client.new( sprintf( '%s:%s', @memcacheHost, @memcachePort ), memcacheOptions )
+
+      @supportMemcache = true
+
+    end
+
+    version              = '1.2.0'
+    date                 = '2016-10-04'
 
     @log.info( '-----------------------------------------------------------------' )
-    @log.info( ' CM Grafana Dashboard Management' )
+    @log.info( ' CoreMedia - Grafana Dashboard Management' )
     @log.info( "  Version #{version} (#{date})" )
     @log.info( '  Copyright 2016 Coremedia' )
+
+    if( @supportMemcache == true )
+      @log.info( "  Memcache Support enabled" )
+      @log.info( "  Memcache Server #{@memcacheHost}:#{@memcachePort}" )
+    end
+
     @log.info( '-----------------------------------------------------------------' )
     @log.info( '' )
 
@@ -145,55 +172,63 @@ class Grafana
 
   def beanAvailable?( host, service, bean, key = nil )
 
-#     port = self.applicationPort( service )
+    json = Hash.new()
 
-    fileName = sprintf( "%s/%s/monitoring.result", @cacheDirectory, host )
+    if( @supportMemcache == true )
 
-    for y in 1..10
+      mcKey         = sprintf( 'result__%s__%s', host, service )
 
-      if( File.exist?( fileName ) )
-        sleep( 1 )
-        file = File.read( fileName )
-        break
+      for y in 1..10
+        result      = @mc.get( mcKey )
+
+        if( result != nil )
+
+          json = { service => result }
+
+          break
+        else
+          @log.debug( sprintf( 'Waiting for data %s ... %d', mcKey, y ) )
+          sleep( 3 )
+        end
+      end
+    else
+
+      fileName = sprintf( "%s/%s/monitoring.result", @cacheDirectory, host )
+
+      for y in 1..10
+
+        if( File.exist?( fileName ) )
+          sleep( 1 )
+          file = File.read( fileName )
+          break
+        end
+
+        @log.debug( sprintf( 'Waiting for file %s ... %d', fileName, y ) )
+        sleep( 3 )
       end
 
-      @log.debug( sprintf( 'Waiting for file %s ... %d', fileName, y ) )
-      sleep( 3 )
+      if( file )
+
+        json   = JSON.parse( file )
+      end
+
     end
 
-    if( file )
+    begin
+      result = self.supportMbean?( json, service, bean, key  )
+    rescue JSON::ParserError => e
 
-      begin
-        json   = JSON.parse( file )
-        result = self.supportMbean?( json, service, bean, key )
-      rescue JSON::ParserError => e
+      @log.error('wrong result (no json)')
+      @log.error(e)
 
-        @log.error('wrong result (no json)')
-        @log.error(e)
-
-        result = false
-      end
+      result = false
     end
 
     return result
   end
 
-
-  def applicationPort( application )
-
-    port = nil
-    mergedHostJson = getJsonFromFile( @mergedHostFile )
-
-    s = mergedHostJson[application] ? mergedHostJson[application] : nil
-    if( s != nil )
-      port = s['port'] ? s['port'] : nil
-    end
-
-    return port
-  end
-
   # add dashboards for a host
-  def addDashbards(host, recreate = false)
+  def addDashbards( host, recreate = false )
 
     @log.info("Adding dashboards for host #{host}, recreate: #{recreate}")
 
@@ -209,12 +244,20 @@ class Grafana
     if( discoveryJson != nil )
 
       services       = discoveryJson.keys
-      @log.debug("Found services: #{services}")
+      @log.debug( "Found services: #{services}" )
 
-      @monitoringResultJson = getJsonFromFile(@monitoringResultFile)
+      if( @supportMemcache == true )
+
+        key         = sprintf( 'result__%s__%s', host, services.last )
+
+        @monitoringResultJson = getJsonFromFile( key, true )
+
+      else
+        @monitoringResultJson = getJsonFromFile( @monitoringResultFile )
+      end
 
       if ( @monitoringResultJson == nil )
-        @log.error("No monitoring.result file found. Exiting.")
+        @log.error( "No monitoring.result file found. Exiting." )
         return nil
       end
 
@@ -239,7 +282,7 @@ class Grafana
 #         @log.debug("Searching templates paths for service: #{service}")
 
         # cae-live-1 -> cae-live
-        serviceName = self.removePostfix( service )
+        serviceName = removePostfix( service )
 
         # get templates for service
         serviceTemplatePaths = *self.getTemplatePathsForService(serviceName)
@@ -412,20 +455,6 @@ class Grafana
 
   end
 
-  # cae-live-1 -> cae-live
-  def removePostfix( service )
-
-    if( service =~ /\d/ )
-
-      lastPart = service.split("-").last
-      service  = service.chomp("-#{lastPart}")
-#       @log.debug("Chomped service: #{service}")
-    end
-
-    return service
-
-  end
-
 
   def getTemplatePathsForServiceType(serviceType)
 
@@ -465,9 +494,12 @@ class Grafana
 
 
   def generateOverviewTemplate( services )
+
     @log.info( 'Create Overview Template' )
+
     rows = getOverviewTemplateRows(services)
     rows = rows.join(',')
+
     template = %(
       {
         "dashboard": {
@@ -511,6 +543,7 @@ class Grafana
 
   end
 
+
   def getOverviewTemplateRows(services)
 
     rows = Array.new()
@@ -518,7 +551,7 @@ class Grafana
     srv  = Array.new()
 
     services.each do |s|
-      srv << self.removePostfix( s )
+      srv << removePostfix( s )
     end
 
     regex = /
@@ -544,7 +577,7 @@ class Grafana
 
     intersect.each do |service|
 
-      service  = self.removePostfix( service )
+      service  = removePostfix( service )
       template = Dir.glob( sprintf( '%s/overview/**%s.tpl', @templateDirectory, service ) ).first
 
       if( File.exist?( template ) )
@@ -561,6 +594,7 @@ class Grafana
     return rows
 
   end
+
 
   def generateLicenseTemplate( host, services )
 
@@ -763,37 +797,61 @@ class Grafana
   end
 
 
-  def getJsonFromFile( filename )
+  def getJsonFromFile( filename, useMemcache = false )
 
     file = nil
 
-    for y in 1..10
-      if( File.exist?( filename ) )
-        file = File.read( filename )
-        break
+    if( useMemcache == true )
+
+      key         = filename
+
+      for y in 1..10
+        json      = @mc.get( key )
+
+        if( json != nil )
+          break
+        else
+          @log.debug( sprintf( 'Waiting for data %s ... %d', key, y ) )
+          sleep( 3 )
+        end
       end
 
-      sleep( 3 )
-      @log.debug( "  Waiting for file #{filename} ... #{y}" )
-    end
+      if( json == nil )
+        @log.error( sprintf( 'No Data in Memcache for key %s found!', filename ) )
+        return nil
+      end
 
-    if( !file )
-      @log.error(sprintf('File %s not found!', filename))
-      return nil
-    end
+    else
 
-    begin
-      json = JSON.parse(file)
-    rescue JSON::ParserError => e
-      @log.error('wrong result (no json)')
-      @log.error(e)
-      exit 1
+      for y in 1..10
+        if( File.exist?( filename ) )
+          file = File.read( filename )
+          break
+        end
+        @log.debug( "  Waiting for file #{filename} ... #{y}" )
+        sleep( 3 )
+      end
+
+      if( !file )
+        @log.error( sprintf( 'File %s not found!', filename ) )
+        return nil
+      end
+
+      begin
+        json = JSON.parse(file)
+      rescue JSON::ParserError => e
+        @log.error('wrong result (no json)')
+        @log.error(e)
+        exit 1
+      end
     end
 
     return json
   end
 
+
   def addGroupOverview( hosts, force = false )
+
     @log.info("Create Group Overview for #{hosts}")
 
     if (force)
@@ -808,29 +866,31 @@ class Grafana
 
       templateRows = Array.new()
 
-      discoveryFile = sprintf('%s/%s/discovery.json', @cacheDirectory, host)
-      discoveryJson = getJsonFromFile(discoveryFile)
+      discoveryFile = sprintf( '%s/%s/discovery.json', @cacheDirectory, host )
+      discoveryJson = getJsonFromFile( discoveryFile )
 
-      if (discoveryJson == nil)
+      if( discoveryJson == nil )
 
-        @log.error("No discovery.json for host #{host}")
+        @log.error( "No discovery.json for host #{host}" )
+
         result = {
-            :status      => 500,
-            :name        => host,
-            :message     => "Unknown host. Please add host to monitoring."
+          :status  => 500,
+          :name    => host,
+          :message => "Unknown host. Please add host to monitoring."
         }
         return result
 
       else
-        services = discoveryJson.keys
-        templateRows = getOverviewTemplateRows(services)
 
-        grafanaHost= host
-        grafanaHost.gsub('.', '-')
+        services     = discoveryJson.keys
+        templateRows = getOverviewTemplateRows( services )
+
+        grafanaHost  = host
+        grafanaHost.gsub( '.', '-' )
 
         templateRows.each do |row|
-          row.gsub!('%SHORTHOST%', self.shortHostname(host))
-          row.gsub!('%HOST%', grafanaHost)
+          row.gsub!( '%SHORTHOST%', self.shortHostname( host ) )
+          row.gsub!( '%HOST%', grafanaHost )
         end
 
         titleRow = %(
@@ -856,8 +916,8 @@ class Grafana
             "title": ""
           }
         )
-        rows.push(titleRow)
-        rows.push(templateRows).flatten!
+        rows.push( titleRow )
+        rows.push( templateRows ).flatten!
       end
     end
 
@@ -900,16 +960,16 @@ class Grafana
       }
     )
 
-    shortHosts = ""
-    tags = "\"overview\""
+    shortHosts = ''
+    tags       = '"overview"'
 
     hosts.each do |host|
-      shortHosts = shortHosts + " " + self.shortHostname( host )
-      tags = tags + ",\"" + self.shortHostname( host ) + "\""
+      shortHosts = sprintf( '%s %s'   , shortHosts, self.shortHostname( host ) )
+      tags       = sprintf( '%s, "%s"', tags      , self.shortHostname( host ) )
     end
 
     if hosts.length > 1
-      tags = tags + ",\"group\""
+      tags = sprintf( '%s, "group"', tags )
     end
 
     template.gsub!( '%SHORTHOST%', shortHosts )
@@ -920,9 +980,9 @@ class Grafana
     end
 
     result = {
-        :status      => 200,
-        :name        => hosts,
-        :message     => "OK"
+      :status  => 200,
+      :name    => hosts,
+      :message => "OK"
     }
 
     return result

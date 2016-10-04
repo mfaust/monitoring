@@ -3,7 +3,7 @@
 # 13.09.2016 - Bodo Schulz
 #
 #
-# v1.2.1
+# v1.3.1
 
 # -----------------------------------------------------------------------------
 
@@ -92,8 +92,8 @@ class DataCollector
     @settings            = settings
     @jolokiaApplications = nil
 
-    version              = '1.2.1'
-    date                 = '2016-09-13'
+    version              = '1.3.1'
+    date                 = '2016-10-04'
 
     @log.info( '-----------------------------------------------------------------' )
     @log.info( ' CoreMedia - DataCollector' )
@@ -401,9 +401,6 @@ class DataCollector
           "(?<type>.+[a-zA-Z])"
           /x
         parts           = mbean.match( regex )
-#        cacheClass      = "#{parts['type']}".split('.').last.capitalize
-#        mbean_type      = sprintf( 'CacheClasses%s', cacheClass )
-
         cacheClass      = parts['type'].to_s
 
         if( cacheClass.include?( 'ecommerce.ibm' ) )
@@ -432,9 +429,9 @@ class DataCollector
         /x
 
         parts           = mbean.match( regex )
-        mbeanModule     = "#{parts['module']}".strip.tr( '. ', '' )
-        mbeanPool       = "#{parts['pool']}".strip.tr( '. ', '' )
-        mbeanType       = "#{parts['type']}".strip.tr( '. ', '' )
+        mbeanModule     = parts['module'].to_s.strip.tr( '. ', '' )
+        mbeanPool       = parts['pool'].to_s.strip.tr( '. ', '' )
+        mbeanType       = parts['type'].to_s.strip.tr( '. ', '' )
         mbean_type      = sprintf( '%s%s', mbeanType, mbeanPool )
 
       elsif( mbean.include?( 'bean=' ) )
@@ -451,8 +448,8 @@ class DataCollector
         /x
 
         parts           = mbean.match( regex )
-        mbeanBean       = "#{parts['bean']}".strip.tr( '. ', '' )
-        mbeanType       = "#{parts['type']}".strip.tr( '. ', '' )
+        mbeanBean       = parts['bean'].to_s.strip.tr( '. ', '' )
+        mbeanType       = parts['type'].to_s.strip.tr( '. ', '' )
         mbean_type      = sprintf( '%s%s', mbeanType, mbeanBean )
 
       elsif( mbean.include?( 'name=' ) )
@@ -468,8 +465,8 @@ class DataCollector
         /x
 
         parts           = mbean.match( regex )
-        mbeanName       = "#{parts['name']}".strip.tr( '. ', '' )
-        mbeanType       = "#{parts['type']}".strip.tr( '. ', '' )
+        mbeanName       = parts['name'].to_s.strip.tr( '. ', '' )
+        mbeanType       = parts['type'].to_s.strip.tr( '. ', '' )
         mbean_type      = sprintf( '%s%s', mbeanType, mbeanName )
 
       elsif( mbean.include?( 'solr') )
@@ -485,9 +482,9 @@ class DataCollector
         /x
 
         parts           = mbean.match( regex )
-        mbeanCore       = "#{parts['core']}".strip.tr( '. ', '' )
+        mbeanCore       = parts['core'].to_s.strip.tr( '. ', '' )
         mbeanCore[0]    = mbeanCore[0].to_s.capitalize
-        mbeanType       = "#{parts['type']}".tr( '. /', '' )
+        mbeanType       = parts['type'].to_s.tr( '. /', '' )
         mbeanType[0]    = mbeanType[0].to_s.capitalize
         mbean_type      = sprintf( 'Solr%s%s', mbeanCore, mbeanType )
 
@@ -501,7 +498,7 @@ class DataCollector
         /x
 
         parts           = mbean.match( regex )
-        mbeanType       = "#{parts['type']}".strip.tr( '. ', '' )
+        mbeanType       = parts['type'].to_s.strip.tr( '. ', '' )
         mbean_type      = sprintf( '%s', mbeanType )
       end
 
@@ -515,10 +512,6 @@ class DataCollector
           'value'     => value
         }
       )
-
-      @log.debug( ' -----------  reorganizeData  ----------------' )
-      @log.debug( result )
-      @log.debug( ' ---------------------------------------------' )
 
     end
 
@@ -685,16 +678,6 @@ class DataCollector
 
           targetUrl = i[0]['target']['url']
 
-          if( @supportMemcache == true )
-
-            key = sprintf( 'request__%s__%s', hostname, v )
-
-            @log.debug( key )
-
-            @mc.set( key, i )
-
-          end
-
           if( @DEBUG == true )
 
             tmpFile = sprintf( '%s/%s/request-%s.json'    , @cacheDirectory, hostname,v )
@@ -725,29 +708,49 @@ class DataCollector
 
             result[v] = self.reorganizeData( response.body )
 
-            tmpResultFile = sprintf( '%s/%s/monitoring.tmp'    , @cacheDirectory, hostname )
-            resultFile    = sprintf( '%s/%s/monitoring.result' , @cacheDirectory, hostname )
-
-            File.open( tmpResultFile , 'w' ) { |f| f.write( JSON.generate( result ) ) }
-            File.rename( tmpResultFile, resultFile )
-
-            if( @supportMemcache == true )
-
-              key = sprintf( 'result__%s__%s', hostname, v )
-
-              @log.debug( key )
-
-              @mc.set( key, result[v] )
-
-              if( @DEBUG == true )
-                @log.debug( @mc.stats( :items ) )
-                @log.debug( JSON.pretty_generate( @mc.get( key ) ) )
-              end
-
-            end
+#            tmpResultFile = sprintf( '%s/%s/monitoring.tmp'    , @cacheDirectory, hostname )
+#            resultFile    = sprintf( '%s/%s/monitoring.result' , @cacheDirectory, hostname )
+#
+#            File.open( tmpResultFile , 'w' ) { |f| f.write( JSON.generate( result ) ) }
+#            File.rename( tmpResultFile, resultFile )
+#
+#            if( @supportMemcache == true )
+#
+#              key = sprintf( 'result__%s__%s', hostname, v )
+#
+#              @log.debug( key )
+#
+#              @mc.set( key, result[v] )
+#
+#              if( @DEBUG == true )
+#                @log.debug( @mc.stats( :items ) )
+#                @log.debug( JSON.pretty_generate( @mc.get( key ) ) )
+#              end
+#
+#            end
 
           end
         end
+
+        if( @supportMemcache == true )
+
+          key = sprintf( 'result__%s__%s', hostname, v )
+
+          @mc.set( key, result[v] )
+
+#           if( @DEBUG == true )
+#             @log.debug( @mc.stats( :items ) )
+#             @log.debug( JSON.pretty_generate( @mc.get( key ) ) )
+#           end
+        else
+
+          tmpResultFile = sprintf( '%s/%s/monitoring.tmp'    , @cacheDirectory, hostname )
+          resultFile    = sprintf( '%s/%s/monitoring.result' , @cacheDirectory, hostname )
+
+          File.open( tmpResultFile , 'w' ) { |f| f.write( JSON.generate( result ) ) }
+          File.rename( tmpResultFile, resultFile )
+        end
+
       end
     end
   end

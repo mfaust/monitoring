@@ -3,7 +3,7 @@
 # 27.08.2016 - Bodo Schulz
 #
 #
-# v1.0.0
+# v1.1.0
 
 # -----------------------------------------------------------------------------
 
@@ -86,6 +86,10 @@ module Sinatra
 
       end
 
+
+      @memcacheHost     = ENV['MEMCACHE_HOST']                         ? ENV['MEMCACHE_HOST']                     : nil
+      @memcachePort     = ENV['MEMCACHE_PORT']                         ? ENV['MEMCACHE_PORT']                     : nil
+
       if( ! File.exist?( @logDirectory ) )
         Dir.mkdir( @logDirectory )
       end
@@ -129,6 +133,8 @@ module Sinatra
       'grafana_host'          => @grafana_host,
       'grafana_port'          => @grafana_port,
       'grafana_path'          => @grafana_path,
+      'memcacheHost'          => @memcacheHost,
+      'memcachePort'          => @memcachePort,
       'template_dir'          => @template_dir
     }
 

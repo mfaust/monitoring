@@ -75,7 +75,7 @@ services:
       - ./share/nginx/etc/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./share/nginx/etc/nginx/modules.d/00-restrictions.conf:/etc/nginx/modules.d/00-restrictions.conf:ro
       - ./share/nginx/etc/nginx/modules.d/01-proxy-grafana.conf:/etc/nginx/modules.d/01-proxy-grafana.conf:ro
-      - ./share/nginx/etc/nginx/modules.d/01-proxy-graphite.conf:/etc/nginx/modules.d/01-proxy-graphite.conf:rw
+      - ./share/nginx/etc/nginx/modules.d/01-proxy-graphite.conf:/etc/nginx/modules.d/01-proxy-graphite.conf:ro
       - ./share/nginx/etc/nginx/modules.d/01-proxy-icingaweb2.conf:/etc/nginx/modules.d/01-proxy-icingaweb2.conf:ro
       - ./share/nginx/etc/nginx/modules.d/01-proxy-rest-service.conf:/etc/nginx/modules.d/01-proxy-rest-service.conf:ro
     networks:
