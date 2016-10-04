@@ -208,7 +208,6 @@ class Grafana
       end
 
       if( file )
-
         json   = JSON.parse( file )
       end
 
