@@ -27,6 +27,8 @@ class Icinga2
     @icingaPort     = settings['icingaPort']     ? settings['icingaPort']     : 5665
     @icingaApiUser  = settings['icingaApiUser']  ? settings['icingaApiUser']  : nil
     @icingaApiPass  = settings['icingaApiPass']  ? settings['icingaApiPass']  : nil
+    @memcacheHost   = settings['memcacheHost']   ? settings['memcacheHost']   : nil
+    @memcachePort   = settings['memcachePort']   ? settings['memcachePort']   : nil
 
     logFile = sprintf( '%s/icinga2.log', @logDirectory )
 
@@ -35,14 +37,13 @@ class Icinga2
     @log = Logger.new( file, 'weekly', 1024000 )
 #    @log = Logger.new( STDOUT )
     @log.level = Logger::INFO
-    @log.datetime_format = "%Y-%m-%d %H:%M:%S"
+    @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
     @log.formatter = proc do |severity, datetime, progname, msg|
       "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
     end
 
     @icingaApiUrlBase = sprintf( 'https://%s:%d', @icingaHost, @icingaPort )
     @nodeName         = Socket.gethostbyname( Socket.gethostname ).first
-
 
     version              = '1.1.0'
     date                 = '2016-09-28'
@@ -51,7 +52,13 @@ class Icinga2
     @log.info( ' Icinga2 Management' )
     @log.info( "  Version #{version} (#{date})" )
     @log.info( '  Copyright 2016 Bodo Schulz' )
-    @log.info( "  Backendsystem #{ @graphiteURI}" )
+    @log.info( "  Backendsystem #{@icingaApiUrlBase}" )
+
+    if( @supportMemcache == true )
+      @log.info( "  Memcache Support enabled" )
+      @log.info( "  Memcache Server #{@memcacheHost}:#{@memcachePort}" )
+    end
+
     @log.info( '-----------------------------------------------------------------' )
     @log.info( '' )
 

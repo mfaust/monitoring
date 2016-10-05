@@ -15,19 +15,19 @@ require_relative '../lib/graphite'
 require_relative '../lib/icinga2'
 require_relative '../lib/tools'
 
-configFile = '/etc/cm-monitoring.yaml'
-
-if( File.exist?( configFile ) )
-
-  config = YAML.load_file( configFile )
-
-  @logDir    = config['monitoring']['log_dir'] ? config['monitoring']['log_dir'] : '/tmp/log'
-
-else
-  puts "no configuration exists"
-  exit 1
-end
-
+#configFile = '/etc/cm-monitoring.yaml'
+#
+#if( File.exist?( configFile ) )
+#
+#  config = YAML.load_file( configFile )
+#
+#  @logDir    = config['monitoring']['log_dir'] ? config['monitoring']['log_dir'] : '/tmp/log'
+#
+#else
+#  puts "no configuration exists"
+#  exit 1
+#end
+#
 # -----------------------------------------------------------------------------
 
 class Monitoring
@@ -36,7 +36,7 @@ class Monitoring
 
   def initialize( settings = {} )
 
-    @logDirectory      = settings['log_dir']           ? settings['log_dir']           : '/tmp'
+    @logDirectory      = settings[:logDirectory] ? settings[:logDirectory] : '/tmp'
 
     logFile = sprintf( '%s/monitoring.log', @logDirectory )
 
@@ -44,7 +44,7 @@ class Monitoring
     file.sync = true
     @log = Logger.new( file, 'weekly', 1024000 )
 #    @log = Logger.new( STDOUT )
-    @log.level = Logger::DEBUG
+    @log.level = Logger::INFO
     @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
     @log.formatter = proc do |severity, datetime, progname, msg|
       "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
@@ -100,6 +100,8 @@ class Monitoring
     @log.info( '  Copyright 2016 Coremedia' )
     @log.info( '-----------------------------------------------------------------' )
     @log.info( '' )
+
+    sleep(2)
 
     @serviceDiscovery = ServiceDiscovery.new( serviceDiscoverConfig )
     @grafana          = Grafana.new( grafanaConfig )
@@ -198,10 +200,10 @@ class Monitoring
         status  = 200
         message = 'host successfuly added'
 
-      elsif( discoveryStatus == 409 )
+      elsif( discoveryResult[:status].to_i == 409 )
 
-        status  = discoveryStatus
-        message = discoveryResult['message'] ? discoveryResult['message'] : 'Host already created'
+        status  = discoveryResult[:status].to_i
+        message = discoveryResult[:message] ? discoveryResult[:message] : 'Host already created'
       end
 
     else
@@ -231,13 +233,24 @@ class Monitoring
       discoveryResult = @serviceDiscovery.deleteHost( host )
       discoveryStatus = @serviceDiscovery.status
 
+      status = {
+        host.to_s => {
+          :icinga    => { :status => icingaStatus },
+          :discovery => { :status => discoveryStatus }
+        }
+      }
+
       if( discoveryStatus == 200 and force == true )
         grafanaResult = @grafana.deleteDashboards( host )
+
+        status[host.to_s][:grafana] = { :status => grafanaStatus }
       end
 
       @log.debug( icingaStatus )
       @log.debug( discoveryStatus )
       @log.debug( grafanaResult )
+
+      return status
 
     else
 
@@ -302,6 +315,19 @@ class Monitoring
   end
 
 
+  def addGrafanaGroupOverview( hosts, force = false )
+
+#     grafanaResult = @grafana.addGroupOverview( hosts, force )
+# #    grafanaStatus = grafanaResult[:status]
+#
+#     return {
+#       :status  => grafanaResult[:status],
+#       :message => grafanaResult[:message]
+#     }
+
+  end
+
+
   def addAnnotation( host, type, descr = '', message = '', customTags = [] )
 
     case type
@@ -320,24 +346,27 @@ class Monitoring
     end
 
   end
+
+
+
 end
 
 # ------------------------------------------------------------------------------------------
 
-options = {
- 'log_dir'               => @logDir
-}
-
-m = Monitoring.new( options )
-
-puts m.listHost( 'monitoring-16-01' )
-
-m.addAnnotation( 'monitoring-16-01', 'create' )
-# puts m.removeHost( 'monitoring-16-01' )
-puts m.addHost( 'monitoring-16-01' , true )
-# puts m.removeHost( 'blueprint-box' )
-
-
-puts m.listHost( 'monitoring-16-01' )
+# options = {
+#  :logDirectory => @logDir
+# }
+#
+# m = Monitoring.new( options )
+#
+# puts m.listHost( 'monitoring-16-01' )
+#
+# m.addAnnotation( 'monitoring-16-01', 'create' )
+# # puts m.removeHost( 'monitoring-16-01' )
+# puts m.addHost( 'monitoring-16-01' , true )
+# # puts m.removeHost( 'blueprint-box' )
+#
+#
+# puts m.listHost( 'monitoring-16-01' )
 
 # EOF
