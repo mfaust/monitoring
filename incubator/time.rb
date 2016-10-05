@@ -12,7 +12,8 @@ soft = 1482105600000
 t      = Date.parse( Time.now().to_s )
 today  = Time.new( t.year, t.month, t.day )
 
-license = Time.at( hard / 1000 )
+license = Time.at( hard / 1000 ).strftime("%d.%m.%Y") ## -%m-%d %H:%M:%S")
+
 
 ## diff    = Time.now().to_i - Time.at( from / 1000 ).to_i
 

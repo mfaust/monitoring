@@ -1,45 +1,26 @@
 #!/usr/bin/ruby
 
-require 'optparse'
-require 'json'
-require 'logger'
+require_relative '/usr/local/lib/icingachecks.rb'
 
-require_relative 'icingachecks.rb'
-
-
-class Integer
-  def to_filesize
-    {
-      'B'  => 1024,
-      'KB' => 1024 * 1024,
-      'MB' => 1024 * 1024 * 1024,
-      'GB' => 1024 * 1024 * 1024 * 1024,
-      'TB' => 1024 * 1024 * 1024 * 1024 * 1024
-    }.each_pair { |e, s| return "#{(self.to_f / (s / 1024)).round(2)} #{e}" if self < s }
-  end
-end
+# ---------------------------------------------------------------------------------------
 
 class Icinga2Check_CM_Memory < Icinga2Check
 
-  STATE_OK        = 0
-  STATE_WARNING   = 1
-  STATE_CRITICAL  = 2
-  STATE_UNKNOWN   = 3
-  STATE_DEPENDENT = 4
-
   def initialize( settings = {} )
 
-    @host        = settings[:host]        ? settings[:host]        : nil
-    @application = settings[:application] ? settings[:application] : nil
+    @log = logger()
+    @mc  = memcache()
+
+    host         = settings[:host]        ? shortHostname( settings[:host] ) : nil
+    application  = settings[:application] ? settings[:application] : nil
     memory       = settings[:memory]      ? settings[:memory]      : nil
 
-    self.check( memory )
+    self.check( host, application, memory )
 
   end
 
 
-
-  def check( type )
+  def check( host, application, type )
 
     # TODO
     # make it configurable
@@ -47,23 +28,28 @@ class Icinga2Check_CM_Memory < Icinga2Check
     critical = 98
 
     # get our bean
-    data = MBean.bean( @host, @application, 'CapConnection' )
+    data = MBean.bean( host, application, 'Memory' )
 
     dataStatus    = data['status']    ? data['status']    : 500
     dataTimestamp = data['timestamp'] ? data['timestamp'] : nil
     dataValue     = ( data != nil && data['value'] ) ? data['value'] : nil
-    dataValue     = dataValue.values.first
 
     case type
     when 'heap-mem'
 
-      type   = 'Heap'
-      memory = dataValue['HeapMemoryUsage'] ? dataValue['HeapMemoryUsage'] : nil
+      memoryType = 'Heap'
+      memory     = dataValue['HeapMemoryUsage'] ? dataValue['HeapMemoryUsage'] : nil
+
+      warning  = 95
+      critical = 98
 
     when 'perm-mem'
 
-      type   = 'Perm'
-      memory = dataValue['NonHeapMemoryUsage'] ? dataValue['NonHeapMemoryUsage'] : nil
+      memoryType = 'Perm'
+      memory     = dataValue['NonHeapMemoryUsage'] ? dataValue['NonHeapMemoryUsage'] : nil
+
+      warning  = 99
+      critical = 100
 
     else
 
@@ -75,9 +61,11 @@ class Icinga2Check_CM_Memory < Icinga2Check
     used      = memory['used']      ? memory['used']      : nil
     committed = memory['committed'] ? memory['committed'] : nil
 
-
-    percent  = ( 100 * used.to_i / max.to_i ).to_i
-
+    if( max != -1 )
+      percent  = ( 100 * used.to_i / max.to_i ).to_i
+    else
+      percent  = ( 100 * used.to_i / committed.to_i ).to_i
+    end
 
     if( percent == warning || percent <= warning )
       status   = 'OK'
@@ -90,14 +78,19 @@ class Icinga2Check_CM_Memory < Icinga2Check
       exitCode = STATE_CRITICAL
     end
 
-    puts sprintf( '%s - %s Memory: %d%% used (Commited: %s - Used: %s - Max: %s )', status, type, percent, committed.to_filesize, used.to_filesize, max.to_filesize )
+    case type
+    when 'heap-mem'
+      puts sprintf( '%s - %s Memory: %d%% used (Commited: %s - Used: %s - Max: %s)', status, memoryType, percent, committed.to_filesize, used.to_filesize, max.to_filesize )
+    else
+      puts sprintf( '%s - %s Memory: %d%% used (Commited: %s - Used: %s)', status, memoryType, percent, committed.to_filesize, used.to_filesize )
+    end
     exit exitCode
 
   end
 
-
 end
 
+# ---------------------------------------------------------------------------------------
 
 options = {}
 OptionParser.new do |opts|

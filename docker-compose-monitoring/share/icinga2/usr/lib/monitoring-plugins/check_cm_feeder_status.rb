@@ -1,104 +1,53 @@
 #!/usr/bin/ruby
 
-require 'optparse'
-require 'json'
-require 'logger'
+require_relative '/usr/local/lib/icingachecks.rb'
 
-require_relative '/usr/local/lib/mbean.rb'
+# ---------------------------------------------------------------------------------------
 
-class Icinga2Check_CM_Feeder
-
-  STATE_OK        = 0
-  STATE_WARNING   = 1
-  STATE_CRITICAL  = 2
-  STATE_UNKNOWN   = 3
-  STATE_DEPENDENT = 4
+class Icinga2Check_CM_Feeder < Icinga2Check
 
   def initialize( settings = {} )
 
-    @host      = settings[:host]    ? settings[:host]   : nil
-    @feeder    = settings[:feeder]  ? settings[:feeder] : nil
+    @log = logger()
+    @mc  = memcache()
 
-    @cacheDirectory = '/var/cache/monitoring'
+    host         = settings[:host]        ? shortHostname( settings[:host] ) : nil
+    feeder    = settings[:feeder]  ? settings[:feeder] : nil
 
-#    logFile = sprintf( '%s/monitoring.log', @logDirectory )
-#    file      = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
-#    file.sync = true
-#    @log = Logger.new( file, 'weekly', 1024000 )
-    @log = Logger.new( STDOUT )
-    @log.level = Logger::DEBUG
-    @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
-    @log.formatter = proc do |severity, datetime, progname, msg|
-      "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
-    end
+    feederServer = self.validate( feeder )
 
-    @memcacheHost     = ENV['MEMCACHE_HOST'] ? ENV['MEMCACHE_HOST'] : nil
-    @memcachePort     = ENV['MEMCACHE_PORT'] ? ENV['MEMCACHE_PORT'] : nil
-    @supportMemcache  = false
-
-    MBean.logger( @log )
-
-    if( @memcacheHost != nil && @memcachePort != nil )
-
-      # enable Memcache Support
-
-      require 'dalli'
-
-      memcacheOptions = {
-        :compress   => true,
-        :namespace  => 'monitoring',
-        :expires_in => 0
-      }
-
-      @mc = Dalli::Client.new( sprintf( '%s:%s', @memcacheHost, @memcachePort ), memcacheOptions )
-
-      @supportMemcache = true
-
-      MBean.memcache( @memcacheHost, @memcachePort )
-    end
-
-    self.validate()
-
-    case @feeder
+    case feeder
     when 'live'
-      self.feederStatus()
+      self.feederStatus( host, feederServer )
     when 'preview'
-      self.feederStatus()
+      self.feederStatus( host, feederServer )
     when 'content'
-      self.contentFeederStatus()
+      self.contentFeederStatus( host, feederServer )
     end
 
   end
 
-  def shortHostname( hostname )
 
-    shortHostname   = hostname.split( '.' ).first
+  def validate( feeder )
 
-    return shortHostname
-
-  end
-
-
-  def validate()
-
-    case @feeder
+    case feeder
     when 'live'
-      @feederServer = 'caefeeder-live'
+      feederServer = 'caefeeder-live'
     when 'preview'
-      @feederServer = 'caefeeder-preview'
+      feederServer = 'caefeeder-preview'
     when 'content'
-      @feederServer = 'content-feeder'
+      feederServer = 'content-feeder'
     else
       puts sprintf( 'Coremedia Feeder - unknown feeder type %s', @feeder )
       exit STATE_CRITICAL
     end
 
-    @host = self.shortHostname( @host )
+    return feederServer
 
   end
 
 
-  def feederStatus()
+  def feederStatus( host, feederServer )
 
     # TODO
     # make it configurable
@@ -106,9 +55,7 @@ class Icinga2Check_CM_Feeder
     critical = 10000
 
     # get our bean
-    health = MBean.bean( @host, @feederServer, 'Health' )
-
-#     @log.debug( health )
+    health = MBean.bean( host, feederServer, 'Health' )
 
     healthStatus    = health['status']    ? health['status']    : 500
     healthTimestamp = health['timestamp'] ? health['timestamp'] : nil
@@ -119,7 +66,7 @@ class Icinga2Check_CM_Feeder
 
     if( healthy == true )
 
-      engine      = MBean.bean( @host, @feederServer, 'ProactiveEngine' )
+      engine      = MBean.bean( host, feederServer, 'ProactiveEngine' )
 
       engineStatus    = engine['status']    ? engine['status']    : 500
       engineTimestamp = engine['timestamp'] ? engine['timestamp'] : nil
@@ -140,23 +87,26 @@ class Icinga2Check_CM_Feeder
         if( maxEntries == currentEntries )
           stateMessage = sprintf( 'all %d Elements feeded', maxEntries )
         else
-          stateMessage = sprintf( '%d Elements of %d feeded. (${CountDiff} left)', currentEntries, maxEntries, diffEntries )
+          stateMessage = sprintf( '%d Elements of %d feeded. (%d left)', currentEntries, maxEntries, diffEntries )
         end
 
         if( diffEntries > critical )
-          puts sprintf( 'CRITICAL - %s - %s', healthMessage, stateMessage )
-          exit STATE_CRITICAL
+          status   = 'CRITICAL'
+          exitCode = STATE_CRITICAL
         elsif( diffEntries > warning || diffEntries == warning )
 
-          puts sprintf( 'WARNING - %s - %s', healthMessage, stateMessage )
-          exit STATE_WARNING
+          status   = 'WARNING'
+          exitCode = STATE_WARNING
         else
 
-          puts sprintf( 'OK - %s - %s', healthMessage, stateMessage )
-          exit STATE_OK
+          status   = 'OK'
+          exitCode = STATE_OK
         end
 
       end
+
+      puts sprintf( '%s - %s - %s', status, healthMessage, stateMessage )
+      exit exitCode
 
     else
       puts sprintf( 'CRITICAL - NOT HEALTHY' )
@@ -166,14 +116,14 @@ class Icinga2Check_CM_Feeder
   end
 
 
-  def contentFeederStatus()
+  def contentFeederStatus( host, feederServer )
 
     # TODO
     # make it configurable
     warning  = 2500
     critical = 10000
 
-    data = MBean.bean( @host, @feederServer, 'Feeder' )
+    data = MBean.bean( host, feederServer, 'Feeder' )
 
     status    = data['status']    ? data['status']    : 500
     timestamp = data['timestamp'] ? data['timestamp'] : nil
@@ -218,6 +168,7 @@ class Icinga2Check_CM_Feeder
 
 end
 
+# ---------------------------------------------------------------------------------------
 
 options = {}
 OptionParser.new do |opts|

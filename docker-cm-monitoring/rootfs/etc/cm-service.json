@@ -49,58 +49,73 @@
     "workflow-server": {
       "description": "Workflow Server",
       "port": 40399,
-      "cap-connection": true
+      "cap_connection": true,
+      "uapi_cache": true,
+      "blob_cache": true
     },
     "content-feeder": {
       "description": "Content Feeder",
       "port": 40499,
       "feeder": "content",
-      "cap-connection": true
+      "cap_connection": true,
+      "uapi_cache": true
     },
     "user-changes": {
       "description": "User Changes",
       "port": 40599,
-      "cap-connection": true
+      "cap_connection": true,
+      "uapi_cache": true
     },
     "elastic-worker": {
       "description": "Elastic Worker",
       "port": 40699,
-      "cap-connection": true
+      "cap_connection": true,
+      "uapi_cache": true,
+      "blob_cache": true
     },
     "caefeeder-preview": {
       "description": "CAEFeeder Preview",
       "port": 40799,
       "feeder": "preview",
-      "cap-connection": true,
+      "cap_connection": true,
+      "uapi_cache": true,
       "application": "caefeeder"
     },
     "caefeeder-live": {
       "description": "CAEFeeder Live",
       "port": 40899,
       "feeder": "live",
-      "cap-connection": true,
+      "cap_connection": true,
+      "uapi_cache": true,
       "application": "caefeeder"
     },
     "cae-preview": {
       "description": "CAE Preview",
       "port": 40999,
-      "cap-connection": true,
+      "cap_connection": true,
+      "uapi_cache": true,
       "application": "cae"
     },
     "studio": {
       "description": "Studio",
       "port": 41099,
-      "cap-connection": true
+      "cap_connection": true,
+      "uapi_cache": true,
+      "blob_cache": true
     },
     "adobe-drive": {
       "description": "Adobe Drive",
       "port": 41199,
-      "cap-connection": true
+      "cap_connection": true,
+      "uapi_cache": true,
+      "blob_cache": true
     },
     "adobe-drive-server": {
       "description": "Adobe Drive Server",
       "port": 41199,
-      "cap-connection": true
+      "cap_connection": true,
+      "uapi_cache": true,
+      "blob_cache": true
     },
     "webdav": {
       "description": "WebDAV",
@@ -122,25 +137,33 @@
     "cae-live-1": {
       "description": "CAE Live 1",
       "port": 42199,
-      "cap-connection": true,
+      "cap_connection": true,
+      "uapi_cache": true,
+      "blob_cache": true,
       "application": "cae"
     },
     "cae-live-2": {
       "description": "CAE Live 2",
       "port": 42299,
-      "cap-connection": true,
+      "cap_connection": true,
+      "uapi_cache": true,
+      "blob_cache": true,
       "application": "cae"
     },
     "cae-live-3": {
       "description": "CAE Live 3",
       "port": 42399,
-      "cap-connection": true,
+      "cap_connection": true,
+      "uapi_cache": true,
+      "blob_cache": true,
       "application": "cae"
     },
     "workflow-server": {
       "description": "Workflow Server",
       "port": 49099,
-      "cap-connection": true
+      "cap_connection": true,
+      "uapi_cache": true,
+      "blob_cache": true
     }
   }
 }
