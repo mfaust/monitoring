@@ -1,8 +1,11 @@
-FROM bodsch/docker-alpine-base:1609-01
+
+FROM bodsch/docker-alpine-base:1610-01
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
-LABEL version="1.3.0"
+LABEL version="1.3.2"
+
+EXPOSE 9001
 
 ENV TERM=xterm
 
@@ -48,7 +51,8 @@ RUN \
      filesize \
      fileutils \
      sinatra \
-     thin
+     thin \
+     dalli
 
 RUN \
   rm -rf /var/cache/apk/*
@@ -56,7 +60,7 @@ RUN \
 RUN \
   mv /etc/collectd/collectd.conf /etc/collectd/collectd.conf.dist
 
-ADD rootfs/ /
+COPY rootfs/ /
 
 # CMD [ '/bin/bash' ]
 

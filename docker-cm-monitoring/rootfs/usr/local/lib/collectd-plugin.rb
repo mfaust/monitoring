@@ -3,7 +3,7 @@
 # 14.09.2016 - Bodo Schulz
 #
 #
-# v1.2.4
+# v1.3.1
 
 # -----------------------------------------------------------------------------
 
@@ -33,6 +33,8 @@ class CollecdPlugin
 
     @logDirectory   = settings['log_dir']      ? settings['log_dir']      : '/tmp'
     @cacheDirectory = settings['cache_dir']    ? settings['cache_dir']    : '/var/tmp/monitoring'
+    @memcacheHost   = settings['memcacheHost'] ? settings['memcacheHost'] : nil
+    @memcachePort   = settings['memcachePort'] ? settings['memcachePort'] : nil
     @interval       = settings['interval']     ? settings['interval']     : 15
 
     logFile = sprintf( '%s/collectd.log', @logDirectory )
@@ -52,15 +54,40 @@ class CollecdPlugin
       FileUtils.chown( 'nobody', 'nobody', logFile )
     end
 
-    version              = '1.2.4'
-    date                 = '2016-09-14'
+    if( @memcacheHost != nil && @memcachePort != nil )
+
+      # enable Memcache Support
+
+      require 'dalli'
+
+      memcacheOptions = {
+        :compress   => true,
+        :namespace  => 'monitoring',
+        :expires_in => 0
+      }
+
+      @mc = Dalli::Client.new( sprintf( '%s:%s', @memcacheHost, @memcachePort ), memcacheOptions )
+
+      @supportMemcache = true
+
+    end
+
+
+    version              = '1.3.1'
+    date                 = '2016-10-04'
 
     @log.info( '-----------------------------------------------------------------' )
-    @log.info( ' CollectdPlugin' )
+    @log.info( ' CoreMedia - CollectdPlugin' )
     @log.info( "  Version #{version} (#{date})" )
     @log.info( '  Copyright 2016 Coremedia' )
     @log.info( "  cache directory located at #{@cacheDirectory}" )
     @log.info( "  configured interval #{@interval}" )
+
+    if( @supportMemcache == true )
+      @log.info( "  Memcache Support enabled" )
+      @log.info( "  Memcache Server #{@memcacheHost}:#{@memcachePort}" )
+    end
+
     @log.info( '-----------------------------------------------------------------' )
     @log.info( '' )
 
@@ -70,7 +97,6 @@ class CollecdPlugin
   def output( data = [] )
 
     data.each do |d|
-
       if( d )
         puts d
       end
@@ -92,7 +118,7 @@ class CollecdPlugin
     /x
 
     parts          = mbean.match( regex )
-    return sprintf( 'core_%s', "#{parts['core']}".strip.tr( '. ', '' ).downcase )
+    return sprintf( 'core_%s', parts['core'].to_s.strip.tr( '. ', '' ).downcase )
 
   end
 
@@ -111,8 +137,8 @@ class CollecdPlugin
       /x
 
       parts           = mbean.match( regex )
-      mbeanName       = "#{parts['name']}" # .strip.tr( '. ', '' )
-      mbeanType       = "#{parts['type']}" # .strip.tr( '. ', '' )
+      mbeanName       = parts['name'].to_s
+      mbeanType       = parts['type'].to_s
 
     return mbeanName
   end
@@ -1843,6 +1869,83 @@ class CollecdPlugin
   end
 
 
+  def createGraphiteOutput( key, values )
+
+    graphiteOutput = Array.new()
+
+    case key
+    when 'Runtime'
+      graphiteOutput.push( self.ParseResult_Runtime( values ) )
+    when 'OperatingSystem'
+      graphiteOutput.push( self.ParseResult_OperatingSystem( values ) )
+    when 'Manager'
+      graphiteOutput.push( self.ParseResult_TomcatManager( values ) )
+    when 'DataViewFactory'
+      graphiteOutput.push( self.ParseResult_DataViewFactory( values ) )
+
+    # currently disabled
+    # need information or discusion about it
+#    when 'TransformedBlobCacheManager'
+#      graphiteOutput.push( self.ParseResult_TransformedBlobCacheManager( values ) )
+    when 'Memory'
+      graphiteOutput.push(self.ParseResult_Memory( values ) )
+    when 'MemoryPoolCMSOldGen'
+      graphiteOutput.push(self.ParseResult_MemoryPool( values ) )
+    when 'MemoryPoolCodeCache'
+      graphiteOutput.push(self.ParseResult_MemoryPool( values ) )
+    when 'MemoryPoolCompressedClassSpace'
+      graphiteOutput.push(self.ParseResult_MemoryPool( values ) )
+    when 'MemoryPoolMetaspace'
+      graphiteOutput.push(self.ParseResult_MemoryPool( values ) )
+    when 'MemoryPoolParEdenSpace'
+      graphiteOutput.push(self.ParseResult_MemoryPool( values ) )
+    when 'MemoryPoolParSurvivorSpace'
+      graphiteOutput.push(self.ParseResult_MemoryPool( values ) )
+    when 'Threading'
+      graphiteOutput.push(self.ParseResult_Threading( values ) )
+  #    when 'ThreadPool'
+  #      graphiteOutput.push( self.ParseResult_ThreadPool( values ) )
+    when 'ClassLoading'
+      graphiteOutput.push(self.ParseResult_ClassLoading( values ) )
+    when 'Server'
+      graphiteOutput.push(self.ParseResult_Server( values ) )
+    when 'Health'
+      graphiteOutput.push(self.ParseResult_Health( values ) )
+    when 'ProactiveEngine'
+      graphiteOutput.push(self.ParseResult_ProactiveEngine( values ) )
+    when 'Feeder'
+      graphiteOutput.push(self.ParseResult_Feeder( values ) )
+    when /^CacheClasses/
+      graphiteOutput.push(self.ParseResult_CacheClasses( key, values ) )
+    when 'CapConnection'
+      graphiteOutput.push(self.ParseResult_CapConnection( values ) )
+    when 'StoreConnectionPool'
+      graphiteOutput.push(self.ParseResult_ConnectionPool( values ) )
+    when 'StoreQueryPool'
+      graphiteOutput.push(self.ParseResult_QueryPool( values ) )
+    when 'StatisticsJobResult'
+      graphiteOutput.push(self.ParseResult_StatisticsJobResult( values ) )
+    when 'StatisticsResourceCache'
+      graphiteOutput.push(self.ParseResult_StatisticsResourceCache( values ) )
+    when 'GarbageCollectorParNew'
+      graphiteOutput.push(self.ParseResult_GCParNew( values ) )
+    when 'GarbageCollectorConcurrentMarkSweep'
+      graphiteOutput.push(self.ParseResult_GCConcurrentMarkSweep( values ) )
+    when /^Solr.*Replication/
+      graphiteOutput.push(self.ParseResult_SolrReplication( values ) )
+    when /^Solr.*QueryResultCache/
+      graphiteOutput.push(self.ParseResult_SolrQueryResultCache( values ) )
+    when /^Solr.*DocumentCache/
+      graphiteOutput.push(self.ParseResult_SolrDocumentCache( values ) )
+    when /^Solr.*Select/
+      graphiteOutput.push(self.ParseResult_SolrSelect( values ) )
+    end
+
+    return graphiteOutput
+
+  end
+
+
 
   def run()
 
@@ -1852,118 +1955,94 @@ class CollecdPlugin
     monitoredServer.each do |h|
 
       @Host = h
+      graphiteOutput = Array.new()
 
       @log.info( sprintf( 'Host: %s', h ) )
 
-      resultFile = sprintf( '%s/%s/monitoring.result', @cacheDirectory, h )
+      if( @supportMemcache == true )
 
-      if( File.exists?( resultFile ) )
+        resultFile = sprintf( '%s/%s/discovery.json', @cacheDirectory, h )
 
-        data = JSON.parse( File.read( resultFile ) )
+        if( File.exists?( resultFile ) )
 
-        graphiteOutput = Array.new()
+          data = JSON.parse( File.read( resultFile ) )
 
-        hostname  = data[:hostname]  ? data[:hostname]  : nil
-        timestamp = data[:timestamp] ? data[:timestamp] : nil
-        keys      = data.keys
-        keys      -= ['hostname', 'timestamp']
+          data.each do |service, d|
 
-        @log.debug( keys )
+            @Service = normalizeService( service )
 
-        keys.each do |service|
+            port        = d['port']        ? d['port']        : nil
+            description = d['description'] ? d['description'] : nil
 
-          @Service = normalizeService( service )
+            key         = sprintf( 'result__%s__%s', h, service )
+            result      = @mc.get( key )
 
-          results = data[service]
+            case service
+            when 'mongodb'
+              graphiteOutput.push( self.ParseResult_mongoDB( result ) )
+            when 'mysql'
+              graphiteOutput.push( self.ParseResult_mySQL( result ) )
+            else
 
-          case service
-          when 'mongodb'
-            graphiteOutput.push( self.ParseResult_mongoDB( results ) )
-          when 'mysql'
-            graphiteOutput.push( self.ParseResult_mySQL( results ) )
-          else
-            @log.debug( service )
+              if( result != nil )
 
-            results.each do |r|
+                result.each do |r|
 
-              r.each do |k,v|
+                  key    = r.keys.first
+                  values = r.values.first
 
-                case k
-                when 'Runtime'
-                  graphiteOutput.push( self.ParseResult_Runtime( v ) )
-                when 'OperatingSystem'
-                  graphiteOutput.push( self.ParseResult_OperatingSystem( v ) )
-                when 'Manager'
-                  graphiteOutput.push( self.ParseResult_TomcatManager( v ) )
-                when 'DataViewFactory'
-                  graphiteOutput.push( self.ParseResult_DataViewFactory( v ) )
+                  graphiteOutput.push( self.createGraphiteOutput( key, values ) )
 
-                # currently disabled
-                # need information or discusion about it
-#                when 'TransformedBlobCacheManager'
-#                  graphiteOutput.push( self.ParseResult_TransformedBlobCacheManager( v ) )
-                when 'Memory'
-                  graphiteOutput.push(self.ParseResult_Memory(v))
-                when 'MemoryPoolCMSOldGen'
-                  graphiteOutput.push(self.ParseResult_MemoryPool(v))
-                when 'MemoryPoolCodeCache'
-                  graphiteOutput.push(self.ParseResult_MemoryPool(v))
-                when 'MemoryPoolCompressedClassSpace'
-                  graphiteOutput.push(self.ParseResult_MemoryPool(v))
-                when 'MemoryPoolMetaspace'
-                  graphiteOutput.push(self.ParseResult_MemoryPool(v))
-                when 'MemoryPoolParEdenSpace'
-                  graphiteOutput.push(self.ParseResult_MemoryPool(v))
-                when 'MemoryPoolParSurvivorSpace'
-                  graphiteOutput.push(self.ParseResult_MemoryPool(v))
-                when 'Threading'
-                  graphiteOutput.push(self.ParseResult_Threading(v))
-  #                when 'ThreadPool'
-  #                  graphiteOutput.push( self.ParseResult_ThreadPool( v ) )
-                when 'ClassLoading'
-                  graphiteOutput.push(self.ParseResult_ClassLoading(v))
-                when 'Server'
-                  graphiteOutput.push(self.ParseResult_Server(v))
-                when 'Health'
-                  graphiteOutput.push(self.ParseResult_Health(v))
-                when 'ProactiveEngine'
-                  graphiteOutput.push(self.ParseResult_ProactiveEngine(v))
-                when 'Feeder'
-                  graphiteOutput.push(self.ParseResult_Feeder(v))
-                when /^CacheClasses/
-                  graphiteOutput.push(self.ParseResult_CacheClasses(k, v))
-                when 'CapConnection'
-                  graphiteOutput.push(self.ParseResult_CapConnection(v))
-                when 'StoreConnectionPool'
-                  graphiteOutput.push(self.ParseResult_ConnectionPool(v))
-                when 'StoreQueryPool'
-                  graphiteOutput.push(self.ParseResult_QueryPool(v))
-                when 'StatisticsJobResult'
-                  graphiteOutput.push(self.ParseResult_StatisticsJobResult(v))
-                when 'StatisticsResourceCache'
-                  graphiteOutput.push(self.ParseResult_StatisticsResourceCache(v))
-                when 'GarbageCollectorParNew'
-                  graphiteOutput.push(self.ParseResult_GCParNew(v))
-                when 'GarbageCollectorConcurrentMarkSweep'
-                  graphiteOutput.push(self.ParseResult_GCConcurrentMarkSweep(v))
-                when /^Solr.*Replication/
-                  graphiteOutput.push(self.ParseResult_SolrReplication(v))
-                when /^Solr.*QueryResultCache/
-                  graphiteOutput.push(self.ParseResult_SolrQueryResultCache(v))
-                when /^Solr.*DocumentCache/
-                  graphiteOutput.push(self.ParseResult_SolrDocumentCache(v))
-                when /^Solr.*Select/
-                  graphiteOutput.push(self.ParseResult_SolrSelect(v))
                 end
+              end
+            end
+          end
+        end
+      else
 
+        resultFile = sprintf( '%s/%s/monitoring.result', @cacheDirectory, h )
+
+        if( File.exists?( resultFile ) )
+
+          data = JSON.parse( File.read( resultFile ) )
+
+          hostname  = data[:hostname]  ? data[:hostname]  : nil
+          timestamp = data[:timestamp] ? data[:timestamp] : nil
+          keys      = data.keys
+          keys      -= ['hostname', 'timestamp']
+
+          @log.debug( keys )
+
+          keys.each do |service|
+
+            @Service = normalizeService( service )
+
+            results = data[service]
+
+            case service
+            when 'mongodb'
+              graphiteOutput.push( self.ParseResult_mongoDB( results ) )
+            when 'mysql'
+              graphiteOutput.push( self.ParseResult_mySQL( results ) )
+            else
+              @log.debug( service )
+
+              results.each do |r|
+
+                r.each do |k,v|
+
+                  graphiteOutput = self.createGraphiteOutput( k, v )
+
+                end
               end
             end
           end
         end
 
-        self.output( graphiteOutput )
       end
 
+      # send to configured graphite host
+      self.output( graphiteOutput )
     end
 
   end

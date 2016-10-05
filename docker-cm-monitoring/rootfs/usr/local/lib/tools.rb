@@ -173,6 +173,25 @@ def normalizeService( service )
 
 end
 
+
+
+  # cae-live-1 -> cae-live
+  def removePostfix( service )
+
+    if( service =~ /\d/ )
+
+      lastPart = service.split("-").last
+      service  = service.chomp("-#{lastPart}")
+#       @log.debug("Chomped service: #{service}")
+    end
+
+    return service
+
+  end
+
+
+
+
   # check if Node exists (simple ping)
   # result @bool
 #   def isRunning? ( ip )

@@ -3,7 +3,7 @@
 #  28.08.2016 - bodsch
 #
 #
-# v1.1.0
+# v1.1.1
 # -----------------------------------------------------------------------------
 
 require 'logger'
@@ -40,11 +40,11 @@ module GraphiteAnnotions
         "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
       end
 
-      version              = '0.1.0'
-      date                 = '2016-09-29'
+      version              = '1.1.1'
+      date                 = '2016-10-04'
 
       @log.info( '-----------------------------------------------------------------' )
-      @log.info( ' CoreMedia - Graphite' )
+      @log.info( ' CoreMedia - Graphite Client' )
       @log.info( "  Version #{version} (#{date})" )
       @log.info( '  Copyright 2016 Coremedia' )
       @log.info( "  Backendsystem #{ @graphiteURI}" )
@@ -98,6 +98,7 @@ module GraphiteAnnotions
 #          request.basic_auth 'admin', 'admin'
 
           response     = http.request( request )
+          responseCode = response.code.to_i
 
           # TODO
           # Errorhandling

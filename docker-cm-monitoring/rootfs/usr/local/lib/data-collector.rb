@@ -3,7 +3,7 @@
 # 13.09.2016 - Bodo Schulz
 #
 #
-# v1.2.1
+# v1.3.1
 
 # -----------------------------------------------------------------------------
 
@@ -30,9 +30,13 @@ class DataCollector
     @cacheDirectory    = settings['cache_dir']             ? settings['cache_dir']             : '/tmp/cache'
     @jolokiaHost       = settings['jolokia_host']          ? settings['jolokia_host']          : 'localhost'
     @jolokiaPort       = settings['jolokia_port']          ? settings['jolokia_port']          : 8080
+    @memcacheHost      = settings['memcacheHost']          ? settings['memcacheHost']          : nil
+    @memcachePort      = settings['memcachePort']          ? settings['memcachePort']          : nil
+
     applicationConfig  = settings['applicationConfigFile'] ? settings['applicationConfigFile'] : nil
     serviceConfig      = settings['serviceConfigFile']     ? settings['serviceConfigFile']     : nil
 
+    @supportMemcache   = false
     @DEBUG             = false
 
     if( ! File.exist?( @logDirectory ) )
@@ -64,20 +68,44 @@ class DataCollector
       exit 1
     end
 
+    if( @memcacheHost != nil && @memcachePort != nil )
+
+      # enable Memcache Support
+
+      require 'dalli'
+
+      memcacheOptions = {
+        :compress   => true,
+        :namespace  => 'monitoring',
+        :expires_in => 0
+      }
+
+      @mc = Dalli::Client.new( sprintf( '%s:%s', @memcacheHost, @memcachePort ), memcacheOptions )
+
+      @supportMemcache = true
+
+    end
+
     self.applicationConfig( applicationConfig )
     self.readConfiguration()
 
     @settings            = settings
     @jolokiaApplications = nil
 
-    version              = '1.2.1'
-    date                 = '2016-09-13'
+    version              = '1.3.1'
+    date                 = '2016-10-04'
 
     @log.info( '-----------------------------------------------------------------' )
     @log.info( ' CoreMedia - DataCollector' )
     @log.info( "  Version #{version} (#{date})" )
     @log.info( '  Copyright 2016 Coremedia' )
     @log.info( "  cache directory located at #{@cacheDirectory}" )
+
+    if( @supportMemcache == true )
+      @log.info( "  Memcache Support enabled" )
+      @log.info( "  Memcache Server #{@memcacheHost}:#{@memcachePort}" )
+    end
+
     @log.info( '-----------------------------------------------------------------' )
     @log.info( '' )
 
@@ -263,6 +291,12 @@ class DataCollector
   end
 
 
+  def internalMemcacheData( host )
+
+
+  end
+
+
   def mergeSolrCores( metrics, cores = [] )
 
     work = Array.new()
@@ -326,155 +360,6 @@ class DataCollector
     return data
   end
 
-
-  def jolokiaTemplateOBSOLETE( params = {} )
-
-    mbean       = params['mbean']
-    server_name = params['server_name']
-    server_port = params['server_port']
-
-    target = {
-      "type" => "read",
-      "mbean" => "#{mbean}",
-      "target" => {
-        "url" => "service:jmx:rmi:///jndi/rmi://#{server_name}:#{server_port}/jmxrmi",
-      },
-      "config" => { "ignoreErrors" => true }
-    }
-
-    attributes = []
-
-    if( params['attributes'] != nil )
-      params['attributes'].split(',').each do |t|
-        attributes.push( t.to_s )
-      end
-
-      target['attribute'] = attributes
-    end
-
-    return target
-
-  end
-
-
-  # create an bulkset over all checks
-  def createBulkCheckOBSOLETE( host, data )
-
-    cachedHostDirectory  = sprintf( '%s/%s', @cacheDirectory, host )
-
-    result  = Array.new()
-
-    data.each do |m,v|
-
-      port    = v['port']
-      metrics = v['metrics']
-
-      save_file = sprintf( 'bulk_%s_%s.json', port, m )
-
-      if( metrics.count == 0 )
-        next
-      end
-
-      metrics.each do |e|
-
-        properties = {
-          'mbean'       => e['mbean'],
-          'attributes'  => e['attribute'] ? e['attribute'] : nil,
-          'server_name' => host,
-          'server_port' => port
-        }
-
-        template = self.jolokiaTemplate( properties )
-
-        result.push( template )
-
-      end
-
-      file_data = JSON.pretty_generate( result )
-      File.open( sprintf( '%s/%s', cachedHostDirectory, save_file ) , 'w' ) {|f| f.write( file_data ) }
-
-      result = []
-
-    end
-  end
-
-  # send check to our jolokia
-  def sendChecksOBSOLETE( file )
-
-    result       = nil
-
-    # if our jolokia proxy available?
-    if( ! portOpen?( @jolokiaHost, @jolokiaPort ) )
-      @log.error( sprintf( 'The Jolokia Service (%s:%s) are not available', @jolokiaHost, @jolokiaPort ) )
-    else
-
-      serverUrl  = sprintf( "http://%s:%s/jolokia", @jolokiaHost, @jolokiaPort )
-
-      uri        = URI.parse( serverUrl )
-      http       = Net::HTTP.new( uri.host, uri.port )
-
-      data       = JSON.parse( File.read( file ) )
-
-      # "service:jmx:rmi:///jndi/rmi://moebius-16-tomcat:2222/jmxrmi"
-      course_line = /
-        ^                   # Starting at the front of the string
-        (.*):\/\/           # all after the douple slashes
-        (?<host>.+\S)       # our hostname
-        :                   # seperator between host and port
-        (?<port>\d+)        # our port
-      /x
-
-      dest_uri  = data[0]['target']['url']
-      parts     = dest_uri.match( course_line )
-      dest_host = "#{parts['host']}".strip
-      dest_port = "#{parts['port']}".strip
-
-      # if our destination service (behind the jolokia proxy) available?
-      if( ! portOpen?( dest_host, dest_port ) )
-
-        @log.error( sprintf( 'The Port %s on Host %s is not open, skip sending data', dest_port, dest_host ) )
-      else
-
-        request = Net::HTTP::Post.new(
-          uri.request_uri,
-          initheader = {'Content-Type' =>'application/json'}
-        )
-        request.body = data.to_json
-
-        #Default read timeout is 60 secs
-        response = Net::HTTP.start( uri.hostname, uri.port, use_ssl: uri.scheme == "https", :read_timeout => 5 ) do |http|
-          begin
-            http.request(request)
-          rescue Exception => e
-            @log.warn("Cannot execute request to #{uri.request_uri}, cause: #{e}")
-            @log.debug("Cannot execute request to #{uri.request_uri}, cause: #{e}, request body: #{request.body}")
-            return
-          end
-        end
-
-        result = response.body
-
-#         @log.debug( 'reorganize data for later use' )
-
-        begin
-          result = self.reorganizeData( result )
-
-          result = JSON.pretty_generate( result )
-
-          cachedHostDirectory  = sprintf( '%s/%s', @cacheDirectory, dest_host )
-          save_file = sprintf( "#{file}.result")
-          File.open( sprintf( '%s/%s', cachedHostDirectory, save_file ) , 'w' ) {|f| f.write( result ) }
-
-        rescue => e
-          @log.error( e )
-          @log.error( 'can\'t send data to jolokia service' )
-        end
-
-      end
-    end
-
-  end
-
   # reorganize data to later simple find
   def reorganizeData( data )
 
@@ -495,15 +380,27 @@ class DataCollector
       timestamp  = c['timestamp']
       status     = c['status']
 
+      # "service:jmx:rmi:///jndi/rmi://moebius-16-tomcat:2222/jmxrmi"
+      regex = /
+        ^                   # Starting at the front of the string
+        (.*):\/\/           # all after the douple slashes
+        (?<host>.+\S)       # our hostname
+        :                   # seperator between host and port
+        (?<port>\d+)        # our port
+      /x
+
+      uri   = request['target']['url']
+      parts = uri.match( regex )
+      host  = parts['host'].to_s.strip
+      port  = parts['port'].to_s.strip
+
+
       if( mbean.include?( 'Cache.Classes' ) )
         regex = /
           CacheClass=
           "(?<type>.+[a-zA-Z])"
           /x
         parts           = mbean.match( regex )
-#        cacheClass      = "#{parts['type']}".split('.').last.capitalize
-#        mbean_type      = sprintf( 'CacheClasses%s', cacheClass )
-
         cacheClass      = parts['type'].to_s
 
         if( cacheClass.include?( 'ecommerce.ibm' ) )
@@ -532,9 +429,9 @@ class DataCollector
         /x
 
         parts           = mbean.match( regex )
-        mbeanModule     = "#{parts['module']}".strip.tr( '. ', '' )
-        mbeanPool       = "#{parts['pool']}".strip.tr( '. ', '' )
-        mbeanType       = "#{parts['type']}".strip.tr( '. ', '' )
+        mbeanModule     = parts['module'].to_s.strip.tr( '. ', '' )
+        mbeanPool       = parts['pool'].to_s.strip.tr( '. ', '' )
+        mbeanType       = parts['type'].to_s.strip.tr( '. ', '' )
         mbean_type      = sprintf( '%s%s', mbeanType, mbeanPool )
 
       elsif( mbean.include?( 'bean=' ) )
@@ -551,8 +448,8 @@ class DataCollector
         /x
 
         parts           = mbean.match( regex )
-        mbeanBean       = "#{parts['bean']}".strip.tr( '. ', '' )
-        mbeanType       = "#{parts['type']}".strip.tr( '. ', '' )
+        mbeanBean       = parts['bean'].to_s.strip.tr( '. ', '' )
+        mbeanType       = parts['type'].to_s.strip.tr( '. ', '' )
         mbean_type      = sprintf( '%s%s', mbeanType, mbeanBean )
 
       elsif( mbean.include?( 'name=' ) )
@@ -568,8 +465,8 @@ class DataCollector
         /x
 
         parts           = mbean.match( regex )
-        mbeanName       = "#{parts['name']}".strip.tr( '. ', '' )
-        mbeanType       = "#{parts['type']}".strip.tr( '. ', '' )
+        mbeanName       = parts['name'].to_s.strip.tr( '. ', '' )
+        mbeanType       = parts['type'].to_s.strip.tr( '. ', '' )
         mbean_type      = sprintf( '%s%s', mbeanType, mbeanName )
 
       elsif( mbean.include?( 'solr') )
@@ -585,9 +482,9 @@ class DataCollector
         /x
 
         parts           = mbean.match( regex )
-        mbeanCore       = "#{parts['core']}".strip.tr( '. ', '' )
+        mbeanCore       = parts['core'].to_s.strip.tr( '. ', '' )
         mbeanCore[0]    = mbeanCore[0].to_s.capitalize
-        mbeanType       = "#{parts['type']}".tr( '. /', '' )
+        mbeanType       = parts['type'].to_s.tr( '. /', '' )
         mbeanType[0]    = mbeanType[0].to_s.capitalize
         mbean_type      = sprintf( 'Solr%s%s', mbeanCore, mbeanType )
 
@@ -601,7 +498,7 @@ class DataCollector
         /x
 
         parts           = mbean.match( regex )
-        mbeanType       = "#{parts['type']}".strip.tr( '. ', '' )
+        mbeanType       = parts['type'].to_s.strip.tr( '. ', '' )
         mbean_type      = sprintf( '%s', mbeanType )
       end
 
@@ -609,7 +506,9 @@ class DataCollector
         mbean_type.to_s => {
           'status'    => status,
           'timestamp' => timestamp,
-          'request'   => request,
+          'host'      => host,
+          'port'      => port,
+          'request'   => request,  # OBSOLETE, can be removed
           'value'     => value
         }
       )
@@ -634,8 +533,8 @@ class DataCollector
 
     # prepare
     parts     = targetUrl.match( regex )
-    destHost  = "#{parts['host']}".strip
-    destPort  = "#{parts['port']}".strip
+    destHost  = parts['host'].to_s.strip
+    destPort  = parts['port'].to_s.strip
 
     @log.debug( sprintf( 'check Port %s on Host %s for sending data', destPort, destHost ) )
 
@@ -809,14 +708,49 @@ class DataCollector
 
             result[v] = self.reorganizeData( response.body )
 
-            tmpResultFile = sprintf( '%s/%s/monitoring.tmp'    , @cacheDirectory, hostname )
-            resultFile    = sprintf( '%s/%s/monitoring.result' , @cacheDirectory, hostname )
-
-            File.open( tmpResultFile , 'w' ) { |f| f.write( JSON.generate( result ) ) }
-            File.rename( tmpResultFile, resultFile )
+#            tmpResultFile = sprintf( '%s/%s/monitoring.tmp'    , @cacheDirectory, hostname )
+#            resultFile    = sprintf( '%s/%s/monitoring.result' , @cacheDirectory, hostname )
+#
+#            File.open( tmpResultFile , 'w' ) { |f| f.write( JSON.generate( result ) ) }
+#            File.rename( tmpResultFile, resultFile )
+#
+#            if( @supportMemcache == true )
+#
+#              key = sprintf( 'result__%s__%s', hostname, v )
+#
+#              @log.debug( key )
+#
+#              @mc.set( key, result[v] )
+#
+#              if( @DEBUG == true )
+#                @log.debug( @mc.stats( :items ) )
+#                @log.debug( JSON.pretty_generate( @mc.get( key ) ) )
+#              end
+#
+#            end
 
           end
         end
+
+        if( @supportMemcache == true )
+
+          key = sprintf( 'result__%s__%s', hostname, v )
+
+          @mc.set( key, result[v] )
+
+#           if( @DEBUG == true )
+#             @log.debug( @mc.stats( :items ) )
+#             @log.debug( JSON.pretty_generate( @mc.get( key ) ) )
+#           end
+        else
+
+          tmpResultFile = sprintf( '%s/%s/monitoring.tmp'    , @cacheDirectory, hostname )
+          resultFile    = sprintf( '%s/%s/monitoring.result' , @cacheDirectory, hostname )
+
+          File.open( tmpResultFile , 'w' ) { |f| f.write( JSON.generate( result ) ) }
+          File.rename( tmpResultFile, resultFile )
+        end
+
       end
     end
   end

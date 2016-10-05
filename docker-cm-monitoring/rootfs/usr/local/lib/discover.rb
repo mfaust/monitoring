@@ -24,32 +24,7 @@ class ServiceDiscovery
 
   def initialize( settings = {} )
 
-    @logDirectory      = settings['log_dir']           ? settings['log_dir']           : '/tmp'
-    @cacheDirectory    = settings['cache_dir']         ? settings['cache_dir']         : '/var/tmp/monitoring'
-    @jolokiaHost       = settings['jolokia_host']      ? settings['jolokia_host']      : 'localhost'
-    @jolokiaPort       = settings['jolokia_port']      ? settings['jolokia_port']      : 8080
-    @serviceConfigFile = settings['serviceConfigFile'] ? settings['serviceConfigFile'] : nil
-
-
-    logFile = sprintf( '%s/service-discovery.log', @logDirectory )
-
-    file      = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
-    file.sync = true
-    @log = Logger.new( file, 'weekly', 1024000 )
-#    @log = Logger.new( STDOUT )
-    @log.level = Logger::INFO
-    @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
-    @log.formatter = proc do |severity, datetime, progname, msg|
-      "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
-    end
-
-    if( ! File.exist?( @cacheDirectory ) )
-      Dir.mkdir( @cacheDirectory )
-    end
-
-    @information = Hash.new()
-
-    @known_ports = [
+    ports = [
       3306,     # mysql
       5432,     # postrgres
       28017,    # mongodb
@@ -87,11 +62,34 @@ class ServiceDiscovery
       49099
     ]
 
+    @logDirectory       = settings['log_dir']           ? settings['log_dir']           : '/tmp'
+    @cacheDirectory     = settings['cache_dir']         ? settings['cache_dir']         : '/var/tmp/monitoring'
+    @jolokiaHost        = settings['jolokia_host']      ? settings['jolokia_host']      : 'localhost'
+    @jolokiaPort        = settings['jolokia_port']      ? settings['jolokia_port']      : 8080
+    @serviceConfigFile  = settings['serviceConfigFile'] ? settings['serviceConfigFile'] : nil
+    @scanPorts          = settings['scanPorts']         ? settings['scanPorts']         : ports
+
+    logFile = sprintf( '%s/service-discovery.log', @logDirectory )
+
+    file      = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
+    file.sync = true
+    @log = Logger.new( file, 'weekly', 1024000 )
+#    @log = Logger.new( STDOUT )
+    @log.level = Logger::INFO
+    @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
+    @log.formatter = proc do |severity, datetime, progname, msg|
+      "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
+    end
+
+    if( ! File.exist?( @cacheDirectory ) )
+      Dir.mkdir( @cacheDirectory )
+    end
+
     version              = '1.2.4'
     date                 = '2016-09-28'
 
     @log.info( '-----------------------------------------------------------------' )
-    @log.info( ' CM Service Discovery' )
+    @log.info( ' CoreMedia - Service Discovery' )
     @log.info( "  Version #{version} (#{date})" )
     @log.info( '  Copyright 2016 Coremedia' )
     @log.info( "  cache directory located at #{@cacheDirectory}" )
@@ -493,7 +491,7 @@ class ServiceDiscovery
 
     # our default known ports
     if( ports.empty? )
-      ports = @known_ports
+      ports = @scanPorts
     end
 
     if( File.exist?( sprintf( '%s/%s', dir_path, file_name ) ) == true )

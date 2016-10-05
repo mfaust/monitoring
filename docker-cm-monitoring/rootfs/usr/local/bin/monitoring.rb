@@ -3,7 +3,7 @@
 # 14.09.2016 - Bodo Schulz
 #
 #
-# v0.5.0
+# v0.6.0
 
 # -----------------------------------------------------------------------------
 
@@ -64,34 +64,38 @@ class Monitoring
     }
 
     grafanaConfig = {
-      'log_dir'      => @logDirectory,
-      'cache_dir'    => @cacheDir,
-      'grafana_host' => @grafana_host,
-      'grafana_port' => @grafana_port,
-      'grafana_path' => @grafana_path,
-      'template_dir' => @template_dir
+      'log_dir'            => @logDirectory,
+      'cache_dir'          => @cacheDir,
+      'grafana_host'       => @grafana_host,
+      'grafana_port'       => @grafana_port,
+      'grafana_path'       => @grafana_path,
+      'memcacheHost'       => @memcacheHost,
+      'memcachePort'       => @memcachePort,
+      'template_dir'       => @template_dir
     }
 
     icingaConfig = {
-      'logDirectory'  => @logDirectory,
-      'icingaHost'    => @icingaHost,
-      'icingaPort'    => @icingaPort,
-      'icingaApiUser' => @icingaApiUser,
-      'icingaApiPass' => @icingaApiPass
+      'logDirectory'       => @logDirectory,
+      'icingaHost'         => @icingaHost,
+      'icingaPort'         => @icingaPort,
+      'icingaApiUser'      => @icingaApiUser,
+      'icingaApiPass'      => @icingaApiPass
     }
 
     graphiteOptions = {
-      'logDirectory'          => @logDirectory,
-      'graphiteHost'          => @graphiteHost,
-      'graphiteHttpPort'      => @graphiteHttpPort,
-      'graphitePort'          => @graphitePort
+      'logDirectory'       => @logDirectory,
+      'graphiteHost'       => @graphiteHost,
+      'graphiteHttpPort'   => @graphiteHttpPort,
+      'graphitePort'       => @graphitePort,
+      'memcacheHost'       => @memcacheHost,
+      'memcachePort'       => @memcachePort
     }
 
-    version              = '0.5.0'
-    date                 = '2016-09-28'
+    version              = '0.6.0'
+    date                 = '2016-10-04'
 
     @log.info( '-----------------------------------------------------------------' )
-    @log.info( ' CM Monitoring Service' )
+    @log.info( ' CoreMedia - Monitoring Service' )
     @log.info( "  Version #{version} (#{date})" )
     @log.info( '  Copyright 2016 Coremedia' )
     @log.info( '-----------------------------------------------------------------' )
@@ -130,6 +134,10 @@ class Monitoring
     @graphitePath     = config['monitoring']['graphite']['path']         ? config['monitoring']['graphite']['path']        : nil
 
     @template_dir     = config['monitoring']['grafana']['template_dir'] ? config['monitoring']['grafana']['template_dir']  : '/var/tmp/templates'
+
+
+    @memcacheHost     = ENV['MEMCACHE_HOST']                            ? ENV['MEMCACHE_HOST']                             : nil
+    @memcachePort     = ENV['MEMCACHE_PORT']                            ? ENV['MEMCACHE_PORT']                             : nil
 
   end
 
@@ -326,8 +334,10 @@ puts m.listHost( 'monitoring-16-01' )
 
 m.addAnnotation( 'monitoring-16-01', 'create' )
 # puts m.removeHost( 'monitoring-16-01' )
-puts m.addHost( 'monitoring-16-01' )
+puts m.addHost( 'monitoring-16-01' , true )
 # puts m.removeHost( 'blueprint-box' )
 
+
+puts m.listHost( 'monitoring-16-01' )
 
 # EOF
