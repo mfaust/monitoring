@@ -136,8 +136,10 @@ services:
       - env/icinga2.env
     depends_on:
       - database
+      - memcached
     extra_hosts:
       - 'database:172.25.0.10'
+      - 'memcached:172.25.0.12'
     ports:
       - 5665:5665
       - 6666:6666
@@ -147,8 +149,13 @@ services:
       - ./data:/srv
       - ./data/monitoring:/var/cache/monitoring
       - ./share/icinga2:/usr/local/monitoring
-      - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_memory_cache:/usr/lib/monitoring-plugins/check_cm_memory_cache
-      - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_feeder_status.rb:/usr/lib/monitoring-plugins/check_cm_feeder_status
+      - ../docker-cm-monitoring/rootfs/usr/local/lib/mbean.rb:/usr/local/lib/mbean.rb:ro
+      - ./share/icinga2/usr/lib/monitoring-plugins/icingachecks.rb:/usr/local/lib/icingachecks.rb:ro
+      - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_memory_cache:/usr/lib/monitoring-plugins/check_cm_memory_cache:ro
+      - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_feeder_status.rb:/usr/lib/monitoring-plugins/check_cm_feeder_status:ro
+      - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_cache.rb:/usr/lib/monitoring-plugins/check_cm_cache:ro
+      - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_memory.rb:/usr/lib/monitoring-plugins/check_cm_memory:ro
+      - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_licenses.rb:/usr/lib/monitoring-plugins/check_cm_license:ro
       - ./share/icinga2/etc/icinga2/objects:/etc/icinga2/objects
     links:
       - database:database

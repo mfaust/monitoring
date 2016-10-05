@@ -107,6 +107,7 @@ class ServiceDiscovery
     @log.info( 'read defines of Services Properties' )
 
     if( @serviceConfigFile == nil )
+      puts 'missing service config file'
       @log.error( 'missing service config file' )
       exit 1
     end
