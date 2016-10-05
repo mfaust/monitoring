@@ -1215,6 +1215,7 @@ class CollecdPlugin
       licenseValidUntilSoft = value['LicenseValidUntilSoft']    ? value['LicenseValidUntilSoft']     : nil
       licenseValidUntilHard = value['LicenseValidUntilHard']    ? value['LicenseValidUntilHard']     : nil
 
+      #in maintenance mode the Server mbean is not available
       case runlevel.downcase
         when 'offline'
           runlevel = 0
