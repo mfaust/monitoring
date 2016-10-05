@@ -564,7 +564,9 @@ class Grafana
     Dir.chdir( sprintf( '%s/overview', @templateDirectory )  )
 
     dirs = Dir.glob( "**.tpl" )
-    dirs = dirs.sort_by{ |a,b| a <=> b }
+    
+    dirs.sort!
+
     dirs.each do |f|
 
       if( f =~ regex )
