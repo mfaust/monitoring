@@ -1,4 +1,6 @@
 #!/usr/bin/ruby
+#
+# encoding: utf-8
 
 require_relative '/usr/local/lib/icingachecks.rb'
 
@@ -11,7 +13,7 @@ class Icinga2Check_CM_Feeder < Icinga2Check
     @log = logger()
     @mc  = memcache()
 
-    host         = settings[:host]        ? shortHostname( settings[:host] ) : nil
+    host      = settings[:host]    ? shortHostname( settings[:host] ) : nil
     feeder    = settings[:feeder]  ? settings[:feeder] : nil
 
     feederServer = self.validate( feeder )
@@ -24,7 +26,6 @@ class Icinga2Check_CM_Feeder < Icinga2Check
     when 'content'
       self.contentFeederStatus( host, feederServer )
     end
-
   end
 
 
@@ -112,7 +113,6 @@ class Icinga2Check_CM_Feeder < Icinga2Check
       puts sprintf( 'CRITICAL - NOT HEALTHY' )
       exit STATE_CRITICAL
     end
-
   end
 
 
@@ -163,7 +163,6 @@ class Icinga2Check_CM_Feeder < Icinga2Check
 
     puts sprintf( '%s - Pending Documents: %d , Pending Events: %d', status, pendingDocuments, pendingEvents )
     exit exitCode
-
   end
 
 end
