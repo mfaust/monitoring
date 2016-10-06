@@ -155,7 +155,9 @@ services:
       - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_feeder_status.rb:/usr/lib/monitoring-plugins/check_cm_feeder_status:ro
       - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_cache.rb:/usr/lib/monitoring-plugins/check_cm_cache:ro
       - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_memory.rb:/usr/lib/monitoring-plugins/check_cm_memory:ro
-      - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_licenses.rb:/usr/lib/monitoring-plugins/check_cm_license:ro
+      - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_license.rb:/usr/lib/monitoring-plugins/check_cm_license:ro
+      - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_capconnection.rb:/usr/lib/monitoring-plugins/check_cm_capconnection:ro
+      - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_runlevel.rb:/usr/lib/monitoring-plugins/check_cm_runlevel:ro
       - ./share/icinga2/etc/icinga2/objects:/etc/icinga2/objects
     links:
       - database:database
