@@ -140,6 +140,7 @@ services:
     extra_hosts:
       - 'database:172.25.0.10'
       - 'memcached:172.25.0.12'
+      - 'blueprint-box:192.168.252.100'
     ports:
       - 5665:5665
       - 6666:6666

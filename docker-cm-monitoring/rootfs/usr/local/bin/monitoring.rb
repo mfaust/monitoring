@@ -1,9 +1,9 @@
 #!/usr/bin/ruby
 #
-# 14.09.2016 - Bodo Schulz
+# 05.10.2016 - Bodo Schulz
 #
 #
-# v0.6.0
+# v1.0.1
 
 # -----------------------------------------------------------------------------
 
@@ -91,8 +91,8 @@ class Monitoring
       'memcachePort'       => @memcachePort
     }
 
-    version              = '0.6.0'
-    date                 = '2016-10-04'
+    version              = '1.0.1'
+    date                 = '2016-10-05'
 
     @log.info( '-----------------------------------------------------------------' )
     @log.info( ' CoreMedia - Monitoring Service' )
@@ -317,13 +317,13 @@ class Monitoring
 
   def addGrafanaGroupOverview( hosts, force = false )
 
-#     grafanaResult = @grafana.addGroupOverview( hosts, force )
-# #    grafanaStatus = grafanaResult[:status]
-#
-#     return {
-#       :status  => grafanaResult[:status],
-#       :message => grafanaResult[:message]
-#     }
+    grafanaResult = @grafana.addGroupOverview( hosts, force )
+#    grafanaStatus = grafanaResult[:status]
+
+    return {
+      :status  => grafanaResult[:status],
+      :message => grafanaResult[:message]
+    }
 
   end
 

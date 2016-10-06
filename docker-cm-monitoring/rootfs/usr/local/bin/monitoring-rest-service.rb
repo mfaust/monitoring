@@ -20,7 +20,7 @@ module Sinatra
   class MonitoringRest < Base
 
     configure do
-      enable :logging
+#       enable :logging
 #       disable :dump_errors
 
       set :environment, :production
@@ -65,10 +65,12 @@ module Sinatra
 
     end
 
+    set :logging, true
     set :app_file, caller_files.first || $0
     set :run, Proc.new { $0 == app_file }
     set :dump_errors, true
     set :show_exceptions, true
+    set :public_folder, '/var/www/monitoring'
 
     set :bind, @restServiceBind
     set :port, @restServicePort.to_i
@@ -91,6 +93,14 @@ module Sinatra
 
     # -----------------------------------------------------------------------------
     # GET
+
+    # prints out a little help about our ReST-API
+    get '/help' do
+
+      send_file File.join( settings.public_folder, 'help' )
+
+    end
+
     # currently not supported
 #    get '/' do
 #      content_type :json

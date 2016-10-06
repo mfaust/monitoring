@@ -49,18 +49,19 @@ Wir haben versucht, möglichst alles über eine API aufrufbar zu bekommen:
 
 | Aufruf | Beschreibung |
 | ------ | ------------- |
+| `curl http://localhost/help`                               | Zeigt eine kurze Hilfe und alle bekannten API Calls an |
 | `curl http://localhost/api`                                | Zeigt alle dem Monitoring bekannten Hosts |
 | `curl http://localhost/api/$name`                          | Zeigt Alle Informationen zum Host an |
 | `curl -X POST http://localhost/api/$name`                  | Fügt einen Host zum Monitoring hinzu und erstellt eine Set von vor definierten Grafana Dashboards |
 | `curl -X POST http://localhost/api/$name/force`            | Fügt einen Host zum Monitoring hinzu, löscht aber vorher alle Autodiscovery Daten und Dashboards |
-| `curl -X DELETE http://localhost/api/$name`                | Löscht einen Host aus dem Monitoring, erhält aber die Grafana Dashboards |
-| `curl -X DELETE http://localhost/api/$name/force`          | Löscht einen Host aus dem Monitoring, inkl. der Grafana Dashboards |
 | `curl -X POST http://localhost/api/a/node/create/$name`    | Erstellt eine Annotation das der Hosts neu erstellt wurde |
 | `curl -X POST http://localhost/api/a/node/destroy/$name`   | Erstellt eine Annotation das der Hosts gelöscht wurde |
 | `curl -X POST http://localhost/api/a/loadtest/start/$name` | Erstellt eine Annotation für das starten eines Lasttests |
 | `curl -X POST http://localhost/api/a/loadtest/stop/$name`  | Erstellt eine Annotation für das beenden eines Lasttests |
 | `curl -X POST http://localhost/api/g/$names`               | Fügt ein Übersichtsdashboard für eine Gruppe von Hosts hinzu. Die Hostnames werden durch + verbunden. Die Hosts müssen dem Monitoring bereits hinzugefügt worden sein. |
 | `curl -X POST http://localhost/api/g/$names/force`         | Fügt ein Übersichtsdashboard für eine Gruppe von Hosts hinzu, löscht vorher das Dashboard. Die Hostnames werden durch + verbunden. Die Hosts müssen dem Monitoring bereits hinzugefügt worden sein. |
+| `curl -X DELETE http://localhost/api/$name`                | Löscht einen Host aus dem Monitoring, erhält aber die Grafana Dashboards |
+| `curl -X DELETE http://localhost/api/$name/force`          | Löscht einen Host aus dem Monitoring, inkl. der Grafana Dashboards |
 
 ## Eigene Anpassungen
 
