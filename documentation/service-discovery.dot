@@ -1,0 +1,72 @@
+// create: dot service-discovery.dot  -Tpng -o assets/service-discovery.png
+
+digraph G {
+
+  nodesep=1.0 // increases the separation between nodes
+  ratio=1
+  overlap=false
+  start=1
+
+  node [
+    fontname="Courier New",
+    fontsize=10,
+    height=0.02,
+    width=0.02,
+    shape=box
+  ]
+  edge [
+    style=solid,
+    arrowhead="normal",
+    arrowsize="0.7",
+//     headport="n"
+//     tailport="s"
+   ] //setup options
+
+  checkPort           [label="check Port"]
+  mbeanRuntime        [label="mbean mbeanRuntime\nattribute 'ClassPath'"]
+  discover            [label="discover\nApplication"]
+  includesCM7         [label="includes\n'cm7-tomcat'",shape=diamond]
+  mbeanManager        [label="mbean 'Manager'\n'contenxt=*'"]
+  mbeanEngineBaseDir  [label="mbean 'Engine'\nattribute 'baseDir'"]
+  mbeanEngineJvmRoute [label="mbean 'Engine'\nattribute 'jvmRoute'"]
+  context             [label="context",shape=diamond]
+  jvmRouteStudio      [label="jvmRoute\n'studio'",shape=diamond]
+  serviceCAEPrev      [label="set cae-preview",shape=box,style=rounded]
+  serviceDelivery     [label="set delivery",shape=box,style=rounded]
+  serviceCM16         [label="extract service",shape=box,style=rounded]
+  serviceCM7          [label="extract service",shape=box,style=rounded]
+
+  final [label="store",shape=diamond,style=rounded]
+
+
+  start -> checkPort
+
+  checkPort -> discover
+
+  discover -> mbeanRuntime
+
+  mbeanRuntime -> includesCM7
+
+  includesCM7 -> mbeanManager [label="yes"]
+  includesCM7 -> serviceCM16 [label="no"]
+
+  mbeanManager -> context [weight=8]
+
+  context -> mbeanEngineBaseDir [label="coremedia\ncaefeeder"]
+  context -> mbeanEngineJvmRoute [label="blueprint"]
+
+  mbeanEngineBaseDir -> serviceCM7
+  mbeanEngineJvmRoute -> jvmRouteStudio
+
+  jvmRouteStudio -> serviceCAEPrev [label="yes"]
+  jvmRouteStudio -> serviceDelivery [label="no"]
+
+
+  serviceCM16 -> final
+  serviceCM7 -> final
+  serviceCAEPrev -> final
+  serviceDelivery -> final
+}
+
+// dot hello.dot  -Tpng > hello.png
+

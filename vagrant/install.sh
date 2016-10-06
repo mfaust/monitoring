@@ -25,5 +25,26 @@ yum -y install docker-engine git
 
 service docker start
 
+[ -d /srv/docker ] || mkdir -vp /srv/docker
+
+cd /srv/docker
+
+if [ ! -d monitoring ]
+then
+  git clone https://github.com/cm-xlabs/monitoring.git .
+
+  cd monitoring/docker-compose-monitoring
+else
+  cd monitoring
+
+  git pull
+fi
+
+for i in down pull build; do docker-compose $i; done
+
+docker-compose up -d
+
+
+
 exit 0
 
