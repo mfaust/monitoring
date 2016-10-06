@@ -61,6 +61,12 @@ class Icinga2Check_CM_Feeder < Icinga2Check
     healthStatus    = health['status']    ? health['status']    : 500
     healthTimestamp = health['timestamp'] ? health['timestamp'] : nil
     healthValue     = ( health != nil && health['value'] ) ? health['value'] : nil
+
+    if( healthValue == nil )
+      puts 'CRITICAL - Service not running!?'
+      exit STATE_CRITICAL
+    end
+
     healthValue     = healthValue.values.first
 
     healthy         = ( healthValue != nil &&  healthValue['Healthy'] ) ? healthValue['Healthy'] : false

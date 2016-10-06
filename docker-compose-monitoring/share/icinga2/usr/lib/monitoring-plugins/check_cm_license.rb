@@ -47,6 +47,12 @@ class Icinga2Check_CM_Licenses < Icinga2Check
     dataStatus      = data['status']    ? data['status']    : 500
     dataTimestamp   = data['timestamp'] ? data['timestamp'] : nil
     dataValue       = ( data != nil && data['value'] ) ? data['value'] : nil
+
+    if( dataValue == nil )
+      puts 'CRITICAL - Service not running!?'
+      exit STATE_CRITICAL
+    end
+    
     dataValue       = dataValue.values.first
 
     t               = Date.parse( Time.now().to_s )

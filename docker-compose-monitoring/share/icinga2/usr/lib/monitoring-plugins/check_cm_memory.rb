@@ -34,6 +34,11 @@ class Icinga2Check_CM_Memory < Icinga2Check
     dataTimestamp = data['timestamp'] ? data['timestamp'] : nil
     dataValue     = ( data != nil && data['value'] ) ? data['value'] : nil
 
+    if( dataValue == nil )
+      puts 'CRITICAL - Service not running!?'
+      exit STATE_CRITICAL
+    end
+
     case type
     when 'heap-mem'
 
