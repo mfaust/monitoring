@@ -25,6 +25,8 @@ yum -y install docker-engine git
 
 service docker start
 
+
+
 [ -d /srv/docker ] || mkdir -vp /srv/docker
 
 cd /srv/docker
@@ -40,9 +42,9 @@ else
   git pull
 fi
 
-for i in down pull build; do docker-compose $i; done
+for i in down pull build; do /usr/local/bin/docker-compose $i; done
 
-docker-compose up -d
+/usr/local/bin/docker-compose up -d
 
 
 
