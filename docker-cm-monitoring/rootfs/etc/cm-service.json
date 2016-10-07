@@ -49,6 +49,8 @@
     "workflow-server": {
       "description": "Workflow Server",
       "port": 40399,
+      "port_http": 40380,
+      "ior": true,
       "cap_connection": true,
       "uapi_cache": true,
       "blob_cache": true

@@ -350,22 +350,31 @@ class Icinga2
       @log.debug( s )
       @log.debug( v.to_json )
 
-      restClient = RestClient::Resource.new(
-        URI.encode( sprintf( '%s/v1/objects/services/%s!%s', @icingaApiUrlBase, host, s ) ),
-        @options
-      )
+      begin
 
-      payload = {
-        "templates" => [ "generic-service" ],
-        "attrs"     => updateHost( v, host )
-      }
+        restClient = RestClient::Resource.new(
+          URI.encode( sprintf( '%s/v1/objects/services/%s!%s', @icingaApiUrlBase, host, s ) ),
+          @options
+        )
 
-      @log.debug( JSON.pretty_generate( payload ) )
+        payload = {
+          "templates" => [ "generic-service" ],
+          "attrs"     => updateHost( v, host )
+        }
 
-       data = restClient.put(
-         JSON.generate( ( payload ) ),
-         @headers
-       )
+        @log.debug( JSON.pretty_generate( payload ) )
+
+        data = restClient.put(
+          JSON.generate( ( payload ) ),
+          @headers
+        )
+      rescue RestClient::ExceptionWithResponse => e
+
+        error  = JSON.parse( e.response )
+
+        @log.error( error )
+
+      end
 
     end
 

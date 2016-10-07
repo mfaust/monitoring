@@ -174,12 +174,6 @@ class Monitoring
       discoveryStatus   = @serviceDiscovery.status
       discoveryServices = @serviceDiscovery.listHosts( host )
 
-      # TODO
-      # discoveryStatus auswerten!
-
-# @log.debug( discoveryResult )
-# @log.debug( discoveryStatus )
-
       if( discoveryStatus == 200 || discoveryStatus == 201 )
 
         services = ( discoveryServices[:hosts] && discoveryServices[:hosts]['services'] ) ? discoveryServices[:hosts]['services'] : nil
@@ -194,6 +188,56 @@ class Monitoring
 
         icingaResult = @icinga.addHost( host, cm )
         icingaStatus = @icinga.status
+
+        if( icingaStatus == 200 )
+
+          # add some custom checks
+          services = {
+            'http-preview-helios-DE' => {
+              'display_name'       => sprintf( 'Preview - %s', host ),
+              'check_command'      => 'http',
+              'host_name'          => host,
+              'vars.http_vhost'    => host,
+              'vars.http_uri'      => sprintf( 'https://preview-helios.%s.coremedia.vm/perfectchef-de-de', host ) ,
+              'vars.http_ssl'      => true
+            },
+            'http-shop-preview-production-helios' => {
+              'display_name'       => sprintf( 'Preview - Auroa eSite', host ),
+              'check_command'      => 'http',
+              'host_name'          => host,
+              'vars.http_vhost'    => host,
+              'vars.http_uri'      => sprintf( 'http://shop-preview-production-helios.%s.coremedia.vm/webapp/wcs/stores/servlet/en/auroraesite', host ) ,
+              'vars.http_ssl'      => true
+            },
+            'http-live-helios-DE' => {
+              'display_name'       => sprintf( 'Live - %s ', host ),
+              'check_command'      => 'http',
+              'host_name'          => host,
+              'vars.http_vhost'    => host,
+              'vars.http_uri'      => sprintf( 'https://helios.%s.coremedia.vm/perfectchef-de-de', host ) ,
+              'vars.http_ssl'      => true
+            },
+            'http-shop-helios' => {
+              'display_name'       => sprintf( 'Live - Auroa eSite', host ),
+              'check_command'      => 'http',
+              'host_name'          => host,
+              'vars.http_vhost'    => host,
+              'vars.http_uri'      => sprintf( 'http://shop-helios.%s.coremedia.vm/webapp/wcs/stores/servlet/en/auroraesite', host ) ,
+              'vars.http_ssl'      => true
+            },
+            'http-studio' => {
+              'display_name'       => sprintf( 'Live - Studio', host ),
+              'check_command'      => 'http',
+              'host_name'          => host,
+              'vars.http_vhost'    => host,
+              'vars.http_uri'      => sprintf( 'http://studio.%s.coremedia.vm/', host ) ,
+              'vars.http_ssl'      => true
+            }
+          }
+
+          @icinga.addServices( host, services )
+
+        end
 
         grafanaResult = @grafana.addDashbards( host )
         grafanaStatus = @grafana.status
