@@ -11,6 +11,8 @@ class Icinga2Check_CM_CapConnection < Icinga2Check
     @log = logger()
     @mc  = memcache()
 
+    MBean.logger( @log )
+
     host         = settings[:host]        ? shortHostname( settings[:host] ) : nil
     application  = settings[:application] ? settings[:application] : nil
     memory       = settings[:memory]      ? settings[:memory]      : nil
@@ -22,38 +24,38 @@ class Icinga2Check_CM_CapConnection < Icinga2Check
 
   def check( host, application, type )
 
-    # TODO
-    # make it configurable
-    warning  = 95
-    critical = 98
-
     # get our bean
     data = MBean.bean( host, application, 'CapConnection' )
 
-    dataStatus    = data['status']    ? data['status']    : 500
-    dataTimestamp = data['timestamp'] ? data['timestamp'] : nil
-    dataValue     = ( data != nil && data['value'] ) ? data['value'] : nil
-
-    if( dataValue == nil )
+    if( data == false )
       puts 'CRITICAL - Service not running!?'
       exit STATE_CRITICAL
-    end
-
-    dataValue     = dataValue.values.first
-
-    state = dataValue['Open'] ? dataValue['Open'] : false
-
-    if( state == true )
-      status   = 'OK'
-      exitCode = STATE_OK
     else
-      status   = 'CRITICAL'
-      exitCode = STATE_CRITICAL
+
+      dataStatus    = data['status']    ? data['status']    : 500
+      dataTimestamp = data['timestamp'] ? data['timestamp'] : nil
+      dataValue     = ( data != nil && data['value'] ) ? data['value'] : nil
+
+      if( dataValue == nil )
+        puts 'CRITICAL - Service not running!?'
+        exit STATE_CRITICAL
+      end
+
+      dataValue     = dataValue.values.first
+
+      state = dataValue['Open'] ? dataValue['Open'] : false
+
+      if( state == true )
+        status   = 'OK'
+        exitCode = STATE_OK
+      else
+        status   = 'CRITICAL'
+        exitCode = STATE_CRITICAL
+      end
+
+      puts sprintf( '%s - Cap Connection %s)', status, state ? 'Open' : 'not existst' )
+      exit exitCode
     end
-
-    puts sprintf( '%s - Cap Connection %s)', status, state ? 'Open' : 'not existst' )
-    exit exitCode
-
   end
 
 end

@@ -13,6 +13,8 @@ class Icinga2Check_CM_Feeder < Icinga2Check
     @log = logger()
     @mc  = memcache()
 
+    MBean.logger( @log )
+
     host      = settings[:host]    ? shortHostname( settings[:host] ) : nil
     feeder    = settings[:feeder]  ? settings[:feeder] : nil
 
@@ -50,104 +52,124 @@ class Icinga2Check_CM_Feeder < Icinga2Check
 
   def feederStatus( host, feederServer )
 
-    # TODO
-    # make it configurable
-    warning  = 2500
-    critical = 10000
+    config   = readConfig( 'caefeeder' )
+    warning  = config[:warning]  ? config[:warning]  : 2500
+    critical = config[:critical] ? config[:critical] : 10000
 
     # get our bean
     health = MBean.bean( host, feederServer, 'Health' )
 
-    healthStatus    = health['status']    ? health['status']    : 500
-    healthTimestamp = health['timestamp'] ? health['timestamp'] : nil
-    healthValue     = ( health != nil && health['value'] ) ? health['value'] : nil
-
-    if( healthValue == nil )
+    if( health == false )
       puts 'CRITICAL - Service not running!?'
       exit STATE_CRITICAL
-    end
+    else
 
-    healthValue     = healthValue.values.first
+      healthStatus    = health['status']    ? health['status']    : 500
+      healthTimestamp = health['timestamp'] ? health['timestamp'] : nil
+      healthValue     = ( health != nil && health['value'] ) ? health['value'] : nil
 
-    healthy         = ( healthValue != nil &&  healthValue['Healthy'] ) ? healthValue['Healthy'] : false
-
-    if( healthy == true )
-
-      engine      = MBean.bean( host, feederServer, 'ProactiveEngine' )
-
-      engineStatus    = engine['status']    ? engine['status']    : 500
-      engineTimestamp = engine['timestamp'] ? engine['timestamp'] : nil
-      engineValue     = ( engine != false && engine['value'] ) ? engine['value'] : nil
-      engineValue     = engineValue.values.first
-
-      maxEntries     = engineValue['KeysCount']         ? engineValue['KeysCount']         : 0  # Number of (active) keys
-      currentEntries = engineValue['ValuesCount']       ? engineValue['ValuesCount']       : 0  # Number of (valid) values. It is less or equal to 'keysCount'
-
-      if( maxEntries == 0 && currentEntries == 0 )
-
-        stateMessage = "no Feederdata. maybe restarting?"
-      else
-
-        healthMessage  = "HEALTHY"
-        diffEntries    = ( maxEntries - currentEntries ).to_i
-
-        if( maxEntries == currentEntries )
-          stateMessage = sprintf( 'all %d Elements feeded', maxEntries )
-        else
-          stateMessage = sprintf( '%d Elements of %d feeded. (%d left)', currentEntries, maxEntries, diffEntries )
-        end
-
-        if( diffEntries > critical )
-          status   = 'CRITICAL'
-          exitCode = STATE_CRITICAL
-        elsif( diffEntries > warning || diffEntries == warning )
-
-          status   = 'WARNING'
-          exitCode = STATE_WARNING
-        else
-
-          status   = 'OK'
-          exitCode = STATE_OK
-        end
-
+      if( healthValue == nil )
+        puts 'CRITICAL - Service not running!?'
+        exit STATE_CRITICAL
       end
 
-      puts sprintf( '%s - %s - %s', status, healthMessage, stateMessage )
-      exit exitCode
+      healthValue     = healthValue.values.first
 
-    else
-      puts sprintf( 'CRITICAL - NOT HEALTHY' )
-      exit STATE_CRITICAL
+      healthy         = ( healthValue != nil &&  healthValue['Healthy'] ) ? healthValue['Healthy'] : false
+
+      if( healthy == true )
+
+        engine      = MBean.bean( host, feederServer, 'ProactiveEngine' )
+
+        engineStatus    = engine['status']    ? engine['status']    : 500
+        engineTimestamp = engine['timestamp'] ? engine['timestamp'] : nil
+        engineValue     = ( engine != false && engine['value'] ) ? engine['value'] : nil
+        engineValue     = engineValue.values.first
+
+        maxEntries     = engineValue['KeysCount']         ? engineValue['KeysCount']         : 0  # Number of (active) keys
+        currentEntries = engineValue['ValuesCount']       ? engineValue['ValuesCount']       : 0  # Number of (valid) values. It is less or equal to 'keysCount'
+
+        if( maxEntries == 0 && currentEntries == 0 )
+
+          stateMessage = "no Feederdata. maybe restarting?"
+        else
+
+          healthMessage  = "HEALTHY"
+          diffEntries    = ( maxEntries - currentEntries ).to_i
+
+          if( maxEntries == currentEntries )
+            stateMessage = sprintf( 'all %d Elements feeded', maxEntries )
+          else
+            stateMessage = sprintf( '%d Elements of %d feeded. (%d left)', currentEntries, maxEntries, diffEntries )
+          end
+
+          if( diffEntries > critical )
+            status   = 'CRITICAL'
+            exitCode = STATE_CRITICAL
+          elsif( diffEntries > warning || diffEntries == warning )
+
+            status   = 'WARNING'
+            exitCode = STATE_WARNING
+          else
+
+            status   = 'OK'
+            exitCode = STATE_OK
+          end
+
+        end
+
+        puts sprintf( '%s - %s - %s', status, healthMessage, stateMessage )
+        exit exitCode
+
+      else
+        puts sprintf( 'CRITICAL - NOT HEALTHY' )
+        exit STATE_CRITICAL
+      end
     end
+
   end
 
 
   def contentFeederStatus( host, feederServer )
 
-    # TODO
-    # make it configurable
-    warning  = 2500
-    critical = 10000
+    config   = readConfig( 'contentfeeder' )
+    warning  = config[:warning]  ? config[:warning]  : 2500
+    critical = config[:critical] ? config[:critical] : 10000
 
     data = MBean.bean( host, feederServer, 'Feeder' )
 
-    status    = data['status']    ? data['status']    : 500
-    timestamp = data['timestamp'] ? data['timestamp'] : nil
-    value     = data['value']     ? data['value']     : nil
-    data      = value.values.first
+    if( health == false )
+      puts 'CRITICAL - Service not running!?'
+      exit STATE_CRITICAL
+    else
 
-    state = data['State'] ? data['State'] : nil
+      status    = data['status']    ? data['status']    : 500
+      timestamp = data['timestamp'] ? data['timestamp'] : nil
+      value     = data['value']     ? data['value']     : nil
+      data      = value.values.first
 
-    if( state == 'running' )
+      state = data['State'] ? data['State'] : nil
 
-      pendingDocuments = data['CurrentPendingDocuments'] ? data['CurrentPendingDocuments'] : nil
-      pendingEvents    = data['PendingEvents']           ? data['PendingEvents']           : nil
+      if( state == 'running' )
 
-      if( pendingDocuments == 0 && pendingDocuments <= warning )
+        pendingDocuments = data['CurrentPendingDocuments'] ? data['CurrentPendingDocuments'] : nil
+        pendingEvents    = data['PendingEvents']           ? data['PendingEvents']           : nil
 
-        status   = 'OK'
-        exitCode = STATE_OK
-      elsif( pendingDocuments >= warning && pendingDocuments <= critical )
+        if( pendingDocuments == 0 && pendingDocuments <= warning )
+
+          status   = 'OK'
+          exitCode = STATE_OK
+        elsif( pendingDocuments >= warning && pendingDocuments <= critical )
+
+          status   = 'WARNING'
+          exitCode = STATE_WARNING
+        else
+
+          status   = 'CRITICAL'
+          exitCode = STATE_CRITICAL
+        end
+
+      elsif( state == 'initializing' )
 
         status   = 'WARNING'
         exitCode = STATE_WARNING
@@ -157,18 +179,9 @@ class Icinga2Check_CM_Feeder < Icinga2Check
         exitCode = STATE_CRITICAL
       end
 
-    elsif( state == 'initializing' )
-
-      status   = 'WARNING'
-      exitCode = STATE_WARNING
-    else
-
-      status   = 'CRITICAL'
-      exitCode = STATE_CRITICAL
+      puts sprintf( '%s - Pending Documents: %d , Pending Events: %d', status, pendingDocuments, pendingEvents )
+      exit exitCode
     end
-
-    puts sprintf( '%s - Pending Documents: %d , Pending Events: %d', status, pendingDocuments, pendingEvents )
-    exit exitCode
   end
 
 end

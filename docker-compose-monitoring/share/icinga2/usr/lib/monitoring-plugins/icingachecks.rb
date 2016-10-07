@@ -29,6 +29,42 @@ class Icinga2Check
   STATE_UNKNOWN   = 3
   STATE_DEPENDENT = 4
 
+  def readConfig( service )
+
+    file = '/etc/cm-icinga2.yaml'
+
+    usePercent = nil
+    warning    = nil
+    critical   = nil
+
+    if( File.exist?( file ) )
+
+      begin
+
+        config  = YAML.load_file( file )
+
+        service = config[service] ? config[service] : nil
+
+        if( service != nil )
+          usePercent = service['usePercent'] ? service['usePercent'] : nil
+          warning    = service['warning'] ? service['warning']       : nil
+          critical   = service['critical'] ? service['critical']     : nil
+        end
+      rescue YAML::ParserError => e
+
+        @log.error( 'wrong result (no yaml)')
+        @log.error( e )
+      end
+    end
+
+    return {
+      :usePercent => usePercent,
+      :warning    => warning,
+      :critical   => critical
+    }
+
+  end
+
 
   def logger()
 

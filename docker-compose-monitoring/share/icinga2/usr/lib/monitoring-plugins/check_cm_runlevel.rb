@@ -11,57 +11,58 @@ class Icinga2Check_CM_Runlevel < Icinga2Check
     @log = logger()
     @mc  = memcache()
 
+    MBean.logger( @log )
+
     host         = settings[:host]        ? shortHostname( settings[:host] ) : nil
     application  = settings[:application] ? settings[:application] : nil
-    memory       = settings[:memory]      ? settings[:memory]      : nil
 
-    self.check( host, application, memory )
+    self.check( host, application )
 
   end
 
 
-  def check( host, application, type )
-
-    # TODO
-    # make it configurable
-    warning  = 95
-    critical = 98
+  def check( host, application )
 
     # get our bean
     data = MBean.bean( host, application, 'Server' )
 
-    dataStatus    = data['status']    ? data['status']    : 500
-    dataTimestamp = data['timestamp'] ? data['timestamp'] : nil
-    dataValue     = ( data != nil && data['value'] ) ? data['value'] : nil
-
-    if( dataValue == nil )
+    if( data == false )
       puts 'CRITICAL - Service not running!?'
       exit STATE_CRITICAL
-    end
-
-    dataValue     = dataValue.values.first
-
-    runlevel      = dataValue['RunLevel'] ? dataValue['RunLevel'] : false
-
-    # in maintenance mode the Server mbean is not available
-    case runlevel.downcase
-    when 'offline'
-      status   = 'CRITICAL'
-      exitCode = STATE_CRITICAL
-    when 'online'
-      status   = 'OK'
-      exitCode = STATE_OK
-    when 'administration'
-      status   = 'WARNING'
-      exitCode = STATE_WARNING
     else
-      status   = 'CRITICAL'
-      exitCode = STATE_CRITICAL
+
+      dataStatus    = data['status']    ? data['status']    : 500
+      dataTimestamp = data['timestamp'] ? data['timestamp'] : nil
+      dataValue     = ( data != nil && data['value'] ) ? data['value'] : nil
+
+      if( dataValue == nil )
+        puts 'CRITICAL - Service not running!?'
+        exit STATE_CRITICAL
+      end
+
+      dataValue     = dataValue.values.first
+
+      runlevel      = dataValue['RunLevel'] ? dataValue['RunLevel'] : false
+
+      # in maintenance mode the Server mbean is not available
+      case runlevel.downcase
+      when 'offline'
+        status   = 'CRITICAL'
+        exitCode = STATE_CRITICAL
+      when 'online'
+        status   = 'OK'
+        exitCode = STATE_OK
+      when 'administration'
+        status   = 'WARNING'
+        exitCode = STATE_WARNING
+      else
+        status   = 'CRITICAL'
+        exitCode = STATE_CRITICAL
+      end
+
+      puts sprintf( '%s - RunLevel in %s Mode)', status, runlevel )
+      exit exitCode
     end
-
-    puts sprintf( '%s - RunLevel in %s Mode)', status, runlevel )
-    exit exitCode
-
   end
 
 end

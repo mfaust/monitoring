@@ -1,31 +1,31 @@
 ---
 caefeeder:
-  use_percent: false
+  usePercent: false
   warning: 2500
   critical: 10000
 
 contentfeeder:
-  use_percent: false
+  usePercent: false
   warning: 2500
   critical: 10000
 
 blob-cache:
-  use_percent: true
+  usePercent: true
   warning: 95
   critical: 98
 
 uapi-cache:
-  use_percent: true
+  usePercent: true
   warning: 95
   critical: 98
 
 heap-memory:
-  use_percent: true
+  usePercent: true
   warning: 95
   critical: 98
 
 perm-memory:
-  use_percent: true
+  usePercent: true
   warning: 99
   critical: 100
 

@@ -87,6 +87,7 @@ class Monitoring
       'graphiteHost'       => @graphiteHost,
       'graphiteHttpPort'   => @graphiteHttpPort,
       'graphitePort'       => @graphitePort,
+      'graphitePath'       => @graphitePath,
       'memcacheHost'       => @memcacheHost,
       'memcachePort'       => @memcachePort
     }
@@ -235,19 +236,19 @@ class Monitoring
 
       status = {
         host.to_s => {
-          :icinga    => { :status => icingaStatus },
-          :discovery => { :status => discoveryStatus }
+          :icinga    => { :status => icingaStatus   , :message => icingaResult[:message] },
+          :discovery => { :status => discoveryStatus, :message => discoveryResult[:message]  }
         }
       }
 
       if( discoveryStatus == 200 and force == true )
         grafanaResult = @grafana.deleteDashboards( host )
 
-        status[host.to_s][:grafana] = { :status => grafanaStatus }
+        status[host.to_s][:grafana] = { :status => grafanaResult[:status], :message => grafanaResult[:message] }
       end
 
-      @log.debug( icingaStatus )
-      @log.debug( discoveryStatus )
+      @log.debug( icingaResult )
+      @log.debug( discoveryResult )
       @log.debug( grafanaResult )
 
       return status

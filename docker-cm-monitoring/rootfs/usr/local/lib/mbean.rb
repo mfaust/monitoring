@@ -56,7 +56,7 @@ class MBean
 
       memcacheKey         = sprintf( 'result__%s__%s', host, service )
 
-      for y in 1..10
+      for y in 1..3
 
         result      = @mc.get( memcacheKey )
 
