@@ -138,7 +138,7 @@ class Icinga2Check_CM_Feeder < Icinga2Check
 
     data = MBean.bean( host, feederServer, 'Feeder' )
 
-    if( health == false )
+    if( data == false )
       puts 'CRITICAL - Service not running!?'
       exit STATE_CRITICAL
     else

@@ -73,7 +73,7 @@ Signal.trap('QUIT') { stop = true }
 until stop
   # do your thing
   r.run()
-  sleep(@scanDiscovery)
+  sleep( 15 )
 end
 
 # -----------------------------------------------------------------------------
