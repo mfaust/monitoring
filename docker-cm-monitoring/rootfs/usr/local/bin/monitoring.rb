@@ -15,19 +15,6 @@ require_relative '../lib/graphite'
 require_relative '../lib/icinga2'
 require_relative '../lib/tools'
 
-#configFile = '/etc/cm-monitoring.yaml'
-#
-#if( File.exist?( configFile ) )
-#
-#  config = YAML.load_file( configFile )
-#
-#  @logDir    = config['monitoring']['log_dir'] ? config['monitoring']['log_dir'] : '/tmp/log'
-#
-#else
-#  puts "no configuration exists"
-#  exit 1
-#end
-#
 # -----------------------------------------------------------------------------
 
 class Monitoring
@@ -116,31 +103,32 @@ class Monitoring
 
     config = YAML.load_file( @configFile )
 
-    @logDirectory     = config['monitoring']['log_dir']                 ? config['monitoring']['log_dir']                  : '/tmp/log'
-    @cacheDir         = config['monitoring']['cache_dir']               ? config['monitoring']['cache_dir']                : '/tmp/cache'
+    @logDirectory     = config['logDirectory']             ? config['logDirectory']             : '/tmp/log'
+    @cacheDir         = config['cacheDirectory']           ? config['cacheDirectory']           : '/tmp/cache'
 
-    @jolokia_host     = config['monitoring']['jolokia']['host']         ? config['monitoring']['jolokia']['host']          : 'localhost'
-    @jolokia_port     = config['monitoring']['jolokia']['port']         ? config['monitoring']['jolokia']['port']          : 8080
+    @jolokia_host     = config['jolokia']['host']          ? config['jolokia']['host']          : 'localhost'
+    @jolokia_port     = config['jolokia']['port']          ? config['jolokia']['port']          : 8080
 
-    @grafana_host     = config['monitoring']['grafana']['host']         ? config['monitoring']['grafana']['host']          : 'localhost'
-    @grafana_port     = config['monitoring']['grafana']['port']         ? config['monitoring']['grafana']['port']          : 3000
-    @grafana_path     = config['monitoring']['grafana']['path']         ? config['monitoring']['grafana']['path']          : nil
+    @grafana_host     = config['grafana']['host']          ? config['grafana']['host']          : 'localhost'
+    @grafana_port     = config['grafana']['port']          ? config['grafana']['port']          : 3000
+    @grafana_path     = config['grafana']['path']          ? config['grafana']['path']          : nil
 
-    @icingaHost       = config['monitoring']['icinga']['host']          ? config['monitoring']['icinga']['host']           : 'localhost'
-    @icingaPort       = config['monitoring']['icinga']['port']          ? config['monitoring']['icinga']['port']           : 5665
-    @icingaApiUser    = config['monitoring']['icinga']['api']['user']   ? config['monitoring']['icinga']['api']['user']    : 'icinga'
-    @icingaApiPass    = config['monitoring']['icinga']['api']['pass']   ? config['monitoring']['icinga']['api']['pass']    : 'icinga'
+    @icingaHost       = config['icinga']['host']           ? config['icinga']['host']           : 'localhost'
+    @icingaPort       = config['icinga']['port']           ? config['icinga']['port']           : 5665
+    @icingaApiUser    = config['icinga']['api']['user']    ? config['icinga']['api']['user']    : 'icinga'
+    @icingaApiPass    = config['icinga']['api']['pass']    ? config['icinga']['api']['pass']    : 'icinga'
 
-    @graphiteHost     = config['monitoring']['graphite']['host']         ? config['monitoring']['graphite']['host']        : 'localhost'
-    @graphiteHttpPort = config['monitoring']['graphite']['http-port']    ? config['monitoring']['graphite']['http-port']   : 80
-    @graphitePort     = config['monitoring']['graphite']['port']         ? config['monitoring']['graphite']['port']        : 2003
-    @graphitePath     = config['monitoring']['graphite']['path']         ? config['monitoring']['graphite']['path']        : nil
+    @graphiteHost     = config['graphite']['host']         ? config['graphite']['host']         : 'localhost'
+    @graphiteHttpPort = config['graphite']['http-port']    ? config['graphite']['http-port']    : 80
+    @graphitePort     = config['graphite']['port']         ? config['graphite']['port']         : 2003
+    @graphitePath     = config['graphite']['path']         ? config['graphite']['path']         : nil
 
-    @template_dir     = config['monitoring']['grafana']['template_dir'] ? config['monitoring']['grafana']['template_dir']  : '/var/tmp/templates'
+    @template_dir     = config['grafana']['templateDirectory']  ? config['grafana']['templateDirectory']  : '/var/tmp/templates'
 
+    @memcacheHost     = ENV['MEMCACHE_HOST']               ? ENV['MEMCACHE_HOST']               : nil
+    @memcachePort     = ENV['MEMCACHE_PORT']               ? ENV['MEMCACHE_PORT']               : nil
 
-    @memcacheHost     = ENV['MEMCACHE_HOST']                            ? ENV['MEMCACHE_HOST']                             : nil
-    @memcachePort     = ENV['MEMCACHE_PORT']                            ? ENV['MEMCACHE_PORT']                             : nil
+    @serviceChecks    = config['service-checks']           ? config['service-checks']           : nil
 
   end
 
@@ -191,6 +179,34 @@ class Monitoring
 
         if( icingaStatus == 200 )
 
+          hash  = Hash.new()
+          array = Array.new()
+
+          @serviceChecks.each do |type|
+
+            @log.debug( type )
+
+            type.each do |subtype,v|
+
+              @log.debug( subtype )
+              @log.debug( v )
+
+              hash = {
+                sprintf( '%s-', type.lowercase ) => {
+                  'display_name'    => sprintf( '%s - %s', type.uppercase, host ),
+                  'check_command'   => type.lowercase,
+                  'host_name'       => host,
+                  'vars.http_vhost' => host,
+                  'vars.http_uri'   => sprintf( v, host )
+                }
+              }
+
+              array.push( hash )
+            end
+          end
+
+          @log.debug( array )
+
           # add some custom checks
           services = {
             'http-preview-helios-DE' => {
@@ -235,7 +251,9 @@ class Monitoring
             }
           }
 
-          @icinga.addServices( host, services )
+          @log.debug( service )
+
+#          @icinga.addServices( host, services )
 
         end
 

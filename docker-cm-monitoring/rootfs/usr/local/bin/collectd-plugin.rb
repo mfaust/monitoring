@@ -19,10 +19,10 @@ if( File.exist?( config_file ) )
 
   config = YAML.load_file( config_file )
 
-  @logDir       = config['monitoring']['log_dir']   ? config['monitoring']['log_dir']   : '/tmp/log'
-  @cacheDir     = config['monitoring']['cache_dir'] ? config['monitoring']['cache_dir'] : '/tmp/cache'
+  @logDir       = config['logDirectory']   ? config['logDirectory']   : '/tmp/log'
+  @cacheDir     = config['cacheDirectory'] ? config['cacheDirectory'] : '/tmp/cache'
 
-  @interval     = config['monitoring']['collectd-plugin']['interval'] ? config['monitoring']['collectd-plugin']['interval'] : 15
+  @interval     = config['collectd-plugin']['interval'] ? config['collectd-plugin']['interval'] : 15
 
   @memcacheHost = ENV['MEMCACHE_HOST']              ? ENV['MEMCACHE_HOST']              : nil
   @memcachePort = ENV['MEMCACHE_PORT']              ? ENV['MEMCACHE_PORT']              : nil

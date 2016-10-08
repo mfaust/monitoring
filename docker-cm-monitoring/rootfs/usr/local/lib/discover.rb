@@ -62,8 +62,8 @@ class ServiceDiscovery
       49099
     ]
 
-    @logDirectory       = settings['log_dir']           ? settings['log_dir']           : '/tmp'
-    @cacheDirectory     = settings['cache_dir']         ? settings['cache_dir']         : '/var/tmp/monitoring'
+    @logDirectory       = settings['logDirectory']      ? settings['logDirectory']      : '/tmp'
+    @cacheDirectory     = settings['cacheDirectory']    ? settings['cacheDirectory']    : '/var/tmp/monitoring'
     @jolokiaHost        = settings['jolokia_host']      ? settings['jolokia_host']      : 'localhost'
     @jolokiaPort        = settings['jolokia_port']      ? settings['jolokia_port']      : 8080
     @serviceConfigFile  = settings['serviceConfigFile'] ? settings['serviceConfigFile'] : nil

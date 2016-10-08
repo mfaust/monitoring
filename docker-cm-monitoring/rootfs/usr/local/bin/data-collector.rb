@@ -22,15 +22,15 @@ if( File.exist?( config_file ) )
 
   config = YAML.load_file( config_file )
 
-  @logDir           = config['monitoring']['log_dir']              ? config['monitoring']['log_dir']          : '/tmp/log'
-  @cacheDir         = config['monitoring']['cache_dir']            ? config['monitoring']['cache_dir']        : '/tmp/cache'
-  @jolokia_host     = config['monitoring']['jolokia']['host']      ? config['monitoring']['jolokia']['host']  : 'localhost'
-  @jolokia_port     = config['monitoring']['jolokia']['port']      ? config['monitoring']['jolokia']['port']  : 8080
+  @logDir           = config['logDirectory']              ? config['logDirectory']          : '/tmp/log'
+  @cacheDir         = config['cacheDirectory']            ? config['cacheDirectory']        : '/tmp/cache'
+  @jolokia_host     = config['jolokia']['host']      ? config['jolokia']['host']  : 'localhost'
+  @jolokia_port     = config['jolokia']['port']      ? config['jolokia']['port']  : 8080
 
   @memcacheHost     = ENV['MEMCACHE_HOST']                         ? ENV['MEMCACHE_HOST']                     : nil
   @memcachePort     = ENV['MEMCACHE_PORT']                         ? ENV['MEMCACHE_PORT']                     : nil
 
-  @scanDiscovery    = config['monitoring']['data-collector']['scan-discovery'] ? config['monitoring']['data-collector']['scan-discovery'] : '10m'
+  @scanDiscovery    = config['data-collector']['scan-discovery'] ? config['data-collector']['scan-discovery'] : '10m'
 
 else
   puts "no configuration exists, use default settings"

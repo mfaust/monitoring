@@ -26,8 +26,8 @@ class DataCollector
 
   def initialize( settings = {} )
 
-    @logDirectory      = settings['log_dir']               ? settings['log_dir']               : '/tmp/log'
-    @cacheDirectory    = settings['cache_dir']             ? settings['cache_dir']             : '/tmp/cache'
+    @logDirectory      = settings['logDirectory']          ? settings['logDirectory']          : '/tmp/log'
+    @cacheDirectory    = settings['cacheDirectory']        ? settings['cacheDirectory']        : '/tmp/cache'
     @jolokiaHost       = settings['jolokia_host']          ? settings['jolokia_host']          : 'localhost'
     @jolokiaPort       = settings['jolokia_port']          ? settings['jolokia_port']          : 8080
     @memcacheHost      = settings['memcacheHost']          ? settings['memcacheHost']          : nil

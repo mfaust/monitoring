@@ -1,30 +1,69 @@
 ---
-monitoring:
-  log_dir: /var/log/monitoring
-  cache_dir: /var/cache/monitoring
-  rest-service:
-    port: 45678
-    bind: 0.0.0.0
-  jolokia:
-    host: jolokia
-    port: 8080
-  grafana:
-    host: grafana
-    port: 3000
-    template_dir: /usr/local/share/templates/grafana
-  graphite:
-    host: nginx
-    port: 2003
-    http-port: 80
-    fix-timezone: true
-    path: /graphite
-  collectd-plugin:
-    interval: 15
-  data-collector:
-    scan-discovery: 10m
-  icinga:
-    host: icinga2-core
-    port: 5665
-    api:
-      user: root
-      pass: icinga
+
+# generelle konfiguration
+logDirectory: /var/log/monitoring
+cacheDirectory: /var/cache/monitoring
+
+# fuer den rest-service
+rest-service:
+  port: 45678
+  bind: 0.0.0.0
+
+jolokia:
+  host: jolokia
+  port: 8080
+
+grafana:
+  host: grafana
+  port: 3000
+  templateDirectory: /usr/local/share/templates/grafana
+
+graphite:
+  host: nginx
+  port: 2003
+  http-port: 80
+  fix-timezone: true
+  path: /graphite
+
+collectd-plugin:
+  interval: 15
+
+data-collector:
+  scan-discovery: 10m
+
+icinga:
+  host: icinga2-core
+  port: 5665
+  api:
+    user: root
+    pass: icinga
+
+service-checks:
+  http:
+    coremedia:
+      - http://overview.%HOST%/
+      - https://helios.%HOST%/perfectchef
+      - https://helios.%HOST%/perfectchef-de-de
+      - https://corporate.%HOST%/corporate
+      - https://corporate.%HOST%/corporate-de-de
+      - https://studio.%HOST%/
+      - https://preview-helios.%HOST%/perfectchef-de-de
+      - https://preview-helios.%HOST%/blueprint/servlet/perfectchef
+      - https://shop-preview-production-helios.%HOST%/webapp/wcs/stores/servlet/en/auroraesite
+      - https://shop-preview-production-helios.%HOST%/webapp/wcs/stores/servlet/en/aurorab2besite
+      - https://preview-corporate.%HOST%/corporate
+    wcs:
+      - https://shop-helios.%HOST%/webapp/wcs/stores/servlet/en/auroraesite
+      - https://shop-helios.%HOST%/webapp/wcs/stores/servlet/en/aurorab2besite
+      - https://%HOST%-wcs:8000/lobtools/cmc/ManagementCenterMain?locale=en_US
+      - https://%HOST%-wcs:8000/webapp/wcs/tools/servlet/ToolsLogon?XMLFile=common.mcLogon
+      - https://%HOST%-wcs:8002/webapp/wcs/admin/servlet/ToolsLogon?XMLFile=adminconsole.AdminConsoleLogon
+      - https://%HOST%-wcs:8004/webapp/wcs/orgadmin/servlet/ToolsLogon?XMLFile=buyerconsole.BuyAdminConsoleLogon&storeId=0
+      - https://%HOST%-wcs:9043/ibm/console/logon.jsp
+  ssl:
+    coremedia:
+      - https://studio.%HOST%/
+    wcs:
+
+
+

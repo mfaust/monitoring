@@ -31,11 +31,11 @@ class CollecdPlugin
 
   def initialize( settings = {} )
 
-    @logDirectory   = settings['log_dir']      ? settings['log_dir']      : '/tmp'
-    @cacheDirectory = settings['cache_dir']    ? settings['cache_dir']    : '/var/tmp/monitoring'
-    @memcacheHost   = settings['memcacheHost'] ? settings['memcacheHost'] : nil
-    @memcachePort   = settings['memcachePort'] ? settings['memcachePort'] : nil
-    @interval       = settings['interval']     ? settings['interval']     : 15
+    @logDirectory   = settings['logDirectory']   ? settings['logDirectory']   : '/tmp'
+    @cacheDirectory = settings['cacheDirectory'] ? settings['cacheDirectory'] : '/var/tmp/monitoring'
+    @memcacheHost   = settings['memcacheHost']   ? settings['memcacheHost']   : nil
+    @memcachePort   = settings['memcachePort']   ? settings['memcachePort']   : nil
+    @interval       = settings['interval']       ? settings['interval']       : 15
 
     logFile = sprintf( '%s/collectd.log', @logDirectory )
 

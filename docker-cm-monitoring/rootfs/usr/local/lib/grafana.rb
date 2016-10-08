@@ -27,15 +27,15 @@ class Grafana
 
   def initialize( settings = {} )
 
-    @logDirectory      = settings['log_dir']      ? settings['log_dir']      : '/tmp'
-    @cacheDirectory    = settings['cache_dir']    ? settings['cache_dir']    : '/var/tmp/monitoring'
-    @templateDirectory = settings['template_dir'] ? settings['template_dir'] : '/var/tmp/templates'
+    @logDirectory      = settings['logDirectory']   ? settings['logDirectory']   : '/tmp'
+    @cacheDirectory    = settings['cacheDirectory'] ? settings['cacheDirectory'] : '/var/tmp/monitoring'
+    @templateDirectory = settings['template_dir']   ? settings['template_dir']   : '/var/tmp/templates'
 
-    @grafanaHost       = settings['grafana_host'] ? settings['grafana_host'] : 'localhost'
-    @grafanaPort       = settings['grafana_port'] ? settings['grafana_port'] : 3000
-    @grafanaPath       = settings['grafana_path'] ? settings['grafana_path'] : nil
-    @memcacheHost      = settings['memcacheHost'] ? settings['memcacheHost'] : nil
-    @memcachePort      = settings['memcachePort'] ? settings['memcachePort'] : nil
+    @grafanaHost       = settings['grafana_host']   ? settings['grafana_host']   : 'localhost'
+    @grafanaPort       = settings['grafana_port']   ? settings['grafana_port']   : 3000
+    @grafanaPath       = settings['grafana_path']   ? settings['grafana_path']   : nil
+    @memcacheHost      = settings['memcacheHost']   ? settings['memcacheHost']   : nil
+    @memcachePort      = settings['memcachePort']   ? settings['memcachePort']   : nil
 
     @grafanaURI        = sprintf( 'http://%s:%s%s', @grafanaHost, @grafanaPort, @grafanaPath )
     @supportMemcache   = false
@@ -563,7 +563,7 @@ class Grafana
     Dir.chdir( sprintf( '%s/overview', @templateDirectory )  )
 
     dirs = Dir.glob( "**.tpl" )
-    
+
     dirs.sort!
 
     dirs.each do |f|

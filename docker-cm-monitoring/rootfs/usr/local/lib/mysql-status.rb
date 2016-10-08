@@ -11,11 +11,12 @@ class  MysqlStatus
 
   def initialize( settings = {} )
 
-    @logDirectory      = settings['log_dir']   ? settings['log_dir']   : '/tmp'
-    @mysqlHost         = settings['mysqlHost'] ? settings['mysqlHost'] : 'localhost'
-    @mysqlPort         = settings['mysqlPort'] ? settings['mysqlPort'] : 3306
-    @mysqlUser         = settings['mysqlUser'] ? settings['mysqlUser'] : 'root'
-    @mysqlPass         = settings['mysqlPass'] ? settings['mysqlPass'] : ''
+    @logDirectory      = settings['logDirectory'] ? settings['logDirectory'] : '/tmp'
+    @mysqlHost         = settings['mysqlHost']    ? settings['mysqlHost']    : 'localhost'
+    @mysqlPort         = settings['mysqlPort']    ? settings['mysqlPort']    : 3306
+    @mysqlUser         = settings['mysqlUser']    ? settings['mysqlUser']    : 'root'
+    @mysqlPass         = settings['mysqlPass']    ? settings['mysqlPass']    : ''
+
     @mysqlQuery        = 'SHOW /*!50002 GLOBAL */ STATUS'
 
     logFile            = sprintf( '%s/mysql-status.log', @logDirectory )
