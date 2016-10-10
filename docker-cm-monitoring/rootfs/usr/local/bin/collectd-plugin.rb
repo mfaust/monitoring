@@ -24,8 +24,8 @@ if( File.exist?( config_file ) )
 
   @interval     = config['collectd-plugin']['interval'] ? config['collectd-plugin']['interval'] : 15
 
-  @memcacheHost = ENV['MEMCACHE_HOST']              ? ENV['MEMCACHE_HOST']              : nil
-  @memcachePort = ENV['MEMCACHE_PORT']              ? ENV['MEMCACHE_PORT']              : nil
+  @memcacheHost = ENV['MEMCACHE_HOST']     ? ENV['MEMCACHE_HOST']     : nil
+  @memcachePort = ENV['MEMCACHE_PORT']     ? ENV['MEMCACHE_PORT']     : nil
 
 else
   puts "no configuration exists, use default settings"
@@ -33,15 +33,17 @@ else
   @logDir       = '/tmp/log'
   @cacheDir     = '/tmp/cache'
   @interval     = 15
+  @memcacheHost  = nil
+  @memcachePort  = nil
 
 end
 
 options = {
-  'log_dir'      => @logDir,
-  'cache_dir'    => @cacheDir,
-  'memcacheHost' => @memcacheHost,
-  'memcachePort' => @memcachePort,
-  'interval'     => @interval
+  :logDirectory    => @logDir,
+  :cacheDirectory  => @cacheDir,
+  :memcacheHost    => @memcacheHost,
+  :memcachePort    => @memcachePort,
+  :interval        => @interval
 }
 
 # -----------------------------------------------------------------------------

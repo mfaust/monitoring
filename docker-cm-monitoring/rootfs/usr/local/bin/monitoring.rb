@@ -23,17 +23,17 @@ class Monitoring
 
   def initialize( settings = {} )
 
-    @logDirectory      = settings[:logDirectory] ? settings[:logDirectory] : '/tmp'
+    @logDirectory   = settings[:logDirectory] ? settings[:logDirectory] : '/tmp'
 
-    logFile = sprintf( '%s/monitoring.log', @logDirectory )
+    logFile         = sprintf( '%s/monitoring.log', @logDirectory )
 
-    file      = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
-    file.sync = true
-    @log = Logger.new( file, 'weekly', 1024000 )
+    file            = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
+    file.sync       = true
+    @log            = Logger.new( file, 'weekly', 1024000 )
 #    @log = Logger.new( STDOUT )
-    @log.level = Logger::INFO
+    @log.level      = Logger::INFO
     @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
-    @log.formatter = proc do |severity, datetime, progname, msg|
+    @log.formatter  = proc do |severity, datetime, progname, msg|
       "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
     end
 
@@ -42,41 +42,39 @@ class Monitoring
     self.readConfigFile()
 
     serviceDiscoverConfig = {
-      'log_dir'            => @logDirectory,
-      'cache_dir'          => @cacheDir,
-      'jolokia_host'       => @jolokia_host,
-      'jolokia_port'       => @jolokia_port,
-      'scanDiscovery'      => @scanDiscovery,
-      'serviceConfigFile'  => '/etc/cm-service.json'
+      :logDirectory        => @logDirectory,
+      :cacheDirectory      => @cacheDir,
+      :jolokiaHost         => @jolokiaHost,
+      :jolokiaPort         => @jolokiaPort,
+      :scanDiscovery       => @scanDiscovery,
+      :serviceConfigFile   => '/etc/cm-service.json'
     }
 
     grafanaConfig = {
-      'log_dir'            => @logDirectory,
-      'cache_dir'          => @cacheDir,
-      'grafana_host'       => @grafana_host,
-      'grafana_port'       => @grafana_port,
-      'grafana_path'       => @grafana_path,
-      'memcacheHost'       => @memcacheHost,
-      'memcachePort'       => @memcachePort,
-      'template_dir'       => @template_dir
+      :logDirectory        => @logDirectory,
+      :cacheDirectory      => @cacheDir,
+      :grafanaHost         => @grafanaHost,
+      :grafanaPort         => @grafanaPort,
+      :grafanaPath         => @grafanaPath,
+      :memcacheHost        => @memcacheHost,
+      :memcachePort        => @memcachePort,
+      :templateDirectory   => @templateDirectory
     }
 
     icingaConfig = {
-      'logDirectory'       => @logDirectory,
-      'icingaHost'         => @icingaHost,
-      'icingaPort'         => @icingaPort,
-      'icingaApiUser'      => @icingaApiUser,
-      'icingaApiPass'      => @icingaApiPass
+      :logDirectory        => @logDirectory,
+      :icingaHost          => @icingaHost,
+      :icingaPort          => @icingaPort,
+      :icingaApiUser       => @icingaApiUser,
+      :icingaApiPass       => @icingaApiPass
     }
 
     graphiteOptions = {
-      'logDirectory'       => @logDirectory,
-      'graphiteHost'       => @graphiteHost,
-      'graphiteHttpPort'   => @graphiteHttpPort,
-      'graphitePort'       => @graphitePort,
-      'graphitePath'       => @graphitePath,
-      'memcacheHost'       => @memcacheHost,
-      'memcachePort'       => @memcachePort
+      :logDirectory        => @logDirectory,
+      :graphiteHost        => @graphiteHost,
+      :graphiteHttpPort    => @graphiteHttpPort,
+      :graphitePort        => @graphitePort,
+      :graphitePath        => @graphitePath
     }
 
     version              = '1.0.1'
@@ -106,12 +104,12 @@ class Monitoring
     @logDirectory     = config['logDirectory']             ? config['logDirectory']             : '/tmp/log'
     @cacheDir         = config['cacheDirectory']           ? config['cacheDirectory']           : '/tmp/cache'
 
-    @jolokia_host     = config['jolokia']['host']          ? config['jolokia']['host']          : 'localhost'
-    @jolokia_port     = config['jolokia']['port']          ? config['jolokia']['port']          : 8080
+    @jolokiaHost      = config['jolokia']['host']          ? config['jolokia']['host']          : 'localhost'
+    @jolokiaPort      = config['jolokia']['port']          ? config['jolokia']['port']          : 8080
 
-    @grafana_host     = config['grafana']['host']          ? config['grafana']['host']          : 'localhost'
-    @grafana_port     = config['grafana']['port']          ? config['grafana']['port']          : 3000
-    @grafana_path     = config['grafana']['path']          ? config['grafana']['path']          : nil
+    @grafanaHost      = config['grafana']['host']          ? config['grafana']['host']          : 'localhost'
+    @grafanaPort      = config['grafana']['port']          ? config['grafana']['port']          : 3000
+    @grafanaPath      = config['grafana']['path']          ? config['grafana']['path']          : nil
 
     @icingaHost       = config['icinga']['host']           ? config['icinga']['host']           : 'localhost'
     @icingaPort       = config['icinga']['port']           ? config['icinga']['port']           : 5665
@@ -123,7 +121,7 @@ class Monitoring
     @graphitePort     = config['graphite']['port']         ? config['graphite']['port']         : 2003
     @graphitePath     = config['graphite']['path']         ? config['graphite']['path']         : nil
 
-    @template_dir     = config['grafana']['templateDirectory']  ? config['grafana']['templateDirectory']  : '/var/tmp/templates'
+    @templateDirectory = config['grafana']['templateDirectory']  ? config['grafana']['templateDirectory']  : '/var/tmp/templates'
 
     @memcacheHost     = ENV['MEMCACHE_HOST']               ? ENV['MEMCACHE_HOST']               : nil
     @memcachePort     = ENV['MEMCACHE_PORT']               ? ENV['MEMCACHE_PORT']               : nil

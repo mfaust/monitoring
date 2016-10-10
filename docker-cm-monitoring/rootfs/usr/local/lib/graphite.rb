@@ -19,22 +19,20 @@ module GraphiteAnnotions
 
     def initialize( settings = {} )
 
-      @logDirectory     = settings['logDirectory']     ? settings['logDirectory']     : '/tmp'
-
-      @graphiteHost     = settings['graphiteHost']     ? settings['graphiteHost']     : 'localhost'
-      @graphiteHttpPort = settings['graphiteHttpPort'] ? settings['graphiteHttpPort'] : 8081
-      @graphitePort     = settings['graphitePort']     ? settings['graphitePort']     : 2003
-      @graphitePath     = settings['graphitePath']     ? settings['graphitePath']     : nil
+      @logDirectory     = settings[:logDirectory]     ? settings[:logDirectory]     : '/tmp'
+      @graphiteHost     = settings[:graphiteHost]     ? settings[:graphiteHost]     : 'localhost'
+      @graphiteHttpPort = settings[:graphiteHttpPort] ? settings[:graphiteHttpPort] : 8081
+      @graphitePort     = settings[:graphitePort]     ? settings[:graphitePort]     : 2003
+      @graphitePath     = settings[:graphitePath]     ? settings[:graphitePath]     : nil
 
       @graphiteURI      = sprintf( 'http://%s:%s%s/events/', @graphiteHost, @graphiteHttpPort, @graphitePath )
 
-      logFile = sprintf( '%s/graphite.log', @logDirectory )
-
-      file      = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
-      file.sync = true
-      @log = Logger.new( file, 'weekly', 1024000 )
+      logFile        = sprintf( '%s/graphite.log', @logDirectory )
+      file           = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
+      file.sync      = true
+      @log           = Logger.new( file, 'weekly', 1024000 )
 #      @log = Logger.new( STDOUT )
-      @log.level = Logger::INFO
+      @log.level     = Logger::INFO
       @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
       @log.formatter = proc do |severity, datetime, progname, msg|
         "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
@@ -172,10 +170,9 @@ module GraphiteAnnotions
     end
 
 
-    def deploymentAnnotation( host, message )
+    def deploymentAnnotation( host, descr )
 
       tag      = Array.new()
-      message  = String.new()
       descr    = String.new()
       time     = Time.now().strftime( '%Y-%m-%d %H:%M:%S' )
 
@@ -184,7 +181,7 @@ module GraphiteAnnotions
 
       message = sprintf( 'Deployment on Node <b>%s</b> started (%s)', host, time )
 
-      descr   = 'Deployment start'
+      descr   = sprintf( 'Deployment %s', descr )
 
       self.annotion( descr, tag, message )
 
@@ -194,7 +191,6 @@ module GraphiteAnnotions
     def generalAnnotation( host, descr, message, customTags = [] )
 
       tag      = Array.new()
-      message  = String.new()
       time     = Time.now().strftime( '%Y-%m-%d %H:%M:%S' )
 
       tag << host

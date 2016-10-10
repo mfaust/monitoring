@@ -27,25 +27,24 @@ class Grafana
 
   def initialize( settings = {} )
 
-    @logDirectory      = settings['logDirectory']   ? settings['logDirectory']   : '/tmp'
-    @cacheDirectory    = settings['cacheDirectory'] ? settings['cacheDirectory'] : '/var/tmp/monitoring'
-    @templateDirectory = settings['template_dir']   ? settings['template_dir']   : '/var/tmp/templates'
-
-    @grafanaHost       = settings['grafana_host']   ? settings['grafana_host']   : 'localhost'
-    @grafanaPort       = settings['grafana_port']   ? settings['grafana_port']   : 3000
-    @grafanaPath       = settings['grafana_path']   ? settings['grafana_path']   : nil
-    @memcacheHost      = settings['memcacheHost']   ? settings['memcacheHost']   : nil
-    @memcachePort      = settings['memcachePort']   ? settings['memcachePort']   : nil
+    @logDirectory      = settings[:logDirectory]      ? settings[:logDirectory]      : '/tmp'
+    @cacheDirectory    = settings[:cacheDirectory]    ? settings[:cacheDirectory]    : '/var/tmp/monitoring'
+    @templateDirectory = settings[:templateDirectory] ? settings[:templateDirectory] : '/var/tmp/templates'
+    @grafanaHost       = settings[:grafanaHost]       ? settings[:grafanaHost]       : 'localhost'
+    @grafanaPort       = settings[:grafanaPort]       ? settings[:grafanaPort]       : 3000
+    @grafanaPath       = settings[:grafanaPath]       ? settings[:grafanaPath]       : nil
+    @memcacheHost      = settings[:memcacheHost]      ? settings[:memcacheHost]      : nil
+    @memcachePort      = settings[:memcachePort]      ? settings[:memcachePort]      : nil
 
     @grafanaURI        = sprintf( 'http://%s:%s%s', @grafanaHost, @grafanaPort, @grafanaPath )
+
     @supportMemcache   = false
 
-    logFile            = sprintf( '%s/grafana.log', @logDirectory )
-
-    file      = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
-    file.sync = true
-    @log = Logger.new(file, 'weekly', 1024000)
-    @log.level = Logger::INFO
+    logFile        = sprintf( '%s/grafana.log', @logDirectory )
+    file           = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
+    file.sync      = true
+    @log           = Logger.new(file, 'weekly', 1024000)
+    @log.level     = Logger::INFO
     @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
     @log.formatter = proc do |severity, datetime, progname, msg|
       "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
@@ -78,8 +77,7 @@ class Grafana
     @log.info( '  Copyright 2016 Coremedia' )
 
     if( @supportMemcache == true )
-      @log.info( "  Memcache Support enabled" )
-      @log.info( "  Memcache Server #{@memcacheHost}:#{@memcachePort}" )
+      @log.info( sprintf( '  Memcache Support enabled (%s:%s)', @memcacheHost, @memcachePort ) )
     end
 
     @log.info( '-----------------------------------------------------------------' )
@@ -90,12 +88,12 @@ class Grafana
 
   def prepare( host )
 
-    @shortHostname    = self.shortHostname( host )
-    @grafanaHostname  = host.gsub( '.', '-' )
+    @shortHostname        = self.shortHostname( host )
+    @grafanaHostname      = host.gsub( '.', '-' )
 
-    @discoveryFile    = sprintf( '%s/%s/discovery.json'         , @cacheDirectory, host )
-    @mergedHostFile   = sprintf( '%s/%s/mergedHostData.json'    , @cacheDirectory, host )
-    @monitoringResultFile   = sprintf( '%s/%s/monitoring.result', @cacheDirectory, host )
+    @discoveryFile        = sprintf( '%s/%s/discovery.json'         , @cacheDirectory, host )
+    @mergedHostFile       = sprintf( '%s/%s/mergedHostData.json'    , @cacheDirectory, host )
+    @monitoringResultFile = sprintf( '%s/%s/monitoring.result', @cacheDirectory, host )
 
   end
 

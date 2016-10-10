@@ -26,15 +26,15 @@ class DataCollector
 
   def initialize( settings = {} )
 
-    @logDirectory      = settings['logDirectory']          ? settings['logDirectory']          : '/tmp/log'
-    @cacheDirectory    = settings['cacheDirectory']        ? settings['cacheDirectory']        : '/tmp/cache'
-    @jolokiaHost       = settings['jolokia_host']          ? settings['jolokia_host']          : 'localhost'
-    @jolokiaPort       = settings['jolokia_port']          ? settings['jolokia_port']          : 8080
-    @memcacheHost      = settings['memcacheHost']          ? settings['memcacheHost']          : nil
-    @memcachePort      = settings['memcachePort']          ? settings['memcachePort']          : nil
+    @logDirectory      = settings[:logDirectory]          ? settings[:logDirectory]          : '/tmp/log'
+    @cacheDirectory    = settings[:cacheDirectory]        ? settings[:cacheDirectory]        : '/tmp/cache'
+    @jolokiaHost       = settings[:jolokiaHost]           ? settings[:jolokiaHost]           : 'localhost'
+    @jolokiaPort       = settings[:jolokiaPort]           ? settings[:jolokiaPort]           : 8080
+    @memcacheHost      = settings[:memcacheHost]          ? settings[:memcacheHost]          : nil
+    @memcachePort      = settings[:memcachePort]          ? settings[:memcachePort]          : nil
 
-    applicationConfig  = settings['applicationConfigFile'] ? settings['applicationConfigFile'] : nil
-    serviceConfig      = settings['serviceConfigFile']     ? settings['serviceConfigFile']     : nil
+    applicationConfig  = settings[:applicationConfigFile] ? settings[:applicationConfigFile] : nil
+    serviceConfig      = settings[:serviceConfigFile]     ? settings[:serviceConfigFile]     : nil
 
     @supportMemcache   = false
     @DEBUG             = false
@@ -47,18 +47,16 @@ class DataCollector
       Dir.mkdir( @cacheDirectory )
     end
 
-    logFile = sprintf( '%s/data-collector.log', @logDirectory )
-
-    file      = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
-    file.sync = true
-    @log = Logger.new( file, 'weekly', 1024000 )
+    logFile        = sprintf( '%s/data-collector.log', @logDirectory )
+    file           = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
+    file.sync      = true
+    @log           = Logger.new( file, 'weekly', 1024000 )
 #    @log = Logger.new( STDOUT )
-    @log.level = Logger::INFO
+    @log.level     = Logger::INFO
     @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
     @log.formatter = proc do |severity, datetime, progname, msg|
       "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
     end
-
 
     if( applicationConfig == nil or serviceConfig == nil )
       msg = 'no Configuration File given'
@@ -71,7 +69,6 @@ class DataCollector
     if( @memcacheHost != nil && @memcachePort != nil )
 
       # enable Memcache Support
-
       require 'dalli'
 
       memcacheOptions = {
@@ -102,8 +99,7 @@ class DataCollector
     @log.info( "  cache directory located at #{@cacheDirectory}" )
 
     if( @supportMemcache == true )
-      @log.info( "  Memcache Support enabled" )
-      @log.info( "  Memcache Server #{@memcacheHost}:#{@memcachePort}" )
+      @log.info( sprintf( '  Memcache Support enabled (%s:%s)', @memcacheHost, @memcachePort ) )
     end
 
     @log.info( '-----------------------------------------------------------------' )
@@ -126,7 +122,8 @@ class DataCollector
     begin
 
       if( File.exist?( @appConfigFile ) )
-        @config      = JSON.parse( File.read( @appConfigFile ) )
+
+        @config      = YAML.load_file( @appConfigFile )
 
         if( @config['jolokia']['applications'] != nil )
           @jolokiaApplications = @config['jolokia']['applications']
@@ -136,10 +133,10 @@ class DataCollector
         @log.error( sprintf( 'Application Config File %s not found!', @appConfigFile ) )
         exit 1
       end
-    rescue JSON::ParserError => e
+    rescue Exception
 
-      @log.error( 'wrong result (no json)')
-      @log.error( e )
+      @log.error( 'wrong result (no yaml)')
+      @log.error( "#{$!}" )
       exit 1
     end
 

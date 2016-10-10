@@ -3,7 +3,7 @@
 # 05.10.2016 - Bodo Schulz
 #
 #
-# v2.0.0
+# v2.0.1
 
 # -----------------------------------------------------------------------------
 
@@ -20,8 +20,6 @@ module Sinatra
   class MonitoringRest < Base
 
     configure do
-#       enable :logging
-#       disable :dump_errors
 
       set :environment, :production
 
@@ -29,11 +27,11 @@ module Sinatra
 
         config = YAML.load_file( '/etc/cm-monitoring.yaml' )
 
-        @logDirectory     = config['monitoring']['log_dir']              ? config['monitoring']['log_dir']              : '/tmp/log'
-        @cacheDir         = config['monitoring']['cache_dir']            ? config['monitoring']['cache_dir']            : '/tmp/cache'
+        @logDirectory     = config['logDirectory']         ? config['logDirectory']         : '/tmp/log'
+        @cacheDir         = config['cacheDirectory']       ? config['cacheDirectory']       : '/tmp/cache'
 
-        @restServicePort  = config['monitoring']['rest-service']['port'] ? config['monitoring']['rest-service']['port'] : 4567
-        @restServiceBind  = config['monitoring']['rest-service']['bind'] ? config['monitoring']['rest-service']['bind'] : '0.0.0.0'
+        @restServicePort  = config['rest-service']['port'] ? config['rest-service']['port'] : 4567
+        @restServiceBind  = config['rest-service']['bind'] ? config['rest-service']['bind'] : '0.0.0.0'
 
       else
         puts "no configuration exists, use default settings"

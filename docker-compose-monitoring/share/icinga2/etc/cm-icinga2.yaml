@@ -33,27 +33,3 @@ license:
   warning: 50
   critical: 20
 
-http:
-  sites:
-    - http://overview.%HOST%.coremedia.vm/
-    # preview
-    - https://preview-helios.%HOST%.coremedia.vm/perfectchef-de-de
-    - https://preview-helios.%HOST%.coremedia.vm/blueprint/servlet/perfectchef
-    - http://shop-preview-production-helios.%HOST%.coremedia.vm/webapp/wcs/stores/servlet/en/auroraesite
-    - http://shop-preview-production-helios.%HOST%.coremedia.vm/webapp/wcs/stores/servlet/en/aurorab2besite
-    - http://preview-corporate.%HOST%.coremedia.vm/corporate
-    # live
-    - https://helios.%HOST%.coremedia.vm/perfectchef
-    - https://helios.%HOST%.coremedia.vm/perfectchef-de-de
-    - https://shop-helios.%HOST%.coremedia.vm/webapp/wcs/stores/servlet/en/auroraesite
-    - https://shop-helios.%HOST%.coremedia.vm/webapp/wcs/stores/servlet/en/aurorab2besite
-    - https://corporate.%HOST%.coremedia.vm/corporate
-    - https://corporate.%HOST%.coremedia.vm/corporate-de-de
-    # management
-    - https://studio.%HOST%.coremedia.vm/
-    - https://%HOST%-wcs.coremedia.vm:8000/lobtools/cmc/ManagementCenterMain?locale=en_US
-    - https://%HOST%-wcs.coremedia.vm:8000/webapp/wcs/tools/servlet/ToolsLogon?XMLFile=common.mcLogon
-    - https://%HOST%-wcs.coremedia.vm:8002/webapp/wcs/admin/servlet/ToolsLogon?XMLFile=adminconsole.AdminConsoleLogon
-    - https://%HOST%-wcs.coremedia.vm:8004/webapp/wcs/orgadmin/servlet/ToolsLogon?XMLFile=buyerconsole.BuyAdminConsoleLogon&storeId=0
-    # wcs
-    - https://%HOST%-wcs.coremedia.vm:9043/ibm/console/logon.jsp

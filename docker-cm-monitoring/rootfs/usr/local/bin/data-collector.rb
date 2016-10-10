@@ -11,24 +11,23 @@ require 'yaml'
 
 lib_dir    = File.expand_path( '../../lib', __FILE__ )
 
-applicationConfigFile = '/etc/cm-application.json'
-serviceConfigFile     = '/etc/cm-service.json'
-
 require sprintf( '%s/data-collector', lib_dir )
 
-config_file = '/etc/cm-monitoring.yaml'
+applicationConfigFile = '/etc/cm-application.yaml'
+serviceConfigFile     = '/etc/cm-service.yaml'
+configFile            = '/etc/cm-monitoring.yaml'
 
-if( File.exist?( config_file ) )
+if( File.exist?( configFile ) )
 
-  config = YAML.load_file( config_file )
+  config = YAML.load_file( configFile )
 
-  @logDir           = config['logDirectory']              ? config['logDirectory']          : '/tmp/log'
-  @cacheDir         = config['cacheDirectory']            ? config['cacheDirectory']        : '/tmp/cache'
-  @jolokia_host     = config['jolokia']['host']      ? config['jolokia']['host']  : 'localhost'
-  @jolokia_port     = config['jolokia']['port']      ? config['jolokia']['port']  : 8080
+  @logDir           = config['logDirectory']         ? config['logDirectory']     : '/tmp/log'
+  @cacheDir         = config['cacheDirectory']       ? config['cacheDirectory']   : '/tmp/cache'
+  @jolokiaHost      = config['jolokia']['host']      ? config['jolokia']['host']  : 'localhost'
+  @jolokiaPort      = config['jolokia']['port']      ? config['jolokia']['port']  : 8080
 
-  @memcacheHost     = ENV['MEMCACHE_HOST']                         ? ENV['MEMCACHE_HOST']                     : nil
-  @memcachePort     = ENV['MEMCACHE_PORT']                         ? ENV['MEMCACHE_PORT']                     : nil
+  @memcacheHost     = ENV['MEMCACHE_HOST']           ? ENV['MEMCACHE_HOST']       : nil
+  @memcachePort     = ENV['MEMCACHE_PORT']           ? ENV['MEMCACHE_PORT']       : nil
 
   @scanDiscovery    = config['data-collector']['scan-discovery'] ? config['data-collector']['scan-discovery'] : '10m'
 
@@ -37,22 +36,24 @@ else
 
   @logDir        = '/tmp/log'
   @cacheDir      = '/tmp/cache'
-  @jolokia_host  = 'localhost'
-  @jolokia_port  = 8080
+  @jolokiaHost   = 'localhost'
+  @jolokiaPort   = 8080
+  @memcacheHost  = nil
+  @memcachePort  = nil
   @scanDiscovery = '10m'
 
 end
 
 options = {
-  'log_dir'               => @logDir,
-  'cache_dir'             => @cacheDir,
-  'jolokia_host'          => @jolokia_host,
-  'jolokia_port'          => @jolokia_port,
-  'memcacheHost'          => @memcacheHost,
-  'memcachePort'          => @memcachePort,
-  'scanDiscovery'         => @scanDiscovery,
-  'applicationConfigFile' => applicationConfigFile,
-  'serviceConfigFile'     => serviceConfigFile
+  :logDirectory          => @logDir,
+  :cacheDirectory        => @cacheDir,
+  :jolokiaHost           => @jolokiaHost,
+  :jolokiaPort           => @jolokiaPort,
+  :memcacheHost          => @memcacheHost,
+  :memcachePort          => @memcachePort,
+  :scanDiscovery         => @scanDiscovery,
+  :applicationConfigFile => applicationConfigFile,
+  :serviceConfigFile     => serviceConfigFile
 }
 
 # -----------------------------------------------------------------------------

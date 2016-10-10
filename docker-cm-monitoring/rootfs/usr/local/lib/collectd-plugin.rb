@@ -31,19 +31,18 @@ class CollecdPlugin
 
   def initialize( settings = {} )
 
-    @logDirectory   = settings['logDirectory']   ? settings['logDirectory']   : '/tmp'
-    @cacheDirectory = settings['cacheDirectory'] ? settings['cacheDirectory'] : '/var/tmp/monitoring'
-    @memcacheHost   = settings['memcacheHost']   ? settings['memcacheHost']   : nil
-    @memcachePort   = settings['memcachePort']   ? settings['memcachePort']   : nil
-    @interval       = settings['interval']       ? settings['interval']       : 15
+    @logDirectory   = settings[:logDirectory]   ? settings[:logDirectory]   : '/tmp/log'
+    @cacheDirectory = settings[:cacheDirectory] ? settings[:cacheDirectory] : '/tmp/cache'
+    @memcacheHost   = settings[:memcacheHost]   ? settings[:memcacheHost]   : nil
+    @memcachePort   = settings[:memcachePort]   ? settings[:memcachePort]   : nil
+    @interval       = settings[:interval]       ? settings[:interval]       : 15
 
-    logFile = sprintf( '%s/collectd.log', @logDirectory )
-
-    file      = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
-    file.sync = true
-    @log = Logger.new( file, 'weekly', 1024000 )
+    logFile        = sprintf( '%s/collectd.log', @logDirectory )
+    file           = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
+    file.sync      = true
+    @log           = Logger.new( file, 'weekly', 1024000 )
 #    @log = Logger.new( STDOUT )
-    @log.level = Logger::INFO
+    @log.level     = Logger::INFO
     @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
     @log.formatter = proc do |severity, datetime, progname, msg|
       "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
@@ -84,8 +83,7 @@ class CollecdPlugin
     @log.info( "  configured interval #{@interval}" )
 
     if( @supportMemcache == true )
-      @log.info( "  Memcache Support enabled" )
-      @log.info( "  Memcache Server #{@memcacheHost}:#{@memcachePort}" )
+      @log.info( sprintf( '  Memcache Support enabled (%s:%s)', @memcacheHost, @memcachePort ) )
     end
 
     @log.info( '-----------------------------------------------------------------' )
@@ -1964,43 +1962,55 @@ class CollecdPlugin
 
       if( @supportMemcache == true )
 
-        resultFile = sprintf( '%s/%s/discovery.json', @cacheDirectory, h )
+        key         = sprintf( '%s__discovery.data', h )
+        data      = @mc.get( key )
 
-        if( File.exists?( resultFile ) )
+        # TODO
+        # handle timeouts
 
-          data = JSON.parse( File.read( resultFile ) )
+        if( data == nil )
 
-          data.each do |service, d|
+          resultFile = sprintf( '%s/%s/discovery.json', @cacheDirectory, h )
 
-            @Service = normalizeService( service )
+          if( File.exists?( resultFile ) )
 
-            port        = d['port']        ? d['port']        : nil
-            description = d['description'] ? d['description'] : nil
+            data = JSON.parse( File.read( resultFile ) )
 
-            key         = sprintf( 'result__%s__%s', h, service )
-            result      = @mc.get( key )
+            @mc.set( key, data )
+          end
+        end
 
-            case service
-            when 'mongodb'
-              graphiteOutput.push( self.ParseResult_mongoDB( result ) )
-            when 'mysql'
-              graphiteOutput.push( self.ParseResult_mySQL( result ) )
-            else
+        data.each do |service, d|
 
-              if( result != nil )
+          @Service = normalizeService( service )
 
-                result.each do |r|
+          port        = d['port']        ? d['port']        : nil
+          description = d['description'] ? d['description'] : nil
 
-                  key    = r.keys.first
-                  values = r.values.first
+          key         = sprintf( 'result__%s__%s', h, service )
+          result      = @mc.get( key )
 
-                  graphiteOutput.push( self.createGraphiteOutput( key, values ) )
+          case service
+          when 'mongodb'
+            graphiteOutput.push( self.ParseResult_mongoDB( result ) )
+          when 'mysql'
+            graphiteOutput.push( self.ParseResult_mySQL( result ) )
+          else
 
-                end
+            if( result != nil )
+
+              result.each do |r|
+
+                key    = r.keys.first
+                values = r.values.first
+
+                graphiteOutput.push( self.createGraphiteOutput( key, values ) )
+
               end
             end
           end
         end
+
       else
 
         resultFile = sprintf( '%s/%s/monitoring.result', @cacheDirectory, h )

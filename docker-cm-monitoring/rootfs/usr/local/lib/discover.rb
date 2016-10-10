@@ -62,20 +62,20 @@ class ServiceDiscovery
       49099
     ]
 
-    @logDirectory       = settings['logDirectory']      ? settings['logDirectory']      : '/tmp'
-    @cacheDirectory     = settings['cacheDirectory']    ? settings['cacheDirectory']    : '/var/tmp/monitoring'
-    @jolokiaHost        = settings['jolokia_host']      ? settings['jolokia_host']      : 'localhost'
-    @jolokiaPort        = settings['jolokia_port']      ? settings['jolokia_port']      : 8080
-    @serviceConfigFile  = settings['serviceConfigFile'] ? settings['serviceConfigFile'] : nil
-    @scanPorts          = settings['scanPorts']         ? settings['scanPorts']         : ports
+    @logDirectory      = settings[:logDirectory]      ? settings[:logDirectory]        : '/tmp/log'
+    @cacheDirectory    = settings[:cacheDirectory]    ? settings[:cacheDirectory]      : '/tmp/cache'
+    @jolokiaHost       = settings[:jolokiaHost]       ? settings[:jolokiaHost]         : 'localhost'
+    @jolokiaPort       = settings[:jolokiaPort]       ? settings[:jolokiaPort]         : 8080
+    @serviceConfig     = settings[:serviceConfigFile] ? settings[:serviceConfigFile]   : nil
+    @scanPorts         = settings[:scanPorts]         ? settings[:scanPorts]           : ports
 
-    logFile = sprintf( '%s/service-discovery.log', @logDirectory )
+    logFile        = sprintf( '%s/service-discovery.log', @logDirectory )
 
-    file      = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
-    file.sync = true
-    @log = Logger.new( file, 'weekly', 1024000 )
+    file           = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
+    file.sync      = true
+    @log           = Logger.new( file, 'weekly', 1024000 )
 #    @log = Logger.new( STDOUT )
-    @log.level = Logger::INFO
+    @log.level     = Logger::INFO
     @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
     @log.formatter = proc do |severity, datetime, progname, msg|
       "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
@@ -106,7 +106,7 @@ class ServiceDiscovery
     #
     @log.info( 'read defines of Services Properties' )
 
-    if( @serviceConfigFile == nil )
+    if( @serviceConfig == nil )
       puts 'missing service config file'
       @log.error( 'missing service config file' )
       exit 1
@@ -114,16 +114,16 @@ class ServiceDiscovery
 
     begin
 
-      if( File.exist?( @serviceConfigFile ) )
-        @serviceConfig      = JSON.parse( File.read( @serviceConfigFile ) )
+      if( File.exist?( @serviceConfig ) )
+        @serviceConfig      = YAML.parse( File.read( @serviceConfig ) )
       else
-        @log.error( sprintf( 'Config File %s not found!', @serviceConfigFile ) )
+        @log.error( sprintf( 'Config File %s not found!', @serviceConfig ) )
         exit 1
       end
 
-    rescue JSON::ParserError => e
+    rescue YAML::ParserError => e
 
-      @log.error( 'wrong result (no json)')
+      @log.error( 'wrong result (no yaml)')
       @log.error( e )
       exit 1
     end
