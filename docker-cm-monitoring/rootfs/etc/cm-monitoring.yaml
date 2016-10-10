@@ -40,30 +40,77 @@ icinga:
 
 service-checks:
   http:
-    coremedia:
-      - http://overview.%HOST%/
-      - https://helios.%HOST%/perfectchef
-      - https://helios.%HOST%/perfectchef-de-de
-      - https://corporate.%HOST%/corporate
-      - https://corporate.%HOST%/corporate-de-de
-      - https://studio.%HOST%/
-      - https://preview-helios.%HOST%/perfectchef-de-de
-      - https://preview-helios.%HOST%/blueprint/servlet/perfectchef
-      - https://shop-preview-production-helios.%HOST%/webapp/wcs/stores/servlet/en/auroraesite
-      - https://shop-preview-production-helios.%HOST%/webapp/wcs/stores/servlet/en/aurorab2besite
-      - https://preview-corporate.%HOST%/corporate
-    wcs:
-      - https://shop-helios.%HOST%/webapp/wcs/stores/servlet/en/auroraesite
-      - https://shop-helios.%HOST%/webapp/wcs/stores/servlet/en/aurorab2besite
-      - https://%HOST%-wcs:8000/lobtools/cmc/ManagementCenterMain?locale=en_US
-      - https://%HOST%-wcs:8000/webapp/wcs/tools/servlet/ToolsLogon?XMLFile=common.mcLogon
-      - https://%HOST%-wcs:8002/webapp/wcs/admin/servlet/ToolsLogon?XMLFile=adminconsole.AdminConsoleLogon
-      - https://%HOST%-wcs:8004/webapp/wcs/orgadmin/servlet/ToolsLogon?XMLFile=buyerconsole.BuyAdminConsoleLogon&storeId=0
-      - https://%HOST%-wcs:9043/ibm/console/logon.jsp
-  ssl:
-    coremedia:
-      - https://studio.%HOST%/
-    wcs:
+  - proto: http
+    port:
+    vhost: overview.%HOST%
+    url:
+  - proto: https
+    port:
+    vhost: helios.%HOST%
+    url: /perfectchef
+  - proto: https
+    port:
+    vhost: helios.%HOST%
+    url: /perfectchef-de-de
+  - proto: https
+    port:
+    vhost: corporate.%HOST%
+    url: /perfectchef
+  - proto: https
+    port:
+    vhost: corporate.%HOST%
+    url: /perfectchef-de-de
+  - proto: https
+    port:
+    vhost: studio.%HOST%
+    url:
+  - proto: https
+    port:
+    vhost: preview-helios.%HOST%
+    url: /perfectchef
+  - proto: https
+    port:
+    vhost: preview-helios.%HOST%
+    url: /blueprint/servlet/perfectchef
+  - proto: https
+    port:
+    vhost: shop-helios.%HOST%
+    url: /webapp/wcs/stores/servlet/en/auroraesite
+  - proto: https
+    port:
+    vhost: shop-helios.%HOST%
+    url: /webapp/wcs/stores/servlet/en/aurorab2besite
+  - proto: https
+    port: 8000
+    vhost: "%HOST%-wcs"
+    url: /lobtools/cmc/ManagementCenterMain?locale=en_US
+  - proto: https
+    port: 8000
+    vhost: "%HOST%-wcs"
+    url: /webapp/wcs/tools/servlet/ToolsLogon?XMLFile=common.mcLogon
+  - proto: https
+    port: 8002
+    vhost: "%HOST%-wcs"
+    url: /webapp/wcs/admin/servlet/ToolsLogon?XMLFile=adminconsole.AdminConsoleLogon
+  - proto: https
+    port: 8004
+    vhost: "%HOST%-wcs"
+    url: /webapp/wcs/orgadmin/servlet/ToolsLogon?XMLFile=buyerconsole.BuyAdminConsoleLogon&storeId=0
+  - proto: https
+    port: 9043
+    vhost: "%HOST%-wcs"
+    url: /ibm/console/logon.jsp
 
+  ssl:
+  - port:
+    vhost: studio.%HOST%
+  - port: 8000
+    vhost: "%HOST%-wcs:8000"
+  - port: 8002
+    vhost: "%HOST%-wcs:8000"
+  - port: 8004
+    vhost: "%HOST%-wcs:8000"
+  - port: 9043
+    vhost: "%HOST%-wcs:8000"
 
 
