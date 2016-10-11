@@ -44,7 +44,7 @@ class Grafana
     file           = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
     file.sync      = true
     @log           = Logger.new(file, 'weekly', 1024000)
-    @log.level     = Logger::INFO
+    @log.level     = Logger::DEBUG
     @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
     @log.formatter = proc do |severity, datetime, progname, msg|
       "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
@@ -174,10 +174,13 @@ class Grafana
 
     if( @supportMemcache == true )
 
-      mcKey         = sprintf( 'result__%s__%s', host, service )
+      memcacheKey = cacheKey( 'result', host, service )
+      @log.debug( sprintf( 'cachekey : %s', key ) )
+
+#       mcKey         = sprintf( 'result__%s__%s', host, service )
 
       for y in 1..10
-        result      = @mc.get( mcKey )
+        result      = @mc.get( memcacheKey )
 
         if( result != nil )
 
@@ -185,7 +188,7 @@ class Grafana
 
           break
         else
-          @log.debug( sprintf( 'Waiting for data %s ... %d', mcKey, y ) )
+          @log.debug( sprintf( 'Waiting for data %s ... %d', memcacheKey, y ) )
           sleep( 3 )
         end
       end
@@ -252,9 +255,12 @@ class Grafana
         servicesTmp.delete( 'mongodb' )
         servicesTmp.delete( 'demodata-generator' )
 
-        key         = sprintf( 'result__%s__%s', host, servicesTmp.last )
+        memcacheKey = cacheKey( 'result', host, servicesTmp.last )
+        @log.debug( sprintf( 'cachekey : %s', memcacheKey ) )
 
-        @monitoringResultJson = getJsonFromFile( key, true )
+#         key         = sprintf( 'result__%s__%s', host, servicesTmp.last )
+
+        @monitoringResultJson = getJsonFromFile( memcacheKey, true )
 
       else
         @monitoringResultJson = getJsonFromFile( @monitoringResultFile )

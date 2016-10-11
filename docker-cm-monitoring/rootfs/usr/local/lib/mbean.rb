@@ -2,6 +2,7 @@
 #
 #
 
+require_relative 'tools'
 
 
 class MBean
@@ -54,7 +55,10 @@ class MBean
 
       end
 
-      memcacheKey         = sprintf( 'result__%s__%s', host, service )
+      memcacheKey = cacheKey( 'result', host, service )
+      @log.debug( sprintf( 'cachekey : %s', memcacheKey ) )
+
+#      memcacheKey         = sprintf( 'result__%s__%s', host, service )
 
       for y in 1..3
 

@@ -119,6 +119,28 @@ end
     return ip
   end
 
+def ip( host )
+
+  begin
+    ip = Socket.gethostbyname( host ).first
+  rescue => e
+    @log.debug( e )
+    ip = name
+  end
+
+  return ip
+end
+
+
+def cacheKey( pre, host, v )
+
+  ip = ip( host )
+
+  return sprintf( '%s__%s__%s', pre, ip, v )
+
+end
+
+
 
   def portOpen? ( name, port, seconds = 1 )
 
