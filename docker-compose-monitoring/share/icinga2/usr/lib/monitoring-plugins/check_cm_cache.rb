@@ -44,6 +44,16 @@ class Icinga2Check_CM_Cache < Icinga2Check
         exit STATE_CRITICAL
       end
 
+      beanTimeout,difference = beanTimeout?( dataTimestamp )
+
+      if( beanTimeout == STATE_CRITICAL )
+        puts sprintf( 'CRITICAL - last check creation is out of date (%d seconds)', difference )
+        exit beanTimeout
+      elsif( beanTimeout == STATE_WARNING )
+        puts sprintf( 'WARNING - last check creation is out of date (%d seconds)', difference )
+        exit beanTimeout
+      end
+
       dataValue     = dataValue.values.first
 
       case type

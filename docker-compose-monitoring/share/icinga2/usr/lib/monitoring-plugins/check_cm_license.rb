@@ -42,7 +42,6 @@ class Icinga2Check_CM_Licenses < Icinga2Check
     warning  = config[:warning]  ? config[:warning]  : 50
     critical = config[:critical] ? config[:critical] : 20
 
-
     # get our bean
     data = MBean.bean( host, application, 'Server' )
 
@@ -58,6 +57,16 @@ class Icinga2Check_CM_Licenses < Icinga2Check
       if( dataValue == nil )
         puts 'CRITICAL - Service not running!?'
         exit STATE_CRITICAL
+      end
+
+      beanTimeout,difference = beanTimeout?( dataTimestamp )
+
+      if( beanTimeout == STATE_CRITICAL )
+        puts sprintf( 'CRITICAL - last check creation is out of date (%d seconds)', difference )
+        exit beanTimeout
+      elsif( beanTimeout == STATE_WARNING )
+        puts sprintf( 'WARNING - last check creation is out of date (%d seconds)', difference )
+        exit beanTimeout
       end
 
       dataValue       = dataValue.values.first

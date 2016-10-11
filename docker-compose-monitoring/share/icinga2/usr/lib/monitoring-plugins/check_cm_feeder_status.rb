@@ -73,6 +73,16 @@ class Icinga2Check_CM_Feeder < Icinga2Check
         exit STATE_CRITICAL
       end
 
+      beanTimeout,difference = beanTimeout?( healthTimestamp )
+
+      if( beanTimeout == STATE_CRITICAL )
+        puts sprintf( 'CRITICAL - last check creation is out of date (%d seconds)', difference )
+        exit beanTimeout
+      elsif( beanTimeout == STATE_WARNING )
+        puts sprintf( 'WARNING - last check creation is out of date (%d seconds)', difference )
+        exit beanTimeout
+      end
+
       healthValue     = healthValue.values.first
 
       healthy         = ( healthValue != nil &&  healthValue['Healthy'] ) ? healthValue['Healthy'] : false
@@ -88,19 +98,35 @@ class Icinga2Check_CM_Feeder < Icinga2Check
 
         maxEntries     = engineValue['KeysCount']         ? engineValue['KeysCount']         : 0  # Number of (active) keys
         currentEntries = engineValue['ValuesCount']       ? engineValue['ValuesCount']       : 0  # Number of (valid) values. It is less or equal to 'keysCount'
+        heartbeat      = engineValue['HeartBeat']         ? engineValue['HeartBeat']         : nil # 1 minute == 60000 ms
+
+        beanTimeout,difference = beanTimeout?( engineTimestamp )
+
+        if( beanTimeout == STATE_CRITICAL )
+          puts sprintf( 'CRITICAL - last check creation is out of date (%d seconds)', difference )
+          exit beanTimeout
+        elsif( beanTimeout == STATE_WARNING )
+          puts sprintf( 'WARNING - last check creation is out of date (%d seconds)', difference )
+          exit beanTimeout
+        end
 
         if( maxEntries == 0 && currentEntries == 0 )
 
           stateMessage = "no Feederdata. maybe restarting?"
         else
 
+          if( heartbeat >= 60000 )
+            puts sprintf( 'CRITICAL - Feeder Heartbeat is more then 1 minute old (Heartbeat %d ms)', heartbeat )
+            exit STATE_CRITICAL
+          end
+
           healthMessage  = "HEALTHY"
           diffEntries    = ( maxEntries - currentEntries ).to_i
 
           if( maxEntries == currentEntries )
-            stateMessage = sprintf( 'all %d Elements feeded', maxEntries )
+            stateMessage = sprintf( 'all %d Elements feeded (Heartbeat %d ms)', maxEntries, heartbeat )
           else
-            stateMessage = sprintf( '%d Elements of %d feeded. (%d left)', currentEntries, maxEntries, diffEntries )
+            stateMessage = sprintf( '%d Elements of %d feeded. (%d left - Heartbeat %d ms)', currentEntries, maxEntries, diffEntries, heartbeat )
           end
 
           if( diffEntries > critical )

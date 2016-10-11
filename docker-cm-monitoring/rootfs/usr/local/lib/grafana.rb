@@ -245,7 +245,14 @@ class Grafana
 
       if( @supportMemcache == true )
 
-        key         = sprintf( 'result__%s__%s', host, services.last )
+        # fist, we must remove strange services
+        servicesTmp = *services
+        servicesTmp.delete( 'mysql' )
+        servicesTmp.delete( 'postgres' )
+        servicesTmp.delete( 'mongodb' )
+        servicesTmp.delete( 'demodata-generator' )
+
+        key         = sprintf( 'result__%s__%s', host, servicesTmp.last )
 
         @monitoringResultJson = getJsonFromFile( key, true )
 

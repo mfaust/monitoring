@@ -3,6 +3,7 @@
 require 'optparse'
 require 'json'
 require 'logger'
+require 'time_difference'
 
 require_relative '/usr/local/lib/mbean.rb'
 
@@ -20,6 +21,15 @@ class Integer
   end
 end
 
+class Time
+  def add_minutes(m)
+    self + (60 * m)
+  end
+
+  def add_seconds(s)
+    self + s
+  end
+end
 
 class Icinga2Check
 
@@ -120,6 +130,47 @@ class Icinga2Check
   def shortHostname( hostname )
 
     return hostname.split( '.' ).first
+
+  end
+
+
+  # check timeout of last bean creation
+  #  warning  at 30000 ms == 30 seconds
+  #  critical at 60000 ms == 60 seconds
+  def beanTimeout?( timestamp, warning = 30, critical = 60 )
+
+    result = false
+    quorum = 5 # add 5 seconds
+
+    if( timestamp == nil || timestamp.to_s == 'null' )
+      result = true
+    else
+      n = Time.now()
+      t = Time.at( timestamp )
+      t = t.add_seconds( quorum )
+
+      difference = TimeDifference.between( t, n ).in_each_component
+      @log.debug( difference )
+      difference = difference[:seconds].ceil
+      @log.debug( difference )
+
+#       @log.debug( sprintf( ' now       : %s', n.to_datetime.strftime("%d %m %Y %H:%M:%S") ) )
+#       @log.debug( sprintf( ' timestamp : %s', t.to_datetime.strftime("%d %m %Y %H:%M:%S") ) )
+#       @log.debug( sprintf( ' difference: %d', difference ) )
+
+      if( difference > critical )
+#         @log.error( sprintf( '  %d > %d', difference, critical ) )
+        result = STATE_CRITICAL
+      elsif( difference > warning || difference == warning )
+#         @log.warning( sprintf( '  %d >= %d', difference, warning ) )
+        result = STATE_WARNING
+      else
+        result = STATE_OK
+      end
+
+    end
+
+    return result, difference
 
   end
 
