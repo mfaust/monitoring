@@ -150,9 +150,7 @@ class Icinga2Check
       t = t.add_seconds( quorum )
 
       difference = TimeDifference.between( t, n ).in_each_component
-      @log.debug( difference )
       difference = difference[:seconds].ceil
-      @log.debug( difference )
 
 #       @log.debug( sprintf( ' now       : %s', n.to_datetime.strftime("%d %m %Y %H:%M:%S") ) )
 #       @log.debug( sprintf( ' timestamp : %s', t.to_datetime.strftime("%d %m %Y %H:%M:%S") ) )
