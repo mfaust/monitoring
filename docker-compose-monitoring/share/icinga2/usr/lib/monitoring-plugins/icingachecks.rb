@@ -78,10 +78,10 @@ class Icinga2Check
 
   def logger()
 
-    logFile      = sprintf( '/var/log/icinga2check.log',  )
+    logFile      = sprintf( '/tmp/icinga2check.log',  )
     file         = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
     file.sync    = true
-    @log      = Logger.new( file, 'weekly', 1024000 )
+    log          = Logger.new( file, 'weekly', 1024000 )
 
 #    log = Logger.new( STDOUT )
     log.level = Logger::DEBUG
