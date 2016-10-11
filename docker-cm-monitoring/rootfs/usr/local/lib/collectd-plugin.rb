@@ -609,8 +609,6 @@ class CollecdPlugin
 
   def ParseResult_Runtime( data = {} )
 
-    @log.debug( data )
-
     result    = []
     mbean     = 'Runtime'
     format    = 'PUTVAL %s/%s-%s-%s/%s interval=%s N:%s'

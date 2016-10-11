@@ -115,16 +115,16 @@ class ServiceDiscovery
     begin
 
       if( File.exist?( @serviceConfig ) )
-        @serviceConfig      = YAML.parse( File.read( @serviceConfig ) )
+        @serviceConfig      = YAML.load_file( @serviceConfig )
       else
         @log.error( sprintf( 'Config File %s not found!', @serviceConfig ) )
         exit 1
       end
 
-    rescue YAML::ParserError => e
+    rescue Exception
 
       @log.error( 'wrong result (no yaml)')
-      @log.error( e )
+      @log.error( "#{$!}" )
       exit 1
     end
 

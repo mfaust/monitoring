@@ -63,7 +63,7 @@ service-checks:
   - proto: https
     port:
     vhost: studio.%HOST%
-    url:
+    url: /studio/
   - proto: https
     port:
     vhost: preview-helios.%HOST%
@@ -80,37 +80,8 @@ service-checks:
     port:
     vhost: shop-helios.%HOST%
     url: /webapp/wcs/stores/servlet/en/aurorab2besite
-  - proto: https
-    port: 8000
-    vhost: "%HOST%-wcs"
-    url: /lobtools/cmc/ManagementCenterMain?locale=en_US
-  - proto: https
-    port: 8000
-    vhost: "%HOST%-wcs"
-    url: /webapp/wcs/tools/servlet/ToolsLogon?XMLFile=common.mcLogon
-  - proto: https
-    port: 8002
-    vhost: "%HOST%-wcs"
-    url: /webapp/wcs/admin/servlet/ToolsLogon?XMLFile=adminconsole.AdminConsoleLogon
-  - proto: https
-    port: 8004
-    vhost: "%HOST%-wcs"
-    url: /webapp/wcs/orgadmin/servlet/ToolsLogon?XMLFile=buyerconsole.BuyAdminConsoleLogon&storeId=0
-  - proto: https
-    port: 9043
-    vhost: "%HOST%-wcs"
-    url: /ibm/console/logon.jsp
 
   ssl:
-  - port:
-    vhost: studio.%HOST%
-  - port: 8000
-    vhost: "%HOST%-wcs:8000"
-  - port: 8002
-    vhost: "%HOST%-wcs:8000"
-  - port: 8004
-    vhost: "%HOST%-wcs:8000"
-  - port: 9043
-    vhost: "%HOST%-wcs:8000"
+  - vhost: studio.%HOST%
 
 

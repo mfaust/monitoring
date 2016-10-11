@@ -47,7 +47,7 @@ class Monitoring
       :jolokiaHost         => @jolokiaHost,
       :jolokiaPort         => @jolokiaPort,
       :scanDiscovery       => @scanDiscovery,
-      :serviceConfigFile   => '/etc/cm-service.json'
+      :serviceConfigFile   => '/etc/cm-service.yaml'
     }
 
     grafanaConfig = {
@@ -180,78 +180,83 @@ class Monitoring
           hash  = Hash.new()
           array = Array.new()
 
-          @serviceChecks.each do |type|
+          # add some custom service-checks
+          @serviceChecks.each do |type,s|
 
-            @log.debug( type )
+            count = 0
 
-            type.each do |subtype,v|
+            s.each do |v|
 
-              @log.debug( subtype )
-              @log.debug( v )
+              proto = v['proto'] ? v['proto']  : 'http'
+              vhost = v['vhost'] ? v['vhost']  : nil
+              port  = v['port']  ? v['port']   : 80
+              url   = v['url']   ? v['url']    : '/'
 
-              hash = {
-                sprintf( '%s-', type.lowercase ) => {
-                  'display_name'    => sprintf( '%s - %s', type.uppercase, host ),
-                  'check_command'   => type.lowercase,
-                  'host_name'       => host,
-                  'vars.http_vhost' => host,
-                  'vars.http_uri'   => sprintf( v, host )
+              if( type == 'ssl' || type == 'ssl_cert' )
+                proto = 'https'
+                port  = 443
+              end
+
+              if( proto == 'https' && ( port == nil || port == 80 ) )
+                port = 443
+              end
+
+              if( vhost =~ /.*%HOST%$/ )
+                #
+                fqdn = Socket.gethostbyname( host ).first
+                fqdn = vhost.gsub( '%HOST%', fqdn )
+              else
+                vhost.gsub!( '%HOST%', host )
+                fqdn  = Socket.gethostbyname( vhost ).first
+              end
+
+              hashKey      = sprintf( '%s-%s-%d', type.downcase, fqdn.downcase, count += 1 )
+              displayName  = sprintf( '%s - %s' , type.upcase  , fqdn.downcase )
+
+              if( type == 'http' || type == 'https' )
+
+                # simple HTTP Check
+                hash = {
+                  hashKey => {
+                    'display_name'    => displayName,
+                    'check_command'   => type.downcase,
+                    'host_name'       => host,
+                    'vars.http_vhost' => fqdn,
+                    'vars.http_uri'   => url,
+                    'vars.http_port'  => port
+                  }
                 }
-              }
+
+                if( port == 443 )
+                  hash[hashKey.to_s]['vars.http_ssl'] = true
+                  hash[hashKey.to_s]['vars.http_ssl_force_tlsv1_2'] = true
+                end
+
+              elsif( type == 'ssl' )
+
+                # check for a ssl certificate
+                hash = {
+                  hashKey => {
+                    'display_name'                      => displayName,
+                    'check_command'                     => type.downcase,
+                    'host_name'                         => host,
+                    'vars.ssl_address'                  => fqdn,
+                    'vars.ssl_port'                     => port,
+                    'vars.ssl_timeout'                  => 10,
+                    'vars.ssl_cert_valid_days_warn'     => 30,
+                    'vars.ssl_cert_valid_days_critical' => 10
+                  }
+                }
+
+              end
 
               array.push( hash )
             end
           end
 
-          @log.debug( array )
+          services = array.reduce( :merge )
 
-          # add some custom checks
-          services = {
-            'http-preview-helios-DE' => {
-              'display_name'       => sprintf( 'Preview - %s', host ),
-              'check_command'      => 'http',
-              'host_name'          => host,
-              'vars.http_vhost'    => host,
-              'vars.http_uri'      => sprintf( 'https://preview-helios.%s.coremedia.vm/perfectchef-de-de', host ) ,
-              'vars.http_ssl'      => true
-            },
-            'http-shop-preview-production-helios' => {
-              'display_name'       => sprintf( 'Preview - Auroa eSite', host ),
-              'check_command'      => 'http',
-              'host_name'          => host,
-              'vars.http_vhost'    => host,
-              'vars.http_uri'      => sprintf( 'http://shop-preview-production-helios.%s.coremedia.vm/webapp/wcs/stores/servlet/en/auroraesite', host ) ,
-              'vars.http_ssl'      => true
-            },
-            'http-live-helios-DE' => {
-              'display_name'       => sprintf( 'Live - %s ', host ),
-              'check_command'      => 'http',
-              'host_name'          => host,
-              'vars.http_vhost'    => host,
-              'vars.http_uri'      => sprintf( 'https://helios.%s.coremedia.vm/perfectchef-de-de', host ) ,
-              'vars.http_ssl'      => true
-            },
-            'http-shop-helios' => {
-              'display_name'       => sprintf( 'Live - Auroa eSite', host ),
-              'check_command'      => 'http',
-              'host_name'          => host,
-              'vars.http_vhost'    => host,
-              'vars.http_uri'      => sprintf( 'http://shop-helios.%s.coremedia.vm/webapp/wcs/stores/servlet/en/auroraesite', host ) ,
-              'vars.http_ssl'      => true
-            },
-            'http-studio' => {
-              'display_name'       => sprintf( 'Live - Studio', host ),
-              'check_command'      => 'http',
-              'host_name'          => host,
-              'vars.http_vhost'    => host,
-              'vars.http_uri'      => sprintf( 'http://studio.%s.coremedia.vm/', host ) ,
-              'vars.http_ssl'      => true
-            }
-          }
-
-          @log.debug( service )
-
-#          @icinga.addServices( host, services )
+          @icinga.addServices( host, services )
 
         end
 
