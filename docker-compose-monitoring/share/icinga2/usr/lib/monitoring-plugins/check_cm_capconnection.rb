@@ -63,7 +63,7 @@ class Icinga2Check_CM_CapConnection < Icinga2Check
         exitCode = STATE_CRITICAL
       end
 
-      puts sprintf( '%s - Cap Connection %s)', status, state ? 'Open' : 'not existst' )
+      puts sprintf( '%s - Cap Connection %s', status, state ? 'Open' : 'not existst' )
       exit exitCode
     end
   end

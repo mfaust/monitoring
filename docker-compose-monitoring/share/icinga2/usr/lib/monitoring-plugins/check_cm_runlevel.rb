@@ -70,7 +70,7 @@ class Icinga2Check_CM_Runlevel < Icinga2Check
         exitCode = STATE_CRITICAL
       end
 
-      puts sprintf( '%s - RunLevel in %s Mode)', status, runlevel )
+      puts sprintf( '%s - RunLevel in %s Mode', status, runlevel )
       exit exitCode
     end
   end
