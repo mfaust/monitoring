@@ -78,12 +78,12 @@ class Icinga2Check
 
   def logger()
 
-#    logFile      = sprintf( '/var/log/icinga2check.log',  )
-#    file         = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
-#    file.sync    = true
-#    @log      = Logger.new( file, 'weekly', 1024000 )
+    logFile      = sprintf( '/var/log/icinga2check.log',  )
+    file         = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
+    file.sync    = true
+    @log      = Logger.new( file, 'weekly', 1024000 )
 
-    log = Logger.new( STDOUT )
+#    log = Logger.new( STDOUT )
     log.level = Logger::DEBUG
     log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
     log.formatter = proc do |severity, datetime, progname, msg|
