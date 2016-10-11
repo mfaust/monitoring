@@ -15,8 +15,8 @@ class Icinga2Check_CM_Feeder < Icinga2Check
 
     MBean.logger( @log )
 
-    host      = settings[:host]    ? shortHostname( settings[:host] ) : nil
-    feeder    = settings[:feeder]  ? settings[:feeder] : nil
+    host   = settings[:host]    ? settings[:host]   : nil
+    feeder = settings[:feeder]  ? settings[:feeder] : nil
 
     feederServer = self.validate( feeder )
 

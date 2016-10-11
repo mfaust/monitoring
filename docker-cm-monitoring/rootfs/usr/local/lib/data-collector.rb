@@ -844,6 +844,4 @@ class DataCollector
 
   end
 
-
-
 end

@@ -13,7 +13,7 @@ class Icinga2Check_HTTP < Icinga2Check
 
     MBean.logger( @log )
 
-    host         = settings[:host]        ? shortHostname( settings[:host] ) : nil
+    host         = settings[:host]        ? settings[:host]        : nil
     application  = settings[:application] ? settings[:application] : nil
 
     self.check( host, application )

@@ -133,6 +133,8 @@ class Monitoring
 
   def addHost( host, force = false )
 
+    experimental = false
+    
     if( host.to_s != '' )
 
       if( force == true )
@@ -175,7 +177,7 @@ class Monitoring
         icingaResult = @icinga.addHost( host, cm )
         icingaStatus = @icinga.status
 
-        if( icingaStatus == 200 )
+        if( icingaStatus == 200 && experimental == true )
 
           hash  = Hash.new()
           array = Array.new()

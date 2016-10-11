@@ -13,7 +13,7 @@ class Icinga2Check_CM_Cache < Icinga2Check
 
     MBean.logger( @log )
 
-    host         = settings[:host]        ? shortHostname( settings[:host] ) : nil
+    host         = settings[:host]        ? settings[:host]        : nil
     application  = settings[:application] ? settings[:application] : nil
     cache        = settings[:cache]       ? settings[:cache]       : nil
 

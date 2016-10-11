@@ -64,7 +64,7 @@ class MBean
           data = { service => result }
           break
         else
-          @log.debug( sprintf( 'Waiting for data %s ... %d', memcacheKey, y ) )
+#           @log.debug( sprintf( 'Waiting for data %s ... %d', memcacheKey, y ) )
           sleep( 3 )
         end
       end
@@ -80,7 +80,7 @@ class MBean
           break
         end
 
-        @log.debug( sprintf( 'Waiting for file %s ... %d', fileName, y ) )
+#         @log.debug( sprintf( 'Waiting for file %s ... %d', fileName, y ) )
         sleep( 3 )
       end
 
@@ -96,14 +96,14 @@ class MBean
       s   = data[service] ? data[service] : nil
 
       if( s == nil )
-        puts ( sprintf( 'no service %s found', service ) )
+#         @log.debug( sprintf( 'no service %s found', service ) )
         return false
       end
 
       mbeanExists  = s.detect { |s| s[mbean] }
 
       if( mbeanExists == nil )
-        puts ( sprintf( 'no mbean %s found', mbean ) )
+#         @log.debug( sprintf( 'no mbean %s found', mbean ) )
         return false
       end
 
@@ -114,7 +114,7 @@ class MBean
 
       if( mbeanStatus.to_i != 200 )
 
-        puts ( sprintf( 'mbean %s found, but status %d', mbean, mbeanStatus ) )
+#         @log.debug( sprintf( 'mbean %s found, but status %d', mbean, mbeanStatus ) )
         return false
       end
 
@@ -123,7 +123,7 @@ class MBean
         result = true
       elsif( mbeanExists != nil && key != nil )
 
-        puts ( sprintf( 'look for key %s', key ) )
+#         @log.debug( sprintf( 'look for key %s', key ) )
 
         mbeanValue = mbeanExists['value'] ? mbeanExists['value'] : nil
 
