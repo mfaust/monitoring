@@ -76,7 +76,8 @@ module Sinatra
     # -----------------------------------------------------------------------------
 
     options = {
-     :logDirectory               => @logDirectory
+     :logDirectory        => @logDirectory,
+     :monitoringServices  => @monitoringServices
     }
 
     m = Monitoring.new( options )
@@ -100,10 +101,14 @@ module Sinatra
     end
 
     # currently not supported
-#    get '/' do
-#      content_type :json
-#      h.listHosts().to_json
-#    end
+    get '/' do
+      content_type :json
+
+      result = m.listHost( nil )
+
+      response.status = result[:status]
+      result.to_json
+    end
 
     # get information about given 'host'
     get '/:host' do

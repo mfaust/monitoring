@@ -1960,10 +1960,7 @@ class CollecdPlugin
 
       if( @supportMemcache == true )
 
-        key         = cacheKey( 'discovery', h, 'data' )
-#         @log.debug( sprintf( 'cachekey : %s', key ) )
-
-#        key         = sprintf( '%s__discovery.data', h )
+        key       = cacheKey( 'discovery', h, 'data' )
         data      = @mc.get( key )
 
         # TODO
@@ -1989,16 +1986,21 @@ class CollecdPlugin
           description = d['description'] ? d['description'] : nil
 
           key         = cacheKey( 'result', h, service )
-#           @log.debug( sprintf( 'cachekey : %s', key ) )
-
-#           key         = sprintf( 'result__%s__%s', h, service )
           result      = @mc.get( key )
 
           case service
           when 'mongodb'
-            graphiteOutput.push( self.ParseResult_mongoDB( result ) )
+            if( result.is_a?( Hash ) )
+              graphiteOutput.push( self.ParseResult_mongoDB( result ) )
+            else
+              @log.error( 'resultdata is not a Hash (mongodb)' )
+            end
           when 'mysql'
-            graphiteOutput.push( self.ParseResult_mySQL( result ) )
+            if( result.is_a?( Hash ) )
+              graphiteOutput.push( self.ParseResult_mySQL( result ) )
+            else
+              @log.error( 'resultdata is not a Hash (mysql)' )
+            end
           else
 
             if( result != nil )
@@ -2038,7 +2040,10 @@ class CollecdPlugin
 
             case service
             when 'mongodb'
-              graphiteOutput.push( self.ParseResult_mongoDB( results ) )
+
+              if( results.class.to_s == 'Hash' )
+                graphiteOutput.push( self.ParseResult_mongoDB( results ) )
+              end
             when 'mysql'
               graphiteOutput.push( self.ParseResult_mySQL( results ) )
             else

@@ -47,7 +47,6 @@ services:
       - icingaweb2
       - cm-monitoring
     extra_hosts:
-      - 'jolokia:172.25.0.11'
       - 'graphite:172.25.0.21'
       - 'grafana:172.25.0.22'
       - 'icingaweb2:172.25.0.31'
@@ -190,12 +189,10 @@ services:
     env_file:
       - env/cm-monitoring.env
     depends_on:
-      - jolokia
       - memcached
       - icinga2-core
       - grafana
     extra_hosts:
-      - 'jolokia:172.25.0.11'
       - 'memcached:172.25.0.12'
       - 'graphite:172.25.0.21'
       - 'grafana:172.25.0.22'
@@ -210,7 +207,6 @@ services:
       - ./data:/srv
     links:
       - icinga2-core:icinga2
-      - jolokia:jolokia
       - grafana:grafana
     networks:
       mon:

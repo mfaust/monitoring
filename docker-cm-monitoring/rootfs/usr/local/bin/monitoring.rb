@@ -23,7 +23,7 @@ class Monitoring
 
   def initialize( settings = {} )
 
-    @logDirectory   = settings[:logDirectory] ? settings[:logDirectory] : '/tmp'
+    @logDirectory       = settings[:logDirectory]       ? settings[:logDirectory]       : '/tmp'
 
     logFile         = sprintf( '%s/monitoring.log', @logDirectory )
 
@@ -31,7 +31,7 @@ class Monitoring
     file.sync       = true
     @log            = Logger.new( file, 'weekly', 1024000 )
 #    @log = Logger.new( STDOUT )
-    @log.level      = Logger::INFO
+    @log.level      = Logger::DEBUG
     @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
     @log.formatter  = proc do |severity, datetime, progname, msg|
       "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
@@ -84,6 +84,11 @@ class Monitoring
     @log.info( ' CoreMedia - Monitoring Service' )
     @log.info( "  Version #{version} (#{date})" )
     @log.info( '  Copyright 2016 Coremedia' )
+    @log.info( '' )
+    @log.info( '  enabled Services' )
+    @log.info( sprintf( '    - discovery: %s', @enabledDiscovery ) )
+    @log.info( sprintf( '    - grafana  : %s', @enabledGrafana ) )
+    @log.info( sprintf( '    - icinga2  : %s', @enabledIcinga ) )
     @log.info( '-----------------------------------------------------------------' )
     @log.info( '' )
 
@@ -128,13 +133,28 @@ class Monitoring
 
     @serviceChecks    = config['service-checks']           ? config['service-checks']           : nil
 
+    @enabledDiscovery = false
+    @enabledGrafana   = false
+    @enabledIcinga    = false
+
+    @monitoringServices = config['monitoring-services']    ? config['monitoring-services']      : nil
+
+    if( @monitoringServices != nil )
+
+      services          = @monitoringServices.reduce( :merge )
+
+      @enabledDiscovery = services['discovery'] && services['discovery'] == true  ? true : false
+      @enabledGrafana   = services['grafana']   && services['grafana'] == true    ? true : false
+      @enabledIcinga    = services['icinga2']   && services['icinga2'] == true    ? true : false
+    end
+
   end
 
 
   def addHost( host, force = false )
 
     experimental = false
-    
+
     if( host.to_s != '' )
 
       if( force == true )
@@ -331,7 +351,7 @@ class Monitoring
   end
 
 
-  def listHost( host )
+  def listHost( host = nil )
 
     if( host.to_s != '' )
 
@@ -374,10 +394,49 @@ class Monitoring
 
     else
 
+      discoveryResult   = @serviceDiscovery.listHosts()
+      discoveryStatus   = discoveryResult[:status] ? discoveryResult[:status] : 400
+
+      if( discoveryStatus != 400 )
+
+        hosts = discoveryResult[:hosts] ? discoveryResult[:hosts] : nil
+
+        hosts = hosts.reduce( :merge ).keys
+
+        hosts.each do |h|
+
+          r  = @serviceDiscovery.listHosts( h )
+          s  = r[:status] ? r[:status] : 400
+
+          if( s != 400 )
+
+            dHost        = r[:hosts] ? r[:hosts] : nil
+
+            if( dHost != nil )
+              discoveryCreated      = dHost[h][:created] ? dHost[h][:created] : 'unknown'
+              discoveryOnline       = dHost[h][:status]  ? dHost[h][:status]  : 'unknown'
+            end
+          end
+
+          hash = {
+            h.to_s => {
+              :discovery => { :status => s, :created => discoveryCreated, :online => discoveryOnline }
+            }
+          }
+
+          array.push( hash )
+
+        end
+
+        discoveryResult = array.reduce( :merge )
+
+      end
+
       return {
-        :status  => 400,
-        :message => 'need hostname to list entries from monitoring'
+        :status    => 200,
+        :discovery => discoveryResult
       }
+
     end
 
   end

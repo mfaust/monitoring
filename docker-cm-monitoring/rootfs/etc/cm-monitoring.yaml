@@ -4,6 +4,11 @@
 logDirectory: /var/log/monitoring
 cacheDirectory: /var/cache/monitoring
 
+monitoring-services:
+  - discovery: true
+  - grafana: true
+  - icinga2: false
+
 # fuer den rest-service
 rest-service:
   port: 45678

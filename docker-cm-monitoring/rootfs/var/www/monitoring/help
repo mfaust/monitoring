@@ -1,53 +1,56 @@
 
-CoreMedia Monitoring API - v1.0
+CoreMedia Monitoring API - v1.1
 
-Kurzbeschreibung der ReST-API
+Short description of the ReST API
 
-  Zeigt alle dem Monitoring bekannten Hosts (steht zur Zeit nicht zur Verfügung)
+  Shows all hosts known to the monitoring
     curl http://localhost/api
 
-  Anzeigen der Information zu einem Host
+  View the information about the host $name
     curl http://localhost/api/$name
 
-  Neu Hinzufügen eines Hosts zum Monitoring
-  Dabei wird das Service Discovery gestartet, Checks für Icinga2 erstellt und die Grafana Dashboards angelegt
+
+  Adding a Host to monitoring
+  First, starting the service discovery, tehen create checks for Icinga2 and at last, create the Grafana Dashboards
     curl -X POST http://localhost/api/$name
 
-  Erneutes hinzufügen eines Hosts zum Monitoring
-  Löscht allerdings vorher alle Service Discovery Daten, Icinga2 Checks und Grafana Dashboards
+  Re-add a host for monitoring
+  Deletes all service discovery Data, Icinga2 Checks, and Grafana Dashboards
     curl -X POST http://localhost/api/$name/force
 
-  Entfernen eines Hosts aus dem Monitoring
-  Grafana Dashboards bleiben dabei erhalten und können damit weiterhin genutzte werden
-    curl -X DELETE http://localhost/api/$name
-
-  Entfernen eines Hosts aus dem Monitoring, inkl. dem entfernen der Grafana Dashboards
-    curl -X DELETE http://localhost/api/$name/force
-
-  Erstellen einer Annotation, dass er Host erstellt wurde
+  Create an annotation that the host was created
     curl -X POST http://localhost/api/a/node/create/$name
 
-  Erstellen einer Annotation, dass er Host gelöscht wurde
+  Create an annotation that the host was deleted
     curl -X POST http://localhost/api/a/node/destroy/$name
 
-  Erstellen einer Annotation für das starten eines Lasttests
+  Create an annotation for starting a load test
     curl -X POST http://localhost/api/a/loadtest/start/$name
 
-  Erstellt eine Annotation für das beenden eines Lasttests
+  Creates an annotation for terminating a load test
     curl -X POST http://localhost/api/a/loadtest/stop/$name
 
-  Erstellt eine Annotation für ein Deployment
+  Creates an annotation for a deployment
     curl -X POST http://localhost/api/a/deployment/$name/$text
 
-  Erstellt einer freien Annotation (kann zu problemen führen)
-  'tags' kann hier eine reiche von Tags enthalten, die mittels '+' getrennt sein müssen
+  Creates a free annotation (NOT TESTED Can lead to problems)
+  $tags can contain a series of tags, which must be separated by '+'
     curl -X POST http://localhost/api/a/$name/$descr/$text/$tags
 
-  Fügt ein Übersichtsdashboard für eine Gruppe von Hosts hinzu.
-  Die Hostnames werden durch + verbunden. Die Hosts müssen dem Monitoring bereits hinzugefügt worden sein.
+  Adds an Grafana overview dashboard to a group of hosts.
+  $names can contain a series of Hostnames, which must be separated by '+'
+  The hosts must already have been added to the monitoring.
     curl -X POST http://localhost/api/g/$names
 
-  Fügt ein Übersichtsdashboard für eine Gruppe von Hosts hinzu, löscht vorher das Dashboard.
-  Die Hostnames werden durch + verbunden. Die Hosts müssen dem Monitoring bereits hinzugefügt worden sein.
+  Re-adds an Grafana overview dashboard to a group of hosts.
+  $names can contain a series of Hostnames, which must be separated by '+'
+  The hosts must already have been added to the monitoring.
     curl -X POST http://localhost/api/g/$names/force
 
+
+  Remove a host from monitoring
+  Grafana dashboards are preserved and can continue to be used
+    curl -X DELETE http://localhost/api/$name
+
+  Removing a host from monitoring, including removing the Grafana Dashboards
+    curl -X DELETE http://localhost/api/$name/force

@@ -175,9 +175,6 @@ class Grafana
     if( @supportMemcache == true )
 
       memcacheKey = cacheKey( 'result', host, service )
-#       @log.debug( sprintf( 'cachekey : %s', key ) )
-
-#       mcKey         = sprintf( 'result__%s__%s', host, service )
 
       for y in 1..10
         result      = @mc.get( memcacheKey )
@@ -256,9 +253,6 @@ class Grafana
         servicesTmp.delete( 'demodata-generator' )
 
         memcacheKey = cacheKey( 'result', host, servicesTmp.last )
-#         @log.debug( sprintf( 'cachekey : %s', memcacheKey ) )
-
-#         key         = sprintf( 'result__%s__%s', host, servicesTmp.last )
 
         @monitoringResultJson = getJsonFromFile( memcacheKey, true )
 
