@@ -175,7 +175,7 @@ class Grafana
     if( @supportMemcache == true )
 
       memcacheKey = cacheKey( 'result', host, service )
-      @log.debug( sprintf( 'cachekey : %s', key ) )
+#       @log.debug( sprintf( 'cachekey : %s', key ) )
 
 #       mcKey         = sprintf( 'result__%s__%s', host, service )
 
@@ -256,7 +256,7 @@ class Grafana
         servicesTmp.delete( 'demodata-generator' )
 
         memcacheKey = cacheKey( 'result', host, servicesTmp.last )
-        @log.debug( sprintf( 'cachekey : %s', memcacheKey ) )
+#         @log.debug( sprintf( 'cachekey : %s', memcacheKey ) )
 
 #         key         = sprintf( 'result__%s__%s', host, servicesTmp.last )
 

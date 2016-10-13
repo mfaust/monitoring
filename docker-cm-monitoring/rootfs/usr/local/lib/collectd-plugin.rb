@@ -1961,7 +1961,7 @@ class CollecdPlugin
       if( @supportMemcache == true )
 
         key         = cacheKey( 'discovery', h, 'data' )
-        @log.debug( sprintf( 'cachekey : %s', key ) )
+#         @log.debug( sprintf( 'cachekey : %s', key ) )
 
 #        key         = sprintf( '%s__discovery.data', h )
         data      = @mc.get( key )
@@ -1989,7 +1989,7 @@ class CollecdPlugin
           description = d['description'] ? d['description'] : nil
 
           key         = cacheKey( 'result', h, service )
-          @log.debug( sprintf( 'cachekey : %s', key ) )
+#           @log.debug( sprintf( 'cachekey : %s', key ) )
 
 #           key         = sprintf( 'result__%s__%s', h, service )
           result      = @mc.get( key )

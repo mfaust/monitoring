@@ -732,7 +732,7 @@ class DataCollector
         if( @supportMemcache == true )
 
           key = cacheKey( 'result', hostname, v )
-          @log.debug( sprintf( 'cachekey : %s', key ) )
+#           @log.debug( sprintf( 'cachekey : %s', key ) )
 
 #          key = sprintf( 'result__%s__%s', hostname, v )
 

@@ -249,6 +249,9 @@ class Icinga2
       name        = host
       message     = message
 
+    rescue e
+      @log.error( e )
+      
     end
 
     @status = status

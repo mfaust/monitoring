@@ -182,6 +182,7 @@ services:
       - icinga2-core
     extra_hosts:
       - 'database:172.25.0.10'
+      - 'icinga2-core:172.25.0.30'
       - 'icinga2:172.25.0.30'
     volumes:
       - /etc/localtime:/etc/localtime:ro
@@ -213,7 +214,7 @@ services:
       - 'memcached:172.25.0.12'
       - 'graphite:172.25.0.21'
       - 'grafana:172.25.0.22'
-      - 'icinga2:172.25.0.30'
+      - 'icinga2-core:172.25.0.30'
       - 'blueprint-box:192.168.252.100'
     ports:
       - 9001:9001
