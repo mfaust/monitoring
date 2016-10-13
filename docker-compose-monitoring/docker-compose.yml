@@ -148,6 +148,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ./share/resolv.conf:/etc/resolv.conf:ro
       - ./data:/srv
+      - ./data/icinga2:/var/lib/icinga2/
       - ./data/monitoring:/var/cache/monitoring
       - ./share/icinga2:/usr/local/monitoring
       - ../docker-cm-monitoring/rootfs/usr/local/lib/mbean.rb:/usr/local/lib/mbean.rb:ro
