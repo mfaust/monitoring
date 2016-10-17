@@ -186,17 +186,6 @@ class ServiceDiscovery
 
       # hash for the NEW Port-Schema
       # since cm160x every application runs in his own container with unique port schema
-#       hash = {
-#         :type => "read",
-#         :mbean => "java.lang:type=Runtime",
-#         :attribute => [
-#           "ClassPath"
-#         ],
-#         :target => {
-#           :url => sprintf( "service:jmx:rmi:///jndi/rmi://%s:%s/jmxrmi", host, port )
-#         }
-#       }
-
 
       h = {
           :type      => "read",
@@ -248,169 +237,30 @@ class ServiceDiscovery
 
         body         = JSON.parse( response.body )
 
-#         @log.debug( JSON.pretty_generate( body ) )
+#       @log.debug( JSON.pretty_generate( body ) )
 
-        if( body.count == 3 )
-          # new version
+        # #1 == Runtime
+        runtime = body[0]
+        # #2  == Manager
+        manager = body[1]
+        # #3  == engine
+        engine = body[2]
 
-          # #1 == Runtime
-          runtime = body[0]
-          # #2  == Manager
-          manager = body[1]
-          # #3  == engine
-          engine = body[2]
+        if( runtime['status'] && runtime['status'] == 200 )
 
-          if( runtime['status'] && runtime['status'] == 200 )
+          value = runtime['value'] ? runtime['value'] : nil
 
-            value = runtime['value'] ? runtime['value'] : nil
+          if( value != nil )
 
-            if( value != nil )
+            classPath  = value['ClassPath'] ? value['ClassPath'] : nil
 
-              classPath  = value['ClassPath'] ? value['ClassPath'] : nil
-
-              if( classPath.include?( 'cm7-tomcat-installation' ) )
-
-                @log.debug( 'found pre cm160x Portstyle (‎possibly cm7.x)' )
-                value = manager['value'] ? manager['value'] : nil
-
-                regex = /context=(.*?),/
-                value.each do |context,v|
-
-                  part = context.match( regex )
-
-                  if( part != nil && part.length > 1 )
-
-                    appName = part[1].gsub!( '/', '' )
-
-                    if( appName == 'manager' )
-                      # skip 'manager'
-                      next
-                    end
-
-                    @log.debug( sprintf( ' - ‎recognized application: %s', appName ) )
-                    services.push( appName )
-                  end
-                end
-
-                @log.debug( services )
-
-                # coremedia = cms, mls, rls?
-                # caefeeder = caefeeder-preview, cae-feeder-live?
-                if( ( services.include?( 'coremedia' ) ) || ( services.include?( 'caefeeder' ) ) )
-
-                  value = engine['value'] ? engine['value'] : nil
-
-                  if( engine['status'].to_i == 200 )
-
-                    baseDir = value['baseDir'] ? value['baseDir'] : nil
-
-                    regex = /
-                      ^                           # Starting at the front of the string
-                      (.*)                        #
-                      \/cm7-                      #
-                      (?<service>.+[a-zA-Z0-9-])  #
-                      (.*)-tomcat                 #
-                      $
-                    /x
-
-                    parts = baseDir.match( regex )
-
-                    if( parts )
-                      service = parts['service'].to_s.strip.tr('. ', '')
-                      services.delete( "coremedia" )
-                      services.delete( "caefeeder" )
-                      services.push( service )
-
-                      @log.debug( sprintf( '  => %s', service ) )
-                    else
-                      @log.error( 'unknown error' )
-                      @log.error( parts )
-                    end
-                  else
-                    @log.error( sprintf( 'response status %d', engine['status'].to_i ) )
-                  end
-                end
-
-                # blueprint = cae-preview or delivery?editor
-                if( services.include?( 'blueprint' ) )
-
-                  value = engine['value'] ? engine['value'] : nil
-
-                  if( engine['status'].to_i == 200 )
-
-                    jvmRoute = value['jvmRoute'] ? value['jvmRoute'] : nil
-
-                    if( ( jvmRoute != nil ) && ( jvmRoute.include?( 'studio' ) ) )
-                      services.delete( "blueprint" )
-                      services.push( "cae-preview" )
-                    else
-                      services.delete( "blueprint" )
-                      services.push( "delivery" )
-                    end
-                  else
-                    @log.error( sprintf( 'response status %d', engine['status'].to_i ) )
-                  end
-                end
-
-              # cm160x - or all others
-              else
-
-                regex = /
-                  ^                           # Starting at the front of the string
-                  (.*)                        #
-                  \/coremedia\/               #
-                  (?<service>.+[a-zA-Z0-9-])  #
-                  \/current                   #
-                  (.*)                        #
-                  $
-                /x
-
-                parts = classPath.match( regex )
-
-                if( parts )
-                  service = parts['service'].to_s.strip.tr('. ', '')
-                  services.push( service )
-
-                  @log.debug( sprintf( '  => %s', service ) )
-                else
-                  @log.error( 'unknown error' )
-                  @log.error( parts )
-                end
-              end
-
-            end
-          end
-
-        else
-
-          if( body['status'] == 200 )
-
-            classPath  = body['value']['ClassPath'] ? body['value']['ClassPath'] : nil
-
-            # OLD styled Application can handle more than one application
-            # e.g. studio and cae-preview or content-management-server and content-feeder and solr-master
             if( classPath.include?( 'cm7-tomcat-installation' ) )
 
               @log.debug( 'found pre cm160x Portstyle (‎possibly cm7.x)' )
-
-              apps = {
-                :type   => "read",
-                :mbean  => "Catalina:type=Manager,context=*,host=*",
-                :target => {
-                  :url => sprintf( "service:jmx:rmi:///jndi/rmi://%s:%s/jmxrmi", host, port )
-                }
-              }
-
-              request.body = JSON.generate( apps )
-              response     = http.request( request )
-              appsBody     = JSON.parse( response.body )
-
-  #            @log.debug( JSON.pretty_generate( appsBody ) )
-
-              contextsMap  = appsBody['value']
+              value = manager['value'] ? manager['value'] : nil
 
               regex = /context=(.*?),/
-              contextsMap.each do |context,v|
+              value.each do |context,v|
 
                 part = context.match( regex )
 
@@ -423,31 +273,22 @@ class ServiceDiscovery
                     next
                   end
 
-  #                 @log.debug( sprintf( ' - ‎recognized application: %s', appName ) )
+                  @log.debug( sprintf( ' - ‎recognized application: %s', appName ) )
                   services.push( appName )
                 end
               end
+
+              @log.debug( services )
 
               # coremedia = cms, mls, rls?
               # caefeeder = caefeeder-preview, cae-feeder-live?
               if( ( services.include?( 'coremedia' ) ) || ( services.include?( 'caefeeder' ) ) )
 
-                hash = {
-                  :type      => "read",
-                  :mbean     => "Catalina:type=Engine",
-                  :attribute => [ 'baseDir' ],
-                  :target    => {
-                    :url => sprintf("service:jmx:rmi:///jndi/rmi://%s:%s/jmxrmi", host, port)
-                  }
-                }
+                value = engine['value'] ? engine['value'] : nil
 
-                request.body = JSON.generate( hash )
-                response     = http.request( request )
-                body         = JSON.parse( response.body )
+                if( engine['status'].to_i == 200 )
 
-                if( body['status'].to_i == 200 )
-
-                  baseDir = body['value']['baseDir'] ? body['value']['baseDir'] : nil
+                  baseDir = value['baseDir'] ? value['baseDir'] : nil
 
                   regex = /
                     ^                           # Starting at the front of the string
@@ -461,40 +302,29 @@ class ServiceDiscovery
                   parts = baseDir.match( regex )
 
                   if( parts )
-                    service = "#{parts['service']}".strip.tr('. ', '')
+                    service = parts['service'].to_s.strip.tr('. ', '')
                     services.delete( "coremedia" )
                     services.delete( "caefeeder" )
                     services.push( service )
 
-  #                  @log.debug( sprintf( '  => %s', service ) )
+                    @log.debug( sprintf( '  => %s', service ) )
                   else
                     @log.error( 'unknown error' )
                     @log.error( parts )
                   end
                 else
-                  @log.error( sprintf( 'response status %d', body['status'].to_i ) )
+                  @log.error( sprintf( 'response status %d', engine['status'].to_i ) )
                 end
               end
 
               # blueprint = cae-preview or delivery?editor
               if( services.include?( 'blueprint' ) )
 
-                hash = {
-                  :type      => "read",
-                  :mbean     => "Catalina:type=Engine",
-                  :attribute => [ 'jvmRoute' ],
-                  :target    => {
-                    :url => sprintf("service:jmx:rmi:///jndi/rmi://%s:%s/jmxrmi", host, port)
-                  }
-                }
+                value = engine['value'] ? engine['value'] : nil
 
-                request.body = JSON.generate(hash)
-                response     = http.request(request)
-                body         = JSON.parse(response.body)
+                if( engine['status'].to_i == 200 )
 
-                if( body['status'].to_i == 200 )
-
-                  jvmRoute = body['value']['jvmRoute'] ? body['value']['jvmRoute'] : nil
+                  jvmRoute = value['jvmRoute'] ? value['jvmRoute'] : nil
 
                   if( ( jvmRoute != nil ) && ( jvmRoute.include?( 'studio' ) ) )
                     services.delete( "blueprint" )
@@ -504,11 +334,11 @@ class ServiceDiscovery
                     services.push( "delivery" )
                   end
                 else
-                  @log.error( sprintf( 'response status %d', body['status'].to_i ) )
+                  @log.error( sprintf( 'response status %d', engine['status'].to_i ) )
                 end
               end
 
-            # all others
+            # cm160x - or all others
             else
 
               regex = /
@@ -524,20 +354,17 @@ class ServiceDiscovery
               parts = classPath.match( regex )
 
               if( parts )
-                service = "#{parts['service']}".strip.tr('. ', '')
+                service = parts['service'].to_s.strip.tr('. ', '')
                 services.push( service )
 
-  #               @log.debug( sprintf( '  => %s', service ) )
+                @log.debug( sprintf( '  => %s', service ) )
               else
                 @log.error( 'unknown error' )
                 @log.error( parts )
               end
             end
 
-          else
-            # uups
           end
-
         end
 
       end
@@ -584,6 +411,14 @@ class ServiceDiscovery
       # the dicovered ports are IMPORTANT
       if( @serviceConfig['services'][d] )
         data[d].merge!( @serviceConfig['services'][d] ) { |key, port| port }
+
+        port       = data[d]['port']      ? data[d]['port']      : nil
+        port_http  = data[d]['port_http'] ? data[d]['port_http'] : nil
+
+        if( port != nil && port_http != nil )
+          data[d]['port_http'] = ( port - 19 )
+        end
+
       else
         @log.debug( sprintf( 'missing entry \'%s\'', d ) )
       end
@@ -647,6 +482,7 @@ class ServiceDiscovery
         :status  => status,
         :message => message
       }
+
     end
 
     # force delete
@@ -700,10 +536,8 @@ class ServiceDiscovery
 
     end
 
-    # merge discovered services with cm-services.json
+    # merge discovered services with cm-services.yaml
     services = self.createHostConfig( services )
-
-#     @log.debug ( d )
 
     File.open( sprintf( '%s/%s', dir_path, file_name ) , 'w' ) { |f| f.write( JSON.pretty_generate( services ) ) }
 
