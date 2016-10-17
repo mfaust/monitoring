@@ -143,21 +143,39 @@ class DataCollector
   end
 
 
-  def checkDiscoveryFileAge( f )
+  def checkHostDataAge( host )
 
-    @log.debug( f )
-    @log.debug( File.mtime( f ).strftime("%Y-%m-%d %H:%M:%S") )
-    @log.debug( Time.now() )
-    @log.debug( Time.now() - ( 60*10 ) )
+    file = sprintf( '%s/%s/mergedHostData.json', @cacheDirectory, host )
 
-    if( File.mtime(f) < ( Time.now() - ( 60*10 ) ) )
-      @log.debug( '  - trigger service discover' )
-      @reDiscovery = true
-    else
-      @reDiscovery = false
+    if( File.exist?( file ) == true )
+
+#       @log.debug( file )
+#       @log.debug( File.mtime( file ).strftime("%Y-%m-%d %H:%M:%S") )
+#       @log.debug( Time.now() )
+#       @log.debug( Time.now() - ( 60*10 ) )
+
+      size  = File.size( file )
+      mtime = File.mtime( file )
+      now   = Time.now()
+      deadLine = now - ( 60*10 )
+
+#       @log.debug( mtime )
+#       @log.debug( now )
+#      @log.debug( sprintf( ' File %s with a size of %d', file, size ) )
+#       @log.debug( ( Time.now() - ( 60*10 ) ) )
+#       @log.debug( '-------------------------------' )
+
+        @log.debug( sprintf( ' File %s with a size of %d', file, size ) )
+
+        if( mtime < deadLine )
+          @log.debug( '  - trigger service discover' )
+
+#          FileUtils.rm( file )
+
+        end
+
     end
 
-    return @reDiscovery
   end
 
 
@@ -516,10 +534,14 @@ class DataCollector
   end
 
 
+  # extract Host and Port of destination services from rmi uri
+  #  - rmi uri are : "service:jmx:rmi:///jndi/rmi://moebius-16-tomcat:2222/jmxrmi"
+  #    host: moebius-16-tomcat
+  #    port: 2222
   def checkHostAndService( targetUrl )
 
     result = false
-    # "service:jmx:rmi:///jndi/rmi://moebius-16-tomcat:2222/jmxrmi"
+
     regex = /
       ^                   # Starting at the front of the string
       (.*):\/\/           # all after the douple slashes
@@ -545,7 +567,8 @@ class DataCollector
 
   end
 
-  # to reduce i/o we work better in memory ...
+  # create a singulary json for every services to send them to the jolokia service
+  #
   def createBulkCheck( data )
 
     hosts  = data.keys
@@ -563,6 +586,13 @@ class DataCollector
       services = data[h][:data] ? data[h][:data] : nil
 
       @log.debug( sprintf( '%d services found', services.count ) )
+
+      # if Host available -> break
+      hostStatus = isRunning?( h )
+
+      if( hostStatus == false )
+        next
+      end
 
       services.each do |s,v|
 
@@ -590,10 +620,10 @@ class DataCollector
           metrics.each do |e|
 
             target = {
-              "type"   => "read",
-              "mbean"  => "#{e['mbean']}",
-              "target" => { "url" => sprintf( "service:jmx:rmi:///jndi/rmi://%s:%s/jmxrmi", h, port ) },
-              "config" => { "ignoreErrors" => true, "ifModifiedSince" => true, "canonicalNaming" => true }
+              :type   => 'read',
+              :mbean  => e['mbean'].to_s,
+              :target => { :url => sprintf( "service:jmx:rmi:///jndi/rmi://%s:%s/jmxrmi", h, port ) },
+              :config => { :ignoreErrors => true, :ifModifiedSince => true, :canonicalNaming => true }
             }
 
             attributes = []
@@ -621,14 +651,17 @@ class DataCollector
       result[:services] = *services.keys
       result[:checks]   = *checks
 
+      # send json to jolokia
       self.sendChecksToJolokia( result )
 
       checks.clear()
       result.clear()
     end
+
   end
 
-
+  # send json data to jolokia and save the result in an memory storage (e.g. memcache)
+  #
   def sendChecksToJolokia( data )
 
     if( portOpen?( @jolokiaHost, @jolokiaPort ) == false )
@@ -805,36 +838,28 @@ class DataCollector
     @log.debug( 'get monitored Servers' )
     monitoredServer = monitoredServer( @cacheDirectory )
 
-    discoveryFile   = 'discovery.json'
-    mergedDataFile  = 'mergedHostData.json'
-
     data = Hash.new()
 
     monitoredServer.each do |h|
 
       @log.info( sprintf( 'Host: %s', h ) )
 
-      cachedHostDirectory  = sprintf( '%s/%s', @cacheDirectory, h )
+      self.checkHostDataAge( h )
 
-      file = sprintf( '%s/%s', cachedHostDirectory, discoveryFile )
-
-      if( File.exist?( file ) == true )
-
-#         if( self.checkDiscoveryFileAge( file ) == true )
+#         if( self.checkHostDataAge( file ) == true )
 #
 #           # re.start the service discovery
 #           @discovery.refreshHost( h )
 #
 #         end
 
-        d = buildMergedData( h )
+      d = self.buildMergedData( h )
 
-        data[h] = {
-          :data      => d,
-          :timestamp => Time.now().to_i
-        }
+      data[h] = {
+        :data      => d,
+        :timestamp => Time.now().to_i
+      }
 
-      end
     end
 
     self.createBulkCheck( data )
