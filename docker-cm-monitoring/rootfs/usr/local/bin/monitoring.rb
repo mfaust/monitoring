@@ -399,8 +399,9 @@ class Monitoring
 
       if( discoveryStatus != 400 )
 
-        hosts = discoveryResult[:hosts] ? discoveryResult[:hosts] : nil
+        array = Array.new()
 
+        hosts = discoveryResult[:hosts] ? discoveryResult[:hosts] : nil
         hosts = hosts.reduce( :merge ).keys
 
         hosts.each do |h|
@@ -418,10 +419,8 @@ class Monitoring
             end
           end
 
-          hash = {
-            h.to_s => {
-              :discovery => { :status => s, :created => discoveryCreated, :online => discoveryOnline }
-            }
+          hash  = {
+            h.to_s => { :discovery => { :status => s, :created => discoveryCreated, :online => discoveryOnline } }
           }
 
           array.push( hash )

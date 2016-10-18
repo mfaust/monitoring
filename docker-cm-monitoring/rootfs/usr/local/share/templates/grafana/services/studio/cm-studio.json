@@ -344,6 +344,13 @@
           "iconColor": "rgb(26, 196, 220)",
           "datasource": "events",
           "tags": "%HOST% loadtest&set=intersection"
+        },
+        {
+          "name": "Deployments",
+          "enable": true,
+          "iconColor": "rgb(176, 40, 253)",
+          "datasource": "events",
+          "tags": "%HOST% deployment&set=intersection"
         }
       ]
     },

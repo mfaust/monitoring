@@ -129,5 +129,5 @@
             "valueName": "current"
           }
         ],
-        "title": "SOLR_MASTER"
+        "title": "SOLR Master"
       }

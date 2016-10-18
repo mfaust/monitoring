@@ -575,7 +575,7 @@ class Grafana
 
       if( f =~ regex )
         part = f.match(regex)
-        dir << "#{part['service']}".strip
+        dir << part['service'].to_s.strip
       end
     end
 
