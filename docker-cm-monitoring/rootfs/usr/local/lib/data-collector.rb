@@ -52,7 +52,7 @@ class DataCollector
     file.sync      = true
     @log           = Logger.new( file, 'weekly', 1024000 )
 #    @log = Logger.new( STDOUT )
-    @log.level     = Logger::DEBUG
+    @log.level     = Logger::INFO
     @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
     @log.formatter = proc do |severity, datetime, progname, msg|
       "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
@@ -145,37 +145,59 @@ class DataCollector
 
   def checkHostDataAge( host )
 
-    file = sprintf( '%s/%s/mergedHostData.json', @cacheDirectory, host )
+    discoveryFile = sprintf( '%s/%s/discovery.json'     , @cacheDirectory, host )
+    hostDateFile  = sprintf( '%s/%s/mergedHostData.json', @cacheDirectory, host )
 
-    if( File.exist?( file ) == true )
+    if( File.exist?( discoveryFile ) == true )
 
-#       @log.debug( file )
-#       @log.debug( File.mtime( file ).strftime("%Y-%m-%d %H:%M:%S") )
-#       @log.debug( Time.now() )
-#       @log.debug( Time.now() - ( 60*10 ) )
+      @log.debug( sprintf( 'discovery.json      - %s', File.mtime( discoveryFile ).strftime( '%Y-%m-%d %H:%M:%S' ) ) )
 
-      size  = File.size( file )
-      mtime = File.mtime( file )
-      now   = Time.now()
-      deadLine = now - ( 60*10 )
+      size     = File.size( discoveryFile )
+#      mtime    = File.mtime( discoveryFile )
+#      now      = Time.now()
+#      deadLine = now - ( 60*10 )
 
-#       @log.debug( mtime )
-#       @log.debug( now )
-#      @log.debug( sprintf( ' File %s with a size of %d', file, size ) )
-#       @log.debug( ( Time.now() - ( 60*10 ) ) )
-#       @log.debug( '-------------------------------' )
+      @log.debug( sprintf( ' File %s with a size of %d', discoveryFile, size ) )
 
-        @log.debug( sprintf( ' File %s with a size of %d', file, size ) )
+      if( size < 10 )
+        # filesize too low
 
-        if( mtime < deadLine )
-          @log.debug( '  - trigger service discover' )
+        FileUtils.rm( discoveryFile )
+        FileUtils.rm( hostDateFile )
 
-#          FileUtils.rm( file )
+        @log.info( 'trigger service discover' )
 
-        end
+        # rediscover service-discovery
+
+        serviceDiscoverConfig = {
+          :logDirectory        => @logDirectory,
+          :cacheDirectory      => @cacheDirectory,
+          :jolokiaHost         => @jolokiaHost,
+          :jolokiaPort         => @jolokiaPort,
+          :serviceConfigFile   => '/etc/cm-service.yaml'
+        }
+        serviceDiscovery = ServiceDiscovery.new( serviceDiscoverConfig )
+        serviceDiscovery.addHost( host )
+
+      end
 
     end
 
+    if( File.exist?( hostDateFile ) == true )
+
+      @log.debug( sprintf( 'mergedHostData.json - %s', File.mtime( hostDateFile ).strftime( '%Y-%m-%d %H:%M:%S' ) ) )
+
+      size     = File.size( hostDateFile )
+      mtime    = File.mtime( hostDateFile )
+      now      = Time.now()
+      deadLine = now - ( 60*10 )
+
+      if( mtime < deadLine )
+
+#        @log.debug( '  - trigger service discover' )
+        FileUtils.rm( hostDateFile )
+      end
+    end
   end
 
 
@@ -591,6 +613,9 @@ class DataCollector
       hostStatus = isRunning?( h )
 
       if( hostStatus == false )
+
+        @log.error( sprintf( '  Host are not available! (%s)', hostStatus ) )
+
         next
       end
 
@@ -620,10 +645,10 @@ class DataCollector
           metrics.each do |e|
 
             target = {
-              :type   => 'read',
-              :mbean  => e['mbean'].to_s,
-              :target => { :url => sprintf( "service:jmx:rmi:///jndi/rmi://%s:%s/jmxrmi", h, port ) },
-              :config => { :ignoreErrors => true, :ifModifiedSince => true, :canonicalNaming => true }
+              'type'   => 'read',
+              'mbean'  => e['mbean'].to_s,
+              'target' => { 'url' => sprintf( "service:jmx:rmi:///jndi/rmi://%s:%s/jmxrmi", h, port ) },
+              'config' => { 'ignoreErrors' => true, 'ifModifiedSince' => true, 'canonicalNaming' => true }
             }
 
             attributes = []
@@ -670,15 +695,15 @@ class DataCollector
       return
     end
 
-    serverUrl  = sprintf( "http://%s:%s/jolokia", @jolokiaHost, @jolokiaPort )
+    serverUrl = sprintf( "http://%s:%s/jolokia", @jolokiaHost, @jolokiaPort )
 
-    uri        = URI.parse( serverUrl )
-    http       = Net::HTTP.new( uri.host, uri.port )
+    uri       = URI.parse( serverUrl )
+    http      = Net::HTTP.new( uri.host, uri.port )
 
-    hostname = data[:hostname] ? data[:hostname] : nil
-    checks   = data[:checks]   ? data[:checks]   : nil
+    hostname  = data[:hostname] ? data[:hostname] : nil
+    checks    = data[:checks]   ? data[:checks]   : nil
 
-    result = {
+    result    = {
       :hostname  => hostname,
       :timestamp => Time.now().to_i
     }
@@ -689,7 +714,9 @@ class DataCollector
 
         @log.debug( sprintf( '%d checks for service %s found', i.count, v ) )
 
-        if( ! i[0]['target'] )
+        target = i[0]['target'] ? i[0]['target'] : nil
+
+        if( target == nil )
 
           case v
           when 'mysql'
@@ -706,14 +733,14 @@ class DataCollector
 
         else
 
-          targetUrl = i[0]['target']['url']
-
           if( @DEBUG == true )
 
             tmpFile = sprintf( '%s/%s/request-%s.json'    , @cacheDirectory, hostname,v )
             File.open( tmpFile , 'w' ) { |f| f.write( JSON.pretty_generate( i ) ) }
 
           end
+
+          targetUrl = target['url']
 
           if( self.checkHostAndService( targetUrl ) == true )
 
@@ -791,6 +818,14 @@ class DataCollector
     discoveryFile        = sprintf( '%s/%s/discovery.json'     , @cacheDirectory, host )
     mergedDataFile       = sprintf( '%s/%s/mergedHostData.json', @cacheDirectory, host )
 
+    if( ! File.exist?( discoveryFile ) )
+
+      @log.error( sprintf( 'no discovered Services found' ) )
+
+      return ( {} )
+
+    end
+
     if( File.exist?( mergedDataFile ) )
 
       @log.debug( 'read merged data' )
@@ -845,13 +880,6 @@ class DataCollector
       @log.info( sprintf( 'Host: %s', h ) )
 
       self.checkHostDataAge( h )
-
-#         if( self.checkHostDataAge( file ) == true )
-#
-#           # re.start the service discovery
-#           @discovery.refreshHost( h )
-#
-#         end
 
       d = self.buildMergedData( h )
 
