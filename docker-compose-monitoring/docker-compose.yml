@@ -12,7 +12,7 @@ networks:
 services:
   database:
     restart: always
-    image: bodsch/docker-mysql:1610-01
+    image: bodsch/docker-mysql:1610-02
     container_name: database
     hostname: database
     env_file:
@@ -26,7 +26,7 @@ services:
 
   jolokia:
     restart: always
-    image: bodsch/docker-jolokia:1610-01
+    image: bodsch/docker-jolokia:1610-02
     container_name: jolokia
     hostname: jolokia
     volumes:
@@ -42,7 +42,7 @@ services:
 
   memcached:
     restart: always
-    image: bodsch/docker-memcached:1610-01
+    image: bodsch/docker-memcached:1610-02
     container_name: memcached
     hostname: memcached
     volumes:
@@ -53,7 +53,7 @@ services:
 
   nginx:
     restart: always
-    image: bodsch/docker-nginx:1610-01
+    image: bodsch/docker-nginx:1610-02
     container_name: nginx
     hostname: nginx
     ports:
@@ -84,7 +84,7 @@ services:
 
   graphite:
     restart: always
-    image: bodsch/docker-graphite:1610-01
+    image: bodsch/docker-graphite:1610-02
     container_name: graphite
     hostname: graphite
     env_file:
@@ -109,7 +109,7 @@ services:
 
   grafana:
     restart: always
-    image: bodsch/docker-grafana:1610-01
+    image: bodsch/docker-grafana:1610-02
     container_name: grafana
     hostname: grafana
     env_file:
@@ -128,7 +128,7 @@ services:
 
   icinga2-core:
     restart: always
-    image: bodsch/docker-icinga2:1610-01
+    image: bodsch/docker-icinga2:1610-02
     container_name: icinga2-core
     hostname: icinga2-core
     env_file:
@@ -171,7 +171,7 @@ services:
 
   icingaweb2:
     restart: always
-    image: bodsch/docker-icingaweb2:1610-01
+    image: bodsch/docker-icingaweb2:1610-02
     container_name: icingaweb2
     hostname: icingaweb2
     env_file:

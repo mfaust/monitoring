@@ -12,7 +12,7 @@ networks:
 services:
   database:
     restart: always
-    image: bodsch/docker-mysql:latest
+    image: bodsch/docker-mysql:1610-02
     container_name: database
     hostname: database
     env_file:
@@ -26,7 +26,7 @@ services:
 
   jolokia:
     restart: always
-    image: bodsch/docker-jolokia:latest
+    image: bodsch/docker-jolokia:1610-02
     container_name: jolokia
     hostname: jolokia
     volumes:
@@ -42,7 +42,7 @@ services:
 
   memcached:
     restart: always
-    image: bodsch/docker-memcached:latest
+    image: bodsch/docker-memcached:1610-02
     container_name: memcached
     hostname: memcached
     volumes:
@@ -53,7 +53,7 @@ services:
 
   nginx:
     restart: always
-    image: bodsch/docker-nginx:latest
+    image: bodsch/docker-nginx:1610-02
     container_name: nginx
     hostname: nginx
     ports:
@@ -64,8 +64,7 @@ services:
       - cm-monitoring
     extra_hosts:
       - 'jolokia:172.25.0.11'
-      - 'grafana:172.25.0.22'
-      - 'icingaweb2:172.25.0.31'
+      - 'grafana:10.101.2.100'
       - 'cm-monitoring:172.25.0.40'
     volumes:
       - /etc/localtime:/etc/localtime:ro
@@ -74,7 +73,6 @@ services:
       - ./share/nginx/etc/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./share/nginx/etc/nginx/modules.d/00-restrictions.conf:/etc/nginx/modules.d/00-restrictions.conf:ro
       - ./share/nginx/etc/nginx/modules.d/01-proxy-grafana.conf:/etc/nginx/modules.d/01-proxy-grafana.conf:ro
-      - ./share/nginx/etc/nginx/modules.d/01-proxy-icingaweb2.conf:/etc/nginx/modules.d/01-proxy-icingaweb2.conf:ro
       - ./share/nginx/etc/nginx/modules.d/01-proxy-rest-service.conf:/etc/nginx/modules.d/01-proxy-rest-service.conf:ro
     networks:
       mon:
@@ -84,124 +82,21 @@ services:
   # we have now a second 'carbon-relay-ng' for testing
   carbon-relay:
     restart: always
-    image: bodsch/docker-carbon-c-relay:latest
+    image: bodsch/docker-carbon-c-relay:1610-02
     container_name: carbon-relay
     hostname: carbon-relay
     ports:
       - 2003:2003
     env_file:
       - env/carbon-relay.env
-    depends_on:
-      - graphite
     extra_hosts:
-      - 'graphite:172.25.0.21'
+      - 'graphite:10.101.2.100'
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./share/carbon-relay/etc/supervisor.d/carbon-relay.ini:/etc/supervisor.d/carbon-relay.ini:ro
     networks:
       mon:
         ipv4_address: 172.25.0.20
-
-  graphite:
-    restart: always
-    image: bodsch/docker-graphite:1609-01
-    container_name: graphite
-    hostname: graphite
-    env_file:
-      - env/database.env
-      - env/graphite.env
-    depends_on:
-      - database
-      - memcached
-    extra_hosts:
-      - 'database:172.25.0.10'
-      - 'memcached:172.25.0.11'
-    ports:
-#      - 2003:2003
-      - 7002:7002
-#      - 8081:8080
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ./data:/srv
-    networks:
-      mon:
-        ipv4_address: 172.25.0.21
-
-  grafana:
-    restart: always
-    image: bodsch/docker-grafana:latest
-    container_name: grafana
-    hostname: grafana
-    env_file:
-      - env/database.env
-      - env/grafana.env
-    depends_on:
-      - database
-    extra_hosts:
-      - 'database:172.25.0.10'
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ./data:/srv
-    networks:
-      mon:
-        ipv4_address: 172.25.0.22
-
-  icinga2-core:
-    restart: always
-    image: bodsch/docker-icinga2:latest
-    container_name: icinga2-core
-    hostname: icinga2-core
-    env_file:
-      - env/database.env
-      - env/icinga2.env
-    depends_on:
-      - database
-    extra_hosts:
-      - 'database:172.25.0.10'
-    ports:
-      - 5665:5665
-      - 6666:6666
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ./share/resolv.conf:/etc/resolv.conf:ro
-      - ./data:/srv
-      - ./share/cache/monitoring:/var/cache/monitoring
-      - ./share/icinga2:/usr/local/monitoring
-      - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_memory_cache:/usr/lib/monitoring-plugins/check_cm_memory_cache
-      - ./share/icinga2/etc/icinga2/objects:/etc/icinga2/objects
-    links:
-      - database:database
-    networks:
-      mon:
-        ipv4_address: 172.25.0.30
-
-  icingaweb2:
-    restart: always
-    image: bodsch/docker-icingaweb2:latest
-    container_name: icingaweb2
-    hostname: icingaweb2
-    env_file:
-      - env/database.env
-      - env/icinga2.env
-      - env/icingaweb2.env
-    depends_on:
-      - database
-      - icinga2-core
-    extra_hosts:
-      - 'database:172.25.0.10'
-      - 'icinga2:172.25.0.30'
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ./data:/srv
-      - ./share/icingaweb2:/usr/local/share
-    volumes_from:
-      - icinga2-core
-    links:
-      - database:database
-      - icinga2-core:icinga2
-    networks:
-      mon:
-        ipv4_address: 172.25.0.31
 
   cm-monitoring:
     restart: always
@@ -212,23 +107,20 @@ services:
       - env/cm-monitoring.env
     depends_on:
       - jolokia
-      - icinga2-core
-      - grafana
+      - carbon-relay
+      - memcached
     extra_hosts:
       - 'jolokia:172.25.0.11'
+      - 'memcached:172.25.0.12'
       - 'carbon-relay:172.25.0.20'
-      - 'grafana:172.25.0.22'
-      - 'icinga2:172.25.0.30'
-      - 'blueprint-box:192.168.252.100'
+      - 'grafana:10.101.2.100'
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./share/resolv.conf:/etc/resolv.conf:ro
       - ./data/monitoring:/var/cache/monitoring
       - ./data:/srv
     links:
-      - icinga2-core:icinga2
       - jolokia:jolokia
-      - grafana:grafana
     networks:
       mon:
         ipv4_address: 172.25.0.40
