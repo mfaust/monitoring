@@ -1,0 +1,101 @@
+// create: dot overview.dot  -Tpng -o assets/overview.png
+
+digraph G {
+
+  nodesep=1.0 // increases the separation between nodes
+  ratio=1
+  overlap=false
+  start=1
+  concentrate=false
+  size="15,10";
+//  rankdir="LR";
+
+  rankdir="BT";
+
+  node [
+    fontname="Courier New",
+    fontsize=10,
+    height=0.2,
+    width=0.2,
+    shape=box
+  ]
+  edge [
+    style=solid,
+    arrowhead="vee",
+    arrowtail="vee",
+    arrowsize="0.7",
+  ]
+
+  subgraph level0{
+
+    user                [label="USER",shape=box]
+
+//     { rank=same; user, coremedia }
+  }
+
+  subgraph cluster_aws{
+    label = "AWS";
+    nginx               [label="docker-nginx"];
+    database            [label="docker-mysql"];
+//     icinga2core         [label="docker-icinga2"];
+//     icingaweb2          [label="docker-icingaweb2"];
+    graphite            [label="docker-graphite"];
+    grafana             [label="docker-grafana"];
+//     { rank=same; icingaweb2 grafana }
+//     { rank=same; database graphite }
+  }
+
+  subgraph cluster_springer{
+    label = "Springer";
+    nginx2              [label="docker-nginx"];
+    memcache            [label="docker-memcache"];
+    jolokia             [label="docker-jolokia"];
+    graphiteRelay       [label="docker-graphite-c-relay"];
+    cmMonitoring        [label="docker-monitoring"];
+//     icinga2satelite    [label="docker-icinga2satelite"];
+
+    { rank=same; memcache, jolokia, graphiteRelay }
+  }
+
+  subgraph cluster_cm{
+    label = "CoreMedia";
+    coremedia           [label="CoreMedia\nServices",shape=box,style=rounded];
+  }
+
+  user -> nginx
+  user -> nginx2
+
+
+//   { rank=same; icingaweb2 grafana cmMonitoring }
+//   { rank=same; icinga2core jolokia }
+//   { rank=same; graphite database memcache jolokia }
+
+  nginx2 -> cmMonitoring [dir=both]
+  nginx -> grafana
+  nginx -> graphite
+//   nginx -> icinga2core
+//   nginx -> icingaweb2
+
+//   icinga2satelite -> icinga2core
+//   icinga2satelite  -> coremedia
+
+  cmMonitoring -> coremedia [style=dashed,label="ping"]
+  cmMonitoring -> jolokia  [dir=both]
+  cmMonitoring -> memcache [dir=both]
+  cmMonitoring -> graphiteRelay
+
+  graphiteRelay -> graphite
+
+//   icinga2core  -> database
+//   icinga2core  -> memcache
+//   icingaweb2   -> database
+
+  grafana      -> database
+  grafana      -> graphite
+//   grafana      -> memcache
+
+  graphite     -> database
+
+  jolokia      -> coremedia [dir=both]
+
+}

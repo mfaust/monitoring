@@ -1,0 +1,27 @@
+#!/bin/bash
+
+COMPOSE_VERSION="1.8.1"
+COMPOSE_FILE="docker-compose-$(uname -s)-$(uname -m)"
+
+curl -L https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/${COMPOSE_FILE} > /usr/local/bin/docker-compose
+chmod +x /usr/local/bin/docker-compose
+
+sudo yum update
+sudo yum -y install docker git
+
+sudo service docker start
+
+sudo mkdir  /srv/docker
+sudo chown ec2-user: docker
+
+cd /srv/docker
+
+git clone git@github.com:cm-xlabs/monitoring.git
+
+cd /srv/docker/monitoring/docker-compose-monitoring/
+
+sudo /usr/local/bin/docker-compose pull
+sudo /usr/local/bin/docker-compose build
+
+sudo /usr/local/bin/docker-compose up -d
+
