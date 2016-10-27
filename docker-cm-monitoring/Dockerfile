@@ -1,9 +1,9 @@
 
-FROM bodsch/docker-alpine-base:1610-01
+FROM bodsch/docker-alpine-base:1610-02
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
-LABEL version="1.3.2"
+LABEL version="1.3.3"
 
 EXPOSE 9001
 
@@ -62,6 +62,5 @@ RUN \
 
 COPY rootfs/ /
 
-# CMD [ '/bin/bash' ]
 
-ENTRYPOINT [ "/opt/startup.sh" ]
+CMD /opt/startup.sh
