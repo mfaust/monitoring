@@ -2,15 +2,14 @@
 
 digraph G {
 
-  nodesep=1.0 // increases the separation between nodes
-  ratio=1
-  overlap=false
-  start=1
-  concentrate=false
-  size="15,10";
-//  rankdir="LR";
+//   nodesep=1.0 // increases the separation between nodes
+//   ratio=1
+//   overlap=false
+//   start=1
+//   concentrate=false
+//   size="15,10";
+  rankdir="LR";
 
-  rankdir="BT";
 
   node [
     fontname="Courier New",
@@ -26,10 +25,11 @@ digraph G {
     arrowsize="0.7",
   ]
 
+//   1->2->3->4[arrowhead=none]
+
   subgraph level0{
 
     user                [label="USER",shape=box]
-
 //     { rank=same; user, coremedia }
   }
 
@@ -61,6 +61,7 @@ digraph G {
     label = "CoreMedia";
     coremedia           [label="CoreMedia\nServices",shape=box,style=rounded];
   }
+
 
   user -> nginx
   user -> nginx2
