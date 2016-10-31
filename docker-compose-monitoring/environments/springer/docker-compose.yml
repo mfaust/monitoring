@@ -10,20 +10,6 @@ networks:
       - subnet: 172.25.0.0/24
 
 services:
-  database:
-    restart: always
-    image: bodsch/docker-mysql:1610-02
-    container_name: database
-    hostname: database
-    env_file:
-      - env/database.env
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ./data:/srv
-    networks:
-      mon:
-        ipv4_address: 172.25.0.10
-
   jolokia:
     restart: always
     image: bodsch/docker-jolokia:1610-02
@@ -59,12 +45,9 @@ services:
     ports:
       - 80:80
     depends_on:
-      - grafana
-      - icingaweb2
       - cm-monitoring
     extra_hosts:
       - 'jolokia:172.25.0.11'
-      - 'grafana:10.101.2.100'
       - 'cm-monitoring:172.25.0.40'
     volumes:
       - /etc/localtime:/etc/localtime:ro
@@ -72,7 +55,6 @@ services:
       - ./share/nginx/etc/nginx/sites-enabled:/etc/nginx/sites-enabled:ro
       - ./share/nginx/etc/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./share/nginx/etc/nginx/modules.d/00-restrictions.conf:/etc/nginx/modules.d/00-restrictions.conf:ro
-      - ./share/nginx/etc/nginx/modules.d/01-proxy-grafana.conf:/etc/nginx/modules.d/01-proxy-grafana.conf:ro
       - ./share/nginx/etc/nginx/modules.d/01-proxy-rest-service.conf:/etc/nginx/modules.d/01-proxy-rest-service.conf:ro
     networks:
       mon:
@@ -90,7 +72,7 @@ services:
     env_file:
       - env/carbon-relay.env
     extra_hosts:
-      - 'graphite:10.101.2.100'
+      - 'graphite:192.168.252.101'
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./share/carbon-relay/etc/supervisor.d/carbon-relay.ini:/etc/supervisor.d/carbon-relay.ini:ro
@@ -113,7 +95,7 @@ services:
       - 'jolokia:172.25.0.11'
       - 'memcached:172.25.0.12'
       - 'carbon-relay:172.25.0.20'
-      - 'grafana:10.101.2.100'
+      - 'grafana:192.168.252.101'
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./share/resolv.conf:/etc/resolv.conf:ro
