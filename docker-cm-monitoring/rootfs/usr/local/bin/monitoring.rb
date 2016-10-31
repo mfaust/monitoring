@@ -96,7 +96,11 @@ class Monitoring
 
     @serviceDiscovery = ServiceDiscovery.new( serviceDiscoverConfig )
     @grafana          = Grafana.new( grafanaConfig )
-    @icinga           = Icinga2.new( icingaConfig )
+
+    if( @enabledIcinga == true )
+      @icinga           = Icinga2.new( icingaConfig )
+    end
+
     @graphite         = GraphiteAnnotions::Client.new( graphiteOptions )
 
   end
@@ -161,8 +165,10 @@ class Monitoring
 
         @log.info( sprintf( 'remove %s from monitoring', host ) )
 
-        icingaResult = @icinga.deleteHost( host )
-        icingaStatus = @icinga.status
+        if( @enabledIcinga == true )
+          icingaResult = @icinga.deleteHost( host )
+          icingaStatus = @icinga.status
+        end
 
         grafanaResult = @grafana.deleteDashboards( host )
         grafanaStatus = @grafana.status
@@ -170,7 +176,10 @@ class Monitoring
         discoveryResult   = @serviceDiscovery.deleteHost( host )
         discoveryStatus   = @serviceDiscovery.status
 
-        @log.debug( icingaResult )
+        if( @enabledIcinga == true )
+          @log.debug( icingaResult )
+        end
+
         @log.debug( grafanaResult )
         @log.debug( discoveryResult )
 
@@ -184,102 +193,105 @@ class Monitoring
 
       if( discoveryStatus == 200 || discoveryStatus == 201 )
 
-        services = ( discoveryServices[:hosts] && discoveryServices[:hosts]['services'] ) ? discoveryServices[:hosts]['services'] : nil
+        if( @enabledIcinga == true )
 
-        services.each do |s|
-          s.last.reject! { |k| k == 'description' }
-          s.last.reject! { |k| k == 'application' }
-        end
+          services = ( discoveryServices[:hosts] && discoveryServices[:hosts]['services'] ) ? discoveryServices[:hosts]['services'] : nil
 
-        cm = Hash.new()
-        cm = { 'cm' => services }
-
-        icingaResult = @icinga.addHost( host, cm )
-        icingaStatus = @icinga.status
-
-        if( icingaStatus == 200 && experimental == true )
-
-          hash  = Hash.new()
-          array = Array.new()
-
-          # add some custom service-checks
-          @serviceChecks.each do |type,s|
-
-            count = 0
-
-            s.each do |v|
-
-              proto = v['proto'] ? v['proto']  : 'http'
-              vhost = v['vhost'] ? v['vhost']  : nil
-              port  = v['port']  ? v['port']   : 80
-              url   = v['url']   ? v['url']    : '/'
-
-              if( type == 'ssl' || type == 'ssl_cert' )
-                proto = 'https'
-                port  = 443
-              end
-
-              if( proto == 'https' && ( port == nil || port == 80 ) )
-                port = 443
-              end
-
-              if( vhost =~ /.*%HOST%$/ )
-                #
-                fqdn = Socket.gethostbyname( host ).first
-                fqdn = vhost.gsub( '%HOST%', fqdn )
-              else
-                vhost.gsub!( '%HOST%', host )
-                fqdn  = Socket.gethostbyname( vhost ).first
-              end
-
-              hashKey      = sprintf( '%s-%s-%d', type.downcase, fqdn.downcase, count += 1 )
-              displayName  = sprintf( '%s - %s' , type.upcase  , fqdn.downcase )
-
-              if( type == 'http' || type == 'https' )
-
-                # simple HTTP Check
-                hash = {
-                  hashKey => {
-                    'display_name'    => displayName,
-                    'check_command'   => type.downcase,
-                    'host_name'       => host,
-                    'vars.http_vhost' => fqdn,
-                    'vars.http_uri'   => url,
-                    'vars.http_port'  => port
-                  }
-                }
-
-                if( port == 443 )
-                  hash[hashKey.to_s]['vars.http_ssl'] = true
-                  hash[hashKey.to_s]['vars.http_ssl_force_tlsv1_2'] = true
-                end
-
-              elsif( type == 'ssl' )
-
-                # check for a ssl certificate
-                hash = {
-                  hashKey => {
-                    'display_name'                      => displayName,
-                    'check_command'                     => type.downcase,
-                    'host_name'                         => host,
-                    'vars.ssl_address'                  => fqdn,
-                    'vars.ssl_port'                     => port,
-                    'vars.ssl_timeout'                  => 10,
-                    'vars.ssl_cert_valid_days_warn'     => 30,
-                    'vars.ssl_cert_valid_days_critical' => 10
-                  }
-                }
-
-              end
-
-              array.push( hash )
-            end
+          services.each do |s|
+            s.last.reject! { |k| k == 'description' }
+            s.last.reject! { |k| k == 'application' }
           end
 
-          services = array.reduce( :merge )
+          cm = Hash.new()
+          cm = { 'cm' => services }
 
-          @icinga.addServices( host, services )
+          icingaResult = @icinga.addHost( host, cm )
+          icingaStatus = @icinga.status
 
+          if( icingaStatus == 200 && experimental == true )
+
+            hash  = Hash.new()
+            array = Array.new()
+
+            # add some custom service-checks
+            @serviceChecks.each do |type,s|
+
+              count = 0
+
+              s.each do |v|
+
+                proto = v['proto'] ? v['proto']  : 'http'
+                vhost = v['vhost'] ? v['vhost']  : nil
+                port  = v['port']  ? v['port']   : 80
+                url   = v['url']   ? v['url']    : '/'
+
+                if( type == 'ssl' || type == 'ssl_cert' )
+                  proto = 'https'
+                  port  = 443
+                end
+
+                if( proto == 'https' && ( port == nil || port == 80 ) )
+                  port = 443
+                end
+
+                if( vhost =~ /.*%HOST%$/ )
+                  #
+                  fqdn = Socket.gethostbyname( host ).first
+                  fqdn = vhost.gsub( '%HOST%', fqdn )
+                else
+                  vhost.gsub!( '%HOST%', host )
+                  fqdn  = Socket.gethostbyname( vhost ).first
+                end
+
+                hashKey      = sprintf( '%s-%s-%d', type.downcase, fqdn.downcase, count += 1 )
+                displayName  = sprintf( '%s - %s' , type.upcase  , fqdn.downcase )
+
+                if( type == 'http' || type == 'https' )
+
+                  # simple HTTP Check
+                  hash = {
+                    hashKey => {
+                      'display_name'    => displayName,
+                      'check_command'   => type.downcase,
+                      'host_name'       => host,
+                      'vars.http_vhost' => fqdn,
+                      'vars.http_uri'   => url,
+                      'vars.http_port'  => port
+                    }
+                  }
+
+                  if( port == 443 )
+                    hash[hashKey.to_s]['vars.http_ssl'] = true
+                    hash[hashKey.to_s]['vars.http_ssl_force_tlsv1_2'] = true
+                  end
+
+                elsif( type == 'ssl' )
+
+                  # check for a ssl certificate
+                  hash = {
+                    hashKey => {
+                      'display_name'                      => displayName,
+                      'check_command'                     => type.downcase,
+                      'host_name'                         => host,
+                      'vars.ssl_address'                  => fqdn,
+                      'vars.ssl_port'                     => port,
+                      'vars.ssl_timeout'                  => 10,
+                      'vars.ssl_cert_valid_days_warn'     => 30,
+                      'vars.ssl_cert_valid_days_critical' => 10
+                    }
+                  }
+
+                end
+
+                array.push( hash )
+              end
+            end
+
+            services = array.reduce( :merge )
+
+            @icinga.addServices( host, services )
+
+          end
         end
 
         grafanaResult = @grafana.addDashbards( host )
@@ -315,26 +327,29 @@ class Monitoring
 
       grafanaResult = 0
 
-      icingaResult    = @icinga.deleteHost( host )
-      icingaStatus    = @icinga.status
+      if( @enabledIcinga == true )
+        icingaResult    = @icinga.deleteHost( host )
+        icingaStatus    = @icinga.status
+
+        status[host.to_s][:icinga] = { :status => icingaStatus   , :message => icingaResult[:message] }
+      end
 
       discoveryResult = @serviceDiscovery.deleteHost( host )
       discoveryStatus = @serviceDiscovery.status
 
-      status = {
-        host.to_s => {
-          :icinga    => { :status => icingaStatus   , :message => icingaResult[:message] },
-          :discovery => { :status => discoveryStatus, :message => discoveryResult[:message]  }
-        }
-      }
+      status[:discovery] = { :status => discoveryStatus, :message => discoveryResult[:message]  }
 
       if( discoveryStatus == 200 and force == true )
+
         grafanaResult = @grafana.deleteDashboards( host )
 
         status[host.to_s][:grafana] = { :status => grafanaResult[:status], :message => grafanaResult[:message] }
       end
 
-      @log.debug( icingaResult )
+      if( @enabledIcinga == true )
+        @log.debug( icingaResult )
+      end
+
       @log.debug( discoveryResult )
       @log.debug( grafanaResult )
 
@@ -355,7 +370,12 @@ class Monitoring
 
     if( host.to_s != '' )
 
-      icingaResult    = @icinga.listHost( host )
+      icingaStatus = 0
+
+      if( @enabledIcinga == true )
+        icingaResult    = @icinga.listHost( host )
+      end
+
       grafanaResult   = @grafana.listDashboards( host )
       discoveryResult = @serviceDiscovery.listHosts( host )
 
@@ -363,7 +383,9 @@ class Monitoring
       discoveryCreated      = 'unknown'
       discoveryOnline       = 'unknown'
 
-      icingaStatus          = icingaResult[:status]    ? icingaResult[:status]    : 400
+      if( @enabledIcinga == true )
+        icingaStatus          = icingaResult[:status]    ? icingaResult[:status]    : 400
+      end
 
       grafanaStatus         = grafanaResult[:status]   ? grafanaResult[:status]   : 400
 

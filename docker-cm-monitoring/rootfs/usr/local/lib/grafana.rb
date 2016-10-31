@@ -44,7 +44,7 @@ class Grafana
     file           = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
     file.sync      = true
     @log           = Logger.new(file, 'weekly', 1024000)
-    @log.level     = Logger::INFO
+    @log.level     = Logger::DEBUG
     @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
     @log.formatter = proc do |severity, datetime, progname, msg|
       "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
@@ -79,7 +79,7 @@ class Grafana
     if( @supportMemcache == true )
       @log.info( sprintf( '  Memcache Support enabled (%s:%s)', @memcacheHost, @memcachePort ) )
     end
-
+    @log.info( "  Backendsystem #{@grafanaURI}" )
     @log.info( '-----------------------------------------------------------------' )
     @log.info( '' )
 
@@ -268,14 +268,25 @@ class Grafana
       # determine type of service from mergedHostData.json file, e.g. cae, caefeeder, contentserver
       mergedHostJson = getJsonFromFile( @mergedHostFile )
 
+      # Overview Template
       self.generateOverviewTemplate( services )
-      self.generateLicenseTemplate( host, services )
+
+      # LicenseInformation
+      if( servicesTmp.include?( 'content-management-server' ) || servicesTmp.include?( 'master-live-server' ) || servicesTmp.include?( 'replication-live-server' ) )
+        self.generateLicenseTemplate( host, services )
+      end
+
+      # MemoryPools for many Services
       self.addNamedTemplate( 'cm-memory-pool.json' )
-      self.addNamedTemplate( 'cm-cae-cache-classes.json' )
 
-      if( self.beanAvailable?( host, 'cae-preview', 'CacheClassesIBMAvailability' ) == true )
+      # CAE Caches
+      if( servicesTmp.include?( 'cae-preview' ) || servicesTmp.include?( 'cae-live' ) )
 
-        self.addNamedTemplate( 'cm-cae-cache-classes-ibm.json' )
+        self.addNamedTemplate( 'cm-cae-cache-classes.json' )
+
+        if( self.beanAvailable?( host, 'cae-preview', 'CacheClassesIBMAvailability' ) == true )
+          self.addNamedTemplate( 'cm-cae-cache-classes-ibm.json' )
+        end
       end
 
       services.each do |service|

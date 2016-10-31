@@ -43,9 +43,8 @@ services:
     ports:
       - 80:80
     depends_on:
+      - graphite
       - grafana
-      - icingaweb2
-      - cm-monitoring
     extra_hosts:
       - 'graphite:172.25.0.21'
       - 'grafana:172.25.0.22'
