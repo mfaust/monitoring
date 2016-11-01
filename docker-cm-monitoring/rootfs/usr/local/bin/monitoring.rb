@@ -31,7 +31,7 @@ class Monitoring
     file.sync       = true
     @log            = Logger.new( file, 'weekly', 1024000 )
 #    @log = Logger.new( STDOUT )
-    @log.level      = Logger::INFO
+    @log.level      = Logger::DEBUG
     @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
     @log.formatter  = proc do |severity, datetime, progname, msg|
       "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
@@ -159,6 +159,9 @@ class Monitoring
 
     experimental = false
 
+    status       = 500
+    message      = 'initialize error'
+
     if( host.to_s != '' )
 
       if( force == true )
@@ -189,11 +192,12 @@ class Monitoring
 
       discoveryResult   = @serviceDiscovery.addHost( host )
       discoveryStatus   = @serviceDiscovery.status
-      discoveryServices = @serviceDiscovery.listHosts( host )
 
-      if( discoveryStatus == 200 || discoveryStatus == 201 )
+      if( discoveryResult[:status].to_i == 200 || discoveryResult[:status].to_i == 201 )
 
         if( @enabledIcinga == true )
+
+          discoveryServices = @serviceDiscovery.listHosts( host )
 
           services = ( discoveryServices[:hosts] && discoveryServices[:hosts]['services'] ) ? discoveryServices[:hosts]['services'] : nil
 
@@ -326,34 +330,41 @@ class Monitoring
     if( host.to_s != '' )
 
       grafanaResult = 0
-
-      if( @enabledIcinga == true )
-        icingaResult    = @icinga.deleteHost( host )
-        icingaStatus    = @icinga.status
-
-        status[host.to_s][:icinga] = { :status => icingaStatus   , :message => icingaResult[:message] }
-      end
+      result        = Array.new()
 
       discoveryResult = @serviceDiscovery.deleteHost( host )
-      discoveryStatus = @serviceDiscovery.status
 
-      status[:discovery] = { :status => discoveryStatus, :message => discoveryResult[:message]  }
+      discoveryHash = { :discovery => { :status => discoveryResult[:status], :message => discoveryResult[:message]  } }
 
-      if( discoveryStatus == 200 and force == true )
+      result.push( discoveryHash )
+
+      if( discoveryResult[:status].to_i == 200 and force == true )
 
         grafanaResult = @grafana.deleteDashboards( host )
 
-        status[host.to_s][:grafana] = { :status => grafanaResult[:status], :message => grafanaResult[:message] }
+        grafanaHash = { :grafana => { :status => grafanaResult[:status], :message => grafanaResult[:message] } }
+
+        result.push( grafanaHash )
       end
 
       if( @enabledIcinga == true )
-        @log.debug( icingaResult )
+
+        icingaResult    = @icinga.deleteHost( host )
+        icingaStatus    = @icinga.status
+
+        icingaHash = { :icinga => { :status => icingaStatus   , :message => icingaResult[:message] } }
+
+        result.push( grafanaHash )
+
+        @log.debug( icingaHash )
       end
 
-      @log.debug( discoveryResult )
-      @log.debug( grafanaResult )
+      discoveryResult = result.reduce( :merge )
 
-      return status
+      return {
+        :status    => 200,
+        :message   => discoveryResult
+      }
 
     else
 
@@ -423,34 +434,37 @@ class Monitoring
 
         array = Array.new()
 
-        hosts = discoveryResult[:hosts] ? discoveryResult[:hosts] : nil
-        hosts = hosts.reduce( :merge ).keys
+        hosts = discoveryResult[:hosts] ? discoveryResult[:hosts] : []
 
-        hosts.each do |h|
+        if( hosts.count != 0 )
 
-          r  = @serviceDiscovery.listHosts( h )
-          s  = r[:status] ? r[:status] : 400
+          hosts = hosts.reduce( :merge ).keys
 
-          if( s != 400 )
+          hosts.each do |h|
 
-            dHost        = r[:hosts] ? r[:hosts] : nil
+            r  = @serviceDiscovery.listHosts( h )
+            s  = r[:status] ? r[:status] : 400
 
-            if( dHost != nil )
-              discoveryCreated      = dHost[h][:created] ? dHost[h][:created] : 'unknown'
-              discoveryOnline       = dHost[h][:status]  ? dHost[h][:status]  : 'unknown'
+            if( s != 400 )
+
+              dHost        = r[:hosts] ? r[:hosts] : nil
+
+              if( dHost != nil )
+                discoveryCreated      = dHost[h][:created] ? dHost[h][:created] : 'unknown'
+                discoveryOnline       = dHost[h][:status]  ? dHost[h][:status]  : 'unknown'
+              end
             end
+
+            hash  = {
+              h.to_s => { :discovery => { :status => s, :created => discoveryCreated, :online => discoveryOnline } }
+            }
+
+            array.push( hash )
+
           end
 
-          hash  = {
-            h.to_s => { :discovery => { :status => s, :created => discoveryCreated, :online => discoveryOnline } }
-          }
-
-          array.push( hash )
-
+          discoveryResult = array.reduce( :merge )
         end
-
-        discoveryResult = array.reduce( :merge )
-
       end
 
       return {
