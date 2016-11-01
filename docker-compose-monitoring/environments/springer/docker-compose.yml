@@ -64,7 +64,7 @@ services:
   # we have now a second 'carbon-relay-ng' for testing
   carbon-relay:
     restart: always
-    image: bodsch/docker-carbon-c-relay:1610-02
+    image: bodsch/docker-carbon-relay-ng:1610-01
     container_name: carbon-relay
     hostname: carbon-relay
     ports:
@@ -75,7 +75,7 @@ services:
       - 'graphite:192.168.252.101'
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ./share/carbon-relay/etc/supervisor.d/carbon-relay.ini:/etc/supervisor.d/carbon-relay.ini:ro
+#      - ./share/carbon-relay/etc/supervisor.d/carbon-relay.ini:/etc/supervisor.d/carbon-relay.ini:ro
     networks:
       mon:
         ipv4_address: 172.25.0.20
