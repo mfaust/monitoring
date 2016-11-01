@@ -807,7 +807,9 @@ class Grafana
         # 400 – Errors (invalid json, missing or invalid fields, etc)
         # 401 – Unauthorized
         # 412 – Precondition failed
-        @log.error( sprintf( ' [%s] - Error', responseCode ) )
+        @log.error( sprintf( ' [%s] - Error for sendTemplateToGrafana', responseCode ) )
+        @log.error( sprintf( '   templateFile: %s', templateFile ) )
+        @log.error( sprintf( '   serviceName : %s', serviceName ) )
       end
 
     end
