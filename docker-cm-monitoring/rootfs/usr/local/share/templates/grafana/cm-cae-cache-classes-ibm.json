@@ -123,17 +123,7 @@
                 "min": null,
                 "show": true
               }
-            ],
-            "thresholds": [],
-            "alert": {
-              "warn": {
-                "op": ">"
-              },
-              "crit": {
-                "op": ">"
-              }
-            },
-            "alerting": {}
+            ]
           },
           {
             "aliasColors": {},
@@ -243,17 +233,7 @@
                 "min": null,
                 "show": true
               }
-            ],
-            "thresholds": [],
-            "alert": {
-              "warn": {
-                "op": ">"
-              },
-              "crit": {
-                "op": ">"
-              }
-            },
-            "alerting": {}
+            ]
           }
         ]
       },
@@ -371,17 +351,7 @@
                 "min": null,
                 "show": true
               }
-            ],
-            "thresholds": [],
-            "alert": {
-              "warn": {
-                "op": ">"
-              },
-              "crit": {
-                "op": ">"
-              }
-            },
-            "alerting": {}
+            ]
           },
           {
             "aliasColors": {},
@@ -491,17 +461,7 @@
                 "min": null,
                 "show": true
               }
-            ],
-            "thresholds": [],
-            "alert": {
-              "warn": {
-                "op": ">"
-              },
-              "crit": {
-                "op": ">"
-              }
-            },
-            "alerting": {}
+            ]
           }
         ]
       },
@@ -619,17 +579,7 @@
                 "min": null,
                 "show": true
               }
-            ],
-            "thresholds": [],
-            "alert": {
-              "warn": {
-                "op": ">"
-              },
-              "crit": {
-                "op": ">"
-              }
-            },
-            "alerting": {}
+            ]
           },
           {
             "aliasColors": {},
@@ -739,17 +689,7 @@
                 "min": null,
                 "show": true
               }
-            ],
-            "thresholds": [],
-            "alert": {
-              "warn": {
-                "op": ">"
-              },
-              "crit": {
-                "op": ">"
-              }
-            },
-            "alerting": {}
+            ]
           }
         ]
       },
@@ -867,17 +807,7 @@
                 "min": null,
                 "show": true
               }
-            ],
-            "thresholds": [],
-            "alert": {
-              "warn": {
-                "op": ">"
-              },
-              "crit": {
-                "op": ">"
-              }
-            },
-            "alerting": {}
+            ]
           },
           {
             "aliasColors": {},
@@ -987,17 +917,7 @@
                 "min": null,
                 "show": true
               }
-            ],
-            "thresholds": [],
-            "alert": {
-              "warn": {
-                "op": ">"
-              },
-              "crit": {
-                "op": ">"
-              }
-            },
-            "alerting": {}
+            ]
           }
         ]
       },
@@ -1115,17 +1035,7 @@
                 "min": null,
                 "show": true
               }
-            ],
-            "thresholds": [],
-            "alert": {
-              "warn": {
-                "op": ">"
-              },
-              "crit": {
-                "op": ">"
-              }
-            },
-            "alerting": {}
+            ]
           },
           {
             "aliasColors": {},
@@ -1235,17 +1145,7 @@
                 "min": null,
                 "show": true
               }
-            ],
-            "thresholds": [],
-            "alert": {
-              "warn": {
-                "op": ">"
-              },
-              "crit": {
-                "op": ">"
-              }
-            },
-            "alerting": {}
+            ]
           }
         ]
       },
@@ -1363,17 +1263,7 @@
                 "min": null,
                 "show": true
               }
-            ],
-            "thresholds": [],
-            "alert": {
-              "warn": {
-                "op": ">"
-              },
-              "crit": {
-                "op": ">"
-              }
-            },
-            "alerting": {}
+            ]
           },
           {
             "aliasColors": {},
@@ -1483,17 +1373,7 @@
                 "min": null,
                 "show": true
               }
-            ],
-            "thresholds": [],
-            "alert": {
-              "warn": {
-                "op": ">"
-              },
-              "crit": {
-                "op": ">"
-              }
-            },
-            "alerting": {}
+            ]
           }
         ]
       },
@@ -1611,17 +1491,7 @@
                 "min": null,
                 "show": true
               }
-            ],
-            "thresholds": [],
-            "alert": {
-              "warn": {
-                "op": ">"
-              },
-              "crit": {
-                "op": ">"
-              }
-            },
-            "alerting": {}
+            ]
           },
           {
             "aliasColors": {},
@@ -1731,17 +1601,7 @@
                 "min": null,
                 "show": true
               }
-            ],
-            "thresholds": [],
-            "alert": {
-              "warn": {
-                "op": ">"
-              },
-              "crit": {
-                "op": ">"
-              }
-            },
-            "alerting": {}
+            ]
           }
         ]
       },
@@ -1859,17 +1719,7 @@
                 "min": null,
                 "show": true
               }
-            ],
-            "thresholds": [],
-            "alert": {
-              "warn": {
-                "op": ">"
-              },
-              "crit": {
-                "op": ">"
-              }
-            },
-            "alerting": {}
+            ]
           },
           {
             "aliasColors": {},
@@ -1979,17 +1829,7 @@
                 "min": null,
                 "show": true
               }
-            ],
-            "thresholds": [],
-            "alert": {
-              "warn": {
-                "op": ">"
-              },
-              "crit": {
-                "op": ">"
-              }
-            },
-            "alerting": {}
+            ]
           }
         ]
       },
@@ -2107,17 +1947,7 @@
                 "min": null,
                 "show": true
               }
-            ],
-            "thresholds": [],
-            "alert": {
-              "warn": {
-                "op": ">"
-              },
-              "crit": {
-                "op": ">"
-              }
-            },
-            "alerting": {}
+            ]
           },
           {
             "aliasColors": {},
@@ -2227,17 +2057,7 @@
                 "min": null,
                 "show": true
               }
-            ],
-            "thresholds": [],
-            "alert": {
-              "warn": {
-                "op": ">"
-              },
-              "crit": {
-                "op": ">"
-              }
-            },
-            "alerting": {}
+            ]
           }
         ]
       },
@@ -2355,17 +2175,7 @@
                 "min": null,
                 "show": true
               }
-            ],
-            "thresholds": [],
-            "alert": {
-              "warn": {
-                "op": ">"
-              },
-              "crit": {
-                "op": ">"
-              }
-            },
-            "alerting": {}
+            ]
           },
           {
             "aliasColors": {},
@@ -2475,17 +2285,7 @@
                 "min": null,
                 "show": true
               }
-            ],
-            "thresholds": [],
-            "alert": {
-              "warn": {
-                "op": ">"
-              },
-              "crit": {
-                "op": ">"
-              }
-            },
-            "alerting": {}
+            ]
           }
         ]
       },
@@ -2603,17 +2403,7 @@
                 "min": null,
                 "show": true
               }
-            ],
-            "thresholds": [],
-            "alert": {
-              "warn": {
-                "op": ">"
-              },
-              "crit": {
-                "op": ">"
-              }
-            },
-            "alerting": {}
+            ]
           },
           {
             "aliasColors": {},
@@ -2723,17 +2513,7 @@
                 "min": null,
                 "show": true
               }
-            ],
-            "thresholds": [],
-            "alert": {
-              "warn": {
-                "op": ">"
-              },
-              "crit": {
-                "op": ">"
-              }
-            },
-            "alerting": {}
+            ]
           }
         ]
       }
