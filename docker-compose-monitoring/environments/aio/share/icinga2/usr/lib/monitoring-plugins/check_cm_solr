@@ -1,0 +1,160 @@
+#!/bin/bash
+#
+# maintainer         Coremedia
+# maintainer_email   bodo.schulz@coremedia.com
+# license            Copyright (C) 2016, CoreMedia AG proprietary License, all rights reserved.
+# description        icinga Check for Solr Status
+# version            1.0.1
+# ----------------------------------------------------------------------------------------
+
+SCRIPTNAME=$(basename $0 .sh)
+VERSION="1.0.1"
+VDATE="07.06.2016"
+
+# ----------------------------------------------------------------------------------------
+
+defaults="/usr/lib/monitoring-plugins/utils.sh"
+
+[ -f ${defaults} ] && {
+  . ${defaults}
+} || {
+  STATE_OK=0
+  STATE_WARNING=1
+  STATE_CRITICAL=2
+  STATE_UNKNOWN=3
+  STATE_DEPENDENT=4
+}
+
+PLUGIN_BASE="/usr/lib/monitoring-plugins"
+CACHE_BASE="/var/cache/monitoring"
+
+[ -f /etc/env.vars ] && . /etc/env.vars
+
+JQ=$(which jq)
+
+# ----------------------------------------------------------------------------------------
+
+HOSTNAME="$(hostname -s)"
+
+# ----------------------------------------------------------------------------------------
+
+version() {
+
+  help_format_title="%-9s %s\n"
+
+  echo ""
+  printf  "$help_format_title" "NRPE-Check to Check Coremedia Solr Status"
+  echo ""
+  printf  "$help_format_title" " Version $VERSION ($VDATE)"
+  echo ""
+}
+
+usage() {
+
+  help_format_title="%-9s %s\n"
+  help_format_desc="%-9s %-10s %s\n"
+  help_format_example="%-9s %-30s %s\n"
+
+  version
+
+  printf  "$help_format_title" "Usage:" \
+          "$SCRIPTNAME [-h|--help] [-v|--version] [-H|--host $Hostname] [-r|--repl $ReplicationType]"
+
+  printf  "$help_format_desc"    ""  "-h | --help"     ": Show this help"
+  printf  "$help_format_desc"    ""  "-v | --version"  ": Prints out the Version"
+  printf  "$help_format_desc"    ""  "-H | --host"     ": Host with running Application"
+  printf  "$help_format_desc"    ""  "-P | --port"     ": JMX Port for the running Solr"
+  printf  "$help_format_desc"    ""  "-r | --repl"     ": Solr Replication Type [live, preview, studio]"
+}
+
+round() {
+  echo $(printf %.$2f $(echo "scale=$2;(((10^$2)*$1)+0.5)/(10^$2)" | bc))
+}
+
+# ----------------------------------------------------------------------------------------
+
+run() {
+
+  filename="${CACHE_BASE}/${HOST}/${PORT}/SolrReplicationHandler.${REPLICATION_TYPE}.result"
+
+  if [ -f ${filename} ]
+  then
+
+    errors=$(${JQ} --raw-output '.[0].value.errors' ${filename})
+    isMaster=$(${JQ} --raw-output '.[0].value.isMaster' ${filename})
+    isSlave=$(${JQ} --raw-output '.[0].value.isSlave' ${filename})
+    medianRequestTime=$(${JQ} --raw-output '.[0].value.medianRequestTime'  ${filename})
+    requests=$(${JQ} --raw-output '.[0].value.requests' ${filename})
+
+    medianRequestTime=$(round ${medianRequestTime} 3)
+
+    echo "Solr Status:  Error: ${errors} - Master: ${isMaster} - Slave: ${isSlave} - requests: ${requests} - reqTime: ${medianRequestTime}"
+
+    result=${STATE_OK}
+  else
+    echo "UNKNOWN - No Result-File available"
+    result=${STATE_UNKNOWN}
+  fi
+
+  exit ${result}
+}
+
+# ----------------------------------------------------------------------------------------
+
+# Parse parameters
+while [ $# -gt 0 ]
+do
+  case "${1}" in
+    -h|--help) shift
+      usage;
+      exit 0
+      ;;
+    -v|--version) shift
+      version;
+      exit 0
+      ;;
+    -H|--host)
+      shift
+      HOST="${1}"
+      SERVICES="${CACHE_BASE}/${HOST}/cm-services"
+      ;;
+    -p|--port)
+      shift
+      PORT="${1}"
+      ;;
+    -r|--repl)
+      shift
+      REPLICATION_TYPE="${1}"
+    ;;
+    *)
+      echo "Unknown argument: '${1}'"
+      exit $STATE_UNKNOWN
+      ;;
+  esac
+shift
+done
+
+#----------------------------------------------------------------------------------------
+
+[ -z "${HOST}" ] && {
+  echo "Usage error: parameter --host missing"
+  usage
+  exit ${STATE_UNKNOWN}
+}
+
+[ -z "${PORT}" ] && {
+  echo "Usage error: parameter --port missing"
+  usage
+  exit ${STATE_UNKNOWN}
+}
+
+
+[ -z "${REPLICATION_TYPE}" ] && {
+  echo "Usage error: parameter --repl needs an argument ('live' or 'preview' or 'studio')"
+  usage
+  exit ${STATE_UNKNOWN}
+}
+
+run
+
+# EOF
