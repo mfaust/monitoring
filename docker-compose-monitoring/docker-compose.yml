@@ -217,6 +217,7 @@ services:
       - 'grafana:172.25.0.22'
       - 'icinga2-core:172.25.0.30'
       - 'blueprint-box:192.168.252.100'
+      - 'nginx-proxy:172.25.0.15'
     ports:
       - 9001:9001
     volumes:

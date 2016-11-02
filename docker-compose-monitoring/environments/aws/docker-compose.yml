@@ -62,7 +62,7 @@ services:
 
   carbon:
     restart: always
-    image: bodsch/docker-go-carbon:1610-01
+    image: bodsch/docker-go-carbon:1611-01
     container_name: carbon
     hostname: carbon
     ports:
@@ -79,21 +79,16 @@ services:
 
   graphite:
     restart: always
-    image: bodsch/docker-graphite:1610-02
+    image: bodsch/docker-graphite:1610-03
     container_name: graphite
     hostname: graphite
     env_file:
-      - env/database.env
       - env/graphite.env
     depends_on:
-      - database
       - memcached
     extra_hosts:
-      - 'database:172.25.0.10'
       - 'memcached:172.25.0.12'
     ports:
-#      - 2003:2003
-#      - 7002:7002
       - 8081:8080
     volumes:
       - /etc/localtime:/etc/localtime:ro
