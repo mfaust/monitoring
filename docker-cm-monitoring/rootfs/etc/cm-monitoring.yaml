@@ -19,12 +19,16 @@ jolokia:
   port: 8080
 
 grafana:
-  host: grafana
-  port: 3000
+  host: nginx-proxy
+  port: 80
+  path: /grafana/
   templateDirectory: /usr/local/share/templates/grafana
 
+# graphite ist hinter dem proxy erreichbar
+# nginx ist der hostname im docker-kontext
+# nginx-proxy ist der hostname im proxy-kontext
 graphite:
-  host: nginx
+  host: nginx-proxy
   port: 2003
   http-port: 80
   fix-timezone: true

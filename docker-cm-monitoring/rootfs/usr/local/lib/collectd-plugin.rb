@@ -258,7 +258,7 @@ class CollecdPlugin
 
         result.push( sprintf( 'PUTVAL %s/%s-%s/%s interval=%s N:%s', @Host, @Service, 'network', 'bytes-in', @interval, bytesIn ) )
         result.push( sprintf( 'PUTVAL %s/%s-%s/%s interval=%s N:%s', @Host, @Service, 'network', 'bytes-out', @interval, bytesOut ) )
-        result.push( sprintf( 'PUTVAL %s/%s-%s/%s interval=%s N:%s', @Host, @Service, 'network', 'total_requests' , @interval, requests ) )
+        result.push( sprintf( format, @Host, @Service, 'network', 'total_requests' , @interval, requests ) )
       end
 
       if( opcounters != nil )

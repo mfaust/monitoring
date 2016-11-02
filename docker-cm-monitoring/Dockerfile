@@ -50,6 +50,7 @@ RUN \
      time_difference \
      filesize \
      fileutils \
+     ruby-supervisor \
      sinatra \
      thin \
      dalli
