@@ -99,7 +99,7 @@ services:
 
   grafana:
     restart: always
-    image: bodsch/docker-grafana:1610-02
+    image: bodsch/docker-grafana:1611-01
     container_name: grafana
     hostname: grafana
     env_file:
@@ -108,9 +108,11 @@ services:
     depends_on:
       - database
       - memcached
+      - carbon
     extra_hosts:
       - 'database:172.25.0.10'
       - 'memcached:172.25.0.12'
+      - 'carbon:172.25.0.20'
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./data:/srv
