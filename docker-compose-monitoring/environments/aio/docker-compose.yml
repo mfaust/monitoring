@@ -1,5 +1,8 @@
 ---
 # project_name: monitoring
+# All-in-one Machine
+# all needed services are startet on one Host
+
 version: '2.0'
 
 networks:
@@ -82,23 +85,35 @@ services:
       mon:
         ipv4_address: 172.25.0.15
 
+  carbon:
+    restart: always
+    image: bodsch/docker-go-carbon:1611-01
+    container_name: carbon
+    hostname: carbon
+    ports:
+      - 2003:2003
+      - 2003:2003/udp
+      - 7002:7002
+      - 7007:7007
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./data:/srv
+    networks:
+      mon:
+        ipv4_address: 172.25.0.20
+
   graphite:
     restart: always
-    image: bodsch/docker-graphite:1610-02
+    image: bodsch/docker-graphite:1610-03
     container_name: graphite
     hostname: graphite
     env_file:
-      - env/database.env
       - env/graphite.env
     depends_on:
-      - database
       - memcached
     extra_hosts:
-      - 'database:172.25.0.10'
       - 'memcached:172.25.0.12'
     ports:
-      - 2003:2003
-      - 7002:7002
       - 8081:8080
     volumes:
       - /etc/localtime:/etc/localtime:ro
@@ -109,7 +124,7 @@ services:
 
   grafana:
     restart: always
-    image: bodsch/docker-grafana:1610-02
+    image: bodsch/docker-grafana:1611-01
     container_name: grafana
     hostname: grafana
     env_file:
@@ -117,8 +132,12 @@ services:
       - env/grafana.env
     depends_on:
       - database
+      - memcached
+      - carbon
     extra_hosts:
       - 'database:172.25.0.10'
+      - 'memcached:172.25.0.12'
+      - 'carbon:172.25.0.20'
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./data:/srv
@@ -200,7 +219,7 @@ services:
 
   cm-monitoring:
     restart: always
-    build: ../docker-cm-monitoring
+    build: ../../../docker-cm-monitoring
     container_name: cm-monitoring
     hostname: cm-monitoring
     env_file:
@@ -213,6 +232,7 @@ services:
     extra_hosts:
       - 'jolokia:172.25.0.11'
       - 'memcached:172.25.0.12'
+      - 'carbon:172.25.0.20'
       - 'graphite:172.25.0.21'
       - 'grafana:172.25.0.22'
       - 'icinga2-core:172.25.0.30'
@@ -228,6 +248,7 @@ services:
     links:
       - icinga2-core:icinga2
       - jolokia:jolokia
+      - carbon:carbon
       - grafana:grafana
     networks:
       mon:
