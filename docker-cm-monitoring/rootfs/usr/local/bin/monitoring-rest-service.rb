@@ -166,7 +166,20 @@ module Sinatra
     post '/h/:host/:force' do
       content_type :json
 
-      result = m.addHost( params[:host], true )
+      result = m.addHost( params[:host], [], true )
+
+      response.status = result[:status]
+      result.to_json
+    end
+
+
+    # create new host
+    #  including icinga2 and grafana
+    post '/h/:host/:tags' do
+      content_type :json
+
+      tags   = params[:tags]
+      result = m.addHost( params[:host], tags )
 
       response.status = result[:status]
       result.to_json

@@ -155,7 +155,7 @@ class Monitoring
   end
 
 
-  def addHost( host, force = false )
+  def addHost( host, tags = [], force = false )
 
     experimental = false
 
