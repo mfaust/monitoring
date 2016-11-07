@@ -219,7 +219,7 @@ services:
 
   cm-monitoring:
     restart: always
-    build: ../../../docker-cm-monitoring
+    build: ../../docker-cm-monitoring
     container_name: cm-monitoring
     hostname: cm-monitoring
     env_file:
