@@ -155,7 +155,7 @@ class Monitoring
   end
 
 
-  def addHost( host, tags = [], force = false )
+  def addHost( host, force = false )
 
     experimental = false
 
@@ -402,6 +402,12 @@ class Monitoring
 
       if( grafanaStatus != 400 )
         grafanaDashboardCount = grafanaResult[:count]   ? grafanaResult[:count]   : 0
+      end
+
+      if( grafanaStatus != 500 )
+        # TODO
+        # implement it
+        grafanaMessage        = grafanaResult[:message]   ? grafanaResult[:message]   : 'internal server error'
       end
 
       discoveryStatus       = discoveryResult[:status] ? discoveryResult[:status] : 400

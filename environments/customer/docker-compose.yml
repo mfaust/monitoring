@@ -12,7 +12,7 @@ networks:
 services:
   jolokia:
     restart: always
-    image: bodsch/docker-jolokia:1610-02
+    image: bodsch/docker-jolokia:1611-02
     container_name: jolokia
     hostname: jolokia
     volumes:
@@ -21,6 +21,7 @@ services:
     ports:
       - 8080:8080
     extra_hosts:
+      # NOTE: local blueprint-box
       - 'blueprint-box:192.168.252.100'
     networks:
       mon:
@@ -72,6 +73,8 @@ services:
     env_file:
       - env/carbon-relay.env
     extra_hosts:
+      # NOTE: external service
+      #- 'graphite:10.101.2.216'
       - 'graphite:192.168.252.101'
     volumes:
       - /etc/localtime:/etc/localtime:ro
@@ -95,7 +98,11 @@ services:
       - 'jolokia:172.25.0.11'
       - 'memcached:172.25.0.12'
       - 'carbon-relay:172.25.0.20'
+      # NOTE: external service
+      #- 'grafana:10.101.2.216'
       - 'grafana:192.168.252.101'
+      # NOTE: external service
+      #- 'nginx-proxy:10.101.2.216'
       - 'nginx-proxy:192.168.252.101'
     volumes:
       - /etc/localtime:/etc/localtime:ro

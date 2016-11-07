@@ -33,6 +33,8 @@ class Grafana
     @grafanaHost       = settings[:grafanaHost]       ? settings[:grafanaHost]       : 'localhost'
     @grafanaPort       = settings[:grafanaPort]       ? settings[:grafanaPort]       : 3000
     @grafanaPath       = settings[:grafanaPath]       ? settings[:grafanaPath]       : nil
+    @grafanaAPIUser    = settings[:grafanaAPIUser]    ? settings[:grafanaAPIUser]    : 'admin'
+    @grafanaAPIPass    = settings[:grafanaAPIPass]    ? settings[:grafanaAPIPass]    : 'admin'
     @memcacheHost      = settings[:memcacheHost]      ? settings[:memcacheHost]      : nil
     @memcachePort      = settings[:memcachePort]      ? settings[:memcachePort]      : nil
 
@@ -94,6 +96,47 @@ class Grafana
     @discoveryFile        = sprintf( '%s/%s/discovery.json'         , @cacheDirectory, host )
     @mergedHostFile       = sprintf( '%s/%s/mergedHostData.json'    , @cacheDirectory, host )
     @monitoringResultFile = sprintf( '%s/%s/monitoring.result', @cacheDirectory, host )
+
+  end
+
+
+
+  def checkGrafana?()
+
+    uri = URI( sprintf( '%s/api/orgs/1', @grafanaURI ) )
+
+    # set timeouts
+    openTimeout = 2
+    readTimeout = 8
+    response    = []
+
+    begin
+
+      http     = Net::HTTP.new( uri.host, uri.port )
+      request  = Net::HTTP::Get.new( uri.request_uri )
+      request.basic_auth( @grafanaAPIUser, @grafanaAPIPass )
+
+      response = Net::HTTP.start( uri.hostname, uri.port, use_ssl: uri.scheme == "https", :read_timeout => readTimeout, :open_timeout => openTimeout ) do |http|
+        begin
+          http.request( request )
+        rescue Exception => e
+
+          msg = 'Cannot execute request to %s, cause: %s'
+          @log.warn( sprintf( msg, uri.request_uri, e ) )
+          @log.debug( sprintf( ' -> request body: %s', request.body ) )
+          return false
+        end
+      end
+
+    rescue Exception => e
+      @log.error( e )
+      @log.error( 'Timeout' )
+      return false
+    end
+
+    responseCode = response.code.to_i
+
+    return true
 
   end
 
@@ -233,6 +276,17 @@ class Grafana
       deleteDashboards( host )
     end
 
+    if( self.checkGrafana?() == false )
+
+      result = {
+        :status      => 500,
+        :name        => host,
+        :message     => 'grafana is not available'
+      }
+
+      return result
+    end
+
     self.prepare( host )
 
     # determine services from discovery.json file, e.g. cae-live, master-live-server, caefeeder-live
@@ -357,6 +411,17 @@ class Grafana
 
     @log.debug("Deleting dashboards for host #{host}")
 
+    if( self.checkGrafana?() == false )
+
+      result = {
+        :status      => 500,
+        :name        => host,
+        :message     => 'grafana is not available'
+      }
+
+      return result
+    end
+
     dashboards = self.searchDashboards( host )
 
     if( dashboards != false )
@@ -383,7 +448,7 @@ class Grafana
           begin
             Net::HTTP.start( uri.host, uri.port ) do |http|
               request = Net::HTTP::Delete.new( uri.path )
-              request.basic_auth( 'admin', 'admin' )
+              request.basic_auth( @grafanaAPIUser, @grafanaAPIPass )
 
               response     = http.request( request )
               responseCode = response.code.to_i
@@ -432,29 +497,62 @@ class Grafana
 
     uri = URI( sprintf( '%s/api/search?query=&tag=%s', @grafanaURI, tag ) )
 
-    http     = Net::HTTP.new( uri.host, uri.port )
-    request  = Net::HTTP::Get.new( uri.request_uri )
-    request.basic_auth( 'admin', 'admin' )
-    response = http.request( request )
+    response = nil
+    Net::HTTP.start( uri.host, uri.port ) do |http|
+      request = Net::HTTP::Get.new( uri.request_uri )
 
-    responseCode = response.code.to_i
+      request.add_field( 'Content-Type', 'application/json' )
+      request.basic_auth( @grafanaAPIUser, @grafanaAPIPass )
 
-    if( responseCode >= 200 && responseCode <= 299 ) || ( responseCode >= 400 && responseCode <= 499 )
+      response     = http.request( request )
+      responseCode = response.code.to_i
 
-      responseBody  = JSON.parse( response.body )
-      dashboards    = responseBody.collect { |item| item['uri'] }
+      if( responseCode == 200 )
 
-      return( dashboards )
-    else
-      @log.info("No dashboards found")
-      @log.error( "GET on #{uri} failed: HTTP #{response.code} - #{response.body}" )
-      return false
+        responseBody  = JSON.parse( response.body )
+        dashboards    = responseBody.collect { |item| item['uri'] }
+
+        return( dashboards )
+
+      # TODO
+      # Errorhandling
+      #if( responseCode != 200 )
+      else
+        # 200 – Created
+        # 400 – Errors (invalid json, missing or invalid fields, etc)
+        # 401 – Unauthorized
+        # 412 – Precondition failed
+        @log.error( sprintf( ' [%s] - Error for search Dashboards', responseCode ) )
+      end
+
     end
+
+#    if( responseCode >= 200 && responseCode <= 299 ) || ( responseCode >= 400 && responseCode <= 499 )
+#
+#      responseBody  = JSON.parse( response.body )
+#      dashboards    = responseBody.collect { |item| item['uri'] }
+#
+#      return( dashboards )
+#    else
+#      @log.info("No dashboards found")
+#      @log.error( "GET on #{uri} failed: HTTP #{response.code} - #{response.body}" )
+#      return false
+#    end
 
   end
 
 
   def listDashboards( tag )
+
+    if( self.checkGrafana?() == false )
+
+      result = {
+        :status      => 500,
+        :message     => 'grafana is not available'
+      }
+
+      return result
+    end
 
     data = self.searchDashboards( tag )
 
@@ -795,7 +893,7 @@ class Grafana
     Net::HTTP.start(grafanaDbUri.host, grafanaDbUri.port) do |http|
       request = Net::HTTP::Post.new grafanaDbUri.request_uri
       request.add_field('Content-Type', 'application/json')
-      request.basic_auth 'admin', 'admin'
+      request.basic_auth( @grafanaAPIUser, @grafanaAPIPass )
       request.body = templateFile
       response     = http.request request
       responseCode = response.code.to_i

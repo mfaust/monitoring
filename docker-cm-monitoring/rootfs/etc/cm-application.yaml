@@ -46,8 +46,9 @@ jolokia:
       - description: Information about GC Survivor Space (HEAP)
         mbean: java.lang:type=MemoryPool,name=Par Survivor Space
         attribute: Usage
+
     contentserver:
-      description: ContentServer
+      description: All ContentServer (CMS, MLS, RLS)
       metrics:
       - description: Base Measurement Points for ALL Content Server
         mbean: com.coremedia:application=*,type=Server
@@ -59,15 +60,30 @@ jolokia:
         mbean: com.coremedia:application=*,bean=QueryPool,type=Store
         attribute: IdleExecutors,RunningExecutors,WaitingQueries,MaxQueries
       - description: Statistics about BlobStore
-        mbean: com.coremedia:application=*,module=BlobStore,pool=BlobStoreMethods,type=Statistics
-      - description: Statistics pool StoreStatistics Job Result
-        mbean: com.coremedia:application=*,module=StoreStatistics,pool=Job Result,type=Statistics
+        mbean: com.coremedia:application=*,type=Statistics,module=BlobStore,pool=BlobStoreMethods
+      - description: Statistics about Publisher
+        mbean: com.coremedia:application=*,type=Statistics,module=Publisher,pool=PublisherMethods
       - description: Statistics about Repository
-        mbean: com.coremedia:application=*,module=RepositoryStatistics,pool=Resource,type=Statistics
+        mbean: com.coremedia:application=*,type=Statistics,module=RepositoryStatistics,pool=Resource
       - description: Statistics about ResourceCache
-        mbean: com.coremedia:application=*,module=ResourceCacheStatistics,pool=ResourceCache,type=Statistics
+        mbean: com.coremedia:application=*,type=Statistics,module=ResourceCacheStatistics,pool=ResourceCache
+      - description: Statistics about Store
+        mbean: com.coremedia:application=*,type=Statistics,module=Store,pool=StoreMethods
+      - description: Statistics pool StoreStatistics Job Execution
+        mbean: com.coremedia:application=*,type=Statistics,module=StoreStatistics,pool=Job Execution
+      - description: Statistics pool StoreStatistics Job Failed
+        mbean: com.coremedia:application=*,type=Statistics,module=StoreStatistics,pool=Job Failed
+      - description: Statistics pool StoreStatistics Job Latency
+        mbean: com.coremedia:application=*,type=Statistics,module=StoreStatistics,pool=Job Latency
+      - description: Statistics pool StoreStatistics Job Result
+        mbean: com.coremedia:application=*,type=Statistics,module=StoreStatistics,pool=Job Result
+      - description: Statistics pool StoreStatistics Job Successful
+        mbean: com.coremedia:application=*,type=Statistics,module=StoreStatistics,pool=Job Successful
+      - description: Statistics pool StoreStatistics Job Unrecoverable
+        mbean: com.coremedia:application=*,type=Statistics,module=StoreStatistics,pool=Job Unrecoverable
       - description: Statistics about TextStore
-        mbean: com.coremedia:application=*,module=TextStore,pool=TextStoreMethods,type=Statistics
+        mbean: com.coremedia:application=*,type=Statistics,module=TextStore,pool=TextStoreMethods
+
     content-management-server:
       description: Content Management Server
       metrics:

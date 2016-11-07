@@ -141,7 +141,7 @@ module Sinatra
     # PLEASE USE "post '/h/:host/:force'"
     # create new host
     #  including icinga2 and grafana
-    post '/:host/:force' do
+    post '/:host/force' do
       content_type :json
 
       result = m.addHost( params[:host], true )
@@ -163,27 +163,27 @@ module Sinatra
 
     # delete EVERY dashboards and checks before create the host
     #  including icinga2 and grafana
-    post '/h/:host/:force' do
+    post '/h/:host/force' do
       content_type :json
 
-      result = m.addHost( params[:host], [], true )
+      result = m.addHost( params[:host], true )
 
       response.status = result[:status]
       result.to_json
     end
 
 
-    # create new host
-    #  including icinga2 and grafana
-    post '/h/:host/:tags' do
-      content_type :json
-
-      tags   = params[:tags]
-      result = m.addHost( params[:host], tags )
-
-      response.status = result[:status]
-      result.to_json
-    end
+#     # create new host
+#     #  including icinga2 and grafana
+#     post '/h/:host/:tags' do
+#       content_type :json
+#
+#       tags   = params[:tags]
+#       result = m.addHost( params[:host], tags )
+#
+#       response.status = result[:status]
+#       result.to_json
+#     end
 
     # create new group of hosts
     post '/g/:hosts' do
