@@ -74,8 +74,8 @@ services:
       - env/carbon-relay.env
     extra_hosts:
       # NOTE: external service
-      #- 'graphite:10.101.2.216'
-      - 'graphite:192.168.252.101'
+      - 'graphite:10.101.2.83'
+      #- 'graphite:192.168.252.101'
     volumes:
       - /etc/localtime:/etc/localtime:ro
 #      - ./share/carbon-relay/etc/supervisor.d/carbon-relay.ini:/etc/supervisor.d/carbon-relay.ini:ro
@@ -99,11 +99,11 @@ services:
       - 'memcached:172.25.0.12'
       - 'carbon-relay:172.25.0.20'
       # NOTE: external service
-      #- 'grafana:10.101.2.216'
-      - 'grafana:192.168.252.101'
+      - 'grafana:10.101.2.83'
+      #- 'grafana:192.168.252.101'
       # NOTE: external service
-      #- 'nginx-proxy:10.101.2.216'
-      - 'nginx-proxy:192.168.252.101'
+      - 'nginx-proxy:10.101.2.83'
+      #- 'nginx-proxy:192.168.252.101'
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./share/resolv.conf:/etc/resolv.conf:ro
