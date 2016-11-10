@@ -1,150 +1,139 @@
 #!/usr/bin/ruby
+#
+#
+# reads and parse the f*ing output of prometheus' node_exporter
+# then put the result as json
+#
+#  (c) 2016 Coremedia (Bodo Schulz)
+#
+
 
 require 'json'
-require 'net/http'
 require 'rest-client'
 
-class String
-  def strip_comment( markers = ['#',';'] )
-    re = Regexp.union( markers ) # construct a regular expression which will match any of the markers
-    if index = (self =~ re)
-      self[0, index].rstrip      # slice the string where the regular expression matches, and return it.
-    else
-      rstrip
-    end
+class NodeExporter
+
+  def initialize( )
+
   end
-end
 
-
+  def callService()
 
     restClient = RestClient::Resource.new(
-      URI.encode( sprintf( 'http://localhost:9100/metrics' ) )
+      URI.encode( sprintf( 'http://%s:%s/metrics', @host, @port ) )
     )
 
-data = restClient.get()
+    data = restClient.get()
+    body = data.body
 
-body = data.body
+    # remove all comments
+    body        = body.each_line.reject{ |x| x.strip =~ /(^.*)#/ }.join
 
-# remove all comments
-body       = body.each_line.reject{ |x| x.strip =~ /(^.*)#/ }.join
+    # get groups
+    @cpu        = body.each_line.select { |name| name =~ /^node_cpu/ }
+    @disk       = body.each_line.select { |name| name =~ /^node_disk/ }
+    @filefd     = body.each_line.select { |name| name =~ /^node_filefd/ }
+    @filesystem = body.each_line.select { |name| name =~ /^node_filesystem/ }
+    @hwmon      = body.each_line.select { |name| name =~ /^node_hwmon/ }
+    @forks      = body.each_line.select { |name| name =~ /^node_forks/ }
+    @load       = body.each_line.select { |name| name =~ /^node_load/ }
+    @memory     = body.each_line.select { |name| name =~ /^node_memory/ }
+    @netstat    = body.each_line.select { |name| name =~ /^node_netstat/ }
+    @network    = body.each_line.select { |name| name =~ /^node_network/ }
 
-# get groups
-cpu        = body.each_line.select { |name| name =~ /^node_cpu/ }
-disk       = body.each_line.select { |name| name =~ /^node_disk/ }
-filefd     = body.each_line.select { |name| name =~ /^node_filefd/ }
-filesystem = body.each_line.select { |name| name =~ /^node_filesystem/ }
-hwmon      = body.each_line.select { |name| name =~ /^node_hwmon/ }
-forks      = body.each_line.select { |name| name =~ /^node_forks/ }
-load       = body.each_line.select { |name| name =~ /^node_load/ }
-memory     = body.each_line.select { |name| name =~ /^node_memory/ }
-netstat    = body.each_line.select { |name| name =~ /^node_netstat/ }
-network    = body.each_line.select { |name| name =~ /^node_network/ }
-
-
+  end
 
 
-def collectCpu( data )
+  def collectCpu( data )
 
-  regex = /(.*){cpu="(?<core>(.*))",mode="(?<mode>(.*))"}(?<mes>(.*))/x
+    result  = Hash.new()
+    tmpCore = nil
+    regex   = /(.*){cpu="(?<core>(.*))",mode="(?<mode>(.*))"}(?<mes>(.*))/x
 
-  result = Hash.new()
+    data.sort!.each do |c|
 
-  core_save = nil
-  data.sort!.each do |c|
+      if( parts = c.match( regex ) )
 
-    if( parts = c.match( regex ) )
+        core, mode, mes = parts.captures
 
-      core, mode, mes = parts.captures
+        mes.strip!
 
-      mes.strip!
+        if( core != tmpCore )
+          result[core] = { mode => mes }
+          tmpCore = core
+        end
 
-      if( core != core_save )
-        result[core] = { mode => mes }
-        core_save = core
+        result[core][mode] = mes
       end
-
-      result[core][mode] = mes
     end
+
+    return result
   end
 
-  return JSON.pretty_generate( Hash[result.sort] )
-end
+  def collectLoad( data )
 
-def collectLoad( data )
+    result = Hash.new()
+    regex = /(?<load>(.*)) (?<mes>(.*))/x
 
-  regex = /(?<load>(.*)) (?<mes>(.*))/x
+    data.each do |c|
 
-  result = Hash.new()
+      if( parts = c.match( regex ) )
 
-  data.each do |c|
+        c.gsub!('node_load15', 'longterm' )
+        c.gsub!('node_load5' , 'midterm' )
+        c.gsub!('node_load1' , 'shortterm' )
 
-    if( parts = c.match( regex ) )
-
-      c.gsub!('node_load15', 'longterm' )
-      c.gsub!('node_load5' , 'midterm' )
-      c.gsub!('node_load1' , 'shortterm' )
-
-      parts = c.split( ' ' )
-      result[parts[0]] = parts[1]
+        parts = c.split( ' ' )
+        result[parts[0]] = parts[1]
+      end
     end
+
+    return result
   end
 
-  return JSON.pretty_generate( Hash[result.sort] )
-end
+  def collectMemory( data )
 
-def collectMemory( data )
+    result = Hash.new()
+    data   = data.select { |name| name =~ /^node_memory_Swap|node_memory_Mem/ }
+    regex  = /(?<load>(.*)) (?<mes>(.*))/x
 
-  regex = /(?<load>(.*)) (?<mes>(.*))/x
+    data.each do |c|
 
-  result = Hash.new()
+      if( parts = c.match( regex ) )
 
-  data = data.select { |name| name =~ /^node_memory_Swap|node_memory_Mem/ }
+        c.gsub!('node_memory_', ' ' )
 
-  data.each do |c|
-
-    if( parts = c.match( regex ) )
-
-      c.gsub!('node_memory_', ' ' )
-
-      parts = c.split( ' ' )
-      result[parts[0]] = sprintf( "%f", parts[1].to_s ).sub(/\.?0*$/, "")
+        parts = c.split( ' ' )
+        result[parts[0]] = sprintf( "%f", parts[1].to_s ).sub(/\.?0*$/, "")
+      end
     end
+
+    return result
   end
 
-  return JSON.pretty_generate( Hash[result.sort] )
+  def collectNetwork( data )
 
-end
+    result = Hash.new()
+    r      = Array.new
 
-def collectNetwork( data )
+    existingDevices = Array.new()
 
-  regex = /(.*)_(?<direction>(.*))_(?<type>(.*)){device="(?<device>(.*))"}(?<mes>(.*))/x
+    regex = /(.*)receive_bytes{device="(?<device>(.*))"}(.*)/
 
-  result = Hash.new()
-  r = Array.new
+    d = data.select { |name| name.match( regex ) }
 
-  device_save = nil
-  type_save = nil
-  existingDevices = Array.new()
+    d.each do |devices|
 
-  d = data.select { |name| name.match( /(.*)receive_bytes{device="(?<device>(.*))"}(.*)/ ) }
-
-  d.each do |devices|
-
-    if( parts = devices.match( /(.*)receive_bytes{device="(?<device>(.*))"}(.*)/ ) )
-      existingDevices += parts.captures
+      if( parts = devices.match( regex ) )
+        existingDevices += parts.captures
+      end
     end
-  end
 
-  existingDevices.each do |d|
+    regex = /(.*)_(?<direction>(.*))_(?<type>(.*)){device="(?<device>(.*))"}(?<mes>(.*))/x
 
-    r = Array.new
+    existingDevices.each do |d|
 
-    [ 'receive','transmit' ].each do |t|
-
-#      puts t
-
-      selected = data.select { |name| name.match( /(.*)#{t}(.*)device="#{d}(.*)/ ) }
-#      puts selected
+      selected = data.select { |name| name.match( /(.*)device="#{d}(.*)/ ) }
 
       hash = {}
 
@@ -154,77 +143,158 @@ def collectNetwork( data )
 
           direction, type, device, mes = parts.captures
 
-#           puts sprintf( '%s : %s : %s -> %s', device, direction, type, sprintf( "%f", mes.to_s ).sub(/\.?0*$/, "" ) )
-
           hash[ d.to_s ] ||= {}
-          hash[ d.to_s ][ t.to_s ] ||= {}
-          hash[ d.to_s ][ t.to_s ][ type.to_s ] ||= {}
-          hash[ d.to_s ][ t.to_s ][ type.to_s ] = sprintf( "%f", mes.to_s ).sub(/\.?0*$/, "" )
+          hash[ d.to_s ][ direction.to_s ] ||= {}
+          hash[ d.to_s ][ direction.to_s ][ type.to_s ] ||= {}
+          hash[ d.to_s ][ direction.to_s ][ type.to_s ] = sprintf( "%f", mes.to_s ).sub(/\.?0*$/, "" )
         end
       end
 
       r.push( hash )
+
     end
 
-def collect_values a
-  a.map(&:to_a).flatten(1).group_by{|k, v| k}.
-  each_value{|v| v.map!{|k, v| v}}
-end
+    result = r.reduce( :merge )
 
-#     result = {}.tap{ |x| r.each{ |h| h.each{ |k,v| (x[k]||=[]) << v } } } #.map( &:to_a ).flatten(1).reduce( {} ) { |h,(k,v)| ( h[k] ||= [] ) << v; h }
+    return result
 
-    result2 = Hash[*r.map(&:to_a).flatten(1)]
-
-#     hash = Hash[*r.flatten]
-
-#     puts JSON.pretty_generate( result )
-    puts JSON.pretty_generate( result2 )
   end
 
-#  result = r.reduce( :merge ).keys
+  def collectDisk( data )
 
-#  puts r.flatten
-#  return JSON.pretty_generate( r.merge )
+    result = Hash.new()
+    r      = Array.new
+
+    existingDevices = Array.new()
+
+    regex = /(.*){device="(?<device>(.*))"}(.*)/
+
+    d = data.select { |name| name.match( regex ) }
+
+    d.each do |devices|
+
+      if( parts = devices.match( regex ) )
+        existingDevices += parts.captures
+      end
+    end
+
+    existingDevices.uniq!
+
+    regex = /(.*)_(?<type>(.*))_(?<direction>(.*)){device="(?<device>(.*))"}(?<mes>(.*))/x
+
+    existingDevices.each do |d|
+
+      selected = data.select     { |name| name.match( /(.*)device="#{d}(.*)/ ) }
+      selected = selected.select { |name| name =~ /bytes_read|bytes_written|io_now/ }
+
+      hash = {}
+
+      selected.each do |s|
+
+        if( parts = s.match( regex ) )
+
+          type, direction, device, mes = parts.captures
+
+          hash[ d.to_s ] ||= {}
+          hash[ d.to_s ][ type.to_s ] ||= {}
+          hash[ d.to_s ][ type.to_s ][ direction.to_s ] ||= {}
+          hash[ d.to_s ][ type.to_s ][ direction.to_s ] = sprintf( "%f", mes.to_s ).sub(/\.?0*$/, "" )
+        end
+      end
+
+      r.push( hash )
+
+    end
+
+    result = r.reduce( :merge )
+
+    return result
+
+  end
+
+  def collectFilesystem( data )
+
+    result = Hash.new()
+    r      = Array.new
+
+    existingDevices = Array.new()
+
+    regex = /(.*){device="(?<device>(.*))"}(.*)/
+
+    d = data.select { |name| name.match( regex ) }
+
+    d.each do |devices|
+
+      if( parts = devices.match( regex ) )
+        existingDevices += parts.captures
+      end
+    end
+
+    existingDevices.uniq!
+
+    regex = /(.*)_(?<type>(.*)){device="(?<device>(.*))",fstype="(?<fstype>(.*))",mountpoint="(?<mountpoint>(.*))"}(?<mes>(.*))/x
+
+    existingDevices.each do |d|
+
+      selected = data.select     { |name| name.match( /(.*)device="#{d}(.*)/ ) }
+
+      hash = {}
+
+      selected.each do |s|
+
+        if( parts = s.match( regex ) )
+
+          type, device, fstype, mountpoint, mes = parts.captures
+
+          hash[ device.to_s ] ||= {}
+          hash[ device.to_s ][ type.to_s ] ||= {}
+          hash[ device.to_s ][ type.to_s ] = sprintf( "%f", mes.to_s ).sub(/\.?0*$/, "" )
+        end
+      end
+
+      r.push( hash )
+
+    end
+
+    result = r.reduce( :merge )
+
+    return result
+
+  end
+
+
+  def run( settings = {} )
+
+    @host      = settings[:host]          ? settings[:host]          : nil
+    @port      = settings[:port]          ? settings[:port]          : nil
+
+    puts @host
+    puts @port
+
+    self.callService( )
+
+    return {
+      :cpu        => self.collectCpu( @cpu ),
+      :load       => self.collectLoad( @load ),
+      :memory     => self.collectMemory( @memory ),
+      :network    => self.collectNetwork( @network ),
+      :disk       => self.collectDisk( @disk ),
+      :filesystem => self.collectFilesystem( @filesystem )
+    }
+
+  end
+
 end
 
+# -------------------------------------------------------------------------------------------------
+# example
 
-# puts collectCpu( cpu )
-# puts collectLoad( load )
-# puts collectMemory( memory )
+options = {
+  :host => '10.2.10.211',
+  :port => '9100'
+}
 
+x = NodeExporter.new()
+puts JSON.pretty_generate( x.run( options ) )
 
-puts collectNetwork( network )
-
-#node_network_receive_bytes{device="eth0"} 98635
-#node_network_receive_bytes{device="lo"} 0
-#node_network_receive_compressed{device="eth0"} 0
-#node_network_receive_compressed{device="lo"} 0
-#node_network_receive_drop{device="eth0"} 0
-#node_network_receive_drop{device="lo"} 0
-#node_network_receive_errs{device="eth0"} 0
-#node_network_receive_errs{device="lo"} 0
-#node_network_receive_fifo{device="eth0"} 0
-#node_network_receive_fifo{device="lo"} 0
-#node_network_receive_frame{device="eth0"} 0
-#node_network_receive_frame{device="lo"} 0
-#node_network_receive_multicast{device="eth0"} 0
-#node_network_receive_multicast{device="lo"} 0
-#node_network_receive_packets{device="eth0"} 1064
-#node_network_receive_packets{device="lo"} 0
-#node_network_transmit_bytes{device="eth0"} 1.912721e+06
-#node_network_transmit_bytes{device="lo"} 0
-#node_network_transmit_compressed{device="eth0"} 0
-#node_network_transmit_compressed{device="lo"} 0
-#node_network_transmit_drop{device="eth0"} 0
-#node_network_transmit_drop{device="lo"} 0
-#node_network_transmit_errs{device="eth0"} 0
-#node_network_transmit_errs{device="lo"} 0
-#node_network_transmit_fifo{device="eth0"} 0
-#node_network_transmit_fifo{device="lo"} 0
-#node_network_transmit_frame{device="eth0"} 0
-#node_network_transmit_frame{device="lo"} 0
-#node_network_transmit_multicast{device="eth0"} 0
-#node_network_transmit_multicast{device="lo"} 0
-#node_network_transmit_packets{device="eth0"} 775
-#node_network_transmit_packets{device="lo"} 0
-#
+# -------------------------------------------------------------------------------------------------
