@@ -74,27 +74,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-AMAsset.count-capacity, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-AMAsset.count-capacity, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-AMAsset.count-level, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-AMAsset.count-level, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-AMAsset.count-evicted, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-AMAsset.count-evicted, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-AMAsset.count-removed, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-AMAsset.count-removed, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-AMAsset.count-missRate, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-AMAsset.count-missRate, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -189,27 +189,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-ContentBeanBackedPageGridPlacement.count-capacity, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-ContentBeanBackedPageGridPlacement.count-capacity, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-ContentBeanBackedPageGridPlacement.count-level, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-ContentBeanBackedPageGridPlacement.count-level, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-ContentBeanBackedPageGridPlacement.count-evicted, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-ContentBeanBackedPageGridPlacement.count-evicted, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-ContentBeanBackedPageGridPlacement.count-removed, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-ContentBeanBackedPageGridPlacement.count-removed, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-ContentBeanBackedPageGridPlacement.count-missRate, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-ContentBeanBackedPageGridPlacement.count-missRate, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -311,27 +311,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-PageGridImpl.count-capacity, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-PageGridImpl.count-capacity, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-PageGridImpl.count-level, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-PageGridImpl.count-level, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-PageGridImpl.count-evicted, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-PageGridImpl.count-evicted, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-PageGridImpl.count-removed, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-PageGridImpl.count-removed, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-PageGridImpl.count-missRate, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-PageGridImpl.count-missRate, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -426,27 +426,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-SolrQueryCacheKey.count-capacity, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-SolrQueryCacheKey.count-capacity, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-SolrQueryCacheKey.count-level, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-SolrQueryCacheKey.count-level, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-SolrQueryCacheKey.count-evicted, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-SolrQueryCacheKey.count-evicted, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-SolrQueryCacheKey.count-removed, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-SolrQueryCacheKey.count-removed, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-SolrQueryCacheKey.count-missRate, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-SolrQueryCacheKey.count-missRate, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -548,27 +548,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-Page.count-capacity, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-Page.count-capacity, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-Page.count-level, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-Page.count-level, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-Page.count-evicted, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-Page.count-evicted, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-Page.count-removed, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-Page.count-removed, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-Page.count-missRate, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-Page.count-missRate, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -663,27 +663,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-Aspect.count-capacity, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-Aspect.count-capacity, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-Aspect.count-level, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-Aspect.count-level, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-Aspect.count-evicted, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-Aspect.count-evicted, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-Aspect.count-removed, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-Aspect.count-removed, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-Aspect.count-missRate, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-Aspect.count-missRate, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -785,27 +785,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-ViewLookup.count-capacity, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-ViewLookup.count-capacity, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-ViewLookup.count-level, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-ViewLookup.count-level, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-ViewLookup.count-evicted, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-ViewLookup.count-evicted, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-ViewLookup.count-removed, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-ViewLookup.count-removed, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-ViewLookup.count-missRate, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-ViewLookup.count-missRate, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -900,27 +900,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-LoadedImageCacheKey.count-capacity, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-LoadedImageCacheKey.count-capacity, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-LoadedImageCacheKey.count-level, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-LoadedImageCacheKey.count-level, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-LoadedImageCacheKey.count-evicted, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-LoadedImageCacheKey.count-evicted, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-LoadedImageCacheKey.count-removed, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-LoadedImageCacheKey.count-removed, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-LoadedImageCacheKey.count-missRate, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-LoadedImageCacheKey.count-missRate, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -1022,27 +1022,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-Object.count-capacity, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-Object.count-capacity, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-Object.count-level, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-Object.count-level, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-Object.count-evicted, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-Object.count-evicted, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-Object.count-removed, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-Object.count-removed, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-Object.count-missRate, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-Object.count-missRate, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -1137,27 +1137,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-AssumesIdentity.count-capacity, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-AssumesIdentity.count-capacity, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-AssumesIdentity.count-level, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-AssumesIdentity.count-level, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-AssumesIdentity.count-evicted, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-AssumesIdentity.count-evicted, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-AssumesIdentity.count-removed, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-AssumesIdentity.count-removed, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-AssumesIdentity.count-missRate, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-AssumesIdentity.count-missRate, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -1259,27 +1259,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-AssumesIdentity.count-capacity, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-AssumesIdentity.count-capacity, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-AssumesIdentity.count-level, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-AssumesIdentity.count-level, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-AssumesIdentity.count-evicted, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-AssumesIdentity.count-evicted, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-AssumesIdentity.count-removed, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-AssumesIdentity.count-removed, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-AssumesIdentity.count-missRate, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-AssumesIdentity.count-missRate, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -1374,27 +1374,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-DIGEST.count-capacity, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-DIGEST.count-capacity, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-DIGEST.count-level, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-DIGEST.count-level, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-DIGEST.count-evicted, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-DIGEST.count-evicted, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-DIGEST.count-removed, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-DIGEST.count-removed, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-DIGEST.count-missRate, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-DIGEST.count-missRate, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -1496,27 +1496,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-Disk.count-capacity, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-Disk.count-capacity, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-Disk.count-level, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-Disk.count-level, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-Disk.count-evicted, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-Disk.count-evicted, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-Disk.count-removed, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-Disk.count-removed, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-Disk.count-missRate, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-Disk.count-missRate, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -1611,27 +1611,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-Heap.count-capacity, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-Heap.count-capacity, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-Heap.count-level, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-Heap.count-level, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-Heap.count-evicted, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-Heap.count-evicted, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-Heap.count-removed, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-Heap.count-removed, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-Heap.count-missRate, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-Heap.count-missRate, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -1733,27 +1733,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-Unlimited.count-capacity, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-Unlimited.count-capacity, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-Unlimited.count-level, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-Unlimited.count-level, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-Unlimited.count-evicted, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-Unlimited.count-evicted, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-Unlimited.count-removed, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-Unlimited.count-removed, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-Unlimited.count-missRate, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-Unlimited.count-missRate, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -1838,27 +1838,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-ALWAYS_STAY_IN_CACHE.count-capacity, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-ALWAYS_STAY_IN_CACHE.count-capacity, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-ALWAYS_STAY_IN_CACHE.count-level, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-ALWAYS_STAY_IN_CACHE.count-level, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-ALWAYS_STAY_IN_CACHE.count-evicted, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-ALWAYS_STAY_IN_CACHE.count-evicted, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(aliasSub(collectd.monitoring-16-01.CAE_$service-CacheClasses-ALWAYS_STAY_IN_CACHE.count-removed, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-ALWAYS_STAY_IN_CACHE.count-removed, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CAE_$service-CacheClasses-ALWAYS_STAY_IN_CACHE.count-missRate, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-ALWAYS_STAY_IN_CACHE.count-missRate, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -1927,33 +1927,38 @@
       "list": [
         {
           "current": {
-            "text": "LIVE",
-            "value": "LIVE"
+            "text": "CAE_LIVE",
+            "value": "CAE_LIVE"
           },
           "datasource": "graphite",
-          "hide": 0,
+          "hide": 1,
           "includeAll": false,
           "multi": false,
           "name": "service",
           "options": [
             {
-              "text": "LIVE",
-              "value": "LIVE",
+              "text": "CAE_LIVE",
+              "value": "CAE_LIVE",
               "selected": true
             },
             {
-              "text": "PREV",
-              "value": "PREV",
+              "text": "CAE_PREV",
+              "value": "CAE_PREV",
+              "selected": false
+            },
+            {
+              "text": "STUDIO",
+              "value": "STUDIO",
               "selected": false
             }
           ],
           "query": "*.%HOST%.*CacheClasses*",
           "refresh": 1,
-          "regex": "/CAE_(.*)-CacheClasses*/",
+          "regex": "/(.*)-CacheClasses*/",
           "tags": [],
           "type": "query",
           "useTags": true,
-          "label": "CAE"
+          "label": ""
         }
       ]
     },
