@@ -51,7 +51,7 @@ module GraphiteAnnotions
 
     end
 
-    def annotion( what, tags, data )
+
 
     # annotations werden direct in die graphite geschrieben
     # POST
@@ -66,13 +66,13 @@ module GraphiteAnnotions
     # GET
     # curl  'http://admin:admin@localhost/grafana/api/datasources/proxy/2/events/get_data?from=-12h&until=now&tags=monitoring-16-01%20created&intersection'
 
+    def annotion( what, tags, data )
+
       str  = Time.now()
 
       # add 2h to fix a f*cking bug in django
       # with Version 1.9 we dont need this ... UASY
       # str = str + (60 * 60 * 2)
-
-      @log.debug( str.to_s )
       _when = Time.parse(str.to_s).to_i
 
       uri = URI( @graphiteURI )
@@ -83,6 +83,8 @@ module GraphiteAnnotions
         'tags' => tags,
         'data' => data
       }
+
+      @log.debug( JSON.pretty_generate( data ) )
 
       response = nil
 
@@ -105,7 +107,8 @@ module GraphiteAnnotions
             # 400 – Errors (invalid json, missing or invalid fields, etc)
             # 401 – Unauthorized
             # 412 – Precondition failed
-            @log.error( sprintf( ' [%s] - Error', responseCode ) )
+            @log.error( sprintf( ' [%s] ', responseCode ) )
+            @log.error( sprintf( '  %s  ', response ) )
           end
         end
       rescue Exception => e
@@ -204,6 +207,7 @@ module GraphiteAnnotions
 
     end
 
+
     def nodeCreatedAnnotation( host )
 
       tag  = sprintf( '%s created', host )
@@ -213,6 +217,7 @@ module GraphiteAnnotions
 
     end
 
+
     def nodeDestroyedAnnotation( host )
 
       tag  = sprintf( '%s destroyed', host )
@@ -221,6 +226,7 @@ module GraphiteAnnotions
       self.annotion( 'node destroyed', tag, data )
 
     end
+
 
     def loadTestStartAnnotation( host )
 
