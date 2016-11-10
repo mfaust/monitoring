@@ -369,19 +369,28 @@ class DataCollector
 
       v['metrics'] = Array.new()
 
-      if( application )
+      if( application != nil )
 
-        applicationMetrics = tomcatApplication[application]['metrics']
+        @log.debug( application )
 
-        if( solr_cores != nil )
-          v['metrics'].push( self.mergeSolrCores( applicationMetrics , solr_cores ) )
+        application.each do |a|
+
+          if( tomcatApplication[a] )
+            applicationMetrics = tomcatApplication[a]['metrics']
+
+            if( solr_cores != nil )
+              v['metrics'].push( self.mergeSolrCores( applicationMetrics , solr_cores ) )
+            end
+
+            # remove unneeded Templates
+            tomcatApplication[a]['metrics'].delete_if {|key| key['mbean'].match( '%CORE%' ) }
+
+            v['metrics'].push( metricsTomcat['metrics'] )
+            v['metrics'].push( applicationMetrics )
+
+          end
         end
 
-        # remove unneeded Templates
-        tomcatApplication[application]['metrics'].delete_if {|key| key['mbean'].match( '%CORE%' ) }
-
-        v['metrics'].push( metricsTomcat['metrics'] )
-        v['metrics'].push( applicationMetrics )
       end
 
       if( tomcatApplication[d] )

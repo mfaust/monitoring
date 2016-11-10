@@ -84,89 +84,8 @@ jolokia:
       - description: Statistics about TextStore
         mbean: com.coremedia:application=*,type=Statistics,module=TextStore,pool=TextStoreMethods
 
-    content-management-server:
-      description: Content Management Server
-      metrics:
-      - description: Statistics about Publisher
-        mbean: com.coremedia:module=Publisher,pool=PublisherMethods,type=Statistics,application=*
-    master-live-server:
-      description: Master Live Server
-      metrics: []
-    replication-live-server:
-      description: Replication Live Server
-      metrics:
-      - description: Information about Replication between MLS and RLS
-        mbean: com.coremedia:type=Replicator,application=*
-        attribute: ConnectionUp,ControllerState,Enabled,PipelineUp,IncomingCount,CompletedCount,UncompletedCount,LatestCompletedSequenceNumber,LatestCompletedArrival,LatestCompletionDuration,LatestIncomingSequenceNumber,LatestIncomingArrival
-    workflow-server:
-      description: Workflow Server
-      metrics:
-      - mbean: com.coremedia:type=CapConnection,application=*
-        attribute: BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open
-    elastic-worker:
-      description: The Elastic Worker
-      metrics:
-      - name: CapConnection
-        mbean: com.coremedia:type=CapConnection,application=*
-        attribute: BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open
-    user-changes:
-      description: The User Changes Webapp
-      metrics:
-      - name: CapConnection
-        mbean: com.coremedia:type=CapConnection,application=*
-        attribute: BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open
-    content-feeder:
-      description: The Content Feeder
-      metrics:
-      - name: feeder
-        mbean: com.coremedia:type=Feeder,application=*
-        attribute: State,Uptime,CurrentPendingDocuments,IndexAverageBatchSendingTime,IndexDocuments,IndexContentDocuments,IndexBytes,PendingEvents,PendingFolders
-      - name: CapConnection
-        mbean: com.coremedia:type=CapConnection,application=*
-        attribute: BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open
-    caefeeder:
-      description: The CAE Feeder (Live and Preview)
-      metrics:
-      - description: ProactiveEngine management component
-        name: caefeeder
-        mbean: com.coremedia:type=ProactiveEngine,application=*
-        attribute: KeysCount,ValuesCount,InvalidationCount,SendSuccessTimeLatest,PurgeTimeLatest,HeartBeat,QueueCapacity,QueueMaxSize,QueueSize,QueueProcessedPerSecond
-      - description: ContentDependencyInvalidator
-        name: DependencyInvalidator
-        mbean: com.coremedia:type=ContentDependencyInvalidator,application=*
-      - description: Health management component
-        name: HealthStatus
-        mbean: com.coremedia:type=Health,application=*
-      - description: the management interface for the CapConnection to allow its configuration
-          and profiling
-        mbean: com.coremedia:type=CapConnection,application=*
-        attribute: BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open
-      - description: Provided statistics for the persistent blob cache
-        mbean: com.coremedia:type=TransformedBlobCacheManager,application=*
-        attribute: AccessCount,CacheSize,FaultCount,FaultSizeSum,InitialLevel,Level,NewGenerationCacheSize,NewGenerationInitialLevel,NewGenerationLevel,OldGenerationInitialLevel,OldGenerationLevel,RecallCount,RecallSizeSum,RotateCount
-      - description: Receiver that is connected to the feeder
-        mbean: com.coremedia:type=Receiver,application=*
-        attribute: AddProcessedCount,AddReceivedCount,InitializeProcessedCount,InitializeReceivedCount,ProcessedCount,ReceivedCount,RemoveProcessedCount,RemoveReceivedCount,UpdateProcessedCount,UpdateReceivedCount
-    adobe-drive:
-      description: Adobe Drive Server
-      metrics:
-      - name: CapConnection
-        mbean: com.coremedia:type=CapConnection,application=*
-        attribute: BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open
-    adobe-drive-server:
-      description: Adobe Drive Server
-      metrics:
-      - name: CapConnection
-        mbean: com.coremedia:type=CapConnection,application=*
-        attribute: BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open
-    sitemanager:
-      description: Site Manger - single Application to provide the old FAT Client
-      metrics: []
-    editor-webstart:
-      description: Editor Webstart - single Application to provide the old FAT Client
-      metrics: []
-    cae:
-      description: checks for all CAE Services
+    caches:
+      description: CAE or Studio Caches
       metrics:
       - name: CapConnection
         mbean: com.coremedia:type=CapConnection,application=*
@@ -249,12 +168,118 @@ jolokia:
         attribute: Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate
       - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.fragment.resolver.SearchTermExternalReferenceResolver",application=*
         attribute: Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate
+
+    content-management-server:
+      description: Content Management Server
+      metrics:
+      - description: Statistics about Publisher
+        mbean: com.coremedia:module=Publisher,pool=PublisherMethods,type=Statistics,application=*
+
+    master-live-server:
+      description: Master Live Server
+      metrics: []
+
+    replication-live-server:
+      description: Replication Live Server
+      metrics:
+      - description: Information about Replication between MLS and RLS
+        mbean: com.coremedia:type=Replicator,application=*
+        attribute: ConnectionUp,ControllerState,Enabled,PipelineUp,IncomingCount,CompletedCount,UncompletedCount,LatestCompletedSequenceNumber,LatestCompletedArrival,LatestCompletionDuration,LatestIncomingSequenceNumber,LatestIncomingArrival
+
+    workflow-server:
+      description: Workflow Server
+      metrics:
+      - mbean: com.coremedia:type=CapConnection,application=*
+        attribute: BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open
+
+    elastic-worker:
+      description: The Elastic Worker
+      metrics:
+      - name: CapConnection
+        mbean: com.coremedia:type=CapConnection,application=*
+        attribute: BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open
+
+    user-changes:
+      description: The User Changes Webapp
+      metrics:
+      - name: CapConnection
+        mbean: com.coremedia:type=CapConnection,application=*
+        attribute: BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open
+
+    content-feeder:
+      description: The Content Feeder
+      metrics:
+      - name: feeder
+        mbean: com.coremedia:type=Feeder,application=*
+        attribute: State,Uptime,CurrentPendingDocuments,IndexAverageBatchSendingTime,IndexDocuments,IndexContentDocuments,IndexBytes,PendingEvents,PendingFolders
+      - name: CapConnection
+        mbean: com.coremedia:type=CapConnection,application=*
+        attribute: BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open
+
+    caefeeder:
+      description: The CAE Feeder (Live and Preview)
+      metrics:
+      - description: ProactiveEngine management component
+        name: caefeeder
+        mbean: com.coremedia:type=ProactiveEngine,application=*
+        attribute: KeysCount,ValuesCount,InvalidationCount,SendSuccessTimeLatest,PurgeTimeLatest,HeartBeat,QueueCapacity,QueueMaxSize,QueueSize,QueueProcessedPerSecond
+      - description: ContentDependencyInvalidator
+        name: DependencyInvalidator
+        mbean: com.coremedia:type=ContentDependencyInvalidator,application=*
+      - description: Health management component
+        name: HealthStatus
+        mbean: com.coremedia:type=Health,application=*
+      - description: the management interface for the CapConnection to allow its configuration
+          and profiling
+        mbean: com.coremedia:type=CapConnection,application=*
+        attribute: BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open
+      - description: Provided statistics for the persistent blob cache
+        mbean: com.coremedia:type=TransformedBlobCacheManager,application=*
+        attribute: AccessCount,CacheSize,FaultCount,FaultSizeSum,InitialLevel,Level,NewGenerationCacheSize,NewGenerationInitialLevel,NewGenerationLevel,OldGenerationInitialLevel,OldGenerationLevel,RecallCount,RecallSizeSum,RotateCount
+      - description: Receiver that is connected to the feeder
+        mbean: com.coremedia:type=Receiver,application=*
+        attribute: AddProcessedCount,AddReceivedCount,InitializeProcessedCount,InitializeReceivedCount,ProcessedCount,ReceivedCount,RemoveProcessedCount,RemoveReceivedCount,UpdateProcessedCount,UpdateReceivedCount
+
+    adobe-drive:
+      description: Adobe Drive Server
+      metrics:
+      - name: CapConnection
+        mbean: com.coremedia:type=CapConnection,application=*
+        attribute: BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open
+
+    adobe-drive-server:
+      description: Adobe Drive Server
+      metrics:
+      - name: CapConnection
+        mbean: com.coremedia:type=CapConnection,application=*
+        attribute: BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open
+
+    sitemanager:
+      description: Site Manger - single Application to provide the old FAT Client
+      metrics: []
+
+    editor-webstart:
+      description: Editor Webstart - single Application to provide the old FAT Client
+      metrics: []
+
+    cae:
+      description: checks for all CAE Services
+      metrics:
+      - name: CapConnection
+        mbean: com.coremedia:type=CapConnection,application=*
+        attribute: BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open
+      - mbean: com.coremedia:type=DataViewFactory,application=*
+        attribute: ActiveTimeOfComputedDataViews,NumberOfCachedDataViews,NumberOfComputedDataViews,NumberOfDataViewLookups,NumberOfEvictedDataViews,NumberOfInvalidatedDataViews,TotalTimeOfComputedDataViews
+      - mbean: com.coremedia:type=TransformedBlobCacheManager,application=*
+        attribute: AccessCount,CacheSize,FaultCount,FaultSizeSum,InitialLevel,Level,NewGenerationCacheSize,NewGenerationInitialLevel,NewGenerationLevel,OldGenerationInitialLevel,OldGenerationLevel,RecallCount,RecallSizeSum,RotateCount
+
     studio:
       description: check for the CM Studio
       metrics:
       - name: CapConnection for Studio
         mbean: com.coremedia:type=CapConnection,application=*
         attribute: BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open
+
     solr:
       description: Solr Standard Checks for Core %CORE%
       metrics:
@@ -266,6 +291,7 @@ jolokia:
         attribute: cumulative_evictions,cumulative_hitratio,cumulative_hits,cumulative_inserts,cumulative_lookups,description,evictions,hitratio,hits,inserts,lookups,size,warmupTime
       - mbean: solr/%CORE%:type=/select,id=org.apache.solr.handler.component.SearchHandler
         attribute: avgRequestsPerSecond,avgTimePerRequest,medianRequestTime,requests,timeouts,errors
+
     webdav:
       description: Webdav
       metrics: []
