@@ -99,7 +99,7 @@ services:
 
   grafana:
     restart: always
-    image: bodsch/docker-grafana:1611-01
+    image: bodsch/docker-grafana:1611-02
     container_name: grafana
     hostname: grafana
     env_file:
