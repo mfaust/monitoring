@@ -322,26 +322,6 @@ class Grafana
       # determine type of service from mergedHostData.json file, e.g. cae, caefeeder, contentserver
       mergedHostJson = getJsonFromFile( @mergedHostFile )
 
-      # Overview Template
-      self.generateOverviewTemplate( services )
-
-      # LicenseInformation
-      if( servicesTmp.include?( 'content-management-server' ) || servicesTmp.include?( 'master-live-server' ) || servicesTmp.include?( 'replication-live-server' ) )
-        self.generateLicenseTemplate( host, services )
-      end
-
-      # MemoryPools for many Services
-      self.addNamedTemplate( 'cm-memory-pool.json' )
-
-      # CAE Caches
-      if( servicesTmp.include?( 'cae-preview' ) || servicesTmp.include?( 'cae-live' ) )
-
-        self.addNamedTemplate( 'cm-cae-cache-classes.json' )
-
-        if( self.beanAvailable?( host, 'cae-preview', 'CacheClassesIBMAvailability' ) == true )
-          self.addNamedTemplate( 'cm-cae-cache-classes-ibm.json' )
-        end
-      end
 
       services.each do |service|
 
@@ -375,6 +355,28 @@ class Grafana
 #         @log.debug( "Found Template paths: #{serviceTemplatePaths}, #{additionalTemplatePaths}")
         self.generateServiceTemplate( serviceName, serviceTemplatePaths, additionalTemplatePaths )
 
+      end
+
+
+      # Overview Template
+      self.generateOverviewTemplate( services )
+
+      # LicenseInformation
+      if( servicesTmp.include?( 'content-management-server' ) || servicesTmp.include?( 'master-live-server' ) || servicesTmp.include?( 'replication-live-server' ) )
+        self.generateLicenseTemplate( host, services )
+      end
+
+      # MemoryPools for many Services
+      self.addNamedTemplate( 'cm-memory-pool.json' )
+
+      # CAE Caches
+      if( servicesTmp.include?( 'cae-preview' ) || servicesTmp.include?( 'cae-live' ) )
+
+        self.addNamedTemplate( 'cm-cae-cache-classes.json' )
+
+        if( self.beanAvailable?( host, 'cae-preview', 'CacheClassesIBMAvailability' ) == true )
+          self.addNamedTemplate( 'cm-cae-cache-classes-ibm.json' )
+        end
       end
 
     end
@@ -617,8 +619,8 @@ class Grafana
       {
         "dashboard": {
           "id": null,
-          "title": "%SHORTHOST% -- Overview",
-          "originalTitle": "%SHORTHOST% - Overview",
+          "title": "%SHORTHOST% = Overview",
+          "originalTitle": "%SHORTHOST% = Overview",
           "tags": [ "%TAG%", "overview" ],
           "style": "dark",
           "timezone": "browser",

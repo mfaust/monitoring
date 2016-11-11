@@ -3,12 +3,12 @@
     "id": null,
     "title": "%SHORTHOST% MongoDB",
     "originalTitle": "%SHORTHOST% MongoDB",
-    "tags": [ "%TAG%", "mongodb" ],
+    "tags": [ "%TAG%", "database", "mongodb" ],
     "style": "dark",
     "timezone": "browser",
     "editable": true,
     "hideControls": false,
-    "sharedCrosshair": false,
+    "sharedCrosshair": true,
     "rows": [
       {
         "collapse": false,

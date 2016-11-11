@@ -187,7 +187,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.monitoring-16-01.USER_CHANGES-CapConnection-open.count-open"
+                "target": "collectd.%HOST%.USER_CHANGES-CapConnection-open.count-open"
               }
             ],
             "thresholds": "0,1",

@@ -187,7 +187,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.monitoring-16-01.ADOBE_DRIVE_SERVER-CapConnection-open.count-open"
+                "target": "collectd.%HOST%.ADOBE_DRIVE_SERVER-CapConnection-open.count-open"
               }
             ],
             "thresholds": "0,1",

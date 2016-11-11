@@ -1,14 +1,14 @@
 {
   "dashboard": {
     "id": null,
-    "title": "%SHORTHOST% - MySQL",
-    "originalTitle": "%SHORTHOST% - MySQL",
+    "title": "%SHORTHOST% MySQL",
+    "originalTitle": "%SHORTHOST% MySQL",
     "tags": [ "%TAG%", "database", "mysql" ],
     "style": "dark",
     "timezone": "browser",
     "editable": true,
     "hideControls": false,
-    "sharedCrosshair": false,
+    "sharedCrosshair": true,
     "rows": [
       {
         "collapse": false,
