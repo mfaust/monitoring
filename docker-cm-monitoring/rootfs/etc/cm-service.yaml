@@ -109,6 +109,7 @@ services:
     application:
     - cae
     - caches
+    - caches-ibm
 
   studio:
     description: Studio
@@ -118,6 +119,7 @@ services:
     blob_cache: true
     application:
     - caches
+    - caches-ibm
 
   adobe-drive:
     description: Adobe Drive
@@ -160,6 +162,7 @@ services:
     application:
     - cae
     - caches
+    - caches-ibm
 
   cae-live-2:
     description: CAE Live 2
@@ -170,6 +173,7 @@ services:
     application:
     - cae
     - caches
+    - caches-ibm
 
   cae-live-3:
     description: CAE Live 3
@@ -180,4 +184,4 @@ services:
     application:
     - cae
     - caches
-
+    - caches-ibm

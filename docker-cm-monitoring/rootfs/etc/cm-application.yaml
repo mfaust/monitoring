@@ -87,13 +87,6 @@ jolokia:
     caches:
       description: CAE or Studio Caches
       metrics:
-      - name: CapConnection
-        mbean: com.coremedia:type=CapConnection,application=*
-        attribute: BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open
-      - mbean: com.coremedia:type=DataViewFactory,application=*
-        attribute: ActiveTimeOfComputedDataViews,NumberOfCachedDataViews,NumberOfComputedDataViews,NumberOfDataViewLookups,NumberOfEvictedDataViews,NumberOfInvalidatedDataViews,TotalTimeOfComputedDataViews
-      - mbean: com.coremedia:type=TransformedBlobCacheManager,application=*
-        attribute: AccessCount,CacheSize,FaultCount,FaultSizeSum,InitialLevel,Level,NewGenerationCacheSize,NewGenerationInitialLevel,NewGenerationLevel,OldGenerationInitialLevel,OldGenerationLevel,RecallCount,RecallSizeSum,RotateCount
       - mbean: com.coremedia:type=Cache.Classes,CacheClass="ALWAYS_STAY_IN_CACHE",application=*
         attribute: Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate
       - mbean: com.coremedia:type=Cache.Classes,CacheClass="DIGEST",application=*
@@ -123,6 +116,10 @@ jolokia:
       - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.transform.image.java2d.LoadedImageCacheKey",application=*
         attribute: Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate
       - mbean: com.coremedia:type=Cache.Classes,CacheClass="java.lang.Object",application=*
+
+    caches-ibm:
+      description: CAE or Studio Caches (eCommerce / IBM)
+      metrics:
         attribute: Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate
       - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.ecommerce.ibm.cache.Availability",application=*
         attribute: Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate
@@ -229,8 +226,7 @@ jolokia:
       - description: Health management component
         name: HealthStatus
         mbean: com.coremedia:type=Health,application=*
-      - description: the management interface for the CapConnection to allow its configuration
-          and profiling
+      - description: the management interface for the CapConnection to allow its configuration and profiling
         mbean: com.coremedia:type=CapConnection,application=*
         attribute: BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open
       - description: Provided statistics for the persistent blob cache
@@ -270,8 +266,10 @@ jolokia:
         attribute: BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open
       - mbean: com.coremedia:type=DataViewFactory,application=*
         attribute: ActiveTimeOfComputedDataViews,NumberOfCachedDataViews,NumberOfComputedDataViews,NumberOfDataViewLookups,NumberOfEvictedDataViews,NumberOfInvalidatedDataViews,TotalTimeOfComputedDataViews
-      - mbean: com.coremedia:type=TransformedBlobCacheManager,application=*
-        attribute: AccessCount,CacheSize,FaultCount,FaultSizeSum,InitialLevel,Level,NewGenerationCacheSize,NewGenerationInitialLevel,NewGenerationLevel,OldGenerationInitialLevel,OldGenerationLevel,RecallCount,RecallSizeSum,RotateCount
+      # currently disabled
+      # need information or discusion about it
+#      - mbean: com.coremedia:type=TransformedBlobCacheManager,application=*
+#        attribute: AccessCount,CacheSize,FaultCount,FaultSizeSum,InitialLevel,Level,NewGenerationCacheSize,NewGenerationInitialLevel,NewGenerationLevel,OldGenerationInitialLevel,OldGenerationLevel,RecallCount,RecallSizeSum,RotateCount
 
     studio:
       description: check for the CM Studio
