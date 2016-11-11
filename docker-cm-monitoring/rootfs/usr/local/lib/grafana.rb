@@ -325,7 +325,7 @@ class Grafana
 
       services.each do |service|
 
-        serviceTemplatePaths    = Array.new()
+        serviceTemplate         = nil
         additionalTemplatePaths = Array.new()
 
 #         @log.debug("Searching templates paths for service: #{service}")
@@ -334,7 +334,7 @@ class Grafana
         serviceName = removePostfix( service )
 
         # get templates for service
-        serviceTemplatePaths = *self.getTemplateForService( serviceName )
+        serviceTemplate = self.getTemplateForService( serviceName )
 
         if( ! ['mongodb', 'mysql', 'postgres'].include?( serviceName ) )
           additionalTemplatePaths.push( *self.getTemplateForService( 'tomcat' ) )
@@ -352,8 +352,11 @@ class Grafana
           @log.error( sprintf( 'file %s doesnt exist', @mergedHostFile ) )
         end
 
-#         @log.debug( "Found Template paths: #{serviceTemplatePaths}, #{additionalTemplatePaths}")
-        self.generateServiceTemplate( serviceName, serviceTemplatePaths, additionalTemplatePaths )
+
+        if( ! serviceTemplate.to_s.empty? )
+          @log.debug( sprintf( "Found Template paths: %s, %s" , serviceTemplate , additionalTemplatePaths ) )
+          self.generateServiceTemplate( serviceName, serviceTemplate.to_s, additionalTemplatePaths )
+        end
 
       end
 
@@ -596,9 +599,11 @@ class Grafana
     return paths
   end
 
+
   def getTemplateForService( serviceName )
 
     template = sprintf( '%s/services/%s.json', @templateDirectory, serviceName )
+    @log.debug( template )
 
     if( ! File.exist?( template ) )
 
@@ -611,7 +616,10 @@ class Grafana
   end
 
 
+  # OBSOLETE
   def getTemplatePathsForService( serviceName )
+
+    @log.error( 'getTemplatePathsForService => OBSOLETE' )
 
     paths = Array.new()
     dirs  = Dir["#{@templateDirectory}/services/#{serviceName}*"]
@@ -854,14 +862,16 @@ class Grafana
   end
 
 
-  def generateServiceTemplate( serviceName, serviceTemplatePaths, additionalTemplatePaths )
+  def generateServiceTemplate( serviceName, serviceTemplate, additionalTemplatePaths )
 
-    serviceTemplatePaths.each do |tpl|
+
+#    serviceTemplatePaths.each do |tpl|
 
       @log.info( sprintf( 'Creating dashboard for %s', serviceName ) )
-      @log.debug( sprintf( '  - template %s', File.basename( tpl ).strip ) )
 
-      templateFile = File.read( tpl )
+      @log.debug( sprintf( '  - template %s', File.basename( serviceTemplate ).strip ) )
+
+      templateFile = File.read( serviceTemplate )
       templateJson = JSON.parse( templateFile )
 
       if( templateJson['dashboard'] && templateJson['dashboard']['rows'] )
@@ -870,6 +880,8 @@ class Grafana
 
         additionalTemplatePaths.each do |additionalTemplate|
 
+          @log.debug( sprintf( '  - merge with template %s', File.basename( additionalTemplate ).strip ) )
+
           additionalTemplateFile = File.read( additionalTemplate )
           additionalTemplateJson = JSON.parse( additionalTemplateFile )
 
@@ -877,13 +889,15 @@ class Grafana
             templateJson['dashboard']['rows'] = additionalTemplateJson['dashboard']['rows'].concat(rows)
           end
 
+
+
         end
 
       end
 
       self.sendTemplateToGrafana( JSON.generate( templateJson ), normalizeService( serviceName ) )
 
-    end
+#    end
   end
 
 
