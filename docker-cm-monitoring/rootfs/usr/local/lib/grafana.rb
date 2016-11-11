@@ -334,20 +334,20 @@ class Grafana
         serviceName = removePostfix( service )
 
         # get templates for service
-        serviceTemplatePaths = *self.getTemplatePathsForService(serviceName)
+        serviceTemplatePaths = *self.getTemplateForService( serviceName )
 
         if( ! ['mongodb', 'mysql', 'postgres'].include?( serviceName ) )
-          additionalTemplatePaths.push( *self.getTemplatePathsForService( 'tomcat' ) )
+          additionalTemplatePaths.push( *self.getTemplateForService( 'tomcat' ) )
         end
 
         # get templates for service type
         if( mergedHostJson != nil )
 
-          serviceType = mergedHostJson[service]["application"]
-
-          if( serviceType )
-            additionalTemplatePaths.push( *self.getTemplatePathsForServiceType( serviceType ) )
-          end
+          # not longer needed
+#          serviceType = mergedHostJson[service]["application"]
+#          if( serviceType )
+#            additionalTemplatePaths.push( *self.getTemplatePathsForServiceType( serviceType ) )
+#          end
         else
           @log.error( sprintf( 'file %s doesnt exist', @mergedHostFile ) )
         end
@@ -411,7 +411,7 @@ class Grafana
   # delete the dashboards for a host
   def deleteDashboards( host )
 
-    @log.debug("Deleting dashboards for host #{host}")
+    @log.debug( sprintf( 'Deleting dashboards for host %s', host ) )
 
     if( self.checkGrafana?() == false )
 
@@ -444,6 +444,8 @@ class Grafana
             # Don't delete group templates except if deletion is forced
             next
           end
+
+          @log.debug( sprintf( '  - %s', i ) )
 
           uri = URI( sprintf( '%s/api/dashboards/%s', @grafanaURI, i ) )
 
@@ -571,38 +573,63 @@ class Grafana
   end
 
 
-  def getTemplatePathsForServiceType(serviceType)
+  def getTemplatePathsForServiceType( serviceType )
 
     paths = Array.new()
-#    @log.debug(serviceType)
+    @log.debug( serviceType )
     dirs  = Dir["#{@templateDirectory}/service-types/#{serviceType}"]
     count = dirs.count()
 
+    @log.debug( dir )
+    @log.debug( count )
+
     if( count != 0 )
 
-#       @log.debug("Found dirs: #{dirs}")
+      @log.debug( "Found dirs: #{dirs}" )
       dirs.each do |dir|
         paths.push(*Dir["#{dir}/cm*.json"])
       end
     end
 
+     @log.debug( paths )
+
     return paths
   end
 
+  def getTemplateForService( serviceName )
 
-  def getTemplatePathsForService(serviceName)
+    template = sprintf( '%s/services/%s.json', @templateDirectory, serviceName )
+
+    if( ! File.exist?( template ) )
+
+      @log.error( sprintf( 'no template for service %s found', serviceName ) )
+
+      template = nil
+    end
+
+    return template
+  end
+
+
+  def getTemplatePathsForService( serviceName )
 
     paths = Array.new()
     dirs  = Dir["#{@templateDirectory}/services/#{serviceName}*"]
     count = dirs.count()
 
+    @log.debug( serviceName )
+    @log.debug( dir )
+    @log.debug( count )
+
     if( count != 0 )
 
-#       @log.debug("Found dirs: #{dirs}")
+      @log.debug("Found dirs: #{dirs}")
       dirs.each do |dir|
         paths.push(*Dir["#{dir}/cm*.json"])
       end
     end
+
+    @log.debug( paths )
 
     return paths
   end
@@ -831,22 +858,23 @@ class Grafana
 
     serviceTemplatePaths.each do |tpl|
 
-      @log.info( sprintf( 'Creating dashboard %s', File.basename(tpl).strip ) )
+      @log.info( sprintf( 'Creating dashboard for %s', serviceName ) )
+      @log.debug( sprintf( '  - template %s', File.basename( tpl ).strip ) )
 
-      templateFile = File.read(tpl)
-      templateJson = JSON.parse(templateFile)
+      templateFile = File.read( tpl )
+      templateJson = JSON.parse( templateFile )
 
-      if (templateJson['dashboard'] and templateJson['dashboard']['rows'])
+      if( templateJson['dashboard'] && templateJson['dashboard']['rows'] )
 
-        rows = templateJson["dashboard"]["rows"]
+        rows = templateJson['dashboard']['rows']
 
         additionalTemplatePaths.each do |additionalTemplate|
 
-          additionalTemplateFile = File.read(additionalTemplate)
-          additionalTemplateJson = JSON.parse(additionalTemplateFile)
+          additionalTemplateFile = File.read( additionalTemplate )
+          additionalTemplateJson = JSON.parse( additionalTemplateFile )
 
-          if (additionalTemplateJson["dashboard"]["rows"])
-            templateJson["dashboard"]["rows"] = additionalTemplateJson["dashboard"]["rows"].concat(rows)
+          if( additionalTemplateJson['dashboard']['rows'] )
+            templateJson['dashboard']['rows'] = additionalTemplateJson['dashboard']['rows'].concat(rows)
           end
 
         end
