@@ -116,11 +116,11 @@ jolokia:
       - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.transform.image.java2d.LoadedImageCacheKey",application=*
         attribute: Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate
       - mbean: com.coremedia:type=Cache.Classes,CacheClass="java.lang.Object",application=*
+        attribute: Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate
 
     caches-ibm:
-      description: CAE or Studio Caches (eCommerce / IBM)
+      description: "CAE or Studio Caches (eCommerce / IBM)"
       metrics:
-        attribute: Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate
       - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.ecommerce.ibm.cache.Availability",application=*
         attribute: Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate
       - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.ecommerce.ibm.cache.Category",application=*
