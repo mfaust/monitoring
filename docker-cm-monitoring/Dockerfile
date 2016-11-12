@@ -3,7 +3,7 @@ FROM bodsch/docker-alpine-base:1610-02
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
-LABEL version="1.3.3"
+LABEL version="1.4.0"
 
 EXPOSE 9001
 
@@ -22,6 +22,7 @@ RUN \
     imagemagick-dev \
     mysql-dev \
     bash \
+    drill \
     ruby-dev \
     ruby-irb \
     ruby-io-console \
