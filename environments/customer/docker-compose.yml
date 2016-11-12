@@ -16,13 +16,17 @@ services:
     image: bodsch/docker-dnsdock:1611-01
     container_name: dnsdock
     hostname: dnsdock
+    labels:
+      com.dnsdock.image: "dnsdock"
+      com.dnsdock.alias: "dnsdock"
+      com.dnsdock.ttl: "10"
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - 53:53
       - 8081:80
-    command: "--nameserver='141.1.1.1:53' --verbose --http=:80"
+    command: "--nameserver='141.1.1.1:53' --http=:80"
     networks:
       mon:
         ipv4_address: 172.25.0.5
@@ -32,6 +36,10 @@ services:
     image: bodsch/docker-jolokia:1611-02
     container_name: jolokia
     hostname: jolokia
+    labels:
+      com.dnsdock.image: "jolokia"
+      com.dnsdock.alias: "jolokia"
+      com.dnsdock.ttl: "10"
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./share/resolv.conf:/etc/resolv.conf:ro
@@ -49,6 +57,10 @@ services:
     image: bodsch/docker-memcached:1610-02
     container_name: memcached
     hostname: memcached
+    labels:
+      com.dnsdock.image: "memcached"
+      com.dnsdock.alias: "memcached"
+      com.dnsdock.ttl: "10"
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:
@@ -60,6 +72,10 @@ services:
     image: bodsch/docker-nginx:1610-02
     container_name: nginx
     hostname: nginx
+    labels:
+      com.dnsdock.image: "nginx"
+      com.dnsdock.alias: "nginx"
+      com.dnsdock.ttl: "10"
     ports:
       - 80:80
     depends_on:
@@ -85,6 +101,10 @@ services:
     image: bodsch/docker-carbon-relay-ng:1610-01
     container_name: carbon-relay
     hostname: carbon-relay
+    labels:
+      com.dnsdock.image: "carbon-relay"
+      com.dnsdock.alias: "carbon-relay"
+      com.dnsdock.ttl: "10"
     ports:
       - 2003:2003
     env_file:
@@ -105,12 +125,12 @@ services:
     build: ../../docker-cm-monitoring
     container_name: cm-monitoring
     hostname: cm-monitoring
+    labels:
+      com.dnsdock.image: "cm-monitoring"
+      com.dnsdock.alias: "cm-monitoring"
+      com.dnsdock.ttl: "10"
     env_file:
       - env/cm-monitoring.env
-    labels:
-      com.dnsdock.name: "cm-monitoring"
-      com.dnsdocker.image: "cm-monitoring"
-      com.dnsdock.ttl: 10 
     depends_on:
       - jolokia
       - carbon-relay
