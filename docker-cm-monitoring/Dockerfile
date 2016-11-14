@@ -34,6 +34,7 @@ RUN \
     bc \
     yajl-tools \
     collectd \
+    collectd-log_logstash \
     fping \
     nmap \
     monitoring-plugins \

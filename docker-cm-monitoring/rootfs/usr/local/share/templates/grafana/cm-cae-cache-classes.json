@@ -1163,7 +1163,7 @@
             ],
             "timeFrom": null,
             "timeShift": null,
-            "title": "SolrQueryCacheKey",
+            "title": "Assumes Identity",
             "tooltip": {
               "msResolution": false,
               "shared": true,
@@ -1200,121 +1200,6 @@
         "editable": true,
         "height": "180px",
         "panels": [
-          {
-            "aliasColors": {},
-            "bars": false,
-            "datasource": "graphite",
-            "decimals": 0,
-            "editable": true,
-            "error": false,
-            "fill": 3,
-            "grid": {
-              "threshold1": null,
-              "threshold1Color": "rgba(216, 200, 27, 0.27)",
-              "threshold2": null,
-              "threshold2Color": "rgba(234, 112, 112, 0.22)"
-            },
-            "id": 10,
-            "isNew": true,
-            "legend": {
-              "alignAsTable": true,
-              "avg": false,
-              "current": true,
-              "max": false,
-              "min": false,
-              "rightSide": true,
-              "show": true,
-              "total": false,
-              "values": true,
-              "sideWidth": 200
-            },
-            "lines": true,
-            "linewidth": 1,
-            "links": [],
-            "nullPointMode": "connected",
-            "percentage": false,
-            "pointradius": 5,
-            "points": false,
-            "renderer": "flot",
-            "seriesOverrides": [
-              {
-                "alias": "missRate",
-                "color": "#CFFAFF",
-                "yaxis": 2
-              },
-              {
-                "alias": "removed",
-                "color": "#1F78C1",
-                "yaxis": 2
-              },
-              {
-                "alias": "evicted",
-                "color": "#BF1B00",
-                "yaxis": 2
-              }
-            ],
-            "span": 6,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
-              {
-                "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-AssumesIdentity.count-capacity, '(.*)-', ''))",
-                "textEditor": false
-              },
-              {
-                "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-AssumesIdentity.count-level, '(.*)-', ''))",
-                "textEditor": false
-              },
-              {
-                "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-AssumesIdentity.count-evicted, '(.*)-', ''))",
-                "textEditor": false
-              },
-              {
-                "refId": "D",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-AssumesIdentity.count-removed, '(.*)-', ''))",
-                "textEditor": false
-              },
-              {
-                "refId": "E",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-CacheClasses-AssumesIdentity.count-missRate, '(.*)-', ''))",
-                "textEditor": false
-              }
-            ],
-            "timeFrom": null,
-            "timeShift": null,
-            "title": "Assumes Identity",
-            "tooltip": {
-              "msResolution": false,
-              "shared": true,
-              "sort": 0,
-              "value_type": "cumulative"
-            },
-            "type": "graph",
-            "xaxis": {
-              "show": true
-            },
-            "yaxes": [
-              {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-              },
-              {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-              }
-            ]
-          },
           {
             "aliasColors": {},
             "bars": false,
@@ -1429,14 +1314,7 @@
                 "show": true
               }
             ]
-          }
-        ]
-      },
-      {
-        "collapse": false,
-        "editable": true,
-        "height": "180px",
-        "panels": [
+          },
           {
             "aliasColors": {},
             "bars": false,
@@ -1551,7 +1429,14 @@
                 "show": true
               }
             ]
-          },
+          }
+        ]
+      },
+      {
+        "collapse": false,
+        "editable": true,
+        "height": "180px",
+        "panels": [
           {
             "aliasColors": {},
             "bars": false,
@@ -1666,14 +1551,7 @@
                 "show": true
               }
             ]
-          }
-        ]
-      },
-      {
-        "collapse": false,
-        "editable": true,
-        "height": "180px",
-        "panels": [
+          },
           {
             "aliasColors": {},
             "bars": false,
@@ -1788,7 +1666,14 @@
                 "show": true
               }
             ]
-          },
+          }
+        ]
+      },
+      {
+        "collapse": false,
+        "editable": true,
+        "height": "180px",
+        "panels": [
           {
             "aliasColors": {},
             "bars": false,
