@@ -22,18 +22,21 @@ then
   fi
 fi
 
+if [ ! -f /usr/local/bin/docker-compose ]
+then
+  curl -L https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/${COMPOSE_FILE} > /tmp/docker-compose
+  chmod +x /tmp/docker-compose
 
-curl -L https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/${COMPOSE_FILE} > /tmp/docker-compose
-chmod +x /tmp/docker-compose
+  sudo mv /tmp/docker-compose /usr/local/bin/docker-compose
+fi
 
-sudo mv /tmp/docker-compose /usr/local/bin/docker-compose
-
-
-if [ "${ID}" == "centos" ]
+if ( [ "${ID}" == "centos" ] || [ "${ID}" == "amzn" ] )
 then
 
   sudo yum update
-  sudo yum -y install docker git
+  sudo yum -y install docker git collectd
+
+  USER="ec2-user"
 
 elif [ "${ID}" == "ubuntu" ]
 then
@@ -48,7 +51,9 @@ then
   apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
 
   apt-get update
-  apt-get install docker-engine  
+  apt-get install docker-engine collectd
+
+  USER="ubuntu"
 
 elif [ "${ID}" == "debian" ]
 then
@@ -69,6 +74,7 @@ then
 
   sudo apt-get install -y docker-engine git
 
+  USER="docker"
 else
   echo "no supported OS"
   exit 1
@@ -77,17 +83,123 @@ fi
 
 sudo service docker start
 
-mkdir  /srv/docker
-# sudo chown ec2-user: docker
+sudo mkdir  /srv/docker
+sudo chown ${USER}: /srv/docker
 
 cd /srv/docker
 
 git clone git@github.com:cm-xlabs/monitoring.git
 
-cd /srv/docker/monitoring/docker-compose-monitoring/
+cd /srv/docker/monitoring/environments/aws
 
-sudo /usr/local/bin/docker-compose pull
-sudo /usr/local/bin/docker-compose build
+if [ -f docker-compose.yml ]
+then
+  sudo /usr/local/bin/docker-compose pull
+  #sudo /usr/local/bin/docker-compose build
+  sudo /usr/local/bin/docker-compose up -d
+else
+  echo "no docker-compose file found!"
+  exit 1
+fi
 
-sudo /usr/local/bin/docker-compose up -d
+cat << EOF > /etc/collectd.conf
+
+Hostname    "docker-host"
+FQDNLookup   false
+
+AutoLoadPlugin true
+
+Interval     45
+
+Timeout      2
+ReadThreads  5
+WriteThreads 5
+
+WriteQueueLimitHigh 1000000
+WriteQueueLimitLow   800000
+
+LoadPlugin logfile
+
+<Plugin logfile>
+        LogLevel info
+        File "/var/log/collectd.log"
+        Timestamp true
+        PrintSeverity false
+</Plugin>
+
+LoadPlugin cpu
+LoadPlugin df
+LoadPlugin disk
+LoadPlugin interface
+LoadPlugin load
+LoadPlugin memory
+
+<Plugin df>
+#       Device "/dev/hda1"
+#       Device "192.168.0.2:/mnt/nfs"
+        MountPoint "/"
+#       FSType "ext3"
+#       IgnoreSelected false
+#       ReportByDevice false
+#       ReportReserved false
+#       ReportInodes false
+#       ValuesAbsolute true
+#       ValuesPercentage false
+</Plugin>
+
+<Plugin disk>
+#  Disk "/^[hs]d[a-f][0-9]?$/"
+#   IgnoreSelected false
+  Disk "/dev/xvda1"
+</Plugin>
+
+<Plugin ethstat>
+  Interface "eth0"
+  Map "rx_csum_offload_errors" "if_rx_errors" "checksum_offload"
+  Map "multicast" "if_multicast"
+  MappedOnly false
+</Plugin>
+
+<Plugin interface>
+  Interface "eth0"
+  IgnoreSelected false
+</Plugin>
+
+#<Plugin ping>
+#       Host "host.foo.bar"
+#       Interval 1.0
+#       Timeout 0.9
+#       TTL 255
+#       SourceAddress "1.2.3.4"
+#       Device "eth0"
+#       MaxMissed -1
+#</Plugin>
+
+#<Plugin "swap">
+#       ReportByDevice false
+#       ReportBytes true
+#</Plugin>
+
+<Plugin write_graphite>
+  <Node "docker">
+    Host "localhost"
+    Port "2003"
+    Protocol "tcp"
+    LogSendErrors true
+    Prefix "collectd."
+    StoreRates true
+    AlwaysAppendDS false
+    EscapeCharacter "-"
+  </Node>
+</Plugin>
+
+# Include "/etc/collectd.d"
+
+EOF
+
+service collectd start
+
+
+exit 0
+
 
