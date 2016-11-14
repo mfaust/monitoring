@@ -864,40 +864,70 @@ class Grafana
 
   def generateServiceTemplate( serviceName, serviceTemplate, additionalTemplatePaths )
 
+    @log.info( sprintf( 'Creating dashboard for %s', serviceName ) )
 
-#    serviceTemplatePaths.each do |tpl|
+    @log.debug( sprintf( '  - template %s', File.basename( serviceTemplate ).strip ) )
 
-      @log.info( sprintf( 'Creating dashboard for %s', serviceName ) )
+    templateFile = File.read( serviceTemplate )
+    templateJson = JSON.parse( templateFile )
 
-      @log.debug( sprintf( '  - template %s', File.basename( serviceTemplate ).strip ) )
+    if( templateJson['dashboard'] && templateJson['dashboard']['rows'] )
 
-      templateFile = File.read( serviceTemplate )
-      templateJson = JSON.parse( templateFile )
+      rows = templateJson['dashboard']['rows']
 
-      if( templateJson['dashboard'] && templateJson['dashboard']['rows'] )
+      additionalTemplatePaths.each do |additionalTemplate|
 
-        rows = templateJson['dashboard']['rows']
+        @log.debug( sprintf( '  - merge with template %s', File.basename( additionalTemplate ).strip ) )
 
-        additionalTemplatePaths.each do |additionalTemplate|
+        additionalTemplateFile = File.read( additionalTemplate )
+        additionalTemplateJson = JSON.parse( additionalTemplateFile )
 
-          @log.debug( sprintf( '  - merge with template %s', File.basename( additionalTemplate ).strip ) )
-
-          additionalTemplateFile = File.read( additionalTemplate )
-          additionalTemplateJson = JSON.parse( additionalTemplateFile )
-
-          if( additionalTemplateJson['dashboard']['rows'] )
-            templateJson['dashboard']['rows'] = additionalTemplateJson['dashboard']['rows'].concat(rows)
-          end
-
-
-
+        if( additionalTemplateJson['dashboard']['rows'] )
+          templateJson['dashboard']['rows'] = additionalTemplateJson['dashboard']['rows'].concat(rows)
         end
-
       end
+    end
 
-      self.sendTemplateToGrafana( JSON.generate( templateJson ), normalizeService( serviceName ) )
+    # add or overwrite annotations
+    annotations = '
+      {
+        "list": [
+          {
+            "name": "created",
+            "enable": true,
+            "iconColor": "rgb(93, 227, 12)",
+            "datasource": "events",
+            "tags": "%HOST% created&set=intersection"
+          },
+          {
+            "name": "destoyed",
+            "enable": true,
+            "iconColor": "rgb(227, 57, 12)",
+            "datasource": "events",
+            "tags": "%HOST% destroyed&set=intersection"
+          },
+          {
+            "name": "Load Tests",
+            "enable": true,
+            "iconColor": "rgb(26, 196, 220)",
+            "datasource": "events",
+            "tags": "%HOST% loadtest&set=intersection"
+          },
+          {
+            "name": "Deployments",
+            "enable": true,
+            "iconColor": "rgb(176, 40, 253)",
+            "datasource": "events",
+            "tags": "%HOST% deployment&set=intersection"
+          }
+        ]
+      }
+    '
 
-#    end
+    templateJson['dashboard']['annotations'] = JSON.parse( annotations )
+
+    self.sendTemplateToGrafana( JSON.generate( templateJson ), normalizeService( serviceName ) )
+
   end
 
 

@@ -47,15 +47,8 @@
             "id": 7,
             "targets": [
               {
-                "hide": true,
-                "refId": "B",
-                "target": "aliasSub(collectd.%HOST%.SOLR_MASTER-core_live-QueryResultCache.count-size, '(.*)-', '')",
-                "textEditor": true
-              },
-              {
-                "hide": false,
-                "refId": "a",
-                "target": "aliasSub(aliasSub(aliasByNode(collectd.%HOST%.SOLR_MASTER-$core-QueryResultCache.count-size, 2), '(.*)-(.*)', '\\1'),'(.*)-', '')",
+                "refId": "A",
+                "target": "aliasSub(aliasSub(aliasByNode(collectd.%HOST%.SOLR_MASTER-core_$core-QueryResultCache.count-size, 2), '(.*)-(.*)', '\\1'),'(.*)-', '')",
                 "textEditor": false
               }
             ],
@@ -140,13 +133,8 @@
             "id": 8,
             "targets": [
               {
-                "hide": true,
-                "refId": "B",
-                "target": "aliasSub(collectd.%HOST%.SOLR_MASTER-core_live-QueryResultCache.count-hits, '(.*)-', '')"
-              },
-              {
                 "refId": "A",
-                "target": "aliasSub(aliasSub(aliasByNode(collectd.%HOST%.SOLR_MASTER-$core-QueryResultCache.count-hits, 2), '(.*)-(.*)', '\\1'),'(.*)-', '')",
+                "target": "aliasSub(aliasSub(aliasByNode(collectd.%HOST%.SOLR_MASTER-core_$core-QueryResultCache.count-hits, 2), '(.*)-(.*)', '\\1'),'(.*)-', '')",
                 "textEditor": false
               }
             ],
@@ -231,14 +219,9 @@
             "id": 9,
             "targets": [
               {
-                "hide": true,
                 "refId": "A",
-                "target": "aliasSub(collectd.%HOST%.SOLR_MASTER-core_live-QueryResultCache.count-hitratio, '(.*)-', '')"
-              },
-              {
-                "refId": "B",
-                "target": "aliasSub(aliasSub(aliasByNode(collectd.%HOST%.SOLR_MASTER-$core-QueryResultCache.count-hitratio, 2), '(.*)-(.*)', '\\1'),'(.*)-', '')",
-                "textEditor": true
+                "target": "aliasSub(aliasSub(aliasByNode(collectd.%HOST%.SOLR_MASTER-core_$core-QueryResultCache.count-hitratio, 2), '(.*)-(.*)', '\\1'),'(.*)-', '')",
+                "textEditor": false
               }
             ],
             "datasource": null,
@@ -322,14 +305,9 @@
             "id": 10,
             "targets": [
               {
-                "hide": true,
-                "refId": "B",
-                "target": "aliasSub(collectd.%HOST%.SOLR_MASTER-core_live-DocumentCache.count-size, '(.*)-', '')"
-              },
-              {
                 "refId": "A",
-                "target": "aliasSub(aliasSub(aliasByNode(collectd.%HOST%.SOLR_MASTER-$core-DocumentCache.count-size, 2), '(.*)-(.*)', '\\1'),'(.*)-', '')",
-                "textEditor": true
+                "target": "aliasSub(aliasSub(aliasByNode(collectd.%HOST%.SOLR_MASTER-core_$core-DocumentCache.count-size, 2), '(.*)-(.*)', '\\1'),'(.*)-', '')",
+                "textEditor": false
               }
             ],
             "datasource": null,
@@ -413,13 +391,8 @@
             "id": 11,
             "targets": [
               {
-                "hide": true,
-                "refId": "B",
-                "target": "aliasSub(collectd.%HOST%.SOLR_MASTER-core_live-DocumentCache.count-hits, '(.*)-', '')"
-              },
-              {
                 "refId": "A",
-                "target": "aliasSub(aliasSub(aliasByNode(collectd.%HOST%.SOLR_MASTER-$core-DocumentCache.count-hits, 2), '(.*)-(.*)', '\\1'),'(.*)-', '')",
+                "target": "aliasSub(aliasSub(aliasByNode(collectd.%HOST%.SOLR_MASTER-core_$core-DocumentCache.count-hits, 2), '(.*)-(.*)', '\\1'),'(.*)-', '')",
                 "textEditor": false
               }
             ],
@@ -504,14 +477,9 @@
             "id": 12,
             "targets": [
               {
-                "hide": true,
-                "refId": "B",
-                "target": "aliasSub(collectd.%HOST%.SOLR_MASTER-core_live-DocumentCache.count-hitratio, '(.*)-', '')"
-              },
-              {
                 "refId": "A",
-                "target": "aliasSub(aliasSub(aliasByNode(collectd.%HOST%.SOLR_MASTER-$core-DocumentCache.count-hitratio, 2), '(.*)-(.*)', '\\1'),'(.*)-', '')",
-                "textEditor": true
+                "target": "aliasSub(aliasSub(aliasByNode(collectd.%HOST%.SOLR_MASTER-core_$core-DocumentCache.count-hitratio, 2), '(.*)-(.*)', '\\1'),'(.*)-', '')",
+                "textEditor": false
               }
             ],
             "datasource": null,
@@ -625,13 +593,8 @@
             "steppedLine": false,
             "targets": [
               {
-                "hide": true,
-                "refId": "B",
-                "target": "alias(aliasSub(collectd.%HOST%.SOLR_MASTER-core_live-Select.count-avgTimePerRequest, '(.*)-', ''), 'time p. request')"
-              },
-              {
                 "refId": "A",
-                "target": "aliasSub(aliasSub(aliasByNode(collectd.%HOST%.SOLR_MASTER-$core-Select.count-avgTimePerRequest, 2), '(.*)-(.*)', '\\1'), '(.*)-', '')",
+                "target": "aliasSub(aliasSub(aliasByNode(collectd.%HOST%.SOLR_MASTER-core_$core-Select.count-avgTimePerRequest, 2), '(.*)-(.*)', '\\1'), '(.*)-', '')",
                 "textEditor": false
               }
             ],
@@ -716,14 +679,9 @@
             "steppedLine": false,
             "targets": [
               {
-                "hide": true,
-                "refId": "B",
-                "target": "aliasSub(collectd.%HOST%.SOLR_MASTER-core_live-Select.count-errors, '(.*)-', '')"
-              },
-              {
                 "refId": "A",
-                "target": "aliasSub(aliasSub(aliasByNode(collectd.%HOST%.SOLR_MASTER-$core-Select.count-errors, 2), '(.*)-(.*)', '\\1'), '(.*)-', '')",
-                "textEditor": true
+                "target": "aliasSub(aliasSub(aliasByNode(collectd.%HOST%.SOLR_MASTER-core_$core-Select.count-errors, 2), '(.*)-(.*)', '\\1'), '(.*)-', '')",
+                "textEditor": false
               }
             ],
             "timeFrom": null,
@@ -791,40 +749,40 @@
     "templating": {
       "list": [
         {
+          "allValue": null,
           "current": {
-            "text": "All",
-            "value": "$__all"
+            "text": "live",
+            "value": "live",
+            "selected": true,
+            "tags": []
           },
           "datasource": "graphite",
           "hide": 0,
-          "includeAll": true,
-          "multi": true,
+          "includeAll": false,
+          "label": null,
+          "multi": false,
           "name": "core",
           "options": [
             {
-              "text": "All",
-              "value": "$__all",
+              "text": "live",
+              "value": "live",
               "selected": true
             },
             {
-              "text": "core_live",
-              "value": "core_live",
+              "text": "preview",
+              "value": "preview",
               "selected": false
             },
             {
-              "text": "core_preview",
-              "value": "core_preview",
-              "selected": false
-            },
-            {
-              "text": "core_studio",
-              "value": "core_studio",
+              "text": "studio",
+              "value": "studio",
               "selected": false
             }
           ],
           "query": "*.%HOST%.SOLR_MASTER-core_*",
           "refresh": 1,
-          "regex": "/.*-(core_.*)-.*/",
+          "regex": "/.*core_(.*)-.*$/",
+          "sort": 0,
           "tagValuesQuery": null,
           "tagsQuery": null,
           "type": "query",
