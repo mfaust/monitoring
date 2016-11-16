@@ -16,6 +16,7 @@ require 'filesize'
 require 'fileutils'
 
 require_relative 'tools'
+require_relative 'mbean'
 
 # -----------------------------------------------------------------------------
 
@@ -174,8 +175,6 @@ class CollecdPlugin
 
   def checkBean‎Consistency( mbean, data = {} )
 
-    result = true
-
     status    = data['status']    ? data['status']    : 505
     timestamp = data['timestamp'] ? data['timestamp'] : 0
 
@@ -190,6 +189,8 @@ class CollecdPlugin
       @log.debug( sprintf( ' -> Host: \'%s\' - Service: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, @Service, mbean, status ) )
       return false
     end
+
+    return true
   end
 
 
