@@ -181,18 +181,15 @@ class CollecdPlugin
 
     if( self.beanTimeout?( timestamp ) )
 
-      @log.error( sprintf( ' -> Host: \'%s\' - Service: \'%s\' - mbean: \'%s\' - status: \'timeout\'', @Host, @Service, mbean ) )
-      result = false
+      @log.debug( sprintf( ' -> Host: \'%s\' - Service: \'%s\' - mbean: \'%s\' - status: \'timeout\'', @Host, @Service, mbean ) )
+      return false
     end
 
     if( status.to_i != 200 )
 
-      @log.error( sprintf( ' -> Host: \'%s\' - Service: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, @Service, mbean, status ) )
-      result = false
+      @log.debug( sprintf( ' -> Host: \'%s\' - Service: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, @Service, mbean, status ) )
+      return false
     end
-
-    return result
-
   end
 
 
@@ -1182,6 +1179,16 @@ class CollecdPlugin
     licenseValidUntilSoft = nil
     licenseValidUntilHard = nil
 
+    # RLS Specific
+    connectionUp          = false
+    controllerState       = nil
+    incomingCount         = 0
+    enabled               = false
+    pipelineUp            = false
+    uncompletedCount      = 0
+    completedCount        = 0
+
+
     def timeParser( today, finalDate )
 
       difference = TimeDifference.between( today, finalDate ).in_each_component
@@ -1192,6 +1199,59 @@ class CollecdPlugin
         :weeks  => difference[:weeks].round,
         :days   => difference[:days].round
       }
+    end
+
+    def replicatorData()
+
+      result       = []
+
+      MBean.logger( @log )
+      MBean.memcache( @memcacheHost, @memcachePort )
+      replicatorData = MBean.bean( @Host, @serviceName, 'Replicator' )
+
+      if( replicatorData == false )
+        @log.error( 'No Data for mbean \'Replicator\' found!' )
+
+        return {
+          :incomingCount => 0,
+          :result        => result
+        }
+      else
+
+        replicatorStatus = replicatorData['status']  ? replicatorData['status']  : 505
+        replicatorValue  = replicatorData['value']   ? replicatorData['value']   : nil
+
+        if( replicatorStatus == 200 && replicatorValue != nil )
+
+          replicatorValue       = replicatorValue.values.first
+
+          connectionUp          = replicatorValue['ConnectionUp']     ? replicatorValue['ConnectionUp']     : false
+          controllerState       = replicatorValue['ControllerState']  ? replicatorValue['ControllerState']  : nil
+          incomingCount         = replicatorValue['IncomingCount']    ? replicatorValue['IncomingCount']    : 0
+          enabled               = replicatorValue['Enabled']          ? replicatorValue['Enabled']          : false
+          pipelineUp            = replicatorValue['PipelineUp']       ? replicatorValue['PipelineUp']       : false
+          uncompletedCount      = replicatorValue['UncompletedCount'] ? replicatorValue['UncompletedCount'] : 0
+          completedCount        = replicatorValue['CompletedCount']   ? replicatorValue['CompletedCount']   : 0
+
+          controllerState.downcase!
+
+          format       = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
+
+#          result.push( sprintf( format, @Host, @Service, 'Replicator', 'connection'  ,'up'      , @interval, connectionUp ) )
+#          result.push( sprintf( format, @Host, @Service, 'Replicator', 'controller'  ,'state'   , @interval, controllerState ) )
+#          result.push( sprintf( format, @Host, @Service, 'Replicator', 'incoming'    ,'count'   , @interval, incomingCount ) )
+#          result.push( sprintf( format, @Host, @Service, 'Replicator', 'pipeline'    ,'up'      , @interval, pipelineUp ) )
+#          result.push( sprintf( format, @Host, @Service, 'Replicator', 'uncompleted' ,'count'   , @interval, uncompletedCount ) )
+#          result.push( sprintf( format, @Host, @Service, 'Replicator', 'completed'   ,'count'   , @interval, completedCount ) )
+#          result.push( sprintf( 'PUTVAL %s/%s-%s/count-%s interval=%s N:%s', @Host, @Service, 'Replicator', 'enabled', @interval, enabled ) )
+
+          return {
+            :incomingCount => incomingCount,
+            :result        => result
+          }
+
+        end
+      end
     end
 
 
@@ -1212,6 +1272,15 @@ class CollecdPlugin
       licenseValidFrom      = value['LicenseValidFrom']         ? value['LicenseValidFrom']          : nil
       licenseValidUntilSoft = value['LicenseValidUntilSoft']    ? value['LicenseValidUntilSoft']     : nil
       licenseValidUntilHard = value['LicenseValidUntilHard']    ? value['LicenseValidUntilHard']     : nil
+
+      replicatorData = replicatorData()
+
+      incomingCount         = replicatorData[:incomingCount] ? replicatorData[:incomingCount] : 0
+      replicatorResult      = replicatorData[:result]        ? replicatorData[:result]        : nil
+
+      if( replicatorResult != nil && replicatorResult.count != 0 )
+        result = replicatorResult
+      end
 
       #in maintenance mode the Server mbean is not available
       case runlevel.downcase
@@ -1304,7 +1373,7 @@ class CollecdPlugin
     result.push( sprintf( format, @Host, @Service, mbean, 'server', 'cache_entries'   , @interval, cacheEntries ) )
     result.push( sprintf( format, @Host, @Service, mbean, 'server', 'cache_interval'  , @interval, cacheInterval ) )
     result.push( sprintf( format, @Host, @Service, mbean, 'server', 'cache_size'      , @interval, cacheSize ) )
-    result.push( sprintf( format, @Host, @Service, mbean, 'server', 'sequence_number' , @interval, reqSeqNumber ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'server', 'sequence_number' , @interval, reqSeqNumber.to_i - incomingCount.to_i ) )
     result.push( sprintf( format, @Host, @Service, mbean, 'server', 'connection_count', @interval, connectionCount ) )
     result.push( sprintf( format, @Host, @Service, mbean, 'server', 'uptime'          , @interval, uptime ) )
     result.push( sprintf( format, @Host, @Service, mbean, 'server', 'runlevel'        , @interval, runlevel ) )
@@ -1986,7 +2055,8 @@ class CollecdPlugin
 
         data.each do |service, d|
 
-          @Service = normalizeService( service )
+          @serviceName = service
+          @Service     = normalizeService( service )
 
           port        = d['port']        ? d['port']        : nil
           description = d['description'] ? d['description'] : nil
