@@ -25,7 +25,6 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - 53:53
-      - 8081:80
     command: "--nameserver='141.1.1.1:53' --http=:80"
     networks:
       mon:
