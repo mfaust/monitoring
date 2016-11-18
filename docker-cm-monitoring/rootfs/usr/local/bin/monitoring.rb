@@ -154,8 +154,10 @@ class Monitoring
 
   end
 
-
-  def configureHost( host, type, data )
+  #
+  # curl -X POST http://localhost/api/v2/config/foo -d '{ "ports": [200,300] }'
+  #
+  def configureHost( host, payload )
 
     experimental = false
 
@@ -172,9 +174,13 @@ class Monitoring
         Dir.mkdir( directory )
       end
 
-      if( File.exist?( sprintf( '%s/%s.json', directory, type ) ) == true )
+      @log.debug( payload )
 
-        hash = { type.to_s => data }
+      hash = JSON.parse( payload )
+
+      if( File.exist?( sprintf( '%s/config.json', directory ) ) == true )
+
+
       end
 
       status  = 200

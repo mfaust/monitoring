@@ -91,6 +91,13 @@ module Sinatra
     end
 
     # -----------------------------------------------------------------------------
+
+    before '/v2/config/:host' do
+      request.body.rewind
+      @request_paylod = request.body.read
+    end
+
+    # -----------------------------------------------------------------------------
     # GET
 
     # prints out a little help about our ReST-API
@@ -171,14 +178,13 @@ module Sinatra
       result.to_json
     end
 
+    #
+    # curl -X POST http://localhost/api/v2/config/foo -d '{ "ports": [200,300] }'
+    #
+    post '/v2/config/:host' do
 
-    post '/config/v2/:host/:type/:data' do
-
-      host = params[:host]
-      type = params[:type]
-      data = params[:data]
-
-      result = m.configureHost( host, type, data )
+      host   = params[:host]
+      result = m.configureHost( host, @request_paylod )
 
       response.status = result[:status]
       result.to_json
