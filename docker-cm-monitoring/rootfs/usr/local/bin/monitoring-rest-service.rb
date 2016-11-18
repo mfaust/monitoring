@@ -164,12 +164,25 @@ module Sinatra
     # delete EVERY dashboards and checks before create the host
     #  including icinga2 and grafana
     post '/h/:host/force' do
-      content_type :json
 
       result = m.addHost( params[:host], true )
 
       response.status = result[:status]
       result.to_json
+    end
+
+
+    post '/config/v2/:host/:type/:data' do
+
+      host = params[:host]
+      type = params[:type]
+      data = params[:data]
+
+      result = m.configureHost( host, type, data )
+
+      response.status = result[:status]
+      result.to_json
+
     end
 
 

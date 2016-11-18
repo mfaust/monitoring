@@ -155,6 +155,41 @@ class Monitoring
   end
 
 
+  def configureHost( host, type, data )
+
+    experimental = false
+
+    status       = 500
+    message      = 'initialize error'
+
+    hash = Hash.new()
+
+    if( host.to_s != '' )
+
+      directory = sprintf( '%s/%s', @cacheDir, host )
+
+      if( !File.exist?( directory ) )
+        Dir.mkdir( directory )
+      end
+
+      if( File.exist?( sprintf( '%s/%s.json', directory, type ) ) == true )
+
+        hash = { type.to_s => data }
+      end
+
+      status  = 200
+      message = hash
+
+    end
+
+    return {
+      :status  => status,
+      :message => message
+    }
+
+  end
+
+
   def addHost( host, force = false )
 
     experimental = false
