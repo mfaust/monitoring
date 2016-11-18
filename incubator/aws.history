@@ -88,7 +88,17 @@ sudo chown ${USER}: /srv/docker
 
 cd /srv/docker
 
-git clone git@github.com:cm-xlabs/monitoring.git
+if [ ! -d monitoring/.git ]
+then
+  rm -rf monitoring
+
+  git clone git@github.com:cm-xlabs/monitoring.git
+else
+  cd monitoring
+
+  git pull
+fi
+
 
 cd /srv/docker/monitoring/environments/aws
 
@@ -102,7 +112,7 @@ else
   exit 1
 fi
 
-cat << EOF > /etc/collectd.conf
+cat << EOF > /tmp/collectd.conf
 
 Hostname    "docker-host"
 FQDNLookup   false
@@ -197,7 +207,9 @@ LoadPlugin memory
 
 EOF
 
-service collectd start
+sudo mv /tmp/collectd.conf /etc/collectd.conf
+
+sudo service collectd start
 
 
 exit 0

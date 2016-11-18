@@ -4,6 +4,10 @@ services:
     description: MySQL
     port: 3306
 
+  node_exporter:
+    description: node_exporter from Prometheus
+    port: 9100
+
   postgres:
     description: PostgreSQL
     port: 5432

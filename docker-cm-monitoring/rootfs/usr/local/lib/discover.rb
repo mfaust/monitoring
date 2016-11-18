@@ -27,6 +27,7 @@ class ServiceDiscovery
     ports = [
       3306,     # mysql
       5432,     # postrgres
+      9100,     # node_exporter
       28017,    # mongodb
       38099,
       40099,

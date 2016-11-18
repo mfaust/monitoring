@@ -1211,7 +1211,7 @@ class CollecdPlugin
       replicatorData = MBean.bean( @Host, @serviceName, 'Replicator' )
 
       if( replicatorData == false )
-        @log.error( 'No Data for mbean \'Replicator\' found!' )
+        @log.error( sprintf( 'No mbean \'Replicator\' for Service %s found!', @serviceName )
 
         return {
           :incomingCount => 0,
@@ -1274,14 +1274,14 @@ class CollecdPlugin
       licenseValidUntilSoft = value['LicenseValidUntilSoft']    ? value['LicenseValidUntilSoft']     : nil
       licenseValidUntilHard = value['LicenseValidUntilHard']    ? value['LicenseValidUntilHard']     : nil
 
-      replicatorData = replicatorData()
-
-      incomingCount         = replicatorData[:incomingCount] ? replicatorData[:incomingCount] : 0
-      replicatorResult      = replicatorData[:result]        ? replicatorData[:result]        : nil
-
-      if( replicatorResult != nil && replicatorResult.count != 0 )
-        result = replicatorResult
-      end
+#       replicatorData = replicatorData()
+#
+#       incomingCount         = replicatorData[:incomingCount] ? replicatorData[:incomingCount] : 0
+#       replicatorResult      = replicatorData[:result]        ? replicatorData[:result]        : nil
+#
+#       if( replicatorResult != nil && replicatorResult.count != 0 )
+#         result = replicatorResult
+#       end
 
       #in maintenance mode the Server mbean is not available
       case runlevel.downcase

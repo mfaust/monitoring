@@ -154,7 +154,7 @@
                 "label": null,
                 "show": true,
                 "logBase": 1,
-                "min": null,
+                "min": -1,
                 "max": null,
                 "format": "none"
               },
