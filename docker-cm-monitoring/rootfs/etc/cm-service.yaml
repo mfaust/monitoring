@@ -101,6 +101,36 @@ services:
     application:
     - caefeeder
 
+  caefeeder2-live:
+    description: CAEFeeder Live
+    port: 40899
+    feeder: live
+    cap_connection: true
+    uapi_cache: true
+    application:
+    - caefeeder
+
+  springer-cms:
+    description: CAE Preview
+    port: 50999
+    cap_connection: true
+    uapi_cache: true
+    application:
+    - cae
+    - caches
+    - caches-ibm
+
+  # preview cae
+  springer-cms:
+    description: CAE Preview
+    port: 50999
+    cap_connection: true
+    uapi_cache: true
+    application:
+    - cae
+    - caches
+    - caches-ibm
+
   cae-preview:
     description: CAE Preview
     port: 40999
@@ -152,6 +182,16 @@ services:
     license: true
     application:
     - contentserver
+
+  springer-cms:
+    description: CAE Live 1
+    port: 42199
+    cap_connection: true
+    uapi_cache: true
+    blob_cache: true
+    application:
+    - cae
+    - caches
 
   cae-live-1:
     description: CAE Live 1
