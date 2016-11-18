@@ -1,0 +1,21 @@
+{
+  "editor-webstart": {
+    "port": 40099,
+    "description": "Editor Webstart"
+  },
+  "webdav": {
+    "port": 40099,
+    "description": "WebDAV"
+  },
+  "studio": {
+    "port": 40099,
+    "description": "Studio",
+    "cap_connection": true,
+    "uapi_cache": true,
+    "blob_cache": true,
+    "application": [
+      "caches",
+      "caches-ibm"
+    ]
+  }
+}

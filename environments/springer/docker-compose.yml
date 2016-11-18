@@ -1,0 +1,157 @@
+---
+# project_name: monitoring
+version: '2.0'
+
+networks:
+  mon:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 172.25.0.0/24
+
+services:
+
+  dnsdock:
+    restart: always
+    image: bodsch/docker-dnsdock:1611-01
+    container_name: dnsdock
+    hostname: dnsdock
+    labels:
+      com.dnsdock.image: "dnsdock"
+      com.dnsdock.alias: "dnsdock"
+      com.dnsdock.ttl: "10"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - 53:53
+      - 8081:80
+    command: "--nameserver='194.171.67.234:53' --http=:80"
+    networks:
+      mon:
+        ipv4_address: 172.25.0.5
+
+  jolokia:
+    restart: always
+    image: bodsch/docker-jolokia:1611-02
+    container_name: jolokia
+    hostname: jolokia
+    labels:
+      com.dnsdock.image: "jolokia"
+      com.dnsdock.alias: "jolokia"
+      com.dnsdock.ttl: "10"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./share/resolv.conf:/etc/resolv.conf:ro
+    ports:
+      - 8080:8080
+    extra_hosts:
+      # NOTE: local blueprint-box
+      - 'blueprint-box:192.168.252.100'
+    networks:
+      mon:
+        ipv4_address: 172.25.0.11
+
+  memcached:
+    restart: always
+    image: bodsch/docker-memcached:1610-02
+    container_name: memcached
+    hostname: memcached
+    labels:
+      com.dnsdock.image: "memcached"
+      com.dnsdock.alias: "memcached"
+      com.dnsdock.ttl: "10"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      mon:
+        ipv4_address: 172.25.0.12
+
+  nginx:
+    restart: always
+    image: bodsch/docker-nginx:1610-02
+    container_name: nginx
+    hostname: nginx
+    labels:
+      com.dnsdock.image: "nginx"
+      com.dnsdock.alias: "nginx"
+      com.dnsdock.ttl: "10"
+    ports:
+      - 80:80
+    depends_on:
+      - cm-monitoring
+    extra_hosts:
+      - 'jolokia:172.25.0.11'
+      - 'cm-monitoring:172.25.0.40'
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./share/nginx/var/www:/var/www:ro
+      - ./share/nginx/etc/nginx/sites-enabled:/etc/nginx/sites-enabled:ro
+      - ./share/nginx/etc/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./share/nginx/etc/nginx/modules.d/00-restrictions.conf:/etc/nginx/modules.d/00-restrictions.conf:ro
+      - ./share/nginx/etc/nginx/modules.d/01-proxy-rest-service.conf:/etc/nginx/modules.d/01-proxy-rest-service.conf:ro
+    networks:
+      mon:
+        ipv4_address: 172.25.0.15
+
+  # support a carbon-relay container
+  # we have now a second 'carbon-relay-ng' for testing
+  carbon-relay:
+    restart: always
+    image: bodsch/docker-carbon-relay-ng:1610-01
+    container_name: carbon-relay
+    hostname: carbon-relay
+    labels:
+      com.dnsdock.image: "carbon-relay"
+      com.dnsdock.alias: "carbon-relay"
+      com.dnsdock.ttl: "10"
+    ports:
+      - 2003:2003
+    env_file:
+      - env/carbon-relay.env
+    extra_hosts:
+      # NOTE: external service
+      - 'graphite:35.156.59.181'
+      #- 'graphite:192.168.252.101'
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+#      - ./share/carbon-relay/etc/supervisor.d/carbon-relay.ini:/etc/supervisor.d/carbon-relay.ini:ro
+    networks:
+      mon:
+        ipv4_address: 172.25.0.20
+
+  cm-monitoring:
+    restart: always
+    build: ../../docker-cm-monitoring
+    container_name: cm-monitoring
+    hostname: cm-monitoring
+    labels:
+      com.dnsdock.image: "cm-monitoring"
+      com.dnsdock.alias: "cm-monitoring"
+      com.dnsdock.ttl: "10"
+    env_file:
+      - env/cm-monitoring.env
+    depends_on:
+      - jolokia
+      - carbon-relay
+      - memcached
+    extra_hosts:
+      - 'jolokia:172.25.0.11'
+      - 'memcached:172.25.0.12'
+      - 'carbon-relay:172.25.0.20'
+      # NOTE: external service
+      - 'grafana:35.156.59.181'
+      #- 'grafana:192.168.252.101'
+      # NOTE: external service
+      - 'nginx-proxy:35.156.59.181'
+      #- 'nginx-proxy:192.168.252.101'
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./share/resolv.conf:/etc/resolv.conf:ro
+      - ./data/monitoring:/var/cache/monitoring
+      - ./data:/srv
+    links:
+      - jolokia:jolokia
+    networks:
+      mon:
+        ipv4_address: 172.25.0.40

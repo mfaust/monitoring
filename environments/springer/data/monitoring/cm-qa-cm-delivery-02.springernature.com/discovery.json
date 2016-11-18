@@ -1,0 +1,24 @@
+{
+  "replication-live-server": {
+    "port": 48099,
+    "description": "RLS",
+    "port_http": 48080,
+    "ior": true,
+    "runlevel": true,
+    "license": true,
+    "application": [
+      "contentserver"
+    ]
+  },
+  "springer-cms": {
+    "port": 49099,
+    "description": "CAE Live 1",
+    "cap_connection": true,
+    "uapi_cache": true,
+    "blob_cache": true,
+    "application": [
+      "cae",
+      "caches"
+    ]
+  }
+}

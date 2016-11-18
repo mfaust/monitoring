@@ -1,0 +1,93 @@
+{
+  "mongodb": {
+    "port": 28017,
+    "description": "MongoDB"
+  },
+  "user-changes": {
+    "port": 41099,
+    "description": "User Changes",
+    "cap_connection": true,
+    "uapi_cache": true
+  },
+  "content-feeder": {
+    "port": 41099,
+    "description": "Content Feeder",
+    "feeder": "content",
+    "cap_connection": true,
+    "uapi_cache": true
+  },
+  "content-management-server": {
+    "port": 41099,
+    "description": "Content Management Server",
+    "port_http": 41080,
+    "ior": true,
+    "runlevel": true,
+    "license": true,
+    "application": [
+      "contentserver"
+    ]
+  },
+  "master-live-server": {
+    "port": 42099,
+    "description": "Master Live Server",
+    "port_http": 42080,
+    "ior": true,
+    "runlevel": true,
+    "license": true,
+    "application": [
+      "contentserver"
+    ]
+  },
+  "workflow-server": {
+    "port": 43099,
+    "description": "Workflow Server",
+    "cap_connection": true,
+    "uapi_cache": true,
+    "blob_cache": true
+  },
+  "solr-master": {
+    "port": 44099,
+    "description": "Solr Master",
+    "cores": [
+      "live",
+      "preview",
+      "studio"
+    ],
+    "application": [
+      "solr"
+    ]
+  },
+  "caefeeder-preview": {
+    "port": 46099,
+    "description": "CAEFeeder Preview",
+    "feeder": "preview",
+    "cap_connection": true,
+    "uapi_cache": true,
+    "application": [
+      "caefeeder"
+    ]
+  },
+  "caefeeder2-preview": {
+    "port": 46099
+  },
+  "caefeeder-live": {
+    "port": 47099,
+    "description": "CAEFeeder Live",
+    "feeder": "live",
+    "cap_connection": true,
+    "uapi_cache": true,
+    "application": [
+      "caefeeder"
+    ]
+  },
+  "caefeeder2-live": {
+    "port": 47099,
+    "description": "CAEFeeder Live",
+    "feeder": "live",
+    "cap_connection": true,
+    "uapi_cache": true,
+    "application": [
+      "caefeeder"
+    ]
+  }
+}
