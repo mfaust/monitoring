@@ -1211,7 +1211,7 @@ class CollecdPlugin
       replicatorData = MBean.bean( @Host, @serviceName, 'Replicator' )
 
       if( replicatorData == false )
-        @log.error( sprintf( 'No mbean \'Replicator\' for Service %s found!', @serviceName )
+        @log.error( sprintf( 'No mbean \'Replicator\' for Service %s found!', @serviceName ) )
 
         return {
           :incomingCount => 0,
