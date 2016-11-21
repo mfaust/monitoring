@@ -52,7 +52,7 @@ class DataCollector
     file.sync      = true
     @log           = Logger.new( file, 'weekly', 1024000 )
 #    @log = Logger.new( STDOUT )
-    @log.level     = Logger::INFO
+    @log.level     = Logger::DEBUG
     @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
     @log.formatter = proc do |severity, datetime, progname, msg|
       "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
@@ -325,6 +325,33 @@ class DataCollector
       pgsql = PostgresStatus.new( settings )
       pgsql.run()
 
+    end
+
+  end
+
+
+  def nodeExporterData( host, data = {} )
+
+    @log.debug()
+
+    @log.debug( host )
+    @log.debug( data )
+
+    port = data[:port] ? data[:port] : nil
+
+    if( port != nil )
+
+      settings = {
+        :host => host,
+        :port => port
+      }
+
+      require_relative 'nodeexporter_data'
+      nodeData = NodeExporter.new()
+
+      data = JSON.parse( JSON.pretty_generate( nodeData.run( settings ) ) )
+
+      return data
     end
 
   end
@@ -646,6 +673,9 @@ class DataCollector
           when 'mongodb'
             # MongoDB
             bulk.push( '' )
+          when 'node_exporter'
+            # Node Exporter (from Prometheus)
+            bulk.push( '' )
           when 'postgres'
             # Postgres
           else
@@ -862,6 +892,15 @@ class DataCollector
       if( data['postgres'] )
         self.postgresData( host, data['postgres'] )
       end
+
+      if( data['node_exporter'] )
+
+        option = {
+          :port => 9100
+        }
+        self.nodeExporterData( host, option )
+      end
+
 
       @log.debug( 'merge Data between Property Files and discovered Services' )
       result = self.mergeData( data )

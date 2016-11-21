@@ -322,7 +322,6 @@ class Grafana
       # determine type of service from mergedHostData.json file, e.g. cae, caefeeder, contentserver
       mergedHostJson = getJsonFromFile( @mergedHostFile )
 
-
       services.each do |service|
 
         serviceTemplate         = nil
@@ -354,8 +353,10 @@ class Grafana
 
 
         if( ! serviceTemplate.to_s.empty? )
+
           @log.debug( sprintf( "Found Template paths: %s, %s" , serviceTemplate , additionalTemplatePaths ) )
           self.generateServiceTemplate( serviceName, serviceTemplate.to_s, additionalTemplatePaths )
+
         end
 
       end

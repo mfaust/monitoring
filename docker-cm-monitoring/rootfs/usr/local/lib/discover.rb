@@ -3,7 +3,7 @@
 # 13.09.2016 - Bodo Schulz
 #
 #
-# v1.2.4
+# v1.2.5
 # -----------------------------------------------------------------------------
 
 require 'socket'
@@ -86,8 +86,8 @@ class ServiceDiscovery
       Dir.mkdir( @cacheDirectory )
     end
 
-    version              = '1.2.4'
-    date                 = '2016-09-28'
+    version              = '1.2.5'
+    date                 = '2016-11-21'
 
     @log.info( '-----------------------------------------------------------------' )
     @log.info( ' CoreMedia - Service Discovery' )
@@ -164,13 +164,15 @@ class ServiceDiscovery
 
     services = Array.new
 
-    if( port == 3306 or port == 5432 or port == 28017 )
+    if( port == 3306 || port == 5432 || port == 9100 || port == 28017 )
 
       case port
       when 3306
         services.push('mysql')
       when 5432
         services.push('postgres')
+      when 9100
+        services.push('node_exporter')
       when 28017
         services.push('mongodb')
       end
