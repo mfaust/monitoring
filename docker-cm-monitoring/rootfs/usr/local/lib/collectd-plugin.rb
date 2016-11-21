@@ -605,6 +605,188 @@ class CollecdPlugin
   end
 
 
+  def ParseResult_nodeExporter( value = {} )
+
+    format = 'PUTVAL %s/%s-%s/%s-%s interval=%s N:%s'
+    result = []
+
+    if( value != nil )
+
+#      @log.debug( JSON.pretty_generate( value ) )
+
+      cpu        = value['cpu']        ? value['cpu']        : nil
+      load       = value['load']       ? value['load']       : nil
+      memory     = value['memory']     ? value['memory']     : nil
+      filesystem = value['filesystem'] ? value['filesystem'] : nil
+
+      if( cpu != nil )
+
+        cpu.each do |c,d|
+
+          ['guest','idle','iowait','irq','nice','softirq','steal','system','user'].each do |m|
+
+            point = d[m] ? d[m] : nil
+
+            if( point != nil )
+              result.push( sprintf( format, @Host, @Service, 'cpu', c, m, @interval, point ) )
+            end
+          end
+        end
+      end
+
+#{
+#  "cpu": {
+#    "cpu0": {
+#      "guest": "0",
+#      "idle": "1.08885848e+06",
+#      "iowait": "485.29",
+#      "irq": "0",
+#      "nice": "0.19",
+#      "softirq": "1045.04",
+#      "steal": "0",
+#      "system": "9539.69",
+#      "user": "40843.14"
+#    },
+#    "cpu1": {
+#      "guest": "0",
+#      "idle": "1.07666644e+06",
+#      "iowait": "415.88",
+#      "irq": "0",
+#      "nice": "0.19",
+#      "softirq": "1628.07",
+#      "steal": "0",
+#      "system": "12317.96",
+#      "user": "48256.33"
+#    }
+#  },
+#  "load": {
+#    "shortterm": "0.1",
+#    "longterm": "0.13",
+#    "midterm": "0.1"
+#  },
+#  "memory": {
+#    "MemAvailable": "3492958208",
+#    "MemFree": "378605568",
+#    "MemTotal": "10317643776",
+#    "SwapCached": "0",
+#    "SwapFree": "0",
+#    "SwapTotal": "0"
+#  },
+#  "network": {
+#    "docker0": {
+#      "receive": {
+#        "bytes": "0",
+#        "compressed": "0",
+#        "drop": "0",
+#        "errs": "0",
+#        "fifo": "0",
+#        "frame": "0",
+#        "multicast": "0",
+#        "packets": "0"
+#      },
+#      "transmit": {
+#        "bytes": "0",
+#        "compressed": "0",
+#        "drop": "0",
+#        "errs": "0",
+#        "fifo": "0",
+#        "frame": "0",
+#        "multicast": "0",
+#        "packets": "0"
+#      }
+#    },
+#    "eth0": {
+#      "receive": {
+#        "bytes": "150430429312",
+#        "compressed": "0",
+#        "drop": "0",
+#        "errs": "0",
+#        "fifo": "0",
+#        "frame": "0",
+#        "multicast": "7",
+#        "packets": "676887217"
+#      },
+#      "transmit": {
+#        "bytes": "232584909545",
+#        "compressed": "0",
+#        "drop": "0",
+#        "errs": "0",
+#        "fifo": "0",
+#        "frame": "0",
+#        "multicast": "0",
+#        "packets": "651601311"
+#      }
+#    },
+#    "lo": {
+#      "receive": {
+#        "bytes": "42496402339",
+#        "compressed": "0",
+#        "drop": "0",
+#        "errs": "0",
+#        "fifo": "0",
+#        "frame": "0",
+#        "multicast": "0",
+#        "packets": "102897397"
+#      },
+#      "transmit": {
+#        "bytes": "42496402339",
+#        "compressed": "0",
+#        "drop": "0",
+#        "errs": "0",
+#        "fifo": "0",
+#        "frame": "0",
+#        "multicast": "0",
+#        "packets": "102897397"
+#      }
+#    }
+#  },
+#  "disk": {
+#    "dm-0": {
+#      "bytes": {
+#        "read": "328886272",
+#        "written": "229814784"
+#      },
+#      "io": {
+#        "now": "0"
+#      }
+#    },
+#    "sda": {
+#      "bytes": {
+#        "read": "1764546560",
+#        "written": "71720772096"
+#      },
+#      "io": {
+#        "now": "0"
+#      }
+#    },
+#    "sr0": {
+#      "bytes": {
+#        "read": "0",
+#        "written": "0"
+#      },
+#      "io": {
+#        "now": "0"
+#      }
+#    }
+#  },
+#  "filesystem": {
+#    "/dev/sda1": {
+#      "avail": "32145022976",
+#      "files": "41936640",
+#      "free": "32145022976",
+#      "readonly": "0",
+#      "size": "42932649984"
+#    }
+#  }
+#}
+
+    end
+
+    return result
+
+  end
+
+
   def ParseResult_Runtime( data = {} )
 
     result    = []
@@ -2067,17 +2249,29 @@ class CollecdPlugin
 
           case service
           when 'mongodb'
+
             if( result.is_a?( Hash ) )
               graphiteOutput.push( self.ParseResult_mongoDB( result ) )
             else
               @log.error( 'resultdata is not a Hash (mongodb)' )
             end
+
           when 'mysql'
+
             if( result.is_a?( Hash ) )
               graphiteOutput.push( self.ParseResult_mySQL( result ) )
             else
               @log.error( 'resultdata is not a Hash (mysql)' )
             end
+
+          when 'node_exporter'
+
+            if( result.is_a?( Hash ) )
+              graphiteOutput.push( self.ParseResult_nodeExporter( result ) )
+            else
+              @log.error( 'resultdata is not a Hash (node_exporter)' )
+            end
+
           else
 
             if( result != nil )
@@ -2117,7 +2311,6 @@ class CollecdPlugin
 
             case service
             when 'mongodb'
-
               if( results.class.to_s == 'Hash' )
                 graphiteOutput.push( self.ParseResult_mongoDB( results ) )
               end
