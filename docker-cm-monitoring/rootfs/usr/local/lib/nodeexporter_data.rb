@@ -245,6 +245,8 @@ class NodeExporter
 
           type, device, fstype, mountpoint, mes = parts.captures
 
+          device.gsub!( '/dev/', '' )
+
           hash[ device.to_s ] ||= {}
           hash[ device.to_s ][ type.to_s ] ||= {}
           hash[ device.to_s ][ type.to_s ] = sprintf( "%f", mes.to_s ).sub(/\.?0*$/, "" )

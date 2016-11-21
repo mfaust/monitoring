@@ -628,50 +628,55 @@ class CollecdPlugin
             point = d[m] ? d[m] : nil
 
             if( point != nil )
-              result.push( sprintf( format, @Host, @Service, 'cpu', c, m, @interval, point ) )
+              result.push( sprintf( format, @Host, @Service, c, 'cpu', m, @interval, point ) )
             end
           end
         end
       end
 
-#{
-#  "cpu": {
-#    "cpu0": {
-#      "guest": "0",
-#      "idle": "1.08885848e+06",
-#      "iowait": "485.29",
-#      "irq": "0",
-#      "nice": "0.19",
-#      "softirq": "1045.04",
-#      "steal": "0",
-#      "system": "9539.69",
-#      "user": "40843.14"
-#    },
-#    "cpu1": {
-#      "guest": "0",
-#      "idle": "1.07666644e+06",
-#      "iowait": "415.88",
-#      "irq": "0",
-#      "nice": "0.19",
-#      "softirq": "1628.07",
-#      "steal": "0",
-#      "system": "12317.96",
-#      "user": "48256.33"
-#    }
-#  },
-#  "load": {
-#    "shortterm": "0.1",
-#    "longterm": "0.13",
-#    "midterm": "0.1"
-#  },
-#  "memory": {
-#    "MemAvailable": "3492958208",
-#    "MemFree": "378605568",
-#    "MemTotal": "10317643776",
-#    "SwapCached": "0",
-#    "SwapFree": "0",
-#    "SwapTotal": "0"
-#  },
+
+      if( load != nil )
+
+        ['shortterm','midterm','longterm'].each do |m|
+
+          point = d[m] ? d[m] : nil
+
+          if( point != nil )
+            result.push( sprintf( format, @Host, @Service, 'load', 'load', m, @interval, point ) )
+          end
+        end
+      end
+
+
+      if( memory != nil )
+
+        ['MemAvailable','MemFree','MemTotal','SwapTotal','SwapFree','SwapCached'].each do |m|
+
+          point = d[m] ? d[m] : nil
+
+          if( point != nil )
+            result.push( sprintf( format, @Host, @Service, 'memory', 'memory', m, @interval, point ) )
+          end
+        end
+      end
+
+
+      if( filesystem != nil )
+
+        filesystem.each do |f,d|
+
+          ['avail','files','free','size'].each do |m|
+
+            point = d[m] ? d[m] : nil
+
+            if( point != nil )
+              result.push( sprintf( format, @Host, @Service, 'filesystem', c, m, @interval, point ) )
+            end
+          end
+        end
+      end
+
+
 #  "network": {
 #    "docker0": {
 #      "receive": {
