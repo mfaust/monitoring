@@ -92,7 +92,7 @@ module Sinatra
 
     # -----------------------------------------------------------------------------
 
-    before '/v2/config/:host' do
+    before '/v2/*/:host' do
       request.body.rewind
       @request_paylod = request.body.read
     end
@@ -190,6 +190,31 @@ module Sinatra
       result.to_json
 
     end
+
+    #
+    # curl -X POST http://localhost/api/v2/host/foo -d '{ "ports": [200,300] }'
+    #
+    post '/v2/host/:host' do
+
+      host   = params[:host]
+      puts @request_paylod.inspect
+
+#      {
+#        "discovery": false,
+#        "icinga2": false,
+#        "grafana": false,
+#        "services": [
+#          "cae-live-1",
+#          "content-managment-server": { "port": 41000 }
+#        ],
+#        "tags": [
+#          "development",
+#          "git-0000000"
+#        ]
+#      }
+
+    end
+
 
 
 #     # create new host

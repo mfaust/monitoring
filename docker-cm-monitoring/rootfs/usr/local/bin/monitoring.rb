@@ -164,6 +164,8 @@ class Monitoring
     status       = 500
     message      = 'initialize error'
 
+    current = Hash.new()
+
     hash = Hash.new()
 
     if( host.to_s != '' )
@@ -178,10 +180,17 @@ class Monitoring
 
       hash = JSON.parse( payload )
 
-      if( File.exist?( sprintf( '%s/config.json', directory ) ) == true )
+      localConfig = sprintf( '%s/config.json', directory )
 
+      if( File.exist?( localConfig ) == true )
+
+        data    = File.read( localConfig )
+
+        current = JSON.parse( data )
 
       end
+
+      hash = current.merge( payload )
 
       status  = 200
       message = hash
