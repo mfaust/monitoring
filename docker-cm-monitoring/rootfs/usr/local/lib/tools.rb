@@ -113,7 +113,7 @@ end
       ip = r.getaddress( name )
     rescue => e
       @log.debug( e )
-      ip = Socket.gethostbyname(name).first
+      ip = Socket.gethostbyname( name ).first
     end
 
     return ip
@@ -125,7 +125,7 @@ def ip( host )
     ip = Socket.gethostbyname( host ).first
   rescue => e
     @log.debug( e )
-    ip = name
+    ip = host
   end
 
   return ip

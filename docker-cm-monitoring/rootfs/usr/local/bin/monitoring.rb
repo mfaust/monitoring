@@ -154,6 +154,56 @@ class Monitoring
 
   end
 
+  #
+  # curl -X POST http://localhost/api/v2/config/foo -d '{ "ports": [200,300] }'
+  #
+  def configureHost( host, payload )
+
+    experimental = false
+
+    status       = 500
+    message      = 'initialize error'
+
+    current = Hash.new()
+
+    hash = Hash.new()
+
+    if( host.to_s != '' )
+
+      directory = sprintf( '%s/%s', @cacheDir, host )
+
+      if( !File.exist?( directory ) )
+        Dir.mkdir( directory )
+      end
+
+      @log.debug( payload )
+
+      hash = JSON.parse( payload )
+
+      localConfig = sprintf( '%s/config.json', directory )
+
+      if( File.exist?( localConfig ) == true )
+
+        data    = File.read( localConfig )
+
+        current = JSON.parse( data )
+
+      end
+
+      hash = current.merge( payload )
+
+      status  = 200
+      message = hash
+
+    end
+
+    return {
+      :status  => status,
+      :message => message
+    }
+
+  end
+
 
   def addHost( host, force = false )
 

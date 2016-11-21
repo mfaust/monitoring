@@ -91,6 +91,13 @@ module Sinatra
     end
 
     # -----------------------------------------------------------------------------
+
+    before '/v2/*/:host' do
+      request.body.rewind
+      @request_paylod = request.body.read
+    end
+
+    # -----------------------------------------------------------------------------
     # GET
 
     # prints out a little help about our ReST-API
@@ -164,13 +171,50 @@ module Sinatra
     # delete EVERY dashboards and checks before create the host
     #  including icinga2 and grafana
     post '/h/:host/force' do
-      content_type :json
 
       result = m.addHost( params[:host], true )
 
       response.status = result[:status]
       result.to_json
     end
+
+    #
+    # curl -X POST http://localhost/api/v2/config/foo -d '{ "ports": [200,300] }'
+    #
+    post '/v2/config/:host' do
+
+      host   = params[:host]
+      result = m.configureHost( host, @request_paylod )
+
+      response.status = result[:status]
+      result.to_json
+
+    end
+
+    #
+    # curl -X POST http://localhost/api/v2/host/foo -d '{ "ports": [200,300] }'
+    #
+    post '/v2/host/:host' do
+
+      host   = params[:host]
+      puts @request_paylod.inspect
+
+#      {
+#        "discovery": false,
+#        "icinga2": false,
+#        "grafana": false,
+#        "services": [
+#          "cae-live-1",
+#          "content-managment-server": { "port": 41000 }
+#        ],
+#        "tags": [
+#          "development",
+#          "git-0000000"
+#        ]
+#      }
+
+    end
+
 
 
 #     # create new host

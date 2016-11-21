@@ -148,6 +148,9 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./share/resolv.conf:/etc/resolv.conf:ro
+      - ./share/monitoring/etc/cm-service.yaml:/etc/cm-service.yaml
+      - ./share/monitoring/etc/cm-application.yaml:/etc/cm-application.yaml
+      - ./share/monitoring/etc/cm-monitoring.yaml:/etc/cm-monitoring.yaml
       - ./data/monitoring:/var/cache/monitoring
       - ./data:/srv
     links:
