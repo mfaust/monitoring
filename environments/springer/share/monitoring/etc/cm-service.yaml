@@ -114,7 +114,8 @@ services:
     uapi_cache: true
     application:
     - caefeeder
-    
+    template: caefeeder-live
+
   cae-preview:
     description: CAE Preview
     port: 40999
@@ -135,6 +136,7 @@ services:
     - cae
     - caches
     - caches-ibm
+    template: cae-preview
 
   studio:
     description: Studio
@@ -187,4 +189,4 @@ services:
     application:
     - cae
     - caches
-
+    template: cae-live

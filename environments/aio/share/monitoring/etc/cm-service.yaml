@@ -96,6 +96,7 @@ services:
     uapi_cache: true
     application:
     - caefeeder
+    template: caefeeder
 
   caefeeder-live:
     description: CAEFeeder Live
@@ -115,6 +116,7 @@ services:
     - cae
     - caches
     - caches-ibm
+    template: cae
 
   studio:
     description: Studio
@@ -159,7 +161,7 @@ services:
     - contentserver
 
   cae-live-1:
-    description: CAE Live 1
+    description: CAE Live
     port: 42199
     cap_connection: true
     uapi_cache: true
@@ -168,3 +170,5 @@ services:
     - cae
     - caches
     - caches-ibm
+    template: cae
+

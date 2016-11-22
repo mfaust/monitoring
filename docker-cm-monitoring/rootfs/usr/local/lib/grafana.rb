@@ -46,7 +46,7 @@ class Grafana
     file           = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
     file.sync      = true
     @log           = Logger.new(file, 'weekly', 1024000)
-    @log.level     = Logger::DEBUG
+    @log.level     = Logger::INFO
     @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
     @log.formatter = proc do |severity, datetime, progname, msg|
       "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
@@ -70,8 +70,8 @@ class Grafana
 
     end
 
-    version              = '1.2.0'
-    date                 = '2016-10-04'
+    version              = '1.3.0'
+    date                 = '2016-11-22'
 
     @log.info( '-----------------------------------------------------------------' )
     @log.info( ' CoreMedia - Grafana Dashboard Management' )
@@ -306,68 +306,93 @@ class Grafana
       services       = discoveryJson.keys
       @log.debug( "Found services: #{services}" )
 
-      if( @supportMemcache == true )
+      # fist, we must remove strange services
+      servicesTmp = *services
+      servicesTmp.delete( 'mysql' )
+      servicesTmp.delete( 'postgres' )
+      servicesTmp.delete( 'mongodb' )
+      servicesTmp.delete( 'node_exporter' )
+      servicesTmp.delete( 'demodata-generator' )
 
-        # fist, we must remove strange services
-        servicesTmp = *services
-        servicesTmp.delete( 'mysql' )
-        servicesTmp.delete( 'postgres' )
-        servicesTmp.delete( 'mongodb' )
-        servicesTmp.delete( 'demodata-generator' )
-
-        memcacheKey = cacheKey( 'result', host, servicesTmp.last )
-
-        @monitoringResultJson = getJsonFromFile( memcacheKey, true )
-
-      else
-        @monitoringResultJson = getJsonFromFile( @monitoringResultFile )
-      end
-
-      if ( @monitoringResultJson == nil )
-        @log.error( "No monitoring.result file found. Exiting." )
-        return nil
-      end
+#       # wait for the last service result in our memcahce
+#       memcacheKey = cacheKey( 'result', host, servicesTmp.last )
+#
+#       @monitoringResultJson = getJsonFromFile( memcacheKey, true )
+#
+#       if ( @monitoringResultJson == nil )
+#         @log.error( "No monitoring.result file found. Exiting." )
+#         return nil
+#       end
 
       # determine type of service from mergedHostData.json file, e.g. cae, caefeeder, contentserver
-      mergedHostJson = getJsonFromFile( @mergedHostFile )
+      mergedHostJson = self.getJsonFromFile( @mergedHostFile )
 
       services.each do |service|
 
         serviceTemplate         = nil
         additionalTemplatePaths = Array.new()
 
-#         @log.debug("Searching templates paths for service: #{service}")
+#         @log.debug( ',---------------------------------------------------------' )
+#         @log.debug( sprintf( 'service: %s', service ) )
 
+        description    = discoveryJson.dig( service, 'description' )
+        template       = discoveryJson.dig( service, 'template' )
+        memcacheKey    = cacheKey( 'result', host, service )
         # cae-live-1 -> cae-live
-        serviceName = removePostfix( service )
+        serviceName    = removePostfix( service )
+        normalizedName = normalizeService( service )
 
-        # get templates for service
-        serviceTemplate = self.getTemplateForService( serviceName )
+#         @log.debug( sprintf( 'description: %s', description ) )
+#         @log.debug( sprintf( 'memcacheKey: %s', memcacheKey ) )
+#         @log.debug( sprintf( 'custom template: %s', template ) )
+#         @log.debug( sprintf( 'service Name: %s', serviceName ) )
+#         @log.debug( sprintf( 'normalized Name: %s', normalizedName ) )
+
+#         @log.debug( '+---------------------------------------------------------' )
+#         @log.debug( "Searching templates paths for service: #{service}" )
+
+        if( template != nil )
+
+          serviceTemplate = self.getTemplateForService( template )
+        else
+          # get templates for service
+          serviceTemplate = self.getTemplateForService( serviceName )
+        end
+#         @log.debug( sprintf( ' => %s', serviceTemplate ) )
+#         @log.debug( '+---------------------------------------------------------' )
 
         if( ! ['mongodb', 'mysql', 'postgres'].include?( serviceName ) )
           additionalTemplatePaths.push( *self.getTemplateForService( 'tomcat' ) )
         end
 
         # get templates for service type
-        if( mergedHostJson != nil )
-
-          # not longer needed
-#          serviceType = mergedHostJson[service]["application"]
-#          if( serviceType )
-#            additionalTemplatePaths.push( *self.getTemplatePathsForServiceType( serviceType ) )
-#          end
-        else
-          @log.error( sprintf( 'file %s doesnt exist', @mergedHostFile ) )
-        end
-
+#         if( mergedHostJson != nil )
+#
+#           # not longer needed
+# #          serviceType = mergedHostJson[service]["application"]
+# #          if( serviceType )
+# #            additionalTemplatePaths.push( *self.getTemplatePathsForServiceType( serviceType ) )
+# #          end
+#         else
+#           @log.error( sprintf( 'file %s doesnt exist', @mergedHostFile ) )
+#         end
 
         if( ! serviceTemplate.to_s.empty? )
 
           @log.debug( sprintf( "Found Template paths: %s, %s" , serviceTemplate , additionalTemplatePaths ) )
-          self.generateServiceTemplate( serviceName, serviceTemplate.to_s, additionalTemplatePaths )
+
+          options = {
+            :description => description,
+            :serviceName => serviceName,
+            :normalizedName => normalizedName,
+            :serviceTemplate => serviceTemplate,
+            :additionalTemplatePaths => additionalTemplatePaths
+          }
+
+          self.generateServiceTemplate( serviceName, options )
 
         end
-
+        @log.debug( '`---------------------------------------------------------' )
       end
 
 
@@ -878,9 +903,16 @@ class Grafana
   end
 
 
-  def generateServiceTemplate( serviceName, serviceTemplate, additionalTemplatePaths )
+  def generateServiceTemplate( serviceName, options = {} )
 
-    @log.info( sprintf( 'Creating dashboard for %s', serviceName ) )
+    @log.info( sprintf( 'Creating dashboard for \'%s\'', serviceName ) )
+    @log.debug( options )
+
+    description             = options[:description]             ? options[:description]             : nil
+    serviceName             = options[:serviceName]             ? options[:serviceName]             : nil
+    normalizedName          = options[:normalizedName]          ? options[:normalizedName]          : nil
+    serviceTemplate         = options[:serviceTemplate]         ? options[:serviceTemplate]         : nil
+    additionalTemplatePaths = options[:additionalTemplatePaths] ? options[:additionalTemplatePaths] : nil
 
     @log.debug( sprintf( '  - template %s', File.basename( serviceTemplate ).strip ) )
 
@@ -942,7 +974,12 @@ class Grafana
 
     templateJson['dashboard']['annotations'] = JSON.parse( annotations )
 
-    self.sendTemplateToGrafana( JSON.generate( templateJson ), normalizeService( serviceName ) )
+    json = JSON.generate( templateJson )
+
+    json.gsub!( '%DESCRIPTION%', description )
+    json.gsub!( '%SERVICE%'    , normalizedName )
+
+    self.sendTemplateToGrafana( json, normalizedName )
 
   end
 
