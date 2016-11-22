@@ -106,8 +106,8 @@ end
         returnValue = wait_thr.value
 
         if( returnValue == 0 )
-          line = stdout.gets
-          host = line[0...-2]
+          host = stdout.gets
+#          host = line[0...-2]
         end
       end
 
