@@ -1,0 +1,14 @@
+{
+  "solr-master": {
+    "port": 45099,
+    "description": "Solr Master",
+    "cores": [
+      "live",
+      "preview",
+      "studio"
+    ],
+    "application": [
+      "solr"
+    ]
+  }
+}
