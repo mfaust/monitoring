@@ -106,6 +106,12 @@ end
 
   def dnsResolve( name )
 
+    # dig +nocmd $(hostname -f) +noall +answer
+    # http://stackoverflow.com/questions/17137914/rescuing-bash-system-stderr-in-ruby
+    # http://ryanselk.com/2016/02/24/dig-in-ruby-2-3
+    # http://stackoverflow.com/questions/4650636/forming-sanitary-shell-commands-or-system-calls-in-ruby
+
+
     require 'resolve/hostname'
 
     begin
