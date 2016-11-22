@@ -178,57 +178,6 @@ module Sinatra
       result.to_json
     end
 
-    #
-    # curl -X POST http://localhost/api/v2/config/foo -d '{ "ports": [200,300] }'
-    #
-    post '/v2/config/:host' do
-
-      host   = params[:host]
-      result = m.configureHost( host, @request_paylod )
-
-      response.status = result[:status]
-      result.to_json
-
-    end
-
-    #
-    # curl -X POST http://localhost/api/v2/host/foo -d '{ "ports": [200,300] }'
-    #
-    post '/v2/host/:host' do
-
-      host   = params[:host]
-      puts @request_paylod.inspect
-
-#      {
-#        "discovery": false,
-#        "icinga2": false,
-#        "grafana": false,
-#        "services": [
-#          "cae-live-1",
-#          "content-managment-server": { "port": 41000 }
-#        ],
-#        "tags": [
-#          "development",
-#          "git-0000000"
-#        ]
-#      }
-
-    end
-
-
-
-#     # create new host
-#     #  including icinga2 and grafana
-#     post '/h/:host/:tags' do
-#       content_type :json
-#
-#       tags   = params[:tags]
-#       result = m.addHost( params[:host], tags )
-#
-#       response.status = result[:status]
-#       result.to_json
-#     end
-
     # create new group of hosts
     post '/g/:hosts' do
       content_type :json
