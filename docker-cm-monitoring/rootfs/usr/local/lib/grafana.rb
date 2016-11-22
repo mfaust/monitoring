@@ -90,7 +90,15 @@ class Grafana
 
   def prepare( host )
 
-    @shortHostname        = self.shortHostname( host )
+    @log.debug( sprintf(  'prepare( %s )', host ) )
+
+    hostInfo = hostResolve( host )
+
+    ip    = hostInfo[:ip]    ? hostInfo[:ip]    : nil # dnsResolve( host )
+    short = hostInfo[:short] ? hostInfo[:short] : nil
+    long  = hostInfo[:long]  ? hostInfo[:long]  : nil
+
+    @shortHostname        = short
     @grafanaHostname      = host.gsub( '.', '-' )
 
     @discoveryFile        = sprintf( '%s/%s/discovery.json'         , @cacheDirectory, host )
@@ -141,17 +149,18 @@ class Grafana
   end
 
 
-  def shortHostname( hostname )
-
-    if( ! isIp?( hostname ) )
-      shortHostname   = hostname.split( '.' ).first
-    else
-      shortHostname   = hostname
-    end
-
-    return shortHostname
-
-  end
+  # OBSOLETE
+#   def shortHostname( hostname )
+#
+#     if( ! isIp?( hostname ) )
+#       shortHostname   = hostname.split( '.' ).first
+#     else
+#       shortHostname   = hostname
+#     end
+#
+#     return shortHostname
+#
+#   end
 
 
   def supportMbean?( data, service, mbean, key = nil )
@@ -385,7 +394,7 @@ class Grafana
 
     end
 
-    dashboards = self.searchDashboards( host )
+    dashboards = self.searchDashboards( @shortHostname )
     count      = 0
 
     if( dashboards != false )
@@ -428,7 +437,9 @@ class Grafana
       return result
     end
 
-    dashboards = self.searchDashboards( host )
+    self.prepare( host )
+
+    dashboards = self.searchDashboards( @shortHostname )
 
     if( dashboards != false )
 
@@ -469,6 +480,7 @@ class Grafana
                 # 401 – Unauthorized
                 # 412 – Precondition failed
                 @log.error( sprintf( ' [%s] - Error', responseCode ) )
+                @log.error( response.body )
               end
             end
 
@@ -501,7 +513,7 @@ class Grafana
   # list dashboards with tag
   def searchDashboards( tag )
 
-    @log.debug( sprintf( 'Search dashboards with tag %s', tag ) )
+    @log.debug( sprintf( 'Search dashboards with tag \'%s\'', tag ) )
 
     uri = URI( sprintf( '%s/api/search?query=&tag=%s', @grafanaURI, tag ) )
 
@@ -531,6 +543,7 @@ class Grafana
         # 401 – Unauthorized
         # 412 – Precondition failed
         @log.error( sprintf( ' [%s] - Error for search Dashboards', responseCode ) )
+        @log.error( response.body )
       end
 
     end
@@ -550,7 +563,7 @@ class Grafana
   end
 
 
-  def listDashboards( tag )
+  def listDashboards( host )
 
     if( self.checkGrafana?() == false )
 
@@ -562,10 +575,12 @@ class Grafana
       return result
     end
 
-    data = self.searchDashboards( tag )
+    self.prepare( host )
+
+    data = self.searchDashboards( @shortHostname )
 
     data.each do |d|
-      d.gsub!( sprintf( 'db/%s-', tag )  ,'' )
+      d.gsub!( sprintf( 'db/%s-', @shortHostname ), '' )
     end
 
     return {
@@ -970,7 +985,8 @@ class Grafana
       request.add_field('Content-Type', 'application/json')
       request.basic_auth( @grafanaAPIUser, @grafanaAPIPass )
       request.body = templateFile
-      response     = http.request request
+
+      response     = http.request( request )
       responseCode = response.code.to_i
 
       # TODO
@@ -981,7 +997,8 @@ class Grafana
         # 401 – Unauthorized
         # 412 – Precondition failed
         @log.error( sprintf( ' [%s] - Error for sendTemplateToGrafana', responseCode ) )
-        @log.error( sprintf( '   templateFile: %s', templateFile ) )
+        @log.error( response.body )
+#        @log.error( sprintf( '   templateFile: %s', templateFile ) )
         @log.error( sprintf( '   serviceName : %s', serviceName ) )
       end
 
@@ -1081,7 +1098,7 @@ class Grafana
         grafanaHost.gsub( '.', '-' )
 
         templateRows.each do |row|
-          row.gsub!( '%SHORTHOST%', self.shortHostname( host ) )
+          row.gsub!( '%SHORTHOST%', @shortHostname )
           row.gsub!( '%HOST%', grafanaHost )
         end
 
@@ -1092,7 +1109,7 @@ class Grafana
             "height": "25px",
             "panels": [
               {
-                "content": "<h2><left><bold>#{self.shortHostname(host)}</bold></left></h2>",
+                "content": "<h2><left><bold>#{@shortHostname}</bold></left></h2>",
                 "editable": true,
                 "error": false,
                 "id": 70,
@@ -1156,8 +1173,8 @@ class Grafana
     tags       = '"overview"'
 
     hosts.each do |host|
-      shortHosts = sprintf( '%s %s'   , shortHosts, self.shortHostname( host ) )
-      tags       = sprintf( '%s, "%s"', tags      , self.shortHostname( host ) )
+      shortHosts = sprintf( '%s %s'   , shortHosts, @shortHostname )
+      tags       = sprintf( '%s, "%s"', tags      , @shortHostname )
     end
 
     if hosts.length > 1

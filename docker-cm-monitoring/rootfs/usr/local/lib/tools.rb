@@ -86,6 +86,54 @@ end
   end
 
 
+  # return some Information about given Hostname
+  def hostResolve( host )
+
+    require 'ipaddress'
+    require 'open3'
+
+    line = nil
+    long  = nil
+    short = nil
+    ip    = nil
+
+    if( IPAddress.valid?( host ) )
+
+      cmd = sprintf( 'dig -x %s +short', host )
+
+      Open3.popen3( cmd ) do |stdin, stdout, stderr, wait_thr|
+        line = stdout.gets
+      end
+
+      host = line[0...-2]
+    end
+
+    line  = nil
+
+    cmd   = sprintf( 'host %s', host )
+
+    Open3.popen3( cmd ) do |stdin, stdout, stderr, wait_thr|
+     line = stdout.read
+    end
+
+    if( line != nil )
+
+      parts = line.split( ' ' )
+
+      long  = parts.first.strip
+      ip    = parts.last.strip
+      short = long.split('.').first
+
+    end
+
+    return {
+      :ip    => ip,
+      :short => short,
+      :long  => long
+    }
+
+  end
+
 
   # check if Node exists (simple ping)
   # result @bool
@@ -104,26 +152,27 @@ end
   end
 
 
-  def dnsResolve( name )
-
-    # dig +nocmd $(hostname -f) +noall +answer
-    # http://stackoverflow.com/questions/17137914/rescuing-bash-system-stderr-in-ruby
-    # http://ryanselk.com/2016/02/24/dig-in-ruby-2-3
-    # http://stackoverflow.com/questions/4650636/forming-sanitary-shell-commands-or-system-calls-in-ruby
-
-
-    require 'resolve/hostname'
-
-    begin
-      r  = Resolve::Hostname.new( :ttl => 320, :resolver_ttl => 120, :system_resolver => true )
-      ip = r.getaddress( name )
-    rescue => e
-      @log.debug( e )
-      ip = Socket.gethostbyname( name ).first
-    end
-
-    return ip
-  end
+# OSOLETE - use hostResolve()
+#   def dnsResolve( name )
+#
+#     # dig +nocmd $(hostname -f) +noall +answer
+#     # http://stackoverflow.com/questions/17137914/rescuing-bash-system-stderr-in-ruby
+#     # http://ryanselk.com/2016/02/24/dig-in-ruby-2-3
+#     # http://stackoverflow.com/questions/4650636/forming-sanitary-shell-commands-or-system-calls-in-ruby
+#
+#
+#     require 'resolve/hostname'
+#
+#     begin
+#       r  = Resolve::Hostname.new( :ttl => 320, :resolver_ttl => 120, :system_resolver => true )
+#       ip = r.getaddress( name )
+#     rescue => e
+#       @log.debug( e )
+#       ip = Socket.gethostbyname( name ).first
+#     end
+#
+#     return ip
+#   end
 
 def ip( host )
 
@@ -148,9 +197,12 @@ end
 
 
 
-  def portOpen? ( name, port, seconds = 1 )
+  def portOpen? ( host, port, seconds = 1 )
 
-    ip = dnsResolve( name )
+    hostInfo = hostResolve( host )
+    ip       = hostInfo[:ip] ? hostInfo[:ip] : nil
+
+#    ip = dnsResolve( name )
 
     # => checks if a port is open or not on a remote host
     Timeout::timeout( seconds ) do

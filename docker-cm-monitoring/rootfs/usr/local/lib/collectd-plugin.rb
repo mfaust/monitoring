@@ -639,7 +639,7 @@ class CollecdPlugin
 
         ['shortterm','midterm','longterm'].each do |m|
 
-          point = d[m] ? d[m] : nil
+          point = load[m] ? load[m] : nil
 
           if( point != nil )
             result.push( sprintf( format, @Host, @Service, 'load', 'load', m, @interval, point ) )
@@ -652,7 +652,7 @@ class CollecdPlugin
 
         ['MemAvailable','MemFree','MemTotal','SwapTotal','SwapFree','SwapCached'].each do |m|
 
-          point = d[m] ? d[m] : nil
+          point = memory[m] ? memory[m] : nil
 
           if( point != nil )
             result.push( sprintf( format, @Host, @Service, 'memory', 'memory', m, @interval, point ) )
@@ -670,7 +670,7 @@ class CollecdPlugin
             point = d[m] ? d[m] : nil
 
             if( point != nil )
-              result.push( sprintf( format, @Host, @Service, 'filesystem', c, m, @interval, point ) )
+              result.push( sprintf( format, @Host, @Service, 'filesystem', f, m, @interval, point ) )
             end
           end
         end
