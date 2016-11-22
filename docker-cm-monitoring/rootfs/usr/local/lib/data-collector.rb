@@ -337,7 +337,7 @@ class DataCollector
     @log.debug( host )
     @log.debug( data )
 
-    port = data[:port] ? data[:port] : nil
+    port = data[:port] ? data[:port] : 9100
 
     if( port != nil )
 
@@ -348,8 +348,8 @@ class DataCollector
 
       require_relative 'nodeexporter_data'
       nodeData = NodeExporter.new()
-
-      data = JSON.parse( JSON.pretty_generate( nodeData.run( settings ) ) )
+      result   = JSON.generate( nodeData.run( settings ) )
+      data     = JSON.parse( result )
 
       return data
     end
@@ -768,6 +768,9 @@ class DataCollector
             result[v] = self.mongoDBData( hostname )
           when 'postgres'
             # Postgres
+          when 'node_exporter'
+            # node_exporter
+            result[v] = self.nodeExporterData( hostname )
           else
             # all others
           end

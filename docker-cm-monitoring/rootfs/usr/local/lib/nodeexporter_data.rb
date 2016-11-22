@@ -55,7 +55,7 @@ class NodeExporter
 
         core, mode, mes = parts.captures
 
-        mes.strip!
+        mes = sprintf( "%f", mes.to_s.strip ).sub(/\.?0*$/, "" )
 
         if( core != tmpCore )
           result[core] = { mode => mes }
@@ -245,6 +245,8 @@ class NodeExporter
 
           type, device, fstype, mountpoint, mes = parts.captures
 
+          device.gsub!( '/dev/', '' )
+
           hash[ device.to_s ] ||= {}
           hash[ device.to_s ][ type.to_s ] ||= {}
           hash[ device.to_s ][ type.to_s ] = sprintf( "%f", mes.to_s ).sub(/\.?0*$/, "" )
@@ -265,10 +267,10 @@ class NodeExporter
   def run( settings = {} )
 
     @host      = settings[:host]          ? settings[:host]          : nil
-    @port      = settings[:port]          ? settings[:port]          : nil
+    @port      = settings[:port]          ? settings[:port]          : 9100
 
-    puts @host
-    puts @port
+#    puts @host
+#    puts @port
 
     self.callService( )
 

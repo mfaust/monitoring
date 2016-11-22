@@ -435,11 +435,11 @@ class ServiceDiscovery
   def deleteHost( host )
 
     @log.info( sprintf( 'delete Host \'%s\'',  host ) )
-    dir_path  = sprintf( '%s/%s', @cacheDirectory, host )
+    chacheDirectory  = sprintf( '%s/%s', @cacheDirectory, host )
 
-    if( File.exist?( dir_path ) )
+    if( File.exist?( chacheDirectory ) )
 
-      FileUtils.rm_r( dir_path )
+      FileUtils.rm_r( chacheDirectory )
 
       @status  = 200
       @message = 'Host successful removed'
@@ -461,6 +461,31 @@ class ServiceDiscovery
 
     @log.info( "Adding host #{host}, force: #{force}")
 
+    # force delete
+    if( force == true )
+      self.deleteHost( host )
+    end
+
+    chacheDirectory  = sprintf( '%s/%s', @cacheDirectory, host )
+
+    if( !File.exist?( chacheDirectory ) )
+      Dir.mkdir( chacheDirectory )
+    end
+
+    discoveryFileName = 'discovery.json'
+
+    if( File.exist?( sprintf( '%s/%s', chacheDirectory, discoveryFileName ) ) == true )
+
+      status  = 409
+      message = 'Host already created'
+
+      return {
+        :status  => status,
+        :message => message
+      }
+    end
+
+
     # first, we check if our jolokia accessable
     if( ! jolokiaIsAvailable?() )
 
@@ -473,7 +498,9 @@ class ServiceDiscovery
       }
     end
 
-    ip = dnsResolve( host )
+    hostInfo = hostResolve( host )
+
+    ip = hostInfo[:ip] ? hostInfo[:ip] : nil # dnsResolve( host )
 
     # second, if the that we whant monitored, available
     if( isRunning?( ip ) == false )
@@ -485,35 +512,13 @@ class ServiceDiscovery
         :status  => status,
         :message => message
       }
-
     end
 
-    # force delete
-    if( force == true )
-      self.deleteHost( host )
-    end
-
-    dir_path  = sprintf( '%s/%s', @cacheDirectory, host )
-    file_name = 'discovery.json'
-
-    if( !File.exist?( dir_path ) )
-      Dir.mkdir( dir_path )
-    end
+    File.open( sprintf( '%s/host.json', chacheDirectory ) , 'w' ) { |f| f.write( JSON.pretty_generate( hostInfo ) ) }
 
     # our default known ports
     if( ports.empty? )
       ports = @scanPorts
-    end
-
-    if( File.exist?( sprintf( '%s/%s', dir_path, file_name ) ) == true )
-
-      status  = 409
-      message = 'Host already created'
-
-      return {
-        :status  => status,
-        :message => message
-      }
     end
 
     discover = Hash.new()
@@ -542,7 +547,7 @@ class ServiceDiscovery
     # merge discovered services with cm-services.yaml
     services = self.createHostConfig( services )
 
-    File.open( sprintf( '%s/%s', dir_path, file_name ) , 'w' ) { |f| f.write( JSON.pretty_generate( services ) ) }
+    File.open( sprintf( '%s/%s', chacheDirectory, discoveryFileName ) , 'w' ) { |f| f.write( JSON.pretty_generate( services ) ) }
 
     status  = 201
     message = 'Host successful created'
@@ -558,20 +563,23 @@ class ServiceDiscovery
 
   def refreshHost( host )
 
-    ip = dnsResolve( host )
+    status  = 200
+    message = 'initialize message'
 
-    # second, if the that we whant monitored, available
+    hostInfo = hostResolve( host )
+    ip       = hostInfo[:ip] ? hostInfo[:ip] : nil
+
+    # second, if the that we want monitored, available
     if( isRunning?( ip ) == false )
 
-      @status  = 400
-      @message = 'Host not available'
-
-      return {
-        :status  => @status,
-        :message => @message
-      }
+      status  = 400
+      message = 'Host not available'
     end
 
+    return {
+      :status  => status,
+      :message => message
+    }
 
   end
 
@@ -602,16 +610,16 @@ class ServiceDiscovery
 
     else
 
-      dir_path  = sprintf( '%s/%s', @cacheDirectory, host )
-      file_name = 'discovery.json'
+      chacheDirectory  = sprintf( '%s/%s', @cacheDirectory, host )
+      discoveryFileName = 'discovery.json'
 
-      file      = sprintf( '%s/%s', dir_path, file_name )
+      file      = sprintf( '%s/%s', chacheDirectory, discoveryFileName )
 
       if( File.exist?( file ) == true )
 
         data = File.read( file )
 
-        h              = hostInformation( file, File.basename( dir_path ) )
+        h              = hostInformation( file, File.basename( chacheDirectory ) )
         h['services' ] = JSON.parse( data )
 
         status   = 200
