@@ -500,7 +500,9 @@ class ServiceDiscovery
 
     hostInfo = hostResolve( host )
 
-    ip = hostInfo[:ip] ? hostInfo[:ip] : nil # dnsResolve( host )
+    ip            = hostInfo[:ip]    ? hostInfo[:ip]    : nil # dnsResolve( host )
+    shortHostName = hostInfo[:short] ? hostInfo[:short] : nil # dnsResolve( host )
+    longHostName  = hostInfo[:long]  ? hostInfo[:long]  : nil # dnsResolve( host )
 
     # second, if the that we whant monitored, available
     if( isRunning?( ip ) == false )
@@ -528,7 +530,7 @@ class ServiceDiscovery
 
     ports.each do |p|
 
-      open = portOpen?( ip, p )
+      open = portOpen?( shortHostName, p )
 
       @log.debug( sprintf( 'Host: %s | Port: %s   - status %s', host, p, open ) )
 

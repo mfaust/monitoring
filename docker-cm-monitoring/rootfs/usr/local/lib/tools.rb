@@ -99,6 +99,8 @@ end
 
     if( IPAddress.valid?( host ) )
 
+      @log.debug( 'IP Address, try reverse lookup' )
+
       cmd = sprintf( 'dig -x %s +short', host )
 
       Open3.popen3( cmd ) do |stdin, stdout, stderr, wait_thr|
@@ -106,12 +108,12 @@ end
         returnValue = wait_thr.value
 
         if( returnValue == 0 )
-          line = stdout.gets
-          host = line[0...-2]
+          host = stdout.gets
+#          host = line[0...-2]
+        else
+          @log.error( stderr.gets )
         end
       end
-
-
     end
 
     line  = nil
@@ -124,6 +126,8 @@ end
 
       if( returnValue == 0 )
         line = stdout.gets
+      else
+        @log.error( stderr.gets )
       end
     end
 
@@ -214,15 +218,15 @@ end
 
   def portOpen? ( host, port, seconds = 1 )
 
-    hostInfo = hostResolve( host )
-    ip       = hostInfo[:ip] ? hostInfo[:ip] : nil
+#     hostInfo = hostResolve( host )
+#     ip       = hostInfo[:ip] ? hostInfo[:ip] : nil
 
 #    ip = dnsResolve( name )
 
     # => checks if a port is open or not on a remote host
     Timeout::timeout( seconds ) do
       begin
-        TCPSocket.new( ip, port ).close
+        TCPSocket.new( host, port ).close
         return true
       rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH, SocketError => e
 #         @log.error( e )
