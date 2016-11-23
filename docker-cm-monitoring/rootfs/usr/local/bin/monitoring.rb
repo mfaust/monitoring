@@ -155,6 +155,27 @@ class Monitoring
   end
 
 
+  def checkAvailablility?( host )
+
+    hostInfo = hostResolve( host )
+
+    ip            = hostInfo[:ip]    ? hostInfo[:ip]    : nil # dnsResolve( host )
+    shortHostName = hostInfo[:short] ? hostInfo[:short] : nil # dnsResolve( host )
+    longHostName  = hostInfo[:long]  ? hostInfo[:long]  : nil # dnsResolve( host )
+
+    @log.info( sprintf( 'Host      : %s', host ) )
+    @log.info( sprintf( 'IP        : %s', ip ) )
+    @log.info( sprintf( 'short Name: %s', shortHostName ) )
+    @log.info( sprintf( 'long Name : %s', longHostName ) )
+
+    if( ip == nil || shortHostName != nil )
+      return false
+    else
+      return true
+    end
+
+  end
+
   def createCacheDirectory( host )
 
     directory = sprintf( '%s/%s', @cacheDir, host )
@@ -285,6 +306,15 @@ class Monitoring
     hash      = Hash.new()
 
     if( host.to_s != '' )
+
+      if( self.checkAvailablility?( host ) == false )
+
+        return {
+          :status  => 400,
+          :message => 'Host are not available (DNS Problem)'
+        }
+
+      end
 
       directory = self.createCacheDirectory( host )
 
@@ -450,6 +480,7 @@ class Monitoring
     }
 
   end
+
 
   def addHostV1( host, force = false )
 
