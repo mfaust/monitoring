@@ -173,9 +173,17 @@ module Sinatra
       result.to_json
     end
 
-
-
     # -----------------------------------------------------------------------------
+    # HOST
+    post '/v2/host/:host' do
+
+      host   = params[:host]
+      result = m.addHost( host, @request_paylod )
+
+      response.status = result[:status]
+      result.to_json
+
+    end
 
 
 

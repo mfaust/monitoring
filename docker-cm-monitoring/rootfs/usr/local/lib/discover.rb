@@ -129,8 +129,6 @@ class ServiceDiscovery
       exit 1
     end
 
-
-
   end
 
 
@@ -485,7 +483,6 @@ class ServiceDiscovery
       }
     end
 
-
     # first, we check if our jolokia accessable
     if( ! jolokiaIsAvailable?() )
 
@@ -518,10 +515,26 @@ class ServiceDiscovery
 
     File.open( sprintf( '%s/host.json', chacheDirectory ) , 'w' ) { |f| f.write( JSON.pretty_generate( hostInfo ) ) }
 
-    # our default known ports
-    if( ports.empty? )
-      ports = @scanPorts
+    # check our customized config
+    customConfig = sprintf( '%s/config.json', chacheDirectory )
+    if( File.exist?( customConfig ) )
+
+      data = JSON.parse( File.read( customConfig ) )
+
+      ports = data['ports'] ? data['ports'] : nil
+
+      if( ports == nil )
+        ports = @scanPorts
+      end
+    else
+
+      # our default known ports
+      if( ports.empty? )
+        ports = @scanPorts
+      end
     end
+
+    @log.debug( "use ports: #{ports}" )
 
     discover = Hash.new()
     services = Hash.new()
@@ -551,7 +564,7 @@ class ServiceDiscovery
 
     File.open( sprintf( '%s/%s', chacheDirectory, discoveryFileName ) , 'w' ) { |f| f.write( JSON.pretty_generate( services ) ) }
 
-    status  = 201
+    status  = 200
     message = 'Host successful created'
 
     @services = services
