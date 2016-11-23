@@ -3,7 +3,7 @@
 # 05.10.2016 - Bodo Schulz
 #
 #
-# v1.0.1
+# v2.x.x
 
 # -----------------------------------------------------------------------------
 
@@ -31,7 +31,7 @@ class Monitoring
     file.sync       = true
     @log            = Logger.new( file, 'weekly', 1024000 )
 #    @log = Logger.new( STDOUT )
-    @log.level      = Logger::INFO
+    @log.level      = Logger::DEBUG
     @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
     @log.formatter  = proc do |severity, datetime, progname, msg|
       "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
@@ -77,8 +77,8 @@ class Monitoring
       :graphitePath        => @graphitePath
     }
 
-    version              = '1.0.1'
-    date                 = '2016-10-05'
+    version              = '1.9.9'
+    date                 = '2016-11-22'
 
     @log.info( '-----------------------------------------------------------------' )
     @log.info( ' CoreMedia - Monitoring Service' )
@@ -151,6 +151,118 @@ class Monitoring
       @enabledGrafana   = services['grafana']   && services['grafana'] == true    ? true : false
       @enabledIcinga    = services['icinga2']   && services['icinga2'] == true    ? true : false
     end
+
+  end
+
+  #
+  # curl -X POST http://localhost/api/v2/config/foo -d '{ "ports": [200,300] }'
+  #
+  def writeHostConfiguration( host, payload )
+
+    status       = 500
+    message      = 'initialize error'
+
+    current = Hash.new()
+    hash    = Hash.new()
+
+    if( host.to_s != '' )
+
+      directory = sprintf( '%s/%s', @cacheDir, host )
+
+      if( !File.exist?( directory ) )
+        Dir.mkdir( directory )
+      end
+
+      hash = JSON.parse( payload )
+
+      localConfig = sprintf( '%s/config.json', directory )
+
+      if( File.exist?( localConfig ) == true )
+
+        data    = File.read( localConfig )
+        current = JSON.parse( data )
+
+      end
+
+      hash = current.merge( hash )
+
+      File.open( localConfig , 'w' ) { |f| f.write( JSON.pretty_generate( hash ) ) }
+
+      status  = 200
+      message = 'config successful written'
+
+    end
+
+    return {
+      :status  => status,
+      :message => message
+    }
+
+  end
+
+
+  def getHostConfiguration( host )
+
+    status       = 500
+    message      = 'initialize error'
+
+    if( host.to_s != '' )
+
+      directory   = sprintf( '%s/%s', @cacheDir, host )
+      localConfig = sprintf( '%s/config.json', directory )
+
+      if( File.exist?( localConfig ) == true )
+
+        data    = File.read( localConfig )
+        current = JSON.parse( data )
+
+        status  = 200
+        message = current
+      else
+
+        status  = 404
+        message = 'No configuration found'
+      end
+
+    end
+
+    return {
+      :status  => status,
+      :message => message
+    }
+
+  end
+
+
+  def removeHostConfiguration( host )
+
+    status       = 500
+    message      = 'initialize error'
+
+    if( host.to_s != '' )
+
+      directory   = sprintf( '%s/%s', @cacheDir, host )
+      localConfig = sprintf( '%s/config.json', directory )
+
+      if( File.exist?( localConfig ) == true )
+
+        FileUtils.rm( localConfig, :force => true )
+
+        status  = 200
+        message = 'configuration succesfull removed'
+      else
+
+        status  = 404
+        message = 'No configuration found'
+
+      end
+
+    end
+
+    return {
+      :status  => status,
+      :message => message
+    }
 
   end
 
