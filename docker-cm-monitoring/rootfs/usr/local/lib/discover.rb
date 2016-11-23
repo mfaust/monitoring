@@ -530,7 +530,7 @@ class ServiceDiscovery
 
     ports.each do |p|
 
-      open = portOpen?( shortHostName, p )
+      open = portOpen?( longHostName, p )
 
       @log.debug( sprintf( 'Host: %s | Port: %s   - status %s', host, p, open ) )
 
