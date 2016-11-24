@@ -207,7 +207,7 @@ module GraphiteAnnotions
 
     end
 
-
+    # OBSOLETE
     def nodeCreatedAnnotation( host )
 
       tag  = sprintf( '%s created', host )
@@ -217,7 +217,7 @@ module GraphiteAnnotions
 
     end
 
-
+    # OBSOLETE
     def nodeDestroyedAnnotation( host )
 
       tag  = sprintf( '%s destroyed', host )
@@ -227,7 +227,7 @@ module GraphiteAnnotions
 
     end
 
-
+    # OBSOLETE
     def loadTestStartAnnotation( host )
 
       tag  = sprintf( '%s loadtest', host )
@@ -237,6 +237,7 @@ module GraphiteAnnotions
 
     end
 
+    # OBSOLETE
     def loadTestStopAnnotation( host )
 
       tag  = sprintf( '%s loadtest', host )
@@ -246,7 +247,7 @@ module GraphiteAnnotions
 
     end
 
-
+    # OBSOLETE
     def startAnnotation( host, data )
 
       tag = sprintf( '%s start', host )
@@ -255,6 +256,7 @@ module GraphiteAnnotions
 
     end
 
+    # OBSOLETE
     def stopAnnotation( host, data )
 
       tag = sprintf( '%s stop', host )
