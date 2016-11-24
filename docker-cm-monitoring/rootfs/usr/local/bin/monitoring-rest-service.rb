@@ -112,31 +112,29 @@ module Sinatra
     end
 
     # currently not supported
-    get '/v2' do
-      content_type :json
+    get '/' do
 
-      result = m.listHost( nil )
-
-      response.status = result[:status]
-      result.to_json
-    end
-
-    # get information about given 'host'
-    get '/v2/:host' do
-      content_type :json
-
-      result = m.listHost( params[:host] )
-
-      response.status = result[:status]
-      result.to_json
+      send_file File.join( settings.public_folder, 'help' )
 
     end
+
+#     # get information about given 'host'
+#     get '/v2/:host' do
+#       content_type :json
+#
+#       result = m.listHost( params[:host] )
+#
+#       response.status = result[:status]
+#       result.to_json
+#
+#     end
 
     # -----------------------------------------------------------------------------
     # CONFIGURE
 
     #
-    # curl -X POST http://localhost/api/v2/config/foo -d '{ "ports": [200,300] }'
+    # curl -X POST http://localhost/api/v2/config/foo \
+    #  --data '{ "ports": [200,300] }'
     #
     post '/v2/config/:host' do
 
@@ -175,6 +173,11 @@ module Sinatra
 
     # -----------------------------------------------------------------------------
     # HOST
+
+    #
+    # curl -X POST http://localhost/api/v2/host/foo \
+    #  --data '{ "force": false, "grafana": true, "icinga": false }'
+    #
     post '/v2/host/:host' do
 
       host   = params[:host]
@@ -185,10 +188,39 @@ module Sinatra
 
     end
 
+    # get information about all hosts
+    get '/v2/host' do
 
+      result = m.listHost( nil, request.env )
+
+      response.status = result[:status]
+      result.to_json
+
+    end
+
+    # get information about given 'host'
+    get '/v2/host/:host' do
+
+      host   = params[:host]
+      result = m.listHost( host, request.env )
+
+      response.status = result[:status]
+      result.to_json
+
+    end
+
+    # remove named host from monitoring
+    delete '/v2/host/:host' do
+
+      host   = params[:host]
+      result = m.removeHost( host, @request_paylod )
+
+      response.status = result[:status]
+      result.to_json
+    end
 
     # -----------------------------------------------------------------------------
-    # DELETE
+    # ANNOTATIONS
 
 
 

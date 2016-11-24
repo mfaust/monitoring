@@ -608,6 +608,15 @@ class Grafana
       d.gsub!( sprintf( 'db/%s-', @shortHostname ), '' )
     end
 
+    if( data.count == 0 )
+      status = 204
+
+      return {
+        :status     => 204,
+        :message    => 'no Dashboards found'
+      }
+    end
+
     return {
       :status     => 200,
       :count      => data.count,

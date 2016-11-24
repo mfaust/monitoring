@@ -433,23 +433,28 @@ class ServiceDiscovery
   def deleteHost( host )
 
     @log.info( sprintf( 'delete Host \'%s\'',  host ) )
-    chacheDirectory  = sprintf( '%s/%s', @cacheDirectory, host )
 
-    if( File.exist?( chacheDirectory ) )
+    status  = 400
+    message = 'Hosts not exists'
 
-      FileUtils.rm_r( chacheDirectory )
+    cacheDirectory  = sprintf( '%s/%s', @cacheDirectory, host )
 
-      @status  = 200
-      @message = 'Host successful removed'
-    else
+    if( File.exist?( cacheDirectory ) )
 
-      @status  = 400
-      @message = 'Hosts not exists'
+      FileUtils.rm_r( cacheDirectory )
+
+#      # hmmm ... prepare our config.json or not?
+#      ['discovery.json','host.json','mergedHostData.json'].each do |f|
+#        FileUtils.rm( sprintf( '%s/%s', @cacheDirectory, f ) , :force => true )
+#      end
+
+      status  = 200
+      message = 'Host successful removed'
     end
 
     return {
-      :status  => @status,
-      :message => @message
+      :status  => status,
+      :message => message
     }
 
   end
@@ -464,15 +469,15 @@ class ServiceDiscovery
       self.deleteHost( host )
     end
 
-    chacheDirectory  = sprintf( '%s/%s', @cacheDirectory, host )
+    cacheDirectory  = sprintf( '%s/%s', @cacheDirectory, host )
 
-    if( !File.exist?( chacheDirectory ) )
-      Dir.mkdir( chacheDirectory )
+    if( !File.exist?( cacheDirectory ) )
+      Dir.mkdir( cacheDirectory )
     end
 
     discoveryFileName = 'discovery.json'
 
-    if( File.exist?( sprintf( '%s/%s', chacheDirectory, discoveryFileName ) ) == true )
+    if( File.exist?( sprintf( '%s/%s', cacheDirectory, discoveryFileName ) ) == true )
 
       status  = 409
       message = 'Host already created'
@@ -513,10 +518,10 @@ class ServiceDiscovery
       }
     end
 
-    File.open( sprintf( '%s/host.json', chacheDirectory ) , 'w' ) { |f| f.write( JSON.pretty_generate( hostInfo ) ) }
+    File.open( sprintf( '%s/host.json', cacheDirectory ) , 'w' ) { |f| f.write( JSON.pretty_generate( hostInfo ) ) }
 
     # check our customized config
-    customConfig = sprintf( '%s/config.json', chacheDirectory )
+    customConfig = sprintf( '%s/config.json', cacheDirectory )
     if( File.exist?( customConfig ) )
 
       data = JSON.parse( File.read( customConfig ) )
@@ -562,7 +567,7 @@ class ServiceDiscovery
     # merge discovered services with cm-services.yaml
     services = self.createHostConfig( services )
 
-    File.open( sprintf( '%s/%s', chacheDirectory, discoveryFileName ) , 'w' ) { |f| f.write( JSON.pretty_generate( services ) ) }
+    File.open( sprintf( '%s/%s', cacheDirectory, discoveryFileName ) , 'w' ) { |f| f.write( JSON.pretty_generate( services ) ) }
 
     status  = 200
     message = 'Host successful created'
@@ -625,16 +630,16 @@ class ServiceDiscovery
 
     else
 
-      chacheDirectory  = sprintf( '%s/%s', @cacheDirectory, host )
+      cacheDirectory  = sprintf( '%s/%s', @cacheDirectory, host )
       discoveryFileName = 'discovery.json'
 
-      file      = sprintf( '%s/%s', chacheDirectory, discoveryFileName )
+      file      = sprintf( '%s/%s', cacheDirectory, discoveryFileName )
 
       if( File.exist?( file ) == true )
 
         data = File.read( file )
 
-        h              = hostInformation( file, File.basename( chacheDirectory ) )
+        h              = hostInformation( file, File.basename( cacheDirectory ) )
         h['services' ] = JSON.parse( data )
 
         status   = 200

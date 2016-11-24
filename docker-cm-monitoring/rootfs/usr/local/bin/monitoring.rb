@@ -77,8 +77,8 @@ class Monitoring
       :graphitePath        => @graphitePath
     }
 
-    version              = '1.9.9'
-    date                 = '2016-11-22'
+    version              = '1.9.11'
+    date                 = '2016-11-24'
 
     @log.info( '-----------------------------------------------------------------' )
     @log.info( ' CoreMedia - Monitoring Service' )
@@ -168,13 +168,14 @@ class Monitoring
     @log.info( sprintf( 'short Name: %s', shortHostName ) )
     @log.info( sprintf( 'long Name : %s', longHostName ) )
 
-    if( ip == nil || shortHostName != nil )
+    if( ip == nil || shortHostName == nil )
       return false
     else
       return true
     end
 
   end
+
 
   def createCacheDirectory( host )
 
@@ -188,8 +189,7 @@ class Monitoring
 
   end
 
-  #
-  # curl -X POST http://localhost/api/v2/config/foo -d '{ "ports": [200,300] }'
+  # -- CONFIGURE ------------------------------------------------------------------------
   #
   def writeHostConfiguration( host, payload )
 
@@ -297,6 +297,8 @@ class Monitoring
   end
 
 
+  # -- HOST -----------------------------------------------------------------------------
+  #
   def addHost( host, payload )
 
     status    = 500
@@ -338,7 +340,8 @@ class Monitoring
 #          "development",
 #          "git-0000000"
 #        ],
-#        "annotation": true
+#        "annotation": true,
+#        "overview": true
 #      }
 
       force           = hash.keys.include?('force')      ? hash['force']      : false
@@ -346,12 +349,21 @@ class Monitoring
       enabledGrafana  = hash.keys.include?('grafana')    ? hash['grafana']    : @enabledGrafana
       enabledIcinga   = hash.keys.include?('icinga')     ? hash['icinga']     : @enabledIcinga
       annotation      = hash.keys.include?('annotation') ? hash['annotation'] : false
+      grafanaOverview = hash.keys.include?('overview')   ? hash['overview']   : false
       services        = hash['services']  ? hash['services']  : []
       tags            = hash['tags']      ? hash['tags']      : []
 
       if( force == true )
 
         @log.info( sprintf( 'remove %s from monitoring', host ) )
+
+        if( enableDiscovery == true )
+          discoveryResult  = @serviceDiscovery.deleteHost( host )
+          discoveryStatus  = discoveryResult[:status]
+          discoveryMessage = discoveryResult[:message]
+
+          @log.debug( "discovery: #{discoveryResult}" )
+        end
 
         if( enabledIcinga == true )
           icingaResult  = @icinga.deleteHost( host )
@@ -367,14 +379,6 @@ class Monitoring
           grafanaMessage = grafanaResult[:message]
 
           @log.debug( "grafana: #{grafanaResult}" )
-        end
-
-        if( enableDiscovery == true )
-          discoveryResult  = @serviceDiscovery.deleteHost( host )
-          discoveryStatus  = discoveryResult[:status]
-          discoveryMessage = discoveryResult[:message]
-
-          @log.debug( "discovery: #{discoveryResult}" )
         end
 
         @log.info( 'done' )
@@ -395,6 +399,11 @@ class Monitoring
 
         status  = discoveryStatus
         message = discoveryMessage
+
+        return {
+          :status  => status,
+          :message => message
+        }
 
       else
         # all fine (200)
@@ -467,8 +476,8 @@ class Monitoring
           :message    => discoveryMessage
         }
 
-        status  = 200
-        message = result
+#        status  = 200
+        return result
 
       end
 
@@ -480,6 +489,265 @@ class Monitoring
     }
 
   end
+
+
+  def listHost( host = nil, payload = nil )
+
+    status                = 500
+    message               = 'initialize error'
+
+    result                = Hash.new()
+    hash                  = Hash.new()
+
+    grafanaDashboardCount = 0
+    grafanaDashboards     = []
+
+
+    if( host.to_s != '' )
+
+      payload = payload.dig( 'rack.request.form_vars' )
+
+      if( payload != nil )
+        enableDiscovery = payload.keys.include?('discovery')  ? payload['discovery']  : @enabledDiscovery
+        enabledGrafana  = payload.keys.include?('grafana')    ? payload['grafana']    : @enabledGrafana
+        enabledIcinga   = payload.keys.include?('icinga')     ? payload['icinga']     : @enabledIcinga
+      else
+        enableDiscovery = @enabledDiscovery
+        enabledGrafana  = @enabledGrafana
+        enabledIcinga   = @enabledIcinga
+      end
+
+      result[host.to_sym] ||= {}
+
+      hostConfiguration        = self.getHostConfiguration( host )
+      hostConfigurationStatus  = hostConfiguration[:status]
+      hostConfigurationMessage = hostConfiguration[:message]
+
+      if( hostConfigurationStatus == 200 )
+        result[host.to_sym][:custom_config] = hostConfigurationMessage
+      end
+
+      if( enableDiscovery == true )
+        discoveryResult  = @serviceDiscovery.listHosts( host )
+        discoveryStatus  = discoveryResult[:status]
+        discoveryMessage = discoveryResult[:message]
+
+        @log.debug( "discovery: #{discoveryResult}" )
+
+        result[host.to_sym][:discovery] ||= {}
+
+        if( discoveryStatus == 200 )
+
+          discoverHost     = discoveryResult[:hosts]      ? discoveryResult[:hosts]      : nil
+          discoveryCreated = discoverHost[host][:created] ? discoverHost[host][:created] : 'unknown'
+          discoveryOnline  = discoverHost[host][:status]  ? discoverHost[host][:status]  : 'unknown'
+
+          result[host.to_sym][:discovery] = {
+            :status     => discoveryStatus,
+            :created    => discoveryCreated,
+            :online     => discoveryOnline
+          }
+        else
+          result[host.to_sym][:discovery] = {
+            :status     => discoveryStatus,
+            :message    => discoveryMessage
+          }
+        end
+      end
+
+
+      if( enabledIcinga == true )
+        icingaResult  = @icinga.listHost( host )
+        icingaStatus  = icingaResult[:status]
+        icingaMessage = icingaResult[:message]
+
+        @log.debug( "icinga: #{icingaResult}" )
+
+        result[host.to_sym][:icinga] ||= {}
+        result[host.to_sym][:icinga] = {
+          :status     => icingaStatus,
+          :message    => icingaMessage
+        }
+      end
+
+
+      if( enabledGrafana == true )
+        grafanaResult  = @grafana.listDashboards( host )
+        grafanaStatus  = grafanaResult[:status]
+        grafanaMessage = grafanaResult[:message]
+
+        @log.debug( "grafana: #{grafanaResult}" )
+
+        result[host.to_sym][:grafana] ||= {}
+
+        if( grafanaStatus == 200 )
+          grafanaDashboardCount = grafanaResult[:count]      ? grafanaResult[:count]      : 0
+          grafanaDashboards     = grafanaResult[:dashboards] ? grafanaResult[:dashboards] : []
+
+          result[host.to_sym][:grafana] = {
+            :status     => grafanaStatus,
+            :dashboards => grafanaDashboards,
+            :count      => grafanaDashboardCount
+          }
+        else
+
+          result[host.to_sym][:grafana] = {
+            :status     => grafanaStatus,
+            :message    => grafanaMessage
+          }
+
+        end
+      end
+
+      return result
+
+    else
+
+      discoveryResult  = @serviceDiscovery.listHosts( host )
+      discoveryStatus  = discoveryResult[:status]
+      discoveryMessage = discoveryResult[:message]
+
+
+      if( discoveryStatus != 400 )
+
+        array = Array.new()
+
+        hosts = discoveryResult[:hosts] ? discoveryResult[:hosts] : []
+
+        if( hosts.count != 0 )
+
+          hosts = hosts.reduce( :merge ).keys
+
+          hosts.each do |h|
+
+            r  = @serviceDiscovery.listHosts( h )
+            s  = r[:status] ? r[:status] : 400
+
+            if( s != 400 )
+
+              dHost        = r[:hosts] ? r[:hosts] : nil
+
+              if( dHost != nil )
+                discoveryCreated      = dHost[h][:created] ? dHost[h][:created] : 'unknown'
+                discoveryOnline       = dHost[h][:status]  ? dHost[h][:status]  : 'unknown'
+              end
+            end
+
+            hash  = {
+              h.to_s => { :discovery => { :status => s, :created => discoveryCreated, :online => discoveryOnline } }
+            }
+
+            array.push( hash )
+
+          end
+
+          discoveryResult = array.reduce( :merge )
+        end
+      end
+
+      return discoveryResult
+
+    end
+
+  end
+
+
+  def removeHost( host, payload )
+
+    status    = 500
+    message   = 'initialize error'
+
+    result    = Hash.new()
+    hash      = Hash.new()
+
+    if( host.to_s != '' )
+
+      directory = self.createCacheDirectory( host )
+
+      hash = JSON.parse( payload )
+
+      @log.debug( hash )
+
+      result[:request] = hash
+
+#      example:
+#      {
+#        "grafana": false,
+#        "annotation": true
+#      }
+
+      enabledGrafana  = hash.keys.include?('grafana')    ? hash['grafana']    : @enabledGrafana
+      enabledIcinga   = hash.keys.include?('icinga')     ? hash['icinga']     : @enabledIcinga
+      annotation      = hash.keys.include?('annotation') ? hash['annotation'] : false
+
+      @log.info( sprintf( 'remove %s from monitoring', host ) )
+
+      result[host.to_sym] ||= {}
+
+      if( enabledIcinga == true )
+        icingaResult  = @icinga.deleteHost( host )
+        icingaStatus  = icingaResult[:status]
+        icingaMessage = icingaResult[:message]
+
+        @log.debug( "icinga: #{icingaResult}" )
+
+#         icingaStatus  = 201
+#         icingaMessage = 'test message'
+
+        result[host.to_sym][:icinga] ||= {}
+        result[host.to_sym][:icinga] = {
+          :status     => icingaStatus,
+          :message    => icingaMessage
+        }
+
+      end
+
+      if( enabledGrafana == true )
+        grafanaResult  = @grafana.deleteDashboards( host )
+        grafanaStatus  = grafanaResult[:status]
+        grafanaMessage = grafanaResult[:message]
+
+        @log.debug( "grafana: #{grafanaResult}" )
+
+        result[host.to_sym][:grafana] = {
+          :status     => grafanaStatus,
+          :message    => grafanaMessage
+        }
+      end
+
+      discoveryResult  = @serviceDiscovery.deleteHost( host )
+      discoveryStatus  = discoveryResult[:status]
+      discoveryMessage = discoveryResult[:message]
+
+      @log.debug( "discovery: #{discoveryResult}" )
+
+      if( annotation == true && discoveryStatus == 200 )
+        self.addAnnotation( host, 'destroy' )
+      end
+
+      result[host.to_sym][:discovery] = {
+        :status     => discoveryStatus,
+        :message    => discoveryMessage
+      }
+
+      return result
+    end
+
+    return {
+      :status  => status,
+      :message => message
+    }
+
+
+  end
+
+
+  # -- ANNOTATIONS ----------------------------------------------------------------------
+  #
+
+
+
+
 
 
   def addHostV1( host, force = false )
@@ -652,7 +920,7 @@ class Monitoring
   end
 
 
-  def removeHost( host, force = false )
+  def removeHostV1( host, force = false )
 
     if( host.to_s != '' )
 
@@ -704,7 +972,7 @@ class Monitoring
   end
 
 
-  def listHost( host = nil )
+  def listHostV1( host = nil )
 
     if( host.to_s != '' )
 
