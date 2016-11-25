@@ -276,6 +276,59 @@ class Grafana
     return result
   end
 
+
+  def addAnnotations( templateJson )
+
+    # add or overwrite annotations
+    annotations = '
+      {
+        "list": [
+          {
+            "name": "created",
+            "enable": false,
+            "iconColor": "rgb(93, 227, 12)",
+            "datasource": "events",
+            "tags": "%HOST% created&set=intersection"
+          },
+          {
+            "name": "destoyed",
+            "enable": false,
+            "iconColor": "rgb(227, 57, 12)",
+            "datasource": "events",
+            "tags": "%HOST% destroyed&set=intersection"
+          },
+          {
+            "name": "Load Tests",
+            "enable": false,
+            "iconColor": "rgb(26, 196, 220)",
+            "datasource": "events",
+            "tags": "%HOST% loadtest&set=intersection"
+          },
+          {
+            "name": "Deployments",
+            "enable": false,
+            "iconColor": "rgb(176, 40, 253)",
+            "datasource": "events",
+            "tags": "%HOST% deployment&set=intersection"
+          }
+        ]
+      }
+    '
+
+    if( templateJson.is_a?( String ) )
+      templateJson = JSON.parse( templateJson )
+    end
+
+    annotation = templateJson.dig( 'dashboard', 'annotations' )
+
+    if( annotation != nil )
+      templateJson['dashboard']['annotations'] = JSON.parse( annotations )
+    end
+
+    return templateJson
+
+  end
+
   # add dashboards for a host
   def addDashbards( host, recreate = false )
 
@@ -744,7 +797,7 @@ class Grafana
   end
 
 
-  def getOverviewTemplateRows(services)
+  def getOverviewTemplateRows( services )
 
     rows = Array.new()
     dir  = Array.new()
@@ -774,6 +827,10 @@ class Grafana
         dir << part['service'].to_s.strip
       end
     end
+
+    # TODO
+    # add overwriten templates!
+
 
     intersect = dir & srv
 
@@ -945,43 +1002,7 @@ class Grafana
       end
     end
 
-    # add or overwrite annotations
-    annotations = '
-      {
-        "list": [
-          {
-            "name": "created",
-            "enable": true,
-            "iconColor": "rgb(93, 227, 12)",
-            "datasource": "events",
-            "tags": "%HOST% created&set=intersection"
-          },
-          {
-            "name": "destoyed",
-            "enable": true,
-            "iconColor": "rgb(227, 57, 12)",
-            "datasource": "events",
-            "tags": "%HOST% destroyed&set=intersection"
-          },
-          {
-            "name": "Load Tests",
-            "enable": true,
-            "iconColor": "rgb(26, 196, 220)",
-            "datasource": "events",
-            "tags": "%HOST% loadtest&set=intersection"
-          },
-          {
-            "name": "Deployments",
-            "enable": true,
-            "iconColor": "rgb(176, 40, 253)",
-            "datasource": "events",
-            "tags": "%HOST% deployment&set=intersection"
-          }
-        ]
-      }
-    '
-
-    templateJson['dashboard']['annotations'] = JSON.parse( annotations )
+    templateJson = self.addAnnotations( templateJson )
 
     json = JSON.generate( templateJson )
 
@@ -995,13 +1016,23 @@ class Grafana
 
   def addNamedTemplate( name )
 
+    @log.info( sprintf( 'add named dashboard for \'%s\'', name ) )
+
     filename = sprintf( '%s/%s', @templateDirectory, name )
 
     if( File.exist?( filename ) )
 
-      file = File.read( filename )
+#      file = File.read( filename )
+#      file = self.addAnnotations( file )
+#      file = JSON.generate( file )
 
-      self.sendTemplateToGrafana( file )
+      self.sendTemplateToGrafana(
+        JSON.generate(
+          self.addAnnotations(
+            File.read( filename )
+          )
+        )
+      )
 
     end
   end
