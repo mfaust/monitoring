@@ -222,7 +222,15 @@ module Sinatra
     # -----------------------------------------------------------------------------
     # ANNOTATIONS
 
+    post '/v2/annotation/:host' do
 
+      host   = params[:host]
+      result = m.addAnnotation( host, @request_paylod )
+
+      response.status = result[:status]
+      result.to_json
+
+    end
 
     # -----------------------------------------------------------------------------
 

@@ -318,13 +318,16 @@ class Monitoring
 
       end
 
-      directory = self.createCacheDirectory( host )
+      directory       = self.createCacheDirectory( host )
 
-      hash = JSON.parse( payload )
-
-      @log.debug( hash )
-
-      result[:request] = hash
+      force           = false
+      enableDiscovery = @enabledDiscovery
+      enabledGrafana  = @enabledGrafana
+      enabledIcinga   = @enabledIcinga
+      annotation      = false
+      grafanaOverview = false
+      services        = []
+      tags            = []
 
 #      example:
 #      {
@@ -344,14 +347,21 @@ class Monitoring
 #        "overview": true
 #      }
 
-      force           = hash.keys.include?('force')      ? hash['force']      : false
-      enableDiscovery = hash.keys.include?('discovery')  ? hash['discovery']  : @enabledDiscovery
-      enabledGrafana  = hash.keys.include?('grafana')    ? hash['grafana']    : @enabledGrafana
-      enabledIcinga   = hash.keys.include?('icinga')     ? hash['icinga']     : @enabledIcinga
-      annotation      = hash.keys.include?('annotation') ? hash['annotation'] : false
-      grafanaOverview = hash.keys.include?('overview')   ? hash['overview']   : false
-      services        = hash['services']  ? hash['services']  : []
-      tags            = hash['tags']      ? hash['tags']      : []
+      if( payload != '' )
+
+        hash = JSON.parse( payload )
+
+        result[:request] = hash
+
+        force           = hash.keys.include?('force')      ? hash['force']      : false
+        enableDiscovery = hash.keys.include?('discovery')  ? hash['discovery']  : @enabledDiscovery
+        enabledGrafana  = hash.keys.include?('grafana')    ? hash['grafana']    : @enabledGrafana
+        enabledIcinga   = hash.keys.include?('icinga')     ? hash['icinga']     : @enabledIcinga
+        annotation      = hash.keys.include?('annotation') ? hash['annotation'] : false
+        grafanaOverview = hash.keys.include?('overview')   ? hash['overview']   : false
+        services        = hash['services']  ? hash['services']  : []
+        tags            = hash['tags']      ? hash['tags']      : []
+      end
 
       if( force == true )
 
@@ -505,16 +515,16 @@ class Monitoring
 
     if( host.to_s != '' )
 
+      enableDiscovery = @enabledDiscovery
+      enabledGrafana  = @enabledGrafana
+      enabledIcinga   = @enabledIcinga
+
       payload = payload.dig( 'rack.request.form_vars' )
 
       if( payload != nil )
         enableDiscovery = payload.keys.include?('discovery')  ? payload['discovery']  : @enabledDiscovery
         enabledGrafana  = payload.keys.include?('grafana')    ? payload['grafana']    : @enabledGrafana
         enabledIcinga   = payload.keys.include?('icinga')     ? payload['icinga']     : @enabledIcinga
-      else
-        enableDiscovery = @enabledDiscovery
-        enabledGrafana  = @enabledGrafana
-        enabledIcinga   = @enabledIcinga
       end
 
       result[host.to_sym] ||= {}
@@ -664,21 +674,26 @@ class Monitoring
 
       directory = self.createCacheDirectory( host )
 
-      hash = JSON.parse( payload )
+      enabledGrafana  = @enabledGrafana
+      enabledIcinga   = @enabledIcinga
+      annotation      = false
 
-      @log.debug( hash )
+#     example:
+#     {
+#       "grafana": false,
+#       "annotation": true
+#     }
 
-      result[:request] = hash
+      if( payload != '' )
 
-#      example:
-#      {
-#        "grafana": false,
-#        "annotation": true
-#      }
+        hash = JSON.parse( payload )
 
-      enabledGrafana  = hash.keys.include?('grafana')    ? hash['grafana']    : @enabledGrafana
-      enabledIcinga   = hash.keys.include?('icinga')     ? hash['icinga']     : @enabledIcinga
-      annotation      = hash.keys.include?('annotation') ? hash['annotation'] : false
+        result[:request] = hash
+
+        enabledGrafana  = hash.keys.include?('grafana')    ? hash['grafana']    : @enabledGrafana
+        enabledIcinga   = hash.keys.include?('icinga')     ? hash['icinga']     : @enabledIcinga
+        annotation      = hash.keys.include?('annotation') ? hash['annotation'] : false
+      end
 
       @log.info( sprintf( 'remove %s from monitoring', host ) )
 
@@ -745,7 +760,7 @@ class Monitoring
   # -- ANNOTATIONS ----------------------------------------------------------------------
   #
 
-  def addAnnotation( host, payload ) # type, descr = '', message = '', customTags = [] )
+  def addAnnotation( host, payload )
 
     status                = 500
     message               = 'initialize error'
@@ -755,80 +770,95 @@ class Monitoring
 
     if( host.to_s != '' )
 
-      hash = JSON.parse( payload )
+      command      = nil
+      argument     = nil
+      message      = nil
+      description  = nil
+      tags         = []
 
-      @log.debug( hash )
+      if( payload != '' )
 
-      result[:request] = hash
+        hash = JSON.parse( payload )
 
-      command      = hash.keys.include?('command')     ? hash['command']     : nil
-      argument     = hash.keys.include?('argument')    ? hash['argument']    : nil
-      message      = hash.keys.include?('message')     ? hash['message']     : nil
-      description  = hash.keys.include?('description') ? hash['description'] : nil
-      tags         = hash['tags']                      ? hash['tags']        : []
+        result[:request] = hash
 
-      if( argument == 'node' && ( command == 'create' || command == 'destroy' ) )
-#       example:
-#       {
-#         "command": "create",
-#         "argument": "node"
-#       }
+        command      = hash.keys.include?('command')     ? hash['command']     : nil
+        argument     = hash.keys.include?('argument')    ? hash['argument']    : nil
+        message      = hash.keys.include?('message')     ? hash['message']     : nil
+        description  = hash.keys.include?('description') ? hash['description'] : nil
+        tags         = hash['tags']                      ? hash['tags']        : []
+
+        if( argument == 'node' && ( command == 'create' || command == 'destroy' ) )
+#         example:
+#         {
+#           "command": "create",
+#           "argument": "node"
+#         }
 #
-#       {
-#         "command": "destroy",
-#         "argument": "node"
-#       }
+#         {
+#           "command": "destroy",
+#           "argument": "node"
+#         }
 
-        message     = nil
-        description = nil
-        tags        = []
-        @graphite.nodeAnnotation( host, command )
+          message     = nil
+          description = nil
+          tags        = []
+          @graphite.nodeAnnotation( host, command )
 
-      elsif( command == 'loadtest' && ( argument == 'start' || stop == 'stop' ) )
+        elsif( command == 'loadtest' && ( argument == 'start' || stop == 'stop' ) )
 
-#       example:
-#       {
-#         "command": "loadtest",
-#         "argument": "start"
-#       }
+#         example:
+#         {
+#           "command": "loadtest",
+#           "argument": "start"
+#         }
 #
-#       {
-#         "command": "loadtest",
-#         "argument": "stop"
-#       }
+#         {
+#           "command": "loadtest",
+#           "argument": "stop"
+#         }
 
-        message     = nil
-        description = nil
-        tags        = []
-        @graphite.loadtestAnnotation( host, argument )
+          message     = nil
+          description = nil
+          tags        = []
+          @graphite.loadtestAnnotation( host, argument )
 
-      elsif( command == 'deployment' )
+        elsif( command == 'deployment' )
 
-#       example:
-#       {
-#         "command": "deployment",
-#         "message": "version 7.1.50",
-#       }
-        description = nil
-        tags        = []
-        @graphite.deploymentAnnotation( host, message )
+#         example:
+#         {
+#           "command": "deployment",
+#           "message": "version 7.1.50",
+#           "tags": [
+#             "development",
+#             "git-0000000"
+#           ]
+#         }
+          description = nil
+          @graphite.deploymentAnnotation( host, message, tags )
 
+        else
+#         example:
+#         {
+#           "command": "",
+#           "message": "date: 2016-12-24, last-cristmas",
+#           "description": "never so ho-ho-ho",
+#           "tags": [
+#             "development",
+#             "git-0000000"
+#           ]
+#         }
+          @graphite.generalAnnotation( host, description, message, tags )
+        end
+
+        status    = 200
+        message   = 'annotation succesfull created'
       else
-#       example:
-#       {
-#         "command": "",
-#         "message": "date: 2016-12-24, last-cristmas",
-#         "description": "never so ho-ho-ho",
-#         "tags": [
-#           "development",
-#           "git-0000000"
-#         ]
-#       }
-        @graphite.generalAnnotation( host, description, message, tags )
-      end
 
-      status    = 200
-      message   = 'annotation succesfull created'
+        status    = 400
+        message   = 'annotation data not set'
+
+      end
 
     end
 

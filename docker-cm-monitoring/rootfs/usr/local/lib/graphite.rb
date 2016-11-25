@@ -173,14 +173,19 @@ module GraphiteAnnotions
     end
 
 
-    def deploymentAnnotation( host, descr )
+    def deploymentAnnotation( host, descr, tags = [] )
 
       tag      = Array.new()
-      descr    = String.new()
       time     = Time.now().strftime( '%Y-%m-%d %H:%M:%S' )
 
       tag << host
       tag << 'deployment'
+
+      if( tags.count != 0 )
+        tag << tags
+        tag.flatten!
+      end
+
 
       message = sprintf( 'Deployment on Node <b>%s</b> started (%s)', host, time )
 
