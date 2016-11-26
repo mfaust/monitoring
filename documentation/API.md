@@ -11,7 +11,7 @@ This API helps also to create Annotations and give back Informations about all k
 ## Custom configuration
 
 ### add
-
+```
     HOSTNAME=monitoring-16-01.coremedia.vm
 
     curl \
@@ -21,23 +21,21 @@ This API helps also to create Annotations and give back Informations about all k
       http://localhost/api/v2/config/${HOSTNAME} | \
       json_reformat
 
-#### result
-
     {
        "status": 200,
        "message": "config successful written"
     }
+```
+
 
 ### list
-
+```
     HOSTNAME=monitoring-16-01.coremedia.vm
 
     curl \
       --silent \
       http://localhost/api/v2/config/${HOSTNAME} | \
       json_reformat
-
-#### result
 
     {
       "status" : 200,
@@ -49,23 +47,21 @@ This API helps also to create Annotations and give back Informations about all k
         ]
       }
     }
-
+```
 
 ### remove
-
+```
     curl \
       --silent \
       --request DELETE \
       http://localhost/api/v2/config/${HOSTNAME} | \
       json_reformat
 
-#### result
-
     {
       "status": 200,
       "message": "configuration succesfull removed"
     }
-
+```
 
 ## Nodes
 
@@ -77,16 +73,16 @@ Aktuell funktionieren folgende Paramaeter:
 
 | Paramerter | Typ | default | Beschreibung |
 | ------ | ------------- | ----- | ----- |
-| `force`      | bool  | false | löscht vorher alle Informationen über die Node. **ACHTUNG** dazu zählt auch eine ggf. vorher durchgefürte _Custom Configuration_ |
-| `discovery`  | bool  | true  | schaltet die ServiceDiscovery der CoreMedia Applicationen ab. |
+| `force`      | bool  | false | wenn `true` gesetzt ist, werden alle vorher gefundenen Informationen über die Node gelöscht **ACHTUNG** dazu zählt auch eine ggf. vorher durchgefürte _Custom Configuration_ |
+| `discovery`  | bool  | true  | schaltet die automatische ServiceDiscovery der CoreMedia Applicationen ab |
 | `icinga`     | bool  | false | deaktiviert den Icinga Support |
-| `grafana`    | bool  | false | deaktivier das hinzufügen von Grafana Dashboards |
-| `services`   | Array | []    | Liste von Applicationen, die explizit ins Monitoring müssen ( benötigt `discovery = false` |
-| `tags`       | Array | []    | Eine Liste von Tags, die im Grafana benutz werden |
+| `grafana`    | bool  | false | deaktiviert den Grafana Support. Dadrurch werden keine Dashboards hinzugefügt |
+| `services`   | Array | []    | eine Liste von Applikationen, die explizit ins Monitoring aufgenommen werden sollen (setzt `discovery = false` vorraus |
+| `tags`       | Array | []    | Eine Liste von Tags, die an die Node in Grafana gehängt werden |
 | `annotation` | bool  | true  | setzt eine Annotation für das erzeugen einer Node |
-| `overview`   | bool  | false | ermöglicht das anlegen eines Overview Templates im Grafana |
+| `overview`   | bool  | false | ermöglicht das Anlegen eines Overview Templates in Grafana |
 
-Als Beispiel dient folgendes:
+**Beispiel eines Parametersatzes**
 
     {
       "force": true,
@@ -105,16 +101,16 @@ Als Beispiel dient folgendes:
       "overview": true
     }
 
-    HOSTNAME=pandora-16-01.coremedia.vm
+#### kompletter Aufruf
+```
+    HOSTNAME=monitoring-16-01.coremedia.vm
 
     curl \
       --silent \
       --request POST \
       --data '{ "force": true }' \
-      http://localhost/api/v2/host/monitoring-16-01 | \
+      http://localhost/api/v2/host/${HOSTNAME} | \
       json_reformat
-
-#### result
 
     {
       "request": {
@@ -132,21 +128,150 @@ Als Beispiel dient folgendes:
         }
       }
     }
+```
+---
 
 
+### remove Node from Monitoring
+
+Das löschen einer Node wird über ein `DELETE` ermöglicht.
+Auch hier ist es möglich das löschen über `--data` Parameter feingranular zu steuern.
+
+Aktuell funktionieren folgende Paramaeter:
+
+| Paramerter   | Typ     | default | Beschreibung |
+| :---------   | :-----: | :-----: | :----------- |
+| `icinga`     | bool    | false   | deaktiviert den Icinga Support |
+| `grafana`    | bool    | false   | deaktiviert den Grafana Support. Dadrurch werden keine Dashboards gelöscht |
+| `annotation` | bool    | true    | setzt eine Annotation für das entfernen einer Node |
 
 
-# remove Node from Monitoring
+**Beispiel eines Parametersatzes**
 
+     example:
+     {
+       "icinga": false,
+       "grafana": false,
+       "annotation": true
+     }
 
-    curl -X DELETE http://localhost/api/v2/host/cmx-16-01 -d '{ "grafana": false, "icinga": false }'
+#### kompletter Aufruf
+```
+    HOSTNAME=monitoring-16-01.coremedia.vm
+
+    curl \
+      --silent \
+      --request DELETE \
+      --data '{ "grafana": false }' \
+      http://localhost/api/v2/host/${HOSTNAME} | \
+      json_reformat
+```
+
+---
 
 # give Information about Node
 
-    curl -X GET http://localhost/api/v2/host/monitoring-16-01
+Informationen über die Nodes des Monitorings bekommt man über ein `GET` zurückgeliefert.
+Hierbei gibt es 2 Möglichkeiten:
 
+* ohne Parameter:
+```
+    HOSTNAME=monitoring-16-01.coremedia.vm
+
+    curl \
+      --silent \
+      --request GET \
+      http://localhost/api/v2/host | \
+      json_reformat
+```
+* mit Parameter:
+```
+    HOSTNAME=monitoring-16-01.coremedia.vm
+
+    curl \
+      --silent \
+      --request GET \
+      http://localhost/api/v2/host/${HOSTNAME} | \
+      json_reformat
+```
+
+---
 
 # add Annotations for Node
 
+Annotationen bieten eine Möglichkeit, Messpunkte in einem Graphen mit einem Ereignissen zu markieren bzw. anzureichern.
 
-    curl -X POST http://localhost/api/v2/annotation/monitoring-16-01 --data '{ "command": "deployment", "message": "version 7.1.50", "tags": ["7.1.50"] }'
+Zu diesem Zweck haben wir 4 Arten von üblichen Annotations fest integriert:
+
+* das erstellen einer Node (`create`)
+* das entfernen einer Node (`destroy`)
+* Lasttestest (`loadtest`)
+* Deployments (`deployment`)
+
+Zu jedem dieser Annotationstypen ist es möglich über `--data` json formatierte Parameter dem ReST Aufruf mitzugeben:
+
+* `create`
+
+```
+    HOSTNAME=monitoring-16-01.coremedia.vm
+
+    curl \
+      --silent \
+      --request POST \
+      --data '{ "command": "create", "argument": "node" }' \
+      http://localhost/api/v2/host/${HOSTNAME} | \
+      json_reformat
+```
+
+* `destroy`
+
+```
+    HOSTNAME=monitoring-16-01.coremedia.vm
+
+    curl \
+      --silent \
+      --request POST \
+      --data '{ "command": "destroy", "argument": "node" }' \
+      http://localhost/api/v2/host/${HOSTNAME} | \
+      json_reformat
+```
+
+* `loadtest`
+
+```
+    HOSTNAME=monitoring-16-01.coremedia.vm
+
+    curl \
+      --silent \
+      --request POST \
+      --data '{ "command": "loadtest", "argument": "start" }' \
+      http://localhost/api/v2/host/${HOSTNAME} | \
+      json_reformat
+
+
+    curl \
+      --silent \
+      --request POST \
+      --data '{ "command": "loadtest", "argument": "stop" }' \
+      http://localhost/api/v2/host/${HOSTNAME} | \
+      json_reformat
+```
+
+* `deployment`
+
+```
+    HOSTNAME=monitoring-16-01.coremedia.vm
+
+    curl \
+      --silent \
+      --request POST \
+      --data '{ "command": "deployment", "message": "version 7.1.50", "tags": ["7.1.50"] }' \
+      http://localhost/api/v2/host/${HOSTNAME} | \
+      json_reformat
+```
+
+Für diese Annotation Typen wurden in den von CoreMedia mitgelieferten Templates entsprechende Anzeigemöglichkeiten geschaffen.
+
+
+
+
