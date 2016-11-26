@@ -71,8 +71,8 @@ Das hinzufügen wird über einen `POST` Request ermöglicht. Hierbei kann über 
 
 Aktuell funktionieren folgende Paramaeter:
 
-| Paramerter | Typ | default | Beschreibung |
-| ------ | ------------- | ----- | ----- |
+| Paramerter   | Typ     | default | Beschreibung |
+| :---------   | :-----: | :-----: | :----------- |
 | `force`      | bool  | false | wenn `true` gesetzt ist, werden alle vorher gefundenen Informationen über die Node gelöscht **ACHTUNG** dazu zählt auch eine ggf. vorher durchgefürte _Custom Configuration_ |
 | `discovery`  | bool  | true  | schaltet die automatische ServiceDiscovery der CoreMedia Applicationen ab |
 | `icinga`     | bool  | false | deaktiviert den Icinga Support |
@@ -142,7 +142,7 @@ Aktuell funktionieren folgende Paramaeter:
 | Paramerter   | Typ     | default | Beschreibung |
 | :---------   | :-----: | :-----: | :----------- |
 | `icinga`     | bool    | false   | deaktiviert den Icinga Support |
-| `grafana`    | bool    | false   | deaktiviert den Grafana Support. Dadrurch werden keine Dashboards gelöscht |
+| `grafana`    | bool    | false   | deaktiviert den Grafana Support. Hierbei bleiben die Dashboards erhalten! |
 | `annotation` | bool    | true    | setzt eine Annotation für das entfernen einer Node |
 
 
@@ -201,16 +201,16 @@ Hierbei gibt es 2 Möglichkeiten:
 
 Annotationen bieten eine Möglichkeit, Messpunkte in einem Graphen mit einem Ereignissen zu markieren bzw. anzureichern.
 
-Zu diesem Zweck haben wir 4 Arten von üblichen Annotations fest integriert:
+Zu diesem Zweck haben wir 4 Arten von üblichen Annotationen fest integriert:
 
 * das erstellen einer Node (`create`)
 * das entfernen einer Node (`destroy`)
 * Lasttestest (`loadtest`)
 * Deployments (`deployment`)
 
-Zu jedem dieser Annotationstypen ist es möglich über `--data` json formatierte Parameter dem ReST Aufruf mitzugeben:
+Zu jedem dieser Annotationen ist es möglich, über `--data` json formatierte Parameter dem ReST Aufruf mitzugeben:
 
-* `create`
+* **`create`**
 
 ```
     HOSTNAME=monitoring-16-01.coremedia.vm
@@ -223,7 +223,7 @@ Zu jedem dieser Annotationstypen ist es möglich über `--data` json formatierte
       json_reformat
 ```
 
-* `destroy`
+* **`destroy`**
 
 ```
     HOSTNAME=monitoring-16-01.coremedia.vm
@@ -236,7 +236,7 @@ Zu jedem dieser Annotationstypen ist es möglich über `--data` json formatierte
       json_reformat
 ```
 
-* `loadtest`
+* **`loadtest`**
 
 ```
     HOSTNAME=monitoring-16-01.coremedia.vm
@@ -257,7 +257,7 @@ Zu jedem dieser Annotationstypen ist es möglich über `--data` json formatierte
       json_reformat
 ```
 
-* `deployment`
+* **`deployment`**
 
 ```
     HOSTNAME=monitoring-16-01.coremedia.vm
