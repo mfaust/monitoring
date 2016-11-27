@@ -73,14 +73,14 @@ Aktuell funktionieren folgende Paramaeter:
 
 | Paramerter   | Typ     | default | Beschreibung |
 | :---------   | :-----: | :-----: | :----------- |
-| `force`      | bool  | false | wenn `true` gesetzt ist, werden alle vorher gefundenen Informationen über die Node gelöscht **ACHTUNG** dazu zählt auch eine ggf. vorher durchgefürte _Custom Configuration_ |
-| `discovery`  | bool  | true  | schaltet die automatische ServiceDiscovery der CoreMedia Applicationen ab |
-| `icinga`     | bool  | false | deaktiviert den Icinga Support |
-| `grafana`    | bool  | false | deaktiviert den Grafana Support. Dadrurch werden keine Dashboards hinzugefügt |
-| `services`   | Array | []    | eine Liste von Applikationen, die explizit ins Monitoring aufgenommen werden sollen (setzt `discovery = false` vorraus |
-| `tags`       | Array | []    | Eine Liste von Tags, die an die Node in Grafana gehängt werden |
-| `annotation` | bool  | true  | setzt eine Annotation für das erzeugen einer Node |
-| `overview`   | bool  | false | ermöglicht das Anlegen eines Overview Templates in Grafana |
+| `force`      | bool    | false   | wenn `true` gesetzt ist, werden alle vorher gefundenen Informationen über die Node gelöscht **ACHTUNG** dazu zählt auch eine ggf. vorher durchgefürte _Custom Configuration_ |
+| `discovery`  | bool    | true    | schaltet die automatische ServiceDiscovery der CoreMedia Applicationen ab |
+| `icinga`     | bool    | false   | deaktiviert den Icinga Support |
+| `grafana`    | bool    | false   | deaktiviert den Grafana Support. Dadrurch werden keine Dashboards hinzugefügt |
+| `services`   | Array   | []      | eine Liste von Applikationen, die explizit ins Monitoring aufgenommen werden sollen (setzt `discovery = false` vorraus |
+| `tags`       | Array   | []      | Eine Liste von Tags, die an die Node in Grafana gehängt werden |
+| `annotation` | bool    | true    | setzt eine Annotation für das erzeugen einer Node |
+| `overview`   | bool    | false   | ermöglicht das Anlegen eines Overview Templates in Grafana |
 
 **Beispiel eines Parametersatzes**
 
