@@ -384,7 +384,7 @@ class Monitoring
         end
 
         if( enabledGrafana == true )
-          grafanaResult  = @grafana.deleteDashboards( host )
+          grafanaResult  = @grafana.deleteDashboards( host, tags )
           grafanaStatus  = grafanaResult[:status]
           grafanaMessage = grafanaResult[:message]
 

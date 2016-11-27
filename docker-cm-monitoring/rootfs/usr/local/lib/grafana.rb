@@ -500,9 +500,11 @@ class Grafana
 
 
   # delete the dashboards for a host
-  def deleteDashboards( host )
+  def deleteDashboards( host, tags = [] )
 
     @log.debug( sprintf( 'Deleting dashboards for host %s', host ) )
+
+    dashboards = Array.new()
 
     if( self.checkGrafana?() == false )
 
@@ -517,7 +519,19 @@ class Grafana
 
     self.prepare( host )
 
-    dashboards = self.searchDashboards( @shortHostname )
+    if( tags.count() != 0 )
+
+      @log.debug( '  and tags:' )
+
+      tags.each do |t|
+
+        @log.debug( sprintf( '    - %s', t ) )
+
+#        dashboards.push( self.searchDashboards( t ) )
+      end
+    end
+
+    dashboards.push( self.searchDashboards( @shortHostname ) )
 
     if( dashboards != false )
 
@@ -533,7 +547,7 @@ class Grafana
 
         dashboards.each do |i|
 
-          if ( (i.include?"group") && (!host.include?"group") )
+          if( (i.include?"group") && ( !host.include?"group") )
             # Don't delete group templates except if deletion is forced
             next
           end
@@ -625,18 +639,6 @@ class Grafana
       end
 
     end
-
-#    if( responseCode >= 200 && responseCode <= 299 ) || ( responseCode >= 400 && responseCode <= 499 )
-#
-#      responseBody  = JSON.parse( response.body )
-#      dashboards    = responseBody.collect { |item| item['uri'] }
-#
-#      return( dashboards )
-#    else
-#      @log.info("No dashboards found")
-#      @log.error( "GET on #{uri} failed: HTTP #{response.code} - #{response.body}" )
-#      return false
-#    end
 
   end
 
