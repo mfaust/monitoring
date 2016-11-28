@@ -70,8 +70,8 @@ class Grafana
 
     end
 
-    version              = '1.3.0'
-    date                 = '2016-11-22'
+    version              = '1.3.2'
+    date                 = '2016-11-28'
 
     @log.info( '-----------------------------------------------------------------' )
     @log.info( ' CoreMedia - Grafana Dashboard Management' )
@@ -147,20 +147,6 @@ class Grafana
     return true
 
   end
-
-
-  # OBSOLETE
-#   def shortHostname( hostname )
-#
-#     if( ! isIp?( hostname ) )
-#       shortHostname   = hostname.split( '.' ).first
-#     else
-#       shortHostname   = hostname
-#     end
-#
-#     return shortHostname
-#
-#   end
 
 
   def supportMbean?( data, service, mbean, key = nil )
@@ -329,14 +315,42 @@ class Grafana
 
   end
 
-  # add dashboards for a host
-  def addDashbards( host, recreate = false )
 
-    @log.info("Adding dashboards for host #{host}, recreate: #{recreate}")
+  def addTags( templateJson )
 
-    if( recreate )
-      deleteDashboards( host )
+    tags = @additionalTags
+
+    # add tags
+    if( templateJson.is_a?( String ) )
+      templateJson = JSON.parse( templateJson )
     end
+
+    currentTags = templateJson.dig( 'dashboard', 'tags' )
+
+    if( currentTags != nil && tags != nil )
+
+      currentTags << tags
+      currentTags.flatten!.sort!
+
+      templateJson['dashboard']['tags'] = currentTags
+    end
+
+    if( templateJson.is_a?( Hash ) )
+      templateJson = JSON.generate( templateJson )
+    end
+
+    return templateJson
+
+  end
+
+
+  # add dashboards for a host
+  def addDashbards( host, options = {} )
+
+    @log.info( sprintf( 'Adding dashboards for host \'%s\'', host ) )
+
+    @additionalTags = options['tags']     ? options['tags']     : []
+    createOverview  = options['overview'] ? options['overview'] : false
 
     if( self.checkGrafana?() == false )
 
@@ -366,16 +380,6 @@ class Grafana
       servicesTmp.delete( 'mongodb' )
       servicesTmp.delete( 'node_exporter' )
       servicesTmp.delete( 'demodata-generator' )
-
-#       # wait for the last service result in our memcahce
-#       memcacheKey = cacheKey( 'result', host, servicesTmp.last )
-#
-#       @monitoringResultJson = getJsonFromFile( memcacheKey, true )
-#
-#       if ( @monitoringResultJson == nil )
-#         @log.error( "No monitoring.result file found. Exiting." )
-#         return nil
-#       end
 
       # determine type of service from mergedHostData.json file, e.g. cae, caefeeder, contentserver
       mergedHostJson = self.getJsonFromFile( @mergedHostFile )
@@ -435,10 +439,10 @@ class Grafana
           @log.debug( sprintf( "Found Template paths: %s, %s" , serviceTemplate , additionalTemplatePaths ) )
 
           options = {
-            :description => description,
-            :serviceName => serviceName,
-            :normalizedName => normalizedName,
-            :serviceTemplate => serviceTemplate,
+            :description             => description,
+            :serviceName             => serviceName,
+            :normalizedName          => normalizedName,
+            :serviceTemplate         => serviceTemplate,
             :additionalTemplatePaths => additionalTemplatePaths
           }
 
@@ -448,27 +452,32 @@ class Grafana
         @log.debug( '`---------------------------------------------------------' )
       end
 
-
       # Overview Template
-      self.generateOverviewTemplate( services )
+      if( createOverview == true )
+        self.generateOverviewTemplate( services )
+      end
 
       # LicenseInformation
       if( servicesTmp.include?( 'content-management-server' ) || servicesTmp.include?( 'master-live-server' ) || servicesTmp.include?( 'replication-live-server' ) )
         self.generateLicenseTemplate( host, services )
       end
 
+      namedTemplate = Array.new()
+
       # MemoryPools for many Services
-      self.addNamedTemplate( 'cm-memory-pool.json' )
+      namedTemplate.push( 'cm-memory-pool.json' )
 
       # CAE Caches
       if( servicesTmp.include?( 'cae-preview' ) || servicesTmp.include?( 'cae-live' ) )
 
-        self.addNamedTemplate( 'cm-cae-cache-classes.json' )
+        namedTemplate.push( 'cm-cae-cache-classes.json' )
 
         if( self.beanAvailable?( host, 'cae-preview', 'CacheClassesIBMAvailability' ) == true )
-          self.addNamedTemplate( 'cm-cae-cache-classes-ibm.json' )
+          namedTemplate.push( 'cm-cae-cache-classes-ibm.json' )
         end
       end
+
+      self.addNamedTemplate( namedTemplate )
 
     end
 
@@ -519,19 +528,20 @@ class Grafana
 
     self.prepare( host )
 
-    if( tags.count() != 0 )
-
-      @log.debug( '  and tags:' )
-
-      tags.each do |t|
-
-        @log.debug( sprintf( '    - %s', t ) )
-
-#        dashboards.push( self.searchDashboards( t ) )
-      end
-    end
+#     if( tags.count() != 0 )
+#
+#       @log.debug( '  and tags:' )
+#
+#       tags.each do |t|
+#
+#         @log.debug( sprintf( '    - %s', t ) )
+#
+# #        dashboards.push( self.searchDashboards( t ) )
+#       end
+#     end
 
     dashboards.push( self.searchDashboards( @shortHostname ) )
+    dashboards.flatten!
 
     if( dashboards != false )
 
@@ -1015,51 +1025,61 @@ class Grafana
 
   end
 
+  # use array to add more than on template
+  def addNamedTemplate( templates = [] )
 
-  def addNamedTemplate( name )
+    @log.info( 'add named template' )
 
-    @log.info( sprintf( 'add named dashboard for \'%s\'', name ) )
+    if( templates.count() != 0 )
 
-    filename = sprintf( '%s/%s', @templateDirectory, name )
+      templates.each do |template|
 
-    if( File.exist?( filename ) )
+        filename = sprintf( '%s/%s', @templateDirectory, template )
 
-#      file = File.read( filename )
-#      file = self.addAnnotations( file )
-#      file = JSON.generate( file )
+        if( File.exist?( filename ) )
 
-      self.sendTemplateToGrafana(
-        JSON.generate(
-          self.addAnnotations(
-            File.read( filename )
+          @log.info( sprintf( '  - %s', File.basename( filename ).strip ) )
+
+#         file = File.read( filename )
+#         file = self.addAnnotations( file )
+#         file = JSON.generate( file )
+
+          self.sendTemplateToGrafana(
+            JSON.generate(
+              self.addAnnotations(
+                File.read( filename )
+              )
+            )
           )
-        )
-      )
-
+        end
+      end
     end
   end
 
 
   def sendTemplateToGrafana( templateFile, serviceName = nil )
 
-    templateFile = regenerateGrafanaTemplateIDs(templateFile)
+    templateFile = regenerateGrafanaTemplateIDs( templateFile )
 
     if( !templateFile )
-      @log.error( "Cannot create dashboard, invalid json" )
+      @log.error( 'Cannot create dashboard, invalid json' )
       return
     end
 
     templateFile.gsub!( '%HOST%'     , @grafanaHostname )
     templateFile.gsub!( '%SHORTHOST%', @shortHostname )
     templateFile.gsub!( '%TAG%'      , @shortHostname )
-    if (serviceName)
+    if( serviceName )
       templateFile.gsub!( '%SERVICE%'  , serviceName )
     end
+
+    templateFile = self.addTags( templateFile )
 
     grafanaDbUri = URI( sprintf( '%s/api/dashboards/db', @grafanaURI ) )
 
     response = nil
     Net::HTTP.start(grafanaDbUri.host, grafanaDbUri.port) do |http|
+
       request = Net::HTTP::Post.new grafanaDbUri.request_uri
       request.add_field('Content-Type', 'application/json')
       request.basic_auth( @grafanaAPIUser, @grafanaAPIPass )

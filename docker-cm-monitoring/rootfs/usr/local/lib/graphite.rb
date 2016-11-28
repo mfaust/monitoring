@@ -38,8 +38,8 @@ module GraphiteAnnotions
         "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
       end
 
-      version              = '1.1.1'
-      date                 = '2016-10-04'
+      version              = '1.1.2'
+      date                 = '2016-11-28'
 
       @log.info( '-----------------------------------------------------------------' )
       @log.info( ' CoreMedia - Graphite Client' )
@@ -80,7 +80,7 @@ module GraphiteAnnotions
       data = {
         'what' => what,
         'when' => _when,
-        'tags' => tags,
+        'tags' => tags.flatten,
         'data' => data
       }
 
@@ -108,7 +108,7 @@ module GraphiteAnnotions
             # 401 – Unauthorized
             # 412 – Precondition failed
             @log.error( sprintf( ' [%s] ', responseCode ) )
-            @log.error( sprintf( '  %s  ', response ) )
+            @log.error( sprintf( '  %s  ', response.body ) )
           end
         end
       rescue Exception => e

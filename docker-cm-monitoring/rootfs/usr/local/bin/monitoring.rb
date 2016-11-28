@@ -77,8 +77,8 @@ class Monitoring
       :graphitePath        => @graphitePath
     }
 
-    version              = '1.9.12'
-    date                 = '2016-11-24'
+    version              = '1.9.14'
+    date                 = '2016-11-28'
 
     @log.info( '-----------------------------------------------------------------' )
     @log.info( ' CoreMedia - Monitoring Service' )
@@ -96,11 +96,7 @@ class Monitoring
 
     @serviceDiscovery = ServiceDiscovery.new( serviceDiscoverConfig )
     @grafana          = Grafana.new( grafanaConfig )
-
-    if( @enabledIcinga == true )
-      @icinga           = Icinga2.new( icingaConfig )
-    end
-
+    @icinga           = Icinga2.new( icingaConfig )
     @graphite         = GraphiteAnnotions::Client.new( graphiteOptions )
 
   end
@@ -357,10 +353,10 @@ class Monitoring
         enableDiscovery = hash.keys.include?('discovery')  ? hash['discovery']  : @enabledDiscovery
         enabledGrafana  = hash.keys.include?('grafana')    ? hash['grafana']    : @enabledGrafana
         enabledIcinga   = hash.keys.include?('icinga')     ? hash['icinga']     : @enabledIcinga
-        annotation      = hash.keys.include?('annotation') ? hash['annotation'] : false
+        annotation      = hash.keys.include?('annotation') ? hash['annotation'] : true
         grafanaOverview = hash.keys.include?('overview')   ? hash['overview']   : false
-        services        = hash['services']  ? hash['services']  : []
-        tags            = hash['tags']      ? hash['tags']      : []
+        services        = hash.keys.include?('services')   ? hash['services']   : []
+        tags            = hash.keys.include?('tags')       ? hash['tags']       : []
       end
 
       if( force == true )
@@ -384,7 +380,7 @@ class Monitoring
         end
 
         if( enabledGrafana == true )
-          grafanaResult  = @grafana.deleteDashboards( host, tags )
+          grafanaResult  = @grafana.deleteDashboards( host )
           grafanaStatus  = grafanaResult[:status]
           grafanaMessage = grafanaResult[:message]
 
@@ -457,7 +453,12 @@ class Monitoring
 
         if( enabledGrafana == true )
 
-          grafanaResult  = @grafana.addDashbards( host )
+          options = {
+            'tags'     => tags,
+            'overview' => grafanaOverview
+          }
+
+          grafanaResult  = @grafana.addDashbards( host, options )
           grafanaStatus  = grafanaResult[:status]
           grafanaMessage = grafanaResult[:message]
 
@@ -692,7 +693,7 @@ class Monitoring
 
         enabledGrafana  = hash.keys.include?('grafana')    ? hash['grafana']    : @enabledGrafana
         enabledIcinga   = hash.keys.include?('icinga')     ? hash['icinga']     : @enabledIcinga
-        annotation      = hash.keys.include?('annotation') ? hash['annotation'] : false
+        annotation      = hash.keys.include?('annotation') ? hash['annotation'] : true
       end
 
       @log.info( sprintf( 'remove %s from monitoring', host ) )
@@ -778,15 +779,15 @@ class Monitoring
 
       if( payload != '' )
 
-        hash = JSON.parse( payload )
+        hash = payload
 
         result[:request] = hash
 
-        command      = hash.keys.include?('command')     ? hash['command']     : nil
-        argument     = hash.keys.include?('argument')    ? hash['argument']    : nil
-        message      = hash.keys.include?('message')     ? hash['message']     : nil
-        description  = hash.keys.include?('description') ? hash['description'] : nil
-        tags         = hash['tags']                      ? hash['tags']        : []
+        command      = hash[:command]     ? hash[:command]     : nil
+        argument     = hash[:argument]    ? hash[:argument]    : nil
+        message      = hash[:message]     ? hash[:message]     : nil
+        description  = hash[:description] ? hash[:description] : nil
+        tags         = hash[:tags]        ? hash[:tags]        : []
 
         if( argument == 'node' && ( command == 'create' || command == 'destroy' ) )
 #         example:
