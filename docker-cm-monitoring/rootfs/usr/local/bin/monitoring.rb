@@ -31,7 +31,7 @@ class Monitoring
     file.sync       = true
     @log            = Logger.new( file, 'weekly', 1024000 )
 #    @log = Logger.new( STDOUT )
-    @log.level      = Logger::DEBUG
+    @log.level      = Logger::INFO
     @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
     @log.formatter  = proc do |severity, datetime, progname, msg|
       "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
@@ -151,56 +151,6 @@ class Monitoring
       @enabledGrafana   = services['grafana']   && services['grafana'] == true    ? true : false
       @enabledIcinga    = services['icinga2']   && services['icinga2'] == true    ? true : false
     end
-
-  end
-
-  #
-  # curl -X POST http://localhost/api/v2/config/foo -d '{ "ports": [200,300] }'
-  #
-  def configureHost( host, payload )
-
-    experimental = false
-
-    status       = 500
-    message      = 'initialize error'
-
-    current = Hash.new()
-
-    hash = Hash.new()
-
-    if( host.to_s != '' )
-
-      directory = sprintf( '%s/%s', @cacheDir, host )
-
-      if( !File.exist?( directory ) )
-        Dir.mkdir( directory )
-      end
-
-      @log.debug( payload )
-
-      hash = JSON.parse( payload )
-
-      localConfig = sprintf( '%s/config.json', directory )
-
-      if( File.exist?( localConfig ) == true )
-
-        data    = File.read( localConfig )
-
-        current = JSON.parse( data )
-
-      end
-
-      hash = current.merge( payload )
-
-      status  = 200
-      message = hash
-
-    end
-
-    return {
-      :status  => status,
-      :message => message
-    }
 
   end
 
