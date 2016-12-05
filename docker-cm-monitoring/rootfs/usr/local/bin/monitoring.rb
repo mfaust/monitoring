@@ -394,7 +394,11 @@ class Monitoring
       # TODO
       # change service-discovery to use 'services'
 
-      discoveryResult   = @serviceDiscovery.addHost( host )
+      options = {
+        'services'     => services
+      }
+
+      discoveryResult   = @serviceDiscovery.addHost( host, options )
       discoveryStatus   = discoveryResult[:status].to_i
       discoveryMessage  = discoveryResult[:message]
 

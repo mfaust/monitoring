@@ -460,15 +460,27 @@ class ServiceDiscovery
   end
 
   # add Host and discovery applications
-  def addHost( host, ports = [], force = false )
+  def addHost( host, options = {} )
 
-    @log.info( "Adding host #{host}, force: #{force}")
+    @log.info( sprintf( 'Adding host \'%s\'', host ) )
 
-    # force delete
-    if( force == true )
-      self.deleteHost( host )
-    end
+#     services = options['services'] ? options['services'] : []
+#     force    = options['force']    ? options['force']    : false
+#
+#     if( services.count != 0 )
+#
+#       @log.info( 'Use additional services:' )
+#       @log.info( "  #{services}" )
+#     end
 
+
+    # OBSOLETE
+#     # force delete
+#     if( force == true )
+#       self.deleteHost( host )
+#     end
+
+    # build Host CacheDirectory (if not exitsts)
     cacheDirectory  = sprintf( '%s/%s', @cacheDirectory, host )
 
     if( !File.exist?( cacheDirectory ) )
@@ -502,9 +514,9 @@ class ServiceDiscovery
 
     hostInfo = hostResolve( host )
 
-    ip            = hostInfo[:ip]    ? hostInfo[:ip]    : nil # dnsResolve( host )
-    shortHostName = hostInfo[:short] ? hostInfo[:short] : nil # dnsResolve( host )
-    longHostName  = hostInfo[:long]  ? hostInfo[:long]  : nil # dnsResolve( host )
+    ip            = hostInfo[:ip]    ? hostInfo[:ip]    : nil
+    shortHostName = hostInfo[:short] ? hostInfo[:short] : nil
+    longHostName  = hostInfo[:long]  ? hostInfo[:long]  : nil
 
     # second, if the that we whant monitored, available
     if( isRunning?( ip ) == false )
