@@ -3,7 +3,7 @@
 # 05.10.2016 - Bodo Schulz
 #
 #
-# v2.x.x
+# v2.0.0
 
 # -----------------------------------------------------------------------------
 
@@ -31,7 +31,7 @@ class Monitoring
     file.sync       = true
     @log            = Logger.new( file, 'weekly', 1024000 )
 #    @log = Logger.new( STDOUT )
-    @log.level      = Logger::DEBUG
+    @log.level      = Logger::INFO
     @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
     @log.formatter  = proc do |severity, datetime, progname, msg|
       "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
@@ -77,8 +77,8 @@ class Monitoring
       :graphitePath        => @graphitePath
     }
 
-    version              = '1.9.14'
-    date                 = '2016-11-28'
+    version              = '2.0.0'
+    date                 = '2016-12-06'
 
     @log.info( '-----------------------------------------------------------------' )
     @log.info( ' CoreMedia - Monitoring Service' )
@@ -184,6 +184,7 @@ class Monitoring
     return directory
 
   end
+
 
   # -- CONFIGURE ------------------------------------------------------------------------
   #
@@ -679,9 +680,9 @@ class Monitoring
 
       directory = self.createCacheDirectory( host )
 
-      enabledGrafana  = @enabledGrafana
-      enabledIcinga   = @enabledIcinga
-      annotation      = false
+      enabledGrafana  = true
+      enabledIcinga   = true
+      annotation      = true
 
 #     example:
 #     {
@@ -695,8 +696,8 @@ class Monitoring
 
         result[:request] = hash
 
-        enabledGrafana  = hash.keys.include?('grafana')    ? hash['grafana']    : @enabledGrafana
-        enabledIcinga   = hash.keys.include?('icinga')     ? hash['icinga']     : @enabledIcinga
+        enabledGrafana  = hash.keys.include?('grafana')    ? hash['grafana']    : true
+        enabledIcinga   = hash.keys.include?('icinga')     ? hash['icinga']     : true
         annotation      = hash.keys.include?('annotation') ? hash['annotation'] : true
       end
 
@@ -793,16 +794,14 @@ class Monitoring
         description  = hash[:description] ? hash[:description] : nil
         tags         = hash[:tags]        ? hash[:tags]        : []
 
-        if( argument == 'node' && ( command == 'create' || command == 'destroy' ) )
+        if( command == 'create' || command == 'destroy' )
 #         example:
 #         {
-#           "command": "create",
-#           "argument": "node"
+#           "command": "create"
 #         }
 #
 #         {
-#           "command": "destroy",
-#           "argument": "node"
+#           "command": "destroy"
 #         }
 
           message     = nil
@@ -876,335 +875,8 @@ class Monitoring
 
 
 
-
-
-  def addHostV1( host, force = false )
-
-    experimental = false
-
-    status       = 500
-    message      = 'initialize error'
-
-    if( host.to_s != '' )
-
-      if( force == true )
-
-        @log.info( sprintf( 'remove %s from monitoring', host ) )
-
-        if( @enabledIcinga == true )
-          icingaResult = @icinga.deleteHost( host )
-          icingaStatus = @icinga.status
-        end
-
-        grafanaResult = @grafana.deleteDashboards( host )
-        grafanaStatus = @grafana.status
-
-        discoveryResult   = @serviceDiscovery.deleteHost( host )
-        discoveryStatus   = @serviceDiscovery.status
-
-        if( @enabledIcinga == true )
-          @log.debug( icingaResult )
-        end
-
-        @log.debug( grafanaResult )
-        @log.debug( discoveryResult )
-
-        @log.info( 'done' )
-
-      end
-
-      discoveryResult   = @serviceDiscovery.addHost( host )
-      discoveryStatus   = @serviceDiscovery.status
-
-      if( discoveryResult[:status].to_i == 200 || discoveryResult[:status].to_i == 201 )
-
-        if( @enabledIcinga == true )
-
-          discoveryServices = @serviceDiscovery.listHosts( host )
-
-          services = ( discoveryServices[:hosts] && discoveryServices[:hosts]['services'] ) ? discoveryServices[:hosts]['services'] : nil
-
-          services.each do |s|
-            s.last.reject! { |k| k == 'description' }
-            s.last.reject! { |k| k == 'application' }
-          end
-
-          cm = Hash.new()
-          cm = { 'cm' => services }
-
-          icingaResult = @icinga.addHost( host, cm )
-          icingaStatus = @icinga.status
-
-          if( icingaStatus == 200 && experimental == true )
-
-            hash  = Hash.new()
-            array = Array.new()
-
-            # add some custom service-checks
-            @serviceChecks.each do |type,s|
-
-              count = 0
-
-              s.each do |v|
-
-                proto = v['proto'] ? v['proto']  : 'http'
-                vhost = v['vhost'] ? v['vhost']  : nil
-                port  = v['port']  ? v['port']   : 80
-                url   = v['url']   ? v['url']    : '/'
-
-                if( type == 'ssl' || type == 'ssl_cert' )
-                  proto = 'https'
-                  port  = 443
-                end
-
-                if( proto == 'https' && ( port == nil || port == 80 ) )
-                  port = 443
-                end
-
-                if( vhost =~ /.*%HOST%$/ )
-                  #
-                  fqdn = Socket.gethostbyname( host ).first
-                  fqdn = vhost.gsub( '%HOST%', fqdn )
-                else
-                  vhost.gsub!( '%HOST%', host )
-                  fqdn  = Socket.gethostbyname( vhost ).first
-                end
-
-                hashKey      = sprintf( '%s-%s-%d', type.downcase, fqdn.downcase, count += 1 )
-                displayName  = sprintf( '%s - %s' , type.upcase  , fqdn.downcase )
-
-                if( type == 'http' || type == 'https' )
-
-                  # simple HTTP Check
-                  hash = {
-                    hashKey => {
-                      'display_name'    => displayName,
-                      'check_command'   => type.downcase,
-                      'host_name'       => host,
-                      'vars.http_vhost' => fqdn,
-                      'vars.http_uri'   => url,
-                      'vars.http_port'  => port
-                    }
-                  }
-
-                  if( port == 443 )
-                    hash[hashKey.to_s]['vars.http_ssl'] = true
-                    hash[hashKey.to_s]['vars.http_ssl_force_tlsv1_2'] = true
-                  end
-
-                elsif( type == 'ssl' )
-
-                  # check for a ssl certificate
-                  hash = {
-                    hashKey => {
-                      'display_name'                      => displayName,
-                      'check_command'                     => type.downcase,
-                      'host_name'                         => host,
-                      'vars.ssl_address'                  => fqdn,
-                      'vars.ssl_port'                     => port,
-                      'vars.ssl_timeout'                  => 10,
-                      'vars.ssl_cert_valid_days_warn'     => 30,
-                      'vars.ssl_cert_valid_days_critical' => 10
-                    }
-                  }
-
-                end
-
-                array.push( hash )
-              end
-            end
-
-            services = array.reduce( :merge )
-
-            @icinga.addServices( host, services )
-
-          end
-        end
-
-        grafanaResult = @grafana.addDashbards( host )
-        grafanaStatus = @grafana.status
-
-        status  = 200
-        message = 'host successfuly added'
-
-      elsif( discoveryResult[:status].to_i == 409 )
-
-        status  = discoveryResult[:status].to_i
-        message = discoveryResult[:message] ? discoveryResult[:message] : 'Host already created'
-      end
-
-    else
-
-      status  = 400
-      message = 'need hostname to add to monitoring'
-
-    end
-
-    return {
-      :status  => status,
-      :message => message
-    }
-
-  end
-
-
-  def removeHostV1( host, force = false )
-
-    if( host.to_s != '' )
-
-      grafanaResult = 0
-      result        = Array.new()
-
-      discoveryResult = @serviceDiscovery.deleteHost( host )
-
-      discoveryHash = { :discovery => { :status => discoveryResult[:status], :message => discoveryResult[:message]  } }
-
-      result.push( discoveryHash )
-
-      if( discoveryResult[:status].to_i == 200 and force == true )
-
-        grafanaResult = @grafana.deleteDashboards( host )
-
-        grafanaHash = { :grafana => { :status => grafanaResult[:status], :message => grafanaResult[:message] } }
-
-        result.push( grafanaHash )
-      end
-
-      if( @enabledIcinga == true )
-
-        icingaResult    = @icinga.deleteHost( host )
-        icingaStatus    = @icinga.status
-
-        icingaHash = { :icinga => { :status => icingaStatus   , :message => icingaResult[:message] } }
-
-        result.push( grafanaHash )
-
-        @log.debug( icingaHash )
-      end
-
-      discoveryResult = result.reduce( :merge )
-
-      return {
-        :status    => 200,
-        :message   => discoveryResult
-      }
-
-    else
-
-      return {
-        :status  => 400,
-        :message => 'need hostname to remove from monitoring'
-      }
-    end
-
-  end
-
-
-  def listHostV1( host = nil )
-
-    if( host.to_s != '' )
-
-      icingaStatus = 0
-
-      if( @enabledIcinga == true )
-        icingaResult    = @icinga.listHost( host )
-      end
-
-      grafanaResult   = @grafana.listDashboards( host )
-      discoveryResult = @serviceDiscovery.listHosts( host )
-
-      grafanaDashboardCount = 0
-      discoveryCreated      = 'unknown'
-      discoveryOnline       = 'unknown'
-
-      if( @enabledIcinga == true )
-        icingaStatus          = icingaResult[:status]    ? icingaResult[:status]    : 400
-      end
-
-      grafanaStatus         = grafanaResult[:status]   ? grafanaResult[:status]   : 400
-
-      if( grafanaStatus != 400 )
-        grafanaDashboardCount = grafanaResult[:count]   ? grafanaResult[:count]   : 0
-      end
-
-      if( grafanaStatus != 500 )
-        # TODO
-        # implement it
-        grafanaMessage        = grafanaResult[:message]   ? grafanaResult[:message]   : 'internal server error'
-      end
-
-      discoveryStatus       = discoveryResult[:status] ? discoveryResult[:status] : 400
-
-      if( discoveryStatus != 400 )
-
-        discoverHost        = discoveryResult[:hosts] ? discoveryResult[:hosts] : nil
-
-        if( discoverHost != nil )
-          discoveryCreated      = discoverHost[host][:created] ? discoverHost[host][:created] : 'unknown'
-          discoveryOnline       = discoverHost[host][:status]  ? discoverHost[host][:status]  : 'unknown'
-        end
-
-      end
-
-      return {
-        host.to_s => {
-          :icinga    => { :status => icingaStatus },
-          :grafana   => { :status => grafanaStatus, :count => grafanaDashboardCount },
-          :discovery => { :status => discoveryStatus, :created => discoveryCreated, :online => discoveryOnline }
-        }
-      }
-
-    else
-
-      discoveryResult   = @serviceDiscovery.listHosts()
-      discoveryStatus   = discoveryResult[:status] ? discoveryResult[:status] : 400
-
-      if( discoveryStatus != 400 )
-
-        array = Array.new()
-
-        hosts = discoveryResult[:hosts] ? discoveryResult[:hosts] : []
-
-        if( hosts.count != 0 )
-
-          hosts = hosts.reduce( :merge ).keys
-
-          hosts.each do |h|
-
-            r  = @serviceDiscovery.listHosts( h )
-            s  = r[:status] ? r[:status] : 400
-
-            if( s != 400 )
-
-              dHost        = r[:hosts] ? r[:hosts] : nil
-
-              if( dHost != nil )
-                discoveryCreated      = dHost[h][:created] ? dHost[h][:created] : 'unknown'
-                discoveryOnline       = dHost[h][:status]  ? dHost[h][:status]  : 'unknown'
-              end
-            end
-
-            hash  = {
-              h.to_s => { :discovery => { :status => s, :created => discoveryCreated, :online => discoveryOnline } }
-            }
-
-            array.push( hash )
-
-          end
-
-          discoveryResult = array.reduce( :merge )
-        end
-      end
-
-      return {
-        :status    => 200,
-        :discovery => discoveryResult
-      }
-
-    end
-
-  end
-
+  # -- FUTURE ---------------------------------------------------------------------------
+  #
 
   def addGrafanaGroupOverview( hosts, force = false )
 
@@ -1219,45 +891,8 @@ class Monitoring
   end
 
 
-  def addAnnotationV1( host, type, descr = '', message = '', customTags = [] )
-
-    case type
-    when 'create'
-      @graphite.nodeAnnotation( host, type )
-    when 'destroy'
-      @graphite.nodeAnnotation( host, type )
-    when 'start'
-      @graphite.loadtestAnnotation( host, type )
-    when 'stop'
-      @graphite.loadtestAnnotation( host, type )
-    when 'deployment'
-      @graphite.deploymentAnnotation( host, message )
-    else
-      @graphite.generalAnnotation( host, descr, message, customTags )
-    end
-
-  end
-
-
-
 end
 
 # ------------------------------------------------------------------------------------------
-
-# options = {
-#  :logDirectory => @logDir
-# }
-#
-# m = Monitoring.new( options )
-#
-# puts m.listHost( 'monitoring-16-01' )
-#
-# m.addAnnotation( 'monitoring-16-01', 'create' )
-# # puts m.removeHost( 'monitoring-16-01' )
-# puts m.addHost( 'monitoring-16-01' , true )
-# # puts m.removeHost( 'blueprint-box' )
-#
-#
-# puts m.listHost( 'monitoring-16-01' )
 
 # EOF

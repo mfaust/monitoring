@@ -1,5 +1,5 @@
 
-# ReST API
+# REST API
 
 ## Description
 
@@ -7,6 +7,13 @@ Our Monitoring provides an simplyfied API to create and destroy Nodes for Monito
 This API helps also to create Annotations and give back Informations about all known Hosts
 
 ## Examples
+
+## helps
+
+```
+    curl \
+      http://localhost/api/v2/help
+```
 
 ## Custom configuration
 
@@ -62,6 +69,7 @@ This API helps also to create Annotations and give back Informations about all k
       "message": "configuration succesfull removed"
     }
 ```
+---
 
 ## Nodes
 
@@ -77,7 +85,6 @@ Aktuell funktionieren folgende Paramaeter:
 | `discovery`  | bool    | true    | schaltet die automatische ServiceDiscovery der CoreMedia Applicationen ab |
 | `icinga`     | bool    | false   | deaktiviert den Icinga Support |
 | `grafana`    | bool    | false   | deaktiviert den Grafana Support. Dadrurch werden keine Dashboards hinzugefügt |
-| `services`   | Array   | []      | eine Liste von Applikationen, die explizit ins Monitoring aufgenommen werden sollen (setzt `discovery = false` vorraus |
 | `tags`       | Array   | []      | Eine Liste von Tags, die an die Node in Grafana gehängt werden |
 | `annotation` | bool    | true    | setzt eine Annotation für das erzeugen einer Node |
 | `overview`   | bool    | false   | ermöglicht das Anlegen eines Overview Templates in Grafana |
@@ -89,10 +96,6 @@ Aktuell funktionieren folgende Paramaeter:
       "discovery": false,
       "icinga": false,
       "grafana": false,
-      "services": [
-        "cae-live-1": {},
-        "content-managment-server": { "port": 41000 }
-      ],
       "tags": [
         "development",
         "git-0000000"
@@ -129,8 +132,6 @@ Aktuell funktionieren folgende Paramaeter:
       }
     }
 ```
----
-
 
 ### remove Node from Monitoring
 
@@ -141,8 +142,8 @@ Aktuell funktionieren folgende Paramaeter:
 
 | Paramerter   | Typ     | default | Beschreibung |
 | :---------   | :-----: | :-----: | :----------- |
-| `icinga`     | bool    | false   | deaktiviert den Icinga Support |
-| `grafana`    | bool    | false   | deaktiviert den Grafana Support. Hierbei bleiben die Dashboards erhalten! |
+| `icinga`     | bool    | true    | deaktiviert den Icinga Support |
+| `grafana`    | bool    | true    | deaktiviert den Grafana Support. Hierbei bleiben die Dashboards erhalten! |
 | `annotation` | bool    | true    | setzt eine Annotation für das entfernen einer Node |
 
 
@@ -197,7 +198,7 @@ Hierbei gibt es 2 Möglichkeiten:
 
 ---
 
-# add Annotations for Node
+# Grafana Annotations
 
 Annotationen bieten eine Möglichkeit, Messpunkte in einem Graphen mit einem Ereignissen zu markieren bzw. anzureichern.
 
@@ -208,7 +209,7 @@ Zu diesem Zweck haben wir 4 Arten von üblichen Annotationen fest integriert:
 * Lasttestest (`loadtest`)
 * Deployments (`deployment`)
 
-Zu jedem dieser Annotationen ist es möglich, über `--data` json formatierte Parameter dem ReST Aufruf mitzugeben:
+Zu jedem dieser Annotationen ist es möglich, über `--data` json formatierte Parameter dem REST Aufruf mitzugeben:
 
 * **`create`**
 
@@ -218,7 +219,7 @@ Zu jedem dieser Annotationen ist es möglich, über `--data` json formatierte Pa
     curl \
       --silent \
       --request POST \
-      --data '{ "command": "create", "argument": "node" }' \
+      --data '{ "command": "create" }' \
       http://localhost/api/v2/host/${HOSTNAME} | \
       json_reformat
 ```
@@ -231,7 +232,7 @@ Zu jedem dieser Annotationen ist es möglich, über `--data` json formatierte Pa
     curl \
       --silent \
       --request POST \
-      --data '{ "command": "destroy", "argument": "node" }' \
+      --data '{ "command": "destroy" }' \
       http://localhost/api/v2/host/${HOSTNAME} | \
       json_reformat
 ```

@@ -23,24 +23,24 @@ module Sinatra
 
       set :environment, :production
 
+      # default configuration
+      @logDirectory     = '/tmp/log'
+      @cacheDir         = '/tmp/cache'
+
+      @restServicePort  = 4567
+      @restServiceBind  = '0.0.0.0'
+
       if( File.exist?( '/etc/cm-monitoring.yaml' ) )
 
         config = YAML.load_file( '/etc/cm-monitoring.yaml' )
 
         @logDirectory     = config['logDirectory']         ? config['logDirectory']         : '/tmp/log'
         @cacheDir         = config['cacheDirectory']       ? config['cacheDirectory']       : '/tmp/cache'
-
         @restServicePort  = config['rest-service']['port'] ? config['rest-service']['port'] : 4567
         @restServiceBind  = config['rest-service']['bind'] ? config['rest-service']['bind'] : '0.0.0.0'
 
       else
         puts "no configuration exists, use default settings"
-
-        @logDirectory     = '/tmp/log'
-        @cacheDir         = '/tmp/cache'
-
-        @restServicePort  = 4567
-        @restServiceBind  = '0.0.0.0'
       end
 
 
@@ -102,7 +102,7 @@ module Sinatra
     end
 
     # -----------------------------------------------------------------------------
-    # GET
+    # HELP
 
     # prints out a little help about our ReST-API
     get '/v2/help' do
@@ -117,17 +117,6 @@ module Sinatra
       send_file File.join( settings.public_folder, 'help' )
 
     end
-
-#     # get information about given 'host'
-#     get '/v2/:host' do
-#       content_type :json
-#
-#       result = m.listHost( params[:host] )
-#
-#       response.status = result[:status]
-#       result.to_json
-#
-#     end
 
     # -----------------------------------------------------------------------------
     # CONFIGURE
