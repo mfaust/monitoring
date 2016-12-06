@@ -38,8 +38,8 @@ module GraphiteAnnotions
         "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
       end
 
-      version              = '1.1.1'
-      date                 = '2016-10-04'
+      version              = '1.1.2'
+      date                 = '2016-11-28'
 
       @log.info( '-----------------------------------------------------------------' )
       @log.info( ' CoreMedia - Graphite Client' )
@@ -80,7 +80,7 @@ module GraphiteAnnotions
       data = {
         'what' => what,
         'when' => _when,
-        'tags' => tags,
+        'tags' => tags.flatten,
         'data' => data
       }
 
@@ -108,7 +108,7 @@ module GraphiteAnnotions
             # 401 – Unauthorized
             # 412 – Precondition failed
             @log.error( sprintf( ' [%s] ', responseCode ) )
-            @log.error( sprintf( '  %s  ', response ) )
+            @log.error( sprintf( '  %s  ', response.body ) )
           end
         end
       rescue Exception => e
@@ -173,14 +173,19 @@ module GraphiteAnnotions
     end
 
 
-    def deploymentAnnotation( host, descr )
+    def deploymentAnnotation( host, descr, tags = [] )
 
       tag      = Array.new()
-      descr    = String.new()
       time     = Time.now().strftime( '%Y-%m-%d %H:%M:%S' )
 
       tag << host
       tag << 'deployment'
+
+      if( tags.count != 0 )
+        tag << tags
+        tag.flatten!
+      end
+
 
       message = sprintf( 'Deployment on Node <b>%s</b> started (%s)', host, time )
 
@@ -207,7 +212,7 @@ module GraphiteAnnotions
 
     end
 
-
+    # OBSOLETE
     def nodeCreatedAnnotation( host )
 
       tag  = sprintf( '%s created', host )
@@ -217,7 +222,7 @@ module GraphiteAnnotions
 
     end
 
-
+    # OBSOLETE
     def nodeDestroyedAnnotation( host )
 
       tag  = sprintf( '%s destroyed', host )
@@ -227,7 +232,7 @@ module GraphiteAnnotions
 
     end
 
-
+    # OBSOLETE
     def loadTestStartAnnotation( host )
 
       tag  = sprintf( '%s loadtest', host )
@@ -237,6 +242,7 @@ module GraphiteAnnotions
 
     end
 
+    # OBSOLETE
     def loadTestStopAnnotation( host )
 
       tag  = sprintf( '%s loadtest', host )
@@ -246,7 +252,7 @@ module GraphiteAnnotions
 
     end
 
-
+    # OBSOLETE
     def startAnnotation( host, data )
 
       tag = sprintf( '%s start', host )
@@ -255,6 +261,7 @@ module GraphiteAnnotions
 
     end
 
+    # OBSOLETE
     def stopAnnotation( host, data )
 
       tag = sprintf( '%s stop', host )

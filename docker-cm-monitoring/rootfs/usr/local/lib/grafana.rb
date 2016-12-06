@@ -70,8 +70,8 @@ class Grafana
 
     end
 
-    version              = '1.3.0'
-    date                 = '2016-11-22'
+    version              = '1.3.2'
+    date                 = '2016-11-28'
 
     @log.info( '-----------------------------------------------------------------' )
     @log.info( ' CoreMedia - Grafana Dashboard Management' )
@@ -147,20 +147,6 @@ class Grafana
     return true
 
   end
-
-
-  # OBSOLETE
-#   def shortHostname( hostname )
-#
-#     if( ! isIp?( hostname ) )
-#       shortHostname   = hostname.split( '.' ).first
-#     else
-#       shortHostname   = hostname
-#     end
-#
-#     return shortHostname
-#
-#   end
 
 
   def supportMbean?( data, service, mbean, key = nil )
@@ -276,14 +262,95 @@ class Grafana
     return result
   end
 
-  # add dashboards for a host
-  def addDashbards( host, recreate = false )
 
-    @log.info("Adding dashboards for host #{host}, recreate: #{recreate}")
+  def addAnnotations( templateJson )
 
-    if( recreate )
-      deleteDashboards( host )
+    # add or overwrite annotations
+    annotations = '
+      {
+        "list": [
+          {
+            "name": "created",
+            "enable": false,
+            "iconColor": "rgb(93, 227, 12)",
+            "datasource": "events",
+            "tags": "%HOST% created&set=intersection"
+          },
+          {
+            "name": "destoyed",
+            "enable": false,
+            "iconColor": "rgb(227, 57, 12)",
+            "datasource": "events",
+            "tags": "%HOST% destroyed&set=intersection"
+          },
+          {
+            "name": "Load Tests",
+            "enable": false,
+            "iconColor": "rgb(26, 196, 220)",
+            "datasource": "events",
+            "tags": "%HOST% loadtest&set=intersection"
+          },
+          {
+            "name": "Deployments",
+            "enable": false,
+            "iconColor": "rgb(176, 40, 253)",
+            "datasource": "events",
+            "tags": "%HOST% deployment&set=intersection"
+          }
+        ]
+      }
+    '
+
+    if( templateJson.is_a?( String ) )
+      templateJson = JSON.parse( templateJson )
     end
+
+    annotation = templateJson.dig( 'dashboard', 'annotations' )
+
+    if( annotation != nil )
+      templateJson['dashboard']['annotations'] = JSON.parse( annotations )
+    end
+
+    return templateJson
+
+  end
+
+
+  def addTags( templateJson )
+
+    tags = @additionalTags
+
+    # add tags
+    if( templateJson.is_a?( String ) )
+      templateJson = JSON.parse( templateJson )
+    end
+
+    currentTags = templateJson.dig( 'dashboard', 'tags' )
+
+    if( currentTags != nil && tags != nil )
+
+      currentTags << tags
+      currentTags.flatten!.sort!
+
+      templateJson['dashboard']['tags'] = currentTags
+    end
+
+    if( templateJson.is_a?( Hash ) )
+      templateJson = JSON.generate( templateJson )
+    end
+
+    return templateJson
+
+  end
+
+
+  # add dashboards for a host
+  def addDashbards( host, options = {} )
+
+    @log.info( sprintf( 'Adding dashboards for host \'%s\'', host ) )
+
+    @additionalTags = options['tags']     ? options['tags']     : []
+    createOverview  = options['overview'] ? options['overview'] : false
 
     if( self.checkGrafana?() == false )
 
@@ -313,16 +380,6 @@ class Grafana
       servicesTmp.delete( 'mongodb' )
       servicesTmp.delete( 'node_exporter' )
       servicesTmp.delete( 'demodata-generator' )
-
-#       # wait for the last service result in our memcahce
-#       memcacheKey = cacheKey( 'result', host, servicesTmp.last )
-#
-#       @monitoringResultJson = getJsonFromFile( memcacheKey, true )
-#
-#       if ( @monitoringResultJson == nil )
-#         @log.error( "No monitoring.result file found. Exiting." )
-#         return nil
-#       end
 
       # determine type of service from mergedHostData.json file, e.g. cae, caefeeder, contentserver
       mergedHostJson = self.getJsonFromFile( @mergedHostFile )
@@ -382,10 +439,10 @@ class Grafana
           @log.debug( sprintf( "Found Template paths: %s, %s" , serviceTemplate , additionalTemplatePaths ) )
 
           options = {
-            :description => description,
-            :serviceName => serviceName,
-            :normalizedName => normalizedName,
-            :serviceTemplate => serviceTemplate,
+            :description             => description,
+            :serviceName             => serviceName,
+            :normalizedName          => normalizedName,
+            :serviceTemplate         => serviceTemplate,
             :additionalTemplatePaths => additionalTemplatePaths
           }
 
@@ -395,27 +452,32 @@ class Grafana
         @log.debug( '`---------------------------------------------------------' )
       end
 
-
       # Overview Template
-      self.generateOverviewTemplate( services )
+      if( createOverview == true )
+        self.generateOverviewTemplate( services )
+      end
 
       # LicenseInformation
       if( servicesTmp.include?( 'content-management-server' ) || servicesTmp.include?( 'master-live-server' ) || servicesTmp.include?( 'replication-live-server' ) )
         self.generateLicenseTemplate( host, services )
       end
 
+      namedTemplate = Array.new()
+
       # MemoryPools for many Services
-      self.addNamedTemplate( 'cm-memory-pool.json' )
+      namedTemplate.push( 'cm-memory-pool.json' )
 
       # CAE Caches
       if( servicesTmp.include?( 'cae-preview' ) || servicesTmp.include?( 'cae-live' ) )
 
-        self.addNamedTemplate( 'cm-cae-cache-classes.json' )
+        namedTemplate.push( 'cm-cae-cache-classes.json' )
 
         if( self.beanAvailable?( host, 'cae-preview', 'CacheClassesIBMAvailability' ) == true )
-          self.addNamedTemplate( 'cm-cae-cache-classes-ibm.json' )
+          namedTemplate.push( 'cm-cae-cache-classes-ibm.json' )
         end
       end
+
+      self.addNamedTemplate( namedTemplate )
 
     end
 
@@ -447,9 +509,11 @@ class Grafana
 
 
   # delete the dashboards for a host
-  def deleteDashboards( host )
+  def deleteDashboards( host, tags = [] )
 
     @log.debug( sprintf( 'Deleting dashboards for host %s', host ) )
+
+    dashboards = Array.new()
 
     if( self.checkGrafana?() == false )
 
@@ -464,7 +528,20 @@ class Grafana
 
     self.prepare( host )
 
-    dashboards = self.searchDashboards( @shortHostname )
+#     if( tags.count() != 0 )
+#
+#       @log.debug( '  and tags:' )
+#
+#       tags.each do |t|
+#
+#         @log.debug( sprintf( '    - %s', t ) )
+#
+# #        dashboards.push( self.searchDashboards( t ) )
+#       end
+#     end
+
+    dashboards.push( self.searchDashboards( @shortHostname ) )
+    dashboards.flatten!
 
     if( dashboards != false )
 
@@ -480,7 +557,7 @@ class Grafana
 
         dashboards.each do |i|
 
-          if ( (i.include?"group") && (!host.include?"group") )
+          if( (i.include?"group") && ( !host.include?"group") )
             # Don't delete group templates except if deletion is forced
             next
           end
@@ -573,18 +650,6 @@ class Grafana
 
     end
 
-#    if( responseCode >= 200 && responseCode <= 299 ) || ( responseCode >= 400 && responseCode <= 499 )
-#
-#      responseBody  = JSON.parse( response.body )
-#      dashboards    = responseBody.collect { |item| item['uri'] }
-#
-#      return( dashboards )
-#    else
-#      @log.info("No dashboards found")
-#      @log.error( "GET on #{uri} failed: HTTP #{response.code} - #{response.body}" )
-#      return false
-#    end
-
   end
 
 
@@ -606,6 +671,15 @@ class Grafana
 
     data.each do |d|
       d.gsub!( sprintf( 'db/%s-', @shortHostname ), '' )
+    end
+
+    if( data.count == 0 )
+      status = 204
+
+      return {
+        :status     => 204,
+        :message    => 'no Dashboards found'
+      }
     end
 
     return {
@@ -735,7 +809,7 @@ class Grafana
   end
 
 
-  def getOverviewTemplateRows(services)
+  def getOverviewTemplateRows( services )
 
     rows = Array.new()
     dir  = Array.new()
@@ -765,6 +839,10 @@ class Grafana
         dir << part['service'].to_s.strip
       end
     end
+
+    # TODO
+    # add overwriten templates!
+
 
     intersect = dir & srv
 
@@ -936,43 +1014,7 @@ class Grafana
       end
     end
 
-    # add or overwrite annotations
-    annotations = '
-      {
-        "list": [
-          {
-            "name": "created",
-            "enable": true,
-            "iconColor": "rgb(93, 227, 12)",
-            "datasource": "events",
-            "tags": "%HOST% created&set=intersection"
-          },
-          {
-            "name": "destoyed",
-            "enable": true,
-            "iconColor": "rgb(227, 57, 12)",
-            "datasource": "events",
-            "tags": "%HOST% destroyed&set=intersection"
-          },
-          {
-            "name": "Load Tests",
-            "enable": true,
-            "iconColor": "rgb(26, 196, 220)",
-            "datasource": "events",
-            "tags": "%HOST% loadtest&set=intersection"
-          },
-          {
-            "name": "Deployments",
-            "enable": true,
-            "iconColor": "rgb(176, 40, 253)",
-            "datasource": "events",
-            "tags": "%HOST% deployment&set=intersection"
-          }
-        ]
-      }
-    '
-
-    templateJson['dashboard']['annotations'] = JSON.parse( annotations )
+    templateJson = self.addAnnotations( templateJson )
 
     json = JSON.generate( templateJson )
 
@@ -983,41 +1025,61 @@ class Grafana
 
   end
 
+  # use array to add more than on template
+  def addNamedTemplate( templates = [] )
 
-  def addNamedTemplate( name )
+    @log.info( 'add named template' )
 
-    filename = sprintf( '%s/%s', @templateDirectory, name )
+    if( templates.count() != 0 )
 
-    if( File.exist?( filename ) )
+      templates.each do |template|
 
-      file = File.read( filename )
+        filename = sprintf( '%s/%s', @templateDirectory, template )
 
-      self.sendTemplateToGrafana( file )
+        if( File.exist?( filename ) )
 
+          @log.info( sprintf( '  - %s', File.basename( filename ).strip ) )
+
+#         file = File.read( filename )
+#         file = self.addAnnotations( file )
+#         file = JSON.generate( file )
+
+          self.sendTemplateToGrafana(
+            JSON.generate(
+              self.addAnnotations(
+                File.read( filename )
+              )
+            )
+          )
+        end
+      end
     end
   end
 
 
   def sendTemplateToGrafana( templateFile, serviceName = nil )
 
-    templateFile = regenerateGrafanaTemplateIDs(templateFile)
+    templateFile = regenerateGrafanaTemplateIDs( templateFile )
 
     if( !templateFile )
-      @log.error( "Cannot create dashboard, invalid json" )
+      @log.error( 'Cannot create dashboard, invalid json' )
       return
     end
 
     templateFile.gsub!( '%HOST%'     , @grafanaHostname )
     templateFile.gsub!( '%SHORTHOST%', @shortHostname )
     templateFile.gsub!( '%TAG%'      , @shortHostname )
-    if (serviceName)
+    if( serviceName )
       templateFile.gsub!( '%SERVICE%'  , serviceName )
     end
+
+    templateFile = self.addTags( templateFile )
 
     grafanaDbUri = URI( sprintf( '%s/api/dashboards/db', @grafanaURI ) )
 
     response = nil
     Net::HTTP.start(grafanaDbUri.host, grafanaDbUri.port) do |http|
+
       request = Net::HTTP::Post.new grafanaDbUri.request_uri
       request.add_field('Content-Type', 'application/json')
       request.basic_auth( @grafanaAPIUser, @grafanaAPIPass )

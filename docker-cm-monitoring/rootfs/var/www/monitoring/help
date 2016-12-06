@@ -1,56 +1,101 @@
 
-CoreMedia Monitoring API - v1.1
+CoreMedia Monitoring API - v2
 
-Short description of the ReST API
+Short description of the REST API
 
-  Shows all hosts known to the monitoring
-    curl http://localhost/api
+  -> Please take a look at the Documentation for more Examples! <-
 
-  View the information about the host $name
-    curl http://localhost/api/$name
+  - Shows all hosts known to the monitoring
+    curl \
+      --silent \
+      --request GET \
+      http://localhost/api/v2/host | \
+      json_reformat
 
-
-  Adding a Host to monitoring
-  First, starting the service discovery, tehen create checks for Icinga2 and at last, create the Grafana Dashboards
-    curl -X POST http://localhost/api/$name
-
-  Re-add a host for monitoring
-  Deletes all service discovery Data, Icinga2 Checks, and Grafana Dashboards
-    curl -X POST http://localhost/api/$name/force
-
-  Create an annotation that the host was created
-    curl -X POST http://localhost/api/a/node/create/$name
-
-  Create an annotation that the host was deleted
-    curl -X POST http://localhost/api/a/node/destroy/$name
-
-  Create an annotation for starting a load test
-    curl -X POST http://localhost/api/a/loadtest/start/$name
-
-  Creates an annotation for terminating a load test
-    curl -X POST http://localhost/api/a/loadtest/stop/$name
-
-  Creates an annotation for a deployment
-    curl -X POST http://localhost/api/a/deployment/$name/$text
-
-  Creates a free annotation (NOT TESTED Can lead to problems)
-  $tags can contain a series of tags, which must be separated by '+'
-    curl -X POST http://localhost/api/a/$name/$descr/$text/$tags
-
-  Adds an Grafana overview dashboard to a group of hosts.
-  $names can contain a series of Hostnames, which must be separated by '+'
-  The hosts must already have been added to the monitoring.
-    curl -X POST http://localhost/api/g/$names
-
-  Re-adds an Grafana overview dashboard to a group of hosts.
-  $names can contain a series of Hostnames, which must be separated by '+'
-  The hosts must already have been added to the monitoring.
-    curl -X POST http://localhost/api/g/$names/force
+  - View the information about the host $name
+    curl \
+      --silent \
+      --request GET \
+      http://localhost/api/v2/host/${HOSTNAME} | \
+      json_reformat
 
 
-  Remove a host from monitoring
-  Grafana dashboards are preserved and can continue to be used
-    curl -X DELETE http://localhost/api/$name
+  - Add customized configuration (eg. Ports)
+    curl \
+      --silent \
+      --request POST \
+      --data '{ "ports": [3306,9100,28017] }' \
+      http://localhost/api/v2/config/${HOSTNAME} | \
+      json_reformat
 
-  Removing a host from monitoring, including removing the Grafana Dashboards
-    curl -X DELETE http://localhost/api/$name/force
+  - List custom configuration
+    curl \
+      --silent \
+      http://localhost/api/v2/config/${HOSTNAME} | \
+      json_reformat
+
+  - Delete custom configuration
+    curl \
+      --silent \
+      --request DELETE \
+      http://localhost/api/v2/config/${HOSTNAME} | \
+      json_reformat
+
+
+  - Adding a Host to monitoring
+    curl \
+      --silent \
+      --request POST \
+      --data '{ "force": true }' \
+      http://localhost/api/v2/host/${HOSTNAME} | \
+      json_reformat
+
+  - Remove Host from Monitoring
+    curl \
+      --silent \
+      --request DELETE \
+      --data '{ "grafana": true }' \
+      http://localhost/api/v2/host/${HOSTNAME} | \
+      json_reformat
+
+
+  - Create an annotation that the host was created
+    curl \
+      --silent \
+      --request POST \
+      --data '{ "command": "create", "argument": "node" }' \
+      http://localhost/api/v2/host/${HOSTNAME} | \
+      json_reformat
+
+  - Create an annotation that the host was deleted
+    curl \
+      --silent \
+      --request POST \
+      --data '{ "command": "destroy", "argument": "node" }' \
+      http://localhost/api/v2/host/${HOSTNAME} | \
+      json_reformat
+
+  - Create an annotation for starting a load test
+    curl \
+      --silent \
+      --request POST \
+      --data '{ "command": "loadtest", "argument": "start" }' \
+      http://localhost/api/v2/host/${HOSTNAME} | \
+      json_reformat
+
+  - Creates an annotation for terminating a load test
+    curl \
+      --silent \
+      --request POST \
+      --data '{ "command": "loadtest", "argument": "stop" }' \
+      http://localhost/api/v2/host/${HOSTNAME} | \
+      json_reformat
+
+  - Creates an annotation for a deployment
+    curl \
+      --silent \
+      --request POST \
+      --data '{ "command": "deployment", "message": "version 7.1.50", "tags": ["7.1.50"] }' \
+      http://localhost/api/v2/host/${HOSTNAME} | \
+      json_reformat
+

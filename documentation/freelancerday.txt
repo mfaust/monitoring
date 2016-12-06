@@ -1,0 +1,17 @@
+
+# add host
+# curl -X POST http://localhost/api/h/monitoring-16-01
+
+# information
+# curl  http://localhost/api/monitoring-16-01
+
+# delete host
+# curl -X DELETE http://localhost/api/monitoring-16-01
+
+# lasttest
+# curl -X POST http://localhost/api/a/loadtest/start/monitoring-16-01 ; tools/bin/stress.sh
+
+#
+# curl -X POST http://localhost/api/a/loadtest/stop/monitoring-16-01
+
+

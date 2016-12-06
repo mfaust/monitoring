@@ -72,11 +72,11 @@ class DataCollector
       require 'dalli'
 
       # add cache setting
-      # eg.cache for 10 min here. deault options is never expire
+      # eg.cache for 2 min here. default options is never expire
       memcacheOptions = {
         :compress   => true,
         :namespace  => 'monitoring',
-        :expires_in => 60*10
+        :expires_in => 60*2
       }
 
       @mc = Dalli::Client.new( sprintf( '%s:%s', @memcacheHost, @memcachePort ), memcacheOptions )

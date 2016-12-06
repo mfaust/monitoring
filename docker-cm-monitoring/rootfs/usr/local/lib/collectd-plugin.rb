@@ -619,16 +619,20 @@ class CollecdPlugin
       memory     = value['memory']     ? value['memory']     : nil
       filesystem = value['filesystem'] ? value['filesystem'] : nil
 
+
+
       if( cpu != nil )
+
+        n = cpu.values.inject { |m, el| m.merge( el ) { |k, old_v, new_v| old_v.to_i + new_v.to_i } }
 
         cpu.each do |c,d|
 
-          ['guest','idle','iowait','irq','nice','softirq','steal','system','user'].each do |m|
+          ['idle','iowait','nice','system','user'].each do |m|
 
-            point = d[m] ? d[m] : nil
+            point = d[m] ? d[m].to_i : nil
 
             if( point != nil )
-              result.push( sprintf( format, @Host, @Service, c, 'cpu', m, @interval, point ) )
+              result.push( sprintf( 'PUTVAL %s/%s-%s/cpu-%s_%s interval=%s N:%s', @Host, @Service, c, m, @interval, point ) )
             end
           end
         end
@@ -642,7 +646,7 @@ class CollecdPlugin
           point = load[m] ? load[m] : nil
 
           if( point != nil )
-            result.push( sprintf( format, @Host, @Service, 'load', 'load', m, @interval, point ) )
+            result.push( sprintf( format, @Host, @Service, 'load', 'count', m, @interval, point ) )
           end
         end
       end
@@ -650,14 +654,25 @@ class CollecdPlugin
 
       if( memory != nil )
 
-        ['MemAvailable','MemFree','MemTotal','SwapTotal','SwapFree','SwapCached'].each do |m|
+        memAvailable = memory['MemAvailable'] ? memory['MemAvailable'] : nil
+        memFree      = memory['MemFree']      ? memory['MemFree']      : nil
+        memTotal     = memory['MemTotal']     ? memory['MemTotal']     : nil
+        memUsed      = ( memTotal.to_i - memAvailable.to_i )
+        swapCached   = memory['SwapCached']   ? memory['SwapCached']   : nil
+        swapFree     = memory['SwapFree']     ? memory['SwapFree']     : nil
+        swapTotal    = memory['SwapTotal']    ? memory['SwapTotal']    : nil
+        swapUsed     = ( swapTotal.to_i - swapFree.to_i )
 
-          point = memory[m] ? memory[m] : nil
+        result.push( sprintf( format, @Host, @Service, 'memory', 'count', 'available', @interval, memAvailable ) )
+        result.push( sprintf( format, @Host, @Service, 'memory', 'count', 'free'     , @interval, memFree ) )
+        result.push( sprintf( format, @Host, @Service, 'memory', 'count', 'total'    , @interval, memTotal ) )
+        result.push( sprintf( format, @Host, @Service, 'memory', 'count', 'used'     , @interval, memUsed ) )
 
-          if( point != nil )
-            result.push( sprintf( format, @Host, @Service, 'memory', 'memory', m, @interval, point ) )
-          end
-        end
+        result.push( sprintf( format, @Host, @Service, 'swap', 'count', 'cached', @interval, swapCached ) )
+        result.push( sprintf( format, @Host, @Service, 'swap', 'count', 'free'  , @interval, swapFree ) )
+        result.push( sprintf( format, @Host, @Service, 'swap', 'count', 'total' , @interval, swapTotal ) )
+        result.push( sprintf( format, @Host, @Service, 'swap', 'count', 'used'  , @interval, swapUsed ) )
+
       end
 
 
@@ -665,12 +680,14 @@ class CollecdPlugin
 
         filesystem.each do |f,d|
 
-          ['avail','files','free','size'].each do |m|
+          ['avail','free','size'].each do |m|
 
             point = d[m] ? d[m] : nil
 
             if( point != nil )
-              result.push( sprintf( format, @Host, @Service, 'filesystem', f, m, @interval, point ) )
+
+              'PUTVAL %s/%s-%s/%s-%s interval=%s N:%s'
+              result.push( sprintf( 'PUTVAL %s/%s-filesystem/count-%s_%s interval=%s N:%s', @Host, @Service, f, m, @interval, point ) )
             end
           end
         end
