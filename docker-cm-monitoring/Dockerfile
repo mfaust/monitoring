@@ -1,5 +1,5 @@
 
-FROM bodsch/docker-alpine-base:1610-02
+FROM bodsch/docker-alpine-base:alpine-3.5
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
@@ -21,16 +21,13 @@ RUN \
     build-base \
     imagemagick-dev \
     mysql-dev \
-    bash \
     drill \
     ruby-dev \
     ruby-irb \
     ruby-io-console \
     ruby-rdoc \
-    nano \
     python \
     jq \
-    jo \
     bc \
     yajl-tools \
     collectd \
@@ -55,13 +52,15 @@ RUN \
      ruby-supervisor \
      sinatra \
      thin \
-     dalli
-
-RUN \
+     dalli && \
+  mv /etc/collectd/collectd.conf /etc/collectd/collectd.conf.dist && \
+  apk del --purge \
+    build-base \
+    imagemagick-dev \
+    mysql-dev \
+    ruby-dev \
+    zlib-dev && \
   rm -rf /var/cache/apk/*
-
-RUN \
-  mv /etc/collectd/collectd.conf /etc/collectd/collectd.conf.dist
 
 COPY rootfs/ /
 

@@ -129,8 +129,6 @@ class ServiceDiscovery
       exit 1
     end
 
-
-
   end
 
 
@@ -435,46 +433,63 @@ class ServiceDiscovery
   def deleteHost( host )
 
     @log.info( sprintf( 'delete Host \'%s\'',  host ) )
-    chacheDirectory  = sprintf( '%s/%s', @cacheDirectory, host )
 
-    if( File.exist?( chacheDirectory ) )
+    status  = 400
+    message = 'Hosts not exists'
 
-      FileUtils.rm_r( chacheDirectory )
+    cacheDirectory  = sprintf( '%s/%s', @cacheDirectory, host )
 
-      @status  = 200
-      @message = 'Host successful removed'
-    else
+    if( File.exist?( cacheDirectory ) )
 
-      @status  = 400
-      @message = 'Hosts not exists'
+      FileUtils.rm_r( cacheDirectory )
+
+#      # hmmm ... prepare our config.json or not?
+#      ['discovery.json','host.json','mergedHostData.json'].each do |f|
+#        FileUtils.rm( sprintf( '%s/%s', @cacheDirectory, f ) , :force => true )
+#      end
+
+      status  = 200
+      message = 'Host successful removed'
     end
 
     return {
-      :status  => @status,
-      :message => @message
+      :status  => status,
+      :message => message
     }
 
   end
 
   # add Host and discovery applications
-  def addHost( host, ports = [], force = false )
+  def addHost( host, options = {} )
 
-    @log.info( "Adding host #{host}, force: #{force}")
+    @log.info( sprintf( 'Adding host \'%s\'', host ) )
 
-    # force delete
-    if( force == true )
-      self.deleteHost( host )
-    end
+#     services = options['services'] ? options['services'] : []
+#     force    = options['force']    ? options['force']    : false
+#
+#     if( services.count != 0 )
+#
+#       @log.info( 'Use additional services:' )
+#       @log.info( "  #{services}" )
+#     end
 
-    chacheDirectory  = sprintf( '%s/%s', @cacheDirectory, host )
 
-    if( !File.exist?( chacheDirectory ) )
-      Dir.mkdir( chacheDirectory )
+    # OBSOLETE
+#     # force delete
+#     if( force == true )
+#       self.deleteHost( host )
+#     end
+
+    # build Host CacheDirectory (if not exitsts)
+    cacheDirectory  = sprintf( '%s/%s', @cacheDirectory, host )
+
+    if( !File.exist?( cacheDirectory ) )
+      Dir.mkdir( cacheDirectory )
     end
 
     discoveryFileName = 'discovery.json'
 
-    if( File.exist?( sprintf( '%s/%s', chacheDirectory, discoveryFileName ) ) == true )
+    if( File.exist?( sprintf( '%s/%s', cacheDirectory, discoveryFileName ) ) == true )
 
       status  = 409
       message = 'Host already created'
@@ -484,7 +499,6 @@ class ServiceDiscovery
         :message => message
       }
     end
-
 
     # first, we check if our jolokia accessable
     if( ! jolokiaIsAvailable?() )
@@ -500,9 +514,9 @@ class ServiceDiscovery
 
     hostInfo = hostResolve( host )
 
-    ip            = hostInfo[:ip]    ? hostInfo[:ip]    : nil # dnsResolve( host )
-    shortHostName = hostInfo[:short] ? hostInfo[:short] : nil # dnsResolve( host )
-    longHostName  = hostInfo[:long]  ? hostInfo[:long]  : nil # dnsResolve( host )
+    ip            = hostInfo[:ip]    ? hostInfo[:ip]    : nil
+    shortHostName = hostInfo[:short] ? hostInfo[:short] : nil
+    longHostName  = hostInfo[:long]  ? hostInfo[:long]  : nil
 
     # second, if the that we whant monitored, available
     if( isRunning?( ip ) == false )
@@ -516,12 +530,28 @@ class ServiceDiscovery
       }
     end
 
-    File.open( sprintf( '%s/host.json', chacheDirectory ) , 'w' ) { |f| f.write( JSON.pretty_generate( hostInfo ) ) }
+    File.open( sprintf( '%s/host.json', cacheDirectory ) , 'w' ) { |f| f.write( JSON.pretty_generate( hostInfo ) ) }
 
-    # our default known ports
-    if( ports.empty? )
-      ports = @scanPorts
+    # check our customized config
+    customConfig = sprintf( '%s/config.json', cacheDirectory )
+    if( File.exist?( customConfig ) )
+
+      data = JSON.parse( File.read( customConfig ) )
+
+      ports = data['ports'] ? data['ports'] : nil
+
+      if( ports == nil )
+        ports = @scanPorts
+      end
+    else
+
+      # our default known ports
+      if( ports.empty? )
+        ports = @scanPorts
+      end
     end
+
+    @log.debug( "use ports: #{ports}" )
 
     discover = Hash.new()
     services = Hash.new()
@@ -549,9 +579,9 @@ class ServiceDiscovery
     # merge discovered services with cm-services.yaml
     services = self.createHostConfig( services )
 
-    File.open( sprintf( '%s/%s', chacheDirectory, discoveryFileName ) , 'w' ) { |f| f.write( JSON.pretty_generate( services ) ) }
+    File.open( sprintf( '%s/%s', cacheDirectory, discoveryFileName ) , 'w' ) { |f| f.write( JSON.pretty_generate( services ) ) }
 
-    status  = 201
+    status  = 200
     message = 'Host successful created'
 
     @services = services
@@ -612,16 +642,16 @@ class ServiceDiscovery
 
     else
 
-      chacheDirectory  = sprintf( '%s/%s', @cacheDirectory, host )
+      cacheDirectory  = sprintf( '%s/%s', @cacheDirectory, host )
       discoveryFileName = 'discovery.json'
 
-      file      = sprintf( '%s/%s', chacheDirectory, discoveryFileName )
+      file      = sprintf( '%s/%s', cacheDirectory, discoveryFileName )
 
       if( File.exist?( file ) == true )
 
         data = File.read( file )
 
-        h              = hostInformation( file, File.basename( chacheDirectory ) )
+        h              = hostInformation( file, File.basename( cacheDirectory ) )
         h['services' ] = JSON.parse( data )
 
         status   = 200

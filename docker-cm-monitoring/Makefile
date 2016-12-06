@@ -1,5 +1,5 @@
-TYPE := icinga2
-IMAGE_NAME := ${USER}-docker-${TYPE}
+TYPE := cm-monitoring
+IMAGE_NAME := docker-${TYPE}
 
 JOLOKIA_IP := $(docker inspect --format '{{ .NetworkSettings.IPAddress }}' jolokia 2>/dev/null)
 GRAPHITE_IP := $(docker inspect --format '{{ .NetworkSettings.IPAddress }}' graphite 2>/dev/null)
@@ -8,14 +8,17 @@ ICINGA2_IP := $(docker inspect --format '{{ .NetworkSettings.IPAddress }}' icing
 
 
 build:
-	docker build --rm --tag=$(IMAGE_NAME) .
+	docker build \
+    --rm \
+    --tag=$(IMAGE_NAME) \
+    .
 
 run:
 	docker run \
 		--detach \
 		--interactive \
 		--tty \
-		--hostname=${USER}-mysql \
+		--hostname=${IMAGE_NAME} \
 		--name=${USER}-${TYPE} \
 		$(IMAGE_NAME)
 
@@ -24,7 +27,7 @@ shell:
 		--rm \
 		--interactive \
 		--tty \
-		--hostname=${USER}-mysql \
+		--hostname=${IMAGE_NAME} \
 		--name=${USER}-${TYPE} \
 		$(IMAGE_NAME)
 

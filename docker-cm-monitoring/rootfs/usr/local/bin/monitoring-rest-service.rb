@@ -23,24 +23,24 @@ module Sinatra
 
       set :environment, :production
 
+      # default configuration
+      @logDirectory     = '/tmp/log'
+      @cacheDir         = '/tmp/cache'
+
+      @restServicePort  = 4567
+      @restServiceBind  = '0.0.0.0'
+
       if( File.exist?( '/etc/cm-monitoring.yaml' ) )
 
         config = YAML.load_file( '/etc/cm-monitoring.yaml' )
 
         @logDirectory     = config['logDirectory']         ? config['logDirectory']         : '/tmp/log'
         @cacheDir         = config['cacheDirectory']       ? config['cacheDirectory']       : '/tmp/cache'
-
         @restServicePort  = config['rest-service']['port'] ? config['rest-service']['port'] : 4567
         @restServiceBind  = config['rest-service']['bind'] ? config['rest-service']['bind'] : '0.0.0.0'
 
       else
         puts "no configuration exists, use default settings"
-
-        @logDirectory     = '/tmp/log'
-        @cacheDir         = '/tmp/cache'
-
-        @restServicePort  = 4567
-        @restServiceBind  = '0.0.0.0'
       end
 
 
@@ -92,16 +92,20 @@ module Sinatra
 
     # -----------------------------------------------------------------------------
 
+    before do
+      content_type :json
+    end
+
     before '/v2/*/:host' do
       request.body.rewind
       @request_paylod = request.body.read
     end
 
     # -----------------------------------------------------------------------------
-    # GET
+    # HELP
 
     # prints out a little help about our ReST-API
-    get '/help' do
+    get '/v2/help' do
 
       send_file File.join( settings.public_folder, 'help' )
 
@@ -109,176 +113,112 @@ module Sinatra
 
     # currently not supported
     get '/' do
-      content_type :json
 
-      result = m.listHost( nil )
+      send_file File.join( settings.public_folder, 'help' )
+
+    end
+
+    # -----------------------------------------------------------------------------
+    # CONFIGURE
+
+    #
+    # curl -X POST http://localhost/api/v2/config/foo \
+    #  --data '{ "ports": [200,300] }'
+    #
+    post '/v2/config/:host' do
+
+      host   = params[:host]
+      result = m.writeHostConfiguration( host, @request_paylod )
 
       response.status = result[:status]
       result.to_json
+
+    end
+
+    #
+    # curl http://localhost/api/v2/config/foo
+    #
+    get '/v2/config/:host' do
+
+      host   = params[:host]
+      result = m.getHostConfiguration( host )
+
+      response.status = result[:status]
+      result.to_json
+
+    end
+
+    #
+    # curl -X DELETE http://localhost/api/v2/config/foo
+    #
+    delete '/v2/config/:host' do
+
+      host   = params[:host]
+      result = m.removeHostConfiguration( host )
+
+      response.status = result[:status]
+      result.to_json
+    end
+
+    # -----------------------------------------------------------------------------
+    # HOST
+
+    #
+    # curl -X POST http://localhost/api/v2/host/foo \
+    #  --data '{ "force": false, "grafana": true, "icinga": false }'
+    #
+    post '/v2/host/:host' do
+
+      host   = params[:host]
+      result = m.addHost( host, @request_paylod )
+
+      response.status = result[:status]
+      result.to_json
+
+    end
+
+    # get information about all hosts
+    get '/v2/host' do
+
+      result = m.listHost( nil, request.env )
+
+      response.status = result[:status]
+      result.to_json
+
     end
 
     # get information about given 'host'
-    get '/:host' do
-      content_type :json
+    get '/v2/host/:host' do
 
-      result = m.listHost( params[:host] )
+      host   = params[:host]
+      result = m.listHost( host, request.env )
 
       response.status = result[:status]
       result.to_json
 
+    end
+
+    # remove named host from monitoring
+    delete '/v2/host/:host' do
+
+      host   = params[:host]
+      result = m.removeHost( host, @request_paylod )
+
+      response.status = result[:status]
+      result.to_json
     end
 
     # -----------------------------------------------------------------------------
-    # POST
+    # ANNOTATIONS
 
-    # DO NOT USE ANYMORE - THIS STYLE IS DEPRECATED
-    # PLEASE USE "post '/h/:host'"
-    # create new host
-    #  including icinga2 and grafana
-    post '/:host' do
-      content_type :json
+    post '/v2/annotation/:host' do
 
-      result = m.addHost( params[:host] )
+      host   = params[:host]
+      result = m.addAnnotation( host, @request_paylod )
 
       response.status = result[:status]
       result.to_json
-    end
 
-    # DO NOT USE ANYMORE - THIS STYLE IS DEPRECATED
-    # PLEASE USE "post '/h/:host/:force'"
-    # create new host
-    #  including icinga2 and grafana
-    post '/:host/force' do
-      content_type :json
-
-      result = m.addHost( params[:host], true )
-
-      response.status = result[:status]
-      result.to_json
-    end
-
-    # create new host
-    #  including icinga2 and grafana
-    post '/h/:host' do
-      content_type :json
-
-      result = m.addHost( params[:host] )
-
-      response.status = result[:status]
-      result.to_json
-    end
-
-    # delete EVERY dashboards and checks before create the host
-    #  including icinga2 and grafana
-    post '/h/:host/force' do
-
-      result = m.addHost( params[:host], true )
-
-      response.status = result[:status]
-      result.to_json
-    end
-
-    # create new group of hosts
-    post '/g/:hosts' do
-      content_type :json
-
-      hostsParam = params[:hosts]
-      hosts      = hostsParam.split('+')
-
-      result     = m.addGrafanaGroupOverview( hosts )
-
-      response.status = result[:status]
-      result.to_json
-    end
-
-    # delete EVERY dashboards before create the hostgroup
-    post '/g/:hosts/force' do
-      content_type :json
-
-      hostsParam = params[:hosts]
-      hosts      = hostsParam.split('+')
-
-      result     = m.addGrafanaGroupOverview( hosts, true )
-
-      response.status = result[:status]
-      result.to_json
-    end
-
-    # annotations ....
-    #  Host [create|destroy]
-    post '/a/node/:type/:host' do
-
-      host = params[:host]
-      type = params[:type]
-
-      case type
-      when 'create'
-        m.addAnnotation( host, 'create' )
-      when 'destroy'
-        m.addAnnotation( host, 'destroy' )
-      else
-        puts "The Type #{type} for Node Annotation are NOT supported! Please use 'create' or 'destroy'"
-      end
-    end
-
-    # Loadtests [start|stop]
-    post '/a/loadtest/:type/:host' do
-
-      host = params[:host]
-      type = params[:type]
-
-      case type
-      when 'start'
-        m.addAnnotation( host, 'start' )
-      when 'stop'
-        m.addAnnotation( host, 'stop' )
-      else
-        puts "The Type #{type} for Loadtest Annotation are NOT supported! Please use 'start' or 'stop'"
-      end
-    end
-
-    #
-    post '/a/deployment/:host/:annotation' do
-
-      host       = params[:host]
-      annotation = params[:annotation]
-
-      m.addAnnotation( host, 'deployment', annotation )
-    end
-
-    #
-    post '/a/:host/:descr/:annotation/:tags' do
-
-      host        = params[:hosts]
-      annotation  = params[:annotation]
-      description = params[:descr]
-      tags        = params[:tags].split('+')
-
-      m.addAnnotation( host, 'general', description, annotation, tags )
-    end
-
-    # -----------------------------------------------------------------------------
-    # DELETE
-
-    # delete a host
-    # WITHOUT Grafana Dashboards
-    delete '/:host' do
-      content_type :json
-
-      result = m.removeHost( params[:host] )
-
-      response.status = result[:status]
-      result.to_json
-    end
-
-    # delete a host
-    delete '/:host/:force' do
-      content_type :json
-
-      result = m.removeHost( params[:host], true )
-
-      response.status = result[:status]
-      result.to_json
     end
 
     # -----------------------------------------------------------------------------
