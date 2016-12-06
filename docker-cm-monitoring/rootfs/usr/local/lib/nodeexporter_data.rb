@@ -14,31 +14,64 @@ class NodeExporter
 
   def initialize( )
 
+    logFile            = sprintf( '%s/node_exporter-status.log', @logDirectory )
+
+    file      = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
+    file.sync = true
+    @log = Logger.new(file, 'weekly', 1024000)
+    @log.level = Logger::DEBUG
+    @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
+    @log.formatter = proc do |severity, datetime, progname, msg|
+      "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
+    end
+
   end
 
   def callService()
 
-    restClient = RestClient::Resource.new(
-      URI.encode( sprintf( 'http://%s:%s/metrics', @host, @port ) )
-    )
+    uri = URI( sprintf( 'http://%s:%s/metrics', @host, @port ) )
 
-    data = restClient.get()
-    body = data.body
+    response = nil
 
-    # remove all comments
-    body        = body.each_line.reject{ |x| x.strip =~ /(^.*)#/ }.join
+    begin
 
-    # get groups
-    @cpu        = body.each_line.select { |name| name =~ /^node_cpu/ }
-    @disk       = body.each_line.select { |name| name =~ /^node_disk/ }
-    @filefd     = body.each_line.select { |name| name =~ /^node_filefd/ }
-    @filesystem = body.each_line.select { |name| name =~ /^node_filesystem/ }
-    @hwmon      = body.each_line.select { |name| name =~ /^node_hwmon/ }
-    @forks      = body.each_line.select { |name| name =~ /^node_forks/ }
-    @load       = body.each_line.select { |name| name =~ /^node_load/ }
-    @memory     = body.each_line.select { |name| name =~ /^node_memory/ }
-    @netstat    = body.each_line.select { |name| name =~ /^node_netstat/ }
-    @network    = body.each_line.select { |name| name =~ /^node_network/ }
+      Net::HTTP.start( uri.host, uri.port ) do |http|
+        request = Net::HTTP::Get.new( uri.request_uri )
+
+        response     = http.request( request )
+        responseCode = response.code.to_i
+
+        # TODO
+        # Errorhandling
+        if( responseCode != 200 )
+          @log.error( sprintf( ' [%s] - Error', responseCode ) )
+          @log.error( response.body )
+        elsif( responseCode == 200 )
+
+          body = response.body
+          # remove all comments
+          body        = body.each_line.reject{ |x| x.strip =~ /(^.*)#/ }.join
+
+          # get groups
+          @cpu        = body.each_line.select { |name| name =~ /^node_cpu/ }
+          @disk       = body.each_line.select { |name| name =~ /^node_disk/ }
+          @filefd     = body.each_line.select { |name| name =~ /^node_filefd/ }
+          @filesystem = body.each_line.select { |name| name =~ /^node_filesystem/ }
+          @hwmon      = body.each_line.select { |name| name =~ /^node_hwmon/ }
+          @forks      = body.each_line.select { |name| name =~ /^node_forks/ }
+          @load       = body.each_line.select { |name| name =~ /^node_load/ }
+          @memory     = body.each_line.select { |name| name =~ /^node_memory/ }
+          @netstat    = body.each_line.select { |name| name =~ /^node_netstat/ }
+          @network    = body.each_line.select { |name| name =~ /^node_network/ }
+
+        end
+      end
+    rescue Exception => e
+#      @log.error( e )
+#      @log.error( e.backtrace )
+      raise( e )
+
+    end
 
   end
 
@@ -272,16 +305,22 @@ class NodeExporter
 #    puts @host
 #    puts @port
 
-    self.callService( )
+    begin
 
-    return {
-      :cpu        => self.collectCpu( @cpu ),
-      :load       => self.collectLoad( @load ),
-      :memory     => self.collectMemory( @memory ),
-      :network    => self.collectNetwork( @network ),
-      :disk       => self.collectDisk( @disk ),
-      :filesystem => self.collectFilesystem( @filesystem )
-    }
+      self.callService( )
+
+      return {
+        :cpu        => self.collectCpu( @cpu ),
+        :load       => self.collectLoad( @load ),
+        :memory     => self.collectMemory( @memory ),
+        :network    => self.collectNetwork( @network ),
+        :disk       => self.collectDisk( @disk ),
+        :filesystem => self.collectFilesystem( @filesystem )
+      }
+    rescue Exception => e
+      @log.error( "An error occurred for query: #{e}" )
+      return false
+    end
 
   end
 
