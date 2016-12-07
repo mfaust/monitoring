@@ -3,7 +3,7 @@
 # 13.09.2016 - Bodo Schulz
 #
 #
-# v1.2.5
+# v1.3.1
 # -----------------------------------------------------------------------------
 
 require 'socket'
@@ -86,8 +86,8 @@ class ServiceDiscovery
       Dir.mkdir( @cacheDirectory )
     end
 
-    version              = '1.2.5'
-    date                 = '2016-11-21'
+    version              = '1.3.1'
+    date                 = '2016-12-07'
 
     @log.info( '-----------------------------------------------------------------' )
     @log.info( ' CoreMedia - Service Discovery' )
@@ -546,9 +546,7 @@ class ServiceDiscovery
     else
 
       # our default known ports
-      if( ports.empty? )
-        ports = @scanPorts
-      end
+      ports = @scanPorts
     end
 
     @log.debug( "use ports: #{ports}" )
