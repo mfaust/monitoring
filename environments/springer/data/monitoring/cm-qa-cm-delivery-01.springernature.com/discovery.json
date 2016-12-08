@@ -19,6 +19,7 @@
     "application": [
       "cae",
       "caches"
-    ]
+    ],
+    "template": "cae-live"
   }
 }

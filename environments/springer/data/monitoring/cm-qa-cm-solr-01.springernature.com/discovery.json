@@ -4,8 +4,11 @@
     "description": "Solr Master",
     "cores": [
       "live",
+      "live2",
       "preview",
-      "studio"
+      "preview2",
+      "studio",
+      "studio2"
     ],
     "application": [
       "solr"

@@ -50,8 +50,11 @@
     "description": "Solr Master",
     "cores": [
       "live",
+      "live2",
       "preview",
-      "studio"
+      "preview2",
+      "studio",
+      "studio2"
     ],
     "application": [
       "solr"
@@ -68,7 +71,15 @@
     ]
   },
   "caefeeder2-preview": {
-    "port": 46099
+    "port": 46099,
+    "description": "CAEFeeder2 Preview",
+    "feeder": "preview",
+    "cap_connection": true,
+    "uapi_cache": true,
+    "application": [
+      "caefeeder"
+    ],
+    "template": "caefeeder-preview"
   },
   "caefeeder-live": {
     "port": 47099,
@@ -88,6 +99,7 @@
     "uapi_cache": true,
     "application": [
       "caefeeder"
-    ]
+    ],
+    "template": "caefeeder-live"
   }
 }
