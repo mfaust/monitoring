@@ -103,31 +103,45 @@ end
 
       cmd = sprintf( 'dig -x %s +short', host )
 
+      @log.debug( cmd )
+
       Open3.popen3( cmd ) do |stdin, stdout, stderr, wait_thr|
 
         returnValue = wait_thr.value
+        stdOut      = stdout.gets
+        stdErr      = stderr.gets
 
-        if( returnValue == 0 )
-          host = stdout.gets
+        if( returnValue == 0 && !stdOut.to_s.empty? )
+@log.debug( '...' )
+          host = stdOut
 #          host = line[0...-2]
         else
-          @log.error( stderr.gets )
+          @log.error( stdErr )
+
+          @log.debug( host )
         end
       end
     end
 
     line  = nil
 
+    @log.debug( host )
+
     cmd   = sprintf( 'host -t A %s', host )
+
+    @log.debug( cmd )
 
     Open3.popen3( cmd ) do |stdin, stdout, stderr, wait_thr|
 
       returnValue = wait_thr.value
+      stdOut      = stdout.gets
+      stdErr      = stderr.gets
 
-      if( returnValue == 0 )
-        line = stdout.gets
+      if( returnValue == 0 && !stdOut.to_s.empty? )
+@log.debug( '---' )
+        line = stdOut
       else
-        @log.error( stderr.gets )
+        @log.error( stdErr )
       end
     end
 
@@ -142,7 +156,7 @@ end
     end
 
     result = {
-      :ip    => ip,
+      :ip    => ip != nil ? ip : host,
       :short => short,
       :long  => long
     }

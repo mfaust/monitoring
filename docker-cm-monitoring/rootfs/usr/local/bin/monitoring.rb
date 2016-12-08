@@ -31,7 +31,7 @@ class Monitoring
     file.sync       = true
     @log            = Logger.new( file, 'weekly', 1024000 )
 #    @log = Logger.new( STDOUT )
-    @log.level      = Logger::INFO
+    @log.level      = Logger::DEBUG
     @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
     @log.formatter  = proc do |severity, datetime, progname, msg|
       "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
@@ -525,22 +525,26 @@ class Monitoring
       enabledGrafana  = @enabledGrafana
       enabledIcinga   = @enabledIcinga
 
-      payload = payload.dig( 'rack.request.form_vars' )
+#       @log.debug( payload )
+#
+#       if( payload != nil )
+#         payload = payload.dig( 'rack.request.form_vars' )
+#       end
+#
+#       if( payload != nil )
+#         enableDiscovery = payload.keys.include?('discovery')  ? payload['discovery']  : @enabledDiscovery
+#         enabledGrafana  = payload.keys.include?('grafana')    ? payload['grafana']    : @enabledGrafana
+#         enabledIcinga   = payload.keys.include?('icinga')     ? payload['icinga']     : @enabledIcinga
+#       end
 
-      if( payload != nil )
-        enableDiscovery = payload.keys.include?('discovery')  ? payload['discovery']  : @enabledDiscovery
-        enabledGrafana  = payload.keys.include?('grafana')    ? payload['grafana']    : @enabledGrafana
-        enabledIcinga   = payload.keys.include?('icinga')     ? payload['icinga']     : @enabledIcinga
-      end
-
-      result[host.to_sym] ||= {}
+      result[host.to_s] ||= {}
 
       hostConfiguration        = self.getHostConfiguration( host )
       hostConfigurationStatus  = hostConfiguration[:status]
       hostConfigurationMessage = hostConfiguration[:message]
 
       if( hostConfigurationStatus == 200 )
-        result[host.to_sym][:custom_config] = hostConfigurationMessage
+        result[host.to_s][:custom_config] = hostConfigurationMessage
       end
 
       if( enableDiscovery == true )
@@ -550,7 +554,7 @@ class Monitoring
 
         @log.debug( "discovery: #{discoveryResult}" )
 
-        result[host.to_sym][:discovery] ||= {}
+        result[host.to_s][:discovery] ||= {}
 
         if( discoveryStatus == 200 )
 
@@ -559,14 +563,14 @@ class Monitoring
           discoveryOnline   = discoverHost[host][:status]   ? discoverHost[host][:status]   : 'unknown'
           discoveryServices = discoverHost[host][:services] ? discoverHost[host][:services] : 'unknown'
 
-          result[host.to_sym][:discovery] = {
+          result[host.to_s][:discovery] = {
             :status     => discoveryStatus,
             :created    => discoveryCreated,
             :online     => discoveryOnline,
             :services   => discoveryServices
           }
         else
-          result[host.to_sym][:discovery] = {
+          result[host.to_s][:discovery] = {
             :status     => discoveryStatus,
             :message    => discoveryMessage
           }
@@ -581,8 +585,8 @@ class Monitoring
 
         @log.debug( "icinga: #{icingaResult}" )
 
-        result[host.to_sym][:icinga] ||= {}
-        result[host.to_sym][:icinga] = {
+        result[host.to_s][:icinga] ||= {}
+        result[host.to_s][:icinga] = {
           :status     => icingaStatus,
           :message    => icingaMessage
         }
@@ -596,26 +600,27 @@ class Monitoring
 
         @log.debug( "grafana: #{grafanaResult}" )
 
-        result[host.to_sym][:grafana] ||= {}
+        result[host.to_s][:grafana] ||= {}
 
         if( grafanaStatus == 200 )
           grafanaDashboardCount = grafanaResult[:count]      ? grafanaResult[:count]      : 0
           grafanaDashboards     = grafanaResult[:dashboards] ? grafanaResult[:dashboards] : []
 
-          result[host.to_sym][:grafana] = {
+          result[host.to_s][:grafana] = {
             :status     => grafanaStatus,
             :dashboards => grafanaDashboards,
             :count      => grafanaDashboardCount
           }
         else
 
-          result[host.to_sym][:grafana] = {
+          result[host.to_s][:grafana] = {
             :status     => grafanaStatus,
             :message    => grafanaMessage
           }
 
         end
       end
+
 
       return result
 
