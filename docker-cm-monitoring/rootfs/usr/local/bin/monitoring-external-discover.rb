@@ -18,18 +18,40 @@ require_relative 'monitoring'
 
 module ExternalDiscovery
 
+  class Node
+
+    attr_accessor :name, :enabled, :id, :ip, :tags
+
+    def initialize( params = {} )
+
+      @name    = params[:name]
+      @enabled = params[:enbaled]
+      @id      = params[:id]
+      @ip      = params[:ip]
+      @tags    = params[:tags]
+    end
+
+  end
+
+
+# "hostname": {
+#   "enabled": true|false
+#   "name": name,
+#   "id": 0,
+#   "ip": '127.0.0.1',
+#   "tags: []
+# }
+
   class Client
 
     def initialize( settings = {} )
 
-      @logDirectory       = settings[:logDirectory]       ? settings[:logDirectory]       : '/tmp'
-
-      logFile         = sprintf( '%s/monitoring.log', @logDirectory )
-
-      file            = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
-      file.sync       = true
-      @log            = Logger.new( file, 'weekly', 1024000 )
-  #    @log = Logger.new( STDOUT )
+#      @logDirectory       = settings[:logDirectory]       ? settings[:logDirectory]       : '/tmp'
+#      logFile         = sprintf( '%s/monitoring.log', @logDirectory )
+#      file            = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
+#      file.sync       = true
+#      @log            = Logger.new( file, 'weekly', 1024000 )
+      @log = Logger.new( STDOUT )
       @log.level      = Logger::DEBUG
       @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
       @log.formatter  = proc do |severity, datetime, progname, msg|
@@ -113,17 +135,51 @@ module ExternalDiscovery
     end
 
 
+    def readFromFile( file )
+
+
+    end
+
+
     def run()
 
+      Process.daemon(true)
+
+      loop do
+        pid = Process.fork do
+
+          self.readFromFile( '/tmp/test.json' )
+          # Do something funky
+        end
+
+        Process.waitpid(pid)
+
+        # Reduce CPU usage
+        sleep(0.1)
+      end
 
     end
 
   end
 end
 
+
+
+
 e = ExternalDiscovery::Client.new()
 
-e.run()
+e.run( )
+
+
+# "hostname": {
+#   "enabled": true|false
+#   "name": name,
+#   "id": 0,
+#   "ip": '127.0.0.1',
+#   "tags: []
+# }
+
+
 
 
 # EOF
