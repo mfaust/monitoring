@@ -90,7 +90,7 @@ module ExternalDiscovery
 
       @data = @mutex.synchronize { self.mockupData() }
 
-      @mc.set( 'consumer__live__data' , @data )
+      return @data # @mc.set( 'consumer__live__data' , @data )
 
     end
 
@@ -143,9 +143,9 @@ module ExternalDiscovery
       @memcacheHost = settings[:memcacheHost] ? settings[:memcacheHost] : nil
       @memcachePort = settings[:memcachePort] ? settings[:memcachePort] : nil
 
-      @configFile   = '/etc/cm-monitoring.yaml'
-
-      self.readConfigFile()
+#      @configFile   = '/etc/cm-monitoring.yaml'
+#
+#      self.readConfigFile()
 
       # add cache setting
       # eg.cache for 2 min here. default options is never expire
@@ -232,7 +232,7 @@ module ExternalDiscovery
 
       @log.debug( 'compare' )
 
-      liveData     = @mc.get( 'consumer__live__data' )     || []
+      liveData     = @data # mc.get( 'consumer__live__data' )     || []
       historicData = @mc.get( 'consumer__historic__data' ) || []
 
       @log.debug( liveData.sort     { |a,b| a[:x] <=> b[:x] } )
@@ -305,7 +305,7 @@ module ExternalDiscovery
 
       threads << Thread.new {
 
-        consumer.getData()
+        @data = consumer.getData()
       }
 
       threads.each {|t| t.join }
