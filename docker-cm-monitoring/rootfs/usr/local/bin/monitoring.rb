@@ -3,7 +3,7 @@
 # 05.10.2016 - Bodo Schulz
 #
 #
-# v2.0.0
+# v2.0.1
 
 # -----------------------------------------------------------------------------
 
@@ -77,8 +77,8 @@ class Monitoring
       :graphitePath        => @graphitePath
     }
 
-    version              = '2.0.0'
-    date                 = '2016-12-06'
+    version              = '2.0.1'
+    date                 = '2016-12-07'
 
     @log.info( '-----------------------------------------------------------------' )
     @log.info( ' CoreMedia - Monitoring Service' )
@@ -321,8 +321,8 @@ class Monitoring
       enableDiscovery = @enabledDiscovery
       enabledGrafana  = @enabledGrafana
       enabledIcinga   = @enabledIcinga
-      annotation      = false
-      grafanaOverview = false
+      annotation      = true
+      grafanaOverview = true
       services        = []
       tags            = []
 
@@ -355,7 +355,7 @@ class Monitoring
         enabledGrafana  = hash.keys.include?('grafana')    ? hash['grafana']    : @enabledGrafana
         enabledIcinga   = hash.keys.include?('icinga')     ? hash['icinga']     : @enabledIcinga
         annotation      = hash.keys.include?('annotation') ? hash['annotation'] : true
-        grafanaOverview = hash.keys.include?('overview')   ? hash['overview']   : false
+        grafanaOverview = hash.keys.include?('overview')   ? hash['overview']   : true
         services        = hash.keys.include?('services')   ? hash['services']   : []
         tags            = hash.keys.include?('tags')       ? hash['tags']       : []
       end
@@ -554,14 +554,16 @@ class Monitoring
 
         if( discoveryStatus == 200 )
 
-          discoverHost     = discoveryResult[:hosts]      ? discoveryResult[:hosts]      : nil
-          discoveryCreated = discoverHost[host][:created] ? discoverHost[host][:created] : 'unknown'
-          discoveryOnline  = discoverHost[host][:status]  ? discoverHost[host][:status]  : 'unknown'
+          discoverHost      = discoveryResult[:hosts]       ? discoveryResult[:hosts]       : nil
+          discoveryCreated  = discoverHost[host][:created]  ? discoverHost[host][:created]  : 'unknown'
+          discoveryOnline   = discoverHost[host][:status]   ? discoverHost[host][:status]   : 'unknown'
+          discoveryServices = discoverHost[host][:services] ? discoverHost[host][:services] : 'unknown'
 
           result[host.to_sym][:discovery] = {
             :status     => discoveryStatus,
             :created    => discoveryCreated,
-            :online     => discoveryOnline
+            :online     => discoveryOnline,
+            :services   => discoveryServices
           }
         else
           result[host.to_sym][:discovery] = {
@@ -680,8 +682,8 @@ class Monitoring
 
       directory = self.createCacheDirectory( host )
 
-      enabledGrafana  = true
-      enabledIcinga   = true
+      enabledGrafana  = @enabledGrafana
+      enabledIcinga   = @enabledIcinga
       annotation      = true
 
 #     example:
@@ -696,8 +698,8 @@ class Monitoring
 
         result[:request] = hash
 
-        enabledGrafana  = hash.keys.include?('grafana')    ? hash['grafana']    : true
-        enabledIcinga   = hash.keys.include?('icinga')     ? hash['icinga']     : true
+        enabledGrafana  = hash.keys.include?('grafana')    ? hash['grafana']    : @enabledGrafana
+        enabledIcinga   = hash.keys.include?('icinga')     ? hash['icinga']     : @enabledIcinga
         annotation      = hash.keys.include?('annotation') ? hash['annotation'] : true
       end
 

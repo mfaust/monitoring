@@ -679,13 +679,28 @@ class ServiceDiscovery
 
   def hostInformation( file, host )
 
-    status = isRunning?( host )
-    age    = File.mtime( file ).strftime("%Y-%m-%d %H:%M:%S")
+    status   = isRunning?( host )
+    age      = File.mtime( file ).strftime("%Y-%m-%d %H:%M:%S")
+    services = Hash.new()
+
+    if( file != host )
+      data   = JSON.parse( File.read( file ) )
+
+      data.each do |d,v|
+
+        services[d.to_s] ||= {}
+        services[d.to_s] = {
+          :port        => v['port'],
+          :description => v['description']
+        }
+      end
+    end
 
     return {
       host => {
-        :status  => status ? 'online' : 'offline',
-        :created => age
+        :status   => status ? 'online' : 'offline',
+        :services => services,
+        :created  => age
       }
     }
 

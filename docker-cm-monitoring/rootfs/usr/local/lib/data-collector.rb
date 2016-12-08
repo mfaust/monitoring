@@ -643,9 +643,15 @@ class DataCollector
 
       @log.debug( sprintf( 'create bulk checks for \'%s\'', h ) )
 
-      services = data[h][:data] ? data[h][:data] : nil
+      services      = data[h][:data] ? data[h][:data] : nil
+      servicesCount = services.count
 
-      @log.debug( sprintf( '%d services found', services.count ) )
+      if( servicesCount == 0 )
+        @log.debug( 'no services found. skip ... ')
+        next
+      end
+
+      @log.debug( sprintf( '%d services found', servicesCount ) )
 
       # if Host available -> break
       hostStatus = isRunning?( h )
@@ -934,10 +940,8 @@ class DataCollector
 
       self.checkHostDataAge( h )
 
-      d = self.buildMergedData( h )
-
       data[h] = {
-        :data      => d,
+        :data      => self.buildMergedData( h ),
         :timestamp => Time.now().to_i
       }
 
