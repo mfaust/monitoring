@@ -14,7 +14,7 @@ require 'fileutils'
 require 'dalli'
 require 'resolve/hostname'
 
-#require_relative 'monitoring'
+require 'monitoring'
 
 # -----------------------------------------------------------------------------
 
@@ -94,93 +94,6 @@ module ExternalDiscovery
 
     end
 
-    def mockupData()
-
-      data = [
-        {
-          "enabled": "true",
-          "id": "i-5f525fa7",
-          "ip": "172.32.31.221",
-          "name": "i-5f525fa7",
-          "tags": [
-            "feeder"
-          ]
-        },
-        {
-          "enabled": "true",
-          "id": "i-03f0d80d",
-          "ip": "172.32.31.58",
-          "name": "i-03f0d80d",
-          "tags": [
-            "cms"
-          ]
-        }
-      ]
-
-      return data
-
-    end
-
-  end
-
-
-  class Client
-
-    def initialize( settings = {} )
-
-#      @logDirectory       = settings[:logDirectory]       ? settings[:logDirectory]       : '/tmp'
-#      logFile         = sprintf( '%s/monitoring.log', @logDirectory )
-#      file            = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
-#      file.sync       = true
-#      @log            = Logger.new( file, 'weekly', 1024000 )
-      @log = Logger.new( STDOUT )
-      @log.level      = Logger::DEBUG
-      @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
-      @log.formatter  = proc do |severity, datetime, progname, msg|
-        "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
-      end
-
-      @memcacheHost = settings[:memcacheHost] ? settings[:memcacheHost] : nil
-      @memcachePort = settings[:memcachePort] ? settings[:memcachePort] : nil
-
-#      @configFile   = '/etc/cm-monitoring.yaml'
-#
-#      self.readConfigFile()
-
-      # add cache setting
-      # eg.cache for 2 min here. default options is never expire
-      memcacheOptions = {
-        :compress   => true,
-        :namespace  => 'discover',
-        :expires_in => 60*3
-      }
-
-      @mc = Dalli::Client.new( sprintf( '%s:%s', @memcacheHost, @memcachePort ), memcacheOptions )
-
-      version              = '0.0.1'
-      date                 = '2016-12-06'
-
-      @log.info( '-----------------------------------------------------------------' )
-      @log.info( ' CoreMedia - External Discovery Service' )
-      @log.info( "  Version #{version} (#{date})" )
-      @log.info( '  Copyright 2016 Coremedia' )
-      @log.info( '-----------------------------------------------------------------' )
-      @log.info( '' )
-    end
-
-
-    def readConfigFile()
-
-      config = YAML.load_file( @configFile )
-
-      @logDirectory  = config.dig('logDirectory')        || '/tmp/log'
-      @cacheDir      = config.dig('cacheDirectory')      || '/tmp/cache'
-
-      @discoveryHost = config.dig( 'discovery', 'host' ) || 'localhost'
-      @discoveryPort = config.dig( 'discovery', 'port' ) || 2222
-
-    end
-
 
     def client()
 
@@ -227,65 +140,233 @@ module ExternalDiscovery
     end
 
 
+    def mockupData()
+
+      data = [
+        {
+          "enabled": "true",
+          "uid": "i-5f525fa7",
+          "ip": "172.32.31.221",
+          "name": "i-5f525fa7",
+          "tags": [
+            "feeder"
+          ]
+        },
+        {
+          "enabled": "true",
+          "uid": "i-03f0d80d",
+          "ip": "172.32.31.58",
+          "name": "i-03f0d80d",
+          "tags": [
+            "cms", "foo"
+          ]
+        },
+        {
+          "enabled": "true",
+          "uid": "b595dd68-66d6-42eb-a9ea-894d526c4f14",
+          "ip": "10.2.14.156",
+          "name": "monitoring-16-01.coremedia.vm",
+          "tags": [
+            "cms"
+          ]
+        }
+      ]
+
+      return data
+
+    end
+
+  end
+
+
+  class Client
+
+    def initialize( settings = {} )
+
+      @logDirectory       = settings[:logDirectory]       ? settings[:logDirectory]       : '/tmp'
+
+#      logFile         = sprintf( '%s/monitoring.log', @logDirectory )
+#      file            = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
+#      file.sync       = true
+#      @log            = Logger.new( file, 'weekly', 1024000 )
+      @log = Logger.new( STDOUT )
+      @log.level      = Logger::DEBUG
+      @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
+      @log.formatter  = proc do |severity, datetime, progname, msg|
+        "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
+      end
+
+      @memcacheHost = settings[:memcacheHost] ? settings[:memcacheHost] : nil
+      @memcachePort = settings[:memcachePort] ? settings[:memcachePort] : nil
+
+#      @configFile   = '/etc/cm-monitoring.yaml'
+#
+#      self.readConfigFile()
+
+      # add cache setting
+      # eg.cache for 2 min here. default options is never expire
+      memcacheOptions = {
+        :compress   => true,
+        :namespace  => 'discover'
+##        :expires_in => 60*3
+      }
+
+      @mc = Dalli::Client.new( sprintf( '%s:%s', @memcacheHost, @memcachePort ), memcacheOptions )
+
+      version              = '0.0.1'
+      date                 = '2016-12-06'
+
+      @log.info( '-----------------------------------------------------------------' )
+      @log.info( ' CoreMedia - External Discovery Service' )
+      @log.info( "  Version #{version} (#{date})" )
+      @log.info( '  Copyright 2016 Coremedia' )
+      @log.info( '-----------------------------------------------------------------' )
+      @log.info( '' )
+    end
+
+
+    def readConfigFile()
+
+      config = YAML.load_file( @configFile )
+
+      @logDirectory  = config.dig('logDirectory')        || '/tmp/log'
+      @cacheDir      = config.dig('cacheDirectory')      || '/tmp/cache'
+
+      @discoveryHost = config.dig( 'discovery', 'host' ) || 'localhost'
+      @discoveryPort = config.dig( 'discovery', 'port' ) || 2222
+
+    end
+
 
     def compareVersions()
 
       @log.debug( 'compare' )
 
-      liveData     = @data # mc.get( 'consumer__live__data' )     || []
+      liveData     = @data
       historicData = @mc.get( 'consumer__historic__data' ) || []
 
-      @log.debug( liveData.sort     { |a,b| a[:x] <=> b[:x] } )
-      @log.debug( historicData.sort { |a,b| a[:x] <=> b[:x] } )
+#       liveData.sort!     { |a,b| a[:x] <=> b[:x] }
+#       historicData.sort! { |a,b| a[:x] <=> b[:x] }
 
-      @log.debug( sprintf( 'live Data holds %d entries', liveData.count ) )
-      @log.debug( sprintf( 'historic Data holds %d entries', historicData.count ) )
+      liveDataCount     = liveData.count
+      historicDataCount = historicData.count
+
+      @log.debug( liveData )
+      @log.debug( historicData )
+
+      @log.info( sprintf( 'live Data holds %d entries'    , liveDataCount ) )
+      @log.info( sprintf( 'historic Data holds %d entries', historicDataCount ) )
+
+      @log.debug( '------------------------------------------------------------' )
 
       def findUid( historic, uid )
 
+        @log.debug( sprintf( 'findUid %s', uid ) )
+
+        f = {}
+
         historic.each do |h|
-          @log.debug( h.values )
 
-          return h.select { |key, value| key.to_s.match(/^uid/) }
-#          @log.debug( h.select { |key, value| key.to_s.match(/^uid/) } )
+          f = h.select { |key, value| key.to_s.match(/^id/) }
+
+          if( f[:id].to_s == uid )
+            f = h
+            break
+          else
+            f = {}
+          end
         end
+
+        return f
       end
 
-      if( liveData.compare( historicData ) == true )
-        @log.debug( 'the same' )
+      options = {
+       :logDirectory        => @logDirectory
+      }
 
-        liveData.each do |k|
-          @log.debug( k )
-#           @log.debug( k.values )
-#           @log.debug( k.values[1] )
+      m = Monitoring.new( options )
 
-          @log.debug( self.findUid( historicData, k.values[1] ) )
+      if( historicDataCount.to_i == 0 )
 
-          #@log.debug( k.find_all { |a| a[:ip] == '172.32.31.58' } )
-#           choices = k.select { |key, value| key.to_s.match(/^choice\d+/) }
+        @log.info( 'no historic datas found' )
 
+        newArray = Array.new()
+
+        # add all founded nodes
+
+        liveData.each do |l|
+
+          uid     = l[:uid]     ? l[:uid]     : 'unset'
+          ip      = l[:ip]      ? l[:ip]      : 'unset'
+          name    = l[:name]    ? l[:name]    : 'unset'
+          tags    = l[:tags]    ? l[:tags]    : []
+
+          @log.info( sprintf( '  get information about %s', ip ) )
+
+          # get node data
+          result = m.listHost( ip )
+
+#           @log.debug( result )
+
+          discoveryStatus = result.dig( ip , :discovery, :status )
+
+          # not exists
+          if( discoveryStatus == 404 )
+
+            @log.info( '  host not in monitoring ... try to add' )
+
+            # add to monitoring
+            d = JSON.generate( {
+              :discovery  => true,
+              :icinga     => false,
+              :grafana    => false,
+              :annotation => true,
+              :tags       => tags
+            } )
+
+#             @log.debug( d )
+
+            result = m.addHost( ip, d )
+
+#             @log.debug( result )
+
+            discoveryStatus = result.dig( :status )
+            discoveryMessage = result.dig( :message )
+
+            if( discoveryStatus == 400 )
+              @log.error( sprintf( '  => %s', discoveryMessage ) )
+
+            else
+
+              # successful
+              newArray << l
+
+            end
+          end
         end
 
-      else
-        @log.debug( 'differs' )
-
-        liveData.each do |k|
-          @log.debug( k )
-#          @log.debug( v )
-
-          @log.debug( k.select { |a| a["ip"] == '172.32.31.58' } )
-
-#           choices = k.select { |key, value| key.to_s.match(/^choice\d+/) }
-
-        end
-
-#         @log.debug( liveData.select { |name,v| v['ip'] == '172.32.31.58' } )
-
-
-
-
-        @mc.set( 'consumer__historic__data', liveData, 60*3 )
+        @log.debug( newArray )
       end
+
+#       if( liveData.compare( historicData ) == true )
+#
+#         @log.debug( 'the same' )
+#
+#       else
+#         @log.debug( 'differs' )
+#
+#         historicData.each do |h|
+#           @log.debug( h.keys )
+#         end
+#
+#         liveData.each do |k|
+#           @log.debug( sprintf( ' => %s', self.findUid( historicData, k.values[1] ) ) )
+#         end
+#
+#         @log.debug( sprintf( ' => %s', self.findUid( historicData, 'i-5f525fa9' ) ) )
+#
+# #         @mc.set( 'consumer__historic__data', liveData, 60*3 )
+#       end
 
     end
 
@@ -310,6 +391,13 @@ module ExternalDiscovery
 
       threads.each {|t| t.join }
 
+      threads << Thread.new {
+
+        @data = self.compareVersions()
+      }
+
+      threads.each {|t| t.join }
+
 #      fork do
 #
 #        @data = consumer.getData()
@@ -318,11 +406,11 @@ module ExternalDiscovery
 #      end
 
 
-      fork do
-        self.compareVersions()
-      end
-
-      Process.waitall
+#      fork do
+#        self.compareVersions()
+#      end
+#
+#      Process.waitall
 
       @log.debug( 'done' )
 
