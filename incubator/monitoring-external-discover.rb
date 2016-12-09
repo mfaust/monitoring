@@ -13,6 +13,7 @@ require 'yaml'
 require 'fileutils'
 require 'dalli'
 require 'resolve/hostname'
+require 'rest-client'
 
 require 'monitoring'
 
@@ -179,6 +180,171 @@ module ExternalDiscovery
   end
 
 
+  class NetworkClient
+
+    def initialize( settings )
+
+      @host = settings[:host] ? settings[:host] : 'localhost'
+      @port = settings[:port] ? settings[:port] : 80
+
+      @log = Logger.new( STDOUT )
+      @log.level      = Logger::DEBUG
+      @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
+      @log.formatter  = proc do |severity, datetime, progname, msg|
+        "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
+      end
+
+      @log.debug( @host )
+      @log.debug( @port )
+
+      @headers     = {
+        'Content-Type' => 'application/json',
+        'Accept'       => 'application/json'
+      }
+
+    end
+
+
+    def fetch( path = '/' )
+
+      # set timeouts
+      openTimeout = 2
+      readTimeout = 8
+      response    = []
+
+      url = sprintf( 'http://localhost%s', path )
+
+#       @log.debug( @host )
+#       @log.debug( @port )
+      @log.debug( url )
+
+
+      restClient = RestClient::Resource.new(
+        URI.encode( url )
+      )
+
+    begin
+      data   = restClient.get( @headers ).body
+      data   = JSON.parse( data )
+
+      @log.debug( data )
+
+    rescue Exception => e
+
+      @log.error( e )
+
+    end
+
+
+    return
+
+
+http = Net::HTTP.new( uri.host, uri.port )
+    http.read_timeout = 1000
+
+    request = Net::HTTP::Get.new( uri.request_uri )
+
+    response = http.start { |http| http.request( request ) }
+
+    case response
+    when Net::HTTPSuccess
+      response.body
+    when Net::HTTPRedirection
+      self.fetch(response['location'], limit - 1)
+    else
+      response.error!
+    end
+
+return
+
+
+
+    Net::HTTP.start( uri.host, uri.port ) do |http|
+      request = Net::HTTP::Get.new( uri.request_uri )
+
+      request.add_field( 'Content-Type', 'application/json' )
+#       request.basic_auth( @grafanaAPIUser, @grafanaAPIPass )
+
+      response     = http.request( request )
+      responseCode = response.code.to_i
+
+      if( responseCode == 200 )
+
+        responseBody  = JSON.parse( response.body )
+#         dashboards    = responseBody.collect { |item| item['uri'] }
+
+        @log.debug( responseBody )
+
+      # TODO
+      # Errorhandling
+      #if( responseCode != 200 )
+      else
+        # 200 – Created
+        # 400 – Errors (invalid json, missing or invalid fields, etc)
+        # 401 – Unauthorized
+        # 412 – Precondition failed
+        @log.error( sprintf( ' [%s] - Error for search Dashboards', responseCode ) )
+        @log.error( response.body )
+      end
+    end
+
+
+
+
+
+
+
+
+
+
+      begin
+
+        http     = Net::HTTP.new( uri.host, uri.port )
+        request  = Net::HTTP::Get.new( uri.request_uri )
+#        request.basic_auth( @grafanaAPIUser, @grafanaAPIPass )
+
+        response = Net::HTTP.start( uri.hostname, uri.port, use_ssl: uri.scheme == "https", :read_timeout => readTimeout, :open_timeout => openTimeout ) do |http|
+
+          begin
+            http.request( request )
+          rescue Exception => e
+
+            @log.warn( sprintf( 'Cannot execute request to %s, cause: %s', uri.request_uri, e ) )
+            @log.debug( sprintf( ' -> request body: %s', request.body ) )
+            return false
+          end
+        end
+      rescue Exception => e
+
+        @log.error( e )
+#        @log.error( 'Timeout' )
+
+        return false
+      end
+
+      responseCode = response.code.to_i
+
+      @log.debug( response.body )
+
+    end
+
+
+    def post()
+
+
+
+
+    end
+
+
+  end
+
+
+
+
+
+
+
   class Client
 
     def initialize( settings = {} )
@@ -279,6 +445,17 @@ module ExternalDiscovery
 
         return f
       end
+
+
+      options = {
+        :host => 'localhost',
+        :port => 80
+      }
+
+      net = NetworkClient.new( options )
+
+      net.fetch( '/api/v2/host' )
+
 
       options = {
        :logDirectory        => @logDirectory
