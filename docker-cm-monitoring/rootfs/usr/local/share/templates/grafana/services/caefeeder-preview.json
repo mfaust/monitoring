@@ -334,7 +334,40 @@
       ]
     },
     "templating": {
-      "list": []
+      "list": [
+        {
+          "type": "query",
+          "label": null,
+          "query": "*.*.*EEDER*_LIVE-Proactive*feeder",
+          "regex": "/(.*)-.*-.*/",
+          "sort": 0,
+          "datasource": "graphite",
+          "refresh": 0,
+          "hide": 0,
+          "name": "feeder",
+          "multi": false,
+          "includeAll": false,
+          "allValue": null,
+          "options": [
+            {
+              "text": "CAEFEEDER2_LIVE",
+              "value": "CAEFEEDER2_LIVE",
+              "selected": true
+            },
+            {
+              "text": "FEEDER_LIVE",
+              "value": "FEEDER_LIVE",
+              "selected": false
+            }
+          ],
+          "current": {
+            "text": "CAEFEEDER2_LIVE",
+            "value": "CAEFEEDER2_LIVE"
+          },
+          "tagsQuery": null,
+          "tagValuesQuery": null
+        }
+      ]
     },
     "annotations": {
       "list": [

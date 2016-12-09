@@ -130,7 +130,7 @@ module Sinatra
       host   = params[:host]
       result = m.writeHostConfiguration( host, @request_paylod )
 
-      response.status = result[:status]
+      status = result[:status]
       result.to_json
 
     end
@@ -143,7 +143,7 @@ module Sinatra
       host   = params[:host]
       result = m.getHostConfiguration( host )
 
-      response.status = result[:status]
+      status = result[:status]
       result.to_json
 
     end
@@ -156,7 +156,7 @@ module Sinatra
       host   = params[:host]
       result = m.removeHostConfiguration( host )
 
-      response.status = result[:status]
+      status = result[:status]
       result.to_json
     end
 
@@ -172,7 +172,7 @@ module Sinatra
       host   = params[:host]
       result = m.addHost( host, @request_paylod )
 
-      response.status = result[:status]
+      status = result[:status]
       result.to_json
 
     end
@@ -182,7 +182,7 @@ module Sinatra
 
       result = m.listHost( nil, request.env )
 
-      response.status = result[:status]
+      status = result[:status]
       result.to_json
 
     end
@@ -193,7 +193,7 @@ module Sinatra
       host   = params[:host]
       result = m.listHost( host, request.env )
 
-      response.status = result[:status]
+      status = result[:status]
       result.to_json
 
     end
@@ -204,7 +204,7 @@ module Sinatra
       host   = params[:host]
       result = m.removeHost( host, @request_paylod )
 
-      response.status = result[:status]
+      status = result[:status]
       result.to_json
     end
 
@@ -216,7 +216,7 @@ module Sinatra
       host   = params[:host]
       result = m.addAnnotation( host, @request_paylod )
 
-      response.status = result[:status]
+      status = result[:status]
       result.to_json
 
     end

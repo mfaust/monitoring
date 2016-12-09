@@ -109,7 +109,7 @@ class CollecdPlugin
     regex = /
       ^                     # Starting at the front of the string
       solr\/                #
-      (?<core>.+[a-zA-Z]):  #
+      (?<core>.+[a-zA-Z0-9]):  #
       (.*)                  #
       type=                 #
       (?<type>.+[a-zA-Z])   #
