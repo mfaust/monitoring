@@ -145,33 +145,42 @@ module ExternalDiscovery
 
       data = [
         {
-          "enabled": "true",
-          "uid": "i-5f525fa7",
-          "ip": "172.32.31.221",
-          "name": "i-5f525fa7",
-          "tags": [
-            "feeder"
-          ]
+          "ip": "172.32.22.201",
+          "name": "cosmos-develop-service-jumphost",
+          "state": "running",
+          "tags": {
+            "customer": "cosmos",
+            "environment": "develop",
+            "instance_type": "t2.medium",
+            "instance_vpc": "vpc-ff36c899",
+            "tier": "service"
+          },
+          "uid": "i-0388354ec53784031"
         },
         {
-          "enabled": "true",
-          "uid": "i-03f0d80d",
-          "ip": "172.32.31.58",
-          "name": "i-03f0d80d",
-          "tags": [
-            "cms", "foo"
-          ]
+          "ip": "172.32.31.56",
+          "name": "cosmos-develop-management-cms",
+          "state": "running",
+          "tags": {
+            "customer": "cosmos",
+            "environment": "develop",
+            "instance_type": "t2.large",
+            "instance_vpc": "vpc-ff36c899",
+            "tier": "management"
+          },
+          "uid": "i-0439acb7468bb04d8"
         },
         {
-          "enabled": "true",
-          "uid": "b595dd68-66d6-42eb-a9ea-894d526c4f14",
           "ip": "10.2.14.156",
           "name": "monitoring-16-01.coremedia.vm",
+          "state": "running",
+          "uid": "b595dd68-66d6-42eb-a9ea-894d526c4f14",
           "tags": [
-            "cms"
+            "customer": "moebius"
           ]
         }
       ]
+
 
       return data
 
@@ -214,117 +223,23 @@ module ExternalDiscovery
 
       url = sprintf( 'http://localhost%s', path )
 
-#       @log.debug( @host )
-#       @log.debug( @port )
       @log.debug( url )
-
 
       restClient = RestClient::Resource.new(
         URI.encode( url )
       )
 
-    begin
-      data   = restClient.get( @headers ).body
-      data   = JSON.parse( data )
-
-      @log.debug( data )
-
-    rescue Exception => e
-
-      @log.error( e )
-
-    end
-
-
-    return
-
-
-http = Net::HTTP.new( uri.host, uri.port )
-    http.read_timeout = 1000
-
-    request = Net::HTTP::Get.new( uri.request_uri )
-
-    response = http.start { |http| http.request( request ) }
-
-    case response
-    when Net::HTTPSuccess
-      response.body
-    when Net::HTTPRedirection
-      self.fetch(response['location'], limit - 1)
-    else
-      response.error!
-    end
-
-return
-
-
-
-    Net::HTTP.start( uri.host, uri.port ) do |http|
-      request = Net::HTTP::Get.new( uri.request_uri )
-
-      request.add_field( 'Content-Type', 'application/json' )
-#       request.basic_auth( @grafanaAPIUser, @grafanaAPIPass )
-
-      response     = http.request( request )
-      responseCode = response.code.to_i
-
-      if( responseCode == 200 )
-
-        responseBody  = JSON.parse( response.body )
-#         dashboards    = responseBody.collect { |item| item['uri'] }
-
-        @log.debug( responseBody )
-
-      # TODO
-      # Errorhandling
-      #if( responseCode != 200 )
-      else
-        # 200 – Created
-        # 400 – Errors (invalid json, missing or invalid fields, etc)
-        # 401 – Unauthorized
-        # 412 – Precondition failed
-        @log.error( sprintf( ' [%s] - Error for search Dashboards', responseCode ) )
-        @log.error( response.body )
-      end
-    end
-
-
-
-
-
-
-
-
-
-
       begin
+        data   = restClient.get( @headers ).body
+        data   = JSON.parse( data )
 
-        http     = Net::HTTP.new( uri.host, uri.port )
-        request  = Net::HTTP::Get.new( uri.request_uri )
-#        request.basic_auth( @grafanaAPIUser, @grafanaAPIPass )
+        @log.debug( data )
 
-        response = Net::HTTP.start( uri.hostname, uri.port, use_ssl: uri.scheme == "https", :read_timeout => readTimeout, :open_timeout => openTimeout ) do |http|
-
-          begin
-            http.request( request )
-          rescue Exception => e
-
-            @log.warn( sprintf( 'Cannot execute request to %s, cause: %s', uri.request_uri, e ) )
-            @log.debug( sprintf( ' -> request body: %s', request.body ) )
-            return false
-          end
-        end
       rescue Exception => e
 
         @log.error( e )
-#        @log.error( 'Timeout' )
 
-        return false
       end
-
-      responseCode = response.code.to_i
-
-      @log.debug( response.body )
 
     end
 
@@ -479,6 +394,8 @@ return
           tags    = l[:tags]    ? l[:tags]    : []
 
           @log.info( sprintf( '  get information about %s', ip ) )
+
+          net.fetch( sprintf( '/api/v2/host/%s', ip ) )
 
           # get node data
           result = m.listHost( ip )

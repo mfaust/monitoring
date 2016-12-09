@@ -159,15 +159,15 @@ class Monitoring
     shortHostName = hostInfo[:short] ? hostInfo[:short] : nil # dnsResolve( host )
     longHostName  = hostInfo[:long]  ? hostInfo[:long]  : nil # dnsResolve( host )
 
-    @log.info( sprintf( 'Host      : %s', host ) )
-    @log.info( sprintf( 'IP        : %s', ip ) )
-    @log.info( sprintf( 'short Name: %s', shortHostName ) )
-    @log.info( sprintf( 'long Name : %s', longHostName ) )
+    @log.info( sprintf( ' Host      : %s', host ) )
+    @log.info( sprintf( ' IP        : %s', ip ) )
+    @log.info( sprintf( ' short Name: %s', shortHostName ) )
+    @log.info( sprintf( ' long Name : %s', longHostName ) )
 
     if( ip == nil || shortHostName == nil )
       return false
     else
-      return true
+      return hostInfo
     end
 
   end
@@ -306,7 +306,9 @@ class Monitoring
 
     if( host.to_s != '' )
 
-      if( self.checkAvailablility?( host ) == false )
+      hostData = self.checkAvailablility?( host )
+
+      if( hostData == false )
 
         return {
           :status  => 400,
@@ -520,6 +522,14 @@ class Monitoring
     grafanaDashboards     = []
 
     if( host.to_s != '' )
+
+      hostData = self.checkAvailablility?( host )
+
+      if( hostData == false )
+        @log.info( 'host has no DNS Information' )
+      else
+        host = hostData.dig( :short )
+      end
 
       enableDiscovery = @enabledDiscovery
       enabledGrafana  = @enabledGrafana
