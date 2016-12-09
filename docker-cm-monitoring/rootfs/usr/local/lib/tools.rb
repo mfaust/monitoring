@@ -112,7 +112,6 @@ end
         stdErr      = stderr.gets
 
         if( returnValue == 0 && !stdOut.to_s.empty? )
-@log.debug( '...' )
           host = stdOut
 #          host = line[0...-2]
         else
@@ -138,7 +137,6 @@ end
       stdErr      = stderr.gets
 
       if( returnValue == 0 && !stdOut.to_s.empty? )
-@log.debug( '---' )
         line = stdOut
       else
         @log.error( stdErr )
