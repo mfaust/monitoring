@@ -15,8 +15,6 @@ require 'dalli'
 require 'resolve/hostname'
 require 'rest-client'
 
-require 'monitoring'
-
 # -----------------------------------------------------------------------------
 
 # Monkey patches
@@ -233,12 +231,14 @@ module ExternalDiscovery
         data   = restClient.get( @headers ).body
         data   = JSON.parse( data )
 
-        @log.debug( data )
+        return data
+#        @log.debug( data )
 
       rescue Exception => e
 
         @log.error( e )
 
+        return nil
       end
 
     end
@@ -369,14 +369,9 @@ module ExternalDiscovery
 
       net = NetworkClient.new( options )
 
-      net.fetch( '/api/v2/host' )
+      hosts = net.fetch( '/api/v2/host' )
 
-
-      options = {
-       :logDirectory        => @logDirectory
-      }
-
-      m = Monitoring.new( options )
+      @log.debug( hosts )
 
       if( historicDataCount.to_i == 0 )
 
@@ -395,47 +390,51 @@ module ExternalDiscovery
 
           @log.info( sprintf( '  get information about %s', ip ) )
 
-          net.fetch( sprintf( '/api/v2/host/%s', ip ) )
+          result = net.fetch( sprintf( '/api/v2/host/%s', ip ) )
+
+          if( result != nil )
 
           # get node data
-          result = m.listHost( ip )
+#           result = m.listHost( ip )
 
-#           @log.debug( result )
+            @log.debug( result )
 
-          discoveryStatus = result.dig( ip , :discovery, :status )
+            discoveryStatus = result.dig( ip, 'discovery', 'status' )
 
-          # not exists
-          if( discoveryStatus == 404 )
+            @log.debug( discoveryStatus )
 
-            @log.info( '  host not in monitoring ... try to add' )
+            # not exists
+            if( discoveryStatus == 404 )
 
-            # add to monitoring
-            d = JSON.generate( {
-              :discovery  => true,
-              :icinga     => false,
-              :grafana    => false,
-              :annotation => true,
-              :tags       => tags
-            } )
+              @log.info( '  host not in monitoring ... try to add' )
 
-#             @log.debug( d )
+              # add to monitoring
+              d = JSON.generate( {
+                :discovery  => true,
+                :icinga     => false,
+                :grafana    => false,
+                :annotation => true,
+                :tags       => tags
+              } )
 
-            result = m.addHost( ip, d )
+              @log.debug( d )
 
-#             @log.debug( result )
+#               result = m.addHost( ip, d )
 
-            discoveryStatus = result.dig( :status )
-            discoveryMessage = result.dig( :message )
+#               @log.debug( result )
 
-            if( discoveryStatus == 400 )
-              @log.error( sprintf( '  => %s', discoveryMessage ) )
+#               discoveryStatus = result.dig( :status )
+#               discoveryMessage = result.dig( :message )
 
-            else
-
-              # successful
-              newArray << l
-
+#               if( discoveryStatus == 400 )
+#                 @log.error( sprintf( '  => %s', discoveryMessage ) )
+#               else
+#                 # successful
+#                 newArray << l
+#
+#               end
             end
+
           end
         end
 

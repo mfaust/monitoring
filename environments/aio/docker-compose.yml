@@ -80,6 +80,8 @@ services:
       com.dnsdock.image: "memcached"
       com.dnsdock.alias: "memcached"
       com.dnsdock.ttl: "10"
+    env_file:
+      - env/memcached.env
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:

@@ -13,6 +13,7 @@ require 'json'
 require 'fileutils'
 require 'net/http'
 require 'uri'
+require 'sqlite3'
 
 require_relative 'tools'
 
@@ -85,6 +86,19 @@ class ServiceDiscovery
     if( ! File.exist?( @cacheDirectory ) )
       Dir.mkdir( @cacheDirectory )
     end
+
+    dbFile = sprintf( '%s/database.sqlite3', @cacheDirectory )
+    @db = SQLite3::Database.new( dbFile )
+
+    # Create a database
+    rows = @db.execute <<-SQL
+      create table dns (
+        ip varchar(16),
+        longname varchar(240),
+        shortname varchar(60)
+      );
+    SQL
+
 
     version              = '1.2.5'
     date                 = '2016-11-21'
@@ -528,6 +542,17 @@ class ServiceDiscovery
         :status  => status,
         :message => message
       }
+    end
+
+    # Execute inserts with parameter markers
+    @db.execute(
+      "INSERT INTO dns ( ip, shortname, longname ) VALUES ( ?, ?, ? )",
+      [ip, shortHostName, longHostName]
+    )
+
+    # Find a few rows
+    @db.execute( "select * from dns" ) do |row|
+      @log.debug( row )
     end
 
     File.open( sprintf( '%s/host.json', cacheDirectory ) , 'w' ) { |f| f.write( JSON.pretty_generate( hostInfo ) ) }

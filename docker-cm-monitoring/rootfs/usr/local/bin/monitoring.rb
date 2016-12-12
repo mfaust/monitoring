@@ -523,13 +523,16 @@ class Monitoring
 
     if( host.to_s != '' )
 
+      result[host.to_s] ||= {}
+
       hostData = self.checkAvailablility?( host )
 
       if( hostData == false )
         @log.info( 'host has no DNS Information' )
-      else
-        host = hostData.dig( :short )
       end
+
+      result[host.to_s][:dns] ||= {}
+      result[host.to_s][:dns] = hostData
 
       enableDiscovery = @enabledDiscovery
       enabledGrafana  = @enabledGrafana
@@ -547,9 +550,9 @@ class Monitoring
 #         enabledIcinga   = payload.keys.include?('icinga')     ? payload['icinga']     : @enabledIcinga
 #       end
 
-      result[host.to_s] ||= {}
+      @log.debug( ( hostData != false && hostData[:short] ) ? hostData[:short] : host  )
 
-      hostConfiguration        = self.getHostConfiguration( host )
+      hostConfiguration        = self.getHostConfiguration( ( hostData != false && hostData[:short] ) ? hostData[:short] : host )
       hostConfigurationStatus  = hostConfiguration[:status]
       hostConfigurationMessage = hostConfiguration[:message]
 
@@ -558,7 +561,7 @@ class Monitoring
       end
 
       if( enableDiscovery == true )
-        discoveryResult  = @serviceDiscovery.listHosts( host )
+        discoveryResult  = @serviceDiscovery.listHosts( ( hostData != false && hostData[:short] ) ? hostData[:short] : host )
         discoveryStatus  = discoveryResult[:status]
         discoveryMessage = discoveryResult[:message]
 

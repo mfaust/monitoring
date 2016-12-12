@@ -21,12 +21,14 @@ RUN \
     build-base \
     imagemagick-dev \
     mysql-dev \
+    sqlite-dev \
     drill \
     ruby-dev \
     ruby-irb \
     ruby-io-console \
     ruby-rdoc \
     python \
+    sqlite \
     jq \
     bc \
     yajl-tools \
@@ -46,6 +48,7 @@ RUN \
      resolve-hostname \
      rest-client \
      mysql2 \
+     sqlite3 \
      time_difference \
      filesize \
      fileutils \
@@ -58,6 +61,7 @@ RUN \
     build-base \
     imagemagick-dev \
     mysql-dev \
+    sqlite-dev \
     ruby-dev \
     zlib-dev && \
   rm -rf /var/cache/apk/*
