@@ -14,6 +14,7 @@ require_relative '../lib/grafana'
 require_relative '../lib/graphite'
 require_relative '../lib/icinga2'
 require_relative '../lib/tools'
+require_relative '../lib/database'
 
 # -----------------------------------------------------------------------------
 
@@ -94,6 +95,8 @@ class Monitoring
 
     sleep(2)
 
+    @database         = Database::SQLite.new()
+
     @serviceDiscovery = ServiceDiscovery.new( serviceDiscoverConfig )
     @grafana          = Grafana.new( grafanaConfig )
     @icinga           = Icinga2.new( icingaConfig )
@@ -163,6 +166,13 @@ class Monitoring
     @log.info( sprintf( ' IP        : %s', ip ) )
     @log.info( sprintf( ' short Name: %s', shortHostName ) )
     @log.info( sprintf( ' long Name : %s', longHostName ) )
+
+    sql = "INSERT OR REPLACE INTO dns ( ip, longname, shortname )
+             VALUES ( '#{ip}', '#{longHostName}', '#{shortHostName}'
+               COALESCE( ( SELECT ip FROM dns WHERE ip = '#{ip}' ), 'Benchwarmer' )
+             )"
+
+    @database.exec( sql )
 
     if( ip == nil || shortHostName == nil )
       return false
@@ -696,7 +706,9 @@ class Monitoring
 
     if( host.to_s != '' )
 
-      directory = self.createCacheDirectory( host )
+      @log.info( sprintf( 'remove %s from monitoring', host ) )
+
+#       directory = self.createCacheDirectory( host )
 
       enabledGrafana  = true
       enabledIcinga   = true
@@ -718,8 +730,6 @@ class Monitoring
         enabledIcinga   = hash.keys.include?('icinga')     ? hash['icinga']     : true
         annotation      = hash.keys.include?('annotation') ? hash['annotation'] : true
       end
-
-      @log.info( sprintf( 'remove %s from monitoring', host ) )
 
       result[host.to_sym] ||= {}
 

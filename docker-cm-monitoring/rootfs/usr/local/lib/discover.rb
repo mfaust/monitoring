@@ -16,6 +16,7 @@ require 'uri'
 require 'sqlite3'
 
 require_relative 'tools'
+#require_relative 'database'
 
 # -------------------------------------------------------------------------------------------------------------------
 
@@ -87,18 +88,7 @@ class ServiceDiscovery
       Dir.mkdir( @cacheDirectory )
     end
 
-    dbFile = sprintf( '%s/database.sqlite3', @cacheDirectory )
-    @db = SQLite3::Database.new( dbFile )
-
-    # Create a database
-    rows = @db.execute <<-SQL
-      create table dns (
-        ip varchar(16),
-        longname varchar(240),
-        shortname varchar(60)
-      );
-    SQL
-
+#    @db = Database::SQLite.new()
 
     version              = '1.2.5'
     date                 = '2016-11-21'
@@ -449,13 +439,31 @@ class ServiceDiscovery
     @log.info( sprintf( 'delete Host \'%s\'',  host ) )
 
     status  = 400
-    message = 'Hosts not exists'
+    message = 'Host not in Monitoring'
 
     cacheDirectory  = sprintf( '%s/%s', @cacheDirectory, host )
 
-    if( File.exist?( cacheDirectory ) )
+    if( Dir.exist?( cacheDirectory ) )
 
-      FileUtils.rm_r( cacheDirectory )
+#         begin
+#             FileUtils.rm_rf( cacheDirectory)
+#             got_exception = false
+#         rescue => e
+#             got_exception = true
+#         end
+#
+#         if got_exception
+#             assert( File.exist?( cacheDirectory ),
+#                     "Exception so we should have failed to remove '#{cacheDirectory}'" )
+#         else
+#             assert( ! File.exist?( cacheDirectory ),
+#                     "'#{cacheDirectory}' still exists, but we got no exception" )
+#         end
+#
+#
+#
+      FileUtils.rm_r( Dir.glob( sprintf( '%s/*', cacheDirectory ) ) )
+      FileUtils.rmdir( cacheDirectory, :verbose => true )
 
 #      # hmmm ... prepare our config.json or not?
 #      ['discovery.json','host.json','mergedHostData.json'].each do |f|
@@ -545,20 +553,21 @@ class ServiceDiscovery
     end
 
     # Execute inserts with parameter markers
-    @db.execute(
-      "INSERT INTO dns ( ip, shortname, longname ) VALUES ( ?, ?, ? )",
-      [ip, shortHostName, longHostName]
-    )
-
-    # Find a few rows
-    @db.execute( "select * from dns" ) do |row|
-      @log.debug( row )
-    end
+#    @db.execute(
+#      "INSERT INTO dns ( ip, shortname, longname ) VALUES ( ?, ?, ? )",
+#      [ip, shortHostName, longHostName]
+#    )
+#
+#    # Find a few rows
+#    @db.execute( "select * from dns" ) do |row|
+#      @log.debug( row )
+#    end
 
     File.open( sprintf( '%s/host.json', cacheDirectory ) , 'w' ) { |f| f.write( JSON.pretty_generate( hostInfo ) ) }
 
     # check our customized config
     customConfig = sprintf( '%s/config.json', cacheDirectory )
+
     if( File.exist?( customConfig ) )
 
       data = JSON.parse( File.read( customConfig ) )
@@ -569,11 +578,7 @@ class ServiceDiscovery
         ports = @scanPorts
       end
     else
-
-      # our default known ports
-      if( ports.empty? )
-        ports = @scanPorts
-      end
+      ports = @scanPorts
     end
 
     @log.debug( "use ports: #{ports}" )
