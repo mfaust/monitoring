@@ -197,8 +197,10 @@ module ExternalDiscovery
 
     def initialize( settings )
 
-      @host = settings[:host] ? settings[:host] : 'localhost'
-      @port = settings[:port] ? settings[:port] : 80
+      @apiHost    = settings[:host]    ? settings[:host]      : 'localhost'
+      @apiPort    = settings[:port]    ? settings[:port]      : 80
+      @apiVersion = settings[:version] ? settings[:version]   : 2
+      @apiUrl     = settings[:url]     ? settings[:url]       : nil
 
       @log = Logger.new( STDOUT )
       @log.level      = Logger::DEBUG
@@ -217,7 +219,7 @@ module ExternalDiscovery
 
     def fetch( path = '/' )
 
-      url = sprintf( 'http://localhost%s', path )
+      url = sprintf( '%s/host/%s', @apiUrl, path )
 
       restClient = RestClient::Resource.new(
         URI.encode( url )
@@ -240,7 +242,7 @@ module ExternalDiscovery
 
     def remove( path )
 
-      url = sprintf( 'http://localhost/api/v2/host%s', path )
+      url = sprintf( '%s/host/%s', @apiUrl, path )
 
       restClient = RestClient::Resource.new(
         URI.encode( url )
@@ -268,7 +270,7 @@ module ExternalDiscovery
 
     def add( path, tags = {} )
 
-      url = sprintf( 'http://localhost/api/v2/host%s', path )
+      url = sprintf( '%s/host/%s', @apiUrl, path )
 
       restClient = RestClient::Resource.new(
         URI.encode( url )
@@ -300,18 +302,23 @@ module ExternalDiscovery
 
     def initialize( settings = {} )
 
-      @logDirectory       = settings[:logDirectory]       ? settings[:logDirectory]       : '/tmp'
+      @logDirectory       = settings[:logDirectory] ? settings[:logDirectory] : '/tmp'
+      @apiHost            = settings[:apiHost]      ? settings[:apiHost]      : 'localhost'
+      @apiPort            = settings[:apiPort]      ? settings[:apiPort]      : 80
+      @apiVersion         = settings[:apiVersion]   ? settings[:apiVersion]   : 2
 
-#      logFile         = sprintf( '%s/monitoring.log', @logDirectory )
-#      file            = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
-#      file.sync       = true
-#      @log            = Logger.new( file, 'weekly', 1024000 )
-      @log = Logger.new( STDOUT )
+      logFile         = sprintf( '%s/monitoring.log', @logDirectory )
+      file            = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
+      file.sync       = true
+      @log            = Logger.new( file, 'weekly', 1024000 )
+#      @log = Logger.new( STDOUT )
       @log.level      = Logger::DEBUG
       @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
       @log.formatter  = proc do |severity, datetime, progname, msg|
         "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
       end
+
+      @apiUrl       = sprintf( 'http://%s/api/v%s', @apiHost, @apiVersion )
 
       @memcacheHost = settings[:memcacheHost] ? settings[:memcacheHost] : nil
       @memcachePort = settings[:memcachePort] ? settings[:memcachePort] : nil
@@ -337,6 +344,10 @@ module ExternalDiscovery
       @log.info( ' CoreMedia - External Discovery Service' )
       @log.info( "  Version #{version} (#{date})" )
       @log.info( '  Copyright 2016 Coremedia' )
+      if( @supportMemcache == true )
+        @log.info( sprintf( '  Memcache Support enabled (%s:%s)', @memcacheHost, @memcachePort ) )
+      end
+      @log.info( "  Backendsystem #{@apiUrl}" )
       @log.info( '-----------------------------------------------------------------' )
       @log.info( '' )
     end
@@ -406,8 +417,10 @@ module ExternalDiscovery
 
 
       options = {
-        :host => 'localhost',
-        :port => 80
+        :host    => @apiHost,
+        :port    => @apiPort,
+        :version => @apiVersion,
+        :url     => @apiUrl
       }
 
       net   = NetworkClient.new( options )
@@ -434,7 +447,7 @@ module ExternalDiscovery
           @log.info( sprintf( 'get information about %s (%s)', name, ip ) )
 
           # get node data
-          result = net.fetch( sprintf( '/api/v2/host/%s', name ) )
+          result = net.fetch( name )
 
           if( result != nil )
 
@@ -478,7 +491,7 @@ module ExternalDiscovery
                 :tags       => useableTags
               } )
 
-              result = net.add( sprintf( '/%s', name ), d )
+              result = net.add( name, d )
 
               @log.debug( result )
 
@@ -518,7 +531,7 @@ module ExternalDiscovery
 
             @log.info( sprintf( 'remove host %s (%s) from monitoring', name, ip ) )
 
-            result = net.remove( sprintf( '/%s', name ) )
+            result = net.remove( name )
 
             discoveryStatus  = result.dig( name, 'discovery', 'status' )
             discoveryMessage = result.dig( name, 'discovery', 'message' )
@@ -586,20 +599,20 @@ end
 
 # ---------------------------------------------------------------------------------------
 
-memcacheHost = ENV['MEMCACHE_HOST'] ? ENV['MEMCACHE_HOST'] : 'localhost'
-memcachePort = ENV['MEMCACHE_PORT'] ? ENV['MEMCACHE_PORT'] : 11211
-
-config = {
-  :logDirectory => '/tmp',
-  :memcacheHost => memcacheHost,
-  :memcachePort => memcachePort
-}
-
-# ---------------------------------------------------------------------------------------
-
-e = ExternalDiscovery::Client.new( config )
-
-e.run( )
-
+# memcacheHost = ENV['MEMCACHE_HOST'] ? ENV['MEMCACHE_HOST'] : 'localhost'
+# memcachePort = ENV['MEMCACHE_PORT'] ? ENV['MEMCACHE_PORT'] : 11211
+#
+# config = {
+#   :logDirectory => '/tmp',
+#   :memcacheHost => memcacheHost,
+#   :memcachePort => memcachePort
+# }
+#
+# # ---------------------------------------------------------------------------------------
+#
+# e = ExternalDiscovery::Client.new( config )
+#
+# e.run( )
+#
 
 # EOF

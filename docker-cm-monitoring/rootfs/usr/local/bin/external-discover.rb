@@ -19,6 +19,9 @@ memcachePort = ENV['MEMCACHE_PORT'] ? ENV['MEMCACHE_PORT'] : 11211
 
 config = {
   :logDirectory => '/var/log/monitoring',
+  :apiHost      => 'nginx-proxy',
+  :apiPort      => 80,
+  :apiVersion   => 2,
   :memcacheHost => memcacheHost,
   :memcachePort => memcachePort
 }
@@ -26,6 +29,8 @@ config = {
 # ---------------------------------------------------------------------------------------
 
 e = ExternalDiscovery::Client.new( config )
+
+sleep( 15 )
 
 # -----------------------------------------------------------------------------
 
