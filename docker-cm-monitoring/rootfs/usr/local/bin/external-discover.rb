@@ -9,7 +9,7 @@
 
 require 'yaml'
 
-require_relative '../external-discover'
+require_relative '../lib/external-discover'
 
 # -----------------------------------------------------------------------------
 

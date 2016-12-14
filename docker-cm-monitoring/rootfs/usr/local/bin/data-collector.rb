@@ -3,15 +3,15 @@
 # 12.08.2016 - Bodo Schulz
 #
 #
-# v1.0.0
+# v1.0.1
 
 # -----------------------------------------------------------------------------
 
 require 'yaml'
 
-lib_dir    = File.expand_path( '../../lib', __FILE__ )
+require_relative '../lib/data-collector'
 
-require sprintf( '%s/data-collector', lib_dir )
+# -----------------------------------------------------------------------------
 
 applicationConfigFile = '/etc/cm-application.yaml'
 serviceConfigFile     = '/etc/cm-service.yaml'
@@ -78,4 +78,3 @@ until stop
 end
 
 # -----------------------------------------------------------------------------
-
