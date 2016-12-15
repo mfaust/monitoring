@@ -70,8 +70,8 @@ class Grafana
 
     end
 
-    version              = '1.3.2'
-    date                 = '2016-11-28'
+    version              = '1.3.3'
+    date                 = '2016-12-15'
 
     @log.info( '-----------------------------------------------------------------' )
     @log.info( ' CoreMedia - Grafana Dashboard Management' )

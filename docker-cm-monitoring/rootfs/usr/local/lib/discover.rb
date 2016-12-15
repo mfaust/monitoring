@@ -445,23 +445,6 @@ class ServiceDiscovery
 
     if( Dir.exist?( cacheDirectory ) )
 
-#         begin
-#             FileUtils.rm_rf( cacheDirectory)
-#             got_exception = false
-#         rescue => e
-#             got_exception = true
-#         end
-#
-#         if got_exception
-#             assert( File.exist?( cacheDirectory ),
-#                     "Exception so we should have failed to remove '#{cacheDirectory}'" )
-#         else
-#             assert( ! File.exist?( cacheDirectory ),
-#                     "'#{cacheDirectory}' still exists, but we got no exception" )
-#         end
-#
-#
-#
       FileUtils.rm_r( Dir.glob( sprintf( '%s/*', cacheDirectory ) ) )
       FileUtils.rmdir( cacheDirectory, :verbose => true )
 
@@ -493,13 +476,6 @@ class ServiceDiscovery
 #
 #       @log.info( 'Use additional services:' )
 #       @log.info( "  #{services}" )
-#     end
-
-
-    # OBSOLETE
-#     # force delete
-#     if( force == true )
-#       self.deleteHost( host )
 #     end
 
     # build Host CacheDirectory (if not exitsts)

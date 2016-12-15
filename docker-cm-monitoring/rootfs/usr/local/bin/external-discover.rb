@@ -13,15 +13,43 @@ require_relative '../lib/external-discover'
 
 # -----------------------------------------------------------------------------
 
+configFile    = '/etc/cm-monitoring.yaml'
 
-memcacheHost = ENV['MEMCACHE_HOST'] ? ENV['MEMCACHE_HOST'] : 'localhost'
-memcachePort = ENV['MEMCACHE_PORT'] ? ENV['MEMCACHE_PORT'] : 11211
+logDirectory  = '/var/log/monitoring'
+apiHost       = 'localhost'
+apiVersion    = 2
+
+discoveryHost = 'localhost'
+discoveryPath = '/'
+
+memcacheHost  = nil
+memcachePort  = nil
+
+if( File.exist?( configFile ) )
+
+  config = YAML.load_file( configFile )
+
+  logDirectory     = config['logDirectory']         ? config['logDirectory']     : '/var/log/monitoring'
+
+  apiHost          = config.dig( 'external-discover', 'internal', 'host' ) || 'localhost'
+  apiVersion       = config.dig( 'external-discover', 'internal', 'version' ) || 2
+
+  discoveryHost    = config.dig( 'external-discover', 'backend', 'host' ) || 'localhost'
+  discoveryPath    = config.dig( 'external-discover', 'backend', 'path' ) || '/'
+
+  memcacheHost     = ENV['MEMCACHE_HOST']           ? ENV['MEMCACHE_HOST']       : nil
+  memcachePort     = ENV['MEMCACHE_PORT']           ? ENV['MEMCACHE_PORT']       : nil
+
+else
+  puts "no configuration exists, use default settings"
+end
+
 
 config = {
-  :logDirectory => '/var/log/monitoring',
-  :apiHost      => 'nginx-proxy',
+  :logDirectory => logDirectory,
+  :apiHost      => apiHost,
   :apiPort      => 80,
-  :apiVersion   => 2,
+  :apiVersion   => apiVersion,
   :memcacheHost => memcacheHost,
   :memcachePort => memcachePort
 }

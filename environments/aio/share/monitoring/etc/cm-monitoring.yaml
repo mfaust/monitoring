@@ -47,6 +47,18 @@ icinga:
     user: root
     pass: icinga
 
+external-discover:
+  backend:
+    host: localhost
+    port: 80
+    path: /
+  internal:
+    host: nginx
+    port: 80
+    path: /
+    version: 2
+
+
 service-checks:
   http:
   - proto: http

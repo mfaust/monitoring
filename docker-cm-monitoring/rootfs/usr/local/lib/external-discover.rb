@@ -202,7 +202,11 @@ module ExternalDiscovery
       @apiVersion = settings[:version] ? settings[:version]   : 2
       @apiUrl     = settings[:url]     ? settings[:url]       : nil
 
-      @log = Logger.new( STDOUT )
+      logFile         = sprintf( '%s/external-discover.log', @logDirectory )
+      file            = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
+      file.sync       = true
+      @log            = Logger.new( file, 'weekly', 1024000 )
+#      @log = Logger.new( STDOUT )
       @log.level      = Logger::DEBUG
       @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
       @log.formatter  = proc do |severity, datetime, progname, msg|
@@ -307,7 +311,7 @@ module ExternalDiscovery
       @apiPort            = settings[:apiPort]      ? settings[:apiPort]      : 80
       @apiVersion         = settings[:apiVersion]   ? settings[:apiVersion]   : 2
 
-      logFile         = sprintf( '%s/monitoring.log', @logDirectory )
+      logFile         = sprintf( '%s/external-discover.log', @logDirectory )
       file            = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
       file.sync       = true
       @log            = Logger.new( file, 'weekly', 1024000 )
@@ -323,22 +327,18 @@ module ExternalDiscovery
       @memcacheHost = settings[:memcacheHost] ? settings[:memcacheHost] : nil
       @memcachePort = settings[:memcachePort] ? settings[:memcachePort] : nil
 
-#      @configFile   = '/etc/cm-monitoring.yaml'
-#
-#      self.readConfigFile()
-
       # add cache setting
       # eg.cache for 2 min here. default options is never expire
       memcacheOptions = {
         :compress   => true,
         :namespace  => 'external-discover'
-##        :expires_in => 60*3
+#        :expires_in => 60*3
       }
 
       @mc = Dalli::Client.new( sprintf( '%s:%s', @memcacheHost, @memcachePort ), memcacheOptions )
 
-      version              = '0.0.1'
-      date                 = '2016-12-06'
+      version              = '0.1.1'
+      date                 = '2016-12-15'
 
       @log.info( '-----------------------------------------------------------------' )
       @log.info( ' CoreMedia - External Discovery Service' )
@@ -353,27 +353,12 @@ module ExternalDiscovery
     end
 
 
-    def readConfigFile()
-
-      config = YAML.load_file( @configFile )
-
-      @logDirectory  = config.dig('logDirectory')        || '/tmp/log'
-      @cacheDir      = config.dig('cacheDirectory')      || '/tmp/cache'
-
-      @discoveryHost = config.dig( 'discovery', 'host' ) || 'localhost'
-      @discoveryPort = config.dig( 'discovery', 'port' ) || 2222
-
-    end
-
-
     def compareVersions()
 
       @log.debug( 'compare' )
 
       liveData     = @data
       historicData = @mc.get( 'consumer__historic__data' ) || []
-
-#       historicData << liveData[liveData.count-1]
 
       identicalEntries      = liveData & historicData
       removedEntries        = liveData - historicData
@@ -383,13 +368,14 @@ module ExternalDiscovery
       identicalEntriesCount = identicalEntries.count
       removedEntriesCount   = removedEntries.count
 
-#       @log.debug( liveData )
-#       @log.debug( historicData )
-
       @log.info( sprintf( 'live Data holds %d entries'    , liveDataCount ) )
+#       @log.debug( "  #{liveData}" )
       @log.info( sprintf( 'historic Data holds %d entries', historicDataCount ) )
+#       @log.debug( "  #{historicData}" )
       @log.info( sprintf( 'identical entries %d'          , identicalEntriesCount ) )
+#       @log.debug(  "  #{identicalEntries}" )
       @log.info( sprintf( 'removed entries %d'            , removedEntriesCount ) )
+#       @log.debug(  "  #{removedEntries}" )
 
       @log.debug( '------------------------------------------------------------' )
 
@@ -424,8 +410,6 @@ module ExternalDiscovery
       }
 
       net   = NetworkClient.new( options )
-#      hosts = net.fetch( '/api/v2/host' )
-#      @log.debug( hosts )
 
       # we have nothing .. first run
       if( historicDataCount.to_i == 0 )
@@ -450,17 +434,13 @@ module ExternalDiscovery
           result = net.fetch( name )
 
           if( result != nil )
-
-#             @log.debug( result )
             dnsStatus  = result.dig( name, 'dns' )
 
             # check DNS resolving
             if( dnsStatus == false )
               @log.error( '  DNS Problem! try IP' )
-              secondTest = net.fetch( sprintf( '/api/v2/host/%s', ip ) )
-
+              secondTest = net.fetch( ip )
               if( secondTest != nil )
-#                 @log.debug( secondTest )
                 dnsStatus  = secondTest.dig( ip, 'dns' )
                 if( dnsStatus == false || dnsStatus == nil )
                   @log.error( '  Host are not available. skip' )
@@ -472,8 +452,13 @@ module ExternalDiscovery
 
             discoveryStatus  = result.dig( name, 'discovery', 'status' )
 
+            # {"status"=>400, "message"=>"Host are not available (DNS Problem)"}
+            if( discoveryStatus == 400 )
+              @log.info( '  The DNS of this host are not resolveable ... skip' )
+              next
+
             # not exists
-            if( discoveryStatus == 404 )
+            elsif( discoveryStatus == 404 )
 
               @log.info( '  host not in monitoring ... try to add' )
 
@@ -495,15 +480,25 @@ module ExternalDiscovery
 
               @log.debug( result )
 
+              if( result != nil )
+
               discoveryStatus  = result.dig( :status )
               discoveryMessage = result.dig( :message )
 
               if( discoveryStatus == 400 )
+                # error
                 @log.error( sprintf( '  => %s', discoveryMessage ) )
+              elsif( discoveryStatus == 409 )
+                # Host already created
+                @log.error( sprintf( '  => %s', discoveryMessage ) )
+
+                newArray << l
               else
                 @log.info( 'Host successful added' )
                 # successful
                 newArray << l
+              end
+
               end
 
             end
@@ -518,7 +513,7 @@ module ExternalDiscovery
 
 
       # remove hosts
-      if( removedEntriesCount.to_i != 0 )
+      if( historicDataCount.to_i != 0 && removedEntriesCount.to_i != 0 )
 
         # remove hosts from monitoring
 
@@ -532,6 +527,10 @@ module ExternalDiscovery
             @log.info( sprintf( 'remove host %s (%s) from monitoring', name, ip ) )
 
             result = net.remove( name )
+
+            if( result == nil )
+              next
+            end
 
             discoveryStatus  = result.dig( name, 'discovery', 'status' )
             discoveryMessage = result.dig( name, 'discovery', 'message' )
@@ -589,30 +588,11 @@ module ExternalDiscovery
 
       @log.debug( 'done' )
 
-
     end
 
   end
 
-
 end
 
 # ---------------------------------------------------------------------------------------
-
-# memcacheHost = ENV['MEMCACHE_HOST'] ? ENV['MEMCACHE_HOST'] : 'localhost'
-# memcachePort = ENV['MEMCACHE_PORT'] ? ENV['MEMCACHE_PORT'] : 11211
-#
-# config = {
-#   :logDirectory => '/tmp',
-#   :memcacheHost => memcacheHost,
-#   :memcachePort => memcachePort
-# }
-#
-# # ---------------------------------------------------------------------------------------
-#
-# e = ExternalDiscovery::Client.new( config )
-#
-# e.run( )
-#
-
 # EOF

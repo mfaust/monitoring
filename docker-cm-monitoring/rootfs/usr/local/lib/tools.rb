@@ -103,7 +103,7 @@ end
 
       cmd = sprintf( 'dig -x %s +short', host )
 
-      @log.debug( cmd )
+#       @log.debug( cmd )
 
       Open3.popen3( cmd ) do |stdin, stdout, stderr, wait_thr|
 
@@ -115,20 +115,19 @@ end
           host = stdOut
 #          host = line[0...-2]
         else
-          @log.error( stdErr )
-
-          @log.debug( host )
+#           @log.error( stdErr )
+#           @log.debug( host )
         end
       end
     end
 
     line  = nil
 
-    @log.debug( host )
+#     @log.debug( host )
 
     cmd   = sprintf( 'host -t A %s', host )
 
-    @log.debug( cmd )
+#     @log.debug( cmd )
 
     Open3.popen3( cmd ) do |stdin, stdout, stderr, wait_thr|
 
@@ -139,7 +138,7 @@ end
       if( returnValue == 0 && !stdOut.to_s.empty? )
         line = stdOut
       else
-        @log.error( stdErr )
+#         @log.error( stdErr )
       end
     end
 

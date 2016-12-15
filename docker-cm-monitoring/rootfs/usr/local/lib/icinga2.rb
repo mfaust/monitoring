@@ -228,7 +228,7 @@ class Icinga2
         message = result['status']
 
       end
-    rescue RestClient::ExceptionWithResponse => e
+    rescue => e
 
       # TODO
       # bessere fehlerbehandlung, hier kommt es immer mal wieder zu problemen!
@@ -251,7 +251,7 @@ class Icinga2
 
     rescue e
       @log.error( e )
-      
+
     end
 
     @status = status

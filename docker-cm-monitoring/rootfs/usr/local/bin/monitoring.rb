@@ -78,8 +78,8 @@ class Monitoring
       :graphitePath        => @graphitePath
     }
 
-    version              = '2.0.0'
-    date                 = '2016-12-06'
+    version              = '2.0.2'
+    date                 = '2016-12-15'
 
     @log.info( '-----------------------------------------------------------------' )
     @log.info( ' CoreMedia - Monitoring Service' )
@@ -162,17 +162,17 @@ class Monitoring
     shortHostName = hostInfo[:short] ? hostInfo[:short] : nil # dnsResolve( host )
     longHostName  = hostInfo[:long]  ? hostInfo[:long]  : nil # dnsResolve( host )
 
-    @log.info( sprintf( ' Host      : %s', host ) )
-    @log.info( sprintf( ' IP        : %s', ip ) )
-    @log.info( sprintf( ' short Name: %s', shortHostName ) )
-    @log.info( sprintf( ' long Name : %s', longHostName ) )
+#     @log.info( sprintf( ' Host      : %s', host ) )
+#     @log.info( sprintf( ' IP        : %s', ip ) )
+#     @log.info( sprintf( ' short Name: %s', shortHostName ) )
+#     @log.info( sprintf( ' long Name : %s', longHostName ) )
 
-    sql = "INSERT OR REPLACE INTO dns ( ip, longname, shortname )
-             VALUES ( '#{ip}', '#{longHostName}', '#{shortHostName}'
-               COALESCE( ( SELECT ip FROM dns WHERE ip = '#{ip}' ), 'Benchwarmer' )
-             )"
-
-    @database.exec( sql )
+#     sql = "INSERT OR REPLACE INTO dns ( ip, longname, shortname )
+#              VALUES ( '#{ip}', '#{longHostName}', '#{shortHostName}'
+#                COALESCE( ( SELECT ip FROM dns WHERE ip = '#{ip}' ), 'Benchwarmer' )
+#              )"
+#
+#     @database.exec( sql )
 
     if( ip == nil || shortHostName == nil )
       return false
@@ -356,9 +356,13 @@ class Monitoring
 #        "overview": true
 #      }
 
+      @log.debug( payload )
+
       if( payload != '' )
 
         hash = JSON.parse( payload )
+
+        @log.debug( hash )
 
         result[:request] = hash
 
@@ -470,6 +474,12 @@ class Monitoring
 
         if( enabledGrafana == true )
 
+          # tags are array or hash ..
+          # when hash, we need only the values. the keys are ignoreable
+          if( tags.is_a?( Hash ) )
+            tags = tags.values
+          end
+
           options = {
             'tags'     => tags,
             'overview' => grafanaOverview
@@ -571,6 +581,7 @@ class Monitoring
       end
 
       if( enableDiscovery == true )
+
         discoveryResult  = @serviceDiscovery.listHosts( ( hostData != false && hostData[:short] ) ? hostData[:short] : host )
         discoveryStatus  = discoveryResult[:status]
         discoveryMessage = discoveryResult[:message]
@@ -581,9 +592,13 @@ class Monitoring
 
         if( discoveryStatus == 200 )
 
-          discoverHost     = discoveryResult[:hosts]      ? discoveryResult[:hosts]      : nil
-          discoveryCreated = discoverHost[host][:created] ? discoverHost[host][:created] : 'unknown'
-          discoveryOnline  = discoverHost[host][:status]  ? discoverHost[host][:status]  : 'unknown'
+          if( discoveryResult.dig( :hosts, host ) != nil )
+            discoveryCreated = discoveryResult.dig( :hosts, host, :created ) || 'unknown'
+            discoveryOnline  = discoveryResult.dig( :hosts, host, :status )  || 'unknown'
+          else
+            discoveryCreated = discoveryResult.dig( :hosts, hostData[:short], :created ) || 'unknown'
+            discoveryOnline  = discoveryResult.dig( :hosts, hostData[:short], :status )  || 'unknown'
+          end
 
           result[host.to_s][:discovery] = {
             :status     => discoveryStatus,
@@ -600,7 +615,8 @@ class Monitoring
 
 
       if( enabledIcinga == true )
-        icingaResult  = @icinga.listHost( host )
+
+        icingaResult  = @icinga.listHost( ( hostData != false && hostData[:short] ) ? hostData[:short] : host )
         icingaStatus  = icingaResult[:status]
         icingaMessage = icingaResult[:message]
 
@@ -615,7 +631,7 @@ class Monitoring
 
 
       if( enabledGrafana == true )
-        grafanaResult  = @grafana.listDashboards( host )
+        grafanaResult  = @grafana.listDashboards( ( hostData != false && hostData[:short] ) ? hostData[:short] : host )
         grafanaStatus  = grafanaResult[:status]
         grafanaMessage = grafanaResult[:message]
 
@@ -624,6 +640,7 @@ class Monitoring
         result[host.to_s][:grafana] ||= {}
 
         if( grafanaStatus == 200 )
+
           grafanaDashboardCount = grafanaResult[:count]      ? grafanaResult[:count]      : 0
           grafanaDashboards     = grafanaResult[:dashboards] ? grafanaResult[:dashboards] : []
 
@@ -710,9 +727,9 @@ class Monitoring
 
 #       directory = self.createCacheDirectory( host )
 
-      enabledGrafana  = true
-      enabledIcinga   = true
-      annotation      = true
+      enableDiscovery = @enabledDiscovery
+      enabledGrafana  = @enabledGrafana
+      enabledIcinga   = @enabledIcinga
 
 #     example:
 #     {
@@ -726,8 +743,8 @@ class Monitoring
 
         result[:request] = hash
 
-        enabledGrafana  = hash.keys.include?('grafana')    ? hash['grafana']    : true
-        enabledIcinga   = hash.keys.include?('icinga')     ? hash['icinga']     : true
+        enabledGrafana  = hash.keys.include?('grafana')    ? hash['grafana']    : @enabledGrafana
+        enabledIcinga   = hash.keys.include?('icinga')     ? hash['icinga']     : @enabledIcinga
         annotation      = hash.keys.include?('annotation') ? hash['annotation'] : true
       end
 
