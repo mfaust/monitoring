@@ -4,6 +4,17 @@
 logDirectory: /var/log/monitoring
 cacheDirectory: /var/cache/monitoring
 
+external-discover:
+  backend:
+    host: localhost
+    port: 80
+    path: /
+  internal:
+    host: nginx
+    port: 80
+    path: /
+    version: 2
+
 monitoring-services:
   - discovery: true
   - grafana: true

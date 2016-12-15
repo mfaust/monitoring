@@ -9,6 +9,8 @@ GRAPHITE_PORT=${GRAPHITE_PORT:-2003}
 MEMCACHE_HOST=${MEMCACHE_HOST:-''}
 MEMCACHE_PORT=${MEMCACHE_PORT:-11211}
 
+SUPPORT_EXTERNAL_DISCOVERY=${SUPPORT_EXTERNAL_DISCOVERY:-false}
+
 # -------------------------------------------------------------------------------------------------
 
 # trap ctrl-c and call ctrl_c()
@@ -28,6 +30,14 @@ createConfig() {
     -e "s/%GRAPHITE_HOST%/${GRAPHITE_HOST}/" \
     -e "s/%GRAPHITE_PORT%/${GRAPHITE_PORT}/" \
     ${cfgFile}
+}
+
+externalDiscovery() {
+
+  if ( [ ${SUPPORT_EXTERNAL_DISCOVERY} = true ] && [ -f /etc/supervisor.d/external-discover.ini ] )
+  then
+    rm -f /etc/supervisor.d/external-discover.ini
+  fi
 
 }
 
@@ -45,17 +55,19 @@ startSupervisor() {
 
 run() {
 
+  externalDiscovery
+
   createConfig
 
   startSupervisor
 
-  cat /etc/motd
+#   cat /etc/motd
 
-  while true
-  do
-    sleep 5m
+#   while true
+#   do
+#     sleep 5m
     # echo -n "."
-  done
+#   done
 }
 
 run
