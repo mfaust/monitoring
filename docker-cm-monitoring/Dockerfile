@@ -49,6 +49,9 @@ RUN \
      rest-client \
      mysql2 \
      sqlite3 \
+     data_mapper \
+     dm-mysql-adapter \
+     dm-sqlite-adapter \
      time_difference \
      filesize \
      fileutils \
