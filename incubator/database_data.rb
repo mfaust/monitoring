@@ -1,43 +1,67 @@
 
+# ---------------------------------------------------------------------------------------
+#
+# monkey patches
 
+module DataMapper
+  module Model
+    def update_or_create( conditions = {}, attributes = {}, merger = true )
+      ( first( conditions ) && first( conditions ).update( attributes ) ) || create( merger ? ( conditions.merge( attributes ) ) : attributes )
+    end
+  end # Module Model
+end # Module DataMapper
 
-      class Dns
-        include DataMapper::Resource
+module DataMapper
+  class Property
+    class MD5 < String
+      key    true
+      length 32
 
-        property :id          , Serial
-        property :ip          , IPAddress, :required => true, :key => true
-        property :shortname   , String   , :required => true, :key => true, :length => 60
-        property :longname    , String   , :required => true,               :length => 250
-        property :checksum    , String   , :length => 64    , :key => true, :default => lambda { |r, p| Digest::SHA256.hexdigest( r.shortname ) }
+      accept_options :fields
 
-        has 1, :discovery
-      end
+      default lambda { |resource, property|
+        Digest::MD5.hexdigest(property.options[:fields].join) }
+    end
+  end
+end
 
-      class Discovery
-        include DataMapper::Resource
+# ---------------------------------------------------------------------------------------
 
-        property :id          , Serial
-        property :created     , DateTime , :default => lambda{ |p,s| DateTime.now }
-#         property :shortname   , String   , :required => true, :length => 60
-#         property :md5sum      , String   , :required => true, :length => 64, :key => true
-        property :service     , String   , :required => true, :length => 64, :index => true
-        property :data        , Json     , :required => true
-        property :status      , Boolean  , :default => false
+class Dns
+  include DataMapper::Resource
 
-        belongs_to :dns
-        has n, :result
-      end
+  property :id          , Serial
+  property :ip          , IPAddress, :required => true, :key => true, :index => true
+  property :shortname   , String   , :required => true, :key => true, :index => true, :length => 60
+  property :longname    , String   , :required => true,               :length => 250
+  property :created     , DateTime , :default => lambda{ |p,s| DateTime.now }
+  property :checksum    , MD5      , :fields => [ :ip, :shortname ]
 
-      class Result
-        include DataMapper::Resource
+  has n, :discovery
+end
 
-        property :id          , Serial
-        property :created     , DateTime , :default => lambda{ |p,s| DateTime.now }
-        property :service     , String   , :required => true, :length => 60
-#         property :md5sum      , String   , :required => true, :length => 64, :key => true
-        property :data        , Json     , :required => true
+class Discovery
+  include DataMapper::Resource
 
-        belongs_to :discovery
-      end
+  property :id          , Serial
+  property :created     , DateTime , :default => lambda{ |p,s| DateTime.now }
+  property :service     , String   , :required => true, :length => 64, :index => true
+  property :data        , Json     , :required => true
+  property :status      , Boolean  , :default => false
 
+  belongs_to :dns
+  has n, :result
+end
 
+class Result
+  include DataMapper::Resource
+
+  property :id          , Serial
+  property :created     , DateTime , :default => lambda{ |p,s| DateTime.now }
+  property :service     , String   , :required => true, :length => 60
+  property :data        , Json     , :required => true
+
+  belongs_to :discovery
+end
+
+# ---------------------------------------------------------------------------------------
