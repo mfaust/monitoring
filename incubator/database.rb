@@ -62,8 +62,9 @@ module Storage
 
     def insertData()
 
+      data = Array.new()
 
-      data  = {
+      data << {
         "replication-live-server"=> {
         "port"=> 48099,
         "description"=> "RLS",
@@ -74,7 +75,9 @@ module Storage
         "application"=> [
            "contentserver"
           ]
-        },
+        }
+      }
+      data << {
         "springer-cms"=> {
           "port"=> 49099,
           "description"=> "CAE Live 1",
@@ -90,28 +93,37 @@ module Storage
 
       # puts JSON.pretty_generate( data )
 
-      Dns.update_or_create( {
-                             :ip        => '10.2.14.156',
-                             :shortname => 'monitoring-16-01',
-                             :longname  => 'monitoring-16-01.coremedia.vm'
-                            }, {
-                                :shortname => 'monitoring-16-01',
-                                :longname  => 'monitoring-16-01.coremedia.vm'
-                               }
-                          )
+      Dns.update_or_create(
+        {
+          :ip        => '10.2.14.156',
+          :shortname => 'monitoring-16-01',
+          :longname  => 'monitoring-16-01.coremedia.vm'
+        }, {
+          :shortname => 'monitoring-16-01',
+          :longname  => 'monitoring-16-01.coremedia.vm'
+        }
+      )
 
-      Discovery.update_or_create( {
-                                   :dns_id     => 1,
-                                   :dns_ip     => '10.2.14.156',
-                                   :dns_shortname  => 'monitoring-16-01',
-                                   :dns_checksum   => '958f0d09e4d3039ef096ec27606de3a87ca10c0453c1b23de688314430c7ee36'
-                                  }, {
-                                      #     :shortname  => 'monitoring-16-01',
-                                      #     :md5sum     => '958f0d09e4d3039ef096ec27606de3a87ca10c0453c1b23de688314430c7ee36',
-                                      :data       => data
-                                     }
-                                )
+      data.each do |d|
 
+        puts   d.keys[0].to_s
+
+        Discovery.update_or_create(
+          {
+            :dns_id         => 1,
+            :dns_ip         => '10.2.14.156',
+            :dns_shortname  => 'monitoring-16-01',
+            :dns_checksum   => '958f0d09e4d3039ef096ec27606de3a87ca10c0453c1b23de688314430c7ee36',
+            :service        => d.keys[0].to_s
+          }, {
+            #:shortname  => 'monitoring-16-01',
+            #:md5sum     => '958f0d09e4d3039ef096ec27606de3a87ca10c0453c1b23de688314430c7ee36',
+            :service    => d.keys[0].to_s,
+            :data       => d.values
+          }
+        )
+
+      end
 
     end
 
@@ -136,10 +148,11 @@ module Storage
       puts d.map( &:ip )
       puts d.map( &:shortname )
 
-      d = Discovery.all( :fields => [ :data ], :dns_shortname => 'monitoring-16-01' )
+      d = Discovery.all( :fields => [ :service, :data ], :dns_shortname => 'monitoring-16-01' )
 
       puts d.inspect
-      puts d.map( &:data)
+      puts d.map( &:service )
+      puts d.map( &:data )
       # puts d.map( &:shortname )
 
 

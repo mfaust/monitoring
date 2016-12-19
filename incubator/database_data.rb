@@ -20,6 +20,7 @@
         property :created     , DateTime , :default => lambda{ |p,s| DateTime.now }
 #         property :shortname   , String   , :required => true, :length => 60
 #         property :md5sum      , String   , :required => true, :length => 64, :key => true
+        property :service     , String   , :required => true, :length => 64, :index => true
         property :data        , Json     , :required => true
         property :status      , Boolean  , :default => false
 
