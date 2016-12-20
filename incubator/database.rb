@@ -60,10 +60,6 @@ module Storage
 
     include Logging
 
-#    include Dns
-#    include Discovery
-#    include Results
-
     def initialize( params = {} )
 
       @cacheDirectory    = params[:cacheDirectory] ? params[:cacheDirectory] : '/var/cache/monitoring'
@@ -84,7 +80,11 @@ module Storage
     end
 
 
-    def createDNS( ip, short, long )
+    def createDNS( params = {}  ) #  ip, short, long )
+
+      ip      = params[ :ip ]    ? params[ :ip ]    : nil
+      short   = params[ :short ] ? params[ :short ] : nil
+      long    = params[ :long ]  ? params[ :long ]  : nil
 
       Dns.update_or_create(
         {
@@ -99,7 +99,11 @@ module Storage
     end
 
 
-    def dnsData( ip, short = nil, long = nil )
+    def dnsData( params = {}  )
+
+      ip      = params[ :ip ]    ? params[ :ip ]    : nil
+      short   = params[ :short ] ? params[ :short ] : nil
+      long    = params[ :long ]  ? params[ :long ]  : nil
 
       d = Dns.all( :ip => ip ) |
           Dns.all( :shortname => short ) |
@@ -123,20 +127,18 @@ module Storage
 
     def createDiscovery( dnsId, dnsIp, dnsShortname, dnsChecksum, service, data )
 
-        Discovery.update_or_create(
-          {
-            :dns_id         => dnsId,
-            :dns_ip         => dnsIp,
-            :dns_shortname  => dnsShortname,
-            :dns_checksum   => dnsChecksum,
-            :service        => service
-          }, {
-            #:shortname  => 'monitoring-16-01',
-            #:md5sum     => '958f0d09e4d3039ef096ec27606de3a87ca10c0453c1b23de688314430c7ee36',
-            :service    => service,
-            :data       => data
-          }
-        )
+      Discovery.update_or_create(
+        {
+          :dns_id         => dnsId,
+          :dns_ip         => dnsIp,
+          :dns_shortname  => dnsShortname,
+          :dns_checksum   => dnsChecksum,
+          :service        => service
+        }, {
+          :service    => service,
+          :data       => data
+        }
+      )
 
     end
 
@@ -182,6 +184,7 @@ module Storage
 
         return array
 
+      # { :ip => '10.2.14.156' }
       elsif( service == nil && ( ip == nil || short == nil ) )
 
         if( ip != nil )
@@ -202,8 +205,8 @@ module Storage
 
         d.each do |data|
 
-          dnsShortName  = data.attribute_get( :dns_shortname )
-          service         = data.attribute_get( :service ).to_s
+          dnsShortName  = data.attribute_get( :dns_shortname ).to_s
+          service       = data.attribute_get( :service ).to_s
           discoveryData = JSON.parse( data.attribute_get( :data ).to_json )
 
           result[key.to_sym][dnsShortName] ||= {}
@@ -241,35 +244,10 @@ module Storage
           :data      => JSON.parse( data )
         }
 
+      else
+        return nil
       end
 
-#       logger.debug( d.inspect )
-
-
-
-
-#
-#       d = ( Discovery.all( :fields=>[ :dns_ip, :dns_shortname, :service, :data ], :dns_ip => ip ) |
-#             Discovery.all( :fields=>[ :dns_ip, :dns_shortname, :service, :data ], :dns_shortname => short ) ) &
-#           Discovery.all( :fields=>[ :dns_ip, :dns_shortname, :service, :data ], :service => service )
-
-#       if( d == nil )
-#         return nil
-#       end
-#
-#       data = d.map( &:data )[0].to_json
-#
-#       return {
-#         :ip        => d.map( &:dns_ip )[0].to_s,
-#         :shortname => d.map( &:dns_shortname )[0].to_s,
-#         :service   => d.map( &:service )[0].to_s,
-#         :data      => JSON.parse( data )
-#       }
-
-
-
-      logger.debug( JSON.pretty_generate( array ) )
-      logger.debug()
     end
 
 
@@ -307,14 +285,14 @@ module Storage
 
       # puts JSON.pretty_generate( data )
 
-      self.createDNS( '10.2.14.156', 'monitoring-16-01', 'monitoring-16-01.coremedia.vm' )
-      self.createDNS( '10.2.14.160', 'monitoring-16-02', 'monitoring-16-02.coremedia.vm' )
+      self.createDNS( { :ip => '10.2.14.156', :short => 'monitoring-16-01', :long => 'monitoring-16-01.coremedia.vm' } )
+      self.createDNS( { :ip => '10.2.14.160', :short => 'monitoring-16-02', :long => 'monitoring-16-02.coremedia.vm' } )
 
       dns = Hash.new()
 
       ['10.2.14.165', '10.2.14.160', '10.2.14.156' ].each do |i|
 
-        dns = self.dnsData( i )
+        dns = self.dnsData( { :ip => i } )
 
         if( dns == nil )
           logger.debug( 'no data for ip ' + i )
@@ -341,34 +319,6 @@ module Storage
     end
 
     def readData(  )
-
-#       #
-#       # puts ""
-#       # puts " OR"
-#       # # OR
-#       # d = Dns.all( :fields=>[:ip, :shortname], :ip => '10.2.14.156' ) | Dns.all(  :fields=>[:ip, :shortname], :shortname => 'monitoring-16-01' )
-#       # puts d.inspect
-#       # puts d.map( &:ip )
-#       # puts d.map( &:shortname )
-#
-#       puts ""
-#       puts " AND"
-#       # AND
-#       d = Dns.all(  :fields=>[:ip, :shortname, :checksum], :ip => '10.2.14.156' ) &
-#       Dns.all(  :fields=>[:ip, :shortname], :shortname => 'monitoring-16-01' )
-#
-#       puts d.inspect
-#       puts d.map( &:ip )
-#       puts d.map( &:shortname )
-#
-#       d = Discovery.all( :fields => [ :service, :data ], :dns_shortname => 'monitoring-16-01' )
-#
-#       puts d.inspect
-#       puts d.map( &:service )
-#       puts d.map( &:data )
-#       # puts d.map( &:shortname )
-
-
 
       d = self.discoveryData( { :ip => '10.2.14.156' } ) # { :ip => '10.2.14.156', :short => 'monitoring-16-01' } )
 
@@ -401,40 +351,6 @@ module Storage
 
     end
   end
-#
-#       class Dns
-#         include DataMapper::Resource
-#
-#         property :id          , Serial
-#         property :ip          , IPAddress, :required => true, :key => true
-#         property :shortname   , String   , :required => true, :key => true, :length => 60
-#         property :longname    , String   , :required => true,               :length => 250
-#         property :md5sum      , String   , :length => 64    , :key => true, :default => lambda { |r, p| Digest::SHA256.hexdigest( r.shortname ) }
-#       end
-#
-#       class Discovery
-#         include DataMapper::Resource
-#
-#         property :id          , Serial
-#         property :created     , DateTime , :default => lambda{ |p,s| DateTime.now }
-#         property :shortname   , String   , :required => true, :length => 60
-#         property :md5sum      , String   , :required => true, :length => 64, :key => true
-#         property :data        , Json     , :required => true
-#
-#
-#         property :status      , Flag[ :online, :offline ], :default => :offline
-#
-#       end
-#
-#       class Results
-#         include DataMapper::Resource
-#
-#         property :id          , Serial
-#         property :created     , DateTime , :default => lambda{ |p,s| DateTime.now }
-#         property :service     , String   , :required => true, :length => 60
-#         property :md5sum      , String   , :required => true, :length => 64, :key => true
-#         property :data        , Json     , :required => true
-#       end
 
 
 end
@@ -444,15 +360,5 @@ m = Storage::SQLite.new()
 
 m.insertData()
 m.readData()
-
-
-
-#if( DataMapper.repository(:default).adapter.storage_exists?('dns') && DataMapper.repository(:default).adapter.storage_exists?('node') )
-#  DataMapper.auto_migrate!
-#end
-
-
-#dns  = Dns.new()
-#node = Node.new()
 
 
