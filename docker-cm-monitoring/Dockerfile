@@ -40,10 +40,14 @@ RUN \
     nrpe-plugin \
     bind-tools \
     zlib \
-    zlib-dev && \
+    zlib-dev
+
+#RUN \
+#  for p in erb gem irb rdoc ri ruby testrb ; do  ln -s /usr/bin/${p}2.2 /usr/bin/${p} ; done
+
+RUN \
    gem install --no-rdoc --no-ri \
      bigdecimal \
-     json \
      ipaddress \
      resolve-hostname \
      rest-client \
@@ -59,17 +63,19 @@ RUN \
      sinatra \
      thin \
      dalli && \
-  mv /etc/collectd/collectd.conf /etc/collectd/collectd.conf.dist && \
-  apk del --purge \
-    build-base \
-    imagemagick-dev \
-    mysql-dev \
-    sqlite-dev \
-    ruby-dev \
-    zlib-dev && \
-  rm -rf /var/cache/apk/*
+   mv /etc/collectd/collectd.conf /etc/collectd/collectd.conf.dist && \
+   apk del --purge \
+     build-base \
+     imagemagick-dev \
+     mysql-dev \
+     sqlite-dev \
+     ruby-dev \
+     zlib-dev && \
+   rm -rf /var/cache/apk/*
 
 COPY rootfs/ /
 
 
 CMD /opt/startup.sh
+
+# CMD /bin/bash

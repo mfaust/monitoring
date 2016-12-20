@@ -14,7 +14,6 @@ require_relative '../lib/grafana'
 require_relative '../lib/graphite'
 require_relative '../lib/icinga2'
 require_relative '../lib/tools'
-require_relative '../lib/database'
 
 # -----------------------------------------------------------------------------
 
@@ -95,8 +94,6 @@ class Monitoring
 
     sleep(2)
 
-    @database         = Database::SQLite.new()
-
     @serviceDiscovery = ServiceDiscovery.new( serviceDiscoverConfig )
     @grafana          = Grafana.new( grafanaConfig )
     @icinga           = Icinga2.new( icingaConfig )
@@ -161,18 +158,6 @@ class Monitoring
     ip            = hostInfo[:ip]    ? hostInfo[:ip]    : nil # dnsResolve( host )
     shortHostName = hostInfo[:short] ? hostInfo[:short] : nil # dnsResolve( host )
     longHostName  = hostInfo[:long]  ? hostInfo[:long]  : nil # dnsResolve( host )
-
-#     @log.info( sprintf( ' Host      : %s', host ) )
-#     @log.info( sprintf( ' IP        : %s', ip ) )
-#     @log.info( sprintf( ' short Name: %s', shortHostName ) )
-#     @log.info( sprintf( ' long Name : %s', longHostName ) )
-
-#     sql = "INSERT OR REPLACE INTO dns ( ip, longname, shortname )
-#              VALUES ( '#{ip}', '#{longHostName}', '#{shortHostName}'
-#                COALESCE( ( SELECT ip FROM dns WHERE ip = '#{ip}' ), 'Benchwarmer' )
-#              )"
-#
-#     @database.exec( sql )
 
     if( ip == nil || shortHostName == nil )
       return false

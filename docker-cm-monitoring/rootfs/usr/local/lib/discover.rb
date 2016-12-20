@@ -16,7 +16,7 @@ require 'uri'
 require 'sqlite3'
 
 require_relative 'tools'
-#require_relative 'database'
+require_relative 'database'
 
 # -------------------------------------------------------------------------------------------------------------------
 
@@ -88,7 +88,7 @@ class ServiceDiscovery
       Dir.mkdir( @cacheDirectory )
     end
 
-#    @db = Database::SQLite.new()
+    @db = Storage::SQLite.new()
 
     version              = '1.2.5'
     date                 = '2016-11-21'
@@ -527,6 +527,8 @@ class ServiceDiscovery
         :message => message
       }
     end
+
+    @db.createDNS( { :ip => ip, :short => shortHostName, :long => longHostName } )
 
     # Execute inserts with parameter markers
 #    @db.execute(
