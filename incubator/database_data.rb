@@ -19,8 +19,7 @@ module DataMapper
 
       accept_options :fields
 
-      default lambda { |resource, property|
-        Digest::MD5.hexdigest(property.options[:fields].join) }
+      default lambda { |resource, property| Digest::MD5.hexdigest( property.options[ :fields ].join ) }
     end
   end
 end
