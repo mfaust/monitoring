@@ -88,7 +88,33 @@ module Storage
     end
 
 
-    def createDiscovery( params = {} ) #  dnsId, dnsIp, dnsShortname, dnsChecksum, service, data )
+    def createDiscovery( params = {} )
+
+      dnsId        = params[ :id ]       ? params[ :id ]       : nil
+      dnsIp        = params[ :ip ]       ? params[ :ip ]       : nil
+      dnsShortname = params[ :short ]    ? params[ :short ]    : nil
+      dnsChecksum  = params[ :checksum ] ? params[ :checksum ] : nil
+      service      = params[ :service ]  ? params[ :service ]  : nil
+      data         = params[ :data ]     ? params[ :data ]     : nil
+
+      if( service == nil && data.is_a?( Hash ) )
+
+        data.each do |k,v|
+
+          logger.debug( sprintf( '%s - %s', dnsShortname, k ) )
+
+          self.writeDiscovery( { :id => dnsId, :ip => dnsIp, :short => dnsShortname, :checksum => dnsChecksum, :service => k, :data => v } )
+
+        end
+
+      else
+        self.writeDiscovery( params )
+      end
+
+    end
+
+    # PRIVATE
+    def writeDiscovery( params = {} )
 
       dnsId        = params[ :id ]       ? params[ :id ]       : nil
       dnsIp        = params[ :ip ]       ? params[ :ip ]       : nil
@@ -109,6 +135,7 @@ module Storage
           :data       => data
         }
       )
+
 
     end
 

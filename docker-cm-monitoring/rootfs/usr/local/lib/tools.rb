@@ -103,8 +103,6 @@ end
 
       cmd = sprintf( 'dig -x %s +short', host )
 
-#       @log.debug( cmd )
-
       Open3.popen3( cmd ) do |stdin, stdout, stderr, wait_thr|
 
         returnValue = wait_thr.value
@@ -123,11 +121,7 @@ end
 
     line  = nil
 
-#     @log.debug( host )
-
     cmd   = sprintf( 'host -t A %s', host )
-
-#     @log.debug( cmd )
 
     Open3.popen3( cmd ) do |stdin, stdout, stderr, wait_thr|
 
@@ -157,8 +151,6 @@ end
       :short => short,
       :long  => long
     }
-
-    @log.debug( result )
 
     return result
 

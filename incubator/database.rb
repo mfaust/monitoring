@@ -3,12 +3,17 @@
 require 'rubygems'
 require 'json'
 require 'logger'
-require 'dm-types'
-require 'dm-core'
-require 'dm-constraints'
-require 'dm-migrations'
+require 'sequel'
+require 'digest/md5'
 
-require_relative 'database_data'
+require_relative '../docker-cm-monitoring/rootfs/usr/local/lib/tools'
+
+# require 'dm-types'
+# require 'dm-core'
+# require 'dm-constraints'
+# require 'dm-migrations'
+
+# require_relative 'database_data'
 
 
 
@@ -70,32 +75,80 @@ module Storage
 
     def prepare()
 
-      DataMapper::Logger.new( $stdout, :info )
-      DataMapper.setup( :default, 'sqlite:///tmp/project.db' )
-      DataMapper::Model.raise_on_save_failure = true
-      DataMapper.finalize
+      @database = Sequel.sqlite( '/tmp/project.db' )
+      @database.loggers << Logger.new( $stdout, :debug )
 
-      DataMapper.auto_upgrade!
+      @database.create_table?( :dns ) {
+        primary_key :id
+        String      :ip        , :size => 128, :key => true, :index => true, :unique => true, :null => false
+        String      :shortname , :size => 60 , :key => true, :index => true, :unique => true, :null => false
+        String      :longname  , :size => 250
+        DateTime    :created   , :default => Time.now
+        String      :checksum  , :size => 32
+        FalseClass  :status
+      }
+
+      @database.create_table?( :config ) {
+        primary_key :id
+        DateTime    :created   , :default => 'now()'
+        String      :shortname , :size => 60 , :key => true, :index => true, :unique => true, :null => false
+        String      :service   , :size => 128, :key => true, :index => true, :unique => true, :null => false
+        String      :data      , :text => true, :null => false
+      }
+
+      @database.create_table?( :discovery ) {
+        primary_key :id
+        DateTime    :created   , :default => 'now()'
+        String      :shortname , :size => 60 , :key => true, :index => true, :unique => true, :null => false
+        String      :service   , :size => 128, :key => true, :index => true, :unique => true, :null => false
+        String      :data      , :text => true, :null => false
+      }
+
+      @database.create_table?( :result ) {
+        primary_key :id
+        DateTime    :created   , :default => 'now()'
+        String      :shortname , :size => 60 , :key => true, :index => true, :unique => true, :null => false
+        String      :service   , :size => 128, :key => true, :index => true, :unique => true, :null => false
+        String      :data      , :text => true, :null => false
+      }
+
+#      DataMapper::Logger.new( $stdout, :info )
+#      DataMapper.setup( :default, 'sqlite:///tmp/project.db' )
+#      DataMapper::Model.raise_on_save_failure = true
+#      DataMapper.finalize
+#
+#      DataMapper.auto_upgrade!
 
     end
 
 
-    def createDNS( params = {} ) #  ip, short, long )
+    def createDNS( params = {} )
 
       ip      = params[ :ip ]    ? params[ :ip ]    : nil
       short   = params[ :short ] ? params[ :short ] : nil
       long    = params[ :long ]  ? params[ :long ]  : nil
 
-      Dns.update_or_create(
-        {
+      dns = @database[:dns]
+
+      rec = dns.select(:id).where(
+        :ip        => ip.to_s,
+        :shortname => short.to_s,
+        :longname  => long.to_s
+      ).to_a.first
+
+      # insert if data not found
+      if( rec == nil )
+
+        dns.insert(
           :ip        => ip.to_s,
           :shortname => short.to_s,
-          :longname  => long.to_s
-        }, {
-          :shortname => short.to_s,
-          :longname  => long.to_s
-        }
-      )
+          :longname  => long.to_s,
+          :checksum  => Digest::MD5.hexdigest( [ :ip, :shortname, :longname ].join ),
+          :created   => DateTime.now(),
+          :status    => isRunning?( long )
+        )
+      end
+
     end
 
 
@@ -105,167 +158,172 @@ module Storage
       short   = params[ :short ] ? params[ :short ] : nil
       long    = params[ :long ]  ? params[ :long ]  : nil
 
-      d = Dns.all( :ip => ip ) |
-          Dns.all( :shortname => short ) |
-          Dns.all( :longname => long )
+      dns = @database[:dns]
 
-      if( d.first == nil )
+      rec = dns.where(
+        (Sequel[:ip => ip.to_s] ) |
+        (Sequel[:shortname => short.to_s] ) |
+        (Sequel[:longname  => long.to_s] )
+      ).to_a
+
+      if( rec.count() == 0 )
         return nil
-      end
-
-      return {
-        :id        => d.map( &:id )[0].to_i,
-        :ip        => d.map( &:ip )[0].to_s,
-        :shortname => d.map( &:shortname )[0].to_s,
-        :longname  => d.map( &:longname )[0].to_s,
-        :created   => d.map( &:created )[0].to_s,
-        :checksum  => d.map( &:checksum )[0].to_s,
-      }
-
-    end
-
-
-    def createDiscovery( params = {} ) #  dnsId, dnsIp, dnsShortname, dnsChecksum, service, data )
-
-      dnsId        = params[ :id ]       ? params[ :id ]       : nil
-      dnsIp        = params[ :ip ]       ? params[ :ip ]       : nil
-      dnsShortname = params[ :short ]    ? params[ :short ]    : nil
-      dnsChecksum  = params[ :checksum ] ? params[ :checksum ] : nil
-      service      = params[ :service ]  ? params[ :service ]  : nil
-      data         = params[ :data ]     ? params[ :data ]     : nil
-
-      Discovery.update_or_create(
-        {
-          :dns_id         => dnsId,
-          :dns_ip         => dnsIp,
-          :dns_shortname  => dnsShortname,
-          :dns_checksum   => dnsChecksum,
-          :service        => service
-        }, {
-          :service    => service,
-          :data       => data
-        }
-      )
-
-    end
-
-
-    def discoveryData( params = {} ) #ip, short = nil, service )
-
-      logger.debug()
-      logger.debug( params )
-
-      ip      = params[ :ip ]      ? params[ :ip ]      : nil
-      short   = params[ :short ]   ? params[ :short ]   : nil
-      service = params[ :service ] ? params[ :service ] : nil
-
-      array     = Array.new()
-      result    = Hash.new()
-
-      if( ( ip != nil || short != nil ) )
-
-        if( ip != nil )
-          host = ip
-        end
-        if( short != nil )
-          host = short
-        end
       else
-        host = nil
-      end
 
-      # ---------------------------------------------------------------------------------
-
-      if( service == nil && host == nil )
-
-        logger.error( 'no data' )
-
-      #  { :short => 'monitoring-16-01', :service => 'replication-live-server' }
-      elsif( service != nil && host == nil )
-
-        result[service.to_s] ||= {}
-
-        Discovery.all( :fields=>[ :dns_ip, :dns_shortname, :service, :data ], :service => service ).each do |data|
-
-          dnsShortName  = data.attribute_get( :dns_shortname )
-          dnsIp         = data.attribute_get( :dns_ip ).to_s
-          discoveryData = JSON.parse( data.attribute_get( :data ).to_json )
-
-          result[service.to_s][dnsShortName] ||= {}
-          result[service.to_s][dnsShortName] = {
-            :ip   => dnsIp,
-            :data => discoveryData
-          }
-
-          array << result
-        end
-
-        array = array.reduce( :merge )
-
-        return array
-
-      # { :short => 'monitoring-16-01' }
-      elsif( service == nil && host != nil )
-
-        d = Discovery.all( :fields=>[ :dns_ip, :dns_shortname, :service, :data ], :dns_ip => ip ) |
-            Discovery.all( :fields=>[ :dns_ip, :dns_shortname, :service, :data ], :dns_shortname => short )
-
-        result[host.to_s] ||= {}
-
-        d.each do |data|
-
-          dnsShortName  = data.attribute_get( :dns_shortname ).to_s
-          service       = data.attribute_get( :service ).to_s
-          discoveryData = JSON.parse( data.attribute_get( :data ).to_json )
-
-          result[host.to_s][service] ||= {}
-          result[host.to_s][service] = {
-            :data => discoveryData
-          }
-
-          array << result
-        end
-
-        array = array.reduce( :merge )
-
-        return array
-
-      elsif( service != nil && host != nil )
-
-        d = ( Discovery.all( :fields=>[ :dns_ip, :dns_shortname, :service, :data ], :dns_ip => ip ) |
-              Discovery.all( :fields=>[ :dns_ip, :dns_shortname, :service, :data ], :dns_shortname => short ) ) &
-             Discovery.all( :fields=>[ :dns_ip, :dns_shortname, :service, :data ], :service => service )
-
-        if( d == nil )
-          return nil
-        end
-
-        result[host.to_s] ||= {}
-
-        service        = d.map( &:service )[0].to_s
-        discoveryData  = d.map( &:data )[0].to_json
-
-        result[host.to_s][service] ||= {}
-        result[host.to_s][service] = {
-          :data => JSON.parse( discoveryData )
+        return {
+          :id        => rec.first[:id].to_i,
+          :ip        => rec.first[:ip].to_s,
+          :shortname => rec.first[:shortname].to_s,
+          :longname  => rec.first[:longname].to_s,
+          :created   => rec.first[:created].to_s,
+          :checksum  => rec.first[:checksum].to_s
         }
 
-        array << result
-        array = array.reduce( :merge )
-
-        return array
-
-#        logger.debug( JSON.pretty_generate( array ) )
-      else
-        logger.error( 'no matches' )
       end
-
-
-      return nil
-
     end
 
 
+#     def createDiscovery( params = {} ) #  dnsId, dnsIp, dnsShortname, dnsChecksum, service, data )
+#
+#       dnsId        = params[ :id ]       ? params[ :id ]       : nil
+#       dnsIp        = params[ :ip ]       ? params[ :ip ]       : nil
+#       dnsShortname = params[ :short ]    ? params[ :short ]    : nil
+#       dnsChecksum  = params[ :checksum ] ? params[ :checksum ] : nil
+#       service      = params[ :service ]  ? params[ :service ]  : nil
+#       data         = params[ :data ]     ? params[ :data ]     : nil
+#
+#       Discovery.update_or_create(
+#         {
+#           :dns_id         => dnsId,
+#           :dns_ip         => dnsIp,
+#           :dns_shortname  => dnsShortname,
+#           :dns_checksum   => dnsChecksum,
+#           :service        => service
+#         }, {
+#           :service    => service,
+#           :data       => data
+#         }
+#       )
+#
+#     end
+#
+#
+#     def discoveryData( params = {} ) #ip, short = nil, service )
+#
+#       logger.debug()
+#       logger.debug( params )
+#
+#       ip      = params[ :ip ]      ? params[ :ip ]      : nil
+#       short   = params[ :short ]   ? params[ :short ]   : nil
+#       service = params[ :service ] ? params[ :service ] : nil
+#
+#       array     = Array.new()
+#       result    = Hash.new()
+#
+#       if( ( ip != nil || short != nil ) )
+#
+#         if( ip != nil )
+#           host = ip
+#         end
+#         if( short != nil )
+#           host = short
+#         end
+#       else
+#         host = nil
+#       end
+#
+#       # ---------------------------------------------------------------------------------
+#
+#       if( service == nil && host == nil )
+#
+#         logger.error( 'no data' )
+#
+#       #  { :short => 'monitoring-16-01', :service => 'replication-live-server' }
+#       elsif( service != nil && host == nil )
+#
+#         result[service.to_s] ||= {}
+#
+#         Discovery.all( :fields=>[ :dns_ip, :dns_shortname, :service, :data ], :service => service ).each do |data|
+#
+#           dnsShortName  = data.attribute_get( :dns_shortname )
+#           dnsIp         = data.attribute_get( :dns_ip ).to_s
+#           discoveryData = JSON.parse( data.attribute_get( :data ).to_json )
+#
+#           result[service.to_s][dnsShortName] ||= {}
+#           result[service.to_s][dnsShortName] = {
+#             :ip   => dnsIp,
+#             :data => discoveryData
+#           }
+#
+#           array << result
+#         end
+#
+#         array = array.reduce( :merge )
+#
+#         return array
+#
+#       # { :short => 'monitoring-16-01' }
+#       elsif( service == nil && host != nil )
+#
+#         d = Discovery.all( :fields=>[ :dns_ip, :dns_shortname, :service, :data ], :dns_ip => ip ) |
+#             Discovery.all( :fields=>[ :dns_ip, :dns_shortname, :service, :data ], :dns_shortname => short )
+#
+#         result[host.to_s] ||= {}
+#
+#         d.each do |data|
+#
+#           dnsShortName  = data.attribute_get( :dns_shortname ).to_s
+#           service       = data.attribute_get( :service ).to_s
+#           discoveryData = JSON.parse( data.attribute_get( :data ).to_json )
+#
+#           result[host.to_s][service] ||= {}
+#           result[host.to_s][service] = {
+#             :data => discoveryData
+#           }
+#
+#           array << result
+#         end
+#
+#         array = array.reduce( :merge )
+#
+#         return array
+#
+#       elsif( service != nil && host != nil )
+#
+#         d = ( Discovery.all( :fields=>[ :dns_ip, :dns_shortname, :service, :data ], :dns_ip => ip ) |
+#               Discovery.all( :fields=>[ :dns_ip, :dns_shortname, :service, :data ], :dns_shortname => short ) ) &
+#              Discovery.all( :fields=>[ :dns_ip, :dns_shortname, :service, :data ], :service => service )
+#
+#         if( d == nil )
+#           return nil
+#         end
+#
+#         result[host.to_s] ||= {}
+#
+#         service        = d.map( &:service )[0].to_s
+#         discoveryData  = d.map( &:data )[0].to_json
+#
+#         result[host.to_s][service] ||= {}
+#         result[host.to_s][service] = {
+#           :data => JSON.parse( discoveryData )
+#         }
+#
+#         array << result
+#         array = array.reduce( :merge )
+#
+#         return array
+#
+# #        logger.debug( JSON.pretty_generate( array ) )
+#       else
+#         logger.error( 'no matches' )
+#       end
+#
+#
+#       return nil
+#
+#     end
+#
+#
     def insertData()
 
       data = Array.new()
@@ -302,12 +360,18 @@ module Storage
 
       self.createDNS( { :ip => '10.2.14.156', :short => 'monitoring-16-01', :long => 'monitoring-16-01.coremedia.vm' } )
       self.createDNS( { :ip => '10.2.14.160', :short => 'monitoring-16-02', :long => 'monitoring-16-02.coremedia.vm' } )
+      self.createDNS( { :ip => '10.2.14.165', :short => 'monitoring-16-07', :long => 'monitoring-16-07.coremedia.vm' } )
+
 
       dns = Hash.new()
 
       [ 'monitoring-16-01', 'monitoring-16-02', 'foo' ].each do |i|
 
         dns = self.dnsData( { :short => i } )
+
+        logger.debug( dns )
+
+        next
 
         if( dns == nil )
           logger.debug( 'no data for ' + i )
@@ -334,24 +398,24 @@ module Storage
         end
       end
     end
-
-    def readData(  )
-
-      d = self.discoveryData( { :ip => '10.2.14.156' } )
-      logger.debug( JSON.pretty_generate( d ) )
-      logger.debug( '===' )
-      d = self.discoveryData( { :short => 'monitoring-16-01' } )
-      logger.debug( JSON.pretty_generate( d ) )
-      logger.debug( '===' )
-      d = self.discoveryData( { :short => 'monitoring-16-01', :service => 'replication-live-server' } )
-      logger.debug( JSON.pretty_generate( d ) )
-      logger.debug( '===' )
-      d = self.discoveryData( { :service => 'replication-live-server' } )
-      logger.debug( JSON.pretty_generate( d ) )
-      logger.debug( '===' )
-
-
-    end
+#
+#     def readData(  )
+#
+#       d = self.discoveryData( { :ip => '10.2.14.156' } )
+#       logger.debug( JSON.pretty_generate( d ) )
+#       logger.debug( '===' )
+#       d = self.discoveryData( { :short => 'monitoring-16-01' } )
+#       logger.debug( JSON.pretty_generate( d ) )
+#       logger.debug( '===' )
+#       d = self.discoveryData( { :short => 'monitoring-16-01', :service => 'replication-live-server' } )
+#       logger.debug( JSON.pretty_generate( d ) )
+#       logger.debug( '===' )
+#       d = self.discoveryData( { :service => 'replication-live-server' } )
+#       logger.debug( JSON.pretty_generate( d ) )
+#       logger.debug( '===' )
+#
+#
+#     end
   end
 
 
@@ -360,8 +424,8 @@ end
 # ---------------------------------------------------------------------------------------
 
 # TESTS
-#m = Storage::SQLite.new()
-#
-# m.insertData()
+m = Storage::SQLite.new()
+
+m.insertData()
 #m.readData()
 

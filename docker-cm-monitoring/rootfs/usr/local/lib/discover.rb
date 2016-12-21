@@ -15,6 +15,7 @@ require 'net/http'
 require 'uri'
 require 'sqlite3'
 
+require_relative 'logging'
 require_relative 'tools'
 require_relative 'database'
 
@@ -22,7 +23,9 @@ require_relative 'database'
 
 class ServiceDiscovery
 
-  attr_reader :status, :message, :services
+#   attr_reader :status, :message, :services
+
+  include Logging
 
   def initialize( settings = {} )
 
@@ -72,17 +75,17 @@ class ServiceDiscovery
     @serviceConfig     = settings[:serviceConfigFile] ? settings[:serviceConfigFile]   : nil
     @scanPorts         = settings[:scanPorts]         ? settings[:scanPorts]           : ports
 
-    logFile        = sprintf( '%s/service-discovery.log', @logDirectory )
-
-    file           = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
-    file.sync      = true
-    @log           = Logger.new( file, 'weekly', 1024000 )
-#    @log = Logger.new( STDOUT )
-    @log.level     = Logger::INFO
-    @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
-    @log.formatter = proc do |severity, datetime, progname, msg|
-      "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
-    end
+#     logFile        = sprintf( '%s/service-discovery.log', @logDirectory )
+#
+#     file           = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
+#     file.sync      = true
+#     @log           = Logger.new( file, 'weekly', 1024000 )
+# #    @log = Logger.new( STDOUT )
+#     logger.level     = Logger::INFO
+#     logger.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
+#     logger.formatter = proc do |severity, datetime, progname, msg|
+#       "[#{datetime.strftime(logger.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
+#     end
 
     if( ! File.exist?( @cacheDirectory ) )
       Dir.mkdir( @cacheDirectory )
@@ -90,16 +93,16 @@ class ServiceDiscovery
 
     @db = Storage::SQLite.new()
 
-    version              = '1.2.5'
-    date                 = '2016-11-21'
+    version              = '1.2.9'
+    date                 = '2016-12-21'
 
-    @log.info( '-----------------------------------------------------------------' )
-    @log.info( ' CoreMedia - Service Discovery' )
-    @log.info( "  Version #{version} (#{date})" )
-    @log.info( '  Copyright 2016 Coremedia' )
-    @log.info( "  cache directory located at #{@cacheDirectory}" )
-    @log.info( '-----------------------------------------------------------------' )
-    @log.info( '' )
+    logger.info( '-----------------------------------------------------------------' )
+    logger.info( ' CoreMedia - Service Discovery' )
+    logger.info( "  Version #{version} (#{date})" )
+    logger.info( '  Copyright 2016 Coremedia' )
+    logger.info( "  cache directory located at #{@cacheDirectory}" )
+    logger.info( '-----------------------------------------------------------------' )
+    logger.info( '' )
 
     self.readConfigurations()
   end
@@ -109,11 +112,11 @@ class ServiceDiscovery
 
     # read Service Configuration
     #
-    @log.info( 'read defines of Services Properties' )
+    logger.info( 'read defines of Services Properties' )
 
     if( @serviceConfig == nil )
       puts 'missing service config file'
-      @log.error( 'missing service config file' )
+      logger.error( 'missing service config file' )
       exit 1
     end
 
@@ -122,14 +125,14 @@ class ServiceDiscovery
       if( File.exist?( @serviceConfig ) )
         @serviceConfig      = YAML.load_file( @serviceConfig )
       else
-        @log.error( sprintf( 'Config File %s not found!', @serviceConfig ) )
+        logger.error( sprintf( 'Config File %s not found!', @serviceConfig ) )
         exit 1
       end
 
     rescue Exception
 
-      @log.error( 'wrong result (no yaml)')
-      @log.error( "#{$!}" )
+      logger.error( 'wrong result (no yaml)')
+      logger.error( "#{$!}" )
       exit 1
     end
 
@@ -141,7 +144,7 @@ class ServiceDiscovery
     if( options )
       config = JSON.pretty_generate( options )
 
-      @log.debug( config )
+      logger.debug( config )
     end
 
   end
@@ -151,8 +154,8 @@ class ServiceDiscovery
 
     # if our jolokia proxy available?
     if( ! portOpen?( @jolokiaHost, @jolokiaPort ) )
-      @log.error( 'jolokia service is not available!' )
-      @log.error( 'skip service discovery' )
+      logger.error( 'jolokia service is not available!' )
+      logger.error( 'skip service discovery' )
       return false
     end
 
@@ -162,7 +165,7 @@ class ServiceDiscovery
 
   def discoverApplication( host, port )
 
-    @log.debug( 'discover Application ...' )
+    logger.debug( 'discover Application ...' )
 
     services = Array.new
 
@@ -225,20 +228,20 @@ class ServiceDiscovery
 
       rescue Timeout::Error, Errno::ECONNREFUSED, Errno::EINVAL, Errno::ECONNRESET, EOFError, Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError => error
 
-        @log.error( error )
+        logger.error( error )
 
         case error
         when Errno::ECONNREFUSED
-          @log.error( 'connection refused' )
+          logger.error( 'connection refused' )
         when Errno::ECONNRESET
-          @log.error( 'connection reset' )
+          logger.error( 'connection reset' )
         end
 
       else
 
         body         = JSON.parse( response.body )
 
-#       @log.debug( JSON.pretty_generate( body ) )
+#       logger.debug( JSON.pretty_generate( body ) )
 
         # #1 == Runtime
         runtime = body[0]
@@ -257,7 +260,7 @@ class ServiceDiscovery
 
             if( classPath.include?( 'cm7-tomcat-installation' ) )
 
-              @log.debug( 'found pre cm160x Portstyle (‎possibly cm7.x)' )
+              logger.debug( 'found pre cm160x Portstyle (‎possibly cm7.x)' )
               value = manager['value'] ? manager['value'] : nil
 
               regex = /context=(.*?),/
@@ -274,12 +277,12 @@ class ServiceDiscovery
                     next
                   end
 
-                  @log.debug( sprintf( ' - ‎recognized application: %s', appName ) )
+                  logger.debug( sprintf( ' - ‎recognized application: %s', appName ) )
                   services.push( appName )
                 end
               end
 
-              @log.debug( services )
+              logger.debug( services )
 
               # coremedia = cms, mls, rls?
               # caefeeder = caefeeder-preview, cae-feeder-live?
@@ -308,13 +311,13 @@ class ServiceDiscovery
                     services.delete( "caefeeder" )
                     services.push( service )
 
-                    @log.debug( sprintf( '  => %s', service ) )
+                    logger.debug( sprintf( '  => %s', service ) )
                   else
-                    @log.error( 'unknown error' )
-                    @log.error( parts )
+                    logger.error( 'unknown error' )
+                    logger.error( parts )
                   end
                 else
-                  @log.error( sprintf( 'response status %d', engine['status'].to_i ) )
+                  logger.error( sprintf( 'response status %d', engine['status'].to_i ) )
                 end
               end
 
@@ -335,7 +338,7 @@ class ServiceDiscovery
                     services.push( "delivery" )
                   end
                 else
-                  @log.error( sprintf( 'response status %d', engine['status'].to_i ) )
+                  logger.error( sprintf( 'response status %d', engine['status'].to_i ) )
                 end
               end
 
@@ -358,10 +361,10 @@ class ServiceDiscovery
                 service = parts['service'].to_s.strip.tr('. ', '')
                 services.push( service )
 
-                @log.debug( sprintf( '  => %s', service ) )
+                logger.debug( sprintf( '  => %s', service ) )
               else
-                @log.error( 'unknown error' )
-                @log.error( parts )
+                logger.error( 'unknown error' )
+                logger.error( parts )
               end
             end
 
@@ -397,7 +400,7 @@ class ServiceDiscovery
 
     end
 
-#    @log.debug( "final services #{services}" )
+#    logger.debug( "final services #{services}" )
 
     return services
   end
@@ -421,7 +424,7 @@ class ServiceDiscovery
         end
 
       else
-        @log.debug( sprintf( 'missing entry \'%s\'', d ) )
+        logger.debug( sprintf( 'missing entry \'%s\'', d ) )
       end
     end
 
@@ -432,7 +435,7 @@ class ServiceDiscovery
   # delete the directory with all files inside
   def deleteHost( host )
 
-    @log.info( sprintf( 'delete Host \'%s\'',  host ) )
+    logger.info( sprintf( 'delete Host \'%s\'',  host ) )
 
     status  = 400
     message = 'Host not in Monitoring'
@@ -463,15 +466,15 @@ class ServiceDiscovery
   # add Host and discovery applications
   def addHost( host, options = {} )
 
-    @log.info( sprintf( 'Adding host \'%s\'', host ) )
+    logger.info( sprintf( 'Adding host \'%s\'', host ) )
 
 #     services = options['services'] ? options['services'] : []
 #     force    = options['force']    ? options['force']    : false
 #
 #     if( services.count != 0 )
 #
-#       @log.info( 'Use additional services:' )
-#       @log.info( "  #{services}" )
+#       logger.info( 'Use additional services:' )
+#       logger.info( "  #{services}" )
 #     end
 
     # build Host CacheDirectory (if not exitsts)
@@ -526,17 +529,6 @@ class ServiceDiscovery
 
     @db.createDNS( { :ip => ip, :short => shortHostName, :long => longHostName } )
 
-    # Execute inserts with parameter markers
-#    @db.execute(
-#      "INSERT INTO dns ( ip, shortname, longname ) VALUES ( ?, ?, ? )",
-#      [ip, shortHostName, longHostName]
-#    )
-#
-#    # Find a few rows
-#    @db.execute( "select * from dns" ) do |row|
-#      @log.debug( row )
-#    end
-
     File.open( sprintf( '%s/host.json', cacheDirectory ) , 'w' ) { |f| f.write( JSON.pretty_generate( hostInfo ) ) }
 
     # check our customized config
@@ -555,7 +547,7 @@ class ServiceDiscovery
       ports = @scanPorts
     end
 
-    @log.debug( "use ports: #{ports}" )
+    logger.debug( "use ports: #{ports}" )
 
     discover = Hash.new()
     services = Hash.new()
@@ -566,7 +558,7 @@ class ServiceDiscovery
 
       open = portOpen?( longHostName, p )
 
-      @log.debug( sprintf( 'Host: %s | Port: %s   - status %s', host, p, open ) )
+      logger.debug( sprintf( 'Host: %s | Port: %s   - status %s', host, p, open ) )
 
       if( open == true )
 
@@ -586,6 +578,35 @@ class ServiceDiscovery
     # TODO
     # hook to create database entry
     File.open( sprintf( '%s/%s', cacheDirectory, discoveryFileName ) , 'w' ) { |f| f.write( JSON.pretty_generate( services ) ) }
+
+    logger.debug( JSON.pretty_generate( services ) )
+
+        dns = @db.dnsData( { :short => shortHostName } )
+
+        if( dns == nil )
+          logger.debug( 'no data for ' + shortHostName )
+        else
+          dnsId        = dns[ :id ]
+          dnsIp        = dns[ :ip ]
+          dnsShortname = dns[ :shortname ]
+          dnsLongname  = dns[ :longname ]
+          dnsCreated   = dns[ :created ]
+          dnsChecksum  = dns[ :checksum ]
+
+          @db.createDiscovery( { :id => dnsId, :ip => dnsIp, :short => dnsShortname, :checksum => dnsChecksum, :data => services } )
+
+#           logger.debug( JSON.pretty_generate dns )
+#
+#           services.each do |k,v|
+#
+#             logger.debug( sprintf( '%s - %s', dnsShortname, k ) )
+#
+#             @db.createDiscovery( { :id => dnsId, :ip => dnsIp, :short => dnsShortname, :checksum => dnsChecksum, :service => k, :data => v } )
+#
+#           end
+        end
+
+
 
     status  = 200
     message = 'Host successful created'

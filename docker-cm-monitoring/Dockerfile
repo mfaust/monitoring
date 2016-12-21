@@ -53,6 +53,7 @@ RUN \
      rest-client \
      mysql2 \
      sqlite3 \
+     sequel \
      data_mapper \
      dm-mysql-adapter \
      dm-sqlite-adapter \
@@ -62,17 +63,19 @@ RUN \
      ruby-supervisor \
      sinatra \
      thin \
-     dalli && \
-   mv /etc/collectd/collectd.conf /etc/collectd/collectd.conf.dist && \
-   apk del --purge \
-     build-base \
-     imagemagick-dev \
-     mysql-dev \
-     sqlite-dev \
-     ruby-dev \
-     zlib-dev && \
-   rm -rf /var/cache/apk/*
+     dalli
 
+# RUN \
+#    mv /etc/collectd/collectd.conf /etc/collectd/collectd.conf.dist && \
+#    apk del --purge \
+#      build-base \
+#      imagemagick-dev \
+#      mysql-dev \
+#      sqlite-dev \
+#      ruby-dev \
+#      zlib-dev && \
+#    rm -rf /var/cache/apk/*
+#
 COPY rootfs/ /
 
 
