@@ -192,34 +192,30 @@ class ServiceDiscovery
       # hash for the NEW Port-Schema
       # since cm160x every application runs in his own container with unique port schema
 
-      h = {
-          :type      => "read",
-          :mbean     => "java.lang:type=Runtime",
-          :attribute => [ "ClassPath" ],
-          :target    => { :url => sprintf( "service:jmx:rmi:///jndi/rmi://%s:%s/jmxrmi", host, port ) },
-          :config    => { "ignoreErrors" => true, "ifModifiedSince" => true, "canonicalNaming" => true }
-      }
+      targetUrl = sprintf( "service:jmx:rmi:///jndi/rmi://%s:%s/jmxrmi", host, port )
 
-      array.push(h)
-
-      h = {
-          :type      => "read",
-          :mbean     => "Catalina:type=Manager,context=*,host=*",
-          :target    => { :url => sprintf( "service:jmx:rmi:///jndi/rmi://%s:%s/jmxrmi", host, port ) },
-          :config    => { "ignoreErrors" => true, "ifModifiedSince" => true, "canonicalNaming" => true }
-      }
-
-      array.push(h)
-
-      h = {
+      array << {
         :type      => "read",
-        :mbean     => "Catalina:type=Engine",
-        :attribute => [ 'baseDir', 'jvmRoute' ],
-        :target    => { :url => sprintf("service:jmx:rmi:///jndi/rmi://%s:%s/jmxrmi", host, port) },
+        :mbean     => "java.lang:type=Runtime",
+        :attribute => [ "ClassPath" ],
+        :target    => { :url => targetUrl },
         :config    => { "ignoreErrors" => true, "ifModifiedSince" => true, "canonicalNaming" => true }
       }
 
-      array.push(h)
+      array << {
+        :type      => "read",
+        :mbean     => "Catalina:type=Manager,context=*,host=*",
+        :target    => { :url => targetUrl },
+        :config    => { "ignoreErrors" => true, "ifModifiedSince" => true, "canonicalNaming" => true }
+      }
+
+      array << {
+        :type      => "read",
+        :mbean     => "Catalina:type=Engine",
+        :attribute => [ 'baseDir', 'jvmRoute' ],
+        :target    => { :url => targetUrl },
+        :config    => { "ignoreErrors" => true, "ifModifiedSince" => true, "canonicalNaming" => true }
+      }
 
       request.body = JSON.generate( array )
 
@@ -587,6 +583,8 @@ class ServiceDiscovery
     # merge discovered services with cm-services.yaml
     services = self.createHostConfig( services )
 
+    # TODO
+    # hook to create database entry
     File.open( sprintf( '%s/%s', cacheDirectory, discoveryFileName ) , 'w' ) { |f| f.write( JSON.pretty_generate( services ) ) }
 
     status  = 200
