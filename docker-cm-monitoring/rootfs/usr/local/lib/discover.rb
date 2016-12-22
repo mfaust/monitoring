@@ -91,7 +91,7 @@ class ServiceDiscovery
       Dir.mkdir( @cacheDirectory )
     end
 
-    @db = Storage::SQLite.new()
+    @db = Storage::Database.new()
 
     version              = '1.2.9'
     date                 = '2016-12-21'
@@ -437,6 +437,8 @@ class ServiceDiscovery
 
     logger.info( sprintf( 'delete Host \'%s\'',  host ) )
 
+    @db.removeDNS( { :ip => host, :short => host, :long => host } )
+
     status  = 400
     message = 'Host not in Monitoring'
 
@@ -593,7 +595,13 @@ class ServiceDiscovery
           dnsCreated   = dns[ :created ]
           dnsChecksum  = dns[ :checksum ]
 
-          @db.createDiscovery( { :id => dnsId, :ip => dnsIp, :short => dnsShortname, :checksum => dnsChecksum, :data => services } )
+          @db.createDiscovery( {
+            :id       => dnsId,
+            :ip       => dnsIp,
+            :short    => dnsShortname,
+            :checksum => dnsChecksum,
+            :data     => services
+          } )
 
 #           logger.debug( JSON.pretty_generate dns )
 #

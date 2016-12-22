@@ -3,13 +3,11 @@
 require 'rubygems'
 require 'json'
 require 'logger'
-require 'dm-types'
-require 'dm-core'
-require 'dm-constraints'
-require 'dm-migrations'
+require 'sequel'
+require 'digest/md5'
 
 require_relative 'logging'
-require_relative 'database_data'
+require_relative 'tools'
 
 # -----------------------------------------------------------------------------
 
@@ -19,7 +17,7 @@ module Storage
 
   end
 
-  class SQLite
+  class Database
 
     include Logging
 
@@ -33,33 +31,114 @@ module Storage
 
     def prepare()
 
-      DataMapper::Logger.new( $stdout, :info )
-      DataMapper.setup( :default, sprintf( 'sqlite://%s/monitoring.db', @cacheDirectory ) )
-      DataMapper::Model.raise_on_save_failure = true
-      DataMapper.finalize
+      @database = Sequel.sqlite( sprintf( '%s/monitoring.db', @cacheDirectory ) )
+      @database.loggers << Logger.new( $stdout, :debug )
 
-      DataMapper.auto_upgrade!
+      @database.create_table?( :dns ) {
+        primary_key :id
+        String      :ip        , :size => 128, :key => true, :index => true, :unique => true, :null => false
+        String      :shortname , :size => 60 , :key => true, :index => true, :unique => true, :null => false
+        String      :longname  , :size => 250
+        DateTime    :created   , :default => Time.now
+        String      :checksum  , :size => 32
+        FalseClass  :status
+      }
+
+      @database.create_table?( :config ) {
+        primary_key :id
+        foreign_key :dns_id, :dns
+        String      :service   , :size => 128 , :key => true, :index => true, :unique => true, :null => false
+        String      :data      , :text => true, :null => false
+        DateTime    :created   , :default => Time.now()
+
+        index [:dns_id, :service ]
+      }
+
+      @database.create_table?( :discovery ) {
+        primary_key :id
+        foreign_key :dns_id, :dns
+        String      :service   , :size => 128, :key => true, :index => true, :null => false
+        String      :data      , :text => true, :null => false
+        DateTime    :created   , :default => Time.now()
+
+        index [:dns_id, :service ]
+#        foreign_key [:shortname, :service], :name => 'unique_discovery'
+      }
+
+      @database.create_table?( :result ) {
+        primary_key :id
+        foreign_key :dns_id, :dns
+        foreign_key :discovery_id, :discovery
+        String      :service   , :size => 128, :key => true, :index => true, :unique => true, :null => false
+        String      :data      , :text => true, :null => false
+        DateTime    :created   , :default => Time.now()
+
+        index [:dns_id, :discovery_id, :service ]
+#         foreign_key [:shortname], :dns
+#         foreign_key [:service]  , :discovery
+      }
+
+      @database.create_or_replace_view( :v_discovery,
+        'select dns.ip, dns.shortname, discovery.* from dns as dns, discovery as discovery where dns.id = discovery.dns_id' )
+
 
     end
 
 
-    def createDNS( params = {} ) #  ip, short, long )
+    def createDNS( params = {} )
 
       ip      = params[ :ip ]    ? params[ :ip ]    : nil
       short   = params[ :short ] ? params[ :short ] : nil
       long    = params[ :long ]  ? params[ :long ]  : nil
 
-      Dns.update_or_create(
-        {
+      dns = @database[:dns]
+
+      rec = dns.select(:id).where(
+        :ip        => ip.to_s,
+        :shortname => short.to_s,
+        :longname  => long.to_s
+      ).to_a.first
+
+      # insert if data not found
+      if( rec == nil )
+
+        dns.insert(
           :ip        => ip.to_s,
           :shortname => short.to_s,
-          :longname  => long.to_s
-        }, {
-          :shortname => short.to_s,
-          :longname  => long.to_s
-        }
-      )
+          :longname  => long.to_s,
+          :checksum  => Digest::MD5.hexdigest( [ ip, short, long ].join ),
+          :created   => DateTime.now(),
+          :status    => isRunning?( long )
+        )
+      end
+
     end
+
+
+    def removeDNS( params = {} )
+
+      ip      = params[ :ip ]    ? params[ :ip ]    : nil
+      short   = params[ :short ] ? params[ :short ] : nil
+      long    = params[ :long ]  ? params[ :long ]  : nil
+
+      rec = @database[:dns].select( :id ).where(
+        ( Sequel[:ip        => ip.to_s] ) |
+        ( Sequel[:shortname => short.to_s] ) |
+        ( Sequel[:longname  => long.to_s] )
+      ).to_a
+
+      if( rec.count() != 0 )
+
+        id = rec.first[:id].to_i
+
+        @database[:result].where( Sequel[:dns_id => id.to_i] ).delete
+        @database[:discovery].where( Sequel[:dns_id => id.to_i] ).delete
+        @database[:dns].where( Sequel[:id => id.to_i] ).delete
+
+      end
+
+    end
+
 
 
     def dnsData( params = {}  )
@@ -68,23 +147,28 @@ module Storage
       short   = params[ :short ] ? params[ :short ] : nil
       long    = params[ :long ]  ? params[ :long ]  : nil
 
-      d = Dns.all( :ip => ip ) |
-          Dns.all( :shortname => short ) |
-          Dns.all( :longname => long )
+      dns = @database[:dns]
 
-      if( d.first == nil )
+      rec = dns.where(
+        (Sequel[:ip => ip.to_s] ) |
+        (Sequel[:shortname => short.to_s] ) |
+        (Sequel[:longname  => long.to_s] )
+      ).to_a
+
+      if( rec.count() == 0 )
         return nil
+      else
+
+        return {
+          :id        => rec.first[:id].to_i,
+          :ip        => rec.first[:ip].to_s,
+          :shortname => rec.first[:shortname].to_s,
+          :longname  => rec.first[:longname].to_s,
+          :created   => rec.first[:created].to_s,
+          :checksum  => rec.first[:checksum].to_s
+        }
+
       end
-
-      return {
-        :id        => d.map( &:id )[0].to_i,
-        :ip        => d.map( &:ip )[0].to_s,
-        :shortname => d.map( &:shortname )[0].to_s,
-        :longname  => d.map( &:longname )[0].to_s,
-        :created   => d.map( &:created )[0].to_s,
-        :checksum  => d.map( &:checksum )[0].to_s,
-      }
-
     end
 
 
@@ -123,24 +207,29 @@ module Storage
       service      = params[ :service ]  ? params[ :service ]  : nil
       data         = params[ :data ]     ? params[ :data ]     : nil
 
-      Discovery.update_or_create(
-        {
-          :dns_id         => dnsId,
-          :dns_ip         => dnsIp,
-          :dns_shortname  => dnsShortname,
-          :dns_checksum   => dnsChecksum,
-          :service        => service
-        }, {
-          :service    => service,
-          :data       => data
-        }
-      )
+      discovery = @database[:discovery]
 
+      rec = discovery.where(
+        (Sequel[:dns_id   => dnsId.to_i] ) &
+        (Sequel[:service  => service.to_s] )
+      ).to_a
+
+      if( rec.count() == 0 )
+
+        return discovery.insert(
+
+          :dns_id     => dnsId.to_i,
+          :service    => service,
+          :data       => data.to_s,
+          :created    => DateTime.now()
+        )
+
+      end
 
     end
 
 
-    def discoveryData( params = {} ) #ip, short = nil, service )
+    def discoveryData( params = {} )
 
       logger.debug()
       logger.debug( params )
@@ -166,6 +255,15 @@ module Storage
 
       # ---------------------------------------------------------------------------------
 
+      def dbaData( w )
+
+        return  @database[:v_discovery].select( :ip, :shortname, :service, :data ).where( w ).to_a
+
+      end
+
+
+      # ---------------------------------------------------------------------------------
+
       if( service == nil && host == nil )
 
         logger.error( 'no data' )
@@ -173,21 +271,26 @@ module Storage
       #  { :short => 'monitoring-16-01', :service => 'replication-live-server' }
       elsif( service != nil && host == nil )
 
+        logger.debug( '( service != nil && host == nil )' )
+        w = ( Sequel[:service => service.to_s] )
+
+        rec = self.dbaData( w )
+
         result[service.to_s] ||= {}
 
-        Discovery.all( :fields=>[ :dns_ip, :dns_shortname, :service, :data ], :service => service ).each do |data|
+        rec.each do |data|
 
-          dnsShortName  = data.attribute_get( :dns_shortname )
-          dnsIp         = data.attribute_get( :dns_ip ).to_s
-          discoveryData = JSON.parse( data.attribute_get( :data ).to_json )
+          dnsShortName  = data.dig( :shortname ).to_s
+          service       = data.dig( :service ).to_s
+          discoveryData = data.dig( :data )
 
           result[service.to_s][dnsShortName] ||= {}
           result[service.to_s][dnsShortName] = {
-            :ip   => dnsIp,
-            :data => discoveryData
+            :data => JSON.parse( discoveryData )
           }
 
           array << result
+
         end
 
         array = array.reduce( :merge )
@@ -195,22 +298,24 @@ module Storage
         return array
 
       # { :short => 'monitoring-16-01' }
+      # { :ip => '10.2.14.156' }
       elsif( service == nil && host != nil )
 
-        d = Discovery.all( :fields=>[ :dns_ip, :dns_shortname, :service, :data ], :dns_ip => ip ) |
-            Discovery.all( :fields=>[ :dns_ip, :dns_shortname, :service, :data ], :dns_shortname => short )
+        w = ( Sequel[:ip => ip.to_s] ) | ( Sequel[:shortname => short.to_s] )
+
+        rec = self.dbaData( w )
 
         result[host.to_s] ||= {}
 
-        d.each do |data|
+        rec.each do |data|
 
-          dnsShortName  = data.attribute_get( :dns_shortname ).to_s
-          service       = data.attribute_get( :service ).to_s
-          discoveryData = JSON.parse( data.attribute_get( :data ).to_json )
+          dnsShortName  = data.dig( :dns_shortname ).to_s
+          service       = data.dig( :service ).to_s
+          discoveryData = data.dig( :data )
 
           result[host.to_s][service] ||= {}
           result[host.to_s][service] = {
-            :data => discoveryData
+            :data => JSON.parse( discoveryData )
           }
 
           array << result
@@ -218,42 +323,46 @@ module Storage
 
         array = array.reduce( :merge )
 
+        logger.debug( JSON.pretty_generate( array ) )
+
         return array
 
       elsif( service != nil && host != nil )
 
-        d = ( Discovery.all( :fields=>[ :dns_ip, :dns_shortname, :service, :data ], :dns_ip => ip ) |
-              Discovery.all( :fields=>[ :dns_ip, :dns_shortname, :service, :data ], :dns_shortname => short ) ) &
-             Discovery.all( :fields=>[ :dns_ip, :dns_shortname, :service, :data ], :service => service )
+        logger.debug( '( service != nil && host != nil )' )
+        w = (
+          (Sequel[:ip => ip.to_s] ) |
+          (Sequel[:shortname => short.to_s] )
+        ) & (
+          (Sequel[:service => service.to_s] )
+        )
 
-        if( d == nil )
+        rec = self.dbaData( w )
+
+        if( rec.count() == 0 )
           return nil
+        else
+          result[host.to_s] ||= {}
+
+          discoveryData  = rec.first[:data] # d.map( &:data )[0].to_json
+
+          result[host.to_s][service] ||= {}
+          result[host.to_s][service] = {
+            :data => JSON.parse( discoveryData )
+          }
+
+          array << result
+          array = array.reduce( :merge )
+
+          return array
         end
 
-        result[host.to_s] ||= {}
-
-        service        = d.map( &:service )[0].to_s
-        discoveryData  = d.map( &:data )[0].to_json
-
-        result[host.to_s][service] ||= {}
-        result[host.to_s][service] = {
-          :data => JSON.parse( discoveryData )
-        }
-
-        array << result
-        array = array.reduce( :merge )
-
-        return array
-
-#        logger.debug( JSON.pretty_generate( array ) )
-      else
-        logger.error( 'no matches' )
       end
-
 
       return nil
 
     end
+
 
 
     def insertData()
@@ -342,6 +451,8 @@ module Storage
 
 
     end
+
+
   end
 
 

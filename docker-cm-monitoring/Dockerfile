@@ -54,9 +54,6 @@ RUN \
      mysql2 \
      sqlite3 \
      sequel \
-     data_mapper \
-     dm-mysql-adapter \
-     dm-sqlite-adapter \
      time_difference \
      filesize \
      fileutils \
