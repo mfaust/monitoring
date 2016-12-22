@@ -94,6 +94,8 @@ module Storage
         String      :shortname , :size => 60 , :key => true, :index => true, :unique => true, :null => false
         String      :service   , :size => 128, :key => true, :index => true, :unique => true, :null => false
         String      :data      , :text => true, :null => false
+
+        foreign_key [:shortname], :dns
       }
 
       @database.create_table?( :discovery ) {
@@ -102,6 +104,8 @@ module Storage
         String      :shortname , :size => 60 , :key => true, :index => true, :unique => true, :null => false
         String      :service   , :size => 128, :key => true, :index => true, :unique => true, :null => false
         String      :data      , :text => true, :null => false
+
+        foreign_key [:shortname], :dns
       }
 
       @database.create_table?( :result ) {
@@ -110,6 +114,9 @@ module Storage
         String      :shortname , :size => 60 , :key => true, :index => true, :unique => true, :null => false
         String      :service   , :size => 128, :key => true, :index => true, :unique => true, :null => false
         String      :data      , :text => true, :null => false
+
+        foreign_key [:shortname], :dns
+        foreign_key [:service]  , :discovery
       }
 
 #      DataMapper::Logger.new( $stdout, :info )
@@ -183,15 +190,25 @@ module Storage
     end
 
 
-#     def createDiscovery( params = {} ) #  dnsId, dnsIp, dnsShortname, dnsChecksum, service, data )
-#
-#       dnsId        = params[ :id ]       ? params[ :id ]       : nil
-#       dnsIp        = params[ :ip ]       ? params[ :ip ]       : nil
-#       dnsShortname = params[ :short ]    ? params[ :short ]    : nil
-#       dnsChecksum  = params[ :checksum ] ? params[ :checksum ] : nil
-#       service      = params[ :service ]  ? params[ :service ]  : nil
-#       data         = params[ :data ]     ? params[ :data ]     : nil
-#
+    def createDiscovery( params = {} )
+
+      dnsId        = params[ :id ]       ? params[ :id ]       : nil
+      dnsIp        = params[ :ip ]       ? params[ :ip ]       : nil
+      dnsShortname = params[ :short ]    ? params[ :short ]    : nil
+      dnsChecksum  = params[ :checksum ] ? params[ :checksum ] : nil
+      service      = params[ :service ]  ? params[ :service ]  : nil
+      data         = params[ :data ]     ? params[ :data ]     : nil
+
+      discovery = @database[:discovery]
+
+      rec = discovery.where(
+        (Sequel[:ip => ip.to_s] ) |
+        (Sequel[:shortname => short.to_s] ) |
+        (Sequel[:longname  => long.to_s] )
+      ).to_a
+
+      logger.debug( rec.inspect )
+
 #       Discovery.update_or_create(
 #         {
 #           :dns_id         => dnsId,
@@ -204,11 +221,11 @@ module Storage
 #           :data       => data
 #         }
 #       )
-#
-#     end
-#
-#
-#     def discoveryData( params = {} ) #ip, short = nil, service )
+
+    end
+
+
+#    def discoveryData( params = {} ) #ip, short = nil, service )
 #
 #       logger.debug()
 #       logger.debug( params )
@@ -370,8 +387,6 @@ module Storage
         dns = self.dnsData( { :short => i } )
 
         logger.debug( dns )
-
-        next
 
         if( dns == nil )
           logger.debug( 'no data for ' + i )
