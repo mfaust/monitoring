@@ -13,7 +13,7 @@ services:
 
   dnsdock:
     restart: always
-    image: bodsch/docker-dnsdock:1611-01
+    image: bodsch/docker-dnsdock:1612-01
     container_name: dnsdock
     hostname: dnsdock
     labels:
@@ -33,7 +33,7 @@ services:
 
   jolokia:
     restart: always
-    image: bodsch/docker-jolokia:1611-02
+    image: bodsch/docker-jolokia:1612-01
     container_name: jolokia
     hostname: jolokia
     labels:
@@ -54,7 +54,7 @@ services:
 
   memcached:
     restart: always
-    image: bodsch/docker-memcached:1610-02
+    image: bodsch/docker-memcached:1612-01
     container_name: memcached
     hostname: memcached
     labels:
@@ -69,7 +69,7 @@ services:
 
   nginx:
     restart: always
-    image: bodsch/docker-nginx:1610-02
+    image: bodsch/docker-nginx:1612-01
     container_name: nginx
     hostname: nginx
     labels:
@@ -98,7 +98,7 @@ services:
   # we have now a second 'carbon-relay-ng' for testing
   carbon-relay:
     restart: always
-    image: bodsch/docker-carbon-relay-ng:1610-01
+    image: bodsch/docker-carbon-relay-ng:1612-01
     container_name: carbon-relay
     hostname: carbon-relay
     labels:
