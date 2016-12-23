@@ -1,9 +1,9 @@
 
-FROM bodsch/docker-alpine-base:alpine-3.5
+FROM bodsch/docker-alpine-base:1612-01
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
-LABEL version="1.4.0"
+LABEL version="1.4.1"
 
 EXPOSE 9001
 
