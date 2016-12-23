@@ -93,11 +93,11 @@ module Storage
       @database.create_table?( :config ) {
         primary_key :id
         foreign_key :dns_id, :dns
-        String      :service   , :size => 128 , :key => true, :index => true, :unique => true, :null => false
-        String      :data      , :text => true, :null => false
+        String      :key       , :size => 128 , :key => true, :index => true, :unique => true, :null => false
+        String      :value     , :text => true, :null => false
         DateTime    :created   , :default => Time.now()
 
-        index [:dns_id, :service ]
+        index [:dns_id, :key ]
       }
 
       @database.create_table?( :discovery ) {
@@ -127,17 +127,190 @@ module Storage
       @database.create_or_replace_view( :v_discovery,
         'select dns.ip, dns.shortname, discovery.* from dns as dns, discovery as discovery where dns.id = discovery.dns_id' )
 
-#      @database.create_view( :view_discovery,
-#        @database[:items].where( :id ) , :check=>true)
-
-#      DataMapper::Logger.new( $stdout, :info )
-#      DataMapper.setup( :default, 'sqlite:///tmp/project.db' )
-#      DataMapper::Model.raise_on_save_failure = true
-#      DataMapper.finalize
-#
-#      DataMapper.auto_upgrade!
+      @database.create_or_replace_view( :v_config,
+        'select dns.ip, dns.shortname, dns.longname, config.* from dns as dns, config as config where dns.id = config.dns_id' )
 
     end
+
+
+    def createConfig( params = {} )
+
+      dnsId        = params[ :id ]       ? params[ :id ]       : nil
+      dnsIp        = params[ :ip ]       ? params[ :ip ]       : nil
+      dnsShortname = params[ :short ]    ? params[ :short ]    : nil
+      dnsChecksum  = params[ :checksum ] ? params[ :checksum ] : nil
+      configKey    = params[ :key ]      ? params[ :key ]      : nil
+      configValues = params[ :value ]    ? params[ :value ]    : nil
+      data         = params[ :data ]     ? params[ :data ]     : nil
+
+      if( ( configKey == nil && configValues == nil ) && data.is_a?( Hash ) )
+
+        data.each do |k,v|
+
+#           logger.debug( sprintf( '%s - %s - %s (%s)', dnsId, dnsShortname, k, v ) )
+
+          self.writeConfig( { :id => dnsId, :ip => dnsIp, :short => dnsShortname, :checksum => dnsChecksum, :key => k, :value => v } )
+        end
+      else
+
+        self.writeConfig( params )
+      end
+
+    end
+
+    # PRIVATE
+    def writeConfig( params = {} )
+
+      dnsId        = params[ :id ]       ? params[ :id ]       : nil
+      dnsIp        = params[ :ip ]       ? params[ :ip ]       : nil
+      dnsShortname = params[ :short ]    ? params[ :short ]    : nil
+      dnsChecksum  = params[ :checksum ] ? params[ :checksum ] : nil
+      configKey    = params[ :key ]      ? params[ :key ]      : nil
+      configValues = params[ :value ]    ? params[ :value ]    : nil
+
+      dns = self.dnsData( { :ip => dnsIp, :short => dnsShortname } )
+
+        if( dns != nil )
+          dnsId        = dns[ :id ]
+          dnsIp        = dns[ :ip ]
+          dnsShortname = dns[ :shortname ]
+          dnsLongname  = dns[ :longname ]
+          dnsCreated   = dns[ :created ]
+          dnsChecksum  = dns[ :checksum ]
+
+          rec = @database[:v_config].where(
+            ( Sequel[:dns_id   => dnsId.to_i] ) &
+            ( Sequel[:key      => configKey.to_s] )
+          ).to_a
+
+          if( rec.count() == 0 )
+
+            @database[:config].insert(
+              :dns_id     => dnsId.to_i,
+              :key        => configKey.to_s,
+              :value      => configValues.to_s,
+              :created    => DateTime.now()
+            )
+          else
+
+            # prüfen, ob 'value' identisch ist
+            dbaValues    = rec.first[:value]
+            configValues = configValues.to_s
+
+            if( dbaValues != configValues )
+
+              @database[:config].where(
+                ( Sequel[:dns_id => dnsId.to_i] ) &
+                ( Sequel[:key    => configKey.to_s] )
+              ).update(
+                :value      => configValues.to_s,
+                :created    => DateTime.now()
+              )
+            end
+          end
+        end
+
+    end
+
+
+    def removeConfig( params = {} )
+
+      ip        = params[ :ip ]    ? params[ :ip ]    : nil
+      short     = params[ :short ] ? params[ :short ] : nil
+      long      = params[ :long ]  ? params[ :long ]  : nil
+      configKey = params[ :key ]   ? params[ :key ]   : nil
+
+      rec = @database[:dns].select( :id ).where(
+        ( Sequel[:ip        => ip.to_s] ) |
+        ( Sequel[:shortname => short.to_s] ) |
+        ( Sequel[:longname  => long.to_s] )
+      ).to_a
+
+      if( rec.count() != 0 )
+
+        id = rec.first[:id].to_i
+
+        if( configKey == nil )
+
+          @database[:config].where( Sequel[:dns_id => id] ).delete
+        else
+          @database[:config].where(
+            ( Sequel[:dns_id => id] ) &
+            ( Sequel[:key    => configKey] )
+          ).delete
+        end
+      end
+    end
+
+
+    def config( params = {} )
+
+      ip        = params[ :ip ]    ? params[ :ip ]    : nil
+      short     = params[ :short ] ? params[ :short ] : nil
+      long      = params[ :long ]  ? params[ :long ]  : nil
+      configKey = params[ :key ]   ? params[ :key ]   : nil
+
+      array     = Array.new()
+      result    = Hash.new()
+
+      def dbaData( w )
+
+        return  @database[:v_config].select( :ip, :shortname, :key, :value ).where( w ).to_a
+
+      end
+
+      if( configKey == nil )
+
+        w = (
+          ( Sequel[:ip        => ip.to_s] ) |
+          ( Sequel[:shortname => short.to_s] ) |
+          ( Sequel[:longname  => long.to_s] )
+        )
+
+      else
+
+        w = (
+          ( Sequel[:ip        => ip.to_s] ) |
+          ( Sequel[:shortname => short.to_s] ) |
+          ( Sequel[:longname  => long.to_s] )
+        ) & (
+          ( Sequel[:key => configKey.to_s] )
+        )
+
+      end
+
+      rec = self.dbaData( w )
+
+      dnsShortName  = rec.first.dig( :shortname ).to_s
+
+      result[dnsShortName.to_s] ||= {}
+
+      rec.each do |data|
+
+        key           = data.dig( :key ).to_s
+        value         = data.dig( :value )
+
+        result[dnsShortName.to_s][key] ||= {}
+        result[dnsShortName.to_s][key] = {
+          :value => JSON.parse( value )
+        }
+
+        array << result
+
+      end
+
+      array = array.reduce( :merge )
+
+      return array
+
+    end
+
+
+
+
+
+
+
 
 
     def createDNS( params = {} )
@@ -163,7 +336,7 @@ module Storage
           :longname  => long.to_s,
           :checksum  => Digest::MD5.hexdigest( [ ip, short, long ].join ),
           :created   => DateTime.now(),
-          :status    => isRunning?( long )
+          :status    => isRunning?( ip )
         )
       end
 
@@ -371,6 +544,7 @@ module Storage
     def insertData()
 
       data = Array.new()
+      config = Array.new()
 
       data << {
         "replication-live-server"=> {
@@ -406,6 +580,19 @@ module Storage
       self.createDNS( { :ip => '10.2.14.160', :short => 'monitoring-16-02', :long => 'monitoring-16-02.coremedia.vm' } )
       self.createDNS( { :ip => '10.2.14.165', :short => 'monitoring-16-07', :long => 'monitoring-16-07.coremedia.vm' } )
 
+      # curl -X POST http://localhost/api/v2/config/monitoring-16-01 --data '{ "ports": [40599,40199] }'
+
+      self.createConfig( { :ip => '10.2.14.156', :data => { "ports": [40599,40199], "services": [ "coremedia-cms" ] } } )
+
+#       self.removeConfig( { :ip => '10.2.14.156', :key => "ports" } )
+
+
+      self.config( { :ip => '10.2.14.156', :key => "ports" } )
+
+      self.config( { :ip => '10.2.14.156' } )
+
+
+      return
 
       dns = Hash.new()
 
@@ -473,5 +660,5 @@ end
 m = Storage::SQLite.new()
 
 m.insertData()
-m.readData()
+# m.readData()
 
