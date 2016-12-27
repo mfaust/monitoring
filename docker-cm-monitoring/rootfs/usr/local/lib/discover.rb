@@ -75,18 +75,6 @@ class ServiceDiscovery
     @serviceConfig     = settings[:serviceConfigFile] ? settings[:serviceConfigFile]   : nil
     @scanPorts         = settings[:scanPorts]         ? settings[:scanPorts]           : ports
 
-#     logFile        = sprintf( '%s/service-discovery.log', @logDirectory )
-#
-#     file           = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
-#     file.sync      = true
-#     @log           = Logger.new( file, 'weekly', 1024000 )
-# #    @log = Logger.new( STDOUT )
-#     logger.level     = Logger::INFO
-#     logger.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
-#     logger.formatter = proc do |severity, datetime, progname, msg|
-#       "[#{datetime.strftime(logger.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
-#     end
-
     if( ! File.exist?( @cacheDirectory ) )
       Dir.mkdir( @cacheDirectory )
     end

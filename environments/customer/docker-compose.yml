@@ -26,7 +26,7 @@ services:
     ports:
       - 53:53
       - 8081:80
-    command: "--nameserver='10.1.2.14:53' --http=:80"
+    command: "--nameserver='10.1.2.14:53' --nameserver='10.1.2.63:53' --http=:80"
     networks:
       mon:
         ipv4_address: 172.25.0.5

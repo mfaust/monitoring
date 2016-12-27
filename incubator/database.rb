@@ -137,12 +137,6 @@ module Storage
           config.id, config.key, config.value
         from
           dns as dns, config as config
-        where
-          (
-            dns.ip = config.ip or
-            dns.shortname = config.shortname or
-            dns.longname = config.longname
-          )
         order by key'
       )
 
@@ -162,8 +156,6 @@ module Storage
 
         data.each do |k,v|
 
-#           logger.debug( sprintf( '%s - %s - %s (%s)', dnsId, dnsShortname, k, v ) )
-
           self.writeConfig( { :ip => dnsIp, :short => dnsShortname, :checksum => dnsChecksum, :key => k, :value => v } )
         end
       else
@@ -182,123 +174,66 @@ module Storage
       configKey    = params[ :key ]      ? params[ :key ]      : nil
       configValues = params[ :value ]    ? params[ :value ]    : nil
 
-      dns = nil # self.dnsData( { :ip => dnsIp, :short => dnsShortname } )
+      if( dnsIp == nil && dnsShortname == nil )
 
-      if( dns != nil )
-        dnsIp        = dns[ :ip ]
-        dnsShortname = dns[ :shortname ]
-        dnsCreated   = dns[ :created ]
-        dnsChecksum  = dns[ :checksum ]
+        return false
+      else
 
         rec = @database[:v_config].where(
-          ( Sequel[:ip   => dnsIp.to_s] ) &
-          ( Sequel[:key  => configKey.to_s] )
+          (
+            ( Sequel[:ip        => dnsIp.to_s] ) |
+            ( Sequel[:shortname => dnsShortname.to_s] )
+          ) & (
+            ( Sequel[:key   => configKey.to_s] ) &
+            ( Sequel[:value => configValues.to_s] )
+          )
         ).to_a
 
         if( rec.count() == 0 )
 
-          @database[:config].insert(
-            :ip       => dnsIp.to_s,
-            :key      => configKey.to_s,
-            :value    => configValues.to_s,
-            :created  => DateTime.now()
-          )
+          if( dnsIp != nil )
+            @database[:config].insert(
+              :ip       => dnsIp.to_s,
+              :key      => configKey.to_s,
+              :value    => configValues.to_s,
+              :created  => DateTime.now()
+            )
+
+          elsif( dnsShortname != nil )
+
+            @database[:config].insert(
+              :shortname => dnsShortname.to_s,
+              :key       => configKey.to_s,
+              :value     => configValues.to_s,
+              :created   => DateTime.now()
+            )
+          end
         else
 
           # prüfen, ob 'value' identisch ist
           dbaValues    = rec.first[:value]
           configValues = configValues.to_s
 
-            logger.debug( ' UPDATE' )
-            logger.debug( '' )
-            logger.debug( dbaValues.class.to_s )
-            logger.debug( configValues.class.to_s )
-            logger.debug( '' )
-
           if( dbaValues != configValues )
 
-            @database[:config].where(
-              ( Sequel[:ip  => dnsIp.to_s] ) &
-              ( Sequel[:key => configKey.to_s] )
-            ).update(
-              :value      => configValues.to_s,
-              :created    => DateTime.now()
-            )
-          end
-        end
-      else
-
-        if( dnsIp == nil && dnsShortname == nil )
-
-          return false
-        else
-
-#           logger.debug( sprintf( ' => %s : %s', dnsIp, dnsShortname ) )
-
-          rec = @database[:v_config].where(
-            (
-              ( Sequel[:ip        => dnsIp.to_s] ) |
-              ( Sequel[:shortname => dnsShortname.to_s] )
-            ) & (
-              ( Sequel[:key   => configKey.to_s] ) &
-              ( Sequel[:value => configValues.to_s] )
-            )
-          ).to_a
-
-#           logger.debug( rec.inspect )
-
-          if( rec.count() == 0 )
-
             if( dnsIp != nil )
-              @database[:config].insert(
-                :ip       => dnsIp.to_s,
-                :key      => configKey.to_s,
-                :value    => configValues.to_s,
-                :created  => DateTime.now()
-              )
 
+              @database[:config].where(
+                ( Sequel[:ip  => dnsIp.to_s] ) &
+                ( Sequel[:key => configKey.to_s] )
+              ).update(
+                :value      => configValues.to_s,
+                :created    => DateTime.now()
+              )
             elsif( dnsShortname != nil )
 
-              @database[:config].insert(
-                :shortname => dnsShortname.to_s,
-                :key       => configKey.to_s,
-                :value     => configValues.to_s,
-                :created   => DateTime.now()
+              @database[:config].where(
+                ( Sequel[:shortname => dnsShortname.to_s] ) &
+                ( Sequel[:key       => configKey.to_s] )
+              ).update(
+                :value      => configValues.to_s,
+                :created    => DateTime.now()
               )
-            end
-          else
-
-            # prüfen, ob 'value' identisch ist
-            dbaValues    = rec.first[:value]
-            configValues = configValues.to_s
-
-#            logger.debug( ' UPDATE' )
-#            logger.debug()
-#            logger.debug( dbaValues )
-#            logger.debug( configValues )
-#            logger.debug()
-
-            if( dbaValues != configValues )
-
-              if( dnsIp != nil )
-
-                @database[:config].where(
-                  ( Sequel[:ip  => dnsIp.to_s] ) &
-                  ( Sequel[:key => configKey.to_s] )
-                ).update(
-                  :value      => configValues.to_s,
-                  :created    => DateTime.now()
-                )
-              elsif( dnsShortname != nil )
-
-                @database[:config].where(
-                  ( Sequel[:shortname => dnsShortname.to_s] ) &
-                  ( Sequel[:key       => configKey.to_s] )
-                ).update(
-                  :value      => configValues.to_s,
-                  :created    => DateTime.now()
-                )
-              end
             end
           end
         end
@@ -379,7 +314,9 @@ module Storage
 
       rec = self.dbaData( w )
 
-      if( rec )
+      logger.debug( rec.count )
+
+      if( rec.count() != 0 )
 
         dnsShortName  = rec.first.dig( :shortname ).to_s
 
@@ -401,6 +338,8 @@ module Storage
 
           array << result
         end
+      else
+        return false
       end
 
       array = array.reduce( :merge )
@@ -408,12 +347,6 @@ module Storage
       return array
 
     end
-
-
-
-
-
-
 
 
 
@@ -693,11 +626,18 @@ module Storage
 
 #       self.removeConfig( { :ip => '10.2.14.156', :key => "ports" } )
 
+      data = Array.new
 
-      logger.debug( JSON.pretty_generate( self.config( { :ip => '10.2.14.156', :key => "ports" } ) ) )
+      data << self.config( { :ip => '10.2.14.156', :key => "ports" } )
 
-      logger.debug( JSON.pretty_generate( self.config( { :ip => '10.2.14.156' } ) ) )
+      data << self.config( { :ip => '10.2.14.156' } )
 
+      data << self.config( { :ip => '10.2.14.170' } )
+
+      data.each do |d|
+
+        logger.debug( d )
+      end
 
       return
 
