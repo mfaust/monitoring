@@ -21,10 +21,10 @@ RUN \
     ruby-dev \
     ruby-io-console \
     ruby-rdoc && \
-   gem install --no-rdoc --no-ri \
-     json \
-     rest-client \
-     dalli && \
+  gem install --no-rdoc --no-ri \
+    json \
+    rest-client \
+    dalli && \
   mkdir /var/log/monitoring && \
   apk del --purge \
     build-base \

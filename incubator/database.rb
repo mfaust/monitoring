@@ -4,18 +4,10 @@ require 'rubygems'
 require 'json'
 require 'logger'
 require 'sequel'
+require 'redis'
 require 'digest/md5'
 
 require_relative '../docker-cm-monitoring/rootfs/usr/local/lib/tools'
-
-# require 'dm-types'
-# require 'dm-core'
-# require 'dm-constraints'
-# require 'dm-migrations'
-
-# require_relative 'database_data'
-
-
 
 # -----------------------------------------------------------------------------
 
@@ -698,6 +690,47 @@ module Storage
     end
   end
 
+
+
+  class Redis
+
+    include Logging
+
+    def initialize( params = {} )
+
+      cacheDirectory  = params[:cacheDirectory] ? params[:cacheDirectory] : '/var/cache/monitoring'
+      redisHost       = params[:redisHost]      ? params[:redisHost]      : 'localhost'
+      redisPort       = params[:redisPort]      ? params[:redisPort]      : 6379
+      redisDatabase   = params[:redisDatabase]  ? params[:redisDatabase]  : 0
+
+      @redis          = Redis.new(
+        :host => redisHost,
+        :port => redisPort,
+        :db   => redisDatabase
+      )
+
+    end
+
+    def self.get( key )
+
+      if( @redis )
+        return @redis.get( key )
+      end
+
+      return nil
+    end
+
+
+    def self.set( key, value )
+
+      if( @redis )
+        return @redis.set( key, value )
+      end
+
+      return nil
+    end
+
+  end
 
 end
 

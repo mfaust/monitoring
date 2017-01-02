@@ -68,8 +68,8 @@ class ServiceDiscovery
       49099
     ]
 
-    @logDirectory      = settings[:logDirectory]      ? settings[:logDirectory]        : '/tmp/log'
-    @cacheDirectory    = settings[:cacheDirectory]    ? settings[:cacheDirectory]      : '/tmp/cache'
+    @logDirectory      = settings[:logDirectory]      ? settings[:logDirectory]        : '/var/log/monitoring'
+    @cacheDirectory    = settings[:cacheDirectory]    ? settings[:cacheDirectory]      : '/var/cache/monitoring'
     @jolokiaHost       = settings[:jolokiaHost]       ? settings[:jolokiaHost]         : 'localhost'
     @jolokiaPort       = settings[:jolokiaPort]       ? settings[:jolokiaPort]         : 8080
     @serviceConfig     = settings[:serviceConfigFile] ? settings[:serviceConfigFile]   : nil
