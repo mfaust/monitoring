@@ -6,16 +6,20 @@
 # v1.1.1
 # -----------------------------------------------------------------------------
 
-require 'logger'
+# require 'logger'
 require 'net/http'
 require 'uri'
 require 'time'
+
+require_relative 'logging'
 
 # -------------------------------------------------------------------------------------------------------------------
 
 module GraphiteAnnotions
 
   class Client
+
+    include Logging
 
     def initialize( settings = {} )
 
@@ -26,28 +30,28 @@ module GraphiteAnnotions
       @graphitePath     = settings[:graphitePath]     ? settings[:graphitePath]     : nil
 
       @graphiteURI      = sprintf( 'http://%s:%s%s/events/', @graphiteHost, @graphiteHttpPort, @graphitePath )
-
-      logFile        = sprintf( '%s/graphite.log', @logDirectory )
-      file           = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
-      file.sync      = true
-      @log           = Logger.new( file, 'weekly', 1024000 )
-#      @log = Logger.new( STDOUT )
-      @log.level     = Logger::DEBUG
-      @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
-      @log.formatter = proc do |severity, datetime, progname, msg|
-        "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
-      end
+# 
+#       logFile        = sprintf( '%s/graphite.log', @logDirectory )
+#       file           = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
+#       file.sync      = true
+#       @log           = Logger.new( file, 'weekly', 1024000 )
+# #      @log = Logger.new( STDOUT )
+#       logger.level     = Logger::DEBUG
+#       logger.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
+#       logger.formatter = proc do |severity, datetime, progname, msg|
+#         "[#{datetime.strftime(logger.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
+#       end
 
       version              = '1.1.2'
       date                 = '2016-11-28'
 
-      @log.info( '-----------------------------------------------------------------' )
-      @log.info( ' CoreMedia - Graphite Client' )
-      @log.info( "  Version #{version} (#{date})" )
-      @log.info( '  Copyright 2016 Coremedia' )
-      @log.info( "  Backendsystem #{@graphiteURI}" )
-      @log.info( '-----------------------------------------------------------------' )
-      @log.info( '' )
+      logger.info( '-----------------------------------------------------------------' )
+      logger.info( ' CoreMedia - Graphite Client' )
+      logger.info( "  Version #{version} (#{date})" )
+      logger.info( '  Copyright 2016 Coremedia' )
+      logger.info( "  Backendsystem #{@graphiteURI}" )
+      logger.info( '-----------------------------------------------------------------' )
+      logger.info( '' )
 
     end
 
@@ -84,7 +88,7 @@ module GraphiteAnnotions
         'data' => data
       }
 
-      @log.debug( JSON.pretty_generate( data ) )
+      logger.debug( JSON.pretty_generate( data ) )
 
       response = nil
 
@@ -107,13 +111,13 @@ module GraphiteAnnotions
             # 400 – Errors (invalid json, missing or invalid fields, etc)
             # 401 – Unauthorized
             # 412 – Precondition failed
-            @log.error( sprintf( ' [%s] ', responseCode ) )
-            @log.error( sprintf( '  %s  ', response.body ) )
+            logger.error( sprintf( ' [%s] ', responseCode ) )
+            logger.error( sprintf( '  %s  ', response.body ) )
           end
         end
       rescue Exception => e
-        @log.error( e )
-        @log.error( e.backtrace )
+        logger.error( e )
+        logger.error( e.backtrace )
 
         status  = 404
         message = sprintf( 'internal error: %s', e )

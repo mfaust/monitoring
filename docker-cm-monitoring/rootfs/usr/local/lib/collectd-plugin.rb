@@ -15,6 +15,7 @@ require 'json'
 require 'filesize'
 require 'fileutils'
 
+require_relative 'logging'
 require_relative 'tools'
 require_relative 'mbean'
 
@@ -30,6 +31,8 @@ class CollecdPlugin
 
 #  attr_reader :status, :message, :services
 
+  include Logging
+
   def initialize( settings = {} )
 
     @logDirectory   = settings[:logDirectory]   ? settings[:logDirectory]   : '/tmp/log'
@@ -38,16 +41,16 @@ class CollecdPlugin
     @memcachePort   = settings[:memcachePort]   ? settings[:memcachePort]   : nil
     @interval       = settings[:interval]       ? settings[:interval]       : 15
 
-    logFile        = sprintf( '%s/collectd.log', @logDirectory )
-    file           = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
-    file.sync      = true
-    @log           = Logger.new( file, 'weekly', 1024000 )
-#    @log = Logger.new( STDOUT )
-    @log.level     = Logger::INFO
-    @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
-    @log.formatter = proc do |severity, datetime, progname, msg|
-      "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
-    end
+#     logFile        = sprintf( '%s/collectd.log', @logDirectory )
+#     file           = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
+#     file.sync      = true
+#     @log           = Logger.new( file, 'weekly', 1024000 )
+# #    @log = Logger.new( STDOUT )
+#     logger.level     = Logger::INFO
+#     logger.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
+#     logger.formatter = proc do |severity, datetime, progname, msg|
+#       "[#{datetime.strftime(logger.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
+#     end
 
     if( File.exists?( logFile ) )
       FileUtils.chmod( 0666, logFile )
@@ -76,19 +79,19 @@ class CollecdPlugin
     version              = '1.3.1'
     date                 = '2016-10-04'
 
-    @log.info( '-----------------------------------------------------------------' )
-    @log.info( ' CoreMedia - CollectdPlugin' )
-    @log.info( "  Version #{version} (#{date})" )
-    @log.info( '  Copyright 2016 Coremedia' )
-    @log.info( "  cache directory located at #{@cacheDirectory}" )
-    @log.info( "  configured interval #{@interval}" )
+    logger.info( '-----------------------------------------------------------------' )
+    logger.info( ' CoreMedia - CollectdPlugin' )
+    logger.info( "  Version #{version} (#{date})" )
+    logger.info( '  Copyright 2016 Coremedia' )
+    logger.info( "  cache directory located at #{@cacheDirectory}" )
+    logger.info( "  configured interval #{@interval}" )
 
     if( @supportMemcache == true )
-      @log.info( sprintf( '  Memcache Support enabled (%s:%s)', @memcacheHost, @memcachePort ) )
+      logger.info( sprintf( '  Memcache Support enabled (%s:%s)', @memcacheHost, @memcachePort ) )
     end
 
-    @log.info( '-----------------------------------------------------------------' )
-    @log.info( '' )
+    logger.info( '-----------------------------------------------------------------' )
+    logger.info( '' )
 
   end
 
@@ -160,9 +163,9 @@ class CollecdPlugin
 
       if( difference > quorum + 1 )
 
-        @log.debug( sprintf( ' now       : %s', n.to_datetime.strftime("%d %m %Y %H:%M:%S") ) )
-        @log.debug( sprintf( ' timestamp : %s', t.to_datetime.strftime("%d %m %Y %H:%M:%S") ) )
-        @log.debug( sprintf( ' difference: %d', difference ) )
+        logger.debug( sprintf( ' now       : %s', n.to_datetime.strftime("%d %m %Y %H:%M:%S") ) )
+        logger.debug( sprintf( ' timestamp : %s', t.to_datetime.strftime("%d %m %Y %H:%M:%S") ) )
+        logger.debug( sprintf( ' difference: %d', difference ) )
 
         result = true
       end
@@ -180,13 +183,13 @@ class CollecdPlugin
 
     if( self.beanTimeout?( timestamp ) )
 
-      @log.debug( sprintf( ' -> Host: \'%s\' - Service: \'%s\' - mbean: \'%s\' - status: \'timeout\'', @Host, @Service, mbean ) )
+      logger.debug( sprintf( ' -> Host: \'%s\' - Service: \'%s\' - mbean: \'%s\' - status: \'timeout\'', @Host, @Service, mbean ) )
       return false
     end
 
     if( status.to_i != 200 )
 
-      @log.debug( sprintf( ' -> Host: \'%s\' - Service: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, @Service, mbean, status ) )
+      logger.debug( sprintf( ' -> Host: \'%s\' - Service: \'%s\' - mbean: \'%s\' - status: \'%d\'', @Host, @Service, mbean, status ) )
       return false
     end
 
@@ -612,7 +615,7 @@ class CollecdPlugin
 
     if( value != nil )
 
-#      @log.debug( JSON.pretty_generate( value ) )
+#      logger.debug( JSON.pretty_generate( value ) )
 
       cpu        = value['cpu']        ? value['cpu']        : nil
       load       = value['load']       ? value['load']       : nil
@@ -1415,7 +1418,7 @@ class CollecdPlugin
       replicatorData = MBean.bean( @Host, @serviceName, 'Replicator' )
 
       if( replicatorData == false )
-        @log.error( sprintf( 'No mbean \'Replicator\' for Service %s found!', @serviceName ) )
+        logger.error( sprintf( 'No mbean \'Replicator\' for Service %s found!', @serviceName ) )
 
         return {
           :incomingCount => 0,
@@ -2230,7 +2233,7 @@ class CollecdPlugin
       @Host = h
       graphiteOutput = Array.new()
 
-      @log.info( sprintf( 'Host: %s', h ) )
+      logger.info( sprintf( 'Host: %s', h ) )
 
       if( @supportMemcache == true )
 
@@ -2275,7 +2278,7 @@ class CollecdPlugin
             if( result.is_a?( Hash ) )
               graphiteOutput.push( self.ParseResult_mongoDB( result ) )
             else
-              @log.error( 'resultdata is not a Hash (mongodb)' )
+              logger.error( 'resultdata is not a Hash (mongodb)' )
             end
 
           when 'mysql'
@@ -2283,7 +2286,7 @@ class CollecdPlugin
             if( result.is_a?( Hash ) )
               graphiteOutput.push( self.ParseResult_mySQL( result ) )
             else
-              @log.error( 'resultdata is not a Hash (mysql)' )
+              logger.error( 'resultdata is not a Hash (mysql)' )
             end
 
           when 'node_exporter'
@@ -2291,7 +2294,7 @@ class CollecdPlugin
             if( result.is_a?( Hash ) )
               graphiteOutput.push( self.ParseResult_nodeExporter( result ) )
             else
-              @log.error( 'resultdata is not a Hash (node_exporter)' )
+              logger.error( 'resultdata is not a Hash (node_exporter)' )
             end
 
           else
@@ -2323,7 +2326,7 @@ class CollecdPlugin
           keys      = data.keys
           keys      -= ['hostname', 'timestamp']
 
-          @log.debug( keys )
+          logger.debug( keys )
 
           keys.each do |service|
 
@@ -2339,7 +2342,7 @@ class CollecdPlugin
             when 'mysql'
               graphiteOutput.push( self.ParseResult_mySQL( results ) )
             else
-              @log.debug( service )
+              logger.debug( service )
 
               results.each do |r|
 

@@ -8,7 +8,7 @@
 
 require 'socket'
 require 'timeout'
-require 'logger'
+# require 'logger'
 require 'json'
 require 'fileutils'
 require 'net/http'
@@ -208,7 +208,11 @@ class ServiceDiscovery
         :config    => { "ignoreErrors" => true, "ifModifiedSince" => true, "canonicalNaming" => true }
       }
 
-      request.body = JSON.generate( array )
+      body = JSON.pretty_generate( array )
+
+      logger.debug( body )
+
+      request.body = body
 
       begin
 
@@ -229,7 +233,7 @@ class ServiceDiscovery
 
         body         = JSON.parse( response.body )
 
-#       logger.debug( JSON.pretty_generate( body ) )
+        logger.debug( JSON.pretty_generate( body ) )
 
         # #1 == Runtime
         runtime = body[0]
@@ -519,20 +523,10 @@ class ServiceDiscovery
 
     @db.createDNS( { :ip => ip, :short => shortHostName, :long => longHostName } )
 
-    File.open( sprintf( '%s/host.json', cacheDirectory ) , 'w' ) { |f| f.write( JSON.pretty_generate( hostInfo ) ) }
+    ports = @db.config( { :ip => ip, :short => shortHostName, :long => longHostName, :key => "ports" } )
 
-    # check our customized config
-    customConfig = sprintf( '%s/config.json', cacheDirectory )
-
-    if( File.exist?( customConfig ) )
-
-      data = JSON.parse( File.read( customConfig ) )
-
-      ports = data['ports'] ? data['ports'] : nil
-
-      if( ports == nil )
-        ports = @scanPorts
-      end
+    if( ports != false )
+      ports = ports.dig( shortHostName, 'ports' )
     else
       ports = @scanPorts
     end
@@ -571,38 +565,27 @@ class ServiceDiscovery
 
     logger.debug( JSON.pretty_generate( services ) )
 
-        dns = @db.dnsData( { :short => shortHostName } )
+    dns = @db.dnsData( { :short => shortHostName } )
 
-        if( dns == nil )
-          logger.debug( 'no data for ' + shortHostName )
-        else
-          dnsId        = dns[ :id ]
-          dnsIp        = dns[ :ip ]
-          dnsShortname = dns[ :shortname ]
-          dnsLongname  = dns[ :longname ]
-          dnsCreated   = dns[ :created ]
-          dnsChecksum  = dns[ :checksum ]
+    if( dns == nil )
+      logger.debug( 'no data for ' + shortHostName )
+    else
+      dnsId        = dns[ :id ]
+      dnsIp        = dns[ :ip ]
+      dnsShortname = dns[ :shortname ]
+      dnsLongname  = dns[ :longname ]
+      dnsCreated   = dns[ :created ]
+      dnsChecksum  = dns[ :checksum ]
 
-          @db.createDiscovery( {
-            :id       => dnsId,
-            :ip       => dnsIp,
-            :short    => dnsShortname,
-            :checksum => dnsChecksum,
-            :data     => services
-          } )
+      @db.createDiscovery( {
+        :id       => dnsId,
+        :ip       => dnsIp,
+        :short    => dnsShortname,
+        :checksum => dnsChecksum,
+        :data     => services
+      } )
 
-#           logger.debug( JSON.pretty_generate dns )
-#
-#           services.each do |k,v|
-#
-#             logger.debug( sprintf( '%s - %s', dnsShortname, k ) )
-#
-#             @db.createDiscovery( { :id => dnsId, :ip => dnsIp, :short => dnsShortname, :checksum => dnsChecksum, :service => k, :data => v } )
-#
-#           end
-        end
-
-
+    end
 
     status  = 200
     message = 'Host successful created'
@@ -644,6 +627,10 @@ class ServiceDiscovery
     hosts = Array.new()
 
     if( host == nil )
+
+      data = @db.discoveryData()
+
+
 
       Dir.chdir( @cacheDirectory )
       Dir.glob( "**" ) do |f|

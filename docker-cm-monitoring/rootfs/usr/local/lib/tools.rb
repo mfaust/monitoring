@@ -80,7 +80,7 @@ end
 
     server.sort!
 
-    @log.debug("Monitored server: #{server}")
+#     @log.debug("Monitored server: #{server}")
 
     return server
   end
@@ -99,7 +99,7 @@ end
 
     if( IPAddress.valid?( host ) )
 
-      @log.debug( 'IP Address, try reverse lookup' )
+#       @log.debug( 'IP Address, try reverse lookup' )
 
       cmd = sprintf( 'dig -x %s +short', host )
 

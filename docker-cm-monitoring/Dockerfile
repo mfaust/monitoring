@@ -70,6 +70,6 @@ RUN \
 
 COPY rootfs/ /
 
-# CMD /opt/startup.sh
+CMD /opt/startup.sh
 
-CMD /bin/bash
+# CMD /bin/bash

@@ -121,7 +121,7 @@ module Storage
       }
 
       @database.create_or_replace_view( :v_discovery,
-        'select dns.ip, dns.shortname, discovery.* from dns as dns, discovery as discovery where dns.id = discovery.dns_id' )
+        'select dns.ip, dns.shortname, dns.created, discovery.* from dns as dns, discovery as discovery where dns.id = discovery.dns_id' )
 
       @database.create_or_replace_view( :v_config,
         'select
@@ -411,6 +411,7 @@ module Storage
       dnsIp        = params[ :ip ]       ? params[ :ip ]       : nil
       dnsShortname = params[ :short ]    ? params[ :short ]    : nil
       dnsChecksum  = params[ :checksum ] ? params[ :checksum ] : nil
+      port         = params[ :port ]     ? params[ :port ]     : nil
       service      = params[ :service ]  ? params[ :service ]  : nil
       data         = params[ :data ]     ? params[ :data ]     : nil
 
@@ -426,6 +427,7 @@ module Storage
         return discovery.insert(
 
           :dns_id     => dnsId.to_i,
+          :port       => port.to_i,
           :service    => service,
           :data       => data.to_s,
           :created    => DateTime.now()
@@ -463,16 +465,28 @@ module Storage
 
       def dbaData( w )
 
-        return  @database[:v_discovery].select( :ip, :shortname, :service, :data ).where( w ).to_a
+        return  @database[:v_discovery].select( :ip, :shortname, :service, :created, :data ).where( w ).to_a
 
       end
 
+      def collectValues( hashes )
+
+        {}.tap{ |r| hashes.each{ |h| h.each{ |k,v| ( r[k]||=[] ) << v } } }
+      end
 
       # ---------------------------------------------------------------------------------
 
       if( service == nil && host == nil )
 
-        logger.error( 'no data' )
+        logger.error( '( service == nil && host == nil )' )
+
+        w = nil
+
+        rec = self.dbaData( w )
+
+        groupByHost = rec.group_by { |k| k[:shortname] }
+
+        return groupByHost.keys
 
       #  { :short => 'monitoring-16-01', :service => 'replication-live-server' }
       elsif( service != nil && host == nil )
@@ -507,6 +521,8 @@ module Storage
       # { :ip => '10.2.14.156' }
       elsif( service == nil && host != nil )
 
+        logger.debug( '( service == nil && host != nil )' )
+
         w = ( Sequel[:ip => ip.to_s] ) | ( Sequel[:shortname => short.to_s] )
 
         rec = self.dbaData( w )
@@ -514,6 +530,8 @@ module Storage
         result[host.to_s] ||= {}
 
         rec.each do |data|
+
+          logger.debug( data.inspect )
 
           dnsShortName  = data.dig( :dns_shortname ).to_s
           service       = data.dig( :service ).to_s
@@ -524,6 +542,10 @@ module Storage
             :data => JSON.parse( discoveryData )
           }
 
+          array << result
+        end
+
+        if( array.count == 0 )
           array << result
         end
 
@@ -618,20 +640,14 @@ module Storage
 
 #       self.removeConfig( { :ip => '10.2.14.156', :key => "ports" } )
 
-      data = Array.new
+      d = Array.new
+      d << self.config( { :ip => '10.2.14.156', :key => "ports" } )
+      d << self.config( { :ip => '10.2.14.156' } )
+      d << self.config( { :ip => '10.2.14.170' } )
 
-      data << self.config( { :ip => '10.2.14.156', :key => "ports" } )
-
-      data << self.config( { :ip => '10.2.14.156' } )
-
-      data << self.config( { :ip => '10.2.14.170' } )
-
-      data.each do |d|
-
-        logger.debug( d )
-      end
-
-      return
+#       data.each do |d|
+#         logger.debug( d )
+#       end
 
       dns = Hash.new()
 
@@ -639,7 +655,7 @@ module Storage
 
         dns = self.dnsData( { :short => i } )
 
-        logger.debug( dns )
+#         logger.debug( dns )
 
         if( dns == nil )
           logger.debug( 'no data for ' + i )
@@ -656,12 +672,16 @@ module Storage
           data.each do |d|
 
             service = d.keys[0].to_s
+            port    = d.dig( service, 'port' )
 
-            logger.debug( sprintf( '%s - %s', dnsShortname, service ) )
+            logger.debug( d )
+
+
+            logger.debug( sprintf( '%s - %s - %s', dnsShortname, port, service ) )
 
 #             logger.debug( d.values.first.to_json.class.to_s )
 
-            self.createDiscovery( { :id => dnsId, :ip => dnsIp, :short => dnsShortname, :checksum => dnsChecksum, :service => service, :data => d.values.first.to_json } )
+            self.createDiscovery( { :id => dnsId, :ip => dnsIp, :short => dnsShortname, :checksum => dnsChecksum, :port => port, :service => service, :data => d.values.first.to_json } )
 
           end
         end
@@ -671,21 +691,33 @@ module Storage
 
     def readData(  )
 
-      d = self.discoveryData( { :ip => '10.2.14.156' } )
+      d = self.discoveryData()
       logger.debug( JSON.pretty_generate( d ) )
       logger.debug( '===' )
 
-      d = self.discoveryData( { :short => 'monitoring-16-01' } )
-      logger.debug( JSON.pretty_generate( d ) )
-      logger.debug( '===' )
-
-      d = self.discoveryData( { :short => 'monitoring-16-01', :service => 'replication-live-server' } )
-      logger.debug( JSON.pretty_generate( d ) )
-      logger.debug( '===' )
-
-      d = self.discoveryData( { :service => 'replication-live-server' } )
-      logger.debug( JSON.pretty_generate( d ) )
-      logger.debug( '===' )
+#       d = self.discoveryData( { :ip => '10.2.14.156' } )
+#       if( d != nil )
+#       logger.debug( JSON.pretty_generate( d ) )
+#       end
+#       logger.debug( '===' )
+#
+#       d = self.discoveryData( { :short => 'monitoring-16-01' } )
+#       if( d != nil )
+#       logger.debug( JSON.pretty_generate( d ) )
+#       end
+#       logger.debug( '===' )
+#
+#       d = self.discoveryData( { :short => 'monitoring-16-01', :service => 'replication-live-server' } )
+#       if( d != nil )
+#       logger.debug( JSON.pretty_generate( d ) )
+#       end
+#       logger.debug( '===' )
+#
+#       d = self.discoveryData( { :service => 'replication-live-server' } )
+#       if( d != nil )
+#       logger.debug( JSON.pretty_generate( d ) )
+#       end
+#       logger.debug( '===' )
 
     end
   end
@@ -740,5 +772,5 @@ end
 m = Storage::SQLite.new()
 
 m.insertData()
-# m.readData()
+m.readData()
 

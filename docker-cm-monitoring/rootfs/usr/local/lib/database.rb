@@ -83,7 +83,7 @@ module Storage
       }
 
       @database.create_or_replace_view( :v_discovery,
-        'select dns.ip, dns.shortname, discovery.* from dns as dns, discovery as discovery where dns.id = discovery.dns_id' )
+        'select dns.ip, dns.shortname, dns.created, discovery.* from dns as dns, discovery as discovery where dns.id = discovery.dns_id' )
 
 #       @database.create_or_replace_view( :v_config,
 #         'select
@@ -205,7 +205,7 @@ module Storage
       long      = params[ :long ]  ? params[ :long ]  : nil
       configKey = params[ :key ]   ? params[ :key ]   : nil
 
-      rec = @database[:config].select(:ip).where(
+      rec = @database[:config].select(:shortname).where(
         ( Sequel[:ip        => ip.to_s] ) |
         ( Sequel[:shortname => short.to_s] ) |
         ( Sequel[:longname  => long.to_s] )
@@ -213,14 +213,14 @@ module Storage
 
       if( rec.count() != 0 )
 
-        id = rec.first[:id].to_i
+        shortname = rec.first[:shortname]
 
         if( configKey == nil )
 
-          @database[:config].where( Sequel[:ip => ip] ).delete
+          @database[:config].where( Sequel[:shortname => shortname] ).delete
         else
           @database[:config].where(
-            ( Sequel[:ip   => ip] ) &
+            ( Sequel[:shortname   => shortname] ) &
             ( Sequel[:key  => configKey] )
           ).delete
         end
@@ -399,6 +399,7 @@ module Storage
       dnsIp        = params[ :ip ]       ? params[ :ip ]       : nil
       dnsShortname = params[ :short ]    ? params[ :short ]    : nil
       dnsChecksum  = params[ :checksum ] ? params[ :checksum ] : nil
+      port         = params[ :port ]     ? params[ :port ]     : nil
       service      = params[ :service ]  ? params[ :service ]  : nil
       data         = params[ :data ]     ? params[ :data ]     : nil
 
@@ -406,9 +407,10 @@ module Storage
 
         data.each do |k,v|
 
-          logger.debug( sprintf( '%s - %s', dnsShortname, k ) )
+          p = v.dig( 'port' )
+          logger.debug( sprintf( '%s - %s - %s', dnsShortname, p, k ) )
 
-          self.writeDiscovery( { :id => dnsId, :ip => dnsIp, :short => dnsShortname, :checksum => dnsChecksum, :service => k, :data => v } )
+          self.writeDiscovery( { :id => dnsId, :ip => dnsIp, :short => dnsShortname, :checksum => dnsChecksum, :port => p, :service => k, :data => v } )
 
         end
 
@@ -425,6 +427,7 @@ module Storage
       dnsIp        = params[ :ip ]       ? params[ :ip ]       : nil
       dnsShortname = params[ :short ]    ? params[ :short ]    : nil
       dnsChecksum  = params[ :checksum ] ? params[ :checksum ] : nil
+      port         = params[ :port ]     ? params[ :port ]     : nil
       service      = params[ :service ]  ? params[ :service ]  : nil
       data         = params[ :data ]     ? params[ :data ]     : nil
 
@@ -440,6 +443,7 @@ module Storage
         return discovery.insert(
 
           :dns_id     => dnsId.to_i,
+          :port       => port.to_i,
           :service    => service,
           :data       => data.to_s,
           :created    => DateTime.now()
@@ -478,7 +482,7 @@ module Storage
 
       def dbaData( w )
 
-        return  @database[:v_discovery].select( :ip, :shortname, :service, :data ).where( w ).to_a
+        return  @database[:v_discovery].select( :ip, :shortname, :created, :service, :data ).where( w ).to_a
 
       end
 
@@ -487,7 +491,13 @@ module Storage
 
       if( service == nil && host == nil )
 
-        logger.error( 'no data' )
+        logger.error( '( service == nil && host == nil )' )
+
+        rec = self.dbaData( nil )
+
+        groupByHost = rec.group_by { |k| k[:shortname] }
+
+        return groupByHost.keys
 
       #  { :short => 'monitoring-16-01', :service => 'replication-live-server' }
       elsif( service != nil && host == nil )

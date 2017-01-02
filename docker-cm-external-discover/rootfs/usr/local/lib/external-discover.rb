@@ -83,19 +83,13 @@ module ExternalDiscovery
 
     def initialize( settings )
 
-      @memcacheHost = settings[:memcacheHost] ? settings[:memcacheHost] : nil
-      @memcachePort = settings[:memcachePort] ? settings[:memcachePort] : nil
+      discoveryHost      = settings[:discoveryHost] ? settings[:discoveryHost] : 'localhost'
+      discoveryPort      = settings[:discoveryPort] ? settings[:discoveryPort] : 80
+      discoveryPath      = settings[:discoveryPath] ? settings[:discoveryPath] : '/'
 
-      memcacheOptions = {
-        :compress   => true,
-        :namespace  => 'discover',
-        :expires_in => 60*2
-      }
-
-#       @mc = Dalli::Client.new( sprintf( '%s:%s', @memcacheHost, @memcachePort ), memcacheOptions )
+      @discoveryUrl      = sprintf( 'http://%s:%d%s', discoveryHost, discoveryPort, discoveryPath )
 
       logger.debug( 'initialized' )
-#       logger.debug( 'initialized' )
 
       @total = 0
       @mutex = Mutex.new
@@ -104,7 +98,7 @@ module ExternalDiscovery
 
     def getData()
 
-      @data = @mutex.synchronize { self.mockupData() }
+      @data = @mutex.synchronize { self.client() }
 
       return @data # @mc.set( 'consumer__live__data' , @data )
 
@@ -113,7 +107,9 @@ module ExternalDiscovery
 
     def client()
 
-      uri = URI( sprintf( 'http://%s:%d', @discoveryHost, @discoveryPort ) )
+      # `curl http://monitoring.develop.cosmos.internal:8080/api/aws
+
+      uri = URI( @discoveryUrl )
 
       response = nil
 
@@ -129,9 +125,8 @@ module ExternalDiscovery
           if( responseCode == 200 )
 
             responseBody  = JSON.parse( response.body )
-            dashboards    = responseBody.collect { |item| item['uri'] }
 
-            return( dashboards )
+            return( responseBody )
 
           # TODO
           # Errorhandling
@@ -318,37 +313,27 @@ module ExternalDiscovery
 
     def initialize( settings = {} )
 
-      @apiHost            = settings[:apiHost]      ? settings[:apiHost]      : 'localhost'
-      @apiPort            = settings[:apiPort]      ? settings[:apiPort]      : 80
-      @apiVersion         = settings[:apiVersion]   ? settings[:apiVersion]   : 2
-      @historic = []
+      apiHost            = settings[:apiHost]      ? settings[:apiHost]      : 'localhost'
+      apiPort            = settings[:apiPort]      ? settings[:apiPort]      : 80
+      apiVersion         = settings[:apiVersion]   ? settings[:apiVersion]   : 2
 
-      @apiUrl       = sprintf( 'http://%s/api/v%s', @apiHost, @apiVersion )
+      @discoveryHost      = settings[:discoveryHost] ? settings[:discoveryHost] : 'localhost'
+      @discoveryPort      = settings[:discoveryPort] ? settings[:discoveryPort] : 80
+      @discoveryPath      = settings[:discoveryPath] ? settings[:discoveryPath] : '/'
 
-#       @memcacheHost = settings[:memcacheHost] ? settings[:memcacheHost] : nil
-#       @memcachePort = settings[:memcachePort] ? settings[:memcachePort] : nil
+      @apiUrl            = sprintf( 'http://%s/api/v%s', apiHost, apiVersion )
+      @discoveryUrl      = sprintf( 'http://%s:%d%s', @discoveryHost, @discoveryPort, @discoveryPath )
+      @historic          = []
 
-      # add cache setting
-      # eg.cache for 2 min here. default options is never expire
-#       memcacheOptions = {
-#         :compress   => true,
-#         :namespace  => 'external-discover'
-# #        :expires_in => 60*3
-#       }
-
-#       @mc = Dalli::Client.new( sprintf( '%s:%s', @memcacheHost, @memcachePort ), memcacheOptions )
-
-      version              = '0.1.1'
-      date                 = '2016-12-15'
+      version            = '0.2.0'
+      date               = '2017-01-02'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - External Discovery Service' )
       logger.info( "  Version #{version} (#{date})" )
       logger.info( '  Copyright 2016 Coremedia' )
-#       if( @supportMemcache == true )
-#         logger.info( sprintf( '  Memcache Support enabled (%s:%s)', @memcacheHost, @memcachePort ) )
-#       end
-      logger.info( "  Backendsystem #{@apiUrl}" )
+      logger.info( "  Monitoring System #{@apiUrl}" )
+      logger.info( "  Discovery System #{@discoveryUrl}" )
       logger.info( '-----------------------------------------------------------------' )
       logger.info( '' )
     end
@@ -426,7 +411,17 @@ module ExternalDiscovery
           ip      = l[:ip]      ? l[:ip]      : nil
           name    = l[:name]    ? l[:name]    : nil
           state   = l[:state]   ? l[:state]   : 'running'
-          tags    = l[:tags]    ? l[:tags]    : []#
+          tags    = l[:tags]    ? l[:tags]    : []
+
+          # states from AWS:
+          #  0 : pending
+          # 16 : running
+          # 32 : shutting-down
+          # 48 : terminated
+          # 64 : stopping
+          # 80 : stopped
+
+
           useableTags = Array.new()
 
           logger.info( sprintf( 'get information about %s (%s)', name, ip ) )
@@ -554,8 +549,9 @@ module ExternalDiscovery
       threads = Array.new()
 
       config = {
-        :memcacheHost => @memcacheHost,
-        :memcachePort => @memcachePort
+        :discoveryHost => @discoveryHost,
+        :discoveryPort => @discoveryPort,
+        :discoveryPath => @discoveryPath
       }
 
       consumer = DataConsumer.new( config )

@@ -12,9 +12,15 @@ run:
 		--detach \
 		--interactive \
 		--tty \
-		--env MEMCACHE_HOST=localhost \
+		--env MEMCACHE_HOST=memcached \
 		--env MEMCACHE_PORT=11211 \
-		--env POLL_INTERVAL=10 \
+		--env DISCOVERY_HOST=foo.bar.com \
+		--env DISCOVERY_PORT=8080 \
+		--env DISCOVERY_PATH=/api/aws \
+		--env DISCOVERY_POLL_INTERVAL=10 \
+		--env MONITORING_HOST=monitoring-16-build.coremedia.vm \
+		--env MONITORING_PORT=80 \
+		--env MONITORING_API_VERSION=2 \
 		--hostname=${IMAGE_NAME} \
 		--name=${IMAGE_NAME} \
 		$(IMAGE_NAME) \
@@ -25,9 +31,15 @@ shell:
 		--rm \
 		--interactive \
 		--tty \
-		--env MEMCACHE_HOST=localhost \
+		--env MEMCACHE_HOST=memcached \
 		--env MEMCACHE_PORT=11211 \
-		--env POLL_INTERVAL=10 \
+		--env DISCOVERY_HOST=foo.bar.com \
+		--env DISCOVERY_PORT=8080 \
+		--env DISCOVERY_PATH=/api/aws \
+		--env DISCOVERY_POLL_INTERVAL=10 \
+		--env MONITORING_HOST=monitoring-16-build.coremedia.vm \
+		--env MONITORING_PORT=80 \
+		--env MONITORING_API_VERSION=2 \
 		--hostname=${IMAGE_NAME} \
 		--name=${IMAGE_NAME} \
 		$(IMAGE_NAME) \

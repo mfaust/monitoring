@@ -159,7 +159,7 @@ class Monitoring
 
   def checkAvailablility?( host )
 
-    hostInfo = hostResolve( host )
+    hostInfo      = hostResolve( host )
 
     ip            = hostInfo[:ip]    ? hostInfo[:ip]    : nil # dnsResolve( host )
     shortHostName = hostInfo[:short] ? hostInfo[:short] : nil # dnsResolve( host )
@@ -211,19 +211,6 @@ class Monitoring
         @db.createConfig( { :short => shortName , :data => hash } )
       end
 
-#       localConfig = sprintf( '%s/config.json', directory )
-#
-#       if( File.exist?( localConfig ) == true )
-#
-#         data    = File.read( localConfig )
-#         current = JSON.parse( data )
-#
-#       end
-#
-#       hash = current.merge( hash )
-#
-#       File.open( localConfig , 'w' ) { |f| f.write( JSON.pretty_generate( hash ) ) }
-
       status  = 200
       message = 'config successful written'
 
@@ -256,23 +243,6 @@ class Monitoring
         status = 200
         message = data
       end
-
-#       directory   = sprintf( '%s/%s', @cacheDir, host )
-#       localConfig = sprintf( '%s/config.json', directory )
-#
-#       if( File.exist?( localConfig ) == true )
-#
-#         data    = File.read( localConfig )
-#         current = JSON.parse( data )
-#
-#         status  = 200
-#         message = current
-#       else
-#
-#         status  = 404
-#         message = 'No configuration found'
-#       end
-
     end
 
     return {
@@ -305,23 +275,6 @@ class Monitoring
         status  = 404
         message = 'No configuration found'
       end
-#
-#       directory   = sprintf( '%s/%s', @cacheDir, host )
-#       localConfig = sprintf( '%s/config.json', directory )
-#
-#       if( File.exist?( localConfig ) == true )
-#
-#         FileUtils.rm( localConfig, :force => true )
-#
-#         status  = 200
-#         message = 'configuration succesfull removed'
-#       else
-#
-#         status  = 404
-#         message = 'No configuration found'
-#
-#       end
-
     end
 
     return {

@@ -31,18 +31,21 @@ if( File.exist?( configFile ) )
 
   config = YAML.load_file( configFile )
 
-  logDirectory     = config['logDirectory']         ? config['logDirectory']     : '/var/log/monitoring'
+  logDirectory     = config['logDirectory']         ? config['logDirectory']         : '/var/log/monitoring'
 
-  apiHost          = config.dig( 'external-discover', 'internal', 'host' ) || 'localhost'
-  apiVersion       = config.dig( 'external-discover', 'internal', 'version' ) || 2
+  apiHost          = ENV['MONITORING_HOST']         ? ENV['MONITORING_HOST']         || 'localhost' # config.dig( 'external-discover', 'internal', 'host' )
+  apiPort          = ENV['MONITORING_PORT']         ? ENV['MONITORING_PORT']         || 80          # config.dig( 'external-discover', 'internal', 'host' )
+  apiVersion       = ENV['MONITORING_API_VERSION']  ? ENV['MONITORING_API_VERSION']  || 2 # config.dig( 'external-discover', 'internal', 'version' )
 
-  discoveryHost    = config.dig( 'external-discover', 'backend', 'host' ) || 'localhost'
-  discoveryPath    = config.dig( 'external-discover', 'backend', 'path' ) || '/'
+  discoveryHost    = ENV['DISCOVERY_HOST']          ? ENV['DISCOVERY_HOST']          || 'localhost'  # config.dig( 'external-discover', 'backend', 'host' ) || 'localhost'
+  discoveryPort    = ENV['DISCOVERY_PORT']          ? ENV['DISCOVERY_PORT']          || 8080  # config.dig( 'external-discover', 'backend', 'host' ) || 'localhost'
+  discoveryPath    = ENV['DISCOVERY_PATH']          ? ENV['DISCOVERY_PATH']          || '/'  # config.dig( 'external-discover', 'backend', 'path' ) || '/'
+  interval         = ENV['DISCOVERY_POLL_INTERVAL'] ? ENV['DISCOVERY_POLL_INTERVAL'] || 30
 
-  memcacheHost     = ENV['MEMCACHE_HOST']           ? ENV['MEMCACHE_HOST']       : 'localhost'
-  memcachePort     = ENV['MEMCACHE_PORT']           ? ENV['MEMCACHE_PORT']       : 11211
+  memcacheHost     = ENV['MEMCACHE_HOST']           ? ENV['MEMCACHE_HOST']           || 'localhost'
+  memcachePort     = ENV['MEMCACHE_PORT']           ? ENV['MEMCACHE_PORT']           || 11211
 
-  interval         = ENV['POLL_INTERVAL']           ? ENV['POLL_INTERVAL']       : 30
+
 
 else
   puts "no configuration exists, use default settings"
@@ -50,12 +53,15 @@ end
 
 
 config = {
-  :logDirectory => logDirectory,
-  :apiHost      => apiHost,
-  :apiPort      => 80,
-  :apiVersion   => apiVersion,
-  :memcacheHost => memcacheHost,
-  :memcachePort => memcachePort
+  :logDirectory  => logDirectory,
+  :apiHost       => apiHost,
+  :apiPort       => 80,
+  :apiVersion    => apiVersion,
+  :discoveryHost => discoveryHost,
+  :discoveryPort => discoveryPort,
+  :discoveryPath => discoveryPath,
+  :memcacheHost  => memcacheHost,
+  :memcachePort  => memcachePort
 }
 
 # ---------------------------------------------------------------------------------------
