@@ -40,6 +40,6 @@ RUN \
 
 COPY rootfs/ /
 
-# ENTRYPOINT /usr/local/bin/external-discover.rb
+ENTRYPOINT [ "/usr/local/bin/external-discover.rb" ]
 
-CMD /bin/sh
+#CMD /bin/sh

@@ -83,9 +83,9 @@ module ExternalDiscovery
 
     def initialize( settings )
 
-      discoveryHost      = settings[:discoveryHost] ? settings[:discoveryHost] : 'localhost'
-      discoveryPort      = settings[:discoveryPort] ? settings[:discoveryPort] : 80
-      discoveryPath      = settings[:discoveryPath] ? settings[:discoveryPath] : '/'
+      discoveryHost      = settings[:discoveryHost] ? settings[:discoveryHost] : nil
+      discoveryPort      = settings[:discoveryPort] ? settings[:discoveryPort] : nil
+      discoveryPath      = settings[:discoveryPath] ? settings[:discoveryPath] : nil
 
       @discoveryUrl      = sprintf( 'http://%s:%d%s', discoveryHost, discoveryPort, discoveryPath )
 
@@ -313,20 +313,20 @@ module ExternalDiscovery
 
     def initialize( settings = {} )
 
-      apiHost            = settings[:apiHost]      ? settings[:apiHost]      : 'localhost'
-      apiPort            = settings[:apiPort]      ? settings[:apiPort]      : 80
-      apiVersion         = settings[:apiVersion]   ? settings[:apiVersion]   : 2
+      apiHost        = settings[:apiHost]       ? settings[:apiHost]       : nil
+      apiPort        = settings[:apiPort]       ? settings[:apiPort]       : nil
+      apiVersion     = settings[:apiVersion]    ? settings[:apiVersion]    : 2
 
-      @discoveryHost      = settings[:discoveryHost] ? settings[:discoveryHost] : 'localhost'
-      @discoveryPort      = settings[:discoveryPort] ? settings[:discoveryPort] : 80
-      @discoveryPath      = settings[:discoveryPath] ? settings[:discoveryPath] : '/'
+      @discoveryHost = settings[:discoveryHost] ? settings[:discoveryHost] : nil
+      @discoveryPort = settings[:discoveryPort] ? settings[:discoveryPort] : nil
+      @discoveryPath = settings[:discoveryPath] ? settings[:discoveryPath] : nil
 
-      @apiUrl            = sprintf( 'http://%s/api/v%s', apiHost, apiVersion )
-      @discoveryUrl      = sprintf( 'http://%s:%d%s', @discoveryHost, @discoveryPort, @discoveryPath )
-      @historic          = []
+      @apiUrl        = sprintf( 'http://%s/api/v%s', apiHost, apiVersion )
+      @discoveryUrl  = sprintf( 'http://%s:%d%s', @discoveryHost, @discoveryPort, @discoveryPath )
+      @historic      = []
 
-      version            = '0.2.0'
-      date               = '2017-01-02'
+      version        = '0.2.0'
+      date           = '2017-01-02'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - External Discovery Service' )
@@ -345,6 +345,18 @@ module ExternalDiscovery
 
       liveData     = @data
       historicData = @historic # @mc.get( 'consumer__historic__data' ) || []
+
+      if( liveData.is_a?( Array ) == false )
+        logger.error( 'liveData is not an Array' )
+
+        return
+      end
+
+      if( historicData.is_a?( Array ) == false )
+        logger.error( 'historicData is not an Array' )
+
+        return
+      end
 
       identicalEntries      = liveData & historicData
       removedEntries        = liveData - historicData

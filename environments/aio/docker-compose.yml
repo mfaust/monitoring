@@ -296,3 +296,24 @@ services:
       mon:
         ipv4_address: 172.25.0.40
 
+
+  cm-external-discover:
+    restart: always
+    build: ../../docker-cm-external-discover
+    container_name: cm-external-discover
+    hostname: cm-external-discover
+    labels:
+      com.dnsdock.image: "cm-external-discover"
+      com.dnsdock.alias: "cm-external-discover"
+      com.dnsdock.ttl: "30"
+    env_file:
+      - env/cm-external-discover.env
+    depends_on:
+      - cm-monitoring
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./share/monitoring/etc/cm-monitoring.yaml:/etc/cm-monitoring.yaml
+      - ./data:/srv
+    networks:
+      mon:
+        ipv4_address: 172.25.0.41
