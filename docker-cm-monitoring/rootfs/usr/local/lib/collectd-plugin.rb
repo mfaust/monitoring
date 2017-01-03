@@ -1484,13 +1484,15 @@ class CollecdPlugin
       licenseValidUntilHard = value['LicenseValidUntilHard']    ? value['LicenseValidUntilHard']     : nil
 
       # Data from RLS
-      replicatorData        = replicatorData()
+      if( @Service == 'RLS' )
+        replicatorData        = replicatorData()
 
-      incomingCount         = replicatorData[:completedSequenceNumber] ? replicatorData[:completedSequenceNumber] : 0
-      replicatorResult      = replicatorData[:result]                  ? replicatorData[:result]                  : nil
+        incomingCount         = replicatorData[:completedSequenceNumber] ? replicatorData[:completedSequenceNumber] : 0
+        replicatorResult      = replicatorData[:result]                  ? replicatorData[:result]                  : nil
 
-      if( replicatorResult != nil && replicatorResult.count != 0 )
-        result = replicatorResult
+        if( replicatorResult != nil && replicatorResult.count != 0 )
+          result = replicatorResult
+        end
       end
 
       #in maintenance mode the Server mbean is not available
