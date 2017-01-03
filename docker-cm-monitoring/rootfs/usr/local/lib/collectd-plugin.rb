@@ -1413,15 +1413,16 @@ class CollecdPlugin
 
       result       = []
 
-      MBean.logger( @log )
+      MBean.logger( logger )
       MBean.memcache( @memcacheHost, @memcachePort )
+
       replicatorData = MBean.bean( @Host, @serviceName, 'Replicator' )
 
       if( replicatorData == false )
         logger.error( sprintf( 'No mbean \'Replicator\' for Service %s found!', @serviceName ) )
 
         return {
-          :incomingCount => 0,
+          :completedSequenceNumber => 0,
           :result        => result
         }
       else
@@ -1431,30 +1432,30 @@ class CollecdPlugin
 
         if( replicatorStatus == 200 && replicatorValue != nil )
 
-          replicatorValue       = replicatorValue.values.first
+          replicatorValue         = replicatorValue.values.first
 
-          connectionUp          = replicatorValue['ConnectionUp']     ? replicatorValue['ConnectionUp']     : false
-          controllerState       = replicatorValue['ControllerState']  ? replicatorValue['ControllerState']  : nil
-          incomingCount         = replicatorValue['IncomingCount']    ? replicatorValue['IncomingCount']    : 0
-          enabled               = replicatorValue['Enabled']          ? replicatorValue['Enabled']          : false
-          pipelineUp            = replicatorValue['PipelineUp']       ? replicatorValue['PipelineUp']       : false
-          uncompletedCount      = replicatorValue['UncompletedCount'] ? replicatorValue['UncompletedCount'] : 0
-          completedCount        = replicatorValue['CompletedCount']   ? replicatorValue['CompletedCount']   : 0
+          connectionUp            = replicatorValue['ConnectionUp']                  ? replicatorValue['ConnectionUp']                  : false
+          controllerState         = replicatorValue['ControllerState']               ? replicatorValue['ControllerState']               : nil
+          completedSequenceNumber = replicatorValue['LatestCompletedSequenceNumber'] ? replicatorValue['LatestCompletedSequenceNumber'] : 0
+          enabled                 = replicatorValue['Enabled']                       ? replicatorValue['Enabled']                       : false
+          pipelineUp              = replicatorValue['PipelineUp']                    ? replicatorValue['PipelineUp']                    : false
+          uncompletedCount        = replicatorValue['UncompletedCount']              ? replicatorValue['UncompletedCount']              : 0
+          completedCount          = replicatorValue['CompletedCount']                ? replicatorValue['CompletedCount']                : 0
 
           controllerState.downcase!
 
           format       = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
 
-#          result.push( sprintf( format, @Host, @Service, 'Replicator', 'connection'  ,'up'      , @interval, connectionUp ) )
-#          result.push( sprintf( format, @Host, @Service, 'Replicator', 'controller'  ,'state'   , @interval, controllerState ) )
-#          result.push( sprintf( format, @Host, @Service, 'Replicator', 'incoming'    ,'count'   , @interval, incomingCount ) )
-#          result.push( sprintf( format, @Host, @Service, 'Replicator', 'pipeline'    ,'up'      , @interval, pipelineUp ) )
-#          result.push( sprintf( format, @Host, @Service, 'Replicator', 'uncompleted' ,'count'   , @interval, uncompletedCount ) )
-#          result.push( sprintf( format, @Host, @Service, 'Replicator', 'completed'   ,'count'   , @interval, completedCount ) )
-#          result.push( sprintf( 'PUTVAL %s/%s-%s/count-%s interval=%s N:%s', @Host, @Service, 'Replicator', 'enabled', @interval, enabled ) )
+          result.push( sprintf( format, @Host, @Service, 'Replicator', 'connection'              ,'up'      , @interval, connectionUp ) )
+          result.push( sprintf( format, @Host, @Service, 'Replicator', 'controller'              ,'state'   , @interval, controllerState ) )
+          result.push( sprintf( format, @Host, @Service, 'Replicator', 'completedSequenceNumber' ,'count'   , @interval, completedSequenceNumber ) )
+          result.push( sprintf( format, @Host, @Service, 'Replicator', 'pipeline'                ,'up'      , @interval, pipelineUp ) )
+          result.push( sprintf( format, @Host, @Service, 'Replicator', 'uncompleted'             ,'count'   , @interval, uncompletedCount ) )
+          result.push( sprintf( format, @Host, @Service, 'Replicator', 'completed'               ,'count'   , @interval, completedCount ) )
+          result.push( sprintf( 'PUTVAL %s/%s-%s/count-%s interval=%s N:%s', @Host, @Service, 'Replicator', 'enabled', @interval, enabled ) )
 
           return {
-            :incomingCount => incomingCount,
+            :completedSequenceNumber => completedSequenceNumber,
             :result        => result
           }
 
@@ -1467,6 +1468,7 @@ class CollecdPlugin
 
       value = value.values.first
 
+      # identical Data from MLS & RLS
       cacheHits             = value['ResourceCacheHits']        ? value['ResourceCacheHits']         : nil
       cacheEvicts           = value['ResourceCacheEvicts']      ? value['ResourceCacheEvicts']       : nil
       cacheEntries          = value['ResourceCacheEntries']     ? value['ResourceCacheEntries']      : nil
@@ -1481,14 +1483,15 @@ class CollecdPlugin
       licenseValidUntilSoft = value['LicenseValidUntilSoft']    ? value['LicenseValidUntilSoft']     : nil
       licenseValidUntilHard = value['LicenseValidUntilHard']    ? value['LicenseValidUntilHard']     : nil
 
-#       replicatorData = replicatorData()
-#
-#       incomingCount         = replicatorData[:incomingCount] ? replicatorData[:incomingCount] : 0
-#       replicatorResult      = replicatorData[:result]        ? replicatorData[:result]        : nil
-#
-#       if( replicatorResult != nil && replicatorResult.count != 0 )
-#         result = replicatorResult
-#       end
+      # Data from RLS
+      replicatorData        = replicatorData()
+
+      incomingCount         = replicatorData[:completedSequenceNumber] ? replicatorData[:completedSequenceNumber] : 0
+      replicatorResult      = replicatorData[:result]                  ? replicatorData[:result]                  : nil
+
+      if( replicatorResult != nil && replicatorResult.count != 0 )
+        result = replicatorResult
+      end
 
       #in maintenance mode the Server mbean is not available
       case runlevel.downcase
@@ -1581,7 +1584,7 @@ class CollecdPlugin
     result.push( sprintf( format, @Host, @Service, mbean, 'server', 'cache_entries'   , @interval, cacheEntries ) )
     result.push( sprintf( format, @Host, @Service, mbean, 'server', 'cache_interval'  , @interval, cacheInterval ) )
     result.push( sprintf( format, @Host, @Service, mbean, 'server', 'cache_size'      , @interval, cacheSize ) )
-    result.push( sprintf( format, @Host, @Service, mbean, 'server', 'sequence_number' , @interval, reqSeqNumber.to_i - incomingCount.to_i ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'server', 'sequence_number' , @interval, reqSeqNumber ) )
     result.push( sprintf( format, @Host, @Service, mbean, 'server', 'connection_count', @interval, connectionCount ) )
     result.push( sprintf( format, @Host, @Service, mbean, 'server', 'uptime'          , @interval, uptime ) )
     result.push( sprintf( format, @Host, @Service, mbean, 'server', 'runlevel'        , @interval, runlevel ) )

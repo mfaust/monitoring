@@ -236,7 +236,7 @@
             "id": 14,
             "targets": [
               {
-                "target": "collectd.%HOST%.RLS-Server-server.count-sequence_number",
+                "target": "collectd.%HOST%.RLS-Server-server.count-completedSequenceNumber",
                 "refId": "A",
                 "hide": false
               }
@@ -317,7 +317,7 @@
                 "hide": true
               },
               {
-                "target": "collectd.%HOST%.RLS-Server-server.count-sequence_number",
+                "target": "collectd.%HOST%.RLS-Server-server.count-completedSequenceNumber",
                 "refId": "B",
                 "hide": true
               },
