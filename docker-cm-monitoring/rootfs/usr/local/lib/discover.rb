@@ -3,7 +3,7 @@
 # 13.09.2016 - Bodo Schulz
 #
 #
-# v1.2.5
+# v1.3.1
 # -----------------------------------------------------------------------------
 
 require 'socket'
@@ -81,8 +81,8 @@ class ServiceDiscovery
 
     @db = Storage::Database.new()
 
-    version              = '1.2.9'
-    date                 = '2016-12-21'
+    version              = '1.3.3'
+    date                 = '2017-01-03'
 
     logger.info( '-----------------------------------------------------------------' )
     logger.info( ' CoreMedia - Service Discovery' )
@@ -528,6 +528,7 @@ class ServiceDiscovery
     if( ports != false )
       ports = ports.dig( shortHostName, 'ports' )
     else
+      # our default known ports
       ports = @scanPorts
     end
 
@@ -691,13 +692,28 @@ class ServiceDiscovery
 
   def hostInformation( file, host )
 
-    status = isRunning?( host )
-    age    = File.mtime( file ).strftime("%Y-%m-%d %H:%M:%S")
+    status   = isRunning?( host )
+    age      = File.mtime( file ).strftime("%Y-%m-%d %H:%M:%S")
+    services = Hash.new()
+
+    if( file != host )
+      data   = JSON.parse( File.read( file ) )
+
+      data.each do |d,v|
+
+        services[d.to_s] ||= {}
+        services[d.to_s] = {
+          :port        => v['port'],
+          :description => v['description']
+        }
+      end
+    end
 
     return {
       host => {
-        :status  => status ? 'online' : 'offline',
-        :created => age
+        :status   => status ? 'online' : 'offline',
+        :services => services,
+        :created  => age
       }
     }
 

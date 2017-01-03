@@ -1,0 +1,14 @@
+{
+  "springer-cms": {
+    "port": 50099,
+    "description": "CAE Live 1",
+    "cap_connection": true,
+    "uapi_cache": true,
+    "blob_cache": true,
+    "application": [
+      "cae",
+      "caches"
+    ],
+    "template": "cae-live"
+  }
+}

@@ -104,9 +104,9 @@ class Grafana
     @shortHostname        = short
     @grafanaHostname      = host.gsub( '.', '-' )
 
-    @discoveryFile        = sprintf( '%s/%s/discovery.json'         , @cacheDirectory, host )
-    @mergedHostFile       = sprintf( '%s/%s/mergedHostData.json'    , @cacheDirectory, host )
-    @monitoringResultFile = sprintf( '%s/%s/monitoring.result', @cacheDirectory, host )
+    @discoveryFile        = sprintf( '%s/%s/discovery.json'       , @cacheDirectory, host )
+    @mergedHostFile       = sprintf( '%s/%s/mergedHostData.json'  , @cacheDirectory, host )
+    @monitoringResultFile = sprintf( '%s/%s/monitoring.result'    , @cacheDirectory, host )
 
   end
 
@@ -369,7 +369,7 @@ class Grafana
     self.prepare( host )
 
     # determine services from discovery.json file, e.g. cae-live, master-live-server, caefeeder-live
-    discoveryJson = getJsonFromFile( @discoveryFile )
+    discoveryJson = self.getJsonFromFile( @discoveryFile )
 
     if( discoveryJson != nil )
 
@@ -677,7 +677,6 @@ class Grafana
     end
 
     if( data.count == 0 )
-      status = 204
 
       return {
         :status     => 204,

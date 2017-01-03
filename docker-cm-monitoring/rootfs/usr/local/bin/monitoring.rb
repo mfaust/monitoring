@@ -3,7 +3,7 @@
 # 05.10.2016 - Bodo Schulz
 #
 #
-# v2.0.0
+# v2.0.1
 
 # -----------------------------------------------------------------------------
 
@@ -27,23 +27,9 @@ class Monitoring
 
   def initialize( settings = {} )
 
-    @logDirectory       = settings[:logDirectory]       ? settings[:logDirectory]       : '/tmp'
-
-#     logFile         = sprintf( '%s/monitoring.log', @logDirectory )
-
-#     file            = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
-#     file.sync       = true
-#     @log            = Logger.new( file, 'weekly', 1024000 )
-# #    @log = Logger.new( STDOUT )
-#     logger.level      = Logger::DEBUG
-#     logger.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
-#     logger.formatter  = proc do |severity, datetime, progname, msg|
-#       "[#{datetime.strftime(logger.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
-#     end
-
+    @logDirectory  = settings[:logDirectory]       ? settings[:logDirectory]       : '/tmp'
+    @configFile    = '/etc/cm-monitoring.yaml'
     @db = Storage::Database.new()
-
-    @configFile = '/etc/cm-monitoring.yaml'
 
     self.readConfigFile()
 
@@ -83,8 +69,8 @@ class Monitoring
       :graphitePath        => @graphitePath
     }
 
-    version              = '2.0.2'
-    date                 = '2016-12-15'
+    version              = '2.1.0'
+    date                 = '2017-01-03'
 
     logger.info( '-----------------------------------------------------------------' )
     logger.info( ' CoreMedia - Monitoring Service' )
@@ -314,8 +300,8 @@ class Monitoring
       enableDiscovery = @enabledDiscovery
       enabledGrafana  = @enabledGrafana
       enabledIcinga   = @enabledIcinga
-      annotation      = false
-      grafanaOverview = false
+      annotation      = true
+      grafanaOverview = true
       services        = []
       tags            = []
 
@@ -352,7 +338,7 @@ class Monitoring
         enabledGrafana  = hash.keys.include?('grafana')    ? hash['grafana']    : @enabledGrafana
         enabledIcinga   = hash.keys.include?('icinga')     ? hash['icinga']     : @enabledIcinga
         annotation      = hash.keys.include?('annotation') ? hash['annotation'] : true
-        grafanaOverview = hash.keys.include?('overview')   ? hash['overview']   : false
+        grafanaOverview = hash.keys.include?('overview')   ? hash['overview']   : true
         services        = hash.keys.include?('services')   ? hash['services']   : []
         tags            = hash.keys.include?('tags')       ? hash['tags']       : []
       end
@@ -539,7 +525,6 @@ class Monitoring
       enabledGrafana  = @enabledGrafana
       enabledIcinga   = @enabledIcinga
 
-#       logger.debug( payload )
 #
 #       if( payload != nil )
 #         payload = payload.dig( 'rack.request.form_vars' )
@@ -552,6 +537,8 @@ class Monitoring
 #       end
 
       logger.debug( ( hostData != false && hostData[:short] ) ? hostData[:short] : host  )
+
+      result[host.to_s] ||= {}
 
       hostConfiguration        = self.getHostConfiguration( ( hostData != false && hostData[:short] ) ? hostData[:short] : host )
       hostConfigurationStatus  = hostConfiguration[:status]
@@ -584,7 +571,8 @@ class Monitoring
           result[host.to_s][:discovery] = {
             :status     => discoveryStatus,
             :created    => discoveryCreated,
-            :online     => discoveryOnline
+            :online     => discoveryOnline,
+            :services   => discoveryServices
           }
         else
           result[host.to_s][:discovery] = {
@@ -706,11 +694,10 @@ class Monitoring
 
       logger.info( sprintf( 'remove %s from monitoring', host ) )
 
-#       directory = self.createCacheDirectory( host )
-
       enableDiscovery = @enabledDiscovery
       enabledGrafana  = @enabledGrafana
       enabledIcinga   = @enabledIcinga
+      annotation      = true
 
 #     example:
 #     {

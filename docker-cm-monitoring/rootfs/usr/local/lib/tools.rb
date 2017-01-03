@@ -12,10 +12,6 @@ def isIp?( data )
   require "ipaddress"
 
   return IPAddress.valid?( data ) # "192.128.0.12"
-  #=> true
-
-  # IPAddress.valid? "192.128.0.260"
-  #=> false
 end
 
 def validJson?( json )
@@ -38,17 +34,11 @@ def regenerateGrafanaTemplateIDs( json )
 
     if( rows != nil )
 
-#      @log.debug( sprintf( ' => found %d rows', rows.count ) )
-
       counter = 1
       idCounter = 10
       rows.each_with_index do |r, counter|
 
-#        @log.debug( sprintf( ' row  %d', counter ) )
-
         panel = r['panels'] ? r['panels'] : nil
-#        @log.debug( sprintf( '   => with %d widgets', panel.count ) )
-
         panel.each do |p|
           p['id']   = idCounter
           idCounter = idCounter+1 # idCounter +=1 ??
@@ -99,9 +89,9 @@ end
 
     if( IPAddress.valid?( host ) )
 
-#       @log.debug( 'IP Address, try reverse lookup' )
-
       cmd = sprintf( 'dig -x %s +short', host )
+
+      @log.debug( cmd )
 
       Open3.popen3( cmd ) do |stdin, stdout, stderr, wait_thr|
 
@@ -111,17 +101,19 @@ end
 
         if( returnValue == 0 && !stdOut.to_s.empty? )
           host = stdOut
-#          host = line[0...-2]
         else
-#           @log.error( stdErr )
-#           @log.debug( host )
+
         end
       end
     end
 
     line  = nil
 
+    @log.debug( host )
+
     cmd   = sprintf( 'host -t A %s', host )
+
+    @log.debug( cmd )
 
     Open3.popen3( cmd ) do |stdin, stdout, stderr, wait_thr|
 
@@ -132,7 +124,7 @@ end
       if( returnValue == 0 && !stdOut.to_s.empty? )
         line = stdOut
       else
-#         @log.error( stdErr )
+
       end
     end
 

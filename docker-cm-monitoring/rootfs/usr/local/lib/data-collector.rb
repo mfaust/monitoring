@@ -49,7 +49,7 @@ class DataCollector
     if( ! File.exist?( @cacheDirectory ) )
       Dir.mkdir( @cacheDirectory )
     end
-# 
+#
 #     logFile        = sprintf( '%s/data-collector.log', @logDirectory )
 #     file           = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
 #     file.sync      = true
@@ -646,9 +646,15 @@ class DataCollector
 
       logger.debug( sprintf( 'create bulk checks for \'%s\'', h ) )
 
-      services = data[h][:data] ? data[h][:data] : nil
+      services      = data[h][:data] ? data[h][:data] : nil
+      servicesCount = services.count
 
-      logger.debug( sprintf( '%d services found', services.count ) )
+      if( servicesCount == 0 )
+        logger.debug( 'no services found. skip ... ' )
+        next
+      end
+
+      logger.debug( sprintf( '%d services found', servicesCount ) )
 
       # if Host available -> break
       hostStatus = isRunning?( h )
@@ -937,10 +943,8 @@ class DataCollector
 
       self.checkHostDataAge( h )
 
-      d = self.buildMergedData( h )
-
       data[h] = {
-        :data      => d,
+        :data      => self.buildMergedData( h ),
         :timestamp => Time.now().to_i
       }
 

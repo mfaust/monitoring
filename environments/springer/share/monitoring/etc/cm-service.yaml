@@ -22,8 +22,11 @@ services:
     port: 40099
     cores:
     - live
+    - live2
     - preview
+    - preview2
     - studio
+    - studio2
     application:
     - solr
 
@@ -32,8 +35,11 @@ services:
     port: 40099
     cores:
     - live
+    - live2
     - preview
+    - preview2
     - studio
+    - studio2
     application:
     - solr
 
@@ -96,6 +102,16 @@ services:
     uapi_cache: true
     application:
     - caefeeder
+
+  caefeeder2-preview:
+    description: CAEFeeder2 Preview
+    port: 40799
+    feeder: preview
+    cap_connection: true
+    uapi_cache: true
+    application:
+    - caefeeder
+    template: caefeeder-preview
 
   caefeeder-live:
     description: CAEFeeder Live
