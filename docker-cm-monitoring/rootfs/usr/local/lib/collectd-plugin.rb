@@ -51,11 +51,11 @@ class CollecdPlugin
 #     logger.formatter = proc do |severity, datetime, progname, msg|
 #       "[#{datetime.strftime(logger.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
 #     end
-
-    if( File.exists?( logFile ) )
-      FileUtils.chmod( 0666, logFile )
-      FileUtils.chown( 'nobody', 'nobody', logFile )
-    end
+# 
+#     if( File.exists?( logFile ) )
+#       FileUtils.chmod( 0666, logFile )
+#       FileUtils.chown( 'nobody', 'nobody', logFile )
+#     end
 
     if( @memcacheHost != nil && @memcachePort != nil )
 
