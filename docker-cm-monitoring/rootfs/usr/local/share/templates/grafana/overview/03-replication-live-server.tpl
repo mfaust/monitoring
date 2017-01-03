@@ -317,7 +317,7 @@
                 "hide": true
               },
               {
-                "target": "collectd.%HOST%.RLS-Server-server.count-completedSequenceNumber",
+                "target": "collectd.%HOST%.RLS-Replicator-completedSequenceNumber.count-count",
                 "refId": "B",
                 "hide": true
               },
