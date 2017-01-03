@@ -236,7 +236,7 @@
             "id": 14,
             "targets": [
               {
-                "target": "collectd.%HOST%.RLS-Server-server.count-completedSequenceNumber",
+                "target": "collectd.%HOST%.RLS-Replicator-completedSequenceNumber.count-count",
                 "refId": "A",
                 "hide": false
               }
