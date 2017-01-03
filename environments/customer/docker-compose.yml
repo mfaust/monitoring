@@ -26,7 +26,7 @@ services:
     ports:
       - 53:53
       - 8081:80
-    command: "--nameserver='10.1.2.14:53' --http=:80"
+    command: "--nameserver='10.1.2.14:53' --nameserver='10.1.2.63:53' --http=:80"
     networks:
       mon:
         ipv4_address: 172.25.0.5
@@ -111,8 +111,8 @@ services:
       - env/carbon-relay.env
     extra_hosts:
       # NOTE: external service
-      - 'graphite:10.101.2.83'
-      #- 'graphite:192.168.252.101'
+      #- 'graphite:10.101.2.83'
+      - 'graphite:192.168.252.101'
     volumes:
       - /etc/localtime:/etc/localtime:ro
 #      - ./share/carbon-relay/etc/supervisor.d/carbon-relay.ini:/etc/supervisor.d/carbon-relay.ini:ro
@@ -136,15 +136,15 @@ services:
       - carbon-relay
       - memcached
     extra_hosts:
-      - 'jolokia:172.25.0.11'
-      - 'memcached:172.25.0.12'
-      - 'carbon-relay:172.25.0.20'
+      #- 'jolokia:172.25.0.11'
+      #- 'memcached:172.25.0.12'
+      #- 'carbon-relay:172.25.0.20'
       # NOTE: external service
-      - 'grafana:10.101.2.83'
-      #- 'grafana:192.168.252.101'
+      #- 'grafana:10.101.2.83'
+      - 'grafana:192.168.252.101'
       # NOTE: external service
-      - 'nginx-proxy:10.101.2.83'
-      #- 'nginx-proxy:192.168.252.101'
+      #- 'nginx-proxy:10.101.2.83'
+      - 'nginx-proxy:192.168.252.101'
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./share/resolv.conf:/etc/resolv.conf:ro

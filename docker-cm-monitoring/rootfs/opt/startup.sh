@@ -28,7 +28,6 @@ createConfig() {
     -e "s/%GRAPHITE_HOST%/${GRAPHITE_HOST}/" \
     -e "s/%GRAPHITE_PORT%/${GRAPHITE_PORT}/" \
     ${cfgFile}
-
 }
 
 startSupervisor() {
@@ -48,14 +47,6 @@ run() {
   createConfig
 
   startSupervisor
-
-  cat /etc/motd
-
-  while true
-  do
-    sleep 5m
-    # echo -n "."
-  done
 }
 
 run

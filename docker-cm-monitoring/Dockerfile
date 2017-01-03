@@ -1,9 +1,9 @@
 
-FROM bodsch/docker-alpine-base:alpine-3.5
+FROM bodsch/docker-alpine-base:1612-01
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
-LABEL version="1.4.0"
+LABEL version="1.4.1"
 
 EXPOSE 9001
 
@@ -21,12 +21,14 @@ RUN \
     build-base \
     imagemagick-dev \
     mysql-dev \
+    sqlite-dev \
     drill \
     ruby-dev \
     ruby-irb \
     ruby-io-console \
     ruby-rdoc \
     python \
+    sqlite \
     jq \
     bc \
     yajl-tools \
@@ -41,11 +43,12 @@ RUN \
     zlib-dev && \
    gem install --no-rdoc --no-ri \
      bigdecimal \
-     json \
      ipaddress \
      resolve-hostname \
      rest-client \
      mysql2 \
+     sqlite3 \
+     sequel \
      time_difference \
      filesize \
      fileutils \
@@ -53,16 +56,20 @@ RUN \
      sinatra \
      thin \
      dalli && \
+  mkdir /var/log/monitoring && \
+  mkdir /var/cache/monitoring && \
   mv /etc/collectd/collectd.conf /etc/collectd/collectd.conf.dist && \
   apk del --purge \
     build-base \
     imagemagick-dev \
     mysql-dev \
+    sqlite-dev \
     ruby-dev \
     zlib-dev && \
   rm -rf /var/cache/apk/*
 
 COPY rootfs/ /
 
-
 CMD /opt/startup.sh
+
+# CMD /bin/bash

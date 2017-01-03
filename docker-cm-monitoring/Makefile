@@ -19,7 +19,7 @@ run:
 		--interactive \
 		--tty \
 		--hostname=${IMAGE_NAME} \
-		--name=${USER}-${TYPE} \
+		--name=${IMAGE_NAME} \
 		$(IMAGE_NAME)
 
 shell:
@@ -28,17 +28,17 @@ shell:
 		--interactive \
 		--tty \
 		--hostname=${IMAGE_NAME} \
-		--name=${USER}-${TYPE} \
+		--name=${IMAGE_NAME} \
 		$(IMAGE_NAME)
 
 exec:
 	docker exec \
 		--interactive \
 		--tty \
-		${USER}-${TYPE} \
+		${IMAGE_NAME} \
 		/bin/sh
 
 stop:
 	docker kill \
-		${USER}-${TYPE}
+		${IMAGE_NAME}
 

@@ -7,7 +7,7 @@ require 'json'
 require 'net/http'
 require 'uri'
 
-require_relative '/home/bschulz/src/cm-xlabs/monitoring/docker-cm-monitoring/rootfs/usr/local/lib/icinga2.rb'
+require_relative '../docker-cm-monitoring/rootfs/usr/local/lib/icinga2.rb'
 
 logDirectory     = '/tmp'
 
@@ -26,26 +26,26 @@ icingaConfig = {
 
 host = 'monitoring-16-01'
 
-services = {
-  'wfs-uapi-cache' => {
-    'display_name' => "WFS UAPI Cache",
-    'check_command' => 'coremedia_cache',
-    'max_check_attempts' => 5,
-    'host_name' => host,
-    'vars.host' => host,
-    'vars.application' => 'workflow-server',
-    'vars.cache' => 'uapi-cache'
-  },
-  'http-preview-helios' => {
-    'display_name'       => sprintf( 'preview-helios.%s', host ),
-    'check_command'      => 'http',
-    'max_check_attempts' => 5,
-    'host_name'          => host,
-    'vars.http_vhost'    => host,
-    'vars.http_uri'      => sprintf( 'https://preview-helios.%s.coremedia.vm/perfectchef-de-de', host ) ,
-    'vars.http_ssl'      => true
-  }
-}
+# services = {
+#   'wfs-uapi-cache' => {
+#     'display_name' => "WFS UAPI Cache",
+#     'check_command' => 'coremedia_cache',
+#     'max_check_attempts' => 5,
+#     'host_name' => host,
+#     'vars.host' => host,
+#     'vars.application' => 'workflow-server',
+#     'vars.cache' => 'uapi-cache'
+#   },
+#   'http-preview-helios' => {
+#     'display_name'       => sprintf( 'preview-helios.%s', host ),
+#     'check_command'      => 'http',
+#     'max_check_attempts' => 5,
+#     'host_name'          => host,
+#     'vars.http_vhost'    => host,
+#     'vars.http_uri'      => sprintf( 'https://preview-helios.%s.coremedia.vm/perfectchef-de-de', host ) ,
+#     'vars.http_ssl'      => true
+#   }
+# }
 
 icinga = Icinga2.new( icingaConfig )
 

@@ -15,7 +15,6 @@ require 'timeout'
 require 'fileutils'
 require 'net/http'
 
-require_relative 'logging'
 require_relative 'discover'
 require_relative 'tools'
 
@@ -24,8 +23,6 @@ require_relative 'tools'
 class DataCollector
 
   attr_reader :status, :message, :services, :reDiscovery
-
-  include Logging
 
   def initialize( settings = {} )
 
@@ -49,22 +46,22 @@ class DataCollector
     if( ! File.exist?( @cacheDirectory ) )
       Dir.mkdir( @cacheDirectory )
     end
-#
-#     logFile        = sprintf( '%s/data-collector.log', @logDirectory )
-#     file           = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
-#     file.sync      = true
-#     @log           = Logger.new( file, 'weekly', 1024000 )
-# #    @log = Logger.new( STDOUT )
-#     logger.level     = Logger::INFO
-#     logger.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
-#     logger.formatter = proc do |severity, datetime, progname, msg|
-#       "[#{datetime.strftime(logger.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
-#     end
+
+    logFile        = sprintf( '%s/data-collector.log', @logDirectory )
+    file           = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
+    file.sync      = true
+    @log           = Logger.new( file, 'weekly', 1024000 )
+#    @log = Logger.new( STDOUT )
+    @log.level     = Logger::INFO
+    @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
+    @log.formatter = proc do |severity, datetime, progname, msg|
+      "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
+    end
 
     if( applicationConfig == nil or serviceConfig == nil )
       msg = 'no Configuration File given'
       puts msg
-      logger.error( msg )
+      @log.error( msg )
 
       exit 1
     end
@@ -97,18 +94,18 @@ class DataCollector
     version              = '1.3.1'
     date                 = '2016-10-04'
 
-    logger.info( '-----------------------------------------------------------------' )
-    logger.info( ' CoreMedia - DataCollector' )
-    logger.info( "  Version #{version} (#{date})" )
-    logger.info( '  Copyright 2016 Coremedia' )
-    logger.info( "  cache directory located at #{@cacheDirectory}" )
+    @log.info( '-----------------------------------------------------------------' )
+    @log.info( ' CoreMedia - DataCollector' )
+    @log.info( "  Version #{version} (#{date})" )
+    @log.info( '  Copyright 2016 Coremedia' )
+    @log.info( "  cache directory located at #{@cacheDirectory}" )
 
     if( @supportMemcache == true )
-      logger.info( sprintf( '  Memcache Support enabled (%s:%s)', @memcacheHost, @memcachePort ) )
+      @log.info( sprintf( '  Memcache Support enabled (%s:%s)', @memcacheHost, @memcachePort ) )
     end
 
-    logger.info( '-----------------------------------------------------------------' )
-    logger.info( '' )
+    @log.info( '-----------------------------------------------------------------' )
+    @log.info( '' )
 
   end
 
@@ -122,7 +119,7 @@ class DataCollector
 
     # read Application Configuration
     # they define all standard checks
-    logger.debug( 'read defines of Application Properties' )
+    @log.debug( 'read defines of Application Properties' )
 
     begin
 
@@ -135,13 +132,13 @@ class DataCollector
         end
 
       else
-        logger.error( sprintf( 'Application Config File %s not found!', @appConfigFile ) )
+        @log.error( sprintf( 'Application Config File %s not found!', @appConfigFile ) )
         exit 1
       end
     rescue Exception
 
-      logger.error( 'wrong result (no yaml)')
-      logger.error( "#{$!}" )
+      @log.error( 'wrong result (no yaml)')
+      @log.error( "#{$!}" )
       exit 1
     end
 
@@ -155,14 +152,14 @@ class DataCollector
 
     if( File.exist?( discoveryFile ) == true )
 
-      logger.debug( sprintf( 'discovery.json      - %s', File.mtime( discoveryFile ).strftime( '%Y-%m-%d %H:%M:%S' ) ) )
+      @log.debug( sprintf( 'discovery.json      - %s', File.mtime( discoveryFile ).strftime( '%Y-%m-%d %H:%M:%S' ) ) )
 
       size     = File.size( discoveryFile )
 #      mtime    = File.mtime( discoveryFile )
 #      now      = Time.now()
 #      deadLine = now - ( 60*10 )
 
-      logger.debug( sprintf( ' File %s with a size of %d', discoveryFile, size ) )
+      @log.debug( sprintf( ' File %s with a size of %d', discoveryFile, size ) )
 
       if( size < 10 )
         # filesize too low
@@ -170,7 +167,7 @@ class DataCollector
         FileUtils.rm( discoveryFile )
         FileUtils.rm( hostDateFile )
 
-        logger.info( 'trigger service discover' )
+        @log.info( 'trigger service discover' )
 
         # rediscover service-discovery
 
@@ -190,7 +187,7 @@ class DataCollector
 
     if( File.exist?( hostDateFile ) == true )
 
-      logger.debug( sprintf( 'mergedHostData.json - %s', File.mtime( hostDateFile ).strftime( '%Y-%m-%d %H:%M:%S' ) ) )
+      @log.debug( sprintf( 'mergedHostData.json - %s', File.mtime( hostDateFile ).strftime( '%Y-%m-%d %H:%M:%S' ) ) )
 
       size     = File.size( hostDateFile )
       mtime    = File.mtime( hostDateFile )
@@ -199,7 +196,7 @@ class DataCollector
 
       if( mtime < deadLine )
 
-#        logger.debug( '  - trigger service discover' )
+#        @log.debug( '  - trigger service discover' )
         FileUtils.rm( hostDateFile )
       end
     end
@@ -217,7 +214,7 @@ class DataCollector
     if( [0,10,20,30,40,50].include?( minute ) and second < 27 )
 
       if( @wroteTick == false )
-        logger.info( ' ----- TICK - TOCK ---- ' )
+        @log.info( ' ----- TICK - TOCK ---- ' )
       end
       @wroteTick = true
     else
@@ -246,15 +243,15 @@ class DataCollector
 
       rescue Timeout::Error, Errno::EHOSTUNREACH, Errno::ECONNREFUSED, Errno::EINVAL, Errno::ECONNRESET, EOFError, Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError => error
 
-        logger.error( error )
+        @log.error( error )
 
         case error
         when Errno::EHOSTUNREACH
-          logger.error( 'Host unreachable' )
+          @log.error( 'Host unreachable' )
         when Errno::ECONNREFUSED
-          logger.error( 'Connection refused' )
+          @log.error( 'Connection refused' )
         when Errno::ECONNRESET
-          logger.error( 'Connection reset' )
+          @log.error( 'Connection reset' )
         end
       else
 
@@ -335,10 +332,10 @@ class DataCollector
 
   def nodeExporterData( host, data = {} )
 
-    logger.debug()
+    @log.debug()
 
-    logger.debug( host )
-    logger.debug( data )
+    @log.debug( host )
+    @log.debug( data )
 
     port = data[:port] ? data[:port] : 9100
 
@@ -403,7 +400,7 @@ class DataCollector
 
       if( application != nil )
 
-        logger.debug( application )
+        @log.debug( application )
 
         application.each do |a|
 
@@ -442,8 +439,8 @@ class DataCollector
   def reorganizeData( data )
 
     if( data == nil )
-      logger.error( "      no data for reorganize" )
-      logger.error( "      skip" )
+      @log.error( "      no data for reorganize" )
+      @log.error( "      skip" )
       return nil
     end
 
@@ -618,12 +615,12 @@ class DataCollector
     destHost  = parts['host'].to_s.strip
     destPort  = parts['port'].to_s.strip
 
-    logger.debug( sprintf( 'check Port %s on Host %s for sending data', destPort, destHost ) )
+    @log.debug( sprintf( 'check Port %s on Host %s for sending data', destPort, destHost ) )
 
     result = portOpen?( destHost, destPort )
 
     if( result == false )
-      logger.error( sprintf( 'The Port %s on Host %s is not open, skip sending data', destPort, destHost ) )
+      @log.error( sprintf( 'The Port %s on Host %s is not open, skip sending data', destPort, destHost ) )
     end
 
     return result
@@ -644,31 +641,25 @@ class DataCollector
 
     hosts.each do |h|
 
-      logger.debug( sprintf( 'create bulk checks for \'%s\'', h ) )
+      @log.debug( sprintf( 'create bulk checks for \'%s\'', h ) )
 
-      services      = data[h][:data] ? data[h][:data] : nil
-      servicesCount = services.count
+      services = data[h][:data] ? data[h][:data] : nil
 
-      if( servicesCount == 0 )
-        logger.debug( 'no services found. skip ... ' )
-        next
-      end
-
-      logger.debug( sprintf( '%d services found', servicesCount ) )
+      @log.debug( sprintf( '%d services found', services.count ) )
 
       # if Host available -> break
       hostStatus = isRunning?( h )
 
       if( hostStatus == false )
 
-        logger.error( sprintf( '  Host are not available! (%s)', hostStatus ) )
+        @log.error( sprintf( '  Host are not available! (%s)', hostStatus ) )
 
         next
       end
 
       services.each do |s,v|
 
-        logger.debug( sprintf( '  - %s', s ) )
+        @log.debug( sprintf( '  - %s', s ) )
 
         port    = v['port']
         metrics = v['metrics']
@@ -740,7 +731,7 @@ class DataCollector
   def sendChecksToJolokia( data )
 
     if( portOpen?( @jolokiaHost, @jolokiaPort ) == false )
-      logger.error( sprintf( 'The Jolokia Service (%s:%s) are not available', @jolokiaHost, @jolokiaPort ) )
+      @log.error( sprintf( 'The Jolokia Service (%s:%s) are not available', @jolokiaHost, @jolokiaPort ) )
 
       return
     end
@@ -762,7 +753,7 @@ class DataCollector
 
       c.each do |v,i|
 
-        logger.debug( sprintf( '%d checks for service %s found', i.count, v ) )
+        @log.debug( sprintf( '%d checks for service %s found', i.count, v ) )
 
         target = i[0]['target'] ? i[0]['target'] : nil
 
@@ -810,8 +801,8 @@ class DataCollector
               rescue Exception => e
 
                 msg = 'Cannot execute request to %s, cause: %s'
-                logger.warn( sprintf( msg, uri.request_uri, e ) )
-                logger.debug( sprintf( ' -> request body: %s', request.body ) )
+                @log.warn( sprintf( msg, uri.request_uri, e ) )
+                @log.debug( sprintf( ' -> request body: %s', request.body ) )
                 return
               end
             end
@@ -828,13 +819,13 @@ class DataCollector
 #
 #              key = sprintf( 'result__%s__%s', hostname, v )
 #
-#              logger.debug( key )
+#              @log.debug( key )
 #
 #              @mc.set( key, result[v] )
 #
 #              if( @DEBUG == true )
-#                logger.debug( @mc.stats( :items ) )
-#                logger.debug( JSON.pretty_generate( @mc.get( key ) ) )
+#                @log.debug( @mc.stats( :items ) )
+#                @log.debug( JSON.pretty_generate( @mc.get( key ) ) )
 #              end
 #
 #            end
@@ -848,8 +839,8 @@ class DataCollector
           @mc.set( key, result[v] )
 
 #           if( @DEBUG == true )
-#             logger.debug( @mc.stats( :items ) )
-#             logger.debug( JSON.pretty_generate( @mc.get( key ) ) )
+#             @log.debug( @mc.stats( :items ) )
+#             @log.debug( JSON.pretty_generate( @mc.get( key ) ) )
 #           end
         else
 
@@ -873,7 +864,7 @@ class DataCollector
 
     if( ! File.exist?( discoveryFile ) )
 
-      logger.error( sprintf( 'no discovered Services found' ) )
+      @log.error( sprintf( 'no discovered Services found' ) )
 
       return ( {} )
 
@@ -881,12 +872,12 @@ class DataCollector
 
     if( File.exist?( mergedDataFile ) )
 
-      logger.debug( 'read merged data' )
+      @log.debug( 'read merged data' )
       result = JSON.parse( File.read( mergedDataFile ) )
 
     else
 
-      logger.debug( 'build merged data' )
+      @log.debug( 'build merged data' )
 
       data = JSON.parse( File.read( discoveryFile ) )
 
@@ -914,10 +905,10 @@ class DataCollector
       end
 
 
-      logger.debug( 'merge Data between Property Files and discovered Services' )
+      @log.debug( 'merge Data between Property Files and discovered Services' )
       result = self.mergeData( data )
 
-      logger.debug( 'save merged data' )
+      @log.debug( 'save merged data' )
 
       resultJson = JSON.generate( result )
 
@@ -932,19 +923,21 @@ class DataCollector
 
   def run()
 
-    logger.debug( 'get monitored Servers' )
+    @log.debug( 'get monitored Servers' )
     monitoredServer = monitoredServer( @cacheDirectory )
 
     data = Hash.new()
 
     monitoredServer.each do |h|
 
-      logger.info( sprintf( 'Host: %s', h ) )
+      @log.info( sprintf( 'Host: %s', h ) )
 
       self.checkHostDataAge( h )
 
+      d = self.buildMergedData( h )
+
       data[h] = {
-        :data      => self.buildMergedData( h ),
+        :data      => d,
         :timestamp => Time.now().to_i
       }
 

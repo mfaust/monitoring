@@ -9,11 +9,13 @@
 
 require 'yaml'
 
+require_relative '../lib/logging'
 require_relative '../lib/discover'
 require_relative '../lib/grafana'
 require_relative '../lib/graphite'
 require_relative '../lib/icinga2'
 require_relative '../lib/tools'
+require_relative '../lib/database'
 
 # -----------------------------------------------------------------------------
 
@@ -21,23 +23,13 @@ class Monitoring
 
   attr_reader :status, :message, :services
 
+  include Logging
+
   def initialize( settings = {} )
 
-    @logDirectory       = settings[:logDirectory]       ? settings[:logDirectory]       : '/tmp'
-
-    logFile         = sprintf( '%s/monitoring.log', @logDirectory )
-
-    file            = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
-    file.sync       = true
-    @log            = Logger.new( file, 'weekly', 1024000 )
-#    @log = Logger.new( STDOUT )
-    @log.level      = Logger::DEBUG
-    @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
-    @log.formatter  = proc do |severity, datetime, progname, msg|
-      "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
-    end
-
-    @configFile = '/etc/cm-monitoring.yaml'
+    @logDirectory  = settings[:logDirectory]       ? settings[:logDirectory]       : '/tmp'
+    @configFile    = '/etc/cm-monitoring.yaml'
+    @db = Storage::Database.new()
 
     self.readConfigFile()
 
@@ -77,20 +69,20 @@ class Monitoring
       :graphitePath        => @graphitePath
     }
 
-    version              = '2.0.1'
-    date                 = '2016-12-07'
+    version              = '2.1.0'
+    date                 = '2017-01-03'
 
-    @log.info( '-----------------------------------------------------------------' )
-    @log.info( ' CoreMedia - Monitoring Service' )
-    @log.info( "  Version #{version} (#{date})" )
-    @log.info( '  Copyright 2016 Coremedia' )
-    @log.info( '' )
-    @log.info( '  enabled Services' )
-    @log.info( sprintf( '    - discovery: %s', @enabledDiscovery ) )
-    @log.info( sprintf( '    - grafana  : %s', @enabledGrafana ) )
-    @log.info( sprintf( '    - icinga2  : %s', @enabledIcinga ) )
-    @log.info( '-----------------------------------------------------------------' )
-    @log.info( '' )
+    logger.info( '-----------------------------------------------------------------' )
+    logger.info( ' CoreMedia - Monitoring Service' )
+    logger.info( "  Version #{version} (#{date})" )
+    logger.info( '  Copyright 2016 Coremedia' )
+    logger.info( '' )
+    logger.info( '  enabled Services' )
+    logger.info( sprintf( '    - discovery: %s', @enabledDiscovery ) )
+    logger.info( sprintf( '    - grafana  : %s', @enabledGrafana ) )
+    logger.info( sprintf( '    - icinga2  : %s', @enabledIcinga ) )
+    logger.info( '-----------------------------------------------------------------' )
+    logger.info( '' )
 
     sleep(2)
 
@@ -153,21 +145,16 @@ class Monitoring
 
   def checkAvailablility?( host )
 
-    hostInfo = hostResolve( host )
+    hostInfo      = hostResolve( host )
 
     ip            = hostInfo[:ip]    ? hostInfo[:ip]    : nil # dnsResolve( host )
     shortHostName = hostInfo[:short] ? hostInfo[:short] : nil # dnsResolve( host )
     longHostName  = hostInfo[:long]  ? hostInfo[:long]  : nil # dnsResolve( host )
 
-    @log.info( sprintf( 'Host      : %s', host ) )
-    @log.info( sprintf( 'IP        : %s', ip ) )
-    @log.info( sprintf( 'short Name: %s', shortHostName ) )
-    @log.info( sprintf( 'long Name : %s', longHostName ) )
-
     if( ip == nil || shortHostName == nil )
       return false
     else
-      return true
+      return hostInfo
     end
 
   end
@@ -202,18 +189,13 @@ class Monitoring
 
       hash = JSON.parse( payload )
 
-      localConfig = sprintf( '%s/config.json', directory )
+      if( isIp?( host ) == true )
+        @db.createConfig( { :ip => host , :data => hash } )
+      else
+        shortName = host.split('.').first
 
-      if( File.exist?( localConfig ) == true )
-
-        data    = File.read( localConfig )
-        current = JSON.parse( data )
-
+        @db.createConfig( { :short => shortName , :data => hash } )
       end
-
-      hash = current.merge( hash )
-
-      File.open( localConfig , 'w' ) { |f| f.write( JSON.pretty_generate( hash ) ) }
 
       status  = 200
       message = 'config successful written'
@@ -235,22 +217,18 @@ class Monitoring
 
     if( host.to_s != '' )
 
-      directory   = sprintf( '%s/%s', @cacheDir, host )
-      localConfig = sprintf( '%s/config.json', directory )
-
-      if( File.exist?( localConfig ) == true )
-
-        data    = File.read( localConfig )
-        current = JSON.parse( data )
-
-        status  = 200
-        message = current
+      if( isIp?( host ) == true )
+        data = @db.config( { :ip => host } )
       else
+        shortName = host.split('.').first
 
-        status  = 404
-        message = 'No configuration found'
+        data = @db.config( { :short => shortName } )
       end
 
+      if( data != false )
+        status = 200
+        message = data
+      end
     end
 
     return {
@@ -268,22 +246,21 @@ class Monitoring
 
     if( host.to_s != '' )
 
-      directory   = sprintf( '%s/%s', @cacheDir, host )
-      localConfig = sprintf( '%s/config.json', directory )
-
-      if( File.exist?( localConfig ) == true )
-
-        FileUtils.rm( localConfig, :force => true )
-
-        status  = 200
-        message = 'configuration succesfull removed'
+      if( isIp?( host ) == true )
+        data = @db.removeConfig( { :ip => host } )
       else
+        shortName = host.split('.').first
 
-        status  = 404
-        message = 'No configuration found'
-
+        data = @db.removeConfig( { :short => shortName } )
       end
 
+      if( data != false )
+        status = 200
+        message = 'configuration succesfull removed'
+      else
+        status  = 404
+        message = 'No configuration found'
+      end
     end
 
     return {
@@ -306,7 +283,9 @@ class Monitoring
 
     if( host.to_s != '' )
 
-      if( self.checkAvailablility?( host ) == false )
+      hostData = self.checkAvailablility?( host )
+
+      if( hostData == false )
 
         return {
           :status  => 400,
@@ -344,9 +323,13 @@ class Monitoring
 #        "overview": true
 #      }
 
+      logger.debug( payload )
+
       if( payload != '' )
 
         hash = JSON.parse( payload )
+
+        logger.debug( hash )
 
         result[:request] = hash
 
@@ -362,14 +345,14 @@ class Monitoring
 
       if( force == true )
 
-        @log.info( sprintf( 'remove %s from monitoring', host ) )
+        logger.info( sprintf( 'remove %s from monitoring', host ) )
 
         if( enableDiscovery == true )
           discoveryResult  = @serviceDiscovery.deleteHost( host )
           discoveryStatus  = discoveryResult[:status]
           discoveryMessage = discoveryResult[:message]
 
-          @log.debug( "discovery: #{discoveryResult}" )
+          logger.debug( "discovery: #{discoveryResult}" )
         end
 
         if( enabledIcinga == true )
@@ -377,7 +360,7 @@ class Monitoring
           icingaStatus  = icingaResult[:status]
           icingaMessage = icingaResult[:message]
 
-          @log.debug( "icinga: #{icingaResult}" )
+          logger.debug( "icinga: #{icingaResult}" )
         end
 
         if( enabledGrafana == true )
@@ -385,10 +368,10 @@ class Monitoring
           grafanaStatus  = grafanaResult[:status]
           grafanaMessage = grafanaResult[:message]
 
-          @log.debug( "grafana: #{grafanaResult}" )
+          logger.debug( "grafana: #{grafanaResult}" )
         end
 
-        @log.info( 'done' )
+        logger.info( 'done' )
 
       end
 
@@ -427,11 +410,11 @@ class Monitoring
 
           services          = discoverdServices.dig( 'hosts', 'services' )
 
-          @log.debug( services )
+          logger.debug( services )
 
           services = ( discoverdServices[:hosts] && discoverdServices[:hosts]['services'] ) ? discoverdServices[:hosts]['services'] : nil
 
-          @log.debug( services )
+          logger.debug( services )
 
 #           services.each do |s|
 #             s.last.reject! { |k| k == 'description' }
@@ -457,6 +440,12 @@ class Monitoring
         end
 
         if( enabledGrafana == true )
+
+          # tags are array or hash ..
+          # when hash, we need only the values. the keys are ignoreable
+          if( tags.is_a?( Hash ) )
+            tags = tags.values
+          end
 
           options = {
             'tags'     => tags,
@@ -521,11 +510,21 @@ class Monitoring
 
     if( host.to_s != '' )
 
+      result[host.to_s] ||= {}
+
+      hostData = self.checkAvailablility?( host )
+
+      if( hostData == false )
+        logger.info( 'host has no DNS Information' )
+      end
+
+      result[host.to_s][:dns] ||= {}
+      result[host.to_s][:dns] = hostData
+
       enableDiscovery = @enabledDiscovery
       enabledGrafana  = @enabledGrafana
       enabledIcinga   = @enabledIcinga
 
-#       @log.debug( payload )
 #
 #       if( payload != nil )
 #         payload = payload.dig( 'rack.request.form_vars' )
@@ -537,9 +536,11 @@ class Monitoring
 #         enabledIcinga   = payload.keys.include?('icinga')     ? payload['icinga']     : @enabledIcinga
 #       end
 
+      logger.debug( ( hostData != false && hostData[:short] ) ? hostData[:short] : host  )
+
       result[host.to_s] ||= {}
 
-      hostConfiguration        = self.getHostConfiguration( host )
+      hostConfiguration        = self.getHostConfiguration( ( hostData != false && hostData[:short] ) ? hostData[:short] : host )
       hostConfigurationStatus  = hostConfiguration[:status]
       hostConfigurationMessage = hostConfiguration[:message]
 
@@ -548,20 +549,24 @@ class Monitoring
       end
 
       if( enableDiscovery == true )
-        discoveryResult  = @serviceDiscovery.listHosts( host )
+
+        discoveryResult  = @serviceDiscovery.listHosts( ( hostData != false && hostData[:short] ) ? hostData[:short] : host )
         discoveryStatus  = discoveryResult[:status]
         discoveryMessage = discoveryResult[:message]
 
-        @log.debug( "discovery: #{discoveryResult}" )
+        logger.debug( "discovery: #{discoveryResult}" )
 
         result[host.to_s][:discovery] ||= {}
 
         if( discoveryStatus == 200 )
 
-          discoverHost      = discoveryResult[:hosts]       ? discoveryResult[:hosts]       : nil
-          discoveryCreated  = discoverHost[host][:created]  ? discoverHost[host][:created]  : 'unknown'
-          discoveryOnline   = discoverHost[host][:status]   ? discoverHost[host][:status]   : 'unknown'
-          discoveryServices = discoverHost[host][:services] ? discoverHost[host][:services] : 'unknown'
+          if( discoveryResult.dig( :hosts, host ) != nil )
+            discoveryCreated = discoveryResult.dig( :hosts, host, :created ) || 'unknown'
+            discoveryOnline  = discoveryResult.dig( :hosts, host, :status )  || 'unknown'
+          else
+            discoveryCreated = discoveryResult.dig( :hosts, hostData[:short], :created ) || 'unknown'
+            discoveryOnline  = discoveryResult.dig( :hosts, hostData[:short], :status )  || 'unknown'
+          end
 
           result[host.to_s][:discovery] = {
             :status     => discoveryStatus,
@@ -579,11 +584,12 @@ class Monitoring
 
 
       if( enabledIcinga == true )
-        icingaResult  = @icinga.listHost( host )
+
+        icingaResult  = @icinga.listHost( ( hostData != false && hostData[:short] ) ? hostData[:short] : host )
         icingaStatus  = icingaResult[:status]
         icingaMessage = icingaResult[:message]
 
-        @log.debug( "icinga: #{icingaResult}" )
+        logger.debug( "icinga: #{icingaResult}" )
 
         result[host.to_s][:icinga] ||= {}
         result[host.to_s][:icinga] = {
@@ -594,15 +600,16 @@ class Monitoring
 
 
       if( enabledGrafana == true )
-        grafanaResult  = @grafana.listDashboards( host )
+        grafanaResult  = @grafana.listDashboards( ( hostData != false && hostData[:short] ) ? hostData[:short] : host )
         grafanaStatus  = grafanaResult[:status]
         grafanaMessage = grafanaResult[:message]
 
-        @log.debug( "grafana: #{grafanaResult}" )
+        logger.debug( "grafana: #{grafanaResult}" )
 
         result[host.to_s][:grafana] ||= {}
 
         if( grafanaStatus == 200 )
+
           grafanaDashboardCount = grafanaResult[:count]      ? grafanaResult[:count]      : 0
           grafanaDashboards     = grafanaResult[:dashboards] ? grafanaResult[:dashboards] : []
 
@@ -685,8 +692,9 @@ class Monitoring
 
     if( host.to_s != '' )
 
-      directory = self.createCacheDirectory( host )
+      logger.info( sprintf( 'remove %s from monitoring', host ) )
 
+      enableDiscovery = @enabledDiscovery
       enabledGrafana  = @enabledGrafana
       enabledIcinga   = @enabledIcinga
       annotation      = true
@@ -708,8 +716,6 @@ class Monitoring
         annotation      = hash.keys.include?('annotation') ? hash['annotation'] : true
       end
 
-      @log.info( sprintf( 'remove %s from monitoring', host ) )
-
       result[host.to_sym] ||= {}
 
       if( enabledIcinga == true )
@@ -717,7 +723,7 @@ class Monitoring
         icingaStatus  = icingaResult[:status]
         icingaMessage = icingaResult[:message]
 
-        @log.debug( "icinga: #{icingaResult}" )
+        logger.debug( "icinga: #{icingaResult}" )
 
 #         icingaStatus  = 201
 #         icingaMessage = 'test message'
@@ -735,7 +741,7 @@ class Monitoring
         grafanaStatus  = grafanaResult[:status]
         grafanaMessage = grafanaResult[:message]
 
-        @log.debug( "grafana: #{grafanaResult}" )
+        logger.debug( "grafana: #{grafanaResult}" )
 
         result[host.to_sym][:grafana] = {
           :status     => grafanaStatus,
@@ -747,7 +753,7 @@ class Monitoring
       discoveryStatus  = discoveryResult[:status]
       discoveryMessage = discoveryResult[:message]
 
-      @log.debug( "discovery: #{discoveryResult}" )
+      logger.debug( "discovery: #{discoveryResult}" )
 
       if( annotation == true && discoveryStatus == 200 )
         self.addAnnotation( host, { "command": "destroy", "argument": "node" } )

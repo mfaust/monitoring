@@ -8,12 +8,13 @@
 
 require 'socket'
 require 'timeout'
-require 'logger'
+# require 'logger'
 require 'json'
 require 'fileutils'
 require 'net/http'
 require 'uri'
 
+require_relative 'logging'
 require_relative 'discover'
 require_relative 'tools'
 
@@ -24,6 +25,8 @@ class Grafana
   attr_reader :version
   attr_reader :status
   attr_reader :message
+
+  include Logging
 
   def initialize( settings = {} )
 
@@ -42,15 +45,15 @@ class Grafana
 
     @supportMemcache   = false
 
-    logFile        = sprintf( '%s/grafana.log', @logDirectory )
-    file           = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
-    file.sync      = true
-    @log           = Logger.new(file, 'weekly', 1024000)
-    @log.level     = Logger::INFO
-    @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
-    @log.formatter = proc do |severity, datetime, progname, msg|
-      "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
-    end
+#     logFile        = sprintf( '%s/grafana.log', @logDirectory )
+#     file           = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
+#     file.sync      = true
+#     @log           = Logger.new(file, 'weekly', 1024000)
+#     logger.level     = Logger::INFO
+#     logger.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
+#     logger.formatter = proc do |severity, datetime, progname, msg|
+#       "[#{datetime.strftime(logger.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
+#     end
 
     if( @memcacheHost != nil && @memcachePort != nil )
 
@@ -70,27 +73,27 @@ class Grafana
 
     end
 
-    version              = '1.3.2'
-    date                 = '2016-11-28'
+    version              = '1.3.3'
+    date                 = '2016-12-15'
 
-    @log.info( '-----------------------------------------------------------------' )
-    @log.info( ' CoreMedia - Grafana Dashboard Management' )
-    @log.info( "  Version #{version} (#{date})" )
-    @log.info( '  Copyright 2016 Coremedia' )
+    logger.info( '-----------------------------------------------------------------' )
+    logger.info( ' CoreMedia - Grafana Dashboard Management' )
+    logger.info( "  Version #{version} (#{date})" )
+    logger.info( '  Copyright 2016 Coremedia' )
 
     if( @supportMemcache == true )
-      @log.info( sprintf( '  Memcache Support enabled (%s:%s)', @memcacheHost, @memcachePort ) )
+      logger.info( sprintf( '  Memcache Support enabled (%s:%s)', @memcacheHost, @memcachePort ) )
     end
-    @log.info( "  Backendsystem #{@grafanaURI}" )
-    @log.info( '-----------------------------------------------------------------' )
-    @log.info( '' )
+    logger.info( "  Backendsystem #{@grafanaURI}" )
+    logger.info( '-----------------------------------------------------------------' )
+    logger.info( '' )
 
   end
 
 
   def prepare( host )
 
-    @log.debug( sprintf(  'prepare( %s )', host ) )
+    logger.debug( sprintf(  'prepare( %s )', host ) )
 
     hostInfo = hostResolve( host )
 
@@ -130,15 +133,15 @@ class Grafana
         rescue Exception => e
 
           msg = 'Cannot execute request to %s, cause: %s'
-          @log.warn( sprintf( msg, uri.request_uri, e ) )
-          @log.debug( sprintf( ' -> request body: %s', request.body ) )
+          logger.warn( sprintf( msg, uri.request_uri, e ) )
+          logger.debug( sprintf( ' -> request body: %s', request.body ) )
           return false
         end
       end
 
     rescue Exception => e
-      @log.error( e )
-      @log.error( 'Timeout' )
+      logger.error( e )
+      logger.error( 'Timeout' )
       return false
     end
 
@@ -156,14 +159,14 @@ class Grafana
     s   = data[service] ? data[service] : nil
 
     if( s == nil )
-      @log.debug( sprintf( 'no service %s found', service ) )
+      logger.debug( sprintf( 'no service %s found', service ) )
       return false
     end
 
     mbeanExists  = s.detect { |s| s[mbean] }
 
     if( mbeanExists == nil )
-      @log.debug( sprintf( 'no mbean %s found', mbean ) )
+      logger.debug( sprintf( 'no mbean %s found', mbean ) )
       return false
     end
 
@@ -172,7 +175,7 @@ class Grafana
 
     if( mbeanStatus.to_i != 200 )
 
-      @log.debug( sprintf( 'mbean %s found, but status %d', mbean, mbeanStatus ) )
+      logger.debug( sprintf( 'mbean %s found, but status %d', mbean, mbeanStatus ) )
       return false
     end
 
@@ -181,7 +184,7 @@ class Grafana
       result = true
     elsif( mbeanExists != nil && key != nil )
 
-      @log.debug( sprintf( 'look for key %s', key ) )
+      logger.debug( sprintf( 'look for key %s', key ) )
 
       mbeanValue = mbeanExists['value'] ? mbeanExists['value'] : nil
 
@@ -223,7 +226,7 @@ class Grafana
 
           break
         else
-          @log.debug( sprintf( 'Waiting for data %s ... %d', memcacheKey, y ) )
+          logger.debug( sprintf( 'Waiting for data %s ... %d', memcacheKey, y ) )
           sleep( 3 )
         end
       end
@@ -239,7 +242,7 @@ class Grafana
           break
         end
 
-        @log.debug( sprintf( 'Waiting for file %s ... %d', fileName, y ) )
+        logger.debug( sprintf( 'Waiting for file %s ... %d', fileName, y ) )
         sleep( 3 )
       end
 
@@ -253,8 +256,8 @@ class Grafana
       result = self.supportMbean?( json, service, bean, key  )
     rescue JSON::ParserError => e
 
-      @log.error('wrong result (no json)')
-      @log.error(e)
+      logger.error('wrong result (no json)')
+      logger.error(e)
 
       result = false
     end
@@ -347,7 +350,7 @@ class Grafana
   # add dashboards for a host
   def addDashbards( host, options = {} )
 
-    @log.info( sprintf( 'Adding dashboards for host \'%s\'', host ) )
+    logger.info( sprintf( 'Adding dashboards for host \'%s\'', host ) )
 
     @additionalTags = options['tags']     ? options['tags']     : []
     createOverview  = options['overview'] ? options['overview'] : false
@@ -371,7 +374,7 @@ class Grafana
     if( discoveryJson != nil )
 
       services       = discoveryJson.keys
-      @log.debug( "Found services: #{services}" )
+      logger.debug( "Found services: #{services}" )
 
       # fist, we must remove strange services
       servicesTmp = *services
@@ -389,8 +392,8 @@ class Grafana
         serviceTemplate         = nil
         additionalTemplatePaths = Array.new()
 
-#         @log.debug( ',---------------------------------------------------------' )
-#         @log.debug( sprintf( 'service: %s', service ) )
+#         logger.debug( ',---------------------------------------------------------' )
+#         logger.debug( sprintf( 'service: %s', service ) )
 
         description    = discoveryJson.dig( service, 'description' )
         template       = discoveryJson.dig( service, 'template' )
@@ -399,14 +402,14 @@ class Grafana
         serviceName    = removePostfix( service )
         normalizedName = normalizeService( service )
 
-#         @log.debug( sprintf( 'description: %s', description ) )
-#         @log.debug( sprintf( 'memcacheKey: %s', memcacheKey ) )
-#         @log.debug( sprintf( 'custom template: %s', template ) )
-#         @log.debug( sprintf( 'service Name: %s', serviceName ) )
-#         @log.debug( sprintf( 'normalized Name: %s', normalizedName ) )
+#         logger.debug( sprintf( 'description: %s', description ) )
+#         logger.debug( sprintf( 'memcacheKey: %s', memcacheKey ) )
+#         logger.debug( sprintf( 'custom template: %s', template ) )
+#         logger.debug( sprintf( 'service Name: %s', serviceName ) )
+#         logger.debug( sprintf( 'normalized Name: %s', normalizedName ) )
 
-#         @log.debug( '+---------------------------------------------------------' )
-#         @log.debug( "Searching templates paths for service: #{service}" )
+#         logger.debug( '+---------------------------------------------------------' )
+#         logger.debug( "Searching templates paths for service: #{service}" )
 
         if( template != nil )
 
@@ -415,8 +418,8 @@ class Grafana
           # get templates for service
           serviceTemplate = self.getTemplateForService( serviceName )
         end
-#         @log.debug( sprintf( ' => %s', serviceTemplate ) )
-#         @log.debug( '+---------------------------------------------------------' )
+#         logger.debug( sprintf( ' => %s', serviceTemplate ) )
+#         logger.debug( '+---------------------------------------------------------' )
 
         if( ! ['mongodb', 'mysql', 'postgres'].include?( serviceName ) )
           additionalTemplatePaths.push( *self.getTemplateForService( 'tomcat' ) )
@@ -431,12 +434,12 @@ class Grafana
 # #            additionalTemplatePaths.push( *self.getTemplatePathsForServiceType( serviceType ) )
 # #          end
 #         else
-#           @log.error( sprintf( 'file %s doesnt exist', @mergedHostFile ) )
+#           logger.error( sprintf( 'file %s doesnt exist', @mergedHostFile ) )
 #         end
 
         if( ! serviceTemplate.to_s.empty? )
 
-          @log.debug( sprintf( "Found Template paths: %s, %s" , serviceTemplate , additionalTemplatePaths ) )
+          logger.debug( sprintf( "Found Template paths: %s, %s" , serviceTemplate , additionalTemplatePaths ) )
 
           options = {
             :description             => description,
@@ -449,7 +452,7 @@ class Grafana
           self.generateServiceTemplate( serviceName, options )
 
         end
-        @log.debug( '`---------------------------------------------------------' )
+        logger.debug( '`---------------------------------------------------------' )
       end
 
       # Overview Template
@@ -511,7 +514,7 @@ class Grafana
   # delete the dashboards for a host
   def deleteDashboards( host, tags = [] )
 
-    @log.debug( sprintf( 'Deleting dashboards for host %s', host ) )
+    logger.debug( sprintf( 'Deleting dashboards for host %s', host ) )
 
     dashboards = Array.new()
 
@@ -530,11 +533,11 @@ class Grafana
 
 #     if( tags.count() != 0 )
 #
-#       @log.debug( '  and tags:' )
+#       logger.debug( '  and tags:' )
 #
 #       tags.each do |t|
 #
-#         @log.debug( sprintf( '    - %s', t ) )
+#         logger.debug( sprintf( '    - %s', t ) )
 #
 # #        dashboards.push( self.searchDashboards( t ) )
 #       end
@@ -547,7 +550,7 @@ class Grafana
 
       count = dashboards.count()
 
-      @log.debug( sprintf( 'found %d dashboards for delete', count ) )
+      logger.debug( sprintf( 'found %d dashboards for delete', count ) )
 
       if( count.to_i == 0 )
 
@@ -562,7 +565,7 @@ class Grafana
             next
           end
 
-          @log.debug( sprintf( '  - %s', i ) )
+          logger.debug( sprintf( '  - %s', i ) )
 
           uri = URI( sprintf( '%s/api/dashboards/%s', @grafanaURI, i ) )
 
@@ -581,16 +584,16 @@ class Grafana
                 # 400 – Errors (invalid json, missing or invalid fields, etc)
                 # 401 – Unauthorized
                 # 412 – Precondition failed
-                @log.error( sprintf( ' [%s] - Error', responseCode ) )
-                @log.error( response.body )
+                logger.error( sprintf( ' [%s] - Error', responseCode ) )
+                logger.error( response.body )
               end
             end
 
             status  = 200
             message = sprintf( '%d dashboards deleted', count )
           rescue Exception => e
-            @log.error( e )
-            @log.error( e.backtrace )
+            logger.error( e )
+            logger.error( e.backtrace )
 
             status  = 404
             message = sprintf( 'internal error: %s', e )
@@ -615,7 +618,7 @@ class Grafana
   # list dashboards with tag
   def searchDashboards( tag )
 
-    @log.debug( sprintf( 'Search dashboards with tag \'%s\'', tag ) )
+    logger.debug( sprintf( 'Search dashboards with tag \'%s\'', tag ) )
 
     uri = URI( sprintf( '%s/api/search?query=&tag=%s', @grafanaURI, tag ) )
 
@@ -644,8 +647,8 @@ class Grafana
         # 400 – Errors (invalid json, missing or invalid fields, etc)
         # 401 – Unauthorized
         # 412 – Precondition failed
-        @log.error( sprintf( ' [%s] - Error for search Dashboards', responseCode ) )
-        @log.error( response.body )
+        logger.error( sprintf( ' [%s] - Error for search Dashboards', responseCode ) )
+        logger.error( response.body )
       end
 
     end
@@ -693,22 +696,22 @@ class Grafana
   def getTemplatePathsForServiceType( serviceType )
 
     paths = Array.new()
-    @log.debug( serviceType )
+    logger.debug( serviceType )
     dirs  = Dir["#{@templateDirectory}/service-types/#{serviceType}"]
     count = dirs.count()
 
-    @log.debug( dir )
-    @log.debug( count )
+    logger.debug( dir )
+    logger.debug( count )
 
     if( count != 0 )
 
-      @log.debug( "Found dirs: #{dirs}" )
+      logger.debug( "Found dirs: #{dirs}" )
       dirs.each do |dir|
         paths.push(*Dir["#{dir}/cm*.json"])
       end
     end
 
-     @log.debug( paths )
+     logger.debug( paths )
 
     return paths
   end
@@ -717,11 +720,11 @@ class Grafana
   def getTemplateForService( serviceName )
 
     template = sprintf( '%s/services/%s.json', @templateDirectory, serviceName )
-    @log.debug( template )
+    logger.debug( template )
 
     if( ! File.exist?( template ) )
 
-      @log.error( sprintf( 'no template for service %s found', serviceName ) )
+      logger.error( sprintf( 'no template for service %s found', serviceName ) )
 
       template = nil
     end
@@ -733,25 +736,25 @@ class Grafana
   # OBSOLETE
   def getTemplatePathsForService( serviceName )
 
-    @log.error( 'getTemplatePathsForService => OBSOLETE' )
+    logger.error( 'getTemplatePathsForService => OBSOLETE' )
 
     paths = Array.new()
     dirs  = Dir["#{@templateDirectory}/services/#{serviceName}*"]
     count = dirs.count()
 
-    @log.debug( serviceName )
-    @log.debug( dir )
-    @log.debug( count )
+    logger.debug( serviceName )
+    logger.debug( dir )
+    logger.debug( count )
 
     if( count != 0 )
 
-      @log.debug("Found dirs: #{dirs}")
+      logger.debug("Found dirs: #{dirs}")
       dirs.each do |dir|
         paths.push(*Dir["#{dir}/cm*.json"])
       end
     end
 
-    @log.debug( paths )
+    logger.debug( paths )
 
     return paths
   end
@@ -759,7 +762,7 @@ class Grafana
 
   def generateOverviewTemplate( services )
 
-    @log.info( 'Create Overview Template' )
+    logger.info( 'Create Overview Template' )
 
     rows = getOverviewTemplateRows(services)
     rows = rows.join(',')
@@ -857,9 +860,9 @@ class Grafana
       end
     end
 
-    @log.debug( " templates: #{dirs}" )
-    @log.debug( " services : #{srv}" )
-    @log.debug( " use      : #{intersect}" )
+    logger.debug( " templates: #{dirs}" )
+    logger.debug( " services : #{srv}" )
+    logger.debug( " use      : #{intersect}" )
 
     return rows
 
@@ -868,15 +871,15 @@ class Grafana
 
   def generateLicenseTemplate( host, services )
 
-    @log.info( 'create License Templates' )
+    logger.info( 'create License Templates' )
 
     rows           = Array.new()
     contentServers = ['content-management-server', 'master-live-server', 'replication-live-server']
     intersect      = contentServers & services
 
-#     @log.debug( " contentServers: #{contentServers}" )
-#     @log.debug( " services      : #{services}" )
-#     @log.debug( " use           : #{intersect}" )
+#     logger.debug( " contentServers: #{contentServers}" )
+#     logger.debug( " services      : #{services}" )
+#     logger.debug( " use           : #{intersect}" )
 
     licenseHead    = sprintf( '%s/licenses/licenses-head.json' , @templateDirectory )
     licenseUntil   = sprintf( '%s/licenses/licenses-until.json', @templateDirectory )
@@ -886,7 +889,7 @@ class Grafana
 
       if( self.beanAvailable?( host, service, 'Server', 'LicenseValidUntilHard' ) == true )
 
-        @log.info( sprintf( 'found License Information for Service %s', service ) )
+        logger.info( sprintf( 'found License Information for Service %s', service ) )
 
         if( File.exist?( licenseUntil ) )
 
@@ -908,7 +911,7 @@ class Grafana
 
       if( self.beanAvailable?( host, service, 'Server', 'ServiceInfos' ) == true )
 
-        @log.info( sprintf( 'found Service Information for Service %s', service ) )
+        logger.info( sprintf( 'found Service Information for Service %s', service ) )
 
         if( File.exist?( licensePart ) )
 
@@ -930,7 +933,7 @@ class Grafana
 
     if( rows.count == 1 )
       # only the license Head is into the array
-      @log.info( 'We have no information about Licenses' )
+      logger.info( 'We have no information about Licenses' )
       return
     end
 
@@ -982,8 +985,8 @@ class Grafana
 
   def generateServiceTemplate( serviceName, options = {} )
 
-    @log.info( sprintf( 'Creating dashboard for \'%s\'', serviceName ) )
-    @log.debug( options )
+    logger.info( sprintf( 'Creating dashboard for \'%s\'', serviceName ) )
+    logger.debug( options )
 
     description             = options[:description]             ? options[:description]             : nil
     serviceName             = options[:serviceName]             ? options[:serviceName]             : nil
@@ -991,7 +994,7 @@ class Grafana
     serviceTemplate         = options[:serviceTemplate]         ? options[:serviceTemplate]         : nil
     additionalTemplatePaths = options[:additionalTemplatePaths] ? options[:additionalTemplatePaths] : nil
 
-    @log.debug( sprintf( '  - template %s', File.basename( serviceTemplate ).strip ) )
+    logger.debug( sprintf( '  - template %s', File.basename( serviceTemplate ).strip ) )
 
     templateFile = File.read( serviceTemplate )
     templateJson = JSON.parse( templateFile )
@@ -1002,7 +1005,7 @@ class Grafana
 
       additionalTemplatePaths.each do |additionalTemplate|
 
-        @log.debug( sprintf( '  - merge with template %s', File.basename( additionalTemplate ).strip ) )
+        logger.debug( sprintf( '  - merge with template %s', File.basename( additionalTemplate ).strip ) )
 
         additionalTemplateFile = File.read( additionalTemplate )
         additionalTemplateJson = JSON.parse( additionalTemplateFile )
@@ -1027,7 +1030,7 @@ class Grafana
   # use array to add more than on template
   def addNamedTemplate( templates = [] )
 
-    @log.info( 'add named template' )
+    logger.info( 'add named template' )
 
     if( templates.count() != 0 )
 
@@ -1037,7 +1040,7 @@ class Grafana
 
         if( File.exist?( filename ) )
 
-          @log.info( sprintf( '  - %s', File.basename( filename ).strip ) )
+          logger.info( sprintf( '  - %s', File.basename( filename ).strip ) )
 
 #         file = File.read( filename )
 #         file = self.addAnnotations( file )
@@ -1061,7 +1064,7 @@ class Grafana
     templateFile = regenerateGrafanaTemplateIDs( templateFile )
 
     if( !templateFile )
-      @log.error( 'Cannot create dashboard, invalid json' )
+      logger.error( 'Cannot create dashboard, invalid json' )
       return
     end
 
@@ -1094,10 +1097,10 @@ class Grafana
         # 400 – Errors (invalid json, missing or invalid fields, etc)
         # 401 – Unauthorized
         # 412 – Precondition failed
-        @log.error( sprintf( ' [%s] - Error for sendTemplateToGrafana', responseCode ) )
-        @log.error( response.body )
-#        @log.error( sprintf( '   templateFile: %s', templateFile ) )
-        @log.error( sprintf( '   serviceName : %s', serviceName ) )
+        logger.error( sprintf( ' [%s] - Error for sendTemplateToGrafana', responseCode ) )
+        logger.error( response.body )
+#        logger.error( sprintf( '   templateFile: %s', templateFile ) )
+        logger.error( sprintf( '   serviceName : %s', serviceName ) )
       end
 
     end
@@ -1118,13 +1121,13 @@ class Grafana
         if( json != nil )
           break
         else
-          @log.debug( sprintf( 'Waiting for data %s ... %d', key, y ) )
+          logger.debug( sprintf( 'Waiting for data %s ... %d', key, y ) )
           sleep( 3 )
         end
       end
 
       if( json == nil )
-        @log.error( sprintf( 'No Data in Memcache for key %s found!', filename ) )
+        logger.error( sprintf( 'No Data in Memcache for key %s found!', filename ) )
         return nil
       end
 
@@ -1135,20 +1138,20 @@ class Grafana
           file = File.read( filename )
           break
         end
-        @log.debug( "  Waiting for file #{filename} ... #{y}" )
+        logger.debug( "  Waiting for file #{filename} ... #{y}" )
         sleep( 3 )
       end
 
       if( !file )
-        @log.error( sprintf( 'File %s not found!', filename ) )
+        logger.error( sprintf( 'File %s not found!', filename ) )
         return nil
       end
 
       begin
         json = JSON.parse(file)
       rescue JSON::ParserError => e
-        @log.error('wrong result (no json)')
-        @log.error(e)
+        logger.error('wrong result (no json)')
+        logger.error(e)
         exit 1
       end
     end
@@ -1159,7 +1162,7 @@ class Grafana
 
   def addGroupOverview( hosts, force = false )
 
-    @log.info("Create Group Overview for #{hosts}")
+    logger.info("Create Group Overview for #{hosts}")
 
     if (force)
       deleteDashboards("group")
@@ -1178,7 +1181,7 @@ class Grafana
 
       if( discoveryJson == nil )
 
-        @log.error( "No discovery.json for host #{host}" )
+        logger.error( "No discovery.json for host #{host}" )
 
         result = {
           :status  => 500,
