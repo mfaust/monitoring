@@ -85,14 +85,14 @@ module Storage
       @database.create_or_replace_view( :v_discovery,
         'select dns.ip, dns.shortname, dns.created, discovery.* from dns as dns, discovery as discovery where dns.id = discovery.dns_id' )
 
-#       @database.create_or_replace_view( :v_config,
-#         'select
-#           dns.ip, dns.shortname, dns.longname,
-#           config.id, config.key, config.value
-#         from
-#           dns as dns, config as config
-#         order by key'
-#       )
+      @database.create_or_replace_view( :v_config,
+        'select
+          dns.ip, dns.shortname, dns.longname, dns.checksum,
+          config.id, config.key, config.value
+        from
+          dns as dns, config as config
+        order by key'
+      )
 
 
     end
@@ -240,7 +240,7 @@ module Storage
 
       def dbaData( w )
 
-        return  @database[:config].select( :ip, :shortname, :key, :value ).where( w ).to_a
+        return  @database[:v_config].select( :ip, :shortname, :checksum, :key, :value ).where( w ).to_a
 
       end
 
@@ -269,20 +269,30 @@ module Storage
         {}.tap{ |r| hashes.each{ |h| h.each{ |k,v| ( r[k]||=[] ) << v } } }
       end
 
+      def parsedResponse( r )
+        return JSON.parse( r )
+      rescue JSON::ParserError => e
+        return r # do smth
+      end
+
       rec = self.dbaData( w )
 
       if( rec.count() != 0 )
 
-        dnsShortName  = rec.first.dig( :shortname ).to_s
+        dnsShortName  = rec.first.dig( :checksum ).to_s
 
         result[dnsShortName.to_s] ||= {}
+        result[dnsShortName.to_s]['dns'] ||= {}
+        result[dnsShortName.to_s]['dns']['ip']        = rec.first.dig( :ip ).to_s
+        result[dnsShortName.to_s]['dns']['shortname'] = rec.first.dig( :shortname ).to_s
+
         groupByKey = rec.group_by { |k| k[:key] }
 
         groupByKey.each do |g,v|
 
           c = collectValues(
             v.map do |hash|
-              { value: JSON.parse( hash[:value] ) }
+              { value: parsedResponse( hash[:value] ) }
             end
           )
 
