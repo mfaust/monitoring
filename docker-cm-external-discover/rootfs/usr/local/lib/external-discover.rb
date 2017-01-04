@@ -7,10 +7,11 @@
 
 # -----------------------------------------------------------------------------
 
-require 'logger'
 require 'json'
 require 'dalli'
 require 'rest-client'
+
+require_relative 'logging'
 
 # -----------------------------------------------------------------------------
 
@@ -31,42 +32,6 @@ class Hash
       self.select { |key| key.to_s.match( args.first ) }
     else
       self.select { |key| args.include?( key ) }
-    end
-  end
-end
-
-# -----------------------------------------------------------------------------
-
-module Logging
-
-  def logger
-    @logger ||= Logging.logger_for(self.class.name)
-  end
-
-  # Use a hash class-ivar to cache a unique Logger per class:
-  @loggers = {}
-
-  class << self
-    def logger_for(classname)
-      @loggers[classname] ||= configure_logger_for(classname)
-    end
-
-    def configure_logger_for(classname)
-
-#      logFile         = '/var/log/monitoring/monitoring.log'
-#      file            = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
-#      file.sync       = true
-#      logger          = Logger.new( file, 'weekly', 1024000 )
-
-      logger                 = Logger.new(STDOUT)
-      logger.progname        = classname
-      logger.level           = Logger::DEBUG
-      logger.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
-      logger.formatter       = proc do |severity, datetime, progname, msg|
-        "[#{datetime.strftime( logger.datetime_format )}] #{severity.ljust(5)} : #{progname} - #{msg}\n"
-      end
-
-      logger
     end
   end
 end
@@ -420,10 +385,10 @@ module ExternalDiscovery
 
         liveData.each do |l|
 
-          ip      = l[:ip]      ? l[:ip]      : nil
-          name    = l[:name]    ? l[:name]    : nil
-          state   = l[:state]   ? l[:state]   : 'running'
-          tags    = l[:tags]    ? l[:tags]    : []
+          ip      = l["ip"]      ? l["ip"]      : nil
+          name    = l["name"]    ? l["name"]    : nil
+          state   = l["state"]   ? l["state"]   : 'running'
+          tags    = l["tags"]    ? l["tags"]    : []
 
           # states from AWS:
           #  0 : pending
@@ -433,29 +398,31 @@ module ExternalDiscovery
           # 64 : stopping
           # 80 : stopped
 
-
           useableTags = Array.new()
 
-          logger.info( sprintf( 'get information about %s (%s)', name, ip ) )
+          logger.info( sprintf( 'get information about %s (%s)', ip, name ) )
 
           # get node data
-          result = net.fetch( name )
+          result = net.fetch( ip )
 
           if( result != nil )
-            dnsStatus  = result.dig( name, 'dns' )
+
+            dnsStatus  = result.dig( ip, 'dns' )
 
             # check DNS resolving
             if( dnsStatus == false )
-              logger.error( '  DNS Problem! try IP' )
+              logger.debug( '  DNS Problem! try IP' )
               secondTest = net.fetch( ip )
               if( secondTest != nil )
                 dnsStatus  = secondTest.dig( ip, 'dns' )
                 if( dnsStatus == false || dnsStatus == nil )
                   logger.error( '  Host are not available. skip' )
                   next
+                else
+                  result = secondTest
+                  name   = ip
                 end
               end
-
             end
 
             discoveryStatus  = result.dig( name, 'discovery', 'status' )
@@ -481,7 +448,8 @@ module ExternalDiscovery
                 :icinga     => false,
                 :grafana    => true,
                 :annotation => true,
-                :tags       => useableTags
+                :tags       => useableTags,
+                :config     => { 'display-name' => name }
               } )
 
               result = net.add( name, d )
@@ -490,22 +458,22 @@ module ExternalDiscovery
 
               if( result != nil )
 
-              discoveryStatus  = result.dig( :status )
-              discoveryMessage = result.dig( :message )
+                discoveryStatus  = result.dig( "status" )
+                discoveryMessage = result.dig( "message" )
 
-              if( discoveryStatus == 400 )
-                # error
-                logger.error( sprintf( '  => %s', discoveryMessage ) )
-              elsif( discoveryStatus == 409 )
-                # Host already created
-                logger.error( sprintf( '  => %s', discoveryMessage ) )
+                if( discoveryStatus == 400 )
+                  # error
+                  logger.error( sprintf( '  => %s', discoveryMessage ) )
+                elsif( discoveryStatus == 409 )
+                  # Host already created
+                  logger.error( sprintf( '  => %s', discoveryMessage ) )
 
-                newArray << l
-              else
-                logger.info( 'Host successful added' )
-                # successful
-                newArray << l
-              end
+                  newArray << l
+                else
+                  logger.info( 'Host successful added' )
+                  # successful
+                  newArray << l
+                end
 
               end
 
@@ -528,12 +496,12 @@ module ExternalDiscovery
 
         removedEntries.each do |r|
 
-          ip      = r[:ip]      ? r[:ip]      : nil
-          name    = r[:name]    ? r[:name]    : nil
+          ip      = r["ip"]      ? r["ip"]      : nil
+          name    = r["name"]    ? r["name"]    : nil
 
           if( ip != nil && name != nil )
 
-            logger.info( sprintf( 'remove host %s (%s) from monitoring', name, ip ) )
+            logger.info( sprintf( 'remove host %s (%s) from monitoring', ip, name ) )
 
             result = net.remove( name )
 
