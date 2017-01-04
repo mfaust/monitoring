@@ -17,6 +17,7 @@ require 'uri'
 require_relative 'logging'
 require_relative 'discover'
 require_relative 'tools'
+require_relative 'database'
 
 # -------------------------------------------------------------------------------------------------------------------
 
@@ -30,7 +31,6 @@ class Grafana
 
   def initialize( settings = {} )
 
-    @logDirectory      = settings[:logDirectory]      ? settings[:logDirectory]      : '/tmp'
     @cacheDirectory    = settings[:cacheDirectory]    ? settings[:cacheDirectory]    : '/var/tmp/monitoring'
     @templateDirectory = settings[:templateDirectory] ? settings[:templateDirectory] : '/var/tmp/templates'
     @grafanaHost       = settings[:grafanaHost]       ? settings[:grafanaHost]       : 'localhost'
@@ -42,18 +42,9 @@ class Grafana
     @memcachePort      = settings[:memcachePort]      ? settings[:memcachePort]      : nil
 
     @grafanaURI        = sprintf( 'http://%s:%s%s', @grafanaHost, @grafanaPort, @grafanaPath )
+    @db                = Storage::Database.new()
 
     @supportMemcache   = false
-
-#     logFile        = sprintf( '%s/grafana.log', @logDirectory )
-#     file           = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
-#     file.sync      = true
-#     @log           = Logger.new(file, 'weekly', 1024000)
-#     logger.level     = Logger::INFO
-#     logger.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
-#     logger.formatter = proc do |severity, datetime, progname, msg|
-#       "[#{datetime.strftime(logger.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
-#     end
 
     if( @memcacheHost != nil && @memcachePort != nil )
 
@@ -95,18 +86,42 @@ class Grafana
 
     logger.debug( sprintf(  'prepare( %s )', host ) )
 
-    hostInfo = hostResolve( host )
+    dns = @db.dnsData( { :ip => host, :short => host } )
 
-    ip    = hostInfo[:ip]    ? hostInfo[:ip]    : nil # dnsResolve( host )
-    short = hostInfo[:short] ? hostInfo[:short] : nil
-    long  = hostInfo[:long]  ? hostInfo[:long]  : nil
+    if( dns != nil )
+      dnsId        = dns[ :id ]
+      dnsIp        = dns[ :ip ]
+      dnsShortname = dns[ :shortname ]
+      dnsLongname  = dns[ :longname ]
+      dnsCreated   = dns[ :created ]
+      dnsChecksum  = dns[ :checksum ]
 
-    @shortHostname        = short
-    @grafanaHostname      = host.gsub( '.', '-' )
+      logger.debug( JSON.pretty_generate( dns ) )
 
-    @discoveryFile        = sprintf( '%s/%s/discovery.json'       , @cacheDirectory, host )
-    @mergedHostFile       = sprintf( '%s/%s/mergedHostData.json'  , @cacheDirectory, host )
-    @monitoringResultFile = sprintf( '%s/%s/monitoring.result'    , @cacheDirectory, host )
+      config = @db.config( { :ip => dnsIp, :key => 'display-name' } )
+
+      @shortHostname        = dnsShortname
+      @grafanaHostname      = config.dig( dnsChecksum, 'display-name' ).first.to_s.gsub( '.', '-' )
+#       @grafanaHostname      = host.gsub( '.', '-' )
+
+      @discoveryFile        = sprintf( '%s/%s/discovery.json'       , @cacheDirectory, host )
+      @mergedHostFile       = sprintf( '%s/%s/mergedHostData.json'  , @cacheDirectory, host )
+      @monitoringResultFile = sprintf( '%s/%s/monitoring.result'    , @cacheDirectory, host )
+
+    end
+
+#     hostInfo = hostResolve( host )
+#
+#     ip    = hostInfo[:ip]    ? hostInfo[:ip]    : nil # dnsResolve( host )
+#     short = hostInfo[:short] ? hostInfo[:short] : nil
+#     long  = hostInfo[:long]  ? hostInfo[:long]  : nil
+
+#     @shortHostname        = dnsShortname
+#     @grafanaHostname      = host.gsub( '.', '-' )
+#
+#     @discoveryFile        = sprintf( '%s/%s/discovery.json'       , @cacheDirectory, host )
+#     @mergedHostFile       = sprintf( '%s/%s/mergedHostData.json'  , @cacheDirectory, host )
+#     @monitoringResultFile = sprintf( '%s/%s/monitoring.result'    , @cacheDirectory, host )
 
   end
 
@@ -354,6 +369,8 @@ class Grafana
 
     @additionalTags = options['tags']     ? options['tags']     : []
     createOverview  = options['overview'] ? options['overview'] : false
+
+
 
     if( self.checkGrafana?() == false )
 
