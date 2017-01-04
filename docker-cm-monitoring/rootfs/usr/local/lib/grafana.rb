@@ -96,32 +96,21 @@ class Grafana
       dnsCreated   = dns[ :created ]
       dnsChecksum  = dns[ :checksum ]
 
-      logger.debug( JSON.pretty_generate( dns ) )
+      @shortHostname  = @grafanaHostname = dnsShortname
 
-      config = @db.config( { :ip => dnsIp, :key => 'display-name' } )
+      config          = @db.config( { :ip => dnsIp, :key => 'display-name' } )
 
-      @shortHostname        = dnsShortname
-      @grafanaHostname      = config.dig( dnsChecksum, 'display-name' ).first.to_s.gsub( '.', '-' )
-#       @grafanaHostname      = host.gsub( '.', '-' )
+      if( config != false )
+        @shortHostname = config.dig( dnsChecksum, 'display-name' ).first.to_s
+      end
+
+      @shortHostname        = @shortHostname.gsub( '.', '-' )
 
       @discoveryFile        = sprintf( '%s/%s/discovery.json'       , @cacheDirectory, host )
       @mergedHostFile       = sprintf( '%s/%s/mergedHostData.json'  , @cacheDirectory, host )
       @monitoringResultFile = sprintf( '%s/%s/monitoring.result'    , @cacheDirectory, host )
 
     end
-
-#     hostInfo = hostResolve( host )
-#
-#     ip    = hostInfo[:ip]    ? hostInfo[:ip]    : nil # dnsResolve( host )
-#     short = hostInfo[:short] ? hostInfo[:short] : nil
-#     long  = hostInfo[:long]  ? hostInfo[:long]  : nil
-
-#     @shortHostname        = dnsShortname
-#     @grafanaHostname      = host.gsub( '.', '-' )
-#
-#     @discoveryFile        = sprintf( '%s/%s/discovery.json'       , @cacheDirectory, host )
-#     @mergedHostFile       = sprintf( '%s/%s/mergedHostData.json'  , @cacheDirectory, host )
-#     @monitoringResultFile = sprintf( '%s/%s/monitoring.result'    , @cacheDirectory, host )
 
   end
 
@@ -369,8 +358,6 @@ class Grafana
 
     @additionalTags = options['tags']     ? options['tags']     : []
     createOverview  = options['overview'] ? options['overview'] : false
-
-
 
     if( self.checkGrafana?() == false )
 
