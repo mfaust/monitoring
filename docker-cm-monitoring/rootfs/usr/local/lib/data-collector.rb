@@ -256,6 +256,10 @@ class DataCollector
         when Errno::ECONNRESET
           logger.error( 'Connection reset' )
         end
+      rescue Exception => e
+
+        logger.error( "An error occurred for connection: #{e}" )
+
       else
 
         data            = JSON.parse( response.body )
