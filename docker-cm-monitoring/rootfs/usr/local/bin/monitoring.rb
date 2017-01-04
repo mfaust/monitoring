@@ -391,8 +391,9 @@ class Monitoring
         short = hostData.dig( :short )
 
         @db.createConfig( {
-          :ip   => ip,
-          :data => config
+          :ip    => ip,
+          :short => short,
+          :data  => config
         } )
 
       end
@@ -735,9 +736,14 @@ class Monitoring
 
         result[:request] = hash
 
+        force           = hash.keys.include?('force')      ? hash['force']      : false
         enabledGrafana  = hash.keys.include?('grafana')    ? hash['grafana']    : @enabledGrafana
         enabledIcinga   = hash.keys.include?('icinga')     ? hash['icinga']     : @enabledIcinga
         annotation      = hash.keys.include?('annotation') ? hash['annotation'] : true
+      end
+
+      if( force == true )
+        @db.removeConfig( { :ip => host, :short => host } )
       end
 
       result[host.to_sym] ||= {}
