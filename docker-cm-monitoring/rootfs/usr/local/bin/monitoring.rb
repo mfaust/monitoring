@@ -69,8 +69,8 @@ class Monitoring
       :graphitePath        => @graphitePath
     }
 
-    version              = '2.1.0'
-    date                 = '2017-01-03'
+    version              = '2.2.0'
+    date                 = '2017-01-04'
 
     logger.info( '-----------------------------------------------------------------' )
     logger.info( ' CoreMedia - Monitoring Service' )

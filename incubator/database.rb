@@ -125,7 +125,7 @@ module Storage
 
       @database.create_or_replace_view( :v_config,
         'select
-          dns.ip, dns.shortname, dns.longname,
+          dns.ip, dns.shortname, dns.longname, dns.checksum,
           config.id, config.key, config.value
         from
           dns as dns, config as config
@@ -275,7 +275,7 @@ module Storage
 
       def dbaData( w )
 
-        return  @database[:v_config].select( :ip, :shortname, :key, :value ).where( w ).to_a
+        return  @database[:v_config].select( :ip, :shortname, :checksum, :key, :value ).where( w ).to_a
 
       end
 
@@ -304,29 +304,41 @@ module Storage
         {}.tap{ |r| hashes.each{ |h| h.each{ |k,v| ( r[k]||=[] ) << v } } }
       end
 
+      def parsedResponse( r )
+        return JSON.parse( r )
+      rescue JSON::ParserError => e
+        return r # do smth
+      end
+
       rec = self.dbaData( w )
 
-      logger.debug( rec.count )
+      logger.debug( rec.inspect )
 
       if( rec.count() != 0 )
 
-        dnsShortName  = rec.first.dig( :shortname ).to_s
+        dnsShortName  = rec.first.dig( :checksum ).to_s
 
         result[dnsShortName.to_s] ||= {}
+        result[dnsShortName.to_s]['dns'] ||= {}
+        result[dnsShortName.to_s]['dns']['ip']        = rec.first.dig( :ip ).to_s
+        result[dnsShortName.to_s]['dns']['shortname'] = rec.first.dig( :shortname ).to_s
+
         groupByKey = rec.group_by { |k| k[:key] }
+
+        logger.debug( JSON.pretty_generate groupByKey )
 
         groupByKey.each do |g,v|
 
           c = collectValues(
             v.map do |hash|
-              { value: JSON.parse( hash[:value] ) }
+              { value: parsedResponse( hash[:value] ) }
             end
           )
 
           values = c.select { |h| h['value'] }
 
           result[dnsShortName.to_s][g.to_s] ||= {}
-          result[dnsShortName.to_s][g.to_s] = values[:value].flatten.sort
+          result[dnsShortName.to_s][g.to_s] = values[:value].flatten.uniq.sort
 
           array << result
         end
@@ -631,6 +643,7 @@ module Storage
       self.createConfig( { :ip => '10.2.14.156'        , :data => { "ports": [40599,40199], "services": [ "coremedia-cms" ] } } )
       self.createConfig( { :short => 'monitoring-16-01', :data => { "ports": [40099] } } )
       self.createConfig( { :short => 'monitoring-16-02', :data => { "ports": [40099] } } )
+      self.createConfig( { :ip => '10.2.14.156'        , :data => { "ports": [40299,40399], "display-name": "foo.bar.com" } } )
 
       self.createDNS( { :ip => '10.2.14.156', :short => 'monitoring-16-01', :long => 'monitoring-16-01.coremedia.vm' } )
       self.createDNS( { :ip => '10.2.14.160', :short => 'monitoring-16-02', :long => 'monitoring-16-02.coremedia.vm' } )
@@ -640,52 +653,57 @@ module Storage
 
 #       self.removeConfig( { :ip => '10.2.14.156', :key => "ports" } )
 
+      logger.info( 'read configurions' )
       d = Array.new
-      d << self.config( { :ip => '10.2.14.156', :key => "ports" } )
-      d << self.config( { :ip => '10.2.14.156' } )
-      d << self.config( { :ip => '10.2.14.170' } )
 
-#       data.each do |d|
-#         logger.debug( d )
-#       end
+      d << self.config( { :ip => '10.2.14.156', :key => "ports" } )
+      d << self.config( { :ip => '10.2.14.156', :key => 'display-name' } )
+      d << self.config( { :ip => '10.2.14.156' } )
+      d << self.config( { :ip => '10.2.14.170', :key => 'display-name' } )
+
+       d.each do |d2|
+         if( d2 )
+          logger.debug( JSON.pretty_generate d2 )
+         end
+       end
+
+      return
 
       dns = Hash.new()
 
-      [ 'monitoring-16-01', 'monitoring-16-02', 'foo' ].each do |i|
-
-        dns = self.dnsData( { :short => i } )
-
-#         logger.debug( dns )
-
-        if( dns == nil )
-          logger.debug( 'no data for ' + i )
-        else
-          dnsId        = dns[ :id ]
-          dnsIp        = dns[ :ip ]
-          dnsShortname = dns[ :shortname ]
-          dnsLongname  = dns[ :longname ]
-          dnsCreated   = dns[ :created ]
-          dnsChecksum  = dns[ :checksum ]
-
-          logger.debug( JSON.pretty_generate dns )
-
-          data.each do |d|
-
-            service = d.keys[0].to_s
-            port    = d.dig( service, 'port' )
-
-            logger.debug( d )
-
-
-            logger.debug( sprintf( '%s - %s - %s', dnsShortname, port, service ) )
-
-#             logger.debug( d.values.first.to_json.class.to_s )
-
-            self.createDiscovery( { :id => dnsId, :ip => dnsIp, :short => dnsShortname, :checksum => dnsChecksum, :port => port, :service => service, :data => d.values.first.to_json } )
-
-          end
-        end
-      end
+#       [ 'monitoring-16-01', 'monitoring-16-02', 'foo' ].each do |i|
+#
+#         dns = self.dnsData( { :short => i } )
+#
+# #         logger.debug( dns )
+#
+#         if( dns == nil )
+#           logger.debug( 'no data for ' + i )
+#         else
+#           dnsId        = dns[ :id ]
+#           dnsIp        = dns[ :ip ]
+#           dnsShortname = dns[ :shortname ]
+#           dnsLongname  = dns[ :longname ]
+#           dnsCreated   = dns[ :created ]
+#           dnsChecksum  = dns[ :checksum ]
+#
+#           logger.debug( JSON.pretty_generate dns )
+#
+#           data.each do |d|
+#
+#             service = d.keys[0].to_s
+#             port    = d.dig( service, 'port' )
+#
+# #            logger.debug( d )
+# #            logger.debug( sprintf( '%s - %s - %s', dnsShortname, port, service ) )
+#
+# #             logger.debug( d.values.first.to_json.class.to_s )
+#
+#             self.createDiscovery( { :id => dnsId, :ip => dnsIp, :short => dnsShortname, :checksum => dnsChecksum, :port => port, :service => service, :data => d.values.first.to_json } )
+#
+#           end
+#         end
+#       end
     end
 
 
@@ -772,5 +790,6 @@ end
 m = Storage::SQLite.new()
 
 m.insertData()
-m.readData()
+
+# m.readData()
 

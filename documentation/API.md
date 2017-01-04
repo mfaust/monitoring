@@ -88,6 +88,7 @@ Aktuell funktionieren folgende Paramaeter:
 | `tags`       | Array   | []      | Eine Liste von Tags, die an die Node in Grafana gehängt werden |
 | `annotation` | bool    | true    | setzt eine Annotation für das erzeugen einer Node |
 | `overview`   | bool    | false   | ermöglicht das Anlegen eines Overview Templates in Grafana |
+| `config`     | Hash    | {}      | Ein Hash für das direkte schreiben einer Konfiguration |
 
 **Beispiel eines Parametersatzes**
 
@@ -100,6 +101,14 @@ Aktuell funktionieren folgende Paramaeter:
         "development",
         "git-0000000"
       ],
+      "config": {
+        "display-name": "foo-bar",
+        "ports": [
+          3306,
+          9100,
+          28017
+        ]
+      },
       "annotation": true,
       "overview": true
     }
@@ -142,6 +151,7 @@ Aktuell funktionieren folgende Paramaeter:
 
 | Paramerter   | Typ     | default | Beschreibung |
 | :---------   | :-----: | :-----: | :----------- |
+| `force`      | bool    | false   | wenn `true` gesetzt ist, werden alle vorher gefundenen Informationen über die Node gelöscht **ACHTUNG** dazu zählt auch eine ggf. vorher durchgefürte _Custom Configuration_ |
 | `icinga`     | bool    | true    | deaktiviert den Icinga Support |
 | `grafana`    | bool    | true    | deaktiviert den Grafana Support. Hierbei bleiben die Dashboards erhalten! |
 | `annotation` | bool    | true    | setzt eine Annotation für das entfernen einer Node |

@@ -64,8 +64,8 @@ class Grafana
 
     end
 
-    version              = '1.3.3'
-    date                 = '2016-12-15'
+    version              = '1.4.0'
+    date                 = '2017-01-04'
 
     logger.info( '-----------------------------------------------------------------' )
     logger.info( ' CoreMedia - Grafana Dashboard Management' )
