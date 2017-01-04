@@ -4,31 +4,35 @@
 
 require 'mysql2'
 
+require_relative 'logging'
+
+# -----------------------------------------------------------------------------
 
 class  MysqlStatus
 
   attr_accessor :mysqlHost, :mysqlPort, :mysqlUser, :mysqlUser
 
+  include Logging
+
   def initialize( settings = {} )
 
-    @logDirectory      = settings['logDirectory'] ? settings['logDirectory'] : '/tmp'
     @mysqlHost         = settings['mysqlHost']    ? settings['mysqlHost']    : 'localhost'
     @mysqlPort         = settings['mysqlPort']    ? settings['mysqlPort']    : 3306
     @mysqlUser         = settings['mysqlUser']    ? settings['mysqlUser']    : 'root'
     @mysqlPass         = settings['mysqlPass']    ? settings['mysqlPass']    : ''
 
     @mysqlQuery        = 'SHOW /*!50002 GLOBAL */ STATUS'
-
-    logFile            = sprintf( '%s/mysql-status.log', @logDirectory )
-
-    file      = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
-    file.sync = true
-    @log = Logger.new(file, 'weekly', 1024000)
-    @log.level = Logger::DEBUG
-    @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
-    @log.formatter = proc do |severity, datetime, progname, msg|
-      "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
-    end
+#
+#     logFile            = sprintf( '%s/mysql-status.log', loggerDirectory )
+#
+#     file      = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
+#     file.sync = true
+#     logger = Logger.new(file, 'weekly', 1024000)
+#     logger.level = Logger::DEBUG
+#     logger.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
+#     logger.formatter = proc do |severity, datetime, progname, msg|
+#       "[#{datetime.strftime(logger.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
+#     end
 
     @relative = false
 
@@ -48,7 +52,7 @@ class  MysqlStatus
       )
 
     rescue Exception => e
-      @log.error( "An error occurred for connection: #{e}" )
+      logger.error( "An error occurred for connection: #{e}" )
     end
 
   end
@@ -163,7 +167,7 @@ class  MysqlStatus
       end
 
     rescue Exception => e
-      @log.error( "An error occurred for query: #{e}" )
+      logger.error( "An error occurred for query: #{e}" )
       return false
     end
 
