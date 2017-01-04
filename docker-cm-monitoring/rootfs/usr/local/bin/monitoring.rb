@@ -151,6 +151,8 @@ class Monitoring
     shortHostName = hostInfo[:short] ? hostInfo[:short] : nil # dnsResolve( host )
     longHostName  = hostInfo[:long]  ? hostInfo[:long]  : nil # dnsResolve( host )
 
+    logger.debug( JSON.pretty_generate( hostInfo ) )
+
     if( ip == nil || shortHostName == nil )
       return false
     else
@@ -304,6 +306,7 @@ class Monitoring
       grafanaOverview = true
       services        = []
       tags            = []
+      config          = {}
 
 #      example:
 #      {
@@ -320,7 +323,11 @@ class Monitoring
 #          "git-0000000"
 #        ],
 #        "annotation": true,
-#        "overview": true
+#        "overview": true,
+#        "config": {
+#          "ports": [50199],
+#          "display-name": "foo.bar.com"
+#        }
 #      }
 
       logger.debug( payload )
@@ -333,14 +340,16 @@ class Monitoring
 
         result[:request] = hash
 
-        force           = hash.keys.include?('force')      ? hash['force']      : false
-        enableDiscovery = hash.keys.include?('discovery')  ? hash['discovery']  : @enabledDiscovery
-        enabledGrafana  = hash.keys.include?('grafana')    ? hash['grafana']    : @enabledGrafana
-        enabledIcinga   = hash.keys.include?('icinga')     ? hash['icinga']     : @enabledIcinga
-        annotation      = hash.keys.include?('annotation') ? hash['annotation'] : true
-        grafanaOverview = hash.keys.include?('overview')   ? hash['overview']   : true
-        services        = hash.keys.include?('services')   ? hash['services']   : []
-        tags            = hash.keys.include?('tags')       ? hash['tags']       : []
+        force           = hash.keys.include?('force')        ? hash['force']        : false
+        enableDiscovery = hash.keys.include?('discovery')    ? hash['discovery']    : @enabledDiscovery
+        enabledGrafana  = hash.keys.include?('grafana')      ? hash['grafana']      : @enabledGrafana
+        enabledIcinga   = hash.keys.include?('icinga')       ? hash['icinga']       : @enabledIcinga
+        annotation      = hash.keys.include?('annotation')   ? hash['annotation']   : true
+        grafanaOverview = hash.keys.include?('overview')     ? hash['overview']     : true
+        services        = hash.keys.include?('services')     ? hash['services']     : []
+        tags            = hash.keys.include?('tags')         ? hash['tags']         : []
+        config          = hash.keys.include?('config')       ? hash['config']       : {}
+
       end
 
       if( force == true )
@@ -372,6 +381,19 @@ class Monitoring
         end
 
         logger.info( 'done' )
+
+      end
+
+      # now, we canwrite an config per node when we add them
+      if( config.is_a?( Hash) )
+
+        ip    = hostData.dig( :ip )
+        short = hostData.dig( :short )
+
+        @db.createConfig( {
+          :ip   => ip,
+          :data => config
+        } )
 
       end
 
@@ -448,8 +470,8 @@ class Monitoring
           end
 
           options = {
-            'tags'     => tags,
-            'overview' => grafanaOverview
+            'tags'         => tags,
+            'overview'     => grafanaOverview
           }
 
           grafanaResult  = @grafana.addDashbards( host, options )
@@ -559,6 +581,8 @@ class Monitoring
         result[host.to_s][:discovery] ||= {}
 
         if( discoveryStatus == 200 )
+
+          discoveryServices = nil
 
           if( discoveryResult.dig( :hosts, host ) != nil )
             discoveryCreated = discoveryResult.dig( :hosts, host, :created ) || 'unknown'
