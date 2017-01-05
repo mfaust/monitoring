@@ -4,5 +4,10 @@ out/
 *.iml
 .idea
 .vagrant
+*~
+
 
 docker-compose-monitoring/data/
+environments/aio/data/
+environments/customer/data/
+environments/aws/data/
