@@ -75,9 +75,14 @@ class ServiceDiscovery
     @jolokiaHost       = settings[:jolokiaHost]       ? settings[:jolokiaHost]         : 'localhost'
     @jolokiaPort       = settings[:jolokiaPort]       ? settings[:jolokiaPort]         : 8080
 
-    @beanstalkHost     = settings[:beanstalkHost]     ? settings[:beanstalkHost]       : 'localhost'
-    @beanstalkPort     = settings[:beanstalkPort]     ? settings[:beanstalkPort]       : 11300
-    @beanstalkQueue    = settings[:beanstalkQueue]    ? settings[:beanstalkQueue]      : 'mq-discover'
+    @mqHost            = settings[:mqHost]            ? settings[:mqHost]              : 'localhost'
+    @mqPort            = settings[:mqPort]            ? settings[:mqPort]              : 11300
+    @mqQueue           = settings[:mqQueue]           ? settings[:mqQueue]             : 'mq-discover'
+
+    @MQSettings = {
+      :beanstalkHost => @mqHost,
+      :beanstalkPort => @mqPort
+    }
 
     @serviceConfig     = settings[:serviceConfigFile] ? settings[:serviceConfigFile]   : nil
     @scanPorts         = settings[:scanPorts]         ? settings[:scanPorts]           : ports
@@ -97,7 +102,7 @@ class ServiceDiscovery
     logger.info( '  Copyright 2016 Coremedia' )
     logger.info( "  cache directory located at #{@cacheDirectory}" )
     logger.info( "  jolokia Service #{@jolokiaHost}:#{@jolokiaPort}" )
-    logger.info( "  message Queue Service #{@beanstalkHost}:#{@beanstalkPort}/#{@beanstalkQueue}" )
+    logger.info( "  message Queue Service #{@mqHost}:#{@mqPort}/#{@mqQueue}" )
     logger.info( '-----------------------------------------------------------------' )
     logger.info( '' )
 
@@ -149,31 +154,104 @@ class ServiceDiscovery
 
   def queue()
 
-    logger.debug( 'start queue' )
+    c = MessageQueue::Consumer.new( @MQSettings )
 
-    settings = {
-      :beanstalkHost => @beanstalkHost,
-      :beanstalkPort => @beanstalkPort
+    threads = Array.new()
+
+    threads << Thread.new {
+
+      self.processQueue(
+        c.getJobFromTube( @mqQueue )
+      )
     }
 
-    c = MessageQueue::Consumer.new( settings )
+    threads.each { |t| t.join }
 
-    puts JSON.pretty_generate( c.tubeStatistics( @beanstalkQueue ) )
+  end
 
-# exit
 
-    loop do
-      j = c.getJobFromTube( @beanstalkQueue )
+  def processQueue( data = {} )
 
-      if( j.count == 0 )
-        break
-      else
-        puts JSON.pretty_generate( j )
+    if( data.count != 0 )
+
+      logger.info( sprintf( 'process Message from Queue %s: %d', data.dig(:tube), data.dig(:id) ) )
+
+      command = data.dig( :body, 'cmd' )     || nil
+      node    = data.dig( :body, 'node' )    || nil
+      payload = data.dig( :body, 'payload' ) || nil
+
+      if( command == nil )
+        logger.error( 'wrong command' )
+        logger.error( data )
+        return
       end
+
+      if( node == nil || payload == nil )
+        logger.error( 'missing node or payload' )
+        logger.error( data )
+        return
+      end
+
+      result = {
+        :status  => 400,
+        :message => sprintf( 'wrong command detected: %s', command )
+      }
+
+      case command
+      when 'add'
+        logger.info( sprintf( 'add node %s', node ) )
+        result = self.addHost( node, payload )
+
+        logger.debug( result )
+      when 'remove'
+        logger.info( sprintf( 'remove node %s', node ) )
+        result = self.deleteHost( node )
+
+        logger.debug( result )
+      when 'refresh'
+        logger.info( sprintf( 'refresh node %s', node ) )
+        result = self.refreshHost( node )
+
+        logger.debug( result )
+      when 'info'
+        logger.info( sprintf( 'give information for %s back', node ) )
+        result = self.listHosts( node )
+      else
+        logger.error( sprintf( 'wrong command detected: %s', command ) )
+
+        result = {
+          :status  => 400,
+          :message => sprintf( 'wrong command detected: %s', command )
+        }
+
+        logger.debug( result )
+      end
+
+      result[:request]    = data
+
+      self.sendMessage( result )
     end
 
   end
 
+
+
+  def sendMessage( data = {} )
+
+    logger.debug( JSON.pretty_generate( data ) )
+
+    p = MessageQueue::Producer.new( @MQSettings )
+
+    job = {
+      cmd:  'information',
+      node: 'monitoring-16-01',
+      from: 'discovery',
+      payload: data
+    }.to_json
+
+    logger.debug( p.addJob( 'mq-information', job ) )
+
+  end
 
 
   def jolokiaIsAvailable?()
@@ -668,8 +746,6 @@ class ServiceDiscovery
     if( host == nil )
 
       data = @db.discoveryData()
-
-
 
       Dir.chdir( @cacheDirectory )
       Dir.glob( "**" ) do |f|

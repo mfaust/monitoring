@@ -89,6 +89,8 @@ def hostResolve( host )
 
     cmd = sprintf( 'dig -x %s +short', host )
 
+#     logger.debug( cmd )
+
     Open3.popen3( cmd ) do |stdin, stdout, stderr, wait_thr|
 
       returnValue = wait_thr.value
@@ -106,6 +108,8 @@ def hostResolve( host )
   line  = nil
 
   cmd   = sprintf( 'host -t A %s', host )
+
+#   logger.debug( cmd )
 
   Open3.popen3( cmd ) do |stdin, stdout, stderr, wait_thr|
 

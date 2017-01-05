@@ -3,9 +3,9 @@ IMAGE_NAME := docker-${TYPE}
 
 build:
 	docker build \
-    --rm \
-    --tag=$(IMAGE_NAME) \
-    .
+		--rm \
+		--tag=$(IMAGE_NAME) .
+	@echo Image tag: ${IMAGE_NAME}
 
 run:
 	docker run \
@@ -13,7 +13,7 @@ run:
 		--interactive \
 		--tty \
 		--env JOLOKIA_HOST=jolokia \
-		--env BEANSTALK_HOST=beanstalkd \
+		--env MQ_HOST=beanstalkd \
 		--label com.dnsdock.image=cm-service-discover \
 		--label com.dnsdock.alias=cm-service-discover \
 		--label com.dnsdock.ttl=30 \
@@ -22,8 +22,7 @@ run:
 		--ip=172.25.0.100 \
 		--hostname=${IMAGE_NAME} \
 		--name=${IMAGE_NAME} \
-		$(IMAGE_NAME) \
-    /usr/local/bin/service-discovery.rb
+		$(IMAGE_NAME)
 
 shell:
 	docker run \
@@ -31,11 +30,12 @@ shell:
 		--interactive \
 		--tty \
 		--env JOLOKIA_HOST=jolokia \
-		--env BEANSTALK_HOST=beanstalkd \
+		--env MQ_HOST=beanstalkd \
 		--label com.dnsdock.image=cm-service-discover \
 		--label com.dnsdock.alias=cm-service-discover \
 		--label com.dnsdock.ttl=30 \
 		--volume /etc/localtime:/etc/localtime:ro \
+		--volume ~/src/cm-xlabs/monitoring/environments/customer/share/resolv.conf:/etc/resolv.conf:ro \
 		--network=customer_mon \
 		--ip=172.25.0.100 \
 		--hostname=${IMAGE_NAME} \

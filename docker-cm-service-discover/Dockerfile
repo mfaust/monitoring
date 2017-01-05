@@ -11,33 +11,23 @@ ENV TERM=xterm
 
 # ---------------------------------------------------------------------------------------
 
-WORKDIR /srv
-VOLUME  /srv
-
 RUN \
   apk --quiet --no-cache update && \
   apk --quiet --no-cache upgrade && \
   apk --quiet --no-cache add \
     build-base \
+    bind-tools \
     imagemagick-dev \
     ruby-dev \
     sqlite-dev \
-    sqlite \
-    yajl-tools \
-    fping \
-    zlib \
-    zlib-dev && \
+    sqlite && \
   gem install --no-rdoc --no-ri \
-    bigdecimal \
     beaneater \
     ipaddress \
     resolve-hostname \
-    rest-client \
     sqlite3 \
     sequel \
-    time_difference \
-    filesize \
-    fileutils && \
+    filesize && \
   mkdir /var/log/monitoring && \
   mkdir /var/cache/monitoring && \
   apk del --purge \
@@ -49,6 +39,4 @@ RUN \
 
 COPY rootfs/ /
 
-# CMD /opt/startup.sh
-
-CMD ["/bin/sh"]
+CMD ["/usr/local/bin/service-discovery.rb"]
