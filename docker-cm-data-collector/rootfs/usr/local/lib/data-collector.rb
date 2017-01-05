@@ -7,31 +7,35 @@
 
 # -----------------------------------------------------------------------------
 
-require 'logger'
 require 'json'
 require 'uri'
 require 'socket'
 require 'timeout'
+require 'dalli'
 require 'fileutils'
 require 'net/http'
 
-require_relative 'discover'
-require_relative 'tools'
+require_relative 'logging'
+require_relative 'message-queue'
+#require_relative 'tools'
 
 # -----------------------------------------------------------------------------
 
 class DataCollector
 
-  attr_reader :status, :message, :services, :reDiscovery
+  include Logging
 
   def initialize( settings = {} )
 
-    @logDirectory      = settings[:logDirectory]          ? settings[:logDirectory]          : '/tmp/log'
-    @cacheDirectory    = settings[:cacheDirectory]        ? settings[:cacheDirectory]        : '/tmp/cache'
+    @logDirectory      = settings[:logDirectory]          ? settings[:logDirectory]          : '/var/log/monitoring'
+    @cacheDirectory    = settings[:cacheDirectory]        ? settings[:cacheDirectory]        : '/var/cache/monitoring'
     @jolokiaHost       = settings[:jolokiaHost]           ? settings[:jolokiaHost]           : 'localhost'
     @jolokiaPort       = settings[:jolokiaPort]           ? settings[:jolokiaPort]           : 8080
-    @memcacheHost      = settings[:memcacheHost]          ? settings[:memcacheHost]          : nil
-    @memcachePort      = settings[:memcachePort]          ? settings[:memcachePort]          : nil
+    @memcacheHost      = settings[:memcacheHost]          ? settings[:memcacheHost]          : 'loclahost'
+    @memcachePort      = settings[:memcachePort]          ? settings[:memcachePort]          : 11211
+    @mqHost            = settings[:mqHost]                ? settings[:mqHost]                : 'localhost'
+    @mqPort            = settings[:mqPort]                ? settings[:mqPort]                : 11300
+    @mqQueue           = settings[:mqQueue]               ? settings[:mqQueue]               : 'mq-collector'
 
     applicationConfig  = settings[:applicationConfigFile] ? settings[:applicationConfigFile] : nil
     serviceConfig      = settings[:serviceConfigFile]     ? settings[:serviceConfigFile]     : nil
@@ -39,51 +43,26 @@ class DataCollector
     @supportMemcache   = false
     @DEBUG             = false
 
-    if( ! File.exist?( @logDirectory ) )
-      Dir.mkdir( @logDirectory )
-    end
-
     if( ! File.exist?( @cacheDirectory ) )
       Dir.mkdir( @cacheDirectory )
     end
 
-    logFile        = sprintf( '%s/data-collector.log', @logDirectory )
-    file           = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
-    file.sync      = true
-    @log           = Logger.new( file, 'weekly', 1024000 )
-#    @log = Logger.new( STDOUT )
-    @log.level     = Logger::INFO
-    @log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
-    @log.formatter = proc do |severity, datetime, progname, msg|
-      "[#{datetime.strftime(@log.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
-    end
-
     if( applicationConfig == nil or serviceConfig == nil )
       msg = 'no Configuration File given'
-      puts msg
-      @log.error( msg )
+      logger.error( msg )
 
       exit 1
     end
 
-    if( @memcacheHost != nil && @memcachePort != nil )
+    # add cache setting
+    # eg.cache for 2 min here. default options is never expire
+    memcacheOptions = {
+      :compress   => true,
+      :namespace  => 'monitoring',
+      :expires_in => 60*2
+    }
 
-      # enable Memcache Support
-      require 'dalli'
-
-      # add cache setting
-      # eg.cache for 2 min here. default options is never expire
-      memcacheOptions = {
-        :compress   => true,
-        :namespace  => 'monitoring',
-        :expires_in => 60*2
-      }
-
-      @mc = Dalli::Client.new( sprintf( '%s:%s', @memcacheHost, @memcachePort ), memcacheOptions )
-
-      @supportMemcache = true
-
-    end
+    @mc = Dalli::Client.new( sprintf( '%s:%s', @memcacheHost, @memcachePort ), memcacheOptions )
 
     self.applicationConfig( applicationConfig )
     self.readConfiguration()
@@ -91,21 +70,18 @@ class DataCollector
     @settings            = settings
     @jolokiaApplications = nil
 
-    version              = '1.3.1'
-    date                 = '2016-10-04'
+    version              = '1.4.0'
+    date                 = '2017-01-05'
 
-    @log.info( '-----------------------------------------------------------------' )
-    @log.info( ' CoreMedia - DataCollector' )
-    @log.info( "  Version #{version} (#{date})" )
-    @log.info( '  Copyright 2016 Coremedia' )
-    @log.info( "  cache directory located at #{@cacheDirectory}" )
-
-    if( @supportMemcache == true )
-      @log.info( sprintf( '  Memcache Support enabled (%s:%s)', @memcacheHost, @memcachePort ) )
-    end
-
-    @log.info( '-----------------------------------------------------------------' )
-    @log.info( '' )
+    logger.info( '-----------------------------------------------------------------' )
+    logger.info( ' CoreMedia - DataCollector' )
+    logger.info( "  Version #{version} (#{date})" )
+    logger.info( '  Copyright 2016 Coremedia' )
+    logger.info( "  cache directory located at #{@cacheDirectory}" )
+    logger.info( "  Memcache Service #{@memcacheHost}:#{@memcachePort}" )
+    logger.info( "  message Queue Service #{@mqHost}:#{@mqPort}/#{@mqQueue}" )
+    logger.info( '-----------------------------------------------------------------' )
+    logger.info( '' )
 
   end
 
@@ -119,7 +95,7 @@ class DataCollector
 
     # read Application Configuration
     # they define all standard checks
-    @log.debug( 'read defines of Application Properties' )
+    logger.debug( 'read defines of Application Properties' )
 
     begin
 
@@ -132,13 +108,13 @@ class DataCollector
         end
 
       else
-        @log.error( sprintf( 'Application Config File %s not found!', @appConfigFile ) )
+        logger.error( sprintf( 'Application Config File %s not found!', @appConfigFile ) )
         exit 1
       end
     rescue Exception
 
-      @log.error( 'wrong result (no yaml)')
-      @log.error( "#{$!}" )
+      logger.error( 'wrong result (no yaml)')
+      logger.error( "#{$!}" )
       exit 1
     end
 
@@ -147,19 +123,24 @@ class DataCollector
 
   def checkHostDataAge( host )
 
+    # TODO
+    # switch to database based
+
+
+
     discoveryFile = sprintf( '%s/%s/discovery.json'     , @cacheDirectory, host )
     hostDateFile  = sprintf( '%s/%s/mergedHostData.json', @cacheDirectory, host )
 
     if( File.exist?( discoveryFile ) == true )
 
-      @log.debug( sprintf( 'discovery.json      - %s', File.mtime( discoveryFile ).strftime( '%Y-%m-%d %H:%M:%S' ) ) )
+      logger.debug( sprintf( 'discovery.json      - %s', File.mtime( discoveryFile ).strftime( '%Y-%m-%d %H:%M:%S' ) ) )
 
       size     = File.size( discoveryFile )
 #      mtime    = File.mtime( discoveryFile )
 #      now      = Time.now()
 #      deadLine = now - ( 60*10 )
 
-      @log.debug( sprintf( ' File %s with a size of %d', discoveryFile, size ) )
+      logger.debug( sprintf( ' File %s with a size of %d', discoveryFile, size ) )
 
       if( size < 10 )
         # filesize too low
@@ -167,19 +148,19 @@ class DataCollector
         FileUtils.rm( discoveryFile )
         FileUtils.rm( hostDateFile )
 
-        @log.info( 'trigger service discover' )
+        logger.info( 'trigger service discover' )
 
-        # rediscover service-discovery
-
-        serviceDiscoverConfig = {
-          :logDirectory        => @logDirectory,
-          :cacheDirectory      => @cacheDirectory,
-          :jolokiaHost         => @jolokiaHost,
-          :jolokiaPort         => @jolokiaPort,
-          :serviceConfigFile   => '/etc/cm-service.yaml'
-        }
-        serviceDiscovery = ServiceDiscovery.new( serviceDiscoverConfig )
-        serviceDiscovery.addHost( host )
+#         # rediscover service-discovery
+#
+#         serviceDiscoverConfig = {
+#           :logDirectory        => @logDirectory,
+#           :cacheDirectory      => @cacheDirectory,
+#           :jolokiaHost         => @jolokiaHost,
+#           :jolokiaPort         => @jolokiaPort,
+#           :serviceConfigFile   => '/etc/cm-service.yaml'
+#         }
+#         serviceDiscovery = ServiceDiscovery.new( serviceDiscoverConfig )
+#         serviceDiscovery.addHost( host )
 
       end
 
@@ -187,7 +168,7 @@ class DataCollector
 
     if( File.exist?( hostDateFile ) == true )
 
-      @log.debug( sprintf( 'mergedHostData.json - %s', File.mtime( hostDateFile ).strftime( '%Y-%m-%d %H:%M:%S' ) ) )
+      logger.debug( sprintf( 'mergedHostData.json - %s', File.mtime( hostDateFile ).strftime( '%Y-%m-%d %H:%M:%S' ) ) )
 
       size     = File.size( hostDateFile )
       mtime    = File.mtime( hostDateFile )
@@ -196,7 +177,7 @@ class DataCollector
 
       if( mtime < deadLine )
 
-#        @log.debug( '  - trigger service discover' )
+#        logger.debug( '  - trigger service discover' )
         FileUtils.rm( hostDateFile )
       end
     end
@@ -214,7 +195,7 @@ class DataCollector
     if( [0,10,20,30,40,50].include?( minute ) and second < 27 )
 
       if( @wroteTick == false )
-        @log.info( ' ----- TICK - TOCK ---- ' )
+        logger.info( ' ----- TICK - TOCK ---- ' )
       end
       @wroteTick = true
     else
@@ -243,16 +224,20 @@ class DataCollector
 
       rescue Timeout::Error, Errno::EHOSTUNREACH, Errno::ECONNREFUSED, Errno::EINVAL, Errno::ECONNRESET, EOFError, Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError => error
 
-        @log.error( error )
+        logger.error( error )
 
         case error
         when Errno::EHOSTUNREACH
-          @log.error( 'Host unreachable' )
+          logger.error( 'Host unreachable' )
         when Errno::ECONNREFUSED
-          @log.error( 'Connection refused' )
+          logger.error( 'Connection refused' )
         when Errno::ECONNRESET
-          @log.error( 'Connection reset' )
+          logger.error( 'Connection reset' )
         end
+      rescue Exception => e
+
+        logger.error( "An error occurred for connection: #{e}" )
+
       else
 
         data            = JSON.parse( response.body )
@@ -282,6 +267,7 @@ class DataCollector
       }
 
       require_relative 'mysql-status'
+
       if( ! @mysql )
         @mysql = MysqlStatus.new( settings )
       end
@@ -322,6 +308,7 @@ class DataCollector
       }
 
       require_relative 'postgres-status'
+
       pgsql = PostgresStatus.new( settings )
       pgsql.run()
 
@@ -332,10 +319,10 @@ class DataCollector
 
   def nodeExporterData( host, data = {} )
 
-    @log.debug()
+    logger.debug()
 
-    @log.debug( host )
-    @log.debug( data )
+    logger.debug( host )
+    logger.debug( data )
 
     port = data[:port] ? data[:port] : 9100
 
@@ -347,6 +334,7 @@ class DataCollector
       }
 
       require_relative 'nodeexporter_data'
+
       nodeData = NodeExporter.new()
       result   = JSON.generate( nodeData.run( settings ) )
       data     = JSON.parse( result )
@@ -400,7 +388,7 @@ class DataCollector
 
       if( application != nil )
 
-        @log.debug( application )
+        logger.debug( application )
 
         application.each do |a|
 
@@ -439,8 +427,8 @@ class DataCollector
   def reorganizeData( data )
 
     if( data == nil )
-      @log.error( "      no data for reorganize" )
-      @log.error( "      skip" )
+      logger.error( "      no data for reorganize" )
+      logger.error( "      skip" )
       return nil
     end
 
@@ -615,12 +603,12 @@ class DataCollector
     destHost  = parts['host'].to_s.strip
     destPort  = parts['port'].to_s.strip
 
-    @log.debug( sprintf( 'check Port %s on Host %s for sending data', destPort, destHost ) )
+    logger.debug( sprintf( 'check Port %s on Host %s for sending data', destPort, destHost ) )
 
     result = portOpen?( destHost, destPort )
 
     if( result == false )
-      @log.error( sprintf( 'The Port %s on Host %s is not open, skip sending data', destPort, destHost ) )
+      logger.error( sprintf( 'The Port %s on Host %s is not open, skip sending data', destPort, destHost ) )
     end
 
     return result
@@ -641,25 +629,31 @@ class DataCollector
 
     hosts.each do |h|
 
-      @log.debug( sprintf( 'create bulk checks for \'%s\'', h ) )
+      logger.debug( sprintf( 'create bulk checks for \'%s\'', h ) )
 
-      services = data[h][:data] ? data[h][:data] : nil
+      services      = data[h][:data] ? data[h][:data] : nil
+      servicesCount = services.count
 
-      @log.debug( sprintf( '%d services found', services.count ) )
+      if( servicesCount == 0 )
+        logger.debug( 'no services found. skip ... ' )
+        next
+      end
+
+      logger.debug( sprintf( '%d services found', servicesCount ) )
 
       # if Host available -> break
       hostStatus = isRunning?( h )
 
       if( hostStatus == false )
 
-        @log.error( sprintf( '  Host are not available! (%s)', hostStatus ) )
+        logger.error( sprintf( '  Host are not available! (%s)', hostStatus ) )
 
         next
       end
 
       services.each do |s,v|
 
-        @log.debug( sprintf( '  - %s', s ) )
+        logger.debug( sprintf( '  - %s', s ) )
 
         port    = v['port']
         metrics = v['metrics']
@@ -731,7 +725,7 @@ class DataCollector
   def sendChecksToJolokia( data )
 
     if( portOpen?( @jolokiaHost, @jolokiaPort ) == false )
-      @log.error( sprintf( 'The Jolokia Service (%s:%s) are not available', @jolokiaHost, @jolokiaPort ) )
+      logger.error( sprintf( 'The Jolokia Service (%s:%s) are not available', @jolokiaHost, @jolokiaPort ) )
 
       return
     end
@@ -753,7 +747,7 @@ class DataCollector
 
       c.each do |v,i|
 
-        @log.debug( sprintf( '%d checks for service %s found', i.count, v ) )
+        logger.debug( sprintf( '%d checks for service %s found', i.count, v ) )
 
         target = i[0]['target'] ? i[0]['target'] : nil
 
@@ -801,8 +795,8 @@ class DataCollector
               rescue Exception => e
 
                 msg = 'Cannot execute request to %s, cause: %s'
-                @log.warn( sprintf( msg, uri.request_uri, e ) )
-                @log.debug( sprintf( ' -> request body: %s', request.body ) )
+                logger.warn( sprintf( msg, uri.request_uri, e ) )
+                logger.debug( sprintf( ' -> request body: %s', request.body ) )
                 return
               end
             end
@@ -819,13 +813,13 @@ class DataCollector
 #
 #              key = sprintf( 'result__%s__%s', hostname, v )
 #
-#              @log.debug( key )
+#              logger.debug( key )
 #
 #              @mc.set( key, result[v] )
 #
 #              if( @DEBUG == true )
-#                @log.debug( @mc.stats( :items ) )
-#                @log.debug( JSON.pretty_generate( @mc.get( key ) ) )
+#                logger.debug( @mc.stats( :items ) )
+#                logger.debug( JSON.pretty_generate( @mc.get( key ) ) )
 #              end
 #
 #            end
@@ -839,8 +833,8 @@ class DataCollector
           @mc.set( key, result[v] )
 
 #           if( @DEBUG == true )
-#             @log.debug( @mc.stats( :items ) )
-#             @log.debug( JSON.pretty_generate( @mc.get( key ) ) )
+#             logger.debug( @mc.stats( :items ) )
+#             logger.debug( JSON.pretty_generate( @mc.get( key ) ) )
 #           end
         else
 
@@ -864,7 +858,7 @@ class DataCollector
 
     if( ! File.exist?( discoveryFile ) )
 
-      @log.error( sprintf( 'no discovered Services found' ) )
+      logger.error( sprintf( 'no discovered Services found' ) )
 
       return ( {} )
 
@@ -872,12 +866,12 @@ class DataCollector
 
     if( File.exist?( mergedDataFile ) )
 
-      @log.debug( 'read merged data' )
+      logger.debug( 'read merged data' )
       result = JSON.parse( File.read( mergedDataFile ) )
 
     else
 
-      @log.debug( 'build merged data' )
+      logger.debug( 'build merged data' )
 
       data = JSON.parse( File.read( discoveryFile ) )
 
@@ -905,10 +899,10 @@ class DataCollector
       end
 
 
-      @log.debug( 'merge Data between Property Files and discovered Services' )
+      logger.debug( 'merge Data between Property Files and discovered Services' )
       result = self.mergeData( data )
 
-      @log.debug( 'save merged data' )
+      logger.debug( 'save merged data' )
 
       resultJson = JSON.generate( result )
 
@@ -923,21 +917,19 @@ class DataCollector
 
   def run()
 
-    @log.debug( 'get monitored Servers' )
+    logger.debug( 'get monitored Servers' )
     monitoredServer = monitoredServer( @cacheDirectory )
 
     data = Hash.new()
 
     monitoredServer.each do |h|
 
-      @log.info( sprintf( 'Host: %s', h ) )
+      logger.info( sprintf( 'Host: %s', h ) )
 
       self.checkHostDataAge( h )
 
-      d = self.buildMergedData( h )
-
       data[h] = {
-        :data      => d,
+        :data      => self.buildMergedData( h ),
         :timestamp => Time.now().to_i
       }
 

@@ -1,4 +1,4 @@
-TYPE := cm-external-discover
+TYPE := cm-data-collector
 IMAGE_NAME := docker-${TYPE}
 
 build:
@@ -14,6 +14,8 @@ run:
 		--tty \
 		--env MEMCACHE_HOST=localhost \
 		--env MEMCACHE_PORT=11211 \
+		--env JOLOKIA_HOST=jolokia \
+		--env MQ_HOST=beanstalkd \
 		--env POLL_INTERVAL=10 \
 		--hostname=${IMAGE_NAME} \
 		--name=${IMAGE_NAME} \
@@ -27,6 +29,8 @@ shell:
 		--tty \
 		--env MEMCACHE_HOST=localhost \
 		--env MEMCACHE_PORT=11211 \
+		--env JOLOKIA_HOST=jolokia \
+		--env MQ_HOST=beanstalkd \
 		--env POLL_INTERVAL=10 \
 		--hostname=${IMAGE_NAME} \
 		--name=${IMAGE_NAME} \
