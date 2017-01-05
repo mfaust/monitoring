@@ -40,6 +40,8 @@ Signal.trap('HUP')  { stop = true }
 Signal.trap('TERM') { stop = true }
 Signal.trap('QUIT') { stop = true }
 
+# -----------------------------------------------------------------------------
+
 sd = ServiceDiscovery.new( config )
 
 until stop

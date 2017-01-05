@@ -235,7 +235,6 @@ class ServiceDiscovery
   end
 
 
-
   def sendMessage( data = {} )
 
     logger.debug( JSON.pretty_generate( data ) )
