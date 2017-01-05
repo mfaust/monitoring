@@ -3,7 +3,7 @@
 # 17.12.2016 - Bodo Schulz
 #
 #
-# v0.9.0
+# v0.9.1
 
 # -----------------------------------------------------------------------------
 
@@ -290,8 +290,8 @@ module ExternalDiscovery
       @discoveryUrl  = sprintf( 'http://%s:%d%s', @discoveryHost, @discoveryPort, @discoveryPath )
       @historic      = []
 
-      version        = '0.2.0'
-      date           = '2017-01-02'
+      version        = '0.9.1'
+      date           = '2017-01-05'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - External Discovery Service' )
@@ -423,6 +423,8 @@ module ExternalDiscovery
                   name   = ip
                 end
               end
+            else
+              name   = ip
             end
 
             discoveryStatus  = result.dig( name, 'discovery', 'status' )
