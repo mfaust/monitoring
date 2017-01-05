@@ -230,18 +230,21 @@ p = MessageQueue::Producer.new( settings )
 
 c = MessageQueue::Consumer.new( settings )
 
-puts JSON.pretty_generate( c.tubeStatistics( 'test-tube' ) )
+puts JSON.pretty_generate( c.tubeStatistics( 'mq-information' ) )
 
 # exit
 
 loop do
-  j = c.getJobFromTube( 'test-tube' )
+  j = c.getJobFromTube( 'mq-information' )
 
   if( j.count == 0 )
-    break
+#    break
   else
     puts JSON.pretty_generate( j )
   end
+
+  sleep(3)
+
 end
 
 # -----------------------------------------------------------------------------
