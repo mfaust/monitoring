@@ -30,7 +30,7 @@ RUN \
     build-base \
     imagemagick-dev \
     ruby-dev \
-    zlib-dev
+    zlib-dev \
     supervisor \
     bash \
     nano \

@@ -17,6 +17,7 @@ require 'net/http'
 
 require_relative 'logging'
 require_relative 'message-queue'
+require_relative 'database'
 #require_relative 'tools'
 
 # -----------------------------------------------------------------------------
@@ -40,7 +41,8 @@ class DataCollector
     applicationConfig  = settings[:applicationConfigFile] ? settings[:applicationConfigFile] : nil
     serviceConfig      = settings[:serviceConfigFile]     ? settings[:serviceConfigFile]     : nil
 
-    @supportMemcache   = false
+    @db                = Storage::Database.new()
+
     @DEBUG             = false
 
     if( ! File.exist?( @cacheDirectory ) )
@@ -911,6 +913,17 @@ class DataCollector
     end
 
     return result
+
+  end
+
+
+  def monitoredServer()
+
+    d = @db.dnsData()
+       if( d != nil )
+       logger.debug( JSON.pretty_generate( d ) )
+       end
+       logger.debug( '===' )
 
   end
 
