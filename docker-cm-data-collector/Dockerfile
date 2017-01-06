@@ -3,7 +3,7 @@ FROM bodsch/docker-ruby
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
-ENV TERM=xterm
+LABEL version="1.2.0"
 
 # ---------------------------------------------------------------------------------------
 
@@ -20,8 +20,12 @@ RUN \
     mysql-dev && \
   gem install --no-rdoc --no-ri \
     bigdecimal \
+    beaneater \
     ipaddress \
     resolve-hostname \
+    time_difference \
+    sqlite3 \
+    sequel \
     rest-client \
     mysql2 && \
   mkdir /var/log/monitoring && \
@@ -44,4 +48,4 @@ COPY rootfs/ /
 
 # ENTRYPOINT /usr/local/bin/external-discover.rb
 
-CMD /bin/sh
+CMD ["/usr/local/bin/data-collector.rb"]

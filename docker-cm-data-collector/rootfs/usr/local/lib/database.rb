@@ -44,7 +44,6 @@ module Storage
         String      :longname  , :size => 250
         DateTime    :created   , :default => Time.now
         String      :checksum  , :size => 32
-        FalseClass  :status
       }
 
       @database.create_table?( :config ) {
@@ -67,8 +66,7 @@ module Storage
         DateTime    :updated   , :default => Time.now
         Integer     :status
 
-        index [ :dns_id, :service, :port ]
-#        foreign_key [:shortname, :service], :name => 'unique_discovery'
+        index [ :dns_id, :status ]
       }
 
       @database.create_table?( :discovery ) {
@@ -80,24 +78,27 @@ module Storage
         DateTime    :created   , :default => Time.now()
 
         index [ :dns_id, :service, :port ]
-#        foreign_key [:shortname, :service], :name => 'unique_discovery'
       }
 
-      @database.create_table?( :result ) {
+      @database.create_table?( :measurements ) {
         primary_key :id
         foreign_key :dns_id, :dns
         foreign_key :discovery_id, :discovery
-        String      :service   , :size => 128, :key => true, :index => true, :unique => true, :null => false
         String      :data      , :text => true, :null => false
         DateTime    :created   , :default => Time.now()
 
-        index [:dns_id, :discovery_id, :service ]
-#         foreign_key [:shortname], :dns
-#         foreign_key [:service]  , :discovery
+        index [ :dns_id, :discovery_id ]
       }
 
       @database.create_or_replace_view( :v_discovery,
-        'select dns.ip, dns.shortname, dns.created, discovery.* from dns as dns, discovery as discovery where dns.id = discovery.dns_id' )
+        'select
+          dns.ip, dns.shortname, dns.created,
+          discovery.*
+        from
+          dns as dns, discovery as discovery
+        where
+          dns.id = discovery.dns_id'
+      )
 
       @database.create_or_replace_view( :v_config,
         'select
@@ -108,8 +109,13 @@ module Storage
         order by key'
       )
 
-      @database.create_or_replace_view( :v_node,
-        'select dns.ip, dns.status, dns.created from dns'
+      @database.create_or_replace_view( :v_status,
+        'select
+          d.ip, d.shortname, d.checksum,
+          s.created, s.updated, s.status
+        from
+          dns as d, status as s
+        where d.id = s.dns_id'
       )
 
     end
@@ -286,11 +292,11 @@ module Storage
         {}.tap{ |r| hashes.each{ |h| h.each{ |k,v| ( r[k]||=[] ) << v } } }
       end
 
-      def parsedResponse( r )
-        return JSON.parse( r )
-      rescue JSON::ParserError => e
-        return r # do smth
-      end
+#       def parsedResponse( r )
+#         return JSON.parse( r )
+#       rescue JSON::ParserError => e
+#         return r # do smth
+#       end
 
       rec = self.dbaData( w )
 
@@ -333,14 +339,16 @@ module Storage
     # -- configurations -------------------------
 
 
-
+    # -- dns ------------------------------------
+    #
     def createDNS( params = {} )
 
       ip      = params[ :ip ]    ? params[ :ip ]    : nil
       short   = params[ :short ] ? params[ :short ] : nil
       long    = params[ :long ]  ? params[ :long ]  : nil
 
-      dns = @database[:dns]
+      dns     = @database[:dns]
+      status  = @database[:status]
 
       rec = dns.select(:id).where(
         :ip        => ip.to_s,
@@ -351,13 +359,19 @@ module Storage
       # insert if data not found
       if( rec == nil )
 
-        dns.insert(
+        insertedId = dns.insert(
           :ip        => ip.to_s,
           :shortname => short.to_s,
           :longname  => long.to_s,
           :checksum  => Digest::MD5.hexdigest( [ ip, short, long ].join ),
+          :created   => DateTime.now()
+        )
+
+        status.insert(
+          :dns_id    => insertedId.to_s,
           :created   => DateTime.now(),
-          :status    => isRunning?( long )
+          :updated   => DateTime.now(),
+          :status    => isRunning?( ip )
         )
       end
 
@@ -418,8 +432,12 @@ module Storage
 
       end
     end
+    #
+    # -- dns ------------------------------------
 
 
+    # -- discovery ------------------------------
+    #
     def createDiscovery( params = {} )
 
       dnsId        = params[ :id ]       ? params[ :id ]       : nil
@@ -513,6 +531,7 @@ module Storage
 
       end
 
+
       # ---------------------------------------------------------------------------------
 
       if( service == nil && host == nil )
@@ -543,7 +562,7 @@ module Storage
 
           result[service.to_s][dnsShortName] ||= {}
           result[service.to_s][dnsShortName] = {
-            :data => JSON.parse( discoveryData )
+            :data => self.parsedResponse( discoveryData )
           }
 
           array << result
@@ -572,7 +591,7 @@ module Storage
 
           result[host.to_s][service] ||= {}
           result[host.to_s][service] = {
-            :data => JSON.parse( discoveryData )
+            :data => self.parsedResponse( discoveryData.gsub( '=>', ':' ) )
           }
 
           array << result
@@ -580,7 +599,7 @@ module Storage
 
         array = array.reduce( :merge )
 
-        logger.debug( JSON.pretty_generate( array ) )
+#         logger.debug( JSON.pretty_generate( array ) )
 
         return array
 
@@ -605,7 +624,7 @@ module Storage
 
           result[host.to_s][service] ||= {}
           result[host.to_s][service] = {
-            :data => JSON.parse( discoveryData )
+            :data => self.parsedResponse( discoveryData )
           }
 
           array << result
@@ -619,107 +638,46 @@ module Storage
       return nil
 
     end
+    #
+    # -- discovery ------------------------------
 
 
-    def insertData()
+    def nodes( params = {} )
 
-      data = Array.new()
+      status    = params[ :status ]    ? params[ :status ]    : nil # Database::ONLINE
 
-      data << {
-        "replication-live-server"=> {
-        "port"=> 48099,
-        "description"=> "RLS",
-        "port_http"=> 48080,
-        "ior"=> true,
-        "runlevel"=> true,
-        "license"=> true,
-        "application"=> [
-           "contentserver"
-          ]
-        }
-      }
+      result    =
 
-      data << {
-        "springer-cms"=> {
-          "port"=> 49099,
-          "description"=> "CAE Live 1",
-          "cap_connection"=> true,
-          "uapi_cache"=> true,
-          "blob_cache"=> true,
-          "application"=> [
-             "cae",
-             "caches"
-            ]
-        }
-      }
-
-      # puts JSON.pretty_generate( data )
-
-      self.createDNS( { :ip => '10.2.14.156', :short => 'monitoring-16-01', :long => 'monitoring-16-01.coremedia.vm' } )
-      self.createDNS( { :ip => '10.2.14.160', :short => 'monitoring-16-02', :long => 'monitoring-16-02.coremedia.vm' } )
-
-      dns = Hash.new()
-
-      [ 'monitoring-16-01', 'monitoring-16-02', 'foo' ].each do |i|
-
-        dns = self.dnsData( { :short => i } )
-
-        if( dns == nil )
-          logger.debug( 'no data for ' + i )
-        else
-          dnsId        = dns[ :id ]
-          dnsIp        = dns[ :ip ]
-          dnsShortname = dns[ :shortname ]
-          dnsLongname  = dns[ :longname ]
-          dnsCreated   = dns[ :created ]
-          dnsChecksum  = dns[ :checksum ]
-
-          logger.debug( JSON.pretty_generate dns )
-
-          data.each do |d|
-
-            service = d.keys[0].to_s
-
-            logger.debug( sprintf( '%s - %s', dnsShortname, service ) )
-#             data    = d.values
-
-            self.createDiscovery( { :id => dnsId, :ip => dnsIp, :short => dnsShortname, :checksum => dnsChecksum, :service => service, :data => d.values } )
-
-          end
-        end
+      if( status != nil )
+        w = ( Sequel[:status => status ] )
+      else
+        w = nil
       end
-    end
 
+      rec = @database[:v_status].select().where( w ) .to_a
 
-    def readData(  )
+      if( rec.count() != 0 )
 
-      d = self.discoveryData( { :ip => '10.2.14.156' } )
-      logger.debug( JSON.pretty_generate( d ) )
-      logger.debug( '===' )
-      d = self.discoveryData( { :short => 'monitoring-16-01' } )
-      logger.debug( JSON.pretty_generate( d ) )
-      logger.debug( '===' )
-      d = self.discoveryData( { :short => 'monitoring-16-01', :service => 'replication-live-server' } )
-      logger.debug( JSON.pretty_generate( d ) )
-      logger.debug( '===' )
-      d = self.discoveryData( { :service => 'replication-live-server' } )
-      logger.debug( JSON.pretty_generate( d ) )
-      logger.debug( '===' )
+        groupByHost = rec.group_by { |k| k[:shortname] }
 
+        return groupByHost
+      end
+
+      return Hash.new()
 
     end
 
+
+      def parsedResponse( r )
+        return JSON.parse( r )
+      rescue JSON::ParserError => e
+        return r # do smth
+      end
 
   end
-
 
 end
 
 # ---------------------------------------------------------------------------------------
 
-# TESTS
-#m = Storage::SQLite.new()
-#
-# m.insertData()
-#m.readData()
-
+# EOF

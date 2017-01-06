@@ -14,11 +14,22 @@ require 'timeout'
 require 'dalli'
 require 'fileutils'
 require 'net/http'
+require 'time'
+require 'date'
+require 'time_difference'
 
 require_relative 'logging'
 require_relative 'message-queue'
 require_relative 'database'
 #require_relative 'tools'
+
+# -----------------------------------------------------------------------------
+
+class Time
+  def add_minutes(m)
+    self + (60 * m)
+  end
+end
 
 # -----------------------------------------------------------------------------
 
@@ -42,6 +53,11 @@ class DataCollector
     serviceConfig      = settings[:serviceConfigFile]     ? settings[:serviceConfigFile]     : nil
 
     @db                = Storage::Database.new()
+
+    @MQSettings = {
+      :beanstalkHost => @mqHost,
+      :beanstalkPort => @mqPort
+    }
 
     @DEBUG             = false
 
@@ -123,66 +139,41 @@ class DataCollector
   end
 
 
-  def checkHostDataAge( host )
+  def checkHostDataAge( host, updated )
 
-    # TODO
-    # switch to database based
+    result = false
+    quorum = 10      # in minutes
 
+    n = Time.now()
+    t = Time.at( updated )
+    t = t.add_minutes( quorum ) + 15
 
+    difference = TimeDifference.between( t, n ).in_each_component
+    difference = difference[:minutes].ceil
 
-    discoveryFile = sprintf( '%s/%s/discovery.json'     , @cacheDirectory, host )
-    hostDateFile  = sprintf( '%s/%s/mergedHostData.json', @cacheDirectory, host )
+    if( difference > quorum + 1 )
 
-    if( File.exist?( discoveryFile ) == true )
+      logger.debug( sprintf( ' now       : %s', n.to_datetime.strftime("%d %m %Y %H:%M:%S") ) )
+      logger.debug( sprintf( ' timestamp : %s', t.to_datetime.strftime("%d %m %Y %H:%M:%S") ) )
+      logger.debug( sprintf( ' difference: %d', difference ) )
 
-      logger.debug( sprintf( 'discovery.json      - %s', File.mtime( discoveryFile ).strftime( '%Y-%m-%d %H:%M:%S' ) ) )
-
-      size     = File.size( discoveryFile )
-#      mtime    = File.mtime( discoveryFile )
-#      now      = Time.now()
-#      deadLine = now - ( 60*10 )
-
-      logger.debug( sprintf( ' File %s with a size of %d', discoveryFile, size ) )
-
-      if( size < 10 )
-        # filesize too low
-
-        FileUtils.rm( discoveryFile )
-        FileUtils.rm( hostDateFile )
-
-        logger.info( 'trigger service discover' )
-
-#         # rediscover service-discovery
+      # quorum reached
+#       p = MessageQueue::Producer.new( @MQSettings )
 #
-#         serviceDiscoverConfig = {
-#           :logDirectory        => @logDirectory,
-#           :cacheDirectory      => @cacheDirectory,
-#           :jolokiaHost         => @jolokiaHost,
-#           :jolokiaPort         => @jolokiaPort,
-#           :serviceConfigFile   => '/etc/cm-service.yaml'
-#         }
-#         serviceDiscovery = ServiceDiscovery.new( serviceDiscoverConfig )
-#         serviceDiscovery.addHost( host )
+#       job = {
+#         cmd:  'refresh',
+#         node: host,
+#         from: 'data-collector',
+#         payload: { "annotation": false }
+#       }.to_json
+#
+#       logger.debug( p.addJob( 'mq-discover', job ) )
 
-      end
-
+      result = true
     end
 
-    if( File.exist?( hostDateFile ) == true )
+    return result
 
-      logger.debug( sprintf( 'mergedHostData.json - %s', File.mtime( hostDateFile ).strftime( '%Y-%m-%d %H:%M:%S' ) ) )
-
-      size     = File.size( hostDateFile )
-      mtime    = File.mtime( hostDateFile )
-      now      = Time.now()
-      deadLine = now - ( 60*10 )
-
-      if( mtime < deadLine )
-
-#        logger.debug( '  - trigger service discover' )
-        FileUtils.rm( hostDateFile )
-      end
-    end
   end
 
 
@@ -382,11 +373,18 @@ class DataCollector
 
     data.each do |d,v|
 
-      application = v['application'] ? v['application'] : nil
-      solr_cores  = v['cores']       ? v['cores']       : nil
-      metrics     = v['metrics']     ? v['metrics']     : nil
+#       logger.debug( " service  #{d}" )
+#       logger.debug( " data     #{v}" )
 
-      v['metrics'] = Array.new()
+      application = v[:data]['application'] ? v[:data]['application'] : nil
+      solr_cores  = v[:data]['cores']       ? v[:data]['cores']       : nil
+      metrics     = v[:data]['metrics']     ? v[:data]['metrics']     : nil
+
+#       logger.debug( application )
+#       logger.debug( solr_cores )
+#       logger.debug( metrics )
+
+      v[:data]['metrics'] = Array.new()
 
       if( application != nil )
 
@@ -395,17 +393,20 @@ class DataCollector
         application.each do |a|
 
           if( tomcatApplication[a] )
+
             applicationMetrics = tomcatApplication[a]['metrics']
 
+#             logger.debug( "  add #{applicationMetrics}" )
+
             if( solr_cores != nil )
-              v['metrics'].push( self.mergeSolrCores( applicationMetrics , solr_cores ) )
+              v[:data]['metrics'].push( self.mergeSolrCores( applicationMetrics , solr_cores ) )
             end
 
             # remove unneeded Templates
             tomcatApplication[a]['metrics'].delete_if {|key| key['mbean'].match( '%CORE%' ) }
 
-            v['metrics'].push( metricsTomcat['metrics'] )
-            v['metrics'].push( applicationMetrics )
+            v[:data]['metrics'].push( metricsTomcat['metrics'] )
+            v[:data]['metrics'].push( applicationMetrics )
 
           end
         end
@@ -413,16 +414,76 @@ class DataCollector
       end
 
       if( tomcatApplication[d] )
-        v['metrics'].push( metricsTomcat['metrics'] )
-        v['metrics'].push( tomcatApplication[d]['metrics'] )
+
+#         logger.debug( "found #{d} in tomcat application" )
+#         logger.debug metricsTomcat['metrics']
+
+        v[:data]['metrics'].push( metricsTomcat['metrics'] )
+        v[:data]['metrics'].push( tomcatApplication[d]['metrics'] )
       end
 
-      v['metrics'].compact!   # remove 'nil' from array
-      v['metrics'].flatten!   # clean up and reduce depth
+      v[:data]['metrics'].compact!   # remove 'nil' from array
+      v[:data]['metrics'].flatten!   # clean up and reduce depth
+
+#       sleep(1)
 
     end
 
+#     logger.debug( JSON.pretty_generate( data ) )
+
+#     logger.debug( '------------------------------------------' )
+
     return data
+
+#     data.each do |d,v|
+#
+#       logger.debug( d )
+#       logger.debug( v )
+#
+#       application = v['application'] ? v['application'] : nil
+#       solr_cores  = v['cores']       ? v['cores']       : nil
+#       metrics     = v['metrics']     ? v['metrics']     : nil
+#
+#       v['metrics'] = Array.new()
+#
+#       if( application != nil )
+#
+#         logger.debug( application )
+#
+#         application.each do |a|
+#
+#           if( tomcatApplication[a] )
+#             applicationMetrics = tomcatApplication[a]['metrics']
+#
+#             if( solr_cores != nil )
+#               v['metrics'].push( self.mergeSolrCores( applicationMetrics , solr_cores ) )
+#             end
+#
+#             # remove unneeded Templates
+#             tomcatApplication[a]['metrics'].delete_if {|key| key['mbean'].match( '%CORE%' ) }
+#
+#             v['metrics'].push( metricsTomcat['metrics'] )
+#             v['metrics'].push( applicationMetrics )
+#
+#           end
+#         end
+#
+#       end
+#
+#       if( tomcatApplication[d] )
+#         v['metrics'].push( metricsTomcat['metrics'] )
+#         v['metrics'].push( tomcatApplication[d]['metrics'] )
+#       end
+#
+#       v['metrics'].compact!   # remove 'nil' from array
+#       v['metrics'].flatten!   # clean up and reduce depth
+#
+#
+#       sleep(1)
+#
+#     end
+#
+#     return data
   end
 
   # reorganize data to later simple find
@@ -855,62 +916,76 @@ class DataCollector
   # creates mergedHostData.json for every Node
   def buildMergedData( host )
 
-    discoveryFile        = sprintf( '%s/%s/discovery.json'     , @cacheDirectory, host )
-    mergedDataFile       = sprintf( '%s/%s/mergedHostData.json', @cacheDirectory, host )
+    logger.debug( "buildMergedData( #{host} )" )
 
-    if( ! File.exist?( discoveryFile ) )
+    # Database
 
-      logger.error( sprintf( 'no discovered Services found' ) )
+    data = @db.discoveryData( { :ip => host, :short => host } )
 
-      return ( {} )
+#     logger.debug( JSON.pretty_generate( data[host.to_s] ) )
 
-    end
 
-    if( File.exist?( mergedDataFile ) )
 
-      logger.debug( 'read merged data' )
-      result = JSON.parse( File.read( mergedDataFile ) )
 
-    else
+#     discoveryFile        = sprintf( '%s/%s/discovery.json'     , @cacheDirectory, host )
+#     mergedDataFile       = sprintf( '%s/%s/mergedHostData.json', @cacheDirectory, host )
+#
+#     if( ! File.exist?( discoveryFile ) )
+#
+#       logger.error( sprintf( 'no discovered Services found' ) )
+#
+#       return ( {} )
+#
+#     end
 
-      logger.debug( 'build merged data' )
-
-      data = JSON.parse( File.read( discoveryFile ) )
-
-      # TODO
-      # create data for mySQL, Postgres
-      #
-      if( data['mongodb'] )
-        self.mongoDBData( host, data['mongodb'] )
-      end
-
-      if( data['mysql'] )
-        self.mysqlData( host, data['mysql'] )
-      end
-
-      if( data['postgres'] )
-        self.postgresData( host, data['postgres'] )
-      end
-
-      if( data['node_exporter'] )
-
-        option = {
-          :port => 9100
-        }
-        self.nodeExporterData( host, option )
-      end
+#     if( File.exist?( mergedDataFile ) )
+#
+#       logger.debug( 'read merged data' )
+#       result = JSON.parse( File.read( mergedDataFile ) )
+#
+#       logger.debug( ( result ) )
+#     else
+#
+#       logger.debug( 'build merged data' )
+#
+#       data = JSON.parse( File.read( discoveryFile ) )
+#
+#       # TODO
+#       # create data for mySQL, Postgres
+#       #
+#       if( data['mongodb'] )
+#         self.mongoDBData( host, data['mongodb'] )
+#       end
+#
+#       if( data['mysql'] )
+#         self.mysqlData( host, data['mysql'] )
+#       end
+#
+#       if( data['postgres'] )
+#         self.postgresData( host, data['postgres'] )
+#       end
+#
+#       if( data['node_exporter'] )
+#
+#         option = {
+#           :port => 9100
+#         }
+#         self.nodeExporterData( host, option )
+#       end
 
 
       logger.debug( 'merge Data between Property Files and discovered Services' )
-      result = self.mergeData( data )
+      result = self.mergeData( data[host.to_s] )
 
       logger.debug( 'save merged data' )
 
       resultJson = JSON.generate( result )
 
-      File.open( mergedDataFile , 'w' ) { |f| f.write( resultJson ) }
+      logger.debug( resultJson )
 
-    end
+#       File.open( mergedDataFile , 'w' ) { |f| f.write( resultJson ) }
+
+#     end
 
     return result
 
@@ -919,11 +994,12 @@ class DataCollector
 
   def monitoredServer()
 
-    d = @db.dnsData()
-       if( d != nil )
-       logger.debug( JSON.pretty_generate( d ) )
-       end
-       logger.debug( '===' )
+    d = @db.nodes( { :status => 1 } )
+
+#     logger.debug( d )
+#     logger.debug( d.keys )
+
+    return d
 
   end
 
@@ -931,26 +1007,31 @@ class DataCollector
   def run()
 
     logger.debug( 'get monitored Servers' )
-    monitoredServer = monitoredServer( @cacheDirectory )
 
     data = Hash.new()
 
-    monitoredServer.each do |h|
+    monitoredServer = self.monitoredServer()
+
+    logger.debug( 'start' )
+    monitoredServer.each do |h,d|
 
       logger.info( sprintf( 'Host: %s', h ) )
 
-      self.checkHostDataAge( h )
+      updated = d.first.dig( :updated )
 
-      data[h] = {
-        :data      => self.buildMergedData( h ),
-        :timestamp => Time.now().to_i
-      }
+      self.checkHostDataAge( h, updated )
+
+       data[h] = {
+         :data      => self.buildMergedData( h ),
+         :timestamp => Time.now().to_i
+       }
 
     end
+    logger.debug( 'stop' )
 
-    self.createBulkCheck( data )
+#    self.createBulkCheck( data )
 
-    self.logMark()
+#    self.logMark()
 
   end
 
