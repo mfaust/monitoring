@@ -25,7 +25,11 @@ module MessageQueue
       beanstalkHost       = params[:beanstalkHost] ? params[:beanstalkHost] : 'beanstalkd'
       beanstalkPort       = params[:beanstalkPort] ? params[:beanstalkPort] : 11300
 
-      @b = Beaneater.new( sprintf( '%s:%s', beanstalkHost, beanstalkPort ) )
+      begin
+        @b = Beaneater.new( sprintf( '%s:%s', beanstalkHost, beanstalkPort ) )
+      rescue => e
+        logger.error( e )
+      end
 
     end
 
