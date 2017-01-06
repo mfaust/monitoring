@@ -19,7 +19,7 @@ services:
     labels:
       com.dnsdock.image: "dnsdock"
       com.dnsdock.alias: "dnsdock"
-      com.dnsdock.ttl: "10"
+      com.dnsdock.ttl: "30"
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock
@@ -31,6 +31,24 @@ services:
       mon:
         ipv4_address: 172.25.0.5
 
+  beanstalkd:
+    restart: always
+    image: bodsch/docker-beanstalkd
+    container_name: beanstalkd
+    hostname: beanstalkd
+    labels:
+      com.dnsdock.image: "beanstalkd"
+      com.dnsdock.alias: "beanstalkd"
+      com.dnsdock.ttl: "30"
+    ports:
+      - 11300:11300
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      mon:
+        ipv4_address: 172.25.0.6
+
+
   jolokia:
     restart: always
     image: bodsch/docker-jolokia:1612-01
@@ -39,7 +57,7 @@ services:
     labels:
       com.dnsdock.image: "jolokia"
       com.dnsdock.alias: "jolokia"
-      com.dnsdock.ttl: "10"
+      com.dnsdock.ttl: "30"
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./share/resolv.conf:/etc/resolv.conf:ro
@@ -48,6 +66,7 @@ services:
     extra_hosts:
       # NOTE: local blueprint-box
       - 'blueprint-box:192.168.252.100'
+      - 'blueprint-box-70:192.168.252.170'
     networks:
       mon:
         ipv4_address: 172.25.0.11
@@ -60,7 +79,7 @@ services:
     labels:
       com.dnsdock.image: "memcached"
       com.dnsdock.alias: "memcached"
-      com.dnsdock.ttl: "10"
+      com.dnsdock.ttl: "30"
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:
@@ -75,7 +94,7 @@ services:
     labels:
       com.dnsdock.image: "nginx"
       com.dnsdock.alias: "nginx"
-      com.dnsdock.ttl: "10"
+      com.dnsdock.ttl: "30"
     ports:
       - 80:80
     depends_on:
@@ -104,7 +123,7 @@ services:
     labels:
       com.dnsdock.image: "carbon-relay"
       com.dnsdock.alias: "carbon-relay"
-      com.dnsdock.ttl: "10"
+      com.dnsdock.ttl: "30"
     ports:
       - 2003:2003
     env_file:
@@ -120,6 +139,52 @@ services:
       mon:
         ipv4_address: 172.25.0.20
 
+  # single service
+  # use MQ to process data
+  cm-service-discover:
+    restart: always
+    build: ../../docker-cm-service-discover
+    container_name: cm-service-discover
+    hostname: cm-service-discover
+    labels:
+      com.dnsdock.image: "cm-service-discover"
+      com.dnsdock.alias: "cm-service-discover"
+      com.dnsdock.ttl: "30"
+    env_file:
+      - env/cm-service-discover.env
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./share/resolv.conf:/etc/resolv.conf:ro
+      - ./data/monitoring:/var/cache/monitoring
+    networks:
+      mon:
+        ipv4_address: 172.25.0.30
+
+  # single service
+  # use MQ to process data
+  cm-data-collector:
+    restart: always
+    build: ../../docker-cm-data-collector
+    container_name: cm-data-collector
+    hostname: cm-data-collector
+    labels:
+      com.dnsdock.image: "cm-data-collector"
+      com.dnsdock.alias: "cm-data-collector"
+      com.dnsdock.ttl: "30"
+    env_file:
+      - env/cm-data-collector.env
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./share/resolv.conf:/etc/resolv.conf:ro
+      - ./share/monitoring/etc/cm-service.yaml:/etc/cm-service.yaml
+      - ./share/monitoring/etc/cm-application.yaml:/etc/cm-application.yaml
+      - ./data/monitoring:/var/cache/monitoring
+    networks:
+      mon:
+        ipv4_address: 172.25.0.31
+
+
+
   cm-monitoring:
     restart: always
     build: ../../docker-cm-monitoring
@@ -128,7 +193,7 @@ services:
     labels:
       com.dnsdock.image: "cm-monitoring"
       com.dnsdock.alias: "cm-monitoring"
-      com.dnsdock.ttl: "10"
+      com.dnsdock.ttl: "30"
     env_file:
       - env/cm-monitoring.env
     depends_on:
@@ -136,6 +201,7 @@ services:
       - carbon-relay
       - memcached
     extra_hosts:
+      - 'blueprint-box:192.168.252.100'
       #- 'jolokia:172.25.0.11'
       #- 'memcached:172.25.0.12'
       #- 'carbon-relay:172.25.0.20'
@@ -158,3 +224,5 @@ services:
     networks:
       mon:
         ipv4_address: 172.25.0.40
+
+

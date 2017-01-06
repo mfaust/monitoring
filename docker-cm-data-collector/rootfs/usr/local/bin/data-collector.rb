@@ -21,7 +21,7 @@ jolokiaHost      = ENV['JOLOKIA_HOST']    ? ENV['JOLOKIA_HOST']    : 'localhost'
 jolokiaPort      = ENV['JOLOKIA_PORT']    ? ENV['JOLOKIA_PORT']    : 8080
 memcacheHost     = ENV['MEMCACHE_HOST']   ? ENV['MEMCACHE_HOST']   : 'localhost'
 memcachePort     = ENV['MEMCACHE_PORT']   ? ENV['MEMCACHE_PORT']   : 11211
-scanDiscovery    = ENV['SCAN_DISCOVERY']  ? ENV ['SCAN_DISCOVERY'] : '10m'
+scanDiscovery    = ENV['SCAN_DISCOVERY']  ? ENV['SCAN_DISCOVERY'] : '10m'
 
 config = {
   :logDirectory          => logDirectory,
