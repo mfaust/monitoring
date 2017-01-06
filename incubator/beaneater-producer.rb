@@ -13,8 +13,8 @@ job = {
 
 
 job = {
-  cmd: 'oergs',
-  node: 'monitoring-16-01',
+  cmd: 'add',
+  node: '192.168.252.170.xip.io',
   payload: {
     "force": true,
     "discovery": false,
@@ -25,14 +25,9 @@ job = {
       "git-0000000"
     ],
     "config": {
-      "display-name": "foo-bar",
-      "ports": [
-        3306,
-        9100,
-        28017
-      ]
+      "display-name": "blueprint-box"
     },
-    "annotation": true,
+    "annotation": false,
     "overview": true
   }
 }.to_json
