@@ -111,8 +111,8 @@ module Storage
 
       @database.create_or_replace_view( :v_status,
         'select
-          d.*,
-          s.*
+          d.ip, d.shortname, d.checksum,
+          s.created, s.updated, s.status
         from
           dns as d, status as s
         where d.id = s.dns_id'
@@ -292,11 +292,11 @@ module Storage
         {}.tap{ |r| hashes.each{ |h| h.each{ |k,v| ( r[k]||=[] ) << v } } }
       end
 
-      def parsedResponse( r )
-        return JSON.parse( r )
-      rescue JSON::ParserError => e
-        return r # do smth
-      end
+#       def parsedResponse( r )
+#         return JSON.parse( r )
+#       rescue JSON::ParserError => e
+#         return r # do smth
+#       end
 
       rec = self.dbaData( w )
 
@@ -339,7 +339,8 @@ module Storage
     # -- configurations -------------------------
 
 
-
+    # -- dns ------------------------------------
+    #
     def createDNS( params = {} )
 
       ip      = params[ :ip ]    ? params[ :ip ]    : nil
@@ -431,8 +432,12 @@ module Storage
 
       end
     end
+    #
+    # -- dns ------------------------------------
 
 
+    # -- discovery ------------------------------
+    #
     def createDiscovery( params = {} )
 
       dnsId        = params[ :id ]       ? params[ :id ]       : nil
@@ -557,7 +562,7 @@ module Storage
 
           result[service.to_s][dnsShortName] ||= {}
           result[service.to_s][dnsShortName] = {
-            :data => JSON.parse( discoveryData )
+            :data => self.parsedResponse( discoveryData )
           }
 
           array << result
@@ -586,7 +591,7 @@ module Storage
 
           result[host.to_s][service] ||= {}
           result[host.to_s][service] = {
-            :data => JSON.parse( discoveryData )
+            :data => self.parsedResponse( discoveryData.gsub( '=>', ':' ) )
           }
 
           array << result
@@ -594,7 +599,7 @@ module Storage
 
         array = array.reduce( :merge )
 
-        logger.debug( JSON.pretty_generate( array ) )
+#         logger.debug( JSON.pretty_generate( array ) )
 
         return array
 
@@ -619,7 +624,7 @@ module Storage
 
           result[host.to_s][service] ||= {}
           result[host.to_s][service] = {
-            :data => JSON.parse( discoveryData )
+            :data => self.parsedResponse( discoveryData )
           }
 
           array << result
@@ -633,107 +638,46 @@ module Storage
       return nil
 
     end
+    #
+    # -- discovery ------------------------------
 
 
-    def insertData()
+    def nodes( params = {} )
 
-      data = Array.new()
+      status    = params[ :status ]    ? params[ :status ]    : nil # Database::ONLINE
 
-      data << {
-        "replication-live-server"=> {
-        "port"=> 48099,
-        "description"=> "RLS",
-        "port_http"=> 48080,
-        "ior"=> true,
-        "runlevel"=> true,
-        "license"=> true,
-        "application"=> [
-           "contentserver"
-          ]
-        }
-      }
+      result    =
 
-      data << {
-        "springer-cms"=> {
-          "port"=> 49099,
-          "description"=> "CAE Live 1",
-          "cap_connection"=> true,
-          "uapi_cache"=> true,
-          "blob_cache"=> true,
-          "application"=> [
-             "cae",
-             "caches"
-            ]
-        }
-      }
-
-      # puts JSON.pretty_generate( data )
-
-      self.createDNS( { :ip => '10.2.14.156', :short => 'monitoring-16-01', :long => 'monitoring-16-01.coremedia.vm' } )
-      self.createDNS( { :ip => '10.2.14.160', :short => 'monitoring-16-02', :long => 'monitoring-16-02.coremedia.vm' } )
-
-      dns = Hash.new()
-
-      [ 'monitoring-16-01', 'monitoring-16-02', 'foo' ].each do |i|
-
-        dns = self.dnsData( { :short => i } )
-
-        if( dns == nil )
-          logger.debug( 'no data for ' + i )
-        else
-          dnsId        = dns[ :id ]
-          dnsIp        = dns[ :ip ]
-          dnsShortname = dns[ :shortname ]
-          dnsLongname  = dns[ :longname ]
-          dnsCreated   = dns[ :created ]
-          dnsChecksum  = dns[ :checksum ]
-
-          logger.debug( JSON.pretty_generate dns )
-
-          data.each do |d|
-
-            service = d.keys[0].to_s
-
-            logger.debug( sprintf( '%s - %s', dnsShortname, service ) )
-#             data    = d.values
-
-            self.createDiscovery( { :id => dnsId, :ip => dnsIp, :short => dnsShortname, :checksum => dnsChecksum, :service => service, :data => d.values } )
-
-          end
-        end
+      if( status != nil )
+        w = ( Sequel[:status => status ] )
+      else
+        w = nil
       end
-    end
 
+      rec = @database[:v_status].select().where( w ) .to_a
 
-    def readData(  )
+      if( rec.count() != 0 )
 
-      d = self.discoveryData( { :ip => '10.2.14.156' } )
-      logger.debug( JSON.pretty_generate( d ) )
-      logger.debug( '===' )
-      d = self.discoveryData( { :short => 'monitoring-16-01' } )
-      logger.debug( JSON.pretty_generate( d ) )
-      logger.debug( '===' )
-      d = self.discoveryData( { :short => 'monitoring-16-01', :service => 'replication-live-server' } )
-      logger.debug( JSON.pretty_generate( d ) )
-      logger.debug( '===' )
-      d = self.discoveryData( { :service => 'replication-live-server' } )
-      logger.debug( JSON.pretty_generate( d ) )
-      logger.debug( '===' )
+        groupByHost = rec.group_by { |k| k[:shortname] }
 
+        return groupByHost
+      end
+
+      return Hash.new()
 
     end
 
+
+      def parsedResponse( r )
+        return JSON.parse( r )
+      rescue JSON::ParserError => e
+        return r # do smth
+      end
 
   end
-
 
 end
 
 # ---------------------------------------------------------------------------------------
 
-# TESTS
-#m = Storage::SQLite.new()
-#
-# m.insertData()
-#m.readData()
-
+# EOF

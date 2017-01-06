@@ -3,11 +3,7 @@ FROM bodsch/docker-ruby
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
-LABEL version="1.5.0"
-
-EXPOSE 9001
-
-ENV TERM=xterm
+LABEL version="1.5.1"
 
 # ---------------------------------------------------------------------------------------
 
