@@ -21,6 +21,9 @@ module Storage
 
     include Logging
 
+    OFFLINE  = 0
+    ONLINE   = 1
+
     def initialize( params = {} )
 
       @cacheDirectory    = params[:cacheDirectory] ? params[:cacheDirectory] : '/var/cache/monitoring'
@@ -41,7 +44,6 @@ module Storage
         String      :longname  , :size => 250
         DateTime    :created   , :default => Time.now
         String      :checksum  , :size => 32
-        FalseClass  :status
       }
 
       @database.create_table?( :config ) {
@@ -57,6 +59,16 @@ module Storage
 #         foreign_key [ :ip, :shortname, :key ], :name => 'unique_config'
       }
 
+      @database.create_table?( :status ) {
+        primary_key :id
+        foreign_key :dns_id, :dns
+        DateTime    :created   , :default => Time.now
+        DateTime    :updated   , :default => Time.now
+        Integer     :status
+
+        index [ :dns_id, :status ]
+      }
+
       @database.create_table?( :discovery ) {
         primary_key :id
         foreign_key :dns_id, :dns
@@ -66,24 +78,27 @@ module Storage
         DateTime    :created   , :default => Time.now()
 
         index [ :dns_id, :service, :port ]
-#        foreign_key [:shortname, :service], :name => 'unique_discovery'
       }
 
-      @database.create_table?( :result ) {
+      @database.create_table?( :measurements ) {
         primary_key :id
         foreign_key :dns_id, :dns
         foreign_key :discovery_id, :discovery
-        String      :service   , :size => 128, :key => true, :index => true, :unique => true, :null => false
         String      :data      , :text => true, :null => false
         DateTime    :created   , :default => Time.now()
 
-        index [:dns_id, :discovery_id, :service ]
-#         foreign_key [:shortname], :dns
-#         foreign_key [:service]  , :discovery
+        index [ :dns_id, :discovery_id ]
       }
 
       @database.create_or_replace_view( :v_discovery,
-        'select dns.ip, dns.shortname, dns.created, discovery.* from dns as dns, discovery as discovery where dns.id = discovery.dns_id' )
+        'select
+          dns.ip, dns.shortname, dns.created,
+          discovery.*
+        from
+          dns as dns, discovery as discovery
+        where
+          dns.id = discovery.dns_id'
+      )
 
       @database.create_or_replace_view( :v_config,
         'select
@@ -94,6 +109,14 @@ module Storage
         order by key'
       )
 
+      @database.create_or_replace_view( :v_status,
+        'select
+          d.*,
+          s.*
+        from
+          dns as d, status as s
+        where d.id = s.dns_id'
+      )
 
     end
 
@@ -323,7 +346,8 @@ module Storage
       short   = params[ :short ] ? params[ :short ] : nil
       long    = params[ :long ]  ? params[ :long ]  : nil
 
-      dns = @database[:dns]
+      dns     = @database[:dns]
+      status  = @database[:status]
 
       rec = dns.select(:id).where(
         :ip        => ip.to_s,
@@ -334,13 +358,19 @@ module Storage
       # insert if data not found
       if( rec == nil )
 
-        dns.insert(
+        insertedId = dns.insert(
           :ip        => ip.to_s,
           :shortname => short.to_s,
           :longname  => long.to_s,
           :checksum  => Digest::MD5.hexdigest( [ ip, short, long ].join ),
+          :created   => DateTime.now()
+        )
+
+        status.insert(
+          :dns_id    => insertedId.to_s,
           :created   => DateTime.now(),
-          :status    => isRunning?( long )
+          :updated   => DateTime.now(),
+          :status    => isRunning?( ip )
         )
       end
 
