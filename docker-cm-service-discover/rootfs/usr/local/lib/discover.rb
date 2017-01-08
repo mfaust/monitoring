@@ -202,6 +202,8 @@ class ServiceDiscovery
         logger.info( sprintf( 'add node %s', node ) )
         result = self.addHost( node, payload )
 
+        @db.setStatus( { :ip => ip, :short => short, :status => isRunning?( ip ) } )
+
         logger.debug( result )
       when 'remove'
         logger.info( sprintf( 'remove node %s', node ) )
@@ -741,6 +743,8 @@ class ServiceDiscovery
   def listHosts( host = nil )
 
     hosts = Array.new()
+
+    logger.info( 'TODO - use Database insteed of File - ASAP' )
 
     if( host == nil )
 

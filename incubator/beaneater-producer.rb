@@ -14,7 +14,7 @@ job = {
 
 job = {
   cmd: 'add',
-  node: '192.168.252.170.xip.io',
+  node: 'monitoring-16-01',
   payload: {
     "force": true,
     "discovery": false,

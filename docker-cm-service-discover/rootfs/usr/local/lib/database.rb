@@ -2,7 +2,7 @@
 
 require 'rubygems'
 require 'json'
-require 'logger'
+require 'dalli'
 require 'sequel'
 require 'digest/md5'
 
@@ -13,9 +13,11 @@ require_relative 'tools'
 
 module Storage
 
+
   class File
 
   end
+
 
   class Database
 
@@ -23,6 +25,7 @@ module Storage
 
     OFFLINE  = 0
     ONLINE   = 1
+    PREPARE  = 99
 
     def initialize( params = {} )
 
@@ -62,8 +65,8 @@ module Storage
       @database.create_table?( :status ) {
         primary_key :id
         foreign_key :dns_id, :dns
-        DateTime    :created   , :default => Time.now
-        DateTime    :updated   , :default => Time.now
+        DateTime    :created   , :default => Time.now()
+        DateTime    :updated   , :default => Time.now()
         Integer     :status
 
         index [ :dns_id, :status ]
@@ -76,6 +79,7 @@ module Storage
         Integer     :port      , :null => false
         String      :data      , :text => true, :null => false
         DateTime    :created   , :default => Time.now()
+        DateTime    :updated   , :default => Time.now()
 
         index [ :dns_id, :service, :port ]
       }
@@ -85,14 +89,16 @@ module Storage
         foreign_key :dns_id, :dns
         foreign_key :discovery_id, :discovery
         String      :data      , :text => true, :null => false
+        String      :checksum  , :size => 32
         DateTime    :created   , :default => Time.now()
+        DateTime    :updated   , :default => Time.now()
 
         index [ :dns_id, :discovery_id ]
       }
 
       @database.create_or_replace_view( :v_discovery,
         'select
-          dns.ip, dns.shortname, dns.created,
+          dns.id as dns_id, dns.ip, dns.shortname, dns.created,
           discovery.*
         from
           dns as dns, discovery as discovery
@@ -116,6 +122,19 @@ module Storage
         from
           dns as d, status as s
         where d.id = s.dns_id'
+      )
+
+      @database.create_or_replace_view( :v_measurements,
+        'select
+          dns.ip, dns.shortname,
+          discovery.port, discovery.service,
+          m.id, m.dns_id, m.discovery_id, m.checksum, m.data
+        from
+          dns as dns, discovery as discovery, measurements as m
+        where
+          dns.id = m.dns_id  and discovery.id = m.discovery_id
+        order by
+          m.id, m.dns_id, m.discovery_id'
       )
 
     end
@@ -292,12 +311,6 @@ module Storage
         {}.tap{ |r| hashes.each{ |h| h.each{ |k,v| ( r[k]||=[] ) << v } } }
       end
 
-#       def parsedResponse( r )
-#         return JSON.parse( r )
-#       rescue JSON::ParserError => e
-#         return r # do smth
-#       end
-
       rec = self.dbaData( w )
 
       if( rec.count() != 0 )
@@ -348,7 +361,6 @@ module Storage
       long    = params[ :long ]  ? params[ :long ]  : nil
 
       dns     = @database[:dns]
-      status  = @database[:status]
 
       rec = dns.select(:id).where(
         :ip        => ip.to_s,
@@ -367,12 +379,8 @@ module Storage
           :created   => DateTime.now()
         )
 
-        status.insert(
-          :dns_id    => insertedId.to_s,
-          :created   => DateTime.now(),
-          :updated   => DateTime.now(),
-          :status    => isRunning?( ip )
-        )
+        self.setStatus( { :ip => ip, :short => short, :status => 99 } )
+
       end
 
     end
@@ -501,9 +509,6 @@ module Storage
 
     def discoveryData( params = {} )
 
-      logger.debug()
-      logger.debug( params )
-
       ip      = params[ :ip ]      ? params[ :ip ]      : nil
       short   = params[ :short ]   ? params[ :short ]   : nil
       service = params[ :service ] ? params[ :service ] : nil
@@ -527,7 +532,7 @@ module Storage
 
       def dbaData( w )
 
-        return  @database[:v_discovery].select( :ip, :shortname, :created, :service, :data ).where( w ).to_a
+        return  @database[:v_discovery].select( :dns_id, :id, :ip, :shortname, :created, :service, :port, :data ).where( w ).to_a
 
       end
 
@@ -558,11 +563,15 @@ module Storage
 
           dnsShortName  = data.dig( :shortname ).to_s
           service       = data.dig( :service ).to_s
+          dnsId         = data.dig( :dns_id ).to_i
+          discoveryId   = data.dig( :id ).to_i
           discoveryData = data.dig( :data )
 
           result[service.to_s][dnsShortName] ||= {}
           result[service.to_s][dnsShortName] = {
-            :data => self.parsedResponse( discoveryData )
+            :dns_id       => dnsId,
+            :discovery_id => discoveryId,
+            :data         => self.parsedResponse( discoveryData.gsub( '=>', ':' ) )
           }
 
           array << result
@@ -587,11 +596,15 @@ module Storage
 
           dnsShortName  = data.dig( :dns_shortname ).to_s
           service       = data.dig( :service ).to_s
+          dnsId         = data.dig( :dns_id ).to_i
+          discoveryId   = data.dig( :id ).to_i
           discoveryData = data.dig( :data )
 
           result[host.to_s][service] ||= {}
           result[host.to_s][service] = {
-            :data => self.parsedResponse( discoveryData.gsub( '=>', ':' ) )
+            :dns_id       => dnsId,
+            :discovery_id => discoveryId,
+            :data         => self.parsedResponse( discoveryData.gsub( '=>', ':' ) )
           }
 
           array << result
@@ -620,11 +633,15 @@ module Storage
         else
           result[host.to_s] ||= {}
 
-          discoveryData  = rec.first[:data] # d.map( &:data )[0].to_json
+          dnsId         = rec.first[:dns_id].to_i
+          discoveryId   = rec.first[:id].to_i
+          discoveryData = rec.first[:data]
 
           result[host.to_s][service] ||= {}
           result[host.to_s][service] = {
-            :data => self.parsedResponse( discoveryData )
+            :dns_id       => dnsId,
+            :discovery_id => discoveryId,
+            :data         => self.parsedResponse( discoveryData.gsub( '=>', ':' ) )
           }
 
           array << result
@@ -640,6 +657,170 @@ module Storage
     end
     #
     # -- discovery ------------------------------
+
+
+    def createMeasurements( params = {} )
+
+      dnsId        = params[ :dns_id ]       ? params[ :dns_id ]       : nil
+      discoveryId  = params[ :discovery_id ] ? params[ :discovery_id ] : nil
+      data         = params[ :data ]         ? params[ :data ]         : nil
+
+      if( dnsId == nil || discoveryId == nil )
+
+        logger.error( 'wrong data' )
+        return {}
+      end
+
+
+      checksum = Digest::MD5.hexdigest( [ dnsId.to_i, discoveryId.to_i, data ].join('-') )
+
+      measurements = @database[:measurements]
+
+      rec = measurements.select( :dns_id, :discovery_id, :checksum ).where(
+        :dns_id       => dnsId.to_s,
+        :discovery_id => discoveryId.to_i
+      ).to_a
+
+      if( rec.count() == 0 )
+
+        return measurements.insert(
+
+          :dns_id       => dnsId.to_i,
+          :discovery_id => discoveryId.to_i,
+          :data         => data.to_s,
+          :checksum     => checksum,
+          :created      => DateTime.now()
+        )
+      else
+
+        dbaChecksum = rec.first[:checksum].to_s
+
+        logger.debug( checksum )
+        logger.debug( dbaChecksum )
+
+        if( dbaChecksum != checksum )
+
+          measurements.where(
+           ( Sequel[:dns_id       => dnsId.to_i] ) &
+           ( Sequel[:discovery_id => discoveryId.to_i] )
+          ).update(
+            :checksum  => checksum,
+            :data      => data.to_s,
+            :updated   => DateTime.now()
+          )
+
+        elsif( dbaChecksum == checksum )
+
+          logger.debug( 'identical data' )
+          return
+        else
+          #
+        end
+      end
+
+    end
+
+
+    def measurements( params = {} )
+
+      logger.debug( params )
+
+      ip      = params[ :ip ]      ? params[ :ip ]      : nil
+      short   = params[ :short ]   ? params[ :short ]   : nil
+      service = params[ :service ] ? params[ :service ] : nil
+
+      array     = Array.new()
+      result    = Hash.new()
+
+      if( ( ip != nil || short != nil ) )
+
+        if( ip != nil )
+          host = ip
+        end
+        if( short != nil )
+          host = short
+        end
+      else
+        host = nil
+      end
+
+      # ---------------------------------------------------------------------------------
+
+      def dbaData( w )
+
+        return  @database[:v_measurements].select(:ip, :shortname, :service, :port, :data).where( w ).to_a
+
+      end
+
+      if( service == nil && host == nil )
+
+        # TODO
+        logger.error( '( service == nil && host == nil )' )
+#
+#         rec = self.dbaData( nil )
+#
+#         groupByHost = rec.group_by { |k| k[:shortname] }
+#
+#         return groupByHost.keys
+
+      #  { :short => 'monitoring-16-01', :service => 'replication-live-server' }
+      elsif( service != nil && host == nil )
+
+        # TODO
+        logger.debug( '( service != nil && host == nil )' )
+
+      # { :short => 'monitoring-16-01' }
+      # { :ip => '10.2.14.156' }
+      elsif( service == nil && host != nil )
+
+        logger.debug( '( service == nil && host != nil )' )
+
+        w = ( Sequel[:ip => ip.to_s] ) | ( Sequel[:shortname => short.to_s] )
+
+        rec = self.dbaData( w )
+
+        if( rec.count() == 0 )
+          return nil
+        else
+
+          result[host.to_s] ||= {}
+
+          rec.each do |data|
+
+            dnsIp         = data.dig( :ip ).to_s
+            dnsShortName  = data.dig( :shortname ).to_s
+            service       = data.dig( :service ).to_s
+            port          = data.dig( :port ).to_i
+            measurements  = data.dig( :data )
+
+            result[host.to_s][service.to_s] ||= {}
+            result[host.to_s][service.to_s] = {
+              :service  => service,
+              :port     => port,
+              :data     => self.parsedResponse( measurements.gsub( '=>', ':' ) )
+            }
+
+            array << result
+          end
+
+          array = array.reduce( :merge )
+
+#           logger.debug( JSON.pretty_generate( array ) )
+        end
+        return array
+
+      # { :short => nil, :service => nil }
+      elsif( service != nil && host != nil )
+
+        # TODO
+        logger.debug( '( service != nil && host != nil )' )
+
+      end
+
+      return nil
+
+    end
+
 
 
     def nodes( params = {} )
@@ -668,13 +849,91 @@ module Storage
     end
 
 
-      def parsedResponse( r )
-        return JSON.parse( r )
-      rescue JSON::ParserError => e
-        return r # do smth
-      end
+    def setStatus( params = {} )
+
+      ip      = params[ :ip ]     ? params[ :ip ]     : nil
+      short   = params[ :short ]  ? params[ :short ]  : nil
+      long    = params[ :long ]   ? params[ :long ]   : nil
+      status  = params[ :status ] ? params[ :status ] : 0
+
+      @database[:status].where(
+        ( Sequel[:ip        => ip.to_s] ) |
+        ( Sequel[:shortname => short.to_s] ) |
+        ( Sequel[:longname  => long.to_s] )
+      ).update(
+        :status     => status.to_i,
+        :updated    => DateTime.now()
+      )
+
+    end
+
+    def parsedResponse( r )
+      return JSON.parse( r )
+    rescue JSON::ParserError => e
+      return r # do smth
+    end
 
   end
+
+
+  class Memcached
+
+    include Logging
+
+    def initialize( params = {} )
+
+      host      = params[:host]      ? params[:host]      : 'localhost'
+      port      = params[:port]      ? params[:port]      : 11211
+      namespace = params[:namespace] ? params[:namespace] : 'monitoring'
+      expire    = params[:expire]    ? params[:expire]    : 2
+
+      memcacheOptions = {
+        :compress   => true,
+        :namespace  => namespace.to_s,
+        :expires_in => ( 60 * expire.to_i )
+      }
+
+      @mc = nil
+
+      begin
+        until( @mc != nil )
+          logger.debug( 'try ...' )
+          @mc = Dalli::Client.new( sprintf( '%s:%s', host, port ), memcacheOptions )
+          sleep( 3 )
+        end
+      rescue => e
+        logger.error( e )
+      end
+    end
+
+    def self.cacheKey( params = {} )
+
+      checksum = Digest::MD5.hexdigest( params.keys.sort.to_s )
+
+      return checksum
+
+    end
+
+    def get( key )
+
+      result = {}
+
+      if( @mc )
+        logger.debug( @mc.stats( :items ) )
+#         sleep(4)
+        result = @mc.get( key )
+      end
+
+      return result
+    end
+
+    def set( key, value )
+
+      return @mc.set( key, value )
+    end
+
+  end
+
 
 end
 

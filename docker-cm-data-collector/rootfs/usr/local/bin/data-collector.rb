@@ -7,7 +7,8 @@
 
 # -----------------------------------------------------------------------------
 
-require_relative '../lib/data-collector'
+# require_relative '../lib/data-collector'
+require_relative '../lib/collector'
 
 # -----------------------------------------------------------------------------
 
@@ -54,12 +55,16 @@ Signal.trap('QUIT') { stop = true }
 
 # -----------------------------------------------------------------------------
 
-r = DataCollector.new( config )
+r = DataCollector::Collector.new( config )
 
-until stop
-  r.run()
-  sleep( 15 )
-end
+r.run()
+
+# r = DataCollector.new( config )
+#
+# until stop
+#   r.run()
+#   sleep( 15 )
+# end
 
 # -----------------------------------------------------------------------------
 

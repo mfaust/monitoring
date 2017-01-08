@@ -922,6 +922,10 @@ class DataCollector
 
     data = @db.discoveryData( { :ip => host, :short => host } )
 
+    if( data == nil )
+      return
+    end
+
 #     logger.debug( JSON.pretty_generate( data[host.to_s] ) )
 
 
