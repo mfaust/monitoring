@@ -7,19 +7,19 @@
 
 # -----------------------------------------------------------------------------
 require 'json'
-require 'uri'
+# require 'uri'
 require 'socket'
 require 'timeout'
 require 'dalli'
 require 'fileutils'
-require 'net/http'
 require 'time'
 require 'date'
 require 'time_difference'
 
 require_relative 'logging'
+require_relative 'jolokia'
 require_relative 'message-queue'
-require_relative 'database'
+require_relative 'storage'
 require_relative 'external-clients'
 
 # -----------------------------------------------------------------------------
@@ -109,8 +109,6 @@ module DataCollector
     # creates mergedHostData.json for every Node
     def buildMergedData()
 
-      logger.debug( "buildMergedData()" )
-
       if( @host == nil )
         logger.error( 'no hostname found' )
         return {}
@@ -121,20 +119,16 @@ module DataCollector
 
       data = @db.discoveryData( { :ip => @host, :short => @host } )
 
-      logger.debug( data )
-
       if( data == nil )
         return false
       end
 
       data.each do |host,d|
 
-        logger.debug( host )
-
         d.each do |service,payload|
 
-          logger.debug( 'merge Data between discovered Services and Property File' )
-          logger.debug( service )
+#          logger.debug( 'merge Data between discovered Services and Property File' )
+#          logger.debug( service )
 
           dnsId       = payload.dig( :dns_id )
           discoveryId = payload.dig( :discovery_id )
@@ -160,8 +154,7 @@ module DataCollector
 
       metricsTomcat     = tomcatApplication['tomcat']      # standard metrics for Tomcat
 
-      logger.debug( data )
-
+#      logger.debug( data )
 
       application = data[:data]['application'] ? data[:data]['application'] : nil
       solr_cores  = data[:data]['cores']       ? data[:data]['cores']       : nil
@@ -177,7 +170,7 @@ module DataCollector
 
             applicationMetrics = tomcatApplication[a]['metrics']
 
-            logger.debug( "  add application metrics for #{a}" )
+#             logger.debug( "  add application metrics for #{a}" )
 
             if( solr_cores != nil )
               data[:data]['metrics'].push( self.mergeSolrCores( applicationMetrics , solr_cores ) )
@@ -196,7 +189,7 @@ module DataCollector
 
       if( tomcatApplication[service] )
 
-        logger.debug( "found #{service} in tomcat application" )
+#         logger.debug( "found #{service} in tomcat application" )
 
         data[:data]['metrics'].push( metricsTomcat['metrics'] )
         data[:data]['metrics'].push( tomcatApplication[service]['metrics'] )
@@ -217,28 +210,27 @@ module DataCollector
 
     def initialize( settings = {} )
 
-      @logDirectory      = settings[:logDirectory]          ? settings[:logDirectory]          : '/var/log/monitoring'
-      @cacheDirectory    = settings[:cacheDirectory]        ? settings[:cacheDirectory]        : '/var/cache/monitoring'
-      @jolokiaHost       = settings[:jolokiaHost]           ? settings[:jolokiaHost]           : 'localhost'
-      @jolokiaPort       = settings[:jolokiaPort]           ? settings[:jolokiaPort]           : 8080
-      @memcacheHost      = settings[:memcacheHost]          ? settings[:memcacheHost]          : 'loclahost'
-      @memcachePort      = settings[:memcachePort]          ? settings[:memcachePort]          : 11211
-      @mqHost            = settings[:mqHost]                ? settings[:mqHost]                : 'localhost'
-      @mqPort            = settings[:mqPort]                ? settings[:mqPort]                : 11300
-      @mqQueue           = settings[:mqQueue]               ? settings[:mqQueue]               : 'mq-collector'
+      @logDirectory       = settings[:logDirectory]          ? settings[:logDirectory]          : '/var/log/monitoring'
+      @cacheDirectory     = settings[:cacheDirectory]        ? settings[:cacheDirectory]        : '/var/cache/monitoring'
+      @jolokiaHost        = settings[:jolokiaHost]           ? settings[:jolokiaHost]           : 'localhost'
+      @jolokiaPort        = settings[:jolokiaPort]           ? settings[:jolokiaPort]           : 8080
+      @memcacheHost       = settings[:memcacheHost]          ? settings[:memcacheHost]          : 'loclahost'
+      @memcachePort       = settings[:memcachePort]          ? settings[:memcachePort]          : 11211
+      @mqHost             = settings[:mqHost]                ? settings[:mqHost]                : 'localhost'
+      @mqPort             = settings[:mqPort]                ? settings[:mqPort]                : 11300
+      @mqQueue            = settings[:mqQueue]               ? settings[:mqQueue]               : 'mq-collector'
 
       @applicationConfig  = settings[:applicationConfigFile] ? settings[:applicationConfigFile] : nil
       @serviceConfig      = settings[:serviceConfigFile]     ? settings[:serviceConfigFile]     : nil
 
-      @db                = Storage::Database.new()
-      @mc                = Storage::Memcached.new( { :host => @memcacheHost, :port => @memcachePort } )
+      @db                 = Storage::Database.new()
+      @mc                 = Storage::Memcached.new( { :host => @memcacheHost, :port => @memcachePort } )
+      @jolokia            = Jolokia::Client.new( { :host => @jolokiaHost, :port => @jolokiaPort } )
 
       @MQSettings = {
         :beanstalkHost => @mqHost,
         :beanstalkPort => @mqPort
       }
-
-      @DEBUG             = true
 
       if( @applicationConfig == nil || @serviceConfig == nil )
         msg = 'no Configuration File given'
@@ -325,7 +317,7 @@ module DataCollector
 
       d = @db.nodes( { :status => 1 } )
 
-      logger.debug( d )
+#       logger.debug( d )
 
       return d
 
@@ -343,7 +335,7 @@ module DataCollector
         :timestamp   => Time.now().to_i
       }
 
-      logger.debug( sprintf( 'create bulk checks for \'%s\'', host ) )
+#       logger.debug( sprintf( 'create bulk checks for \'%s\'', host ) )
 
       data = @db.measurements( { :ip => host, :short => host } )
 
@@ -456,7 +448,7 @@ module DataCollector
       destHost  = parts['host'].to_s.strip
       destPort  = parts['port'].to_s.strip
 
-      logger.debug( sprintf( 'check Port %s on Host %s for sending data', destPort, destHost ) )
+#       logger.debug( sprintf( 'check Port %s on Host %s for sending data', destPort, destHost ) )
 
       result = portOpen?( destHost, destPort )
 
@@ -473,16 +465,15 @@ module DataCollector
     #
     def sendChecksToJolokia( data )
 
-      if( portOpen?( @jolokiaHost, @jolokiaPort ) == false )
-        logger.error( sprintf( 'The Jolokia Service (%s:%s) are not available', @jolokiaHost, @jolokiaPort ) )
+      if( @jolokia.jolokiaIsAvailable?() == false )
 
-        return
+        logger.error( 'jolokia service is not available!' )
+
+        return {
+          :status  => 500,
+          :message => 'jolokia service is not available!'
+        }
       end
-
-      serverUrl = sprintf( "http://%s:%s/jolokia", @jolokiaHost, @jolokiaPort )
-
-      uri       = URI.parse( serverUrl )
-      http      = Net::HTTP.new( uri.host, uri.port )
 
       hostname  = data[:hostname] ? data[:hostname] : nil
       checks    = data[:checks]   ? data[:checks]   : nil
@@ -496,7 +487,7 @@ module DataCollector
 
         c.each do |v,i|
 
-          logger.debug( sprintf( '%d checks for service %s found', i.count, v ) )
+#           logger.debug( sprintf( '%d checks for service %s found', i.count, v ) )
 
           target = i[0]['target'] ? i[0]['target'] : nil
 
@@ -520,86 +511,18 @@ module DataCollector
 
           else
 
-            if( @DEBUG == true )
-
-              tmpFile = sprintf( '%s/%s/request-%s.json'    , @cacheDirectory, hostname,v )
-              File.open( tmpFile , 'w' ) { |f| f.write( JSON.pretty_generate( i ) ) }
-
-            end
-
             targetUrl = target['url']
 
             if( self.checkHostAndService( targetUrl ) == true )
 
-              request = Net::HTTP::Post.new(
-                uri.request_uri,
-                initheader = { 'Content-Type' =>'application/json' }
-              )
-              request.body = i.to_json
+              response  = @jolokia.post( { :payload => i } )
 
-              # default read timeout is 60 secs
-              response = Net::HTTP.start(
-                uri.hostname,
-                uri.port,
-                use_ssl: uri.scheme == "https",
-                :read_timeout => 45
-              ) do |http|
-                begin
-                  http.request( request )
-                rescue Exception => e
-                  logger.warn( sprintf( 'Cannot execute request to %s://%s:%s%s, cause: %s', uri.scheme, uri.hostname, uri.port, uri.request_uri, e ) )
-
-#                   logger.debug( sprintf( ' -> request body: %s', request.body ) )
-                  return
-                rescue => e
-                  logger.warn( sprintf( 'Cannot execute request to %s://%s:%s%s, cause: %s', uri.scheme, uri.hostname, uri.port, uri.request_uri, e ) )
-
-                end
-              end
-
-              result[v] = self.reorganizeData( response.body )
-
-#              tmpResultFile = sprintf( '%s/%s/monitoring.tmp'    , @cacheDirectory, hostname )
-#              resultFile    = sprintf( '%s/%s/monitoring.result' , @cacheDirectory, hostname )
-#
-#              File.open( tmpResultFile , 'w' ) { |f| f.write( JSON.generate( result ) ) }
-#              File.rename( tmpResultFile, resultFile )
-#
-#              if( @supportMemcache == true )
-#
-#                key = sprintf( 'result__%s__%s', hostname, v )
-#
-#                logger.debug( key )
-#
-#                @mc.set( key, result[v] )
-#
-#                if( @DEBUG == true )
-#                  logger.debug( @mc.stats( :items ) )
-#                  logger.debug( JSON.pretty_generate( @mc.get( key ) ) )
-#                end
-#
-#              end
+              result[v] = self.reorganizeData( response[:message] )
 
             end
           end
 
-          if( @supportMemcache == true )
-
-            key = cacheKey( 'result', hostname, v )
-            @mc.set( key, result[v] )
-
-#             if( @DEBUG == true )
-#               logger.debug( @mc.stats( :items ) )
-#               logger.debug( JSON.pretty_generate( @mc.get( key ) ) )
-#             end
-          else
-
-            tmpResultFile = sprintf( '%s/%s/monitoring.tmp'    , @cacheDirectory, hostname )
-            resultFile    = sprintf( '%s/%s/monitoring.result' , @cacheDirectory, hostname )
-
-            File.open( tmpResultFile , 'w' ) { |f| f.write( JSON.generate( result ) ) }
-            File.rename( tmpResultFile, resultFile )
-          end
+          @mc.set( Storage::Memcached.cacheKey( { :host => hostname, :pre => 'result', :service => v } ), result[v] )
 
         end
       end
@@ -615,7 +538,6 @@ module DataCollector
         return nil
       end
 
-      data    = JSON.parse( data )
       result  = Array.new()
 
       data.each do |c|
@@ -772,6 +694,7 @@ module DataCollector
 
       monitoredServer = self.monitoredServer()
 
+      logger.debug( "#{monitoredServer.keys}" )
       logger.debug( 'start' )
 
       monitoredServer.each do |h,d|
@@ -811,8 +734,6 @@ module DataCollector
       end
 
       logger.debug( 'stop' )
-
-
 
     end
 

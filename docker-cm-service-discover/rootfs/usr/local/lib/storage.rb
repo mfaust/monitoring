@@ -38,7 +38,7 @@ module Storage
     def prepare()
 
       @database = Sequel.sqlite( sprintf( '%s/monitoring.db', @cacheDirectory ) )
-      @database.loggers << logger # Logger.new( $stdout, :debug )
+#       @database.loggers << logger # Logger.new( $stdout, :debug )
 
       @database.create_table?( :dns ) {
         primary_key :id
@@ -117,8 +117,8 @@ module Storage
 
       @database.create_or_replace_view( :v_status,
         'select
-          d.ip, d.shortname, d.checksum,
-          s.created, s.updated, s.status
+          d.id as dns_id, d.ip, d.shortname, d.checksum,
+          s.id, s.created, s.updated, s.status
         from
           dns as d, status as s
         where d.id = s.dns_id'
@@ -379,7 +379,7 @@ module Storage
           :created   => DateTime.now()
         )
 
-        self.setStatus( { :ip => ip, :short => short, :status => 99 } )
+        self.setStatus( { :dns_id => insertedId, :ip => ip, :short => short, :status => 99 } )
 
       end
 
@@ -402,8 +402,11 @@ module Storage
 
         id = rec.first[:id].to_i
 
-        @database[:result].where( Sequel[:dns_id => id] ).delete
+        self.setStatus( { :dns_id => id, :status => 99 } )
+
+        @database[:measurements].where( Sequel[:dns_id => id] ).delete
         @database[:discovery].where( Sequel[:dns_id => id] ).delete
+        @database[:status].where( Sequel[:dns_id => id] ).delete
         @database[:dns].where( Sequel[:id => id] ).delete
 
       end
@@ -461,7 +464,7 @@ module Storage
         data.each do |k,v|
 
           p = v.dig( 'port' )
-          logger.debug( sprintf( '%s - %s - %s', dnsShortname, p, k ) )
+#           logger.debug( sprintf( '%s - %s - %s', dnsShortname, p, k ) )
 
           self.writeDiscovery( { :id => dnsId, :ip => dnsIp, :short => dnsShortname, :checksum => dnsChecksum, :port => p, :service => k, :data => v } )
 
@@ -552,7 +555,7 @@ module Storage
       #  { :short => 'monitoring-16-01', :service => 'replication-live-server' }
       elsif( service != nil && host == nil )
 
-        logger.debug( '( service != nil && host == nil )' )
+#         logger.debug( '( service != nil && host == nil )' )
         w = ( Sequel[:service => service.to_s] )
 
         rec = self.dbaData( w )
@@ -618,7 +621,7 @@ module Storage
 
       elsif( service != nil && host != nil )
 
-        logger.debug( '( service != nil && host != nil )' )
+#         logger.debug( '( service != nil && host != nil )' )
         w = (
           (Sequel[:ip => ip.to_s] ) |
           (Sequel[:shortname => short.to_s] )
@@ -671,7 +674,6 @@ module Storage
         return {}
       end
 
-
       checksum = Digest::MD5.hexdigest( [ dnsId.to_i, discoveryId.to_i, data ].join('-') )
 
       measurements = @database[:measurements]
@@ -695,8 +697,8 @@ module Storage
 
         dbaChecksum = rec.first[:checksum].to_s
 
-        logger.debug( checksum )
-        logger.debug( dbaChecksum )
+#         logger.debug( checksum )
+#         logger.debug( dbaChecksum )
 
         if( dbaChecksum != checksum )
 
@@ -711,7 +713,7 @@ module Storage
 
         elsif( dbaChecksum == checksum )
 
-          logger.debug( 'identical data' )
+#           logger.debug( 'identical data' )
           return
         else
           #
@@ -722,8 +724,6 @@ module Storage
 
 
     def measurements( params = {} )
-
-      logger.debug( params )
 
       ip      = params[ :ip ]      ? params[ :ip ]      : nil
       short   = params[ :short ]   ? params[ :short ]   : nil
@@ -767,13 +767,13 @@ module Storage
       elsif( service != nil && host == nil )
 
         # TODO
-        logger.debug( '( service != nil && host == nil )' )
+#         logger.debug( '( service != nil && host == nil )' )
 
       # { :short => 'monitoring-16-01' }
       # { :ip => '10.2.14.156' }
       elsif( service == nil && host != nil )
 
-        logger.debug( '( service == nil && host != nil )' )
+#         logger.debug( '( service == nil && host != nil )' )
 
         w = ( Sequel[:ip => ip.to_s] ) | ( Sequel[:shortname => short.to_s] )
 
@@ -813,7 +813,7 @@ module Storage
       elsif( service != nil && host != nil )
 
         # TODO
-        logger.debug( '( service != nil && host != nil )' )
+#         logger.debug( '( service != nil && host != nil )' )
 
       end
 
@@ -851,26 +851,69 @@ module Storage
 
     def setStatus( params = {} )
 
+      dnsId   = params[ :dns_id ] ? params[ :dns_id ] : nil
       ip      = params[ :ip ]     ? params[ :ip ]     : nil
       short   = params[ :short ]  ? params[ :short ]  : nil
       long    = params[ :long ]   ? params[ :long ]   : nil
       status  = params[ :status ] ? params[ :status ] : 0
 
-      @database[:status].where(
-        ( Sequel[:ip        => ip.to_s] ) |
-        ( Sequel[:shortname => short.to_s] ) |
-        ( Sequel[:longname  => long.to_s] )
-      ).update(
-        :status     => status.to_i,
-        :updated    => DateTime.now()
-      )
+      if( ip == nil || short == nil )
+        return
+      end
+
+      # shortway insert ...
+      if( dnsId != nil )
+
+        @database[:status].insert(
+          :dns_id   => dnsId.to_i,
+          :status   => status
+        )
+        return
+      end
+
+      # check existing status entry
+      rec = @database[:v_status].select(:id, :dns_id).where(
+        Sequel[:ip        => ip.to_s] |
+        Sequel[:shortname => short.to_s]
+      ).to_a
+
+      if( rec.count() == 0 )
+
+        # get dns data to prper create entry
+        dnsData = self.dnsData( { :ip => ip, :short => short } )
+
+        statusId  = rec.first[:id].to_i
+        dnsId     = rec.first[:dns_id].to_i
+
+        @database[:status].insert(
+          :dns_id   => dnsId.to_i,
+          :status   => status
+        )
+
+      else
+
+        # update status
+        statusId  = rec.first[:id].to_i
+        dnsId     = rec.first[:dns_id].to_i
+
+        @database[:status].where(
+          ( Sequel[:id     => statusId] &
+            Sequel[:dns_id => dnsId]
+          )
+        ).update(
+          :status     => status,
+          :updated    => DateTime.now()
+        )
+      end
 
     end
 
     def parsedResponse( r )
+
       return JSON.parse( r )
     rescue JSON::ParserError => e
       return r # do smth
+
     end
 
   end
@@ -919,7 +962,7 @@ module Storage
       result = {}
 
       if( @mc )
-        logger.debug( @mc.stats( :items ) )
+#         logger.debug( @mc.stats( :items ) )
 #         sleep(4)
         result = @mc.get( key )
       end

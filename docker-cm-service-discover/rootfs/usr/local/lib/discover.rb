@@ -6,25 +6,22 @@
 # v1.3.1
 # -----------------------------------------------------------------------------
 
-require 'socket'
-require 'timeout'
+# require 'timeout'
 require 'json'
 require 'yaml'
 require 'fileutils'
-require 'net/http'
-require 'uri'
-require 'sqlite3'
+# require 'uri'
+# require 'sqlite3'
 
 require_relative 'logging'
+require_relative 'jolokia'
 require_relative 'message-queue'
+require_relative 'storage'
 require_relative 'tools'
-require_relative 'database'
 
 # -------------------------------------------------------------------------------------------------------------------
 
 class ServiceDiscovery
-
-#   attr_reader :status, :message, :services
 
   include Logging
 
@@ -87,11 +84,13 @@ class ServiceDiscovery
     @serviceConfig     = settings[:serviceConfigFile] ? settings[:serviceConfigFile]   : nil
     @scanPorts         = settings[:scanPorts]         ? settings[:scanPorts]           : ports
 
-    if( ! File.exist?( @cacheDirectory ) )
-      Dir.mkdir( @cacheDirectory )
-    end
+#     if( ! File.exist?( @cacheDirectory ) )
+#       Dir.mkdir( @cacheDirectory )
+#     end
 
     @db                 = Storage::Database.new()
+
+    @jolokia            = Jolokia::Client.new( { :host => @jolokiaHost, :port => @jolokiaPort } )
 
     version             = '1.4.0'
     date                = '2017-01-05'
@@ -136,17 +135,6 @@ class ServiceDiscovery
       logger.error( 'wrong result (no yaml)')
       logger.error( "#{$!}" )
       exit 1
-    end
-
-  end
-
-
-  def configure( options = {} )
-
-    if( options )
-      config = JSON.pretty_generate( options )
-
-      logger.debug( config )
     end
 
   end
@@ -202,7 +190,7 @@ class ServiceDiscovery
         logger.info( sprintf( 'add node %s', node ) )
         result = self.addHost( node, payload )
 
-        @db.setStatus( { :ip => ip, :short => short, :status => isRunning?( ip ) } )
+        @db.setStatus( { :ip => node, :short => node, :status => isRunning?( node ) } )
 
         logger.debug( result )
       when 'remove'
@@ -255,22 +243,9 @@ class ServiceDiscovery
   end
 
 
-  def jolokiaIsAvailable?()
-
-    # if our jolokia proxy available?
-    if( ! portOpen?( @jolokiaHost, @jolokiaPort ) )
-      logger.error( 'jolokia service is not available!' )
-      logger.error( 'skip service discovery' )
-      return false
-    end
-
-    return true
-  end
-
-
   def discoverApplication( host, port )
 
-    logger.debug( 'discover Application ...' )
+#     logger.debug( 'discover Application ...' )
 
     services = Array.new
 
@@ -288,11 +263,6 @@ class ServiceDiscovery
       end
     else
 
-      uri          = URI.parse( sprintf( 'http://%s:%s', @jolokiaHost, @jolokiaPort ) )
-      http         = Net::HTTP.new( uri.host, uri.port )
-
-      request      = Net::HTTP::Post.new( '/jolokia/' )
-      request.add_field('Content-Type', 'application/json')
 
       h     = Hash.new()
       array = Array.new()
@@ -325,159 +295,152 @@ class ServiceDiscovery
         :config    => { "ignoreErrors" => true, "ifModifiedSince" => true, "canonicalNaming" => true }
       }
 
-      body = JSON.pretty_generate( array )
+      response = @jolokia.post( { :payload => array } )
 
-      logger.debug( body )
+      if( response[:status] != 200 )
 
-      request.body = body
+        logger.error( response[:message] )
 
-      begin
-
-        response     = http.request( request )
-
-      rescue Timeout::Error, Errno::ECONNREFUSED, Errno::EINVAL, Errno::ECONNRESET, EOFError, Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError => error
-
-        logger.error( error )
-
-        case error
-        when Errno::ECONNREFUSED
-          logger.error( 'connection refused' )
-        when Errno::ECONNRESET
-          logger.error( 'connection reset' )
-        end
+        return response
 
       else
 
-        body         = JSON.parse( response.body )
+        body = response.dig(:message)
 
-        logger.debug( JSON.pretty_generate( body ) )
+        if( body != nil )
 
-        # #1 == Runtime
-        runtime = body[0]
-        # #2  == Manager
-        manager = body[1]
-        # #3  == engine
-        engine = body[2]
+          # #1 == Runtime
+          runtime = body[0]
+          # #2  == Manager
+          manager = body[1]
+          # #3  == engine
+          engine = body[2]
 
-        if( runtime['status'] && runtime['status'] == 200 )
+#           logger.debug( JSON.pretty_generate( runtime ) )
+#           logger.debug( JSON.pretty_generate( manager ) )
+#           logger.debug( JSON.pretty_generate( engine ) )
 
-          value = runtime['value'] ? runtime['value'] : nil
+          if( runtime['status'] && runtime['status'] == 200 )
 
-          if( value != nil )
+            value = runtime['value'] ? runtime['value'] : nil
 
-            classPath  = value['ClassPath'] ? value['ClassPath'] : nil
+            if( value != nil )
 
-            if( classPath.include?( 'cm7-tomcat-installation' ) )
+              classPath  = value['ClassPath'] ? value['ClassPath'] : nil
 
-              logger.debug( 'found pre cm160x Portstyle (‎possibly cm7.x)' )
-              value = manager['value'] ? manager['value'] : nil
+              if( classPath.include?( 'cm7-tomcat-installation' ) )
 
-              regex = /context=(.*?),/
-              value.each do |context,v|
+                logger.debug( 'found pre cm160x Portstyle (‎possibly cm7.x)' )
+                value = manager['value'] ? manager['value'] : nil
 
-                part = context.match( regex )
+                regex = /context=(.*?),/
+                value.each do |context,v|
 
-                if( part != nil && part.length > 1 )
+                  part = context.match( regex )
 
-                  appName = part[1].gsub!( '/', '' )
+                  if( part != nil && part.length > 1 )
 
-                  if( appName == 'manager' )
-                    # skip 'manager'
-                    next
+                    appName = part[1].gsub!( '/', '' )
+
+                    if( appName == 'manager' )
+                      # skip 'manager'
+                      next
+                    end
+
+                    logger.debug( sprintf( ' - ‎recognized application: %s', appName ) )
+                    services.push( appName )
                   end
-
-                  logger.debug( sprintf( ' - ‎recognized application: %s', appName ) )
-                  services.push( appName )
                 end
-              end
 
-              logger.debug( services )
+                logger.debug( services )
 
-              # coremedia = cms, mls, rls?
-              # caefeeder = caefeeder-preview, cae-feeder-live?
-              if( ( services.include?( 'coremedia' ) ) || ( services.include?( 'caefeeder' ) ) )
+                # coremedia = cms, mls, rls?
+                # caefeeder = caefeeder-preview, cae-feeder-live?
+                if( ( services.include?( 'coremedia' ) ) || ( services.include?( 'caefeeder' ) ) )
 
-                value = engine['value'] ? engine['value'] : nil
+                  value = engine['value'] ? engine['value'] : nil
 
-                if( engine['status'].to_i == 200 )
+                  if( engine['status'].to_i == 200 )
 
-                  baseDir = value['baseDir'] ? value['baseDir'] : nil
+                    baseDir = value['baseDir'] ? value['baseDir'] : nil
 
-                  regex = /
-                    ^                           # Starting at the front of the string
-                    (.*)                        #
-                    \/cm7-                      #
-                    (?<service>.+[a-zA-Z0-9-])  #
-                    (.*)-tomcat                 #
-                    $
-                  /x
+                    regex = /
+                      ^                           # Starting at the front of the string
+                      (.*)                        #
+                      \/cm7-                      #
+                      (?<service>.+[a-zA-Z0-9-])  #
+                      (.*)-tomcat                 #
+                      $
+                    /x
 
-                  parts = baseDir.match( regex )
+                    parts = baseDir.match( regex )
 
-                  if( parts )
-                    service = parts['service'].to_s.strip.tr('. ', '')
-                    services.delete( "coremedia" )
-                    services.delete( "caefeeder" )
-                    services.push( service )
+                    if( parts )
+                      service = parts['service'].to_s.strip.tr('. ', '')
+                      services.delete( "coremedia" )
+                      services.delete( "caefeeder" )
+                      services.push( service )
 
-                    logger.debug( sprintf( '  => %s', service ) )
+                      logger.debug( sprintf( '  => %s', service ) )
+                    else
+                      logger.error( 'unknown error' )
+                      logger.error( parts )
+                    end
                   else
-                    logger.error( 'unknown error' )
-                    logger.error( parts )
+                    logger.error( sprintf( 'response status %d', engine['status'].to_i ) )
                   end
-                else
-                  logger.error( sprintf( 'response status %d', engine['status'].to_i ) )
                 end
-              end
 
-              # blueprint = cae-preview or delivery?editor
-              if( services.include?( 'blueprint' ) )
+                # blueprint = cae-preview or delivery?editor
+                if( services.include?( 'blueprint' ) )
 
-                value = engine['value'] ? engine['value'] : nil
+                  value = engine['value'] ? engine['value'] : nil
 
-                if( engine['status'].to_i == 200 )
+                  if( engine['status'].to_i == 200 )
 
-                  jvmRoute = value['jvmRoute'] ? value['jvmRoute'] : nil
+                    jvmRoute = value['jvmRoute'] ? value['jvmRoute'] : nil
 
-                  if( ( jvmRoute != nil ) && ( jvmRoute.include?( 'studio' ) ) )
-                    services.delete( "blueprint" )
-                    services.push( "cae-preview" )
+                    if( ( jvmRoute != nil ) && ( jvmRoute.include?( 'studio' ) ) )
+                      services.delete( "blueprint" )
+                      services.push( "cae-preview" )
+                    else
+                      services.delete( "blueprint" )
+                      services.push( "delivery" )
+                    end
                   else
-                    services.delete( "blueprint" )
-                    services.push( "delivery" )
+                    logger.error( sprintf( 'response status %d', engine['status'].to_i ) )
                   end
-                else
-                  logger.error( sprintf( 'response status %d', engine['status'].to_i ) )
                 end
-              end
 
-            # cm160x - or all others
-            else
-
-              regex = /
-                ^                           # Starting at the front of the string
-                (.*)                        #
-                \/coremedia\/               #
-                (?<service>.+[a-zA-Z0-9-])  #
-                \/current                   #
-                (.*)                        #
-                $
-              /x
-
-              parts = classPath.match( regex )
-
-              if( parts )
-                service = parts['service'].to_s.strip.tr('. ', '')
-                services.push( service )
-
-                logger.debug( sprintf( '  => %s', service ) )
+              # cm160x - or all others
               else
-                logger.error( 'unknown error' )
-                logger.error( parts )
-              end
-            end
 
+                regex = /
+                  ^                           # Starting at the front of the string
+                  (.*)                        #
+                  \/coremedia\/               #
+                  (?<service>.+[a-zA-Z0-9-])  #
+                  \/current                   #
+                  (.*)                        #
+                  $
+                /x
+
+                parts = classPath.match( regex )
+
+                if( parts )
+                  service = parts['service'].to_s.strip.tr('. ', '')
+                  services.push( service )
+
+                  logger.debug( sprintf( '  => %s', service ) )
+                else
+                  logger.error( 'unknown error' )
+                  logger.error( parts )
+                end
+              end
+
+            end
           end
+
         end
 
       end
@@ -546,22 +509,10 @@ class ServiceDiscovery
 
     logger.info( sprintf( 'delete Host \'%s\'',  host ) )
 
-    @db.removeDNS( { :ip => host, :short => host, :long => host } )
-
     status  = 400
     message = 'Host not in Monitoring'
 
-    cacheDirectory  = sprintf( '%s/%s', @cacheDirectory, host )
-
-    if( Dir.exist?( cacheDirectory ) )
-
-      FileUtils.rm_r( Dir.glob( sprintf( '%s/*', cacheDirectory ) ) )
-      FileUtils.rmdir( cacheDirectory, :verbose => true )
-
-#      # hmmm ... prepare our config.json or not?
-#      ['discovery.json','host.json','mergedHostData.json'].each do |f|
-#        FileUtils.rm( sprintf( '%s/%s', @cacheDirectory, f ) , :force => true )
-#      end
+    if( @db.removeDNS( { :ip => host, :short => host, :long => host } ) != nil )
 
       status  = 200
       message = 'Host successful removed'
@@ -579,48 +530,29 @@ class ServiceDiscovery
 
     logger.info( sprintf( 'Adding host \'%s\'', host ) )
 
-#     services = options['services'] ? options['services'] : []
-#     force    = options['force']    ? options['force']    : false
-#
-#     if( services.count != 0 )
-#
-#       logger.info( 'Use additional services:' )
-#       logger.info( "  #{services}" )
-#     end
+    if( @db.discoveryData( { :ip => host, :short => host, :long => host } ) != nil )
 
-    # build Host CacheDirectory (if not exitsts)
-    cacheDirectory  = sprintf( '%s/%s', @cacheDirectory, host )
-
-    if( !File.exist?( cacheDirectory ) )
-      Dir.mkdir( cacheDirectory )
-    end
-
-    discoveryFileName = 'discovery.json'
-
-    if( File.exist?( sprintf( '%s/%s', cacheDirectory, discoveryFileName ) ) == true )
-
-      status  = 409
-      message = 'Host already created'
+      logger.error( 'Host already created' )
 
       return {
-        :status  => status,
-        :message => message
+        :status  => 409,
+        :message => 'Host already created'
+      }
+
+    end
+
+    if( @jolokia.jolokiaIsAvailable?() == false )
+
+      logger.error( 'jolokia service is not available!' )
+
+      return {
+        :status  => 500,
+        :message => 'jolokia service is not available!'
       }
     end
 
-    # first, we check if our jolokia accessable
-    if( ! jolokiaIsAvailable?() )
-
-      status  = 400
-      message = 'Jolokia not available'
-
-      return {
-        :status  => status,
-        :message => message
-      }
-    end
-
-    hostInfo = hostResolve( host )
+    # create DNS Information
+    hostInfo      = hostResolve( host )
 
     ip            = hostInfo[:ip]    ? hostInfo[:ip]    : nil
     shortHostName = hostInfo[:short] ? hostInfo[:short] : nil
@@ -629,12 +561,9 @@ class ServiceDiscovery
     # second, if the that we whant monitored, available
     if( isRunning?( ip ) == false )
 
-      status  = 400
-      message = 'Host not available'
-
       return {
-        :status  => status,
-        :message => message
+        :status  => 400,
+        :message => 'Host not available'
       }
     end
 
@@ -649,7 +578,7 @@ class ServiceDiscovery
       ports = @scanPorts
     end
 
-    logger.debug( "use ports: #{ports}" )
+#     logger.debug( "use ports: #{ports}" )
 
     discover = Hash.new()
     services = Hash.new()
@@ -660,14 +589,18 @@ class ServiceDiscovery
 
       open = portOpen?( longHostName, p )
 
-      logger.debug( sprintf( 'Host: %s | Port: %s   - status %s', host, p, open ) )
+#       logger.debug( sprintf( 'Host: %s | Port: %s   - status %s', host, p, open ) )
 
       if( open == true )
 
         names = self.discoverApplication( host, p )
 
-        names.each do |name|
-          services.merge!( { name => { 'port' => p } } )
+        if( names != nil )
+
+          names.each do |name|
+            services.merge!( { name => { 'port' => p } } )
+          end
+
         end
 
       end
@@ -677,13 +610,7 @@ class ServiceDiscovery
     # merge discovered services with cm-services.yaml
     services = self.createHostConfig( services )
 
-    # TODO
-    # hook to create database entry
-    File.open( sprintf( '%s/%s', cacheDirectory, discoveryFileName ) , 'w' ) { |f| f.write( JSON.pretty_generate( services ) ) }
-
-    logger.debug( JSON.pretty_generate( services ) )
-
-    dns = @db.dnsData( { :short => shortHostName } )
+    dns      = @db.dnsData( { :short => shortHostName } )
 
     if( dns == nil )
       logger.debug( 'no data for ' + shortHostName )
@@ -746,64 +673,69 @@ class ServiceDiscovery
 
     logger.info( 'TODO - use Database insteed of File - ASAP' )
 
-    if( host == nil )
+    return {}
 
-      data = @db.discoveryData()
 
-      Dir.chdir( @cacheDirectory )
-      Dir.glob( "**" ) do |f|
+    # CODE above are OBSOLETE
 
-        if( FileTest.directory?( f ) )
-          hosts.push( hostInformation( f, File.basename( f ) ) )
-        end
-      end
-
-      hosts.sort!{ |a,b| a['name'] <=> b['name'] }
-
-      status  = 200
-      message = hosts
-
-      return {
-        :status  => status,
-        :hosts   => message
-      }
-
-    else
-
-      cacheDirectory  = sprintf( '%s/%s', @cacheDirectory, host )
-      discoveryFileName = 'discovery.json'
-
-      file      = sprintf( '%s/%s', cacheDirectory, discoveryFileName )
-
-      if( File.exist?( file ) == true )
-
-        data = File.read( file )
-
-        h              = hostInformation( file, File.basename( cacheDirectory ) )
-        h['services' ] = JSON.parse( data )
-
-        status   = 200
-        message  = h
-        @services = h['services']
-
-        return {
-          :status  => status,
-          :hosts   => message
-        }
-
-      else
-
-        status  = 404
-        message = 'No discovery File found'
-
-        return {
-          :status  => status,
-          :hosts   => nil,
-          :message => message
-        }
-      end
-
-    end
+#     if( host == nil )
+#
+#       data = @db.discoveryData()
+#
+#       Dir.chdir( @cacheDirectory )
+#       Dir.glob( "**" ) do |f|
+#
+#         if( FileTest.directory?( f ) )
+#           hosts.push( hostInformation( f, File.basename( f ) ) )
+#         end
+#       end
+#
+#       hosts.sort!{ |a,b| a['name'] <=> b['name'] }
+#
+#       status  = 200
+#       message = hosts
+#
+#       return {
+#         :status  => status,
+#         :hosts   => message
+#       }
+#
+#     else
+#
+#       cacheDirectory  = sprintf( '%s/%s', @cacheDirectory, host )
+#       discoveryFileName = 'discovery.json'
+#
+#       file      = sprintf( '%s/%s', cacheDirectory, discoveryFileName )
+#
+#       if( File.exist?( file ) == true )
+#
+#         data = File.read( file )
+#
+#         h              = hostInformation( file, File.basename( cacheDirectory ) )
+#         h['services' ] = JSON.parse( data )
+#
+#         status   = 200
+#         message  = h
+#         @services = h['services']
+#
+#         return {
+#           :status  => status,
+#           :hosts   => message
+#         }
+#
+#       else
+#
+#         status  = 404
+#         message = 'No discovery File found'
+#
+#         return {
+#           :status  => status,
+#           :hosts   => nil,
+#           :message => message
+#         }
+#       end
+#
+#     end
   end
 
 
