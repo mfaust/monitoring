@@ -40,7 +40,7 @@ class MBean
     data = Hash.new()
 
 
-      cacheKey = Storage::Memcached.cacheKey( { :host => @Host, :pre => 'result', :service => 'Replicator' } )
+      memcacheKey = Storage::Memcached.cacheKey( { :host => host, :pre => 'result', :service => 'Replicator' } )
 
 #       require 'dalli'
 #
