@@ -132,17 +132,23 @@ module Storage
         index [ :dns_id, :discovery_id ]
       }
 
-      @database.create_or_replace_view( :v_discovery,
-        'select
-          dns.ip, dns.shortname, dns.created,
-          discovery.*
-        from
-          dns as dns, discovery as discovery
-        where
-          dns.id = discovery.dns_id'
-      )
+      if( @database.table_exists?(:v_discovery) == false )
 
-      @database.create_or_replace_view( :v_config,
+        @database.create_view( :v_discovery,
+          'select
+            dns.ip, dns.shortname, dns.created,
+            discovery.*
+          from
+            dns as dns, discovery as discovery
+          where
+            dns.id = discovery.dns_id'
+        )
+
+      end
+
+      if( @database.table_exists?(:v_config) == false )
+
+      @database.create_view( :v_config,
         'select
           dns.ip, dns.shortname, dns.longname, dns.checksum,
           config.id, config.key, config.value
@@ -150,7 +156,8 @@ module Storage
           dns as dns, config as config
         order by key'
       )
-
+      end
+      
       @database.create_or_replace_view( :v_status,
         'select
           d.ip, d.shortname, d.checksum,

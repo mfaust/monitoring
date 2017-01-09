@@ -10,6 +10,8 @@ module ExternalClients
 
   class MySQL
 
+    include Logging
+
     def initialize( params = {} )
 
       @mysqlHost  = params[:host]     ? params[:host]     : 'localhost'
@@ -163,6 +165,8 @@ module ExternalClients
 
   class MongoDb
 
+    include Logging
+
     def initialize( params = {} )
 
       @host = params[:host] ? params[:host] : 'localhost'
@@ -220,6 +224,8 @@ module ExternalClients
 
   class NodeExporter
 
+    include Logging
+
     def initialize( params = {} )
 
       @host      = params[:host]          ? params[:host]          : nil
@@ -245,8 +251,8 @@ module ExternalClients
           # TODO
           # Errorhandling
           if( responseCode != 200 )
-            @log.error( sprintf( ' [%s] - Error', responseCode ) )
-            @log.error( response.body )
+            logger.error( sprintf( ' [%s] - Error', responseCode ) )
+            logger.error( response.body )
           elsif( responseCode == 200 )
 
             body = response.body
@@ -268,8 +274,8 @@ module ExternalClients
           end
         end
       rescue Exception => e
-  #      @log.error( e )
-  #      @log.error( e.backtrace )
+  #      logger.error( e )
+  #      logger.error( e.backtrace )
         raise( e )
 
       end
@@ -521,7 +527,7 @@ module ExternalClients
           :filesystem => self.collectFilesystem( @filesystem )
         }
       rescue Exception => e
-        @log.error( "An error occurred for query: #{e}" )
+        logger.error( "An error occurred for query: #{e}" )
         return false
       end
 

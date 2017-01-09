@@ -96,47 +96,54 @@ module Storage
         index [ :dns_id, :discovery_id ]
       }
 
-      @database.create_or_replace_view( :v_discovery,
-        'select
-          dns.id as dns_id, dns.ip, dns.shortname, dns.created,
-          discovery.*
-        from
-          dns as dns, discovery as discovery
-        where
-          dns.id = discovery.dns_id'
-      )
+      if( @database.table_exists?(:v_discovery) == false )
+        @database.create_view( :v_discovery,
+          'select
+            dns.id as dns_id, dns.ip, dns.shortname, dns.created,
+            discovery.*
+          from
+            dns as dns, discovery as discovery
+          where
+            dns.id = discovery.dns_id', :replace => true
+        )
+      end
 
-      @database.create_or_replace_view( :v_config,
-        'select
-          dns.ip, dns.shortname, dns.longname, dns.checksum,
-          config.id, config.key, config.value
-        from
-          dns as dns, config as config
-        order by key'
-      )
+      if( @database.table_exists?(:v_config) == false )
+        @database.create_view( :v_config,
+          'select
+            dns.ip, dns.shortname, dns.longname, dns.checksum,
+            config.id, config.key, config.value
+          from
+            dns as dns, config as config
+          order by key', :replace => true
+        )
+      end
 
-      @database.create_or_replace_view( :v_status,
-        'select
-          d.id as dns_id, d.ip, d.shortname, d.checksum,
-          s.id, s.created, s.updated, s.status
-        from
-          dns as d, status as s
-        where d.id = s.dns_id'
-      )
+      if( @database.table_exists?(:v_status) == false )
+        @database.create_view( :v_status,
+          'select
+            d.id as dns_id, d.ip, d.shortname, d.checksum,
+            s.id, s.created, s.updated, s.status
+          from
+            dns as d, status as s
+          where d.id = s.dns_id', :replace => true
+        )
+      end
 
-      @database.create_or_replace_view( :v_measurements,
-        'select
-          dns.ip, dns.shortname,
-          discovery.port, discovery.service,
-          m.id, m.dns_id, m.discovery_id, m.checksum, m.data
-        from
-          dns as dns, discovery as discovery, measurements as m
-        where
-          dns.id = m.dns_id  and discovery.id = m.discovery_id
-        order by
-          m.id, m.dns_id, m.discovery_id'
-      )
-
+      if( @database.table_exists?(:v_measurements) == false )
+        @database.create_view( :v_measurements,
+          'select
+            dns.ip, dns.shortname,
+            discovery.port, discovery.service,
+            m.id, m.dns_id, m.discovery_id, m.checksum, m.data
+          from
+            dns as dns, discovery as discovery, measurements as m
+          where
+            dns.id = m.dns_id  and discovery.id = m.discovery_id
+          order by
+            m.id, m.dns_id, m.discovery_id', :replace => true
+        )
+      end
     end
 
 
@@ -951,7 +958,8 @@ module Storage
 
     def self.cacheKey( params = {} )
 
-      checksum = Digest::MD5.hexdigest( params.keys.sort.to_s )
+      params = Hash[params.sort]
+      checksum = Digest::MD5.hexdigest( params.to_s )
 
       return checksum
 

@@ -24,9 +24,6 @@ job = {
       "development",
       "git-0000000"
     ],
-    "config": {
-      "display-name": "blueprint-box"
-    },
     "annotation": false,
     "overview": true
   }

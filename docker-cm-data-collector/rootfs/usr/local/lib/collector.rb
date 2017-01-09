@@ -223,6 +223,19 @@ module DataCollector
       @applicationConfig  = settings[:applicationConfigFile] ? settings[:applicationConfigFile] : nil
       @serviceConfig      = settings[:serviceConfigFile]     ? settings[:serviceConfigFile]     : nil
 
+      version            = '1.5.0'
+      date               = '2017-01-07'
+
+      logger.info( '-----------------------------------------------------------------' )
+      logger.info( ' CoreMedia - DataCollector' )
+      logger.info( "  Version #{version} (#{date})" )
+      logger.info( '  Copyright 2016-2017 Coremedia' )
+      logger.info( "  cache directory located at #{@cacheDirectory}" )
+      logger.info( "  Memcache Service #{@memcacheHost}:#{@memcachePort}" )
+      logger.info( "  Message Queue Service #{@mqHost}:#{@mqPort}/#{@mqQueue}" )
+      logger.info( '-----------------------------------------------------------------' )
+      logger.info( '' )
+
       @db                 = Storage::Database.new()
       @mc                 = Storage::Memcached.new( { :host => @memcacheHost, :port => @memcachePort } )
       @jolokia            = Jolokia::Client.new( { :host => @jolokiaHost, :port => @jolokiaPort } )
@@ -238,19 +251,6 @@ module DataCollector
 
         exit 1
       end
-
-      version            = '1.5.0'
-      date               = '2017-01-07'
-
-      logger.info( '-----------------------------------------------------------------' )
-      logger.info( ' CoreMedia - DataCollector' )
-      logger.info( "  Version #{version} (#{date})" )
-      logger.info( '  Copyright 2016 Coremedia' )
-      logger.info( "  cache directory located at #{@cacheDirectory}" )
-      logger.info( "  Memcache Service #{@memcacheHost}:#{@memcachePort}" )
-      logger.info( "  Message Queue Service #{@mqHost}:#{@mqPort}/#{@mqQueue}" )
-      logger.info( '-----------------------------------------------------------------' )
-      logger.info( '' )
 
     end
 
@@ -517,12 +517,19 @@ module DataCollector
 
               response  = @jolokia.post( { :payload => i } )
 
-              result[v] = self.reorganizeData( response[:message] )
+              if( response[:status].to_i == 200 )
+                result[v] = self.reorganizeData( response[:message] )
+              end
 
             end
           end
 
-          @mc.set( Storage::Memcached.cacheKey( { :host => hostname, :pre => 'result', :service => v } ), result[v] )
+          cacheKey = Storage::Memcached.cacheKey( { :host => hostname, :pre => 'result', :service => v } )
+
+#           logger.debug( { :host => hostname, :pre => 'result', :service => v } )
+#           logger.debug( cacheKey )
+
+          @mc.set( cacheKey, result[v] )
 
         end
       end

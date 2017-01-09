@@ -7,7 +7,6 @@ require 'sequel'
 require 'digest/md5'
 
 require_relative 'logging'
-require_relative 'tools'
 
 # -----------------------------------------------------------------------------
 
@@ -38,7 +37,7 @@ module Storage
     def prepare()
 
       @database = Sequel.sqlite( sprintf( '%s/monitoring.db', @cacheDirectory ) )
-#      @database.loggers << logger # Logger.new( $stdout, :debug )
+#      @database.loggers << logger
 
       @database.create_table?( :dns ) {
         primary_key :id

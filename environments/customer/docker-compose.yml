@@ -190,6 +190,32 @@ services:
       mon:
         ipv4_address: 172.25.0.31
 
+  # single service
+  # use MQ to process data
+  cm-collectd:
+    restart: always
+    build: ../../docker-cm-collectd
+    container_name: cm-collectd
+    hostname: cm-collectd
+    labels:
+      com.dnsdock.image: "cm-collectd"
+      com.dnsdock.alias: "cm-collectd"
+      com.dnsdock.ttl: "30"
+    env_file:
+      - env/cm-collectd.env
+    depends_on:
+      - memcached
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./share/resolv.conf:/etc/resolv.conf:ro
+      - ./data/monitoring:/var/cache/monitoring
+    networks:
+      mon:
+        ipv4_address: 172.25.0.32
+
+
+
+
 
 
   cm-monitoring:
