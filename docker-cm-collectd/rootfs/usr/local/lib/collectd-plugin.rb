@@ -2180,7 +2180,6 @@ module Collecd
 
       monitoredServer = self.monitoredServer()
       data            = nil
-      today           = Time.now().to_s
 
       logger.debug( "#{monitoredServer.keys}" )
 
@@ -2197,10 +2196,11 @@ module Collecd
         # recreate the cache every 10 minutes
         if ( data != nil )
 
-          timestamp = data.dig('timestamp' ) || Time.now().to_s
+          today     = Time.now().to_s
+          timestamp = data.dig( 'timestamp' ) || Time.now().to_s
 
           x = self.timeParser( today, timestamp )
-          logger.debug( x )
+#           logger.debug( x )
 
           if( x[:minutes] >= 10 )
             data = nil
@@ -2211,7 +2211,7 @@ module Collecd
         if( data == nil )
 
           data = @db.discoveryData( { :ip => h, :short => h } )
-          logger.debug( data )
+#           logger.debug( data )
 
           data = data[h]
           data['timestamp'] = Time.now().to_s
@@ -2237,9 +2237,6 @@ module Collecd
           cacheKey     = Storage::Memcached.cacheKey( { :host => h, :pre => 'result', :service => service } )
 
           result = @mc.get( cacheKey )
-
-
-          next
 
           case service
           when 'mongodb'

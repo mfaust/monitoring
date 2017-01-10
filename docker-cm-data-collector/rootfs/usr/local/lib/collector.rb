@@ -255,6 +255,21 @@ module DataCollector
     end
 
 
+    def timeParser( today, finalDate )
+
+      difference = TimeDifference.between( today, finalDate ).in_each_component
+
+      return {
+        :years   => difference[:years].round,
+        :months  => difference[:months].round,
+        :weeks   => difference[:weeks].round,
+        :days    => difference[:days].round,
+        :hours   => difference[:hours].round,
+        :minutes => difference[:minutes].round,
+      }
+    end
+
+
     def mongoDBData( host, data = {} )
 
       m = ExternalClients::MongoDb.new( { :host => host, :port => 28017 } )
@@ -337,7 +352,41 @@ module DataCollector
 
 #       logger.debug( sprintf( 'create bulk checks for \'%s\'', host ) )
 
-      data = @db.measurements( { :ip => host, :short => host } )
+      # to improve performance, read initial collector Data from Database and store them into Memcache (or Redis)
+      key       = Storage::Memcached.cacheKey( { :host => host, :pre => 'collector' } )
+      data      = @mc.get( key )
+
+      # recreate the cache every 10 minutes
+      if ( data != nil )
+
+        today     = Time.now().to_s
+        timestamp = data.dig( 'timestamp' ) || Time.now().to_s
+
+        x = self.timeParser( today, timestamp )
+#         logger.debug( x )
+
+        if( x[:minutes] >= 10 )
+          data = nil
+        end
+
+      end
+
+      if( data == nil )
+
+        data = @db.measurements( { :ip => host, :short => host } )
+#         logger.debug( data )
+
+        data['timestamp'] = Time.now().to_s
+
+        if( data == nil || data == false )
+          return
+        else
+          @mc.set( key, data )
+        end
+
+      end
+
+#       data = @db.measurements( { :ip => host, :short => host } )
 
       if( data == nil || data == false )
         return
