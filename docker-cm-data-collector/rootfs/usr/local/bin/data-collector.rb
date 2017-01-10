@@ -56,10 +56,6 @@ Signal.trap('QUIT') { stop = true }
 
 r = DataCollector::Collector.new( config )
 
-# r.run()
-
-# r = DataCollector.new( config )
-#
 until stop
   r.run()
   sleep( 15 )

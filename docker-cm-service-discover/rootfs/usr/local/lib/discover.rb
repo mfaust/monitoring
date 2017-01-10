@@ -6,12 +6,9 @@
 # v1.3.1
 # -----------------------------------------------------------------------------
 
-# require 'timeout'
 require 'json'
 require 'yaml'
 require 'fileutils'
-# require 'uri'
-# require 'sqlite3'
 
 require_relative 'logging'
 require_relative 'jolokia'
