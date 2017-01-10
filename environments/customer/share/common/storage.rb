@@ -940,15 +940,18 @@ module Storage
 
       memcacheOptions = {
         :compress   => true,
-        :namespace  => namespace.to_s,
-        :expires_in => ( 60 * expire.to_i )  # :expires_in - default TTL in seconds (defaults to 0 or forever)
+        :namespace  => namespace.to_s
       }
+
+      if( expire.to_i != 0 )
+        memcacheOptions[:expires_in] = ( 60 * expire.to_i )  # :expires_in - default TTL in seconds (defaults to 0 or forever)
+      end
 
       @mc = nil
 
       begin
         until( @mc != nil )
-          logger.debug( 'try ...' )
+#           logger.debug( 'try ...' )
           @mc = Dalli::Client.new( sprintf( '%s:%s', host, port ), memcacheOptions )
           sleep( 3 )
         end
@@ -959,7 +962,7 @@ module Storage
 
     def self.cacheKey( params = {} )
 
-      params = Hash[params.sort]
+      params   = Hash[params.sort]
       checksum = Digest::MD5.hexdigest( params.to_s )
 
       return checksum
