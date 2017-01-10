@@ -38,7 +38,7 @@ module Storage
     def prepare()
 
       @database = Sequel.sqlite( sprintf( '%s/monitoring.db', @cacheDirectory ) )
-#       @database.loggers << logger # Logger.new( $stdout, :debug )
+#      @database.loggers << logger # Logger.new( $stdout, :debug )
 
       @database.create_table?( :dns ) {
         primary_key :id
@@ -144,6 +144,7 @@ module Storage
             m.id, m.dns_id, m.discovery_id', :replace => true
         )
       end
+
     end
 
 
@@ -935,12 +936,12 @@ module Storage
       host      = params[:host]      ? params[:host]      : 'localhost'
       port      = params[:port]      ? params[:port]      : 11211
       namespace = params[:namespace] ? params[:namespace] : 'monitoring'
-      expire    = params[:expire]    ? params[:expire]    : 2
+      expire    = params[:expire]    ? params[:expire]    : 10
 
       memcacheOptions = {
         :compress   => true,
         :namespace  => namespace.to_s,
-        :expires_in => ( 60 * expire.to_i )
+        :expires_in => ( 60 * expire.to_i )  # :expires_in - default TTL in seconds (defaults to 0 or forever)
       }
 
       @mc = nil
