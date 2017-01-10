@@ -166,6 +166,26 @@ jolokia:
       - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.fragment.resolver.SearchTermExternalReferenceResolver",application=*
         attribute: Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate
 
+    caches-studio:
+      description: "Studio Caches"
+      metrics:
+      - mbean: com.coremedia:type=Cache.Classes,CacheClass="ALWAYS_STAY_IN_CACHE",application=*
+        attribute: Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate
+      - mbean: com.coremedia:type=Cache.Classes,CacheClass="DIGEST",application=*
+        attribute: Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate
+      - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.blueprint.cae.search.solr.SolrQueryCacheKey",application=*
+        attribute: Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate
+      - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.cap.disk",application=*
+        attribute: Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate
+      - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.cap.heap",application=*
+        attribute: Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate
+      - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.cap.unlimited",application=*
+        attribute: Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate
+      - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.transform.image.java2d.LoadedImageCacheKey",application=*
+        attribute: Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate
+      - mbean: com.coremedia:type=Cache.Classes,CacheClass="java.lang.Object",application=*
+        attribute: Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate
+
     content-management-server:
       description: Content Management Server
       metrics:
