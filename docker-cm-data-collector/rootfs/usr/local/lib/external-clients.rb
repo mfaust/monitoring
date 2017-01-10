@@ -209,9 +209,7 @@ module ExternalClients
 
         else
 
-          data            = JSON.parse( response.body )
-
-          result = data
+          return JSON.parse( response.body )
         end
 
       end

@@ -211,38 +211,38 @@ end
 # -----------------------------------------------------------------------------
 # TESTS
 
-settings = {
-  :beanstalkHost => 'localhost'
-}
-
-p = MessageQueue::Producer.new( settings )
-
-
-# 100.times do |i|
+# settings = {
+#   :beanstalkHost => 'localhost'
+# }
 #
-#   job = {
-#     cmd:   'add',
-#     payload: sprintf( "foo-bar-%s.com", i )
-#   }.to_json
+# p = MessageQueue::Producer.new( settings )
 #
-#   p.addJob( 'test-tube', job )
+#
+# # 100.times do |i|
+# #
+# #   job = {
+# #     cmd:   'add',
+# #     payload: sprintf( "foo-bar-%s.com", i )
+# #   }.to_json
+# #
+# #   p.addJob( 'test-tube', job )
+# # end
+#
+# c = MessageQueue::Consumer.new( settings )
+#
+# puts JSON.pretty_generate( c.tubeStatistics( 'test-tube' ) )
+#
+# # exit
+#
+# loop do
+#   j = c.getJobFromTube( 'test-tube' )
+#
+#   if( j.count == 0 )
+#     break
+#   else
+#     puts JSON.pretty_generate( j )
+#   end
 # end
-
-c = MessageQueue::Consumer.new( settings )
-
-puts JSON.pretty_generate( c.tubeStatistics( 'test-tube' ) )
-
-# exit
-
-loop do
-  j = c.getJobFromTube( 'test-tube' )
-
-  if( j.count == 0 )
-    break
-  else
-    puts JSON.pretty_generate( j )
-  end
-end
 
 # -----------------------------------------------------------------------------
 

@@ -2,8 +2,7 @@
 #
 #
 
-# require_relative 'tools'
-
+require_relative 'storage'
 
 class MBean
 
@@ -11,23 +10,10 @@ class MBean
     @log = logger
   end
 
-  def self.memcache( host, port )
-    @memcacheHost = host
-    @memcachePort = port
+  def self.memcache( memcache )
 
-    require 'dalli'
+    @mc = memcache
 
-    if( !@mc )
-
-      memcacheOptions = {
-        :compress   => true,
-        :namespace  => 'monitoring',
-        :expires_in => 0
-      }
-
-      @mc = Dalli::Client.new( sprintf( '%s:%s', @memcacheHost, @memcachePort ), memcacheOptions )
-
-    end
   end
 
   def self.cacheDirectory( dir )
@@ -39,37 +25,20 @@ class MBean
 
     data = Hash.new()
 
+    memcacheKey = Storage::Memcached.cacheKey( { :host => host, :pre => 'result', :service => service } )
 
-      memcacheKey = Storage::Memcached.cacheKey( { :host => host, :pre => 'result', :service => 'Replicator' } )
+    for y in 1..3
 
-#       require 'dalli'
-#
-#       if( !@mc )
-#
-#         memcacheOptions = {
-#           :compress   => true,
-#           :namespace  => 'monitoring',
-#           :expires_in => 0
-#         }
-#
-#         @mc = Dalli::Client.new( sprintf( '%s:%s', @memcacheHost, @memcachePort ), memcacheOptions )
-#
-#       end
-#
-#       memcacheKey = cacheKey( 'result', host, service )
+      result      = @mc.get( memcacheKey )
 
-      for y in 1..3
-
-        result      = @mc.get( memcacheKey )
-
-        if( result != nil )
-          data = { service => result }
-          break
-        else
-#           @log.debug( sprintf( 'Waiting for data %s ... %d', memcacheKey, y ) )
-          sleep( 3 )
-        end
+      if( result != nil )
+        data = { service => result }
+        break
+      else
+#        @log.debug( sprintf( 'Waiting for data %s ... %d', memcacheKey, y ) )
+        sleep( 3 )
       end
+    end
 
     # ---------------------------------------------------------------------------------------
 
@@ -78,14 +47,14 @@ class MBean
       s   = data[service] ? data[service] : nil
 
       if( s == nil )
-#         @log.debug( sprintf( 'no service %s found', service ) )
+#        @log.debug( sprintf( 'no service %s found', service ) )
         return false
       end
 
       mbeanExists  = s.detect { |s| s[mbean] }
 
       if( mbeanExists == nil )
-#         @log.debug( sprintf( 'no mbean %s found', mbean ) )
+#        @log.debug( sprintf( 'no mbean %s found', mbean ) )
         return false
       end
 
@@ -95,8 +64,7 @@ class MBean
       return mbeanExists
 
       if( mbeanStatus.to_i != 200 )
-
-#         @log.debug( sprintf( 'mbean %s found, but status %d', mbean, mbeanStatus ) )
+#        @log.debug( sprintf( 'mbean %s found, but status %d', mbean, mbeanStatus ) )
         return false
       end
 
@@ -105,7 +73,7 @@ class MBean
         result = true
       elsif( mbeanExists != nil && key != nil )
 
-#         @log.debug( sprintf( 'look for key %s', key ) )
+#        @log.debug( sprintf( 'look for key %s', key ) )
 
         mbeanValue = mbeanExists['value'] ? mbeanExists['value'] : nil
 
@@ -299,7 +267,7 @@ class MBean
     else
       if( self.beanTimeout?( timestamp ) )
 
-        @log.error( sprintf( '  status: %d: %s (Service: \'%s\' - mbean: \'%s\')', status, timestamp, service, mbean ) )
+        @log.error( sprintf( '  status: %d: %s (Host: \'%s\' :: Service: \'%s\' - mbean: \'%s\')', status, timestamp, host, service, mbean ) )
         return false
       end
     end

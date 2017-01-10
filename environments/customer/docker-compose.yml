@@ -80,6 +80,8 @@ services:
       com.dnsdock.image: "memcached"
       com.dnsdock.alias: "memcached"
       com.dnsdock.ttl: "30"
+    env_file:
+      - env/memcached.env
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:
@@ -141,26 +143,26 @@ services:
 
   # single service
   # use MQ to process data
-  cm-service-discover:
-    restart: always
-    build: ../../docker-cm-service-discover
-    container_name: cm-service-discover
-    hostname: cm-service-discover
-    labels:
-      com.dnsdock.image: "cm-service-discover"
-      com.dnsdock.alias: "cm-service-discover"
-      com.dnsdock.ttl: "30"
-    env_file:
-      - env/cm-service-discover.env
-    depends_on:
-      - jolokia
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ./share/resolv.conf:/etc/resolv.conf:ro
-      - ./data/monitoring:/var/cache/monitoring
-    networks:
-      mon:
-        ipv4_address: 172.25.0.30
+#  cm-service-discover:
+#    restart: always
+#    build: ../../docker-cm-service-discover
+#    container_name: cm-service-discover
+#    hostname: cm-service-discover
+#    labels:
+#      com.dnsdock.image: "cm-service-discover"
+#      com.dnsdock.alias: "cm-service-discover"
+#      com.dnsdock.ttl: "30"
+#    env_file:
+#      - env/cm-service-discover.env
+#    depends_on:
+#      - jolokia
+#    volumes:
+#      - /etc/localtime:/etc/localtime:ro
+#      - ./share/resolv.conf:/etc/resolv.conf:ro
+#      - ./data/monitoring:/var/cache/monitoring
+#    networks:
+#      mon:
+#        ipv4_address: 172.25.0.30
 
   # single service
   # use MQ to process data

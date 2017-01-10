@@ -42,7 +42,7 @@ module Collecd
       @interval       = params[:interval]       ? params[:interval]       : 15
 
       @db             = Storage::Database.new()
-      @mc             = Storage::Memcached.new( { :host => @memcacheHost, :port => @memcachePort, :expire => 0 } )
+      @mc             = Storage::Memcached.new( { :host => @memcacheHost, :port => @memcachePort } )
 
       MBean.logger( logger )
 
@@ -69,6 +69,7 @@ module Collecd
       return d
 
     end
+
 
     def output( data = [] )
 
@@ -132,6 +133,19 @@ module Collecd
     end
 
 
+    def timeParser( today, finalDate )
+
+      difference = TimeDifference.between( today, finalDate ).in_each_component
+
+      return {
+        :years   => difference[:years].round,
+        :months  => difference[:months].round,
+        :weeks   => difference[:weeks].round,
+        :days    => difference[:days].round,
+        :hours   => difference[:hours].round,
+        :minutes => difference[:minutes].round,
+      }
+    end
 
 
   def ParseResult_mongoDB( value = {} )
@@ -1334,24 +1348,14 @@ module Collecd
     completedCount        = 0
 
 
-    def timeParser( today, finalDate )
 
-      difference = TimeDifference.between( today, finalDate ).in_each_component
-
-      return {
-        :years  => difference[:years].round,
-        :months => difference[:months].round,
-        :weeks  => difference[:weeks].round,
-        :days   => difference[:days].round
-      }
-    end
 
     def replicatorData()
 
       result       = []
 
       MBean.logger( logger )
-      MBean.memcache( @memcacheHost, @memcachePort )
+      MBean.memcache( @mc )
 
 #       cacheKey = Storage::Memcached.cacheKey( { :host => @Host, :pre => 'result', :service => 'Replicator' } )
 #       replicatorData = @mc.get( memcacheKey )
@@ -1491,7 +1495,7 @@ module Collecd
 
           result.push( sprintf( format, @Host, @Service, mbean, 'license_until_soft', 'raw'      , @interval, licenseValidUntilSoft / 1000 ) )
 
-          x                   = timeParser( today, Time.at( licenseValidUntilSoft / 1000 ) )
+          x                   = self.timeParser( today, Time.at( licenseValidUntilSoft / 1000 ) )
           validUntilSoftMonth = x[:months]
           validUntilSoftWeek  = x[:weeks]
           validUntilSoftDays  = x[:days]
@@ -1506,7 +1510,7 @@ module Collecd
 
           result.push( sprintf( format, @Host, @Service, mbean, 'license_until_hard', 'raw'      , @interval, licenseValidUntilHard / 1000 ) )
 
-          x                   = timeParser( today, Time.at( licenseValidUntilHard / 1000 ) )
+          x                   = self.timeParser( today, Time.at( licenseValidUntilHard / 1000 ) )
           validUntilHardMonth = x[:months]
           validUntilHardWeek  = x[:weeks]
           validUntilHardDays  = x[:days]
@@ -2175,32 +2179,42 @@ module Collecd
     def run()
 
       monitoredServer = self.monitoredServer()
-
       data            = nil
+      today           = Time.now().to_s
 
       logger.debug( "#{monitoredServer.keys}" )
-#       logger.debug( 'start' )
-
-  #     data            = Hash.new()
 
       monitoredServer.each do |h,d|
 
         @Host = h
         graphiteOutput = Array.new()
+#         logger.debug( sprintf( 'Host: %s', h ) )
 
-        logger.info( sprintf( 'Host: %s', h ) )
-
-        # to improve performance, read initial discovery Data from Databse and store them into Memcache (or Redis)
+        # to improve performance, read initial discovery Data from Database and store them into Memcache (or Redis)
         key       = Storage::Memcached.cacheKey( { :host => h, :pre => 'discovery' } )
         data      = @mc.get( key )
 
-        # TODO
-        # handle timeouts
+        # recreate the cache every 10 minutes
+        if ( data != nil )
+
+          timestamp = data.dig('timestamp' ) || Time.now().to_s
+
+          x = self.timeParser( today, timestamp )
+          logger.debug( x )
+
+          if( x[:minutes] >= 10 )
+            data = nil
+          end
+
+        end
 
         if( data == nil )
 
           data = @db.discoveryData( { :ip => h, :short => h } )
+          logger.debug( data )
+
           data = data[h]
+          data['timestamp'] = Time.now().to_s
 
           if( data == nil )
             next
@@ -2210,8 +2224,7 @@ module Collecd
 
         end
 
-        # no discovery data in memcache,
-        # no discovery file found
+        # no discovery data found
         if( data == nil )
           next
         end
@@ -2221,16 +2234,12 @@ module Collecd
           @serviceName = service
           @Service     = self.normalizeService( service )
 
-#           logger.debug( @serviceName )
-#           logger.debug( @Service )
-#           logger.debug( d )
-
-          port        = d.dig( :data, 'port' )        # ['port']        ? d['port']        : nil
-          description = d.dig( :data, 'description' ) # ['description'] ? d['description'] : nil
-
-          cacheKey = Storage::Memcached.cacheKey( { :host => h, :pre => 'result', :service => service } )
+          cacheKey     = Storage::Memcached.cacheKey( { :host => h, :pre => 'result', :service => service } )
 
           result = @mc.get( cacheKey )
+
+
+          next
 
           case service
           when 'mongodb'
@@ -2239,6 +2248,7 @@ module Collecd
               graphiteOutput.push( self.ParseResult_mongoDB( result ) )
             else
               logger.error( 'resultdata is not a Hash (mongodb)' )
+
             end
 
           when 'mysql'
@@ -2264,7 +2274,7 @@ module Collecd
               result.each do |r|
                 key    = r.keys.first
                 values = r.values.first
-#                 logger.debug(key)
+
                 graphiteOutput.push( self.createGraphiteOutput( key, values ) )
 
               end
@@ -2275,9 +2285,6 @@ module Collecd
         # send to configured graphite host
         self.output( graphiteOutput )
       end
-
-#       logger.debug( 'stop' )
-
     end
 
   end

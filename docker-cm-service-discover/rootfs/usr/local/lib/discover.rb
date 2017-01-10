@@ -185,6 +185,10 @@ class ServiceDiscovery
       case command
       when 'add'
         logger.info( sprintf( 'add node %s', node ) )
+
+        # TODO
+        # check payload!
+        # e.g. for 'force' ...
         result = self.addHost( node, payload )
 
         @db.setStatus( { :ip => node, :short => node, :status => isRunning?( node ) } )

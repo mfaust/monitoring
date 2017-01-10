@@ -936,12 +936,12 @@ module Storage
       host      = params[:host]      ? params[:host]      : 'localhost'
       port      = params[:port]      ? params[:port]      : 11211
       namespace = params[:namespace] ? params[:namespace] : 'monitoring'
-      expire    = params[:expire]    ? params[:expire]    : 2
+      expire    = params[:expire]    ? params[:expire]    : 10
 
       memcacheOptions = {
         :compress   => true,
         :namespace  => namespace.to_s,
-        :expires_in => ( 60 * expire.to_i )
+        :expires_in => ( 60 * expire.to_i )  # :expires_in - default TTL in seconds (defaults to 0 or forever)
       }
 
       @mc = nil

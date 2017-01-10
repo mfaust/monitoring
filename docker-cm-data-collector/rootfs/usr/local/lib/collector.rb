@@ -487,11 +487,26 @@ module DataCollector
 
         c.each do |v,i|
 
-#           logger.debug( sprintf( '%d checks for service %s found', i.count, v ) )
+          logger.debug( sprintf( '%d checks for service %s found', i.count, v ) )
 
-          target = i[0]['target'] ? i[0]['target'] : nil
+          cacheKey = Storage::Memcached.cacheKey( { :host => hostname, :pre => 'result', :service => v } )
 
-          if( target == nil )
+#           logger.debug( { :host => hostname, :pre => 'result', :service => v } )
+#           logger.debug( cacheKey )
+
+          if( i.count > 1 )
+            targetUrl = i.first.dig( 'target', 'url' )
+
+            if( self.checkHostAndService( targetUrl ) == true )
+
+              response  = @jolokia.post( { :payload => i } )
+
+              if( response[:status].to_i == 200 )
+                result[v] = self.reorganizeData( response[:message] )
+              end
+
+            end
+          else
 
             case v
             when 'mysql'
@@ -509,27 +524,13 @@ module DataCollector
               # all others
             end
 
-          else
-
-            targetUrl = target['url']
-
-            if( self.checkHostAndService( targetUrl ) == true )
-
-              response  = @jolokia.post( { :payload => i } )
-
-              if( response[:status].to_i == 200 )
-                result[v] = self.reorganizeData( response[:message] )
-              end
-
-            end
+#             logger.debug( result[v] )
           end
 
-          cacheKey = Storage::Memcached.cacheKey( { :host => hostname, :pre => 'result', :service => v } )
-
-#           logger.debug( { :host => hostname, :pre => 'result', :service => v } )
-#           logger.debug( cacheKey )
-
-          @mc.set( cacheKey, result[v] )
+          if( @mc.set( cacheKey, result[v] ) == false )
+            logger.error( sprintf( 'value for key % can not be write', cacheKey ) )
+            logger.error( { :host => hostname, :pre => 'result', :service => v } )
+          end
 
         end
       end
@@ -701,8 +702,8 @@ module DataCollector
 
       monitoredServer = self.monitoredServer()
 
-      logger.debug( "#{monitoredServer.keys}" )
-      logger.debug( 'start' )
+#       logger.debug( "#{monitoredServer.keys}" )
+#       logger.debug( 'start' )
 
       monitoredServer.each do |h,d|
 
@@ -740,7 +741,7 @@ module DataCollector
 
       end
 
-      logger.debug( 'stop' )
+#       logger.debug( 'stop' )
 
     end
 

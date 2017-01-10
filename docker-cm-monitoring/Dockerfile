@@ -42,6 +42,7 @@ RUN \
     zlib \
     zlib-dev && \
    gem install --no-rdoc --no-ri \
+     beaneater \
      bigdecimal \
      ipaddress \
      resolve-hostname \

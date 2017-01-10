@@ -15,7 +15,8 @@ require_relative '../lib/grafana'
 require_relative '../lib/graphite'
 require_relative '../lib/icinga2'
 require_relative '../lib/tools'
-require_relative '../lib/database'
+require_relative '../lib/storage'
+require_relative '../lib/message-queue'
 
 # -----------------------------------------------------------------------------
 
@@ -69,6 +70,11 @@ class Monitoring
       :graphitePath        => @graphitePath
     }
 
+    @MQSettings = {
+      :beanstalkHost       => @mqHost,
+      :beanstalkPort       => @mqPort
+    }
+
     version              = '2.2.0'
     date                 = '2017-01-04'
 
@@ -117,6 +123,10 @@ class Monitoring
     @graphiteHttpPort = config['graphite']['http-port']    ? config['graphite']['http-port']    : 80
     @graphitePort     = config['graphite']['port']         ? config['graphite']['port']         : 2003
     @graphitePath     = config['graphite']['path']         ? config['graphite']['path']         : nil
+
+    @mqHost           = config['mq']['host']               ? config['mq']['host']               : 'localhost'
+    @mqPort           = config['mq']['port']               ? config['mq']['port']               : 11300
+    @mqQueue          = config['mq']['queue']              ? config['mq']['queue']              : 'mq-rest-service'
 
     @templateDirectory = config['grafana']['templateDirectory']  ? config['grafana']['templateDirectory']  : '/var/tmp/templates'
 
@@ -174,6 +184,40 @@ class Monitoring
 
   end
 
+
+  # -- MESSAGE-QUEUE ---------------------------------------------------------------------
+  #
+  def messageQueue( params = {} )
+
+    logger.debug( params )
+
+    command = params.dig(:command)
+    node    = params.dig(:node)
+    queue   = params.dig(:queue)
+    data    = params.dig(:payload)
+
+    p = MessageQueue::Producer.new( @MQSettings )
+
+    job = {
+      cmd:  command,
+      node: node,
+      from: 'rest-service',
+      payload: data
+    }.to_json
+
+    logger.debug( p.addJob( queue, job ) )
+
+#
+# p = MessageQueue::Producer.new( settings )
+
+# #   job = {
+# #     cmd:   'add',
+# #     payload: sprintf( "foo-bar-%s.com", i )
+# #   }.to_json
+# #
+# #   p.addJob( 'test-tube', job )
+
+  end
 
   # -- CONFIGURE ------------------------------------------------------------------------
   #
@@ -357,7 +401,14 @@ class Monitoring
         logger.info( sprintf( 'remove %s from monitoring', host ) )
 
         if( enableDiscovery == true )
-          discoveryResult  = @serviceDiscovery.deleteHost( host )
+
+          self.messageQueue( { :command => 'remove', :node => host, :queue => 'mq-discover', :payload => { "force" => true } } )
+
+          discoveryResult = {
+            :status  => 200,
+            :message => 'send to MQ'
+          }
+#          discoveryResult  = @serviceDiscovery.deleteHost( host )
           discoveryStatus  = discoveryResult[:status]
           discoveryMessage = discoveryResult[:message]
 
@@ -405,7 +456,14 @@ class Monitoring
         'services'     => services
       }
 
-      discoveryResult   = @serviceDiscovery.addHost( host, options )
+      self.messageQueue( { :command => 'add', :node => host, :queue => 'mq-discover', :payload => payload } )
+
+      discoveryResult = {
+        :status  => 200,
+        :message => 'send to MQ'
+      }
+
+#      discoveryResult   = @serviceDiscovery.addHost( host, options )
       discoveryStatus   = discoveryResult[:status].to_i
       discoveryMessage  = discoveryResult[:message]
 
@@ -932,6 +990,10 @@ class Monitoring
     }
 
   end
+
+
+
+
 
 
 end

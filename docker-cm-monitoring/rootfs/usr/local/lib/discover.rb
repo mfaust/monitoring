@@ -17,7 +17,7 @@ require 'sqlite3'
 
 require_relative 'logging'
 require_relative 'tools'
-require_relative 'database'
+require_relative 'storage'
 
 # -------------------------------------------------------------------------------------------------------------------
 
