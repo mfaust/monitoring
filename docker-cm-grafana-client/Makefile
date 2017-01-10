@@ -1,4 +1,4 @@
-TYPE := cm-grafana
+TYPE := cm-grafana-client
 IMAGE_NAME := docker-${TYPE}
 
 build:
@@ -13,10 +13,10 @@ run:
 		--interactive \
 		--tty \
 		--env GRAFANA_HOST=nginx-proxy \
-		--env GRAFANA_PORT=3000 \
+		--env GRAFANA_PORT=80 \
 		--env GRAFANA_PATH=grafana/ \
-		--label com.dnsdock.image=cm-grafana \
-		--label com.dnsdock.alias=cm-grafana \
+		--label com.dnsdock.image=${TYPE} \
+		--label com.dnsdock.alias=${TYPE} \
 		--label com.dnsdock.ttl=30 \
 		--volume /etc/localtime:/etc/localtime:ro \
 		--network=customer_customer \
@@ -30,13 +30,16 @@ shell:
 		--rm \
 		--interactive \
 		--tty \
-		--env GRAFANA_HOST=nginx-proxy \
-		--env GRAFANA_PORT=3000 \
+		--env GRAFANA_HOST=192.168.252.101 \
+		--env GRAFANA_PORT=80 \
 		--env GRAFANA_PATH=grafana/ \
-		--label com.dnsdock.image=cm-grafana \
-		--label com.dnsdock.alias=cm-grafana \
+		--label com.dnsdock.image=${TYPE} \
+		--label com.dnsdock.alias=${TYPE} \
 		--label com.dnsdock.ttl=30 \
 		--volume /etc/localtime:/etc/localtime:ro \
+		--volume ~/src/cm-xlabs/monitoring/environments/customer/share/resolv.conf:/etc/resolv.conf:ro \
+		--network=customer_mon \
+		--ip=172.25.0.100 \
 		--hostname=${IMAGE_NAME} \
 		--name=${IMAGE_NAME} \
 		$(IMAGE_NAME)
