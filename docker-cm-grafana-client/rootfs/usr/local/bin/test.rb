@@ -7,11 +7,26 @@ grafanaHost        = ENV['GRAFANA_HOST'] ? ENV['GRAFANA_HOST'] : 'localhost'
 grafanaPort        = ENV['GRAFANA_PORT'] ? ENV['GRAFANA_PORT'] : 80
 
 
-options = { :debug => false, :timeout => 3, :ssl => false, :url_path => '/grafana' }
-g = Grafana::Client.new(
-  { :host => grafanaHost, :port => grafanaPort, :user => 'admin', :password => 'admin', :settings => options }
-)
+config = {
+  :host => grafanaHost,
+  :port => grafanaPort,
+  :user => 'admin',
+  :password => 'admin',
+  :debug    => true,
+  :timeout  => 10,
+  :ssl      => false,
+  :url_path => '/grafana',
+  :templateDirectory => '/usr/local/share/templates/grafana'
+}
+
+g = Grafana::Client.new( config )
+
+if( g != nil )
+
+#   puts g.allUsers()
+#   puts g.homeDashboard()
+
+  puts g.createDashboardForHost( { :host => 'monitoring-16-01' } )
+end
 
 
-puts g.dataSources()
-puts g.availableDataSourceTypes()

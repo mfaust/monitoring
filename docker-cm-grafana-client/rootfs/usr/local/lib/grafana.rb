@@ -17,7 +17,7 @@ require 'rest-client'
 
 require_relative 'logging'
 # require_relative '../../lib/message-queue'
-# require_relative '../../lib/storage'
+require_relative '../lib/storage'
 require_relative 'grafana/http_request'
 require_relative 'grafana/user'
 require_relative 'grafana/users'
@@ -30,6 +30,7 @@ require_relative 'grafana/snapshot'
 require_relative 'grafana/login'
 require_relative 'grafana/admin'
 require_relative 'grafana/version'
+require_relative 'grafana/coremedia/dashboard'
 
 # -----------------------------------------------------------------------------
 
@@ -48,10 +49,40 @@ module Grafana
     include Grafana::Dashboard
     include Grafana::DashboardTemplate
     include Grafana::Snapshot
-#     include Grafana::Frontend
     include Grafana::Login
     include Grafana::Admin
+    include Grafana::Coremedia::Dashboard
+    include Grafana::Coremedia::Templates
+    include Grafana::Coremedia::Annotations
+    include Grafana::Coremedia::Tags
 
+    # Returns a new instance of Client
+    #
+    # @param [Hash, #read] params the configure the Client
+    # @option params [String] :host the Grafana Hostname (default: 'localhost')
+    # @option params [String] :port the Grafana Port (default: 80)
+    # @option params [String] :user the Grafana User for Login (default: 'admin')
+    # @option params [String] :password the Grafana Users Password for Login (default: '')
+    # @option params [Bool] :debug enabled debug Output
+    # @option params [Integer] :timeout Timeout for the RestClient
+    # @option params [Integer] :open_timeout
+    # @option params [String] :url_path advanced URL Path, when Grafana is located behind a Proxy Services, or the uri_path has changed
+    # @option params [Bool] :ssl enable SSL Connections
+    # @option params [Hash] :headers optional Header for an API Key Login
+    # @example to create an new Instance
+    #    config = {
+    #      :host     => grafanaHost,
+    #      :port     => grafanaPort,
+    #      :user     => 'admin',
+    #      :password => 'admin',
+    #      :debug    => false,
+    #      :timeout  => 3,
+    #      :ssl      => false,
+    #      :url_path => '/grafana'
+    #    }
+    #
+    #    g = Grafana::Client.new( config )
+    # @return [bool, #read]
     def initialize( params = {} )
 
       logger.debug( params )
@@ -60,40 +91,45 @@ module Grafana
       port     = params[:port]     ? params[:port]     : 80
       user     = params[:user]     ? params[:user]     : 'admin'
       password = params[:password] ? params[:password] : ''
-      settings = params.keys.include?(:settings) ? params[:settings] : {}
+      urlPath  = params[:url_path] ? params[:url_path] : ''
+      ssl      = params[:ssl]      ? params[:ssl]      : false
 
-      @debug   = ( settings[:debug] ? true : false )
+      debug    = params[:debug]    ? params[:debug]    : false
+      proto    = ( ssl == true ? 'https' : 'http' )
+
+      if( debug == true )
+        logger.level = Logger::DEBUG
+      end
+
       @apiInstance = nil
+      @db          = Storage::Database.new()
 
-      if( settings.has_key?(:timeout) && settings[:timeout].to_i <= 0 )
-        settings[:timeout] = 5
+      if( params.has_key?(:timeout) && params[:timeout].to_i <= 0 )
+        params[:timeout] = 5
       end
 
-      if( settings.has_key?(:open_timeout) && settings[:open_timeout].to_i <= 0 )
-        settings[:open_timeout] = 5
+      if( params.has_key?(:open_timeout) && params[:open_timeout].to_i <= 0 )
+        params[:open_timeout] = 5
       end
 
-      if( settings.has_key?(:headers) && settings[:headers].class.to_s != 'Hash' )
-        settings['headers'] = {}
+      if( params.has_key?(:headers) && params[:headers].is_a?( Hash ) )
+        params[:headers] = {}
       end
 
-      if( settings.has_key?(:url_path) && settings[:url_path].class.to_s != 'String' )
-        settings[:url_path] = ''
-      end
+      @templateDirectory = params[:templateDirectory] ? params[:templateDirectory] : '/var/tmp/templates'
 
-      proto = ( settings.has_key?(:ssl) && settings[:ssl] == true ? 'https' : 'http')
-      @url  = sprintf( '%s://%s:%s%s', proto, host, port, settings[:url_path] )
+      @url  = sprintf( '%s://%s:%s%s', proto, host, port, urlPath )
 
-      logger.debug( "Initializing API client #{@url}" )
-      logger.debug( "Options: #{settings}" )
+      logger.debug( "Initializing API client '#{@url}'" )
+      logger.debug( "Options: #{params}" )
 
       begin
 
         @apiInstance = RestClient::Resource.new(
           @url,
-          :timeout      => settings[:timeout],
-          :open_timeout => settings[:open_timeout],
-          :headers      => settings[:headers],
+          :timeout      => params[:timeout],
+          :open_timeout => params[:open_timeout],
+          :headers      => params[:headers],
           :verify_ssl   => false
         )
       rescue => e
@@ -102,23 +138,34 @@ module Grafana
 
       @headers = nil
 
-      if( false ) #settings['headers'].has_key?('Authorization') )
+      logger.debug( params )
+
+      if( params[:headers] && params[:headers].has_key?(:authorization) )
         # API key Auth
         @headers = {
           :content_type  => 'application/json; charset=UTF-8',
-          :Authorization => settings['headers']['Authorization']
+          :Authorization => params[:headers][:authorization]
         }
       else
         # Regular login Auth
         self.login( { :user => user, :password => password } )
 
-        logger.debug( @headers )
+        if( logger.debug( @headers ) == false )
+          return nil
+        end
       end
 
       return self
     end
 
-
+    # Login into Grafana
+    #
+    # @param [Hash, #read] params the params to create a valid login
+    # @option params [String] :user The Username
+    # @option params [String] :password The Password
+    # @example For an successful Login
+    #    login( { :user => 'admin', :password => 'admin' } )
+    # @return [bool, #read]
     def login( params = {} )
 
       user     = params[:user]     ? params[:user]     : 'admin'
@@ -133,25 +180,66 @@ module Grafana
           request_data.to_json,
           { :content_type => 'application/json; charset=UTF-8' }
         )
+
         @sessionCookies = resp.cookies
+
         if( resp.code.to_i == 200 )
+
           @headers = {
             :content_type => 'application/json; charset=UTF-8',
             :cookies      => @sessionCookies
           }
+
           return true
         else
           return false
         end
       rescue => e
-        logger.debug( "Error running POST request on /login: #{e}" )
-        logger.debug( "Request data: #{request_data.to_json}" )
+
+        logger.error( "Error running POST request on /login: #{e}" )
+        logger.error( "Request data: #{request_data.to_json}" )
+
         return false
       end
+
       logger.debug("User session initiated")
     end
 
-  end # End of Client class
+
+    def prepare( host )
+
+      logger.debug( sprintf(  'prepare( %s )', host ) )
+
+      dns = @db.dnsData( { :ip => host, :short => host } )
+
+      if( dns != nil )
+        dnsId        = dns[ :id ]
+        dnsIp        = dns[ :ip ]
+        dnsShortname = dns[ :shortname ]
+        dnsLongname  = dns[ :longname ]
+        dnsCreated   = dns[ :created ]
+        dnsChecksum  = dns[ :checksum ]
+
+        @shortHostname  = @grafanaHostname = dnsShortname
+
+        config          = @db.config( { :ip => dnsIp, :key => 'display-name' } )
+
+        if( config != false )
+          @shortHostname = config.dig( dnsChecksum, 'display-name' ).first.to_s
+        end
+
+        @shortHostname        = @shortHostname.gsub( '.', '-' )
+
+        @discoveryFile        = sprintf( '%s/%s/discovery.json'       , @cacheDirectory, host )
+        @mergedHostFile       = sprintf( '%s/%s/mergedHostData.json'  , @cacheDirectory, host )
+        @monitoringResultFile = sprintf( '%s/%s/monitoring.result'    , @cacheDirectory, host )
+
+      end
+
+    end
+
+
+  end
 
 end
 

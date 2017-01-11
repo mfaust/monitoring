@@ -14,7 +14,7 @@ module Grafana
     def dataSources()
 
       endpoint = "/api/datasources"
-      logger.info("Attempting to get existing data sources (GET #{endpoint})")
+      logger.debug("Attempting to get existing data sources (GET #{endpoint})")
 
       data_sources = getRequest( endpoint )
 
@@ -33,7 +33,7 @@ module Grafana
 
     def dataSource(id)
       endpoint = "/api/datasources/#{id}"
-      logger.info("Attempting to get existing data source ID #{id}")
+      logger.debug("Attempting to get existing data source ID #{id}")
       return getRequest(endpoint)
     end
 
@@ -42,7 +42,7 @@ module Grafana
       existing_ds = self.dataSource(id)
       ds = existing_ds.merge(ds)
       endpoint = "/api/datasources/#{id}"
-      logger.info("Updating data source ID #{id}")
+      logger.debug("Updating data source ID #{id}")
       return putRequest(endpoint, ds.to_json)
     end
 
@@ -53,21 +53,21 @@ module Grafana
         return false
       end
       endpoint = "/api/datasources"
-      logger.info("Creating data source: #{ds['name']} (database: #{ds['database']})")
+      logger.debug("Creating data source: #{ds['name']} (database: #{ds['database']})")
       return postRequest(endpoint, ds.to_json)
     end
 
 
     def deleteDataSource(id)
       endpoint = "/api/datasources/#{id}"
-      logger.info("Deleting data source #{id} (DELETE #{endpoint})")
+      logger.debug("Deleting data source #{id} (DELETE #{endpoint})")
       return deleteRequest(endpoint)
     end
 
 
     def availableDataSourceTypes()
       endpoint = '/api/datasources'
-      logger.info("Attempting to get existing data source types (GET #{endpoint})")
+      logger.debug("Attempting to get existing data source types (GET #{endpoint})")
       return getRequest(endpoint)
     end
 

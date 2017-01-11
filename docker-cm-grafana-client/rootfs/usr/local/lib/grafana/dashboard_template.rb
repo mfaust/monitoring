@@ -8,7 +8,7 @@ module Grafana
     @@cw_dimensions = []
 
 
-    def build_template(params={})
+    def buildTemplate( params = {} )
 
       if !params.has_key?('from')
         params['from'] = 'now-2h'
@@ -22,7 +22,7 @@ module Grafana
 
       rows = []
       params['panels'].each do |panel|
-        rows.push(self.build_panel(panel))
+        rows.push(self.buildPanel(panel))
       end
 
       tpl = %q[
@@ -99,7 +99,7 @@ module Grafana
     end
 
 
-    def build_panel(params={})
+    def buildPanel( params = {} )
 
       panel = %q[
         {
@@ -172,7 +172,7 @@ module Grafana
 
       targets = []
       params['targets'].each do |t|
-        targets.push(self.build_target(t))
+        targets.push(self.buildTarget(t))
       end
 
 
@@ -186,7 +186,7 @@ module Grafana
     end
 
 
-    def build_target(params={})
+    def buildTarget( params = {} )
 
       target = %q[
         {
