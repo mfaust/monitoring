@@ -117,7 +117,7 @@ class Grafana
 
   # check if the Grafana Service available
   #
-  # @return [bool] 
+  # @return [bool]
   def checkGrafana?()
 
     uri = URI( sprintf( '%s/api/orgs/1', @grafanaURI ) )
