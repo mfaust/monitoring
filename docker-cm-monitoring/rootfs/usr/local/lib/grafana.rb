@@ -115,7 +115,9 @@ class Grafana
   end
 
 
-
+  # check if the Grafana Service available
+  #
+  # @return [bool] 
   def checkGrafana?()
 
     uri = URI( sprintf( '%s/api/orgs/1', @grafanaURI ) )
@@ -619,7 +621,10 @@ class Grafana
   end
 
 
-  # list dashboards with tag
+  # search dashboards with tag
+  #
+  # @param [String, #read] tag the tag for search string
+  # @return [Hash] a list of Dashboards
   def searchDashboards( tag )
 
     logger.debug( sprintf( 'Search dashboards with tag \'%s\'', tag ) )
@@ -659,7 +664,10 @@ class Grafana
 
   end
 
-
+  # list dashboards from host
+  #
+  # @param [String, #read] host the hostname for search
+  # @return [bool]
   def listDashboards( host )
 
     if( self.checkGrafana?() == false )

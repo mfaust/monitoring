@@ -173,7 +173,7 @@ module Storage
     end
 
     # PRIVATE
-    def writeConfig( params = {} )
+    private def writeConfig( params = {} )
 
       dnsIp        = params[ :ip ]       ? params[ :ip ]       : nil
       dnsShortname = params[ :short ]    ? params[ :short ]    : nil
