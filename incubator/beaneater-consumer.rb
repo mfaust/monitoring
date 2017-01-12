@@ -3,9 +3,9 @@
 require 'beaneater'
 require 'json'
 
-bs = Beaneater.new( 'beanstalkd' )
+bs = Beaneater.new( 'localhost' )
 
-puts bs.tubes['my-tube'].stats
+puts bs.tubes['mq-information'].stats
 puts ''
 
 
@@ -17,7 +17,7 @@ def foo( id, body, state, stats )
   sleep 2
 end
 
-tube = bs.tubes.find('my-tube')
+tube = bs.tubes.find('mq-information')
 
 while( job = tube.peek(:buried) )
 
@@ -26,11 +26,11 @@ while( job = tube.peek(:buried) )
   job.delete
 end
 
-#puts bs.tubes['my-tube'].peek(:buried)
+#puts bs.tubes['mq-information'].peek(:buried)
 
 loop do
 
-  tube = bs.tubes.watch!('my-tube')
+  tube = bs.tubes.watch!('mq-information')
 
   job = bs.tubes.reserve
 
@@ -55,7 +55,7 @@ loop do
 
   puts '-----------------------------'
 
-  puts bs.tubes['my-tube'].stats
+  puts bs.tubes['mq-information'].stats
   puts '-----------------------------'
 
 end
@@ -66,11 +66,11 @@ return
 
 p bs.stats.keys
 
-tube = bs.tubes.find('my-tube')
+tube = bs.tubes.find('mq-information')
 puts tube
 
 
-bs.tubes.watch!('my-tube')
+bs.tubes.watch!('mq-information')
 
 loop do
 

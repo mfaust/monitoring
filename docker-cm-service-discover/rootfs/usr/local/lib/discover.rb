@@ -234,7 +234,6 @@ class ServiceDiscovery
 
     job = {
       cmd:  'information',
-      node: 'monitoring-16-01',
       from: 'discovery',
       payload: data
     }.to_json

@@ -233,31 +233,31 @@ services:
 
   # single service
   # use MQ to process data
-#  cm-grafana-client:
-#    restart: always
-#    build: ../../docker-cm-grafana
-#    container_name: cm-grafana-client
-#    hostname: cm-grafana-client
-#    labels:
-#      com.dnsdock.image: "cm-grafana-client"
-#      com.dnsdock.alias: "cm-grafana-client"
-#      com.dnsdock.ttl: "30"
-#    env_file:
-#      - env/cm-grafana.env
-#    depends_on:
-#      - beanstalkd
-#    volumes:
-#      - /etc/localtime:/etc/localtime:ro
-#      - ./share/resolv.conf:/etc/resolv.conf:ro
-#      - ./share/common/jolokia.rb:/usr/local/lib/jolokia.rb:ro
-#      - ./share/common/logging.rb:/usr/local/lib/logging.rb:ro
-#      - ./share/common/message-queue.rb:/usr/local/lib/message-queue.rb:ro
-#      - ./share/common/storage.rb:/usr/local/lib/storage.rb:ro
-#      - ./share/common/tools.rb:/usr/local/lib/tools.rb:ro
-#      - ./data/monitoring:/var/cache/monitoring
-#    networks:
-#      mon:
-#        ipv4_address: 172.25.0.33
+  cm-grafana-client:
+    restart: always
+    build: ../../docker-cm-grafana-client
+    container_name: cm-grafana-client
+    hostname: cm-grafana-client
+    labels:
+      com.dnsdock.image: "cm-grafana-client"
+      com.dnsdock.alias: "cm-grafana-client"
+      com.dnsdock.ttl: "30"
+    env_file:
+      - env/cm-grafana-client.env
+    depends_on:
+      - beanstalkd
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./share/resolv.conf:/etc/resolv.conf:ro
+      - ./share/grafana-client/templates:/usr/local/share/templates:ro
+      - ./share/common/logging.rb:/usr/local/lib/logging.rb:ro
+      - ./share/common/message-queue.rb:/usr/local/lib/message-queue.rb:ro
+      - ./share/common/storage.rb:/usr/local/lib/storage.rb:ro
+      - ./share/common/mbean.rb:/usr/local/lib/mbean.rb:ro
+      - ./data/monitoring:/var/cache/monitoring
+    networks:
+      mon:
+        ipv4_address: 172.25.0.33
 
 
 
