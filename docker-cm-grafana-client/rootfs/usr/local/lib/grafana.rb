@@ -16,8 +16,9 @@ require 'time_difference'
 require 'rest-client'
 
 require_relative 'logging'
-# require_relative '../../lib/message-queue'
+require_relative '../lib/message-queue'
 require_relative '../lib/storage'
+require_relative '../lib/mbean'
 require_relative 'grafana/http_request'
 require_relative 'grafana/user'
 require_relative 'grafana/users'
@@ -87,15 +88,25 @@ module Grafana
 
       logger.debug( params )
 
-      host     = params[:host]     ? params[:host]     : 'localhost'
-      port     = params[:port]     ? params[:port]     : 80
-      user     = params[:user]     ? params[:user]     : 'admin'
-      password = params[:password] ? params[:password] : ''
-      urlPath  = params[:url_path] ? params[:url_path] : ''
-      ssl      = params[:ssl]      ? params[:ssl]      : false
+      host         = params[:host]           ? params[:host]           : 'localhost'
+      port         = params[:port]           ? params[:port]           : 80
+      user         = params[:user]           ? params[:user]           : 'admin'
+      password     = params[:password]       ? params[:password]       : ''
+      urlPath      = params[:url_path]       ? params[:url_path]       : ''
+      ssl          = params[:ssl]            ? params[:ssl]            : false
+      debug        = params[:debug]          ? params[:debug]          : false
+      memcacheHost = params[:memcacheHost]   ? params[:memcacheHost]   : nil
+      memcachePort = params[:memcachePort]   ? params[:memcachePort]   : nil
+      mqHost       = params[:mqHost]         ? params[:mqHost]         : 'localhost'
+      mqPort       = params[:mqPort]         ? params[:mqPort]         : 11300
+      @mqQueue     = params[:mqQueue]        ? params[:mqQueue]        : 'mq-grafana'
 
-      debug    = params[:debug]    ? params[:debug]    : false
-      proto    = ( ssl == true ? 'https' : 'http' )
+      @MQSettings = {
+        :beanstalkHost => mqHost,
+        :beanstalkPort => mqPort
+      }
+
+      proto        = ( ssl == true ? 'https' : 'http' )
 
       if( debug == true )
         logger.level = Logger::DEBUG
@@ -103,6 +114,7 @@ module Grafana
 
       @apiInstance = nil
       @db          = Storage::Database.new()
+      @mc          = Storage::Memcached.new( { :host => memcacheHost, :port => memcachePort } )
 
       if( params.has_key?(:timeout) && params[:timeout].to_i <= 0 )
         params[:timeout] = 5
@@ -206,37 +218,115 @@ module Grafana
     end
 
 
-    def prepare( host )
+    # Message-Queue Integration
+    #
+    #
+    #
+    def queue()
 
-      logger.debug( sprintf(  'prepare( %s )', host ) )
+      c = MessageQueue::Consumer.new( @MQSettings )
 
-      dns = @db.dnsData( { :ip => host, :short => host } )
+      threads = Array.new()
 
-      if( dns != nil )
-        dnsId        = dns[ :id ]
-        dnsIp        = dns[ :ip ]
-        dnsShortname = dns[ :shortname ]
-        dnsLongname  = dns[ :longname ]
-        dnsCreated   = dns[ :created ]
-        dnsChecksum  = dns[ :checksum ]
+      threads << Thread.new {
 
-        @shortHostname  = @grafanaHostname = dnsShortname
+        self.processQueue(
+          c.getJobFromTube( @mqQueue )
+        )
+      }
 
-        config          = @db.config( { :ip => dnsIp, :key => 'display-name' } )
+      threads.each { |t| t.join }
 
-        if( config != false )
-          @shortHostname = config.dig( dnsChecksum, 'display-name' ).first.to_s
+    end
+
+
+    def processQueue( data = {} )
+
+      if( data.count != 0 )
+
+        logger.info( sprintf( 'process Message from Queue %s: %d', data.dig(:tube), data.dig(:id) ) )
+
+        command = data.dig( :body, 'cmd' )     || nil
+        node    = data.dig( :body, 'node' )    || nil
+        payload = data.dig( :body, 'payload' ) || nil
+
+        if( command == nil )
+          logger.error( 'wrong command' )
+          logger.error( data )
+          return
         end
 
-        @shortHostname        = @shortHostname.gsub( '.', '-' )
+        if( node == nil || payload == nil )
+          logger.error( 'missing node or payload' )
+          logger.error( data )
+          return
+        end
 
-#         @discoveryFile        = sprintf( '%s/%s/discovery.json'       , @cacheDirectory, host )
-#         @mergedHostFile       = sprintf( '%s/%s/mergedHostData.json'  , @cacheDirectory, host )
-#         @monitoringResultFile = sprintf( '%s/%s/monitoring.result'    , @cacheDirectory, host )
+        result = {
+          :status  => 400,
+          :message => sprintf( 'wrong command detected: %s', command )
+        }
 
+
+        logger.debug( data )
+        logger.debug( data.dig( :body, 'payload' ) )
+
+        tags     = data.dig( :body, 'payload', 'tags' )
+        overview = data.dig( :body, 'payload', 'overview' ) || true
+
+        case command
+        when 'add'
+#           logger.info( sprintf( 'add node %s', node ) )
+
+          # TODO
+          # check payload!
+          # e.g. for 'force' ...
+          result = self.createDashboardForHost( { :host => node, :tags => tags, :overview => overview } )
+
+          logger.info( result )
+        when 'remove'
+#           logger.info( sprintf( 'remove dashboards for node %s', node ) )
+          result = self.deleteDashboards( { :host => node } )
+
+          logger.info( result )
+        when 'info'
+#           logger.info( sprintf( 'give dashboards for %s back', node ) )
+          result = self.listDashboards( { :host => node } )
+        else
+          logger.error( sprintf( 'wrong command detected: %s', command ) )
+
+          result = {
+            :status  => 400,
+            :message => sprintf( 'wrong command detected: %s', command )
+          }
+
+          logger.info( result )
+        end
+
+        result[:request]    = data
+
+#         self.sendMessage( result )
       end
 
     end
+
+
+    def sendMessage( data = {} )
+
+    logger.debug( JSON.pretty_generate( data ) )
+
+    p = MessageQueue::Producer.new( @MQSettings )
+
+    job = {
+      cmd:  'information',
+      from: 'discovery',
+      payload: data
+    }.to_json
+
+    logger.debug( p.addJob( 'mq-information', job ) )
+
+  end
+
 
 
   end

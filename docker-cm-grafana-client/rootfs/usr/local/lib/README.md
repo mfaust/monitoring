@@ -17,14 +17,20 @@ If you come across a bug or if you have a request for a new feature, please open
 #### Creating an instance of the grafana api client:
 ```ruby
 config = {
-  :host     => grafanaHost,
-  :port     => grafanaPort,
-  :user     => 'admin',
-  :password => 'admin',
-  :debug    => false,
-  :timeout  => 3,
-  :ssl      => false,
-  :url_path => '/grafana'
+  :host              => grafanaHost,
+  :port              => grafanaPort,
+  :user              => grafanaApiUser,
+  :password          => grafanaApiPassword,
+  :debug             => false,
+  :timeout           => 10,
+  :ssl               => false,
+  :url_path          => grafanaUrlPath,
+  :templateDirectory => grafanaTemplatePath,
+  :memcacheHost      => memcacheHost,
+  :memcachePort      => memcachePort,
+  :mqHost            => mqHost,
+  :mqPort            => mqPort,
+  :mqQueue           => mqQueue
 }
 g = Grafana::Client.new( config )
 ```
@@ -65,4 +71,4 @@ g = Grafana::Client.new('[GRAFANA_HOST]', [GRAFANA_PORT], nil, nil, options)
 
 ## License
 
-Covered by the MIT [license](LICENSE).
+

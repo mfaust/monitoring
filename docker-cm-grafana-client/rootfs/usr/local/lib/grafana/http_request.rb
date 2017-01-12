@@ -65,38 +65,67 @@ module Grafana
     # @return [Mixed, #read]  return false at Error, or an JSON on success
     def issueRequest( methodType = 'GET', endpoint = '/', data = {} )
 
-      logger.debug( "( methodType = '#{methodType}', endpoint = '#{endpoint}', data = '#{data}' )" )
+      resultCodes = {
+        200 => 'created',
+        400 => 'Errors (invalid json, missing or invalid fields, etc)',
+        401 => 'Unauthorized',
+        412 => 'Precondition failed'
+      }
+#       logger.debug( "( methodType = '#{methodType}', endpoint = '#{endpoint}', data = '#{data}' )" )
 
-      logger.debug( @headers )
+#       logger.debug( @headers )
 
       begin
-        resp = nil
+        response =nil
         case methodType.upcase
         when 'GET'
-          resp = @apiInstance[endpoint].get( @headers )
+          response = @apiInstance[endpoint].get( @headers )
         when 'POST'
-          resp = @apiInstance[endpoint].post( data, @headers )
+          response = @apiInstance[endpoint].post( data, @headers )
         when 'PATCH'
-          resp = @apiInstance[endpoint].patch( data, @headers )
+          response = @apiInstance[endpoint].patch( data, @headers )
         when 'PUT'
-          resp = @apiInstance[endpoint].put( data, @headers )
+          response = @apiInstance[endpoint].put( data, @headers )
         when 'DELETE'
-          resp = @apiInstance[endpoint].delete( @headers )
+          response = @apiInstance[endpoint].delete( @headers )
         else
           logger.error( "Error: #{__method__} is not a valid request method." )
           return false
         end
 
-        if( ( resp.code.to_i >= 200 && resp.code.to_i <= 299 ) || ( resp.code.to_i >= 400 && resp.code.to_i <= 499 ) )
-          return JSON.parse( resp.body )
+        responseCode = response.code.to_i
+        responseBody = response.body
+
+#         logger.debug( response )
+
+        if( ( responseCode >= 200 && responseCode <= 299 ) || ( responseCode >= 400 && responseCode <= 499 ) )
+
+          begin
+            result            = JSON.parse( responseBody )
+
+            if( result['status'] )
+              result['message'] = result.dig( 'status' )
+              result['status']  = response.code.to_i
+            end
+          rescue => e
+
+          end
+          return result
         else
-          logger.error( "#{__method__} on #{endpoint} failed: HTTP #{resp.code} - #{resp.body}" )
-          return false
+
+          logger.error( "#{__method__} #{methodType.upcase} on #{endpoint} failed: HTTP #{response.code} - #{responseBody}" )
+
+          return JSON.parse( responseBody )
         end
 
       rescue => e
-       logger.error( "Error: #{__method__} #{endpoint} error: #{e}" )
-       return false
+
+        logger.error( "Error: #{__method__} #{methodType.upcase} on #{endpoint} error: '#{e}'" )
+
+        result           = JSON.parse( e.response )
+        result['status'] = e.to_s.split( ' ' ).first
+
+        return result
       end
 
     end
