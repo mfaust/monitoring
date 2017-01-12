@@ -704,7 +704,7 @@ class Grafana
 
   end
 
-
+  # OBSOLETE
   def getTemplatePathsForServiceType( serviceType )
 
     paths = Array.new()
