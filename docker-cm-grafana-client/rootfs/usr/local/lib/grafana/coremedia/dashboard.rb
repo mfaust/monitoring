@@ -166,7 +166,7 @@ module Grafana
               :additionalTemplatePaths => additionalTemplatePaths
             }
 
-            self.generateServiceTemplate( options )
+            self.createServiceTemplate( options )
 
           end
           logger.debug( '`---------------------------------------------------------' )
@@ -185,6 +185,8 @@ module Grafana
 
 
       def listDashboards( host )
+
+        host            = params[:host]     ? params[:host]     : nil
 
         data = self.searchDashboards( { :tags   => host } )
         data = data.collect { |item| item['uri'] }
@@ -234,7 +236,7 @@ module Grafana
       end
 
 
-      def generateServiceTemplate( params = {} )
+      def createServiceTemplate( params = {} )
 
         description             = params[:description]             ? params[:description]             : nil
         serviceName             = params[:serviceName]             ? params[:serviceName]             : nil
@@ -270,14 +272,35 @@ module Grafana
         templateJson = self.addAnnotations( templateJson )
         json = JSON.generate( templateJson )
 
-
-
-        json.gsub!( '%DESCRIPTION%', description )
-        json.gsub!( '%SERVICE%'    , normalizedName )
+        json = self.normalize( json )
 
         logger.debug( json )
 
 #         self.sendTemplateToGrafana( json, normalizedName )
+
+      end
+
+
+      def normalize( params )
+
+        template        = params[:template]        ? params[:template]        : nil
+        serviceName     = params[:serviceName]     ? params[:serviceName]     : nil
+        description     = params[:description]     ? params[:description]     : nil
+        normalizedName  = params[:normalizedName]  ? params[:normalizedName]  : nil
+        grafanaHostname = params[:grafanaHostname] ? params[:grafanaHostname] : nil
+        shortHostname   = params[:shortHostname]   ? params[:shortHostname]   : nil
+
+        if( serviceName )
+          template.gsub!( '%SERVICE%'  , serviceName )
+        end
+
+        template.gsub!(
+          '%DESCRIPTION%' => description,
+          '%SERVICE%'     => normalizedName,
+          '%HOST%'        => grafanaHostname,
+          '%SHORTHOST%'   => shortHostname,
+          '%TAG%'         => shortHostname
+        )
 
       end
 

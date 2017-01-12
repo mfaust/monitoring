@@ -230,9 +230,9 @@ module Grafana
 
         @shortHostname        = @shortHostname.gsub( '.', '-' )
 
-        @discoveryFile        = sprintf( '%s/%s/discovery.json'       , @cacheDirectory, host )
-        @mergedHostFile       = sprintf( '%s/%s/mergedHostData.json'  , @cacheDirectory, host )
-        @monitoringResultFile = sprintf( '%s/%s/monitoring.result'    , @cacheDirectory, host )
+#         @discoveryFile        = sprintf( '%s/%s/discovery.json'       , @cacheDirectory, host )
+#         @mergedHostFile       = sprintf( '%s/%s/mergedHostData.json'  , @cacheDirectory, host )
+#         @monitoringResultFile = sprintf( '%s/%s/monitoring.result'    , @cacheDirectory, host )
 
       end
 
