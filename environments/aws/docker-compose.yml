@@ -134,7 +134,7 @@ services:
 
   grafana:
     restart: always
-    image: bodsch/docker-grafana:1612-01
+    image: bodsch/docker-grafana:1701-02
     container_name: grafana
     hostname: grafana
     labels:
