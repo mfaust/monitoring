@@ -14,7 +14,8 @@ RUN \
     build-base \
     ruby-dev && \
   gem install --no-rdoc --no-ri \
-    beaneater && \
+    beaneater \
+    rest-client && \
   mkdir /var/log/monitoring && \
   mkdir /var/cache/monitoring && \
   apk del --purge \

@@ -220,7 +220,9 @@ class ServiceDiscovery
 
       result[:request]    = data
 
-      self.sendMessage( result )
+      self.sendMessage( { :cmd => 'information', :queue => 'mq-information', :payload => result } )
+      self.sendMessage( { :cmd => 'add'        , :queue => 'mq-grafana'    , :node => node, :payload => result, :delay => 20 } )
+
     end
 
   end
@@ -228,17 +230,26 @@ class ServiceDiscovery
 
   def sendMessage( data = {} )
 
-    logger.debug( JSON.pretty_generate( data ) )
+    cmd     = params[:cmd]     ? params[:cmd]     : nil
+    queue   = params[:queue]   ? params[:queue]   : nil
+    payload = params[:payload] ? params[:payload] : {}
+    delay   = params[:delay]   ? params[:delay]   : 2
+
+    if( cmd == nil || queue == nil || payload.count() == 0 )
+      return
+    end
+
+    logger.debug( JSON.pretty_generate( payload ) )
 
     p = MessageQueue::Producer.new( @MQSettings )
 
     job = {
-      cmd:  'information',
+      cmd:  cmd,
       from: 'discovery',
-      payload: data
+      payload: payload
     }.to_json
 
-    logger.debug( p.addJob( 'mq-information', job ) )
+    logger.debug( p.addJob( queue, job, delay ) )
 
   end
 

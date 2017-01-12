@@ -10,10 +10,10 @@
 require 'yaml'
 
 require_relative '../lib/logging'
-require_relative '../lib/discover'
-require_relative '../lib/grafana'
-require_relative '../lib/graphite'
-require_relative '../lib/icinga2'
+# require_relative '../lib/discover'
+# require_relative '../lib/grafana'
+# require_relative '../lib/graphite'
+# require_relative '../lib/icinga2'
 require_relative '../lib/tools'
 require_relative '../lib/storage'
 require_relative '../lib/message-queue'
@@ -92,10 +92,10 @@ class Monitoring
 
     sleep(2)
 
-    @serviceDiscovery = ServiceDiscovery.new( serviceDiscoverConfig )
-    @grafana          = Grafana.new( grafanaConfig )
-    @icinga           = Icinga2.new( icingaConfig )
-    @graphite         = GraphiteAnnotions::Client.new( graphiteOptions )
+#     @serviceDiscovery = ServiceDiscovery.new( serviceDiscoverConfig )
+#     @grafana          = Grafana.new( grafanaConfig )
+##     @icinga           = Icinga2.new( icingaConfig )
+##     @graphite         = GraphiteAnnotions::Client.new( graphiteOptions )
 
   end
 
@@ -400,36 +400,36 @@ class Monitoring
 
         logger.info( sprintf( 'remove %s from monitoring', host ) )
 
-        if( enableDiscovery == true )
+        self.messageQueue( { :command => 'remove', :node => host, :queue => 'mq-discover', :payload => { "force" => true } } )
 
-          self.messageQueue( { :command => 'remove', :node => host, :queue => 'mq-discover', :payload => { "force" => true } } )
-
-          discoveryResult = {
-            :status  => 200,
-            :message => 'send to MQ'
-          }
-#          discoveryResult  = @serviceDiscovery.deleteHost( host )
-          discoveryStatus  = discoveryResult[:status]
-          discoveryMessage = discoveryResult[:message]
-
-          logger.debug( "discovery: #{discoveryResult}" )
-        end
-
-        if( enabledIcinga == true )
-          icingaResult  = @icinga.deleteHost( host )
-          icingaStatus  = icingaResult[:status]
-          icingaMessage = icingaResult[:message]
-
-          logger.debug( "icinga: #{icingaResult}" )
-        end
-
-        if( enabledGrafana == true )
-          grafanaResult  = @grafana.deleteDashboards( host )
-          grafanaStatus  = grafanaResult[:status]
-          grafanaMessage = grafanaResult[:message]
-
-          logger.debug( "grafana: #{grafanaResult}" )
-        end
+#         if( enableDiscovery == true )
+#
+#           discoveryResult = {
+#             :status  => 200,
+#             :message => 'send to MQ'
+#           }
+#           discoveryResult  = @serviceDiscovery.deleteHost( host )
+#           discoveryStatus  = discoveryResult[:status]
+#           discoveryMessage = discoveryResult[:message]
+#
+#           logger.debug( "discovery: #{discoveryResult}" )
+#         end
+#
+#         if( enabledIcinga == true )
+#           icingaResult  = @icinga.deleteHost( host )
+#           icingaStatus  = icingaResult[:status]
+#           icingaMessage = icingaResult[:message]
+#
+#           logger.debug( "icinga: #{icingaResult}" )
+#         end
+#
+#         if( enabledGrafana == true )
+#           grafanaResult  = @grafana.deleteDashboards( host )
+#           grafanaStatus  = grafanaResult[:status]
+#           grafanaMessage = grafanaResult[:message]
+#
+#           logger.debug( "grafana: #{grafanaResult}" )
+#         end
 
         logger.info( 'done' )
 
@@ -520,37 +520,37 @@ class Monitoring
 
         end
 
-        if( enabledGrafana == true )
-
-          # tags are array or hash ..
-          # when hash, we need only the values. the keys are ignoreable
-          if( tags.is_a?( Hash ) )
-            tags = tags.values
-          end
-
-          options = {
-            'tags'         => tags,
-            'overview'     => grafanaOverview
-          }
-
-          grafanaResult  = @grafana.addDashbards( host, options )
-          grafanaStatus  = grafanaResult[:status]
-          grafanaMessage = grafanaResult[:message]
-
-          if( grafanaStatus == 200 )
-
-            grafanaListDashboards = @grafana.listDashboards( host )
-            grafanaDashboardCount = grafanaListDashboards[:count]   ? grafanaListDashboards[:count]   : 0
-
-            result[host.to_sym][:grafana] ||= {}
-            result[host.to_sym][:grafana] = {
-              :status     => grafanaStatus,
-              :message    => grafanaMessage,
-              :dashboards => grafanaDashboardCount
-            }
-
-          end
-        end
+#         if( enabledGrafana == true )
+#
+#           # tags are array or hash ..
+#           # when hash, we need only the values. the keys are ignoreable
+#           if( tags.is_a?( Hash ) )
+#             tags = tags.values
+#           end
+#
+#           options = {
+#             'tags'         => tags,
+#             'overview'     => grafanaOverview
+#           }
+#
+#           grafanaResult  = @grafana.addDashbards( host, options )
+#           grafanaStatus  = grafanaResult[:status]
+#           grafanaMessage = grafanaResult[:message]
+#
+#           if( grafanaStatus == 200 )
+#
+#             grafanaListDashboards = @grafana.listDashboards( host )
+#             grafanaDashboardCount = grafanaListDashboards[:count]   ? grafanaListDashboards[:count]   : 0
+#
+#             result[host.to_sym][:grafana] ||= {}
+#             result[host.to_sym][:grafana] = {
+#               :status     => grafanaStatus,
+#               :message    => grafanaMessage,
+#               :dashboards => grafanaDashboardCount
+#             }
+#
+#           end
+#         end
 
         if( annotation == true )
 

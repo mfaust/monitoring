@@ -321,64 +321,6 @@ module GraphiteAnnotions
 
     end
 
-    # OBSOLETE
-    def nodeCreatedAnnotation( host )
-
-      tag  = sprintf( '%s created', host )
-      data = sprintf( 'Node <b>%s</b> created (%s)', host, Time.now().strftime( '%Y-%m-%d %H:%M:%S' ) )
-
-      self.annotion( 'node created', tag, data )
-
-    end
-
-    # OBSOLETE
-    def nodeDestroyedAnnotation( host )
-
-      tag  = sprintf( '%s destroyed', host )
-      data = sprintf( 'Node <b>%s</b> destroyed (%s)', host, Time.now().strftime( '%Y-%m-%d %H:%M:%S' ))
-
-      self.annotion( 'node destroyed', tag, data )
-
-    end
-
-    # OBSOLETE
-    def loadTestStartAnnotation( host )
-
-      tag  = sprintf( '%s loadtest', host )
-      data = sprintf( 'Load Test for Node <b>%s</b> started (%s)', host, Time.now().strftime( '%Y-%m-%d %H:%M:%S' ) )
-
-      self.annotion( 'load test start', tag, data )
-
-    end
-
-    # OBSOLETE
-    def loadTestStopAnnotation( host )
-
-      tag  = sprintf( '%s loadtest', host )
-      data = sprintf( 'Load Test for Node <b>%s</b> ended (%s)', host, Time.now().strftime( '%Y-%m-%d %H:%M:%S' ) )
-
-      self.annotion( 'load test end', tag, data )
-
-    end
-
-    # OBSOLETE
-    def startAnnotation( host, data )
-
-      tag = sprintf( '%s start', host )
-
-      self.annotion( 'starting', host, data )
-
-    end
-
-    # OBSOLETE
-    def stopAnnotation( host, data )
-
-      tag = sprintf( '%s stop', host )
-
-      self.annotion( 'stopping', host, data )
-
-    end
-
 
   end
 
