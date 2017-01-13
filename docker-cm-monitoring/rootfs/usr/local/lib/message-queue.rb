@@ -1,47 +1,16 @@
 #!/usr/bin/ruby
-
-require 'beaneater'
-require 'json'
-# require 'timeout'
-# require 'term/ansicolor'
-require 'logger'
-# require_relative '../docker-cm-monitoring/rootfs/usr/local/lib/tools'
+#
+# 05.01.2017 - Bodo Schulz
+# v1.0.1
+#
+# simplified API for Beanaeter (Client Class for beanstalk)
 
 # -----------------------------------------------------------------------------
 
-module Logging
-
-  def logger
-    @logger ||= Logging.logger_for(self.class.name)
-  end
-
-  # Use a hash class-ivar to cache a unique Logger per class:
-  @loggers = {}
-
-  class << self
-    def logger_for(classname)
-      @loggers[classname] ||= configure_logger_for(classname)
-    end
-
-    def configure_logger_for(classname)
-
-#      logFile         = '/var/log/monitoring/monitoring.log'
-#      file            = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
-#      file.sync       = true
-#      logger          = Logger.new( file, 'weekly', 1024000 )
-
-      logger                 = Logger.new(STDOUT)
-      logger.progname        = classname
-      logger.level           = Logger::DEBUG
-      logger.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
-      logger.formatter       = proc do |severity, datetime, progname, msg|
-        "[#{datetime.strftime( logger.datetime_format )}] #{severity.ljust(5)} : #{progname} - #{msg}\n"
-      end
-
-      logger
-    end
-  end
-end
+require 'beaneater'
+require 'json'
+require 'logger'
+require_relative 'logging'
 
 # -----------------------------------------------------------------------------
 
@@ -56,7 +25,11 @@ module MessageQueue
       beanstalkHost       = params[:beanstalkHost] ? params[:beanstalkHost] : 'beanstalkd'
       beanstalkPort       = params[:beanstalkPort] ? params[:beanstalkPort] : 11300
 
-      @b = Beaneater.new( sprintf( '%s:%s', beanstalkHost, beanstalkPort ) )
+      begin
+        @b = Beaneater.new( sprintf( '%s:%s', beanstalkHost, beanstalkPort ) )
+      rescue => e
+        logger.error( e )
+      end
 
     end
 
@@ -88,7 +61,11 @@ module MessageQueue
       beanstalkHost       = params[:beanstalkHost] ? params[:beanstalkHost] : 'beanstalkd'
       beanstalkPort       = params[:beanstalkPort] ? params[:beanstalkPort] : 11300
 
-      @b = Beaneater.new( sprintf( '%s:%s', beanstalkHost, beanstalkPort ) )
+      begin
+        @b = Beaneater.new( sprintf( '%s:%s', beanstalkHost, beanstalkPort ) )
+      rescue => e
+        logger.error( e )
+      end
 
     end
 
@@ -142,6 +119,8 @@ module MessageQueue
           return result
         end
 
+        logger.debug( stats )
+
 
         tube = @b.tubes.watch!( tube.to_s )
 
@@ -171,9 +150,6 @@ module MessageQueue
         rescue Beaneater::TimedOutError
           # nothing to do
         end
-
-
-
       end
 
       return result
@@ -205,9 +181,6 @@ module MessageQueue
 
 end
 
-
-
-
 # -----------------------------------------------------------------------------
 # TESTS
 
@@ -218,21 +191,19 @@ end
 # p = MessageQueue::Producer.new( settings )
 #
 #
-# # 100.times do |i|
-# #
-# #   job = {
-# #     cmd:   'add',
-# #     payload: sprintf( "foo-bar-%s.com", i )
-# #   }.to_json
-# #
-# #   p.addJob( 'test-tube', job )
-# # end
+# 100.times do |i|
+#
+#   job = {
+#     cmd:   'add',
+#     payload: sprintf( "foo-bar-%s.com", i )
+#   }.to_json
+#
+#   p.addJob( 'test-tube', job )
+# end
 #
 # c = MessageQueue::Consumer.new( settings )
 #
 # puts JSON.pretty_generate( c.tubeStatistics( 'test-tube' ) )
-#
-# # exit
 #
 # loop do
 #   j = c.getJobFromTube( 'test-tube' )
@@ -245,5 +216,3 @@ end
 # end
 
 # -----------------------------------------------------------------------------
-
-

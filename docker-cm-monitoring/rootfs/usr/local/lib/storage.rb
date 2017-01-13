@@ -25,19 +25,31 @@ module Storage
 
     OFFLINE  = 0
     ONLINE   = 1
+    DELETE   = 98
     PREPARE  = 99
 
     def initialize( params = {} )
 
       @cacheDirectory    = params[:cacheDirectory] ? params[:cacheDirectory] : '/var/cache/monitoring'
 
-      self.prepare
+      self.prepare()
     end
 
 
     def prepare()
 
-      @database = Sequel.sqlite( sprintf( '%s/monitoring.db', @cacheDirectory ) )
+      @database = nil
+
+      begin
+        until( @database != nil )
+#           logger.debug( 'try ...' )
+          @database = Sequel.sqlite( sprintf( '%s/monitoring.db', @cacheDirectory ) )
+          sleep( 3 )
+        end
+      rescue => e
+        logger.error( e )
+      end
+
 #      @database.loggers << logger # Logger.new( $stdout, :debug )
 
       @database.create_table?( :dns ) {
@@ -147,10 +159,27 @@ module Storage
 
     end
 
+    def checkDatabase()
+
+      if( @database == nil )
+        self.prepare()
+
+        if( @database == nil )
+          return false
+        end
+      end
+
+    end
+
+
 
     # -- configurations -------------------------
     #
     def createConfig( params = {} )
+
+      if( self.checkDatabase() == false )
+        return false
+      end
 
       dnsIp        = params[ :ip ]       ? params[ :ip ]       : nil
       dnsShortname = params[ :short ]    ? params[ :short ]    : nil
@@ -173,7 +202,11 @@ module Storage
     end
 
     # PRIVATE
-    private def writeConfig( params = {} )
+    def writeConfig( params = {} )
+
+      if( self.checkDatabase() == false )
+        return false
+      end
 
       dnsIp        = params[ :ip ]       ? params[ :ip ]       : nil
       dnsShortname = params[ :short ]    ? params[ :short ]    : nil
@@ -250,6 +283,10 @@ module Storage
 
     def removeConfig( params = {} )
 
+      if( self.checkDatabase() == false )
+        return false
+      end
+
       ip        = params[ :ip ]    ? params[ :ip ]    : nil
       short     = params[ :short ] ? params[ :short ] : nil
       long      = params[ :long ]  ? params[ :long ]  : nil
@@ -279,6 +316,10 @@ module Storage
 
 
     def config( params = {} )
+
+      if( self.checkDatabase() == false )
+        return false
+      end
 
       ip        = params[ :ip ]    ? params[ :ip ]    : nil
       short     = params[ :short ] ? params[ :short ] : nil
@@ -364,6 +405,10 @@ module Storage
     #
     def createDNS( params = {} )
 
+      if( self.checkDatabase() == false )
+        return false
+      end
+
       ip      = params[ :ip ]    ? params[ :ip ]    : nil
       short   = params[ :short ] ? params[ :short ] : nil
       long    = params[ :long ]  ? params[ :long ]  : nil
@@ -396,6 +441,10 @@ module Storage
 
     def removeDNS( params = {} )
 
+      if( self.checkDatabase() == false )
+        return false
+      end
+
       ip      = params[ :ip ]    ? params[ :ip ]    : nil
       short   = params[ :short ] ? params[ :short ] : nil
       long    = params[ :long ]  ? params[ :long ]  : nil
@@ -423,6 +472,10 @@ module Storage
 
 
     def dnsData( params = {}  )
+
+      if( self.checkDatabase() == false )
+        return false
+      end
 
       ip      = params[ :ip ]    ? params[ :ip ]    : nil
       short   = params[ :short ] ? params[ :short ] : nil
@@ -459,6 +512,10 @@ module Storage
     #
     def createDiscovery( params = {} )
 
+      if( self.checkDatabase() == false )
+        return false
+      end
+
       dnsId        = params[ :id ]       ? params[ :id ]       : nil
       dnsIp        = params[ :ip ]       ? params[ :ip ]       : nil
       dnsShortname = params[ :short ]    ? params[ :short ]    : nil
@@ -486,6 +543,10 @@ module Storage
 
     # PRIVATE
     def writeDiscovery( params = {} )
+
+      if( self.checkDatabase() == false )
+        return false
+      end
 
       dnsId        = params[ :id ]       ? params[ :id ]       : nil
       dnsIp        = params[ :ip ]       ? params[ :ip ]       : nil
@@ -519,6 +580,10 @@ module Storage
 
 
     def discoveryData( params = {} )
+
+      if( self.checkDatabase() == false )
+        return false
+      end
 
       ip      = params[ :ip ]      ? params[ :ip ]      : nil
       short   = params[ :short ]   ? params[ :short ]   : nil
@@ -672,6 +737,10 @@ module Storage
 
     def createMeasurements( params = {} )
 
+      if( self.checkDatabase() == false )
+        return false
+      end
+
       dnsId        = params[ :dns_id ]       ? params[ :dns_id ]       : nil
       discoveryId  = params[ :discovery_id ] ? params[ :discovery_id ] : nil
       data         = params[ :data ]         ? params[ :data ]         : nil
@@ -732,6 +801,10 @@ module Storage
 
 
     def measurements( params = {} )
+
+      if( self.checkDatabase() == false )
+        return false
+      end
 
       ip      = params[ :ip ]      ? params[ :ip ]      : nil
       short   = params[ :short ]   ? params[ :short ]   : nil
@@ -833,6 +906,10 @@ module Storage
 
     def nodes( params = {} )
 
+      if( self.checkDatabase() == false )
+        return false
+      end
+
       status    = params[ :status ]    ? params[ :status ]    : nil # Database::ONLINE
 
       result    =
@@ -858,6 +935,10 @@ module Storage
 
 
     def setStatus( params = {} )
+
+      if( self.checkDatabase() == false )
+        return false
+      end
 
       dnsId   = params[ :dns_id ] ? params[ :dns_id ] : nil
       ip      = params[ :ip ]     ? params[ :ip ]     : nil
@@ -940,15 +1021,18 @@ module Storage
 
       memcacheOptions = {
         :compress   => true,
-        :namespace  => namespace.to_s,
-        :expires_in => ( 60 * expire.to_i )  # :expires_in - default TTL in seconds (defaults to 0 or forever)
+        :namespace  => namespace.to_s
       }
+
+      if( expire.to_i != 0 )
+        memcacheOptions[:expires_in] = ( 60 * expire.to_i )  # :expires_in - default TTL in seconds (defaults to 0 or forever)
+      end
 
       @mc = nil
 
       begin
         until( @mc != nil )
-          logger.debug( 'try ...' )
+#           logger.debug( 'try ...' )
           @mc = Dalli::Client.new( sprintf( '%s:%s', host, port ), memcacheOptions )
           sleep( 3 )
         end
@@ -959,7 +1043,7 @@ module Storage
 
     def self.cacheKey( params = {} )
 
-      params = Hash[params.sort]
+      params   = Hash[params.sort]
       checksum = Digest::MD5.hexdigest( params.to_s )
 
       return checksum
