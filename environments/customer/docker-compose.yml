@@ -259,7 +259,29 @@ services:
       mon:
         ipv4_address: 172.25.0.33
 
-
+  # single service
+  # use MQ to process data
+  cm-graphite-client:
+    restart: always
+    build: ../../docker-cm-graphite-client
+    container_name: cm-graphite-client
+    hostname: cm-graphite-client
+    labels:
+      com.dnsdock.image: "cm-graphite-client"
+      com.dnsdock.alias: "cm-graphite-client"
+      com.dnsdock.ttl: "30"
+    env_file:
+      - env/cm-graphite-client.env
+    depends_on:
+      - beanstalkd
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./share/resolv.conf:/etc/resolv.conf:ro
+      - ./share/common/logging.rb:/usr/local/lib/logging.rb:ro
+      - ./share/common/message-queue.rb:/usr/local/lib/message-queue.rb:ro
+    networks:
+      mon:
+        ipv4_address: 172.25.0.34
 
   cm-monitoring:
     restart: always

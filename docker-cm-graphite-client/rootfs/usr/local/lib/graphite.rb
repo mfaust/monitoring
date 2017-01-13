@@ -11,6 +11,7 @@ require 'uri'
 require 'time'
 
 require_relative 'logging'
+require_relative 'message-queue'
 
 # -------------------------------------------------------------------------------------------------------------------
 
@@ -45,7 +46,7 @@ module GraphiteAnnotions
       logger.info( '  Copyright 2016-2017 Coremedia' )
       logger.info( '  used Services:' )
       logger.info( "    - Graphite     : #{@graphiteURI}" )
-      logger.info( "    - Message Queue: #{@mqHost}:#{@mqPort}/#{@mqQueue}" )
+      logger.info( "    - Message Queue: #{mqHost}:#{mqPort}/#{@mqQueue}" )
       logger.info( '-----------------------------------------------------------------' )
       logger.info( '' )
 
