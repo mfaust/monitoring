@@ -207,7 +207,7 @@ module Grafana
 
           namedTemplate.push( 'cm-cae-cache-classes.json' )
 
-          if( @@mbean.beanAvailable?( host, 'cae-preview', 'CacheClassesIBMAvailability' ) == true )
+          if( @mbean.beanAvailable?( host, 'cae-preview', 'CacheClassesIBMAvailability' ) == true )
             namedTemplate.push( 'cm-cae-cache-classes-ibm.json' )
           end
         end
