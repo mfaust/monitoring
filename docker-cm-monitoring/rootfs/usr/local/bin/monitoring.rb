@@ -553,7 +553,6 @@ class Monitoring
 #         end
 
         if( annotation == true )
-
           self.addAnnotation( host, { "command": "create", "argument": "node" } )
         end
 
@@ -844,7 +843,7 @@ class Monitoring
       logger.debug( "discovery: #{discoveryResult}" )
 
       if( annotation == true && discoveryStatus == 200 )
-        self.addAnnotation( host, { "command": "destroy", "argument": "node" } )
+         self.addAnnotation( host, { "remove": "destroy", "argument": "node" } )
       end
 
       result[host.to_sym][:discovery] = {
@@ -895,7 +894,7 @@ class Monitoring
         description  = hash[:description] ? hash[:description] : nil
         tags         = hash[:tags]        ? hash[:tags]        : []
 
-        if( command == 'create' || command == 'destroy' )
+        if( command == 'create' || command == 'remove' )
 #         example:
 #         {
 #           "command": "create"
@@ -908,7 +907,9 @@ class Monitoring
           message     = nil
           description = nil
           tags        = []
-          @graphite.nodeAnnotation( host, command )
+          self.messageQueue( { :cmd => command, :node => host, :queue => 'mq-graphite', :payload => { "node" => host } } )
+
+#           @graphite.nodeAnnotation( host, command )
 
         elsif( command == 'loadtest' && ( argument == 'start' || stop == 'stop' ) )
 
@@ -926,7 +927,10 @@ class Monitoring
           message     = nil
           description = nil
           tags        = []
-          @graphite.loadtestAnnotation( host, argument )
+
+          self.messageQueue( { :cmd => 'loadtest', :node => host, :queue => 'mq-graphite', :payload => { "argument" => argument } } )
+
+          # @graphite.loadtestAnnotation( host, argument )
 
         elsif( command == 'deployment' )
 
@@ -940,7 +944,9 @@ class Monitoring
 #           ]
 #         }
           description = nil
-          @graphite.deploymentAnnotation( host, message, tags )
+          self.messageQueue( { :cmd => 'deployment', :node => host, :queue => 'mq-graphite', :payload => { "message" => message, "tags" => tags } } )
+
+#           @graphite.deploymentAnnotation( host, message, tags )
 
         else
 #         example:
@@ -953,7 +959,9 @@ class Monitoring
 #             "git-0000000"
 #           ]
 #         }
-          @graphite.generalAnnotation( host, description, message, tags )
+          self.messageQueue( { :cmd => 'general', :node => host, :queue => 'mq-graphite', :payload => { "message" => message, "tags" => tags, "description" => description } } )
+
+#           @graphite.generalAnnotation( host, description, message, tags )
         end
 
         status    = 200

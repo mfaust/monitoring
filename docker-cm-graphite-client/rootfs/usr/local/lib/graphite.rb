@@ -3,10 +3,9 @@
 #  28.08.2016 - bodsch
 #
 #
-# v1.1.1
+# v1.2.0
 # -----------------------------------------------------------------------------
 
-# require 'logger'
 require 'net/http'
 require 'uri'
 require 'time'
@@ -23,29 +22,30 @@ module GraphiteAnnotions
 
     def initialize( params = {} )
 
-      @logDirectory     = params[:logDirectory]     ? params[:logDirectory]     : '/tmp'
-      @graphiteHost     = params[:graphiteHost]     ? params[:graphiteHost]     : 'localhost'
-      @graphiteHttpPort = params[:graphiteHttpPort] ? params[:graphiteHttpPort] : 8081
-      @graphitePort     = params[:graphitePort]     ? params[:graphitePort]     : 2003
-      @graphitePath     = params[:graphitePath]     ? params[:graphitePath]     : nil
+      graphiteHost      = params[:graphiteHost]     ? params[:graphiteHost]     : 'localhost'
+      graphiteHttpPort  = params[:graphiteHttpPort] ? params[:graphiteHttpPort] : 8081
+      graphitePort      = params[:graphitePort]     ? params[:graphitePort]     : 2003
+      graphitePath      = params[:graphitePath]     ? params[:graphitePath]     : nil
       mqHost            = params[:mqHost]           ? params[:mqHost]           : 'localhost'
       mqPort            = params[:mqPort]           ? params[:mqPort]           : 11300
-      @mqQueue          = params[:mqQueue]          ? params[:mqQueue]          : 'mq-grafana'
+      @mqQueue          = params[:mqQueue]          ? params[:mqQueue]          : 'mq-graphite'
 
-      @graphiteURI      = sprintf( 'http://%s:%s%s/events/', @graphiteHost, @graphiteHttpPort, @graphitePath )
+      @graphiteURI      = sprintf( 'http://%s:%s%s/events/', graphiteHost, graphiteHttpPort, graphitePath )
       @MQSettings = {
         :beanstalkHost => mqHost,
         :beanstalkPort => mqPort
       }
 
-      version              = '1.1.2'
-      date                 = '2016-11-28'
+      version              = '1.2.0'
+      date                 = '2017-01-13'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - Graphite Client' )
       logger.info( "  Version #{version} (#{date})" )
-      logger.info( '  Copyright 2016 Coremedia' )
-      logger.info( "  Backendsystem #{@graphiteURI}" )
+      logger.info( '  Copyright 2016-2017 Coremedia' )
+      logger.info( '  used Services:' )
+      logger.info( "    - Graphite     : #{@graphiteURI}" )
+      logger.info( "    - Message Queue: #{@mqHost}:#{@mqPort}/#{@mqQueue}" )
       logger.info( '-----------------------------------------------------------------' )
       logger.info( '' )
 
@@ -71,6 +71,13 @@ module GraphiteAnnotions
       threads.each { |t| t.join }
 
     end
+
+
+        # { :cmd => 'create'    , :node => host, :queue => 'mq-graphite', :payload => { "node": node } }
+        # { :cmd => 'remove'    , :node => host, :queue => 'mq-graphite', :payload => { "node": node } }
+        # { :cmd => 'loadtest'  , :node => host, :queue => 'mq-graphite', :payload => { "argument": argument } }
+        # { :cmd => 'deployment', :node => host, :queue => 'mq-graphite', :payload => { "message": => message, "tags" => tags } }
+        # { :cmd => 'general'   , :node => host, :queue => 'mq-graphite', :payload => { "message": => message, "tags" => tags, "description" => description } }
 
 
     def processQueue( data = {} )
@@ -100,31 +107,47 @@ module GraphiteAnnotions
           :message => sprintf( 'wrong command detected: %s', command )
         }
 
-
         logger.debug( data )
-        logger.debug( data.dig( :body, 'payload' ) )
+        logger.debug( payload )
 
-        tags     = data.dig( :body, 'payload', 'tags' )
-        overview = data.dig( :body, 'payload', 'overview' ) || true
+        logger.info( sprintf( 'add annotation \'%s\'for node %s', command, node ) )
 
         case command
-        when 'add'
-#           logger.info( sprintf( 'add node %s', node ) )
+        when 'create', 'remove'
 
-          # TODO
-          # check payload!
-          # e.g. for 'force' ...
-          result = self.createDashboardForHost( { :host => node, :tags => tags, :overview => overview } )
+          result = self.nodeAnnotation( node, command )
 
           logger.info( result )
-        when 'remove'
-#           logger.info( sprintf( 'remove dashboards for node %s', node ) )
-          result = self.deleteDashboards( { :host => node } )
+        when 'loadtest'
+
+          argument = payload.dig( 'argument' )
+
+          if( argument != 'start' || argument != 'stop' )
+            logger.error( sprintf( 'wrong argument for LOADTEST \'%s\'', argument ) )
+            return
+          end
+
+          result = self.loadtestAnnotation( node, argument )
 
           logger.info( result )
-        when 'info'
-#           logger.info( sprintf( 'give dashboards for %s back', node ) )
-          result = self.listDashboards( { :host => node } )
+
+        when 'deployment'
+
+          message = payload.dig( 'message' )
+          tags    = payload.dig( 'tags' ) || []
+
+          result = self.deploymentAnnotation( node, message, tags )
+
+          logger.info( result )
+        when 'general'
+
+          description = payload.dig( 'description' )
+          message     = payload.dig( 'message' )
+          tags        = payload.dig( 'tags' ) || []
+
+          result = self.generalAnnotation( node, description, message, tags )
+
+          logger.info( result )
         else
           logger.error( sprintf( 'wrong command detected: %s', command ) )
 
@@ -215,7 +238,7 @@ module GraphiteAnnotions
             # 200 – Created
             # 400 – Errors (invalid json, missing or invalid fields, etc)
             # 401 – Unauthorized
-            # 412 – Precondition failed
+            # 404 –
             logger.error( sprintf( ' [%s] ', responseCode ) )
             logger.error( sprintf( '  %s  ', response.body ) )
           end
