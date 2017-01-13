@@ -191,7 +191,6 @@ services:
       - ./share/monitoring/etc/cm-service.yaml:/etc/cm-service.yaml
       - ./share/monitoring/etc/cm-application.yaml:/etc/cm-application.yaml
       - ./share/common/jolokia.rb:/usr/local/lib/jolokia.rb:ro
-      - ./share/common/logging.rb:/usr/local/lib/logging.rb:ro
       - ./share/common/message-queue.rb:/usr/local/lib/message-queue.rb:ro
       - ./share/common/storage.rb:/usr/local/lib/storage.rb:ro
       - ./share/common/tools.rb:/usr/local/lib/tools.rb:ro
@@ -220,8 +219,10 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./share/resolv.conf:/etc/resolv.conf:ro
+      - ./share/monitoring/etc/cm-service.yaml:/etc/cm-service.yaml
+      - ./share/monitoring/etc/cm-application.yaml:/etc/cm-application.yaml
+      - ./share/monitoring/etc/cm-monitoring.yaml:/etc/cm-monitoring.yaml
       - ./share/common/jolokia.rb:/usr/local/lib/jolokia.rb:ro
-      - ./share/common/logging.rb:/usr/local/lib/logging.rb:ro
       - ./share/common/message-queue.rb:/usr/local/lib/message-queue.rb:ro
       - ./share/common/storage.rb:/usr/local/lib/storage.rb:ro
       - ./share/common/tools.rb:/usr/local/lib/tools.rb:ro
@@ -246,6 +247,7 @@ services:
       - env/cm-grafana-client.env
     depends_on:
       - beanstalkd
+      - memcached
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./share/resolv.conf:/etc/resolv.conf:ro
@@ -274,6 +276,10 @@ services:
       - env/cm-graphite-client.env
     depends_on:
       - beanstalkd
+    extra_hosts:
+      # NOTE: external service
+      #- 'nginx-proxy:10.101.2.83'
+      - 'nginx-proxy:192.168.252.101'
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./share/resolv.conf:/etc/resolv.conf:ro

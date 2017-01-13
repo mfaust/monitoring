@@ -1,9 +1,9 @@
 #!/usr/bin/ruby
 #
-# 09.01.2017 - Bodo Schulz
+# 13.01.2017 - Bodo Schulz
 #
 #
-# v0.0.0
+# v1.0.0
 
 # -----------------------------------------------------------------------------
 
@@ -108,13 +108,14 @@ module Grafana
 
       proto        = ( ssl == true ? 'https' : 'http' )
 
-      if( debug == true )
+#       if( debug == true )
         logger.level = Logger::DEBUG
-      end
+#       end
 
       @apiInstance = nil
       @db          = Storage::Database.new()
       @mc          = Storage::Memcached.new( { :host => memcacheHost, :port => memcachePort } )
+      @mbean       = MBean::Client.new( { :memcache => @mc } )
 
       if( params.has_key?(:timeout) && params[:timeout].to_i <= 0 )
         params[:timeout] = 5
@@ -313,8 +314,6 @@ module Grafana
 
     def sendMessage( data = {} )
 
-    logger.debug( JSON.pretty_generate( data ) )
-
     p = MessageQueue::Producer.new( @MQSettings )
 
     job = {
@@ -322,6 +321,8 @@ module Grafana
       from: 'discovery',
       payload: data
     }.to_json
+
+    logger.debug( JSON.pretty_generate( job ) )
 
     logger.debug( p.addJob( 'mq-information', job ) )
 

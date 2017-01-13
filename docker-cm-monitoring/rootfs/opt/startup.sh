@@ -44,6 +44,8 @@ startSupervisor() {
 
 run() {
 
+#  curl http://dnsdock.docker/services/newid -X PUT --data-ascii '{"name": "foo", "image": "bar", "ip": "192.168.0.3", "ttl": 30}'
+
   createConfig
 
   startSupervisor

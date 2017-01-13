@@ -3,7 +3,7 @@
 # 12.08.2016 - Bodo Schulz
 #
 #
-# v1.0.1
+# v1.1.0
 
 # -----------------------------------------------------------------------------
 
@@ -24,7 +24,8 @@ mqPort           = ENV['MQ_PORT']         ? ENV['MQ_PORT']         : 11300
 mqQueue          = ENV['MQ_QUEUE']        ? ENV['MQ_QUEUE']        : 'mq-collector'
 memcacheHost     = ENV['MEMCACHE_HOST']   ? ENV['MEMCACHE_HOST']   : 'localhost'
 memcachePort     = ENV['MEMCACHE_PORT']   ? ENV['MEMCACHE_PORT']   : 11211
-scanDiscovery    = ENV['SCAN_DISCOVERY']  ? ENV['SCAN_DISCOVERY'] : '10m'
+scanDiscovery    = ENV['SCAN_DISCOVERY']  ? ENV['SCAN_DISCOVERY']  : '10m'
+intervall        = ENV['INTERVALL']       ? ENV['INTERVALL']       : 15
 
 config = {
   :logDirectory          => logDirectory,
@@ -56,9 +57,15 @@ Signal.trap('QUIT') { stop = true }
 
 r = DataCollector::Collector.new( config )
 
-until stop
-  r.run()
-  sleep( 15 )
+if( r != nil )
+
+  until stop
+    r.run()
+    sleep( intervall.to_i )
+  end
+
+else
+  exit 2
 end
 
 # -----------------------------------------------------------------------------

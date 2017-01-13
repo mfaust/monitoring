@@ -65,42 +65,38 @@ class ServiceDiscovery
 
     @logDirectory      = settings[:logDirectory]      ? settings[:logDirectory]        : '/var/log/monitoring'
     @cacheDirectory    = settings[:cacheDirectory]    ? settings[:cacheDirectory]      : '/var/cache/monitoring'
-
     @jolokiaHost       = settings[:jolokiaHost]       ? settings[:jolokiaHost]         : 'localhost'
     @jolokiaPort       = settings[:jolokiaPort]       ? settings[:jolokiaPort]         : 8080
-
-    @mqHost            = settings[:mqHost]            ? settings[:mqHost]              : 'localhost'
-    @mqPort            = settings[:mqPort]            ? settings[:mqPort]              : 11300
+    mqHost             = settings[:mqHost]            ? settings[:mqHost]              : 'localhost'
+    mqPort             = settings[:mqPort]            ? settings[:mqPort]              : 11300
     @mqQueue           = settings[:mqQueue]           ? settings[:mqQueue]             : 'mq-discover'
 
     @MQSettings = {
-      :beanstalkHost => @mqHost,
-      :beanstalkPort => @mqPort
+      :beanstalkHost => mqHost,
+      :beanstalkPort => mqPort
     }
 
     @serviceConfig     = settings[:serviceConfigFile] ? settings[:serviceConfigFile]   : nil
     @scanPorts         = settings[:scanPorts]         ? settings[:scanPorts]           : ports
 
-#     if( ! File.exist?( @cacheDirectory ) )
-#       Dir.mkdir( @cacheDirectory )
-#     end
+    logger.level = Logger::DEBUG
 
-    @db                 = Storage::Database.new()
-
-    @jolokia            = Jolokia::Client.new( { :host => @jolokiaHost, :port => @jolokiaPort } )
-
-    version             = '1.4.0'
-    date                = '2017-01-05'
+    version             = '1.4.1'
+    date                = '2017-01-13'
 
     logger.info( '-----------------------------------------------------------------' )
     logger.info( ' CoreMedia - Service Discovery' )
     logger.info( "  Version #{version} (#{date})" )
-    logger.info( '  Copyright 2016 Coremedia' )
+    logger.info( '  Copyright 2016-2017 Coremedia' )
+    logger.info( '  used Services:' )
+    logger.info( "    - jolokia      : #{@jolokiaHost}:#{@jolokiaPort}" )
+    logger.info( "    - message queue: #{mqHost}:#{mqPort}/#{@mqQueue}" )
     logger.info( "  cache directory located at #{@cacheDirectory}" )
-    logger.info( "  jolokia Service #{@jolokiaHost}:#{@jolokiaPort}" )
-    logger.info( "  message Queue Service #{@mqHost}:#{@mqPort}/#{@mqQueue}" )
     logger.info( '-----------------------------------------------------------------' )
     logger.info( '' )
+
+    @db                 = Storage::Database.new()
+    @jolokia            = Jolokia::Client.new( { :host => @jolokiaHost, :port => @jolokiaPort } )
 
     self.readConfigurations()
   end
@@ -160,6 +156,7 @@ class ServiceDiscovery
     if( data.count != 0 )
 
       logger.info( sprintf( 'process Message from Queue %s: %d', data.dig(:tube), data.dig(:id) ) )
+      logger.debug( data )
 
       command = data.dig( :body, 'cmd' )     || nil
       node    = data.dig( :body, 'node' )    || nil
@@ -186,29 +183,52 @@ class ServiceDiscovery
       when 'add'
         logger.info( sprintf( 'add node %s', node ) )
 
-        # TODO
-        # check payload!
-        # e.g. for 'force' ...
-        result = self.addHost( node, payload )
+        begin
+          # TODO
+          # check payload!
+          # e.g. for 'force' ...
+          result = self.addHost( node, payload )
 
-        @db.setStatus( { :ip => node, :short => node, :status => isRunning?( node ) } )
+          @db.setStatus( { :ip => node, :short => node, :status => isRunning?( node ) } )
 
-        logger.debug( result )
+          logger.debug( 'send message to \'mq-grafana\'' )
+          self.sendMessage( { :cmd => 'add', :queue => 'mq-grafana', :node => node, :payload => result } )
+
+          logger.debug( result )
+        rescue
+
+        end
       when 'remove'
         logger.info( sprintf( 'remove node %s', node ) )
-        result = self.deleteHost( node )
 
-        logger.debug( result )
+        begin
+
+          @db.setStatus( { :ip => node, :short => node, :status => 98 } )
+
+          logger.debug( 'send message to \'mq-grafana\'' )
+          self.sendMessage( { :cmd => 'remove', :queue => 'mq-grafana', :node => node, :payload => { "force": true } } )
+
+          sleep( 2 )
+
+          result = self.deleteHost( node )
+
+          logger.debug( result )
+        rescue
+
+        end
+
       when 'refresh'
         logger.info( sprintf( 'refresh node %s', node ) )
+
         result = self.refreshHost( node )
 
         logger.debug( result )
       when 'info'
         logger.info( sprintf( 'give information for %s back', node ) )
+
         result = self.listHosts( node )
       else
-        logger.error( sprintf( 'wrong command detected: %s', command ) )
+#         logger.error( sprintf( 'wrong command detected: %s', command ) )
 
         result = {
           :status  => 400,
@@ -220,17 +240,18 @@ class ServiceDiscovery
 
       result[:request]    = data
 
+      logger.debug( 'send message to \'mq-information\'' )
       self.sendMessage( { :cmd => 'information', :queue => 'mq-information', :payload => result } )
-      self.sendMessage( { :cmd => 'add'        , :queue => 'mq-grafana'    , :node => node, :payload => result, :delay => 20 } )
 
     end
 
   end
 
 
-  def sendMessage( data = {} )
+  def sendMessage( params = {} )
 
     cmd     = params[:cmd]     ? params[:cmd]     : nil
+    node    = params[:node]    ? params[:node]    : nil
     queue   = params[:queue]   ? params[:queue]   : nil
     payload = params[:payload] ? params[:payload] : {}
     delay   = params[:delay]   ? params[:delay]   : 2
@@ -239,15 +260,18 @@ class ServiceDiscovery
       return
     end
 
-    logger.debug( JSON.pretty_generate( payload ) )
+#     logger.debug( JSON.pretty_generate( payload ) )
 
     p = MessageQueue::Producer.new( @MQSettings )
 
     job = {
-      cmd:  cmd,
-      from: 'discovery',
-      payload: payload
+      cmd:  cmd,          # require
+      node: node,         # require
+      from: 'discovery',  # optional
+      payload: payload    # require
     }.to_json
+
+    logger.debug( JSON.pretty_generate( job ) )
 
     logger.debug( p.addJob( queue, job, delay ) )
 

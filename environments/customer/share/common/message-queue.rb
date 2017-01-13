@@ -119,6 +119,8 @@ module MessageQueue
           return result
         end
 
+        logger.debug( stats )
+
 
         tube = @b.tubes.watch!( tube.to_s )
 
@@ -148,9 +150,6 @@ module MessageQueue
         rescue Beaneater::TimedOutError
           # nothing to do
         end
-
-
-
       end
 
       return result

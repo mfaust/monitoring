@@ -3,7 +3,7 @@
 # 14.09.2016 - Bodo Schulz
 #
 #
-# v1.3.1
+# v1.4.2
 
 # -----------------------------------------------------------------------------
 
@@ -41,8 +41,8 @@ module Collecd
 
       @interval       = params[:interval]       ? params[:interval]       : 15
 
-      version              = '1.4.1-beta1'
-      date                 = '2017-01-09'
+      version              = '1.4.2'
+      date                 = '2017-01-13'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - CollectdPlugin' )
@@ -50,14 +50,13 @@ module Collecd
       logger.info( '  Copyright 2016-2017 Coremedia' )
       logger.info( "  configured interval #{@interval}" )
       logger.info( '  used Services:' )
-      logger.info( "    - Memcache     : #{memcacheHost}:#{memcachePort}" )
+      logger.info( "    - memcache     : #{memcacheHost}:#{memcachePort}" )
       logger.info( '-----------------------------------------------------------------' )
       logger.info( '' )
 
-      @db             = Storage::Database.new()
-      @mc             = Storage::Memcached.new( { :host => memcacheHost, :port => memcachePort } )
-
-      MBean.logger( logger )
+      @db          = Storage::Database.new()
+      @mc          = Storage::Memcached.new( { :host => memcacheHost, :port => memcachePort } )
+      @mbean       = MBean::Client.new( { :memcache => @mc } )
 
     end
 
@@ -775,7 +774,7 @@ module Collecd
     uptime  = 0
     start   = 0
 
-    if( MBean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+    if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
 
 #       value = value.values.first
 
@@ -810,7 +809,7 @@ module Collecd
     fileDescriptorCountOpen    = 0
     vvailableProcessors        = 0
 
-    if( MBean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+    if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
 
 #       value = value.values.first
     end
@@ -872,7 +871,7 @@ module Collecd
     sessionCounter          = 0       # Total number of sessions created by this manager
     maxActive               = 0       # Maximum number of active sessions so far
 
-    if( MBean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+    if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
 
       value = value.values.first
 
@@ -929,7 +928,7 @@ module Collecd
     activeTime   = 0
     totalTime    = 0
 
-    if( MBean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+    if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
 
       value = value.values.first
 
@@ -979,7 +978,7 @@ module Collecd
     rotateCount        = 0   # count of rotates since system start
     accessCount        = 0   # count of accesses since system start
 
-    if( MBean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+    if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
 
       value = value.values.first
 
@@ -1050,7 +1049,7 @@ module Collecd
 
     end
 
-    if( MBean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+    if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
 
 #       value = value.values.first
 
@@ -1102,7 +1101,7 @@ module Collecd
     peak   = 0
     count  = 0
 
-    if( MBean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+    if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
 
 #       value = value.values.first
 
@@ -1139,7 +1138,7 @@ module Collecd
     totalLoaded = 0
     unloaded    = 0
 
-    if( MBean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+    if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
 
 #       value = value.values.first
 
@@ -1174,10 +1173,10 @@ module Collecd
     used      = 0
     committed = 0
     percent   = 0
-    mbeanName = MBean.beanName( bean )
+    mbeanName = @mbean.beanName( bean )
     mbeanName = mbeanName.strip.tr( ' ', '_' )
 
-    if( MBean.checkBean‎Consistency( mbean, data ) == true && value != nil && usage != nil )
+    if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil && usage != nil )
 
       init      = usage['init']       ? usage['init']      : nil
       max       = usage['max']        ? usage['max']       : nil
@@ -1209,7 +1208,7 @@ module Collecd
     format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
     value  = data['value'] ? data['value'] : nil
 
-    if( MBean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+    if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
 
 #       value = value.values.first
 
@@ -1268,7 +1267,7 @@ module Collecd
     format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
     value  = data['value'] ? data['value'] : nil
 
-    if( MBean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+    if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
 
 #       value = value.values.first
 
@@ -1355,13 +1354,10 @@ module Collecd
 
       result       = []
 
-      MBean.logger( logger )
-      MBean.memcache( @mc )
-
 #       cacheKey = Storage::Memcached.cacheKey( { :host => @Host, :pre => 'result', :service => 'Replicator' } )
 #       replicatorData = @mc.get( memcacheKey )
 
-      replicatorData = MBean.bean( @Host, @serviceName, 'Replicator' )
+      replicatorData = @mbean.bean( @Host, @serviceName, 'Replicator' )
 
       if( replicatorData == false )
         logger.error( sprintf( 'No mbean \'Replicator\' for Service %s found!', @serviceName ) )
@@ -1409,7 +1405,7 @@ module Collecd
     end
 
 
-    if( MBean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+    if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
 
       value = value.values.first
 
@@ -1554,7 +1550,7 @@ module Collecd
     indexContentDocuments   = 0
     currentPendingDocuments = 0
 
-    if( MBean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+    if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
 
       value = value.values.first
 
@@ -1596,7 +1592,7 @@ module Collecd
     level     = 0
     missRate  = 0
 
-    if( MBean.checkBean‎Consistency( key, data ) == true && value != nil )
+    if( @mbean.checkBean‎Consistency( key, data ) == true && value != nil )
 
       value = value.values.first
 
@@ -1634,7 +1630,7 @@ module Collecd
     # defaults
     healthy = -1 # 0: false, 1: true, -1: N/A
 
-    if( MBean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+    if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
 
       value = value.values.first
 
@@ -1668,7 +1664,7 @@ module Collecd
     queueMaxSize   = 0
     queueSize      = 0
 
-    if( MBean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+    if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
 
       value = value.values.first
 
@@ -1716,7 +1712,7 @@ module Collecd
     suSessions       = 0
     open             = -1 # 0: false, 1: true, -1: N/A
 
-    if( MBean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+    if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
 
       value = value.values.first
 
@@ -1776,7 +1772,7 @@ module Collecd
     errors            = 0
     indexSize         = 0
 
-    if( MBean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+    if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
 
 #      value = value.values.first
 
@@ -1829,7 +1825,7 @@ module Collecd
     cumulative_hitratio  = 0
     cumulative_lookups   = 0
 
-    if( MBean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+    if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
 
 #      value = value.values.first
 
@@ -1896,7 +1892,7 @@ module Collecd
     timeouts               = 0
     errors                 = 0
 
-    if( MBean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+    if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
 
 #      value = value.values.first
 
@@ -1934,7 +1930,7 @@ module Collecd
     busy   = 0
     min    = 0
 
-    if( MBean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+    if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
 
       value = value.values.first
 
@@ -1970,7 +1966,7 @@ module Collecd
     queriesMax       = 0
     queriesWaiting   = 0
 
-    if( MBean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+    if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
 
       value = value.values.first
 
@@ -2011,7 +2007,7 @@ module Collecd
     successful    = 0
     unrecoverable = 0
 
-    if( MBean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+    if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
 
       value = value.values.first
 
@@ -2044,7 +2040,7 @@ module Collecd
     misses   = 0
     hits     = 0
 
-    if( MBean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+    if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
 
       value = value.values.first
 
@@ -2245,8 +2241,7 @@ module Collecd
             if( result.is_a?( Hash ) )
               graphiteOutput.push( self.ParseResult_mongoDB( result ) )
             else
-              logger.error( 'resultdata is not a Hash (mongodb)' )
-
+              logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @Host, service ) )
             end
 
           when 'mysql'
@@ -2254,7 +2249,7 @@ module Collecd
             if( result.is_a?( Hash ) )
               graphiteOutput.push( self.ParseResult_mySQL( result ) )
             else
-              logger.error( 'resultdata is not a Hash (mysql)' )
+              logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @Host, service ) )
             end
 
           when 'node_exporter'
@@ -2262,7 +2257,7 @@ module Collecd
             if( result.is_a?( Hash ) )
               graphiteOutput.push( self.ParseResult_nodeExporter( result ) )
             else
-              logger.error( 'resultdata is not a Hash (node_exporter)' )
+              logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @Host, service ) )
             end
 
           else
@@ -2286,6 +2281,5 @@ module Collecd
     end
 
   end
-
 
 end

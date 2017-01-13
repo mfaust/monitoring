@@ -132,7 +132,19 @@ module Grafana
         servicesTmp.delete( 'node_exporter' )
         servicesTmp.delete( 'demodata-generator' )
 
-        measurements = @db.measurements( { :ip => host, :short => host } ).dig( host )
+        measurements = nil
+
+        begin
+          until( measurements != nil )
+            logger.debug( 'wait for measurements data ...' )
+            measurements = @db.measurements( { :ip => host, :short => host } )
+            sleep( 5 )
+          end
+        rescue => e
+          logger.error( e )
+        end
+
+        measurements = measurements.dig( host )
 
         services.each do |service|
 
@@ -195,7 +207,7 @@ module Grafana
 
           namedTemplate.push( 'cm-cae-cache-classes.json' )
 
-          if( MBean::beanAvailable?( host, 'cae-preview', 'CacheClassesIBMAvailability' ) == true )
+          if( @@mbean.beanAvailable?( host, 'cae-preview', 'CacheClassesIBMAvailability' ) == true )
             namedTemplate.push( 'cm-cae-cache-classes-ibm.json' )
           end
         end
@@ -292,9 +304,6 @@ module Grafana
 
         logger.info( 'create License Templates' )
 
-        MBean.logger( logger )
-        MBean.memcache( @mc )
-
         host            = params[:host]     ? params[:host]     : nil
         services        = params[:services] ? params[:services] : []
 
@@ -312,7 +321,7 @@ module Grafana
 
         intersect.each do |service|
 
-          if( MBean::beanAvailable?( host, service, 'Server', 'LicenseValidUntilHard' ) == true )
+          if( @mbean.beanAvailable?( host, service, 'Server', 'LicenseValidUntilHard' ) == true )
 
             logger.info( sprintf( 'found License Information for Service %s', service ) )
 
@@ -334,7 +343,7 @@ module Grafana
 
         intersect.each do |service|
 
-          if( MBean::beanAvailable?( host, service, 'Server', 'ServiceInfos' ) == true )
+          if( @mbean.beanAvailable?( host, service, 'Server', 'ServiceInfos' ) == true )
 
             logger.info( sprintf( 'found Service Information for Service %s', service ) )
 
@@ -465,13 +474,17 @@ module Grafana
       # @return [Hash, #read]
       def listDashboards( params = {} )
 
+        logger.debug( 'listDashboards()' )
+
         host            = params[:host]     ? params[:host]     : nil
 
         data = self.searchDashboards( { :tags   => host } )
-
         data = data.collect { |item| item['uri'] }
+
+        logger.debug( data )
+
         data.each do |d|
-          d.gsub!( sprintf( 'db/%s-', @shortHostname ), '' )
+          d.gsub!( sprintf( 'db/%s-', host ), '' )
         end
 
         # logger.debug( JSON.pretty_generate( data ) )
@@ -511,7 +524,7 @@ module Grafana
 
         self.prepare( host )
 
-        dashboards = self.listDashboards( { :host => @shortHostname } )
+        dashboards = self.listDashboards( { :host => host } )
         dashboards = dashboards.dig(:dashboards)
 
         if( dashboards == nil )

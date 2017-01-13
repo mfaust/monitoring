@@ -149,7 +149,7 @@ services:
     port: 41399
 
   replication-live-server:
-    description: RLS
+    description: Replication Live Server
     port: 42099
     port_http: 42080
     ior: true

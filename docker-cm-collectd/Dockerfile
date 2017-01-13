@@ -12,6 +12,7 @@ RUN \
   apk --quiet --no-cache upgrade && \
   apk --quiet --no-cache add \
     build-base \
+    supervisor \
     bind-tools \
     collectd \
     collectd-log_logstash \

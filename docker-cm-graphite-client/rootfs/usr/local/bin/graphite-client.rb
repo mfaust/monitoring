@@ -3,17 +3,13 @@
 # 03.01.2017 - Bodo Schulz
 #
 #
-# v0.7.0
+# v2.0.1
 
 # -----------------------------------------------------------------------------
-
-require 'yaml'
 
 require_relative '../lib/graphite'
 
 # -----------------------------------------------------------------------------
-
-logDirectory     = '/var/log/monitoring'
 
 graphiteHost      = ENV['GRAPHITE_HOST']      ? ENV['GRAPHITE_HOST']       : 'localhost'
 graphitePort      = ENV['GRAPHITE_PORT']      ? ENV['GRAPHITE_PORT']       : 2003
@@ -24,19 +20,19 @@ mqPort            = ENV['MQ_PORT']            ? ENV['MQ_PORT']             : 113
 mqQueue           = ENV['MQ_QUEUE']           ? ENV['MQ_QUEUE']            : 'mq-graphite'
 
 config = {
-  :logDirectory      => logDirectory,
   :graphiteHost      => graphiteHost,
   :graphitePort      => graphitePort,
   :graphiteHttpPort  => graphiteHttpPort,
   :graphitePath      => graphitePath,
   :mqHost            => mqHost,
   :mqPort            => mqPort,
-  :mqQueue           => mqQueue
+  :mqQueue           => mqQueue,
+  :debug             => true
 }
 
 # ---------------------------------------------------------------------------------------
 
-g = GraphiteAnnotions::Client.new( config )
+g = Graphite::Client.new( config )
 
 # -----------------------------------------------------------------------------
 
@@ -49,10 +45,16 @@ Signal.trap('HUP')  { stop = true }
 Signal.trap('TERM') { stop = true }
 Signal.trap('QUIT') { stop = true }
 
-until stop
-  # do your thing
-  g.queue()
-  sleep( 5 )
+if( g != nil )
+
+  until stop
+    # do your thing
+    g.queue()
+    sleep( 5 )
+  end
+
+else
+  exit 2
 end
 
 # -----------------------------------------------------------------------------

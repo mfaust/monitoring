@@ -189,9 +189,9 @@ class Monitoring
   #
   def messageQueue( params = {} )
 
-    logger.debug( params )
+#     logger.debug( params )
 
-    command = params.dig(:command)
+    command = params.dig(:cmd)
     node    = params.dig(:node)
     queue   = params.dig(:queue)
     data    = params.dig(:payload)
@@ -201,9 +201,13 @@ class Monitoring
     job = {
       cmd:  command,
       node: node,
+      timestamp: Time.now().strftime( '%Y-%m-%d %H:%M:%S' ),
       from: 'rest-service',
       payload: data
     }.to_json
+
+    logger.debug( queue )
+    logger.debug( job )
 
     logger.debug( p.addJob( queue, job ) )
 
@@ -374,13 +378,13 @@ class Monitoring
 #        }
 #      }
 
-      logger.debug( payload )
+      puts( payload )
 
       if( payload != '' )
 
         hash = JSON.parse( payload )
 
-        logger.debug( hash )
+        puts( hash )
 
         result[:request] = hash
 
@@ -396,46 +400,17 @@ class Monitoring
 
       end
 
-      if( force == true )
-
-        logger.info( sprintf( 'remove %s from monitoring', host ) )
-
-        self.messageQueue( { :command => 'remove', :node => host, :queue => 'mq-discover', :payload => { "force" => true } } )
-
-#         if( enableDiscovery == true )
+#       if( force == true )
 #
-#           discoveryResult = {
-#             :status  => 200,
-#             :message => 'send to MQ'
-#           }
-#           discoveryResult  = @serviceDiscovery.deleteHost( host )
-#           discoveryStatus  = discoveryResult[:status]
-#           discoveryMessage = discoveryResult[:message]
+#         logger.info( sprintf( 'remove %s from monitoring', host ) )
 #
-#           logger.debug( "discovery: #{discoveryResult}" )
-#         end
+#         self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-discover', :payload => { "force" => true } } )
 #
-#         if( enabledIcinga == true )
-#           icingaResult  = @icinga.deleteHost( host )
-#           icingaStatus  = icingaResult[:status]
-#           icingaMessage = icingaResult[:message]
+#         sleep( 2 )
 #
-#           logger.debug( "icinga: #{icingaResult}" )
-#         end
-#
-#         if( enabledGrafana == true )
-#           grafanaResult  = @grafana.deleteDashboards( host )
-#           grafanaStatus  = grafanaResult[:status]
-#           grafanaMessage = grafanaResult[:message]
-#
-#           logger.debug( "grafana: #{grafanaResult}" )
-#         end
+#       end
 
-        logger.info( 'done' )
-
-      end
-
-      # now, we canwrite an config per node when we add them
+      # now, we can write an config per node when we add them
       if( config.is_a?( Hash) )
 
         ip    = hostData.dig( :ip )
@@ -456,116 +431,59 @@ class Monitoring
         'services'     => services
       }
 
-      self.messageQueue( { :command => 'add', :node => host, :queue => 'mq-discover', :payload => payload } )
+      self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-discover', :payload => payload } )
 
       discoveryResult = {
         :status  => 200,
         :message => 'send to MQ'
       }
 
-#      discoveryResult   = @serviceDiscovery.addHost( host, options )
-      discoveryStatus   = discoveryResult[:status].to_i
-      discoveryMessage  = discoveryResult[:message]
-
-      # jolokia is not available (400)
-      # Host not available (400)
-      # Host already created (409)
-      if( discoveryStatus == 400 || discoveryStatus == 409 )
-
-        status  = discoveryStatus
-        message = discoveryMessage
-
-        return {
-          :status  => status,
-          :message => message
-        }
-
-      else
-        # all fine (200)
-
         result[host.to_sym] ||= {}
 
-        if( enabledIcinga == true )
-
-          discoverdServices = @serviceDiscovery.listHosts( host )
-
-          services          = discoverdServices.dig( 'hosts', 'services' )
-
-          logger.debug( services )
-
-          services = ( discoverdServices[:hosts] && discoverdServices[:hosts]['services'] ) ? discoverdServices[:hosts]['services'] : nil
-
-          logger.debug( services )
-
-#           services.each do |s|
-#             s.last.reject! { |k| k == 'description' }
-#             s.last.reject! { |k| k == 'application' }
-#           end
+#         if( enabledIcinga == true )
 #
-#           cm = Hash.new()
-#           cm = { 'cm' => services }
+#           discoverdServices = @serviceDiscovery.listHosts( host )
 #
-#           icingaResult  = @icinga.addHost( host, cm )
-#           icingaStatus  = icingaResult[:status]
-#           icingaMessage = icingaResult[:message]
-
-          icingaStatus  = 201
-          icingaMessage = 'test message'
-
-          result[host.to_sym][:icinga] ||= {}
-          result[host.to_sym][:icinga] = {
-            :status     => icingaStatus,
-            :message    => icingaMessage
-          }
-
-        end
-
-#         if( enabledGrafana == true )
+#           services          = discoverdServices.dig( 'hosts', 'services' )
 #
-#           # tags are array or hash ..
-#           # when hash, we need only the values. the keys are ignoreable
-#           if( tags.is_a?( Hash ) )
-#             tags = tags.values
-#           end
+#           logger.debug( services )
 #
-#           options = {
-#             'tags'         => tags,
-#             'overview'     => grafanaOverview
+#           services = ( discoverdServices[:hosts] && discoverdServices[:hosts]['services'] ) ? discoverdServices[:hosts]['services'] : nil
+#
+#           logger.debug( services )
+#
+# #           services.each do |s|
+# #             s.last.reject! { |k| k == 'description' }
+# #             s.last.reject! { |k| k == 'application' }
+# #           end
+# #
+# #           cm = Hash.new()
+# #           cm = { 'cm' => services }
+# #
+# #           icingaResult  = @icinga.addHost( host, cm )
+# #           icingaStatus  = icingaResult[:status]
+# #           icingaMessage = icingaResult[:message]
+#
+#           icingaStatus  = 201
+#           icingaMessage = 'test message'
+#
+#           result[host.to_sym][:icinga] ||= {}
+#           result[host.to_sym][:icinga] = {
+#             :status     => icingaStatus,
+#             :message    => icingaMessage
 #           }
 #
-#           grafanaResult  = @grafana.addDashbards( host, options )
-#           grafanaStatus  = grafanaResult[:status]
-#           grafanaMessage = grafanaResult[:message]
-#
-#           if( grafanaStatus == 200 )
-#
-#             grafanaListDashboards = @grafana.listDashboards( host )
-#             grafanaDashboardCount = grafanaListDashboards[:count]   ? grafanaListDashboards[:count]   : 0
-#
-#             result[host.to_sym][:grafana] ||= {}
-#             result[host.to_sym][:grafana] = {
-#               :status     => grafanaStatus,
-#               :message    => grafanaMessage,
-#               :dashboards => grafanaDashboardCount
-#             }
-#
-#           end
 #         end
+
 
         if( annotation == true )
           self.addAnnotation( host, { "command": "create", "argument": "node" } )
         end
 
         result[host.to_sym][:discovery] ||= {}
-        result[host.to_sym][:discovery] = {
-          :status     => discoveryStatus,
-          :message    => discoveryMessage
-        }
+        result[host.to_sym][:discovery] = discoveryResult
 
-#        status  = 200
         return result
-
-      end
 
     end
 
@@ -783,6 +701,8 @@ class Monitoring
 
 #     example:
 #     {
+#       "force": true,
+#       "icinga": false,
 #       "grafana": false,
 #       "annotation": true
 #     }
@@ -799,57 +719,33 @@ class Monitoring
         annotation      = hash.keys.include?('annotation') ? hash['annotation'] : true
       end
 
+      result[host.to_sym] ||= {}
+
+#       if( enabledIcinga == true )
+#
+# #        self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-icinga', :payload => { "force" => true } } )
+#       end
+
+#      if( enabledGrafana == true )
+#        self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-grafana', :payload => { "force" => true } } )
+#      end
+
+      self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-discover', :payload => { "force" => force } } )
+
+      discoveryResult = {
+        :status  => 200,
+        :message => 'send to MQ'
+      }
+
+      if( annotation == true )
+         self.addAnnotation( host, { "command": "remove", "argument": "node" } )
+      end
+
       if( force == true )
         @db.removeConfig( { :ip => host, :short => host } )
       end
 
-      result[host.to_sym] ||= {}
-
-      if( enabledIcinga == true )
-        icingaResult  = @icinga.deleteHost( host )
-        icingaStatus  = icingaResult[:status]
-        icingaMessage = icingaResult[:message]
-
-        logger.debug( "icinga: #{icingaResult}" )
-
-#         icingaStatus  = 201
-#         icingaMessage = 'test message'
-
-        result[host.to_sym][:icinga] ||= {}
-        result[host.to_sym][:icinga] = {
-          :status     => icingaStatus,
-          :message    => icingaMessage
-        }
-
-      end
-
-      if( enabledGrafana == true )
-        grafanaResult  = @grafana.deleteDashboards( host )
-        grafanaStatus  = grafanaResult[:status]
-        grafanaMessage = grafanaResult[:message]
-
-        logger.debug( "grafana: #{grafanaResult}" )
-
-        result[host.to_sym][:grafana] = {
-          :status     => grafanaStatus,
-          :message    => grafanaMessage
-        }
-      end
-
-      discoveryResult  = @serviceDiscovery.deleteHost( host )
-      discoveryStatus  = discoveryResult[:status]
-      discoveryMessage = discoveryResult[:message]
-
-      logger.debug( "discovery: #{discoveryResult}" )
-
-      if( annotation == true && discoveryStatus == 200 )
-         self.addAnnotation( host, { "remove": "destroy", "argument": "node" } )
-      end
-
-      result[host.to_sym][:discovery] = {
-        :status     => discoveryStatus,
-        :message    => discoveryMessage
-      }
+      result[host.to_sym][:discovery] = discoveryResult
 
       return result
     end
@@ -907,7 +803,7 @@ class Monitoring
           message     = nil
           description = nil
           tags        = []
-          self.messageQueue( { :cmd => command, :node => host, :queue => 'mq-graphite', :payload => { "node" => host } } )
+          self.messageQueue( { :cmd => command, :node => host, :queue => 'mq-graphite', :payload => { "timestamp": Time.now().to_i, "node" => host } } )
 
 #           @graphite.nodeAnnotation( host, command )
 
@@ -928,7 +824,7 @@ class Monitoring
           description = nil
           tags        = []
 
-          self.messageQueue( { :cmd => 'loadtest', :node => host, :queue => 'mq-graphite', :payload => { "argument" => argument } } )
+          self.messageQueue( { :cmd => 'loadtest', :node => host, :queue => 'mq-graphite', :payload => { "timestamp": Time.now().to_i, "argument" => argument } } )
 
           # @graphite.loadtestAnnotation( host, argument )
 
@@ -944,7 +840,7 @@ class Monitoring
 #           ]
 #         }
           description = nil
-          self.messageQueue( { :cmd => 'deployment', :node => host, :queue => 'mq-graphite', :payload => { "message" => message, "tags" => tags } } )
+          self.messageQueue( { :cmd => 'deployment', :node => host, :queue => 'mq-graphite', :payload => { "timestamp": Time.now().to_i, "message" => message, "tags" => tags } } )
 
 #           @graphite.deploymentAnnotation( host, message, tags )
 
@@ -959,7 +855,7 @@ class Monitoring
 #             "git-0000000"
 #           ]
 #         }
-          self.messageQueue( { :cmd => 'general', :node => host, :queue => 'mq-graphite', :payload => { "message" => message, "tags" => tags, "description" => description } } )
+          self.messageQueue( { :cmd => 'general', :node => host, :queue => 'mq-graphite', :payload => { "timestamp": Time.now().to_i, "message" => message, "tags" => tags, "description" => description } } )
 
 #           @graphite.generalAnnotation( host, description, message, tags )
         end

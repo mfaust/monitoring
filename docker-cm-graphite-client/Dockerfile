@@ -3,7 +3,7 @@ FROM bodsch/docker-ruby
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
-LABEL version="1.5.1"
+LABEL version="2.0.1"
 
 # ---------------------------------------------------------------------------------------
 

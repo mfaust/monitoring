@@ -1,13 +1,13 @@
 #!/usr/bin/ruby
 #
-# 07.01.2017 - Bodo Schulz
+# 13.01.2017 - Bodo Schulz
 #
 #
-# v1.5.0
+# v1.6.0
 
 # -----------------------------------------------------------------------------
+
 require 'json'
-# require 'uri'
 require 'socket'
 require 'timeout'
 require 'dalli'
@@ -33,9 +33,11 @@ module DataCollector
     attr_accessor :config
     attr_accessor :jolokiaApplications
 
-    @@jolokiaApplications = 'initial value'
+#     @@jolokiaApplications = 'initial value'
 
     def initialize( params = {} )
+
+      logger.level = Logger::DEBUG
 
       applicationConfig   = params[:applicationConfigFile] ? params[:applicationConfigFile] : nil
       serviceConfig       = params[:serviceConfigFile]     ? params[:serviceConfigFile]     : nil
@@ -208,41 +210,41 @@ module DataCollector
 
     include Logging
 
-    def initialize( settings = {} )
+    def initialize( params = {} )
 
-      @logDirectory       = settings[:logDirectory]          ? settings[:logDirectory]          : '/var/log/monitoring'
-      @cacheDirectory     = settings[:cacheDirectory]        ? settings[:cacheDirectory]        : '/var/cache/monitoring'
-      @jolokiaHost        = settings[:jolokiaHost]           ? settings[:jolokiaHost]           : 'localhost'
-      @jolokiaPort        = settings[:jolokiaPort]           ? settings[:jolokiaPort]           : 8080
-      @memcacheHost       = settings[:memcacheHost]          ? settings[:memcacheHost]          : 'loclahost'
-      @memcachePort       = settings[:memcachePort]          ? settings[:memcachePort]          : 11211
-      @mqHost             = settings[:mqHost]                ? settings[:mqHost]                : 'localhost'
-      @mqPort             = settings[:mqPort]                ? settings[:mqPort]                : 11300
-      @mqQueue            = settings[:mqQueue]               ? settings[:mqQueue]               : 'mq-collector'
+      logDirectory        = params[:logDirectory]          ? params[:logDirectory]          : '/var/log/monitoring'
+      cacheDirectory      = params[:cacheDirectory]        ? params[:cacheDirectory]        : '/var/cache/monitoring'
+      jolokiaHost         = params[:jolokiaHost]           ? params[:jolokiaHost]           : 'localhost'
+      jolokiaPort         = params[:jolokiaPort]           ? params[:jolokiaPort]           : 8080
+      memcacheHost        = params[:memcacheHost]          ? params[:memcacheHost]          : 'loclahost'
+      memcachePort        = params[:memcachePort]          ? params[:memcachePort]          : 11211
+      mqHost              = params[:mqHost]                ? params[:mqHost]                : 'localhost'
+      mqPort              = params[:mqPort]                ? params[:mqPort]                : 11300
+      @mqQueue            = params[:mqQueue]               ? params[:mqQueue]               : 'mq-collector'
+      @applicationConfig  = params[:applicationConfigFile] ? params[:applicationConfigFile] : nil
+      @serviceConfig      = params[:serviceConfigFile]     ? params[:serviceConfigFile]     : nil
 
-      @applicationConfig  = settings[:applicationConfigFile] ? settings[:applicationConfigFile] : nil
-      @serviceConfig      = settings[:serviceConfigFile]     ? settings[:serviceConfigFile]     : nil
-
-      version            = '1.5.0'
-      date               = '2017-01-07'
+      version            = '1.6.0'
+      date               = '2017-01-13'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - DataCollector' )
       logger.info( "  Version #{version} (#{date})" )
       logger.info( '  Copyright 2016-2017 Coremedia' )
-      logger.info( "  cache directory located at #{@cacheDirectory}" )
-      logger.info( "  Memcache Service #{@memcacheHost}:#{@memcachePort}" )
-      logger.info( "  Message Queue Service #{@mqHost}:#{@mqPort}/#{@mqQueue}" )
+      logger.info( '  used Services:' )
+      logger.info( "    - jolokia      : #{jolokiaHost}:#{jolokiaPort}" )
+      logger.info( "    - memcache     : #{memcacheHost}:#{memcachePort}" )
+      logger.info( "    - message queue: #{mqHost}:#{mqPort}/#{@mqQueue}" )
+      logger.info( "  cache directory located at #{cacheDirectory}" )
       logger.info( '-----------------------------------------------------------------' )
-      logger.info( '' )
 
       @db                 = Storage::Database.new()
-      @mc                 = Storage::Memcached.new( { :host => @memcacheHost, :port => @memcachePort } )
-      @jolokia            = Jolokia::Client.new( { :host => @jolokiaHost, :port => @jolokiaPort } )
+      @mc                 = Storage::Memcached.new( { :host => memcacheHost, :port => memcachePort } )
+      @jolokia            = Jolokia::Client.new( { :host => jolokiaHost, :port => jolokiaPort } )
 
       @MQSettings = {
-        :beanstalkHost => @mqHost,
-        :beanstalkPort => @mqPort
+        :beanstalkHost => mqHost,
+        :beanstalkPort => mqPort
       }
 
       if( @applicationConfig == nil || @serviceConfig == nil )
@@ -374,13 +376,14 @@ module DataCollector
       if( data == nil )
 
         data = @db.measurements( { :ip => host, :short => host } )
-#         logger.debug( data )
 
-        data['timestamp'] = Time.now().to_s
+        logger.debug( data )
 
         if( data == nil || data == false )
           return
         else
+          data['timestamp'] = Time.now().to_s
+
           @mc.set( key, data )
         end
 

@@ -6,20 +6,23 @@
 # v1.2.0
 # -----------------------------------------------------------------------------
 
-require 'net/http'
+require 'rest-client'
 require 'uri'
 require 'time'
 
 require_relative 'logging'
 require_relative 'message-queue'
+require_relative 'graphite/annotations'
 
 # -------------------------------------------------------------------------------------------------------------------
 
-module GraphiteAnnotions
+module Graphite
 
   class Client
 
     include Logging
+
+    include Graphite::Annotions
 
     def initialize( params = {} )
 
@@ -30,12 +33,19 @@ module GraphiteAnnotions
       mqHost            = params[:mqHost]           ? params[:mqHost]           : 'localhost'
       mqPort            = params[:mqPort]           ? params[:mqPort]           : 11300
       @mqQueue          = params[:mqQueue]          ? params[:mqQueue]          : 'mq-graphite'
+      debug             = params[:debug]            ? params[:debug]            : false
 
-      @graphiteURI      = sprintf( 'http://%s:%s%s/events/', graphiteHost, graphiteHttpPort, graphitePath )
+      @graphiteURI      = sprintf( 'http://%s:%s%s', graphiteHost, graphiteHttpPort, graphitePath )
       @MQSettings = {
         :beanstalkHost => mqHost,
         :beanstalkPort => mqPort
       }
+
+      logger.debug( params )
+
+      if( debug == true )
+        logger.level = Logger::DEBUG
+      end
 
       version              = '1.2.0'
       date                 = '2017-01-13'
@@ -45,10 +55,27 @@ module GraphiteAnnotions
       logger.info( "  Version #{version} (#{date})" )
       logger.info( '  Copyright 2016-2017 Coremedia' )
       logger.info( '  used Services:' )
-      logger.info( "    - Graphite     : #{@graphiteURI}" )
-      logger.info( "    - Message Queue: #{mqHost}:#{mqPort}/#{@mqQueue}" )
+      logger.info( "    - graphite     : #{@graphiteURI}" )
+      logger.info( "    - message Queue: #{mqHost}:#{mqPort}/#{@mqQueue}" )
       logger.info( '-----------------------------------------------------------------' )
       logger.info( '' )
+
+      begin
+
+        @apiInstance = RestClient::Resource.new(
+          @graphiteURI,
+          :timeout      => 10,
+          :open_timeout => 10,
+          :headers      => {},
+          :verify_ssl   => false
+        )
+      rescue => e
+        logger.error( e )
+
+        return nil
+      end
+
+      return self
 
     end
 
@@ -87,20 +114,49 @@ module GraphiteAnnotions
 
         logger.info( sprintf( 'process Message from Queue %s: %d', data.dig(:tube), data.dig(:id) ) )
 
-        command = data.dig( :body, 'cmd' )     || nil
-        node    = data.dig( :body, 'node' )    || nil
-        payload = data.dig( :body, 'payload' ) || nil
+        @timestamp = nil
+
+        command    = data.dig( :body, 'cmd' )     || nil
+        node       = data.dig( :body, 'node' )    || nil
+        payload    = data.dig( :body, 'payload' ) || nil
+        timestamp  = payload.dig( 'timestamp' )
+#         logger.debug( timestamp )
+
+        if( timestamp != nil )
+
+          if( timestamp.is_a?( Time ) )
+
+#             logger.debug( 'is Time' )
+            timestamp = Time.parse( timestamp )
+
+            logger.debug( @timestamp )
+          end
+
+          @timestamp = timestamp.to_i
+
+#           logger.debug( @timestamp )
+        end
 
         if( command == nil )
-          logger.error( 'wrong command' )
+          logger.error( 'no command' )
           logger.error( data )
-          return
+
+          return {
+            :status  => 400,
+            :message => 'no command',
+            :request => data
+          }
         end
 
         if( node == nil || payload == nil )
           logger.error( 'missing node or payload' )
           logger.error( data )
-          return
+
+          return {
+            :status  => 400,
+            :message => 'missing node or payload',
+            :request => data
+          }
         end
 
         result = {
@@ -108,10 +164,7 @@ module GraphiteAnnotions
           :message => sprintf( 'wrong command detected: %s', command )
         }
 
-        logger.debug( data )
-        logger.debug( payload )
-
-        logger.info( sprintf( 'add annotation \'%s\'for node %s', command, node ) )
+        logger.info( sprintf( 'add annotation \'%s\' for node %s', command, node ) )
 
         case command
         when 'create', 'remove'
@@ -184,169 +237,8 @@ module GraphiteAnnotions
 
   end
 
-
-
-    # annotations werden direct in die graphite geschrieben
-    # POST
-    # curl -v -H 'Accept: application/json' -X POST \
-    #   http://localhost:8081/events/  \
-    #   -d '{ "what": "annotions test", "tags": ["monitoring-16-01"], "data": "test another adding annotion for <b>WTF</b>" }'
-    #
-    # curl -v -H 'Accept: application/json' -X POST \
-    #   http://monitoring-16-build/graphite/events/ \
-    #   -d '{ "what": "annotions test", "tags": ["monitoring-16-01","loadtest"],  "data": "test another adding annotion for <b>WTF</b>" }'
-
-    # GET
-    # curl  'http://admin:admin@localhost/grafana/api/datasources/proxy/2/events/get_data?from=-12h&until=now&tags=monitoring-16-01%20created&intersection'
-
-    def annotion( what, tags, data )
-
-      str  = Time.now()
-
-      # add 2h to fix a f*cking bug in django
-      # with Version 1.9 we dont need this ... UASY
-      # str = str + (60 * 60 * 2)
-      _when = Time.parse(str.to_s).to_i
-
-      uri = URI( @graphiteURI )
-
-      data = {
-        'what' => what,
-        'when' => _when,
-        'tags' => tags.flatten,
-        'data' => data
-      }
-
-      logger.debug( JSON.pretty_generate( data ) )
-
-      response = nil
-
-      begin
-        Net::HTTP.start( uri.host, uri.port ) do |http|
-          request = Net::HTTP::Post.new( uri.request_uri )
-
-#          request.set_form_data( data )
-          request.add_field('Content-Type', 'application/json')
-          request.body = JSON.generate( data )
-#          request.basic_auth 'admin', 'admin'
-
-          response     = http.request( request )
-          responseCode = response.code.to_i
-
-          # TODO
-          # Errorhandling
-          if( responseCode != 200 )
-            # 200 – Created
-            # 400 – Errors (invalid json, missing or invalid fields, etc)
-            # 401 – Unauthorized
-            # 404 –
-            logger.error( sprintf( ' [%s] ', responseCode ) )
-            logger.error( sprintf( '  %s  ', response.body ) )
-          end
-        end
-      rescue Exception => e
-        logger.error( e )
-        logger.error( e.backtrace )
-
-        status  = 404
-        message = sprintf( 'internal error: %s', e )
-      end
-
-    end
-
-
-    def nodeAnnotation( host, type )
-
-      tag      = Array.new()
-      message  = String.new()
-      descr    = String.new()
-      time     = Time.now().strftime( '%Y-%m-%d %H:%M:%S' )
-
-      tag << host
-
-      case type
-      when 'create'
-        tag << 'created'
-        message = sprintf( 'Node <b>%s</b> created (%s)', host, time )
-        descr   = 'node created'
-      when 'destroy'
-        tag << 'destroyed'
-        message = sprintf( 'Node <b>%s</b> destroyed (%s)', host, time )
-        descr   = 'node destroyed'
-      end
-
-      self.annotion( descr, tag, message )
-
-    end
-
-
-    def loadtestAnnotation( host, type )
-
-      tag      = Array.new()
-      message  = String.new()
-      descr    = String.new()
-      time     = Time.now().strftime( '%Y-%m-%d %H:%M:%S' )
-
-      tag << host
-      tag << 'loadtest'
-
-      case type
-      when 'start'
-
-        message = sprintf( 'Loadtest for Node <b>%s</b> started (%s)', host, time )
-        descr   = 'loadtest start'
-      when 'stop'
-
-        message = sprintf( 'Loadtest for Node <b>%s</b> ended (%s)', host, time )
-        descr   = 'loadtest end'
-      end
-
-      self.annotion( descr, tag, message )
-
-    end
-
-
-    def deploymentAnnotation( host, descr, tags = [] )
-
-      tag      = Array.new()
-      time     = Time.now().strftime( '%Y-%m-%d %H:%M:%S' )
-
-      tag << host
-      tag << 'deployment'
-
-      if( tags.count != 0 )
-        tag << tags
-        tag.flatten!
-      end
-
-
-      message = sprintf( 'Deployment on Node <b>%s</b> started (%s)', host, time )
-
-      descr   = sprintf( 'Deployment %s', descr )
-
-      self.annotion( descr, tag, message )
-
-    end
-
-
-    def generalAnnotation( host, descr, message, customTags = [] )
-
-      tag      = Array.new()
-      time     = Time.now().strftime( '%Y-%m-%d %H:%M:%S' )
-
-      tag << host
-      tag.push( customTags )
-
-      message = sprintf( '%s <b>%s</b> (%s)', descr, host, time )
-
-      descr   = host
-
-      self.annotion( descr, tag, message )
-
-    end
-
-
   end
 
 end
+
 
