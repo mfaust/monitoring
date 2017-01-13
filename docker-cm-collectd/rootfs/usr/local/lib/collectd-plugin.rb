@@ -36,15 +36,10 @@ module Collecd
 
     def initialize( params = {} )
 
-      @memcacheHost   = params[:memcacheHost]   ? params[:memcacheHost]   : nil
-      @memcachePort   = params[:memcachePort]   ? params[:memcachePort]   : nil
+      memcacheHost   = params[:memcacheHost]   ? params[:memcacheHost]   : nil
+      memcachePort   = params[:memcachePort]   ? params[:memcachePort]   : nil
 
       @interval       = params[:interval]       ? params[:interval]       : 15
-
-      @db             = Storage::Database.new()
-      @mc             = Storage::Memcached.new( { :host => @memcacheHost, :port => @memcachePort } )
-
-      MBean.logger( logger )
 
       version              = '1.4.1-beta1'
       date                 = '2017-01-09'
@@ -54,9 +49,15 @@ module Collecd
       logger.info( "  Version #{version} (#{date})" )
       logger.info( '  Copyright 2016-2017 Coremedia' )
       logger.info( "  configured interval #{@interval}" )
-      logger.info( "  Memcache Service #{@memcacheHost}:#{@memcachePort}" )
+      logger.info( '  used Services:' )
+      logger.info( "    - Memcache     : #{memcacheHost}:#{memcachePort}" )
       logger.info( '-----------------------------------------------------------------' )
       logger.info( '' )
+
+      @db             = Storage::Database.new()
+      @mc             = Storage::Memcached.new( { :host => memcacheHost, :port => memcachePort } )
+
+      MBean.logger( logger )
 
     end
 
