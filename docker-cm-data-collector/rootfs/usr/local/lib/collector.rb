@@ -33,11 +33,7 @@ module DataCollector
     attr_accessor :config
     attr_accessor :jolokiaApplications
 
-#     @@jolokiaApplications = 'initial value'
-
     def initialize( params = {} )
-
-      logger.level = Logger::DEBUG
 
       applicationConfig   = params[:applicationConfigFile] ? params[:applicationConfigFile] : nil
       serviceConfig       = params[:serviceConfigFile]     ? params[:serviceConfigFile]     : nil
@@ -274,14 +270,27 @@ module DataCollector
 
     def mongoDBData( host, data = {} )
 
-      m = ExternalClients::MongoDb.new( { :host => host, :port => 28017 } )
+      port = 28017
 
-      return m.get()
+      result = portOpen?( host, port )
+
+      if( result == false )
+        logger.error( sprintf( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
+
+        return JSON.parse( JSON.generate( { :status => 500 } ) )
+      else
+
+
+        m = ExternalClients::MongoDb.new( { :host => host, :port => port } )
+
+        return m.get()
+      end
 
   end
 
     def mysqlData( host, data = {} )
 
+      data = {}
       user = data['user'] ? data['user'] : 'cm_management'
       pass = data['pass'] ? data['pass'] : 'cm_management'
       port = data['port'] ? data['port'] : 3306
@@ -297,14 +306,27 @@ module DataCollector
         }
       end
 
-      m = ExternalClients::MySQL.new( { :host => host, :username => user, :password => pass } )
-      mysqlData = m.get()
+      result = portOpen?( host, port )
 
-      if( mysqlData == false )
-        mysqlData   = JSON.generate( { :status => 500 } )
+      if( result == false )
+        logger.error( sprintf( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
+
+        return JSON.parse( JSON.generate( { :status => 500 } ) )
+      else
+
+        m = ExternalClients::MySQL.new( { :host => host, :username => user, :password => pass } )
+
+        if( m != nil )
+
+          mysqlData = m.get()
+
+          if( mysqlData == false )
+            mysqlData   = JSON.generate( { :status => 500 } )
+          end
+
+          data           = JSON.parse( mysqlData )
+        end
       end
-
-      data           = JSON.parse( mysqlData )
 
       return data
 

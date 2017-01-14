@@ -15,9 +15,13 @@ require 'fileutils'
 require 'resolve/hostname'
 
 require_relative 'monitoring'
+require_relative '../lib/logging'
 
 module Sinatra
+
   class MonitoringRest < Base
+
+    include Logging
 
     configure do
 
@@ -127,8 +131,12 @@ module Sinatra
     #
     post '/v2/config/:host' do
 
-      host   = params[:host]
-      result = m.writeHostConfiguration( host, @request_paylod )
+      host            = params[:host]
+
+      payload         =  @request_paylod
+      @request_paylod = nil
+
+      result = m.writeHostConfiguration( host, paylod )
 
       status = result[:status]
       result.to_json
@@ -169,8 +177,18 @@ module Sinatra
     #
     post '/v2/host/:host' do
 
-      host   = params[:host]
-      result = m.addHost( host, @request_paylod )
+      host            = params[:host]
+      payload         =  @request_paylod
+      @request_paylod = nil
+
+      logger.debug( sprintf( 'POST \'/v2/host/:host\' - \'%s\', \'%s\'', host, payload ) )
+
+      result = {
+        :status  => 200,
+        :message => 'test'
+      }
+
+      result = m.addHost( host, payload )
 
       status = result[:status]
       result.to_json

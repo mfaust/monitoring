@@ -16,7 +16,7 @@ services:
 
   dnsdock:
     restart: always
-    image: bodsch/docker-dnsdock:1612-01
+    image: bodsch/docker-dnsdock:1701-02
     container_name: dnsdock
     hostname: dnsdock
     labels:
@@ -35,7 +35,7 @@ services:
 
   database:
     restart: always
-    image: bodsch/docker-mysql:1612-01
+    image: bodsch/docker-mysql:1701-02
     container_name: database
     hostname: database
     labels:
@@ -53,7 +53,7 @@ services:
 
   jolokia:
     restart: always
-    image: bodsch/docker-jolokia:1612-01
+    image: bodsch/docker-jolokia:1701-02
     container_name: jolokia
     hostname: jolokia
     labels:
@@ -73,7 +73,7 @@ services:
 
   memcached:
     restart: always
-    image: bodsch/docker-memcached:1612-01
+    image: bodsch/docker-memcached:1701-02
     container_name: memcached
     hostname: memcached
     labels:
@@ -90,7 +90,7 @@ services:
 
   nginx:
     restart: always
-    image: bodsch/docker-nginx:1612-01
+    image: bodsch/docker-nginx:1701-02
     container_name: nginx
     hostname: nginx
     labels:
@@ -119,7 +119,7 @@ services:
 
   carbon:
     restart: always
-    image: bodsch/docker-go-carbon:1612-01
+    image: bodsch/docker-go-carbon:1701-02
     container_name: carbon
     hostname: carbon
     labels:
@@ -140,7 +140,7 @@ services:
 
   graphite:
     restart: always
-    image: bodsch/docker-graphite:1612-01
+    image: bodsch/docker-graphite:1701-02
     container_name: graphite
     hostname: graphite
     labels:
@@ -187,7 +187,7 @@ services:
 
   icinga2-core:
     restart: always
-    image: bodsch/docker-icinga2:1612-01
+    image: bodsch/docker-icinga2:1701-02
     container_name: icinga2-core
     hostname: icinga2-core
     labels:
@@ -232,7 +232,7 @@ services:
 
   icingaweb2:
     restart: always
-    image: bodsch/docker-icingaweb2:1612-01
+    image: bodsch/docker-icingaweb2:1701-02
     container_name: icingaweb2
     hostname: icingaweb2
     labels:

@@ -191,9 +191,6 @@ class ServiceDiscovery
 
           @db.setStatus( { :ip => node, :short => node, :status => isRunning?( node ) } )
 
-          logger.debug( 'send message to \'mq-grafana\'' )
-          self.sendMessage( { :cmd => 'add', :queue => 'mq-grafana', :node => node, :payload => result } )
-
           logger.debug( result )
         rescue
 
@@ -205,10 +202,10 @@ class ServiceDiscovery
 
           @db.setStatus( { :ip => node, :short => node, :status => 98 } )
 
-          logger.debug( 'send message to \'mq-grafana\'' )
-          self.sendMessage( { :cmd => 'remove', :queue => 'mq-grafana', :node => node, :payload => { "force": true } } )
-
-          sleep( 2 )
+#           logger.debug( 'send message to \'mq-grafana\'' )
+#           self.sendMessage( { :cmd => 'remove', :queue => 'mq-grafana', :node => node, :payload => { "force": true } } )
+#
+#           sleep( 2 )
 
           result = self.deleteHost( node )
 

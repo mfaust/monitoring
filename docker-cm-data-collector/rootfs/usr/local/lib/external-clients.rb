@@ -24,11 +24,6 @@ module ExternalClients
       @relative   = false
       @client     = nil
 
-    end
-
-
-    def connect()
-
       begin
         @client = Mysql2::Client.new(
           :host            => @mysqlHost,
@@ -42,7 +37,11 @@ module ExternalClients
 
       rescue Exception => e
         logger.error( "An error occurred for connection: #{e}" )
+
+        return nil
       end
+
+      return self
 
     end
 
@@ -136,28 +135,27 @@ module ExternalClients
 
     def get()
 
-      if( !@client )
-        self.connect()
-      end
+      if( @client )
 
-      begin
+        begin
 
-        rs = @client.query( @mysqlQuery )
+          rs = @client.query( @mysqlQuery )
 
-        if( rs )
+          if( rs )
 
-          rows = self.toJson( rs )
-          rows = self.valuesToNumeric( rows )
-          rows = self.scaleValues( rows )
+            rows = self.toJson( rs )
+            rows = self.valuesToNumeric( rows )
+            rows = self.scaleValues( rows )
 
-          return rows.to_json
-        else
+            return rows.to_json
+          else
+            return false
+          end
+
+        rescue Exception => e
+          logger.error( "An error occurred for query: #{e}" )
           return false
         end
-
-      rescue Exception => e
-        logger.error( "An error occurred for query: #{e}" )
-        return false
       end
     end
 

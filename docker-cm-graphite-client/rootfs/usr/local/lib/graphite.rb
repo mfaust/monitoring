@@ -43,10 +43,6 @@ module Graphite
 
       logger.debug( params )
 
-      if( debug == true )
-        logger.level = Logger::DEBUG
-      end
-
       version              = '1.2.0'
       date                 = '2017-01-13'
 

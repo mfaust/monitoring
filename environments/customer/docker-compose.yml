@@ -13,7 +13,7 @@ services:
 
   dnsdock:
     restart: always
-    image: bodsch/docker-dnsdock:1612-01
+    image: bodsch/docker-dnsdock:1701-02
     container_name: dnsdock
     hostname: dnsdock
     labels:
@@ -26,32 +26,33 @@ services:
     ports:
       - 53:53
       - 8081:80
-    command: "--nameserver='10.1.2.14:53' --nameserver='10.1.2.63:53' --http=:80"
+    # You can use also Environment vars like this:
+    # command: "--nameserver='${DNS_1}:53' --nameserver='${DNS_2}:53' --http=:80"
+    command: "--nameserver='10.1.2.63:53' --http=:80"
     networks:
       mon:
         ipv4_address: 172.25.0.5
 
   beanstalkd:
     restart: always
-    image: bodsch/docker-beanstalkd
+    image: bodsch/docker-beanstalkd:1701-02
     container_name: beanstalkd
     hostname: beanstalkd
     labels:
       com.dnsdock.image: "beanstalkd"
       com.dnsdock.alias: "beanstalkd"
       com.dnsdock.ttl: "30"
-    ports:
-      - 11300:11300
+#    ports:
+#      - 11300:11300
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:
       mon:
         ipv4_address: 172.25.0.6
 
-
   jolokia:
     restart: always
-    image: bodsch/docker-jolokia:1612-01
+    image: bodsch/docker-jolokia:1701-02
     container_name: jolokia
     hostname: jolokia
     labels:
@@ -73,7 +74,7 @@ services:
 
   memcached:
     restart: always
-    image: bodsch/docker-memcached:1612-01
+    image: bodsch/docker-memcached:1701-02
     container_name: memcached
     hostname: memcached
     labels:
@@ -90,7 +91,7 @@ services:
 
   nginx:
     restart: always
-    image: bodsch/docker-nginx:1612-01
+    image: bodsch/docker-nginx:1701-02
     container_name: nginx
     hostname: nginx
     labels:
@@ -99,11 +100,12 @@ services:
       com.dnsdock.ttl: "30"
     ports:
       - 80:80
+    command: "/usr/sbin/nginx"
     depends_on:
       - cm-monitoring
-    extra_hosts:
-      - 'jolokia:172.25.0.11'
-      - 'cm-monitoring:172.25.0.40'
+#    extra_hosts:
+#      - 'jolokia:172.25.0.11'
+#      - 'cm-monitoring:172.25.0.40'
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./share/nginx/var/www:/var/www:ro
@@ -119,7 +121,7 @@ services:
   # we have now a second 'carbon-relay-ng' for testing
   carbon-relay:
     restart: always
-    image: bodsch/docker-carbon-relay-ng:1612-01
+    image: bodsch/docker-carbon-relay-ng:1701-02
     container_name: carbon-relay
     hostname: carbon-relay
     labels:
@@ -133,7 +135,8 @@ services:
     extra_hosts:
       # NOTE: external service
       #- 'graphite:10.101.2.83'
-      - 'graphite:192.168.252.101'
+      #- 'graphite:192.168.252.101'
+      - 'graphite:192.168.0.5'
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:
@@ -235,6 +238,11 @@ services:
     depends_on:
       - beanstalkd
       - memcached
+    extra_hosts:
+      # NOTE: external service
+      #- 'nginx-proxy:10.101.2.83'
+      #- 'nginx-proxy:192.168.252.101'
+      - 'nginx-proxy:192.168.0.5'
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./share/resolv.conf:/etc/resolv.conf:ro
@@ -262,7 +270,8 @@ services:
     extra_hosts:
       # NOTE: external service
       #- 'nginx-proxy:10.101.2.83'
-      - 'nginx-proxy:192.168.252.101'
+      #- 'nginx-proxy:192.168.252.101'
+      - 'nginx-proxy:192.168.0.5'
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./share/resolv.conf:/etc/resolv.conf:ro
@@ -281,10 +290,10 @@ services:
       com.dnsdock.ttl: "30"
     env_file:
       - env/cm-monitoring.env
-    depends_on:
-      - jolokia
-      - carbon-relay
-      - memcached
+    #depends_on:
+      #- jolokia
+      #- carbon-relay
+      #- memcached
     extra_hosts:
       - 'blueprint-box:192.168.252.100'
       #- 'jolokia:172.25.0.11'
@@ -292,10 +301,12 @@ services:
       #- 'carbon-relay:172.25.0.20'
       # NOTE: external service
       #- 'grafana:10.101.2.83'
-      - 'grafana:192.168.252.101'
+      #- 'grafana:192.168.252.101'
+#      - 'graphite:192.168.0.5'
       # NOTE: external service
       #- 'nginx-proxy:10.101.2.83'
-      - 'nginx-proxy:192.168.252.101'
+      #- 'nginx-proxy:192.168.252.101'
+#      - 'nginx-proxy:192.168.0.5'
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./share/resolv.conf:/etc/resolv.conf:ro
@@ -305,7 +316,8 @@ services:
       - ./data/monitoring:/var/cache/monitoring
       - ./data:/srv
     links:
-      - jolokia:jolokia
+#      - jolokia:jolokia
+      - beanstalkd:beanstalkd
     networks:
       mon:
         ipv4_address: 172.25.0.40

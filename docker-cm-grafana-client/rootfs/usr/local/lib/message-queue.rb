@@ -119,9 +119,6 @@ module MessageQueue
           return result
         end
 
-        logger.debug( stats )
-
-
         tube = @b.tubes.watch!( tube.to_s )
 
         begin

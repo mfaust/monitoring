@@ -86,7 +86,7 @@ module Grafana
     # @return [bool, #read]
     def initialize( params = {} )
 
-      logger.debug( params )
+#       logger.debug( params )
 
       host         = params[:host]           ? params[:host]           : 'localhost'
       port         = params[:port]           ? params[:port]           : 80
@@ -133,8 +133,8 @@ module Grafana
 
       @url  = sprintf( '%s://%s:%s%s', proto, host, port, urlPath )
 
-      logger.debug( "Initializing API client '#{@url}'" )
-      logger.debug( "Options: #{params}" )
+#       logger.debug( "Initializing API client '#{@url}'" )
+#       logger.debug( "Options: #{params}" )
 
       begin
 
@@ -245,11 +245,16 @@ module Grafana
 
       if( data.count != 0 )
 
+        logger.debug( '--------------------------------------------------------' )
         logger.info( sprintf( 'process Message from Queue %s: %d', data.dig(:tube), data.dig(:id) ) )
 
-        command = data.dig( :body, 'cmd' )     || nil
-        node    = data.dig( :body, 'node' )    || nil
-        payload = data.dig( :body, 'payload' ) || nil
+        command  = data.dig( :body, 'cmd' )     || nil
+        node     = data.dig( :body, 'node' )    || nil
+        payload  = data.dig( :body, 'payload' ) || nil
+        tags     = []
+        overview = true
+
+        logger.debug( payload )
 
         if( command == nil )
           logger.error( 'wrong command' )
@@ -268,16 +273,19 @@ module Grafana
           :message => sprintf( 'wrong command detected: %s', command )
         }
 
+#         logger.debug( data )
+#         logger.debug( data.dig( :body, 'payload' ) )
 
-        logger.debug( data )
-        logger.debug( data.dig( :body, 'payload' ) )
-
-        tags     = data.dig( :body, 'payload', 'tags' )
-        overview = data.dig( :body, 'payload', 'overview' ) || true
+        if( payload.is_a?( String ) == false )
+          tags     = payload.dig( 'tags' )     || []
+          overview = payload.dig( 'overview' ) || true
+        end
 
         case command
         when 'add'
-#           logger.info( sprintf( 'add node %s', node ) )
+          logger.info( sprintf( 'add dashboards for node %s', node ) )
+
+          # {:id=>"9", :tube=>"mq-grafana", :state=>"reserved", :ttr=>10, :prio=>65536, :age=>3, :delay=>2, :body=>{"cmd"=>"add", "node"=>"monitoring-16-01", "timestamp"=>"2017-01-14 19:05:41", "from"=>"rest-service", "payload"=>""}}
 
           # TODO
           # check payload!
@@ -286,12 +294,12 @@ module Grafana
 
           logger.info( result )
         when 'remove'
-#           logger.info( sprintf( 'remove dashboards for node %s', node ) )
+          logger.info( sprintf( 'remove dashboards for node %s', node ) )
           result = self.deleteDashboards( { :host => node } )
 
           logger.info( result )
         when 'info'
-#           logger.info( sprintf( 'give dashboards for %s back', node ) )
+          logger.info( sprintf( 'give dashboards for %s back', node ) )
           result = self.listDashboards( { :host => node } )
         else
           logger.error( sprintf( 'wrong command detected: %s', command ) )
@@ -300,11 +308,13 @@ module Grafana
             :status  => 400,
             :message => sprintf( 'wrong command detected: %s', command )
           }
-
-          logger.info( result )
         end
 
         result[:request]    = data
+
+        logger.info( result )
+
+        logger.debug( '--------------------------------------------------------' )
 
 #         self.sendMessage( result )
       end

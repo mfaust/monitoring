@@ -76,7 +76,8 @@ module Grafana
 #           @discoveryFile        = sprintf( '%s/%s/discovery.json'       , @cacheDirectory, host )
 #           @mergedHostFile       = sprintf( '%s/%s/mergedHostData.json'  , @cacheDirectory, host )
 #           @monitoringResultFile = sprintf( '%s/%s/monitoring.result'    , @cacheDirectory, host )
-
+        else
+          logger.error( 'no DNS entry found' )
         end
 
 
@@ -93,6 +94,9 @@ module Grafana
       #
       #
       def createDashboardForHost( params = {} )
+
+        logger.debug( 'createDashboardForHost()' )
+        logger.debug( params )
 
         host            = params[:host]     ? params[:host]     : nil
         @additionalTags = params[:tags]     ? params[:tags]     : []
