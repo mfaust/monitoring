@@ -14,7 +14,6 @@ RUN \
     build-base \
     ruby-dev && \
   gem install --no-rdoc --no-ri \
-    beaneater \
     rest-client && \
   mkdir /var/log/monitoring && \
   mkdir /var/cache/monitoring && \
