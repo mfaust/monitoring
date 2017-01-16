@@ -13,32 +13,32 @@ services:
 
   dnsdock:
     restart: always
-    image: bodsch/docker-dnsdock:1612-01
+    image: bodsch/docker-dnsdock:1701-02
     container_name: dnsdock
     hostname: dnsdock
     labels:
       com.dnsdock.image: "dnsdock"
       com.dnsdock.alias: "dnsdock"
-      com.dnsdock.ttl: "10"
+      com.dnsdock.ttl: "30"
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - 53:53
-    command: "--nameserver='141.1.1.1:53' --http=:80"
+    command: "--nameserver='10.1.2.14:53' --nameserver='10.1.2.63:53'  --http=:80"
     networks:
       mon:
         ipv4_address: 172.25.0.5
 
   database:
     restart: always
-    image: bodsch/docker-mysql:1612-01
+    image: bodsch/docker-mysql:1701-02
     container_name: database
     hostname: database
     labels:
       com.dnsdock.image: "database"
       com.dnsdock.alias: "database"
-      com.dnsdock.ttl: "10"
+      com.dnsdock.ttl: "30"
     env_file:
       - env/database.env
     volumes:
@@ -50,13 +50,13 @@ services:
 
   memcached:
     restart: always
-    image: bodsch/docker-memcached:1612-01
+    image: bodsch/docker-memcached:1701-02
     container_name: memcached
     hostname: memcached
     labels:
       com.dnsdock.image: "memcached"
       com.dnsdock.alias: "memcached"
-      com.dnsdock.ttl: "10"
+      com.dnsdock.ttl: "30"
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:
@@ -65,13 +65,13 @@ services:
 
   nginx:
     restart: always
-    image: bodsch/docker-nginx:1612-01
+    image: bodsch/docker-nginx:1701-02
     container_name: nginx
     hostname: nginx
     labels:
       com.dnsdock.image: "nginx"
       com.dnsdock.alias: "nginx"
-      com.dnsdock.ttl: "10"
+      com.dnsdock.ttl: "30"
     ports:
       - 80:80
     depends_on:
@@ -91,13 +91,13 @@ services:
 
   carbon:
     restart: always
-    image: bodsch/docker-go-carbon:1612-01
+    image: bodsch/docker-go-carbon:1701-02
     container_name: carbon
     hostname: carbon
     labels:
       com.dnsdock.image: "carbon"
       com.dnsdock.alias: "carbon"
-      com.dnsdock.ttl: "10"
+      com.dnsdock.ttl: "30"
     ports:
       - 2003:2003
       - 2003:2003/udp
@@ -112,13 +112,13 @@ services:
 
   graphite:
     restart: always
-    image: bodsch/docker-graphite:1612-01
+    image: bodsch/docker-graphite:1701-02
     container_name: graphite
     hostname: graphite
     labels:
       com.dnsdock.image: "graphite"
       com.dnsdock.alias: "graphite"
-      com.dnsdock.ttl: "10"
+      com.dnsdock.ttl: "30"
     env_file:
       - env/graphite.env
     depends_on:
@@ -134,13 +134,13 @@ services:
 
   grafana:
     restart: always
-    image: bodsch/docker-grafana:1612-01
+    image: bodsch/docker-grafana:1701-02
     container_name: grafana
     hostname: grafana
     labels:
       com.dnsdock.image: "grafana"
       com.dnsdock.alias: "grafana"
-      com.dnsdock.ttl: "10"
+      com.dnsdock.ttl: "30"
     env_file:
       - env/database.env
       - env/grafana.env
