@@ -16,20 +16,20 @@ require_relative '../lib/message-queue'
 
 logDirectory     = '/var/log/monitoring'
 
-icinagHost      = ENV['ICINGA_HOST']         ? ENV['ICINGA_HOST']          : 'localhost'
-icinagPort      = ENV['ICINGA_PORT']         ? ENV['ICINGA_PORT']          : 2003
-icingaApiUser   = ENV['ICINGA_API_USER']     ? ENV['ICINGA_API_USER']      : 8081
+icingaHost      = ENV['ICINGA_HOST']         ? ENV['ICINGA_HOST']          : 'localhost'
+icingaPort      = ENV['ICINGA_PORT']         ? ENV['ICINGA_PORT']          : 5665
+icingaApiUser   = ENV['ICINGA_API_USER']     ? ENV['ICINGA_API_USER']      : 'admin'
 icingaApiPass   = ENV['ICINGA_API_PASSWORD'] ? ENV['ICINGA_API_PASSWORD']  : nil
+mqEnabled       = ENV['MQ_ENABLED']          ? ENV['MQ_ENABLED']           : false
 mqHost          = ENV['MQ_HOST']             ? ENV['MQ_HOST']              : 'localhost'
 mqPort          = ENV['MQ_PORT']             ? ENV['MQ_PORT']              : 11300
-mqQueue         = ENV['MQ_QUEUE']            ? ENV['MQ_QUEUE']             : 'mq-graphite'
+mqQueue         = ENV['MQ_QUEUE']            ? ENV['MQ_QUEUE']             : 'mq-icinga'
 
 config = {
-  :logDirectory   => logDirectory,
   :icingaHost     => icingaHost,
   :icingaPort     => icingaPort,
-  :icingaApiUser  => icingaApiUser
-  :icingaApiPass  => icingaApiPass
+  :icingaApiUser  => icingaApiUser,
+  :icingaApiPass  => icingaApiPass,
   :mqHost         => mqHost,
   :mqPort         => mqPort,
   :mqQueue        => mqQueue
@@ -164,7 +164,13 @@ Signal.trap('QUIT') { stop = true }
 
 until stop
   # do your thing
-  queue()
+  if( mqEnabled == true )
+
+    queue()
+  else
+
+    i.run()
+  end
   sleep( 15 )
 end
 
