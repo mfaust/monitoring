@@ -83,16 +83,16 @@ module Graphite
 
       c = MessageQueue::Consumer.new( @MQSettings )
 
-      threads = Array.new()
+#       threads = Array.new()
 
-      threads << Thread.new {
+#       threads << Thread.new {
 
         self.processQueue(
           c.getJobFromTube( @mqQueue )
         )
-      }
+#       }
 
-      threads.each { |t| t.join }
+#       threads.each { |t| t.join }
 
     end
 

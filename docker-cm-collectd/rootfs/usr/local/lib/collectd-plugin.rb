@@ -39,7 +39,8 @@ module Collecd
       memcacheHost   = params[:memcacheHost]   ? params[:memcacheHost]   : nil
       memcachePort   = params[:memcachePort]   ? params[:memcachePort]   : nil
 
-      @interval       = params[:interval]       ? params[:interval]       : 15
+      @interval      = params[:interval]       ? params[:interval]       : 15
+      @interval      = @interval.to_i
 
       version              = '1.4.2'
       date                 = '2017-01-13'

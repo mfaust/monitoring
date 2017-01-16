@@ -108,10 +108,6 @@ module Grafana
 
       proto        = ( ssl == true ? 'https' : 'http' )
 
-#       if( debug == true )
-        logger.level = Logger::DEBUG
-#       end
-
       @apiInstance = nil
       @db          = Storage::Database.new()
       @mc          = Storage::Memcached.new( { :host => memcacheHost, :port => memcachePort } )
@@ -132,9 +128,6 @@ module Grafana
       @templateDirectory = params[:templateDirectory] ? params[:templateDirectory] : '/var/tmp/templates'
 
       @url  = sprintf( '%s://%s:%s%s', proto, host, port, urlPath )
-
-#       logger.debug( "Initializing API client '#{@url}'" )
-#       logger.debug( "Options: #{params}" )
 
       begin
 
@@ -227,16 +220,16 @@ module Grafana
 
       c = MessageQueue::Consumer.new( @MQSettings )
 
-      threads = Array.new()
+#       threads = Array.new()
 
-      threads << Thread.new {
+#       threads << Thread.new {
 
         self.processQueue(
           c.getJobFromTube( @mqQueue )
         )
-      }
+#       }
 
-      threads.each { |t| t.join }
+#       threads.each { |t| t.join }
 
     end
 
@@ -247,6 +240,7 @@ module Grafana
 
         logger.debug( '--------------------------------------------------------' )
         logger.info( sprintf( 'process Message from Queue %s: %d', data.dig(:tube), data.dig(:id) ) )
+        logger.debug( data )
 
         command  = data.dig( :body, 'cmd' )     || nil
         node     = data.dig( :body, 'node' )    || nil
@@ -273,12 +267,23 @@ module Grafana
           :message => sprintf( 'wrong command detected: %s', command )
         }
 
-#         logger.debug( data )
-#         logger.debug( data.dig( :body, 'payload' ) )
+#         logger.debug( payload )
+#         logger.debug( payload.class.to_s )
+
+        if( payload.is_a?( String ) == true )
+
+          payload  = JSON.parse( payload )
+        end
+
+#         logger.debug( payload )
+#         logger.debug( payload.class.to_s )
 
         if( payload.is_a?( String ) == false )
-          tags     = payload.dig( 'tags' )     || []
+
+          tags     = payload.dig( 'tags' )
           overview = payload.dig( 'overview' ) || true
+
+#           logger.debug( tags )
         end
 
         case command

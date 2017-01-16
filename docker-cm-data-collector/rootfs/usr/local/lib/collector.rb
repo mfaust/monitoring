@@ -209,7 +209,6 @@ module DataCollector
     def initialize( params = {} )
 
       logDirectory        = params[:logDirectory]          ? params[:logDirectory]          : '/var/log/monitoring'
-      cacheDirectory      = params[:cacheDirectory]        ? params[:cacheDirectory]        : '/var/cache/monitoring'
       jolokiaHost         = params[:jolokiaHost]           ? params[:jolokiaHost]           : 'localhost'
       jolokiaPort         = params[:jolokiaPort]           ? params[:jolokiaPort]           : 8080
       memcacheHost        = params[:memcacheHost]          ? params[:memcacheHost]          : 'loclahost'
@@ -231,7 +230,6 @@ module DataCollector
       logger.info( "    - jolokia      : #{jolokiaHost}:#{jolokiaPort}" )
       logger.info( "    - memcache     : #{memcacheHost}:#{memcachePort}" )
       logger.info( "    - message queue: #{mqHost}:#{mqPort}/#{@mqQueue}" )
-      logger.info( "  cache directory located at #{cacheDirectory}" )
       logger.info( '-----------------------------------------------------------------' )
 
       @db                 = Storage::Database.new()
@@ -399,7 +397,7 @@ module DataCollector
 
         data = @db.measurements( { :ip => host, :short => host } )
 
-        logger.debug( data )
+#         logger.debug( data )
 
         if( data == nil || data == false )
           return
@@ -427,7 +425,7 @@ module DataCollector
       services      = services.keys
       servicesCount = services.count
 
-      logger.debug( sprintf( '%d services found', servicesCount ) )
+      logger.info( sprintf( '%d services for node \'%s\' found', servicesCount, host ) )
 
       services.each do |s|
 
@@ -435,7 +433,7 @@ module DataCollector
         metrics = data.dig( host, s, :data, 'metrics' )
         bulk    = Array.new()
 
-        logger.debug( sprintf( '  %s (%d)', s, port ) )
+        logger.debug( sprintf( '    %s (%d)', s, port ) )
 
         if( metrics != nil && metrics.count == 0 )
           case s
@@ -561,7 +559,7 @@ module DataCollector
 
         c.each do |v,i|
 
-          logger.debug( sprintf( '%d checks for service %s found', i.count, v ) )
+          logger.debug( sprintf( '%d checks for service \'%s\' found', i.count, v ) )
 
           cacheKey = Storage::Memcached.cacheKey( { :host => hostname, :pre => 'result', :service => v } )
 
@@ -573,12 +571,11 @@ module DataCollector
 
             if( self.checkHostAndService( targetUrl ) == true )
 
-              response  = @jolokia.post( { :payload => i } )
+              response  = @jolokia.post( { :payload => i, :timeout => 15 } )
 
               if( response[:status].to_i == 200 )
                 result[v] = self.reorganizeData( response[:message] )
               end
-
             end
           else
 
@@ -781,7 +778,7 @@ module DataCollector
 
       monitoredServer.each do |h,d|
 
-        logger.info( sprintf( 'Host: %s', h ) )
+#        logger.info( sprintf( 'Host: %s', h ) )
 
         prepared = @mc.get( Storage::Memcached.cacheKey( { :host => h, :pre => 'prepare' } ) )
 

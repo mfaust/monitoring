@@ -67,7 +67,7 @@ module Jolokia
           }
 
 #           logger.debug( sprintf( ' -> request body: %s', request.body ) )
-          return
+
         rescue => e
           logger.warn( sprintf( 'Cannot execute request to %s://%s:%s%s, cause: %s', uri.scheme, uri.hostname, uri.port, uri.request_uri, e ) )
 

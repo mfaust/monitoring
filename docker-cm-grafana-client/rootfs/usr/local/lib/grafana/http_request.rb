@@ -8,7 +8,7 @@ module Grafana
     # @return [Mixed, #read]  return false at Error, or an JSON on success
     def getRequest( endpoint )
 
-      logger.debug("Running: Grafana::HttpRequest::#{__method__} on #{endpoint}")
+#       logger.debug("Running: Grafana::HttpRequest::#{__method__} on #{endpoint}")
 
       return self.issueRequest( 'GET', endpoint )
     end
@@ -19,7 +19,7 @@ module Grafana
     # @return [Mixed, #read]  return false at Error, or an JSON on success
     def postRequest( endpoint, postdata = {} )
 
-      logger.debug("Running: Grafana::HttpRequest::#{__method__} on #{endpoint}")
+#       logger.debug("Running: Grafana::HttpRequest::#{__method__} on #{endpoint}")
 
       return self.issueRequest( 'POST', endpoint, postdata )
     end
@@ -29,7 +29,7 @@ module Grafana
     # @param [String, #read] endpoint URL for a HTTP Request
     # @return [Mixed, #read]  return false at Error, or an JSON on success
     def putRequest( endpoint, putdata = {} )
-      logger.debug("Running: Grafana::HttpRequest::#{__method__} on #{endpoint}")
+#       logger.debug("Running: Grafana::HttpRequest::#{__method__} on #{endpoint}")
 
       return self.issueRequest( 'PUT', endpoint, putdata )
     end
@@ -40,7 +40,7 @@ module Grafana
     # @return [Mixed, #read]  return false at Error, or an JSON on success
     def deleteRequest( endpoint )
 
-      logger.debug("Running: Grafana::HttpRequest::#{__method__} on #{endpoint}")
+#       logger.debug("Running: Grafana::HttpRequest::#{__method__} on #{endpoint}")
 
       return self.issueRequest( 'DELETE', endpoint )
     end
@@ -51,7 +51,7 @@ module Grafana
     # @return [Mixed, #read]  return false at Error, or an JSON on success
     def patchRequest( endpoint, patchdata = {} )
 
-      logger.debug("Running: Grafana::HttpRequest::#{__method__} on #{endpoint}")
+#       logger.debug("Running: Grafana::HttpRequest::#{__method__} on #{endpoint}")
 
       return self.issueRequest( 'PATCH', endpoint, patchdata )
     end
@@ -71,9 +71,6 @@ module Grafana
         401 => 'Unauthorized',
         412 => 'Precondition failed'
       }
-#       logger.debug( "( methodType = '#{methodType}', endpoint = '#{endpoint}', data = '#{data}' )" )
-
-#       logger.debug( @headers )
 
       begin
         response =nil

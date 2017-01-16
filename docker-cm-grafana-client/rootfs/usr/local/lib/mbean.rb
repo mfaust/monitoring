@@ -112,7 +112,7 @@ module MBean
 
       result = false
 
-      logger.debug( sprintf( 'supportMbean?( %s, %s, mbean, %s )', data, service, key ) )
+#       logger.debug( sprintf( 'supportMbean?( %s, %s, mbean, %s )', data, service, key ) )
 
       if( data == nil )
         logger.error( 'no data given' )

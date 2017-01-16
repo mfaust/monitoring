@@ -134,6 +134,8 @@ class Monitoring
     node    = params.dig(:node)
     queue   = params.dig(:queue)
     data    = params.dig(:payload)
+    ttr     = params.dig(:ttr)   || 10
+    delay   = params.dig(:delay) || 2
 
     p = MessageQueue::Producer.new( @MQSettings )
 
@@ -148,7 +150,7 @@ class Monitoring
     logger.debug( queue )
     logger.debug( job )
 
-    logger.debug( p.addJob( queue, job ) )
+    logger.debug( p.addJob( queue, job, ttr, delay ) )
 
 #
 # p = MessageQueue::Producer.new( settings )
@@ -355,22 +357,24 @@ class Monitoring
         if( enabledGrafana == true )
           logger.info( 'remove grafana dashborads' )
           logger.debug( 'send message to \'mq-grafana\'' )
-          self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-grafana', :payload => { "force" => true } } )
+          self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-grafana', :payload => payload } )
         end
 
         if( enabledIcinga == true )
           logger.info( 'remove icinga checks and notifications' )
           logger.debug( 'send message to \'mq-icinga\'' )
-          self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-icinga', :payload => { "force" => true } } )
+          self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-icinga', :payload => payload } )
         end
 
         if( enableDiscovery == true )
           logger.info( 'remove node from discovery service' )
           logger.debug( 'send message to \'mq-discover\'' )
-          self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-discover', :payload => { "force" => true } } )
+          self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-discover', :payload => payload } )
         end
 
         sleep( 2 )
+
+        logger.info( 'done' )
 
       end
 
@@ -401,7 +405,7 @@ class Monitoring
         logger.info( 'create grafana dashborads' )
 
         logger.debug( 'send message to \'mq-grafana\'' )
-        self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-grafana', :payload => payload } )
+        self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-grafana', :payload => payload, :ttr => 15, :delay => 10 } )
       end
 
       if( enabledIcinga == true )
@@ -409,7 +413,7 @@ class Monitoring
         logger.info( 'create icinga checks and notifications' )
 
         logger.debug( 'send message to \'mq-icinga\'' )
-        self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-icinga', :payload => payload } )
+        self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-icinga', :payload => payload, :ttr => 15, :delay => 10 } )
       end
 
       if( annotation == true )

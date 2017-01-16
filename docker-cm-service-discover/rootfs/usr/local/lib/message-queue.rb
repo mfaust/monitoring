@@ -33,17 +33,34 @@ module MessageQueue
 
     end
 
-    def addJob( tube, job = {}, delay = 2 )
+    # add an Job to an names Message Queue
+    #
+    # @param [String, #read] tube the Queue Name
+    # @param [Hash, #read] job the Jobdata will send to Message Queue
+    # @param [Integer, #read] ttr time to run -- is an integer number of seconds to allow a worker
+    # to run this job. This time is counted from the moment a worker reserves
+    # this job. If the worker does not delete, release, or bury the job within
+    # <ttr> seconds, the job will time out and the server will release the job.
+    # The minimum ttr is 1. If the client sends 0, the server will silently
+    # increase the ttr to 1.
+    # @param [Integer, #read] delay is an integer number of seconds to wait before putting the job in
+    # the ready queue. The job will be in the "delayed" state during this time.
+    # @example send a Job to Beanaeter
+    #    addJob()
+    # @return [Hash,#read]
+    def addJob( tube, job = {}, ttr = 10, delay = 2 )
+
+      logger.debug( sprintf( 'addJob( %s, job = {}, %s, %s )', tube, ttr, delay ) )
 
       if( @b )
 
-#         logger.debug( "add job to tube #{tube}" )
-#         logger.debug( job )
+        logger.debug( "add job to tube #{tube}" )
+        logger.debug( job )
 
 #        tube = @b.use( tube.to_s )
-        response = @b.tubes[ tube.to_s ].put( job , :ttr => 10, :delay => delay )
+        response = @b.tubes[ tube.to_s ].put( job , :ttr => ttr, :delay => delay )
 
-#         logger.debug( response )
+        logger.debug( response )
       end
 
     end

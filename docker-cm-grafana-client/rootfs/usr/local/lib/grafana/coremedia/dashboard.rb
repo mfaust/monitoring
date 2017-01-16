@@ -3,6 +3,7 @@ module Grafana
 
   module Coremedia
 
+
     module Dashboard
 
       # cae-live-1 -> cae-live
@@ -55,6 +56,9 @@ module Grafana
 
         dns = @db.dnsData( { :ip => host, :short => host } )
 
+        logger.debug( dns.class.to_s )
+        logger.debug( dns )
+
         if( dns != nil )
           dnsId        = dns[ :id ]
           dnsIp        = dns[ :ip ]
@@ -72,10 +76,6 @@ module Grafana
           end
 
           @shortHostname        = @shortHostname.gsub( '.', '-' )
-
-#           @discoveryFile        = sprintf( '%s/%s/discovery.json'       , @cacheDirectory, host )
-#           @mergedHostFile       = sprintf( '%s/%s/mergedHostData.json'  , @cacheDirectory, host )
-#           @monitoringResultFile = sprintf( '%s/%s/monitoring.result'    , @cacheDirectory, host )
         else
           logger.error( 'no DNS entry found' )
         end
@@ -136,19 +136,7 @@ module Grafana
         servicesTmp.delete( 'node_exporter' )
         servicesTmp.delete( 'demodata-generator' )
 
-        measurements = nil
-
-        begin
-          until( measurements != nil )
-            logger.debug( 'wait for measurements data ...' )
-            measurements = @db.measurements( { :ip => host, :short => host } )
-            sleep( 5 )
-          end
-        rescue => e
-          logger.error( e )
-        end
-
-        measurements = measurements.dig( host )
+        serviceHash = Hash.new()
 
         services.each do |service|
 
@@ -171,7 +159,7 @@ module Grafana
 
           if( ! serviceTemplate.to_s.empty? )
 
-            logger.debug( sprintf( "Found Template paths: %s, %s" , serviceTemplate , additionalTemplatePaths ) )
+#             logger.debug( sprintf( "Found Template paths: %s, %s" , serviceTemplate , additionalTemplatePaths ) )
 
             options = {
               :description             => description,
@@ -189,15 +177,9 @@ module Grafana
 
         # we want an Services Overview for this Host
         if( createOverview == true )
-          self.createOverview( services )
+          self.createOverview( services ) # add description
         end
 
-        # LicenseInformation
-        if( servicesTmp.include?( 'content-management-server' ) ||
-            servicesTmp.include?( 'master-live-server' ) ||
-            servicesTmp.include?( 'replication-live-server' ) )
-          self.createLicenseTemplate( { :host => host, :services => services } )
-        end
 
         # named Templates are a subset of specialized Templates
         # like Memory-Pools, Tomcat or simple Grafana-Templates
@@ -217,6 +199,29 @@ module Grafana
         end
 
         self.createNamedTemplate( namedTemplate )
+
+        measurements = nil
+
+        begin
+          until( measurements != nil )
+            logger.debug( sprintf( 'wait for measurements data for node \'%s\'', host ) )
+            measurements = @db.measurements( { :ip => host, :short => host } )
+            sleep( 5 )
+          end
+
+          logger.debug( 'found measurement data' )
+        rescue => e
+          logger.error( e )
+        end
+
+#        measurements = measurements.dig( host )
+
+        # - at last - the LicenseInformation
+        if( servicesTmp.include?( 'content-management-server' ) ||
+            servicesTmp.include?( 'master-live-server' ) ||
+            servicesTmp.include?( 'replication-live-server' ) )
+          self.createLicenseTemplate( { :host => host, :services => services } )
+        end
 
 
         dashboards = self.listDashboards( { :host => @shortHostname } )
@@ -272,12 +277,12 @@ module Grafana
                 #{rows}
               ],
               "time": {
-                "from": "now-3m",
+                "from": "now-2m",
                 "to": "now"
               },
               "timepicker": {
-                "refresh_intervals": [ "1m", "2m" ],
-                "time_options": [ "3m", "5m", "15m" ]
+                "refresh_intervals": [ "30s", "1m", "2m" ],
+                "time_options": [ "1m", "3m", "5m", "15m" ]
               },
               "templating": {
                 "list": []
@@ -606,18 +611,18 @@ module Grafana
         additionalTemplatePaths = params[:additionalTemplatePaths] ? params[:additionalTemplatePaths] : []
 
         logger.info( sprintf( 'Creating dashboard for \'%s\'', serviceName ) )
-        logger.debug( sprintf( '  - template %s', File.basename( serviceTemplate ).strip ) )
+#         logger.debug( sprintf( '  - template %s', File.basename( serviceTemplate ).strip ) )
 
         templateFile = File.read( serviceTemplate )
         templateJson = JSON.parse( templateFile )
 
         rows         = templateJson.dig( 'dashboard', 'rows' )
 
-        if( rows != nil ) #templateJson.dig( 'dashboards', 'rows' ) ) # ['dashboard'] && templateJson['dashboard']['rows'] )
+        if( rows != nil )
 
           additionalTemplatePaths.each do |additionalTemplate|
 
-            logger.debug( sprintf( '  - merge with template %s', File.basename( additionalTemplate ).strip ) )
+#             logger.debug( sprintf( '  - merge with template %s', File.basename( additionalTemplate ).strip ) )
 
             additionalTemplateFile = File.read( additionalTemplate )
             additionalTemplateJson = JSON.parse( additionalTemplateFile )
