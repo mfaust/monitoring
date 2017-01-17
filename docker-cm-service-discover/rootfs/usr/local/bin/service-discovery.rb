@@ -42,11 +42,15 @@ Signal.trap('QUIT') { stop = true }
 
 # -----------------------------------------------------------------------------
 
+# puts( 'ServiceDiscovery.new( config )' )
+
 sd = ServiceDiscovery.new( config )
+
+# puts( 'done' )
 
 until stop
   sd.queue()
-  sleep( 5 )
+  sleep( 2 )
 end
 
 # -----------------------------------------------------------------------------

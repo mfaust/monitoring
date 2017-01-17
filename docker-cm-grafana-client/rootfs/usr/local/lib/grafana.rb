@@ -3,7 +3,7 @@
 # 13.01.2017 - Bodo Schulz
 #
 #
-# v1.0.0
+# v1.0.1
 
 # -----------------------------------------------------------------------------
 
@@ -306,6 +306,11 @@ module Grafana
         when 'info'
           logger.info( sprintf( 'give dashboards for %s back', node ) )
           result = self.listDashboards( { :host => node } )
+
+          self.sendMessage( { :cmd => 'info', :queue => 'mq-grafana-info', :payload => result, :ttr => 1, :delay => 0 } )
+#           self.sendMessage( result )
+
+          return
         else
           logger.error( sprintf( 'wrong command detected: %s', command ) )
 
@@ -320,26 +325,55 @@ module Grafana
         logger.info( result )
 
         logger.debug( '--------------------------------------------------------' )
-
-#         self.sendMessage( result )
       end
 
     end
 
+    def sendMessage( params = {} )
 
-    def sendMessage( data = {} )
+      cmd     = params[:cmd]     ? params[:cmd]     : nil
+      node    = params[:node]    ? params[:node]    : nil
+      queue   = params[:queue]   ? params[:queue]   : nil
+      payload = params[:payload] ? params[:payload] : {}
+      ttr     = params[:ttr]     ? params[:trr]     : 10
+      delay   = params[:delay]   ? params[:delay]   : 2
+
+      if( cmd == nil || queue == nil || payload.count() == 0 )
+        return
+      end
+
+#       logger.debug( JSON.pretty_generate( payload ) )
+
+      p = MessageQueue::Producer.new( @MQSettings )
+
+      job = {
+        cmd:  cmd,          # require
+        node: node,         # require
+        timestamp: Time.now().strftime( '%Y-%m-%d %H:%M:%S' ), # optional
+        from: 'grafana',    # optional
+        payload: payload    # require
+      }.to_json
+
+      logger.debug( JSON.pretty_generate( job ) )
+
+      logger.debug( p.addJob( queue, job, ttr, delay ) )
+
+    end
+
+
+    def sendMessageOBSOLETE( data = {} )
 
     p = MessageQueue::Producer.new( @MQSettings )
 
     job = {
       cmd:  'information',
-      from: 'discovery',
+      from: 'grafana',
       payload: data
     }.to_json
 
     logger.debug( JSON.pretty_generate( job ) )
 
-    logger.debug( p.addJob( 'mq-information', job ) )
+    logger.debug( p.addJob( 'mq-grafana-info', job ) )
 
   end
 

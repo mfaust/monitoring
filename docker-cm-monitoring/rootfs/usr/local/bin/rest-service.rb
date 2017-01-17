@@ -217,9 +217,9 @@ module Sinatra
       host   = params[:host]
       result = m.listHost( host, request.env )
 
-      status = result[:status]
+#       status = result[:status]
 
-      JSON.pretty_generate( result.to_json )
+      result
 
     end
 

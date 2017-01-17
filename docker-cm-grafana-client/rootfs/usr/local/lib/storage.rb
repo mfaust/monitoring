@@ -50,7 +50,7 @@ module Storage
         logger.error( e )
       end
 
-#       @database.loggers << logger # Logger.new( $stdout, :debug )
+      # @database.loggers << logger # Logger.new( $stdout, :debug )
 
       @database.create_table?( :dns ) {
         primary_key :id
@@ -612,7 +612,6 @@ module Storage
 
       end
 
-
       # ---------------------------------------------------------------------------------
 
       if( service == nil && host == nil )
@@ -912,7 +911,7 @@ module Storage
 
       status    = params[ :status ]    ? params[ :status ]    : nil # Database::ONLINE
 
-      result    =
+      result    = nil
 
       if( status != nil )
         w = ( Sequel[:status => status ] )
@@ -996,6 +995,38 @@ module Storage
       end
 
     end
+
+
+    def status( params = {} )
+
+      if( self.checkDatabase() == false )
+        return false
+      end
+
+      ip      = params[ :ip ]    ? params[ :ip ]    : nil
+      short   = params[ :short ] ? params[ :short ] : nil
+      long    = params[ :long ]  ? params[ :long ]  : nil
+
+
+      rec = @database[:v_status].select( :ip, :shortname, :created, :status ).where(
+        Sequel[:ip        => ip.to_s] | Sequel[:shortname => short.to_s]
+      ).to_a
+
+      if( rec.count() == 0 )
+        return nil
+      else
+
+        return {
+          :ip        => rec.first[:ip].to_s,
+          :shortname => rec.first[:shortname].to_s,
+          :created   => rec.first[:created].to_s,
+          :status    => rec.first[:status].to_i
+        }
+
+      end
+
+    end
+
 
     def parsedResponse( r )
 

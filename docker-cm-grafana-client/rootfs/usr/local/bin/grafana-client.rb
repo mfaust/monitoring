@@ -58,7 +58,7 @@ if( g != nil )
 
   until stop
     g.queue()
-    sleep( 5 )
+    sleep( 2 )
   end
 
 else

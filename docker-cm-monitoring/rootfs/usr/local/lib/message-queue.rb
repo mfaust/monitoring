@@ -37,20 +37,23 @@ module MessageQueue
     #
     # @param [String, #read] tube the Queue Name
     # @param [Hash, #read] job the Jobdata will send to Message Queue
+    # @param [Integer, #read] prio is an integer < 2**32. Jobs with smaller priority values will be
+    #        scheduled before jobs with larger priorities. The most urgent priority is 0;
+    #        the least urgent priority is 4,294,967,295.
     # @param [Integer, #read] ttr time to run -- is an integer number of seconds to allow a worker
-    # to run this job. This time is counted from the moment a worker reserves
-    # this job. If the worker does not delete, release, or bury the job within
+    #        to run this job. This time is counted from the moment a worker reserves
+    #        this job. If the worker does not delete, release, or bury the job within
     # <ttr> seconds, the job will time out and the server will release the job.
-    # The minimum ttr is 1. If the client sends 0, the server will silently
-    # increase the ttr to 1.
+    #        The minimum ttr is 1. If the client sends 0, the server will silently
+    #        increase the ttr to 1.
     # @param [Integer, #read] delay is an integer number of seconds to wait before putting the job in
-    # the ready queue. The job will be in the "delayed" state during this time.
+    #        the ready queue. The job will be in the "delayed" state during this time.
     # @example send a Job to Beanaeter
     #    addJob()
     # @return [Hash,#read]
-    def addJob( tube, job = {}, ttr = 10, delay = 2 )
+    def addJob( tube, job = {}, prio = 65536, ttr = 10, delay = 2 )
 
-      logger.debug( sprintf( 'addJob( %s, job = {}, %s, %s )', tube, ttr, delay ) )
+      logger.debug( sprintf( 'addJob( %s, job = {}, %s, %s, %s )', tube, prio, ttr, delay ) )
 
       if( @b )
 
@@ -58,7 +61,7 @@ module MessageQueue
         logger.debug( job )
 
 #        tube = @b.use( tube.to_s )
-        response = @b.tubes[ tube.to_s ].put( job , :ttr => ttr, :delay => delay )
+        response = @b.tubes[ tube.to_s ].put( job , :prio => prio, :ttr => ttr, :delay => delay )
 
         logger.debug( response )
       end

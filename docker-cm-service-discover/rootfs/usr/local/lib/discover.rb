@@ -3,7 +3,7 @@
 # 13.09.2016 - Bodo Schulz
 #
 #
-# v1.4.2
+# v1.4.3
 # -----------------------------------------------------------------------------
 
 require 'json'
@@ -77,8 +77,8 @@ class ServiceDiscovery
     @serviceConfig     = settings[:serviceConfigFile] ? settings[:serviceConfigFile]   : nil
     @scanPorts         = settings[:scanPorts]         ? settings[:scanPorts]           : ports
 
-    version             = '1.4.2'
-    date                = '2017-01-16'
+    version             = '1.4.3'
+    date                = '2017-01-17'
 
     logger.info( '-----------------------------------------------------------------' )
     logger.info( ' CoreMedia - Service Discovery' )
@@ -130,11 +130,18 @@ class ServiceDiscovery
 
   def queue()
 
+#     logger.debug( 'ask queue' )
+
     c = MessageQueue::Consumer.new( @MQSettings )
 
-    self.processQueue(
-      c.getJobFromTube( @mqQueue )
-    )
+    data = c.getJobFromTube( @mqQueue )
+
+    if( data.count() != 0 )
+
+#       logger.debug( data )
+
+      self.processQueue( data )
+    end
 
   end
 
@@ -190,11 +197,6 @@ class ServiceDiscovery
 
           @db.setStatus( { :ip => node, :short => node, :status => 98 } )
 
-#           logger.debug( 'send message to \'mq-grafana\'' )
-#           self.sendMessage( { :cmd => 'remove', :queue => 'mq-grafana', :node => node, :payload => { "force": true } } )
-#
-#           sleep( 2 )
-
           result = self.deleteHost( node )
 
           logger.debug( result )
@@ -212,6 +214,8 @@ class ServiceDiscovery
         logger.info( sprintf( 'give information for %s back', node ) )
 
         result = self.listHosts( node )
+
+        self.sendMessage( { :cmd => 'info', :queue => 'mq-discover-info', :payload => result, :ttr => 1, :delay => 0 } )
       else
 #         logger.error( sprintf( 'wrong command detected: %s', command ) )
 
@@ -223,10 +227,10 @@ class ServiceDiscovery
         logger.debug( result )
       end
 
-      result[:request]    = data
+#       result[:request]    = data
 
-      logger.debug( 'send message to \'mq-information\'' )
-      self.sendMessage( { :cmd => 'information', :queue => 'mq-information', :payload => result } )
+#       logger.debug( 'send message to \'mq-discover-info\'' )
+#       self.sendMessage( { :cmd => 'info', :queue => 'mq-discovery-info', :payload => result } )
 
     end
 
@@ -253,6 +257,7 @@ class ServiceDiscovery
     job = {
       cmd:  cmd,          # require
       node: node,         # require
+      timestamp: Time.now().strftime( '%Y-%m-%d %H:%M:%S' ), # optional
       from: 'discovery',  # optional
       payload: payload    # require
     }.to_json
@@ -687,11 +692,50 @@ class ServiceDiscovery
 
   def listHosts( host = nil )
 
-    hosts = Array.new()
+    hosts  = Array.new()
+    result = Hash.new()
 
-    logger.info( 'TODO - use Database insteed of File - ASAP' )
+    if( host == nil )
 
-    return {}
+      logger.info( 'TODO - use Database insteed of File - ASAP' )
+    else
+
+      discoveryData  = @db.discoveryData( { :ip => host, :short => host } )
+      services       = discoveryData.dig( host ).keys
+
+      status         = @db.status( { :ip => host, :short => host } )
+
+      logger.debug( status )
+
+      created        = status.dig( :created )
+      created        = Time.parse( created ).strftime( '%Y-%m-%d %H:%M:%S' )
+
+      online         = status.dig( :status )
+
+      case online
+      when 0
+        status = 'offline'
+      when 1
+        status = 'online'
+      when 98
+        status = 'delete'
+      when 99
+        status = 'prepare'
+      else
+        status = 'unknown'
+      end
+
+      result = {
+        :status   => status,
+        :services => services,
+        :created  => created
+      }
+
+      logger.debug( JSON.pretty_generate ( result ) )
+
+    end
+
+    return result
 
 
     # CODE above are OBSOLETE

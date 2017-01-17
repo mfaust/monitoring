@@ -25,7 +25,7 @@ module Logging
       file.sync       = true
       logger          = Logger.new( file, 'weekly', 1024000 )
 
-      logger                 = Logger.new(STDOUT)
+#       logger                 = Logger.new(STDOUT)
       logger.progname        = classname
       logger.level           = Logger::DEBUG
       logger.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
