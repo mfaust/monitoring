@@ -103,9 +103,6 @@ services:
     command: "/usr/sbin/nginx"
     depends_on:
       - cm-monitoring
-#    extra_hosts:
-#      - 'jolokia:172.25.0.11'
-#      - 'cm-monitoring:172.25.0.40'
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./share/nginx/var/www:/var/www:ro
@@ -296,17 +293,6 @@ services:
       #- memcached
     extra_hosts:
       - 'blueprint-box:192.168.252.100'
-      #- 'jolokia:172.25.0.11'
-      #- 'memcached:172.25.0.12'
-      #- 'carbon-relay:172.25.0.20'
-      # NOTE: external service
-      #- 'grafana:10.101.2.83'
-      #- 'grafana:192.168.252.101'
-#      - 'graphite:192.168.0.5'
-      # NOTE: external service
-      #- 'nginx-proxy:10.101.2.83'
-      #- 'nginx-proxy:192.168.252.101'
-      #- 'nginx-proxy:192.168.0.5'
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./share/resolv.conf:/etc/resolv.conf:ro
@@ -316,7 +302,6 @@ services:
       - ./data/monitoring:/var/cache/monitoring
       - ./data:/srv
     links:
-#      - jolokia:jolokia
       - beanstalkd:beanstalkd
     networks:
       mon:
