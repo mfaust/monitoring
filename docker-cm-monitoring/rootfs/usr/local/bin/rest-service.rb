@@ -3,7 +3,7 @@
 # 05.10.2016 - Bodo Schulz
 #
 #
-# v2.0.1
+# v2.1.0
 
 # -----------------------------------------------------------------------------
 
@@ -139,7 +139,8 @@ module Sinatra
       result = m.writeHostConfiguration( host, paylod )
 
       status = result[:status]
-      result.to_json
+
+      JSON.pretty_generate( result.to_json )
 
     end
 
@@ -152,7 +153,8 @@ module Sinatra
       result = m.getHostConfiguration( host )
 
       status = result[:status]
-      result.to_json
+
+      JSON.pretty_generate( result.to_json )
 
     end
 
@@ -165,7 +167,9 @@ module Sinatra
       result = m.removeHostConfiguration( host )
 
       status = result[:status]
-      result.to_json
+
+      JSON.pretty_generate( result.to_json )
+
     end
 
     # -----------------------------------------------------------------------------
@@ -191,7 +195,8 @@ module Sinatra
       result = m.addHost( host, payload )
 
       status = result[:status]
-      result.to_json
+
+      JSON.pretty_generate( result.to_json )
 
     end
 
@@ -201,7 +206,8 @@ module Sinatra
       result = m.listHost( nil, request.env )
 
       status = result[:status]
-      result.to_json
+
+      JSON.pretty_generate( result.to_json )
 
     end
 
@@ -212,7 +218,8 @@ module Sinatra
       result = m.listHost( host, request.env )
 
       status = result[:status]
-      result.to_json
+
+      JSON.pretty_generate( result.to_json )
 
     end
 
@@ -223,7 +230,9 @@ module Sinatra
       result = m.removeHost( host, @request_paylod )
 
       status = result[:status]
-      result.to_json
+
+      JSON.pretty_generate( result.to_json )
+
     end
 
     # -----------------------------------------------------------------------------
@@ -235,7 +244,8 @@ module Sinatra
       result = m.addAnnotation( host, @request_paylod )
 
       status = result[:status]
-      result.to_json
+
+      JSON.pretty_generate( result.to_json )
 
     end
 

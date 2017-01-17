@@ -3,7 +3,7 @@
 # 05.10.2016 - Bodo Schulz
 #
 #
-# v2.0.1
+# v2.2.2
 
 # -----------------------------------------------------------------------------
 
@@ -24,7 +24,7 @@ class Monitoring
 
   def initialize( settings = {} )
 
-    @logDirectory  = settings[:logDirectory]       ? settings[:logDirectory]       : '/tmp'
+#     @logDirectory  = settings[:logDirectory]       ? settings[:logDirectory]       : '/tmp'
     @configFile    = '/etc/cm-monitoring.yaml'
 
     logger.level           = Logger::DEBUG
@@ -36,8 +36,8 @@ class Monitoring
       :beanstalkPort       => @mqPort
     }
 
-    version              = '2.2.1'
-    date                 = '2017-01-14'
+    version              = '2.2.2'
+    date                 = '2017-01-17'
 
     logger.info( '-----------------------------------------------------------------' )
     logger.info( ' CoreMedia - Monitoring Service' )
@@ -60,17 +60,17 @@ class Monitoring
 
     config = YAML.load_file( @configFile )
 
-    @logDirectory     = config['logDirectory']             ? config['logDirectory']             : '/tmp/log'
-    @cacheDir         = config['cacheDirectory']           ? config['cacheDirectory']           : '/tmp/cache'
+#     @logDirectory     = config['logDirectory']             ? config['logDirectory']             : '/tmp/log'
+#     @cacheDir         = config['cacheDirectory']           ? config['cacheDirectory']           : '/tmp/cache'
 
     @mqHost           = config['mq']['host']               ? config['mq']['host']               : 'localhost'
     @mqPort           = config['mq']['port']               ? config['mq']['port']               : 11300
     @mqQueue          = config['mq']['queue']              ? config['mq']['queue']              : 'mq-rest-service'
 
-    @templateDirectory = config['grafana']['templateDirectory']  ? config['grafana']['templateDirectory']  : '/var/tmp/templates'
+#     @templateDirectory = config['grafana']['templateDirectory']  ? config['grafana']['templateDirectory']  : '/var/tmp/templates'
 
-    @memcacheHost     = ENV['MEMCACHE_HOST']               ? ENV['MEMCACHE_HOST']               : nil
-    @memcachePort     = ENV['MEMCACHE_PORT']               ? ENV['MEMCACHE_PORT']               : nil
+#     @memcacheHost     = ENV['MEMCACHE_HOST']               ? ENV['MEMCACHE_HOST']               : nil
+#     @memcachePort     = ENV['MEMCACHE_PORT']               ? ENV['MEMCACHE_PORT']               : nil
 
     @serviceChecks    = config['service-checks']           ? config['service-checks']           : nil
 
@@ -151,16 +151,6 @@ class Monitoring
     logger.debug( job )
 
     logger.debug( p.addJob( queue, job, ttr, delay ) )
-
-#
-# p = MessageQueue::Producer.new( settings )
-
-# #   job = {
-# #     cmd:   'add',
-# #     payload: sprintf( "foo-bar-%s.com", i )
-# #   }.to_json
-# #
-# #   p.addJob( 'test-tube', job )
 
   end
 
@@ -536,6 +526,46 @@ class Monitoring
       if( hostConfigurationStatus == 200 )
         result[host.to_s][:custom_config] = hostConfigurationMessage
       end
+
+
+      if( enabledIcinga == true )
+        logger.info( 'get information from icinga' )
+        logger.debug( 'send message to \'mq-icinga\'' )
+        self.messageQueue( { :cmd => 'information', :node => host, :queue => 'mq-icinga', :payload => {} } )
+      end
+      if( enabledGrafana == true )
+        logger.info( 'get information from grafana' )
+        logger.debug( 'send message to \'mq-grafana\'' )
+        self.messageQueue( { :cmd => 'information', :node => host, :queue => 'mq-grafana', :payload => {} } )
+      end
+
+      if( enableDiscovery == true )
+        logger.info( 'get information from discovery service' )
+        logger.debug( 'send message to \'mq-discover\'' )
+        self.messageQueue( { :cmd => 'information', :node => host, :queue => 'mq-discover', :payload => {} } )
+      end
+
+      c = MessageQueue::Consumer.new( @MQSettings )
+
+      resultArray = Array.new()
+      threads     = Array.new()
+
+      logger.debug('start')
+
+      ['mq-icinga','mq-grafana','mq-discover'].each do |queue|
+
+        threads << Thread.new {
+
+          resultArray << c.getJobFromTube( queue )
+        }
+
+        threads.each { |t| t.join }
+      end
+
+      logger.debug('end')
+      logger.debug( resultArray )
+
+      return result
 
       if( enableDiscovery == true )
 
