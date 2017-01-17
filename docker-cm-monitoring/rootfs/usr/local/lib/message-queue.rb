@@ -126,7 +126,6 @@ module MessageQueue
     end
 
 
-
     def getJobFromTube( tube )
 
       result = {}
@@ -134,13 +133,11 @@ module MessageQueue
       if( @b )
 
         stats = self.tubeStatistics( tube )
+#         logger.debug( stats )
 
         if( stats.dig( :ready ) == 0 )
           return result
         end
-
-        logger.debug( stats )
-
 
         tube = @b.tubes.watch!( tube.to_s )
 
