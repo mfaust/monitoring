@@ -506,9 +506,9 @@ class Monitoring
       result[host.to_s][:dns] ||= {}
       result[host.to_s][:dns] = hostData
 
-      enableDiscovery = @enabledDiscovery
-      enabledGrafana  = @enabledGrafana
-      enabledIcinga   = @enabledIcinga
+      enableDiscovery = false # @enabledDiscovery
+      enabledGrafana  = false # @enabledGrafana
+      enabledIcinga   = false # @enabledIcinga
 
 #
 #       if( payload != nil )
