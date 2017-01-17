@@ -6,6 +6,8 @@ Das Coremedia Monitoring basiert auf mehreren - durchaus voneinander abhängigen
 Ziel ist ein funktionierendes Monitoring-System, welches auf jedem System ausgerollt werden kann.
 
 
+![Service-Discovery](assets/service-discovery.png)
+
 # Service Discovery
 
 

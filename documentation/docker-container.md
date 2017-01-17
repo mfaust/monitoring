@@ -12,7 +12,9 @@ Die Startseite lässt sich im lokalen Browser unter [localhost](http://localhost
 
 [Grafana](http://grafana.org/) ist ein Web-UI um Grafen in Echtzeit darstellen zu können.
 
-Es können verschiedene Storage-Backends ([graphite](http://graphite.readthedocs.org/en/latest/), [influxdb](https://influxdata.com/), [Elasticsearch](https://www.elastic.co/products/elasticsearch), [Cloudwatch](https://aws.amazon.com/de/cloudwatch/), [Prometeus](https://prometheus.io/), [OpenTSDB](http://opentsdb.net/) ) benutzt werden.
+Es können verschiedene Storage-Backends ([graphite](http://graphite.readthedocs.org/en/latest/), [influxdb](https://influxdata.com/),
+[Elasticsearch](https://www.elastic.co/products/elasticsearch), [Cloudwatch](https://aws.amazon.com/de/cloudwatch/),
+[Prometeus](https://prometheus.io/), [OpenTSDB](http://opentsdb.net/) ) benutzt werden.
 
 In diesem Meta-Package wird ausschließlich `graphite` genutzt.
 
@@ -56,26 +58,39 @@ Dient als Storage-Backend für Icinga2, Graphite, Grafana.
 
 ## cm-monitoring
 
-Beinhaltet alle Coremediaspezifika. Vor allem Scripte für Icinga, Grafana und Jolokia.
+Beinhaltet die REST-API um die Coremedia Services in das Monitoring aufzunehmen.
 
-In dem Container wird der zu monitorende Host in das System eingefügt.
+## cm-collectd
 
+Ein Container, welcher die Daten zu einer Time-Series Datenbank weiterleitet.
+
+## cm-data-collector
+
+Ein Service, welcher in einem (konfigurierbaren) Interval die Messdaten erhebt.
+
+## cm-external-discover
+
+TBD
+
+## cm-grafana-client
+
+Ein Service, welcher mit dem Grafana Service kommuniziert und die entsprechenden Dashboards verwaltet.
+
+## cm-graphite-client
+
+Ein Service um Annotations in Grafana zu ermöglichen.
+
+## cm-icinga-client
+
+Ein Service für einen Icinga Satellite, welcher Host- und Servicechecks ausführt.
+
+## cm-service-discover
+
+Der Service, welcher das Coremedia Service Discovery vornimmt und feststellt, welcher Service in welchem Tomcat deployed wurde.
 
 ## Schematischer Aufbau
 ![schema](assets/cm-grafana.png "Schematischer Aufbau und Kommunikationsbeziehung")
 
-
-# Vorbereitungen & benötigte Software
-
-Wir benötigen eine Docker Engine
-
- - [Mac](https://docs.docker.com/engine/installation/mac/)
- - [Linux](https://docs.docker.com/engine/installation/linux/ubuntulinux/)
- - [Windows](https://docs.docker.com/engine/installation/windows/)
-
-Und docker-compose:
-
- - [docker-compose](https://docs.docker.com/compose/install/)
 
 
 ## Nutzung
@@ -85,7 +100,14 @@ Mit Hilfe von `docker-compose` wir der gesammte Stack so gestartet, dass alle Ab
 Services, die von einander abhängig sind (z.B. eine Datenbank) legen entsprechende Wartezeit ein und prüfen deren Verfügbarkeit.
 
 
+### Beispiele
+
+TBD
+
+
 ## Start
+
+TODO
 
     cd ~
     git clone -b docker git@github.com:CoreMedia/devops.git ~/monitoring/
@@ -115,13 +137,6 @@ Wenn diese nicht mehr benötigt werden, können diese entfernt werden.
 
 Man kann sich in alle Container einklinken und zusehen, was diese so treiben. Um sich mit dem `cm-monitoring` Container  zu verbinden reicht ein
 
-    docker -ti exec cm-monitoring /bin/bash
+    docker-compose exec cm-monitoring /bin/sh
 
-Dann kann man dort genau so hantieren, wie in einem (stark eingeschränktem) Linux-System.
-
-Laufen services? `supervisorctl status`
-Neustart eines Services `supervisorctl restart $SERVICE`
-Neustart aller Services `supervisorctl restart all`
-
-Logfiles werden unter `/var/log/monitoring` und `/tmp/*.log` abgelegt.
 
