@@ -3,7 +3,7 @@
 # 13.09.2016 - Bodo Schulz
 #
 #
-# v1.3.1
+# v1.4.2
 # -----------------------------------------------------------------------------
 
 require 'json'
@@ -63,10 +63,8 @@ class ServiceDiscovery
       49099
     ]
 
-    @logDirectory      = settings[:logDirectory]      ? settings[:logDirectory]        : '/var/log/monitoring'
-    @cacheDirectory    = settings[:cacheDirectory]    ? settings[:cacheDirectory]      : '/var/cache/monitoring'
-    @jolokiaHost       = settings[:jolokiaHost]       ? settings[:jolokiaHost]         : 'localhost'
-    @jolokiaPort       = settings[:jolokiaPort]       ? settings[:jolokiaPort]         : 8080
+    jolokiaHost        = settings[:jolokiaHost]       ? settings[:jolokiaHost]         : 'localhost'
+    jolokiaPort        = settings[:jolokiaPort]       ? settings[:jolokiaPort]         : 8080
     mqHost             = settings[:mqHost]            ? settings[:mqHost]              : 'localhost'
     mqPort             = settings[:mqPort]            ? settings[:mqPort]              : 11300
     @mqQueue           = settings[:mqQueue]           ? settings[:mqQueue]             : 'mq-discover'
@@ -79,24 +77,21 @@ class ServiceDiscovery
     @serviceConfig     = settings[:serviceConfigFile] ? settings[:serviceConfigFile]   : nil
     @scanPorts         = settings[:scanPorts]         ? settings[:scanPorts]           : ports
 
-    logger.level = Logger::DEBUG
-
-    version             = '1.4.1'
-    date                = '2017-01-13'
+    version             = '1.4.2'
+    date                = '2017-01-16'
 
     logger.info( '-----------------------------------------------------------------' )
     logger.info( ' CoreMedia - Service Discovery' )
     logger.info( "  Version #{version} (#{date})" )
     logger.info( '  Copyright 2016-2017 Coremedia' )
     logger.info( '  used Services:' )
-    logger.info( "    - jolokia      : #{@jolokiaHost}:#{@jolokiaPort}" )
+    logger.info( "    - jolokia      : #{jolokiaHost}:#{jolokiaPort}" )
     logger.info( "    - message queue: #{mqHost}:#{mqPort}/#{@mqQueue}" )
-    logger.info( "  cache directory located at #{@cacheDirectory}" )
     logger.info( '-----------------------------------------------------------------' )
     logger.info( '' )
 
     @db                 = Storage::Database.new()
-    @jolokia            = Jolokia::Client.new( { :host => @jolokiaHost, :port => @jolokiaPort } )
+    @jolokia            = Jolokia::Client.new( { :host => jolokiaHost, :port => jolokiaPort } )
 
     self.readConfigurations()
   end
@@ -137,16 +132,9 @@ class ServiceDiscovery
 
     c = MessageQueue::Consumer.new( @MQSettings )
 
-    threads = Array.new()
-
-    threads << Thread.new {
-
-      self.processQueue(
-        c.getJobFromTube( @mqQueue )
-      )
-    }
-
-    threads.each { |t| t.join }
+    self.processQueue(
+      c.getJobFromTube( @mqQueue )
+    )
 
   end
 
@@ -251,6 +239,7 @@ class ServiceDiscovery
     node    = params[:node]    ? params[:node]    : nil
     queue   = params[:queue]   ? params[:queue]   : nil
     payload = params[:payload] ? params[:payload] : {}
+    ttr     = params[:ttr]     ? params[:trr]     : 10
     delay   = params[:delay]   ? params[:delay]   : 2
 
     if( cmd == nil || queue == nil || payload.count() == 0 )
@@ -270,7 +259,7 @@ class ServiceDiscovery
 
     logger.debug( JSON.pretty_generate( job ) )
 
-    logger.debug( p.addJob( queue, job, delay ) )
+    logger.debug( p.addJob( queue, job, ttr, delay ) )
 
   end
 
@@ -294,7 +283,6 @@ class ServiceDiscovery
         services.push('mongodb')
       end
     else
-
 
       h     = Hash.new()
       array = Array.new()
@@ -503,8 +491,6 @@ class ServiceDiscovery
       }
 
     end
-
-#    logger.debug( "final services #{services}" )
 
     return services
   end

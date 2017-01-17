@@ -50,7 +50,7 @@ module Storage
         logger.error( e )
       end
 
-#      @database.loggers << logger # Logger.new( $stdout, :debug )
+#       @database.loggers << logger # Logger.new( $stdout, :debug )
 
       @database.create_table?( :dns ) {
         primary_key :id

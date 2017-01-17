@@ -29,6 +29,16 @@ createConfig() {
     ${cfgFile}
 }
 
+rights() {
+
+  chgrp nobody /var/log
+  chmod g+w /var/log
+  
+  touch /var/log/collectd.log
+  chmod a+w /var/log/collectd.log
+  chown nobody:nobody /var/log/collectd.log
+}
+
 startSupervisor() {
 
 #  echo -e "\n Starting Supervisor.\n\n"
@@ -44,6 +54,8 @@ startSupervisor() {
 run() {
 
   createConfig
+
+  rights
 
   startSupervisor
 

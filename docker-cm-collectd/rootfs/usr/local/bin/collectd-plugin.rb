@@ -23,11 +23,27 @@ config = {
 
 # -----------------------------------------------------------------------------
 
+# NEVER FORK THE PROCESS!
+# the used supervisord will control all
+stop = false
+
+Signal.trap('INT')  { stop = true }
+Signal.trap('HUP')  { stop = true }
+Signal.trap('TERM') { stop = true }
+Signal.trap('QUIT') { stop = true }
+
+# -----------------------------------------------------------------------------
+
 c = Collecd::Plugin.new( config )
 
-loop do
+until stop
   c.run()
   sleep( interval.to_i )
 end
+
+#loop do
+#  c.run()
+#  sleep( interval.to_i )
+#end
 
 # EOF
