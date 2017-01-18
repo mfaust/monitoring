@@ -67,8 +67,12 @@ module Graphite
 
         logger.error( "Error: #{__method__}  on #{endpoint} error: '#{e}'" )
 
-        result           = JSON.parse( e.response )
-        result['status'] = e.to_s.split( ' ' ).first
+        if( e.response )
+          result           = JSON.parse( e.response )
+        else
+          result  = e.inspect
+        end
+          result['status'] = e.to_s.split( ' ' ).first
 
         return result
       end

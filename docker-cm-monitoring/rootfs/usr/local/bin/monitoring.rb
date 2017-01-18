@@ -184,10 +184,10 @@ class Monitoring
 
     end
 
-    return {
+    return JSON.pretty_generate( {
       :status  => status,
       :message => message
-    }
+    } )
 
   end
 
@@ -213,10 +213,10 @@ class Monitoring
       end
     end
 
-    return {
+    return JSON.pretty_generate( {
       :status  => status,
       :message => message
-    }
+    } )
 
   end
 
@@ -245,10 +245,10 @@ class Monitoring
       end
     end
 
-    return {
+    return JSON.pretty_generate( {
       :status  => status,
       :message => message
-    }
+    } )
 
   end
 
@@ -601,96 +601,9 @@ class Monitoring
 
       return JSON.pretty_generate( result )
 
-
-
-
-
-      if( enableDiscovery == true )
-
-        discoveryResult  = @serviceDiscovery.listHosts( ( hostData != false && hostData[:short] ) ? hostData[:short] : host )
-        discoveryStatus  = discoveryResult[:status]
-        discoveryMessage = discoveryResult[:message]
-
-        logger.debug( "discovery: #{discoveryResult}" )
-
-        result[host.to_s][:discovery] ||= {}
-
-        if( discoveryStatus == 200 )
-
-          discoveryServices = nil
-
-          if( discoveryResult.dig( :hosts, host ) != nil )
-            discoveryCreated = discoveryResult.dig( :hosts, host, :created ) || 'unknown'
-            discoveryOnline  = discoveryResult.dig( :hosts, host, :status )  || 'unknown'
-          else
-            discoveryCreated = discoveryResult.dig( :hosts, hostData[:short], :created ) || 'unknown'
-            discoveryOnline  = discoveryResult.dig( :hosts, hostData[:short], :status )  || 'unknown'
-          end
-
-          result[host.to_s][:discovery] = {
-            :status     => discoveryStatus,
-            :created    => discoveryCreated,
-            :online     => discoveryOnline,
-            :services   => discoveryServices
-          }
-        else
-          result[host.to_s][:discovery] = {
-            :status     => discoveryStatus,
-            :message    => discoveryMessage
-          }
-        end
-      end
-
-
-      if( enabledIcinga == true )
-
-        icingaResult  = @icinga.listHost( ( hostData != false && hostData[:short] ) ? hostData[:short] : host )
-        icingaStatus  = icingaResult[:status]
-        icingaMessage = icingaResult[:message]
-
-        logger.debug( "icinga: #{icingaResult}" )
-
-        result[host.to_s][:icinga] ||= {}
-        result[host.to_s][:icinga] = {
-          :status     => icingaStatus,
-          :message    => icingaMessage
-        }
-      end
-
-
-      if( enabledGrafana == true )
-        grafanaResult  = @grafana.listDashboards( ( hostData != false && hostData[:short] ) ? hostData[:short] : host )
-        grafanaStatus  = grafanaResult[:status]
-        grafanaMessage = grafanaResult[:message]
-
-        logger.debug( "grafana: #{grafanaResult}" )
-
-        result[host.to_s][:grafana] ||= {}
-
-        if( grafanaStatus == 200 )
-
-          grafanaDashboardCount = grafanaResult[:count]      ? grafanaResult[:count]      : 0
-          grafanaDashboards     = grafanaResult[:dashboards] ? grafanaResult[:dashboards] : []
-
-          result[host.to_s][:grafana] = {
-            :status     => grafanaStatus,
-            :dashboards => grafanaDashboards,
-            :count      => grafanaDashboardCount
-          }
-        else
-
-          result[host.to_s][:grafana] = {
-            :status     => grafanaStatus,
-            :message    => grafanaMessage
-          }
-
-        end
-      end
-
-
-      return result
-
     else
+
+      return JSON.pretty_generate( { :status => 204, :message => 'not yet ready' } )
 
       discoveryResult  = @serviceDiscovery.listHosts( host )
       discoveryStatus  = discoveryResult[:status]
@@ -821,14 +734,13 @@ class Monitoring
 
       result[host.to_sym][:discovery] = discoveryResult
 
-      return result
+      return JSON.pretty_generate( result )
     end
 
-    return {
+    return JSON.pretty_generate( {
       :status  => status,
       :message => message
-    }
-
+    } )
 
   end
 
@@ -945,10 +857,10 @@ class Monitoring
 
     end
 
-    return {
+    return JSON.pretty_generate( {
       :status  => status,
       :message => message
-    }
+    } )
 
   end
 

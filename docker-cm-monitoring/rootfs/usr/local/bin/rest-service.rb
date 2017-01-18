@@ -140,7 +140,7 @@ module Sinatra
 
       status = result[:status]
 
-      JSON.pretty_generate( result.to_json )
+      result
 
     end
 
@@ -154,7 +154,7 @@ module Sinatra
 
       status = result[:status]
 
-      JSON.pretty_generate( result.to_json )
+      result
 
     end
 
@@ -168,7 +168,7 @@ module Sinatra
 
       status = result[:status]
 
-      JSON.pretty_generate( result.to_json )
+      result
 
     end
 
@@ -196,7 +196,7 @@ module Sinatra
 
       status = result[:status]
 
-      JSON.pretty_generate( result.to_json )
+      result
 
     end
 
@@ -207,7 +207,7 @@ module Sinatra
 
       status = result[:status]
 
-      JSON.pretty_generate( result.to_json )
+      result
 
     end
 
@@ -231,7 +231,7 @@ module Sinatra
 
       status = result[:status]
 
-      JSON.pretty_generate( result.to_json )
+      result
 
     end
 
@@ -245,7 +245,7 @@ module Sinatra
 
       status = result[:status]
 
-      JSON.pretty_generate( result.to_json )
+      result
 
     end
 

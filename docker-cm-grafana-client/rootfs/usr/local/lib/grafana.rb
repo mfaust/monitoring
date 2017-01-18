@@ -267,10 +267,10 @@ module Grafana
           :message => sprintf( 'wrong command detected: %s', command )
         }
 
-#         logger.debug( payload )
-#         logger.debug( payload.class.to_s )
+        logger.debug( payload )
+        logger.debug( payload.class.to_s )
 
-        if( payload.is_a?( String ) == true )
+        if( payload.is_a?( String ) == true && payload.to_s != '' )
 
           payload  = JSON.parse( payload )
         end
