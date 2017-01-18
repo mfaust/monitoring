@@ -1,16 +1,21 @@
-Coremedia Monitoring
-====================
-
-Das Coremedia Monitoring basiert auf mehreren - durchaus voneinander abhängigen - Dockercontainer.
-
-Ziel ist ein funktionierendes Monitoring-System, welches auf jedem System ausgerollt werden kann.
-
-
-![Service-Discovery](assets/service-discovery.png)
 
 # Service Discovery
 
+Our Service Discovery is a little Score game.
 
+In older Version, we can deploy many Applications on one Servlet-Container.
+
+The JMX Result are different.
+
+And (the worst case) any Customer can be change the Application names.
+
+## Overview
+![Service-Discovery](assets/service-discovery.png)
+
+
+# request to get data
+
+example data to send to jolokia. A bulk-request for 3 different mbeans.
 
 ```
 [
@@ -22,11 +27,6 @@ Ziel ist ein funktionierendes Monitoring-System, welches auf jedem System ausger
     ],
     "target": {
       "url": "service:jmx:rmi:///jndi/rmi://monitoring-16-01:42199/jmxrmi"
-    },
-    "config": {
-      "ignoreErrors": true,
-      "ifModifiedSince": true,
-      "canonicalNaming": true
     }
   },
   {
@@ -34,11 +34,6 @@ Ziel ist ein funktionierendes Monitoring-System, welches auf jedem System ausger
     "mbean": "Catalina:type=Manager,context=*,host=*",
     "target": {
       "url": "service:jmx:rmi:///jndi/rmi://monitoring-16-01:42199/jmxrmi"
-    },
-    "config": {
-      "ignoreErrors": true,
-      "ifModifiedSince": true,
-      "canonicalNaming": true
     }
   },
   {
@@ -50,11 +45,6 @@ Ziel ist ein funktionierendes Monitoring-System, welches auf jedem System ausger
     ],
     "target": {
       "url": "service:jmx:rmi:///jndi/rmi://monitoring-16-01:42199/jmxrmi"
-    },
-    "config": {
-      "ignoreErrors": true,
-      "ifModifiedSince": true,
-      "canonicalNaming": true
     }
   }
 ]
@@ -63,6 +53,9 @@ Ziel ist ein funktionierendes Monitoring-System, welches auf jedem System ausger
 # results
 
 ## 7.0
+
+*Old Version*
+
 ```
 [
   {
@@ -90,184 +83,22 @@ Ziel ist ein funktionierendes Monitoring-System, welches auf jedem System ausger
     },
     "value": {
       "Catalina:context=/blueprint,host=localhost,type=Manager": {
-        "sessionAttributeValueClassNameFilter": null,
-        "modelerType": "org.apache.catalina.session.StandardManager",
-        "warnOnSessionAttributeFilterFailure": false,
-        "sessionIdLength": -1,
-        "className": "org.apache.catalina.session.StandardManager",
-        "secureRandomAlgorithm": "SHA1PRNG",
-        "maxInactiveInterval": 5400,
-        "sessionAverageAliveTime": 0,
-        "rejectedSessions": 0,
-        "secureRandomClass": null,
-        "processExpiresFrequency": 6,
-        "stateName": "STARTED",
-        "duplicates": 0,
-        "distributable": false,
-        "maxActiveSessions": -1,
-        "sessionMaxAliveTime": 0,
-        "processingTime": 0,
-        "pathname": "SESSIONS.ser",
-        "sessionExpireRate": 0,
-        "sessionAttributeNameFilter": null,
-        "sessionCreateRate": 0,
-        "activeSessions": 0,
-        "name": "StandardManager",
-        "secureRandomProvider": null,
-        "jvmRoute": "studioWorker",
-        "maxActive": 0,
-        "sessionCounter": 0,
-        "expiredSessions": 0
+
       },
       "Catalina:context=/manager,host=localhost,type=Manager": {
-        "sessionAttributeValueClassNameFilter": null,
-        "modelerType": "org.apache.catalina.session.StandardManager",
-        "warnOnSessionAttributeFilterFailure": false,
-        "sessionIdLength": -1,
-        "className": "org.apache.catalina.session.StandardManager",
-        "secureRandomAlgorithm": "SHA1PRNG",
-        "maxInactiveInterval": 5400,
-        "sessionAverageAliveTime": 0,
-        "rejectedSessions": 0,
-        "secureRandomClass": null,
-        "processExpiresFrequency": 6,
-        "stateName": "STARTED",
-        "duplicates": 0,
-        "distributable": false,
-        "maxActiveSessions": -1,
-        "sessionMaxAliveTime": 0,
-        "processingTime": 0,
-        "pathname": "SESSIONS.ser",
-        "sessionExpireRate": 0,
-        "sessionAttributeNameFilter": null,
-        "sessionCreateRate": 0,
-        "activeSessions": 0,
-        "name": "StandardManager",
-        "secureRandomProvider": null,
-        "jvmRoute": "studioWorker",
-        "maxActive": 0,
-        "sessionCounter": 0,
-        "expiredSessions": 0
+
       },
       "Catalina:context=/editor-webstart,host=localhost,type=Manager": {
-        "sessionAttributeValueClassNameFilter": null,
-        "modelerType": "org.apache.catalina.session.StandardManager",
-        "warnOnSessionAttributeFilterFailure": false,
-        "sessionIdLength": -1,
-        "className": "org.apache.catalina.session.StandardManager",
-        "secureRandomAlgorithm": "SHA1PRNG",
-        "maxInactiveInterval": 5400,
-        "sessionAverageAliveTime": 0,
-        "rejectedSessions": 0,
-        "secureRandomClass": null,
-        "processExpiresFrequency": 6,
-        "stateName": "STARTED",
-        "duplicates": 0,
-        "distributable": false,
-        "maxActiveSessions": -1,
-        "sessionMaxAliveTime": 0,
-        "processingTime": 1,
-        "pathname": "SESSIONS.ser",
-        "sessionExpireRate": 0,
-        "sessionAttributeNameFilter": null,
-        "sessionCreateRate": 0,
-        "activeSessions": 0,
-        "name": "StandardManager",
-        "secureRandomProvider": null,
-        "jvmRoute": "studioWorker",
-        "maxActive": 0,
-        "sessionCounter": 0,
-        "expiredSessions": 0
+
       },
       "Catalina:context=/webdav,host=localhost,type=Manager": {
-        "sessionAttributeValueClassNameFilter": null,
-        "modelerType": "org.apache.catalina.session.StandardManager",
-        "warnOnSessionAttributeFilterFailure": false,
-        "sessionIdLength": -1,
-        "className": "org.apache.catalina.session.StandardManager",
-        "secureRandomAlgorithm": "SHA1PRNG",
-        "maxInactiveInterval": 5400,
-        "sessionAverageAliveTime": 0,
-        "rejectedSessions": 0,
-        "secureRandomClass": null,
-        "processExpiresFrequency": 6,
-        "stateName": "STARTED",
-        "duplicates": 0,
-        "distributable": false,
-        "maxActiveSessions": -1,
-        "sessionMaxAliveTime": 0,
-        "processingTime": 0,
-        "pathname": "SESSIONS.ser",
-        "sessionExpireRate": 0,
-        "sessionAttributeNameFilter": null,
-        "sessionCreateRate": 0,
-        "activeSessions": 0,
-        "name": "StandardManager",
-        "secureRandomProvider": null,
-        "jvmRoute": "studioWorker",
-        "maxActive": 0,
-        "sessionCounter": 0,
-        "expiredSessions": 0
+
       },
       "Catalina:context=/studio,host=localhost,type=Manager": {
-        "sessionAttributeValueClassNameFilter": null,
-        "modelerType": "org.apache.catalina.session.StandardManager",
-        "warnOnSessionAttributeFilterFailure": false,
-        "sessionIdLength": -1,
-        "className": "org.apache.catalina.session.StandardManager",
-        "secureRandomAlgorithm": "SHA1PRNG",
-        "maxInactiveInterval": 5400,
-        "sessionAverageAliveTime": 0,
-        "rejectedSessions": 0,
-        "secureRandomClass": null,
-        "processExpiresFrequency": 6,
-        "stateName": "STARTED",
-        "duplicates": 0,
-        "distributable": false,
-        "maxActiveSessions": -1,
-        "sessionMaxAliveTime": 0,
-        "processingTime": 1,
-        "pathname": "SESSIONS.ser",
-        "sessionExpireRate": 0,
-        "sessionAttributeNameFilter": null,
-        "sessionCreateRate": 0,
-        "activeSessions": 0,
-        "name": "StandardManager",
-        "secureRandomProvider": null,
-        "jvmRoute": "studioWorker",
-        "maxActive": 0,
-        "sessionCounter": 0,
-        "expiredSessions": 0
+
       },
       "Catalina:context=/elastic-worker,host=localhost,type=Manager": {
-        "sessionAttributeValueClassNameFilter": null,
-        "modelerType": "org.apache.catalina.session.StandardManager",
-        "warnOnSessionAttributeFilterFailure": false,
-        "sessionIdLength": -1,
-        "className": "org.apache.catalina.session.StandardManager",
-        "secureRandomAlgorithm": "SHA1PRNG",
-        "maxInactiveInterval": 5400,
-        "sessionAverageAliveTime": 0,
-        "rejectedSessions": 0,
-        "secureRandomClass": null,
-        "processExpiresFrequency": 6,
-        "stateName": "STARTED",
-        "duplicates": 0,
-        "distributable": false,
-        "maxActiveSessions": -1,
-        "sessionMaxAliveTime": 0,
-        "processingTime": 0,
-        "pathname": "SESSIONS.ser",
-        "sessionExpireRate": 0,
-        "sessionAttributeNameFilter": null,
-        "sessionCreateRate": 0,
-        "activeSessions": 0,
-        "name": "StandardManager",
-        "secureRandomProvider": null,
-        "jvmRoute": "studioWorker",
-        "maxActive": 0,
-        "sessionCounter": 0,
-        "expiredSessions": 0
+
       }
     },
     "timestamp": 1483716539,
@@ -294,6 +125,35 @@ Ziel ist ein funktionierendes Monitoring-System, welches auf jedem System ausger
   }
 ]
 ```
+In the first block (```"mbean": "java.lang:type=Runtime"```) we look at the ```"ClassPath"``` Variable.
+contains the result ```cm7-tomcat-installation``` we have an old portstyle and an 7.0 Version.
+
+Then, we look at the second Block(```"mbean": "Catalina:context=*,host=*,type=Manager"```) and use the ```"value"``` Part.
+
+Every deployed Application has his own ```Catalina:context``` Entry.
+
+In the Example above, we found following
+
+- blueprint
+- manager
+- editor-webstart
+- webdav
+- studio
+- elastic-worker
+
+In the third block (```"mbean": "Catalina:type=Engine"```) we analized both attributes ```baseDir``` and ```jvmRoute```.
+
+Contains ```baseDir``` ```coremedia``` or ```caefeeder``` we extract the Application from the Path Name.
+
+Contains ```baseDir``` ```blueprint```, we extract the Application from the ```jvmRoute```.
+
+Contains ```jvmRoute``` ```studio``` then we think, it is a ```cae-preview```, otherwise it is a ```delivery-cae```
+
+The ```manager``` entry will complete ignored.
+The found application names are finally normalized.
+
+
+
 
 ## 7.1
 
@@ -328,34 +188,7 @@ Ziel ist ein funktionierendes Monitoring-System, welches auf jedem System ausger
     },
     "value": {
       "Catalina:context=/blueprint,host=localhost,type=Manager": {
-        "sessionAttributeValueClassNameFilter": null,
-        "modelerType": "org.apache.catalina.session.StandardManager",
-        "sessionIdLength": -1,
-        "warnOnSessionAttributeFilterFailure": false,
-        "className": "org.apache.catalina.session.StandardManager",
-        "secureRandomAlgorithm": "SHA1PRNG",
-        "maxInactiveInterval": 3600,
-        "secureRandomClass": null,
-        "sessionAverageAliveTime": 0,
-        "rejectedSessions": 0,
-        "processExpiresFrequency": 6,
-        "stateName": "STARTED",
-        "duplicates": 0,
-        "distributable": false,
-        "maxActiveSessions": -1,
-        "sessionMaxAliveTime": 0,
-        "processingTime": 4,
-        "pathname": "SESSIONS.ser",
-        "sessionExpireRate": 0,
-        "sessionAttributeNameFilter": null,
-        "activeSessions": 0,
-        "sessionCreateRate": 0,
-        "name": "StandardManager",
-        "secureRandomProvider": null,
-        "jvmRoute": "cae-live-1",
-        "expiredSessions": 0,
-        "maxActive": 0,
-        "sessionCounter": 0
+
       }
     },
     "timestamp": 1483365782,
@@ -383,4 +216,12 @@ Ziel ist ein funktionierendes Monitoring-System, welches auf jedem System ausger
 ]
 
 ```
+
+In the first block (```"mbean": "java.lang:type=Runtime"```) we look at the ```"ClassPath"``` Variable.
+Contains the result **NOT** ```cm7-tomcat-installation``` we have an new portstyle and can extract the Application Name from ```ClassPath```.
+
+Multiple Aplications in one Tomcat will be ignored.
+
+
+
 
