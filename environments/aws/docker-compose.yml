@@ -151,6 +151,8 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./data:/srv
+      - ./share/grafana/templates/graphite-carbon-metrics.json:/opt/grafana/dashboards
+      - ./share/grafana/templates/internal-grafana-stats.json:/opt/grafana/dashboards
     networks:
       mon:
         ipv4_address: 172.25.0.22
