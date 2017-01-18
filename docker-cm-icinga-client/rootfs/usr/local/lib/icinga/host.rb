@@ -156,6 +156,18 @@ module Icinga
 
       @headers.delete( 'X-HTTP-Method-Override' )
 
+      result = Network.get( {
+        :host => host,
+        :url  => sprintf( '%s/v1/objects/hosts/%s', @icingaApiUrlBase, host ),
+        :headers  => @headers,
+        :options  => @options
+      })
+
+
+      logger.debug( result )
+
+      exit 2
+
       restClient = RestClient::Resource.new(
         URI.encode( sprintf( '%s/v1/objects/hosts/%s', @icingaApiUrlBase, host ) ),
         @options

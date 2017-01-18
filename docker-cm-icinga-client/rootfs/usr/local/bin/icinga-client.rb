@@ -17,7 +17,7 @@ require_relative '../lib/message-queue'
 logDirectory     = '/var/log/monitoring'
 
 icingaHost      = ENV['ICINGA_HOST']         ? ENV['ICINGA_HOST']          : 'localhost'
-icingaPort      = ENV['ICINGA_PORT']         ? ENV['ICINGA_PORT']          : 5665
+icingaApiPort   = ENV['ICINGA_API_PORT']     ? ENV['ICINGA_API_PORT']      : 5665
 icingaApiUser   = ENV['ICINGA_API_USER']     ? ENV['ICINGA_API_USER']      : 'admin'
 icingaApiPass   = ENV['ICINGA_API_PASSWORD'] ? ENV['ICINGA_API_PASSWORD']  : nil
 mqEnabled       = ENV['MQ_ENABLED']          ? ENV['MQ_ENABLED']           : false
@@ -27,7 +27,7 @@ mqQueue         = ENV['MQ_QUEUE']            ? ENV['MQ_QUEUE']             : 'mq
 
 config = {
   :icingaHost     => icingaHost,
-  :icingaPort     => icingaPort,
+  :icingaApiPort  => icingaApiPort,
   :icingaApiUser  => icingaApiUser,
   :icingaApiPass  => icingaApiPass,
   :mqHost         => mqHost,
@@ -162,17 +162,21 @@ Signal.trap('HUP')  { stop = true }
 Signal.trap('TERM') { stop = true }
 Signal.trap('QUIT') { stop = true }
 
-until stop
-  # do your thing
-  if( mqEnabled == true )
-
-    queue()
-  else
-
-    i.run()
-  end
-  sleep( 15 )
+if( i != nil )
+  i.run()
 end
+
+# until stop
+#   # do your thing
+#   if( mqEnabled == true )
+#
+#     queue()
+#   else
+#
+#     i.run()
+#   end
+#   sleep( 15 )
+# end
 
 # -----------------------------------------------------------------------------
 

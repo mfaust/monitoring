@@ -134,3 +134,62 @@ module Icinga
 
 end
 
+
+module Icinga
+
+  module Network
+
+    def self.get( params = {} )
+
+      host    = params.dig(:host)    || nil
+      url     = params.dig(:url)     || nil
+      headers = params.dig(:headers) || nil
+      options = params.dig(:options) || nil
+
+      result  = {}
+
+      restClient = RestClient::Resource.new(
+        URI.encode( url ),
+        options
+      )
+
+      begin
+        data  = restClient.get( headers )
+        results  = JSON.parse( data.body )
+        results  = results.dig('results')
+
+        result[:status] = 200
+
+        results.each do |r|
+
+          attrs = r.dig('attrs')
+
+          result[attrs['name']] = {
+            :name         => attrs['name'],
+            :display_name => attrs['display_name'],
+            :type         => attrs['type']
+          }
+
+        end
+
+      rescue => e
+
+        puts e
+
+        error = JSON.parse( e.response )
+
+        result = {
+          :status      => error['error'].to_i,
+          :name        => host,
+          :message     => error['status']
+        }
+
+      end
+
+      return result
+
+    end
+  end
+end
+
+

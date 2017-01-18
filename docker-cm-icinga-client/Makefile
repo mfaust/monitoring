@@ -12,13 +12,13 @@ run:
 		--detach \
 		--interactive \
 		--tty \
-		--env-file ~/src/cm-xlabs/monitoring/environments/customer/env/cm-icinga-client.env \
+		--env-file ~/src/cm-xlabs/monitoring/environments/aio/env/cm-icinga-client.env \
 		--label com.dnsdock.image=${TYPE} \
 		--label com.dnsdock.alias=${TYPE} \
 		--label com.dnsdock.ttl=30 \
 		--volume /etc/localtime:/etc/localtime:ro \
-		--volume ~/src/cm-xlabs/monitoring/environments/customer/share/resolv.conf:/etc/resolv.conf:ro \
-		--network=customer_mon \
+		--volume ~/src/cm-xlabs/monitoring/environments/aio/share/resolv.conf:/etc/resolv.conf:ro \
+		--network=aio_mon \
 		--ip=172.25.0.100 \
 		--hostname=${IMAGE_NAME} \
 		--name=${IMAGE_NAME} \
@@ -29,11 +29,14 @@ shell:
 		--rm \
 		--interactive \
 		--tty \
-		--env-file /srv/docker/cm-xlabs/monitoring/environments/customer/env/cm-icinga-client.env \
+		--env-file ~/src/cm-xlabs/monitoring/environments/aio/env/cm-icinga-client.env \
 		--label com.dnsdock.image=${TYPE} \
 		--label com.dnsdock.alias=${TYPE} \
 		--label com.dnsdock.ttl=30 \
 		--volume /etc/localtime:/etc/localtime:ro \
+		--volume ~/src/cm-xlabs/monitoring/environments/aio/share/resolv.conf:/etc/resolv.conf:ro \
+		--network=aio_mon \
+		--ip=172.25.0.100 \
 		--hostname=${IMAGE_NAME} \
 		--name=${IMAGE_NAME} \
 		$(IMAGE_NAME)

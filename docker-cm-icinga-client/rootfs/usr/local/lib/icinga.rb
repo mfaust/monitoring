@@ -25,7 +25,8 @@ module Icinga
 
     include Logging
 
-    include Icinga::HttpRequest
+    include Icinga::Network
+#    include Icinga::HttpRequest
     include Icinga::Application
     include Icinga::Host
     include Icinga::Service
@@ -33,14 +34,14 @@ module Icinga
     def initialize( params = {} )
 
       @icingaHost     = params[:icingaHost]     ? params[:icingaHost]     : 'localhost'
-      @icingaPort     = params[:icingaPort]     ? params[:icingaPort]     : 5665
+      @icingaApiPort  = params[:icingaApiPort]  ? params[:icingaApiPort]  : 5665
       @icingaApiUser  = params[:icingaApiUser]  ? params[:icingaApiUser]  : nil
       @icingaApiPass  = params[:icingaApiPass]  ? params[:icingaApiPass]  : nil
 
       timeout         = 10
       openTimeout     = 10
 
-      @icingaApiUrlBase = sprintf( 'https://%s:%d', @icingaHost, @icingaPort )
+      @icingaApiUrlBase = sprintf( 'https://%s:%d', @icingaHost, @icingaApiPort )
       @nodeName         = Socket.gethostbyname( Socket.gethostname ).first
 
       version              = '1.3.0-dev'
@@ -55,42 +56,14 @@ module Icinga
       logger.info( '' )
 
       logger.debug( sprintf( '  server   : %s', @icingaHost ) )
-      logger.debug( sprintf( '  port     : %s', @icingaPort ) )
+      logger.debug( sprintf( '  port     : %s', @icingaApiPort ) )
       logger.debug( sprintf( '  api url  : %s', @icingaApiUrlBase ) )
       logger.debug( sprintf( '  api user : %s', @icingaApiUser ) )
       logger.debug( sprintf( '  api pass : %s', @icingaApiPass ) )
       logger.debug( sprintf( '  node name: %s', @nodeName ) )
 
-      begin
-
-        @apiInstance = RestClient::Resource.new(
-          @icingaApiUrlBase,
-          :timeout      => timeout,
-          :open_timeout => openTimeout,
-          :headers      => @headers,
-          :verify_ssl   => false
-        )
-      rescue => e
-        logger.error( e )
-      end
-
-      @hasCert =  self.checkCert( { :nodeName => @nodeName, :user => @icingaApiUser, :password => @icingaApiPass } )
-
-      @headers     = {
-        'Content-Type' => 'application/json',
-        'Accept'       => 'application/json'
-      }
-
-      if( @hasCert == true )
-
-      else
-        # Regular login Auth
-        self.login( { :user => @icingaApiUser, :password => @icingaApiPass } )
-
-        if( logger.debug( @headers ) == false )
-          return nil
-        end
-      end
+      @hasCert   = self.checkCert( { :user => @icingaApiUser, :password =>  @icingaApiPass } )
+      @headers   = { "Content-Type" => "application/json", "Accept" => "application/json" }
 
       return self
 
@@ -140,56 +113,9 @@ module Icinga
     end
 
 
-    # Login into Icinga
-    #
-    # @param [Hash, #read] params the params to create a valid login
-    # @option params [String] :user The Username
-    # @option params [String] :password The Password
-    # @example For an successful Login
-    #    login( { :user => 'admin', :password => 'admin' } )
-    # @return [bool, #read]
-    def login( params = {} )
-
-      user     = params[:user]     ? params[:user]     : 'admin'
-      password = params[:password] ? params[:password] : 'admin'
-
-      logger.debug( "Attempting to establish user session" )
-
-      request_data = { 'User' => user, 'Password' => password }
-
-      begin
-        resp = @apiInstance['/'].post(
-          request_data.to_json,
-          { :content_type => 'application/json; charset=UTF-8' }
-        )
-
-        @sessionCookies = resp.cookies
-
-        if( resp.code.to_i == 200 )
-
-          @headers = {
-            :content_type => 'application/json; charset=UTF-8',
-            :cookies      => @sessionCookies
-          }
-
-          return true
-        else
-          return false
-        end
-      rescue => e
-
-        logger.error( "Error running POST request on /: #{e}" )
-        logger.error( "Request data: #{request_data.to_json}" )
-
-        return false
-      end
-
-      logger.debug("User session initiated")
-    end
-
-
     def run()
 
+      logger.debug( self.listHost() )
 
     end
 
