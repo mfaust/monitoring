@@ -9,18 +9,20 @@ cd /var/tmp
 
 base="media"
 
+url="master71-ci-tomcat.coremedia.vm"
 
 getUrls() {
 
   local media=$1
 
-  lynx -dump -listonly http://${base}.192.168.252.100.xip.io | grep "http://${media}.192.168.252.100.xip.io" | awk -F' ' '{print $2}' | sort | uniq > ${media}.192.168.252.100.urls
+  lynx -dump -listonly http://${base}.${url} | awk -F' ' '{print $2}' | sort | uniq > ${media}.${url}.urls
+# | grep "http://${media}.${url}" | awk -F' ' '{print $2}' | sort | uniq > ${media}.${url}.urls
 }
 
 getUrls "media"
 getUrls "corporate"
 getUrls "helios"
 
-siege --file=/var/tmp/media.192.168.252.100.urls
-siege --file=/var/tmp/corporate.192.168.252.100.urls
-siege --file=/var/tmp/helios.192.168.252.100.urls
+#siege --file=/var/tmp/media.${url}.urls
+#siege --file=/var/tmp/corporate.${url}.urls
+#siege --file=/var/tmp/helios.${url}.urls
