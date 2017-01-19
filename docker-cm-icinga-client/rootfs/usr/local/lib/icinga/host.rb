@@ -3,7 +3,21 @@ module Icinga
 
   module Host
 
-    def addHost( host, vars = {} )
+    def addHost( params = {}, host = nil, vars = {} )
+
+      code        = nil
+      result      = {}
+
+      host = params.dig(:host) || nil
+      vars = params.dig(:vars) || {}
+
+      if( host == nil )
+
+        return {
+          :status  => 500,
+          :message => 'internal Server Error'
+        }
+      end
 
       status      = 0
       name        = host
@@ -32,7 +46,7 @@ module Icinga
 
       result = Network.put( {
         :host    => host,
-        :url     => sprintf( '%s/v1/objects/hosts/%s', @icingaApiUrlBase, host ),mjhn8
+        :url     => sprintf( '%s/v1/objects/hosts/%s', @icingaApiUrlBase, host ),
         :headers => @headers,
         :options => @options,
         :payload => payload
@@ -182,63 +196,24 @@ module Icinga
     end
 
 
-    def listHost( host = nil )
+    def listHost( params = {} )
 
       code        = nil
       result      = {}
 
-      @headers.delete( 'X-HTTP-Method-Override' )
+      host = params.dig(:host) || nil
 
       result = Network.get( {
         :host => host,
         :url  => sprintf( '%s/v1/objects/hosts/%s', @icingaApiUrlBase, host ),
         :headers  => @headers,
         :options  => @options
-      })
+      } )
 
+      logger.debug( JSON.pretty_generate( result ) )
 
-      logger.debug( result )
+      return result
 
-      exit 2
-
-#       restClient = RestClient::Resource.new(
-#         URI.encode( sprintf( '%s/v1/objects/hosts/%s', @icingaApiUrlBase, host ) ),
-#         @options
-#       )
-#
-#       begin
-#         data     = restClient.get( @headers )
-#
-#         results  =  JSON.parse( data.body )['results']
-#
-#   #      logger.info( sprintf '%d hosts in monitoring', results.count() )
-#
-#         result[:status] = 200
-#
-#         results.each do |r|
-#
-#           attrs = r['attrs'] ?  r['attrs'] : nil
-#
-#           result[attrs['name']] = {
-#             :name         => attrs['name'],
-#             :display_name => attrs['display_name'],
-#             :type         => attrs['type']
-#           }
-#
-#         end
-#
-#       rescue => e
-#
-#         error = JSON.parse( e.response )
-#
-#         result = {
-#           :status      => error['error'].to_i,
-#           :name        => host,
-#           :message     => error['status']
-#         }
-#       end
-#
-#       return result
     end
 
   end

@@ -488,6 +488,17 @@ module Grafana
         host            = params[:host]     ? params[:host]     : nil
 
         data = self.searchDashboards( { :tags   => host } )
+
+        logger.debug( data )
+
+        if( data == nil )
+
+          return {
+            :status     => 204,
+            :message    => 'no Dashboards found'
+          }
+        end
+
         data = data.collect { |item| item['uri'] }
 
         logger.debug( data )

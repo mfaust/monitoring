@@ -86,7 +86,7 @@ module Grafana
     # @return [bool, #read]
     def initialize( params = {} )
 
-#       logger.debug( params )
+#      logger.debug( params )
 
       host         = params[:host]           ? params[:host]           : 'localhost'
       port         = params[:port]           ? params[:port]           : 80
@@ -140,6 +140,8 @@ module Grafana
         )
       rescue => e
         logger.error( e )
+
+        return nil
       end
 
       @headers = nil

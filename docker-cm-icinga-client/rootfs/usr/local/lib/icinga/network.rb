@@ -4,12 +4,18 @@ module Icinga
 
     def self.get( params = {} )
 
+      print "GET\n"
+
       host    = params.dig(:host)    || nil
       url     = params.dig(:url)     || nil
       headers = params.dig(:headers) || nil
       options = params.dig(:options) || nil
 
+      headers.delete( 'X-HTTP-Method-Override' )
+
       result  = {}
+
+      print url + "\n"
 
       restClient = RestClient::Resource.new(
         URI.encode( url ),
@@ -17,17 +23,19 @@ module Icinga
       )
 
       begin
+
         data  = restClient.get( headers )
         results  = JSON.parse( data.body )
         results  = results.dig('results')
 
         result[:status] = 200
+        result[:data] ||={}
 
         results.each do |r|
 
           attrs = r.dig('attrs')
 
-          result[attrs['name']] = {
+          result[:data][attrs['name']] = {
             :name         => attrs['name'],
             :display_name => attrs['display_name'],
             :type         => attrs['type']
@@ -35,17 +43,26 @@ module Icinga
 
         end
 
-      rescue => e
+      rescue RestClient::ExceptionWithResponse => e
 
-        puts e
+        puts e.inspect
 
-        error = JSON.parse( e.response )
+        error  = e.response ? e.response : nil
+
+        puts error
+
+        error = JSON.parse( error )
 
         result = {
           :status      => error['error'].to_i,
           :name        => host,
           :message     => error['status']
         }
+      rescue Errno::ECONNREFUSED => e
+
+        puts e.inspect
+
+        $stderr.puts "Server refusing connection; retrying in 5s..."
 
       end
 
@@ -56,6 +73,8 @@ module Icinga
 
     def self.put( params = {} )
 
+      print "PUT\n"
+
       host    = params.dig(:host)    || nil
       url     = params.dig(:url)     || nil
       headers = params.dig(:headers) || nil
@@ -63,6 +82,8 @@ module Icinga
       payload = params.dig(:payload) || nil
 
       result  = {}
+
+      print url + "\n"
 
       restClient = RestClient::Resource.new(
         URI.encode( url ),
@@ -141,6 +162,8 @@ module Icinga
 
     def self.delete( params = {} )
 
+      print "DELETE\n"
+
       host    = params.dig(:host)    || nil
       url     = params.dig(:url)     || nil
       headers = params.dig(:headers) || nil
@@ -150,6 +173,8 @@ module Icinga
       headers['X-HTTP-Method-Override'] = 'DELETE'
 
       result  = {}
+
+      print url + "\n"
 
       restClient = RestClient::Resource.new(
         URI.encode( url ),

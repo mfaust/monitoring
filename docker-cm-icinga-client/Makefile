@@ -39,7 +39,7 @@ shell:
 		--ip=172.25.0.100 \
 		--hostname=${IMAGE_NAME} \
 		--name=${IMAGE_NAME} \
-		$(IMAGE_NAME)
+		$(IMAGE_NAME) icinga-client.rb
 
 exec:
 	docker exec \
