@@ -12,7 +12,7 @@ require 'net/http'
 require 'uri'
 
 require_relative 'logging'
-require_relative 'icinga/http_request'
+require_relative 'icinga/network'
 require_relative 'icinga/application'
 require_relative 'icinga/host'
 require_relative 'icinga/service'
@@ -26,7 +26,6 @@ module Icinga
     include Logging
 
     include Icinga::Network
-#    include Icinga::HttpRequest
     include Icinga::Application
     include Icinga::Host
     include Icinga::Service
@@ -37,12 +36,17 @@ module Icinga
       @icingaApiPort  = params[:icingaApiPort]  ? params[:icingaApiPort]  : 5665
       @icingaApiUser  = params[:icingaApiUser]  ? params[:icingaApiUser]  : nil
       @icingaApiPass  = params[:icingaApiPass]  ? params[:icingaApiPass]  : nil
-
-      timeout         = 10
-      openTimeout     = 10
+      mqHost          = params[:mqHost]         ? params[:mqHost]         : 'localhost'
+      mqPort          = params[:mqPort]         ? params[:mqPort]         : 11300
+      @mqQueue        = params[:mqQueue]        ? params[:mqQueue]        : 'mq-graphite'
 
       @icingaApiUrlBase = sprintf( 'https://%s:%d', @icingaHost, @icingaApiPort )
       @nodeName         = Socket.gethostbyname( Socket.gethostname ).first
+
+      @MQSettings = {
+        :beanstalkHost => mqHost,
+        :beanstalkPort => mqPort
+      }
 
       version              = '1.3.0-dev'
       date                 = '2017-01-15'
@@ -52,6 +56,9 @@ module Icinga
       logger.info( "  Version #{version} (#{date})" )
       logger.info( '  Copyright 2016-2017 Bodo Schulz' )
       logger.info( "  Backendsystem #{@icingaApiUrlBase}" )
+      logger.info( '  used Services:' )
+#       logger.info( "    - graphite     : #{@graphiteURI}" )
+      logger.info( "    - message Queue: #{mqHost}:#{mqPort}/#{@mqQueue}" )
       logger.info( '-----------------------------------------------------------------' )
       logger.info( '' )
 
@@ -109,6 +116,111 @@ module Icinga
 
         return false
       end
+
+    end
+
+
+    # Message-Queue Integration
+    #
+    #
+    #
+    def queue()
+
+      c = MessageQueue::Consumer.new( @MQSettings )
+#
+#       threads = Array.new()
+
+#       threads << Thread.new {
+
+        processQueue(
+          c.getJobFromTube( @mqQueue )
+        )
+#       }
+
+#       threads.each { |t| t.join }
+
+    end
+
+
+    def processQueue( data = {} )
+
+      if( data.count != 0 )
+
+        logger.info( sprintf( 'process Message from Queue %s: %d', data.dig(:tube), data.dig(:id) ) )
+        logger.debug( data )
+        #logger.debug( data.dig( :body, 'payload' ) )
+
+        command = data.dig( :body, 'cmd' )     || nil
+        node    = data.dig( :body, 'node' )    || nil
+        payload = data.dig( :body, 'payload' ) || nil
+
+        if( command == nil )
+          logger.error( 'wrong command' )
+          logger.error( data )
+          return
+        end
+
+        if( node == nil || payload == nil )
+          logger.error( 'missing node or payload' )
+          logger.error( data )
+          return
+        end
+
+        result = {
+          :status  => 400,
+          :message => sprintf( 'wrong command detected: %s', command )
+        }
+
+        case command
+        when 'add'
+          logger.info( sprintf( 'add node %s', node ) )
+
+          # TODO
+          # check payload!
+          # e.g. for 'force' ...
+#           result = self.createDashboardForHost( { :host => node, :tags => tags, :overview => overview } )
+
+#           logger.info( result )
+        when 'remove'
+          logger.info( sprintf( 'remove dashboards for node %s', node ) )
+#           result = self.deleteDashboards( { :host => node } )
+
+#           logger.info( result )
+        when 'info'
+          logger.info( sprintf( 'give dashboards for %s back', node ) )
+#           result = self.listDashboards( { :host => node } )
+        else
+          logger.error( sprintf( 'wrong command detected: %s', command ) )
+
+          result = {
+            :status  => 400,
+            :message => sprintf( 'wrong command detected: %s', command )
+          }
+
+#           logger.info( result )
+        end
+
+        result[:request]    = data
+
+#         self.sendMessage( result )
+      end
+
+    end
+
+
+    def sendMessage( data = {} )
+
+      logger.debug( JSON.pretty_generate( data ) )
+
+      p = MessageQueue::Producer.new( @MQSettings )
+
+      job = {
+        cmd:  'information',
+        from: 'icinga',
+        payload: data
+      }.to_json
+
+      logger.debug( p.addJob( 'mq-icinga', job ) )
 
     end
 
