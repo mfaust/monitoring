@@ -194,29 +194,26 @@ class Monitoring
 
   def getHostConfiguration( host )
 
-    status       = 500
-    message      = 'initialize error'
-
     if( host.to_s != '' )
 
-      if( isIp?( host ) == true )
-        data = @db.config( { :ip => host } )
-      else
-        shortName = host.split('.').first
+      data = @db.config( { :ip => host, :short => host, :long => host } )
 
-        data = @db.config( { :short => shortName } )
-      end
+      # logger.debug( data )
 
       if( data != false )
-        status = 200
-        message = data
+
+       return {
+          :status  => 200,
+          :message => data
+        }
       end
+
     end
 
-    return JSON.pretty_generate( {
-      :status  => status,
-      :message => message
-    } )
+    return {
+      :status  => 204,
+      :message => 'no configuration found'
+    }
 
   end
 
@@ -526,8 +523,11 @@ class Monitoring
       result[host.to_s] ||= {}
 
       hostConfiguration        = self.getHostConfiguration( ( hostData != false && hostData[:short] ) ? hostData[:short] : host )
-      hostConfigurationStatus  = hostConfiguration[:status]
-      hostConfigurationMessage = hostConfiguration[:message]
+
+      if( hostConfiguration != nil )
+        hostConfigurationStatus  = hostConfiguration.dig(:status)  || 204
+        hostConfigurationMessage = hostConfiguration.dig(:message)
+      end
 
       if( hostConfigurationStatus == 200 )
         result[host.to_s][:custom_config] = hostConfigurationMessage
