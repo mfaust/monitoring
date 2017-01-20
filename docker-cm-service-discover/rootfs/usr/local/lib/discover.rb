@@ -74,6 +74,8 @@ class ServiceDiscovery
       :beanstalkPort => mqPort
     }
 
+    logger.level       = Logger::DEBUG
+
     @serviceConfig     = settings[:serviceConfigFile] ? settings[:serviceConfigFile]   : nil
     @scanPorts         = settings[:scanPorts]         ? settings[:scanPorts]           : ports
 
@@ -692,8 +694,9 @@ class ServiceDiscovery
 
   def listHosts( host = nil )
 
-    hosts  = Array.new()
-    result = Hash.new()
+    hosts    = Array.new()
+    result   = Hash.new()
+    services = Hash.new()
 
     if( host == nil )
 
@@ -701,11 +704,18 @@ class ServiceDiscovery
     else
 
       discoveryData  = @db.discoveryData( { :ip => host, :short => host } )
-      services       = discoveryData.dig( host ).keys
+      hostServices   = discoveryData.dig( host )
+
+      hostServices.each do |s|
+
+        s.last.dig(:data).reject! { |k| k == :application }
+
+        services[s.first.to_sym] ||= {}
+        services[s.first.to_sym] = s.last.dig(:data)
+
+      end
 
       status         = @db.status( { :ip => host, :short => host } )
-
-      logger.debug( status )
 
       created        = status.dig( :created )
       created        = Time.parse( created ).strftime( '%Y-%m-%d %H:%M:%S' )
@@ -731,7 +741,7 @@ class ServiceDiscovery
         :created  => created
       }
 
-      logger.debug( JSON.pretty_generate ( result ) )
+#      logger.debug( JSON.pretty_generate ( result ) )
 
     end
 
