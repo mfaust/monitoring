@@ -125,14 +125,155 @@ module Icinga
 
     def run()
 
-#      logger.debug( self.addHost( { :host => 'monitoring-16-01' } ) )
+#      vars = {
+#        'coremedia' => {
+#          'cae-preview': {
+#            'port': 40000,
+#            'jmx': true
+#          },
+#          'master-live-server': {
+#            'port': 40299,
+#            'port_http': 40280,
+#            'ior': true,
+#            'runlevel': true,
+#            'license': true
+#          }
+#        }
+#      }
+
+      vars = {
+        "coremedia" => {
+
+          "adobe-drive-server": {
+            "port": 41199,
+            "description": "Adobe Drive Server",
+            "cap_connection": true,
+            "uapi_cache": true,
+            "blob_cache": true
+          },
+          "cae-live-1": {
+            "port": 42199,
+            "description": "CAE Live 1",
+            "cap_connection": true,
+            "uapi_cache": true,
+            "blob_cache": true
+          },
+          "cae-preview": {
+            "port": 40999,
+            "description": "CAE Preview",
+            "cap_connection": true,
+            "uapi_cache": true
+          },
+          "caefeeder-live": {
+            "port": 40899,
+            "description": "CAEFeeder Live",
+            "feeder": "live",
+            "cap_connection": true,
+            "uapi_cache": true
+          },
+          "caefeeder-preview": {
+            "port": 40799,
+            "description": "CAEFeeder Preview",
+            "feeder": "preview",
+            "cap_connection": true,
+            "uapi_cache": true
+          },
+          "content-feeder": {
+            "port": 40499,
+            "description": "Content Feeder",
+            "feeder": "content",
+            "cap_connection": true,
+            "uapi_cache": true
+          },
+          "content-management-server": {
+            "port": 40199,
+            "description": "Content Management Server",
+            "port_http": 40180,
+            "ior": true,
+            "runlevel": true,
+            "license": true
+          },
+          "elastic-worker": {
+            "port": 40699,
+            "description": "Elastic Worker",
+            "cap_connection": true,
+            "uapi_cache": true,
+            "blob_cache": true
+          },
+          "master-live-server": {
+            "port": 40299,
+            "description": "Master Live Server",
+            "port_http": 40280,
+            "ior": true,
+            "runlevel": true,
+            "license": true
+          },
+          "mongodb": {
+            "port": 28017,
+            "description": "MongoDB"
+          },
+          "mysql": {
+            "port": 3306,
+            "description": "MySQL"
+          },
+          "replication-live-server": {
+            "port": 42099,
+            "description": "RLS",
+            "port_http": 42080,
+            "ior": true,
+            "runlevel": true,
+            "license": true
+          },
+          "sitemanager": {
+            "port": 41399,
+            "description": "Site Manager"
+          },
+          "solr-master": {
+            "port": 40099,
+            "description": "Solr Master",
+            "cores": [
+              "live",
+              "preview",
+              "studio"
+            ]
+          },
+          "studio": {
+            "port": 41099,
+            "description": "Studio",
+            "cap_connection": true,
+            "uapi_cache": true,
+            "blob_cache": true
+          },
+          "user-changes": {
+            "port": 40599,
+            "description": "User Changes",
+            "cap_connection": true,
+            "uapi_cache": true
+          },
+          "workflow-server": {
+            "port": 40399,
+            "description": "Workflow Server",
+            "cap_connection": true,
+            "uapi_cache": true,
+            "blob_cache": true
+          }
+        }
+      }
+
+
+
+       logger.debug( self.deleteHost( { :host => 'monitoring-16-01' } ) )
+
+       logger.debug( self.addHost( { :host => 'monitoring-16-01', :vars => vars } ) )
 #      logger.debug( self.addHost( { :host => 'moebius-ci-01' } ) )
 #      logger.debug( self.addHost( { :host => 'moebius-ci-02' } ) )
 
-      logger.debug( self.applicationData() )
+#       logger.debug( self.applicationData() )
 
-      logger.debug( self.listHost( { :host => 'monitoring-16-01' } ) )
-      logger.debug( self.listHost() )
+#      logger.debug( self.listHost( { :host => 'monitoring-16-01' } ) )
+#       logger.debug( self.listHost() )
+
+
 
     end
 

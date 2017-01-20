@@ -8,12 +8,12 @@ require_relative '/usr/local/lib/icingachecks.rb'
 
 class Icinga2Check_CM_Licenses < Icinga2Check
 
-  def initialize( settings = {} )
+  def do( settings = {} )
 
-    @log = logger()
-    @mc  = memcache()
+#    @log = logger()
+#    @mc  = memcache()
 
-    MBean.logger( @log )
+#    MBean.logger( @log )
 
     host         = settings[:host]        ? settings[:host]        : nil
     application  = settings[:application] ? settings[:application] : nil
@@ -43,7 +43,7 @@ class Icinga2Check_CM_Licenses < Icinga2Check
     critical = config[:critical] ? config[:critical] : 20
 
     # get our bean
-    data = MBean.bean( host, application, 'Server' )
+    data = @bean.bean( host, application, 'Server' )
 
     if( data == false )
       puts 'CRITICAL - Service not running!?'
@@ -118,4 +118,5 @@ OptionParser.new do |opts|
 
 end.parse!
 
-m = Icinga2Check_CM_Licenses.new( options )
+m = Icinga2Check_CM_Licenses.new()
+m.do( options )
