@@ -8,10 +8,7 @@ class Icinga2Check_HTTP < Icinga2Check
 
   def initialize( settings = {} )
 
-    @log = logger()
-    @mc  = memcache()
-
-    MBean.logger( @log )
+    super
 
     host         = settings[:host]        ? settings[:host]        : nil
     application  = settings[:application] ? settings[:application] : nil

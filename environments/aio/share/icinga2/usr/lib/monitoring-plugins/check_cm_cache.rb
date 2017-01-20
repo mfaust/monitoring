@@ -8,10 +8,7 @@ class Icinga2Check_CM_Cache < Icinga2Check
 
   def initialize( settings = {} )
 
-    @log = logger()
-    @mc  = memcache()
-
-    MBean.logger( @log )
+    super
 
     host         = settings[:host]        ? settings[:host]        : nil
     application  = settings[:application] ? settings[:application] : nil
@@ -28,7 +25,7 @@ class Icinga2Check_CM_Cache < Icinga2Check
     critical = config[:critical] ? config[:critical] : 95
 
     # get our bean
-    data = MBean.bean( host, application, 'CapConnection' )
+    data = @bean.bean( host, application, 'CapConnection' )
 
     if( data == false )
       puts 'CRITICAL - Service not running!?'

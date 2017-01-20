@@ -8,10 +8,7 @@ class Icinga2Check_CM_Memory < Icinga2Check
 
   def initialize( settings = {} )
 
-    @log = logger()
-    @mc  = memcache()
-
-    MBean.logger( @log )
+    super
 
     host         = settings[:host]        ? settings[:host]        : nil
     application  = settings[:application] ? settings[:application] : nil
@@ -30,7 +27,7 @@ class Icinga2Check_CM_Memory < Icinga2Check
 
 
     # get our bean
-    data = MBean.bean( host, application, 'Memory' )
+    data = @mbean.bean( host, application, 'Memory' )
 
     if( data == false )
       puts 'CRITICAL - Service not running!?'

@@ -10,10 +10,7 @@ class Icinga2Check_CM_Feeder < Icinga2Check
 
   def initialize( settings = {} )
 
-    @log = logger()
-    @mc  = memcache()
-
-    MBean.logger( @log )
+    super
 
     host   = settings[:host]    ? settings[:host]   : nil
     feeder = settings[:feeder]  ? settings[:feeder] : nil
@@ -41,7 +38,7 @@ class Icinga2Check_CM_Feeder < Icinga2Check
     when 'content'
       feederServer = 'content-feeder'
     else
-      puts sprintf( 'Coremedia Feeder - unknown feeder type %s', @feeder )
+      puts sprintf( 'Coremedia Feeder - unknown feeder type %s', feeder )
       exit STATE_CRITICAL
     end
 
@@ -89,7 +86,7 @@ class Icinga2Check_CM_Feeder < Icinga2Check
 
       if( healthy == true )
 
-        engine      = MBean.bean( host, feederServer, 'ProactiveEngine' )
+        engine      = @mbean.bean( host, feederServer, 'ProactiveEngine' )
 
         engineStatus    = engine['status']    ? engine['status']    : 500
         engineTimestamp = engine['timestamp'] ? engine['timestamp'] : nil

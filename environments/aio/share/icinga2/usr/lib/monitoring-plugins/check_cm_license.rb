@@ -8,12 +8,9 @@ require_relative '/usr/local/lib/icingachecks.rb'
 
 class Icinga2Check_CM_Licenses < Icinga2Check
 
-  def do( settings = {} )
+  def initialize( settings = {} )
 
-#    @log = logger()
-#    @mc  = memcache()
-
-#    MBean.logger( @log )
+    super
 
     host         = settings[:host]        ? settings[:host]        : nil
     application  = settings[:application] ? settings[:application] : nil
@@ -118,5 +115,4 @@ OptionParser.new do |opts|
 
 end.parse!
 
-m = Icinga2Check_CM_Licenses.new()
-m.do( options )
+m = Icinga2Check_CM_Licenses.new( options )
