@@ -42,8 +42,6 @@ module Icinga
 
       logger.debug( JSON.pretty_generate( payload ) )
 
-
-
       result = Network.put( {
         :host    => host,
         :url     => sprintf( '%s/v1/objects/hosts/%s', @icingaApiUrlBase, host ),

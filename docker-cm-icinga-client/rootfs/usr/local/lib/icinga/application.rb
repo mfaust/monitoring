@@ -1,7 +1,7 @@
 
 module Icinga
 
-  module Application
+  module Status
 
     def applicationData()
 
