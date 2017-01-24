@@ -25,4 +25,4 @@ RUN \
 
 COPY rootfs/ /
 
-CMD [ "/bin/sh" ]
+CMD [ "/usr/local/bin/icinga-client.rb" ]

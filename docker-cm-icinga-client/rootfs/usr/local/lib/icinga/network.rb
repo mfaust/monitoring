@@ -148,6 +148,12 @@ module Icinga
 
         end
 
+      rescue Errno::ECONNREFUSED => e
+
+        puts e.inspect
+
+        $stderr.puts "Server refusing connection; retrying in 5s..."
+
       end
 
       return result
@@ -224,6 +230,11 @@ module Icinga
           }
 
         end
+      rescue Errno::ECONNREFUSED => e
+
+        puts e.inspect
+
+        $stderr.puts "Server refusing connection; retrying in 5s..."
 
       end
 

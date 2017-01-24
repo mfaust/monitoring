@@ -15,7 +15,7 @@ icingaHost      = ENV['ICINGA_HOST']         ? ENV['ICINGA_HOST']          : 'lo
 icingaApiPort   = ENV['ICINGA_API_PORT']     ? ENV['ICINGA_API_PORT']      : 5665
 icingaApiUser   = ENV['ICINGA_API_USER']     ? ENV['ICINGA_API_USER']      : 'admin'
 icingaApiPass   = ENV['ICINGA_API_PASSWORD'] ? ENV['ICINGA_API_PASSWORD']  : nil
-mqEnabled       = ENV['MQ_ENABLED']          ? ENV['MQ_ENABLED']           : false
+mqEnabled       = ENV['MQ_ENABLED']          ? ENV['MQ_ENABLED']           : true
 mqHost          = ENV['MQ_HOST']             ? ENV['MQ_HOST']              : 'localhost'
 mqPort          = ENV['MQ_PORT']             ? ENV['MQ_PORT']              : 11300
 mqQueue         = ENV['MQ_QUEUE']            ? ENV['MQ_QUEUE']             : 'mq-icinga'
@@ -45,16 +45,20 @@ Signal.trap('HUP')  { stop = true }
 Signal.trap('TERM') { stop = true }
 Signal.trap('QUIT') { stop = true }
 
-until stop
-  # do your thing
-  if( mqEnabled == true )
+if( i != nil )
 
-    i.queue()
-  else
+  until stop
+    # do your thing
+    if( mqEnabled == true )
 
-    i.run()
+      i.queue()
+    else
+
+      i.run()
+    end
+    sleep( 15 )
   end
-  sleep( 15 )
+
 end
 
 # -----------------------------------------------------------------------------
