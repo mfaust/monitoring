@@ -14,6 +14,8 @@ class Icinga2Check_CM_CapConnection < Icinga2Check
     application  = settings[:application] ? settings[:application] : nil
     memory       = settings[:memory]      ? settings[:memory]      : nil
 
+    host         = self.shortHostname( host )
+
     self.check( host, application, memory )
 
   end
@@ -24,45 +26,23 @@ class Icinga2Check_CM_CapConnection < Icinga2Check
     # get our bean
     data = @mbean.bean( host, application, 'CapConnection' )
 
-    if( data == false )
-      puts 'CRITICAL - Service not running!?'
-      exit STATE_CRITICAL
+    dataValue = self.runningOrOutdated( data )
+
+    dataValue = dataValue.values.first
+
+    state = dataValue['Open'] ? dataValue['Open'] : false
+
+    if( state == true )
+      status   = 'OK'
+      exitCode = STATE_OK
     else
-
-      dataStatus    = data['status']    ? data['status']    : 500
-      dataTimestamp = data['timestamp'] ? data['timestamp'] : nil
-      dataValue     = ( data != nil && data['value'] ) ? data['value'] : nil
-
-      if( dataValue == nil )
-        puts 'CRITICAL - Service not running!?'
-        exit STATE_CRITICAL
-      end
-
-      beanTimeout,difference = beanTimeout?( dataTimestamp )
-
-      if( beanTimeout == STATE_CRITICAL )
-        puts sprintf( 'CRITICAL - last check creation is out of date (%d seconds)', difference )
-        exit beanTimeout
-      elsif( beanTimeout == STATE_WARNING )
-        puts sprintf( 'WARNING - last check creation is out of date (%d seconds)', difference )
-        exit beanTimeout
-      end
-
-      dataValue     = dataValue.values.first
-
-      state = dataValue['Open'] ? dataValue['Open'] : false
-
-      if( state == true )
-        status   = 'OK'
-        exitCode = STATE_OK
-      else
-        status   = 'CRITICAL'
-        exitCode = STATE_CRITICAL
-      end
-
-      puts sprintf( '%s - Cap Connection %s', status, state ? 'Open' : 'not existst' )
-      exit exitCode
+      status   = 'CRITICAL'
+      exitCode = STATE_CRITICAL
     end
+
+    puts sprintf( '%s - Cap Connection %s', status, state ? 'Open' : 'not existst' )
+    exit exitCode
+
   end
 
 end

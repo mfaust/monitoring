@@ -13,6 +13,8 @@ class Icinga2Check_HTTP < Icinga2Check
     host         = settings[:host]        ? settings[:host]        : nil
     application  = settings[:application] ? settings[:application] : nil
 
+    host         = self.shortHostname( host )
+
     self.check( host, application )
 
   end

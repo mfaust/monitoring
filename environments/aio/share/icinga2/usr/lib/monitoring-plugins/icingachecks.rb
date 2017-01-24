@@ -6,6 +6,7 @@ require 'logger'
 require 'time_difference'
 
 require_relative '/usr/local/lib/logging'
+require_relative '/usr/local/lib/storage'
 require_relative '/usr/local/lib/mbean'
 
 # ---------------------------------------------------------------------------------------
@@ -44,11 +45,8 @@ class Icinga2Check
 
   def initialize( settings = {} )
 
-    memcacheHost     = ENV['MEMCACHE_HOST'] ? ENV['MEMCACHE_HOST'] : nil
-    memcachePort     = ENV['MEMCACHE_PORT'] ? ENV['MEMCACHE_PORT'] : nil
-
-#     @logDirectory  = settings[:logDirectory]       ? settings[:logDirectory]       : '/tmp'
-#    @configFile  = '/etc/cm-monitoring.yaml'
+    memcacheHost = ENV['MEMCACHE_HOST'] ? ENV['MEMCACHE_HOST'] : nil
+    memcachePort = ENV['MEMCACHE_PORT'] ? ENV['MEMCACHE_PORT'] : nil
 
     logger.level = Logger::DEBUG
 
@@ -94,60 +92,53 @@ class Icinga2Check
   end
 
 
-#   def logger()
-#
-#     logFile      = sprintf( '/tmp/icinga2check.log',  )
-#     file         = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
-#     file.sync    = true
-#     log          = Logger.new( file, 'weekly', 1024000 )
-#
-# #    log = Logger.new( STDOUT )
-#     log.level = Logger::DEBUG
-#     log.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
-#     log.formatter = proc do |severity, datetime, progname, msg|
-#       "[#{datetime.strftime(logger.datetime_format)}] #{severity.ljust(5)} : #{msg}\n"
-#     end
-#
-#     return log
-#
-#   end
-
-
-#   def memcache()
-#
-#     memcacheHost     = ENV['MEMCACHE_HOST'] ? ENV['MEMCACHE_HOST'] : nil
-#     memcachePort     = ENV['MEMCACHE_PORT'] ? ENV['MEMCACHE_PORT'] : nil
-#     supportMemcache  = false
-#
-#     if( memcacheHost != nil && memcachePort != nil )
-#
-#       # enable Memcache Support
-#
-#       require 'dalli'
-#
-#       memcacheOptions = {
-#         :compress   => true,
-#         :namespace  => 'monitoring',
-#         :expires_in => 0
-#       }
-#
-#       mc = Dalli::Client.new( sprintf( '%s:%s', memcacheHost, memcachePort ), memcacheOptions )
-#
-#       supportMemcache = true
-#
-#       MBean.memcache( mc )
-#
-#       return mc
-#     end
-#
-#     return false
-#
-#   end
-
-
   def shortHostname( hostname )
 
-    return hostname.split( '.' ).first
+    # look in the memcache
+    memcacheKey = Storage::Memcached.cacheKey( { :host => hostname, :type => 'dns' })
+
+    data      = @mc.get( memcacheKey )
+
+    if( data == nil )
+
+      data = hostResolve( hostname )
+      @mc.set( memcacheKey, data )
+    end
+
+    hostname = data.dig(:short)
+
+    return hostname
+
+  end
+
+
+  def runningOrOutdated( data )
+
+    if( data == false )
+      puts 'CRITICAL - Service not running!?'
+      exit STATE_CRITICAL
+    end
+
+    dataStatus    = data['status']    ? data['status']    : 500
+    dataTimestamp = data['timestamp'] ? data['timestamp'] : nil
+    dataValue     = ( data != nil && data['value'] ) ? data['value'] : nil
+
+    if( dataValue == nil )
+      puts 'CRITICAL - Service not running!?'
+      exit STATE_CRITICAL
+    end
+
+    beanTimeout,difference = beanTimeout?( dataTimestamp )
+
+    if( beanTimeout == STATE_CRITICAL )
+      puts sprintf( 'CRITICAL - last check creation is out of date (%d seconds)', difference )
+      exit beanTimeout
+    elsif( beanTimeout == STATE_WARNING )
+      puts sprintf( 'WARNING - last check creation is out of date (%d seconds)', difference )
+      exit beanTimeout
+    end
+
+    return dataValue
 
   end
 
@@ -168,17 +159,17 @@ class Icinga2Check
       t = t.add_seconds( quorum )
 
       difference = TimeDifference.between( t, n ).in_each_component
-      difference = difference[:seconds].ceil
+      difference = difference[:seconds].round
 
 #       logger.debug( sprintf( ' now       : %s', n.to_datetime.strftime("%d %m %Y %H:%M:%S") ) )
 #       logger.debug( sprintf( ' timestamp : %s', t.to_datetime.strftime("%d %m %Y %H:%M:%S") ) )
 #       logger.debug( sprintf( ' difference: %d', difference ) )
 
       if( difference > critical )
-#         logger.error( sprintf( '  %d > %d', difference, critical ) )
+         logger.error( sprintf( '  %d > %d', difference, critical ) )
         result = STATE_CRITICAL
       elsif( difference > warning || difference == warning )
-#         logger.warning( sprintf( '  %d >= %d', difference, warning ) )
+         logger.warn( sprintf( '  %d >= %d', difference, warning ) )
         result = STATE_WARNING
       else
         result = STATE_OK

@@ -15,6 +15,8 @@ class Icinga2Check_CM_Feeder < Icinga2Check
     host   = settings[:host]    ? settings[:host]   : nil
     feeder = settings[:feeder]  ? settings[:feeder] : nil
 
+    host         = self.shortHostname( host )
+
     feederServer = self.validate( feeder )
 
     case feeder
@@ -54,100 +56,64 @@ class Icinga2Check_CM_Feeder < Icinga2Check
     critical = config[:critical] ? config[:critical] : 10000
 
     # get our bean
-    health = MBean.bean( host, feederServer, 'Health' )
+    health      = @mbean.bean( host, feederServer, 'Health' )
 
-    if( health == false )
-      puts 'CRITICAL - Service not running!?'
-      exit STATE_CRITICAL
-    else
+    healthValue = self.runningOrOutdated( health )
+    healthValue = healthValue.values.first
 
-      healthStatus    = health['status']    ? health['status']    : 500
-      healthTimestamp = health['timestamp'] ? health['timestamp'] : nil
-      healthValue     = ( health != nil && health['value'] ) ? health['value'] : nil
+    healthy     = ( healthValue != nil &&  healthValue['Healthy'] ) ? healthValue['Healthy'] : false
 
-      if( healthValue == nil )
-        puts 'CRITICAL - Service not running!?'
-        exit STATE_CRITICAL
-      end
+    if( healthy == true )
 
-      beanTimeout,difference = beanTimeout?( healthTimestamp )
+      engine      = @mbean.bean( host, feederServer, 'ProactiveEngine' )
 
-      if( beanTimeout == STATE_CRITICAL )
-        puts sprintf( 'CRITICAL - last check creation is out of date (%d seconds)', difference )
-        exit beanTimeout
-      elsif( beanTimeout == STATE_WARNING )
-        puts sprintf( 'WARNING - last check creation is out of date (%d seconds)', difference )
-        exit beanTimeout
-      end
+      engineValue = self.runningOrOutdated( engine )
+      engineValue = engineValue.values.first
 
-      healthValue     = healthValue.values.first
+      maxEntries     = engineValue['KeysCount']   ? engineValue['KeysCount']   : 0  # Number of (active) keys
+      currentEntries = engineValue['ValuesCount'] ? engineValue['ValuesCount'] : 0  # Number of (valid) values. It is less or equal to 'keysCount'
+      heartbeat      = engineValue['HeartBeat']   ? engineValue['HeartBeat']   : nil # 1 minute == 60000 ms
 
-      healthy         = ( healthValue != nil &&  healthValue['Healthy'] ) ? healthValue['Healthy'] : false
+      if( maxEntries == 0 && currentEntries == 0 )
 
-      if( healthy == true )
+        stateMessage = 'no Feederdata. maybe restarting?'
+      else
 
-        engine      = @mbean.bean( host, feederServer, 'ProactiveEngine' )
-
-        engineStatus    = engine['status']    ? engine['status']    : 500
-        engineTimestamp = engine['timestamp'] ? engine['timestamp'] : nil
-        engineValue     = ( engine != false && engine['value'] ) ? engine['value'] : nil
-        engineValue     = engineValue.values.first
-
-        maxEntries     = engineValue['KeysCount']         ? engineValue['KeysCount']         : 0  # Number of (active) keys
-        currentEntries = engineValue['ValuesCount']       ? engineValue['ValuesCount']       : 0  # Number of (valid) values. It is less or equal to 'keysCount'
-        heartbeat      = engineValue['HeartBeat']         ? engineValue['HeartBeat']         : nil # 1 minute == 60000 ms
-
-        beanTimeout,difference = beanTimeout?( engineTimestamp )
-
-        if( beanTimeout == STATE_CRITICAL )
-          puts sprintf( 'CRITICAL - last check creation is out of date (%d seconds)', difference )
-          exit beanTimeout
-        elsif( beanTimeout == STATE_WARNING )
-          puts sprintf( 'WARNING - last check creation is out of date (%d seconds)', difference )
-          exit beanTimeout
+        if( heartbeat >= 60000 )
+          puts sprintf( 'CRITICAL - Feeder Heartbeat is more then 1 minute old (Heartbeat %d ms)', heartbeat )
+          exit STATE_CRITICAL
         end
 
-        if( maxEntries == 0 && currentEntries == 0 )
+        healthMessage  = 'HEALTHY'
+        diffEntries    = ( maxEntries - currentEntries ).to_i
 
-          stateMessage = "no Feederdata. maybe restarting?"
+        if( maxEntries == currentEntries )
+          stateMessage = sprintf( 'all %d Elements feeded (Heartbeat %d ms)', maxEntries, heartbeat )
+        else
+          stateMessage = sprintf( '%d Elements of %d feeded. (%d left - Heartbeat %d ms)', currentEntries, maxEntries, diffEntries, heartbeat )
+        end
+
+        if( diffEntries > critical )
+          status   = 'CRITICAL'
+          exitCode = STATE_CRITICAL
+        elsif( diffEntries > warning || diffEntries == warning )
+
+          status   = 'WARNING'
+          exitCode = STATE_WARNING
         else
 
-          if( heartbeat >= 60000 )
-            puts sprintf( 'CRITICAL - Feeder Heartbeat is more then 1 minute old (Heartbeat %d ms)', heartbeat )
-            exit STATE_CRITICAL
-          end
-
-          healthMessage  = "HEALTHY"
-          diffEntries    = ( maxEntries - currentEntries ).to_i
-
-          if( maxEntries == currentEntries )
-            stateMessage = sprintf( 'all %d Elements feeded (Heartbeat %d ms)', maxEntries, heartbeat )
-          else
-            stateMessage = sprintf( '%d Elements of %d feeded. (%d left - Heartbeat %d ms)', currentEntries, maxEntries, diffEntries, heartbeat )
-          end
-
-          if( diffEntries > critical )
-            status   = 'CRITICAL'
-            exitCode = STATE_CRITICAL
-          elsif( diffEntries > warning || diffEntries == warning )
-
-            status   = 'WARNING'
-            exitCode = STATE_WARNING
-          else
-
-            status   = 'OK'
-            exitCode = STATE_OK
-          end
-
+          status   = 'OK'
+          exitCode = STATE_OK
         end
 
-        puts sprintf( '%s - %s - %s', status, healthMessage, stateMessage )
-        exit exitCode
-
-      else
-        puts sprintf( 'CRITICAL - NOT HEALTHY' )
-        exit STATE_CRITICAL
       end
+
+      puts sprintf( '%s - %s - %s', status, healthMessage, stateMessage )
+      exit exitCode
+
+    else
+      puts sprintf( 'CRITICAL - NOT HEALTHY' )
+      exit STATE_CRITICAL
     end
 
   end
@@ -159,40 +125,21 @@ class Icinga2Check_CM_Feeder < Icinga2Check
     warning  = config[:warning]  ? config[:warning]  : 2500
     critical = config[:critical] ? config[:critical] : 10000
 
-    data = MBean.bean( host, feederServer, 'Feeder' )
+    data      = @mbean.bean( host, feederServer, 'Feeder' )
+    dataValue = self.runningOrOutdated( data )
+    dataValue = dataValue.values.first
+    state     = dataValue.dig('State')
 
-    if( data == false )
-      puts 'CRITICAL - Service not running!?'
-      exit STATE_CRITICAL
-    else
+    if( state == 'running' )
 
-      status    = data['status']    ? data['status']    : 500
-      timestamp = data['timestamp'] ? data['timestamp'] : nil
-      value     = data['value']     ? data['value']     : nil
-      data      = value.values.first
+      pendingDocuments = dataValue.dig('CurrentPendingDocuments')
+      pendingEvents    = dataValue.dig('PendingEvents')
 
-      state = data['State'] ? data['State'] : nil
+      if( pendingDocuments == 0 && pendingDocuments <= warning )
 
-      if( state == 'running' )
-
-        pendingDocuments = data['CurrentPendingDocuments'] ? data['CurrentPendingDocuments'] : nil
-        pendingEvents    = data['PendingEvents']           ? data['PendingEvents']           : nil
-
-        if( pendingDocuments == 0 && pendingDocuments <= warning )
-
-          status   = 'OK'
-          exitCode = STATE_OK
-        elsif( pendingDocuments >= warning && pendingDocuments <= critical )
-
-          status   = 'WARNING'
-          exitCode = STATE_WARNING
-        else
-
-          status   = 'CRITICAL'
-          exitCode = STATE_CRITICAL
-        end
-
-      elsif( state == 'initializing' )
+        status   = 'OK'
+        exitCode = STATE_OK
+      elsif( pendingDocuments >= warning && pendingDocuments <= critical )
 
         status   = 'WARNING'
         exitCode = STATE_WARNING
@@ -202,9 +149,19 @@ class Icinga2Check_CM_Feeder < Icinga2Check
         exitCode = STATE_CRITICAL
       end
 
-      puts sprintf( '%s - Pending Documents: %d , Pending Events: %d', status, pendingDocuments, pendingEvents )
-      exit exitCode
+    elsif( state == 'initializing' )
+
+      status   = 'WARNING'
+      exitCode = STATE_WARNING
+    else
+
+      status   = 'CRITICAL'
+      exitCode = STATE_CRITICAL
     end
+
+    puts sprintf( '%s - Pending Documents: %d , Pending Events: %d', status, pendingDocuments, pendingEvents )
+    exit exitCode
+
   end
 
 end

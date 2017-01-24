@@ -15,6 +15,8 @@ class Icinga2Check_CM_Licenses < Icinga2Check
     host         = settings[:host]        ? settings[:host]        : nil
     application  = settings[:application] ? settings[:application] : nil
 
+    host         = self.shortHostname( host )
+
     self.check( host, application )
 
   end
@@ -40,65 +42,41 @@ class Icinga2Check_CM_Licenses < Icinga2Check
     critical = config[:critical] ? config[:critical] : 20
 
     # get our bean
-    data = @bean.bean( host, application, 'Server' )
+    data      = @mbean.bean( host, application, 'Server' )
+    dataValue = self.runningOrOutdated( data )
+    
+    dataValue = dataValue.values.first
 
-    if( data == false )
-      puts 'CRITICAL - Service not running!?'
-      exit STATE_CRITICAL
-    else
+    t               = Date.parse( Time.now().to_s )
+    today           = Time.new( t.year, t.month, t.day )
 
-      dataStatus      = data['status']    ? data['status']    : 500
-      dataTimestamp   = data['timestamp'] ? data['timestamp'] : nil
-      dataValue       = ( data != nil && data['value'] ) ? data['value'] : nil
+    validUntilHard  = dataValue['LicenseValidUntilHard']    ? dataValue['LicenseValidUntilHard']     : nil
 
-      if( dataValue == nil )
-        puts 'CRITICAL - Service not running!?'
-        exit STATE_CRITICAL
-      end
+    if( validUntilHard != nil )
 
-      beanTimeout,difference = beanTimeout?( dataTimestamp )
+      x               = self.timeParser( today, Time.at( validUntilHard / 1000 ) )
+      validUntilDays  = x[:days]
 
-      if( beanTimeout == STATE_CRITICAL )
-        puts sprintf( 'CRITICAL - last check creation is out of date (%d seconds)', difference )
-        exit beanTimeout
-      elsif( beanTimeout == STATE_WARNING )
-        puts sprintf( 'WARNING - last check creation is out of date (%d seconds)', difference )
-        exit beanTimeout
-      end
+      licenseDate     = Time.at( validUntilHard / 1000 ).strftime("%d.%m.%Y")
 
-      dataValue       = dataValue.values.first
-
-      t               = Date.parse( Time.now().to_s )
-      today           = Time.new( t.year, t.month, t.day )
-
-      validUntilHard  = dataValue['LicenseValidUntilHard']    ? dataValue['LicenseValidUntilHard']     : nil
-
-      if( validUntilHard != nil )
-
-        x               = self.timeParser( today, Time.at( validUntilHard / 1000 ) )
-        validUntilDays  = x[:days]
-
-        licenseDate     = Time.at( validUntilHard / 1000 ).strftime("%d.%m.%Y")
-
-        if( validUntilDays >= warning || validUntilDays == warning )
-          status   = 'OK'
-          exitCode = STATE_OK
-        elsif( validUntilDays >= critical && validUntilDays <= warning )
-          status   = 'WARNING'
-          exitCode = STATE_WARNING
-        else
-          status   = 'CRITICAL'
-          exitCode = STATE_CRITICAL
-        end
-
-        puts sprintf( '%s - Coremedia License is valid until %s - %d days left', status, licenseDate, validUntilDays )
+      if( validUntilDays >= warning || validUntilDays == warning )
+        status   = 'OK'
+        exitCode = STATE_OK
+      elsif( validUntilDays >= critical && validUntilDays <= warning )
+        status   = 'WARNING'
+        exitCode = STATE_WARNING
       else
-        puts sprintf( 'UNKNOWN - No valid Coremedia License found' )
-        exitCode = STATE_UNKNOWN
+        status   = 'CRITICAL'
+        exitCode = STATE_CRITICAL
       end
 
-      exit exitCode
+      puts sprintf( '%s - Coremedia License is valid until %s - %d days left', status, licenseDate, validUntilDays )
+    else
+      puts sprintf( 'UNKNOWN - No valid Coremedia License found' )
+      exitCode = STATE_UNKNOWN
     end
+
+    exit exitCode
 
   end
 
