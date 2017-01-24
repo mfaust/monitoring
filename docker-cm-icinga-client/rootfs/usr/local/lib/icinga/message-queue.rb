@@ -1,7 +1,7 @@
 
 module Icinga
 
-  module MessageQueue
+  module Queue
 
     # Message-Queue Integration
     #
@@ -9,18 +9,13 @@ module Icinga
     #
     def queue()
 
+#       logger.debug('queue()')
+
       c = MessageQueue::Consumer.new( @MQSettings )
-#
-#       threads = Array.new()
 
-#       threads << Thread.new {
-
-        processQueue(
-          c.getJobFromTube( @mqQueue )
-        )
-#       }
-
-#       threads.each { |t| t.join }
+      processQueue(
+        c.getJobFromTube( @mqQueue )
+      )
 
     end
 
@@ -30,8 +25,8 @@ module Icinga
       if( data.count != 0 )
 
         logger.info( sprintf( 'process Message from Queue %s: %d', data.dig(:tube), data.dig(:id) ) )
-        logger.debug( data )
-        #logger.debug( data.dig( :body, 'payload' ) )
+#         logger.debug( data )
+#         logger.debug( JSON.pretty_generate( data.dig( :body, 'payload' ) ) )
 
         command = data.dig( :body, 'cmd' )     || nil
         node    = data.dig( :body, 'node' )    || nil
@@ -40,13 +35,19 @@ module Icinga
         if( command == nil )
           logger.error( 'wrong command' )
           logger.error( data )
-          return
+          return {
+            :status  => 500,
+            :message => 'no command given'
+          }
         end
 
         if( node == nil || payload == nil )
           logger.error( 'missing node or payload' )
           logger.error( data )
-          return
+          return {
+            :status  => 500,
+            :message => 'missing node or payload'
+          }
         end
 
         result = {
@@ -57,21 +58,17 @@ module Icinga
         case command
         when 'add'
           logger.info( sprintf( 'add node %s', node ) )
+          result = self.addHost( { :host => node, :vars => payload } )
 
-          # TODO
-          # check payload!
-          # e.g. for 'force' ...
-#           result = self.createDashboardForHost( { :host => node, :tags => tags, :overview => overview } )
-
-#           logger.info( result )
+          logger.info( result )
         when 'remove'
-          logger.info( sprintf( 'remove dashboards for node %s', node ) )
-#           result = self.deleteDashboards( { :host => node } )
+          logger.info( sprintf( 'remove checks for node %s', node ) )
+          result = self.deleteHost( { :host => node } )
 
-#           logger.info( result )
+          logger.info( result )
         when 'info'
-          logger.info( sprintf( 'give dashboards for %s back', node ) )
-#           result = self.listDashboards( { :host => node } )
+          logger.info( sprintf( 'give information for node %s', node ) )
+          result = self.listHost( { :host => node } )
         else
           logger.error( sprintf( 'wrong command detected: %s', command ) )
 
@@ -80,10 +77,17 @@ module Icinga
             :message => sprintf( 'wrong command detected: %s', command )
           }
 
-#           logger.info( result )
+#          logger.info( result )
+        end
+
+        if( result.is_a?( String ) )
+
+          result = JSON.parse( result )
         end
 
         result[:request]    = data
+
+        logger.debug( result )
 
 #         self.sendMessage( result )
       end

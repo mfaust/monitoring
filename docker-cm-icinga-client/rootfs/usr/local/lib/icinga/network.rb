@@ -129,7 +129,7 @@ module Icinga
           error = JSON.parse( error )
         end
 
-        results = error.dig( 'results')
+        results = error.dig( 'results' ).first
 
         if( results != nil )
 
@@ -143,7 +143,6 @@ module Icinga
 
           result = {
             :status      => error.dig( 'error' ).to_i,
-#            :name        => results.dig('name'),
             :message     => error.dig( 'status' )
           }
 

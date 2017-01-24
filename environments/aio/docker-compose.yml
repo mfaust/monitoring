@@ -47,6 +47,8 @@ services:
       com.dnsdock.ttl: "30"
     volumes:
       - /etc/localtime:/etc/localtime:ro
+    ports:
+      - 11300:11300
     networks:
       mon:
         ipv4_address: 172.25.0.6
@@ -203,7 +205,7 @@ services:
 
   icinga2-core:
     restart: always
-    image: bodsch/docker-icinga2:1701-03
+    image: bodsch/docker-icinga2:1701-04
     container_name: icinga2-core
     hostname: icinga2-core
     labels:

@@ -396,12 +396,28 @@ class Monitoring
         self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-grafana', :payload => payload, :prio => 10, :ttr => 15, :delay => 10 } )
       end
 
-      if( enabledIcinga == true )
+      if( enabledIcinga == true && enableDiscovery == true )
 
         logger.info( 'create icinga checks and notifications' )
 
+        sleep( 3 )
+        # in first, we need the discovered services ...
+        logger.info( 'we need information from discovery service' )
+        logger.debug( 'send message to \'mq-discover\'' )
+        self.messageQueue( { :cmd => 'info', :node => host, :queue => 'mq-discover', :payload => {}, :prio => 2, :ttr => 1, :delay => 0 } )
+
+        sleep( 3 )
+
+        c = MessageQueue::Consumer.new( @MQSettings )
+
+        resultArray = Array.new()
+        threads     = Array.new()
+
+        discoveryStatus = c.getJobFromTube('mq-discover-info')
+        discoveryPayload = discoveryStatus.dig( :body, 'payload' ) || {}
+
         logger.debug( 'send message to \'mq-icinga\'' )
-        self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-icinga', :payload => payload, :prio => 10, :ttr => 15, :delay => 10 } )
+        self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-icinga', :payload => discoveryPayload, :prio => 10, :ttr => 15, :delay => 10 } )
       end
 
       if( annotation == true )
@@ -415,54 +431,11 @@ class Monitoring
         :message => 'send to MQ'
       }
 
-        result[host.to_sym] ||= {}
+      result[host.to_sym] ||= {}
+      result[host.to_sym][:discovery] ||= {}
+      result[host.to_sym][:discovery] = discoveryResult
 
-#       # TODO
-#       # change service-discovery to use 'services'
-#
-#       options = {
-#         'services'     => services
-#       }
-
-#         if( enabledIcinga == true )
-#
-#           discoverdServices = @serviceDiscovery.listHosts( host )
-#
-#           services          = discoverdServices.dig( 'hosts', 'services' )
-#
-#           logger.debug( services )
-#
-#           services = ( discoverdServices[:hosts] && discoverdServices[:hosts]['services'] ) ? discoverdServices[:hosts]['services'] : nil
-#
-#           logger.debug( services )
-#
-# #           services.each do |s|
-# #             s.last.reject! { |k| k == 'description' }
-# #             s.last.reject! { |k| k == 'application' }
-# #           end
-# #
-# #           cm = Hash.new()
-# #           cm = { 'cm' => services }
-# #
-# #           icingaResult  = @icinga.addHost( host, cm )
-# #           icingaStatus  = icingaResult[:status]
-# #           icingaMessage = icingaResult[:message]
-#
-#           icingaStatus  = 201
-#           icingaMessage = 'test message'
-#
-#           result[host.to_sym][:icinga] ||= {}
-#           result[host.to_sym][:icinga] = {
-#             :status     => icingaStatus,
-#             :message    => icingaMessage
-#           }
-#
-#         end
-
-        result[host.to_sym][:discovery] ||= {}
-        result[host.to_sym][:discovery] = discoveryResult
-
-        return result
+      return result
 
     end
 

@@ -7,14 +7,9 @@
 
 # -----------------------------------------------------------------------------
 
-require 'yaml'
-
 require_relative '../lib/icinga'
-require_relative '../lib/message-queue'
 
 # -----------------------------------------------------------------------------
-
-logDirectory     = '/var/log/monitoring'
 
 icingaHost      = ENV['ICINGA_HOST']         ? ENV['ICINGA_HOST']          : 'localhost'
 icingaApiPort   = ENV['ICINGA_API_PORT']     ? ENV['ICINGA_API_PORT']      : 5665
@@ -35,13 +30,9 @@ config = {
   :mqQueue        => mqQueue
 }
 
-
-
 # ---------------------------------------------------------------------------------------
 
 i = Icinga::Client.new( config )
-
-# ---------------------------------------------------------------------------------------
 
 # ---------------------------------------------------------------------------------------
 
@@ -54,21 +45,17 @@ Signal.trap('HUP')  { stop = true }
 Signal.trap('TERM') { stop = true }
 Signal.trap('QUIT') { stop = true }
 
-if( i != nil )
-  i.run()
-end
+until stop
+  # do your thing
+  if( mqEnabled == true )
 
-# until stop
-#   # do your thing
-#   if( mqEnabled == true )
-#
-#     queue()
-#   else
-#
-#     i.run()
-#   end
-#   sleep( 15 )
-# end
+    i.queue()
+  else
+
+    i.run()
+  end
+  sleep( 15 )
+end
 
 # -----------------------------------------------------------------------------
 

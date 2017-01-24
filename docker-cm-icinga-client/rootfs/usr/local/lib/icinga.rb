@@ -12,6 +12,7 @@ require 'net/http'
 require 'uri'
 
 require_relative 'logging'
+require_relative 'message-queue'
 require_relative 'icinga/network'
 require_relative 'icinga/status'
 require_relative 'icinga/host'
@@ -30,7 +31,7 @@ module Icinga
     include Icinga::Status
     include Icinga::Host
     include Icinga::Service
-    include Icinga::MessageQueue
+    include Icinga::Queue
 
     def initialize( params = {} )
 
@@ -260,8 +261,6 @@ module Icinga
         }
       }
 
-
-
        logger.debug( self.deleteHost( { :host => 'monitoring-16-01' } ) )
 
        logger.debug( self.addHost( { :host => 'monitoring-16-01', :vars => vars } ) )
@@ -272,8 +271,6 @@ module Icinga
 
 #      logger.debug( self.listHost( { :host => 'monitoring-16-01' } ) )
 #       logger.debug( self.listHost() )
-
-
 
     end
 
