@@ -19,7 +19,7 @@ services:
     labels:
       com.dnsdock.image: "dnsdock"
       com.dnsdock.alias: "dnsdock"
-      com.dnsdock.ttl: "10"
+      com.dnsdock.ttl: "0"
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock
@@ -38,7 +38,7 @@ services:
     labels:
       com.dnsdock.image: "database"
       com.dnsdock.alias: "database"
-      com.dnsdock.ttl: "10"
+      com.dnsdock.ttl: "0"
     env_file:
       - env/database.env
     volumes:
@@ -56,7 +56,7 @@ services:
     labels:
       com.dnsdock.image: "memcached"
       com.dnsdock.alias: "memcached"
-      com.dnsdock.ttl: "10"
+      com.dnsdock.ttl: "0"
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:
@@ -71,7 +71,7 @@ services:
     labels:
       com.dnsdock.image: "nginx"
       com.dnsdock.alias: "nginx"
-      com.dnsdock.ttl: "10"
+      com.dnsdock.ttl: "0"
     ports:
       - 80:80
     depends_on:
@@ -97,7 +97,7 @@ services:
     labels:
       com.dnsdock.image: "carbon"
       com.dnsdock.alias: "carbon"
-      com.dnsdock.ttl: "10"
+      com.dnsdock.ttl: "0"
     ports:
       - 2003:2003
       - 2003:2003/udp
@@ -118,13 +118,11 @@ services:
     labels:
       com.dnsdock.image: "graphite"
       com.dnsdock.alias: "graphite"
-      com.dnsdock.ttl: "10"
+      com.dnsdock.ttl: "0"
     env_file:
       - env/graphite.env
     depends_on:
       - memcached
-    ports:
-      - 8081:8080
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./data:/srv
@@ -140,7 +138,7 @@ services:
     labels:
       com.dnsdock.image: "grafana"
       com.dnsdock.alias: "grafana"
-      com.dnsdock.ttl: "10"
+      com.dnsdock.ttl: "0"
     env_file:
       - env/database.env
       - env/grafana.env

@@ -314,7 +314,7 @@ module DataCollector
 
         m = ExternalClients::MySQL.new( { :host => host, :username => user, :password => pass } )
 
-        if( m != nil )
+        if( m != nil || m != false )
 
           mysqlData = m.get()
 
@@ -322,7 +322,7 @@ module DataCollector
             mysqlData   = JSON.generate( { :status => 500 } )
           end
 
-          data           = JSON.parse( mysqlData )
+          data          = JSON.parse( mysqlData )
         end
       end
 

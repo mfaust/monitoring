@@ -95,8 +95,8 @@ module Grafana
       #
       def createDashboardForHost( params = {} )
 
-        logger.debug( 'createDashboardForHost()' )
-        logger.debug( params )
+#         logger.debug( 'createDashboardForHost()' )
+#         logger.debug( params )
 
         host            = params[:host]     ? params[:host]     : nil
         @additionalTags = params[:tags]     ? params[:tags]     : []
@@ -187,6 +187,9 @@ module Grafana
 
         # MemoryPools for many Services
         namedTemplate.push( 'cm-memory-pool.json' )
+
+        # unique Tomcat Dashboard
+        namedTemplate.push( 'cm-tomcat.json' )
 
         # CAE Caches
         if( servicesTmp.include?( 'cae-preview' ) || servicesTmp.include?( 'cae-live' ) )

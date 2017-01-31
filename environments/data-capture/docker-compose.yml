@@ -19,16 +19,16 @@ services:
     labels:
       com.dnsdock.image: "dnsdock"
       com.dnsdock.alias: "dnsdock"
-      com.dnsdock.ttl: "30"
+      com.dnsdock.ttl: "0"
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock
-    ports:
-      - 53:53
-      - 8081:80
+#    ports:
+#      - 53:53
+#      - 8081:80
     # You can use also Environment vars like this:
     # command: "--nameserver='${DNS_1}:53' --nameserver='${DNS_2}:53' --http=:80"
-    command: "--nameserver='10.1.2.63:53' --http=:80"
+    command: "--nameserver='10.1.2.63:53' --nameserver='10.1.2.14:53' --http=:80"
     networks:
       mon:
         ipv4_address: 172.25.0.5
@@ -41,7 +41,7 @@ services:
     labels:
       com.dnsdock.image: "beanstalkd"
       com.dnsdock.alias: "beanstalkd"
-      com.dnsdock.ttl: "30"
+      com.dnsdock.ttl: "0"
 #    ports:
 #      - 11300:11300
     volumes:
@@ -58,16 +58,15 @@ services:
     labels:
       com.dnsdock.image: "jolokia"
       com.dnsdock.alias: "jolokia"
-      com.dnsdock.ttl: "30"
+      com.dnsdock.ttl: "0"
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./share/resolv.conf:/etc/resolv.conf:ro
-    ports:
-      - 8080:8080
-    extra_hosts:
-      # NOTE: local blueprint-box
-      - 'blueprint-box:192.168.252.100'
-      - 'blueprint-box-70:192.168.252.170'
+#    ports:
+#      - 8080:8080
+#    extra_hosts:
+#      # NOTE: local blueprint-box
+#      - 'blueprint-box:192.168.252.170'
     networks:
       mon:
         ipv4_address: 172.25.0.11
@@ -80,7 +79,7 @@ services:
     labels:
       com.dnsdock.image: "memcached"
       com.dnsdock.alias: "memcached"
-      com.dnsdock.ttl: "30"
+      com.dnsdock.ttl: "0"
     env_file:
       - env/memcached.env
     volumes:
@@ -97,7 +96,7 @@ services:
     labels:
       com.dnsdock.image: "nginx"
       com.dnsdock.alias: "nginx"
-      com.dnsdock.ttl: "30"
+      com.dnsdock.ttl: "0"
     ports:
       - 80:80
     command: "/usr/sbin/nginx"
@@ -124,7 +123,7 @@ services:
     labels:
       com.dnsdock.image: "carbon-relay"
       com.dnsdock.alias: "carbon-relay"
-      com.dnsdock.ttl: "30"
+      com.dnsdock.ttl: "0"
     ports:
       - 2003:2003
     env_file:
@@ -132,7 +131,7 @@ services:
     extra_hosts:
       # NOTE: external service
       #- 'graphite:10.101.2.83'
-      - 'graphite:192.168.252.101'
+      - 'graphite:192.168.252.5'
       #- 'graphite:192.168.0.5'
     volumes:
       - /etc/localtime:/etc/localtime:ro
@@ -150,16 +149,21 @@ services:
     labels:
       com.dnsdock.image: "cm-service-discover"
       com.dnsdock.alias: "cm-service-discover"
-      com.dnsdock.ttl: "30"
+      com.dnsdock.ttl: "0"
     env_file:
       - env/cm-service-discover.env
     depends_on:
       - jolokia
+      - memcached
+      - beanstalkd
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./share/resolv.conf:/etc/resolv.conf:ro
       - ./data/monitoring:/var/cache/monitoring
-
+    links:
+      - jolokia:jolokia
+      - memcached:memcached
+      - beanstalkd:beanstalkd
     networks:
       mon:
         ipv4_address: 172.25.0.30
@@ -174,12 +178,13 @@ services:
     labels:
       com.dnsdock.image: "cm-data-collector"
       com.dnsdock.alias: "cm-data-collector"
-      com.dnsdock.ttl: "30"
+      com.dnsdock.ttl: "0"
     env_file:
       - env/cm-data-collector.env
     depends_on:
       - jolokia
       - memcached
+      - beanstalkd
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./share/resolv.conf:/etc/resolv.conf:ro
@@ -188,6 +193,8 @@ services:
       - ./data/monitoring:/var/cache/monitoring
     links:
       - jolokia:jolokia
+      - memcached:memcached
+      - beanstalkd:beanstalkd
     networks:
       mon:
         ipv4_address: 172.25.0.31
@@ -202,7 +209,7 @@ services:
     labels:
       com.dnsdock.image: "cm-collectd"
       com.dnsdock.alias: "cm-collectd"
-      com.dnsdock.ttl: "30"
+      com.dnsdock.ttl: "0"
     env_file:
       - env/cm-collectd.env
     depends_on:
@@ -214,10 +221,12 @@ services:
       - ./share/monitoring/etc/cm-application.yaml:/etc/cm-application.yaml
       - ./share/monitoring/etc/cm-monitoring.yaml:/etc/cm-monitoring.yaml
       - ./data/monitoring:/var/cache/monitoring
+    links:
+      - memcached:memcached
+      - beanstalkd:beanstalkd
     networks:
       mon:
         ipv4_address: 172.25.0.32
-
 
   # single service
   # use MQ to process data
@@ -229,7 +238,7 @@ services:
     labels:
       com.dnsdock.image: "cm-grafana-client"
       com.dnsdock.alias: "cm-grafana-client"
-      com.dnsdock.ttl: "30"
+      com.dnsdock.ttl: "0"
     env_file:
       - env/cm-grafana-client.env
     depends_on:
@@ -238,13 +247,16 @@ services:
     extra_hosts:
       # NOTE: external service
       #- 'nginx-proxy:10.101.2.83'
-      - 'nginx-proxy:192.168.252.101'
+      - 'nginx-proxy:192.168.252.5'
       #- 'nginx-proxy:192.168.0.5'
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./share/resolv.conf:/etc/resolv.conf:ro
       - ./share/grafana-client/templates:/usr/local/share/templates:ro
       - ./data/monitoring:/var/cache/monitoring
+    links:
+      - memcached:memcached
+      - beanstalkd:beanstalkd
     networks:
       mon:
         ipv4_address: 172.25.0.33
@@ -259,7 +271,7 @@ services:
     labels:
       com.dnsdock.image: "cm-graphite-client"
       com.dnsdock.alias: "cm-graphite-client"
-      com.dnsdock.ttl: "30"
+      com.dnsdock.ttl: "0"
     env_file:
       - env/cm-graphite-client.env
     depends_on:
@@ -267,11 +279,13 @@ services:
     extra_hosts:
       # NOTE: external service
       #- 'nginx-proxy:10.101.2.83'
-      - 'nginx-proxy:192.168.252.101'
+      - 'nginx-proxy:192.168.252.5'
       #- 'nginx-proxy:192.168.0.5'
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./share/resolv.conf:/etc/resolv.conf:ro
+    links:
+      - beanstalkd:beanstalkd
     networks:
       mon:
         ipv4_address: 172.25.0.34
@@ -284,15 +298,15 @@ services:
     labels:
       com.dnsdock.image: "cm-monitoring"
       com.dnsdock.alias: "cm-monitoring"
-      com.dnsdock.ttl: "30"
+      com.dnsdock.ttl: "0"
     env_file:
       - env/cm-monitoring.env
-    #depends_on:
-      #- jolokia
-      #- carbon-relay
-      #- memcached
-    extra_hosts:
-      - 'blueprint-box:192.168.252.100'
+#    depends_on:
+#      - jolokia
+#      - carbon-relay
+#      - memcached
+#    extra_hosts:
+#      - 'blueprint-box:192.168.252.170'
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./share/resolv.conf:/etc/resolv.conf:ro

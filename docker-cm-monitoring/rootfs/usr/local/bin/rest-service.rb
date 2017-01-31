@@ -138,7 +138,7 @@ module Sinatra
 
       result = m.writeHostConfiguration( host, paylod )
 
-      status = result[:status]
+      status result[:status]
 
       result
 
@@ -152,7 +152,7 @@ module Sinatra
       host   = params[:host]
       result = m.getHostConfiguration( host )
 
-      status = result[:status]
+      status result[:status]
 
       result
 
@@ -166,7 +166,7 @@ module Sinatra
       host   = params[:host]
       result = m.removeHostConfiguration( host )
 
-      status = result[:status]
+      status result[:status]
 
       result
 
@@ -182,19 +182,14 @@ module Sinatra
     post '/v2/host/:host' do
 
       host            = params[:host]
-      payload         =  @request_paylod
+      payload         = @request_paylod
       @request_paylod = nil
 
       logger.debug( sprintf( 'POST \'/v2/host/:host\' - \'%s\', \'%s\'', host, payload ) )
 
-      result = {
-        :status  => 200,
-        :message => 'test'
-      }
-
       result = m.addHost( host, payload )
 
-      status = result[:status]
+      status result[:status]
 
       result
 
@@ -205,7 +200,7 @@ module Sinatra
 
       result = m.listHost( nil, request.env )
 
-      status = result[:status]
+#       status = result[:status]
 
       result
 
@@ -229,7 +224,9 @@ module Sinatra
       host   = params[:host]
       result = m.removeHost( host, @request_paylod )
 
-      status = result[:status]
+      logger.debug( result )
+
+#       status result[:status]
 
       result
 
@@ -243,7 +240,7 @@ module Sinatra
       host   = params[:host]
       result = m.addAnnotation( host, @request_paylod )
 
-      status = result[:status]
+#       status = result[:status]
 
       result
 

@@ -79,8 +79,8 @@ class ServiceDiscovery
     @serviceConfig     = settings[:serviceConfigFile] ? settings[:serviceConfigFile]   : nil
     @scanPorts         = settings[:scanPorts]         ? settings[:scanPorts]           : ports
 
-    version             = '1.4.3'
-    date                = '2017-01-17'
+    version             = '1.4.4'
+    date                = '2017-01-30'
 
     logger.info( '-----------------------------------------------------------------' )
     logger.info( ' CoreMedia - Service Discovery' )
@@ -273,7 +273,7 @@ class ServiceDiscovery
 
   def discoverApplication( host, port )
 
-#     logger.debug( 'discover Application ...' )
+#     logger.debug( sprintf( 'discoverApplication( %s, %d )', host, port ) )
 
     services = Array.new
 
@@ -322,13 +322,26 @@ class ServiceDiscovery
         :config    => { "ignoreErrors" => true, "ifModifiedSince" => true, "canonicalNaming" => true }
       }
 
-      response = @jolokia.post( { :payload => array } )
+      response       = @jolokia.post( { :payload => array } )
+      responseStatus = response[:status].to_i
 
-      if( response[:status] != 200 )
+      if( responseStatus != 200 )
 
-        logger.error( response[:message] )
+        response = response[:message]
+        response.delete!( "\t" ).delete!( "\n" )
 
-        return response
+        regex    = /(.*)connection to:(?<host>.+[a-zA-Z0-9]);(.*)Exception:(?<exception>.+\S)/
+
+        all,host,exception = response.match( regex ).to_a
+
+        logger.error( sprintf( '%s - %s', host.strip, exception.strip.tr('[]','') ) )
+
+        return nil
+
+        return {
+          :status  => responseStatus,
+          :message => sprintf( '%s - %s', host.strip, exception.strip.tr('[]','') )
+        }
 
       else
 
@@ -408,7 +421,7 @@ class ServiceDiscovery
                       services.delete( "caefeeder" )
                       services.push( service )
 
-                      logger.debug( sprintf( '  => %s', service ) )
+#                       logger.debug( sprintf( '  => %s', service ) )
                     else
                       logger.error( 'unknown error' )
                       logger.error( parts )
@@ -458,7 +471,7 @@ class ServiceDiscovery
                   service = parts['service'].to_s.strip.tr('. ', '')
                   services.push( service )
 
-                  logger.debug( sprintf( '  => %s', service ) )
+#                   logger.debug( sprintf( '  => %s', service ) )
                 else
                   logger.error( 'unknown error' )
                   logger.error( parts )
@@ -499,6 +512,8 @@ class ServiceDiscovery
 
     end
 
+    logger.debug( "  found services: #{services}" )
+
     return services
   end
 
@@ -521,7 +536,7 @@ class ServiceDiscovery
         end
 
       else
-        logger.debug( sprintf( 'missing entry \'%s\'', d ) )
+        logger.debug( sprintf( 'missing entry \'%s\' in cm-service.yaml for merge with discovery data', d ) )
       end
     end
 
@@ -586,6 +601,9 @@ class ServiceDiscovery
     # second, if the that we whant monitored, available
     if( isRunning?( ip ) == false )
 
+      logger.error( 'host not running' )
+      logger.debug( hostInfo )
+
       return {
         :status  => 400,
         :message => 'Host not available'
@@ -603,7 +621,7 @@ class ServiceDiscovery
       ports = @scanPorts
     end
 
-#     logger.debug( "use ports: #{ports}" )
+    logger.debug( "use ports: #{ports}" )
 
     discover = Hash.new()
     services = Hash.new()
@@ -614,7 +632,7 @@ class ServiceDiscovery
 
       open = portOpen?( longHostName, p )
 
-#       logger.debug( sprintf( 'Host: %s | Port: %s   - status %s', host, p, open ) )
+      logger.debug( sprintf( 'Host: %s | Port: %s   %s', host, p, open ? 'open' : 'closed' ) )
 
       if( open == true )
 
@@ -704,6 +722,16 @@ class ServiceDiscovery
     else
 
       discoveryData  = @db.discoveryData( { :ip => host, :short => host } )
+
+      if( discoveryData == nil )
+
+        return {
+          :status   => 404,
+          :message  => 'no host found'
+        }
+
+      end
+
       hostServices   = discoveryData.dig( host )
 
       hostServices.each do |s|

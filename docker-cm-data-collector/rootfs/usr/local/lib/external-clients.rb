@@ -38,7 +38,7 @@ module ExternalClients
       rescue Exception => e
         logger.error( "An error occurred for connection: #{e}" )
 
-        return nil
+        return false
       end
 
       return self

@@ -18,7 +18,7 @@ module Jolokia
 
     def initialize( params = {} )
 
-      logger.debug( params )
+#       logger.debug( params )
 
       @Host = params[:host] ? params[:host] : 'localhost'
       @Port = params[:port] ? params[:port] : 8080
@@ -54,7 +54,9 @@ module Jolokia
         use_ssl: uri.scheme == "https",
         :read_timeout => timeout
       ) do |http|
+
         begin
+
           http.request( request )
 
         rescue Exception => e
@@ -68,7 +70,9 @@ module Jolokia
 
 #           logger.debug( sprintf( ' -> request body: %s', request.body ) )
           return
+
         rescue => e
+
           logger.warn( sprintf( 'Cannot execute request to %s://%s:%s%s, cause: %s', uri.scheme, uri.hostname, uri.port, uri.request_uri, e ) )
 
           return {
@@ -79,9 +83,29 @@ module Jolokia
         end
       end
 
+      body = JSON.parse( response.body )
+
+#       logger.debug( 'done' )
+#       logger.debug( body.first )
+
+      requestStatus = body.first['status'] ? body.first['status'] : 500
+      requestError  = body.first['error']  ? body.first['error']  : nil
+
+# #       logger.debug( requestStatus )
+#       logger.debug( requestError )
+
+      if( requestStatus != 200 )
+
+        # stacktrace found! :(
+        return {
+          :status   => requestStatus,
+          :message  => requestError
+        }
+      end
+
       return {
         :status  => 200,
-        :message => JSON.parse( response.body )
+        :message => body
       }
 
     end
