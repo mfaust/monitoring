@@ -406,7 +406,7 @@ class Monitoring
         logger.debug( 'send message to \'mq-discover\'' )
         self.messageQueue( { :cmd => 'info', :node => host, :queue => 'mq-discover', :payload => {}, :prio => 2, :ttr => 1, :delay => 0 } )
 
-        sleep( 3 )
+        sleep( 4 )
 
         c = MessageQueue::Consumer.new( @MQSettings )
 
@@ -414,7 +414,19 @@ class Monitoring
         threads     = Array.new()
 
         discoveryStatus = c.getJobFromTube('mq-discover-info')
-        discoveryPayload = discoveryStatus.dig( :body, 'payload' ) || {}
+        discoveryPayload = discoveryStatus.dig( :body, 'payload' )
+
+        if( discoveryPayload != nil )
+
+          if( discoveryPayload.is_a?( Hash ) )
+            discoveryPayload = discoveryPayload.to_json
+          end
+
+           discoveryPayload = JSON.parse( discoveryPayload.split('"services":').join('"coremedia":') )
+        else
+
+          discoveryPayload = {}
+        end
 
         logger.debug( 'send message to \'mq-icinga\'' )
         self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-icinga', :payload => discoveryPayload, :prio => 10, :ttr => 15, :delay => 10 } )

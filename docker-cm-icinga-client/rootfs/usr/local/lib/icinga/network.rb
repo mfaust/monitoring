@@ -4,8 +4,6 @@ module Icinga
 
     def self.get( params = {} )
 
-      print "GET\n"
-
       host    = params.dig(:host)    || nil
       url     = params.dig(:url)     || nil
       headers = params.dig(:headers) || nil
@@ -14,8 +12,6 @@ module Icinga
       headers.delete( 'X-HTTP-Method-Override' )
 
       result  = {}
-
-      print url + "\n"
 
       restClient = RestClient::Resource.new(
         URI.encode( url ),
@@ -52,13 +48,9 @@ module Icinga
 
       rescue RestClient::ExceptionWithResponse => e
 
-        puts e.inspect
-
         error  = e.response ? e.response : nil
 
-        puts error
-
-        error = JSON.parse( error )
+        error  = JSON.parse( error )
 
         result = {
           :status      => error['error'].to_i,
@@ -66,8 +58,6 @@ module Icinga
           :message     => error['status']
         }
       rescue Errno::ECONNREFUSED => e
-
-        puts e.inspect
 
         $stderr.puts "Server refusing connection; retrying in 5s..."
 
@@ -80,8 +70,6 @@ module Icinga
 
     def self.put( params = {} )
 
-      print "PUT\n"
-
       host    = params.dig(:host)    || nil
       url     = params.dig(:url)     || nil
       headers = params.dig(:headers) || nil
@@ -91,8 +79,6 @@ module Icinga
       headers['X-HTTP-Method-Override'] = 'PUT'
 
       result  = {}
-
-      print url + "\n"
 
       restClient = RestClient::Resource.new(
         URI.encode( url ),
@@ -106,7 +92,7 @@ module Icinga
           headers
         )
 
-        data   = JSON.parse( data )
+        data    = JSON.parse( data )
         results = data.dig('results').first
 
         if( results != nil )
@@ -123,8 +109,6 @@ module Icinga
 
         error  = e.response ? e.response : nil
 
-        puts error
-
         if( error.is_a?( String ) )
           error = JSON.parse( error )
         end
@@ -136,7 +120,8 @@ module Icinga
           result = {
             :status      => results.dig('code').to_i,
             :name        => results.dig('name'),
-            :message     => results.dig('status')
+            :message     => results.dig('status'),
+            :error       => results.dig('errors')
           }
 
         else
@@ -150,8 +135,6 @@ module Icinga
 
       rescue Errno::ECONNREFUSED => e
 
-        puts e.inspect
-
         $stderr.puts "Server refusing connection; retrying in 5s..."
 
       end
@@ -163,8 +146,6 @@ module Icinga
 
     def self.delete( params = {} )
 
-      print "DELETE\n"
-
       host    = params.dig(:host)    || nil
       url     = params.dig(:url)     || nil
       headers = params.dig(:headers) || nil
@@ -174,8 +155,6 @@ module Icinga
       headers['X-HTTP-Method-Override'] = 'DELETE'
 
       result  = {}
-
-      print url + "\n"
 
       restClient = RestClient::Resource.new(
         URI.encode( url ),
@@ -205,8 +184,6 @@ module Icinga
 
         error  = e.response ? e.response : nil
 
-        puts error
-
         if( error.is_a?( String ) )
           error = JSON.parse( error )
         end
@@ -231,8 +208,6 @@ module Icinga
 
         end
       rescue Errno::ECONNREFUSED => e
-
-        puts e.inspect
 
         $stderr.puts "Server refusing connection; retrying in 5s..."
 

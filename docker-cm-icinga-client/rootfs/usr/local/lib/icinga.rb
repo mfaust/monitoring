@@ -51,8 +51,8 @@ module Icinga
         :beanstalkPort => mqPort
       }
 
-      version              = '1.3.0-dev'
-      date                 = '2017-01-15'
+      version              = '1.3.2-dev'
+      date                 = '2017-02-01'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' Icinga2 Management' )
@@ -125,6 +125,8 @@ module Icinga
 
 
     def run()
+
+      return
 
 #      vars = {
 #        'coremedia' => {
