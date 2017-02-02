@@ -245,6 +245,8 @@ services:
     depends_on:
       - nginx
       - icinga2-core
+    ports:
+      - 4567:4567
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./share/resolv.conf:/etc/resolv.conf:ro
