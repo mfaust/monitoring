@@ -205,7 +205,7 @@ services:
 
   icinga2-core:
     restart: always
-    image: bodsch/docker-icinga2:1701-04
+    image: bodsch/docker-icinga2:1702-01
     container_name: icinga2-core
     hostname: icinga2-core
     labels:

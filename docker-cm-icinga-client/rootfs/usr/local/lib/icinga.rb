@@ -263,16 +263,13 @@ module Icinga
         }
       }
 
-       logger.debug( self.deleteHost( { :host => 'monitoring-16-01' } ) )
-
-       logger.debug( self.addHost( { :host => 'monitoring-16-01', :vars => vars } ) )
+#      logger.debug( self.deleteHost( { :host => 'monitoring-16-01' } ) )
+#      logger.debug( self.addHost( { :host => 'monitoring-16-01', :vars => vars } ) )
 #      logger.debug( self.addHost( { :host => 'moebius-ci-01' } ) )
 #      logger.debug( self.addHost( { :host => 'moebius-ci-02' } ) )
-
-#       logger.debug( self.applicationData() )
-
+#      logger.debug( self.applicationData() )
 #      logger.debug( self.listHost( { :host => 'monitoring-16-01' } ) )
-#       logger.debug( self.listHost() )
+#      logger.debug( self.listHost() )
 
     end
 
