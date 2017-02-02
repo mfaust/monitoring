@@ -242,6 +242,8 @@ services:
       com.dnsdock.image: "icinga2-cert-service"
       com.dnsdock.alias: "icinga2-cert-service"
       com.dnsdock.ttl: "0"
+    env_file:
+      - env/icinga2.env
     depends_on:
       - nginx
       - icinga2-core
