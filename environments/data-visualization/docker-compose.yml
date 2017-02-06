@@ -174,6 +174,7 @@ services:
     ports:
       - 5665:5665
       - 6666:6666
+      - 4567:4567
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./share/resolv.conf:/etc/resolv.conf:ro
@@ -195,8 +196,6 @@ services:
       - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_runlevel.rb:/usr/lib/monitoring-plugins/check_cm_runlevel:ro
       - ./share/icinga2/usr/lib/monitoring-plugins/check_ssl_cert:/usr/lib/monitoring-plugins/check_ssl_cert:ro
       - ./share/icinga2/etc/icinga2/objects:/etc/icinga2/objects
-    links:
-      - database:database
     networks:
       mon:
         ipv4_address: 172.25.0.30
@@ -225,7 +224,6 @@ services:
     volumes_from:
       - icinga2-core
     links:
-      - database:database
       - icinga2-core:icinga2
     networks:
       mon:
@@ -233,30 +231,30 @@ services:
 
   # single service
 
-  icinga2-cert-service:
-    restart: always
-    build: https://github.com/bodsch/docker-icinga2-cert-service.git
-    container_name: icinga2-cert-service
-    hostname: icinga2-cert-service
-    labels:
-      com.dnsdock.image: "icinga2-cert-service"
-      com.dnsdock.alias: "icinga2-cert-service"
-      com.dnsdock.ttl: "0"
-    env_file:
-      - env/icinga2.env
-      - env/icinga2-cert-service.env
-    depends_on:
-      - nginx
-      - icinga2-core
-    ports:
-      - 4567:4567
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ./share/resolv.conf:/etc/resolv.conf:ro
-    volumes_from:
-      - icinga2-core
-    links:
-      - icinga2-core
-    networks:
-      mon:
-        ipv4_address: 172.25.0.40
+#  icinga2-cert-service:
+#    restart: always
+#    build: https://github.com/bodsch/docker-icinga2-cert-service.git
+#    container_name: icinga2-cert-service
+#    hostname: icinga2-cert-service
+#    labels:
+#      com.dnsdock.image: "icinga2-cert-service"
+#      com.dnsdock.alias: "icinga2-cert-service"
+#      com.dnsdock.ttl: "0"
+#    env_file:
+#      - env/icinga2.env
+#      - env/icinga2-cert-service.env
+#    depends_on:
+#      - nginx
+#      - icinga2-core
+#    ports:
+#      - 4567:4567
+#    volumes:
+#      - /etc/localtime:/etc/localtime:ro
+#      - ./share/resolv.conf:/etc/resolv.conf:ro
+#    volumes_from:
+#      - icinga2-core
+#    links:
+#      - icinga2-core
+#    networks:
+#      mon:
+#        ipv4_address: 172.25.0.40

@@ -290,6 +290,33 @@ services:
       mon:
         ipv4_address: 172.25.0.34
 
+  # single service
+  # use MQ to process data
+  cm-icinga-client:
+    restart: always
+    build: ../../docker-cm-icinga-client
+    container_name: cm-icinga-client
+    hostname: cm-icinga-client
+    labels:
+      com.dnsdock.image: "cm-icinga-client"
+      com.dnsdock.alias: "cm-icinga-client"
+      com.dnsdock.ttl: "30"
+    env_file:
+      - env/cm-icinga-client.env
+      - env/icinga2.env
+    depends_on:
+      - beanstalkd
+    #extra_hosts:
+      # NOTE: external service
+      #- 'nginx-proxy:10.101.2.83'
+      #- 'nginx-proxy:192.168.252.101'
+      #- 'nginx-proxy:192.168.0.5'
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./share/resolv.conf:/etc/resolv.conf:ro
+    networks:
+      mon:
+        ipv4_address: 172.25.0.35
 
 
   icinga2-satellite:
@@ -331,7 +358,8 @@ services:
       - ./share/icinga2/usr/lib/monitoring-plugins/check_ssl_cert:/usr/lib/monitoring-plugins/check_ssl_cert:ro
       - ./share/icinga2/etc/icinga2/objects:/etc/icinga2/objects
     links:
-      - database:database
+      - beanstalkd:beanstalkd
+      - memcached:memcached
     networks:
       mon:
         ipv4_address: 172.25.0.38
