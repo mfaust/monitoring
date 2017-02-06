@@ -158,7 +158,7 @@ services:
 
   icinga2-core:
     restart: always
-    image: bodsch/docker-icinga2:1702-01
+    image: bodsch/docker-icinga2:1702-02
     container_name: icinga2-core
     hostname: icinga2-core
     labels:
@@ -244,6 +244,7 @@ services:
       com.dnsdock.ttl: "0"
     env_file:
       - env/icinga2.env
+      - env/icinga2-cert-service.env
     depends_on:
       - nginx
       - icinga2-core
