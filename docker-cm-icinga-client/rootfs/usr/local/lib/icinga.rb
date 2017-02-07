@@ -41,7 +41,7 @@ module Icinga
       @icingaApiPass  = params[:icingaApiPass]  ? params[:icingaApiPass]  : nil
       mqHost          = params[:mqHost]         ? params[:mqHost]         : 'localhost'
       mqPort          = params[:mqPort]         ? params[:mqPort]         : 11300
-      @mqQueue        = params[:mqQueue]        ? params[:mqQueue]        : 'mq-graphite'
+      @mqQueue        = params[:mqQueue]        ? params[:mqQueue]        : 'mq-icinga'
 
       @icingaApiUrlBase = sprintf( 'https://%s:%d', @icingaHost, @icingaApiPort )
       @nodeName         = Socket.gethostbyname( Socket.gethostname ).first

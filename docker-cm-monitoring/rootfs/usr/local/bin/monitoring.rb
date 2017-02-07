@@ -406,7 +406,7 @@ class Monitoring
         logger.debug( 'send message to \'mq-discover\'' )
         self.messageQueue( { :cmd => 'info', :node => host, :queue => 'mq-discover', :payload => {}, :prio => 2, :ttr => 1, :delay => 0 } )
 
-        sleep( 4 )
+        sleep( 5 )
 
         c = MessageQueue::Consumer.new( @MQSettings )
 
