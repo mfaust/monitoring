@@ -162,7 +162,7 @@ services:
 
   grafana:
     restart: always
-    image: bodsch/docker-grafana:1612-01
+    image: bodsch/docker-grafana:1701-02
     container_name: grafana
     hostname: grafana
     labels:
@@ -232,7 +232,7 @@ services:
 
   icingaweb2:
     restart: always
-    image: bodsch/docker-icingaweb2:1612-01
+    image: bodsch/docker-icingaweb2:1702-01
     container_name: icingaweb2
     hostname: icingaweb2
     labels:
@@ -297,23 +297,23 @@ services:
         ipv4_address: 172.25.0.40
 
 
-  cm-external-discover:
-    restart: always
-    build: ../../docker-cm-external-discover
-    container_name: cm-external-discover
-    hostname: cm-external-discover
-    labels:
-      com.dnsdock.image: "cm-external-discover"
-      com.dnsdock.alias: "cm-external-discover"
-      com.dnsdock.ttl: "30"
-    env_file:
-      - env/cm-external-discover.env
-    depends_on:
-      - cm-monitoring
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ./share/monitoring/etc/cm-monitoring.yaml:/etc/cm-monitoring.yaml
-      - ./data:/srv
-    networks:
-      mon:
-        ipv4_address: 172.25.0.41
+#  cm-external-discover:
+#    restart: always
+#    build: ../../docker-cm-external-discover
+#    container_name: cm-external-discover
+#    hostname: cm-external-discover
+#    labels:
+#      com.dnsdock.image: "cm-external-discover"
+#      com.dnsdock.alias: "cm-external-discover"
+#      com.dnsdock.ttl: "30"
+#    env_file:
+#      - env/cm-external-discover.env
+#    depends_on:
+#      - cm-monitoring
+#    volumes:
+#      - /etc/localtime:/etc/localtime:ro
+#      - ./share/monitoring/etc/cm-monitoring.yaml:/etc/cm-monitoring.yaml
+#      - ./data:/srv
+#    networks:
+#      mon:
+#        ipv4_address: 172.25.0.41
