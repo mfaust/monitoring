@@ -10,7 +10,7 @@ mq:
 monitoring-services:
   - discovery: true
   - grafana: true
-  - icinga2: false
+  - icinga2: true
 
 # fuer den rest-service
 rest-service:

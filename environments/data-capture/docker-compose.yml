@@ -302,8 +302,8 @@ services:
       com.dnsdock.alias: "cm-icinga-client"
       com.dnsdock.ttl: "30"
     env_file:
-      - env/cm-icinga-client.env
       - env/icinga2.env
+      - env/cm-icinga-client.env
     depends_on:
       - beanstalkd
     #extra_hosts:
