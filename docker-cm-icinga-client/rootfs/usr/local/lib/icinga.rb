@@ -35,13 +35,15 @@ module Icinga
 
     def initialize( params = {} )
 
-      @icingaHost     = params[:icingaHost]     ? params[:icingaHost]     : 'localhost'
-      @icingaApiPort  = params[:icingaApiPort]  ? params[:icingaApiPort]  : 5665
-      @icingaApiUser  = params[:icingaApiUser]  ? params[:icingaApiUser]  : nil
-      @icingaApiPass  = params[:icingaApiPass]  ? params[:icingaApiPass]  : nil
-      mqHost          = params[:mqHost]         ? params[:mqHost]         : 'localhost'
-      mqPort          = params[:mqPort]         ? params[:mqPort]         : 11300
-      @mqQueue        = params[:mqQueue]        ? params[:mqQueue]        : 'mq-icinga'
+      @icingaHost       = params[:icingaHost]      ? params[:icingaHost]       : 'localhost'
+      @icingaApiPort    = params[:icingaApiPort]   ? params[:icingaApiPort]    : 5665
+      @icingaApiUser    = params[:icingaApiUser]   ? params[:icingaApiUser]    : nil
+      @icingaApiPass    = params[:icingaApiPass]   ? params[:icingaApiPass]    : nil
+      @icingaCluser     = params[:icingaCluser]    ? params[:icingaCluser]     : false
+      @icingaSatellite  = params[:icingaSatellite] ? params[:icingaSatellite]  : nil
+      mqHost            = params[:mqHost]          ? params[:mqHost]           : 'localhost'
+      mqPort            = params[:mqPort]          ? params[:mqPort]           : 11300
+      @mqQueue          = params[:mqQueue]         ? params[:mqQueue]          : 'mq-icinga'
 
       @icingaApiUrlBase = sprintf( 'https://%s:%d', @icingaHost, @icingaApiPort )
       @nodeName         = Socket.gethostbyname( Socket.gethostname ).first
@@ -51,16 +53,19 @@ module Icinga
         :beanstalkPort => mqPort
       }
 
-      version              = '1.3.2-dev'
-      date                 = '2017-02-01'
+      version              = '1.3.3-dev'
+      date                 = '2017-02-07'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' Icinga2 Management' )
       logger.info( "  Version #{version} (#{date})" )
       logger.info( '  Copyright 2016-2017 Bodo Schulz' )
       logger.info( "  Backendsystem #{@icingaApiUrlBase}" )
+      logger.info( sprintf( '  cluster enabled: %s', @icingaCluser ? 'true' : 'false' ) )
+      if( @icingaCluser == true )
+          logger.info( sprintf( '    satellite endpoint: %s', @icingaSatellite ) )
+      end
       logger.info( '  used Services:' )
-#       logger.info( "    - graphite     : #{@graphiteURI}" )
       logger.info( "    - message Queue: #{mqHost}:#{mqPort}/#{@mqQueue}" )
       logger.info( '-----------------------------------------------------------------' )
       logger.info( '' )

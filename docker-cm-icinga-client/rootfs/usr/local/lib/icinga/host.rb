@@ -8,8 +8,9 @@ module Icinga
       code        = nil
       result      = {}
 
-      host = params.dig(:host) || nil
-      vars = params.dig(:vars) || {}
+      host     = params.dig(:host) || nil
+      vars     = params.dig(:vars) || {}
+      endpoint = nil
 
       if( host == nil )
 
@@ -33,6 +34,10 @@ module Icinga
           "enable_notifications" => false
         }
       }
+
+      if( @icingaCluser == true && @icingaSatellite != nil )
+        payload['attrs']['vars']['client_endpoint'] = @icingaSatellite
+      end
 
       if( ! vars.empty? )
         payload['attrs']['vars'] = vars
