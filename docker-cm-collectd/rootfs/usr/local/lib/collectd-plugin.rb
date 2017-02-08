@@ -1523,15 +1523,16 @@ module Collecd
 
     format       = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
 
-    result.push( sprintf( format, @Host, @Service, mbean, 'server', 'cache_hits'      , @interval, cacheHits ) )
-    result.push( sprintf( format, @Host, @Service, mbean, 'server', 'cache_evicts'    , @interval, cacheEvicts ) )
-    result.push( sprintf( format, @Host, @Service, mbean, 'server', 'cache_entries'   , @interval, cacheEntries ) )
-    result.push( sprintf( format, @Host, @Service, mbean, 'server', 'cache_interval'  , @interval, cacheInterval ) )
-    result.push( sprintf( format, @Host, @Service, mbean, 'server', 'cache_size'      , @interval, cacheSize ) )
-    result.push( sprintf( format, @Host, @Service, mbean, 'server', 'sequence_number' , @interval, reqSeqNumber ) )
-    result.push( sprintf( format, @Host, @Service, mbean, 'server', 'connection_count', @interval, connectionCount ) )
-    result.push( sprintf( format, @Host, @Service, mbean, 'server', 'uptime'          , @interval, uptime ) )
-    result.push( sprintf( format, @Host, @Service, mbean, 'server', 'runlevel'        , @interval, runlevel ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'ResourceCache', 'hits'            , @interval, cacheHits ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'ResourceCache', 'evicts'          , @interval, cacheEvicts ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'ResourceCache', 'entries'         , @interval, cacheEntries ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'ResourceCache', 'interval'        , @interval, cacheInterval ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'ResourceCache', 'size'            , @interval, cacheSize ) )
+
+    result.push( sprintf( format, @Host, @Service, mbean, 'Repository'   , 'sequence_number' , @interval, reqSeqNumber ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'server'       , 'connection_count', @interval, connectionCount ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'server'       , 'uptime'          , @interval, uptime ) )
+    result.push( sprintf( format, @Host, @Service, mbean, 'server'       , 'runlevel'        , @interval, runlevel ) )
 
     return result
 

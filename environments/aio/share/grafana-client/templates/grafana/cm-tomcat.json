@@ -1,9 +1,9 @@
 {
   "dashboard": {
     "id": null,
-    "title": "%SHORTHOST% Tomcat",
-    "originalTitle": "%SHORTHOST% Tomcat",
-    "tags": [ "%TAG%" ],
+    "title": "%SHORTHOST% - Tomcats",
+    "originalTitle": "%SHORTHOST% - Tomcatss",
+    "tags": [ "%TAG%", "tomcats" ],
     "style": "dark",
     "timezone": "browser",
     "editable": true,
@@ -12,36 +12,13 @@
     "rows": [
       {
         "collapse": false,
-        "height": 42,
-        "panels": [
-          {
-            "content": "<h3><center><a href=\"/grafana/dashboard/db/%HOST%-tomcats?var-application=%SERVICE%\">Tomcat</a></center></h3>",
-            "id": 23,
-            "links": [],
-            "mode": "html",
-            "span": 12,
-            "title": "",
-            "type": "text"
-          }
-        ],
-        "repeat": null,
-        "repeatIteration": null,
-        "repeatRowId": null,
-        "showTitle": false,
-        "title": "Dashboard Row",
-        "titleSize": "h6"
-      },
-      {
-        "collapse": true,
-        "editable": true,
         "height": "25px",
         "panels": [
           {
             "content": "<h2><center>Tomcat</center></h2>",
             "editable": true,
             "error": false,
-            "id": 70,
-            "isNew": true,
+            "id": 10,
             "links": [],
             "mode": "html",
             "span": 12,
@@ -50,28 +27,27 @@
             "type": "text"
           }
         ],
-        "title": ""
+        "repeat": null,
+        "repeatIteration": null,
+        "repeatRowId": null,
+        "showTitle": false,
+        "title": "Row title",
+        "titleSize": "h6"
       },
       {
-        "collapse": true,
-        "editable": true,
+        "collapse": false,
         "height": "150px",
         "panels": [
           {
             "aliasColors": {},
             "bars": false,
             "datasource": "graphite",
+            "decimals": 2,
             "editable": true,
             "error": false,
             "fill": 3,
-            "grid": {
-              "threshold1": null,
-              "threshold1Color": "rgba(216, 200, 27, 0.27)",
-              "threshold2": null,
-              "threshold2Color": "rgba(234, 112, 112, 0.22)"
-            },
-            "id": 72,
-            "isNew": true,
+            "grid": {},
+            "id": 11,
             "legend": {
               "alignAsTable": true,
               "avg": false,
@@ -80,9 +56,9 @@
               "min": false,
               "rightSide": true,
               "show": true,
+              "sideWidth": 230,
               "total": false,
-              "values": true,
-              "sideWidth": 230
+              "values": true
             },
             "lines": true,
             "linewidth": 1,
@@ -92,7 +68,20 @@
             "pointradius": 5,
             "points": false,
             "renderer": "flot",
-            "seriesOverrides": [],
+            "seriesOverrides": [
+              {
+                "alias": "percent",
+                "color": "#C15C17",
+                "fill": 0,
+                "yaxis": 2
+              },
+              {
+                "alias": "percent (avg)",
+                "color": "#BF1B00",
+                "fill": 0,
+                "yaxis": 2
+              }
+            ],
             "span": 12,
             "stack": false,
             "steppedLine": false,
@@ -100,22 +89,35 @@
               {
                 "hide": false,
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.%SERVICE%-Memory-heap_memory.count-max, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$application-Memory-heap_memory.count-max, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "hide": false,
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.%SERVICE%-Memory-heap_memory.count-committed, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$application-Memory-heap_memory.count-committed, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "hide": false,
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.%SERVICE%-Memory-heap_memory.count-used, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$application-Memory-heap_memory.count-used, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "hide": false,
+                "refId": "D",
+                "target": "alias(smartSummarize(aliasSub(collectd.%HOST%.$application-Memory-heap_memory.count-used_percent, '(.*)-', ''), '3m', 'avg'), 'percent (avg)')",
+                "textEditor": false
+              },
+              {
+                "hide": true,
+                "refId": "E",
+                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.$application-Memory-heap_memory.count-used_percent, '(.*)-', ''), 'percent'))",
                 "textEditor": false
               }
             ],
+            "thresholds": [],
             "timeFrom": null,
             "timeShift": null,
             "title": "Heap Memory",
@@ -123,12 +125,15 @@
               "msResolution": false,
               "ordering": "alphabetical",
               "shared": true,
-              "value_type": "cumulative",
-              "sort": 0
+              "sort": 0,
+              "value_type": "cumulative"
             },
             "type": "graph",
             "xaxis": {
-              "show": true
+              "mode": "time",
+              "name": null,
+              "show": true,
+              "values": []
             },
             "yaxes": [
               {
@@ -139,38 +144,37 @@
                 "show": true
               },
               {
-                "format": "short",
+                "format": "none",
+                "label": "percent",
                 "logBase": 1,
-                "max": null,
+                "max": "100",
                 "min": null,
-                "show": false
+                "show": true
               }
-            ],
-            "decimals": 2
+            ]
           }
         ],
-        "title": "Heap Memory"
+        "repeat": null,
+        "repeatIteration": null,
+        "repeatRowId": null,
+        "showTitle": false,
+        "title": "Heap Memory",
+        "titleSize": "h6"
       },
       {
-        "collapse": true,
-        "editable": true,
+        "collapse": false,
         "height": "150px",
         "panels": [
           {
             "aliasColors": {},
             "bars": false,
             "datasource": "graphite",
+            "decimals": 2,
             "editable": true,
             "error": false,
             "fill": 1,
-            "grid": {
-              "threshold1": null,
-              "threshold1Color": "rgba(216, 200, 27, 0.27)",
-              "threshold2": null,
-              "threshold2Color": "rgba(234, 112, 112, 0.22)"
-            },
-            "id": 74,
-            "isNew": true,
+            "grid": {},
+            "id": 12,
             "legend": {
               "alignAsTable": true,
               "avg": false,
@@ -179,9 +183,9 @@
               "min": false,
               "rightSide": true,
               "show": true,
+              "sideWidth": 230,
               "total": false,
-              "values": true,
-              "sideWidth": 230
+              "values": true
             },
             "lines": true,
             "linewidth": 1,
@@ -191,22 +195,48 @@
             "pointradius": 5,
             "points": false,
             "renderer": "flot",
-            "seriesOverrides": [],
+            "seriesOverrides": [
+              {
+                "alias": "percent",
+                "color": "#C15C17",
+                "fill": 0,
+                "yaxis": 2
+              },
+              {
+                "alias": "percent (avg)",
+                "color": "#BF1B00",
+                "fill": 0,
+                "yaxis": 2
+              }
+            ],
             "span": 12,
             "stack": false,
             "steppedLine": false,
             "targets": [
               {
-                "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.%SERVICE%-Memory-perm_memory.count-committed, '(.*)-', ''))",
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$application-Memory-perm_memory.count-committed, '(.*)-', ''))",
                 "textEditor": false
               },
               {
-                "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.%SERVICE%-Memory-perm_memory.count-used, '(.*)-', ''))",
+                "refId": "B",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$application-Memory-perm_memory.count-used, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "hide": false,
+                "refId": "C",
+                "target": "alias(smartSummarize(aliasSub(collectd.%HOST%.$application-Memory-perm_memory.count-used_percent, '(.*)-', ''), '3m', 'avg'), 'percent (avg)')",
+                "textEditor": false
+              },
+              {
+                "hide": true,
+                "refId": "D",
+                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.$application-Memory-perm_memory.count-used_percent, '(.*)-', ''), 'percent'))",
                 "textEditor": false
               }
             ],
+            "thresholds": [],
             "timeFrom": null,
             "timeShift": null,
             "title": "Perm Memory",
@@ -214,12 +244,15 @@
               "msResolution": false,
               "ordering": "alphabetical",
               "shared": true,
-              "value_type": "cumulative",
-              "sort": 0
+              "sort": 0,
+              "value_type": "cumulative"
             },
             "type": "graph",
             "xaxis": {
-              "show": true
+              "mode": "time",
+              "name": null,
+              "show": true,
+              "values": []
             },
             "yaxes": [
               {
@@ -230,21 +263,25 @@
                 "show": true
               },
               {
-                "format": "short",
+                "format": "none",
+                "label": "percent",
                 "logBase": 1,
-                "max": null,
+                "max": "100",
                 "min": null,
-                "show": false
+                "show": true
               }
-            ],
-            "decimals": 2
+            ]
           }
         ],
-        "title": "Perm Memory"
+        "repeat": null,
+        "repeatIteration": null,
+        "repeatRowId": null,
+        "showTitle": false,
+        "title": "Perm Memory",
+        "titleSize": "h6"
       },
       {
-        "collapse": true,
-        "editable": true,
+        "collapse": false,
         "height": "150px",
         "panels": [
           {
@@ -256,14 +293,8 @@
             "editable": true,
             "error": false,
             "fill": 3,
-            "grid": {
-              "threshold1": null,
-              "threshold1Color": "rgba(216, 200, 27, 0.27)",
-              "threshold2": null,
-              "threshold2Color": "rgba(234, 112, 112, 0.22)"
-            },
-            "id": 6,
-            "isNew": true,
+            "grid": {},
+            "id": 13,
             "legend": {
               "alignAsTable": true,
               "avg": false,
@@ -272,9 +303,9 @@
               "min": false,
               "rightSide": true,
               "show": true,
+              "sideWidth": 230,
               "total": false,
-              "values": true,
-              "sideWidth": 230
+              "values": true
             },
             "lines": true,
             "linewidth": 1,
@@ -285,22 +316,36 @@
             "pointradius": 5,
             "points": false,
             "renderer": "flot",
-            "seriesOverrides": [],
+            "seriesOverrides": [
+              {
+                "alias": "percent",
+                "color": "#C15C17",
+                "fill": 0,
+                "yaxis": 2
+              },
+              {
+                "alias": "percent (avg)",
+                "color": "#BF1B00",
+                "fill": 0,
+                "yaxis": 2
+              }
+            ],
             "span": 12,
             "stack": false,
             "steppedLine": false,
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.%SERVICE%-GCParNew-gc_duration.count-duration, '(.*)-', ''), 'Par New'))",
+                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.$application-GCParNew-gc_duration.count-duration, '(.*)-', ''), 'Par New'))",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.%SERVICE%-GCConcurrentMarkSweep-gc_duration.count-duration, '(.*)-', ''), 'Con Mark Sweep'))",
+                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.$application-GCConcurrentMarkSweep-gc_duration.count-duration, '(.*)-', ''), 'Con Mark Sweep'))",
                 "textEditor": false
               }
             ],
+            "thresholds": [],
             "timeFrom": null,
             "timeShift": null,
             "title": "Garbage Collector Duration",
@@ -313,33 +358,39 @@
             },
             "type": "graph",
             "xaxis": {
-              "show": true
+              "mode": "time",
+              "name": null,
+              "show": true,
+              "values": []
             },
             "yaxes": [
               {
-                "format": "ms",
-                "label": null,
+                "format": "bytes",
                 "logBase": 1,
                 "max": null,
                 "min": null,
                 "show": true
               },
               {
-                "format": "short",
-                "label": null,
+                "format": "none",
+                "label": "percent",
                 "logBase": 1,
-                "max": null,
+                "max": "100",
                 "min": null,
                 "show": true
               }
             ]
           }
         ],
-        "title": "Garbage Collector"
+        "repeat": null,
+        "repeatIteration": null,
+        "repeatRowId": null,
+        "showTitle": false,
+        "title": "Garbage Collector",
+        "titleSize": "h6"
       },
       {
-        "collapse": true,
-        "editable": true,
+        "collapse": false,
         "height": "150px",
         "panels": [
           {
@@ -351,14 +402,8 @@
             "editable": true,
             "error": false,
             "fill": 3,
-            "grid": {
-              "threshold1": null,
-              "threshold1Color": "rgba(216, 200, 27, 0.27)",
-              "threshold2": null,
-              "threshold2Color": "rgba(234, 112, 112, 0.22)"
-            },
-            "id": 15,
-            "isNew": true,
+            "grid": {},
+            "id": 14,
             "legend": {
               "alignAsTable": true,
               "avg": false,
@@ -367,9 +412,9 @@
               "min": false,
               "rightSide": true,
               "show": true,
+              "sideWidth": 230,
               "total": false,
-              "values": true,
-              "sideWidth": 230
+              "values": true
             },
             "lines": true,
             "linewidth": 1,
@@ -380,17 +425,31 @@
             "pointradius": 5,
             "points": false,
             "renderer": "flot",
-            "seriesOverrides": [],
+            "seriesOverrides": [
+              {
+                "alias": "percent",
+                "color": "#C15C17",
+                "fill": 0,
+                "yaxis": 2
+              },
+              {
+                "alias": "percent (avg)",
+                "color": "#BF1B00",
+                "fill": 0,
+                "yaxis": 2
+              }
+            ],
             "span": 12,
             "stack": false,
             "steppedLine": false,
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.%SERVICE%-Threading-threading.*, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$application-Threading-threading.*, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
+            "thresholds": [],
             "timeFrom": null,
             "timeShift": null,
             "title": "Threads",
@@ -403,33 +462,39 @@
             },
             "type": "graph",
             "xaxis": {
-              "show": true
+              "mode": "time",
+              "name": null,
+              "show": true,
+              "values": []
             },
             "yaxes": [
               {
-                "format": "none",
-                "label": null,
+                "format": "bytes",
                 "logBase": 1,
                 "max": null,
                 "min": null,
                 "show": true
               },
               {
-                "format": "short",
-                "label": null,
+                "format": "none",
+                "label": "percent",
                 "logBase": 1,
-                "max": null,
+                "max": "100",
                 "min": null,
                 "show": true
               }
             ]
           }
         ],
-        "title": "Threads"
+        "repeat": null,
+        "repeatIteration": null,
+        "repeatRowId": null,
+        "showTitle": false,
+        "title": "Threads",
+        "titleSize": "h6"
       },
       {
-        "collapse": true,
-        "editable": true,
+        "collapse": false,
         "height": "300px",
         "panels": [
           {
@@ -441,14 +506,8 @@
             "editable": true,
             "error": false,
             "fill": 3,
-            "grid": {
-              "threshold1": null,
-              "threshold1Color": "rgba(216, 200, 27, 0.27)",
-              "threshold2": null,
-              "threshold2Color": "rgba(234, 112, 112, 0.22)"
-            },
+            "grid": {},
             "id": 15,
-            "isNew": true,
             "legend": {
               "alignAsTable": true,
               "avg": false,
@@ -457,9 +516,9 @@
               "min": false,
               "rightSide": true,
               "show": true,
+              "sideWidth": 230,
               "total": false,
-              "values": true,
-              "sideWidth": 230
+              "values": true
             },
             "lines": true,
             "linewidth": 1,
@@ -470,17 +529,31 @@
             "pointradius": 5,
             "points": false,
             "renderer": "flot",
-            "seriesOverrides": [],
+            "seriesOverrides": [
+              {
+                "alias": "percent",
+                "color": "#C15C17",
+                "fill": 0,
+                "yaxis": 2
+              },
+              {
+                "alias": "percent (avg)",
+                "color": "#BF1B00",
+                "fill": 0,
+                "yaxis": 2
+              }
+            ],
             "span": 12,
             "stack": false,
             "steppedLine": false,
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.%SERVICE%-Manager-sessions.*, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$application-Manager-sessions.*, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
+            "thresholds": [],
             "timeFrom": null,
             "timeShift": null,
             "title": "Tomcat Sessions",
@@ -493,29 +566,36 @@
             },
             "type": "graph",
             "xaxis": {
-              "show": true
+              "mode": "time",
+              "name": null,
+              "show": true,
+              "values": []
             },
             "yaxes": [
               {
-                "format": "none",
-                "label": null,
+                "format": "bytes",
                 "logBase": 1,
                 "max": null,
                 "min": null,
                 "show": true
               },
               {
-                "format": "short",
-                "label": null,
+                "format": "none",
+                "label": "percent",
                 "logBase": 1,
-                "max": null,
+                "max": "100",
                 "min": null,
                 "show": true
               }
             ]
           }
         ],
-        "title": "Tomcat Sessions"
+        "repeat": null,
+        "repeatIteration": null,
+        "repeatRowId": null,
+        "showTitle": false,
+        "title": "Tomcat Sessions",
+        "titleSize": "h6"
       }
     ],
     "time": {
@@ -544,8 +624,31 @@
         "30d"
       ]
     },
+
+
     "templating": {
-      "list": []
+      "list": [
+        {
+          "allValue": null,
+          "current": {},
+          "datasource": "graphite",
+          "hide": 0,
+          "includeAll": false,
+          "label": null,
+          "multi": false,
+          "name": "application",
+          "options": [],
+          "query": ".*.%HOST%.*-Memory*",
+          "refresh": 1,
+          "regex": "/(.*)-Memory-perm_memory(.*)/",
+          "sort": 0,
+          "tagValuesQuery": "",
+          "tags": [],
+          "tagsQuery": "",
+          "type": "query",
+          "useTags": false
+        }
+      ]
     },
     "annotations": {
       "list": [

@@ -236,7 +236,7 @@
             "id": 9,
             "targets": [
               {
-                "target": "collectd.%HOST%.MLS-Server-server.count-sequence_number",
+                "target": "collectd.%HOST%.MLS-Server-Repository.count-sequence_number",
                 "refId": "A",
                 "hide": false
               }
