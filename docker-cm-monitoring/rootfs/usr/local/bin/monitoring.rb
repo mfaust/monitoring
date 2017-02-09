@@ -328,15 +328,15 @@ class Monitoring
         config          = hash.keys.include?('config')       ? hash['config']       : {}
       end
 
-        logger.debug( sprintf( 'force      : %s', force            ? 'true' : 'false' ) )
-        logger.debug( sprintf( 'discovery  : %s', enableDiscovery  ? 'true' : 'false' ) )
-        logger.debug( sprintf( 'grafana    : %s', enabledGrafana   ? 'true' : 'false' ) )
-        logger.debug( sprintf( 'icinga     : %s', enabledIcinga    ? 'true' : 'false' ) )
-        logger.debug( sprintf( 'annotation : %s', annotation       ? 'true' : 'false' ) )
-        logger.debug( sprintf( 'overview   : %s', grafanaOverview  ? 'true' : 'false' ) )
-        logger.debug( sprintf( 'services   : %s', services ) )
-        logger.debug( sprintf( 'tags       : %s', tags ) )
-        logger.debug( sprintf( 'config     : %s', config ) )
+      logger.debug( sprintf( 'force      : %s', force            ? 'true' : 'false' ) )
+      logger.debug( sprintf( 'discovery  : %s', enableDiscovery  ? 'true' : 'false' ) )
+      logger.debug( sprintf( 'grafana    : %s', enabledGrafana   ? 'true' : 'false' ) )
+      logger.debug( sprintf( 'icinga     : %s', enabledIcinga    ? 'true' : 'false' ) )
+      logger.debug( sprintf( 'annotation : %s', annotation       ? 'true' : 'false' ) )
+      logger.debug( sprintf( 'overview   : %s', grafanaOverview  ? 'true' : 'false' ) )
+      logger.debug( sprintf( 'services   : %s', services ) )
+      logger.debug( sprintf( 'tags       : %s', tags ) )
+      logger.debug( sprintf( 'config     : %s', config ) )
 
       if( force == true )
 
@@ -360,10 +360,9 @@ class Monitoring
           self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-discover', :payload => payload, :prio => 0 } )
         end
 
-        sleep( 2 )
-
         logger.info( 'done' )
 
+        sleep( 2 )
       end
 
       # now, we can write an own configiguration per node when we add them, hurray
@@ -400,7 +399,7 @@ class Monitoring
 
         logger.info( 'create icinga checks and notifications' )
 
-        sleep( 3 )
+        sleep( 4 )
         # in first, we need the discovered services ...
         logger.info( 'we need information from discovery service' )
         logger.debug( 'send message to \'mq-discover\'' )
@@ -408,13 +407,33 @@ class Monitoring
 
         sleep( 5 )
 
-        c = MessageQueue::Consumer.new( @MQSettings )
-
         resultArray = Array.new()
         threads     = Array.new()
 
-        discoveryStatus = c.getJobFromTube('mq-discover-info')
-        discoveryPayload = discoveryStatus.dig( :body, 'payload' )
+        c = MessageQueue::Consumer.new( @MQSettings )
+
+        discoveryStatus  = nil
+        discoveryPayload = nil
+
+#         discoveryStatus  = c.getJobFromTube('mq-discover-info')
+#         discoveryPayload = discoveryStatus.dig( :body, 'payload' )
+
+        for y in 1..10
+
+          result      = c.getJobFromTube('mq-discover-info')
+
+          if( result != nil )
+            discoveryStatus = result
+            break
+          else
+            logger.debug( sprintf( 'Waiting for data %s ... %d', 'mq-discover-info', y ) )
+            sleep( 3 )
+          end
+        end
+
+        if( discoveryStatus != nil )
+          discoveryPayload = discoveryStatus.dig( :body, 'payload' )
+        end
 
         if( discoveryPayload != nil )
 
