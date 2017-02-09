@@ -56,7 +56,7 @@ module Grafana
 
         dns = @db.dnsData( { :ip => host, :short => host } )
 
-        logger.debug( dns.class.to_s )
+#         logger.debug( dns.class.to_s )
         logger.debug( dns )
 
         if( dns != nil )
@@ -79,7 +79,6 @@ module Grafana
         else
           logger.error( 'no DNS entry found' )
         end
-
 
       end
 
@@ -151,7 +150,8 @@ module Grafana
           normalizedName  = self.normalizeService( service )
 
           templateName    = template != nil ? template : serviceName
-          serviceTemplate = self.templateForService( serviceName )
+          serviceTemplate = self.templateForService( templateName )
+#           serviceTemplate = self.templateForService( serviceName )
 
           if( ! ['mongodb', 'mysql', 'postgres'].include?( serviceName ) )
             additionalTemplatePaths << self.templateForService( 'tomcat' )
@@ -212,7 +212,7 @@ module Grafana
             sleep( 5 )
           end
 
-          logger.debug( 'found measurement data' )
+#           logger.debug( 'found measurement data' )
         rescue => e
           logger.error( e )
         end
@@ -486,13 +486,13 @@ module Grafana
       # @return [Hash, #read]
       def listDashboards( params = {} )
 
-        logger.debug( 'listDashboards()' )
+#         logger.debug( 'listDashboards()' )
 
         host            = params[:host]     ? params[:host]     : nil
 
         data = self.searchDashboards( { :tags   => host } )
 
-        logger.debug( data )
+#         logger.debug( data )
 
         if( data == nil )
 
@@ -504,7 +504,7 @@ module Grafana
 
         data = data.collect { |item| item['uri'] }
 
-        logger.debug( data )
+#         logger.debug( data )
 
         data.each do |d|
           d.gsub!( sprintf( 'db/%s-', host ), '' )
@@ -602,8 +602,14 @@ module Grafana
 
       def templateForService( serviceName )
 
+        # TODO
+        # look for '%s/%s.json'  and  '%s/services/%s.json'
+        # first match wins
+
+        return
+        
         template = sprintf( '%s/services/%s.json', @templateDirectory, serviceName )
-        logger.debug( template )
+#         logger.debug( template )
 
         if( ! File.exist?( template ) )
 

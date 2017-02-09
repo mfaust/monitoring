@@ -38,7 +38,7 @@ module MBean
           break
         else
   #        logger.debug( sprintf( 'Waiting for data %s ... %d', memcacheKey, y ) )
-          sleep( 3 )
+          sleep( 5 )
         end
       end
 
@@ -147,7 +147,7 @@ module MBean
         result = true
       elsif( mbeanExists != nil && key != nil )
 
-        logger.debug( sprintf( 'look for key %s', key ) )
+#         logger.debug( sprintf( 'look for key %s', key ) )
 
         mbeanValue = mbeanExists['value'] ? mbeanExists['value'] : nil
 
@@ -185,8 +185,8 @@ module MBean
           data = { service => result }
           break
         else
-          logger.debug( sprintf( 'Waiting for data %s ... %d', memcacheKey, y ) )
-          sleep( 3 )
+#           logger.debug( sprintf( 'Waiting for data %s ... %d', memcacheKey, y ) )
+          sleep( 5 )
         end
       end
 

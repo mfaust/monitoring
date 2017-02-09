@@ -8,7 +8,7 @@ module Grafana
     # @return [Mixed, #read]  return false at Error, or an JSON on success
     def getRequest( endpoint )
 
-      logger.debug("Running: Grafana::HttpRequest::#{__method__} on #{endpoint}")
+#       logger.debug("Running: Grafana::HttpRequest::#{__method__} on #{endpoint}")
 
       return self.issueRequest( 'GET', endpoint )
     end
@@ -19,7 +19,7 @@ module Grafana
     # @return [Mixed, #read]  return false at Error, or an JSON on success
     def postRequest( endpoint, postdata = {} )
 
-     logger.debug("Running: Grafana::HttpRequest::#{__method__} on #{endpoint}")
+#      logger.debug("Running: Grafana::HttpRequest::#{__method__} on #{endpoint}")
 
       return self.issueRequest( 'POST', endpoint, postdata )
     end
@@ -30,7 +30,7 @@ module Grafana
     # @return [Mixed, #read]  return false at Error, or an JSON on success
     def putRequest( endpoint, putdata = {} )
 
-      logger.debug("Running: Grafana::HttpRequest::#{__method__} on #{endpoint}")
+#       logger.debug("Running: Grafana::HttpRequest::#{__method__} on #{endpoint}")
 
       return self.issueRequest( 'PUT', endpoint, putdata )
     end
@@ -41,7 +41,7 @@ module Grafana
     # @return [Mixed, #read]  return false at Error, or an JSON on success
     def deleteRequest( endpoint )
 
-      logger.debug("Running: Grafana::HttpRequest::#{__method__} on #{endpoint}")
+#       logger.debug("Running: Grafana::HttpRequest::#{__method__} on #{endpoint}")
 
       return self.issueRequest( 'DELETE', endpoint )
     end
@@ -52,7 +52,7 @@ module Grafana
     # @return [Mixed, #read]  return false at Error, or an JSON on success
     def patchRequest( endpoint, patchdata = {} )
 
-      logger.debug("Running: Grafana::HttpRequest::#{__method__} on #{endpoint}")
+#       logger.debug("Running: Grafana::HttpRequest::#{__method__} on #{endpoint}")
 
       return self.issueRequest( 'PATCH', endpoint, patchdata )
     end
@@ -91,39 +91,31 @@ module Grafana
           return false
         end
 
-        if( resonspe != nil )
+        responseCode = response.code.to_i
+        responseBody = response.body
 
-          responseCode = response.code.to_i
-          responseBody = response.body
+        if( ( responseCode >= 200 && responseCode <= 299 ) || ( responseCode >= 400 && responseCode <= 499 ) )
 
-#           logger.debug( response )
+          begin
+            result            = JSON.parse( responseBody )
 
-          if( ( responseCode >= 200 && responseCode <= 299 ) || ( responseCode >= 400 && responseCode <= 499 ) )
-
-            begin
-              result            = JSON.parse( responseBody )
-
-              if( result['status'] )
-                result['message'] = result.dig( 'status' )
-                result['status']  = response.code.to_i
-              end
-            rescue => e
-
+            if( result['status'] )
+              result['message'] = result.dig( 'status' )
+              result['status']  = response.code.to_i
             end
-            return result
-          else
+          rescue => e
 
-            logger.error( "#{__method__} #{methodType.upcase} on #{endpoint} failed: HTTP #{response.code} - #{responseBody}" )
-
-            return JSON.parse( responseBody )
+            logger.error( e )
           end
+
+          return result
         else
 
-          return {
-            'status'  => 500,
-            'message' => 'internal error'
-          }
+          logger.error( "#{__method__} #{methodType.upcase} on #{endpoint} failed: HTTP #{response.code} - #{responseBody}" )
+
+          return JSON.parse( responseBody )
         end
+
       rescue => e
 
 #        logger.error( "Error: #{__method__} #{methodType.upcase} on #{endpoint} error: '#{e}'" )

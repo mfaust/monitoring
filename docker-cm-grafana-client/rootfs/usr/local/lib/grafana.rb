@@ -146,6 +146,7 @@ module Grafana
 
       @headers = nil
 
+      logger.debug( @url )
       logger.debug( params )
 
       if( params[:headers] && params[:headers].has_key?(:authorization) )
@@ -156,9 +157,9 @@ module Grafana
         }
       else
         # Regular login Auth
-        self.login( { :user => user, :password => password } )
+        login = self.login( { :user => user, :password => password } )
 
-        if( logger.debug( @headers ) == false )
+        if( login == false )
           return nil
         end
       end
