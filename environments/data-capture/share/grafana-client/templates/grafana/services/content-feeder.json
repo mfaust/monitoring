@@ -40,7 +40,7 @@
             "aliasColors": {},
             "bars": false,
             "datasource": "graphite",
-            "decimals": 2,
+            "decimals": 1,
             "editable": true,
             "error": false,
             "fill": 3,

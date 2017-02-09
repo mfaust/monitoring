@@ -84,7 +84,7 @@
               },
               {
                 "refId": "D",
-                "target": "alias(smartSummarize(aliasSub(collectd.%HOST%.$service-MemoryPool-Par_Eden_Space.count-used_percent, '(.*)-', ''), '5m', 'avg'), 'percent (avg)')",
+                "target": "alias(smartSummarize(aliasSub(collectd.%HOST%.$service-MemoryPool-Par_Eden_Space.count-used_percent, '(.*)-', ''), '3m', 'avg'), 'percent (avg)')",
                 "textEditor": false
               },
               {
@@ -120,7 +120,7 @@
                 "format": "none",
                 "label": "used in %",
                 "logBase": 1,
-                "max": null,
+                "max": "110",
                 "min": null,
                 "show": true
               }
@@ -240,7 +240,7 @@
                 "format": "none",
                 "label": "used in %",
                 "logBase": 1,
-                "max": null,
+                "max": "110",
                 "min": null,
                 "show": true
               }
@@ -359,7 +359,7 @@
                 "format": "none",
                 "label": "used in %",
                 "logBase": 1,
-                "max": null,
+                "max": "110",
                 "min": null,
                 "show": true
               }
@@ -479,7 +479,7 @@
                 "format": "none",
                 "label": "used in %",
                 "logBase": 1,
-                "max": null,
+                "max": "110",
                 "min": null,
                 "show": true
               }
@@ -598,7 +598,7 @@
                 "format": "none",
                 "label": "used in %",
                 "logBase": 1,
-                "max": null,
+                "max": "110",
                 "min": null,
                 "show": true
               }
@@ -717,7 +717,7 @@
                 "format": "none",
                 "label": "used in %",
                 "logBase": 1,
-                "max": null,
+                "max": "110",
                 "min": null,
                 "show": true
               }

@@ -42,7 +42,7 @@
             "aliasColors": {},
             "bars": false,
             "datasource": "graphite",
-            "decimals": 2,
+            "decimals": 1,
             "editable": true,
             "error": false,
             "fill": 3,
@@ -167,7 +167,7 @@
             "aliasColors": {},
             "bars": false,
             "datasource": "graphite",
-            "decimals": 2,
+            "decimals": 1,
             "editable": true,
             "error": false,
             "fill": 1,
@@ -262,7 +262,7 @@
                 "format": "none",
                 "label": "percent",
                 "logBase": 1,
-                "max": "100",
+                "max": "110",
                 "min": null,
                 "show": true
               }
@@ -461,7 +461,7 @@
             },
             "yaxes": [
               {
-                "format": "bytes",
+                "format": "none",
                 "logBase": 1,
                 "max": null,
                 "min": null,
@@ -471,7 +471,7 @@
                 "format": "none",
                 "label": "percent",
                 "logBase": 1,
-                "max": "100",
+                "max": "110",
                 "min": null,
                 "show": true
               }
@@ -573,7 +573,7 @@
                 "format": "none",
                 "label": "percent",
                 "logBase": 1,
-                "max": "100",
+                "max": "110",
                 "min": null,
                 "show": true
               }

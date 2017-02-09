@@ -169,7 +169,7 @@
             ],
             "timeFrom": null,
             "timeShift": null,
-            "title": "Statistic Resourcecache",
+            "title": "Statistic Resource Cache",
             "tooltip": {
               "msResolution": false,
               "ordering": "alphabetical",
@@ -199,7 +199,7 @@
             ]
           }
         ],
-        "title": "statistics"
+        "title": "Statistic Resource Cache"
       },
       {
         "collapse": false,
@@ -283,7 +283,7 @@
             ]
           }
         ],
-        "title": "statistics"
+        "title": "Statistic Jobresult"
       },
       {
         "title": "Server Resource Cache",
