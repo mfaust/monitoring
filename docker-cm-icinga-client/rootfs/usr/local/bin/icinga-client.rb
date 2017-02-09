@@ -15,18 +15,21 @@ icingaHost      = ENV['ICINGA_HOST']              ? ENV['ICINGA_HOST']          
 icingaApiPort   = ENV['ICINGA_API_PORT']          ? ENV['ICINGA_API_PORT']          : 5665
 icingaApiUser   = ENV['ICINGA_API_USER']          ? ENV['ICINGA_API_USER']          : 'admin'
 icingaApiPass   = ENV['ICINGA_API_PASSWORD']      ? ENV['ICINGA_API_PASSWORD']      : nil
-icingaCluser    = ENV['ICINGA_CLUSTER']           ? ENV['ICINGA_CLUSTER']           : false
+icingaCluster   = ENV['ICINGA_CLUSTER']           ? ENV['ICINGA_CLUSTER']           : false
 icingaSatellite = ENV['ICINGA_CLUSTER_SATELLITE'] ? ENV['ICINGA_CLUSTER_SATELLITE'] : nil
 mqHost          = ENV['MQ_HOST']                  ? ENV['MQ_HOST']                  : 'localhost'
 mqPort          = ENV['MQ_PORT']                  ? ENV['MQ_PORT']                  : 11300
 mqQueue         = ENV['MQ_QUEUE']                 ? ENV['MQ_QUEUE']                 : 'mq-icinga'
+
+# convert string to bool
+icingaCluster   = icingaCluster.to_s.eql?('true') ? true : false
 
 config = {
   :icingaHost      => icingaHost,
   :icingaApiPort   => icingaApiPort,
   :icingaApiUser   => icingaApiUser,
   :icingaApiPass   => icingaApiPass,
-  :icingaCluser    => icingaCluser,
+  :icingaCluster   => icingaCluster,
   :icingaSatellite => icingaSatellite,
   :mqHost          => mqHost,
   :mqPort          => mqPort,

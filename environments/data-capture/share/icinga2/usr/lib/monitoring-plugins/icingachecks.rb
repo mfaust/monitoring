@@ -2,6 +2,7 @@
 
 require 'optparse'
 require 'json'
+require 'yaml'
 require 'logger'
 require 'time_difference'
 

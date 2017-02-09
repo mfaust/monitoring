@@ -39,7 +39,7 @@ module Icinga
       @icingaApiPort    = params[:icingaApiPort]   ? params[:icingaApiPort]    : 5665
       @icingaApiUser    = params[:icingaApiUser]   ? params[:icingaApiUser]    : nil
       @icingaApiPass    = params[:icingaApiPass]   ? params[:icingaApiPass]    : nil
-      @icingaCluser     = params[:icingaCluser]    ? params[:icingaCluser]     : false
+      @icingaCluster    = params[:icingaCluster]   ? params[:icingaCluster]    : false
       @icingaSatellite  = params[:icingaSatellite] ? params[:icingaSatellite]  : nil
       mqHost            = params[:mqHost]          ? params[:mqHost]           : 'localhost'
       mqPort            = params[:mqPort]          ? params[:mqPort]           : 11300
@@ -61,9 +61,9 @@ module Icinga
       logger.info( "  Version #{version} (#{date})" )
       logger.info( '  Copyright 2016-2017 Bodo Schulz' )
       logger.info( "  Backendsystem #{@icingaApiUrlBase}" )
-      logger.info( sprintf( '  cluster enabled: %s', @icingaCluser ? 'true' : 'false' ) )
-      if( @icingaCluser == true )
-          logger.info( sprintf( '    satellite endpoint: %s', @icingaSatellite ) )
+      logger.info( sprintf( '    cluster enabled: %s', @icingaCluster ? 'true' : 'false' ) )
+      if( @icingaCluster )
+        logger.info( sprintf( '    satellite endpoint: %s', @icingaSatellite ) )
       end
       logger.info( '  used Services:' )
       logger.info( "    - message Queue: #{mqHost}:#{mqPort}/#{@mqQueue}" )

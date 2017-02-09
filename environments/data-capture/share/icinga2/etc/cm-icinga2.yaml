@@ -16,8 +16,8 @@ blob-cache:
 
 uapi-cache:
   usePercent: true
-  warning: 95
-  critical: 98
+  warning: 98
+  critical: 99
 
 heap-memory:
   usePercent: true

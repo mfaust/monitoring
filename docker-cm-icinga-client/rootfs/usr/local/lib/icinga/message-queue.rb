@@ -97,7 +97,7 @@ module Icinga
 
     def sendMessage( data = {} )
 
-      logger.debug( JSON.pretty_generate( data ) )
+#       logger.debug( JSON.pretty_generate( data ) )
 
       p = MessageQueue::Producer.new( @MQSettings )
 

@@ -35,13 +35,15 @@ module Icinga
         }
       }
 
-      if( @icingaCluser == true && @icingaSatellite != nil )
-        payload['attrs']['vars']['client_endpoint'] = @icingaSatellite
-      end
-
       if( ! vars.empty? )
         payload['attrs']['vars'] = vars
       end
+
+      if( @icingaCluster == true && @icingaSatellite != nil )
+        payload['attrs']['zone'] = @icingaSatellite
+      end
+
+#       logger.debug( JSON.pretty_generate( payload ) )
 
       result = Network.put( {
         :host    => host,
@@ -50,8 +52,6 @@ module Icinga
         :options => @options,
         :payload => payload
       } )
-
-#       logger.debug( JSON.pretty_generate( payload ) )
 
       return JSON.pretty_generate( result )
 
