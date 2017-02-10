@@ -523,9 +523,14 @@ class ServiceDiscovery
 
     data.each do |d,v|
 
+      logger.debug( d )
+
       # merge data between discovered Services and our base configuration,
       # the dicovered ports are IMPORTANT
       if( @serviceConfig['services'][d] )
+
+        logger.debug( @serviceConfig['services'][d] )
+
         data[d].merge!( @serviceConfig['services'][d] ) { |key, port| port }
 
         port       = data[d]['port']      ? data[d]['port']      : nil

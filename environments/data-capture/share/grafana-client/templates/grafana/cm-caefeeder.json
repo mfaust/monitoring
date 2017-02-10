@@ -289,17 +289,7 @@
           "multi": false,
           "includeAll": false,
           "allValue": null,
-          "options": [
-            {
-              "text": "FEEDER_LIVE",
-              "value": "FEEDER_LIVE",
-              "selected": false
-            }
-          ],
-          "current": {
-            "text": "FEEDER_LIVE",
-            "value": "FEEDER_LIVE"
-          },
+          "current": {},
           "tagsQuery": null,
           "tagValuesQuery": null
         }

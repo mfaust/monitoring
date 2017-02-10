@@ -141,6 +141,10 @@ module Grafana
 
           additionalTemplatePaths = Array.new()
 
+          serviceData = discovery.dig( host, service, :data )
+
+          logger.debug( serviceData )
+
           description    = discovery.dig( host, service, :data, 'description' )
           template       = discovery.dig( host, service, :data, 'template' )
           cacheKey       = Storage::Memcached.cacheKey( { :host => host, :pre => 'result', :service => service } )
@@ -153,13 +157,22 @@ module Grafana
           serviceTemplate = self.templateForService( templateName )
 #           serviceTemplate = self.templateForService( serviceName )
 
+
+          logger.debug( sprintf( '  description %s', description ) )
+          logger.debug( sprintf( '  template %s', template ) )
+          logger.debug( sprintf( '  templateName %s', templateName ) )
+          logger.debug( sprintf( '  cacheKey %s', cacheKey ) )
+
+
+
+
           if( ! ['mongodb', 'mysql', 'postgres'].include?( serviceName ) )
             additionalTemplatePaths << self.templateForService( 'tomcat' )
           end
 
           if( ! serviceTemplate.to_s.empty? )
 
-#             logger.debug( sprintf( "Found Template paths: %s, %s" , serviceTemplate , additionalTemplatePaths ) )
+            logger.debug( sprintf( "Found Template paths: %s, %s" , serviceTemplate , additionalTemplatePaths ) )
 
             options = {
               :description             => description,
@@ -606,19 +619,44 @@ module Grafana
         # look for '%s/%s.json'  and  '%s/services/%s.json'
         # first match wins
 
-        return
-        
-        template = sprintf( '%s/services/%s.json', @templateDirectory, serviceName )
-#         logger.debug( template )
+        template      = nil
+        templateArray = Array.new()
 
-        if( ! File.exist?( template ) )
+        templateArray << sprintf( '%s/%s.json', @templateDirectory, serviceName )
+        templateArray << sprintf( '%s/services/%s.json', @templateDirectory, serviceName )
+
+        templateArray.each do |tpl|
+
+          logger.debug( tpl )
+
+          if( File.exist?( tpl ) )
+
+            logger.debug( sprintf( '  => found %s', tpl ) )
+            template = tpl
+            break
+          end
+        end
+
+        if( template == nil )
 
           logger.error( sprintf( 'no template for service %s found', serviceName ) )
-
-          template = nil
         end
 
         return template
+#
+#         return
+#
+#         template = sprintf( '%s/services/%s.json', @templateDirectory, serviceName )
+# #         logger.debug( template )
+#
+#         if( ! File.exist?( template ) )
+#
+#           logger.error( sprintf( 'no template for service %s found', serviceName ) )
+#
+#           template = nil
+#         end
+#
+#         return template
       end
 
 
