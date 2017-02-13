@@ -60,7 +60,8 @@ class ServiceDiscovery
       46099,
       47099,
       48099,
-      49099
+      49099,
+      55555     # resourced (https://github.com/resourced/resourced)
     ]
 
     jolokiaHost        = settings[:jolokiaHost]       ? settings[:jolokiaHost]         : 'localhost'
@@ -288,6 +289,8 @@ class ServiceDiscovery
         services.push('node_exporter')
       when 28017
         services.push('mongodb')
+      when 55555
+        services.push('resourced')
       end
     else
 

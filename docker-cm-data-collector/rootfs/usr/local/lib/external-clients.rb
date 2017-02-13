@@ -531,4 +531,61 @@ module ExternalClients
 
   end
 
+  class Resourced
+
+    include Logging
+
+    def initialize( params = {} )
+
+      @host      = params[:host]          ? params[:host]          : nil
+      @port      = params[:port]          ? params[:port]          : 55555
+
+    end
+
+    def callService()
+
+      uri = URI( sprintf( 'http://%s:%s/r', @host, @port ) )
+
+      response = nil
+
+      begin
+
+
+
+      rescue
+
+
+
+      end
+
+    end
+
+    def get()
+
+      puts @host
+      puts @port
+
+      begin
+
+        self.callService( )
+
+#        return {
+#          :cpu        => self.collectCpu( @cpu ),
+#          :load       => self.collectLoad( @load ),
+#          :memory     => self.collectMemory( @memory ),
+#          :network    => self.collectNetwork( @network ),
+#          :disk       => self.collectDisk( @disk ),
+#          :filesystem => self.collectFilesystem( @filesystem )
+#        }
+
+      rescue Exception => e
+        logger.error( "An error occurred for query: #{e}" )
+        return false
+      end
+
+    end
+
+
+  end
+
 end

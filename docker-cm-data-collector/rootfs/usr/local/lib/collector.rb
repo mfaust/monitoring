@@ -348,6 +348,24 @@ module DataCollector
     end
 
 
+    def resourcedData( host, data = {} )
+
+      port = data[:port] ? data[:port] : 55555
+
+      if( port != nil )
+
+        m = ExternalClients::Resouced.new( { :host => host, :port => port } )
+        nodeData = m.get()
+
+        result   = JSON.generate( nodeData )
+        data     = JSON.parse( result )
+
+        return data
+      end
+
+    end
+
+
     # return all known and active (online) server for monitoring
     #
     def monitoredServer()
@@ -448,6 +466,8 @@ module DataCollector
             bulk.push( '' )
           when 'postgres'
             # Postgres
+          when 'resourced'
+            # resourced
           else
             # all others
           end
@@ -591,6 +611,8 @@ module DataCollector
             when 'node_exporter'
               # node_exporter
               result[v] = self.nodeExporterData( hostname )
+            when 'resourced'
+              result[v] = self.resourcedData( hostname )
             else
               # all others
             end
