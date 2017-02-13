@@ -13,7 +13,7 @@ services:
 
   dnsdock:
     restart: always
-    image: bodsch/docker-dnsdock:1702-02
+    image: bodsch/docker-dnsdock:1701-02
     container_name: dnsdock
     hostname: dnsdock
     labels:
