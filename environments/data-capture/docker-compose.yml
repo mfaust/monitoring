@@ -323,7 +323,7 @@ services:
 
   icinga2-satellite:
     restart: always
-    image: bodsch/docker-icinga2:1702-02
+    image: bodsch/docker-icinga2:1702-03
     container_name: icinga2-satellite
     hostname: icinga2-satellite
     labels:
