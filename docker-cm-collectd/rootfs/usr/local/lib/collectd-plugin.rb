@@ -156,29 +156,29 @@ module Collecd
 
     if( value != nil )
 
-      uptime         = value['uptime']
+      uptime         = value.dig('uptime')
 
-      asserts        = value['asserts']       ? value['asserts']       : nil
-      connections    = value['connections']   ? value['connections']   : nil
-      network        = value['network']       ? value['network']       : nil
-      opcounters     = value['opcounters']    ? value['opcounters']    : nil
-      tcmalloc       = value['tcmalloc']      ? value['tcmalloc']      : nil
-      storageEngine  = value['storageEngine'] ? value['storageEngine'] : nil
-      metrics        = value['metrics']       ? value['metrics']       : nil
-      mem            = value['mem']           ? value['mem']           : nil
-      extraInfo      = value['extra_info']    ? value['extra_info']    : nil
-      wiredTiger     = value['wiredTiger']    ? value['wiredTiger']    : nil
-      globalLock     = value['globalLock']    ? value['globalLock']    : nil
+      asserts        = value.dig('asserts')
+      connections    = value.dig('connections')
+      network        = value.dig('network')
+      opcounters     = value.dig('opcounters')
+      tcmalloc       = value.dig('tcmalloc')
+      storageEngine  = value.dig('storageEngine')
+      metrics        = value.dig('metrics')
+      mem            = value.dig('mem')
+      extraInfo      = value.dig('extra_info')
+      wiredTiger     = value.dig('wiredTiger')
+      globalLock     = value.dig('globalLock')
 
 
       result.push( sprintf( 'PUTVAL %s/%s-%s/%s interval=%s N:%s', @Host, @Service, 'uptime', 'uptime'   , @interval, uptime ) )
 
       if( asserts != nil )
-        regular   = asserts['regular']   ? asserts['regular'] : nil
-        warning   = asserts['warning']   ? asserts['warning'] : nil
-        message   = asserts['msg']       ? asserts['msg'] : nil
-        user      = asserts['user']      ? asserts['user'] : nil
-        rollovers = asserts['rollovers'] ? asserts['rollovers'] : nil
+        regular   = asserts.dig('regular')
+        warning   = asserts.dig('warning')
+        message   = asserts.dig('msg')
+        user      = asserts.dig('user')
+        rollovers = asserts.dig('rollovers')
 
         result.push( sprintf( format, @Host, @Service, 'asserts', 'regular'   , @interval, regular ) )
         result.push( sprintf( format, @Host, @Service, 'asserts', 'warning'   , @interval, warning ) )
@@ -188,12 +188,14 @@ module Collecd
       end
 
       if( connections != nil )
-        current        = connections['current']       ? connections['current'] : nil
-        available      = connections['available']     ? connections['available'] : nil
-        totalCreated   = connections['totalCreated']  ? connections['totalCreated'] : nil
+        current        = connections.dig( 'current' )
+        available      = connections.dig( 'available' )
+        totalCreated   = connections.dig( 'totalCreated' )
 
-        if( totalCreated )
-          totalCreated = totalCreated['$numberLong']  ? totalCreated['$numberLong'] : nil
+        if( totalCreated != nil )
+          totalCreated = connections.dig( '$numberLong' )
+        else
+          totalCreated = nil
         end
 
         result.push( sprintf( format, @Host, @Service, 'connections', 'current'     , @interval, current ) )
@@ -202,12 +204,12 @@ module Collecd
       end
 
       if( network != nil )
-        bytesIn   = network['bytesIn']      ? network['bytesIn']      : nil
-        bytesOut  = network['bytesOut']     ? network['bytesOut']     : nil
-        requests  = network['numRequests']  ? network['numRequests']  : nil
-        bytesIn   = bytesIn['$numberLong']  ? bytesIn['$numberLong']  : nil
-        bytesOut  = bytesOut['$numberLong'] ? bytesOut['$numberLong'] : nil
-        requests  = requests['$numberLong'] ? requests['$numberLong'] : nil
+        bytesIn   = network.dig('bytesIn')
+        bytesOut  = network.dig('bytesOut')
+        requests  = network.dig('numRequests')
+        bytesIn   = bytesIn.dig('$numberLong')
+        bytesOut  = bytesOut.dig('$numberLong')
+        requests  = requests.dig('$numberLong')
 
         result.push( sprintf( 'PUTVAL %s/%s-%s/%s interval=%s N:%s', @Host, @Service, 'network', 'bytes-in', @interval, bytesIn ) )
         result.push( sprintf( 'PUTVAL %s/%s-%s/%s interval=%s N:%s', @Host, @Service, 'network', 'bytes-out', @interval, bytesOut ) )
@@ -215,12 +217,12 @@ module Collecd
       end
 
       if( opcounters != nil )
-        insert  = opcounters['insert']  ? opcounters['insert']  : nil
-        query   = opcounters['query']   ? opcounters['query']   : nil
-        update  = opcounters['update']  ? opcounters['update']  : nil
-        delete  = opcounters['delete']  ? opcounters['delete']  : nil
-        getmore = opcounters['getmore'] ? opcounters['getmore'] : nil
-        command = opcounters['command'] ? opcounters['command'] : nil
+        insert  = opcounters.dig('insert')
+        query   = opcounters.dig('query')
+        update  = opcounters.dig('update')
+        delete  = opcounters.dig('delete')
+        getmore = opcounters.dig('getmore')
+        command = opcounters.dig('command')
 
         result.push( sprintf( format, @Host, @Service, 'opcounters', 'insert'  , @interval, insert ) )
         result.push( sprintf( format, @Host, @Service, 'opcounters', 'query'   , @interval, query ) )
@@ -231,11 +233,12 @@ module Collecd
       end
 
       if( tcmalloc != nil )
-        generic = tcmalloc['generic']  ? tcmalloc['generic'] : nil
-        malloc  = tcmalloc['tcmalloc'] ? tcmalloc['tcmalloc'] : nil
 
-        heapSize         = generic['heap_size']               ? generic['heap_size'] : nil
-        heapUsed         = generic['current_allocated_bytes'] ? generic['current_allocated_bytes'] : nil # Bytes in use by application
+        generic = tcmalloc.dig('generic')
+        malloc  = tcmalloc.dig('tcmalloc')
+
+        heapSize         = generic.dig('heap_size')
+        heapUsed         = generic.dig('current_allocated_bytes')
 
         percent   = ( 100 * heapUsed / heapSize )
 
@@ -261,25 +264,25 @@ module Collecd
 
       if( storageEngine != nil )
 
-        storageEngine  = storageEngine['name'] ? storageEngine['name'] : nil
+        storageEngine  = storageEngine.dig('name')
 
         if( storageEngine != nil )
 
-          storage = value[storageEngine] ? value[storageEngine] : nil
+          storage = value.dig( storageEngine )
 
           if( storage != nil )
 
-            blockManager = storage['block-manager'] ? storage['block-manager']  : nil
-            connection   = storage['connection']    ? storage['connection']     : nil
+            blockManager = storage.dig('block-manager')
+            connection   = storage.dig('connection')
 
-            storageBytesRead           = blockManager['bytes read']         ? blockManager['bytes read']         : nil
-            storageBytesWritten        = blockManager['bytes written']      ? blockManager['bytes written']      : nil
-            storageBlocksRead          = blockManager['blocks read']        ? blockManager['blocks read']        : nil
-            storageBlocksWritten       = blockManager['blocks written']     ? blockManager['blocks written']     : nil
+            storageBytesRead           = blockManager.dig('bytes read')
+            storageBytesWritten        = blockManager.dig('bytes written')
+            storageBlocksRead          = blockManager.dig('blocks read')
+            storageBlocksWritten       = blockManager.dig('blocks written')
 
-            storageConnectionIORead    = connection['total read I/Os']      ? connection['total read I/Os']      : nil
-            storageConnectionIOWrite   = connection['total write I/Os']     ? connection['total write I/Os']     : nil
-            storageConnectionFilesOpen = connection['files currently open'] ? connection['files currently open'] : nil
+            storageConnectionIORead    = connection.dig('total read I/Os')
+            storageConnectionIOWrite   = connection.dig('total write I/Os')
+            storageConnectionFilesOpen = connection.dig('files currently open')
 
             result.push( sprintf( 'PUTVAL %s/%s-%s/%s interval=%s N:%s', @Host, @Service, 'bytes', 'bytes-read', @interval , storageBytesRead ) )
             result.push( sprintf( 'PUTVAL %s/%s-%s/%s interval=%s N:%s', @Host, @Service, 'bytes', 'bytes-write', @interval, storageBytesWritten ) )
@@ -296,28 +299,29 @@ module Collecd
 
       if( metrics != nil )
 
-        commands = metrics['commands'] ? metrics['commands'] : nil
+        commands = metrics.dig('commands')
 
         if( commands != nil )
 
           ['authenticate','buildInfo','createIndexes','delete','drop','find','findAndModify','insert','listCollections','mapReduce','renameCollection','update'].each do |m|
 
-            cmd = commands[m] ? commands[m] : nil
+            cmd = commands.dig( m )
 
             if( cmd != nil )
-              d = cmd['total']['$numberLong'] ? cmd['total']['$numberLong']  : nil
+#              d = cmd['total']['$numberLong'] ? cmd['total']['$numberLong']  : nil
+              d  = cmd.dig( 'total', '$numberLong' )
 
               result.push( sprintf( format, @Host, @Service, 'commands', m , @interval, d ) )
             end
           end
 
 
-          currentOp = commands['currentOp'] ? commands['currentOp'] : nil
+          currentOp = commands.dig('currentOp')
 
           if (currentOp != nil)
 
-            total  = currentOp['total']['$numberLong']  ? currentOp['total']['$numberLong']  : nil
-            failed = currentOp['failed']['$numberLong'] ? currentOp['failed']['$numberLong'] : nil
+            total  = currentOp.dig('total' , '$numberLong')
+            failed = currentOp.dig('failed', '$numberLong')
 
             result.push( sprintf( format, @Host, @Service, 'currentOp', 'total',  @interval, total ) )
             result.push( sprintf( format, @Host, @Service, 'currentOp', 'failed', @interval, failed ) )
@@ -325,16 +329,17 @@ module Collecd
 
         end
 
-        cursor = metrics['cursor'] ? metrics['cursor'] : nil
+        cursor = metrics.dig('cursor')
+
         if (cursor != nil)
-          cursorOpen     = cursor['open']     ? cursor['open']     : nil
-          cursorTimedOut = cursor['timedOut'] ? cursor['timedOut'] : nil
+          cursorOpen     = cursor.dig('open')
+          cursorTimedOut = cursor.dig('timedOut')
 
           if( cursorOpen != nil && cursorTimedOut != nil )
 
-            openNoTimeout = cursorOpen['noTimeout']['$numberLong'] ? cursorOpen['noTimeout']['$numberLong'] : nil
-            openTotal     = cursorOpen['total']['$numberLong']     ? cursorOpen['total']['$numberLong']     : nil
-            timedOut      = cursorTimedOut['$numberLong']          ? cursorTimedOut['$numberLong']          : nil
+            openNoTimeout = cursorOpen.dig( 'noTimeout', '$numberLong' )
+            openTotal     = cursorOpen.dig( 'total'    , '$numberLong' )
+            timedOut      = cursorTimedOut.dig( '$numberLong' )
 
             result.push( sprintf( format, @Host, @Service, 'cursor', 'open-total',      @interval, openTotal ) )
             result.push( sprintf( format, @Host, @Service, 'cursor', 'open-no-timeout', @interval, openNoTimeout ) )
@@ -347,8 +352,8 @@ module Collecd
 
       if( mem != nil )
 
-        virtual        = mem['virtual']       ? mem['virtual']  : nil
-        resident       = mem['resident']      ? mem['resident'] : nil
+        virtual        = mem.dig('virtual')
+        resident       = mem.dig('resident')
 
         result.push( sprintf( format, @Host, @Service, 'mem', 'virtual'    , @interval, virtual ) )
         result.push( sprintf( format, @Host, @Service, 'mem', 'resident'   , @interval, resident ) )
@@ -356,21 +361,22 @@ module Collecd
 
       if( extraInfo != nil )
 
-        pageFaults        = extraInfo['page_faults']       ? extraInfo['page_faults']  : nil
+        pageFaults        = extraInfo.dig('page_faults')
 
         result.push( sprintf( format, @Host, @Service, 'extraInfo', 'pageFaults' , @interval, pageFaults ) )
       end
 
       if( wiredTiger != nil )
 
-        wiredTigerCache = wiredTiger['cache'] ? wiredTiger['cache'] : nil
+        wiredTigerCache        = wiredTiger.dig('cache')
+        concurrentTransactions = wiredTiger.dig('concurrentTransactions')
 
         if( wiredTigerCache != nil )
-          bytes         = wiredTigerCache['bytes currently in the cache']      ? wiredTigerCache['bytes currently in the cache']      : nil
-          maximum       = wiredTigerCache['maximum bytes configured']          ? wiredTigerCache['maximum bytes configured']          : nil
-          tracked       = wiredTigerCache['tracked dirty bytes in the cache']  ? wiredTigerCache['tracked dirty bytes in the cache']  : nil
-          unmodified    = wiredTigerCache['unmodified pages evicted']          ? wiredTigerCache['unmodified pages evicted']          : nil
-          modified      = wiredTigerCache['modified pages evicted']            ? wiredTigerCache['modified pages evicted']            : nil
+          bytes         = wiredTigerCache.dig('bytes currently in the cache')
+          maximum       = wiredTigerCache.dig('maximum bytes configured')
+          tracked       = wiredTigerCache.dig('tracked dirty bytes in the cache')
+          unmodified    = wiredTigerCache.dig('unmodified pages evicted')
+          modified      = wiredTigerCache.dig('modified pages evicted')
 
           result.push( sprintf( format, @Host, @Service, 'wiredTigerCache', 'bytes'      , @interval, bytes ) )
           result.push( sprintf( format, @Host, @Service, 'wiredTigerCache', 'maximum'    , @interval, maximum ) )
@@ -379,20 +385,17 @@ module Collecd
           result.push( sprintf( format, @Host, @Service, 'wiredTigerCache', 'modified'   , @interval, modified ) )
         end
 
-
-        concurrentTransactions = wiredTiger['concurrentTransactions'] ? wiredTiger['concurrentTransactions'] : nil
-
         if (concurrentTransactions)
-          read        = concurrentTransactions['read']       ? concurrentTransactions['read']     : nil
-          write       = concurrentTransactions['write']      ? concurrentTransactions['write']    : nil
+          read        = concurrentTransactions.dig('read')
+          write       = concurrentTransactions.dig('write')
 
           if (read != nil && write != nil)
 
-            readOut          = read['out']         ? read['out']       : nil
-            readAvailable    = read['available']   ? read['available'] : nil
+            readOut          = read.dig('out')
+            readAvailable    = read.dig('available')
 
-            writeOut         = write['out']        ? write['out']       : nil
-            writeAvailable   = write['available']  ? write['available'] : nil
+            writeOut         = write.dig('out')
+            writeAvailable   = write.dig('available')
 
             result.push( sprintf( format, @Host, @Service, 'wiredTigerConcTrans', 'readOut'          , @interval, readOut ) )
             result.push( sprintf( format, @Host, @Service, 'wiredTigerConcTrans', 'readAvailable'    , @interval, readAvailable ) )
@@ -405,30 +408,27 @@ module Collecd
 
       if( globalLock != nil )
 
-        currentQueue = globalLock['currentQueue'] ? globalLock['currentQueue'] : nil
+        currentQueue  = globalLock.dig('currentQueue')
+        activeClients = globalLock.dig('activeClients')
 
-        if (currentQueue)
-          readers       = currentQueue['readers']    ? currentQueue['readers']  : nil
-          writers       = currentQueue['writers']    ? currentQueue['writers']  : nil
-          total         = currentQueue['total']      ? currentQueue['total']    : nil
+        if( currentQueue )
+          readers       = currentQueue.dig('readers')
+          writers       = currentQueue.dig('writers')
+          total         = currentQueue.dig('total')
 
           result.push( sprintf( format, @Host, @Service, 'globalLockCurrentQueue', 'readers'    , @interval, readers ) )
           result.push( sprintf( format, @Host, @Service, 'globalLockCurrentQueue', 'writers'    , @interval, writers ) )
           result.push( sprintf( format, @Host, @Service, 'globalLockCurrentQueue', 'total'      , @interval, total ) )
-
         end
 
-        activeClients = globalLock['activeClients'] ? globalLock['activeClients'] : nil
-
-        if (currentQueue)
-          readers     = activeClients['readers']    ? activeClients['readers']  : nil
-          writers     = activeClients['writers']    ? activeClients['writers']  : nil
-          total       = activeClients['total']      ? activeClients['total']    : nil
+        if( activeClients )
+          readers     = activeClients.dig('readers')
+          writers     = activeClients.dig('writers')
+          total       = activeClients.dig('total')
 
           result.push( sprintf( format, @Host, @Service, 'globalLockActiveClients', 'readers'    , @interval, readers ) )
           result.push( sprintf( format, @Host, @Service, 'globalLockActiveClients', 'writers'    , @interval, writers ) )
           result.push( sprintf( format, @Host, @Service, 'globalLockActiveClients', 'total'      , @interval, total ) )
-
         end
       end
 
@@ -569,12 +569,10 @@ module Collecd
 
 #      logger.debug( JSON.pretty_generate( value ) )
 
-      cpu        = value['cpu']        ? value['cpu']        : nil
-      load       = value['load']       ? value['load']       : nil
-      memory     = value['memory']     ? value['memory']     : nil
-      filesystem = value['filesystem'] ? value['filesystem'] : nil
-
-
+      cpu        = value.dig('cpu')
+      load       = value.dig('load')
+      memory     = value.dig('memory')
+      filesystem = value.dig('filesystem')
 
       if( cpu != nil )
 
@@ -584,10 +582,12 @@ module Collecd
 
           ['idle','iowait','nice','system','user'].each do |m|
 
-            point = d[m] ? d[m].to_i : nil
+            point = d.dig( m )
 
             if( point != nil )
-              result.push( sprintf( 'PUTVAL %s/%s-%s/cpu-%s_%s interval=%s N:%s', @Host, @Service, c, m, @interval, point ) )
+              # collectd.h3_xanhaem_de.cpu.*.cpu.idle.value
+              result.push( sprintf( 'PUTVAL %s/%s-cpu/count-%s_%s interval=%s N:%s', @Host, @Service, c, m, @interval, point ) )
+##              result.push( sprintf( 'PUTVAL %s/%s-%s/cpu_%s interval=%s N:%s', @Host, @Service, c, m, @interval, point ) )
             end
           end
         end
@@ -598,7 +598,7 @@ module Collecd
 
         ['shortterm','midterm','longterm'].each do |m|
 
-          point = load[m] ? load[m] : nil
+          point = load.dig( m ) # [m] ? load[m] : nil
 
           if( point != nil )
             result.push( sprintf( format, @Host, @Service, 'load', 'count', m, @interval, point ) )
@@ -609,41 +609,75 @@ module Collecd
 
       if( memory != nil )
 
-        memAvailable = memory['MemAvailable'] ? memory['MemAvailable'] : nil
-        memFree      = memory['MemFree']      ? memory['MemFree']      : nil
-        memTotal     = memory['MemTotal']     ? memory['MemTotal']     : nil
-        memUsed      = ( memTotal.to_i - memAvailable.to_i )
-        swapCached   = memory['SwapCached']   ? memory['SwapCached']   : nil
-        swapFree     = memory['SwapFree']     ? memory['SwapFree']     : nil
-        swapTotal    = memory['SwapTotal']    ? memory['SwapTotal']    : nil
-        swapUsed     = ( swapTotal.to_i - swapFree.to_i )
+        memAvailable    = memory.dig('MemAvailable')
+        memFree         = memory.dig('MemFree')
+        memTotal        = memory.dig('MemTotal')
+        memUsed         = ( memTotal.to_i - memAvailable.to_i )
+        memUsedPercent  = ( 100 * memUsed.to_i / memTotal.to_i ).to_i
 
-        result.push( sprintf( format, @Host, @Service, 'memory', 'count', 'available', @interval, memAvailable ) )
-        result.push( sprintf( format, @Host, @Service, 'memory', 'count', 'free'     , @interval, memFree ) )
-        result.push( sprintf( format, @Host, @Service, 'memory', 'count', 'total'    , @interval, memTotal ) )
-        result.push( sprintf( format, @Host, @Service, 'memory', 'count', 'used'     , @interval, memUsed ) )
+        swapTotal       = memory.dig('SwapTotal')
 
-        result.push( sprintf( format, @Host, @Service, 'swap', 'count', 'cached', @interval, swapCached ) )
-        result.push( sprintf( format, @Host, @Service, 'swap', 'count', 'free'  , @interval, swapFree ) )
-        result.push( sprintf( format, @Host, @Service, 'swap', 'count', 'total' , @interval, swapTotal ) )
-        result.push( sprintf( format, @Host, @Service, 'swap', 'count', 'used'  , @interval, swapUsed ) )
+        if( swapTotal == 0 )
+          swapCached      = 0
+          swapFree        = 0
+          swapUsed        = 0
+          swapUsedPercent = 0
+        else
+
+          swapCached      = memory.dig('SwapCached')
+          swapFree        = memory.dig('SwapFree')
+          swapUsed        = ( swapTotal.to_i - swapFree.to_i )
+
+          if( swapUsed.to_i > 0 && swapTotal.to_i > 0 )
+            swapUsedPercent = ( 100 * swapUsed.to_i / swapTotal.to_i ).to_i
+          else
+            swapUsedPercent = 0
+          end
+
+        end
+
+        result.push( sprintf( format, @Host, @Service, 'memory', 'count', 'available'    , @interval, memAvailable ) )
+        result.push( sprintf( format, @Host, @Service, 'memory', 'count', 'free'         , @interval, memFree ) )
+        result.push( sprintf( format, @Host, @Service, 'memory', 'count', 'total'        , @interval, memTotal ) )
+        result.push( sprintf( format, @Host, @Service, 'memory', 'count', 'used'         , @interval, memUsed ) )
+        result.push( sprintf( format, @Host, @Service, 'memory', 'count', 'used_percent' , @interval, memUsedPercent ) )
+
+        result.push( sprintf( format, @Host, @Service, 'swap'  , 'count', 'cached'       , @interval, swapCached ) )
+        result.push( sprintf( format, @Host, @Service, 'swap'  , 'count', 'free'         , @interval, swapFree ) )
+        result.push( sprintf( format, @Host, @Service, 'swap'  , 'count', 'total'        , @interval, swapTotal ) )
+        result.push( sprintf( format, @Host, @Service, 'swap'  , 'count', 'used'         , @interval, swapUsed ) )
+        result.push( sprintf( format, @Host, @Service, 'swap'  , 'count', 'used_percent' , @interval, swapUsedPercent ) )
 
       end
 
 
       if( filesystem != nil )
 
+        format = 'PUTVAL %s/%s-filesystem/count-%s_%s interval=%s N:%s'
+
         filesystem.each do |f,d|
 
-          ['avail','free','size'].each do |m|
+          avail = d.dig('avail')
+          size  = d.dig('size')
 
-            point = d[m] ? d[m] : nil
+          used         = ( size.to_i - avail.to_i )
+          usedPercent  = ( 100 * used.to_i / size.to_i ).to_i
 
-            if( point != nil )
+          result.push( sprintf( format, @Host, @Service, f, 'total'        , @interval, size ) )
+          result.push( sprintf( format, @Host, @Service, f, 'free'         , @interval, avail ) )
+          result.push( sprintf( format, @Host, @Service, f, 'used'         , @interval, used ) )
+          result.push( sprintf( format, @Host, @Service, f, 'used_percent' , @interval, usedPercent ) )
 
-              'PUTVAL %s/%s-%s/%s-%s interval=%s N:%s'
-              result.push( sprintf( 'PUTVAL %s/%s-filesystem/count-%s_%s interval=%s N:%s', @Host, @Service, f, m, @interval, point ) )
-            end
+
+#           ['avail','free','size'].each do |m|
+#
+#             point = d.dig(m) # [m] ? d[m] : nil
+#
+#             if( point != nil )
+#
+# #              'PUTVAL %s/%s-%s/%s-%s interval=%s N:%s'
+#               result.push( sprintf( 'PUTVAL %s/%s-filesystem/count-%s_%s interval=%s N:%s', @Host, @Service, f, m, @interval, point ) )
+#             end
           end
         end
       end

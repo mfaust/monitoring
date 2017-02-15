@@ -1,9 +1,9 @@
 {
   "dashboard": {
     "id": null,
-    "title": "%SHORTHOST% - Tomcats",
-    "originalTitle": "%SHORTHOST% - Tomcats",
-    "tags": [ "%TAG%", "tomcats" ],
+    "title": "%SHORTHOST% - Operating System",
+    "originalTitle": "%SHORTHOST% - Operating System",
+    "tags": [ "%TAG%", "os" ],
     "style": "dark",
     "timezone": "browser",
     "editable": true,
@@ -12,26 +12,182 @@
     "rows": [
       {
         "collapse": false,
-        "height": "25px",
+        "height": "150",
         "panels": [
           {
-            "content": "<h2><center>Tomcat</center></h2>",
-            "editable": true,
-            "error": false,
-            "id": 10,
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "fill": 2,
+            "id": 3,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": true,
+              "min": true,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
             "links": [],
-            "mode": "html",
+            "nullPointMode": "null",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
             "span": 12,
-            "title": "",
-            "transparent": true,
-            "type": "text"
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "aliasSub(collectd.%HOST%.NODE_EXPORTER-load.*, '(.*)-', '')",
+                "textEditor": false
+              }
+            ],
+            "thresholds": [],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "Load",
+            "tooltip": {
+              "shared": true,
+              "sort": 0,
+              "value_type": "individual"
+            },
+            "type": "graph",
+            "xaxis": {
+              "mode": "time",
+              "name": null,
+              "show": true,
+              "values": []
+            },
+            "yaxes": [
+              {
+                "format": "none",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ]
           }
         ],
         "repeat": null,
         "repeatIteration": null,
         "repeatRowId": null,
         "showTitle": false,
-        "title": "Row title",
+        "title": "Dashboard Row",
+        "titleSize": "h6"
+      },
+      {
+        "collapse": false,
+        "height": "150",
+        "panels": [
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "decimals": 0,
+            "fill": 2,
+            "id": 4,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": true,
+              "min": true,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "null",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [
+              {
+                "alias": "percent used",
+                "color": "#890F02",
+                "yaxis": 2
+              }
+            ],
+            "span": 12,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "alias(collectd.%HOST%.NODE_EXPORTER-filesystem.count-rootfs_total, 'total')"
+              },
+              {
+                "refId": "B",
+                "target": "alias(collectd.%HOST%.NODE_EXPORTER-filesystem.count-rootfs_free, 'free')"
+              },
+              {
+                "refId": "C",
+                "target": "alias(collectd.%HOST%.NODE_EXPORTER-filesystem.count-rootfs_used_percent, 'percent used')"
+              }
+            ],
+            "thresholds": [],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "root Filesystem",
+            "tooltip": {
+              "shared": true,
+              "sort": 0,
+              "value_type": "individual"
+            },
+            "type": "graph",
+            "xaxis": {
+              "mode": "time",
+              "name": null,
+              "show": true,
+              "values": []
+            },
+            "yaxes": [
+              {
+                "format": "bytes",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "none",
+                "label": "percent",
+                "logBase": 1,
+                "max": "110",
+                "min": null,
+                "show": true
+              }
+            ]
+          }
+        ],
+        "repeat": null,
+        "repeatIteration": null,
+        "repeatRowId": null,
+        "showTitle": false,
+        "title": "Dashboard Row",
         "titleSize": "h6"
       },
       {
@@ -42,28 +198,24 @@
             "aliasColors": {},
             "bars": false,
             "datasource": "graphite",
-            "decimals": 1,
-            "editable": true,
-            "error": false,
-            "fill": 3,
-            "grid": {},
-            "id": 11,
+            "decimals": 0,
+            "fill": 2,
+            "id": 1,
             "legend": {
               "alignAsTable": true,
               "avg": false,
               "current": true,
-              "max": false,
-              "min": false,
+              "max": true,
+              "min": true,
               "rightSide": true,
               "show": true,
-              "sideWidth": 230,
               "total": false,
               "values": true
             },
             "lines": true,
             "linewidth": 1,
             "links": [],
-            "nullPointMode": "connected",
+            "nullPointMode": "null",
             "percentage": false,
             "pointradius": 5,
             "points": false,
@@ -71,12 +223,7 @@
             "seriesOverrides": [
               {
                 "alias": "percent",
-                "color": "#C15C17",
-                "yaxis": 2
-              },
-              {
-                "alias": "percent (avg)",
-                "color": "#BF1B00",
+                "color": "#890F02",
                 "yaxis": 2
               }
             ],
@@ -85,46 +232,213 @@
             "steppedLine": false,
             "targets": [
               {
-                "hide": false,
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$application-Memory-heap_memory.count-max, '(.*)-', ''))",
+                "target": "alias(collectd.%HOST%.NODE_EXPORTER-memory.count-total, 'total')"
+              },
+              {
+                "refId": "C",
+                "target": "alias(collectd.%HOST%.NODE_EXPORTER-memory.count-used, 'used')",
                 "textEditor": false
               },
               {
+                "refId": "D",
+                "target": "alias(collectd.%HOST%.NODE_EXPORTER-memory.count-used_percent, 'percent')",
+                "textEditor": false
+              }
+            ],
+            "thresholds": [],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "Memory",
+            "tooltip": {
+              "shared": true,
+              "sort": 0,
+              "value_type": "individual"
+            },
+            "type": "graph",
+            "xaxis": {
+              "mode": "time",
+              "name": null,
+              "show": true,
+              "values": []
+            },
+            "yaxes": [
+              {
+                "format": "bytes",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "none",
+                "label": "percent used",
+                "logBase": 1,
+                "max": "110",
+                "min": null,
+                "show": true
+              }
+            ]
+          }
+        ],
+        "repeat": null,
+        "repeatIteration": null,
+        "repeatRowId": null,
+        "showTitle": false,
+        "title": "Dashboard Row",
+        "titleSize": "h6"
+      },
+      {
+        "collapse": false,
+        "height": "150",
+        "panels": [
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "fill": 2,
+            "id": 2,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": true,
+              "min": true,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "null",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [
+              {
+                "alias": "percent",
+                "color": "#890F02",
+                "yaxis": 2
+              }
+            ],
+            "span": 12,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "alias(collectd.%HOST%.NODE_EXPORTER-swap.count-total, 'total')"
+              },
+              {
+                "refId": "B",
+                "target": "alias(collectd.%HOST%.NODE_EXPORTER-swap.count-used, 'used')"
+              },
+              {
+                "refId": "C",
+                "target": "alias(collectd.%HOST%.NODE_EXPORTER-swap.count-used_percent, 'percent')"
+              }
+            ],
+            "thresholds": [],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "Swap",
+            "tooltip": {
+              "shared": true,
+              "sort": 0,
+              "value_type": "individual"
+            },
+            "type": "graph",
+            "xaxis": {
+              "mode": "time",
+              "name": null,
+              "show": true,
+              "values": []
+            },
+            "yaxes": [
+              {
+                "format": "bytes",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "none",
+                "label": "percent",
+                "logBase": 1,
+                "max": "110",
+                "min": null,
+                "show": true
+              }
+            ]
+          }
+        ],
+        "repeat": null,
+        "repeatIteration": null,
+        "repeatRowId": null,
+        "showTitle": false,
+        "title": "Dashboard Row",
+        "titleSize": "h6"
+      },
+      {
+        "collapse": false,
+        "height": 250,
+        "panels": [
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "fill": 2,
+            "id": 5,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": true,
+              "min": true,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "nullPointMode": "null",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "span": 12,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
                 "hide": false,
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$application-Memory-heap_memory.count-committed, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(smartSummarize(perSecond(collectd.%HOST%.NODE_EXPORTER-cpu.count-cpu[0-9]_user), '1m', 'avg'), '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "hide": false,
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$application-Memory-heap_memory.count-used, '(.*)-', ''))",
-                "textEditor": false
-              },
-              {
-                "hide": false,
-                "refId": "D",
-                "target": "alias(smartSummarize(aliasSub(collectd.%HOST%.$application-Memory-heap_memory.count-used_percent, '(.*)-', ''), '3m', 'avg'), 'percent (avg)')",
-                "textEditor": false
-              },
-              {
-                "hide": true,
-                "refId": "E",
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.$application-Memory-heap_memory.count-used_percent, '(.*)-', ''), 'percent'))",
+                "target": "aliasByMetric(aliasSub(smartSummarize(perSecond(collectd.%HOST%.NODE_EXPORTER-cpu.count-cpu[0-9]_iowait), '1m', 'avg'), '(.*)-', ''))",
                 "textEditor": false
               }
             ],
             "thresholds": [],
             "timeFrom": null,
             "timeShift": null,
-            "title": "Heap Memory",
+            "title": "Panel Title",
             "tooltip": {
-              "msResolution": false,
-              "ordering": "alphabetical",
               "shared": true,
               "sort": 0,
-              "value_type": "cumulative"
+              "value_type": "individual"
             },
             "type": "graph",
             "xaxis": {
@@ -135,17 +449,18 @@
             },
             "yaxes": [
               {
-                "format": "bytes",
+                "format": "short",
+                "label": null,
                 "logBase": 1,
                 "max": null,
                 "min": null,
                 "show": true
               },
               {
-                "format": "none",
-                "label": "percent",
+                "format": "short",
+                "label": null,
                 "logBase": 1,
-                "max": "110",
+                "max": null,
                 "min": null,
                 "show": true
               }
@@ -156,435 +471,7 @@
         "repeatIteration": null,
         "repeatRowId": null,
         "showTitle": false,
-        "title": "Heap Memory",
-        "titleSize": "h6"
-      },
-      {
-        "collapse": false,
-        "height": "150px",
-        "panels": [
-          {
-            "aliasColors": {},
-            "bars": false,
-            "datasource": "graphite",
-            "decimals": 1,
-            "editable": true,
-            "error": false,
-            "fill": 1,
-            "grid": {},
-            "id": 12,
-            "legend": {
-              "alignAsTable": true,
-              "avg": false,
-              "current": true,
-              "max": false,
-              "min": false,
-              "rightSide": true,
-              "show": true,
-              "sideWidth": 230,
-              "total": false,
-              "values": true
-            },
-            "lines": true,
-            "linewidth": 1,
-            "links": [],
-            "nullPointMode": "connected",
-            "percentage": false,
-            "pointradius": 5,
-            "points": false,
-            "renderer": "flot",
-            "seriesOverrides": [
-              {
-                "alias": "percent",
-                "color": "#C15C17",
-                "yaxis": 2
-              },
-              {
-                "alias": "percent (avg)",
-                "color": "#BF1B00",
-                "yaxis": 2
-              }
-            ],
-            "span": 12,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
-              {
-                "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$application-Memory-perm_memory.count-committed, '(.*)-', ''))",
-                "textEditor": false
-              },
-              {
-                "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$application-Memory-perm_memory.count-used, '(.*)-', ''))",
-                "textEditor": false
-              },
-              {
-                "hide": false,
-                "refId": "C",
-                "target": "alias(smartSummarize(aliasSub(collectd.%HOST%.$application-Memory-perm_memory.count-used_percent, '(.*)-', ''), '3m', 'avg'), 'percent (avg)')",
-                "textEditor": false
-              },
-              {
-                "hide": true,
-                "refId": "D",
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.$application-Memory-perm_memory.count-used_percent, '(.*)-', ''), 'percent'))",
-                "textEditor": false
-              }
-            ],
-            "thresholds": [],
-            "timeFrom": null,
-            "timeShift": null,
-            "title": "Perm Memory",
-            "tooltip": {
-              "msResolution": false,
-              "ordering": "alphabetical",
-              "shared": true,
-              "sort": 0,
-              "value_type": "cumulative"
-            },
-            "type": "graph",
-            "xaxis": {
-              "mode": "time",
-              "name": null,
-              "show": true,
-              "values": []
-            },
-            "yaxes": [
-              {
-                "format": "bytes",
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-              },
-              {
-                "format": "none",
-                "label": "percent",
-                "logBase": 1,
-                "max": "110",
-                "min": null,
-                "show": true
-              }
-            ]
-          }
-        ],
-        "repeat": null,
-        "repeatIteration": null,
-        "repeatRowId": null,
-        "showTitle": false,
-        "title": "Perm Memory",
-        "titleSize": "h6"
-      },
-      {
-        "collapse": false,
-        "height": "150px",
-        "panels": [
-          {
-            "aliasColors": {},
-            "bars": false,
-            "cacheTimeout": "",
-            "datasource": "graphite",
-            "decimals": 2,
-            "editable": true,
-            "error": false,
-            "fill": 3,
-            "grid": {},
-            "id": 13,
-            "legend": {
-              "alignAsTable": true,
-              "avg": false,
-              "current": true,
-              "max": false,
-              "min": false,
-              "rightSide": true,
-              "show": true,
-              "sideWidth": 230,
-              "total": false,
-              "values": true
-            },
-            "lines": true,
-            "linewidth": 1,
-            "links": [],
-            "maxDataPoints": "",
-            "nullPointMode": "connected",
-            "percentage": false,
-            "pointradius": 5,
-            "points": false,
-            "renderer": "flot",
-            "seriesOverrides": [
-              {
-                "alias": "percent",
-                "color": "#C15C17",
-                "yaxis": 2
-              },
-              {
-                "alias": "percent (avg)",
-                "color": "#BF1B00",
-                "yaxis": 2
-              }
-            ],
-            "span": 12,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
-              {
-                "refId": "A",
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.$application-GCParNew-gc_duration.count-duration, '(.*)-', ''), 'Par New'))",
-                "textEditor": false
-              },
-              {
-                "refId": "B",
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.$application-GCConcurrentMarkSweep-gc_duration.count-duration, '(.*)-', ''), 'Con Mark Sweep'))",
-                "textEditor": false
-              }
-            ],
-            "thresholds": [],
-            "timeFrom": null,
-            "timeShift": null,
-            "title": "Garbage Collector Duration",
-            "tooltip": {
-              "msResolution": false,
-              "ordering": "alphabetical",
-              "shared": true,
-              "sort": 0,
-              "value_type": "cumulative"
-            },
-            "type": "graph",
-            "xaxis": {
-              "mode": "time",
-              "name": null,
-              "show": true,
-              "values": []
-            },
-            "yaxes": [
-              {
-                "format": "bytes",
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-              },
-              {
-                "format": "none",
-                "label": "percent",
-                "logBase": 1,
-                "max": "100",
-                "min": null,
-                "show": true
-              }
-            ]
-          }
-        ],
-        "repeat": null,
-        "repeatIteration": null,
-        "repeatRowId": null,
-        "showTitle": false,
-        "title": "Garbage Collector",
-        "titleSize": "h6"
-      },
-      {
-        "collapse": false,
-        "height": "150px",
-        "panels": [
-          {
-            "aliasColors": {},
-            "bars": false,
-            "cacheTimeout": "",
-            "datasource": "graphite",
-            "decimals": 0,
-            "editable": true,
-            "error": false,
-            "fill": 3,
-            "grid": {},
-            "id": 14,
-            "legend": {
-              "alignAsTable": true,
-              "avg": false,
-              "current": true,
-              "max": false,
-              "min": false,
-              "rightSide": true,
-              "show": true,
-              "sideWidth": 230,
-              "total": false,
-              "values": true
-            },
-            "lines": true,
-            "linewidth": 1,
-            "links": [],
-            "maxDataPoints": "",
-            "nullPointMode": "connected",
-            "percentage": false,
-            "pointradius": 5,
-            "points": false,
-            "renderer": "flot",
-            "seriesOverrides": [
-              {
-                "alias": "percent",
-                "color": "#C15C17",
-                "yaxis": 2
-              },
-              {
-                "alias": "percent (avg)",
-                "color": "#BF1B00",
-                "yaxis": 2
-              }
-            ],
-            "span": 12,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
-              {
-                "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$application-Threading-threading.*, '(.*)-', ''))",
-                "textEditor": false
-              }
-            ],
-            "thresholds": [],
-            "timeFrom": null,
-            "timeShift": null,
-            "title": "Threads",
-            "tooltip": {
-              "msResolution": false,
-              "ordering": "alphabetical",
-              "shared": true,
-              "sort": 0,
-              "value_type": "cumulative"
-            },
-            "type": "graph",
-            "xaxis": {
-              "mode": "time",
-              "name": null,
-              "show": true,
-              "values": []
-            },
-            "yaxes": [
-              {
-                "format": "none",
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-              },
-              {
-                "format": "none",
-                "label": "percent",
-                "logBase": 1,
-                "max": "110",
-                "min": null,
-                "show": true
-              }
-            ]
-          }
-        ],
-        "repeat": null,
-        "repeatIteration": null,
-        "repeatRowId": null,
-        "showTitle": false,
-        "title": "Threads",
-        "titleSize": "h6"
-      },
-      {
-        "collapse": false,
-        "height": "300px",
-        "panels": [
-          {
-            "aliasColors": {},
-            "bars": false,
-            "cacheTimeout": "",
-            "datasource": "graphite",
-            "decimals": 0,
-            "editable": true,
-            "error": false,
-            "fill": 3,
-            "grid": {},
-            "id": 15,
-            "legend": {
-              "alignAsTable": true,
-              "avg": false,
-              "current": true,
-              "max": false,
-              "min": false,
-              "rightSide": true,
-              "show": true,
-              "sideWidth": 230,
-              "total": false,
-              "values": true
-            },
-            "lines": true,
-            "linewidth": 1,
-            "links": [],
-            "maxDataPoints": "",
-            "nullPointMode": "connected",
-            "percentage": false,
-            "pointradius": 5,
-            "points": false,
-            "renderer": "flot",
-            "seriesOverrides": [
-              {
-                "alias": "percent",
-                "color": "#C15C17",
-                "yaxis": 2
-              },
-              {
-                "alias": "percent (avg)",
-                "color": "#BF1B00",
-                "yaxis": 2
-              }
-            ],
-            "span": 12,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
-              {
-                "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$application-Manager-sessions.*, '(.*)-', ''))",
-                "textEditor": false
-              }
-            ],
-            "thresholds": [],
-            "timeFrom": null,
-            "timeShift": null,
-            "title": "Tomcat Sessions",
-            "tooltip": {
-              "msResolution": false,
-              "ordering": "alphabetical",
-              "shared": true,
-              "sort": 0,
-              "value_type": "cumulative"
-            },
-            "type": "graph",
-            "xaxis": {
-              "mode": "time",
-              "name": null,
-              "show": true,
-              "values": []
-            },
-            "yaxes": [
-              {
-                "format": "bytes",
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-              },
-              {
-                "format": "none",
-                "label": "percent",
-                "logBase": 1,
-                "max": "110",
-                "min": null,
-                "show": true
-              }
-            ]
-          }
-        ],
-        "repeat": null,
-        "repeatIteration": null,
-        "repeatRowId": null,
-        "showTitle": false,
-        "title": "Tomcat Sessions",
+        "title": "Dashboard Row",
         "titleSize": "h6"
       }
     ],
@@ -614,30 +501,7 @@
         "30d"
       ]
     },
-    "templating": {
-      "list": [
-        {
-          "allValue": null,
-          "current": {},
-          "datasource": "graphite",
-          "hide": 0,
-          "includeAll": false,
-          "label": null,
-          "multi": false,
-          "name": "application",
-          "options": [],
-          "query": ".*.%HOST%.*-Memory*",
-          "refresh": 1,
-          "regex": "/(.*)-Memory-perm_memory(.*)/",
-          "sort": 0,
-          "tagValuesQuery": "",
-          "tags": [],
-          "tagsQuery": "",
-          "type": "query",
-          "useTags": false
-        }
-      ]
-    },
+    "templating": { },
     "annotations": {
       "list": [
         {

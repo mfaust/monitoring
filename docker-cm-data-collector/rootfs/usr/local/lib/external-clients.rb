@@ -256,6 +256,7 @@ module ExternalClients
             body        = body.each_line.reject{ |x| x.strip =~ /(^.*)#/ }.join
 
             # get groups
+            @boot       = body.each_line.select { |name| name =~ /^node_boot_time/ }
             @cpu        = body.each_line.select { |name| name =~ /^node_cpu/ }
             @disk       = body.each_line.select { |name| name =~ /^node_disk/ }
             @filefd     = body.each_line.select { |name| name =~ /^node_filefd/ }
@@ -276,6 +277,22 @@ module ExternalClients
 
       end
 
+    end
+
+
+    def collectUptime( data )
+
+      result  = Hash.new()
+
+      parts    = data.last.split( ' ' )
+
+      bootTime = sprintf( "%f", parts[1].to_s ).sub(/\.?0*$/, "" )
+      uptime   = Time.at( Time.now() - Time.at( bootTime.to_i ) ).to_i
+
+      result[parts[0]] = bootTime
+      result['uptime'] = uptime
+
+      return result
     end
 
 
@@ -517,14 +534,12 @@ module ExternalClients
 
     def get()
 
-      puts @host
-      puts @port
-
       begin
 
         self.callService( )
 
         return {
+          :uptime     => self.collectUptime( @boot ),
           :cpu        => self.collectCpu( @cpu ),
           :load       => self.collectLoad( @load ),
           :memory     => self.collectMemory( @memory ),
