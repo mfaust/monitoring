@@ -94,6 +94,8 @@ module Grafana
         responseCode = response.code.to_i
         responseBody = response.body
 
+        logger.debug( response )
+
         if( ( responseCode >= 200 && responseCode <= 299 ) || ( responseCode >= 400 && responseCode <= 499 ) )
 
           begin
@@ -118,7 +120,7 @@ module Grafana
 
       rescue => e
 
-#        logger.error( "Error: #{__method__} #{methodType.upcase} on #{endpoint} error: '#{e}'" )
+        logger.error( "Error: #{__method__} #{methodType.upcase} on #{endpoint} error: '#{e}'" )
 #
 #        result           = JSON.parse( e.response )
 #        result['status'] = e.to_s.split( ' ' ).first

@@ -1,5 +1,5 @@
 
-FROM bodsch/docker-alpine-base:1612-01
+FROM bodsch/docker-alpine-base:1701-04
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
@@ -41,22 +41,22 @@ RUN \
     bind-tools \
     zlib \
     zlib-dev && \
-   gem install --no-rdoc --no-ri \
-     beaneater \
-     bigdecimal \
-     ipaddress \
-     resolve-hostname \
-     rest-client \
-     mysql2 \
-     sqlite3 \
-     sequel \
-     time_difference \
-     filesize \
-     fileutils \
-     ruby-supervisor \
-     sinatra \
-     thin \
-     dalli && \
+  gem install --no-rdoc --no-ri \
+    beaneater \
+    bigdecimal \
+    ipaddress \
+    resolve-hostname \
+    rest-client \
+    mysql2 \
+    sqlite3 \
+    sequel \
+    time_difference \
+    filesize \
+    fileutils \
+    ruby-supervisor \
+    sinatra \
+    thin \
+    dalli && \
   mkdir /var/log/monitoring && \
   mkdir /var/cache/monitoring && \
   mv /etc/collectd/collectd.conf /etc/collectd/collectd.conf.dist && \

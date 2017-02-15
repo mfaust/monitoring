@@ -146,8 +146,8 @@ module Grafana
 
       @headers = nil
 
-      logger.debug( @url )
-      logger.debug( params )
+#       logger.debug( @url )
+#       logger.debug( params )
 
       if( params[:headers] && params[:headers].has_key?(:authorization) )
         # API key Auth
@@ -223,16 +223,9 @@ module Grafana
 
       c = MessageQueue::Consumer.new( @MQSettings )
 
-#       threads = Array.new()
-
-#       threads << Thread.new {
-
-        self.processQueue(
-          c.getJobFromTube( @mqQueue )
-        )
-#       }
-
-#       threads.each { |t| t.join }
+      self.processQueue(
+        c.getJobFromTube( @mqQueue )
+      )
 
     end
 
@@ -251,7 +244,7 @@ module Grafana
         tags     = []
         overview = true
 
-        logger.debug( payload )
+#         logger.debug( payload )
 
         if( command == nil )
           logger.error( 'wrong command' )
@@ -270,8 +263,8 @@ module Grafana
           :message => sprintf( 'wrong command detected: %s', command )
         }
 
-        logger.debug( payload )
-        logger.debug( payload.class.to_s )
+#         logger.debug( payload )
+#         logger.debug( payload.class.to_s )
 
         if( payload.is_a?( String ) == true && payload.to_s != '' )
 
@@ -291,7 +284,7 @@ module Grafana
 
         case command
         when 'add'
-          logger.info( sprintf( 'add dashboards for node %s', node ) )
+#           logger.info( sprintf( 'add dashboards for node %s', node ) )
 
           # {:id=>"9", :tube=>"mq-grafana", :state=>"reserved", :ttr=>10, :prio=>65536, :age=>3, :delay=>2, :body=>{"cmd"=>"add", "node"=>"monitoring-16-01", "timestamp"=>"2017-01-14 19:05:41", "from"=>"rest-service", "payload"=>""}}
 
@@ -302,12 +295,12 @@ module Grafana
 
           logger.info( result )
         when 'remove'
-          logger.info( sprintf( 'remove dashboards for node %s', node ) )
+#           logger.info( sprintf( 'remove dashboards for node %s', node ) )
           result = self.deleteDashboards( { :host => node } )
 
           logger.info( result )
         when 'info'
-          logger.info( sprintf( 'give dashboards for %s back', node ) )
+#           logger.info( sprintf( 'give dashboards for %s back', node ) )
           result = self.listDashboards( { :host => node } )
 
           self.sendMessage( { :cmd => 'info', :queue => 'mq-grafana-info', :payload => result, :ttr => 1, :delay => 0 } )

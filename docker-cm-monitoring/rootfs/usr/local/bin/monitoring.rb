@@ -437,11 +437,18 @@ class Monitoring
 
         if( discoveryPayload != nil )
 
+          services          = discoveryPayload.dig( 'services' )
+
+           services.each do |s|
+             s.last.reject! { |k| k == 'template' }
+             s.last.reject! { |k| k == 'application' }
+           end
+
           if( discoveryPayload.is_a?( Hash ) )
             discoveryPayload = discoveryPayload.to_json
           end
 
-           discoveryPayload = JSON.parse( discoveryPayload.split('"services":').join('"coremedia":') )
+          discoveryPayload = JSON.parse( discoveryPayload.split('"services":').join('"coremedia":') )
         else
 
           discoveryPayload = {}

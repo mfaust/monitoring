@@ -17,6 +17,10 @@ services:
     description: MongoDB
     port: 28017
 
+  resourced:
+    description: Resourced
+    port: 55555
+
   solr-master:
     description: Solr Master
     port: 40099

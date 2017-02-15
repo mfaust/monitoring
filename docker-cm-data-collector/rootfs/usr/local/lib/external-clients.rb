@@ -438,6 +438,7 @@ module ExternalClients
             hash[ d.to_s ][ type.to_s ] ||= {}
             hash[ d.to_s ][ type.to_s ][ direction.to_s ] ||= {}
             hash[ d.to_s ][ type.to_s ][ direction.to_s ] = sprintf( "%f", mes.to_s ).sub(/\.?0*$/, "" )
+
           end
         end
 
@@ -456,6 +457,14 @@ module ExternalClients
 
       result = Hash.new()
       r      = Array.new
+
+      # blacklist
+      data.reject! { |t| t[/iso9660/] }
+      data.reject! { |t| t[/tmpfs/] }
+      data.reject! { |t| t[/rpc_pipefs/] }
+      data.reject! { |t| t[/nfs4/] }
+      data.reject! { |t| t[/overlay/] }
+      data.flatten!
 
       existingDevices = Array.new()
 
@@ -490,7 +499,8 @@ module ExternalClients
 
             hash[ device.to_s ] ||= {}
             hash[ device.to_s ][ type.to_s ] ||= {}
-            hash[ device.to_s ][ type.to_s ] = sprintf( "%f", mes.to_s ).sub(/\.?0*$/, "" )
+            hash[ device.to_s ][ type.to_s ]  = sprintf( "%f", mes.to_s ).sub(/\.?0*$/, "" )
+            hash[ device.to_s ]['mountpoint'] = mountpoint
           end
         end
 
@@ -542,23 +552,73 @@ module ExternalClients
 
     end
 
-    def callService()
 
-      uri = URI( sprintf( 'http://%s:%s/r', @host, @port ) )
+    def network( path )
+
+      uri = URI( sprintf( 'http://%s:%s/r/%s', @host, @port, path ) )
 
       response = nil
+      result   = {}
 
       begin
 
+        Net::HTTP.start( uri.host, uri.port ) do |http|
+          request = Net::HTTP::Get.new( uri.request_uri )
 
+          response     = http.request( request )
+          responseCode = response.code.to_i
 
-      rescue
+          # TODO
+          # Errorhandling
+          if( responseCode != 200 )
+            logger.error( sprintf( ' [%s] - Error', responseCode ) )
+            logger.error( response.body )
+          elsif( responseCode == 200 )
 
+            body = response.body
 
+            result = body.dig( "Data" )
+
+          end
+        end
+
+      rescue => e
+
+        logger.error( e )
+        logger.error( e.backtrace )
 
       end
 
+      return result
+
     end
+
+
+
+
+    def collectLoad( data )
+
+      result = Hash.new()
+      regex = /(?<load>(.*)) (?<mes>(.*))/x
+
+      data = self.network( 'load-avg' )
+
+      data.each do |c|
+
+        if( parts = c.match( regex ) )
+
+          c.gsub!('node_load15', 'longterm' )
+          c.gsub!('node_load5' , 'midterm' )
+          c.gsub!('node_load1' , 'shortterm' )
+
+          parts = c.split( ' ' )
+          result[parts[0]] = parts[1]
+        end
+      end
+
+      return result
+    end
+
 
     def get()
 
@@ -569,14 +629,9 @@ module ExternalClients
 
         self.callService( )
 
-#        return {
-#          :cpu        => self.collectCpu( @cpu ),
-#          :load       => self.collectLoad( @load ),
-#          :memory     => self.collectMemory( @memory ),
-#          :network    => self.collectNetwork( @network ),
-#          :disk       => self.collectDisk( @disk ),
-#          :filesystem => self.collectFilesystem( @filesystem )
-#        }
+        return {
+          :load       => self.collectLoad( 'load-avg' )
+        }
 
       rescue Exception => e
         logger.error( "An error occurred for query: #{e}" )

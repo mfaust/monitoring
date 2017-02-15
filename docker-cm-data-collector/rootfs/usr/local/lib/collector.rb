@@ -286,6 +286,7 @@ module DataCollector
 
   end
 
+
     def mysqlData( host, data = {} )
 
       data = {}
@@ -329,6 +330,7 @@ module DataCollector
       return data
 
     end
+
 
     def nodeExporterData( host, data = {} )
 

@@ -278,7 +278,7 @@ class ServiceDiscovery
 
     services = Array.new
 
-    if( port == 3306 || port == 5432 || port == 9100 || port == 28017 )
+    if( port == 3306 || port == 5432 || port == 9100 || port == 28017 || port == 55555 )
 
       case port
       when 3306
