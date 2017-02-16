@@ -7,11 +7,48 @@
 #  (c) 2016 Coremedia (Bodo Schulz)
 #
 
-
 require 'json'
 require 'rest-client'
 
+require 'logger'
+
+# -------------------------------------------------------------------------------------------------
+
+module Logging
+
+  def logger
+    @logger ||= Logging.logger_for( self.class.name )
+  end
+
+  # Use a hash class-ivar to cache a unique Logger per class:
+  @loggers = {}
+
+  class << self
+    def logger_for( classname )
+      @loggers[classname] ||= configure_logger_for( classname )
+    end
+
+    def configure_logger_for( classname )
+
+      logger                 = Logger.new(STDOUT)
+      logger.progname        = classname
+      logger.level           = Logger::DEBUG
+      logger.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
+      logger.formatter       = proc do |severity, datetime, progname, msg|
+        "[#{datetime.strftime( logger.datetime_format )}] #{severity.ljust(5)} : #{progname} - #{msg}\n"
+      end
+
+      logger
+    end
+  end
+end
+
+# -------------------------------------------------------------------------------------------------
+
+
 class NodeExporter
+
+  include Logging
 
   def initialize( )
 
@@ -30,6 +67,7 @@ class NodeExporter
     body        = body.each_line.reject{ |x| x.strip =~ /(^.*)#/ }.join
 
     # get groups
+    @boot       = body.each_line.select { |name| name =~ /^node_boot_time/ }
     @cpu        = body.each_line.select { |name| name =~ /^node_cpu/ }
     @disk       = body.each_line.select { |name| name =~ /^node_disk/ }
     @filefd     = body.each_line.select { |name| name =~ /^node_filefd/ }
@@ -43,6 +81,24 @@ class NodeExporter
 
   end
 
+
+  def collectUptime( data )
+
+    result  = Hash.new()
+    tmpCore = nil
+
+    logger.debug( data.class.to_s )
+
+        parts = data.last.split( ' ' )
+
+        bootTime = sprintf( "%f", parts[1].to_s ).sub(/\.?0*$/, "" )
+        uptime   = Time.at( Time.now() - Time.at( bootTime.to_i ) ).to_i
+
+        result[parts[0]] = bootTime
+        result['uptime'] = uptime
+
+    return result
+  end
 
   def collectCpu( data )
 
@@ -217,6 +273,14 @@ class NodeExporter
     result = Hash.new()
     r      = Array.new
 
+    # blacklist
+    data.reject! { |t| t[/iso9660/] }
+    data.reject! { |t| t[/tmpfs/] }
+    data.reject! { |t| t[/rpc_pipefs/] }
+    data.reject! { |t| t[/nfs4/] }
+    data.reject! { |t| t[/overlay/] }
+    data.flatten!
+
     existingDevices = Array.new()
 
     regex = /(.*){device="(?<device>(.*))"}(.*)/
@@ -249,6 +313,7 @@ class NodeExporter
           hash[ device.to_s ] ||= {}
           hash[ device.to_s ][ type.to_s ] ||= {}
           hash[ device.to_s ][ type.to_s ] = sprintf( "%f", mes.to_s ).sub(/\.?0*$/, "" )
+          hash[ device.to_s ]['mountpoint'] = mountpoint
         end
       end
 
@@ -274,11 +339,12 @@ class NodeExporter
     self.callService( )
 
     return {
-      :cpu        => self.collectCpu( @cpu ),
-      :load       => self.collectLoad( @load ),
-      :memory     => self.collectMemory( @memory ),
-      :network    => self.collectNetwork( @network ),
-      :disk       => self.collectDisk( @disk ),
+      :uptime     => self.collectUptime( @boot ),
+#       :cpu        => self.collectCpu( @cpu ),
+#       :load       => self.collectLoad( @load ),
+#       :memory     => self.collectMemory( @memory ),
+#       :network    => self.collectNetwork( @network ),
+#       :disk       => self.collectDisk( @disk ),
       :filesystem => self.collectFilesystem( @filesystem )
     }
 
@@ -290,7 +356,7 @@ end
 # example
 
 options = {
-  :host => '10.2.10.211',
+  :host => 'release-1701-tomcat',
   :port => '9100'
 }
 
