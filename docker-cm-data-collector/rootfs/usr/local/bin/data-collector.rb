@@ -3,62 +3,44 @@
 # 12.08.2016 - Bodo Schulz
 #
 #
-# v1.0.1
+# v1.1.0
 
 # -----------------------------------------------------------------------------
 
-require 'yaml'
-
-require_relative '../lib/data-collector'
+require_relative '../lib/collector'
 
 # -----------------------------------------------------------------------------
 
+logDirectory          = '/var/log/monitoring'
+cacheDirectory        = '/var/cache/monitoring'
 applicationConfigFile = '/etc/cm-application.yaml'
 serviceConfigFile     = '/etc/cm-service.yaml'
-configFile            = '/etc/cm-monitoring.yaml'
 
-if( File.exist?( configFile ) )
 
-  config = YAML.load_file( configFile )
+jolokiaHost      = ENV['JOLOKIA_HOST']    ? ENV['JOLOKIA_HOST']    : 'localhost'
+jolokiaPort      = ENV['JOLOKIA_PORT']    ? ENV['JOLOKIA_PORT']    : 8080
+mqHost           = ENV['MQ_HOST']         ? ENV['MQ_HOST']         : 'localhost'
+mqPort           = ENV['MQ_PORT']         ? ENV['MQ_PORT']         : 11300
+mqQueue          = ENV['MQ_QUEUE']        ? ENV['MQ_QUEUE']        : 'mq-collector'
+memcacheHost     = ENV['MEMCACHE_HOST']   ? ENV['MEMCACHE_HOST']   : 'localhost'
+memcachePort     = ENV['MEMCACHE_PORT']   ? ENV['MEMCACHE_PORT']   : 11211
+scanDiscovery    = ENV['SCAN_DISCOVERY']  ? ENV['SCAN_DISCOVERY']  : '10m'
+intervall        = ENV['INTERVALL']       ? ENV['INTERVALL']       : 15
 
-  @logDir           = config['logDirectory']         ? config['logDirectory']     : '/tmp/log'
-  @cacheDir         = config['cacheDirectory']       ? config['cacheDirectory']   : '/tmp/cache'
-  @jolokiaHost      = config['jolokia']['host']      ? config['jolokia']['host']  : 'localhost'
-  @jolokiaPort      = config['jolokia']['port']      ? config['jolokia']['port']  : 8080
-
-  @memcacheHost     = ENV['MEMCACHE_HOST']           ? ENV['MEMCACHE_HOST']       : nil
-  @memcachePort     = ENV['MEMCACHE_PORT']           ? ENV['MEMCACHE_PORT']       : nil
-
-  @scanDiscovery    = config['data-collector']['scan-discovery'] ? config['data-collector']['scan-discovery'] : '10m'
-
-else
-  puts "no configuration exists, use default settings"
-
-  @logDir        = '/tmp/log'
-  @cacheDir      = '/tmp/cache'
-  @jolokiaHost   = 'localhost'
-  @jolokiaPort   = 8080
-  @memcacheHost  = nil
-  @memcachePort  = nil
-  @scanDiscovery = '10m'
-
-end
-
-options = {
-  :logDirectory          => @logDir,
-  :cacheDirectory        => @cacheDir,
-  :jolokiaHost           => @jolokiaHost,
-  :jolokiaPort           => @jolokiaPort,
-  :memcacheHost          => @memcacheHost,
-  :memcachePort          => @memcachePort,
-  :scanDiscovery         => @scanDiscovery,
+config = {
+  :logDirectory          => logDirectory,
+  :cacheDirectory        => cacheDirectory,
+  :jolokiaHost           => jolokiaHost,
+  :jolokiaPort           => jolokiaPort,
+  :mqHost                => mqHost,
+  :mqPort                => mqPort,
+  :mqQueue               => mqQueue,
+  :memcacheHost          => memcacheHost,
+  :memcachePort          => memcachePort,
+  :scanDiscovery         => scanDiscovery,
   :applicationConfigFile => applicationConfigFile,
   :serviceConfigFile     => serviceConfigFile
 }
-
-# -----------------------------------------------------------------------------
-
-r = DataCollector.new( options )
 
 # -----------------------------------------------------------------------------
 
@@ -71,10 +53,21 @@ Signal.trap('HUP')  { stop = true }
 Signal.trap('TERM') { stop = true }
 Signal.trap('QUIT') { stop = true }
 
-until stop
-  # do your thing
-  r.run()
-  sleep( 15 )
+# -----------------------------------------------------------------------------
+
+r = DataCollector::Collector.new( config )
+
+if( r != nil )
+
+  until stop
+    r.run()
+    sleep( intervall.to_i )
+  end
+
+else
+  exit 2
 end
 
 # -----------------------------------------------------------------------------
+
+# EOF

@@ -3,19 +3,16 @@
 # 05.10.2016 - Bodo Schulz
 #
 #
-# v2.0.1
+# v2.2.3
 
 # -----------------------------------------------------------------------------
 
 require 'yaml'
 
 require_relative '../lib/logging'
-require_relative '../lib/discover'
-require_relative '../lib/grafana'
-require_relative '../lib/graphite'
-require_relative '../lib/icinga2'
 require_relative '../lib/tools'
-require_relative '../lib/database'
+require_relative '../lib/storage'
+require_relative '../lib/message-queue'
 
 # -----------------------------------------------------------------------------
 
@@ -27,69 +24,34 @@ class Monitoring
 
   def initialize( settings = {} )
 
-    @logDirectory  = settings[:logDirectory]       ? settings[:logDirectory]       : '/tmp'
+#     @logDirectory  = settings[:logDirectory]       ? settings[:logDirectory]       : '/tmp'
     @configFile    = '/etc/cm-monitoring.yaml'
-    @db = Storage::Database.new()
+
+    logger.level           = Logger::DEBUG
 
     self.readConfigFile()
 
-    serviceDiscoverConfig = {
-      :logDirectory        => @logDirectory,
-      :cacheDirectory      => @cacheDir,
-      :jolokiaHost         => @jolokiaHost,
-      :jolokiaPort         => @jolokiaPort,
-      :scanDiscovery       => @scanDiscovery,
-      :serviceConfigFile   => '/etc/cm-service.yaml'
+    @MQSettings = {
+      :beanstalkHost       => @mqHost,
+      :beanstalkPort       => @mqPort
     }
 
-    grafanaConfig = {
-      :logDirectory        => @logDirectory,
-      :cacheDirectory      => @cacheDir,
-      :grafanaHost         => @grafanaHost,
-      :grafanaPort         => @grafanaPort,
-      :grafanaPath         => @grafanaPath,
-      :memcacheHost        => @memcacheHost,
-      :memcachePort        => @memcachePort,
-      :templateDirectory   => @templateDirectory
-    }
-
-    icingaConfig = {
-      :logDirectory        => @logDirectory,
-      :icingaHost          => @icingaHost,
-      :icingaPort          => @icingaPort,
-      :icingaApiUser       => @icingaApiUser,
-      :icingaApiPass       => @icingaApiPass
-    }
-
-    graphiteOptions = {
-      :logDirectory        => @logDirectory,
-      :graphiteHost        => @graphiteHost,
-      :graphiteHttpPort    => @graphiteHttpPort,
-      :graphitePort        => @graphitePort,
-      :graphitePath        => @graphitePath
-    }
-
-    version              = '2.2.0'
-    date                 = '2017-01-04'
+    version              = '2.2.3'
+    date                 = '2017-01-17'
 
     logger.info( '-----------------------------------------------------------------' )
     logger.info( ' CoreMedia - Monitoring Service' )
     logger.info( "  Version #{version} (#{date})" )
-    logger.info( '  Copyright 2016 Coremedia' )
+    logger.info( '  Copyright 2016-2017 Coremedia' )
     logger.info( '' )
-    logger.info( '  enabled Services' )
-    logger.info( sprintf( '    - discovery: %s', @enabledDiscovery ) )
-    logger.info( sprintf( '    - grafana  : %s', @enabledGrafana ) )
-    logger.info( sprintf( '    - icinga2  : %s', @enabledIcinga ) )
+#     logger.info( '  enabled Services' )
+#     logger.info( sprintf( '    - discovery: %s', @enabledDiscovery ) )
+#     logger.info( sprintf( '    - grafana  : %s', @enabledGrafana ) )
+#     logger.info( sprintf( '    - icinga2  : %s', @enabledIcinga ) )
     logger.info( '-----------------------------------------------------------------' )
     logger.info( '' )
 
-    sleep(2)
-
-    @serviceDiscovery = ServiceDiscovery.new( serviceDiscoverConfig )
-    @grafana          = Grafana.new( grafanaConfig )
-    @icinga           = Icinga2.new( icingaConfig )
-    @graphite         = GraphiteAnnotions::Client.new( graphiteOptions )
+    @db = Storage::Database.new()
 
   end
 
@@ -98,30 +60,17 @@ class Monitoring
 
     config = YAML.load_file( @configFile )
 
-    @logDirectory     = config['logDirectory']             ? config['logDirectory']             : '/tmp/log'
-    @cacheDir         = config['cacheDirectory']           ? config['cacheDirectory']           : '/tmp/cache'
+#     @logDirectory     = config['logDirectory']             ? config['logDirectory']             : '/tmp/log'
+#     @cacheDir         = config['cacheDirectory']           ? config['cacheDirectory']           : '/tmp/cache'
 
-    @jolokiaHost      = config['jolokia']['host']          ? config['jolokia']['host']          : 'localhost'
-    @jolokiaPort      = config['jolokia']['port']          ? config['jolokia']['port']          : 8080
+    @mqHost           = config['mq']['host']               ? config['mq']['host']               : 'localhost'
+    @mqPort           = config['mq']['port']               ? config['mq']['port']               : 11300
+    @mqQueue          = config['mq']['queue']              ? config['mq']['queue']              : 'mq-rest-service'
 
-    @grafanaHost      = config['grafana']['host']          ? config['grafana']['host']          : 'localhost'
-    @grafanaPort      = config['grafana']['port']          ? config['grafana']['port']          : 3000
-    @grafanaPath      = config['grafana']['path']          ? config['grafana']['path']          : nil
+#     @templateDirectory = config['grafana']['templateDirectory']  ? config['grafana']['templateDirectory']  : '/var/tmp/templates'
 
-    @icingaHost       = config['icinga']['host']           ? config['icinga']['host']           : 'localhost'
-    @icingaPort       = config['icinga']['port']           ? config['icinga']['port']           : 5665
-    @icingaApiUser    = config['icinga']['api']['user']    ? config['icinga']['api']['user']    : 'icinga'
-    @icingaApiPass    = config['icinga']['api']['pass']    ? config['icinga']['api']['pass']    : 'icinga'
-
-    @graphiteHost     = config['graphite']['host']         ? config['graphite']['host']         : 'localhost'
-    @graphiteHttpPort = config['graphite']['http-port']    ? config['graphite']['http-port']    : 80
-    @graphitePort     = config['graphite']['port']         ? config['graphite']['port']         : 2003
-    @graphitePath     = config['graphite']['path']         ? config['graphite']['path']         : nil
-
-    @templateDirectory = config['grafana']['templateDirectory']  ? config['grafana']['templateDirectory']  : '/var/tmp/templates'
-
-    @memcacheHost     = ENV['MEMCACHE_HOST']               ? ENV['MEMCACHE_HOST']               : nil
-    @memcachePort     = ENV['MEMCACHE_PORT']               ? ENV['MEMCACHE_PORT']               : nil
+#     @memcacheHost     = ENV['MEMCACHE_HOST']               ? ENV['MEMCACHE_HOST']               : nil
+#     @memcachePort     = ENV['MEMCACHE_PORT']               ? ENV['MEMCACHE_PORT']               : nil
 
     @serviceChecks    = config['service-checks']           ? config['service-checks']           : nil
 
@@ -162,18 +111,44 @@ class Monitoring
   end
 
 
-  def createCacheDirectory( host )
+#   def createCacheDirectory( host )
+#
+#     directory = sprintf( '%s/%s', @cacheDir, host )
+#
+#     if( !File.exist?( directory ) )
+#       Dir.mkdir( directory )
+#     end
+#
+#     return directory
+#
+#   end
 
-    directory = sprintf( '%s/%s', @cacheDir, host )
 
-    if( !File.exist?( directory ) )
-      Dir.mkdir( directory )
-    end
+  # -- MESSAGE-QUEUE ---------------------------------------------------------------------
+  #
+  def messageQueue( params = {} )
 
-    return directory
+    command = params.dig(:cmd)
+    node    = params.dig(:node)
+    queue   = params.dig(:queue)
+    data    = params.dig(:payload)
+    prio    = params.dig(:prio)  || 65536
+    ttr     = params.dig(:ttr)   || 10
+    delay   = params.dig(:delay) || 2
+
+    p = MessageQueue::Producer.new( @MQSettings )
+
+    job = {
+      cmd:  command,
+      node: node,
+      timestamp: Time.now().strftime( '%Y-%m-%d %H:%M:%S' ),
+      from: 'rest-service',
+      payload: data
+    }.to_json
+
+    p.addJob( queue, job, prio, ttr, delay )
 
   end
-
 
   # -- CONFIGURE ------------------------------------------------------------------------
   #
@@ -187,7 +162,7 @@ class Monitoring
 
     if( host.to_s != '' )
 
-      directory = self.createCacheDirectory( host )
+#       directory = self.createCacheDirectory( host )
 
       hash = JSON.parse( payload )
 
@@ -204,38 +179,35 @@ class Monitoring
 
     end
 
-    return {
+    return JSON.pretty_generate( {
       :status  => status,
       :message => message
-    }
+    } )
 
   end
 
 
   def getHostConfiguration( host )
 
-    status       = 500
-    message      = 'initialize error'
-
     if( host.to_s != '' )
 
-      if( isIp?( host ) == true )
-        data = @db.config( { :ip => host } )
-      else
-        shortName = host.split('.').first
+      data = @db.config( { :ip => host, :short => host, :long => host } )
 
-        data = @db.config( { :short => shortName } )
-      end
+      # logger.debug( data )
 
       if( data != false )
-        status = 200
-        message = data
+
+       return {
+          :status  => 200,
+          :message => data
+        }
       end
+
     end
 
     return {
-      :status  => status,
-      :message => message
+      :status  => 204,
+      :message => 'no configuration found'
     }
 
   end
@@ -265,49 +237,16 @@ class Monitoring
       end
     end
 
-    return {
+    return JSON.pretty_generate( {
       :status  => status,
       :message => message
-    }
+    } )
 
   end
 
 
   # -- HOST -----------------------------------------------------------------------------
   #
-  def addHost( host, payload )
-
-    status    = 500
-    message   = 'initialize error'
-
-    result    = Hash.new()
-    hash      = Hash.new()
-
-    if( host.to_s != '' )
-
-      hostData = self.checkAvailablility?( host )
-
-      if( hostData == false )
-
-        return {
-          :status  => 400,
-          :message => 'Host are not available (DNS Problem)'
-        }
-
-      end
-
-      directory       = self.createCacheDirectory( host )
-
-      force           = false
-      enableDiscovery = @enabledDiscovery
-      enabledGrafana  = @enabledGrafana
-      enabledIcinga   = @enabledIcinga
-      annotation      = true
-      grafanaOverview = true
-      services        = []
-      tags            = []
-      config          = {}
-
 #      example:
 #      {
 #        "force": true,
@@ -330,13 +269,46 @@ class Monitoring
 #        }
 #      }
 
-      logger.debug( payload )
+  def addHost( host, payload )
 
-      if( payload != '' )
+    status    = 500
+    message   = 'initialize error'
+
+    logger.debug( sprintf( 'addHost( \'%s\', \'%s\' )', host, payload ) )
+
+    logger.info( sprintf( 'add node \'%s\' to monitoring', host ) )
+
+    result    = Hash.new()
+    hash      = Hash.new()
+
+    if( host.to_s != '' )
+
+      hostData = self.checkAvailablility?( host )
+
+      if( hostData == false )
+
+        return {
+          :status  => 400,
+          :message => 'Host are not available (DNS Problem)'
+        }
+
+      end
+
+#       directory       = self.createCacheDirectory( host )
+
+      force           = false
+      enableDiscovery = @enabledDiscovery
+      enabledGrafana  = @enabledGrafana
+      enabledIcinga   = @enabledIcinga
+      annotation      = true
+      grafanaOverview = true
+      services        = []
+      tags            = []
+      config          = {}
+
+      if( payload.to_s != '' )
 
         hash = JSON.parse( payload )
-
-        logger.debug( hash )
 
         result[:request] = hash
 
@@ -349,42 +321,46 @@ class Monitoring
         services        = hash.keys.include?('services')     ? hash['services']     : []
         tags            = hash.keys.include?('tags')         ? hash['tags']         : []
         config          = hash.keys.include?('config')       ? hash['config']       : {}
-
       end
+
+      logger.debug( sprintf( 'force      : %s', force            ? 'true' : 'false' ) )
+      logger.debug( sprintf( 'discovery  : %s', enableDiscovery  ? 'true' : 'false' ) )
+      logger.debug( sprintf( 'grafana    : %s', enabledGrafana   ? 'true' : 'false' ) )
+      logger.debug( sprintf( 'icinga     : %s', enabledIcinga    ? 'true' : 'false' ) )
+      logger.debug( sprintf( 'annotation : %s', annotation       ? 'true' : 'false' ) )
+      logger.debug( sprintf( 'overview   : %s', grafanaOverview  ? 'true' : 'false' ) )
+      logger.debug( sprintf( 'services   : %s', services ) )
+      logger.debug( sprintf( 'tags       : %s', tags ) )
+      logger.debug( sprintf( 'config     : %s', config ) )
 
       if( force == true )
 
-        logger.info( sprintf( 'remove %s from monitoring', host ) )
+        logger.info( 'force mode ...' )
 
-        if( enableDiscovery == true )
-          discoveryResult  = @serviceDiscovery.deleteHost( host )
-          discoveryStatus  = discoveryResult[:status]
-          discoveryMessage = discoveryResult[:message]
-
-          logger.debug( "discovery: #{discoveryResult}" )
+        if( enabledGrafana == true )
+          logger.info( 'remove grafana dashborads' )
+          logger.debug( 'send message to \'mq-grafana\'' )
+          self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-grafana', :payload => payload, :prio => 0 } )
         end
 
         if( enabledIcinga == true )
-          icingaResult  = @icinga.deleteHost( host )
-          icingaStatus  = icingaResult[:status]
-          icingaMessage = icingaResult[:message]
-
-          logger.debug( "icinga: #{icingaResult}" )
+          logger.info( 'remove icinga checks and notifications' )
+          logger.debug( 'send message to \'mq-icinga\'' )
+          self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-icinga', :payload => payload, :prio => 0 } )
         end
 
-        if( enabledGrafana == true )
-          grafanaResult  = @grafana.deleteDashboards( host )
-          grafanaStatus  = grafanaResult[:status]
-          grafanaMessage = grafanaResult[:message]
-
-          logger.debug( "grafana: #{grafanaResult}" )
+        if( enableDiscovery == true )
+          logger.info( 'remove node from discovery service' )
+          logger.debug( 'send message to \'mq-discover\'' )
+          self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-discover', :payload => payload, :prio => 0 } )
         end
 
         logger.info( 'done' )
 
+        sleep( 2 )
       end
 
-      # now, we canwrite an config per node when we add them
+      # now, we can write an own configiguration per node when we add them, hurray
       if( config.is_a?( Hash) )
 
         ip    = hostData.dig( :ip )
@@ -398,124 +374,129 @@ class Monitoring
 
       end
 
-      # TODO
-      # change service-discovery to use 'services'
+      if( enableDiscovery == true )
 
-      options = {
-        'services'     => services
+        logger.info( 'add node to discovery service' )
+
+        logger.debug( 'send message to \'mq-discover\'' )
+        self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-discover', :payload => payload, :prio => 1, :delay => 1 } )
+
+        sleep( 2 )
+      end
+
+      if( enabledGrafana == true )
+
+        logger.info( 'create grafana dashborads' )
+
+        logger.debug( 'send message to \'mq-grafana\'' )
+        self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-grafana', :payload => payload, :prio => 10, :ttr => 15, :delay => 10 } )
+      end
+
+      if( enabledIcinga == true && enableDiscovery == true )
+
+        logger.info( 'create icinga checks and notifications' )
+
+        sleep( 4 )
+        # in first, we need the discovered services ...
+        logger.info( 'we need information from discovery service' )
+        logger.debug( 'send message to \'mq-discover\'' )
+        self.messageQueue( { :cmd => 'info', :node => host, :queue => 'mq-discover', :payload => {}, :prio => 2, :ttr => 1, :delay => 0 } )
+
+        sleep( 5 )
+
+        resultArray = Array.new()
+        threads     = Array.new()
+
+        c = MessageQueue::Consumer.new( @MQSettings )
+
+        discoveryStatus  = nil
+        discoveryPayload = nil
+
+#         discoveryStatus  = c.getJobFromTube('mq-discover-info')
+#         discoveryPayload = discoveryStatus.dig( :body, 'payload' )
+
+        for y in 1..10
+
+          result      = c.getJobFromTube('mq-discover-info')
+
+          if( result != nil )
+            discoveryStatus = result
+            break
+          else
+            logger.debug( sprintf( 'Waiting for data %s ... %d', 'mq-discover-info', y ) )
+            sleep( 4 )
+          end
+        end
+
+        if( discoveryStatus != nil )
+          discoveryPayload = discoveryStatus.dig( :body, 'payload' )
+        end
+
+        if( discoveryPayload != nil )
+
+          services          = discoveryPayload.dig( 'services' )
+
+          if( services != nil )
+
+#             for y in 1..10
+#
+#               services          = discoveryPayload.dig( 'services' )
+#
+#               if( services != nil )
+#                 break
+#               else
+#                 logger.debug( sprintf( 'Waiting for data %s ... %d', 'mq-discover-info', y ) )
+#                 sleep( 3 )
+#               end
+#             end
+
+            services.each do |s|
+              s.last.reject! { |k| k == 'template' }
+              s.last.reject! { |k| k == 'application' }
+            end
+
+            if( discoveryPayload.is_a?( Hash ) )
+              discoveryPayload = discoveryPayload.to_json
+            end
+
+            discoveryPayload = JSON.parse( discoveryPayload.split('"services":').join('"coremedia":') )
+
+          else
+
+            discoveryPayload = {}
+          end
+        else
+
+          discoveryPayload = {}
+        end
+
+        logger.debug( 'send message to \'mq-icinga\'' )
+        self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-icinga', :payload => discoveryPayload, :prio => 10, :ttr => 15, :delay => 10 } )
+      end
+
+      if( annotation == true )
+
+        logger.info( 'annotation for create' )
+        self.addAnnotation( host, { "command": "create", "argument": "node" } )
+      end
+
+      discoveryResult = {
+        :status  => 200,
+        :message => 'send to MQ'
       }
 
-      discoveryResult   = @serviceDiscovery.addHost( host, options )
-      discoveryStatus   = discoveryResult[:status].to_i
-      discoveryMessage  = discoveryResult[:message]
+      result[host.to_sym] ||= {}
+      result[host.to_sym][:discovery] ||= {}
+      result[host.to_sym][:discovery] = discoveryResult
 
-      # jolokia is not available (400)
-      # Host not available (400)
-      # Host already created (409)
-      if( discoveryStatus == 400 || discoveryStatus == 409 )
-
-        status  = discoveryStatus
-        message = discoveryMessage
-
-        return {
-          :status  => status,
-          :message => message
-        }
-
-      else
-        # all fine (200)
-
-        result[host.to_sym] ||= {}
-
-        if( enabledIcinga == true )
-
-          discoverdServices = @serviceDiscovery.listHosts( host )
-
-          services          = discoverdServices.dig( 'hosts', 'services' )
-
-          logger.debug( services )
-
-          services = ( discoverdServices[:hosts] && discoverdServices[:hosts]['services'] ) ? discoverdServices[:hosts]['services'] : nil
-
-          logger.debug( services )
-
-#           services.each do |s|
-#             s.last.reject! { |k| k == 'description' }
-#             s.last.reject! { |k| k == 'application' }
-#           end
-#
-#           cm = Hash.new()
-#           cm = { 'cm' => services }
-#
-#           icingaResult  = @icinga.addHost( host, cm )
-#           icingaStatus  = icingaResult[:status]
-#           icingaMessage = icingaResult[:message]
-
-          icingaStatus  = 201
-          icingaMessage = 'test message'
-
-          result[host.to_sym][:icinga] ||= {}
-          result[host.to_sym][:icinga] = {
-            :status     => icingaStatus,
-            :message    => icingaMessage
-          }
-
-        end
-
-        if( enabledGrafana == true )
-
-          # tags are array or hash ..
-          # when hash, we need only the values. the keys are ignoreable
-          if( tags.is_a?( Hash ) )
-            tags = tags.values
-          end
-
-          options = {
-            'tags'         => tags,
-            'overview'     => grafanaOverview
-          }
-
-          grafanaResult  = @grafana.addDashbards( host, options )
-          grafanaStatus  = grafanaResult[:status]
-          grafanaMessage = grafanaResult[:message]
-
-          if( grafanaStatus == 200 )
-
-            grafanaListDashboards = @grafana.listDashboards( host )
-            grafanaDashboardCount = grafanaListDashboards[:count]   ? grafanaListDashboards[:count]   : 0
-
-            result[host.to_sym][:grafana] ||= {}
-            result[host.to_sym][:grafana] = {
-              :status     => grafanaStatus,
-              :message    => grafanaMessage,
-              :dashboards => grafanaDashboardCount
-            }
-
-          end
-        end
-
-        if( annotation == true )
-
-          self.addAnnotation( host, { "command": "create", "argument": "node" } )
-        end
-
-        result[host.to_sym][:discovery] ||= {}
-        result[host.to_sym][:discovery] = {
-          :status     => discoveryStatus,
-          :message    => discoveryMessage
-        }
-
-#        status  = 200
-        return result
-
-      end
+      return result
 
     end
 
-    return {
+    return JSON.pretty_generate( {
       :status  => status,
       :message => message
-    }
+    } )
 
   end
 
@@ -527,6 +508,11 @@ class Monitoring
 
     result                = Hash.new()
     hash                  = Hash.new()
+
+    result = {
+      :status  => status,
+      :message => message
+    }
 
     grafanaDashboardCount = 0
     grafanaDashboards     = []
@@ -544,9 +530,9 @@ class Monitoring
       result[host.to_s][:dns] ||= {}
       result[host.to_s][:dns] = hostData
 
-      enableDiscovery = @enabledDiscovery
-      enabledGrafana  = @enabledGrafana
-      enabledIcinga   = @enabledIcinga
+      enableDiscovery = true # @enabledDiscovery
+      enabledGrafana  = true # @enabledGrafana
+      enabledIcinga   = false # @enabledIcinga
 
 #
 #       if( payload != nil )
@@ -564,99 +550,87 @@ class Monitoring
       result[host.to_s] ||= {}
 
       hostConfiguration        = self.getHostConfiguration( ( hostData != false && hostData[:short] ) ? hostData[:short] : host )
-      hostConfigurationStatus  = hostConfiguration[:status]
-      hostConfigurationMessage = hostConfiguration[:message]
+
+      if( hostConfiguration != nil )
+        hostConfigurationStatus  = hostConfiguration.dig(:status)  || 204
+        hostConfigurationMessage = hostConfiguration.dig(:message)
+      end
 
       if( hostConfigurationStatus == 200 )
         result[host.to_s][:custom_config] = hostConfigurationMessage
       end
 
-      if( enableDiscovery == true )
-
-        discoveryResult  = @serviceDiscovery.listHosts( ( hostData != false && hostData[:short] ) ? hostData[:short] : host )
-        discoveryStatus  = discoveryResult[:status]
-        discoveryMessage = discoveryResult[:message]
-
-        logger.debug( "discovery: #{discoveryResult}" )
-
-        result[host.to_s][:discovery] ||= {}
-
-        if( discoveryStatus == 200 )
-
-          discoveryServices = nil
-
-          if( discoveryResult.dig( :hosts, host ) != nil )
-            discoveryCreated = discoveryResult.dig( :hosts, host, :created ) || 'unknown'
-            discoveryOnline  = discoveryResult.dig( :hosts, host, :status )  || 'unknown'
-          else
-            discoveryCreated = discoveryResult.dig( :hosts, hostData[:short], :created ) || 'unknown'
-            discoveryOnline  = discoveryResult.dig( :hosts, hostData[:short], :status )  || 'unknown'
-          end
-
-          result[host.to_s][:discovery] = {
-            :status     => discoveryStatus,
-            :created    => discoveryCreated,
-            :online     => discoveryOnline,
-            :services   => discoveryServices
-          }
-        else
-          result[host.to_s][:discovery] = {
-            :status     => discoveryStatus,
-            :message    => discoveryMessage
-          }
-        end
-      end
-
 
       if( enabledIcinga == true )
-
-        icingaResult  = @icinga.listHost( ( hostData != false && hostData[:short] ) ? hostData[:short] : host )
-        icingaStatus  = icingaResult[:status]
-        icingaMessage = icingaResult[:message]
-
-        logger.debug( "icinga: #{icingaResult}" )
-
-        result[host.to_s][:icinga] ||= {}
-        result[host.to_s][:icinga] = {
-          :status     => icingaStatus,
-          :message    => icingaMessage
-        }
+        logger.info( 'get information from icinga' )
+        logger.debug( 'send message to \'mq-icinga\'' )
+        self.messageQueue( { :cmd => 'info', :node => host, :queue => 'mq-icinga', :payload => {} } )
+      end
+      if( enabledGrafana == true )
+        logger.info( 'get information from grafana' )
+        logger.debug( 'send message to \'mq-grafana\'' )
+        self.messageQueue( { :cmd => 'info', :node => host, :queue => 'mq-grafana', :payload => {}, :ttr => 1, :delay => 0 } )
       end
 
+      if( enableDiscovery == true )
+        logger.info( 'get information from discovery service' )
+        logger.debug( 'send message to \'mq-discover\'' )
+        self.messageQueue( { :cmd => 'info', :node => host, :queue => 'mq-discover', :payload => {}, :ttr => 1, :delay => 0 } )
+      end
+
+      sleep( 8 )
+
+      c = MessageQueue::Consumer.new( @MQSettings )
+
+      resultArray = Array.new()
+      threads     = Array.new()
+
+      logger.debug('start')
+      if( enableDiscovery == true )
+        discoveryStatus = c.getJobFromTube('mq-discover-info')
+
+        if( discoveryStatus )
+          result[host.to_s][:discovery] ||= {}
+          discoveryStatus = discoveryStatus.dig( :body, 'payload' ) || {}
+          result[host.to_s][:discovery] = discoveryStatus
+        end
+      end
 
       if( enabledGrafana == true )
-        grafanaResult  = @grafana.listDashboards( ( hostData != false && hostData[:short] ) ? hostData[:short] : host )
-        grafanaStatus  = grafanaResult[:status]
-        grafanaMessage = grafanaResult[:message]
+        grafanaStatus = c.getJobFromTube('mq-grafana-info')
 
-        logger.debug( "grafana: #{grafanaResult}" )
+        if( grafanaStatus )
+          result[host.to_s][:grafana] ||= {}
+          grafanaStatus = grafanaStatus.dig( :body, 'payload' ) || {}
+          result[host.to_s][:grafana] = grafanaStatus
+        end
+      end
 
-        result[host.to_s][:grafana] ||= {}
+      if( enabledIcinga == true )
+        icingaStatus = c.getJobFromTube('mq-icinga-info')
 
-        if( grafanaStatus == 200 )
-
-          grafanaDashboardCount = grafanaResult[:count]      ? grafanaResult[:count]      : 0
-          grafanaDashboards     = grafanaResult[:dashboards] ? grafanaResult[:dashboards] : []
-
-          result[host.to_s][:grafana] = {
-            :status     => grafanaStatus,
-            :dashboards => grafanaDashboards,
-            :count      => grafanaDashboardCount
-          }
-        else
-
-          result[host.to_s][:grafana] = {
-            :status     => grafanaStatus,
-            :message    => grafanaMessage
-          }
-
+        if( icingaStatus )
+          result[host.to_s][:icinga] ||= {}
+          icingaStatus = icingaStatus.dig( :body, 'payload' ) || {}
+          result[host.to_s][:icinga] = icingaStatus
         end
       end
 
 
-      return result
+
+#      ['mq-icinga-info','mq-grafana-info','mq-discover-info'].each do |queue|
+#        resultArray << c.getJobFromTube( queue )
+#      end
+
+      logger.debug('end')
+#      logger.debug( resultArray )
+      logger.debug( result )
+
+      return JSON.pretty_generate( result )
 
     else
+
+      return JSON.pretty_generate( { :status => 204, :message => 'not yet ready' } )
 
       discoveryResult  = @serviceDiscovery.listHosts( host )
       discoveryStatus  = discoveryResult[:status]
@@ -707,7 +681,16 @@ class Monitoring
   end
 
 
+#     example:
+#     {
+#       "force": true,
+#       "icinga": false,
+#       "grafana": false,
+#       "annotation": true
+#     }
   def removeHost( host, payload )
+
+    logger.info( sprintf( 'remove node \'%s\' from monitoring', host ) )
 
     status    = 500
     message   = 'initialize error'
@@ -724,12 +707,6 @@ class Monitoring
       enabledIcinga   = @enabledIcinga
       annotation      = true
 
-#     example:
-#     {
-#       "grafana": false,
-#       "annotation": true
-#     }
-
       if( payload != '' )
 
         hash = JSON.parse( payload )
@@ -742,66 +719,55 @@ class Monitoring
         annotation      = hash.keys.include?('annotation') ? hash['annotation'] : true
       end
 
-      if( force == true )
-        @db.removeConfig( { :ip => host, :short => host } )
-      end
+        logger.debug( sprintf( 'force      : %s', force            ? 'true' : 'false' ) )
+        logger.debug( sprintf( 'discovery  : %s', enableDiscovery  ? 'true' : 'false' ) )
+        logger.debug( sprintf( 'grafana    : %s', enabledGrafana   ? 'true' : 'false' ) )
+        logger.debug( sprintf( 'icinga     : %s', enabledIcinga    ? 'true' : 'false' ) )
+        logger.debug( sprintf( 'annotation : %s', annotation       ? 'true' : 'false' ) )
 
       result[host.to_sym] ||= {}
 
+      if( annotation == true )
+        logger.info( 'annotation for remove' )
+        self.addAnnotation( host, { "command": "remove", "argument": "node" } )
+      end
+
       if( enabledIcinga == true )
-        icingaResult  = @icinga.deleteHost( host )
-        icingaStatus  = icingaResult[:status]
-        icingaMessage = icingaResult[:message]
-
-        logger.debug( "icinga: #{icingaResult}" )
-
-#         icingaStatus  = 201
-#         icingaMessage = 'test message'
-
-        result[host.to_sym][:icinga] ||= {}
-        result[host.to_sym][:icinga] = {
-          :status     => icingaStatus,
-          :message    => icingaMessage
-        }
-
+        logger.info( 'remove icinga checks and notifications' )
+        logger.debug( 'send message to \'mq-icinga\'' )
+        self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-icinga', :payload => { "force" => true } } )
       end
-
       if( enabledGrafana == true )
-        grafanaResult  = @grafana.deleteDashboards( host )
-        grafanaStatus  = grafanaResult[:status]
-        grafanaMessage = grafanaResult[:message]
-
-        logger.debug( "grafana: #{grafanaResult}" )
-
-        result[host.to_sym][:grafana] = {
-          :status     => grafanaStatus,
-          :message    => grafanaMessage
-        }
+        logger.info( 'remove grafana dashborads' )
+        logger.debug( 'send message to \'mq-grafana\'' )
+        self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-grafana', :payload => { "force" => true } } )
       end
 
-      discoveryResult  = @serviceDiscovery.deleteHost( host )
-      discoveryStatus  = discoveryResult[:status]
-      discoveryMessage = discoveryResult[:message]
-
-      logger.debug( "discovery: #{discoveryResult}" )
-
-      if( annotation == true && discoveryStatus == 200 )
-        self.addAnnotation( host, { "command": "destroy", "argument": "node" } )
+      if( enableDiscovery == true )
+        logger.info( 'remove node from discovery service' )
+        logger.debug( 'send message to \'mq-discover\'' )
+        self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-discover', :payload => { "force" => true } } )
       end
 
-      result[host.to_sym][:discovery] = {
-        :status     => discoveryStatus,
-        :message    => discoveryMessage
+      if( force == true )
+        logger.info( 'remove configuration from db (force mode)' )
+        @db.removeConfig( { :ip => host, :short => host } )
+      end
+
+      discoveryResult = {
+        :status  => 200,
+        :message => 'send to MQ'
       }
 
-      return result
+      result[host.to_sym][:discovery] = discoveryResult
+
+      return JSON.pretty_generate( result )
     end
 
-    return {
+    return JSON.pretty_generate( {
       :status  => status,
       :message => message
-    }
-
+    } )
 
   end
 
@@ -837,7 +803,7 @@ class Monitoring
         description  = hash[:description] ? hash[:description] : nil
         tags         = hash[:tags]        ? hash[:tags]        : []
 
-        if( command == 'create' || command == 'destroy' )
+        if( command == 'create' || command == 'remove' )
 #         example:
 #         {
 #           "command": "create"
@@ -850,7 +816,9 @@ class Monitoring
           message     = nil
           description = nil
           tags        = []
-          @graphite.nodeAnnotation( host, command )
+          self.messageQueue( { :cmd => command, :node => host, :queue => 'mq-graphite', :payload => { "timestamp": Time.now().to_i, "node" => host } } )
+
+#           @graphite.nodeAnnotation( host, command )
 
         elsif( command == 'loadtest' && ( argument == 'start' || stop == 'stop' ) )
 
@@ -868,7 +836,10 @@ class Monitoring
           message     = nil
           description = nil
           tags        = []
-          @graphite.loadtestAnnotation( host, argument )
+
+          self.messageQueue( { :cmd => 'loadtest', :node => host, :queue => 'mq-graphite', :payload => { "timestamp": Time.now().to_i, "argument" => argument } } )
+
+          # @graphite.loadtestAnnotation( host, argument )
 
         elsif( command == 'deployment' )
 
@@ -882,7 +853,9 @@ class Monitoring
 #           ]
 #         }
           description = nil
-          @graphite.deploymentAnnotation( host, message, tags )
+          self.messageQueue( { :cmd => 'deployment', :node => host, :queue => 'mq-graphite', :payload => { "timestamp": Time.now().to_i, "message" => message, "tags" => tags } } )
+
+#           @graphite.deploymentAnnotation( host, message, tags )
 
         else
 #         example:
@@ -895,7 +868,9 @@ class Monitoring
 #             "git-0000000"
 #           ]
 #         }
-          @graphite.generalAnnotation( host, description, message, tags )
+          self.messageQueue( { :cmd => 'general', :node => host, :queue => 'mq-graphite', :payload => { "timestamp": Time.now().to_i, "message" => message, "tags" => tags, "description" => description } } )
+
+#           @graphite.generalAnnotation( host, description, message, tags )
         end
 
         status    = 200
@@ -909,10 +884,10 @@ class Monitoring
 
     end
 
-    return {
+    return JSON.pretty_generate( {
       :status  => status,
       :message => message
-    }
+    } )
 
   end
 
@@ -932,6 +907,10 @@ class Monitoring
     }
 
   end
+
+
+
+
 
 
 end

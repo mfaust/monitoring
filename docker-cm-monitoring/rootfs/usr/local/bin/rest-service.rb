@@ -3,7 +3,7 @@
 # 05.10.2016 - Bodo Schulz
 #
 #
-# v2.0.1
+# v2.1.0
 
 # -----------------------------------------------------------------------------
 
@@ -15,9 +15,13 @@ require 'fileutils'
 require 'resolve/hostname'
 
 require_relative 'monitoring'
+require_relative '../lib/logging'
 
 module Sinatra
+
   class MonitoringRest < Base
+
+    include Logging
 
     configure do
 
@@ -127,11 +131,16 @@ module Sinatra
     #
     post '/v2/config/:host' do
 
-      host   = params[:host]
-      result = m.writeHostConfiguration( host, @request_paylod )
+      host            = params[:host]
 
-      status = result[:status]
-      result.to_json
+      payload         =  @request_paylod
+      @request_paylod = nil
+
+      result = m.writeHostConfiguration( host, paylod )
+
+      status result[:status]
+
+      result
 
     end
 
@@ -143,8 +152,9 @@ module Sinatra
       host   = params[:host]
       result = m.getHostConfiguration( host )
 
-      status = result[:status]
-      result.to_json
+      status result[:status]
+
+      result
 
     end
 
@@ -156,8 +166,10 @@ module Sinatra
       host   = params[:host]
       result = m.removeHostConfiguration( host )
 
-      status = result[:status]
-      result.to_json
+      status result[:status]
+
+      result
+
     end
 
     # -----------------------------------------------------------------------------
@@ -169,11 +181,17 @@ module Sinatra
     #
     post '/v2/host/:host' do
 
-      host   = params[:host]
-      result = m.addHost( host, @request_paylod )
+      host            = params[:host]
+      payload         = @request_paylod
+      @request_paylod = nil
 
-      status = result[:status]
-      result.to_json
+      logger.debug( sprintf( 'POST \'/v2/host/:host\' - \'%s\', \'%s\'', host, payload ) )
+
+      result = m.addHost( host, payload )
+
+      status result[:status]
+
+      result
 
     end
 
@@ -182,8 +200,9 @@ module Sinatra
 
       result = m.listHost( nil, request.env )
 
-      status = result[:status]
-      result.to_json
+#       status = result[:status]
+
+      result
 
     end
 
@@ -193,8 +212,9 @@ module Sinatra
       host   = params[:host]
       result = m.listHost( host, request.env )
 
-      status = result[:status]
-      result.to_json
+#       status = result[:status]
+
+      result
 
     end
 
@@ -204,8 +224,12 @@ module Sinatra
       host   = params[:host]
       result = m.removeHost( host, @request_paylod )
 
-      status = result[:status]
-      result.to_json
+      logger.debug( result )
+
+#       status result[:status]
+
+      result
+
     end
 
     # -----------------------------------------------------------------------------
@@ -216,8 +240,9 @@ module Sinatra
       host   = params[:host]
       result = m.addAnnotation( host, @request_paylod )
 
-      status = result[:status]
-      result.to_json
+#       status = result[:status]
+
+      result
 
     end
 

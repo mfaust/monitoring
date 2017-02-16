@@ -1,10 +1,12 @@
 #!/usr/bin/ruby
 
+# http://ricostacruz.com/cheatsheets/sequel.html
+
 require 'rubygems'
 require 'json'
 require 'logger'
 require 'sequel'
-require 'redis'
+# require 'redis'
 require 'digest/md5'
 
 require_relative '../docker-cm-monitoring/rootfs/usr/local/lib/tools'
@@ -55,7 +57,10 @@ module Storage
 
 
 
-  class SQLite
+  class Database
+
+    OFFLINE  = 0
+    ONLINE   = 1
 
     include Logging
 
@@ -95,6 +100,16 @@ module Storage
 #         foreign_key [ :ip, :shortname, :key ], :name => 'unique_config'
       }
 
+      @database.create_table?( :status ) {
+        primary_key :id
+        foreign_key :dns_id, :dns
+        DateTime    :created   , :default => Time.now
+        DateTime    :updated   , :default => Time.now
+        Integer     :status
+
+        index [ :dns_id, :status ]
+      }
+
       @database.create_table?( :discovery ) {
         primary_key :id
         foreign_key :dns_id, :dns
@@ -107,29 +122,49 @@ module Storage
 #        foreign_key [:shortname, :service], :name => 'unique_discovery'
       }
 
-      @database.create_table?( :result ) {
+      @database.create_table?( :measurements ) {
         primary_key :id
         foreign_key :dns_id, :dns
         foreign_key :discovery_id, :discovery
-        String      :service   , :size => 128, :key => true, :index => true, :unique => true, :null => false
         String      :data      , :text => true, :null => false
         DateTime    :created   , :default => Time.now()
 
-        index [:dns_id, :discovery_id, :service ]
-#         foreign_key [:shortname], :dns
-#         foreign_key [:service]  , :discovery
+        index [ :dns_id, :discovery_id ]
       }
 
-      @database.create_or_replace_view( :v_discovery,
-        'select dns.ip, dns.shortname, dns.created, discovery.* from dns as dns, discovery as discovery where dns.id = discovery.dns_id' )
+      if( @database.table_exists?(:v_discovery) == false )
 
-      @database.create_or_replace_view( :v_config,
+        @database.create_view( :v_discovery,
+          'select
+            dns.ip, dns.shortname, dns.created,
+            discovery.*
+          from
+            dns as dns, discovery as discovery
+          where
+            dns.id = discovery.dns_id'
+        )
+
+      end
+
+      if( @database.table_exists?(:v_config) == false )
+
+      @database.create_view( :v_config,
         'select
           dns.ip, dns.shortname, dns.longname, dns.checksum,
           config.id, config.key, config.value
         from
           dns as dns, config as config
         order by key'
+      )
+      end
+      
+      @database.create_or_replace_view( :v_status,
+        'select
+          d.ip, d.shortname, d.checksum,
+          s.created, s.updated, s.status
+        from
+          dns as d, status as s
+        where d.id = s.dns_id'
       )
 
     end
@@ -353,6 +388,31 @@ module Storage
     end
 
 
+    def nodes( params = {} )
+
+      status    = params[ :status ]    ? params[ :status ]    : nil # Database::ONLINE
+
+      result    =
+
+      if( status != nil )
+        w = ( Sequel[:status => status ] )
+      else
+        w = nil
+      end
+
+      rec = @database[:v_status].select().where( w ) .to_a
+
+      if( rec.count() != 0 )
+
+        groupByHost = rec.group_by { |k| k[:shortname] }
+
+        return groupByHost
+      end
+
+      return Hash.new()
+
+    end
+
 
     def createDNS( params = {} )
 
@@ -360,7 +420,8 @@ module Storage
       short   = params[ :short ] ? params[ :short ] : nil
       long    = params[ :long ]  ? params[ :long ]  : nil
 
-      dns = @database[:dns]
+      dns     = @database[:dns]
+      status  = @database[:status]
 
       rec = dns.select(:id).where(
         :ip        => ip.to_s,
@@ -371,12 +432,18 @@ module Storage
       # insert if data not found
       if( rec == nil )
 
-        dns.insert(
+        insertedId = dns.insert(
           :ip        => ip.to_s,
           :shortname => short.to_s,
           :longname  => long.to_s,
           :checksum  => Digest::MD5.hexdigest( [ ip, short, long ].join ),
+          :created   => DateTime.now()
+        )
+
+        status.insert(
+          :dns_id    => insertedId.to_s,
           :created   => DateTime.now(),
+          :updated   => DateTime.now(),
           :status    => isRunning?( ip )
         )
       end
@@ -390,7 +457,7 @@ module Storage
       short   = params[ :short ] ? params[ :short ] : nil
       long    = params[ :long ]  ? params[ :long ]  : nil
 
-      dns = @database[:dns]
+      dns     = @database[:dns]
 
       rec = dns.where(
         (Sequel[:ip => ip.to_s] ) |
@@ -653,61 +720,51 @@ module Storage
 
 #       self.removeConfig( { :ip => '10.2.14.156', :key => "ports" } )
 
-      logger.info( 'read configurions' )
-      d = Array.new
-
-      d << self.config( { :ip => '10.2.14.156', :key => "ports" } )
-      d << self.config( { :ip => '10.2.14.156', :key => 'display-name' } )
-      d << self.config( { :ip => '10.2.14.156' } )
-      d << self.config( { :ip => '10.2.14.170', :key => 'display-name' } )
-
-       d.each do |d2|
-         if( d2 )
-          logger.debug( JSON.pretty_generate d2 )
-         end
-       end
-
-      return
 
       dns = Hash.new()
 
-#       [ 'monitoring-16-01', 'monitoring-16-02', 'foo' ].each do |i|
-#
-#         dns = self.dnsData( { :short => i } )
-#
-# #         logger.debug( dns )
-#
-#         if( dns == nil )
-#           logger.debug( 'no data for ' + i )
-#         else
-#           dnsId        = dns[ :id ]
-#           dnsIp        = dns[ :ip ]
-#           dnsShortname = dns[ :shortname ]
-#           dnsLongname  = dns[ :longname ]
-#           dnsCreated   = dns[ :created ]
-#           dnsChecksum  = dns[ :checksum ]
-#
-#           logger.debug( JSON.pretty_generate dns )
-#
-#           data.each do |d|
-#
-#             service = d.keys[0].to_s
-#             port    = d.dig( service, 'port' )
-#
-# #            logger.debug( d )
-# #            logger.debug( sprintf( '%s - %s - %s', dnsShortname, port, service ) )
-#
-# #             logger.debug( d.values.first.to_json.class.to_s )
-#
-#             self.createDiscovery( { :id => dnsId, :ip => dnsIp, :short => dnsShortname, :checksum => dnsChecksum, :port => port, :service => service, :data => d.values.first.to_json } )
-#
-#           end
-#         end
-#       end
+      [ 'monitoring-16-01', 'monitoring-16-02', 'foo' ].each do |i|
+
+        dns = self.dnsData( { :short => i } )
+
+#         logger.debug( dns )
+
+        if( dns == nil )
+          logger.debug( 'no data for ' + i )
+        else
+          dnsId        = dns[ :id ]
+          dnsIp        = dns[ :ip ]
+          dnsShortname = dns[ :shortname ]
+          dnsLongname  = dns[ :longname ]
+          dnsCreated   = dns[ :created ]
+          dnsChecksum  = dns[ :checksum ]
+
+          logger.debug( JSON.pretty_generate dns )
+
+          data.each do |d|
+
+            service = d.keys[0].to_s
+            port    = d.dig( service, 'port' )
+
+#            logger.debug( d )
+            logger.debug( sprintf( '%s - %s - %s', dnsShortname, port, service ) )
+#             logger.debug( d.values.first.to_json.class.to_s )
+
+            self.createDiscovery( { :id => dnsId, :ip => dnsIp, :short => dnsShortname, :checksum => dnsChecksum, :port => port, :service => service, :data => d.values.first.to_json } )
+
+          end
+        end
+      end
     end
 
 
     def readData(  )
+
+#       self.dnsData()
+
+      self.nodes()
+      self.nodes( { :status => Database::ONLINE } )
+      self.nodes( { :status => Database::OFFLINE } )
 
       d = self.discoveryData()
       logger.debug( JSON.pretty_generate( d ) )
@@ -736,6 +793,22 @@ module Storage
 #       logger.debug( JSON.pretty_generate( d ) )
 #       end
 #       logger.debug( '===' )
+
+
+#       logger.info( 'read configurions' )
+#       d = Array.new
+#
+#       d << self.config( { :ip => '10.2.14.156', :key => "ports" } )
+#       d << self.config( { :ip => '10.2.14.156', :key => 'display-name' } )
+#       d << self.config( { :ip => '10.2.14.156' } )
+#       d << self.config( { :ip => '10.2.14.170', :key => 'display-name' } )
+#
+#        d.each do |d2|
+#          if( d2 )
+#           logger.debug( JSON.pretty_generate d2 )
+#          end
+#        end
+
 
     end
   end
@@ -787,9 +860,9 @@ end
 # ---------------------------------------------------------------------------------------
 
 # TESTS
-m = Storage::SQLite.new()
+m = Storage::Database.new()
 
 m.insertData()
 
-# m.readData()
+m.readData()
 

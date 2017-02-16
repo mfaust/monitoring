@@ -96,7 +96,6 @@ services:
     uapi_cache: true
     application:
     - caefeeder
-    template: caefeeder
 
   caefeeder-live:
     description: CAEFeeder Live
@@ -116,7 +115,6 @@ services:
     - cae
     - caches
     - caches-ibm
-    template: cae
 
   studio:
     description: Studio
@@ -125,7 +123,7 @@ services:
     uapi_cache: true
     blob_cache: true
     application:
-    - caches
+    - caches-studio
     - caches-ibm
 
   adobe-drive:
@@ -151,7 +149,7 @@ services:
     port: 41399
 
   replication-live-server:
-    description: RLS
+    description: Replication Live Server
     port: 42099
     port_http: 42080
     ior: true
@@ -161,7 +159,7 @@ services:
     - contentserver
 
   cae-live-1:
-    description: CAE Live
+    description: CAE Live 1
     port: 42199
     cap_connection: true
     uapi_cache: true
@@ -170,5 +168,3 @@ services:
     - cae
     - caches
     - caches-ibm
-    template: cae
-

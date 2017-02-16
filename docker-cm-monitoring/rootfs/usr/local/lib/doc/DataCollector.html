@@ -1,0 +1,3119 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  Class: DataCollector
+  
+    &mdash; Documentation by YARD 0.9.6
+  
+</title>
+
+  <link rel="stylesheet" href="css/style.css" type="text/css" charset="utf-8" />
+
+  <link rel="stylesheet" href="css/common.css" type="text/css" charset="utf-8" />
+
+<script type="text/javascript" charset="utf-8">
+  pathId = "DataCollector";
+  relpath = '';
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div class="nav_wrap">
+      <iframe id="nav" src="class_list.html?1"></iframe>
+      <div id="resizer"></div>
+    </div>
+
+    <div id="main" tabindex="-1">
+      <div id="header">
+        <div id="menu">
+  
+    <a href="_index.html">Index (D)</a> &raquo;
+    
+    
+    <span class="title">DataCollector</span>
+  
+</div>
+
+        <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="class_list.html">
+
+        <svg width="24" height="24">
+          <rect x="0" y="4" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="12" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="20" width="24" height="4" rx="1" ry="1"></rect>
+        </svg>
+    </a>
+  
+</div>
+        <div class="clear"></div>
+      </div>
+
+      <div id="content"><h1>Class: DataCollector
+  
+  
+  
+</h1>
+<div class="box_info">
+  
+  <dl>
+    <dt>Inherits:</dt>
+    <dd>
+      <span class="inheritName">Object</span>
+      
+        <ul class="fullTree">
+          <li>Object</li>
+          
+            <li class="next">DataCollector</li>
+          
+        </ul>
+        <a href="#" class="inheritanceTree">show all</a>
+      
+    </dd>
+  </dl>
+  
+
+  
+  
+  
+  
+  <dl>
+      <dt>Includes:</dt>
+      <dd><span class='object_link'><a href="Logging.html" title="Logging (module)">Logging</a></span></dd>
+  </dl>
+  
+  
+
+  
+
+  
+  <dl>
+    <dt>Defined in:</dt>
+    <dd>data-collector.rb</dd>
+  </dl>
+  
+</div>
+
+<h2>Overview</h2><div class="docstring">
+  <div class="discussion">
+    -----------------------------------------------------------------------------
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div>
+
+
+
+  <h2>Instance Attribute Summary <small><a href="#" class="summary_toggle">collapse</a></small></h2>
+  <ul class="summary">
+    
+      <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#message-instance_method" title="#message (instance method)">#<strong>message</strong>  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+    
+      <span class="note title readonly">readonly</span>
+    
+    
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'>Returns the value of attribute message.</div></span>
+  
+</li>
+
+    
+      <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#reDiscovery-instance_method" title="#reDiscovery (instance method)">#<strong>reDiscovery</strong>  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+    
+      <span class="note title readonly">readonly</span>
+    
+    
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'>Returns the value of attribute reDiscovery.</div></span>
+  
+</li>
+
+    
+      <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#services-instance_method" title="#services (instance method)">#<strong>services</strong>  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+    
+      <span class="note title readonly">readonly</span>
+    
+    
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'>Returns the value of attribute services.</div></span>
+  
+</li>
+
+    
+      <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#status-instance_method" title="#status (instance method)">#<strong>status</strong>  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+    
+      <span class="note title readonly">readonly</span>
+    
+    
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'>Returns the value of attribute status.</div></span>
+  
+</li>
+
+    
+  </ul>
+
+
+
+
+  
+    <h2>
+      Instance Method Summary
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#applicationConfig-instance_method" title="#applicationConfig (instance method)">#<strong>applicationConfig</strong>(applicationConfig)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#buildMergedData-instance_method" title="#buildMergedData (instance method)">#<strong>buildMergedData</strong>(host)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'>merge Data between Property Files and discovered Services creates mergedHostData.json for every Node.</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#checkHostAndService-instance_method" title="#checkHostAndService (instance method)">#<strong>checkHostAndService</strong>(targetUrl)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'>extract Host and Port of destination services from rmi uri  - rmi uri are : &quot;service:jmx:rmi:///jndi/rmi://moebius-16-tomcat:2222/jmxrmi&quot;    host: moebius-16-tomcat    port: 2222.</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#checkHostDataAge-instance_method" title="#checkHostDataAge (instance method)">#<strong>checkHostDataAge</strong>(host)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#createBulkCheck-instance_method" title="#createBulkCheck (instance method)">#<strong>createBulkCheck</strong>(data)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'>create a singulary json for every services to send them to the jolokia service.</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#initialize-instance_method" title="#initialize (instance method)">#<strong>initialize</strong>(settings = {})  &#x21d2; DataCollector </a>
+    
+
+    
+  </span>
+  
+  
+    <span class="note title constructor">constructor</span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'>A new instance of DataCollector.</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#internalMemcacheData-instance_method" title="#internalMemcacheData (instance method)">#<strong>internalMemcacheData</strong>(host)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#logMark-instance_method" title="#logMark (instance method)">#<strong>logMark</strong>  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#mergeData-instance_method" title="#mergeData (instance method)">#<strong>mergeData</strong>(data = {})  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#mergeSolrCores-instance_method" title="#mergeSolrCores (instance method)">#<strong>mergeSolrCores</strong>(metrics, cores = [])  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#mongoDBData-instance_method" title="#mongoDBData (instance method)">#<strong>mongoDBData</strong>(host, data = {})  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#mysqlData-instance_method" title="#mysqlData (instance method)">#<strong>mysqlData</strong>(host, data = {})  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#nodeExporterData-instance_method" title="#nodeExporterData (instance method)">#<strong>nodeExporterData</strong>(host, data = {})  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#postgresData-instance_method" title="#postgresData (instance method)">#<strong>postgresData</strong>(host, data = {})  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#readConfiguration-instance_method" title="#readConfiguration (instance method)">#<strong>readConfiguration</strong>  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#reorganizeData-instance_method" title="#reorganizeData (instance method)">#<strong>reorganizeData</strong>(data)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'>reorganize data to later simple find.</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#run-instance_method" title="#run (instance method)">#<strong>run</strong>  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#sendChecksToJolokia-instance_method" title="#sendChecksToJolokia (instance method)">#<strong>sendChecksToJolokia</strong>(data)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'>send json data to jolokia and save the result in an memory storage (e.g. memcache).</div></span>
+  
+</li>
+
+      
+    </ul>
+  
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+  <h3 class="inherited">Methods included from <span class='object_link'><a href="Logging.html" title="Logging (module)">Logging</a></span></h3>
+  <p class="inherited"><span class='object_link'><a href="Logging.html#configure_logger_for-class_method" title="Logging.configure_logger_for (method)">configure_logger_for</a></span>, <span class='object_link'><a href="Logging.html#logger-instance_method" title="Logging#logger (method)">#logger</a></span>, <span class='object_link'><a href="Logging.html#logger_for-class_method" title="Logging.logger_for (method)">logger_for</a></span></p>
+<div id="constructor_details" class="method_details_list">
+  <h2>Constructor Details</h2>
+  
+    <div class="method_details first">
+  <h3 class="signature first" id="initialize-instance_method">
+  
+    #<strong>initialize</strong>(settings = {})  &#x21d2; <tt><span class='object_link'><a href="" title="DataCollector (class)">DataCollector</a></span></tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    Returns a new instance of DataCollector
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'data-collector.rb', line 30</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span> <span class='id identifier rubyid_settings'>settings</span> <span class='op'>=</span> <span class='lbrace'>{</span><span class='rbrace'>}</span> <span class='rparen'>)</span>
+
+  <span class='ivar'>@logDirectory</span>      <span class='op'>=</span> <span class='id identifier rubyid_settings'>settings</span><span class='lbracket'>[</span><span class='symbol'>:logDirectory</span><span class='rbracket'>]</span>          <span class='op'>?</span> <span class='id identifier rubyid_settings'>settings</span><span class='lbracket'>[</span><span class='symbol'>:logDirectory</span><span class='rbracket'>]</span>          <span class='op'>:</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>/tmp/log</span><span class='tstring_end'>&#39;</span></span>
+  <span class='ivar'>@cacheDirectory</span>    <span class='op'>=</span> <span class='id identifier rubyid_settings'>settings</span><span class='lbracket'>[</span><span class='symbol'>:cacheDirectory</span><span class='rbracket'>]</span>        <span class='op'>?</span> <span class='id identifier rubyid_settings'>settings</span><span class='lbracket'>[</span><span class='symbol'>:cacheDirectory</span><span class='rbracket'>]</span>        <span class='op'>:</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>/tmp/cache</span><span class='tstring_end'>&#39;</span></span>
+  <span class='ivar'>@jolokiaHost</span>       <span class='op'>=</span> <span class='id identifier rubyid_settings'>settings</span><span class='lbracket'>[</span><span class='symbol'>:jolokiaHost</span><span class='rbracket'>]</span>           <span class='op'>?</span> <span class='id identifier rubyid_settings'>settings</span><span class='lbracket'>[</span><span class='symbol'>:jolokiaHost</span><span class='rbracket'>]</span>           <span class='op'>:</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>localhost</span><span class='tstring_end'>&#39;</span></span>
+  <span class='ivar'>@jolokiaPort</span>       <span class='op'>=</span> <span class='id identifier rubyid_settings'>settings</span><span class='lbracket'>[</span><span class='symbol'>:jolokiaPort</span><span class='rbracket'>]</span>           <span class='op'>?</span> <span class='id identifier rubyid_settings'>settings</span><span class='lbracket'>[</span><span class='symbol'>:jolokiaPort</span><span class='rbracket'>]</span>           <span class='op'>:</span> <span class='int'>8080</span>
+  <span class='ivar'>@memcacheHost</span>      <span class='op'>=</span> <span class='id identifier rubyid_settings'>settings</span><span class='lbracket'>[</span><span class='symbol'>:memcacheHost</span><span class='rbracket'>]</span>          <span class='op'>?</span> <span class='id identifier rubyid_settings'>settings</span><span class='lbracket'>[</span><span class='symbol'>:memcacheHost</span><span class='rbracket'>]</span>          <span class='op'>:</span> <span class='kw'>nil</span>
+  <span class='ivar'>@memcachePort</span>      <span class='op'>=</span> <span class='id identifier rubyid_settings'>settings</span><span class='lbracket'>[</span><span class='symbol'>:memcachePort</span><span class='rbracket'>]</span>          <span class='op'>?</span> <span class='id identifier rubyid_settings'>settings</span><span class='lbracket'>[</span><span class='symbol'>:memcachePort</span><span class='rbracket'>]</span>          <span class='op'>:</span> <span class='kw'>nil</span>
+
+  <span class='id identifier rubyid_applicationConfig'>applicationConfig</span>  <span class='op'>=</span> <span class='id identifier rubyid_settings'>settings</span><span class='lbracket'>[</span><span class='symbol'>:applicationConfigFile</span><span class='rbracket'>]</span> <span class='op'>?</span> <span class='id identifier rubyid_settings'>settings</span><span class='lbracket'>[</span><span class='symbol'>:applicationConfigFile</span><span class='rbracket'>]</span> <span class='op'>:</span> <span class='kw'>nil</span>
+  <span class='id identifier rubyid_serviceConfig'>serviceConfig</span>      <span class='op'>=</span> <span class='id identifier rubyid_settings'>settings</span><span class='lbracket'>[</span><span class='symbol'>:serviceConfigFile</span><span class='rbracket'>]</span>     <span class='op'>?</span> <span class='id identifier rubyid_settings'>settings</span><span class='lbracket'>[</span><span class='symbol'>:serviceConfigFile</span><span class='rbracket'>]</span>     <span class='op'>:</span> <span class='kw'>nil</span>
+
+  <span class='ivar'>@supportMemcache</span>   <span class='op'>=</span> <span class='kw'>false</span>
+  <span class='ivar'>@DEBUG</span>             <span class='op'>=</span> <span class='kw'>false</span>
+
+  <span class='kw'>if</span><span class='lparen'>(</span> <span class='op'>!</span> <span class='const'>File</span><span class='period'>.</span><span class='id identifier rubyid_exist?'>exist?</span><span class='lparen'>(</span> <span class='ivar'>@logDirectory</span> <span class='rparen'>)</span> <span class='rparen'>)</span>
+    <span class='const'>Dir</span><span class='period'>.</span><span class='id identifier rubyid_mkdir'>mkdir</span><span class='lparen'>(</span> <span class='ivar'>@logDirectory</span> <span class='rparen'>)</span>
+  <span class='kw'>end</span>
+
+  <span class='kw'>if</span><span class='lparen'>(</span> <span class='op'>!</span> <span class='const'>File</span><span class='period'>.</span><span class='id identifier rubyid_exist?'>exist?</span><span class='lparen'>(</span> <span class='ivar'>@cacheDirectory</span> <span class='rparen'>)</span> <span class='rparen'>)</span>
+    <span class='const'>Dir</span><span class='period'>.</span><span class='id identifier rubyid_mkdir'>mkdir</span><span class='lparen'>(</span> <span class='ivar'>@cacheDirectory</span> <span class='rparen'>)</span>
+  <span class='kw'>end</span>
+<span class='comment'>#
+</span><span class='comment'>#     logFile        = sprintf( &#39;%s/data-collector.log&#39;, @logDirectory )
+</span><span class='comment'>#     file           = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
+</span><span class='comment'>#     file.sync      = true
+</span><span class='comment'>#     @log           = Logger.new( file, &#39;weekly&#39;, 1024000 )
+</span><span class='comment'># #    @log = Logger.new( STDOUT )
+</span><span class='comment'>#     logger.level     = Logger::INFO
+</span><span class='comment'>#     logger.datetime_format = &quot;%Y-%m-%d %H:%M:%S::%3N&quot;
+</span><span class='comment'>#     logger.formatter = proc do |severity, datetime, progname, msg|
+</span><span class='comment'>#       &quot;[#{datetime.strftime(logger.datetime_format)}] #{severity.ljust(5)} : #{msg}\n&quot;
+</span><span class='comment'>#     end
+</span>
+  <span class='kw'>if</span><span class='lparen'>(</span> <span class='id identifier rubyid_applicationConfig'>applicationConfig</span> <span class='op'>==</span> <span class='kw'>nil</span> <span class='kw'>or</span> <span class='id identifier rubyid_serviceConfig'>serviceConfig</span> <span class='op'>==</span> <span class='kw'>nil</span> <span class='rparen'>)</span>
+    <span class='id identifier rubyid_msg'>msg</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>no Configuration File given</span><span class='tstring_end'>&#39;</span></span>
+    <span class='id identifier rubyid_puts'>puts</span> <span class='id identifier rubyid_msg'>msg</span>
+    <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_error'>error</span><span class='lparen'>(</span> <span class='id identifier rubyid_msg'>msg</span> <span class='rparen'>)</span>
+
+    <span class='id identifier rubyid_exit'>exit</span> <span class='int'>1</span>
+  <span class='kw'>end</span>
+
+  <span class='kw'>if</span><span class='lparen'>(</span> <span class='ivar'>@memcacheHost</span> <span class='op'>!=</span> <span class='kw'>nil</span> <span class='op'>&amp;&amp;</span> <span class='ivar'>@memcachePort</span> <span class='op'>!=</span> <span class='kw'>nil</span> <span class='rparen'>)</span>
+
+    <span class='comment'># enable Memcache Support
+</span>    <span class='id identifier rubyid_require'>require</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>dalli</span><span class='tstring_end'>&#39;</span></span>
+
+    <span class='comment'># add cache setting
+</span>    <span class='comment'># eg.cache for 2 min here. default options is never expire
+</span>    <span class='id identifier rubyid_memcacheOptions'>memcacheOptions</span> <span class='op'>=</span> <span class='lbrace'>{</span>
+      <span class='symbol'>:compress</span>   <span class='op'>=&gt;</span> <span class='kw'>true</span><span class='comma'>,</span>
+      <span class='symbol'>:namespace</span>  <span class='op'>=&gt;</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>monitoring</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span>
+      <span class='symbol'>:expires_in</span> <span class='op'>=&gt;</span> <span class='int'>60</span><span class='op'>*</span><span class='int'>2</span>
+    <span class='rbrace'>}</span>
+
+    <span class='ivar'>@mc</span> <span class='op'>=</span> <span class='const'>Dalli</span><span class='op'>::</span><span class='const'>Client</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span> <span class='id identifier rubyid_sprintf'>sprintf</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>%s:%s</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='ivar'>@memcacheHost</span><span class='comma'>,</span> <span class='ivar'>@memcachePort</span> <span class='rparen'>)</span><span class='comma'>,</span> <span class='id identifier rubyid_memcacheOptions'>memcacheOptions</span> <span class='rparen'>)</span>
+
+    <span class='ivar'>@supportMemcache</span> <span class='op'>=</span> <span class='kw'>true</span>
+
+  <span class='kw'>end</span>
+
+  <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_applicationConfig'>applicationConfig</span><span class='lparen'>(</span> <span class='id identifier rubyid_applicationConfig'>applicationConfig</span> <span class='rparen'>)</span>
+  <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_readConfiguration'>readConfiguration</span><span class='lparen'>(</span><span class='rparen'>)</span>
+
+  <span class='ivar'>@settings</span>            <span class='op'>=</span> <span class='id identifier rubyid_settings'>settings</span>
+  <span class='ivar'>@jolokiaApplications</span> <span class='op'>=</span> <span class='kw'>nil</span>
+
+  <span class='id identifier rubyid_version'>version</span>              <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>1.3.1</span><span class='tstring_end'>&#39;</span></span>
+  <span class='id identifier rubyid_date'>date</span>                 <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>2016-10-04</span><span class='tstring_end'>&#39;</span></span>
+
+  <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_info'>info</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>-----------------------------------------------------------------</span><span class='tstring_end'>&#39;</span></span> <span class='rparen'>)</span>
+  <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_info'>info</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'> CoreMedia - DataCollector</span><span class='tstring_end'>&#39;</span></span> <span class='rparen'>)</span>
+  <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_info'>info</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>  Version </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_version'>version</span><span class='embexpr_end'>}</span><span class='tstring_content'> (</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_date'>date</span><span class='embexpr_end'>}</span><span class='tstring_content'>)</span><span class='tstring_end'>&quot;</span></span> <span class='rparen'>)</span>
+  <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_info'>info</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>  Copyright 2016 Coremedia</span><span class='tstring_end'>&#39;</span></span> <span class='rparen'>)</span>
+  <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_info'>info</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>  cache directory located at </span><span class='embexpr_beg'>#{</span><span class='ivar'>@cacheDirectory</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span> <span class='rparen'>)</span>
+
+  <span class='kw'>if</span><span class='lparen'>(</span> <span class='ivar'>@supportMemcache</span> <span class='op'>==</span> <span class='kw'>true</span> <span class='rparen'>)</span>
+    <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_info'>info</span><span class='lparen'>(</span> <span class='id identifier rubyid_sprintf'>sprintf</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>  Memcache Support enabled (%s:%s)</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='ivar'>@memcacheHost</span><span class='comma'>,</span> <span class='ivar'>@memcachePort</span> <span class='rparen'>)</span> <span class='rparen'>)</span>
+  <span class='kw'>end</span>
+
+  <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_info'>info</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>-----------------------------------------------------------------</span><span class='tstring_end'>&#39;</span></span> <span class='rparen'>)</span>
+  <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_info'>info</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_end'>&#39;</span></span> <span class='rparen'>)</span>
+
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+  
+</div>
+
+  <div id="instance_attr_details" class="attr_details">
+    <h2>Instance Attribute Details</h2>
+    
+      
+      <span id=""></span>
+      <div class="method_details first">
+  <h3 class="signature first" id="message-instance_method">
+  
+    #<strong>message</strong>  &#x21d2; <tt>Object</tt>  <span class="extras">(readonly)</span>
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    Returns the value of attribute message
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+26
+27
+28</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'data-collector.rb', line 26</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_message'>message</span>
+  <span class='ivar'>@message</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      
+      <span id=""></span>
+      <div class="method_details ">
+  <h3 class="signature " id="reDiscovery-instance_method">
+  
+    #<strong>reDiscovery</strong>  &#x21d2; <tt>Object</tt>  <span class="extras">(readonly)</span>
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    Returns the value of attribute reDiscovery
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+26
+27
+28</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'data-collector.rb', line 26</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_reDiscovery'>reDiscovery</span>
+  <span class='ivar'>@reDiscovery</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      
+      <span id=""></span>
+      <div class="method_details ">
+  <h3 class="signature " id="services-instance_method">
+  
+    #<strong>services</strong>  &#x21d2; <tt>Object</tt>  <span class="extras">(readonly)</span>
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    Returns the value of attribute services
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+26
+27
+28</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'data-collector.rb', line 26</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_services'>services</span>
+  <span class='ivar'>@services</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      
+      <span id=""></span>
+      <div class="method_details ">
+  <h3 class="signature " id="status-instance_method">
+  
+    #<strong>status</strong>  &#x21d2; <tt>Object</tt>  <span class="extras">(readonly)</span>
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    Returns the value of attribute status
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+26
+27
+28</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'data-collector.rb', line 26</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_status'>status</span>
+  <span class='ivar'>@status</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+  </div>
+
+
+  <div id="instance_method_details" class="method_details_list">
+    <h2>Instance Method Details</h2>
+
+    
+      <div class="method_details first">
+  <h3 class="signature first" id="applicationConfig-instance_method">
+  
+    #<strong>applicationConfig</strong>(applicationConfig)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+116
+117
+118</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'data-collector.rb', line 116</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_applicationConfig'>applicationConfig</span><span class='lparen'>(</span> <span class='id identifier rubyid_applicationConfig'>applicationConfig</span> <span class='rparen'>)</span>
+  <span class='ivar'>@appConfigFile</span>  <span class='op'>=</span> <span class='const'>File</span><span class='period'>.</span><span class='id identifier rubyid_expand_path'>expand_path</span><span class='lparen'>(</span> <span class='id identifier rubyid_applicationConfig'>applicationConfig</span> <span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="buildMergedData-instance_method">
+  
+    #<strong>buildMergedData</strong>(host)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    merge Data between Property Files and discovered Services
+creates mergedHostData.json for every Node
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+873
+874
+875
+876
+877
+878
+879
+880
+881
+882
+883
+884
+885
+886
+887
+888
+889
+890
+891
+892
+893
+894
+895
+896
+897
+898
+899
+900
+901
+902
+903
+904
+905
+906
+907
+908
+909
+910
+911
+912
+913
+914
+915
+916
+917
+918
+919
+920
+921
+922
+923
+924
+925
+926
+927
+928
+929
+930
+931
+932
+933
+934</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'data-collector.rb', line 873</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_buildMergedData'>buildMergedData</span><span class='lparen'>(</span> <span class='id identifier rubyid_host'>host</span> <span class='rparen'>)</span>
+
+  <span class='id identifier rubyid_discoveryFile'>discoveryFile</span>        <span class='op'>=</span> <span class='id identifier rubyid_sprintf'>sprintf</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>%s/%s/discovery.json</span><span class='tstring_end'>&#39;</span></span>     <span class='comma'>,</span> <span class='ivar'>@cacheDirectory</span><span class='comma'>,</span> <span class='id identifier rubyid_host'>host</span> <span class='rparen'>)</span>
+  <span class='id identifier rubyid_mergedDataFile'>mergedDataFile</span>       <span class='op'>=</span> <span class='id identifier rubyid_sprintf'>sprintf</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>%s/%s/mergedHostData.json</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='ivar'>@cacheDirectory</span><span class='comma'>,</span> <span class='id identifier rubyid_host'>host</span> <span class='rparen'>)</span>
+
+  <span class='kw'>if</span><span class='lparen'>(</span> <span class='op'>!</span> <span class='const'>File</span><span class='period'>.</span><span class='id identifier rubyid_exist?'>exist?</span><span class='lparen'>(</span> <span class='id identifier rubyid_discoveryFile'>discoveryFile</span> <span class='rparen'>)</span> <span class='rparen'>)</span>
+
+    <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_error'>error</span><span class='lparen'>(</span> <span class='id identifier rubyid_sprintf'>sprintf</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>no discovered Services found</span><span class='tstring_end'>&#39;</span></span> <span class='rparen'>)</span> <span class='rparen'>)</span>
+
+    <span class='kw'>return</span> <span class='lparen'>(</span> <span class='lbrace'>{</span><span class='rbrace'>}</span> <span class='rparen'>)</span>
+
+  <span class='kw'>end</span>
+
+  <span class='kw'>if</span><span class='lparen'>(</span> <span class='const'>File</span><span class='period'>.</span><span class='id identifier rubyid_exist?'>exist?</span><span class='lparen'>(</span> <span class='id identifier rubyid_mergedDataFile'>mergedDataFile</span> <span class='rparen'>)</span> <span class='rparen'>)</span>
+
+    <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_debug'>debug</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>read merged data</span><span class='tstring_end'>&#39;</span></span> <span class='rparen'>)</span>
+    <span class='id identifier rubyid_result'>result</span> <span class='op'>=</span> <span class='const'>JSON</span><span class='period'>.</span><span class='id identifier rubyid_parse'>parse</span><span class='lparen'>(</span> <span class='const'>File</span><span class='period'>.</span><span class='id identifier rubyid_read'>read</span><span class='lparen'>(</span> <span class='id identifier rubyid_mergedDataFile'>mergedDataFile</span> <span class='rparen'>)</span> <span class='rparen'>)</span>
+
+  <span class='kw'>else</span>
+
+    <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_debug'>debug</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>build merged data</span><span class='tstring_end'>&#39;</span></span> <span class='rparen'>)</span>
+
+    <span class='id identifier rubyid_data'>data</span> <span class='op'>=</span> <span class='const'>JSON</span><span class='period'>.</span><span class='id identifier rubyid_parse'>parse</span><span class='lparen'>(</span> <span class='const'>File</span><span class='period'>.</span><span class='id identifier rubyid_read'>read</span><span class='lparen'>(</span> <span class='id identifier rubyid_discoveryFile'>discoveryFile</span> <span class='rparen'>)</span> <span class='rparen'>)</span>
+
+    <span class='comment'># TODO
+</span>    <span class='comment'># create data for mySQL, Postgres
+</span>    <span class='comment'>#
+</span>    <span class='kw'>if</span><span class='lparen'>(</span> <span class='id identifier rubyid_data'>data</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>mongodb</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span> <span class='rparen'>)</span>
+      <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_mongoDBData'>mongoDBData</span><span class='lparen'>(</span> <span class='id identifier rubyid_host'>host</span><span class='comma'>,</span> <span class='id identifier rubyid_data'>data</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>mongodb</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span> <span class='rparen'>)</span>
+    <span class='kw'>end</span>
+
+    <span class='kw'>if</span><span class='lparen'>(</span> <span class='id identifier rubyid_data'>data</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>mysql</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span> <span class='rparen'>)</span>
+      <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_mysqlData'>mysqlData</span><span class='lparen'>(</span> <span class='id identifier rubyid_host'>host</span><span class='comma'>,</span> <span class='id identifier rubyid_data'>data</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>mysql</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span> <span class='rparen'>)</span>
+    <span class='kw'>end</span>
+
+    <span class='kw'>if</span><span class='lparen'>(</span> <span class='id identifier rubyid_data'>data</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>postgres</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span> <span class='rparen'>)</span>
+      <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_postgresData'>postgresData</span><span class='lparen'>(</span> <span class='id identifier rubyid_host'>host</span><span class='comma'>,</span> <span class='id identifier rubyid_data'>data</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>postgres</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span> <span class='rparen'>)</span>
+    <span class='kw'>end</span>
+
+    <span class='kw'>if</span><span class='lparen'>(</span> <span class='id identifier rubyid_data'>data</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>node_exporter</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span> <span class='rparen'>)</span>
+
+      <span class='id identifier rubyid_option'>option</span> <span class='op'>=</span> <span class='lbrace'>{</span>
+        <span class='symbol'>:port</span> <span class='op'>=&gt;</span> <span class='int'>9100</span>
+      <span class='rbrace'>}</span>
+      <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_nodeExporterData'>nodeExporterData</span><span class='lparen'>(</span> <span class='id identifier rubyid_host'>host</span><span class='comma'>,</span> <span class='id identifier rubyid_option'>option</span> <span class='rparen'>)</span>
+    <span class='kw'>end</span>
+
+
+    <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_debug'>debug</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>merge Data between Property Files and discovered Services</span><span class='tstring_end'>&#39;</span></span> <span class='rparen'>)</span>
+    <span class='id identifier rubyid_result'>result</span> <span class='op'>=</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_mergeData'>mergeData</span><span class='lparen'>(</span> <span class='id identifier rubyid_data'>data</span> <span class='rparen'>)</span>
+
+    <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_debug'>debug</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>save merged data</span><span class='tstring_end'>&#39;</span></span> <span class='rparen'>)</span>
+
+    <span class='id identifier rubyid_resultJson'>resultJson</span> <span class='op'>=</span> <span class='const'>JSON</span><span class='period'>.</span><span class='id identifier rubyid_generate'>generate</span><span class='lparen'>(</span> <span class='id identifier rubyid_result'>result</span> <span class='rparen'>)</span>
+
+    <span class='const'>File</span><span class='period'>.</span><span class='id identifier rubyid_open'>open</span><span class='lparen'>(</span> <span class='id identifier rubyid_mergedDataFile'>mergedDataFile</span> <span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>w</span><span class='tstring_end'>&#39;</span></span> <span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_f'>f</span><span class='op'>|</span> <span class='id identifier rubyid_f'>f</span><span class='period'>.</span><span class='id identifier rubyid_write'>write</span><span class='lparen'>(</span> <span class='id identifier rubyid_resultJson'>resultJson</span> <span class='rparen'>)</span> <span class='rbrace'>}</span>
+
+  <span class='kw'>end</span>
+
+  <span class='kw'>return</span> <span class='id identifier rubyid_result'>result</span>
+
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="checkHostAndService-instance_method">
+  
+    #<strong>checkHostAndService</strong>(targetUrl)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    extract Host and Port of destination services from rmi uri
+ - rmi uri are : &quot;service:jmx:rmi:///jndi/rmi://moebius-16-tomcat:2222/jmxrmi&quot;
+   host: moebius-16-tomcat
+   port: 2222
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+608
+609
+610
+611
+612
+613
+614
+615
+616
+617
+618
+619
+620
+621
+622
+623
+624
+625
+626
+627
+628
+629
+630
+631
+632
+633
+634
+635</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'data-collector.rb', line 608</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_checkHostAndService'>checkHostAndService</span><span class='lparen'>(</span> <span class='id identifier rubyid_targetUrl'>targetUrl</span> <span class='rparen'>)</span>
+
+  <span class='id identifier rubyid_result'>result</span> <span class='op'>=</span> <span class='kw'>false</span>
+
+  <span class='id identifier rubyid_regex'>regex</span> <span class='op'>=</span> <span class='tstring'><span class='regexp_beg'>/</span><span class='tstring_content'>
+    ^                   # Starting at the front of the string
+    (.*):\/\/           # all after the douple slashes
+    (?&lt;host&gt;.+\S)       # our hostname
+    :                   # seperator between host and port
+    (?&lt;port&gt;\d+)        # our port
+  </span><span class='regexp_end'>/x</span></span>
+
+  <span class='comment'># prepare
+</span>  <span class='id identifier rubyid_parts'>parts</span>     <span class='op'>=</span> <span class='id identifier rubyid_targetUrl'>targetUrl</span><span class='period'>.</span><span class='id identifier rubyid_match'>match</span><span class='lparen'>(</span> <span class='id identifier rubyid_regex'>regex</span> <span class='rparen'>)</span>
+  <span class='id identifier rubyid_destHost'>destHost</span>  <span class='op'>=</span> <span class='id identifier rubyid_parts'>parts</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>host</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_strip'>strip</span>
+  <span class='id identifier rubyid_destPort'>destPort</span>  <span class='op'>=</span> <span class='id identifier rubyid_parts'>parts</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>port</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_strip'>strip</span>
+
+  <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_debug'>debug</span><span class='lparen'>(</span> <span class='id identifier rubyid_sprintf'>sprintf</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>check Port %s on Host %s for sending data</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_destPort'>destPort</span><span class='comma'>,</span> <span class='id identifier rubyid_destHost'>destHost</span> <span class='rparen'>)</span> <span class='rparen'>)</span>
+
+  <span class='id identifier rubyid_result'>result</span> <span class='op'>=</span> <span class='id identifier rubyid_portOpen?'><span class='object_link'><a href="top-level-namespace.html#portOpen%3F-instance_method" title="#portOpen? (method)">portOpen?</a></span></span><span class='lparen'>(</span> <span class='id identifier rubyid_destHost'>destHost</span><span class='comma'>,</span> <span class='id identifier rubyid_destPort'>destPort</span> <span class='rparen'>)</span>
+
+  <span class='kw'>if</span><span class='lparen'>(</span> <span class='id identifier rubyid_result'>result</span> <span class='op'>==</span> <span class='kw'>false</span> <span class='rparen'>)</span>
+    <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_error'>error</span><span class='lparen'>(</span> <span class='id identifier rubyid_sprintf'>sprintf</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>The Port %s on Host %s is not open, skip sending data</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_destPort'>destPort</span><span class='comma'>,</span> <span class='id identifier rubyid_destHost'>destHost</span> <span class='rparen'>)</span> <span class='rparen'>)</span>
+  <span class='kw'>end</span>
+
+  <span class='kw'>return</span> <span class='id identifier rubyid_result'>result</span>
+
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="checkHostDataAge-instance_method">
+  
+    #<strong>checkHostDataAge</strong>(host)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'data-collector.rb', line 151</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_checkHostDataAge'>checkHostDataAge</span><span class='lparen'>(</span> <span class='id identifier rubyid_host'>host</span> <span class='rparen'>)</span>
+
+  <span class='id identifier rubyid_discoveryFile'>discoveryFile</span> <span class='op'>=</span> <span class='id identifier rubyid_sprintf'>sprintf</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>%s/%s/discovery.json</span><span class='tstring_end'>&#39;</span></span>     <span class='comma'>,</span> <span class='ivar'>@cacheDirectory</span><span class='comma'>,</span> <span class='id identifier rubyid_host'>host</span> <span class='rparen'>)</span>
+  <span class='id identifier rubyid_hostDateFile'>hostDateFile</span>  <span class='op'>=</span> <span class='id identifier rubyid_sprintf'>sprintf</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>%s/%s/mergedHostData.json</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='ivar'>@cacheDirectory</span><span class='comma'>,</span> <span class='id identifier rubyid_host'>host</span> <span class='rparen'>)</span>
+
+  <span class='kw'>if</span><span class='lparen'>(</span> <span class='const'>File</span><span class='period'>.</span><span class='id identifier rubyid_exist?'>exist?</span><span class='lparen'>(</span> <span class='id identifier rubyid_discoveryFile'>discoveryFile</span> <span class='rparen'>)</span> <span class='op'>==</span> <span class='kw'>true</span> <span class='rparen'>)</span>
+
+    <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_debug'>debug</span><span class='lparen'>(</span> <span class='id identifier rubyid_sprintf'>sprintf</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>discovery.json      - %s</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='const'>File</span><span class='period'>.</span><span class='id identifier rubyid_mtime'>mtime</span><span class='lparen'>(</span> <span class='id identifier rubyid_discoveryFile'>discoveryFile</span> <span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_strftime'>strftime</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>%Y-%m-%d %H:%M:%S</span><span class='tstring_end'>&#39;</span></span> <span class='rparen'>)</span> <span class='rparen'>)</span> <span class='rparen'>)</span>
+
+    <span class='id identifier rubyid_size'>size</span>     <span class='op'>=</span> <span class='const'>File</span><span class='period'>.</span><span class='id identifier rubyid_size'>size</span><span class='lparen'>(</span> <span class='id identifier rubyid_discoveryFile'>discoveryFile</span> <span class='rparen'>)</span>
+<span class='comment'>#      mtime    = File.mtime( discoveryFile )
+</span><span class='comment'>#      now      = Time.now()
+</span><span class='comment'>#      deadLine = now - ( 60*10 )
+</span>
+    <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_debug'>debug</span><span class='lparen'>(</span> <span class='id identifier rubyid_sprintf'>sprintf</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'> File %s with a size of %d</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_discoveryFile'>discoveryFile</span><span class='comma'>,</span> <span class='id identifier rubyid_size'>size</span> <span class='rparen'>)</span> <span class='rparen'>)</span>
+
+    <span class='kw'>if</span><span class='lparen'>(</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&lt;</span> <span class='int'>10</span> <span class='rparen'>)</span>
+      <span class='comment'># filesize too low
+</span>
+      <span class='const'>FileUtils</span><span class='period'>.</span><span class='id identifier rubyid_rm'>rm</span><span class='lparen'>(</span> <span class='id identifier rubyid_discoveryFile'>discoveryFile</span> <span class='rparen'>)</span>
+      <span class='const'>FileUtils</span><span class='period'>.</span><span class='id identifier rubyid_rm'>rm</span><span class='lparen'>(</span> <span class='id identifier rubyid_hostDateFile'>hostDateFile</span> <span class='rparen'>)</span>
+
+      <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_info'>info</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>trigger service discover</span><span class='tstring_end'>&#39;</span></span> <span class='rparen'>)</span>
+
+      <span class='comment'># rediscover service-discovery
+</span>
+      <span class='id identifier rubyid_serviceDiscoverConfig'>serviceDiscoverConfig</span> <span class='op'>=</span> <span class='lbrace'>{</span>
+        <span class='symbol'>:logDirectory</span>        <span class='op'>=&gt;</span> <span class='ivar'>@logDirectory</span><span class='comma'>,</span>
+        <span class='symbol'>:cacheDirectory</span>      <span class='op'>=&gt;</span> <span class='ivar'>@cacheDirectory</span><span class='comma'>,</span>
+        <span class='symbol'>:jolokiaHost</span>         <span class='op'>=&gt;</span> <span class='ivar'>@jolokiaHost</span><span class='comma'>,</span>
+        <span class='symbol'>:jolokiaPort</span>         <span class='op'>=&gt;</span> <span class='ivar'>@jolokiaPort</span><span class='comma'>,</span>
+        <span class='symbol'>:serviceConfigFile</span>   <span class='op'>=&gt;</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>/etc/cm-service.yaml</span><span class='tstring_end'>&#39;</span></span>
+      <span class='rbrace'>}</span>
+      <span class='id identifier rubyid_serviceDiscovery'>serviceDiscovery</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="ServiceDiscovery.html" title="ServiceDiscovery (class)">ServiceDiscovery</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="ServiceDiscovery.html#initialize-instance_method" title="ServiceDiscovery#initialize (method)">new</a></span></span><span class='lparen'>(</span> <span class='id identifier rubyid_serviceDiscoverConfig'>serviceDiscoverConfig</span> <span class='rparen'>)</span>
+      <span class='id identifier rubyid_serviceDiscovery'>serviceDiscovery</span><span class='period'>.</span><span class='id identifier rubyid_addHost'>addHost</span><span class='lparen'>(</span> <span class='id identifier rubyid_host'>host</span> <span class='rparen'>)</span>
+
+    <span class='kw'>end</span>
+
+  <span class='kw'>end</span>
+
+  <span class='kw'>if</span><span class='lparen'>(</span> <span class='const'>File</span><span class='period'>.</span><span class='id identifier rubyid_exist?'>exist?</span><span class='lparen'>(</span> <span class='id identifier rubyid_hostDateFile'>hostDateFile</span> <span class='rparen'>)</span> <span class='op'>==</span> <span class='kw'>true</span> <span class='rparen'>)</span>
+
+    <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_debug'>debug</span><span class='lparen'>(</span> <span class='id identifier rubyid_sprintf'>sprintf</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>mergedHostData.json - %s</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='const'>File</span><span class='period'>.</span><span class='id identifier rubyid_mtime'>mtime</span><span class='lparen'>(</span> <span class='id identifier rubyid_hostDateFile'>hostDateFile</span> <span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_strftime'>strftime</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>%Y-%m-%d %H:%M:%S</span><span class='tstring_end'>&#39;</span></span> <span class='rparen'>)</span> <span class='rparen'>)</span> <span class='rparen'>)</span>
+
+    <span class='id identifier rubyid_size'>size</span>     <span class='op'>=</span> <span class='const'>File</span><span class='period'>.</span><span class='id identifier rubyid_size'>size</span><span class='lparen'>(</span> <span class='id identifier rubyid_hostDateFile'>hostDateFile</span> <span class='rparen'>)</span>
+    <span class='id identifier rubyid_mtime'>mtime</span>    <span class='op'>=</span> <span class='const'>File</span><span class='period'>.</span><span class='id identifier rubyid_mtime'>mtime</span><span class='lparen'>(</span> <span class='id identifier rubyid_hostDateFile'>hostDateFile</span> <span class='rparen'>)</span>
+    <span class='id identifier rubyid_now'>now</span>      <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Time.html" title="Time (class)">Time</a></span></span><span class='period'>.</span><span class='id identifier rubyid_now'>now</span><span class='lparen'>(</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_deadLine'>deadLine</span> <span class='op'>=</span> <span class='id identifier rubyid_now'>now</span> <span class='op'>-</span> <span class='lparen'>(</span> <span class='int'>60</span><span class='op'>*</span><span class='int'>10</span> <span class='rparen'>)</span>
+
+    <span class='kw'>if</span><span class='lparen'>(</span> <span class='id identifier rubyid_mtime'>mtime</span> <span class='op'>&lt;</span> <span class='id identifier rubyid_deadLine'>deadLine</span> <span class='rparen'>)</span>
+
+<span class='comment'>#        logger.debug( &#39;  - trigger service discover&#39; )
+</span>      <span class='const'>FileUtils</span><span class='period'>.</span><span class='id identifier rubyid_rm'>rm</span><span class='lparen'>(</span> <span class='id identifier rubyid_hostDateFile'>hostDateFile</span> <span class='rparen'>)</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="createBulkCheck-instance_method">
+  
+    #<strong>createBulkCheck</strong>(data)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    create a singulary json for every services to send them to the jolokia service
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+639
+640
+641
+642
+643
+644
+645
+646
+647
+648
+649
+650
+651
+652
+653
+654
+655
+656
+657
+658
+659
+660
+661
+662
+663
+664
+665
+666
+667
+668
+669
+670
+671
+672
+673
+674
+675
+676
+677
+678
+679
+680
+681
+682
+683
+684
+685
+686
+687
+688
+689
+690
+691
+692
+693
+694
+695
+696
+697
+698
+699
+700
+701
+702
+703
+704
+705
+706
+707
+708
+709
+710
+711
+712
+713
+714
+715
+716
+717
+718
+719
+720
+721
+722
+723
+724
+725
+726
+727
+728
+729
+730
+731
+732
+733
+734
+735
+736
+737
+738
+739
+740</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'data-collector.rb', line 639</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_createBulkCheck'>createBulkCheck</span><span class='lparen'>(</span> <span class='id identifier rubyid_data'>data</span> <span class='rparen'>)</span>
+
+  <span class='id identifier rubyid_hosts'>hosts</span>  <span class='op'>=</span> <span class='id identifier rubyid_data'>data</span><span class='period'>.</span><span class='id identifier rubyid_keys'>keys</span>
+  <span class='id identifier rubyid_checks'>checks</span> <span class='op'>=</span> <span class='const'>Array</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_array'>array</span>  <span class='op'>=</span> <span class='const'>Array</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='rparen'>)</span>
+
+  <span class='id identifier rubyid_result'>result</span> <span class='op'>=</span> <span class='lbrace'>{</span>
+    <span class='symbol'>:timestamp</span>   <span class='op'>=&gt;</span> <span class='const'><span class='object_link'><a href="Time.html" title="Time (class)">Time</a></span></span><span class='period'>.</span><span class='id identifier rubyid_now'>now</span><span class='lparen'>(</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_to_i'>to_i</span>
+  <span class='rbrace'>}</span>
+
+  <span class='id identifier rubyid_hosts'>hosts</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_h'>h</span><span class='op'>|</span>
+
+    <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_debug'>debug</span><span class='lparen'>(</span> <span class='id identifier rubyid_sprintf'>sprintf</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>create bulk checks for \&#39;%s\&#39;</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_h'>h</span> <span class='rparen'>)</span> <span class='rparen'>)</span>
+
+    <span class='id identifier rubyid_services'>services</span>      <span class='op'>=</span> <span class='id identifier rubyid_data'>data</span><span class='lbracket'>[</span><span class='id identifier rubyid_h'>h</span><span class='rbracket'>]</span><span class='lbracket'>[</span><span class='symbol'>:data</span><span class='rbracket'>]</span> <span class='op'>?</span> <span class='id identifier rubyid_data'>data</span><span class='lbracket'>[</span><span class='id identifier rubyid_h'>h</span><span class='rbracket'>]</span><span class='lbracket'>[</span><span class='symbol'>:data</span><span class='rbracket'>]</span> <span class='op'>:</span> <span class='kw'>nil</span>
+    <span class='id identifier rubyid_servicesCount'>servicesCount</span> <span class='op'>=</span> <span class='id identifier rubyid_services'>services</span><span class='period'>.</span><span class='id identifier rubyid_count'>count</span>
+
+    <span class='kw'>if</span><span class='lparen'>(</span> <span class='id identifier rubyid_servicesCount'>servicesCount</span> <span class='op'>==</span> <span class='int'>0</span> <span class='rparen'>)</span>
+      <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_debug'>debug</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>no services found. skip ... </span><span class='tstring_end'>&#39;</span></span> <span class='rparen'>)</span>
+      <span class='kw'>next</span>
+    <span class='kw'>end</span>
+
+    <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_debug'>debug</span><span class='lparen'>(</span> <span class='id identifier rubyid_sprintf'>sprintf</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>%d services found</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_servicesCount'>servicesCount</span> <span class='rparen'>)</span> <span class='rparen'>)</span>
+
+    <span class='comment'># if Host available -&gt; break
+</span>    <span class='id identifier rubyid_hostStatus'>hostStatus</span> <span class='op'>=</span> <span class='id identifier rubyid_isRunning?'><span class='object_link'><a href="top-level-namespace.html#isRunning%3F-instance_method" title="#isRunning? (method)">isRunning?</a></span></span><span class='lparen'>(</span> <span class='id identifier rubyid_h'>h</span> <span class='rparen'>)</span>
+
+    <span class='kw'>if</span><span class='lparen'>(</span> <span class='id identifier rubyid_hostStatus'>hostStatus</span> <span class='op'>==</span> <span class='kw'>false</span> <span class='rparen'>)</span>
+
+      <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_error'>error</span><span class='lparen'>(</span> <span class='id identifier rubyid_sprintf'>sprintf</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>  Host are not available! (%s)</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_hostStatus'>hostStatus</span> <span class='rparen'>)</span> <span class='rparen'>)</span>
+
+      <span class='kw'>next</span>
+    <span class='kw'>end</span>
+
+    <span class='id identifier rubyid_services'>services</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_s'>s</span><span class='comma'>,</span><span class='id identifier rubyid_v'>v</span><span class='op'>|</span>
+
+      <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_debug'>debug</span><span class='lparen'>(</span> <span class='id identifier rubyid_sprintf'>sprintf</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>  - %s</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_s'>s</span> <span class='rparen'>)</span> <span class='rparen'>)</span>
+
+      <span class='id identifier rubyid_port'>port</span>    <span class='op'>=</span> <span class='id identifier rubyid_v'>v</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>port</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span>
+      <span class='id identifier rubyid_metrics'>metrics</span> <span class='op'>=</span> <span class='id identifier rubyid_v'>v</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>metrics</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span>
+      <span class='id identifier rubyid_bulk'>bulk</span>    <span class='op'>=</span> <span class='const'>Array</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='rparen'>)</span>
+
+      <span class='kw'>if</span><span class='lparen'>(</span> <span class='id identifier rubyid_metrics'>metrics</span><span class='period'>.</span><span class='id identifier rubyid_count'>count</span> <span class='op'>==</span> <span class='int'>0</span> <span class='rparen'>)</span>
+        <span class='kw'>case</span> <span class='id identifier rubyid_s'>s</span>
+        <span class='kw'>when</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>mysql</span><span class='tstring_end'>&#39;</span></span>
+          <span class='comment'># MySQL
+</span>          <span class='id identifier rubyid_bulk'>bulk</span><span class='period'>.</span><span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_end'>&#39;</span></span> <span class='rparen'>)</span>
+        <span class='kw'>when</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>mongodb</span><span class='tstring_end'>&#39;</span></span>
+          <span class='comment'># MongoDB
+</span>          <span class='id identifier rubyid_bulk'>bulk</span><span class='period'>.</span><span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_end'>&#39;</span></span> <span class='rparen'>)</span>
+        <span class='kw'>when</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>node_exporter</span><span class='tstring_end'>&#39;</span></span>
+          <span class='comment'># Node Exporter (from Prometheus)
+</span>          <span class='id identifier rubyid_bulk'>bulk</span><span class='period'>.</span><span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_end'>&#39;</span></span> <span class='rparen'>)</span>
+        <span class='kw'>when</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>postgres</span><span class='tstring_end'>&#39;</span></span>
+          <span class='comment'># Postgres
+</span>        <span class='kw'>else</span>
+          <span class='comment'># all others
+</span>        <span class='kw'>end</span>
+      <span class='kw'>else</span>
+
+        <span class='id identifier rubyid_metrics'>metrics</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_e'>e</span><span class='op'>|</span>
+
+          <span class='id identifier rubyid_target'>target</span> <span class='op'>=</span> <span class='lbrace'>{</span>
+            <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>type</span><span class='tstring_end'>&#39;</span></span>   <span class='op'>=&gt;</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>read</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span>
+            <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>mbean</span><span class='tstring_end'>&#39;</span></span>  <span class='op'>=&gt;</span> <span class='id identifier rubyid_e'>e</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>mbean</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='comma'>,</span>
+            <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>target</span><span class='tstring_end'>&#39;</span></span> <span class='op'>=&gt;</span> <span class='lbrace'>{</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>url</span><span class='tstring_end'>&#39;</span></span> <span class='op'>=&gt;</span> <span class='id identifier rubyid_sprintf'>sprintf</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>service:jmx:rmi:///jndi/rmi://%s:%s/jmxrmi</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_h'>h</span><span class='comma'>,</span> <span class='id identifier rubyid_port'>port</span> <span class='rparen'>)</span> <span class='rbrace'>}</span><span class='comma'>,</span>
+            <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>config</span><span class='tstring_end'>&#39;</span></span> <span class='op'>=&gt;</span> <span class='lbrace'>{</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>ignoreErrors</span><span class='tstring_end'>&#39;</span></span> <span class='op'>=&gt;</span> <span class='kw'>true</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>ifModifiedSince</span><span class='tstring_end'>&#39;</span></span> <span class='op'>=&gt;</span> <span class='kw'>true</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>canonicalNaming</span><span class='tstring_end'>&#39;</span></span> <span class='op'>=&gt;</span> <span class='kw'>true</span> <span class='rbrace'>}</span>
+          <span class='rbrace'>}</span>
+
+          <span class='id identifier rubyid_attributes'>attributes</span> <span class='op'>=</span> <span class='lbracket'>[</span><span class='rbracket'>]</span>
+          <span class='kw'>if</span><span class='lparen'>(</span> <span class='id identifier rubyid_e'>e</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>attribute</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span> <span class='rparen'>)</span>
+            <span class='id identifier rubyid_e'>e</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>attribute</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_split'>split</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>,</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_t'>t</span><span class='op'>|</span>
+              <span class='id identifier rubyid_attributes'>attributes</span><span class='period'>.</span><span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span> <span class='id identifier rubyid_t'>t</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span> <span class='rparen'>)</span>
+            <span class='kw'>end</span>
+
+            <span class='id identifier rubyid_target'>target</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>attribute</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_attributes'>attributes</span>
+          <span class='kw'>end</span>
+
+          <span class='id identifier rubyid_bulk'>bulk</span><span class='period'>.</span><span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span> <span class='id identifier rubyid_target'>target</span> <span class='rparen'>)</span>
+        <span class='kw'>end</span>
+
+      <span class='kw'>end</span>
+
+      <span class='kw'>if</span><span class='lparen'>(</span> <span class='id identifier rubyid_bulk'>bulk</span><span class='period'>.</span><span class='id identifier rubyid_count'>count</span> <span class='op'>!=</span> <span class='int'>0</span> <span class='rparen'>)</span>
+        <span class='id identifier rubyid_checks'>checks</span><span class='period'>.</span><span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span> <span class='lbrace'>{</span> <span class='id identifier rubyid_s'>s</span> <span class='op'>=&gt;</span> <span class='id identifier rubyid_bulk'>bulk</span><span class='period'>.</span><span class='id identifier rubyid_flatten'>flatten</span> <span class='rbrace'>}</span> <span class='rparen'>)</span>
+      <span class='kw'>end</span>
+    <span class='kw'>end</span>
+
+    <span class='id identifier rubyid_checks'>checks</span><span class='period'>.</span><span class='id identifier rubyid_flatten!'>flatten!</span>
+
+    <span class='id identifier rubyid_result'>result</span><span class='lbracket'>[</span><span class='symbol'>:hostname</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_h'>h</span>
+    <span class='id identifier rubyid_result'>result</span><span class='lbracket'>[</span><span class='symbol'>:services</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='op'>*</span><span class='id identifier rubyid_services'>services</span><span class='period'>.</span><span class='id identifier rubyid_keys'>keys</span>
+    <span class='id identifier rubyid_result'>result</span><span class='lbracket'>[</span><span class='symbol'>:checks</span><span class='rbracket'>]</span>   <span class='op'>=</span> <span class='op'>*</span><span class='id identifier rubyid_checks'>checks</span>
+
+    <span class='comment'># send json to jolokia
+</span>    <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_sendChecksToJolokia'>sendChecksToJolokia</span><span class='lparen'>(</span> <span class='id identifier rubyid_result'>result</span> <span class='rparen'>)</span>
+
+    <span class='id identifier rubyid_checks'>checks</span><span class='period'>.</span><span class='id identifier rubyid_clear'>clear</span><span class='lparen'>(</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_result'>result</span><span class='period'>.</span><span class='id identifier rubyid_clear'>clear</span><span class='lparen'>(</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="internalMemcacheData-instance_method">
+  
+    #<strong>internalMemcacheData</strong>(host)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+367
+368
+369
+370</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'data-collector.rb', line 367</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_internalMemcacheData'>internalMemcacheData</span><span class='lparen'>(</span> <span class='id identifier rubyid_host'>host</span> <span class='rparen'>)</span>
+
+
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="logMark-instance_method">
+  
+    #<strong>logMark</strong>  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'data-collector.rb', line 209</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_logMark'>logMark</span><span class='lparen'>(</span><span class='rparen'>)</span>
+
+  <span class='id identifier rubyid_t'>t</span>      <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Time.html" title="Time (class)">Time</a></span></span><span class='period'>.</span><span class='id identifier rubyid_now'>now</span>
+  <span class='id identifier rubyid_minute'>minute</span> <span class='op'>=</span> <span class='id identifier rubyid_t'>t</span><span class='period'>.</span><span class='id identifier rubyid_min'>min</span>
+  <span class='id identifier rubyid_second'>second</span> <span class='op'>=</span> <span class='id identifier rubyid_t'>t</span><span class='period'>.</span><span class='id identifier rubyid_sec'>sec</span>
+
+  <span class='ivar'>@wroteTick</span><span class='op'>=</span> <span class='kw'>false</span>
+
+  <span class='kw'>if</span><span class='lparen'>(</span> <span class='lbracket'>[</span><span class='int'>0</span><span class='comma'>,</span><span class='int'>10</span><span class='comma'>,</span><span class='int'>20</span><span class='comma'>,</span><span class='int'>30</span><span class='comma'>,</span><span class='int'>40</span><span class='comma'>,</span><span class='int'>50</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_include?'>include?</span><span class='lparen'>(</span> <span class='id identifier rubyid_minute'>minute</span> <span class='rparen'>)</span> <span class='kw'>and</span> <span class='id identifier rubyid_second'>second</span> <span class='op'>&lt;</span> <span class='int'>27</span> <span class='rparen'>)</span>
+
+    <span class='kw'>if</span><span class='lparen'>(</span> <span class='ivar'>@wroteTick</span> <span class='op'>==</span> <span class='kw'>false</span> <span class='rparen'>)</span>
+      <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_info'>info</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'> ----- TICK - TOCK ---- </span><span class='tstring_end'>&#39;</span></span> <span class='rparen'>)</span>
+    <span class='kw'>end</span>
+    <span class='ivar'>@wroteTick</span> <span class='op'>=</span> <span class='kw'>true</span>
+  <span class='kw'>else</span>
+    <span class='ivar'>@wroteTick</span> <span class='op'>=</span> <span class='kw'>false</span>
+  <span class='kw'>end</span>
+
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="mergeData-instance_method">
+  
+    #<strong>mergeData</strong>(data = {})  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+395
+396
+397
+398
+399
+400
+401
+402
+403
+404
+405
+406
+407
+408
+409
+410
+411
+412
+413
+414
+415
+416
+417
+418
+419
+420
+421
+422
+423
+424
+425
+426
+427
+428
+429
+430
+431
+432
+433
+434
+435
+436
+437
+438
+439
+440
+441
+442
+443</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'data-collector.rb', line 395</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_mergeData'>mergeData</span><span class='lparen'>(</span> <span class='id identifier rubyid_data'>data</span> <span class='op'>=</span> <span class='lbrace'>{</span><span class='rbrace'>}</span> <span class='rparen'>)</span>
+
+  <span class='id identifier rubyid_tomcatApplication'>tomcatApplication</span> <span class='op'>=</span> <span class='const'>Marshal</span><span class='period'>.</span><span class='id identifier rubyid_load'>load</span><span class='lparen'>(</span> <span class='const'>Marshal</span><span class='period'>.</span><span class='id identifier rubyid_dump'>dump</span><span class='lparen'>(</span> <span class='ivar'>@config</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>jolokia</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>applications</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span> <span class='rparen'>)</span> <span class='rparen'>)</span>
+  <span class='id identifier rubyid_metricsTomcat'>metricsTomcat</span>     <span class='op'>=</span> <span class='id identifier rubyid_tomcatApplication'>tomcatApplication</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>tomcat</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span>      <span class='comment'># standard metrics for Tomcat
+</span>
+  <span class='id identifier rubyid_data'>data</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_d'>d</span><span class='comma'>,</span><span class='id identifier rubyid_v'>v</span><span class='op'>|</span>
+
+    <span class='id identifier rubyid_application'>application</span> <span class='op'>=</span> <span class='id identifier rubyid_v'>v</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>application</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span> <span class='op'>?</span> <span class='id identifier rubyid_v'>v</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>application</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span> <span class='op'>:</span> <span class='kw'>nil</span>
+    <span class='id identifier rubyid_solr_cores'>solr_cores</span>  <span class='op'>=</span> <span class='id identifier rubyid_v'>v</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>cores</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span>       <span class='op'>?</span> <span class='id identifier rubyid_v'>v</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>cores</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span>       <span class='op'>:</span> <span class='kw'>nil</span>
+    <span class='id identifier rubyid_metrics'>metrics</span>     <span class='op'>=</span> <span class='id identifier rubyid_v'>v</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>metrics</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span>     <span class='op'>?</span> <span class='id identifier rubyid_v'>v</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>metrics</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span>     <span class='op'>:</span> <span class='kw'>nil</span>
+
+    <span class='id identifier rubyid_v'>v</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>metrics</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='const'>Array</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='rparen'>)</span>
+
+    <span class='kw'>if</span><span class='lparen'>(</span> <span class='id identifier rubyid_application'>application</span> <span class='op'>!=</span> <span class='kw'>nil</span> <span class='rparen'>)</span>
+
+      <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_debug'>debug</span><span class='lparen'>(</span> <span class='id identifier rubyid_application'>application</span> <span class='rparen'>)</span>
+
+      <span class='id identifier rubyid_application'>application</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_a'>a</span><span class='op'>|</span>
+
+        <span class='kw'>if</span><span class='lparen'>(</span> <span class='id identifier rubyid_tomcatApplication'>tomcatApplication</span><span class='lbracket'>[</span><span class='id identifier rubyid_a'>a</span><span class='rbracket'>]</span> <span class='rparen'>)</span>
+          <span class='id identifier rubyid_applicationMetrics'>applicationMetrics</span> <span class='op'>=</span> <span class='id identifier rubyid_tomcatApplication'>tomcatApplication</span><span class='lbracket'>[</span><span class='id identifier rubyid_a'>a</span><span class='rbracket'>]</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>metrics</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span>
+
+          <span class='kw'>if</span><span class='lparen'>(</span> <span class='id identifier rubyid_solr_cores'>solr_cores</span> <span class='op'>!=</span> <span class='kw'>nil</span> <span class='rparen'>)</span>
+            <span class='id identifier rubyid_v'>v</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>metrics</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_mergeSolrCores'>mergeSolrCores</span><span class='lparen'>(</span> <span class='id identifier rubyid_applicationMetrics'>applicationMetrics</span> <span class='comma'>,</span> <span class='id identifier rubyid_solr_cores'>solr_cores</span> <span class='rparen'>)</span> <span class='rparen'>)</span>
+          <span class='kw'>end</span>
+
+          <span class='comment'># remove unneeded Templates
+</span>          <span class='id identifier rubyid_tomcatApplication'>tomcatApplication</span><span class='lbracket'>[</span><span class='id identifier rubyid_a'>a</span><span class='rbracket'>]</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>metrics</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_delete_if'>delete_if</span> <span class='lbrace'>{</span><span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='op'>|</span> <span class='id identifier rubyid_key'>key</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>mbean</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_match'>match</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>%CORE%</span><span class='tstring_end'>&#39;</span></span> <span class='rparen'>)</span> <span class='rbrace'>}</span>
+
+          <span class='id identifier rubyid_v'>v</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>metrics</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span> <span class='id identifier rubyid_metricsTomcat'>metricsTomcat</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>metrics</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span> <span class='rparen'>)</span>
+          <span class='id identifier rubyid_v'>v</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>metrics</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span> <span class='id identifier rubyid_applicationMetrics'>applicationMetrics</span> <span class='rparen'>)</span>
+
+        <span class='kw'>end</span>
+      <span class='kw'>end</span>
+
+    <span class='kw'>end</span>
+
+    <span class='kw'>if</span><span class='lparen'>(</span> <span class='id identifier rubyid_tomcatApplication'>tomcatApplication</span><span class='lbracket'>[</span><span class='id identifier rubyid_d'>d</span><span class='rbracket'>]</span> <span class='rparen'>)</span>
+      <span class='id identifier rubyid_v'>v</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>metrics</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span> <span class='id identifier rubyid_metricsTomcat'>metricsTomcat</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>metrics</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span> <span class='rparen'>)</span>
+      <span class='id identifier rubyid_v'>v</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>metrics</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span> <span class='id identifier rubyid_tomcatApplication'>tomcatApplication</span><span class='lbracket'>[</span><span class='id identifier rubyid_d'>d</span><span class='rbracket'>]</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>metrics</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span> <span class='rparen'>)</span>
+    <span class='kw'>end</span>
+
+    <span class='id identifier rubyid_v'>v</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>metrics</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_compact!'>compact!</span>   <span class='comment'># remove &#39;nil&#39; from array
+</span>    <span class='id identifier rubyid_v'>v</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>metrics</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_flatten!'>flatten!</span>   <span class='comment'># clean up and reduce depth
+</span>
+  <span class='kw'>end</span>
+
+  <span class='kw'>return</span> <span class='id identifier rubyid_data'>data</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="mergeSolrCores-instance_method">
+  
+    #<strong>mergeSolrCores</strong>(metrics, cores = [])  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+373
+374
+375
+376
+377
+378
+379
+380
+381
+382
+383
+384
+385
+386
+387
+388
+389
+390
+391
+392</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'data-collector.rb', line 373</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_mergeSolrCores'>mergeSolrCores</span><span class='lparen'>(</span> <span class='id identifier rubyid_metrics'>metrics</span><span class='comma'>,</span> <span class='id identifier rubyid_cores'>cores</span> <span class='op'>=</span> <span class='lbracket'>[</span><span class='rbracket'>]</span> <span class='rparen'>)</span>
+
+  <span class='id identifier rubyid_work'>work</span> <span class='op'>=</span> <span class='const'>Array</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='rparen'>)</span>
+
+  <span class='id identifier rubyid_cores'>cores</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_core'>core</span><span class='op'>|</span>
+
+    <span class='id identifier rubyid_metric'>metric</span> <span class='op'>=</span> <span class='const'>Marshal</span><span class='period'>.</span><span class='id identifier rubyid_load'>load</span><span class='lparen'>(</span> <span class='const'>Marshal</span><span class='period'>.</span><span class='id identifier rubyid_dump'>dump</span><span class='lparen'>(</span> <span class='id identifier rubyid_metrics'>metrics</span> <span class='rparen'>)</span> <span class='rparen'>)</span>
+
+    <span class='id identifier rubyid_metric'>metric</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_m'>m</span><span class='op'>|</span>
+      <span class='id identifier rubyid_mb'>mb</span> <span class='op'>=</span> <span class='id identifier rubyid_m'>m</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>mbean</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span>
+      <span class='id identifier rubyid_mb'>mb</span><span class='period'>.</span><span class='id identifier rubyid_sub!'>sub!</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>%CORE%</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_core'>core</span> <span class='rparen'>)</span>
+    <span class='kw'>end</span>
+
+    <span class='id identifier rubyid_work'>work</span><span class='period'>.</span><span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span> <span class='id identifier rubyid_metric'>metric</span> <span class='rparen'>)</span>
+  <span class='kw'>end</span>
+
+  <span class='id identifier rubyid_work'>work</span><span class='period'>.</span><span class='id identifier rubyid_flatten!'>flatten!</span>
+
+  <span class='kw'>return</span> <span class='id identifier rubyid_work'>work</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="mongoDBData-instance_method">
+  
+    #<strong>mongoDBData</strong>(host, data = {})  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+230
+231
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252
+253
+254
+255
+256
+257
+258
+259
+260
+261
+262
+263
+264
+265
+266
+267
+268
+269
+270
+271</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'data-collector.rb', line 230</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_mongoDBData'>mongoDBData</span><span class='lparen'>(</span> <span class='id identifier rubyid_host'>host</span><span class='comma'>,</span> <span class='id identifier rubyid_data'>data</span> <span class='op'>=</span> <span class='lbrace'>{</span><span class='rbrace'>}</span> <span class='rparen'>)</span>
+
+  <span class='id identifier rubyid_port'>port</span> <span class='op'>=</span> <span class='id identifier rubyid_data'>data</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>port</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span> <span class='op'>?</span> <span class='id identifier rubyid_data'>data</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>port</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span> <span class='op'>:</span> <span class='int'>28017</span>
+
+  <span class='kw'>if</span><span class='lparen'>(</span> <span class='id identifier rubyid_port'>port</span> <span class='op'>!=</span> <span class='kw'>nil</span> <span class='rparen'>)</span>
+
+    <span class='id identifier rubyid_serverUrl'>serverUrl</span>  <span class='op'>=</span> <span class='id identifier rubyid_sprintf'>sprintf</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>http://%s:%s/serverStatus</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_host'>host</span><span class='comma'>,</span> <span class='id identifier rubyid_port'>port</span> <span class='rparen'>)</span>
+
+    <span class='id identifier rubyid_uri'>uri</span>        <span class='op'>=</span> <span class='const'>URI</span><span class='period'>.</span><span class='id identifier rubyid_parse'>parse</span><span class='lparen'>(</span> <span class='id identifier rubyid_serverUrl'>serverUrl</span> <span class='rparen'>)</span>
+    <span class='id identifier rubyid_http'>http</span>       <span class='op'>=</span> <span class='const'>Net</span><span class='op'>::</span><span class='const'>HTTP</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span> <span class='id identifier rubyid_uri'>uri</span><span class='period'>.</span><span class='id identifier rubyid_host'>host</span><span class='comma'>,</span> <span class='id identifier rubyid_uri'>uri</span><span class='period'>.</span><span class='id identifier rubyid_port'>port</span> <span class='rparen'>)</span>
+    <span class='id identifier rubyid_request'>request</span>    <span class='op'>=</span> <span class='const'>Net</span><span class='op'>::</span><span class='const'>HTTP</span><span class='op'>::</span><span class='const'>Get</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span> <span class='id identifier rubyid_uri'>uri</span><span class='period'>.</span><span class='id identifier rubyid_request_uri'>request_uri</span> <span class='rparen'>)</span>
+    <span class='id identifier rubyid_request'>request</span><span class='period'>.</span><span class='id identifier rubyid_add_field'>add_field</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>Content-Type</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>application/json</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span>
+
+    <span class='kw'>begin</span>
+
+      <span class='id identifier rubyid_response'>response</span>     <span class='op'>=</span> <span class='id identifier rubyid_http'>http</span><span class='period'>.</span><span class='id identifier rubyid_request'>request</span><span class='lparen'>(</span> <span class='id identifier rubyid_request'>request</span> <span class='rparen'>)</span>
+
+    <span class='kw'>rescue</span> <span class='const'>Timeout</span><span class='op'>::</span><span class='const'>Error</span><span class='comma'>,</span> <span class='const'>Errno</span><span class='op'>::</span><span class='const'>EHOSTUNREACH</span><span class='comma'>,</span> <span class='const'>Errno</span><span class='op'>::</span><span class='const'>ECONNREFUSED</span><span class='comma'>,</span> <span class='const'>Errno</span><span class='op'>::</span><span class='const'>EINVAL</span><span class='comma'>,</span> <span class='const'>Errno</span><span class='op'>::</span><span class='const'>ECONNRESET</span><span class='comma'>,</span> <span class='const'>EOFError</span><span class='comma'>,</span> <span class='const'>Net</span><span class='op'>::</span><span class='const'>HTTPBadResponse</span><span class='comma'>,</span> <span class='const'>Net</span><span class='op'>::</span><span class='const'>HTTPHeaderSyntaxError</span><span class='comma'>,</span> <span class='const'>Net</span><span class='op'>::</span><span class='const'>ProtocolError</span> <span class='op'>=&gt;</span> <span class='id identifier rubyid_error'>error</span>
+
+      <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_error'>error</span><span class='lparen'>(</span> <span class='id identifier rubyid_error'>error</span> <span class='rparen'>)</span>
+
+      <span class='kw'>case</span> <span class='id identifier rubyid_error'>error</span>
+      <span class='kw'>when</span> <span class='const'>Errno</span><span class='op'>::</span><span class='const'>EHOSTUNREACH</span>
+        <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_error'>error</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>Host unreachable</span><span class='tstring_end'>&#39;</span></span> <span class='rparen'>)</span>
+      <span class='kw'>when</span> <span class='const'>Errno</span><span class='op'>::</span><span class='const'>ECONNREFUSED</span>
+        <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_error'>error</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>Connection refused</span><span class='tstring_end'>&#39;</span></span> <span class='rparen'>)</span>
+      <span class='kw'>when</span> <span class='const'>Errno</span><span class='op'>::</span><span class='const'>ECONNRESET</span>
+        <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_error'>error</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>Connection reset</span><span class='tstring_end'>&#39;</span></span> <span class='rparen'>)</span>
+      <span class='kw'>end</span>
+    <span class='kw'>rescue</span> <span class='const'>Exception</span> <span class='op'>=&gt;</span> <span class='id identifier rubyid_e'>e</span>
+
+      <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_error'>error</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>An error occurred for connection: </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_e'>e</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span> <span class='rparen'>)</span>
+
+    <span class='kw'>else</span>
+
+      <span class='id identifier rubyid_data'>data</span>            <span class='op'>=</span> <span class='const'>JSON</span><span class='period'>.</span><span class='id identifier rubyid_parse'>parse</span><span class='lparen'>(</span> <span class='id identifier rubyid_response'>response</span><span class='period'>.</span><span class='id identifier rubyid_body'>body</span> <span class='rparen'>)</span>
+
+      <span class='kw'>return</span> <span class='id identifier rubyid_data'>data</span>
+    <span class='kw'>end</span>
+
+  <span class='kw'>end</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="mysqlData-instance_method">
+  
+    #<strong>mysqlData</strong>(host, data = {})  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294
+295
+296
+297
+298
+299
+300
+301
+302
+303
+304
+305
+306
+307
+308
+309
+310</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'data-collector.rb', line 274</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_mysqlData'>mysqlData</span><span class='lparen'>(</span> <span class='id identifier rubyid_host'>host</span><span class='comma'>,</span> <span class='id identifier rubyid_data'>data</span> <span class='op'>=</span> <span class='lbrace'>{</span><span class='rbrace'>}</span> <span class='rparen'>)</span>
+
+  <span class='id identifier rubyid_user'>user</span> <span class='op'>=</span> <span class='id identifier rubyid_data'>data</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>user</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span> <span class='op'>?</span> <span class='id identifier rubyid_data'>data</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>user</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span> <span class='op'>:</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>cm_management</span><span class='tstring_end'>&#39;</span></span>
+  <span class='id identifier rubyid_pass'>pass</span> <span class='op'>=</span> <span class='id identifier rubyid_data'>data</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>pass</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span> <span class='op'>?</span> <span class='id identifier rubyid_data'>data</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>pass</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span> <span class='op'>:</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>cm_management</span><span class='tstring_end'>&#39;</span></span>
+  <span class='id identifier rubyid_port'>port</span> <span class='op'>=</span> <span class='id identifier rubyid_data'>data</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>port</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span> <span class='op'>?</span> <span class='id identifier rubyid_data'>data</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>port</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span> <span class='op'>:</span> <span class='int'>3306</span>
+
+  <span class='kw'>if</span><span class='lparen'>(</span> <span class='id identifier rubyid_port'>port</span> <span class='op'>!=</span> <span class='kw'>nil</span> <span class='rparen'>)</span>
+
+    <span class='comment'># TODO
+</span>    <span class='comment'># we need an low-level-priv User for Monitoring!
+</span>    <span class='id identifier rubyid_settings'>settings</span> <span class='op'>=</span> <span class='lbrace'>{</span>
+      <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>log_dir</span><span class='tstring_end'>&#39;</span></span>   <span class='op'>=&gt;</span> <span class='ivar'>@logDirectory</span><span class='comma'>,</span>
+      <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>mysqlHost</span><span class='tstring_end'>&#39;</span></span> <span class='op'>=&gt;</span> <span class='id identifier rubyid_host'>host</span><span class='comma'>,</span>
+      <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>mysqlUser</span><span class='tstring_end'>&#39;</span></span> <span class='op'>=&gt;</span> <span class='id identifier rubyid_user'>user</span><span class='comma'>,</span>
+      <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>mysqlPass</span><span class='tstring_end'>&#39;</span></span> <span class='op'>=&gt;</span> <span class='id identifier rubyid_pass'>pass</span>
+    <span class='rbrace'>}</span>
+
+    <span class='id identifier rubyid_require_relative'>require_relative</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>mysql-status</span><span class='tstring_end'>&#39;</span></span>
+    <span class='kw'>if</span><span class='lparen'>(</span> <span class='op'>!</span> <span class='ivar'>@mysql</span> <span class='rparen'>)</span>
+      <span class='ivar'>@mysql</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="MysqlStatus.html" title="MysqlStatus (class)">MysqlStatus</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="MysqlStatus.html#initialize-instance_method" title="MysqlStatus#initialize (method)">new</a></span></span><span class='lparen'>(</span> <span class='id identifier rubyid_settings'>settings</span> <span class='rparen'>)</span>
+    <span class='kw'>end</span>
+
+    <span class='id identifier rubyid_hash'>hash</span>            <span class='op'>=</span> <span class='const'>Hash</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_array'>array</span>           <span class='op'>=</span> <span class='const'>Array</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_mysqlData'>mysqlData</span>       <span class='op'>=</span> <span class='ivar'>@mysql</span><span class='period'>.</span><span class='id identifier rubyid_run'>run</span><span class='lparen'>(</span><span class='rparen'>)</span>
+
+    <span class='kw'>if</span><span class='lparen'>(</span> <span class='id identifier rubyid_mysqlData'>mysqlData</span> <span class='op'>==</span> <span class='kw'>false</span> <span class='rparen'>)</span>
+      <span class='id identifier rubyid_mysqlData'>mysqlData</span>   <span class='op'>=</span> <span class='const'>JSON</span><span class='period'>.</span><span class='id identifier rubyid_generate'>generate</span><span class='lparen'>(</span> <span class='lbrace'>{</span> <span class='symbol'>:status</span> <span class='op'>=&gt;</span> <span class='int'>500</span> <span class='rbrace'>}</span> <span class='rparen'>)</span>
+    <span class='kw'>end</span>
+
+    <span class='id identifier rubyid_data'>data</span>           <span class='op'>=</span> <span class='const'>JSON</span><span class='period'>.</span><span class='id identifier rubyid_parse'>parse</span><span class='lparen'>(</span> <span class='id identifier rubyid_mysqlData'>mysqlData</span> <span class='rparen'>)</span>
+
+    <span class='kw'>return</span> <span class='id identifier rubyid_data'>data</span>
+
+  <span class='kw'>end</span>
+
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="nodeExporterData-instance_method">
+  
+    #<strong>nodeExporterData</strong>(host, data = {})  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355
+356
+357
+358
+359
+360
+361
+362
+363
+364</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'data-collector.rb', line 340</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_nodeExporterData'>nodeExporterData</span><span class='lparen'>(</span> <span class='id identifier rubyid_host'>host</span><span class='comma'>,</span> <span class='id identifier rubyid_data'>data</span> <span class='op'>=</span> <span class='lbrace'>{</span><span class='rbrace'>}</span> <span class='rparen'>)</span>
+
+  <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_debug'>debug</span><span class='lparen'>(</span><span class='rparen'>)</span>
+
+  <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_debug'>debug</span><span class='lparen'>(</span> <span class='id identifier rubyid_host'>host</span> <span class='rparen'>)</span>
+  <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_debug'>debug</span><span class='lparen'>(</span> <span class='id identifier rubyid_data'>data</span> <span class='rparen'>)</span>
+
+  <span class='id identifier rubyid_port'>port</span> <span class='op'>=</span> <span class='id identifier rubyid_data'>data</span><span class='lbracket'>[</span><span class='symbol'>:port</span><span class='rbracket'>]</span> <span class='op'>?</span> <span class='id identifier rubyid_data'>data</span><span class='lbracket'>[</span><span class='symbol'>:port</span><span class='rbracket'>]</span> <span class='op'>:</span> <span class='int'>9100</span>
+
+  <span class='kw'>if</span><span class='lparen'>(</span> <span class='id identifier rubyid_port'>port</span> <span class='op'>!=</span> <span class='kw'>nil</span> <span class='rparen'>)</span>
+
+    <span class='id identifier rubyid_settings'>settings</span> <span class='op'>=</span> <span class='lbrace'>{</span>
+      <span class='symbol'>:host</span> <span class='op'>=&gt;</span> <span class='id identifier rubyid_host'>host</span><span class='comma'>,</span>
+      <span class='symbol'>:port</span> <span class='op'>=&gt;</span> <span class='id identifier rubyid_port'>port</span>
+    <span class='rbrace'>}</span>
+
+    <span class='id identifier rubyid_require_relative'>require_relative</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>nodeexporter_data</span><span class='tstring_end'>&#39;</span></span>
+    <span class='id identifier rubyid_nodeData'>nodeData</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="NodeExporter.html" title="NodeExporter (class)">NodeExporter</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="NodeExporter.html#initialize-instance_method" title="NodeExporter#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_result'>result</span>   <span class='op'>=</span> <span class='const'>JSON</span><span class='period'>.</span><span class='id identifier rubyid_generate'>generate</span><span class='lparen'>(</span> <span class='id identifier rubyid_nodeData'>nodeData</span><span class='period'>.</span><span class='id identifier rubyid_run'>run</span><span class='lparen'>(</span> <span class='id identifier rubyid_settings'>settings</span> <span class='rparen'>)</span> <span class='rparen'>)</span>
+    <span class='id identifier rubyid_data'>data</span>     <span class='op'>=</span> <span class='const'>JSON</span><span class='period'>.</span><span class='id identifier rubyid_parse'>parse</span><span class='lparen'>(</span> <span class='id identifier rubyid_result'>result</span> <span class='rparen'>)</span>
+
+    <span class='kw'>return</span> <span class='id identifier rubyid_data'>data</span>
+  <span class='kw'>end</span>
+
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="postgresData-instance_method">
+  
+    #<strong>postgresData</strong>(host, data = {})  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+313
+314
+315
+316
+317
+318
+319
+320
+321
+322
+323
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334
+335
+336
+337</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'data-collector.rb', line 313</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_postgresData'>postgresData</span><span class='lparen'>(</span> <span class='id identifier rubyid_host'>host</span><span class='comma'>,</span> <span class='id identifier rubyid_data'>data</span> <span class='op'>=</span> <span class='lbrace'>{</span><span class='rbrace'>}</span> <span class='rparen'>)</span>
+
+  <span class='comment'># WiP and nore sure
+</span>  <span class='kw'>return</span>
+
+  <span class='id identifier rubyid_user'>user</span> <span class='op'>=</span> <span class='id identifier rubyid_data'>data</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>user</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span> <span class='op'>?</span> <span class='id identifier rubyid_data'>data</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>user</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span> <span class='op'>:</span> <span class='kw'>nil</span>
+  <span class='id identifier rubyid_pass'>pass</span> <span class='op'>=</span> <span class='id identifier rubyid_data'>data</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>pass</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span> <span class='op'>?</span> <span class='id identifier rubyid_data'>data</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>pass</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span> <span class='op'>:</span> <span class='kw'>nil</span>
+  <span class='id identifier rubyid_port'>port</span> <span class='op'>=</span> <span class='id identifier rubyid_data'>data</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>port</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span> <span class='op'>?</span> <span class='id identifier rubyid_data'>data</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>port</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span> <span class='op'>:</span> <span class='kw'>nil</span>
+
+  <span class='kw'>if</span><span class='lparen'>(</span> <span class='id identifier rubyid_port'>port</span> <span class='op'>!=</span> <span class='kw'>nil</span> <span class='rparen'>)</span>
+
+    <span class='id identifier rubyid_settings'>settings</span> <span class='op'>=</span> <span class='lbrace'>{</span>
+      <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>log_dir</span><span class='tstring_end'>&#39;</span></span>      <span class='op'>=&gt;</span> <span class='ivar'>@logDirectory</span><span class='comma'>,</span>
+      <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>postgresHost</span><span class='tstring_end'>&#39;</span></span> <span class='op'>=&gt;</span> <span class='id identifier rubyid_host'>host</span><span class='comma'>,</span>
+      <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>postgresUser</span><span class='tstring_end'>&#39;</span></span> <span class='op'>=&gt;</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>coremedia</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span>
+      <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>postgresPass</span><span class='tstring_end'>&#39;</span></span> <span class='op'>=&gt;</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>coremedia</span><span class='tstring_end'>&#39;</span></span>
+    <span class='rbrace'>}</span>
+
+    <span class='id identifier rubyid_require_relative'>require_relative</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>postgres-status</span><span class='tstring_end'>&#39;</span></span>
+    <span class='id identifier rubyid_pgsql'>pgsql</span> <span class='op'>=</span> <span class='const'>PostgresStatus</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span> <span class='id identifier rubyid_settings'>settings</span> <span class='rparen'>)</span>
+    <span class='id identifier rubyid_pgsql'>pgsql</span><span class='period'>.</span><span class='id identifier rubyid_run'>run</span><span class='lparen'>(</span><span class='rparen'>)</span>
+
+  <span class='kw'>end</span>
+
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="readConfiguration-instance_method">
+  
+    #<strong>readConfiguration</strong>  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'data-collector.rb', line 121</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_readConfiguration'>readConfiguration</span><span class='lparen'>(</span><span class='rparen'>)</span>
+
+  <span class='comment'># read Application Configuration
+</span>  <span class='comment'># they define all standard checks
+</span>  <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_debug'>debug</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>read defines of Application Properties</span><span class='tstring_end'>&#39;</span></span> <span class='rparen'>)</span>
+
+  <span class='kw'>begin</span>
+
+    <span class='kw'>if</span><span class='lparen'>(</span> <span class='const'>File</span><span class='period'>.</span><span class='id identifier rubyid_exist?'>exist?</span><span class='lparen'>(</span> <span class='ivar'>@appConfigFile</span> <span class='rparen'>)</span> <span class='rparen'>)</span>
+
+      <span class='ivar'>@config</span>      <span class='op'>=</span> <span class='const'>YAML</span><span class='period'>.</span><span class='id identifier rubyid_load_file'>load_file</span><span class='lparen'>(</span> <span class='ivar'>@appConfigFile</span> <span class='rparen'>)</span>
+
+      <span class='kw'>if</span><span class='lparen'>(</span> <span class='ivar'>@config</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>jolokia</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>applications</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span> <span class='op'>!=</span> <span class='kw'>nil</span> <span class='rparen'>)</span>
+        <span class='ivar'>@jolokiaApplications</span> <span class='op'>=</span> <span class='ivar'>@config</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>jolokia</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>applications</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span>
+      <span class='kw'>end</span>
+
+    <span class='kw'>else</span>
+      <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_error'>error</span><span class='lparen'>(</span> <span class='id identifier rubyid_sprintf'>sprintf</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>Application Config File %s not found!</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='ivar'>@appConfigFile</span> <span class='rparen'>)</span> <span class='rparen'>)</span>
+      <span class='id identifier rubyid_exit'>exit</span> <span class='int'>1</span>
+    <span class='kw'>end</span>
+  <span class='kw'>rescue</span> <span class='const'>Exception</span>
+
+    <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_error'>error</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>wrong result (no yaml)</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_error'>error</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='gvar'>$!</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span> <span class='rparen'>)</span>
+    <span class='id identifier rubyid_exit'>exit</span> <span class='int'>1</span>
+  <span class='kw'>end</span>
+
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="reorganizeData-instance_method">
+  
+    #<strong>reorganizeData</strong>(data)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    reorganize data to later simple find
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+446
+447
+448
+449
+450
+451
+452
+453
+454
+455
+456
+457
+458
+459
+460
+461
+462
+463
+464
+465
+466
+467
+468
+469
+470
+471
+472
+473
+474
+475
+476
+477
+478
+479
+480
+481
+482
+483
+484
+485
+486
+487
+488
+489
+490
+491
+492
+493
+494
+495
+496
+497
+498
+499
+500
+501
+502
+503
+504
+505
+506
+507
+508
+509
+510
+511
+512
+513
+514
+515
+516
+517
+518
+519
+520
+521
+522
+523
+524
+525
+526
+527
+528
+529
+530
+531
+532
+533
+534
+535
+536
+537
+538
+539
+540
+541
+542
+543
+544
+545
+546
+547
+548
+549
+550
+551
+552
+553
+554
+555
+556
+557
+558
+559
+560
+561
+562
+563
+564
+565
+566
+567
+568
+569
+570
+571
+572
+573
+574
+575
+576
+577
+578
+579
+580
+581
+582
+583
+584
+585
+586
+587
+588
+589
+590
+591
+592
+593
+594
+595
+596
+597
+598
+599
+600
+601</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'data-collector.rb', line 446</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_reorganizeData'>reorganizeData</span><span class='lparen'>(</span> <span class='id identifier rubyid_data'>data</span> <span class='rparen'>)</span>
+
+  <span class='kw'>if</span><span class='lparen'>(</span> <span class='id identifier rubyid_data'>data</span> <span class='op'>==</span> <span class='kw'>nil</span> <span class='rparen'>)</span>
+    <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_error'>error</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>      no data for reorganize</span><span class='tstring_end'>&quot;</span></span> <span class='rparen'>)</span>
+    <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_error'>error</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>      skip</span><span class='tstring_end'>&quot;</span></span> <span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='kw'>nil</span>
+  <span class='kw'>end</span>
+
+  <span class='id identifier rubyid_data'>data</span>    <span class='op'>=</span> <span class='const'>JSON</span><span class='period'>.</span><span class='id identifier rubyid_parse'>parse</span><span class='lparen'>(</span> <span class='id identifier rubyid_data'>data</span> <span class='rparen'>)</span>
+  <span class='id identifier rubyid_result'>result</span>  <span class='op'>=</span> <span class='const'>Array</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='rparen'>)</span>
+
+  <span class='id identifier rubyid_data'>data</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_c'>c</span><span class='op'>|</span>
+
+    <span class='id identifier rubyid_mbean'>mbean</span>      <span class='op'>=</span> <span class='id identifier rubyid_c'>c</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>request</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>mbean</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span>
+    <span class='id identifier rubyid_request'>request</span>    <span class='op'>=</span> <span class='id identifier rubyid_c'>c</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>request</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span>
+    <span class='id identifier rubyid_value'>value</span>      <span class='op'>=</span> <span class='id identifier rubyid_c'>c</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>value</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span>
+    <span class='id identifier rubyid_timestamp'>timestamp</span>  <span class='op'>=</span> <span class='id identifier rubyid_c'>c</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>timestamp</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span>
+    <span class='id identifier rubyid_status'>status</span>     <span class='op'>=</span> <span class='id identifier rubyid_c'>c</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>status</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span>
+
+    <span class='comment'># &quot;service:jmx:rmi:///jndi/rmi://moebius-16-tomcat:2222/jmxrmi&quot;
+</span>    <span class='id identifier rubyid_regex'>regex</span> <span class='op'>=</span> <span class='tstring'><span class='regexp_beg'>/</span><span class='tstring_content'>
+      ^                   # Starting at the front of the string
+      (.*):\/\/           # all after the douple slashes
+      (?&lt;host&gt;.+\S)       # our hostname
+      :                   # seperator between host and port
+      (?&lt;port&gt;\d+)        # our port
+    </span><span class='regexp_end'>/x</span></span>
+
+    <span class='id identifier rubyid_uri'>uri</span>   <span class='op'>=</span> <span class='id identifier rubyid_request'>request</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>target</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>url</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span>
+    <span class='id identifier rubyid_parts'>parts</span> <span class='op'>=</span> <span class='id identifier rubyid_uri'>uri</span><span class='period'>.</span><span class='id identifier rubyid_match'>match</span><span class='lparen'>(</span> <span class='id identifier rubyid_regex'>regex</span> <span class='rparen'>)</span>
+    <span class='id identifier rubyid_host'>host</span>  <span class='op'>=</span> <span class='id identifier rubyid_parts'>parts</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>host</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_strip'>strip</span>
+    <span class='id identifier rubyid_port'>port</span>  <span class='op'>=</span> <span class='id identifier rubyid_parts'>parts</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>port</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_strip'>strip</span>
+
+
+    <span class='kw'>if</span><span class='lparen'>(</span> <span class='id identifier rubyid_mbean'>mbean</span><span class='period'>.</span><span class='id identifier rubyid_include?'>include?</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>Cache.Classes</span><span class='tstring_end'>&#39;</span></span> <span class='rparen'>)</span> <span class='rparen'>)</span>
+      <span class='id identifier rubyid_regex'>regex</span> <span class='op'>=</span> <span class='tstring'><span class='regexp_beg'>/</span><span class='tstring_content'>
+        CacheClass=
+        &quot;(?&lt;type&gt;.+[a-zA-Z])&quot;
+        </span><span class='regexp_end'>/x</span></span>
+      <span class='id identifier rubyid_parts'>parts</span>           <span class='op'>=</span> <span class='id identifier rubyid_mbean'>mbean</span><span class='period'>.</span><span class='id identifier rubyid_match'>match</span><span class='lparen'>(</span> <span class='id identifier rubyid_regex'>regex</span> <span class='rparen'>)</span>
+      <span class='id identifier rubyid_cacheClass'>cacheClass</span>      <span class='op'>=</span> <span class='id identifier rubyid_parts'>parts</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>type</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span>
+
+      <span class='kw'>if</span><span class='lparen'>(</span> <span class='id identifier rubyid_cacheClass'>cacheClass</span><span class='period'>.</span><span class='id identifier rubyid_include?'>include?</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>ecommerce.ibm</span><span class='tstring_end'>&#39;</span></span> <span class='rparen'>)</span> <span class='rparen'>)</span>
+        <span class='id identifier rubyid_format'>format</span>   <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>CacheClassesIBM%s</span><span class='tstring_end'>&#39;</span></span>
+      <span class='kw'>else</span>
+        <span class='id identifier rubyid_format'>format</span>   <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>CacheClasses%s</span><span class='tstring_end'>&#39;</span></span>
+      <span class='kw'>end</span>
+
+      <span class='id identifier rubyid_cacheClass'>cacheClass</span>     <span class='op'>=</span> <span class='id identifier rubyid_cacheClass'>cacheClass</span><span class='period'>.</span><span class='id identifier rubyid_split'>split</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>.</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_last'>last</span>
+      <span class='id identifier rubyid_cacheClass'>cacheClass</span><span class='lbracket'>[</span><span class='int'>0</span><span class='rbracket'>]</span>  <span class='op'>=</span> <span class='id identifier rubyid_cacheClass'>cacheClass</span><span class='lbracket'>[</span><span class='int'>0</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_capitalize'>capitalize</span>
+      <span class='id identifier rubyid_mbean_type'>mbean_type</span>     <span class='op'>=</span> <span class='id identifier rubyid_sprintf'>sprintf</span><span class='lparen'>(</span> <span class='id identifier rubyid_format'>format</span><span class='comma'>,</span> <span class='id identifier rubyid_cacheClass'>cacheClass</span> <span class='rparen'>)</span>
+
+
+    <span class='kw'>elsif</span><span class='lparen'>(</span> <span class='id identifier rubyid_mbean'>mbean</span><span class='period'>.</span><span class='id identifier rubyid_include?'>include?</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>module=</span><span class='tstring_end'>&#39;</span></span> <span class='rparen'>)</span> <span class='rparen'>)</span>
+      <span class='id identifier rubyid_regex'>regex</span> <span class='op'>=</span> <span class='tstring'><span class='regexp_beg'>/</span><span class='tstring_content'>
+        ^                     # Starting at the front of the string
+        (.*)                  #
+        module=               #
+        (?&lt;module&gt;.+[a-zA-Z]) #
+        (.*)                  #
+        pool=                 #
+        (?&lt;pool&gt;.+[a-zA-Z])   #
+        (.*)                  #
+        type=                 #
+        (?&lt;type&gt;.+[a-zA-Z])   #
+      </span><span class='regexp_end'>/x</span></span>
+
+      <span class='id identifier rubyid_parts'>parts</span>           <span class='op'>=</span> <span class='id identifier rubyid_mbean'>mbean</span><span class='period'>.</span><span class='id identifier rubyid_match'>match</span><span class='lparen'>(</span> <span class='id identifier rubyid_regex'>regex</span> <span class='rparen'>)</span>
+      <span class='id identifier rubyid_mbeanModule'>mbeanModule</span>     <span class='op'>=</span> <span class='id identifier rubyid_parts'>parts</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>module</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_strip'>strip</span><span class='period'>.</span><span class='id identifier rubyid_tr'>tr</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>. </span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_end'>&#39;</span></span> <span class='rparen'>)</span>
+      <span class='id identifier rubyid_mbeanPool'>mbeanPool</span>       <span class='op'>=</span> <span class='id identifier rubyid_parts'>parts</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>pool</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_strip'>strip</span><span class='period'>.</span><span class='id identifier rubyid_tr'>tr</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>. </span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_end'>&#39;</span></span> <span class='rparen'>)</span>
+      <span class='id identifier rubyid_mbeanType'>mbeanType</span>       <span class='op'>=</span> <span class='id identifier rubyid_parts'>parts</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>type</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_strip'>strip</span><span class='period'>.</span><span class='id identifier rubyid_tr'>tr</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>. </span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_end'>&#39;</span></span> <span class='rparen'>)</span>
+      <span class='id identifier rubyid_mbean_type'>mbean_type</span>      <span class='op'>=</span> <span class='id identifier rubyid_sprintf'>sprintf</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>%s%s</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_mbeanType'>mbeanType</span><span class='comma'>,</span> <span class='id identifier rubyid_mbeanPool'>mbeanPool</span> <span class='rparen'>)</span>
+
+    <span class='kw'>elsif</span><span class='lparen'>(</span> <span class='id identifier rubyid_mbean'>mbean</span><span class='period'>.</span><span class='id identifier rubyid_include?'>include?</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>bean=</span><span class='tstring_end'>&#39;</span></span> <span class='rparen'>)</span> <span class='rparen'>)</span>
+
+      <span class='id identifier rubyid_regex'>regex</span> <span class='op'>=</span> <span class='tstring'><span class='regexp_beg'>/</span><span class='tstring_content'>
+        ^                     # Starting at the front of the string
+        (.*)                  #
+        bean=                 #
+        (?&lt;bean&gt;.+[a-zA-Z])   #
+        (.*)                  #
+        type=                 #
+        (?&lt;type&gt;.+[a-zA-Z])   #
+        $
+      </span><span class='regexp_end'>/x</span></span>
+
+      <span class='id identifier rubyid_parts'>parts</span>           <span class='op'>=</span> <span class='id identifier rubyid_mbean'>mbean</span><span class='period'>.</span><span class='id identifier rubyid_match'>match</span><span class='lparen'>(</span> <span class='id identifier rubyid_regex'>regex</span> <span class='rparen'>)</span>
+      <span class='id identifier rubyid_mbeanBean'>mbeanBean</span>       <span class='op'>=</span> <span class='id identifier rubyid_parts'>parts</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>bean</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_strip'>strip</span><span class='period'>.</span><span class='id identifier rubyid_tr'>tr</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>. </span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_end'>&#39;</span></span> <span class='rparen'>)</span>
+      <span class='id identifier rubyid_mbeanType'>mbeanType</span>       <span class='op'>=</span> <span class='id identifier rubyid_parts'>parts</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>type</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_strip'>strip</span><span class='period'>.</span><span class='id identifier rubyid_tr'>tr</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>. </span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_end'>&#39;</span></span> <span class='rparen'>)</span>
+      <span class='id identifier rubyid_mbean_type'>mbean_type</span>      <span class='op'>=</span> <span class='id identifier rubyid_sprintf'>sprintf</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>%s%s</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_mbeanType'>mbeanType</span><span class='comma'>,</span> <span class='id identifier rubyid_mbeanBean'>mbeanBean</span> <span class='rparen'>)</span>
+
+    <span class='kw'>elsif</span><span class='lparen'>(</span> <span class='id identifier rubyid_mbean'>mbean</span><span class='period'>.</span><span class='id identifier rubyid_include?'>include?</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>name=</span><span class='tstring_end'>&#39;</span></span> <span class='rparen'>)</span> <span class='rparen'>)</span>
+      <span class='id identifier rubyid_regex'>regex</span> <span class='op'>=</span> <span class='tstring'><span class='regexp_beg'>/</span><span class='tstring_content'>
+        ^                     # Starting at the front of the string
+        (.*)                  #
+        name=                 #
+        (?&lt;name&gt;.+[a-zA-Z])   #
+        (.*)                  #
+        type=                 #
+        (?&lt;type&gt;.+[a-zA-Z])   #
+        $
+      </span><span class='regexp_end'>/x</span></span>
+
+      <span class='id identifier rubyid_parts'>parts</span>           <span class='op'>=</span> <span class='id identifier rubyid_mbean'>mbean</span><span class='period'>.</span><span class='id identifier rubyid_match'>match</span><span class='lparen'>(</span> <span class='id identifier rubyid_regex'>regex</span> <span class='rparen'>)</span>
+      <span class='id identifier rubyid_mbeanName'>mbeanName</span>       <span class='op'>=</span> <span class='id identifier rubyid_parts'>parts</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>name</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_strip'>strip</span><span class='period'>.</span><span class='id identifier rubyid_tr'>tr</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>. </span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_end'>&#39;</span></span> <span class='rparen'>)</span>
+      <span class='id identifier rubyid_mbeanType'>mbeanType</span>       <span class='op'>=</span> <span class='id identifier rubyid_parts'>parts</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>type</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_strip'>strip</span><span class='period'>.</span><span class='id identifier rubyid_tr'>tr</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>. </span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_end'>&#39;</span></span> <span class='rparen'>)</span>
+      <span class='id identifier rubyid_mbean_type'>mbean_type</span>      <span class='op'>=</span> <span class='id identifier rubyid_sprintf'>sprintf</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>%s%s</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_mbeanType'>mbeanType</span><span class='comma'>,</span> <span class='id identifier rubyid_mbeanName'>mbeanName</span> <span class='rparen'>)</span>
+
+    <span class='kw'>elsif</span><span class='lparen'>(</span> <span class='id identifier rubyid_mbean'>mbean</span><span class='period'>.</span><span class='id identifier rubyid_include?'>include?</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>solr</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span> <span class='rparen'>)</span>
+
+      <span class='id identifier rubyid_regex'>regex</span> <span class='op'>=</span> <span class='tstring'><span class='regexp_beg'>/</span><span class='tstring_content'>
+        ^                     # Starting at the front of the string
+        solr\/                #
+        (?&lt;core&gt;.+[a-zA-Z0-9]):  #
+        (.*)                  #
+        type=                 #
+        (?&lt;type&gt;.+[a-zA-Z])   #
+        $
+      </span><span class='regexp_end'>/x</span></span>
+
+      <span class='id identifier rubyid_parts'>parts</span>           <span class='op'>=</span> <span class='id identifier rubyid_mbean'>mbean</span><span class='period'>.</span><span class='id identifier rubyid_match'>match</span><span class='lparen'>(</span> <span class='id identifier rubyid_regex'>regex</span> <span class='rparen'>)</span>
+      <span class='id identifier rubyid_mbeanCore'>mbeanCore</span>       <span class='op'>=</span> <span class='id identifier rubyid_parts'>parts</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>core</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_strip'>strip</span><span class='period'>.</span><span class='id identifier rubyid_tr'>tr</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>. </span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_end'>&#39;</span></span> <span class='rparen'>)</span>
+      <span class='id identifier rubyid_mbeanCore'>mbeanCore</span><span class='lbracket'>[</span><span class='int'>0</span><span class='rbracket'>]</span>    <span class='op'>=</span> <span class='id identifier rubyid_mbeanCore'>mbeanCore</span><span class='lbracket'>[</span><span class='int'>0</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_capitalize'>capitalize</span>
+      <span class='id identifier rubyid_mbeanType'>mbeanType</span>       <span class='op'>=</span> <span class='id identifier rubyid_parts'>parts</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>type</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_tr'>tr</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>. /</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_end'>&#39;</span></span> <span class='rparen'>)</span>
+      <span class='id identifier rubyid_mbeanType'>mbeanType</span><span class='lbracket'>[</span><span class='int'>0</span><span class='rbracket'>]</span>    <span class='op'>=</span> <span class='id identifier rubyid_mbeanType'>mbeanType</span><span class='lbracket'>[</span><span class='int'>0</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_capitalize'>capitalize</span>
+      <span class='id identifier rubyid_mbean_type'>mbean_type</span>      <span class='op'>=</span> <span class='id identifier rubyid_sprintf'>sprintf</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>Solr%s%s</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_mbeanCore'>mbeanCore</span><span class='comma'>,</span> <span class='id identifier rubyid_mbeanType'>mbeanType</span> <span class='rparen'>)</span>
+
+    <span class='kw'>else</span>
+      <span class='id identifier rubyid_regex'>regex</span> <span class='op'>=</span> <span class='tstring'><span class='regexp_beg'>/</span><span class='tstring_content'>
+        ^                     # Starting at the front of the string
+        (.*)                  #
+        type=                 #
+        (?&lt;type&gt;.+[a-zA-Z])   #
+        $
+      </span><span class='regexp_end'>/x</span></span>
+
+      <span class='id identifier rubyid_parts'>parts</span>           <span class='op'>=</span> <span class='id identifier rubyid_mbean'>mbean</span><span class='period'>.</span><span class='id identifier rubyid_match'>match</span><span class='lparen'>(</span> <span class='id identifier rubyid_regex'>regex</span> <span class='rparen'>)</span>
+      <span class='id identifier rubyid_mbeanType'>mbeanType</span>       <span class='op'>=</span> <span class='id identifier rubyid_parts'>parts</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>type</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_strip'>strip</span><span class='period'>.</span><span class='id identifier rubyid_tr'>tr</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>. </span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_end'>&#39;</span></span> <span class='rparen'>)</span>
+      <span class='id identifier rubyid_mbean_type'>mbean_type</span>      <span class='op'>=</span> <span class='id identifier rubyid_sprintf'>sprintf</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>%s</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_mbeanType'>mbeanType</span> <span class='rparen'>)</span>
+    <span class='kw'>end</span>
+
+    <span class='id identifier rubyid_result'>result</span><span class='period'>.</span><span class='id identifier rubyid_push'>push</span><span class='lparen'>(</span>
+      <span class='id identifier rubyid_mbean_type'>mbean_type</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span> <span class='op'>=&gt;</span> <span class='lbrace'>{</span>
+        <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>status</span><span class='tstring_end'>&#39;</span></span>    <span class='op'>=&gt;</span> <span class='id identifier rubyid_status'>status</span><span class='comma'>,</span>
+        <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>timestamp</span><span class='tstring_end'>&#39;</span></span> <span class='op'>=&gt;</span> <span class='id identifier rubyid_timestamp'>timestamp</span><span class='comma'>,</span>
+        <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>host</span><span class='tstring_end'>&#39;</span></span>      <span class='op'>=&gt;</span> <span class='id identifier rubyid_host'>host</span><span class='comma'>,</span>
+        <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>port</span><span class='tstring_end'>&#39;</span></span>      <span class='op'>=&gt;</span> <span class='id identifier rubyid_port'>port</span><span class='comma'>,</span>
+        <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>request</span><span class='tstring_end'>&#39;</span></span>   <span class='op'>=&gt;</span> <span class='id identifier rubyid_request'>request</span><span class='comma'>,</span>  <span class='comment'># OBSOLETE, can be removed
+</span>        <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>value</span><span class='tstring_end'>&#39;</span></span>     <span class='op'>=&gt;</span> <span class='id identifier rubyid_value'>value</span>
+      <span class='rbrace'>}</span>
+    <span class='rparen'>)</span>
+
+  <span class='kw'>end</span>
+
+  <span class='kw'>return</span> <span class='id identifier rubyid_result'>result</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="run-instance_method">
+  
+    #<strong>run</strong>  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+937
+938
+939
+940
+941
+942
+943
+944
+945
+946
+947
+948
+949
+950
+951
+952
+953
+954
+955
+956
+957
+958
+959
+960
+961</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'data-collector.rb', line 937</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_run'>run</span><span class='lparen'>(</span><span class='rparen'>)</span>
+
+  <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_debug'>debug</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>get monitored Servers</span><span class='tstring_end'>&#39;</span></span> <span class='rparen'>)</span>
+  <span class='id identifier rubyid_monitoredServer'><span class='object_link'><a href="top-level-namespace.html#monitoredServer-instance_method" title="#monitoredServer (method)">monitoredServer</a></span></span> <span class='op'>=</span> <span class='id identifier rubyid_monitoredServer'><span class='object_link'><a href="top-level-namespace.html#monitoredServer-instance_method" title="#monitoredServer (method)">monitoredServer</a></span></span><span class='lparen'>(</span> <span class='ivar'>@cacheDirectory</span> <span class='rparen'>)</span>
+
+  <span class='id identifier rubyid_data'>data</span> <span class='op'>=</span> <span class='const'>Hash</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='rparen'>)</span>
+
+  <span class='id identifier rubyid_monitoredServer'><span class='object_link'><a href="top-level-namespace.html#monitoredServer-instance_method" title="#monitoredServer (method)">monitoredServer</a></span></span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_h'>h</span><span class='op'>|</span>
+
+    <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_info'>info</span><span class='lparen'>(</span> <span class='id identifier rubyid_sprintf'>sprintf</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>Host: %s</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_h'>h</span> <span class='rparen'>)</span> <span class='rparen'>)</span>
+
+    <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_checkHostDataAge'>checkHostDataAge</span><span class='lparen'>(</span> <span class='id identifier rubyid_h'>h</span> <span class='rparen'>)</span>
+
+    <span class='id identifier rubyid_data'>data</span><span class='lbracket'>[</span><span class='id identifier rubyid_h'>h</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='lbrace'>{</span>
+      <span class='symbol'>:data</span>      <span class='op'>=&gt;</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_buildMergedData'>buildMergedData</span><span class='lparen'>(</span> <span class='id identifier rubyid_h'>h</span> <span class='rparen'>)</span><span class='comma'>,</span>
+      <span class='symbol'>:timestamp</span> <span class='op'>=&gt;</span> <span class='const'><span class='object_link'><a href="Time.html" title="Time (class)">Time</a></span></span><span class='period'>.</span><span class='id identifier rubyid_now'>now</span><span class='lparen'>(</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_to_i'>to_i</span>
+    <span class='rbrace'>}</span>
+
+  <span class='kw'>end</span>
+
+  <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_createBulkCheck'>createBulkCheck</span><span class='lparen'>(</span> <span class='id identifier rubyid_data'>data</span> <span class='rparen'>)</span>
+
+  <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_logMark'>logMark</span><span class='lparen'>(</span><span class='rparen'>)</span>
+
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="sendChecksToJolokia-instance_method">
+  
+    #<strong>sendChecksToJolokia</strong>(data)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    send json data to jolokia and save the result in an memory storage (e.g. memcache)
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+744
+745
+746
+747
+748
+749
+750
+751
+752
+753
+754
+755
+756
+757
+758
+759
+760
+761
+762
+763
+764
+765
+766
+767
+768
+769
+770
+771
+772
+773
+774
+775
+776
+777
+778
+779
+780
+781
+782
+783
+784
+785
+786
+787
+788
+789
+790
+791
+792
+793
+794
+795
+796
+797
+798
+799
+800
+801
+802
+803
+804
+805
+806
+807
+808
+809
+810
+811
+812
+813
+814
+815
+816
+817
+818
+819
+820
+821
+822
+823
+824
+825
+826
+827
+828
+829
+830
+831
+832
+833
+834
+835
+836
+837
+838
+839
+840
+841
+842
+843
+844
+845
+846
+847
+848
+849
+850
+851
+852
+853
+854
+855
+856
+857
+858
+859
+860
+861
+862
+863
+864
+865
+866
+867
+868
+869</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'data-collector.rb', line 744</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_sendChecksToJolokia'>sendChecksToJolokia</span><span class='lparen'>(</span> <span class='id identifier rubyid_data'>data</span> <span class='rparen'>)</span>
+
+  <span class='kw'>if</span><span class='lparen'>(</span> <span class='id identifier rubyid_portOpen?'><span class='object_link'><a href="top-level-namespace.html#portOpen%3F-instance_method" title="#portOpen? (method)">portOpen?</a></span></span><span class='lparen'>(</span> <span class='ivar'>@jolokiaHost</span><span class='comma'>,</span> <span class='ivar'>@jolokiaPort</span> <span class='rparen'>)</span> <span class='op'>==</span> <span class='kw'>false</span> <span class='rparen'>)</span>
+    <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_error'>error</span><span class='lparen'>(</span> <span class='id identifier rubyid_sprintf'>sprintf</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>The Jolokia Service (%s:%s) are not available</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='ivar'>@jolokiaHost</span><span class='comma'>,</span> <span class='ivar'>@jolokiaPort</span> <span class='rparen'>)</span> <span class='rparen'>)</span>
+
+    <span class='kw'>return</span>
+  <span class='kw'>end</span>
+
+  <span class='id identifier rubyid_serverUrl'>serverUrl</span> <span class='op'>=</span> <span class='id identifier rubyid_sprintf'>sprintf</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>http://%s:%s/jolokia</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='ivar'>@jolokiaHost</span><span class='comma'>,</span> <span class='ivar'>@jolokiaPort</span> <span class='rparen'>)</span>
+
+  <span class='id identifier rubyid_uri'>uri</span>       <span class='op'>=</span> <span class='const'>URI</span><span class='period'>.</span><span class='id identifier rubyid_parse'>parse</span><span class='lparen'>(</span> <span class='id identifier rubyid_serverUrl'>serverUrl</span> <span class='rparen'>)</span>
+  <span class='id identifier rubyid_http'>http</span>      <span class='op'>=</span> <span class='const'>Net</span><span class='op'>::</span><span class='const'>HTTP</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span> <span class='id identifier rubyid_uri'>uri</span><span class='period'>.</span><span class='id identifier rubyid_host'>host</span><span class='comma'>,</span> <span class='id identifier rubyid_uri'>uri</span><span class='period'>.</span><span class='id identifier rubyid_port'>port</span> <span class='rparen'>)</span>
+
+  <span class='id identifier rubyid_hostname'>hostname</span>  <span class='op'>=</span> <span class='id identifier rubyid_data'>data</span><span class='lbracket'>[</span><span class='symbol'>:hostname</span><span class='rbracket'>]</span> <span class='op'>?</span> <span class='id identifier rubyid_data'>data</span><span class='lbracket'>[</span><span class='symbol'>:hostname</span><span class='rbracket'>]</span> <span class='op'>:</span> <span class='kw'>nil</span>
+  <span class='id identifier rubyid_checks'>checks</span>    <span class='op'>=</span> <span class='id identifier rubyid_data'>data</span><span class='lbracket'>[</span><span class='symbol'>:checks</span><span class='rbracket'>]</span>   <span class='op'>?</span> <span class='id identifier rubyid_data'>data</span><span class='lbracket'>[</span><span class='symbol'>:checks</span><span class='rbracket'>]</span>   <span class='op'>:</span> <span class='kw'>nil</span>
+
+  <span class='id identifier rubyid_result'>result</span>    <span class='op'>=</span> <span class='lbrace'>{</span>
+    <span class='symbol'>:hostname</span>  <span class='op'>=&gt;</span> <span class='id identifier rubyid_hostname'>hostname</span><span class='comma'>,</span>
+    <span class='symbol'>:timestamp</span> <span class='op'>=&gt;</span> <span class='const'><span class='object_link'><a href="Time.html" title="Time (class)">Time</a></span></span><span class='period'>.</span><span class='id identifier rubyid_now'>now</span><span class='lparen'>(</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_to_i'>to_i</span>
+  <span class='rbrace'>}</span>
+
+  <span class='id identifier rubyid_checks'>checks</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_c'>c</span><span class='op'>|</span>
+
+    <span class='id identifier rubyid_c'>c</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_v'>v</span><span class='comma'>,</span><span class='id identifier rubyid_i'>i</span><span class='op'>|</span>
+
+      <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_debug'>debug</span><span class='lparen'>(</span> <span class='id identifier rubyid_sprintf'>sprintf</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>%d checks for service %s found</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_i'>i</span><span class='period'>.</span><span class='id identifier rubyid_count'>count</span><span class='comma'>,</span> <span class='id identifier rubyid_v'>v</span> <span class='rparen'>)</span> <span class='rparen'>)</span>
+
+      <span class='id identifier rubyid_target'>target</span> <span class='op'>=</span> <span class='id identifier rubyid_i'>i</span><span class='lbracket'>[</span><span class='int'>0</span><span class='rbracket'>]</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>target</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span> <span class='op'>?</span> <span class='id identifier rubyid_i'>i</span><span class='lbracket'>[</span><span class='int'>0</span><span class='rbracket'>]</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>target</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span> <span class='op'>:</span> <span class='kw'>nil</span>
+
+      <span class='kw'>if</span><span class='lparen'>(</span> <span class='id identifier rubyid_target'>target</span> <span class='op'>==</span> <span class='kw'>nil</span> <span class='rparen'>)</span>
+
+        <span class='kw'>case</span> <span class='id identifier rubyid_v'>v</span>
+        <span class='kw'>when</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>mysql</span><span class='tstring_end'>&#39;</span></span>
+          <span class='comment'># MySQL
+</span>          <span class='id identifier rubyid_result'>result</span><span class='lbracket'>[</span><span class='id identifier rubyid_v'>v</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_mysqlData'>mysqlData</span><span class='lparen'>(</span> <span class='id identifier rubyid_hostname'>hostname</span> <span class='rparen'>)</span>
+        <span class='kw'>when</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>mongodb</span><span class='tstring_end'>&#39;</span></span>
+          <span class='comment'># MongoDB
+</span>          <span class='id identifier rubyid_result'>result</span><span class='lbracket'>[</span><span class='id identifier rubyid_v'>v</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_mongoDBData'>mongoDBData</span><span class='lparen'>(</span> <span class='id identifier rubyid_hostname'>hostname</span> <span class='rparen'>)</span>
+        <span class='kw'>when</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>postgres</span><span class='tstring_end'>&#39;</span></span>
+          <span class='comment'># Postgres
+</span>        <span class='kw'>when</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>node_exporter</span><span class='tstring_end'>&#39;</span></span>
+          <span class='comment'># node_exporter
+</span>          <span class='id identifier rubyid_result'>result</span><span class='lbracket'>[</span><span class='id identifier rubyid_v'>v</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_nodeExporterData'>nodeExporterData</span><span class='lparen'>(</span> <span class='id identifier rubyid_hostname'>hostname</span> <span class='rparen'>)</span>
+        <span class='kw'>else</span>
+          <span class='comment'># all others
+</span>        <span class='kw'>end</span>
+
+      <span class='kw'>else</span>
+
+        <span class='kw'>if</span><span class='lparen'>(</span> <span class='ivar'>@DEBUG</span> <span class='op'>==</span> <span class='kw'>true</span> <span class='rparen'>)</span>
+
+          <span class='id identifier rubyid_tmpFile'>tmpFile</span> <span class='op'>=</span> <span class='id identifier rubyid_sprintf'>sprintf</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>%s/%s/request-%s.json</span><span class='tstring_end'>&#39;</span></span>    <span class='comma'>,</span> <span class='ivar'>@cacheDirectory</span><span class='comma'>,</span> <span class='id identifier rubyid_hostname'>hostname</span><span class='comma'>,</span><span class='id identifier rubyid_v'>v</span> <span class='rparen'>)</span>
+          <span class='const'>File</span><span class='period'>.</span><span class='id identifier rubyid_open'>open</span><span class='lparen'>(</span> <span class='id identifier rubyid_tmpFile'>tmpFile</span> <span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>w</span><span class='tstring_end'>&#39;</span></span> <span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_f'>f</span><span class='op'>|</span> <span class='id identifier rubyid_f'>f</span><span class='period'>.</span><span class='id identifier rubyid_write'>write</span><span class='lparen'>(</span> <span class='const'>JSON</span><span class='period'>.</span><span class='id identifier rubyid_pretty_generate'>pretty_generate</span><span class='lparen'>(</span> <span class='id identifier rubyid_i'>i</span> <span class='rparen'>)</span> <span class='rparen'>)</span> <span class='rbrace'>}</span>
+
+        <span class='kw'>end</span>
+
+        <span class='id identifier rubyid_targetUrl'>targetUrl</span> <span class='op'>=</span> <span class='id identifier rubyid_target'>target</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>url</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span>
+
+        <span class='kw'>if</span><span class='lparen'>(</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_checkHostAndService'>checkHostAndService</span><span class='lparen'>(</span> <span class='id identifier rubyid_targetUrl'>targetUrl</span> <span class='rparen'>)</span> <span class='op'>==</span> <span class='kw'>true</span> <span class='rparen'>)</span>
+
+          <span class='id identifier rubyid_request'>request</span> <span class='op'>=</span> <span class='const'>Net</span><span class='op'>::</span><span class='const'>HTTP</span><span class='op'>::</span><span class='const'>Post</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span>
+            <span class='id identifier rubyid_uri'>uri</span><span class='period'>.</span><span class='id identifier rubyid_request_uri'>request_uri</span><span class='comma'>,</span>
+            <span class='id identifier rubyid_initheader'>initheader</span> <span class='op'>=</span> <span class='lbrace'>{</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>Content-Type</span><span class='tstring_end'>&#39;</span></span> <span class='op'>=&gt;</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>application/json</span><span class='tstring_end'>&#39;</span></span> <span class='rbrace'>}</span>
+          <span class='rparen'>)</span>
+          <span class='id identifier rubyid_request'>request</span><span class='period'>.</span><span class='id identifier rubyid_body'>body</span> <span class='op'>=</span> <span class='id identifier rubyid_i'>i</span><span class='period'>.</span><span class='id identifier rubyid_to_json'>to_json</span>
+
+          <span class='comment'># default read timeout is 60 secs
+</span>          <span class='id identifier rubyid_response'>response</span> <span class='op'>=</span> <span class='const'>Net</span><span class='op'>::</span><span class='const'>HTTP</span><span class='period'>.</span><span class='id identifier rubyid_start'>start</span><span class='lparen'>(</span> <span class='id identifier rubyid_uri'>uri</span><span class='period'>.</span><span class='id identifier rubyid_hostname'>hostname</span><span class='comma'>,</span> <span class='id identifier rubyid_uri'>uri</span><span class='period'>.</span><span class='id identifier rubyid_port'>port</span><span class='comma'>,</span> <span class='label'>use_ssl:</span> <span class='id identifier rubyid_uri'>uri</span><span class='period'>.</span><span class='id identifier rubyid_scheme'>scheme</span> <span class='op'>==</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>https</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='symbol'>:read_timeout</span> <span class='op'>=&gt;</span> <span class='int'>8</span> <span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_http'>http</span><span class='op'>|</span>
+            <span class='kw'>begin</span>
+              <span class='id identifier rubyid_http'>http</span><span class='period'>.</span><span class='id identifier rubyid_request'>request</span><span class='lparen'>(</span> <span class='id identifier rubyid_request'>request</span> <span class='rparen'>)</span>
+            <span class='kw'>rescue</span> <span class='const'>Exception</span> <span class='op'>=&gt;</span> <span class='id identifier rubyid_e'>e</span>
+
+              <span class='id identifier rubyid_msg'>msg</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>Cannot execute request to %s, cause: %s</span><span class='tstring_end'>&#39;</span></span>
+              <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_warn'>warn</span><span class='lparen'>(</span> <span class='id identifier rubyid_sprintf'>sprintf</span><span class='lparen'>(</span> <span class='id identifier rubyid_msg'>msg</span><span class='comma'>,</span> <span class='id identifier rubyid_uri'>uri</span><span class='period'>.</span><span class='id identifier rubyid_request_uri'>request_uri</span><span class='comma'>,</span> <span class='id identifier rubyid_e'>e</span> <span class='rparen'>)</span> <span class='rparen'>)</span>
+              <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_debug'>debug</span><span class='lparen'>(</span> <span class='id identifier rubyid_sprintf'>sprintf</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'> -&gt; request body: %s</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_request'>request</span><span class='period'>.</span><span class='id identifier rubyid_body'>body</span> <span class='rparen'>)</span> <span class='rparen'>)</span>
+              <span class='kw'>return</span>
+            <span class='kw'>end</span>
+          <span class='kw'>end</span>
+
+          <span class='id identifier rubyid_result'>result</span><span class='lbracket'>[</span><span class='id identifier rubyid_v'>v</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_reorganizeData'>reorganizeData</span><span class='lparen'>(</span> <span class='id identifier rubyid_response'>response</span><span class='period'>.</span><span class='id identifier rubyid_body'>body</span> <span class='rparen'>)</span>
+
+<span class='comment'>#            tmpResultFile = sprintf( &#39;%s/%s/monitoring.tmp&#39;    , @cacheDirectory, hostname )
+</span><span class='comment'>#            resultFile    = sprintf( &#39;%s/%s/monitoring.result&#39; , @cacheDirectory, hostname )
+</span><span class='comment'>#
+</span><span class='comment'>#            File.open( tmpResultFile , &#39;w&#39; ) { |f| f.write( JSON.generate( result ) ) }
+</span><span class='comment'>#            File.rename( tmpResultFile, resultFile )
+</span><span class='comment'>#
+</span><span class='comment'>#            if( @supportMemcache == true )
+</span><span class='comment'>#
+</span><span class='comment'>#              key = sprintf( &#39;result__%s__%s&#39;, hostname, v )
+</span><span class='comment'>#
+</span><span class='comment'>#              logger.debug( key )
+</span><span class='comment'>#
+</span><span class='comment'>#              @mc.set( key, result[v] )
+</span><span class='comment'>#
+</span><span class='comment'>#              if( @DEBUG == true )
+</span><span class='comment'>#                logger.debug( @mc.stats( :items ) )
+</span><span class='comment'>#                logger.debug( JSON.pretty_generate( @mc.get( key ) ) )
+</span><span class='comment'>#              end
+</span><span class='comment'>#
+</span><span class='comment'>#            end
+</span>
+        <span class='kw'>end</span>
+      <span class='kw'>end</span>
+
+      <span class='kw'>if</span><span class='lparen'>(</span> <span class='ivar'>@supportMemcache</span> <span class='op'>==</span> <span class='kw'>true</span> <span class='rparen'>)</span>
+
+        <span class='id identifier rubyid_key'>key</span> <span class='op'>=</span> <span class='id identifier rubyid_cacheKey'><span class='object_link'><a href="top-level-namespace.html#cacheKey-instance_method" title="#cacheKey (method)">cacheKey</a></span></span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>result</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_hostname'>hostname</span><span class='comma'>,</span> <span class='id identifier rubyid_v'>v</span> <span class='rparen'>)</span>
+        <span class='ivar'>@mc</span><span class='period'>.</span><span class='id identifier rubyid_set'>set</span><span class='lparen'>(</span> <span class='id identifier rubyid_key'>key</span><span class='comma'>,</span> <span class='id identifier rubyid_result'>result</span><span class='lbracket'>[</span><span class='id identifier rubyid_v'>v</span><span class='rbracket'>]</span> <span class='rparen'>)</span>
+
+<span class='comment'>#           if( @DEBUG == true )
+</span><span class='comment'>#             logger.debug( @mc.stats( :items ) )
+</span><span class='comment'>#             logger.debug( JSON.pretty_generate( @mc.get( key ) ) )
+</span><span class='comment'>#           end
+</span>      <span class='kw'>else</span>
+
+        <span class='id identifier rubyid_tmpResultFile'>tmpResultFile</span> <span class='op'>=</span> <span class='id identifier rubyid_sprintf'>sprintf</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>%s/%s/monitoring.tmp</span><span class='tstring_end'>&#39;</span></span>    <span class='comma'>,</span> <span class='ivar'>@cacheDirectory</span><span class='comma'>,</span> <span class='id identifier rubyid_hostname'>hostname</span> <span class='rparen'>)</span>
+        <span class='id identifier rubyid_resultFile'>resultFile</span>    <span class='op'>=</span> <span class='id identifier rubyid_sprintf'>sprintf</span><span class='lparen'>(</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>%s/%s/monitoring.result</span><span class='tstring_end'>&#39;</span></span> <span class='comma'>,</span> <span class='ivar'>@cacheDirectory</span><span class='comma'>,</span> <span class='id identifier rubyid_hostname'>hostname</span> <span class='rparen'>)</span>
+
+        <span class='const'>File</span><span class='period'>.</span><span class='id identifier rubyid_open'>open</span><span class='lparen'>(</span> <span class='id identifier rubyid_tmpResultFile'>tmpResultFile</span> <span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>w</span><span class='tstring_end'>&#39;</span></span> <span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_f'>f</span><span class='op'>|</span> <span class='id identifier rubyid_f'>f</span><span class='period'>.</span><span class='id identifier rubyid_write'>write</span><span class='lparen'>(</span> <span class='const'>JSON</span><span class='period'>.</span><span class='id identifier rubyid_generate'>generate</span><span class='lparen'>(</span> <span class='id identifier rubyid_result'>result</span> <span class='rparen'>)</span> <span class='rparen'>)</span> <span class='rbrace'>}</span>
+        <span class='const'>File</span><span class='period'>.</span><span class='id identifier rubyid_rename'>rename</span><span class='lparen'>(</span> <span class='id identifier rubyid_tmpResultFile'>tmpResultFile</span><span class='comma'>,</span> <span class='id identifier rubyid_resultFile'>resultFile</span> <span class='rparen'>)</span>
+      <span class='kw'>end</span>
+
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+  </div>
+
+</div>
+
+      <div id="footer">
+  Generated on Wed Jan 11 07:00:50 2017 by
+  <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.9.6 (ruby-2.3.3).
+</div>
+
+    </div>
+  </body>
+</html>
