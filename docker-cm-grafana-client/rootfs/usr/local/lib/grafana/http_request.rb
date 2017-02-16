@@ -94,20 +94,29 @@ module Grafana
         responseCode = response.code.to_i
         responseBody = response.body
 
-        logger.debug( response )
+#        logger.debug( response )
 
         if( ( responseCode >= 200 && responseCode <= 299 ) || ( responseCode >= 400 && responseCode <= 499 ) )
 
           begin
-            result            = JSON.parse( responseBody )
 
-            if( result['status'] )
-              result['message'] = result.dig( 'status' )
-              result['status']  = response.code.to_i
+            result = JSON.parse( responseBody )
+
+            if( result.is_a?( Hash ) )
+
+              resultStatus = result.dig('status')
+
+              if( resultStatus != nil )
+                result['message'] = resultStatus
+                result['status']  = response.code.to_i
+              end
             end
+
           rescue => e
 
             logger.error( e )
+
+            result = false
           end
 
           return result
@@ -118,14 +127,10 @@ module Grafana
           return JSON.parse( responseBody )
         end
 
-      rescue => e
+      rescue RestClient::ExceptionWithResponse => e
 
         logger.error( "Error: #{__method__} #{methodType.upcase} on #{endpoint} error: '#{e}'" )
-#
-#        result           = JSON.parse( e.response )
-#        result['status'] = e.to_s.split( ' ' ).first
-#
-#        return result
+
       end
 
     end

@@ -333,17 +333,26 @@ class ServiceDiscovery
         response = response[:message]
         response.delete!( "\t" ).delete!( "\n" )
 
-        regex    = /(.*)connection to:(?<host>.+[a-zA-Z0-9]);(.*)Exception:(?<exception>.+\S)/
-
-        all,host,exception = response.match( regex ).to_a
-
-        logger.error( sprintf( '%s - %s', host.strip, exception.strip.tr('[]','') ) )
+#         logger.debug( response )
+#
+#         regex    = [
+#           /(.*)connection to:(?<host>.+[a-zA-Z0-9]);/i,
+#           /(.*)Exception:(?<exception>.+\S)/i
+#         ]
+#
+#         re = Regexp.union(regex)
+#
+#         all,host,exception = response.match( re ).to_a
+#
+#         logger.error( sprintf( '%s - %s', host.strip, exception.strip.tr('[]','') ) )
+#
+#         return nil
 
         return nil
 
         return {
           :status  => responseStatus,
-          :message => sprintf( '%s - %s', host.strip, exception.strip.tr('[]','') )
+          :message => response
         }
 
       else
@@ -359,9 +368,9 @@ class ServiceDiscovery
           # #3  == engine
           engine = body[2]
 
-#           logger.debug( JSON.pretty_generate( runtime ) )
-#           logger.debug( JSON.pretty_generate( manager ) )
-#           logger.debug( JSON.pretty_generate( engine ) )
+#            logger.debug( JSON.pretty_generate( runtime ) )
+#            logger.debug( JSON.pretty_generate( manager ) )
+#            logger.debug( JSON.pretty_generate( engine ) )
 
           if( runtime['status'] && runtime['status'] == 200 )
 
@@ -424,7 +433,7 @@ class ServiceDiscovery
                       services.delete( "caefeeder" )
                       services.push( service )
 
-#                       logger.debug( sprintf( '  => %s', service ) )
+                      logger.debug( sprintf( '  => %s', service ) )
                     else
                       logger.error( 'unknown error' )
                       logger.error( parts )
@@ -777,7 +786,7 @@ class ServiceDiscovery
         :created  => created
       }
 
-#      logger.debug( JSON.pretty_generate ( result ) )
+#       logger.debug( JSON.pretty_generate ( result ) )
 
     end
 

@@ -1,4 +1,5 @@
 #!/usr/bin/ruby
+$VERBOSE = nil
 
 require 'optparse'
 require 'json'

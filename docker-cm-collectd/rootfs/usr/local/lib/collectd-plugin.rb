@@ -667,18 +667,6 @@ module Collecd
           result.push( sprintf( format, @Host, @Service, f, 'free'         , @interval, avail ) )
           result.push( sprintf( format, @Host, @Service, f, 'used'         , @interval, used ) )
           result.push( sprintf( format, @Host, @Service, f, 'used_percent' , @interval, usedPercent ) )
-
-
-#           ['avail','free','size'].each do |m|
-#
-#             point = d.dig(m) # [m] ? d[m] : nil
-#
-#             if( point != nil )
-#
-# #              'PUTVAL %s/%s-%s/%s-%s interval=%s N:%s'
-#               result.push( sprintf( 'PUTVAL %s/%s-filesystem/count-%s_%s interval=%s N:%s', @Host, @Service, f, m, @interval, point ) )
-#             end
-          end
         end
       end
 

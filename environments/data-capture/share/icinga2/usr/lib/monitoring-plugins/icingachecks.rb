@@ -1,4 +1,6 @@
 #!/usr/bin/ruby
+# suppres "warning: constant ::Fixnum is deprecated"
+$VERBOSE = nil
 
 require 'optparse'
 require 'json'

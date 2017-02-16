@@ -128,8 +128,6 @@ class Monitoring
   #
   def messageQueue( params = {} )
 
-#     logger.debug( params )
-
     command = params.dig(:cmd)
     node    = params.dig(:node)
     queue   = params.dig(:queue)
@@ -148,10 +146,7 @@ class Monitoring
       payload: data
     }.to_json
 
-    logger.debug( queue )
-    logger.debug( job )
-
-    logger.debug( p.addJob( queue, job, prio, ttr, delay ) )
+    p.addJob( queue, job, prio, ttr, delay )
 
   end
 
@@ -384,7 +379,9 @@ class Monitoring
         logger.info( 'add node to discovery service' )
 
         logger.debug( 'send message to \'mq-discover\'' )
-        self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-discover', :payload => payload, :prio => 2 } )
+        self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-discover', :payload => payload, :prio => 1, :delay => 1 } )
+
+        sleep( 2 )
       end
 
       if( enabledGrafana == true )
@@ -427,7 +424,7 @@ class Monitoring
             break
           else
             logger.debug( sprintf( 'Waiting for data %s ... %d', 'mq-discover-info', y ) )
-            sleep( 3 )
+            sleep( 4 )
           end
         end
 
@@ -439,16 +436,35 @@ class Monitoring
 
           services          = discoveryPayload.dig( 'services' )
 
-           services.each do |s|
-             s.last.reject! { |k| k == 'template' }
-             s.last.reject! { |k| k == 'application' }
-           end
+          if( services != nil )
 
-          if( discoveryPayload.is_a?( Hash ) )
-            discoveryPayload = discoveryPayload.to_json
+#             for y in 1..10
+#
+#               services          = discoveryPayload.dig( 'services' )
+#
+#               if( services != nil )
+#                 break
+#               else
+#                 logger.debug( sprintf( 'Waiting for data %s ... %d', 'mq-discover-info', y ) )
+#                 sleep( 3 )
+#               end
+#             end
+
+            services.each do |s|
+              s.last.reject! { |k| k == 'template' }
+              s.last.reject! { |k| k == 'application' }
+            end
+
+            if( discoveryPayload.is_a?( Hash ) )
+              discoveryPayload = discoveryPayload.to_json
+            end
+
+            discoveryPayload = JSON.parse( discoveryPayload.split('"services":').join('"coremedia":') )
+
+          else
+
+            discoveryPayload = {}
           end
-
-          discoveryPayload = JSON.parse( discoveryPayload.split('"services":').join('"coremedia":') )
         else
 
           discoveryPayload = {}

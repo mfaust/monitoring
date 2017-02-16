@@ -69,6 +69,7 @@ module Jolokia
           }
 
 #           logger.debug( sprintf( ' -> request body: %s', request.body ) )
+
           return
 
         rescue => e
@@ -91,7 +92,7 @@ module Jolokia
       requestStatus = body.first['status'] ? body.first['status'] : 500
       requestError  = body.first['error']  ? body.first['error']  : nil
 
-# #       logger.debug( requestStatus )
+#       logger.debug( requestStatus )
 #       logger.debug( requestError )
 
       if( requestStatus != 200 )

@@ -53,14 +53,13 @@ module MessageQueue
     # @return [Hash,#read]
     def addJob( tube, job = {}, prio = 65536, ttr = 10, delay = 2 )
 
-      logger.debug( sprintf( 'addJob( %s, job = {}, %s, %s, %s )', tube, prio, ttr, delay ) )
+      logger.debug( sprintf( 'addJob( tube: %s, job = {}, prio: %s, ttr: %s, delay: %s )', tube, prio, ttr, delay ) )
 
       if( @b )
 
         logger.debug( "add job to tube #{tube}" )
         logger.debug( job )
 
-#        tube = @b.use( tube.to_s )
         response = @b.tubes[ tube.to_s ].put( job , :prio => prio, :ttr => ttr, :delay => delay )
 
         logger.debug( response )
