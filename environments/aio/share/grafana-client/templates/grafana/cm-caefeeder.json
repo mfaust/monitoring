@@ -1,9 +1,8 @@
 {
   "dashboard": {
     "id": null,
-    "title": "%SHORTHOST% Elastic Worker",
-    "originalTitle": "%SHORTHOST% Elastic Worker",
-    "tags": [ "%TAG%" ],
+    "title": "%SHORTHOST% CAE Feeder",
+    "tags": [ "%TAG%", "feeder" ],
     "style": "dark",
     "timezone": "browser",
     "editable": true,
@@ -16,10 +15,10 @@
         "height": "25px",
         "panels": [
           {
-            "content": "<h2><center>Elastic Worker</center></h2>",
+            "content": "<h2><center>CAE Feeder</center></h2>",
             "editable": true,
             "error": false,
-            "id": 1,
+            "id": 31,
             "isNew": true,
             "links": [],
             "mode": "html",
@@ -29,7 +28,7 @@
             "type": "text"
           }
         ],
-        "title": "New row"
+        "title": ""
       },
       {
         "collapse": false,
@@ -40,7 +39,7 @@
             "aliasColors": {},
             "bars": false,
             "datasource": "graphite",
-            "decimals": 1,
+            "decimals": 0,
             "editable": true,
             "error": false,
             "fill": 3,
@@ -50,7 +49,119 @@
               "threshold2": null,
               "threshold2Color": "rgba(234, 112, 112, 0.22)"
             },
-            "id": 7,
+            "id": 37,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": true,
+              "min": true,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [
+              {
+                "alias": "heartbeat",
+                "yaxis": 2
+              }
+            ],
+            "span": 12,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$feeder-ProactiveEngine-feeder.count-diff, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "B",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$feeder-ProactiveEngine-feeder.count-current, '(.*)-', ''))",
+                "textEditor": false,
+                "hide": true
+              },
+              {
+                "refId": "C",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$feeder-ProactiveEngine-feeder.count-max, '(.*)-', ''))",
+                "textEditor": false,
+                "hide": true
+              },
+              {
+                "refId": "D",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$feeder-ProactiveEngine-feeder.count-invalidations, '(.*)-', ''))",
+                "textEditor": false,
+                "hide": true
+              },
+              {
+                "refId": "E",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$feeder-ProactiveEngine-feeder.count-heartbeat, '(.*)-', ''))",
+                "textEditor": false
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "Feeder Elements",
+            "tooltip": {
+              "msResolution": false,
+              "ordering": "alphabetical",
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "none",
+                "logBase": 1,
+                "max": null,
+                "min": 0,
+                "show": true
+              },
+              {
+                "format": "ms",
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ]
+          }
+        ],
+        "title": "Feeder Elements"
+      },
+      {
+        "collapse": false,
+        "editable": true,
+        "height": "150px",
+        "panels": [
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "editable": true,
+            "error": false,
+            "fill": 3,
+            "grid": {
+              "threshold1": null,
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2": null,
+              "threshold2Color": "rgba(234, 112, 112, 0.22)"
+            },
+            "id": 40,
             "isNew": true,
             "legend": {
               "alignAsTable": true,
@@ -84,18 +195,18 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "alias(aliasSub(collectd.%HOST%.ELASTIC_WORKER-CapConnection-heap_cache.count-size, '(.*)-', ''), 'max')",
+                "target": "alias(aliasSub(collectd.%HOST%.$feeder-CapConnection-heap_cache.count-size, '(.*)-', ''), 'max')",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "alias(aliasSub(collectd.%HOST%.ELASTIC_WORKER-CapConnection-heap_cache.count-used, '(.*)-', ''), 'used')",
+                "target": "alias(aliasSub(collectd.%HOST%.$feeder-CapConnection-heap_cache.count-used, '(.*)-', ''), 'used')",
                 "textEditor": false
               },
               {
                 "refId": "C",
                 "target": "alias(asPercent(#B, #A), 'percent')",
-                "targetFull": "alias(asPercent(alias(aliasSub(collectd.%HOST%.ELASTIC_WORKER-CapConnection-heap_cache.count-used, '(.*)-', ''), 'used'), alias(aliasSub(collectd.%HOST%.ELASTIC_WORKER-CapConnection-heap_cache.count-size, '(.*)-', ''), 'max')), 'percent')",
+                "targetFull": "alias(asPercent(alias(aliasSub(collectd.%HOST%.$feeder-CapConnection-heap_cache.count-used, '(.*)-', ''), 'used'), alias(aliasSub(collectd.%HOST%.$feeder-CapConnection-heap_cache.count-size, '(.*)-', ''), 'max')), 'percent')",
                 "textEditor": false
               }
             ],
@@ -130,112 +241,11 @@
                 "min": null,
                 "show": true
               }
-            ]
+            ],
+            "decimals": 1
           }
         ],
         "title": "UAPI Cache"
-      },
-      {
-        "collapse": false,
-        "editable": true,
-        "height": "150px",
-        "panels": [
-          {
-            "aliasColors": {},
-            "bars": false,
-            "datasource": "graphite",
-            "decimals": 1,
-            "editable": true,
-            "error": false,
-            "fill": 3,
-            "grid": {
-              "threshold1": null,
-              "threshold1Color": "rgba(216, 200, 27, 0.27)",
-              "threshold2": null,
-              "threshold2Color": "rgba(234, 112, 112, 0.22)"
-            },
-            "id": 9,
-            "isNew": true,
-            "legend": {
-              "alignAsTable": true,
-              "avg": false,
-              "current": true,
-              "max": false,
-              "min": false,
-              "rightSide": true,
-              "show": true,
-              "total": false,
-              "values": true
-            },
-            "lines": true,
-            "linewidth": 1,
-            "links": [],
-            "nullPointMode": "connected",
-            "percentage": false,
-            "pointradius": 5,
-            "points": false,
-            "renderer": "flot",
-            "seriesOverrides": [
-              {
-                "alias": "percent",
-                "color": "#BF1B00",
-                "yaxis": 2
-              }
-            ],
-            "span": 12,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
-              {
-                "refId": "A",
-                "target": "alias(collectd.%HOST%.ELASTIC_WORKER-CapConnection-blob_cache.count-size, 'max')",
-                "textEditor": false
-              },
-              {
-                "refId": "B",
-                "target": "alias(collectd.%HOST%.ELASTIC_WORKER-CapConnection-blob_cache.count-used, 'used')",
-                "textEditor": false
-              },
-              {
-                "refId": "C",
-                "target": "alias(collectd.%HOST%.ELASTIC_WORKER-CapConnection-blob_cache.count-used_percent, 'percent')",
-                "textEditor": false
-              }
-            ],
-            "timeFrom": null,
-            "timeShift": null,
-            "title": "BlobCache",
-            "tooltip": {
-              "msResolution": false,
-              "ordering": "alphabetical",
-              "shared": true,
-              "sort": 0,
-              "value_type": "cumulative"
-            },
-            "type": "graph",
-            "xaxis": {
-              "show": true
-            },
-            "yaxes": [
-              {
-                "format": "bytes",
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-              },
-              {
-                "format": "none",
-                "label": "percent",
-                "logBase": 1,
-                "max": "110",
-                "min": null,
-                "show": true
-              }
-            ]
-          }
-        ],
-        "title": "Blob Cache"
       }
     ],
     "time": {
@@ -265,7 +275,25 @@
       ]
     },
     "templating": {
-      "list": []
+      "list": [
+        {
+          "type": "query",
+          "label": null,
+          "query": "*.*.*EEDER*Proactive*feeder",
+          "regex": "/(.*)-.*-.*/",
+          "sort": 0,
+          "datasource": "graphite",
+          "refresh": 0,
+          "hide": 0,
+          "name": "feeder",
+          "multi": false,
+          "includeAll": false,
+          "allValue": null,
+          "current": {},
+          "tagsQuery": null,
+          "tagValuesQuery": null
+        }
+      ]
     },
     "annotations": {
       "list": [
@@ -294,7 +322,8 @@
     },
     "refresh": "1m",
     "schemaVersion": 12,
-    "version": 4,
-    "links": []
+    "version": 12,
+    "links": [],
+    "gnetId": null
   }
 }

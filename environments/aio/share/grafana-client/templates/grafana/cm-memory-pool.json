@@ -54,8 +54,13 @@
             "seriesOverrides": [
               {
                 "alias": "percent",
-                "yaxis": 2,
-                "color": "#CFFAFF"
+                "color": "#C15C17",
+                "yaxis": 2
+              },
+              {
+                "alias": "percent (avg)",
+                "color": "#BF1B00",
+                "yaxis": 2
               }
             ],
             "span": 12,
@@ -79,8 +84,14 @@
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.$service-MemoryPool-Par_Eden_Space.count-used_percent, '(.*)-', ''), 'percent'))",
+                "target": "alias(smartSummarize(aliasSub(collectd.%HOST%.$service-MemoryPool-Par_Eden_Space.count-used_percent, '(.*)-', ''), '3m', 'avg'), 'percent (avg)')",
                 "textEditor": false
+              },
+              {
+                "refId": "E",
+                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.$service-MemoryPool-Par_Eden_Space.count-used_percent, '(.*)-', ''), 'percent'))",
+                "textEditor": false,
+                "hide": true
               }
             ],
             "timeFrom": null,
@@ -109,7 +120,7 @@
                 "format": "none",
                 "label": "used in %",
                 "logBase": 1,
-                "max": null,
+                "max": "110",
                 "min": null,
                 "show": true
               }
@@ -163,8 +174,13 @@
             "seriesOverrides": [
               {
                 "alias": "percent",
-                "yaxis": 2,
-                "color": "#CFFAFF"
+                "color": "#C15C17",
+                "yaxis": 2
+              },
+              {
+                "alias": "percent (avg)",
+                "color": "#BF1B00",
+                "yaxis": 2
               }
             ],
             "span": 12,
@@ -188,8 +204,14 @@
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.$service-MemoryPool-Par_Survivor_Space.count-used_percent, '(.*)-', ''), 'percent'))",
+                "target": "alias(smartSummarize(aliasSub(collectd.%HOST%.$service-MemoryPool-Par_Survivor_Space.count-used_percent, '(.*)-', ''), '5m', 'avg'), 'percent (avg)')",
                 "textEditor": false
+              },
+              {
+                "refId": "E",
+                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.$service-MemoryPool-Par_Survivor_Space.count-used_percent, '(.*)-', ''), 'percent'))",
+                "textEditor": false,
+                "hide": true
               }
             ],
             "timeFrom": null,
@@ -218,7 +240,7 @@
                 "format": "none",
                 "label": "used in %",
                 "logBase": 1,
-                "max": null,
+                "max": "110",
                 "min": null,
                 "show": true
               }
@@ -271,8 +293,13 @@
             "seriesOverrides": [
               {
                 "alias": "percent",
-                "yaxis": 2,
-                "color": "#CFFAFF"
+                "color": "#C15C17",
+                "yaxis": 2
+              },
+              {
+                "alias": "percent (avg)",
+                "color": "#BF1B00",
+                "yaxis": 2
               }
             ],
             "span": 12,
@@ -296,8 +323,14 @@
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.$service-MemoryPool-CMS_Old_Gen.count-used_percent, '(.*)-', ''), 'percent'))",
+                "target": "alias(smartSummarize(aliasSub(collectd.%HOST%.$service-MemoryPool-CMS_Old_Gen.count-used_percent, '(.*)-', ''), '5m', 'avg'), 'percent (avg)')",
                 "textEditor": false
+              },
+              {
+                "refId": "E",
+                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.$service-MemoryPool-CMS_Old_Gen.count-used_percent, '(.*)-', ''), 'percent'))",
+                "textEditor": false,
+                "hide": true
               }
             ],
             "timeFrom": null,
@@ -326,7 +359,7 @@
                 "format": "none",
                 "label": "used in %",
                 "logBase": 1,
-                "max": null,
+                "max": "110",
                 "min": null,
                 "show": true
               }
@@ -379,8 +412,13 @@
             "seriesOverrides": [
               {
                 "alias": "percent",
-                "yaxis": 2,
-                "color": "#CFFAFF"
+                "color": "#C15C17",
+                "yaxis": 2
+              },
+              {
+                "alias": "percent (avg)",
+                "color": "#BF1B00",
+                "yaxis": 2
               }
             ],
             "span": 12,
@@ -405,8 +443,14 @@
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.$service-MemoryPool-Metaspace.count-used_percent, '(.*)-', ''), 'percent'))",
+                "target": "alias(smartSummarize(aliasSub(collectd.%HOST%.$service-MemoryPool-Metaspace.count-used_percent, '(.*)-', ''), '5m', 'avg'), 'percent (avg)')",
                 "textEditor": false
+              },
+              {
+                "refId": "E",
+                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.$service-MemoryPool-Metaspace.count-used_percent, '(.*)-', ''), 'percent'))",
+                "textEditor": false,
+                "hide": true
               }
             ],
             "timeFrom": null,
@@ -435,7 +479,7 @@
                 "format": "none",
                 "label": "used in %",
                 "logBase": 1,
-                "max": null,
+                "max": "110",
                 "min": null,
                 "show": true
               }
@@ -488,8 +532,13 @@
             "seriesOverrides": [
               {
                 "alias": "percent",
-                "yaxis": 2,
-                "color": "#CFFAFF"
+                "color": "#C15C17",
+                "yaxis": 2
+              },
+              {
+                "alias": "percent (avg)",
+                "color": "#BF1B00",
+                "yaxis": 2
               }
             ],
             "span": 12,
@@ -513,8 +562,14 @@
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.$service-MemoryPool-Code_Cache.count-used_percent, '(.*)-', ''), 'percent'))",
+                "target": "alias(smartSummarize(aliasSub(collectd.%HOST%.$service-MemoryPool-Code_Cache.count-used_percent, '(.*)-', ''), '5m', 'avg'), 'percent (avg)')",
                 "textEditor": false
+              },
+              {
+                "refId": "E",
+                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.$service-MemoryPool-Code_Cache.count-used_percent, '(.*)-', ''), 'percent'))",
+                "textEditor": false,
+                "hide": true
               }
             ],
             "timeFrom": null,
@@ -543,7 +598,7 @@
                 "format": "none",
                 "label": "used in %",
                 "logBase": 1,
-                "max": null,
+                "max": "110",
                 "min": null,
                 "show": true
               }
@@ -596,8 +651,13 @@
             "seriesOverrides": [
               {
                 "alias": "percent",
-                "yaxis": 2,
-                "color": "#CFFAFF"
+                "color": "#C15C17",
+                "yaxis": 2
+              },
+              {
+                "alias": "percent (avg)",
+                "color": "#BF1B00",
+                "yaxis": 2
               }
             ],
             "span": 12,
@@ -621,8 +681,14 @@
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.$service-MemoryPool-Compressed_Class_Space.count-used_percent, '(.*)-', ''), 'percent'))",
+                "target": "alias(smartSummarize(aliasSub(collectd.%HOST%.$service-MemoryPool-Compressed_Class_Space.count-used_percent, '(.*)-', ''), '5m', 'avg'), 'percent (avg)')",
                 "textEditor": false
+              },
+              {
+                "refId": "E",
+                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.$service-MemoryPool-Compressed_Class_Space.count-used_percent, '(.*)-', ''), 'percent'))",
+                "textEditor": false,
+                "hide": true
               }
             ],
             "timeFrom": null,
@@ -651,7 +717,7 @@
                 "format": "none",
                 "label": "used in %",
                 "logBase": 1,
-                "max": null,
+                "max": "110",
                 "min": null,
                 "show": true
               }
