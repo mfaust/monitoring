@@ -1,7 +1,7 @@
-Coremedia Monitoring
+CoreMedia Monitoring
 ====================
 
-Das Coremedia Monitoring basiert auf einem Set von mehreren Dockercontainern, welche die genutzten Services kappseln.
+Das CoreMedia Monitoring basiert auf einem Set von mehreren Dockercontainern, welche die genutzten Services kappseln.
 
 Der Einstaz von Docker ist nicht zwingend notwendig, wird aber in diesem Kontext genutzt um eine dynamische Entwicklung zu fördern.
 

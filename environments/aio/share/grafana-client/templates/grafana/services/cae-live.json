@@ -39,7 +39,7 @@
             "aliasColors": {},
             "bars": false,
             "datasource": "graphite",
-            "decimals": 2,
+            "decimals": 1,
             "editable": true,
             "error": false,
             "fill": 3,
@@ -70,7 +70,13 @@
             "pointradius": 5,
             "points": false,
             "renderer": "flot",
-            "seriesOverrides": [],
+            "seriesOverrides": [
+              {
+                "alias": "percent",
+                "color": "#BF1B00",
+                "yaxis": 2
+              }
+            ],
             "span": 12,
             "stack": false,
             "steppedLine": false,
@@ -83,6 +89,12 @@
               {
                 "refId": "B",
                 "target": "alias(aliasSub(collectd.%HOST%.CAE_LIVE-CapConnection-heap_cache.count-used, '(.*)-', ''), 'used')",
+                "textEditor": false
+              },
+              {
+                "refId": "C",
+                "target": "alias(asPercent(#B, #A), 'percent')",
+                "targetFull": "alias(asPercent(alias(aliasSub(collectd.%HOST%.CAE_LIVE-CapConnection-heap_cache.count-used, '(.*)-', ''), 'used'), alias(aliasSub(collectd.%HOST%.CAE_LIVE-CapConnection-heap_cache.count-size, '(.*)-', ''), 'max')), 'percent')",
                 "textEditor": false
               }
             ],
@@ -106,14 +118,14 @@
                 "label": null,
                 "logBase": 1,
                 "max": null,
-                "min": null,
+                "min": 0,
                 "show": true
               },
               {
-                "format": "short",
-                "label": null,
+                "format": "none",
+                "label": "percent",
                 "logBase": 1,
-                "max": null,
+                "max": "110",
                 "min": null,
                 "show": true
               }
@@ -131,7 +143,7 @@
             "aliasColors": {},
             "bars": false,
             "datasource": "graphite",
-            "decimals": 2,
+            "decimals": 1,
             "editable": true,
             "error": false,
             "fill": 3,
@@ -162,19 +174,30 @@
             "pointradius": 5,
             "points": false,
             "renderer": "flot",
-            "seriesOverrides": [],
+            "seriesOverrides": [
+              {
+                "alias": "percent",
+                "color": "#BF1B00",
+                "yaxis": 2
+              }
+            ],
             "span": 12,
             "stack": false,
             "steppedLine": false,
             "targets": [
               {
-                "refId": "B",
+                "refId": "A",
                 "target": "alias(collectd.%HOST%.CAE_LIVE-CapConnection-blob_cache.count-size, 'max')",
                 "textEditor": false
               },
               {
-                "refId": "A",
+                "refId": "B",
                 "target": "alias(collectd.%HOST%.CAE_LIVE-CapConnection-blob_cache.count-used, 'used')",
+                "textEditor": false
+              },
+              {
+                "refId": "C",
+                "target": "alias(collectd.%HOST%.CAE_LIVE-CapConnection-blob_cache.count-used_percent, 'percent')",
                 "textEditor": false
               }
             ],
@@ -201,9 +224,10 @@
                 "show": true
               },
               {
-                "format": "short",
+                "format": "none",
+                "label": "percent",
                 "logBase": 1,
-                "max": null,
+                "max": "110",
                 "min": null,
                 "show": true
               }

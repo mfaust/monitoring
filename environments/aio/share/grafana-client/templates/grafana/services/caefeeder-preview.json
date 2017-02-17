@@ -55,8 +55,8 @@
               "alignAsTable": true,
               "avg": false,
               "current": true,
-              "max": false,
-              "min": false,
+              "max": true,
+              "min": true,
               "rightSide": true,
               "show": true,
               "total": false,
@@ -70,7 +70,12 @@
             "pointradius": 5,
             "points": false,
             "renderer": "flot",
-            "seriesOverrides": [],
+            "seriesOverrides": [
+              {
+                "alias": "heartbeat",
+                "yaxis": 2
+              }
+            ],
             "span": 12,
             "stack": false,
             "steppedLine": false,
@@ -97,6 +102,11 @@
                 "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_PREV-ProactiveEngine-feeder.count-invalidations, '(.*)-', ''))",
                 "textEditor": false,
                 "hide": true
+              },
+              {
+                "refId": "E",
+                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_PREV-ProactiveEngine-feeder.count-heartbeat, '(.*)-', ''))",
+                "textEditor": false
               }
             ],
             "timeFrom": null,
@@ -122,11 +132,11 @@
                 "show": true
               },
               {
-                "format": "short",
+                "format": "ms",
                 "logBase": 1,
                 "max": null,
                 "min": null,
-                "show": false
+                "show": true
               }
             ]
           }
@@ -172,7 +182,13 @@
             "pointradius": 5,
             "points": false,
             "renderer": "flot",
-            "seriesOverrides": [],
+            "seriesOverrides": [
+              {
+                "alias": "percent",
+                "color": "#BF1B00",
+                "yaxis": 2
+              }
+            ],
             "span": 12,
             "stack": false,
             "steppedLine": false,
@@ -185,6 +201,12 @@
               {
                 "refId": "B",
                 "target": "alias(aliasSub(collectd.%HOST%.FEEDER_PREV-CapConnection-heap_cache.count-used, '(.*)-', ''), 'used')",
+                "textEditor": false
+              },
+              {
+                "refId": "C",
+                "target": "alias(asPercent(#B, #A), 'percent')",
+                "targetFull": "alias(asPercent(alias(aliasSub(collectd.%HOST%.FEEDER_PREV-CapConnection-heap_cache.count-used, '(.*)-', ''), 'used'), alias(aliasSub(collectd.%HOST%.FEEDER_PREV-CapConnection-heap_cache.count-size, '(.*)-', ''), 'max')), 'percent')",
                 "textEditor": false
               }
             ],
@@ -208,19 +230,19 @@
                 "label": null,
                 "logBase": 1,
                 "max": null,
-                "min": null,
+                "min": 0,
                 "show": true
               },
               {
-                "format": "short",
-                "label": null,
+                "format": "none",
+                "label": "percent",
                 "logBase": 1,
-                "max": null,
+                "max": "110",
                 "min": null,
                 "show": true
               }
             ],
-            "decimals": 2
+            "decimals": 1
           }
         ],
         "title": "UAPI Cache"
@@ -350,19 +372,14 @@
           "allValue": null,
           "options": [
             {
-              "text": "CAEFEEDER2_LIVE",
-              "value": "CAEFEEDER2_LIVE",
-              "selected": true
-            },
-            {
               "text": "FEEDER_LIVE",
               "value": "FEEDER_LIVE",
               "selected": false
             }
           ],
           "current": {
-            "text": "CAEFEEDER2_LIVE",
-            "value": "CAEFEEDER2_LIVE"
+            "text": "FEEDER_LIVE",
+            "value": "FEEDER_LIVE"
           },
           "tagsQuery": null,
           "tagValuesQuery": null

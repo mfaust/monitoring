@@ -133,7 +133,7 @@
             "id": 100,
             "targets": [
               {
-                "target": "collectd.%HOST%.MLS-Server-server.count-sequence_number",
+                "target": "collectd.%HOST%.MLS-Server-Repository.count-sequence_number",
                 "refId": "A",
                 "hide": true
               },
@@ -381,33 +381,38 @@
         "title": "statistics"
       },
       {
-        "title": "Server Cache",
+        "title": "Server Resource Cache",
         "height": "150px",
         "editable": true,
         "collapse": false,
         "panels": [
           {
-            "title": "Server Cache",
+            "title": "Server Resource Cache",
             "error": false,
-            "span": 6,
+            "span": 12,
             "editable": true,
             "type": "graph",
             "isNew": true,
             "id": 58,
             "targets": [
               {
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.RLS-Server-server.count-cache_entries, '(.*)-', ''), 'entries'))",
+                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.RLS-Server-ResourceCache.count-entries, '(.*)-', ''), 'Cache Faults'))",
                 "refId": "A",
                 "textEditor": false
               },
               {
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.RLS-Server-server.count-cache_evicts, '(.*)-', ''), 'evicts'))",
+                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.RLS-Server-ResourceCache.count-evicts, '(.*)-', ''), 'Cache Evicts'))",
                 "refId": "B",
                 "textEditor": false
               },
               {
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.RLS-Server-server.count-cache_hits, '(.*)-', ''), 'hits'))",
+                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.RLS-Server-ResourceCache.count-hits, '(.*)-', ''), 'Cache Hits'))",
                 "refId": "C",
+                "textEditor": false
+              },
+              {
+                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.RLS-Server-ResourceCache.count-size, '(.*)-', ''), 'Cache Entries'))",
+                "refId": "D",
                 "textEditor": false
               }
             ],
@@ -472,84 +477,6 @@
             "aliasColors": {},
             "seriesOverrides": [],
             "links": []
-          },
-          {
-            "title": "Server Cache",
-            "error": false,
-            "span": 6,
-            "editable": true,
-            "type": "graph",
-            "isNew": true,
-            "id": 59,
-            "targets": [
-              {
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.RLS-Server-server.count-cache_size, '(.*)-', ''), 'Entries'))",
-                "refId": "A",
-                "textEditor": false
-              }
-            ],
-            "datasource": "graphite",
-            "renderer": "flot",
-            "yaxes": [
-              {
-                "label": null,
-                "show": true,
-                "logBase": 1,
-                "min": null,
-                "max": null,
-                "format": "bytes"
-              },
-              {
-                "label": null,
-                "show": false,
-                "logBase": 1,
-                "min": null,
-                "max": null,
-                "format": "short"
-              }
-            ],
-            "xaxis": {
-              "show": true
-            },
-            "grid": {
-              "threshold1": null,
-              "threshold2": null,
-              "threshold1Color": "rgba(216, 200, 27, 0.27)",
-              "threshold2Color": "rgba(234, 112, 112, 0.22)"
-            },
-            "lines": true,
-            "fill": 3,
-            "linewidth": 1,
-            "points": false,
-            "pointradius": 5,
-            "bars": false,
-            "stack": false,
-            "percentage": false,
-            "legend": {
-              "show": true,
-              "values": true,
-              "min": false,
-              "max": false,
-              "current": true,
-              "total": false,
-              "avg": false,
-              "alignAsTable": true,
-              "rightSide": true
-            },
-            "nullPointMode": "connected",
-            "steppedLine": false,
-            "tooltip": {
-              "value_type": "cumulative",
-              "shared": true,
-              "sort": 0,
-              "msResolution": false
-            },
-            "timeFrom": null,
-            "timeShift": null,
-            "aliasColors": {},
-            "seriesOverrides": [],
-            "links": [],
-            "decimals": 2
           }
         ]
       }
