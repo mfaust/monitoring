@@ -213,10 +213,9 @@ services:
       - env/database.env
       - env/icinga2.env
     depends_on:
+      - beanstalkd
       - database
       - memcached
-    extra_hosts:
-      - 'blueprint-box:192.168.252.100'
     ports:
       - 5665:5665
       - 6666:6666
@@ -227,10 +226,12 @@ services:
       - ./data/icinga2:/var/lib/icinga2/
       - ./data/monitoring:/var/cache/monitoring
       - ./share/icinga2:/usr/local/monitoring
-      - ../docker-cm-monitoring/rootfs/usr/local/lib/mbean.rb:/usr/local/lib/mbean.rb:ro
-      - ../docker-cm-monitoring/rootfs/usr/local/lib/tools.rb:/usr/local/lib/tools.rb:ro
+      - ./share/icinga2/etc/cm-icinga2.yaml:/etc/cm-icinga2.yaml
+      - ./share/icinga2/usr/local/lib/mbean.rb:/usr/local/lib/mbean.rb:ro
+      - ./share/icinga2/usr/local/lib/tools.rb:/usr/local/lib/tools.rb:ro
+      - ./share/icinga2/usr/local/lib/storage.rb:/usr/local/lib/storage.rb:ro
+      - ./share/icinga2/usr/local/lib/logging.rb:/usr/local/lib/logging.rb:ro
       - ./share/icinga2/usr/lib/monitoring-plugins/icingachecks.rb:/usr/local/lib/icingachecks.rb:ro
-      - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_memory_cache:/usr/lib/monitoring-plugins/check_cm_memory_cache:ro
       - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_feeder_status.rb:/usr/lib/monitoring-plugins/check_cm_feeder_status:ro
       - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_cache.rb:/usr/lib/monitoring-plugins/check_cm_cache:ro
       - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_memory.rb:/usr/lib/monitoring-plugins/check_cm_memory:ro
@@ -240,6 +241,8 @@ services:
       - ./share/icinga2/usr/lib/monitoring-plugins/check_ssl_cert:/usr/lib/monitoring-plugins/check_ssl_cert:ro
       - ./share/icinga2/etc/icinga2/objects:/etc/icinga2/objects
     links:
+      - beanstalkd:beanstalkd
+      - memcached:memcached
       - database:database
     networks:
       mon:
