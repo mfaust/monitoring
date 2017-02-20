@@ -2,28 +2,32 @@
 
 digraph G {
 
-  nodesep=1.0 // increases the separation between nodes
-  ratio=1
-  overlap=false
-  start=1
-  concentrate=false
+  nodesep     = 0.5 // increases the separation between nodes
+  ratio       = 1.5
+  overlap     = true
+  start       = 1
+  concentrate = false
+
+  splines     = true
+
 
   node [
     fontname = "Courier New",
-    fontsize = 10,
+    fontsize = 12,
     height   = 0.2,
     width    = 0.2,
     shape    = box
   ]
   edge [
-    style=solid,
-    arrowhead="vee",
-    arrowtail="vee",
-    arrowsize="0.7",
+    style     = solid,
+    arrowhead = "vee",
+    arrowtail = "vee",
+    arrowsize = "0.7",
+    splines   = "curved"
   ]
 
   subgraph level0{
-    user                [label="USER",shape=box]
+    user                [label = "USER",shape = none]
   }
   subgraph cluster_visualisation{
     label = "Visualisation";
@@ -38,23 +42,23 @@ digraph G {
     icinga2Web          [label="icinga2-web"]
     database            [label="database"]
 
-    { rank=same; nginx carbon graphite icinga2Master }
+    { rank = same; icinga2Web icinga2Master grafana }
+    { rank = same; graphite carbon memcached }
   }
+
+  { rank=min; user capture }  [style=invis]
 
   user              -> nginx
 
-  capture           -> nginx
-  capture           -> graphite
-  capture           -> carbon
-  capture           -> icinga2Master
+  capture           -> { nginx graphite carbon icinga2Master }  [weight=1000]
 
-  nginx             -> grafana
-  nginx             -> icinga2Web
+  nginx             -> { grafana icinga2Web }                   [weight=1000]
 
-  grafana           -> database
-  grafana           -> memcached
+  grafana           -> { database memcached graphite }            [weight=1000]
+  grafana           -> carbon     [style=dashed, label="optional", weight=1000]
 
   icinga2Master     -> database
-  icinga2Web        -> database
-  icinga2Web        -> icinga2Master
+  icinga2Master     -> carbon     [style=dashed,label="optional", weight=1000]
+
+  icinga2Web        -> { database icinga2Master }
 }
