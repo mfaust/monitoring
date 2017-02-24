@@ -17,7 +17,8 @@ RUN \
     ruby-dev \
     sqlite-dev \
     sqlite \
-    mysql-dev && \
+    mysql-dev \
+    postgresql-dev && \
   gem install --no-rdoc --no-ri \
     bigdecimal \
     beaneater \
@@ -27,7 +28,8 @@ RUN \
     sqlite3 \
     sequel \
     rest-client \
-    mysql2 && \
+    mysql2 \
+    pg && \
   mkdir /var/log/monitoring && \
   mkdir /var/cache/monitoring && \
   apk del --purge \

@@ -332,6 +332,35 @@ module DataCollector
     end
 
 
+    def postgresData( host, data = {} )
+
+      # WiP and nore sure
+      # return
+
+      user = data['user'] ? data['user'] : nil
+      pass = data['pass'] ? data['pass'] : nil
+      port = data['port'] ? data['port'] : 5432
+
+      if( port != nil )
+
+        settings = {
+          'postgresHost' => host,
+          'postgresUser' => 'cm7management',
+          'postgresPass' => 'cm7management',
+          'postgresPort' => port,
+          'postgresDBName' => 'coremedia'
+        }
+
+        pgsql = ExternalClients::PostgresStatus.new( settings )
+        data = pgsql.run()
+
+        logger.debug( data )
+
+      end
+
+    end
+
+
     def nodeExporterData( host, data = {} )
 
       port = data[:port] ? data[:port] : 9100
@@ -468,6 +497,7 @@ module DataCollector
             bulk.push( '' )
           when 'postgres'
             # Postgres
+            bulk.push( '' )
           when 'resourced'
             # resourced
           else
@@ -610,6 +640,7 @@ module DataCollector
               result[v] = self.mongoDBData( hostname )
             when 'postgres'
               # Postgres
+              result[v] = self.postgresData( hostname )
             when 'node_exporter'
               # node_exporter
               result[v] = self.nodeExporterData( hostname )

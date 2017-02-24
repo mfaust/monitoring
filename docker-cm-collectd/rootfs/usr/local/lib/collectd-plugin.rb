@@ -560,6 +560,21 @@ module Collecd
   end
 
 
+  def ParseResult_postgres( value = {} )
+
+    format = 'PUTVAL %s/%s-%s/%s-%s interval=%s N:%s'
+    result = []
+
+    if( value != nil )
+
+      logger.debug( value )
+
+    end
+
+    return result
+  end
+
+
   def ParseResult_nodeExporter( value = {} )
 
     format = 'PUTVAL %s/%s-%s/%s-%s interval=%s N:%s'
@@ -2234,6 +2249,10 @@ module Collecd
           data = @db.discoveryData( { :ip => h, :short => h } )
 #           logger.debug( data )
 
+          if( data == nil )
+            next
+          end
+
           data = data[h]
           data['timestamp'] = Time.now().to_s
 
@@ -2275,6 +2294,15 @@ module Collecd
             else
               logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @Host, service ) )
             end
+
+          when 'postgres'
+
+            if( result.is_a?( Hash ) )
+              graphiteOutput.push( self.ParseResult_postgres( result ) )
+            else
+              logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @Host, service ) )
+            end
+
 
           when 'node_exporter'
 
