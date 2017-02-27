@@ -13,6 +13,7 @@ module CarbonWriter
 
       @graphiteHost = params.dig( :graphite, :host )
       @graphitePort = params.dig( :graphite, :port )
+      @slice        = params.dig( :slice )
 
       @buffer       = CarbonWriter::Buffer.new( { :cache => 4 * 60 * 60 } )
 
@@ -34,7 +35,7 @@ module CarbonWriter
           logger.error( e )
 
         retry
-
+          sleep( 5 )
         end
       end
 
@@ -43,23 +44,33 @@ module CarbonWriter
     end
 
 
-    def report( metric = {} )
+    def metric( metric = {} )
 
-      logger.debug( sprintf( 'report( %s )', metric ) )
+      logger.debug( sprintf( 'metric( %s )', metric ) )
       key   = metric.dig(:key)
       value = metric.dig(:value)
-      time  = metric.dig(:time) || metric[:time] = Time.now
+      time  = metric.dig(:time) || Time.now
 
       # TODO
       # value must be an float!
 
       if( key == nil || value == nil )
         logger.error( 'ERROR' )
-
         return
       end
 
-      @buffer.push( { :metric => metric } )
+      value = value.to_f
+      time  = time.to_i
+
+      metric = {
+        :key   => key,
+        :value => value,
+        :time  => normalizeTime( time, @slice )
+      }
+
+#       logger.debug( metric )
+
+      @buffer.push( metric )
 
       if( @buffer.new_records?() )
 
@@ -67,23 +78,21 @@ module CarbonWriter
 
       end
 
-
-      return
-
-
-      begin
-
-        self.socket.write( "#{key} #{value.to_f} #{time.to_i}\n" )
-
-      rescue Errno::EPIPE, Errno::EHOSTUNREACH, Errno::ECONNREFUSED
-
-        @socket = nil
-        nil
-
-      end
+#       begin
+#
+#         puts( "#{key} #{value.to_f} #{time.to_i}\n" )
+#
+# #        self.socket.write( "#{key} #{value.to_f} #{time.to_i}\n" )
+#
+#       rescue Errno::EPIPE, Errno::EHOSTUNREACH, Errno::ECONNREFUSED
+#
+#         @socket = nil
+#         nil
+#
+#       end
     end
 
-    def close_socket()
+    def closeSocket()
 
       if( @socket )
         @socket.close
@@ -91,6 +100,24 @@ module CarbonWriter
 
       @socket = nil
     end
+
+
+    private
+
+    def normalizeTime( time, slice )
+
+      logger.debug( "normalizeTime( #{time}, #{slice} )" )
+
+      if( slice.nil?() )
+        slice = 1
+      end
+
+      result = ((time || Time.now).to_i / slice * slice).to_i
+
+      return result
+    end
+
+
 
   end
 
@@ -232,6 +259,7 @@ module CarbonWriter
       end
 
     end
+
 
   end
 end

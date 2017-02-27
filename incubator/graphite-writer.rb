@@ -41,6 +41,24 @@ module CarbonWriter
 
 end
 
+require 'rufus-scheduler'
+
+
+require 'rufus-scheduler'
+
+s = Rufus::Scheduler.new
+
+p [ :scheduled_at, Time.now ]
+
+s.every '5s', :first_in => 0.4 do
+  p [ :every,  Time.now ]
+end
+
+s.join
+
+
+exit 0
+
 
 options = {
   :graphite => { :host => 'web6.xanhaem.de', :port => 2003 },
@@ -50,22 +68,14 @@ options = {
 
 client = CarbonWriter.new( options )
 
-# client = CarbonWriter.new(
-#   graphite: "graphite.example.com:2003", # required argument
-#   prefix: ["example","prefix"],          # add example.prefix to each key
-#   slice: 60,                             # results are aggregated in 60 seconds slices
-#   interval: 60,                          # send to graphite every 60 seconds
-#                                          # default is 0 ( direct send )
-#   cache: 4 * 60 * 60,                    # set the max age in seconds for records reanimation
-# )
+scheduler = Rufus::Scheduler.new
 
-client.report( { :key => "webServer.web01.loadAvg" , :value => 10 } )
+scheduler.every '15s', :first_in => 0.4 do
+  client.metric( { :key => "webServer.web01.loadAvg" , :value => 10.7 } )
+  client.metric( { :key => "webServer.web02.loadAvg" , :value => 1.0 } )
+  client.metric( { :key => "webServer.web03.loadAvg" , :value => 0.3 } )
+end
 
-# client.metrics(
-#   {
-#   "webServer.web01.loadAvg"  => 10.7,
-#   "webServer.web01.memUsage" => 40
-#   }, Time.at(1326067060)
-# )
+scheduler.join
 
 

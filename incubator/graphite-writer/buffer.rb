@@ -88,59 +88,38 @@ module CarbonWriter
 
       data = nested_zero_hash()
 
-      logger.debug( data )
-
       counter = 0
 
       while self.new_records?()
-
-        logger.debug('. ')
 
         if ( counter += 1 ) > 1_000_000 # TODO: fix this
           break
         end
 
-        hash = queue.pop
-
-        time = normalize_time( hash.dig( :metric, :time ), options[:slice] )
-
-        values = hash.values
-        values.flatten!
-#         logger.debug( "values: #{values}" )
-
-        key = values.first.dig(:key)
-
-        values.first.delete_if { |k,v| k == :key }
-        values.first.each { |k,v| data[time][k] += v.to_f }
-
-        data[:key] = key
+        data = queue.pop
 
       end
 
-      logger.debug( "data #{data}" )
+      key   = data.dig(:key)
+      value = data.dig(:value)
+      time  = data.dig(:time)
 
 
-      data.map do |time, hash|
-
-        logger.debug( time )
-        logger.debug( hash )
-
-        hash.map do |key, value|
-
-          if cache
-            value   = cache.incr( time, key, value )
-          end
-
-          results = ["#{prefix}#{key}",("%f"%value).to_f, time]
-          format == :string ? results.join(" ") : results
-        end
-
+      if( cache )
+        value   = cache.incr( time, key, value )
       end
+
+#       logger.debug( "value: #{value}" )
+#
+#       results = [ "#{prefix}#{key}", ("%f"%value).to_f, time ]
+#       if( format == :string )
+#         results.join(" ")
+#
+#         logger.debug( results.class.to_s )
+#       end
 
       data.flatten(1)
-
 #       logger.debug( data )
-
       return data
 
     end
