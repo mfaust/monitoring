@@ -78,18 +78,18 @@ module CarbonWriter
 
       end
 
-#       begin
-#
-#         puts( "#{key} #{value.to_f} #{time.to_i}\n" )
-#
-# #        self.socket.write( "#{key} #{value.to_f} #{time.to_i}\n" )
-#
-#       rescue Errno::EPIPE, Errno::EHOSTUNREACH, Errno::ECONNREFUSED
-#
-#         @socket = nil
-#         nil
-#
-#       end
+      begin
+
+        puts( "#{key} #{value.to_f} #{time.to_i}\n" )
+
+        self.socket.write( "#{key} #{value.to_f} #{time.to_i}\n" )
+
+      rescue Errno::EPIPE, Errno::EHOSTUNREACH, Errno::ECONNREFUSED
+
+        @socket = nil
+        nil
+
+      end
     end
 
     def closeSocket()

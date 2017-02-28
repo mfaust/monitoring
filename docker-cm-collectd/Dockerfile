@@ -24,6 +24,7 @@ RUN \
     bigdecimal \
     time_difference \
     filesize \
+    rufus-scheduler \
     sqlite3 \
     sequel && \
   mkdir /var/log/monitoring && \

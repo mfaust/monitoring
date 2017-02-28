@@ -21,7 +21,7 @@ require_relative 'graphite-writer/buffer'
 require_relative 'graphite-writer/cache'
 require_relative 'graphite-writer/client'
 require_relative 'graphite-writer/connector'
-require_relative 'graphite-writer/middleware'
+# require_relative 'graphite-writer/middleware'
 
 
 # -------------------------------------------------------------------------------------------------
@@ -75,7 +75,7 @@ Signal.trap('QUIT') { stop = true }
 
 
 options = {
-  :graphite => { :host => 'web6.xanhaem.de', :port => 2003 },
+  :graphite => { :host => 'moebius-monitoring-storage', :port => 2003 },
   :interval => 60,
   :cache    => ( 4 * 60 * 60 )
 }
@@ -84,18 +84,22 @@ client = CarbonWriter.new( options )
 
 scheduler = Rufus::Scheduler.new
 
-scheduler.every( '15s', :first_in => 0.4 ) do
-  client.metric( { :key => "webServer.web01.loadAvg" , :value => 10.7 } )
-  client.metric( { :key => "webServer.web02.loadAvg" , :value => 1.0 } )
-  client.metric( { :key => "webServer.web03.loadAvg" , :value => 0.3 } )
+scheduler.every( '45s', :first_in => 0.4 ) do
+  client.metric( { :key => "test.master-17-tomcat.WFS.Runtime.starttime" , :value => 1488287135933 } )
+  client.metric( { :key => "test.master-17-tomcat.WFS.Manager.processing.time.count" , :value => 4 } )
+
 end
 
 
 scheduler.every( '1s' ) do
+
   if( stop == true )
-    p "shutdon ... bye, bye"
-    s.shutdown(:kill)
+
+    p "shutdown scheduler ..."
+
+    scheduler.shutdown(:kill)
   end
+
 end
 
 

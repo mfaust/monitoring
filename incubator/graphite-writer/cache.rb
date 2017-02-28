@@ -23,7 +23,13 @@ module CarbonWriter
 
         logger.debug( options )
 
-        Zscheduler.every(120) { clean( options[:cache] ) }
+        scheduler = Rufus::Scheduler.new
+
+        scheduler.every( 10 ) do
+          clean( options[:cache] )
+        end
+
+#         Zscheduler.every(120) { clean( options[:cache] ) }
 
       end
 
