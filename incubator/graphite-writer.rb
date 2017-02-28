@@ -9,7 +9,10 @@
 
 # require 'json'
 # require 'rest-client'
-require 'zscheduler'
+
+p "#{RUBY_VERSION}-p#{RUBY_PATCHLEVEL}"
+p $$
+
 
 require_relative 'graphite-writer/version'
 require_relative 'graphite-writer/logging'
@@ -43,21 +46,32 @@ end
 
 require 'rufus-scheduler'
 
+stop = false
 
-require 'rufus-scheduler'
+Signal.trap('INT')  { stop = true }
+Signal.trap('HUP')  { stop = true }
+Signal.trap('TERM') { stop = true }
+Signal.trap('QUIT') { stop = true }
 
-s = Rufus::Scheduler.new
-
-p [ :scheduled_at, Time.now ]
-
-s.every '5s', :first_in => 0.4 do
-  p [ :every,  Time.now ]
-end
-
-s.join
-
-
-exit 0
+# s = Rufus::Scheduler.new
+#
+# p [ :scheduled_at, Time.now ]
+#
+# s.every( '5s', :first_in => 0.4 ) do
+#   p [ :every,  Time.now ]
+# end
+#
+# s.every '1s' do
+#   if( stop == true )
+#     p :bye
+#     s.shutdown(:kill)
+#   end
+# end
+#
+# s.join
+#
+#
+# exit 0
 
 
 options = {
@@ -70,11 +84,20 @@ client = CarbonWriter.new( options )
 
 scheduler = Rufus::Scheduler.new
 
-scheduler.every '15s', :first_in => 0.4 do
+scheduler.every( '15s', :first_in => 0.4 ) do
   client.metric( { :key => "webServer.web01.loadAvg" , :value => 10.7 } )
   client.metric( { :key => "webServer.web02.loadAvg" , :value => 1.0 } )
   client.metric( { :key => "webServer.web03.loadAvg" , :value => 0.3 } )
 end
+
+
+scheduler.every( '1s' ) do
+  if( stop == true )
+    p "shutdon ... bye, bye"
+    s.shutdown(:kill)
+  end
+end
+
 
 scheduler.join
 
