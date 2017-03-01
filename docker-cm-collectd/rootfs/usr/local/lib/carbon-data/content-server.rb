@@ -106,102 +106,6 @@ module CarbonData
     end
 
 
-    def contentServerStatisticsJobResult( data = {} )
-
-      result    = []
-      mbean     = 'StatisticsJobResult'
-      format    = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
-      value     = data.dig('value')
-
-      # defaults
-      failed        = 0
-      successful    = 0
-      unrecoverable = 0
-
-      if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
-
-        value = value.values.first
-
-        failed        = value.dig('Failed')
-        successful    = value.dig('Successful')
-        unrecoverable = value.dig('Unrecoverable')
-
-      end
-
-      result << {
-        :key   => sprintf( '%s.%s.%s.%s', @Host, @Service, mbean, 'failed' ),
-        :value => failed
-      } << {
-        :key   => sprintf( '%s.%s.%s.%s', @Host, @Service, mbean, 'successful' ),
-        :value => successful
-      } << {
-        :key   => sprintf( '%s.%s.%s.%s', @Host, @Service, mbean, 'unrecoverable' ),
-        :value => unrecoverable
-      }
-
-      result.push( sprintf( format, @Host, @Service, mbean, 'stats_jobresult', 'failed'       , @interval, failed ) )
-      result.push( sprintf( format, @Host, @Service, mbean, 'stats_jobresult', 'successful'   , @interval, successful ) )
-      result.push( sprintf( format, @Host, @Service, mbean, 'stats_jobresult', 'unrecoverable', @interval, unrecoverable ) )
-
-      return result
-
-    end
-
-
-    def contentServerStatisticsResourceCache( data = {} )
-
-      result    = []
-      mbean     = 'StatisticsResourceCache'
-      format    = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
-      value     = data.dig('value')
-
-      # defaults
-      size     = 0
-      removed  = 0
-      faults   = 0
-      misses   = 0
-      hits     = 0
-
-      if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
-
-        value = value.values.first
-
-        size     = value.dig('CacheSize')
-        removed  = value.dig('CacheRemoved')
-        faults   = value.dig('CacheFaults')
-        misses   = value.dig('CacheMisses')
-        hits     = value.dig('CacheHits')
-
-      end
-
-      result << {
-        :key   => sprintf( '%s.%s.%s.%s', @Host, @Service, mbean, 'size' ),
-        :value => size
-      } << {
-        :key   => sprintf( '%s.%s.%s.%s', @Host, @Service, mbean, 'removed' ),
-        :value => removed
-      } << {
-        :key   => sprintf( '%s.%s.%s.%s', @Host, @Service, mbean, 'faults' ),
-        :value => faults
-      } << {
-        :key   => sprintf( '%s.%s.%s.%s', @Host, @Service, mbean, 'misses' ),
-        :value => misses
-      } << {
-        :key   => sprintf( '%s.%s.%s.%s', @Host, @Service, mbean, 'hits' ),
-        :value => hits
-      }
-
-      result.push( sprintf( format, @Host, @Service, mbean, 'stats_resourcecache', 'size'   , @interval, size ) )
-      result.push( sprintf( format, @Host, @Service, mbean, 'stats_resourcecache', 'removed', @interval, removed ) )
-      result.push( sprintf( format, @Host, @Service, mbean, 'stats_resourcecache', 'faults' , @interval, faults ) )
-      result.push( sprintf( format, @Host, @Service, mbean, 'stats_resourcecache', 'misses' , @interval, misses ) )
-      result.push( sprintf( format, @Host, @Service, mbean, 'stats_resourcecache', 'hits'   , @interval, hits ) )
-
-      return result
-
-    end
-
-
     def contentServerServer( data = {} )
 
       result    = []
@@ -518,9 +422,103 @@ module CarbonData
     end
 
 
+    def contentServerStatisticsJobResult( data = {} )
+
+      result    = []
+      mbean     = 'StatisticsJobResult'
+      format    = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
+      value     = data.dig('value')
+
+      # defaults
+      failed        = 0
+      successful    = 0
+      unrecoverable = 0
+
+      if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+
+        value = value.values.first
+
+        failed        = value.dig('Failed')
+        successful    = value.dig('Successful')
+        unrecoverable = value.dig('Unrecoverable')
+
+      end
+
+      result << {
+        :key   => sprintf( '%s.%s.%s.%s', @Host, @Service, mbean, 'failed' ),
+        :value => failed
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s', @Host, @Service, mbean, 'successful' ),
+        :value => successful
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s', @Host, @Service, mbean, 'unrecoverable' ),
+        :value => unrecoverable
+      }
+
+      result.push( sprintf( format, @Host, @Service, mbean, 'stats_jobresult', 'failed'       , @interval, failed ) )
+      result.push( sprintf( format, @Host, @Service, mbean, 'stats_jobresult', 'successful'   , @interval, successful ) )
+      result.push( sprintf( format, @Host, @Service, mbean, 'stats_jobresult', 'unrecoverable', @interval, unrecoverable ) )
+
+      return result
+
+    end
 
 
-    def ParseResult_StatisticsBlobStoreMethods( data = {} )
+    def contentServerStatisticsResourceCache( data = {} )
+
+      result    = []
+      mbean     = 'StatisticsResourceCache'
+#       format    = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
+      value     = data.dig('value')
+
+      # defaults
+      size     = 0
+      removed  = 0
+      faults   = 0
+      misses   = 0
+      hits     = 0
+
+      if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+
+        value = value.values.first
+
+        size     = value.dig('CacheSize')
+        removed  = value.dig('CacheRemoved')
+        faults   = value.dig('CacheFaults')
+        misses   = value.dig('CacheMisses')
+        hits     = value.dig('CacheHits')
+
+      end
+
+      result << {
+        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, 'cache', 'size' ),
+        :value => size
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, 'cache', 'removed' ),
+        :value => removed
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, 'cache', 'faults' ),
+        :value => faults
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, 'cache', 'misses' ),
+        :value => misses
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, 'cache', 'hits' ),
+        :value => hits
+      }
+
+#       result.push( sprintf( format, @Host, @Service, mbean, 'stats_resourcecache', 'size'   , @interval, size ) )
+#       result.push( sprintf( format, @Host, @Service, mbean, 'stats_resourcecache', 'removed', @interval, removed ) )
+#       result.push( sprintf( format, @Host, @Service, mbean, 'stats_resourcecache', 'faults' , @interval, faults ) )
+#       result.push( sprintf( format, @Host, @Service, mbean, 'stats_resourcecache', 'misses' , @interval, misses ) )
+#       result.push( sprintf( format, @Host, @Service, mbean, 'stats_resourcecache', 'hits'   , @interval, hits ) )
+
+      return result
+
+    end
+
+
+    def contentServerStatisticsBlobStoreMethods( data = {} )
 
       # was für komische
       # müssen wir klären
@@ -528,7 +526,7 @@ module CarbonData
     end
 
 
-    def ParseResult_StatisticsResource( data = {} )
+    def contentServerStatisticsResource( data = {} )
 
       # was für komische
       # müssen wir klären
@@ -536,7 +534,7 @@ module CarbonData
     end
 
 
-    def ParseResult_StatisticsTextStoreMethods( data = {} )
+    def contentServerStatisticsTextStoreMethods( data = {} )
 
       # was für komische
       # müssen wir klären
@@ -544,7 +542,7 @@ module CarbonData
     end
 
 
-    def ParseResult_StatisticsPublisherMethods( data = {} )
+    def contentServerStatisticsPublisherMethods( data = {} )
 
       # was für komische
       # müssen wir klären

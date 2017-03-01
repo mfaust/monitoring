@@ -4,57 +4,12 @@ module CarbonData
 
 
 
-    def ParseResult_MemoryPool( data = {} )
+    def clientsCapConnection( data = {} )
 
-      result  = []
-      mbean   = 'MemoryPool'
-      format  = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
-      value   = data['value']    ? data['value']    : nil
-      request = data['request']  ? data['request']  : nil
-      bean    = ( request != nil && request['mbean'] ) ? request['mbean'] : nil
-      usage   = ( value != nil && ['Usage'] )          ? value['Usage']   : nil
-
-      # defaults
-      init      = 0
-      max       = 0
-      used      = 0
-      committed = 0
-      percent   = 0
-      mbeanName = @mbean.beanName( bean )
-      mbeanName = mbeanName.strip.tr( ' ', '_' )
-
-      if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil && usage != nil )
-
-        init      = usage['init']       ? usage['init']      : nil
-        max       = usage['max']        ? usage['max']       : nil
-        used      = usage['used']       ? usage['used']      : nil
-        committed = usage['committed']  ? usage['committed'] : nil
-
-        if( max != -1 )
-          percent   = ( 100 * used / max )
-        else
-          percent   = ( 100 * used / committed )
-        end
-
-      end
-
-      result.push( sprintf( format, @Host, @Service, mbean, mbeanName, 'init'        , @interval, init ) )
-      result.push( sprintf( format, @Host, @Service, mbean, mbeanName, 'committed'   , @interval, committed ) )
-      result.push( sprintf( format, @Host, @Service, mbean, mbeanName, 'max'         , @interval, max ) )
-      result.push( sprintf( format, @Host, @Service, mbean, mbeanName, 'used'        , @interval, used ) )
-      result.push( sprintf( format, @Host, @Service, mbean, mbeanName, 'used_percent', @interval, percent ) )
-
-      return result
-    end
-
-
-
-    def ParseResult_CapConnection( data = {} )
-
-      result = []
-      mbean  = 'CapConnection'
-      format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
-      value  = data['value']  ? data['value']  : nil
+      result    = []
+      mbean     = 'CapConnection'
+#       format    = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
+      value     = data.dig('value')
 
       # defaults
       blobCacheSize    = 0
@@ -72,49 +27,81 @@ module CarbonData
 
         value = value.values.first
 
-        blobCacheSize    = value['BlobCacheSize']        ? value['BlobCacheSize']      : nil
-        blobCacheLevel   = value['BlobCacheLevel']       ? value['BlobCacheLevel']     : nil
-        blobCacheFaults  = value['BlobCacheFaults']      ? value['BlobCacheFaults']    : nil
+        blobCacheSize    = value.dig('BlobCacheSize')
+        blobCacheLevel   = value.dig('BlobCacheLevel')
+        blobCacheFaults  = value.dig('BlobCacheFaults')
         blobCachePercent = ( 100 * blobCacheLevel.to_i / blobCacheSize.to_i ).to_i
 
-        heapCacheSize    = value['HeapCacheSize']        ? value['HeapCacheSize']      : nil
-        heapCacheLevel   = value['HeapCacheLevel']       ? value['HeapCacheLevel']     : nil
-        heapCacheFaults  = value['HeapCacheFaults']      ? value['HeapCacheFaults']    : nil
+        heapCacheSize    = value.dig('HeapCacheSize')
+        heapCacheLevel   = value.dig('HeapCacheLevel')
+        heapCacheFaults  = value.dig('HeapCacheFaults')
         heapCachePercent = ( 100 * heapCacheLevel.to_i / heapCacheSize.to_i ).to_i
 
-        suSessions       = value['NumberOfSUSessions']   ? value['NumberOfSUSessions'] : nil
+        suSessions       = value.dig('NumberOfSUSessions')
 
-        connectionOpen   = (value['Open']  != nil)       ? value['Open']               : nil
+        connectionOpen   = value.dig('Open')
         if ( connectionOpen != nil )
           open           = connectionOpen ? 1 : 0
         end
       end
 
-      result.push( sprintf( format, @Host, @Service, mbean, 'blob_cache', 'size'        , @interval, blobCacheSize ) )
-      result.push( sprintf( format, @Host, @Service, mbean, 'blob_cache', 'used'        , @interval, blobCacheLevel ) )
-      result.push( sprintf( format, @Host, @Service, mbean, 'blob_cache', 'fault'       , @interval, blobCacheFaults ) )
-      result.push( sprintf( format, @Host, @Service, mbean, 'blob_cache', 'used_percent', @interval, blobCachePercent ) )
 
-      result.push( sprintf( format, @Host, @Service, mbean, 'heap_cache', 'size'        , @interval, heapCacheSize ) )
-      result.push( sprintf( format, @Host, @Service, mbean, 'heap_cache', 'used'        , @interval, heapCacheLevel ) )
-      result.push( sprintf( format, @Host, @Service, mbean, 'heap_cache', 'fault'       , @interval, heapCacheFaults ) )
-      result.push( sprintf( format, @Host, @Service, mbean, 'heap_cache', 'used_percent', @interval, heapCachePercent ) )
+      result << {
+        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @Host, @Service, mbean, 'blob', 'cache', 'size' ),
+        :value => blobCacheSize
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @Host, @Service, mbean, 'blob', 'cache', 'used' ),
+        :value => blobCacheLevel
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @Host, @Service, mbean, 'blob', 'cache', 'fault' ),
+        :value => blobCacheFaults
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @Host, @Service, mbean, 'blob', 'cache', 'used_percent' ),
+        :value => blobCachePercent
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @Host, @Service, mbean, 'heap', 'cache', 'size' ),
+        :value => heapCacheSize
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @Host, @Service, mbean, 'heap', 'cache', 'used' ),
+        :value => heapCacheLevel
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @Host, @Service, mbean, 'heap', 'cache', 'fault' ),
+        :value => heapCacheFaults
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @Host, @Service, mbean, 'heap', 'cache', 'used_percent' ),
+        :value => heapCachePercent
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'su_sessions', 'sessions' ),
+        :value => suSessions
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s'      , @Host, @Service, mbean, 'open' ),
+        :value => open
+      }
 
-      result.push( sprintf( format, @Host, @Service, mbean, 'su_sessions', 'sessions'   , @interval, suSessions ) )
-      result.push( sprintf( format, @Host, @Service, mbean, 'open'       , 'open'       , @interval, open ) )
+#       result.push( sprintf( format, @Host, @Service, mbean, 'blob_cache', 'size'        , @interval, blobCacheSize ) )
+#       result.push( sprintf( format, @Host, @Service, mbean, 'blob_cache', 'used'        , @interval, blobCacheLevel ) )
+#       result.push( sprintf( format, @Host, @Service, mbean, 'blob_cache', 'fault'       , @interval, blobCacheFaults ) )
+#       result.push( sprintf( format, @Host, @Service, mbean, 'blob_cache', 'used_percent', @interval, blobCachePercent ) )
+#
+#       result.push( sprintf( format, @Host, @Service, mbean, 'heap_cache', 'size'        , @interval, heapCacheSize ) )
+#       result.push( sprintf( format, @Host, @Service, mbean, 'heap_cache', 'used'        , @interval, heapCacheLevel ) )
+#       result.push( sprintf( format, @Host, @Service, mbean, 'heap_cache', 'fault'       , @interval, heapCacheFaults ) )
+#       result.push( sprintf( format, @Host, @Service, mbean, 'heap_cache', 'used_percent', @interval, heapCachePercent ) )
+#
+#       result.push( sprintf( format, @Host, @Service, mbean, 'su_sessions', 'sessions'   , @interval, suSessions ) )
+#       result.push( sprintf( format, @Host, @Service, mbean, 'open'       , 'open'       , @interval, open ) )
 
       return result
 
     end
 
 
-
-    def ParseResult_TransformedBlobCacheManager( data = {} )
+    def clientsTransformedBlobCacheManager( data = {} )
 
       result    = []
       mbean     = 'TransformedBlobCacheManager'
       format    = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
-      value     = data['value']     ? data['value']     : nil
+      value     = data.dig('value')
 
       # defaults
       cacheSize          = 0   # set the cache size in bytes
@@ -136,22 +123,58 @@ module CarbonData
 
         value = value.values.first
 
-        cacheSize               = value['CacheSize']                 ? value['CacheSize']                 : nil
-        cacheLevel              = value['Level']                     ? value['Level']                     : nil
-        cacheInitialLevel       = value['InitialLevel']              ? value['InitialLevel']              : nil
-        newGenCacheSize         = value['NewGenerationCacheSize']    ? value['NewGenerationCacheSize']    : nil
-        newGenCacheLevel        = value['NewGenerationLevel']        ? value['NewGenerationLevel']        : nil
-        newGenCacheInitialLevel = value['NewGenerationInitialLevel'] ? value['NewGenerationInitialLevel'] : nil
-        oldGenCacheLevel        = value['OldGenerationLevel']        ? value['OldGenerationLevel']        : nil
-        oldGenCacheInitialLevel = value['OldGenerationInitialLevel'] ? value['OldGenerationInitialLevel'] : nil
-        faultSize               = value['FaultSizeSum']              ? value['FaultSizeSum']              : nil
-        fault                   = value['FaultCount']                ? value['FaultCount']                : nil
-        recallSize              = value['RecallSizeSum']             ? value['RecallSizeSum']             : nil
-        recall                  = value['RecallCount']               ? value['RecallCount']               : nil
-        rotate                  = value['RotateCount']               ? value['RotateCount']               : nil
-        access                  = value['AccessCount']               ? value['AccessCount']               : nil
+        cacheSize               = value.dig('CacheSize')
+        cacheLevel              = value.dig('Level')
+        cacheInitialLevel       = value.dig('InitialLevel')
+        newGenCacheSize         = value.dig('NewGenerationCacheSize')
+        newGenCacheLevel        = value.dig('NewGenerationLevel')
+        newGenCacheInitialLevel = value.dig('NewGenerationInitialLevel')
+        oldGenCacheLevel        = value.dig('OldGenerationLevel')
+        oldGenCacheInitialLevel = value.dig('OldGenerationInitialLevel')
+        faultSize               = value.dig('FaultSizeSum')
+        fault                   = value.dig('FaultCount')
+        recallSize              = value.dig('RecallSizeSum')
+        recall                  = value.dig('RecallCount')
+        rotate                  = value.dig('RotateCount')
+        access                  = value.dig('AccessCount')
 
       end
+
+
+      result << {
+        :key   => sprintf( '%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'cache', 'size' ),
+        :value => cacheSize
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'cache', 'level' ),
+        :value => cacheLevel
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'cache', 'initial_level' ),
+        :value => cacheInitialLevel
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @Host, @Service, mbean, 'cache', 'new_gen', 'size' ),
+        :value => newGenCacheSize
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @Host, @Service, mbean, 'cache', 'new_gen', 'level' ),
+        :value => newGenCacheLevel
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @Host, @Service, mbean, 'cache', 'new_gen', 'initial_level' ),
+        :value => newGenCacheInitialLevel
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @Host, @Service, mbean, 'cache', 'old_gen', 'size' ),
+        :value => oldGenCacheLevel
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @Host, @Service, mbean, 'cache', 'old_gen', 'initial_level' ),
+        :value => oldGenCacheInitialLevel
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'fault', 'count' ),
+        :value => fault
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'fault', 'size' ),
+        :value => faultSize
+      }
+
+
+
 
       result.push( sprintf( format, @Host, @Service, mbean, 'cache'       , 'size'          , @interval, cacheSize ) )
       result.push( sprintf( format, @Host, @Service, mbean, 'cache'       , 'level'         , @interval, cacheLevel ) )
@@ -173,7 +196,63 @@ module CarbonData
     end
 
 
-    
+    def clientsMemoryPool( key, data = {} )
+
+      result  = []
+      mbean   = 'MemoryPool'
+      value   = data.dig('value')
+      request = data.dig('request')
+      bean    = data.dig('request', 'mbean') # ( request != nil && request['mbean'] ) ? request['mbean'] : nil
+      usage   = data.dig('value', 'Usage')   # ( value != nil && ['Usage'] )          ? value['Usage']   : nil
+
+      # defaults
+      init      = 0
+      max       = 0
+      used      = 0
+      committed = 0
+      percent   = 0
+      mbeanName = @mbean.beanName( bean )
+      mbeanName = mbeanName.strip.tr( ' ', '_' )
+
+      if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil && usage != nil )
+
+        init      = usage.dig('init')
+        max       = usage.dig('max')
+        used      = usage.dig('used')
+        committed = usage.dig('committed')
+
+        if( max != -1 )
+          percent   = ( 100 * used / max )
+        else
+          percent   = ( 100 * used / committed )
+        end
+
+      end
+
+
+      result << {
+        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, mbeanName, 'init' ),
+        :value => init
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, mbeanName, 'committed' ),
+        :value => committed
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, mbeanName, 'max' ),
+        :value => max
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, mbeanName, 'used_percent' ),
+        :value => percent
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, mbeanName, 'used' ),
+        :value => used
+      }
+
+      return result
+    end
+
+
+
+
   end
 
 end
