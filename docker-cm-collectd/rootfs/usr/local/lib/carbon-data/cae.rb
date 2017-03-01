@@ -3,13 +3,11 @@ module CarbonData
   module Cae
 
 
-
-    def ParseResult_DataViewFactory( data = {} )
+    def caeDataViewFactory( data = {} )
 
       result    = []
       mbean     = 'DataViewFactory'
-      format    = 'PUTVAL %s/%s-%s/count-%s interval=%s N:%s'
-      value     = data['value']     ? data['value']     : nil
+      value     = data.dig('value')
 
       # defaults
       lookups      = 0
@@ -24,41 +22,52 @@ module CarbonData
 
         value = value.values.first
 
-        lookups      = value['NumberOfDataViewLookups']       ? value['NumberOfDataViewLookups']       : nil
-        computed     = value['NumberOfComputedDataViews']     ? value['NumberOfComputedDataViews']     : nil
-        cached       = value['NumberOfCachedDataViews']       ? value['NumberOfCachedDataViews']       : nil
-        invalidated  = value['NumberOfInvalidatedDataViews']  ? value['NumberOfInvalidatedDataViews']  : nil
-        evicted      = value['NumberOfEvictedDataViews']      ? value['NumberOfEvictedDataViews']      : nil
-        activeTime   = value['ActiveTimeOfComputedDataViews'] ? value['ActiveTimeOfComputedDataViews'] : nil
-        totalTime    = value['TotalTimeOfComputedDataViews']  ? value['TotalTimeOfComputedDataViews']  : nil
+        lookups      = value.dig('NumberOfDataViewLookups')
+        computed     = value.dig('NumberOfComputedDataViews')
+        cached       = value.dig('NumberOfCachedDataViews')
+        invalidated  = value.dig('NumberOfInvalidatedDataViews')
+        evicted      = value.dig('NumberOfEvictedDataViews')
+        activeTime   = value.dig('ActiveTimeOfComputedDataViews')
+        totalTime    = value.dig('TotalTimeOfComputedDataViews')
 
       end
 
-      result.push( sprintf( format, @Host, @Service, mbean, 'lookups'     , @interval, lookups ) )
-      result.push( sprintf( format, @Host, @Service, mbean, 'computed'    , @interval, computed ) )
-      result.push( sprintf( format, @Host, @Service, mbean, 'cached'      , @interval, cached ) )
-      result.push( sprintf( format, @Host, @Service, mbean, 'invalidated' , @interval, invalidated ) )
-      result.push( sprintf( format, @Host, @Service, mbean, 'evicted'     , @interval, evicted ) )
-      result.push( sprintf( format, @Host, @Service, mbean, 'activeTime'  , @interval, activeTime ) )
-      result.push( sprintf( format, @Host, @Service, mbean, 'totalTime'   , @interval, totalTime ) )
+      result << {
+        :key   => sprintf( '%s.%s.%s.%s', @Host, @Service, mbean, 'lookups' ),
+        :value => lookups
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s', @Host, @Service, mbean, 'computed' ),
+        :value => computed
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s', @Host, @Service, mbean, 'cached' ),
+        :value => cached
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s', @Host, @Service, mbean, 'invalidated' ),
+        :value => invalidated
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s', @Host, @Service, mbean, 'evicted' ),
+        :value => evicted
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s', @Host, @Service, mbean, 'activeTime' ),
+        :value => activeTime
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s', @Host, @Service, mbean, 'totalTime' ),
+        :value => totalTime
+      }
 
       return result
 
     end
 
 
+    def caeCacheClasses( key, data = {} )
 
-    def ParseResult_CacheClasses( key, data = {} )
-
-      result = []
-      mbean  = 'CacheClasses'
-      format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
-      value  = data['value']  ? data['value']  : nil
-      cacheClass = key.gsub( mbean, '' )
+      result      = []
+      mbean       = 'CacheClasses'
+      value       = data.dig('value')
+      cacheClass  = key.gsub( mbean, '' )
 
       data['service'] = @Service
-
-  #     logger.debug( data )
 
       # defaults
       capacity  = 0
@@ -73,29 +82,42 @@ module CarbonData
 
         value = value.values.first
 
-        capacity  = value['Capacity']    ? value['Capacity']    : nil
-        evaluated = value['Evaluated']   ? value['Evaluated']   : nil
-        evicted   = value['Evicted']     ? value['Evicted']     : nil
-        inserted  = value['Inserted']    ? value['Inserted']    : nil
-        removed   = value['Removed']     ? value['Removed']     : nil
-        level     = value['Level']       ? value['Level']       : nil
-        missRate  = value['MissRate']    ? value['MissRate']    : nil
+        capacity  = value.dig('Capacity')
+        evaluated = value.dig('Evaluated')
+        evicted   = value.dig('Evicted')
+        inserted  = value.dig('Inserted')
+        removed   = value.dig('Removed')
+        level     = value.dig('Level')
+        missRate  = value.dig('MissRate')
 
       end
 
-      result.push( sprintf( format, @Host, @Service, mbean, cacheClass, 'evaluated' , @interval, evaluated ) )
-      result.push( sprintf( format, @Host, @Service, mbean, cacheClass, 'evicted'   , @interval, evicted ) )
-      result.push( sprintf( format, @Host, @Service, mbean, cacheClass, 'inserted'  , @interval, inserted ) )
-      result.push( sprintf( format, @Host, @Service, mbean, cacheClass, 'removed'   , @interval, removed ) )
-
-      result.push( sprintf( format, @Host, @Service, mbean, cacheClass, 'level'     , @interval, level ) )
-      result.push( sprintf( format, @Host, @Service, mbean, cacheClass, 'capacity'  , @interval, capacity ) )
-      result.push( sprintf( format, @Host, @Service, mbean, cacheClass, 'missRate'  , @interval, missRate ) )
+      result << {
+        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, cacheClass, 'evaluated' ),
+        :value => evaluated
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, cacheClass, 'evicted' ),
+        :value => evicted
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, cacheClass, 'inserted' ),
+        :value => inserted
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, cacheClass, 'removed' ),
+        :value => removed
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, cacheClass, 'level' ),
+        :value => level
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, cacheClass, 'capacity' ),
+        :value => capacity
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, cacheClass, 'missRate' ),
+        :value => missRate
+      }
 
       return result
 
     end
-
 
 
   end

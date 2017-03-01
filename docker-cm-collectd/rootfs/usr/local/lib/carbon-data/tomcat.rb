@@ -3,11 +3,10 @@ module CarbonData
 
   module Tomcat
 
-    def ParseResult_Runtime( data = {} )
+    def tomcatRuntime( data = {} )
 
       result    = []
       mbean     = 'Runtime'
-#       format    = 'PUTVAL %s/%s-%s-%s/%s interval=%s N:%s'
       value     = data.dig('value')
 
       # defaults
@@ -15,8 +14,6 @@ module CarbonData
       start   = 0
 
       if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
-
-  #       value = value.values.first
 
         uptime   = value.dig('Uptime')
         start    = value.dig('StartTime')
@@ -30,18 +27,15 @@ module CarbonData
         :key   => sprintf( '%s.%s.%s.%s', @Host, @Service, mbean, 'starttime' ),
         :value => start
       }
-#       result.push( sprintf( format, @Host, @Service, mbean, 'uptime'   , 'uptime', @interval, uptime ) )
-#       result.push( sprintf( format, @Host, @Service, mbean, 'starttime', 'gauge' , @interval, start ) )
 
       return result
     end
 
 
-    def ParseResult_OperatingSystem( data = {} )
+    def tomcatOperatingSystem( data = {} )
 
       result    = []
       mbean     = 'OperatingSystem'
-#       format    = 'PUTVAL %s/%s-%s-%s/%s interval=%s N:%s'
       value     = data.dig('value')
 
       # defaults
@@ -62,9 +56,6 @@ module CarbonData
 
   #       value = value.values.first
       end
-
-  #     result.push( sprintf( format, @Host, @Service, mbean, 'uptime'   , 'uptime', @interval, uptime ) )
-  #     result.push( sprintf( format, @Host, @Service, mbean, 'starttime', 'gauge' , @interval, start ) )
 
       return result
 
@@ -97,11 +88,10 @@ module CarbonData
     end
 
 
-    def ParseResult_TomcatManager( data = {} )
+    def tomcatManager( data = {} )
 
       result    = []
       mbean     = 'Manager'
-#       format    = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
       value     = data.dig('value')
 
       # defaults
@@ -141,77 +131,58 @@ module CarbonData
 
       end
 
-      format = '%s.%s.%s.%s.%s'
-
       result << {
         # PUTVAL master-17-tomcat/WFS-Manager-processing/count-time interval=15 N:4
-        :key   => sprintf( format, @Host, @Service, mbean, 'processing', 'time' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, 'processing', 'time' ),
         :value => processingTime
       } << {
-        :key   => sprintf( format, @Host, @Service, mbean, 'sessions', 'count' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, 'sessions', 'count' ),
         :value => sessionCounter
       } << {
-        :key   => sprintf( format, @Host, @Service, mbean, 'sessions', 'expired' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, 'sessions', 'expired' ),
         :value => expiredSessions
       } << {
-        :key   => sprintf( format, @Host, @Service, mbean, 'sessions', 'alive_avg' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, 'sessions', 'alive_avg' ),
         :value => sessionAverageAliveTime
       } << {
-        :key   => sprintf( format, @Host, @Service, mbean, 'sessions', 'rejected' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, 'sessions', 'rejected' ),
         :value => rejectedSessions
       } << {
-        :key   => sprintf( format, @Host, @Service, mbean, 'sessions', 'duplicates' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, 'sessions', 'duplicates' ),
         :value => duplicates
       } << {
-        :key   => sprintf( format, @Host, @Service, mbean, 'sessions', 'max_alive' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, 'sessions', 'max_alive' ),
         :value => sessionMaxAliveTime
       } << {
-        :key   => sprintf( format, @Host, @Service, mbean, 'sessions', 'expire_rate' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, 'sessions', 'expire_rate' ),
         :value => sessionExpireRate
       } << {
-        :key   => sprintf( format, @Host, @Service, mbean, 'sessions', 'create_rate' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, 'sessions', 'create_rate' ),
         :value => sessionCreateRate
       } << {
-        :key   => sprintf( format, @Host, @Service, mbean, 'sessions', 'max_active' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, 'sessions', 'max_active' ),
         :value => maxActive
       } << {
-        :key   => sprintf( format, @Host, @Service, mbean, 'sessions', 'expire_freq' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, 'sessions', 'expire_freq' ),
         :value => processExpiresFrequency
       }
 
       if( maxActiveSessions.to_i != -1 )
 
         result << {
-          :key   => sprintf( format, @Host, @Service, mbean, 'sessions', 'max_active_allowed' ),
+          :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, 'sessions', 'max_active_allowed' ),
           :value => maxActiveSessions
         }
       end
-
-#      result.push( sprintf( format, @Host, @Service, mbean, 'processing', 'time'              , @interval, processingTime ) )
-#      result.push( sprintf( format, @Host, @Service, mbean, 'sessions'  , 'count'             , @interval, sessionCounter ) )
-#      result.push( sprintf( format, @Host, @Service, mbean, 'sessions'  , 'expired'           , @interval, expiredSessions ) )
-#      result.push( sprintf( format, @Host, @Service, mbean, 'sessions'  , 'alive_avg'         , @interval, sessionAverageAliveTime ) )
-#      result.push( sprintf( format, @Host, @Service, mbean, 'sessions'  , 'rejected'          , @interval, rejectedSessions ) )
-#      result.push( sprintf( format, @Host, @Service, mbean, 'sessions'  , 'duplicates'        , @interval, duplicates ) )
-#
-#      if( maxActiveSessions.to_i != -1 )
-#        result.push( sprintf( format, @Host, @Service, mbean, 'sessions'  , 'max_active_allowed', @interval, maxActiveSessions ) )
-#      end
-#      result.push( sprintf( format, @Host, @Service, mbean, 'sessions'  , 'max_alive'         , @interval, sessionMaxAliveTime ) )
-#      result.push( sprintf( format, @Host, @Service, mbean, 'sessions'  , 'expire_rate'       , @interval, sessionExpireRate ) )
-#      result.push( sprintf( format, @Host, @Service, mbean, 'sessions'  , 'create_rate'       , @interval, sessionCreateRate ) )
-#      result.push( sprintf( format, @Host, @Service, mbean, 'sessions'  , 'max_active'        , @interval, maxActive ) )
-#      result.push( sprintf( format, @Host, @Service, mbean, 'sessions'  , 'expire_freq'       , @interval, processExpiresFrequency ) )
 
       return result
     end
 
 
-    def ParseResult_Memory( data = {} )
+    def tomcatMemoryUsage( data = {} )
 
-      result = []
-      mbean  = 'Memory'
-#       format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
+      result    = []
+      mbean     = 'Memory'
       value     = data.dig('value')
 
       memoryTypes = ['HeapMemoryUsage', 'NonHeapMemoryUsage']
@@ -238,8 +209,6 @@ module CarbonData
       end
 
       if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
-
-  #       value = value.values.first
 
         memoryTypes.each do |m|
 
@@ -269,42 +238,8 @@ module CarbonData
             :value => committed
           }
 
-#           result.push( sprintf( format, @Host, @Service, mbean, type, 'init'        , @interval, init ) )
-#           result.push( sprintf( format, @Host, @Service, mbean, type, 'max'         , @interval, max ) )
-#           result.push( sprintf( format, @Host, @Service, mbean, type, 'used'        , @interval, used ) )
-#           result.push( sprintf( format, @Host, @Service, mbean, type, 'used_percent', @interval, percent ) )
-#           result.push( sprintf( format, @Host, @Service, mbean, type, 'committed'   , @interval, committed ) )
         end
-#
-#       else
-#
-#         memoryTypes.each do |m|
-#
-#           type      = memType( m )
-#
-#           result << {
-#             :key   => sprintf( '%s.%s.%s.%s.%s'   , @Host, @Service, mbean, type, 'init' ),
-#             :value => init
-#           } << {
-#             :key   => sprintf( '%s.%s.%s.%s.%s'   , @Host, @Service, mbean, type, 'max' ),
-#             :value => max
-#           } << {
-#             :key   => sprintf( '%s.%s.%s.%s.%s'   , @Host, @Service, mbean, type, 'used' ),
-#             :value => used
-#           } << {
-#             :key   => sprintf( '%s.%s.%s.%s.%s'   , @Host, @Service, mbean, type, 'used_percent' ),
-#             :value => percent
-#           } << {
-#             :key   => sprintf( '%s.%s.%s.%s.%s'   , @Host, @Service, mbean, type, 'committed' ),
-#             :value => committed
-#           }
-#
-#           result.push( sprintf( format, @Host, @Service, mbean, type, 'init'        , @interval, init ) )
-#           result.push( sprintf( format, @Host, @Service, mbean, type, 'max'         , @interval, max ) )
-#           result.push( sprintf( format, @Host, @Service, mbean, type, 'used'        , @interval, used ) )
-#           result.push( sprintf( format, @Host, @Service, mbean, type, 'used_percent', @interval, percent ) )
-#           result.push( sprintf( format, @Host, @Service, mbean, type, 'committed'   , @interval, committed ) )
-#         end
+
       end
 
       return result
@@ -312,11 +247,10 @@ module CarbonData
     end
 
 
-    def ParseResult_Threading( data = {} )
+    def tomcatThreading( data = {} )
 
-      result = []
-      mbean  = 'Threading'
-#       format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
+      result    = []
+      mbean     = 'Threading'
       value     = data.dig('value')
 
       # defaults
@@ -325,15 +259,10 @@ module CarbonData
 
       if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
 
-  #       value = value.values.first
-
         peak   = value.dig('PeakThreadCount')
         count  = value.dig('ThreadCount')
 
       end
-
-#     PUTVAL master-17-tomcat/FEEDER_CONTENT-Threading-threading/count-peak interval=15 N:36
-#     PUTVAL master-17-tomcat/FEEDER_CONTENT-Threading-threading/count-count interval=15 N:34
 
       result << {
         :key   => sprintf( '%s.%s.%s.%s'   , @Host, @Service, mbean, 'peak' ),
@@ -343,70 +272,80 @@ module CarbonData
         :value => count
       }
 
-#       result.push( sprintf( format, @Host, @Service, mbean, 'threading', 'peak' , @interval, peak ) )
-#       result.push( sprintf( format, @Host, @Service, mbean, 'threading', 'count', @interval, count ) )
-
       return result
 
     end
 
 
-    def ParseResult_GCParNew( data = {} )
+    def tomcatGCMemoryUsage( mbean, data )
 
-      result = []
-      mbean  = 'GCParNew'
-#       format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
       value     = data.dig('value')
+      result    = []
 
       if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
-
-  #       value = value.values.first
 
         lastGcInfo = value.dig('LastGcInfo')
 
         if( lastGcInfo != nil )
 
-          duration      = lastGcInfo.dig('duration')
+          threadCount   = lastGcInfo.dig('GcThreadCount')   # The number of GC threads.
+          duration      = lastGcInfo.dig('duration')        # The elapsed time of this GC. (milliseconds)
 
-          #    PUTVAL master-17-tomcat/FEEDER_CONTENT-GCParNew-gc_duration/count-duration interval=15 N:2
+          mbean.gsub!( 'GC', 'GarbageCollector.' )
+
           result << {
-            :key   => sprintf( '%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'gc_duration', 'count' ),
+            :key   => sprintf( '%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'threads', 'count' ),
+            :value => threadCount
+          } << {
+            :key   => sprintf( '%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'duration', 'time' ),
             :value => duration
           }
 
-#           result.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_%s', 'duration' ), 'duration'     , @interval, duration ) )
-
           # currently not needed
           # activate if you need
-  #        ['memoryUsageBeforeGc', 'memoryUsageAfterGc'].each do |gc|
-  #
-  #          case gc
-  #          when 'memoryUsageBeforeGc'
-  #            gc_type = 'before'
-  #          when 'memoryUsageAfterGc'
-  #            gc_type = 'after'
-  #          end
-  #
-  #          ['Par Survivor Space', 'CMS Perm Gen', 'Code Cache', 'Par Eden Space', 'CMS Old Gen', 'Compressed Class Space', 'Metaspace' ].each do |type|
-  #
-  #            if( lastGcInfo[gc][type] )
-  #              init      = lastGcInfo[gc][type]['init']      ? lastGcInfo[gc][type]['init']      : nil
-  #              committed = lastGcInfo[gc][type]['committed'] ? lastGcInfo[gc][type]['committed'] : nil
-  #              max       = lastGcInfo[gc][type]['max']       ? lastGcInfo[gc][type]['max']       : nil
-  #              used      = lastGcInfo[gc][type]['used']      ? lastGcInfo[gc][type]['used']      : nil
-  #
-  #              percent   = ( 100 * used / committed )
-  #
-  #              type      = type.strip.tr( ' ', '_' ).downcase
-  #
-  #              result.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_parnew_%s_%s', gc_type, type ), 'init'        , @interval, init ) )
-  #              result.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_parnew_%s_%s', gc_type, type ), 'committed'   , @interval, committed ) )
-  #              result.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_parnew_%s_%s', gc_type, type ), 'max'         , @interval, max ) )
-  #              result.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_parnew_%s_%s', gc_type, type ), 'used'        , @interval, used ) )
-  #              result.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_parnew_%s_%s', gc_type, type ), 'used_percent', @interval, percent ) )
-  #            end
-  #         end
-  #        end
+          #
+          # memoryUsageAfterGc  - The memory usage of all memory pools at the end of this GC.
+          # memoryUsageBeforeGc - The memory usage of all memory pools at the beginning of this GC.
+          #
+#          ['memoryUsageBeforeGc', 'memoryUsageAfterGc'].each do |gc|
+#
+#            case gc
+#            when 'memoryUsageBeforeGc'
+#              gcType = 'before'
+#            when 'memoryUsageAfterGc'
+#              gcType = 'after'
+#            end
+#
+#            ['Par Survivor Space', 'CMS Perm Gen', 'Code Cache', 'Par Eden Space', 'CMS Old Gen', 'Compressed Class Space', 'Metaspace' ].each do |type|
+#
+#              lastGcInfoType = lastGcInfo.dig( gc, type )
+#
+#              if( lastGcInfoType != nil )
+#
+#                init      = lastGcInfoType.dig( 'init' )
+#                committed = lastGcInfoType.dig( 'committed' )
+#                max       = lastGcInfoType.dig( 'max' )
+#                used      = lastGcInfoType.dig( 'used' )
+#
+#                type      = type.strip.tr( ' ', '_' ).downcase
+#
+#                result << {
+#                  :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'duration', gcType, type, 'init' ),
+#                  :value => init
+#                } << {
+#                  :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'duration', gcType, type, 'committed' ),
+#                  :value => committed
+#                } << {
+#                  :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'duration', gcType, type, 'max' ),
+#                  :value => max
+#                } << {
+#                  :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'duration', gcType, type, 'used' ),
+#                  :value => used
+#                }
+#
+#              end
+#            end
+#          end
 
         end
       end
@@ -416,73 +355,24 @@ module CarbonData
     end
 
 
-    def ParseResult_GCConcurrentMarkSweep( data = {} )
+    def tomcatGCParNew( data = {} )
 
-      result = []
-      mbean  = 'GCConcurrentMarkSweep'
-#       format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
-      value     = data.dig('value')
-
-      if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
-
-  #       value = value.values.first
-
-        lastGcInfo = value.dig('LastGcInfo')
-
-        if( lastGcInfo != nil )
-
-          duration      = lastGcInfo.dig('duration')
-
-          #    PUTVAL master-17-tomcat/FEEDER_CONTENT-GCParNew-gc_duration/count-duration interval=15 N:2
-          result << {
-            :key   => sprintf( '%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'gc_duration', 'count' ),
-            :value => duration
-          }
-
-#           result.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_%s', 'duration' ), 'duration'     , @interval, duration ) )
-
-          # currently not needed
-          # activate if you need
-  #        ['memoryUsageBeforeGc', 'memoryUsageAfterGc'].each do |gc|
-  #
-  #          case gc
-  #          when 'memoryUsageBeforeGc'
-  #            gc_type = 'before'
-  #          when 'memoryUsageAfterGc'
-  #            gc_type = 'after'
-  #          end
-  #
-  #          ['Par Survivor Space', 'CMS Perm Gen', 'Code Cache', 'Par Eden Space', 'CMS Old Gen', 'Compressed Class Space', 'Metaspace' ].each do |type|
-  #
-  #            if( lastGcInfo[gc][type] )
-  #              init      = lastGcInfo[gc][type]['init']      ? lastGcInfo[gc][type]['init']      : nil
-  #              committed = lastGcInfo[gc][type]['committed'] ? lastGcInfo[gc][type]['committed'] : nil
-  #              max       = lastGcInfo[gc][type]['max']       ? lastGcInfo[gc][type]['max']       : nil
-  #              used      = lastGcInfo[gc][type]['used']      ? lastGcInfo[gc][type]['used']      : nil
-  #
-  #              type      = type.strip.tr( ' ', '_' ).downcase
-  #
-  #              result.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_markwseep_%s_%s', gc_type, type ), 'init'     , @interval, init ) )
-  #              result.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_markwseep_%s_%s', gc_type, type ), 'committed', @interval, committed ) )
-  #              result.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_markwseep_%s_%s', gc_type, type ), 'max'      , @interval, max ) )
-  #              result.push( sprintf( format, @Host, @Service, mbean, sprintf( 'gc_markwseep_%s_%s', gc_type, type ), 'used'     , @interval, used ) )
-  #            end
-  #          end
-  #        end
-
-        end
-      end
-
-      return result
+      return self.tomcatGCMemoryUsage( 'GCParNew', data )
 
     end
 
 
-    def ParseResult_ClassLoading( data = {} )
+    def tomcatGCConcurrentMarkSweep( data = {} )
 
-      result = []
-      mbean  = 'ClassLoading'
-#       format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
+      return self.tomcatGCMemoryUsage( 'GCConcurrentMarkSweep', data )
+
+    end
+
+
+    def tomcatClassLoading( data = {} )
+
+      result    = []
+      mbean     = 'ClassLoading'
       value     = data.dig('value')
 
       # defaults
@@ -492,17 +382,11 @@ module CarbonData
 
       if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
 
-  #       value = value.values.first
-
         loaded      = value.dig('LoadedClassCount')
         totalLoaded = value.dig('TotalLoadedClassCount')
         unloaded    = value.dig('UnloadedClassCount')
 
       end
-
-#     PUTVAL master-17-tomcat/FEEDER_CONTENT-ClassLoading-class_loading/count-loaded interval=15 N:9197
-#     PUTVAL master-17-tomcat/FEEDER_CONTENT-ClassLoading-class_loading/count-total interval=15 N:9254
-#     PUTVAL master-17-tomcat/FEEDER_CONTENT-ClassLoading-class_loading/count-unloaded interval=15 N:57
 
       result << {
         :key   => sprintf( '%s.%s.%s.%s'   , @Host, @Service, mbean, 'loaded' ),
@@ -515,16 +399,12 @@ module CarbonData
         :value => unloaded
       }
 
-#       result.push( sprintf( format, @Host, @Service, mbean, 'class_loading', 'loaded'  , @interval, loaded ) )
-#       result.push( sprintf( format, @Host, @Service, mbean, 'class_loading', 'total'   , @interval, totalLoaded ) )
-#       result.push( sprintf( format, @Host, @Service, mbean, 'class_loading', 'unloaded', @interval, unloaded ) )
-
       return result
 
     end
 
 
-    def ParseResult_ThreadPool( data = {} )
+    def tomcatThreadPool( data = {} )
 
       # was für komische
       # müssen wir klären

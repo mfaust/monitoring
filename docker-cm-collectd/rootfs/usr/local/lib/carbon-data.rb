@@ -20,6 +20,8 @@ require_relative 'mbean'
 
 require_relative 'carbon-data/utils'
 require_relative 'carbon-data/tomcat'
+require_relative 'carbon-data/cae'
+require_relative 'carbon-data/content-server'
 
 # -----------------------------------------------------------------------------
 
@@ -39,6 +41,8 @@ module CarbonData
 
     include CarbonData::Utils
     include CarbonData::Tomcat
+    include CarbonData::Cae
+    include CarbonData::ContentServer
 
     def initialize( params = {} )
 
@@ -52,7 +56,7 @@ module CarbonData
       date                 = '2017-01-13'
 
       logger.info( '-----------------------------------------------------------------' )
-      logger.info( ' CoreMedia - CollectdPlugin' )
+      logger.info( ' CoreMedia - CarbonData' )
       logger.info( "  Version #{version} (#{date})" )
       logger.info( '  Copyright 2016-2017 Coremedia' )
       logger.info( "  configured interval #{@interval}" )
@@ -77,28 +81,45 @@ module CarbonData
     graphiteOutput = Array.new()
 
     case key
+      # Tomcats
     when 'Runtime'
-      graphiteOutput.push( self.ParseResult_Runtime( values ) )
+      graphiteOutput.push( self.tomcatRuntime( values ) )
     when 'OperatingSystem'
-      graphiteOutput.push( self.ParseResult_OperatingSystem( values ) )
+      graphiteOutput.push( self.tomcatOperatingSystem( values ) )
     when 'Manager'
-      graphiteOutput.push( self.ParseResult_TomcatManager( values ) )
+      graphiteOutput.push( self.tomcatManager( values ) )
     when 'Memory'
-      graphiteOutput.push( self.ParseResult_Memory( values ) )
+      graphiteOutput.push( self.tomcatMemoryUsage( values ) )
     when 'Threading'
-      graphiteOutput.push( self.ParseResult_Threading( values ) )
+      graphiteOutput.push( self.tomcatThreading( values ) )
     when 'GarbageCollectorParNew'
-      graphiteOutput.push( self.ParseResult_GCParNew( values ) )
+      graphiteOutput.push( self.tomcatGCParNew( values ) )
     when 'GarbageCollectorConcurrentMarkSweep'
-      graphiteOutput.push( self.ParseResult_GCConcurrentMarkSweep( values ) )
+      graphiteOutput.push( self.tomcatGCConcurrentMarkSweep( values ) )
     when 'ClassLoading'
-      graphiteOutput.push( self.ParseResult_ClassLoading( values ) )
+      graphiteOutput.push( self.tomcatClassLoading( values ) )
     when 'ThreadPool'
-      graphiteOutput.push( self.ParseResult_ThreadPool( values ) )
+      graphiteOutput.push( self.tomcatThreadPool( values ) )
 
+      # CAE
+    when 'DataViewFactory'
+      graphiteOutput.push( self.caeDataViewFactory( values ) )
+    when /^CacheClasses/
+      graphiteOutput.push( self.caeCacheClasses( key, values ) )
 
-#     when 'DataViewFactory'
-#       graphiteOutput.push( self.ParseResult_DataViewFactory( values ) )
+      # Content Server
+    when 'StoreQueryPool'
+      graphiteOutput.push( self.contentServerQueryPool( values ) )
+    when 'StoreConnectionPool'
+      graphiteOutput.push( self.contentServerConnectionPool( values ) )
+    when 'Server'
+      graphiteOutput.push( self.contentServerServer( values ) )
+    when 'StatisticsJobResult'
+      graphiteOutput.push( self.contentServerStatisticsJobResult( values ) )
+
+    when 'StatisticsResourceCache'
+      graphiteOutput.push( self.contentServerStatisticsResourceCache( values ) )
+
 #
 #     # currently disabled
 #     # need information or discusion about it
@@ -118,26 +139,18 @@ module CarbonData
 #     when 'MemoryPoolParSurvivorSpace'
 #       graphiteOutput.push(self.ParseResult_MemoryPool( values ) )
 
-#     when 'Server'
-#       graphiteOutput.push(self.ParseResult_Server( values ) )
+
 #     when 'Health'
 #       graphiteOutput.push(self.ParseResult_Health( values ) )
 #     when 'ProactiveEngine'
 #       graphiteOutput.push(self.ParseResult_ProactiveEngine( values ) )
 #     when 'Feeder'
 #       graphiteOutput.push(self.ParseResult_Feeder( values ) )
-#     when /^CacheClasses/
-#       graphiteOutput.push(self.ParseResult_CacheClasses( key, values ) )
+
 #     when 'CapConnection'
 #       graphiteOutput.push(self.ParseResult_CapConnection( values ) )
-#     when 'StoreConnectionPool'
-#       graphiteOutput.push(self.ParseResult_ConnectionPool( values ) )
-#     when 'StoreQueryPool'
-#       graphiteOutput.push(self.ParseResult_QueryPool( values ) )
-#     when 'StatisticsJobResult'
-#       graphiteOutput.push(self.ParseResult_StatisticsJobResult( values ) )
-#     when 'StatisticsResourceCache'
-#       graphiteOutput.push(self.ParseResult_StatisticsResourceCache( values ) )
+
+
 
 #     when /^Solr.*Replication/
 #       graphiteOutput.push(self.ParseResult_SolrReplication( values ) )

@@ -4,13 +4,12 @@ module CarbonData
   module ContentServer
 
 
+    def contentServerQueryPool( data = {} )
 
-    def ParseResult_QueryPool( data = {} )
-
-      result = []
-      mbean  = 'QueryPool'
-      format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
-      value  = data['value']  ? data['value']  : nil
+      result    = []
+      mbean     = 'QueryPool'
+#       format    = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
+      value     = data.dig('value')
 
       # defaults
       executorsRunning = 0
@@ -22,105 +21,43 @@ module CarbonData
 
         value = value.values.first
 
-        executorsRunning = value['RunningExecutors'] ? value['RunningExecutors'] : nil
-        executorsIdle    = value['IdleExecutors']    ? value['IdleExecutors']    : nil
-        queriesMax       = value['MaxQueries']       ? value['MaxQueries']       : nil
-        queriesWaiting   = value['WaitingQueries']   ? value['WaitingQueries']   : nil
+        executorsRunning = value.dig('RunningExecutors')
+        executorsIdle    = value.dig('IdleExecutors')
+        queriesMax       = value.dig('MaxQueries')
+        queriesWaiting   = value.dig('WaitingQueries')
 
       end
 
-      result.push( sprintf( format, @Host, @Service, mbean, 'query_pool', 'executors_running', @interval, executorsRunning ) )
-      result.push( sprintf( format, @Host, @Service, mbean, 'query_pool', 'executors_idle'   , @interval, executorsIdle ) )
-      result.push( sprintf( format, @Host, @Service, mbean, 'query_pool', 'queries_max'      , @interval, queriesMax ) )
-      result.push( sprintf( format, @Host, @Service, mbean, 'query_pool', 'queries_waiting'  , @interval, queriesWaiting ) )
+      result << {
+        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, 'executors', 'running' ),
+        :value => executorsRunning
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, 'executors', 'idle' ),
+        :value => executorsIdle
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, 'queries', 'max' ),
+        :value => queriesMax
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, 'queries', 'waiting' ),
+        :value => queriesWaiting
+      }
 
-      return result
-
-    end
-
-    def ParseResult_StatisticsBlobStoreMethods( data = {} )
-
-      # was für komische Werte kommen da aus JMX raus?
-      # müssen wir klären
-
-    end
-
-
-    def ParseResult_StatisticsJobResult( data = {} )
-
-      result = []
-      mbean  = 'StatisticsJobResult'
-      format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
-      value  = data['value']  ? data['value']  : nil
-
-      # defaults
-      failed        = 0
-      successful    = 0
-      unrecoverable = 0
-
-      if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
-
-        value = value.values.first
-
-        failed        = value['Failed']        ? value['Failed']        : nil
-        successful    = value['Successful']    ? value['Successful']    : nil
-        unrecoverable = value['Unrecoverable'] ? value['Unrecoverable'] : nil
-
-      end
-
-      result.push( sprintf( format, @Host, @Service, mbean, 'stats_jobresult', 'failed'       , @interval, failed ) )
-      result.push( sprintf( format, @Host, @Service, mbean, 'stats_jobresult', 'successful'   , @interval, successful ) )
-      result.push( sprintf( format, @Host, @Service, mbean, 'stats_jobresult', 'unrecoverable', @interval, unrecoverable ) )
-
+#      result.push( sprintf( format, @Host, @Service, mbean, 'query_pool', 'executors_running', @interval, executorsRunning ) )
+#      result.push( sprintf( format, @Host, @Service, mbean, 'query_pool', 'executors_idle'   , @interval, executorsIdle ) )
+#      result.push( sprintf( format, @Host, @Service, mbean, 'query_pool', 'queries_max'      , @interval, queriesMax ) )
+#      result.push( sprintf( format, @Host, @Service, mbean, 'query_pool', 'queries_waiting'  , @interval, queriesWaiting ) )
+#
       return result
 
     end
 
 
-    def ParseResult_StatisticsResourceCache( data = {} )
+    def contentServerConnectionPool( data = {} )
 
-      result = []
-      mbean  = 'StatisticsResourceCache'
-      format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
-      value  = data['value']  ? data['value']  : nil
-
-      # defaults
-      size     = 0
-      removed  = 0
-      faults   = 0
-      misses   = 0
-      hits     = 0
-
-      if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
-
-        value = value.values.first
-
-        size     = value['CacheSize']     ? value['CacheSize']     : nil
-        removed  = value['CacheRemoved']  ? value['CacheRemoved']  : nil
-        faults   = value['CacheFaults']   ? value['CacheFaults']   : nil
-        misses   = value['CacheMisses']   ? value['CacheMisses']   : nil
-        hits     = value['CacheHits']     ? value['CacheHits']     : nil
-
-      end
-
-      result.push( sprintf( format, @Host, @Service, mbean, 'stats_resourcecache', 'size'   , @interval, size ) )
-      result.push( sprintf( format, @Host, @Service, mbean, 'stats_resourcecache', 'removed', @interval, removed ) )
-      result.push( sprintf( format, @Host, @Service, mbean, 'stats_resourcecache', 'faults' , @interval, faults ) )
-      result.push( sprintf( format, @Host, @Service, mbean, 'stats_resourcecache', 'misses' , @interval, misses ) )
-      result.push( sprintf( format, @Host, @Service, mbean, 'stats_resourcecache', 'hits'   , @interval, hits ) )
-
-      return result
-
-    end
-
-
-
-    def ParseResult_ConnectionPool( data = {} )
-
-      result = []
-      mbean  = 'ConnectionPool'
-      format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
-      value  = data['value']  ? data['value']  : nil
+      result    = []
+      mbean     = 'ConnectionPool'
+#       format    = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
+      value     = data.dig('value')
 
       # defaults
       open   = 0
@@ -133,31 +70,144 @@ module CarbonData
 
         value = value.values.first
 
-        open   = value['OpenConnections']  ? value['OpenConnections']  : nil
-        max    = value['MaxConnections']   ? value['MaxConnections']   : nil
-        idle   = value['IdleConnections']  ? value['IdleConnections']  : nil
-        busy   = value['BusyConnections']  ? value['BusyConnections']  : nil
-        min    = value['MinConnections']   ? value['MinConnections']   : nil
+        open   = value.dig('OpenConnections')
+        max    = value.dig('MaxConnections')
+        idle   = value.dig('IdleConnections')
+        busy   = value.dig('BusyConnections')
+        min    = value.dig('MinConnections')
 
       end
 
-      result.push( sprintf( format, @Host, @Service, mbean, 'connection_pool', 'open', @interval, open ) )
-      result.push( sprintf( format, @Host, @Service, mbean, 'connection_pool', 'max' , @interval, max ) )
-      result.push( sprintf( format, @Host, @Service, mbean, 'connection_pool', 'idle', @interval, idle ) )
-      result.push( sprintf( format, @Host, @Service, mbean, 'connection_pool', 'busy', @interval, busy ) )
-      result.push( sprintf( format, @Host, @Service, mbean, 'connection_pool', 'min' , @interval, min ) )
+      result << {
+        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, 'connections', 'open' ),
+        :value => open
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, 'connections', 'max' ),
+        :value => max
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, 'connections', 'idle' ),
+        :value => idle
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, 'connections', 'busy' ),
+        :value => busy
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, 'connections', 'min' ),
+        :value => min
+      }
+
+#      result.push( sprintf( format, @Host, @Service, mbean, 'connection_pool', 'open', @interval, open ) )
+#      result.push( sprintf( format, @Host, @Service, mbean, 'connection_pool', 'max' , @interval, max ) )
+#      result.push( sprintf( format, @Host, @Service, mbean, 'connection_pool', 'idle', @interval, idle ) )
+#      result.push( sprintf( format, @Host, @Service, mbean, 'connection_pool', 'busy', @interval, busy ) )
+#      result.push( sprintf( format, @Host, @Service, mbean, 'connection_pool', 'min' , @interval, min ) )
 
       return result
 
     end
 
 
-    def ParseResult_Server( data = {} )
+    def contentServerStatisticsJobResult( data = {} )
 
-      result       = []
-      mbean        = 'Server'
-      format       = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
-      value        = data['value']  ? data['value']  : nil
+      result    = []
+      mbean     = 'StatisticsJobResult'
+      format    = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
+      value     = data.dig('value')
+
+      # defaults
+      failed        = 0
+      successful    = 0
+      unrecoverable = 0
+
+      if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+
+        value = value.values.first
+
+        failed        = value.dig('Failed')
+        successful    = value.dig('Successful')
+        unrecoverable = value.dig('Unrecoverable')
+
+      end
+
+      result << {
+        :key   => sprintf( '%s.%s.%s.%s', @Host, @Service, mbean, 'failed' ),
+        :value => failed
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s', @Host, @Service, mbean, 'successful' ),
+        :value => successful
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s', @Host, @Service, mbean, 'unrecoverable' ),
+        :value => unrecoverable
+      }
+
+      result.push( sprintf( format, @Host, @Service, mbean, 'stats_jobresult', 'failed'       , @interval, failed ) )
+      result.push( sprintf( format, @Host, @Service, mbean, 'stats_jobresult', 'successful'   , @interval, successful ) )
+      result.push( sprintf( format, @Host, @Service, mbean, 'stats_jobresult', 'unrecoverable', @interval, unrecoverable ) )
+
+      return result
+
+    end
+
+
+    def contentServerStatisticsResourceCache( data = {} )
+
+      result    = []
+      mbean     = 'StatisticsResourceCache'
+      format    = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
+      value     = data.dig('value')
+
+      # defaults
+      size     = 0
+      removed  = 0
+      faults   = 0
+      misses   = 0
+      hits     = 0
+
+      if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+
+        value = value.values.first
+
+        size     = value.dig('CacheSize')
+        removed  = value.dig('CacheRemoved')
+        faults   = value.dig('CacheFaults')
+        misses   = value.dig('CacheMisses')
+        hits     = value.dig('CacheHits')
+
+      end
+
+      result << {
+        :key   => sprintf( '%s.%s.%s.%s', @Host, @Service, mbean, 'size' ),
+        :value => size
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s', @Host, @Service, mbean, 'removed' ),
+        :value => removed
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s', @Host, @Service, mbean, 'faults' ),
+        :value => faults
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s', @Host, @Service, mbean, 'misses' ),
+        :value => misses
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s', @Host, @Service, mbean, 'hits' ),
+        :value => hits
+      }
+
+      result.push( sprintf( format, @Host, @Service, mbean, 'stats_resourcecache', 'size'   , @interval, size ) )
+      result.push( sprintf( format, @Host, @Service, mbean, 'stats_resourcecache', 'removed', @interval, removed ) )
+      result.push( sprintf( format, @Host, @Service, mbean, 'stats_resourcecache', 'faults' , @interval, faults ) )
+      result.push( sprintf( format, @Host, @Service, mbean, 'stats_resourcecache', 'misses' , @interval, misses ) )
+      result.push( sprintf( format, @Host, @Service, mbean, 'stats_resourcecache', 'hits'   , @interval, hits ) )
+
+      return result
+
+    end
+
+
+    def contentServerServer( data = {} )
+
+      result    = []
+      mbean     = 'Server'
+#       format    = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
+      value     = data.dig('value')
 
       # defaults
       cacheHits             = 0
@@ -183,43 +233,50 @@ module CarbonData
       uncompletedCount      = 0
       completedCount        = 0
 
-
-
-
       def replicatorData()
 
         result       = []
-
-  #       cacheKey = Storage::Memcached.cacheKey( { :host => @Host, :pre => 'result', :service => 'Replicator' } )
-  #       replicatorData = @mc.get( memcacheKey )
 
         replicatorData = @mbean.bean( @Host, @serviceName, 'Replicator' )
 
         if( replicatorData == false )
           logger.error( sprintf( 'No mbean \'Replicator\' for Service %s found!', @serviceName ) )
 
-          return {
-            :completedSequenceNumber => 0,
-            :result        => result
-          }
+          return completedSequenceNumber, result
+
+#          return {
+#            :completedSequenceNumber => 0,
+#            :result                  => result
+#          }
         else
 
-          replicatorStatus = replicatorData['status']  ? replicatorData['status']  : 505
-          replicatorValue  = replicatorData['value']   ? replicatorData['value']   : nil
+          replicatorStatus = replicatorData.dig('status') || 505
+          replicatorValue  = replicatorData.dig('value')
 
           if( replicatorStatus == 200 && replicatorValue != nil )
 
             replicatorValue         = replicatorValue.values.first
 
-            connectionUp            = replicatorValue['ConnectionUp']                  ? replicatorValue['ConnectionUp']                  : false
-            controllerState         = replicatorValue['ControllerState']               ? replicatorValue['ControllerState']               : nil
-            completedSequenceNumber = replicatorValue['LatestCompletedSequenceNumber'] ? replicatorValue['LatestCompletedSequenceNumber'] : 0
-            enabled                 = replicatorValue['Enabled']                       ? replicatorValue['Enabled']                       : false
-            pipelineUp              = replicatorValue['PipelineUp']                    ? replicatorValue['PipelineUp']                    : false
-            uncompletedCount        = replicatorValue['UncompletedCount']              ? replicatorValue['UncompletedCount']              : 0
-            completedCount          = replicatorValue['CompletedCount']                ? replicatorValue['CompletedCount']                : 0
+            connectionUp            = replicatorValue.dig('ConnectionUp') || false
+            controllerState         = replicatorValue.dig('ControllerState')
+            completedSequenceNumber = replicatorValue.dig('LatestCompletedSequenceNumber') || 0
+            enabled                 = replicatorValue.dig('Enabled') || false
+            pipelineUp              = replicatorValue.dig('PipelineUp') || false
+            uncompletedCount        = replicatorValue.dig('UncompletedCount') || 0
+            completedCount          = replicatorValue.dig('CompletedCount') || 0
 
             controllerState.downcase!
+
+            result << {
+              :key   => sprintf( '%s.%s.%s.%s', @Host, @Service, 'Replicator', 'completedSequenceNumber' ),
+              :value => completedSequenceNumber
+            } << {
+              :key   => sprintf( '%s.%s.%s.%s', @Host, @Service, 'Replicator', 'uncompleted' ),
+              :value => uncompletedCount
+            } << {
+              :key   => sprintf( '%s.%s.%s.%s', @Host, @Service, 'Replicator', 'completed' ),
+              :value => completedCount
+            }
 
             format       = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
 
@@ -231,10 +288,12 @@ module CarbonData
             result.push( sprintf( format, @Host, @Service, 'Replicator', 'completed'               ,'count'   , @interval, completedCount ) )
   #           result.push( sprintf( 'PUTVAL %s/%s-%s/count-%s interval=%s N:%s', @Host, @Service, 'Replicator', 'enabled', @interval, enabled ) )
 
-            return {
-              :completedSequenceNumber => completedSequenceNumber,
-              :result        => result
-            }
+            return completedSequenceNumber, result
+
+#            return {
+#              :completedSequenceNumber => completedSequenceNumber,
+#              :result                  => result
+#            }
 
           end
         end
@@ -246,33 +305,36 @@ module CarbonData
         value = value.values.first
 
         # identical Data from MLS & RLS
-        cacheHits             = value['ResourceCacheHits']        ? value['ResourceCacheHits']         : nil
-        cacheEvicts           = value['ResourceCacheEvicts']      ? value['ResourceCacheEvicts']       : nil
-        cacheEntries          = value['ResourceCacheEntries']     ? value['ResourceCacheEntries']      : nil
-        cacheInterval         = value['ResourceCacheInterval']    ? value['ResourceCacheInterval']     : nil
-        cacheSize             = value['ResourceCacheSize']        ? value['ResourceCacheSize']         : nil
-        reqSeqNumber          = value['RepositorySequenceNumber'] ? value['RepositorySequenceNumber']  : nil
-        connectionCount       = value['ConnectionCount']          ? value['ConnectionCount']           : nil
-        runlevel              = value['RunLevel']                 ? value['RunLevel']                  : nil
-        uptime                = value['Uptime']                   ? value['Uptime']                    : nil
-        serviceInfos          = value['ServiceInfos']             ? value['ServiceInfos']              : nil
-        licenseValidFrom      = value['LicenseValidFrom']         ? value['LicenseValidFrom']          : nil
-        licenseValidUntilSoft = value['LicenseValidUntilSoft']    ? value['LicenseValidUntilSoft']     : nil
-        licenseValidUntilHard = value['LicenseValidUntilHard']    ? value['LicenseValidUntilHard']     : nil
+        cacheHits             = value.dig('ResourceCacheHits')
+        cacheEvicts           = value.dig('ResourceCacheEvicts')
+        cacheEntries          = value.dig('ResourceCacheEntries')
+        cacheInterval         = value.dig('ResourceCacheInterval')
+        cacheSize             = value.dig('ResourceCacheSize')
+        reqSeqNumber          = value.dig('RepositorySequenceNumber')
+        connectionCount       = value.dig('ConnectionCount')
+        runlevel              = value.dig('RunLevel')
+        uptime                = value.dig('Uptime')
+        serviceInfos          = value.dig('ServiceInfos')
+        licenseValidFrom      = value.dig('LicenseValidFrom')
+        licenseValidUntilSoft = value.dig('LicenseValidUntilSoft')
+        licenseValidUntilHard = value.dig('LicenseValidUntilHard')
 
         # Data from RLS
         if( @Service == 'RLS' )
-          replicatorData        = replicatorData()
 
-          incomingCount         = replicatorData[:completedSequenceNumber] ? replicatorData[:completedSequenceNumber] : 0
-          replicatorResult      = replicatorData[:result]                  ? replicatorData[:result]                  : nil
+          incomingCount, replicatorResult = replicatorData()
+
+#          replicatorData        = replicatorData()
+#
+#          incomingCount         = replicatorData.dig(:completedSequenceNumber) || 0
+#          replicatorResult      = replicatorData.dig(:result)
 
           if( replicatorResult != nil && replicatorResult.count != 0 )
-            result = replicatorResult
+            result << replicatorResult
           end
         end
 
-        #in maintenance mode the Server mbean is not available
+        # in maintenance mode the Server mbean is not available
         case runlevel.downcase
           when 'offline'
             runlevel = 0
@@ -294,80 +356,162 @@ module CarbonData
 
             if( enabled == true )
 
-              named          = v['named']         ? v['named']         : 0
-              namedMax       = v['maxnamed']      ? v['maxnamed']      : 0
+              named          = v.dig('named')         || 0
+              namedMax       = v.dig('maxnamed')      || 0
               namedDiff      = namedMax - named
-              concurrent     = v['concurrent']    ? v['concurrent']    : 0
-              concurrentMax  = v['maxconcurrent'] ? v['maxconcurrent'] : 0
+              concurrent     = v.dig('concurrent')    || 0
+              concurrentMax  = v.dig('maxconcurrent') || 0
               concurrentDiff = concurrentMax - concurrent
 
-              result.push( sprintf( format, @Host, @Service, mbean, 'service_info', s , 'named'          , @interval, named ) )
-              result.push( sprintf( format, @Host, @Service, mbean, 'service_info', s , 'named_max'      , @interval, namedMax ) )
-              result.push( sprintf( format, @Host, @Service, mbean, 'service_info', s , 'named_diff'     , @interval, namedDiff ) )
-              result.push( sprintf( format, @Host, @Service, mbean, 'service_info', s , 'concurrent'     , @interval, concurrent ) )
-              result.push( sprintf( format, @Host, @Service, mbean, 'service_info', s , 'concurrent_max' , @interval, concurrentMax ) )
-              result.push( sprintf( format, @Host, @Service, mbean, 'service_info', s , 'concurrent_diff', @interval, concurrentDiff ) )
+              result << {
+                :key   => sprintf( '%s.%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'ServiceInfo', s, 'named' ),
+                :value => named
+              } << {
+                :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s', @Host, @Service, mbean, 'ServiceInfo', s, 'named', 'max' ),
+                :value => namedMax
+              } << {
+                :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s', @Host, @Service, mbean, 'ServiceInfo', s, 'named', 'diff' ),
+                :value => namedDiff
+              } << {
+                :key   => sprintf( '%s.%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'ServiceInfo', s, 'concurrent' ),
+                :value => concurrent
+              } << {
+                :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s', @Host, @Service, mbean, 'ServiceInfo', s, 'concurrent', 'max' ),
+                :value => concurrentMax
+              } << {
+                :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s', @Host, @Service, mbean, 'ServiceInfo', s, 'concurrent', 'diff' ),
+                :value => concurrentDiff
+              }
+
+#               result.push( sprintf( format, @Host, @Service, mbean, 'service_info', s , 'named'          , @interval, named ) )
+#               result.push( sprintf( format, @Host, @Service, mbean, 'service_info', s , 'named_max'      , @interval, namedMax ) )
+#               result.push( sprintf( format, @Host, @Service, mbean, 'service_info', s , 'named_diff'     , @interval, namedDiff ) )
+#               result.push( sprintf( format, @Host, @Service, mbean, 'service_info', s , 'concurrent'     , @interval, concurrent ) )
+#               result.push( sprintf( format, @Host, @Service, mbean, 'service_info', s , 'concurrent_max' , @interval, concurrentMax ) )
+#               result.push( sprintf( format, @Host, @Service, mbean, 'service_info', s , 'concurrent_diff', @interval, concurrentDiff ) )
+
             end
           end
         end
 
-        if( licenseValidFrom != nil || licenseValidUntilSoft != nil || licenseValidUntilHard != nil)
+        if( licenseValidFrom != nil || licenseValidUntilSoft != nil || licenseValidUntilHard != nil )
 
-          format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
+#           format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
           t      = Date.parse( Time.now().to_s )
           today  = Time.new( t.year, t.month, t.day )
 
           if( licenseValidFrom != nil )
 
-            result.push( sprintf( format, @Host, @Service, mbean, 'license_from', 'raw'      , @interval, licenseValidFrom / 1000 ) )
+            result << {
+              :key   => sprintf( '%s.%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'license', 'from', 'raw' ),
+              :value => licenseValidFrom / 1000
+            }
+
+#             result.push( sprintf( format, @Host, @Service, mbean, 'license_from', 'raw'      , @interval, licenseValidFrom / 1000 ) )
 
           end
 
 
           if( licenseValidUntilSoft != nil )
 
-            result.push( sprintf( format, @Host, @Service, mbean, 'license_until_soft', 'raw'      , @interval, licenseValidUntilSoft / 1000 ) )
-
             x                   = self.timeParser( today, Time.at( licenseValidUntilSoft / 1000 ) )
-            validUntilSoftMonth = x[:months]
-            validUntilSoftWeek  = x[:weeks]
-            validUntilSoftDays  = x[:days]
+            validUntilSoftMonth = x.dig(:months)
+            validUntilSoftWeek  = x.dig(:weeks)
+            validUntilSoftDays  = x.dig(:days)
 
-            result.push( sprintf( format, @Host, @Service, mbean, 'license_until_soft', 'months' , @interval, validUntilSoftMonth ) )
-            result.push( sprintf( format, @Host, @Service, mbean, 'license_until_soft', 'weeks'  , @interval, validUntilSoftWeek ) )
-            result.push( sprintf( format, @Host, @Service, mbean, 'license_until_soft', 'days'   , @interval, validUntilSoftDays ) )
+            result << {
+              :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'license', 'until', 'soft', 'raw' ),
+              :value => licenseValidUntilSoft / 1000
+            } << {
+              :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'license', 'until', 'soft', 'month' ),
+              :value => validUntilSoftMonth
+            }  << {
+              :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'license', 'until', 'soft', 'weeks' ),
+              :value => validUntilSoftWeek
+            }  << {
+              :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'license', 'until', 'soft', 'days' ),
+              :value => validUntilSoftDays
+            }
+
+#             result.push( sprintf( format, @Host, @Service, mbean, 'license_until_soft', 'raw'    , @interval, licenseValidUntilSoft / 1000 ) )
+#             result.push( sprintf( format, @Host, @Service, mbean, 'license_until_soft', 'months' , @interval, validUntilSoftMonth ) )
+#             result.push( sprintf( format, @Host, @Service, mbean, 'license_until_soft', 'weeks'  , @interval, validUntilSoftWeek ) )
+#             result.push( sprintf( format, @Host, @Service, mbean, 'license_until_soft', 'days'   , @interval, validUntilSoftDays ) )
 
           end
 
           if( licenseValidUntilHard != nil )
 
-            result.push( sprintf( format, @Host, @Service, mbean, 'license_until_hard', 'raw'      , @interval, licenseValidUntilHard / 1000 ) )
-
             x                   = self.timeParser( today, Time.at( licenseValidUntilHard / 1000 ) )
-            validUntilHardMonth = x[:months]
-            validUntilHardWeek  = x[:weeks]
-            validUntilHardDays  = x[:days]
+            validUntilHardMonth = x.dig(:months)
+            validUntilHardWeek  = x.dig(:weeks)
+            validUntilHardDays  = x.dig(:days)
 
-            result.push( sprintf( format, @Host, @Service, mbean, 'license_until_hard', 'months' , @interval, validUntilHardMonth ) )
-            result.push( sprintf( format, @Host, @Service, mbean, 'license_until_hard', 'weeks'  , @interval, validUntilHardWeek ) )
-            result.push( sprintf( format, @Host, @Service, mbean, 'license_until_hard', 'days'   , @interval, validUntilHardDays ) )
+            result << {
+              :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'license', 'until', 'hard', 'raw' ),
+              :value => licenseValidUntilHard / 1000
+            } << {
+              :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'license', 'until', 'hard', 'month' ),
+              :value => validUntilHardMonth
+            }  << {
+              :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'license', 'until', 'hard', 'weeks' ),
+              :value => validUntilHardWeek
+            }  << {
+              :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'license', 'until', 'hard', 'days' ),
+              :value => validUntilHardDays
+            }
+
+#             result.push( sprintf( format, @Host, @Service, mbean, 'license_until_hard', 'raw'    , @interval, licenseValidUntilHard / 1000 ) )
+#             result.push( sprintf( format, @Host, @Service, mbean, 'license_until_hard', 'months' , @interval, validUntilHardMonth ) )
+#             result.push( sprintf( format, @Host, @Service, mbean, 'license_until_hard', 'weeks'  , @interval, validUntilHardWeek ) )
+#             result.push( sprintf( format, @Host, @Service, mbean, 'license_until_hard', 'days'   , @interval, validUntilHardDays ) )
           end
         end
 
       end
 
-      format       = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
+      result << {
+        :key   => sprintf( '%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'ResourceCache', 'hits' ),
+        :value => cacheHits
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'ResourceCache', 'evicts' ),
+        :value => cacheEvicts
+      }  << {
+        :key   => sprintf( '%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'ResourceCache', 'entries' ),
+        :value => cacheEntries
+      }  << {
+        :key   => sprintf( '%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'ResourceCache', 'interval' ),
+        :value => cacheInterval
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'ResourceCache', 'size' ),
+        :value => cacheSize
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'Repository', 'SequenceNumber' ),
+        :value => reqSeqNumber
+      }  << {
+        :key   => sprintf( '%s.%s.%s.%s'   , @Host, @Service, mbean, 'connection' ),
+        :value => connectionCount
+      }  << {
+        :key   => sprintf( '%s.%s.%s.%s'   , @Host, @Service, mbean, 'uptime' ),
+        :value => uptime
+      }  << {
+        :key   => sprintf( '%s.%s.%s.%s'   , @Host, @Service, mbean, 'runlevel' ),
+        :value => runlevel
+      }
 
-      result.push( sprintf( format, @Host, @Service, mbean, 'ResourceCache', 'hits'            , @interval, cacheHits ) )
-      result.push( sprintf( format, @Host, @Service, mbean, 'ResourceCache', 'evicts'          , @interval, cacheEvicts ) )
-      result.push( sprintf( format, @Host, @Service, mbean, 'ResourceCache', 'entries'         , @interval, cacheEntries ) )
-      result.push( sprintf( format, @Host, @Service, mbean, 'ResourceCache', 'interval'        , @interval, cacheInterval ) )
-      result.push( sprintf( format, @Host, @Service, mbean, 'ResourceCache', 'size'            , @interval, cacheSize ) )
 
-      result.push( sprintf( format, @Host, @Service, mbean, 'Repository'   , 'sequence_number' , @interval, reqSeqNumber ) )
-      result.push( sprintf( format, @Host, @Service, mbean, 'server'       , 'connection_count', @interval, connectionCount ) )
-      result.push( sprintf( format, @Host, @Service, mbean, 'server'       , 'uptime'          , @interval, uptime ) )
-      result.push( sprintf( format, @Host, @Service, mbean, 'server'       , 'runlevel'        , @interval, runlevel ) )
+#       format       = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
+#
+#       result.push( sprintf( format, @Host, @Service, mbean, 'ResourceCache', 'hits'            , @interval, cacheHits ) )
+#       result.push( sprintf( format, @Host, @Service, mbean, 'ResourceCache', 'evicts'          , @interval, cacheEvicts ) )
+#       result.push( sprintf( format, @Host, @Service, mbean, 'ResourceCache', 'entries'         , @interval, cacheEntries ) )
+#       result.push( sprintf( format, @Host, @Service, mbean, 'ResourceCache', 'interval'        , @interval, cacheInterval ) )
+#       result.push( sprintf( format, @Host, @Service, mbean, 'ResourceCache', 'size'            , @interval, cacheSize ) )
+#
+#       result.push( sprintf( format, @Host, @Service, mbean, 'Repository'   , 'sequence_number' , @interval, reqSeqNumber ) )
+#       result.push( sprintf( format, @Host, @Service, mbean, 'server'       , 'connection_count', @interval, connectionCount ) )
+#       result.push( sprintf( format, @Host, @Service, mbean, 'server'       , 'uptime'          , @interval, uptime ) )
+#       result.push( sprintf( format, @Host, @Service, mbean, 'server'       , 'runlevel'        , @interval, runlevel ) )
 
       return result
 
@@ -407,6 +551,13 @@ module CarbonData
 
     end
 
+
+    def contentServerStatisticsBlobStoreMethods( data = {} )
+
+      # was für komische Werte kommen da aus JMX raus?
+      # müssen wir klären
+
+    end
 
   end
 
