@@ -182,15 +182,15 @@ module CarbonData
               :value => completedCount
             }
 
-            format       = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
+#             format       = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
 
-  #           result.push( sprintf( format, @Host, @Service, 'Replicator', 'connection'              ,'up'      , @interval, connectionUp ) )
-  #           result.push( sprintf( format, @Host, @Service, 'Replicator', 'controller'              ,'state'   , @interval, controllerState ) )
-            result.push( sprintf( format, @Host, @Service, 'Replicator', 'completedSequenceNumber' ,'count'   , @interval, completedSequenceNumber ) )
-  #           result.push( sprintf( format, @Host, @Service, 'Replicator', 'pipeline'                ,'up'      , @interval, pipelineUp ) )
-            result.push( sprintf( format, @Host, @Service, 'Replicator', 'uncompleted'             ,'count'   , @interval, uncompletedCount ) )
-            result.push( sprintf( format, @Host, @Service, 'Replicator', 'completed'               ,'count'   , @interval, completedCount ) )
-  #           result.push( sprintf( 'PUTVAL %s/%s-%s/count-%s interval=%s N:%s', @Host, @Service, 'Replicator', 'enabled', @interval, enabled ) )
+#   #           result.push( sprintf( format, @Host, @Service, 'Replicator', 'connection'              ,'up'      , @interval, connectionUp ) )
+#   #           result.push( sprintf( format, @Host, @Service, 'Replicator', 'controller'              ,'state'   , @interval, controllerState ) )
+#             result.push( sprintf( format, @Host, @Service, 'Replicator', 'completedSequenceNumber' ,'count'   , @interval, completedSequenceNumber ) )
+#   #           result.push( sprintf( format, @Host, @Service, 'Replicator', 'pipeline'                ,'up'      , @interval, pipelineUp ) )
+#             result.push( sprintf( format, @Host, @Service, 'Replicator', 'uncompleted'             ,'count'   , @interval, uncompletedCount ) )
+#             result.push( sprintf( format, @Host, @Service, 'Replicator', 'completed'               ,'count'   , @interval, completedCount ) )
+#   #           result.push( sprintf( 'PUTVAL %s/%s-%s/count-%s interval=%s N:%s', @Host, @Service, 'Replicator', 'enabled', @interval, enabled ) )
 
             return completedSequenceNumber, result
 
@@ -426,7 +426,7 @@ module CarbonData
 
       result    = []
       mbean     = 'StatisticsJobResult'
-      format    = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
+#       format    = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
       value     = data.dig('value')
 
       # defaults
@@ -455,9 +455,9 @@ module CarbonData
         :value => unrecoverable
       }
 
-      result.push( sprintf( format, @Host, @Service, mbean, 'stats_jobresult', 'failed'       , @interval, failed ) )
-      result.push( sprintf( format, @Host, @Service, mbean, 'stats_jobresult', 'successful'   , @interval, successful ) )
-      result.push( sprintf( format, @Host, @Service, mbean, 'stats_jobresult', 'unrecoverable', @interval, unrecoverable ) )
+#       result.push( sprintf( format, @Host, @Service, mbean, 'stats_jobresult', 'failed'       , @interval, failed ) )
+#       result.push( sprintf( format, @Host, @Service, mbean, 'stats_jobresult', 'successful'   , @interval, successful ) )
+#       result.push( sprintf( format, @Host, @Service, mbean, 'stats_jobresult', 'unrecoverable', @interval, unrecoverable ) )
 
       return result
 

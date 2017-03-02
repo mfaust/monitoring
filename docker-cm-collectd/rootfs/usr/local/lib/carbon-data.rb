@@ -23,6 +23,7 @@ require_relative 'carbon-data/tomcat'
 require_relative 'carbon-data/cae'
 require_relative 'carbon-data/content-server'
 require_relative 'carbon-data/clients'
+require_relative 'carbon-data/feeder'
 
 # -----------------------------------------------------------------------------
 
@@ -45,7 +46,7 @@ module CarbonData
     include CarbonData::Cae
     include CarbonData::ContentServer
     include CarbonData::Clients
-
+    include CarbonData::Feeder
 
     def initialize( params = {} )
 
@@ -130,7 +131,16 @@ module CarbonData
     when 'TransformedBlobCacheManager'
       graphiteOutput.push( self.clientsTransformedBlobCacheManager( values ) )
     when /^MemoryPool*/
-      graphiteOutput.push(self.clientsMemoryPool( key, values ) )
+      graphiteOutput.push( self.clientsMemoryPool( key, values ) )
+
+      # Feeder
+    when 'Health'
+      graphiteOutput.push( self.feederHealth( values ) )
+    when 'ProactiveEngine'
+      graphiteOutput.push( self.feederProactiveEngine( values ) )
+    when 'Feeder'
+      graphiteOutput.push( self.feederFeeder( values ) )
+
 
 
 #     when 'MemoryPoolCMSOldGen'
@@ -147,12 +157,8 @@ module CarbonData
 #       graphiteOutput.push(self.ParseResult_MemoryPool( values ) )
 
 
-#     when 'Health'
-#       graphiteOutput.push(self.ParseResult_Health( values ) )
-#     when 'ProactiveEngine'
-#       graphiteOutput.push(self.ParseResult_ProactiveEngine( values ) )
-#     when 'Feeder'
-#       graphiteOutput.push(self.ParseResult_Feeder( values ) )
+
+
 
 
 

@@ -3,12 +3,12 @@ module CarbonData
   module Feeder
 
 
-    def ParseResult_Health( data = {} )
+    def feederHealth( data = {} )
 
-      result = []
-      mbean  = 'Health'
-      format = 'PUTVAL %s/%s-%s-%s/gauge-%s interval=%s N:%s'
-      value  = data['value']  ? data['value']  : nil
+      result      = []
+      mbean       = 'Health'
+      format      = 'PUTVAL %s/%s-%s-%s/gauge-%s interval=%s N:%s'
+      value       = data.dig('value')
 
       # defaults
       healthy = -1 # 0: false, 1: true, -1: N/A
@@ -17,51 +17,87 @@ module CarbonData
 
         value = value.values.first
 
-        healthy   = value['Healthy']  ? value['Healthy'] : nil
+        healthy   = value.dig('Healthy')
         if ( healthy != nil )
           healthy           = healthy == true ? 1 : 0
         end
 
       end
 
+      result << {
+        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, 'feeder', 'healthy' ),
+        :value => healthy
+      }
+
       result.push( sprintf( format, @Host, @Service, mbean, 'feeder', 'healthy', @interval, healthy ) )
 
       return result
     end
 
-    # Check for the CAEFeeder
-    def ParseResult_ProactiveEngine( data = {} )
 
-      result = []
-      mbean  = 'ProactiveEngine'
-      format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
-      value  = data['value'] ? data['value'] : nil
+    # Check for the CAEFeeder
+    def feederProactiveEngine( data = {} )
+
+      result      = []
+      mbean       = 'ProactiveEngine'
+      format      = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
+      value       = data.dig('value')
 
       # defaults
-      maxEntries     = 0
-      currentEntries = 0
-      diffEntries    = 0
-      invalidations  = 0
-      heartbeat      = 0
-      queueCapacity  = 0
-      queueMaxSize   = 0
-      queueSize      = 0
+      maxEntries     = 0  # (KeysCount) Number of (active) keys
+      currentEntries = 0  # (ValuesCount) Number of (valid) values. It is less or equal to 'keysCount'
+      diffEntries    = 0  #
+      invalidations  = 0  # (InvalidationCount) Number of invalidations which have been received
+      heartbeat      = 0  # (HeartBeat) The heartbeat of this service: Milliseconds between now and the latest activity. A low value indicates that the service is alive. An constantly increasing value might be caused by a 'sick' or dead service
+      queueCapacity  = 0  # (QueueCapacity) The queue's capacity: Maximum number of items which can be enqueued
+      queueMaxSize   = 0  # (QueueMaxSize) Maximum number of items which had been waiting in the queue
+      queueSize      = 0  # (QueueSize) Number of items waiting in the queue for being processed. Less or equal than 'queueCapacity'. Zero means that ProactiveEngine is idle.
 
       if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
 
         value = value.values.first
 
-        maxEntries     = value['KeysCount']         ? value['KeysCount']         : 0  # Number of (active) keys
-        currentEntries = value['ValuesCount']       ? value['ValuesCount']       : 0  # Number of (valid) values. It is less or equal to 'keysCount'
+        maxEntries     = value.dig('KeysCount')   || 0
+        currentEntries = value.dig('ValuesCount') || 0
         diffEntries    = ( maxEntries - currentEntries ).to_i
 
-        invalidations  = value['InvalidationCount'] ? value['InvalidationCount'] : nil  # Number of invalidations which have been received
-        heartbeat      = value['HeartBeat']         ? value['HeartBeat']         : nil  # The heartbeat of this service: Milliseconds between now and the latest activity. A low value indicates that the service is alive. An constantly increasing value might be caused by a 'sick' or dead service
-        queueCapacity  = value['QueueCapacity']     ? value['QueueCapacity']     : nil  # The queue's capacity: Maximum number of items which can be enqueued
-        queueMaxSize   = value['QueueMaxSize']      ? value['QueueMaxSize']      : nil  # Maximum number of items which had been waiting in the queue
-        queueSize      = value['QueueSize']         ? value['QueueSize']         : nil  # Number of items waiting in the queue for being processed. Less or equal than 'queueCapacity'. Zero means that ProactiveEngine is idle.
+        invalidations  = value.dig('InvalidationCount')
+        heartbeat      = value.dig('HeartBeat')
+        queueCapacity  = value.dig('QueueCapacity')
+        queueMaxSize   = value.dig('QueueMaxSize')
+        queueSize      = value.dig('QueueSize')
 
       end
+
+
+
+      result << {
+        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @Host, @Service, mbean, 'feeder', 'entries', 'max' ),
+        :value => maxEntries
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @Host, @Service, mbean, 'feeder', 'entries', 'current' ),
+        :value => currentEntries
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @Host, @Service, mbean, 'feeder', 'entries', 'diff' ),
+        :value => diffEntries
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'feeder', 'invalidations' ),
+        :value => invalidations
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'feeder', 'heartbeat' ),
+        :value => heartbeat
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'queue', 'capacity' ),
+        :value => queueCapacity
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'queue', 'max_waiting' ),
+        :value => queueMaxSize
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'queue', 'waiting' ),
+        :value => queueSize
+      }
+
+
 
       result.push( sprintf( format, @Host, @Service, mbean, 'feeder', 'max'          , @interval, maxEntries ) )
       result.push( sprintf( format, @Host, @Service, mbean, 'feeder', 'current'      , @interval, currentEntries ) )
@@ -76,14 +112,12 @@ module CarbonData
     end
 
 
-
-
-    def ParseResult_Feeder( data = {} )
+    def feederFeeder( data = {} )
 
       result = []
       mbean  = 'Feeder'
       format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
-      value  = data['value']  ? data['value']  : nil
+      value       = data.dig('value')
 
       # defaults
       pendingEvents           = 0
@@ -95,12 +129,28 @@ module CarbonData
 
         value = value.values.first
 
-        pendingEvents           = value['PendingEvents']              ? value['PendingEvents']              : nil
-        indexDocuments          = value['IndexDocuments']             ? value['IndexDocuments']             : nil
-        indexContentDocuments   = value['IndexContentDocuments']      ? value['IndexContentDocuments']      : nil
-        currentPendingDocuments = value['CurrentPendingDocuments']    ? value['CurrentPendingDocuments']    : nil
+        pendingEvents           = value.dig('PendingEvents')
+        indexDocuments          = value.dig('IndexDocuments')
+        indexContentDocuments   = value.dig('IndexContentDocuments')
+        currentPendingDocuments = value.dig('CurrentPendingDocuments')
 
       end
+
+      result << {
+        :key   => sprintf( '%s.%s.%s.%s'   , @Host, @Service, mbean, 'pending_events' ),
+        :value => pendingEvents
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s'   , @Host, @Service, mbean, 'index_documents' ),
+        :value => indexDocuments
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s'   , @Host, @Service, mbean, 'index_content_documents' ),
+        :value => indexContentDocuments
+      } << {
+        :key   => sprintf( '%s.%s.%s.%s'   , @Host, @Service, mbean, 'current_pending_documents' ),
+        :value => currentPendingDocuments
+      }
+
+
 
       result.push( sprintf( format, @Host, @Service, mbean, 'server', 'pending_events'            , @interval, pendingEvents ) )
       result.push( sprintf( format, @Host, @Service, mbean, 'server', 'index_documents'           , @interval, indexDocuments ) )
@@ -111,7 +161,7 @@ module CarbonData
 
     end
 
-    
+
   end
 
 
