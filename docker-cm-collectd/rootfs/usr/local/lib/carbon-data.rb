@@ -24,6 +24,8 @@ require_relative 'carbon-data/cae'
 require_relative 'carbon-data/content-server'
 require_relative 'carbon-data/clients'
 require_relative 'carbon-data/feeder'
+require_relative 'carbon-data/solr'
+require_relative 'carbon-data/database/mongodb'
 
 # -----------------------------------------------------------------------------
 
@@ -47,6 +49,8 @@ module CarbonData
     include CarbonData::ContentServer
     include CarbonData::Clients
     include CarbonData::Feeder
+    include CarbonData::Solr
+    include CarbonData::Database::MongoDB
 
     def initialize( params = {} )
 
@@ -126,23 +130,8 @@ module CarbonData
       # Clients
     when 'CapConnection'
       graphiteOutput.push( self.clientsCapConnection( values ) )
-    # currently disabled
-    # need information or discusion about it
-    when 'TransformedBlobCacheManager'
-      graphiteOutput.push( self.clientsTransformedBlobCacheManager( values ) )
     when /^MemoryPool*/
       graphiteOutput.push( self.clientsMemoryPool( key, values ) )
-
-      # Feeder
-    when 'Health'
-      graphiteOutput.push( self.feederHealth( values ) )
-    when 'ProactiveEngine'
-      graphiteOutput.push( self.feederProactiveEngine( values ) )
-    when 'Feeder'
-      graphiteOutput.push( self.feederFeeder( values ) )
-
-
-
 #     when 'MemoryPoolCMSOldGen'
 #       graphiteOutput.push(self.ParseResult_MemoryPool( values ) )
 #     when 'MemoryPoolCodeCache'
@@ -156,21 +145,27 @@ module CarbonData
 #     when 'MemoryPoolParSurvivorSpace'
 #       graphiteOutput.push(self.ParseResult_MemoryPool( values ) )
 
+      # Feeder
+    when 'Health'
+      graphiteOutput.push( self.feederHealth( values ) )
+    when 'ProactiveEngine'
+      graphiteOutput.push( self.feederProactiveEngine( values ) )
+    when 'Feeder'
+      graphiteOutput.push( self.feederFeeder( values ) )
+    # currently disabled
+    # need information or discusion about it
+    when 'TransformedBlobCacheManager'
+      graphiteOutput.push( self.feederTransformedBlobCacheManager( values ) )
 
-
-
-
-
-
-
-#     when /^Solr.*Replication/
-#       graphiteOutput.push(self.ParseResult_SolrReplication( values ) )
-#     when /^Solr.*QueryResultCache/
-#       graphiteOutput.push(self.ParseResult_SolrQueryResultCache( values ) )
-#     when /^Solr.*DocumentCache/
-#       graphiteOutput.push(self.ParseResult_SolrDocumentCache( values ) )
-#     when /^Solr.*Select/
-#       graphiteOutput.push(self.ParseResult_SolrSelect( values ) )
+      # Solr
+    when /^Solr.*Replication/
+      graphiteOutput.push( self.solrReplication( values ) )
+    when /^Solr.*QueryResultCache/
+      graphiteOutput.push( self.solrQueryResultCache( values ) )
+    when /^Solr.*DocumentCache/
+      graphiteOutput.push( self.solrDocumentCache( values ) )
+    when /^Solr.*Select/
+      graphiteOutput.push( self.solrSelect( values ) )
     end
 
     return graphiteOutput
@@ -250,11 +245,11 @@ module CarbonData
           case service
           when 'mongodb'
 
-#             if( result.is_a?( Hash ) )
-#               graphiteOutput.push( self.ParseResult_mongoDB( result ) )
-#             else
-#               logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @Host, service ) )
-#             end
+            if( result.is_a?( Hash ) )
+              graphiteOutput.push( self.databaseMongoDB( result ) )
+            else
+              logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @Host, service ) )
+            end
 
           when 'mysql'
 
