@@ -22,6 +22,8 @@ require_relative 'carbon-data/utils'
 require_relative 'carbon-data/tomcat'
 require_relative 'carbon-data/cae'
 require_relative 'carbon-data/content-server'
+require_relative 'carbon-data/clients'
+require_relative 'carbon-data/feeder'
 
 # -----------------------------------------------------------------------------
 
@@ -43,6 +45,8 @@ module CarbonData
     include CarbonData::Tomcat
     include CarbonData::Cae
     include CarbonData::ContentServer
+    include CarbonData::Clients
+    include CarbonData::Feeder
 
     def initialize( params = {} )
 
@@ -116,15 +120,28 @@ module CarbonData
       graphiteOutput.push( self.contentServerServer( values ) )
     when 'StatisticsJobResult'
       graphiteOutput.push( self.contentServerStatisticsJobResult( values ) )
-
     when 'StatisticsResourceCache'
       graphiteOutput.push( self.contentServerStatisticsResourceCache( values ) )
 
-#
-#     # currently disabled
-#     # need information or discusion about it
-# #    when 'TransformedBlobCacheManager'
-# #      graphiteOutput.push( self.ParseResult_TransformedBlobCacheManager( values ) )
+      # Clients
+    when 'CapConnection'
+      graphiteOutput.push( self.clientsCapConnection( values ) )
+    # currently disabled
+    # need information or discusion about it
+    when 'TransformedBlobCacheManager'
+      graphiteOutput.push( self.clientsTransformedBlobCacheManager( values ) )
+    when /^MemoryPool*/
+      graphiteOutput.push( self.clientsMemoryPool( key, values ) )
+
+      # Feeder
+    when 'Health'
+      graphiteOutput.push( self.feederHealth( values ) )
+    when 'ProactiveEngine'
+      graphiteOutput.push( self.feederProactiveEngine( values ) )
+    when 'Feeder'
+      graphiteOutput.push( self.feederFeeder( values ) )
+
+
 
 #     when 'MemoryPoolCMSOldGen'
 #       graphiteOutput.push(self.ParseResult_MemoryPool( values ) )
@@ -140,15 +157,9 @@ module CarbonData
 #       graphiteOutput.push(self.ParseResult_MemoryPool( values ) )
 
 
-#     when 'Health'
-#       graphiteOutput.push(self.ParseResult_Health( values ) )
-#     when 'ProactiveEngine'
-#       graphiteOutput.push(self.ParseResult_ProactiveEngine( values ) )
-#     when 'Feeder'
-#       graphiteOutput.push(self.ParseResult_Feeder( values ) )
 
-#     when 'CapConnection'
-#       graphiteOutput.push(self.ParseResult_CapConnection( values ) )
+
+
 
 
 
