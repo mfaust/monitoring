@@ -1,23 +1,26 @@
+
 module CarbonData
 
-  module Postgres
+  module Database
+
+    module Postgres
 
 
-    def ParseResult_postgres( value = {} )
+      def databasePostgres( value = {} )
 
-      format = 'PUTVAL %s/%s-%s/%s-%s interval=%s N:%s'
-      result = []
+        format = 'PUTVAL %s/%s-%s/%s-%s interval=%s N:%s'
+        result = []
 
-      if( value != nil )
+        if( value != nil )
 
-        logger.debug( value )
+          logger.debug( value )
 
+        end
+
+        return result
       end
 
-      return result
     end
-
-
 
   end
 

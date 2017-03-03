@@ -68,8 +68,6 @@ module CarbonData
 
           if( connections != nil )
 
-            logger.debug( JSON.pretty_generate( connections ) )
-
             current        = connections.dig( 'current' )
             available      = connections.dig( 'available' )
             totalCreated   = connections.dig( 'totalCreated' )
@@ -184,7 +182,7 @@ module CarbonData
               :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, 'memory', 'heap', 'used' ),
               :value => heapUsed
             } << {
-              :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, 'memory', 'heap', 'used_percent' ),
+              :key   => sprintf( '%s.%s.%s.%s.%s.%s', @Host, @Service, 'memory', 'heap', 'used', 'percent' ),
               :value => percent
             }
 
@@ -213,15 +211,13 @@ module CarbonData
                 blockManager = storage.dig('block-manager')
                 connection   = storage.dig('connection')
 
-                logger.debug( JSON.pretty_generate( connection ) )
-
                 storageBytesRead           = blockManager.dig('bytes read')
                 storageBytesWritten        = blockManager.dig('bytes written')
                 storageBlocksRead          = blockManager.dig('blocks read')
                 storageBlocksWritten       = blockManager.dig('blocks written')
 
                 storageConnectionIORead    = connection.dig('total read I/Os')
-                storageConnectionIOWrite   = connection.dig('total write I/O')
+                storageConnectionIOWrite   = connection.dig('total write I/Os')
                 storageConnectionFilesOpen = connection.dig('files currently open')
 
                 result << {

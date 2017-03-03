@@ -52,7 +52,7 @@ module CarbonData
 
       if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
 
-        logger.debug( value )
+        logger.debug( JSON.pretty_generate( value ) )
 
   #       value = value.values.first
       end
@@ -231,7 +231,7 @@ module CarbonData
             :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, type, 'used' ),
             :value => used
           } << {
-            :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, type, 'used_percent' ),
+            :key   => sprintf( '%s.%s.%s.%s.%s.%s', @Host, @Service, mbean, type, 'used', 'percent' ),
             :value => percent
           } << {
             :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, type, 'committed' ),

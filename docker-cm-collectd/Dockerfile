@@ -24,6 +24,7 @@ RUN \
     bigdecimal \
     time_difference \
     filesize \
+    tzinfo-data \
     rufus-scheduler \
     sqlite3 \
     sequel && \

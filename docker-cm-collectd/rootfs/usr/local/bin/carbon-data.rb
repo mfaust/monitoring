@@ -5,20 +5,28 @@
 #
 # v1.5.0
 
+# p "#{RUBY_VERSION}-p#{RUBY_PATCHLEVEL}"
+# p $$
+
 # -----------------------------------------------------------------------------
 
-require_relative '../lib/carbon-data'
+require 'rufus-scheduler'
+
+require_relative '../lib/carbon-writer'
 
 # -----------------------------------------------------------------------------
 
-memcacheHost = ENV['MEMCACHE_HOST']     ? ENV['MEMCACHE_HOST']     : 'localhost'
-memcachePort = ENV['MEMCACHE_PORT']     ? ENV['MEMCACHE_PORT']     : 11211
-interval     = ENV['COLLECTD_INTERVAL'] ? ENV['COLLECTD_INTERVAL'] : 15
+memcacheHost = ENV.fetch( 'MEMCACHE_HOST'    , 'localhost' )
+memcachePort = ENV.fetch( 'MEMCACHE_PORT'    , 11211 )
+interval     = ENV.fetch( 'COLLECTD_INTERVAL', 15 )
+carbonHost   = ENV.fetch( 'GRAPHITE_HOST'    , 'carbon' )
+carbonPort   = ENV.fetch( 'GRAPHITE_PORT'    , 2003 )
 
 config = {
-  :memcacheHost    => memcacheHost,
-  :memcachePort    => memcachePort,
-  :interval        => interval
+  :memcache        => { :host => memcacheHost, :port => memcachePort },
+  :graphite        => { :host => carbonHost, :port => carbonPort },
+  :interval        => interval,
+  :cache           => ( 2 * 60 * 60 )
 }
 
 # -----------------------------------------------------------------------------
@@ -34,8 +42,32 @@ Signal.trap('QUIT') { stop = true }
 
 # -----------------------------------------------------------------------------
 
-c = CarbonData::Consumer.new( config )
+client = CarbonWriter.new( config )
 
-c.run()
 
-# EOF
+exit 0
+
+scheduler = Rufus::Scheduler.new
+
+scheduler.every( '45s', :first_in => 0.4 ) do
+  client.metric( { :key => "test.master-17-tomcat.WFS.Runtime.starttime" , :value => 1488287135933 } )
+  client.metric( { :key => "test.master-17-tomcat.WFS.Manager.processing.time.count" , :value => 4 } )
+
+end
+
+
+scheduler.every( '1s' ) do
+
+  if( stop == true )
+
+    p "shutdown scheduler ..."
+
+    scheduler.shutdown(:kill)
+  end
+
+end
+
+
+scheduler.join
+
+

@@ -56,7 +56,7 @@ module CarbonData
         :key   => sprintf( '%s.%s.%s.%s.%s.%s', @Host, @Service, mbean, 'blob', 'cache', 'fault' ),
         :value => blobCacheFaults
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @Host, @Service, mbean, 'blob', 'cache', 'used_percent' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s', @Host, @Service, mbean, 'blob', 'cache', 'used', 'percent' ),
         :value => blobCachePercent
       } << {
         :key   => sprintf( '%s.%s.%s.%s.%s.%s', @Host, @Service, mbean, 'heap', 'cache', 'size' ),
@@ -68,7 +68,7 @@ module CarbonData
         :key   => sprintf( '%s.%s.%s.%s.%s.%s', @Host, @Service, mbean, 'heap', 'cache', 'fault' ),
         :value => heapCacheFaults
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @Host, @Service, mbean, 'heap', 'cache', 'used_percent' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s', @Host, @Service, mbean, 'heap', 'cache', 'used', 'percent' ),
         :value => heapCachePercent
       } << {
         :key   => sprintf( '%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'su_sessions', 'sessions' ),
@@ -140,7 +140,7 @@ module CarbonData
         :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, mbeanName, 'max' ),
         :value => max
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, mbeanName, 'used_percent' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @Host, @Service, mbean, mbeanName, 'used', 'percent' ),
         :value => percent
       } << {
         :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, mbeanName, 'used' ),

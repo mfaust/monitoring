@@ -26,6 +26,9 @@ require_relative 'carbon-data/clients'
 require_relative 'carbon-data/feeder'
 require_relative 'carbon-data/solr'
 require_relative 'carbon-data/database/mongodb'
+require_relative 'carbon-data/database/mysql'
+require_relative 'carbon-data/database/postgres'
+require_relative 'carbon-data/operating-system/node-exporter'
 
 # -----------------------------------------------------------------------------
 
@@ -51,23 +54,26 @@ module CarbonData
     include CarbonData::Feeder
     include CarbonData::Solr
     include CarbonData::Database::MongoDB
+    include CarbonData::Database::MySQL
+    include CarbonData::Database::Postgres
+    include CarbonData::OperatingSystem::NodeExporter
 
     def initialize( params = {} )
 
-      memcacheHost   = params[:memcacheHost]   ? params[:memcacheHost]   : nil
-      memcachePort   = params[:memcachePort]   ? params[:memcachePort]   : nil
+      memcacheHost   = params.dig( :memcache, :host )
+      memcachePort   = params.dig( :memcache, :port )
 
-      @interval      = params[:interval]       ? params[:interval]       : 15
-      @interval      = @interval.to_i
+#       @interval      = params[:interval]       ? params[:interval]       : 15
+#       @interval      = @interval.to_i
 
-      version              = '1.4.2'
-      date                 = '2017-01-13'
+      version              = '1.99.8'
+      date                 = '2017-03-03'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - CarbonData' )
       logger.info( "  Version #{version} (#{date})" )
       logger.info( '  Copyright 2016-2017 Coremedia' )
-      logger.info( "  configured interval #{@interval}" )
+#       logger.info( "  configured interval #{@interval}" )
       logger.info( '  used Services:' )
       logger.info( "    - memcache     : #{memcacheHost}:#{memcachePort}" )
       logger.info( '-----------------------------------------------------------------' )
@@ -80,98 +86,96 @@ module CarbonData
     end
 
 
-
-
     def createGraphiteOutput( key, values )
 
-      logger.debug( sprintf( 'createGraphiteOutput( %s, %s )', key, values ) )
+#      logger.debug( sprintf( 'createGraphiteOutput( %s, %s )', key, values ) )
 
-    graphiteOutput = Array.new()
+      graphiteOutput = Array.new()
 
-    case key
-      # Tomcats
-    when 'Runtime'
-      graphiteOutput.push( self.tomcatRuntime( values ) )
-    when 'OperatingSystem'
-      graphiteOutput.push( self.tomcatOperatingSystem( values ) )
-    when 'Manager'
-      graphiteOutput.push( self.tomcatManager( values ) )
-    when 'Memory'
-      graphiteOutput.push( self.tomcatMemoryUsage( values ) )
-    when 'Threading'
-      graphiteOutput.push( self.tomcatThreading( values ) )
-    when 'GarbageCollectorParNew'
-      graphiteOutput.push( self.tomcatGCParNew( values ) )
-    when 'GarbageCollectorConcurrentMarkSweep'
-      graphiteOutput.push( self.tomcatGCConcurrentMarkSweep( values ) )
-    when 'ClassLoading'
-      graphiteOutput.push( self.tomcatClassLoading( values ) )
-    when 'ThreadPool'
-      graphiteOutput.push( self.tomcatThreadPool( values ) )
+      case key
+        # Tomcats
+      when 'Runtime'
+        graphiteOutput.push( self.tomcatRuntime( values ) )
+      # really not a good idea
+#      when 'OperatingSystem'
+#        graphiteOutput.push( self.tomcatOperatingSystem( values ) )
+      when 'Manager'
+        graphiteOutput.push( self.tomcatManager( values ) )
+      when 'Memory'
+        graphiteOutput.push( self.tomcatMemoryUsage( values ) )
+      when 'Threading'
+        graphiteOutput.push( self.tomcatThreading( values ) )
+      when 'GarbageCollectorParNew'
+        graphiteOutput.push( self.tomcatGCParNew( values ) )
+      when 'GarbageCollectorConcurrentMarkSweep'
+        graphiteOutput.push( self.tomcatGCConcurrentMarkSweep( values ) )
+      when 'ClassLoading'
+        graphiteOutput.push( self.tomcatClassLoading( values ) )
+      when 'ThreadPool'
+        graphiteOutput.push( self.tomcatThreadPool( values ) )
 
-      # CAE
-    when 'DataViewFactory'
-      graphiteOutput.push( self.caeDataViewFactory( values ) )
-    when /^CacheClasses/
-      graphiteOutput.push( self.caeCacheClasses( key, values ) )
+        # CAE
+      when 'DataViewFactory'
+        graphiteOutput.push( self.caeDataViewFactory( values ) )
+      when /^CacheClasses/
+        graphiteOutput.push( self.caeCacheClasses( key, values ) )
 
-      # Content Server
-    when 'StoreQueryPool'
-      graphiteOutput.push( self.contentServerQueryPool( values ) )
-    when 'StoreConnectionPool'
-      graphiteOutput.push( self.contentServerConnectionPool( values ) )
-    when 'Server'
-      graphiteOutput.push( self.contentServerServer( values ) )
-    when 'StatisticsJobResult'
-      graphiteOutput.push( self.contentServerStatisticsJobResult( values ) )
-    when 'StatisticsResourceCache'
-      graphiteOutput.push( self.contentServerStatisticsResourceCache( values ) )
+        # Content Server
+      when 'StoreQueryPool'
+        graphiteOutput.push( self.contentServerQueryPool( values ) )
+      when 'StoreConnectionPool'
+        graphiteOutput.push( self.contentServerConnectionPool( values ) )
+      when 'Server'
+        graphiteOutput.push( self.contentServerServer( values ) )
+      when 'StatisticsJobResult'
+        graphiteOutput.push( self.contentServerStatisticsJobResult( values ) )
+      when 'StatisticsResourceCache'
+        graphiteOutput.push( self.contentServerStatisticsResourceCache( values ) )
 
-      # Clients
-    when 'CapConnection'
-      graphiteOutput.push( self.clientsCapConnection( values ) )
-    when /^MemoryPool*/
-      graphiteOutput.push( self.clientsMemoryPool( key, values ) )
-#     when 'MemoryPoolCMSOldGen'
-#       graphiteOutput.push(self.ParseResult_MemoryPool( values ) )
-#     when 'MemoryPoolCodeCache'
-#       graphiteOutput.push(self.ParseResult_MemoryPool( values ) )
-#     when 'MemoryPoolCompressedClassSpace'
-#       graphiteOutput.push(self.ParseResult_MemoryPool( values ) )
-#     when 'MemoryPoolMetaspace'
-#       graphiteOutput.push(self.ParseResult_MemoryPool( values ) )
-#     when 'MemoryPoolParEdenSpace'
-#       graphiteOutput.push(self.ParseResult_MemoryPool( values ) )
-#     when 'MemoryPoolParSurvivorSpace'
-#       graphiteOutput.push(self.ParseResult_MemoryPool( values ) )
+        # Clients
+      when 'CapConnection'
+        graphiteOutput.push( self.clientsCapConnection( values ) )
+      when /^MemoryPool*/
+        graphiteOutput.push( self.clientsMemoryPool( key, values ) )
+  #     when 'MemoryPoolCMSOldGen'
+  #       graphiteOutput.push(self.ParseResult_MemoryPool( values ) )
+  #     when 'MemoryPoolCodeCache'
+  #       graphiteOutput.push(self.ParseResult_MemoryPool( values ) )
+  #     when 'MemoryPoolCompressedClassSpace'
+  #       graphiteOutput.push(self.ParseResult_MemoryPool( values ) )
+  #     when 'MemoryPoolMetaspace'
+  #       graphiteOutput.push(self.ParseResult_MemoryPool( values ) )
+  #     when 'MemoryPoolParEdenSpace'
+  #       graphiteOutput.push(self.ParseResult_MemoryPool( values ) )
+  #     when 'MemoryPoolParSurvivorSpace'
+  #       graphiteOutput.push(self.ParseResult_MemoryPool( values ) )
 
-      # Feeder
-    when 'Health'
-      graphiteOutput.push( self.feederHealth( values ) )
-    when 'ProactiveEngine'
-      graphiteOutput.push( self.feederProactiveEngine( values ) )
-    when 'Feeder'
-      graphiteOutput.push( self.feederFeeder( values ) )
-    # currently disabled
-    # need information or discusion about it
-    when 'TransformedBlobCacheManager'
-      graphiteOutput.push( self.feederTransformedBlobCacheManager( values ) )
+        # Feeder
+      when 'Health'
+        graphiteOutput.push( self.feederHealth( values ) )
+      when 'ProactiveEngine'
+        graphiteOutput.push( self.feederProactiveEngine( values ) )
+      when 'Feeder'
+        graphiteOutput.push( self.feederFeeder( values ) )
+      # currently disabled
+      # need information or discusion about it
+      when 'TransformedBlobCacheManager'
+        graphiteOutput.push( self.feederTransformedBlobCacheManager( values ) )
 
-      # Solr
-    when /^Solr.*Replication/
-      graphiteOutput.push( self.solrReplication( values ) )
-    when /^Solr.*QueryResultCache/
-      graphiteOutput.push( self.solrQueryResultCache( values ) )
-    when /^Solr.*DocumentCache/
-      graphiteOutput.push( self.solrDocumentCache( values ) )
-    when /^Solr.*Select/
-      graphiteOutput.push( self.solrSelect( values ) )
+        # Solr
+      when /^Solr.*Replication/
+        graphiteOutput.push( self.solrReplication( values ) )
+      when /^Solr.*QueryResultCache/
+        graphiteOutput.push( self.solrQueryResultCache( values ) )
+      when /^Solr.*DocumentCache/
+        graphiteOutput.push( self.solrDocumentCache( values ) )
+      when /^Solr.*Select/
+        graphiteOutput.push( self.solrSelect( values ) )
+      end
+
+      return graphiteOutput
+
     end
-
-    return graphiteOutput
-
-  end
-
 
 
     def run()
@@ -179,13 +183,14 @@ module CarbonData
       monitoredServer = self.monitoredServer()
       data            = nil
 
-      logger.debug( "#{monitoredServer.keys}" )
+#       logger.debug( "#{monitoredServer.keys}" )
 
       monitoredServer.each do |h,d|
 
         @Host = h
         graphiteOutput = Array.new()
-#         logger.debug( sprintf( 'Host: %s', h ) )
+
+        logger.info( sprintf( 'Host: %s', h ) )
 
         # to improve performance, read initial discovery Data from Database and store them into Memcache (or Redis)
         key       = Storage::Memcached.cacheKey( { :host => h, :pre => 'discovery' } )
@@ -209,7 +214,7 @@ module CarbonData
         if( data == nil )
 
           data = @db.discoveryData( { :ip => h, :short => h } )
-          logger.debug( data )
+#           logger.debug( data )
 
           if( data == nil )
             next
@@ -236,7 +241,11 @@ module CarbonData
           @serviceName = service
           @Service     = self.normalizeService( service )
 
-          logger.debug( @Service )
+          if( service.downcase == 'timestamp' )
+            next
+          end
+
+          logger.info( sprintf( '  - %s (%s)', service, @Service ) )
 
           cacheKey     = Storage::Memcached.cacheKey( { :host => h, :pre => 'result', :service => service } )
 
@@ -253,27 +262,27 @@ module CarbonData
 
           when 'mysql'
 
-#             if( result.is_a?( Hash ) )
-#               graphiteOutput.push( self.ParseResult_mySQL( result ) )
-#             else
-#               logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @Host, service ) )
-#             end
+            if( result.is_a?( Hash ) )
+              graphiteOutput.push( self.databaseMySQL( result ) )
+            else
+              logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @Host, service ) )
+            end
 
           when 'postgres'
 
-#             if( result.is_a?( Hash ) )
-#               graphiteOutput.push( self.ParseResult_postgres( result ) )
-#             else
-#               logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @Host, service ) )
-#             end
+            if( result.is_a?( Hash ) )
+              graphiteOutput.push( self.databasePostgres( result ) )
+            else
+              logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @Host, service ) )
+            end
 
           when 'node_exporter'
 
-#             if( result.is_a?( Hash ) )
-#               graphiteOutput.push( self.ParseResult_nodeExporter( result ) )
-#             else
-#               logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @Host, service ) )
-#             end
+            if( result.is_a?( Hash ) )
+              graphiteOutput.push( self.operatingSystemNodeExporter( result ) )
+            else
+              logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @Host, service ) )
+            end
 
           else
 
@@ -291,8 +300,7 @@ module CarbonData
 
         end
 
-        # send to configured graphite host
-        self.output( graphiteOutput )
+        return graphiteOutput
       end
     end
 
