@@ -108,10 +108,10 @@ module CarbonData
 
             result << {
               :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, 'network', 'bytes', 'tx' ),
-              :value => bytesIn
+              :value => bytesOut
             } << {
               :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, 'network', 'bytes', 'rx' ),
-              :value => bytesOut
+              :value => bytesIn
             } << {
               :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, 'network', 'requests', 'total' ),
               :value => requests
