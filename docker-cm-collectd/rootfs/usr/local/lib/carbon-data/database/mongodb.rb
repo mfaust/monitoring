@@ -8,7 +8,7 @@ module CarbonData
 
       def databaseMongoDB( value = {} )
 
-        format = 'PUTVAL %s/%s-%s/count-%s interval=%s N:%s'
+#         format = 'PUTVAL %s/%s-%s/count-%s interval=%s N:%s'
         result = []
 
         if( value != nil )
@@ -59,11 +59,11 @@ module CarbonData
               :value => rollovers
             }
 
-            result.push( sprintf( format, @Host, @Service, 'asserts', 'regular'   , @interval, regular ) )
-            result.push( sprintf( format, @Host, @Service, 'asserts', 'warning'   , @interval, warning ) )
-            result.push( sprintf( format, @Host, @Service, 'asserts', 'message'   , @interval, message ) )
-            result.push( sprintf( format, @Host, @Service, 'asserts', 'user'      , @interval, user ) )
-            result.push( sprintf( format, @Host, @Service, 'asserts', 'rollovers' , @interval, rollovers ) )
+#             result.push( sprintf( format, @Host, @Service, 'asserts', 'regular'   , @interval, regular ) )
+#             result.push( sprintf( format, @Host, @Service, 'asserts', 'warning'   , @interval, warning ) )
+#             result.push( sprintf( format, @Host, @Service, 'asserts', 'message'   , @interval, message ) )
+#             result.push( sprintf( format, @Host, @Service, 'asserts', 'user'      , @interval, user ) )
+#             result.push( sprintf( format, @Host, @Service, 'asserts', 'rollovers' , @interval, rollovers ) )
           end
 
           if( connections != nil )
@@ -91,9 +91,9 @@ module CarbonData
               :value => totalCreated
             }
 
-            result.push( sprintf( format, @Host, @Service, 'connections', 'current'     , @interval, current ) )
-            result.push( sprintf( format, @Host, @Service, 'connections', 'available'   , @interval, available ) )
-            result.push( sprintf( format, @Host, @Service, 'connections', 'totalCreated', @interval, totalCreated ) )
+#             result.push( sprintf( format, @Host, @Service, 'connections', 'current'     , @interval, current ) )
+#             result.push( sprintf( format, @Host, @Service, 'connections', 'available'   , @interval, available ) )
+#             result.push( sprintf( format, @Host, @Service, 'connections', 'totalCreated', @interval, totalCreated ) )
           end
 
           if( network != nil )
@@ -117,9 +117,9 @@ module CarbonData
               :value => requests
             }
 
-            result.push( sprintf( 'PUTVAL %s/%s-%s/%s interval=%s N:%s', @Host, @Service, 'network', 'bytes-in', @interval, bytesIn ) )
-            result.push( sprintf( 'PUTVAL %s/%s-%s/%s interval=%s N:%s', @Host, @Service, 'network', 'bytes-out', @interval, bytesOut ) )
-            result.push( sprintf( format, @Host, @Service, 'network', 'total_requests' , @interval, requests ) )
+#             result.push( sprintf( 'PUTVAL %s/%s-%s/%s interval=%s N:%s', @Host, @Service, 'network', 'bytes-in', @interval, bytesIn ) )
+#             result.push( sprintf( 'PUTVAL %s/%s-%s/%s interval=%s N:%s', @Host, @Service, 'network', 'bytes-out', @interval, bytesOut ) )
+#             result.push( sprintf( format, @Host, @Service, 'network', 'total_requests' , @interval, requests ) )
           end
 
           if( opcounters != nil )
@@ -151,12 +151,12 @@ module CarbonData
               :value => command
             }
 
-            result.push( sprintf( format, @Host, @Service, 'opcounters', 'insert'  , @interval, insert ) )
-            result.push( sprintf( format, @Host, @Service, 'opcounters', 'query'   , @interval, query ) )
-            result.push( sprintf( format, @Host, @Service, 'opcounters', 'update'  , @interval, update ) )
-            result.push( sprintf( format, @Host, @Service, 'opcounters', 'delete'  , @interval, delete ) )
-            result.push( sprintf( format, @Host, @Service, 'opcounters', 'getmore' , @interval, getmore ) )
-            result.push( sprintf( format, @Host, @Service, 'opcounters', 'command' , @interval, command ) )
+#             result.push( sprintf( format, @Host, @Service, 'opcounters', 'insert'  , @interval, insert ) )
+#             result.push( sprintf( format, @Host, @Service, 'opcounters', 'query'   , @interval, query ) )
+#             result.push( sprintf( format, @Host, @Service, 'opcounters', 'update'  , @interval, update ) )
+#             result.push( sprintf( format, @Host, @Service, 'opcounters', 'delete'  , @interval, delete ) )
+#             result.push( sprintf( format, @Host, @Service, 'opcounters', 'getmore' , @interval, getmore ) )
+#             result.push( sprintf( format, @Host, @Service, 'opcounters', 'command' , @interval, command ) )
           end
 
           if( tcmalloc != nil )
@@ -188,9 +188,9 @@ module CarbonData
               :value => percent
             }
 
-            result.push( sprintf( format, @Host, @Service, 'heap_memory', 'size' , @interval, heapSize ) )
-            result.push( sprintf( format, @Host, @Service, 'heap_memory', 'used' , @interval, heapUsed ) )
-            result.push( sprintf( format, @Host, @Service, 'heap_memory', 'used_percent', @interval, percent ) )
+#             result.push( sprintf( format, @Host, @Service, 'heap_memory', 'size' , @interval, heapSize ) )
+#             result.push( sprintf( format, @Host, @Service, 'heap_memory', 'used' , @interval, heapUsed ) )
+#             result.push( sprintf( format, @Host, @Service, 'heap_memory', 'used_percent', @interval, percent ) )
     #
             # result.push( sprintf( format, @Host, @Service, 'cache', 'central_free' , @interval, centralCacheFree ) )
             # result.push( sprintf( format, @Host, @Service, 'cache', 'transfer_free', @interval, transferCacheFee ) )
@@ -247,15 +247,15 @@ module CarbonData
                   :value => storageConnectionFilesOpen
                 }
 
-                result.push( sprintf( 'PUTVAL %s/%s-%s/%s interval=%s N:%s', @Host, @Service, 'bytes', 'bytes-read', @interval , storageBytesRead ) )
-                result.push( sprintf( 'PUTVAL %s/%s-%s/%s interval=%s N:%s', @Host, @Service, 'bytes', 'bytes-write', @interval, storageBytesWritten ) )
-                result.push( sprintf( format, @Host, @Service, 'blocks', 'read'  , @interval, storageBlocksRead ) )
-                result.push( sprintf( format, @Host, @Service, 'blocks', 'write' , @interval, storageBlocksWritten ) )
-
-                result.push( sprintf( 'PUTVAL %s/%s-%s/%s interval=%s N:%s', @Host, @Service, 'io', 'count-read', @interval , storageConnectionIORead ) )
-                result.push( sprintf( 'PUTVAL %s/%s-%s/%s interval=%s N:%s', @Host, @Service, 'io', 'count-write', @interval, storageConnectionIOWrite ) )
-
-                result.push( sprintf( format, @Host, @Service, 'files', 'open', @interval, storageConnectionFilesOpen ) )
+#                 result.push( sprintf( 'PUTVAL %s/%s-%s/%s interval=%s N:%s', @Host, @Service, 'bytes', 'bytes-read', @interval , storageBytesRead ) )
+#                 result.push( sprintf( 'PUTVAL %s/%s-%s/%s interval=%s N:%s', @Host, @Service, 'bytes', 'bytes-write', @interval, storageBytesWritten ) )
+#                 result.push( sprintf( format, @Host, @Service, 'blocks', 'read'  , @interval, storageBlocksRead ) )
+#                 result.push( sprintf( format, @Host, @Service, 'blocks', 'write' , @interval, storageBlocksWritten ) )
+#
+#                 result.push( sprintf( 'PUTVAL %s/%s-%s/%s interval=%s N:%s', @Host, @Service, 'io', 'count-read', @interval , storageConnectionIORead ) )
+#                 result.push( sprintf( 'PUTVAL %s/%s-%s/%s interval=%s N:%s', @Host, @Service, 'io', 'count-write', @interval, storageConnectionIOWrite ) )
+#
+#                 result.push( sprintf( format, @Host, @Service, 'files', 'open', @interval, storageConnectionFilesOpen ) )
               end
             end
           end
@@ -279,7 +279,7 @@ module CarbonData
                     :value => d
                   }
 
-                  result.push( sprintf( format, @Host, @Service, 'commands', m , @interval, d ) )
+#                   result.push( sprintf( format, @Host, @Service, 'commands', m , @interval, d ) )
                 end
               end
 
@@ -299,9 +299,8 @@ module CarbonData
                   :value => failed
                 }
 
-
-                result.push( sprintf( format, @Host, @Service, 'currentOp', 'total',  @interval, total ) )
-                result.push( sprintf( format, @Host, @Service, 'currentOp', 'failed', @interval, failed ) )
+#                 result.push( sprintf( format, @Host, @Service, 'currentOp', 'total',  @interval, total ) )
+#                 result.push( sprintf( format, @Host, @Service, 'currentOp', 'failed', @interval, failed ) )
               end
 
             end
@@ -330,9 +329,9 @@ module CarbonData
                   :value => timedOut
                 }
 
-                result.push( sprintf( format, @Host, @Service, 'cursor', 'open-total',      @interval, openTotal ) )
-                result.push( sprintf( format, @Host, @Service, 'cursor', 'open-no-timeout', @interval, openNoTimeout ) )
-                result.push( sprintf( format, @Host, @Service, 'cursor', 'timed-out',       @interval, timedOut ) )
+#                 result.push( sprintf( format, @Host, @Service, 'cursor', 'open-total',      @interval, openTotal ) )
+#                 result.push( sprintf( format, @Host, @Service, 'cursor', 'open-no-timeout', @interval, openNoTimeout ) )
+#                 result.push( sprintf( format, @Host, @Service, 'cursor', 'timed-out',       @interval, timedOut ) )
               end
 
             end
@@ -352,8 +351,8 @@ module CarbonData
               :value => resident
             }
 
-            result.push( sprintf( format, @Host, @Service, 'mem', 'virtual'    , @interval, virtual ) )
-            result.push( sprintf( format, @Host, @Service, 'mem', 'resident'   , @interval, resident ) )
+#             result.push( sprintf( format, @Host, @Service, 'mem', 'virtual'    , @interval, virtual ) )
+#             result.push( sprintf( format, @Host, @Service, 'mem', 'resident'   , @interval, resident ) )
           end
 
           if( extraInfo != nil )
@@ -365,7 +364,7 @@ module CarbonData
               :value => pageFaults
             }
 
-            result.push( sprintf( format, @Host, @Service, 'extraInfo', 'pageFaults' , @interval, pageFaults ) )
+#             result.push( sprintf( format, @Host, @Service, 'extraInfo', 'pageFaults' , @interval, pageFaults ) )
           end
 
           if( wiredTiger != nil )
@@ -374,6 +373,7 @@ module CarbonData
             concurrentTransactions = wiredTiger.dig('concurrentTransactions')
 
             if( wiredTigerCache != nil )
+
               bytes         = wiredTigerCache.dig('bytes currently in the cache')
               maximum       = wiredTigerCache.dig('maximum bytes configured')
               tracked       = wiredTigerCache.dig('tracked dirty bytes in the cache')
@@ -397,11 +397,11 @@ module CarbonData
                 :value => unmodified
               }
 
-              result.push( sprintf( format, @Host, @Service, 'wiredTigerCache', 'bytes'      , @interval, bytes ) )
-              result.push( sprintf( format, @Host, @Service, 'wiredTigerCache', 'maximum'    , @interval, maximum ) )
-              result.push( sprintf( format, @Host, @Service, 'wiredTigerCache', 'tracked'    , @interval, tracked ) )
-              result.push( sprintf( format, @Host, @Service, 'wiredTigerCache', 'unmodified' , @interval, unmodified ) )
-              result.push( sprintf( format, @Host, @Service, 'wiredTigerCache', 'modified'   , @interval, modified ) )
+#               result.push( sprintf( format, @Host, @Service, 'wiredTigerCache', 'bytes'      , @interval, bytes ) )
+#               result.push( sprintf( format, @Host, @Service, 'wiredTigerCache', 'maximum'    , @interval, maximum ) )
+#               result.push( sprintf( format, @Host, @Service, 'wiredTigerCache', 'tracked'    , @interval, tracked ) )
+#               result.push( sprintf( format, @Host, @Service, 'wiredTigerCache', 'unmodified' , @interval, unmodified ) )
+#               result.push( sprintf( format, @Host, @Service, 'wiredTigerCache', 'modified'   , @interval, modified ) )
             end
 
             if( concurrentTransactions != nil )
@@ -431,10 +431,10 @@ module CarbonData
                   :value => writeAvailable
                 }
 
-                result.push( sprintf( format, @Host, @Service, 'wiredTigerConcTrans', 'readOut'          , @interval, readOut ) )
-                result.push( sprintf( format, @Host, @Service, 'wiredTigerConcTrans', 'readAvailable'    , @interval, readAvailable ) )
-                result.push( sprintf( format, @Host, @Service, 'wiredTigerConcTrans', 'writeOut'         , @interval, writeOut ) )
-                result.push( sprintf( format, @Host, @Service, 'wiredTigerConcTrans', 'writeAvailable'   , @interval, writeAvailable ) )
+#                 result.push( sprintf( format, @Host, @Service, 'wiredTigerConcTrans', 'readOut'          , @interval, readOut ) )
+#                 result.push( sprintf( format, @Host, @Service, 'wiredTigerConcTrans', 'readAvailable'    , @interval, readAvailable ) )
+#                 result.push( sprintf( format, @Host, @Service, 'wiredTigerConcTrans', 'writeOut'         , @interval, writeOut ) )
+#                 result.push( sprintf( format, @Host, @Service, 'wiredTigerConcTrans', 'writeAvailable'   , @interval, writeAvailable ) )
               end
 
             end
@@ -462,9 +462,9 @@ module CarbonData
                 :value => total
               }
 
-              result.push( sprintf( format, @Host, @Service, 'globalLockCurrentQueue', 'readers'    , @interval, readers ) )
-              result.push( sprintf( format, @Host, @Service, 'globalLockCurrentQueue', 'writers'    , @interval, writers ) )
-              result.push( sprintf( format, @Host, @Service, 'globalLockCurrentQueue', 'total'      , @interval, total ) )
+#               result.push( sprintf( format, @Host, @Service, 'globalLockCurrentQueue', 'readers'    , @interval, readers ) )
+#               result.push( sprintf( format, @Host, @Service, 'globalLockCurrentQueue', 'writers'    , @interval, writers ) )
+#               result.push( sprintf( format, @Host, @Service, 'globalLockCurrentQueue', 'total'      , @interval, total ) )
             end
 
             if( activeClients != nil )
@@ -484,9 +484,9 @@ module CarbonData
                 :value => total
               }
 
-              result.push( sprintf( format, @Host, @Service, 'globalLockActiveClients', 'readers'    , @interval, readers ) )
-              result.push( sprintf( format, @Host, @Service, 'globalLockActiveClients', 'writers'    , @interval, writers ) )
-              result.push( sprintf( format, @Host, @Service, 'globalLockActiveClients', 'total'      , @interval, total ) )
+#               result.push( sprintf( format, @Host, @Service, 'globalLockActiveClients', 'readers'    , @interval, readers ) )
+#               result.push( sprintf( format, @Host, @Service, 'globalLockActiveClients', 'writers'    , @interval, writers ) )
+#               result.push( sprintf( format, @Host, @Service, 'globalLockActiveClients', 'total'      , @interval, total ) )
             end
           end
 
