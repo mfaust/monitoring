@@ -30,7 +30,7 @@ module CarbonWriter
 
     def normalize_time( time, slice )
 
-      logger.debug( "normalize_time( #{time}, #{slice} )" )
+#       logger.debug( "normalize_time( #{time}, #{slice} )" )
 
       if slice.nil?
         slice = 60
@@ -43,7 +43,7 @@ module CarbonWriter
 
     def nested_zero_hash()
 
-      logger.debug( 'nested_zero_hash()' )
+#       logger.debug( 'nested_zero_hash()' )
 
       Hash.new { |h,k| h[k] = Hash.new { |h,k| h[k] = 0 } }
 

@@ -40,4 +40,4 @@ RUN \
 
 COPY rootfs/ /
 
-CMD [ "/opt/startup.sh" ]
+CMD [ "/usr/local/bin/carbon-data.rb" ]

@@ -25,7 +25,7 @@ module CarbonWriter
 
         scheduler = Rufus::Scheduler.new
 
-        scheduler.every( 10 ) do
+        scheduler.every( 120 ) do
           clean( options[:cache] )
         end
 
@@ -35,20 +35,20 @@ module CarbonWriter
 
       def get( time, key )
 
-        logger.debug( sprintf( 'get( %s, %s )', time, key ) )
+#         logger.debug( sprintf( 'get( %s, %s )', time, key ) )
 
         cache[time.to_i][key]
       end
 
       def set( time, key, value )
 
-        logger.debug( sprintf( 'set( %s, %s, %s )', time, key, value ) )
+#         logger.debug( sprintf( 'set( %s, %s, %s )', time, key, value ) )
         cache[time.to_i][key] = value.to_f
       end
 
       def incr( time, key, value )
 
-        logger.debug( 'incr()' )
+#         logger.debug( 'incr()' )
         self.set( time, key, value.to_f + self.get( time, key ) )
       end
 
@@ -63,11 +63,11 @@ module CarbonWriter
 
       def clean( max_age )
 
-        logger.debug( "before_clean  #{cache}" )
+        logger.debug( sprintf( 'before clean  : ', cache.count ) )
 
         cache.delete_if { |t,k| Time.now.to_i - t > max_age }
 
-        logger.debug( "after_clean  #{cache}" )
+        logger.debug( sprintf( 'after clean   : ', cache.count ) )
 
       end
 

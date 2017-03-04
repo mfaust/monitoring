@@ -42,21 +42,18 @@ Signal.trap('QUIT') { stop = true }
 
 # -----------------------------------------------------------------------------
 
-client = CarbonWriter.new( config )
-
-
-exit 0
+writer = CarbonWriter.new( config )
 
 scheduler = Rufus::Scheduler.new
 
-scheduler.every( '45s', :first_in => 0.4 ) do
-  client.metric( { :key => "test.master-17-tomcat.WFS.Runtime.starttime" , :value => 1488287135933 } )
-  client.metric( { :key => "test.master-17-tomcat.WFS.Manager.processing.time.count" , :value => 4 } )
+scheduler.every( interval, :first_in => 1 ) do
+
+  writer.run()
 
 end
 
 
-scheduler.every( '1s' ) do
+scheduler.every( '5s' ) do
 
   if( stop == true )
 
@@ -69,5 +66,3 @@ end
 
 
 scheduler.join
-
-

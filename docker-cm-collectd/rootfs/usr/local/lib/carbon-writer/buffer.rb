@@ -72,7 +72,7 @@ module CarbonWriter
     # push({:metric => {'a' => 10},:time => Time.now})
     def push( obj )
 
-      logger.debug( "push( #{obj} )" )
+#       logger.debug( "push( #{obj} )" )
 
       queue.push( obj )
 
@@ -84,7 +84,7 @@ module CarbonWriter
 
     def pull( format = nil )
 
-      logger.debug( sprintf( 'pull( %s )', format ) )
+#       logger.debug( sprintf( 'pull( %s )', format ) )
 
       data = nested_zero_hash()
 

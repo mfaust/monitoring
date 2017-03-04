@@ -69,27 +69,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-MemoryPool-Par_Eden_Space.count-committed, '(.*)-', ''))",
+                "target": "aliasByMetric(*.master-17-tomcat.$Application.MemoryPool.Par_Eden_Space.committed)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-MemoryPool-Par_Eden_Space.count-max, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(*.%HOST%.$Application.MemoryPool.Par_Eden_Space.max, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-MemoryPool-Par_Eden_Space.count-used, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(*.%HOST%.$Application.MemoryPool.Par_Eden_Space.used, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "alias(smartSummarize(aliasSub(collectd.%HOST%.$service-MemoryPool-Par_Eden_Space.count-used_percent, '(.*)-', ''), '3m', 'avg'), 'percent (avg)')",
+                "target": "alias(smartSummarize(aliasSub(*.%HOST%.$Application.MemoryPool.Par_Eden_Space.used_percent, '(.*)-', ''), '3m', 'avg'), 'percent (avg)')",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.$service-MemoryPool-Par_Eden_Space.count-used_percent, '(.*)-', ''), 'percent'))",
+                "target": "aliasByMetric(alias(aliasSub(*.%HOST%.$Application.MemoryPool.Par_Eden_Space.used_percent, '(.*)-', ''), 'percent'))",
                 "textEditor": false,
                 "hide": true
               }
@@ -189,27 +189,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-MemoryPool-Par_Survivor_Space.count-committed, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(*.%HOST%.$Application.MemoryPool.Par_Survivor_Space.committed, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-MemoryPool-Par_Survivor_Space.count-max, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(*.%HOST%.$Application.MemoryPool.Par_Survivor_Space.max, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-MemoryPool-Par_Survivor_Space.count-used, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(*.%HOST%.$Application.MemoryPool.Par_Survivor_Space.used, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "alias(smartSummarize(aliasSub(collectd.%HOST%.$service-MemoryPool-Par_Survivor_Space.count-used_percent, '(.*)-', ''), '5m', 'avg'), 'percent (avg)')",
+                "target": "alias(smartSummarize(aliasSub(*.%HOST%.$Application.MemoryPool.Par_Survivor_Space.used_percent, '(.*)-', ''), '5m', 'avg'), 'percent (avg)')",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.$service-MemoryPool-Par_Survivor_Space.count-used_percent, '(.*)-', ''), 'percent'))",
+                "target": "aliasByMetric(alias(aliasSub(*.%HOST%.$Application.MemoryPool.Par_Survivor_Space.used_percent, '(.*)-', ''), 'percent'))",
                 "textEditor": false,
                 "hide": true
               }
@@ -308,27 +308,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-MemoryPool-CMS_Old_Gen.count-committed, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(*.%HOST%.$Application.MemoryPool.CMS_Old_Gen.committed, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-MemoryPool-CMS_Old_Gen.count-max, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(*.%HOST%.$Application.MemoryPool.CMS_Old_Gen.max, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-MemoryPool-CMS_Old_Gen.count-used, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(*.%HOST%.$Application.MemoryPool.CMS_Old_Gen.used, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "alias(smartSummarize(aliasSub(collectd.%HOST%.$service-MemoryPool-CMS_Old_Gen.count-used_percent, '(.*)-', ''), '5m', 'avg'), 'percent (avg)')",
+                "target": "alias(smartSummarize(aliasSub(*.%HOST%.$Application.MemoryPool.CMS_Old_Gen.used_percent, '(.*)-', ''), '5m', 'avg'), 'percent (avg)')",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.$service-MemoryPool-CMS_Old_Gen.count-used_percent, '(.*)-', ''), 'percent'))",
+                "target": "aliasByMetric(alias(aliasSub(*.%HOST%.$Application.MemoryPool.CMS_Old_Gen.used_percent, '(.*)-', ''), 'percent'))",
                 "textEditor": false,
                 "hide": true
               }
@@ -427,28 +427,28 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-MemoryPool-Metaspace.count-committed, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(*.%HOST%.$Application.MemoryPool.Metaspace.committed, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "hide": true,
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-MemoryPool-Metaspace.count-max, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(*.%HOST%.$Application.MemoryPool.Metaspace.max, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-MemoryPool-Metaspace.count-used, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(*.%HOST%.$Application.MemoryPool.Metaspace.used, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "alias(smartSummarize(aliasSub(collectd.%HOST%.$service-MemoryPool-Metaspace.count-used_percent, '(.*)-', ''), '5m', 'avg'), 'percent (avg)')",
+                "target": "alias(smartSummarize(aliasSub(*.%HOST%.$Application.MemoryPool.Metaspace.used_percent, '(.*)-', ''), '5m', 'avg'), 'percent (avg)')",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.$service-MemoryPool-Metaspace.count-used_percent, '(.*)-', ''), 'percent'))",
+                "target": "aliasByMetric(alias(aliasSub(*.%HOST%.$Application.MemoryPool.Metaspace.used_percent, '(.*)-', ''), 'percent'))",
                 "textEditor": false,
                 "hide": true
               }
@@ -547,27 +547,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-MemoryPool-Code_Cache.count-committed, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(*.%HOST%.$Application.MemoryPool.Code_Cache.committed, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-MemoryPool-Code_Cache.count-max, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(*.%HOST%.$Application.MemoryPool.Code_Cache.max, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-MemoryPool-Code_Cache.count-used, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(*.%HOST%.$Application.MemoryPool.Code_Cache.used, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "alias(smartSummarize(aliasSub(collectd.%HOST%.$service-MemoryPool-Code_Cache.count-used_percent, '(.*)-', ''), '5m', 'avg'), 'percent (avg)')",
+                "target": "alias(smartSummarize(aliasSub(*.%HOST%.$Application.MemoryPool.Code_Cache.used_percent, '(.*)-', ''), '5m', 'avg'), 'percent (avg)')",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.$service-MemoryPool-Code_Cache.count-used_percent, '(.*)-', ''), 'percent'))",
+                "target": "aliasByMetric(alias(aliasSub(*.%HOST%.$Application.MemoryPool.Code_Cache.used_percent, '(.*)-', ''), 'percent'))",
                 "textEditor": false,
                 "hide": true
               }
@@ -666,27 +666,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-MemoryPool-Compressed_Class_Space.count-committed, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(*.%HOST%.$Application.MemoryPool.Compressed_Class_Space.committed, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-MemoryPool-Compressed_Class_Space.count-max, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(*.%HOST%.$Application.MemoryPool.Compressed_Class_Space.max, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$service-MemoryPool-Compressed_Class_Space.count-used, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(*.%HOST%.$Application.MemoryPool.Compressed_Class_Space.used, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "alias(smartSummarize(aliasSub(collectd.%HOST%.$service-MemoryPool-Compressed_Class_Space.count-used_percent, '(.*)-', ''), '5m', 'avg'), 'percent (avg)')",
+                "target": "alias(smartSummarize(aliasSub(*.%HOST%.$Application.MemoryPool.Compressed_Class_Space.used_percent, '(.*)-', ''), '5m', 'avg'), 'percent (avg)')",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.$service-MemoryPool-Compressed_Class_Space.count-used_percent, '(.*)-', ''), 'percent'))",
+                "target": "aliasByMetric(alias(aliasSub(*.%HOST%.$Application.MemoryPool.Compressed_Class_Space.used_percent, '(.*)-', ''), 'percent'))",
                 "textEditor": false,
                 "hide": true
               }
@@ -844,15 +844,16 @@
               "selected": false
             }
           ],
-          "query": "*.%HOST%.*MemoryPool-*",
-          "refresh": 1,
-          "regex": "/(.*)-MemoryPool*/",
+          "name": "Application",
+          "query": "*.%HOST%.*",
+          "regex": "/^(?!MONGODB|MYSQL).*$/",
+          "hide": 1,
           "sort": 0,
+          "refresh": 1,
           "tagValuesQuery": null,
           "tags": [],
           "tagsQuery": null,
-          "type": "query",
-          "useTags": true
+          "type": "query"
         }
       ]
     },

@@ -87,31 +87,31 @@
               {
                 "hide": false,
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$application-Memory-heap_memory.count-max, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$Application.Memory.heap_memory.max)",
                 "textEditor": false
               },
               {
                 "hide": false,
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$application-Memory-heap_memory.count-committed, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$Application.Memory.heap_memory.committed)",
                 "textEditor": false
               },
               {
                 "hide": false,
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$application-Memory-heap_memory.count-used, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$Application.Memory.heap_memory.used)",
                 "textEditor": false
               },
               {
                 "hide": false,
                 "refId": "D",
-                "target": "alias(smartSummarize(aliasSub(collectd.%HOST%.$application-Memory-heap_memory.count-used_percent, '(.*)-', ''), '3m', 'avg'), 'percent (avg)')",
+                "target": "alias(smartSummarize(aliasSub(*.%HOST%.$Application.Memory.heap_memory.used_percent, '(.*)-', ''), '3m', 'avg'), 'percent (avg)')",
                 "textEditor": false
               },
               {
                 "hide": true,
                 "refId": "E",
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.$application-Memory-heap_memory.count-used_percent, '(.*)-', ''), 'percent'))",
+                "target": "aliasByMetric(alias(aliasSub(*.%HOST%.$Application.Memory.heap_memory.used_percent, '(.*)-', ''), 'percent'))",
                 "textEditor": false
               }
             ],
@@ -211,24 +211,24 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$application-Memory-perm_memory.count-committed, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$Application.Memory.perm_memory.committed)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$application-Memory-perm_memory.count-used, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$Application.Memory.perm_memory.used)",
                 "textEditor": false
               },
               {
                 "hide": false,
                 "refId": "C",
-                "target": "alias(smartSummarize(aliasSub(collectd.%HOST%.$application-Memory-perm_memory.count-used_percent, '(.*)-', ''), '3m', 'avg'), 'percent (avg)')",
+                "target": "alias(smartSummarize(aliasSub(*.%HOST%.$Application.Memory.perm_memory.used_percent, '(.*)-', ''), '3m', 'avg'), 'percent (avg)')",
                 "textEditor": false
               },
               {
                 "hide": true,
                 "refId": "D",
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.$application-Memory-perm_memory.count-used_percent, '(.*)-', ''), 'percent'))",
+                "target": "aliasByMetric(alias(aliasSub(*.%HOST%.$Application.Memory.perm_memory.used_percent, '(.*)-', ''), 'percent'))",
                 "textEditor": false
               }
             ],
@@ -330,12 +330,12 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.$application-GCParNew-gc_duration.count-duration, '(.*)-', ''), 'Par New'))",
+                "target": "aliasByMetric(alias(aliasSub(*.%HOST%.$Application.GarbageCollector.ParNew.duration.time, '(.*)-', ''), 'Par New'))",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.$application-GCConcurrentMarkSweep-gc_duration.count-duration, '(.*)-', ''), 'Con Mark Sweep'))",
+                "target": "aliasByMetric(alias(aliasSub(*.%HOST%.$Application.GarbageCollector.ConcurrentMarkSweep.duration.time, '(.*)-', ''), 'Con Mark Sweep'))",
                 "textEditor": false
               }
             ],
@@ -359,7 +359,7 @@
             },
             "yaxes": [
               {
-                "format": "bytes",
+                "format": "ms",
                 "logBase": 1,
                 "max": null,
                 "min": null,
@@ -437,7 +437,12 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$application-Threading-threading.*, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$Application.Threading.count)",
+                "textEditor": false
+              },
+              {
+                "refId": "B",
+                "target": "aliasByMetric(*.%HOST%.$Application.Threading.peak)",
                 "textEditor": false
               }
             ],
@@ -539,7 +544,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$application-Manager-sessions.*, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(*.%HOST%.$Application.Manager.sessions.*, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -563,7 +568,7 @@
             },
             "yaxes": [
               {
-                "format": "bytes",
+                "format": "none",
                 "logBase": 1,
                 "max": null,
                 "min": null,
@@ -617,24 +622,16 @@
     "templating": {
       "list": [
         {
-          "allValue": null,
-          "current": {},
-          "datasource": "graphite",
-          "hide": 0,
-          "includeAll": false,
-          "label": null,
-          "multi": false,
-          "name": "application",
-          "options": [],
-          "query": ".*.%HOST%.*-Memory*",
-          "refresh": 1,
-          "regex": "/(.*)-Memory-perm_memory(.*)/",
+          "name": "Application",
+          "query": "*.%HOST%.*",
+          "regex": "/^(?!MONGODB|MYSQL).*$/",
+          "hide": 1,
           "sort": 0,
-          "tagValuesQuery": "",
+          "refresh": 1,
+          "tagValuesQuery": null,
           "tags": [],
-          "tagsQuery": "",
-          "type": "query",
-          "useTags": false
+          "tagsQuery": null,
+          "type": "query"
         }
       ]
     },

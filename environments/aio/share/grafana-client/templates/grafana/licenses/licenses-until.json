@@ -38,7 +38,7 @@
           "id": 63,
           "targets": [
             {
-              "target": "collectd.%HOST%.%SERVICE%-Server-license_until_soft.count-days",
+              "target": "*.%HOST%.%SERVICE%.Server.license.until.soft.days",
               "refId": "A"
             }
           ],
@@ -68,7 +68,7 @@
           "id": 63,
           "targets": [
             {
-              "target": "collectd.%HOST%.%SERVICE%-Server-license_until_soft.count-weeks",
+              "target": "*.%HOST%.%SERVICE%.Server.license.until.soft.weeks",
               "refId": "A"
             }
           ],
@@ -92,7 +92,7 @@
           "id": 62,
           "targets": [
             {
-              "target": "collectd.%HOST%.%SERVICE%-Server-license_until_soft.count-months",
+              "target": "*.%HOST%.%SERVICE%.Server.license.until.soft.month",
               "refId": "A"
             }
           ],
@@ -141,7 +141,7 @@
           "id": 63,
           "targets": [
             {
-              "target": "collectd.%HOST%.%SERVICE%-Server-license_until_hard.count-days",
+              "target": "*.%HOST%.%SERVICE%.Server.license.until.hard.days",
               "refId": "A"
             }
           ],
@@ -171,7 +171,7 @@
           "id": 63,
           "targets": [
             {
-              "target": "collectd.%HOST%.%SERVICE%-Server-license_until_hard.count-weeks",
+              "target": "*.%HOST%.%SERVICE%.Server.license.until.hard.weeks",
               "refId": "A"
             }
           ],
@@ -195,7 +195,7 @@
           "id": 62,
           "targets": [
             {
-              "target": "collectd.%HOST%.%SERVICE%-Server-license_until_hard.count-months",
+              "target": "*.%HOST%.%SERVICE%.Server.license.until.hard.month",
               "refId": "A"
             }
           ],

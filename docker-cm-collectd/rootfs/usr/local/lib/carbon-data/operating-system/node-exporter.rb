@@ -105,7 +105,7 @@ module CarbonData
               :key   => sprintf( '%s.%s.%s.%s'         , @Host, @Service, 'memory', 'used' ),
               :value => memUsed
             } << {
-              :key   => sprintf( '%s.%s.%s.%s.%s'      , @Host, @Service, 'memory', 'used' ,'percent' ),
+              :key   => sprintf( '%s.%s.%s.%s'         , @Host, @Service, 'memory', 'used_percent' ),
               :value => memUsedPercent
             } << {
               :key   => sprintf( '%s.%s.%s.%s'         , @Host, @Service, 'swap', 'cached' ),
@@ -120,7 +120,7 @@ module CarbonData
               :key   => sprintf( '%s.%s.%s.%s'         , @Host, @Service, 'swap', 'used' ),
               :value => swapUsed
             } << {
-              :key   => sprintf( '%s.%s.%s.%s.%s'      , @Host, @Service, 'swap', 'used' ,'percent' ),
+              :key   => sprintf( '%s.%s.%s.%s'         , @Host, @Service, 'swap', 'used_percent' ),
               :value => swapUsedPercent
             }
 
@@ -161,7 +161,7 @@ module CarbonData
                 :key   => sprintf( '%s.%s.%s.%s.%s'         , @Host, @Service, 'filesystem', f, 'used' ),
                 :value => used
               } << {
-                :key   => sprintf( '%s.%s.%s.%s.%s.%s'      , @Host, @Service, 'filesystem', f, 'used', 'percent' ),
+                :key   => sprintf( '%s.%s.%s.%s.%s'         , @Host, @Service, 'filesystem', f, 'used_percent' ),
                 :value => usedPercent
               }
 

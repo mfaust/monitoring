@@ -231,7 +231,7 @@ module CarbonData
             :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, type, 'used' ),
             :value => used
           } << {
-            :key   => sprintf( '%s.%s.%s.%s.%s.%s', @Host, @Service, mbean, type, 'used', 'percent' ),
+            :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, type, 'used_percent' ),
             :value => percent
           } << {
             :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, type, 'committed' ),

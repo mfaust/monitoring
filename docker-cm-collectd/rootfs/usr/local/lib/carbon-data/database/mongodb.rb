@@ -182,7 +182,7 @@ module CarbonData
               :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, 'memory', 'heap', 'used' ),
               :value => heapUsed
             } << {
-              :key   => sprintf( '%s.%s.%s.%s.%s.%s', @Host, @Service, 'memory', 'heap', 'used', 'percent' ),
+              :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, 'memory', 'heap', 'used_percent' ),
               :value => percent
             }
 
