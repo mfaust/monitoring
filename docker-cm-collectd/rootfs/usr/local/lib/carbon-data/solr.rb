@@ -140,6 +140,8 @@ module CarbonData
 
   #      value = value.values.first
 
+
+
         generation        = value.dig('generation')
         isMaster          = value.dig('isSlave')
         isSlave           = value.dig('isMaster')
@@ -148,7 +150,7 @@ module CarbonData
         requests          = value.dig('requests')
         medianRequestTime = value.dig('medianRequestTime')
         errors            = value.dig('errors')
-        timeouts          = value.dig('timeouts')
+#         timeouts          = value.dig('timeouts')
         indexSize         = value.dig('indexSize')
         isMaster          = value.dig('isMaster')  || 1
         isSlave           = value.dig('isSlave')   || 0
@@ -173,9 +175,9 @@ module CarbonData
       } << {
         :key   => sprintf( '%s.%s.%s.%s.%s'   , @Host, @Service, solrCore, mbean, 'requests' ),
         :value => requests
-      } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s'   , @Host, @Service, solrCore, mbean, 'timeouts' ),
-        :value => timeouts
+#       } << {
+#         :key   => sprintf( '%s.%s.%s.%s.%s'   , @Host, @Service, solrCore, mbean, 'timeouts' ),
+#         :value => timeouts
       } << {
         :key   => sprintf( '%s.%s.%s.%s.%s'   , @Host, @Service, solrCore, mbean, 'errors' ),
         :value => errors

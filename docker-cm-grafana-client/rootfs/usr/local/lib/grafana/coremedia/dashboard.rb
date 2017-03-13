@@ -157,14 +157,11 @@ module Grafana
           serviceTemplate = self.templateForService( templateName )
 #           serviceTemplate = self.templateForService( serviceName )
 
-
-          logger.debug( sprintf( '  description %s', description ) )
-          logger.debug( sprintf( '  template %s', template ) )
+          logger.debug( sprintf( '  serviceName  %s', serviceName ) )
+          logger.debug( sprintf( '  description  %s', description ) )
+          logger.debug( sprintf( '  template     %s', template ) )
           logger.debug( sprintf( '  templateName %s', templateName ) )
-          logger.debug( sprintf( '  cacheKey %s', cacheKey ) )
-
-
-
+          logger.debug( sprintf( '  cacheKey     %s', cacheKey ) )
 
           if( ! ['mongodb', 'mysql', 'postgres'].include?( serviceName ) )
             additionalTemplatePaths << self.templateForService( 'tomcat' )
@@ -209,7 +206,7 @@ module Grafana
 
           namedTemplate.push( 'cm-cae-cache-classes.json' )
 
-          if( @mbean.beanAvailable?( host, 'cae-preview', 'CacheClassesIBMAvailability' ) == true )
+          if( @mbean.beanAvailable?( host, 'cae-preview', 'CacheClassesECommerceAvailability' ) == true )
             namedTemplate.push( 'cm-cae-cache-classes-ibm.json' )
           end
         end
@@ -222,10 +219,12 @@ module Grafana
           until( measurements != nil )
             logger.debug( sprintf( 'wait for measurements data for node \'%s\'', host ) )
             measurements = @db.measurements( { :ip => host, :short => host } )
-            sleep( 5 )
+            sleep( 8 )
           end
 
-#           logger.debug( 'found measurement data' )
+          logger.debug( 'found measurement data' )
+
+          logger.debug( JSON.pretty_generate( measurements ) )
         rescue => e
           logger.error( e )
         end

@@ -178,14 +178,21 @@ module CarbonData
     end
 
 
-    def run()
+    def nodes()
 
-      monitoredServer = self.monitoredServer()
+      return self.monitoredServer()
+
+    end
+
+
+    def run( node )
+
+#      monitoredServer =
       data            = nil
 
-#       logger.debug( "#{monitoredServer.keys}" )
+#      logger.debug( "#{monitoredServer.keys}" )
 
-      monitoredServer.each do |h,d|
+      node.each do |h,d|
 
         @Host = h
         graphiteOutput = Array.new()

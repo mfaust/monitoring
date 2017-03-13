@@ -118,50 +118,50 @@ jolokia:
       - mbean: com.coremedia:type=Cache.Classes,CacheClass="java.lang.Object",application=*
         attribute: Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate
 
-    caches-ibm:
-      description: "CAE or Studio Caches (eCommerce / IBM)"
+    caches-ecommerce:
+      description: "CAE or Studio Caches (eCommerce)"
       metrics:
-      - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.ecommerce.ibm.cache.Availability",application=*
+      - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.ecommerce.cache.Availability",application=*
         attribute: Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate
-      - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.ecommerce.ibm.cache.Category",application=*
+      - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.ecommerce.cache.Category",application=*
         attribute: Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate
-      - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.ecommerce.ibm.cache.CommerceUser",application=*
+      - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.ecommerce.cache.CommerceUser",application=*
         attribute: Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate
-      - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.ecommerce.ibm.cache.Contract",application=*
+      - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.ecommerce.cache.Contract",application=*
         attribute: Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate
-      - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.ecommerce.ibm.cache.ContractIdsByUser",application=*
+      - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.ecommerce.cache.ContractIdsByUser",application=*
         attribute: Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate
-      - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.ecommerce.ibm.cache.ContractsByUser",application=*
+      - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.ecommerce.cache.ContractsByUser",application=*
         attribute: Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate
-      - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.ecommerce.ibm.cache.DynamicPrice",application=*
+      - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.ecommerce.cache.DynamicPrice",application=*
         attribute: Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate
-      - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.ecommerce.ibm.cache.MarketingSpot",application=*
+      - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.ecommerce.cache.MarketingSpot",application=*
         attribute: Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate
-      - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.ecommerce.ibm.cache.MarketingSpots",application=*
+      - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.ecommerce.cache.MarketingSpots",application=*
         attribute: Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate
-      - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.ecommerce.ibm.cache.PreviewToken",application=*
+      - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.ecommerce.cache.PreviewToken",application=*
         attribute: Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate
-      - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.ecommerce.ibm.cache.Product",application=*
+      - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.ecommerce.cache.Product",application=*
         attribute: Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate
-      - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.ecommerce.ibm.cache.ProductsByCategory",application=*
+      - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.ecommerce.cache.ProductsByCategory",application=*
         attribute: Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate
-      - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.ecommerce.ibm.cache.Segment",application=*
+      - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.ecommerce.cache.Segment",application=*
         attribute: Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate
-      - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.ecommerce.ibm.cache.Segments",application=*
+      - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.ecommerce.cache.Segments",application=*
         attribute: Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate
-      - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.ecommerce.ibm.cache.SegmentsByUser",application=*
+      - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.ecommerce.cache.SegmentsByUser",application=*
         attribute: Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate
-      - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.ecommerce.ibm.cache.StaticPrice",application=*
+      - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.ecommerce.cache.StaticPrice",application=*
         attribute: Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate
-      - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.ecommerce.ibm.cache.StoreInfo",application=*
+      - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.ecommerce.cache.StoreInfo",application=*
         attribute: Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate
-      - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.ecommerce.ibm.cache.SubCategories",application=*
+      - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.ecommerce.cache.SubCategories",application=*
         attribute: Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate
-      - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.ecommerce.ibm.cache.TopCategories",application=*
+      - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.ecommerce.cache.TopCategories",application=*
         attribute: Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate
-      - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.ecommerce.ibm.cache.UserIsLoggedIn",application=*
+      - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.ecommerce.cache.UserIsLoggedIn",application=*
         attribute: Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate
-      - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.ecommerce.ibm.cache.Workspaces",application=*
+      - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.ecommerce.cache.Workspaces",application=*
         attribute: Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate
       - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.fragment.resolver.SearchTermExternalReferenceResolver",application=*
         attribute: Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate

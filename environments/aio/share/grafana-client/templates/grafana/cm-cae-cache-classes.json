@@ -74,27 +74,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-AMAsset.count-capacity, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.AMAsset.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-AMAsset.count-level, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.AMAsset.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-AMAsset.count-evicted, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.AMAsset.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-AMAsset.count-removed, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.AMAsset.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-AMAsset.count-missRate, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.AMAsset.missRate)",
                 "textEditor": false
               }
             ],
@@ -189,27 +189,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-ContentBeanBackedPageGridPlacement.count-capacity, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ContentBeanBackedPageGridPlacement.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-ContentBeanBackedPageGridPlacement.count-level, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ContentBeanBackedPageGridPlacement.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-ContentBeanBackedPageGridPlacement.count-evicted, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ContentBeanBackedPageGridPlacement.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-ContentBeanBackedPageGridPlacement.count-removed, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ContentBeanBackedPageGridPlacement.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-ContentBeanBackedPageGridPlacement.count-missRate, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ContentBeanBackedPageGridPlacement.missRate)",
                 "textEditor": false
               }
             ],
@@ -311,27 +311,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-PageGridImpl.count-capacity, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.PageGridImpl.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-PageGridImpl.count-level, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.PageGridImpl.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-PageGridImpl.count-evicted, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.PageGridImpl.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-PageGridImpl.count-removed, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.PageGridImpl.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-PageGridImpl.count-missRate, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.PageGridImpl.missRate)",
                 "textEditor": false
               }
             ],
@@ -426,27 +426,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-SolrQueryCacheKey.count-capacity, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.SolrQueryCacheKey.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-SolrQueryCacheKey.count-level, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.SolrQueryCacheKey.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-SolrQueryCacheKey.count-evicted, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.SolrQueryCacheKey.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-SolrQueryCacheKey.count-removed, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.SolrQueryCacheKey.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-SolrQueryCacheKey.count-missRate, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.SolrQueryCacheKey.missRate)",
                 "textEditor": false
               }
             ],
@@ -548,27 +548,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-Page.count-capacity, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Page.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-Page.count-level, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Page.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-Page.count-evicted, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Page.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-Page.count-removed, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Page.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-Page.count-missRate, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Page.missRate)",
                 "textEditor": false
               }
             ],
@@ -663,27 +663,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-Aspect.count-capacity, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Aspect.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-Aspect.count-level, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Aspect.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-Aspect.count-evicted, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Aspect.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-Aspect.count-removed, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Aspect.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-Aspect.count-missRate, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Aspect.missRate)",
                 "textEditor": false
               }
             ],
@@ -785,27 +785,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-ViewLookup.count-capacity, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ViewLookup.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-ViewLookup.count-level, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ViewLookup.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-ViewLookup.count-evicted, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ViewLookup.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-ViewLookup.count-removed, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ViewLookup.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-ViewLookup.count-missRate, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ViewLookup.missRate)",
                 "textEditor": false
               }
             ],
@@ -900,27 +900,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-LoadedImageCacheKey.count-capacity, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.LoadedImageCacheKey.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-LoadedImageCacheKey.count-level, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.LoadedImageCacheKey.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-LoadedImageCacheKey.count-evicted, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.LoadedImageCacheKey.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-LoadedImageCacheKey.count-removed, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.LoadedImageCacheKey.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-LoadedImageCacheKey.count-missRate, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.LoadedImageCacheKey.missRate)",
                 "textEditor": false
               }
             ],
@@ -1022,27 +1022,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-Object.count-capacity, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Object.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-Object.count-level, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Object.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-Object.count-evicted, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Object.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-Object.count-removed, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Object.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-Object.count-missRate, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Object.missRate)",
                 "textEditor": false
               }
             ],
@@ -1137,27 +1137,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-AssumesIdentity.count-capacity, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.AssumesIdentity.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-AssumesIdentity.count-level, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.AssumesIdentity.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-AssumesIdentity.count-evicted, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.AssumesIdentity.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-AssumesIdentity.count-removed, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.AssumesIdentity.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-AssumesIdentity.count-missRate, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.AssumesIdentity.missRate)",
                 "textEditor": false
               }
             ],
@@ -1259,27 +1259,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-DIGEST.count-capacity, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.DIGEST.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-DIGEST.count-level, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.DIGEST.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-DIGEST.count-evicted, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.DIGEST.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-DIGEST.count-removed, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.DIGEST.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-DIGEST.count-missRate, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.DIGEST.missRate)",
                 "textEditor": false
               }
             ],
@@ -1374,27 +1374,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-Disk.count-capacity, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Disk.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-Disk.count-level, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Disk.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-Disk.count-evicted, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Disk.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-Disk.count-removed, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Disk.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-Disk.count-missRate, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Disk.missRate)",
                 "textEditor": false
               }
             ],
@@ -1496,27 +1496,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-Heap.count-capacity, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Heap.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-Heap.count-level, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Heap.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-Heap.count-evicted, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Heap.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-Heap.count-removed, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Heap.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-Heap.count-missRate, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Heap.missRate)",
                 "textEditor": false
               }
             ],
@@ -1611,27 +1611,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-Unlimited.count-capacity, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Unlimited.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-Unlimited.count-level, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Unlimited.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-Unlimited.count-evicted, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Unlimited.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-Unlimited.count-removed, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Unlimited.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-Unlimited.count-missRate, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Unlimited.missRate)",
                 "textEditor": false
               }
             ],
@@ -1733,27 +1733,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-ALWAYS_STAY_IN_CACHE.count-capacity, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ALWAYS_STAY_IN_CACHE.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-ALWAYS_STAY_IN_CACHE.count-level, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ALWAYS_STAY_IN_CACHE.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-ALWAYS_STAY_IN_CACHE.count-evicted, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ALWAYS_STAY_IN_CACHE.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-ALWAYS_STAY_IN_CACHE.count-removed, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ALWAYS_STAY_IN_CACHE.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$service-CacheClasses-ALWAYS_STAY_IN_CACHE.count-missRate, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ALWAYS_STAY_IN_CACHE.missRate)",
                 "textEditor": false
               }
             ],
@@ -1847,12 +1847,12 @@
               "selected": false
             }
           ],
-          "query": "*.%HOST%.*CacheClasses*",
+          "query": "*.%HOST%.*",
           "refresh": 1,
-          "regex": "/(.*)-CacheClasses*/",
+          "regex": "/^(CAE_(.*)|STUDIO).*$/",
           "tags": [],
           "type": "query",
-          "useTags": true,
+          "useTags": false,
           "label": ""
         }
       ]

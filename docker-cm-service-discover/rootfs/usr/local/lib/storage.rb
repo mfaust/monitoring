@@ -1099,6 +1099,11 @@ module Storage
       return @mc.set( key, value )
     end
 
+    def self.delete( key )
+
+      return @mc.delete( key )
+    end
+
   end
 
 

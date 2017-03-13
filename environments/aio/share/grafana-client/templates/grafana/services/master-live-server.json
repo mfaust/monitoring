@@ -61,6 +61,7 @@
               "min": false,
               "rightSide": true,
               "show": true,
+              "sideWidth": 200,
               "total": false,
               "values": true
             },
@@ -97,8 +98,6 @@
                 "target": "alias(*.%HOST%.MLS.QueryPool.executors.running, 'executors running')",
                 "textEditor": false
               }
-
-
             ],
             "timeFrom": null,
             "timeShift": null,
@@ -162,6 +161,7 @@
               "min": false,
               "rightSide": true,
               "show": true,
+              "sideWidth": 200,
               "total": false,
               "values": true
             },
@@ -246,6 +246,7 @@
               "min": false,
               "rightSide": true,
               "show": true,
+              "sideWidth": 200,
               "total": false,
               "values": true
             },
@@ -304,7 +305,7 @@
       },
       {
         "title": "Server Resource Cache",
-        "height": "150px",
+        "height": "200px",
         "editable": true,
         "collapse": false,
         "panels": [
@@ -362,6 +363,7 @@
             "percentage": false,
             "legend": {
               "show": true,
+              "sideWidth": 200,
               "values": true,
               "min": false,
               "max": false,

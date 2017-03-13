@@ -22,9 +22,11 @@ RUN \
   gem install --no-rdoc --no-ri \
     bigdecimal \
     beaneater \
+    rufus-scheduler \
     ipaddress \
     resolve-hostname \
     time_difference \
+    tzinfo-data \
     sqlite3 \
     sequel \
     rest-client \

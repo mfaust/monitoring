@@ -114,7 +114,7 @@ services:
     application:
     - cae
     - caches
-    - caches-ibm
+    - caches-ecommerce
 
   studio:
     description: Studio
@@ -124,7 +124,7 @@ services:
     blob_cache: true
     application:
     - caches-studio
-    - caches-ibm
+    - caches-ecommerce
 
   adobe-drive:
     description: Adobe Drive
@@ -167,4 +167,4 @@ services:
     application:
     - cae
     - caches
-    - caches-ibm
+    - caches-ecommerce

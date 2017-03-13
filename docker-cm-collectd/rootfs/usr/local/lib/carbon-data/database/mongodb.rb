@@ -68,15 +68,32 @@ module CarbonData
 
           if( connections != nil )
 
+            logger.debug( JSON.pretty_generate( connections ) )
+
+
+#{
+#  "current": 41,
+#  "available": 51159,
+#  "totalCreated": 7357  => Fixnum
+#}
+#
+#
+#{
+#  "current": 33,
+#  "available": 52395,
+#  "totalCreated": {     => Hash
+#    "$numberLong": "220"
+#  }
+#}
+
+
             current        = connections.dig( 'current' )
             available      = connections.dig( 'available' )
             totalCreated   = connections.dig( 'totalCreated' )
 
-#             if( totalCreated != nil )
-#               totalCreated = connections.dig( '$numberLong' )
-#             else
-#               totalCreated = nil
-#             end
+            if( totalCreated.is_a?( Hash ) )
+              totalCreated = connections.dig( 'totalCreated', '$numberLong' )
+            end
 
             result << {
               :key   => sprintf( '%s.%s.%s.%s'   , @Host, @Service, 'connections', 'current' ),

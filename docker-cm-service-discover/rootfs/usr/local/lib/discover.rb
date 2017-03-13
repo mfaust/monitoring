@@ -198,12 +198,17 @@ class ServiceDiscovery
 
         begin
 
+          logger.debug('1')
+          self.sendMessage( { :cmd => command, :queue => 'mq-collector', :payload => { :host => node, :pre => 'prepare' }, :ttr => 1, :delay => 0 } )
+          logger.debug('2')
           @db.setStatus( { :ip => node, :short => node, :status => 98 } )
-
+          logger.debug('3')
           result = self.deleteHost( node )
-
+          logger.debug('4')
           logger.debug( result )
-        rescue
+        rescue => e
+
+          logger.error( e )
 
         end
 

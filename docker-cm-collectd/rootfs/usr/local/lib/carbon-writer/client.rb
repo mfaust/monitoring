@@ -52,18 +52,27 @@ module CarbonWriter
 
       start = Time.now
 #       logger.debug( 'start for getting data' )
-      data = @carbonData.run()
 
-      if( data.is_a?( Array ) )
-        data.flatten!
-      end
-#       logger.debug( 'done' )
-      finish = Time.now
+      nodes = @carbonData.nodes()
 
-      logger.info( sprintf( 'getting %s measurepoints in %s seconds', data.count, finish - start ) )
+      logger.debug( "#{nodes}" )
 
-      data.each do |m|
-        self.metric( m )
+      nodes.each do |n|
+
+        data = @carbonData.run( n )
+
+        if( data.is_a?( Array ) )
+          data.flatten!
+        end
+#         logger.debug( 'done' )
+        finish = Time.now
+
+        logger.info( sprintf( 'getting %s measurepoints in %s seconds', data.count, finish - start ) )
+
+        data.each do |m|
+          self.metric( m )
+        end
+
       end
 
 #      logger.debug( JSON.pretty_generate( data ) )
@@ -81,12 +90,14 @@ module CarbonWriter
       # value must be an float!
 
       if( key == nil || value == nil )
-        logger.error( 'ERROR' )
+#         logger.error( 'ERROR' )
         if( key == nil )
           logger.error( 'missing \'key\' entry' )
+          logger.debug( sprintf( 'metric( %s )', metric ) )
         end
         if( value == nil )
           logger.error( 'missing \'value\' entry' )
+          logger.debug( sprintf( 'metric( %s )', metric ) )
         end
 
         return
@@ -108,7 +119,7 @@ module CarbonWriter
 
       begin
 
-#         puts( "#{key} #{value.to_f} #{time.to_i}\n" )
+#        logger.debug( "#{key} #{value} #{time.to_i}" )
 
         self.socket.write( "carbon-writer.#{key} #{value.to_f} #{time.to_i}\n" )
 
