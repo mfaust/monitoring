@@ -16,7 +16,7 @@ services:
 
   dnsdock:
     restart: always
-    image: bodsch/docker-dnsdock:1701-02
+    image: bodsch/docker-dnsdock:1703-02
     container_name: dnsdock
     hostname: dnsdock
     labels:
@@ -50,7 +50,7 @@ services:
 
   database:
     restart: always
-    image: bodsch/docker-mysql:1612-01
+    image: bodsch/docker-mysql:1702-02
     container_name: database
     hostname: database
     labels:
@@ -68,7 +68,7 @@ services:
 
   jolokia:
     restart: always
-    image: bodsch/docker-jolokia:1702-02
+    image: bodsch/docker-jolokia:latest
     container_name: jolokia
     hostname: jolokia
     labels:
