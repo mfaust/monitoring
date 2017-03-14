@@ -42,7 +42,6 @@ module Storage
 
       begin
         until( @database != nil )
-#           logger.debug( 'try ...' )
           @database = Sequel.sqlite( sprintf( '%s/monitoring.db', @cacheDirectory ) )
           sleep( 3 )
         end
@@ -69,9 +68,6 @@ module Storage
         String      :key       , :size => 128 , :key => true, :index => true, :null => false
         String      :value     , :text => true, :null => false
         DateTime    :created   , :default => Time.now()
-
-#         index [ :ip, :shortname, :key ]
-#         foreign_key [ :ip, :shortname, :key ], :name => 'unique_config'
       }
 
       @database.create_table?( :status ) {
@@ -529,7 +525,6 @@ module Storage
         data.each do |k,v|
 
           p = v.dig( 'port' )
-#           logger.debug( sprintf( '%s - %s - %s', dnsShortname, p, k ) )
 
           self.writeDiscovery( { :id => dnsId, :ip => dnsIp, :short => dnsShortname, :checksum => dnsChecksum, :port => p, :service => k, :data => v } )
 
@@ -627,7 +622,6 @@ module Storage
       #  { :short => 'monitoring-16-01', :service => 'replication-live-server' }
       elsif( service != nil && host == nil )
 
-#         logger.debug( '( service != nil && host == nil )' )
         w = ( Sequel[:service => service.to_s] )
 
         rec = self.dbaData( w )
@@ -687,13 +681,10 @@ module Storage
 
         array = array.reduce( :merge )
 
-#         logger.debug( JSON.pretty_generate( array ) )
-
         return array
 
       elsif( service != nil && host != nil )
 
-#         logger.debug( '( service != nil && host != nil )' )
         w = (
           (Sequel[:ip => ip.to_s] ) |
           (Sequel[:shortname => short.to_s] )
@@ -773,9 +764,6 @@ module Storage
 
         dbaChecksum = rec.first[:checksum].to_s
 
-#         logger.debug( checksum )
-#         logger.debug( dbaChecksum )
-
         if( dbaChecksum != checksum )
 
           measurements.where(
@@ -789,7 +777,6 @@ module Storage
 
         elsif( dbaChecksum == checksum )
 
-#           logger.debug( 'identical data' )
           return
         else
           #
@@ -853,8 +840,6 @@ module Storage
       # { :ip => '10.2.14.156' }
       elsif( service == nil && host != nil )
 
-#         logger.debug( '( service == nil && host != nil )' )
-
         w = ( Sequel[:ip => ip.to_s] ) | ( Sequel[:shortname => short.to_s] )
 
         rec = self.dbaData( w )
@@ -884,9 +869,8 @@ module Storage
           end
 
           array = array.reduce( :merge )
-
-#           logger.debug( JSON.pretty_generate( array ) )
         end
+
         return array
 
       # { :short => nil, :service => nil }
@@ -1063,7 +1047,6 @@ module Storage
 
       begin
         until( @mc != nil )
-#           logger.debug( 'try ...' )
           @mc = Dalli::Client.new( sprintf( '%s:%s', host, port ), memcacheOptions )
           sleep( 3 )
         end
@@ -1086,8 +1069,6 @@ module Storage
       result = {}
 
       if( @mc )
-#         logger.debug( @mc.stats( :items ) )
-#         sleep(4)
         result = @mc.get( key )
       end
 
