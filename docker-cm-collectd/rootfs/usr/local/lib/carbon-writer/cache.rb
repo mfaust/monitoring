@@ -21,34 +21,26 @@ module CarbonWriter
 
       def initialize( options )
 
-        logger.debug( options )
-
         scheduler = Rufus::Scheduler.new
 
         scheduler.every( 120 ) do
           clean( options[:cache] )
         end
 
-#         Zscheduler.every(120) { clean( options[:cache] ) }
-
       end
 
       def get( time, key )
-
-#         logger.debug( sprintf( 'get( %s, %s )', time, key ) )
 
         cache[time.to_i][key]
       end
 
       def set( time, key, value )
 
-#         logger.debug( sprintf( 'set( %s, %s, %s )', time, key, value ) )
         cache[time.to_i][key] = value.to_f
       end
 
       def incr( time, key, value )
 
-#         logger.debug( 'incr()' )
         self.set( time, key, value.to_f + self.get( time, key ) )
       end
 
@@ -58,16 +50,11 @@ module CarbonWriter
 
         @cache ||= nested_zero_hash()
 
-#         logger.debug( @cache )
       end
 
       def clean( max_age )
 
-        logger.debug( sprintf( 'before clean  : ', cache.count ) )
-
         cache.delete_if { |t,k| Time.now.to_i - t > max_age }
-
-        logger.debug( sprintf( 'after clean   : ', cache.count ) )
 
       end
 

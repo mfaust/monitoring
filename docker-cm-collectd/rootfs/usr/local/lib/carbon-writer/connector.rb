@@ -26,13 +26,10 @@ module CarbonWriter
 
       def initialize( options )
 
-        logger.debug( options )
         @connectors = options[:backends].map { |o| Connector.new(*o) }
       end
 
       def publish( messages )
-
-        logger.debug( [ :connector_group, :publish, messages.size, @connectors ] )
 
         Array(messages).each { |msg| @connectors.map {|c| c.puts msg} }
       end
@@ -45,8 +42,6 @@ module CarbonWriter
     def puts( message )
 
       begin
-
-        logger.debug( [ :connector, :puts, [ @host, @port ].join( ':' ), message ] )
 
         socket.puts message + "\n"
       rescue Errno::EPIPE, Errno::EINVAL, Errno::ETIMEDOUT
@@ -67,7 +62,6 @@ module CarbonWriter
 
       if @socket.nil? || @socket.closed?
 
-        logger.debug( [ :connector,[ @host, @port ] ] )
         @socket = ::TCPSocket.new @host, @port
       end
 

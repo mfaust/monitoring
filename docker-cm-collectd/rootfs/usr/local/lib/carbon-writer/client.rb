@@ -10,8 +10,6 @@ module CarbonWriter
 
     def initialize( params = {} )
 
-#       logger.debug( params )
-
       @graphiteHost = params.dig( :graphite, :host )
       @graphitePort = params.dig( :graphite, :port )
       @slice        = params.dig( :slice )
@@ -25,8 +23,6 @@ module CarbonWriter
 
 
     def socket()
-
-#       logger.debug( 'socket()' )
 
       if( ! @socket || @socket.closed? )
 
@@ -51,11 +47,7 @@ module CarbonWriter
     def run()
 
       start = Time.now
-#       logger.debug( 'start for getting data' )
-
       nodes = @carbonData.nodes()
-
-      logger.debug( "#{nodes}" )
 
       nodes.each do |n|
 
@@ -64,7 +56,7 @@ module CarbonWriter
         if( data.is_a?( Array ) )
           data.flatten!
         end
-#         logger.debug( 'done' )
+
         finish = Time.now
 
         logger.info( sprintf( 'getting %s measurepoints in %s seconds', data.count, finish - start ) )
@@ -75,13 +67,11 @@ module CarbonWriter
 
       end
 
-#      logger.debug( JSON.pretty_generate( data ) )
     end
 
 
     def metric( metric = {} )
 
-#       logger.debug( sprintf( 'metric( %s )', metric ) )
       key   = metric.dig(:key)
       value = metric.dig(:value)
       time  = metric.dig(:time) || Time.now
@@ -90,11 +80,12 @@ module CarbonWriter
       # value must be an float!
 
       if( key == nil || value == nil )
-#         logger.error( 'ERROR' )
+
         if( key == nil )
           logger.error( 'missing \'key\' entry' )
           logger.debug( sprintf( 'metric( %s )', metric ) )
         end
+
         if( value == nil )
           logger.error( 'missing \'value\' entry' )
           logger.debug( sprintf( 'metric( %s )', metric ) )
@@ -145,8 +136,6 @@ module CarbonWriter
     private
 
     def normalizeTime( time, slice )
-
-#       logger.debug( "normalizeTime( #{time}, #{slice} )" )
 
       if( slice.nil?() )
         slice = 1

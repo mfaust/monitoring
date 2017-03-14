@@ -88,7 +88,7 @@ module CarbonData
 
     def createGraphiteOutput( key, values )
 
-#      logger.debug( sprintf( 'createGraphiteOutput( %s, %s )', key, values ) )
+      logger.debug( sprintf( 'createGraphiteOutput( %s, values )', key ) )
 
       graphiteOutput = Array.new()
 

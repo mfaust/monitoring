@@ -18,8 +18,6 @@ module Jolokia
 
     def initialize( params = {} )
 
-      logger.debug( params )
-
       @Host = params[:host] ? params[:host] : 'localhost'
       @Port = params[:port] ? params[:port] : 8080
 
@@ -27,9 +25,6 @@ module Jolokia
 
 
     def post( params = {} )
-
-#       logger.debug( 'Jolokia.post()' )
-#       logger.debug( params )
 
       payload = params[:payload] ? params[:payload] : {}
       timeout = params[:timeout] ? params[:timeout] : 10
@@ -66,8 +61,6 @@ module Jolokia
             :message => e
           }
 
-#           logger.debug( sprintf( ' -> request body: %s', request.body ) )
-          return
         rescue => e
           logger.warn( sprintf( 'Cannot execute request to %s://%s:%s%s, cause: %s', uri.scheme, uri.hostname, uri.port, uri.request_uri, e ) )
 

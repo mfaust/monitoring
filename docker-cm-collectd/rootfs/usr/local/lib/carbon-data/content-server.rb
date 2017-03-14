@@ -143,7 +143,10 @@ module CarbonData
 
         replicatorData = @mbean.bean( @Host, @serviceName, 'Replicator' )
 
+
+
         if( replicatorData == false )
+
           logger.error( sprintf( 'No mbean \'Replicator\' for Service %s found!', @serviceName ) )
 
           return completedSequenceNumber, result

@@ -70,6 +70,8 @@ class Icinga2Check_CM_Feeder < Icinga2Check
       engineValue = self.runningOrOutdated( engine )
       engineValue = engineValue.values.first
 
+      logger.debug( JSON.pretty_generate( engineValue ) )
+
       maxEntries     = engineValue['KeysCount']   ? engineValue['KeysCount']   : 0  # Number of (active) keys
       currentEntries = engineValue['ValuesCount'] ? engineValue['ValuesCount'] : 0  # Number of (valid) values. It is less or equal to 'keysCount'
       heartbeat      = engineValue['HeartBeat']   ? engineValue['HeartBeat']   : nil # 1 minute == 60000 ms
@@ -77,6 +79,7 @@ class Icinga2Check_CM_Feeder < Icinga2Check
       if( maxEntries == 0 && currentEntries == 0 )
 
         stateMessage = 'no Feederdata. maybe restarting?'
+        exitCode STATE_UNKNOWN
       else
 
         if( heartbeat >= 60000 )

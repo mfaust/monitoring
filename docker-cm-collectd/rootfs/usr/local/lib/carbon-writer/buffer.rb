@@ -35,8 +35,6 @@ module CarbonWriter
 
     def initialize( options )
 
-      logger.debug( options )
-
       @options  = options
       @queue    = Queue.new
 #       @streamer = Hash.new { |h,k| h[k] = "" }
@@ -72,8 +70,6 @@ module CarbonWriter
     # push({:metric => {'a' => 10},:time => Time.now})
     def push( obj )
 
-#       logger.debug( "push( #{obj} )" )
-
       queue.push( obj )
 
       nil
@@ -83,8 +79,6 @@ module CarbonWriter
     alias_method :<<, :push
 
     def pull( format = nil )
-
-#       logger.debug( sprintf( 'pull( %s )', format ) )
 
       data = nested_zero_hash()
 
@@ -104,22 +98,12 @@ module CarbonWriter
       value = data.dig(:value)
       time  = data.dig(:time)
 
-
       if( cache )
         value   = cache.incr( time, key, value )
       end
 
-#       logger.debug( "value: #{value}" )
-#
-#       results = [ "#{prefix}#{key}", ("%f"%value).to_f, time ]
-#       if( format == :string )
-#         results.join(" ")
-#
-#         logger.debug( results.class.to_s )
-#       end
-
       data.flatten(1)
-#       logger.debug( data )
+
       return data
 
     end

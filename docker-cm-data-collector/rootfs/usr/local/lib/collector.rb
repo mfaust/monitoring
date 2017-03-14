@@ -3,7 +3,7 @@
 # 13.01.2017 - Bodo Schulz
 #
 #
-# v1.6.0
+# v1.7.0
 
 # -----------------------------------------------------------------------------
 
@@ -209,19 +209,18 @@ module DataCollector
 
     def initialize( params = {} )
 
-      logDirectory        = params[:logDirectory]          ? params[:logDirectory]          : '/var/log/monitoring'
-      jolokiaHost         = params[:jolokiaHost]           ? params[:jolokiaHost]           : 'localhost'
-      jolokiaPort         = params[:jolokiaPort]           ? params[:jolokiaPort]           : 8080
-      memcacheHost        = params[:memcacheHost]          ? params[:memcacheHost]          : 'localhost'
-      memcachePort        = params[:memcachePort]          ? params[:memcachePort]          : 11211
-      mqHost              = params[:mqHost]                ? params[:mqHost]                : 'localhost'
-      mqPort              = params[:mqPort]                ? params[:mqPort]                : 11300
-      @mqQueue            = params[:mqQueue]               ? params[:mqQueue]               : 'mq-collector'
-      @applicationConfig  = params[:applicationConfigFile] ? params[:applicationConfigFile] : nil
-      @serviceConfig      = params[:serviceConfigFile]     ? params[:serviceConfigFile]     : nil
+      jolokiaHost         = params.dig(:jolokiaHost)           || 'localhost'
+      jolokiaPort         = params.dig(:jolokiaPort)           ||  8080
+      memcacheHost        = params.dig(:memcacheHost)          || 'localhost'
+      memcachePort        = params.dig(:memcachePort)          || 11211
+      mqHost              = params.dig(:mqHost)                || 'localhost'
+      mqPort              = params.dig(:mqPort)                || 11300
+      @mqQueue            = params.dig(:mqQueue)               || 'mq-collector'
+      @applicationConfig  = params.dig(:applicationConfigFile)
+      @serviceConfig      = params.dig(:serviceConfigFile)
 
-      version            = '1.6.0'
-      date               = '2017-01-13'
+      version            = '1.7.0'
+      date               = '2017-03-14'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - DataCollector' )
@@ -233,22 +232,21 @@ module DataCollector
       logger.info( "    - message queue: #{mqHost}:#{mqPort}/#{@mqQueue}" )
       logger.info( '-----------------------------------------------------------------' )
 
-      @db                 = Storage::Database.new()
-      @mc                 = Storage::Memcached.new( { :host => memcacheHost, :port => memcachePort } )
-      @jolokia            = Jolokia::Client.new( { :host => jolokiaHost, :port => jolokiaPort } )
-
       @MQSettings = {
         :beanstalkHost => mqHost,
         :beanstalkPort => mqPort
       }
 
+      @db                 = Storage::Database.new()
+      @mc                 = Storage::Memcached.new( { :host => memcacheHost, :port => memcachePort } )
+      @jolokia            = Jolokia::Client.new( { :host => jolokiaHost, :port => jolokiaPort } )
       @mq                 = MessageQueue::Consumer.new( @MQSettings )
 
       if( @applicationConfig == nil || @serviceConfig == nil )
         msg = 'no Configuration File given'
         logger.error( msg )
 
-        exit 1
+        fail msg
       end
 
         # run internal scheduler to remove old data
@@ -329,7 +327,7 @@ module DataCollector
 
           mysqlData = m.get()
 
-          if( mysqlData == false )
+          if( mysqlData == false || mysqlData == nil )
             mysqlData   = JSON.generate( { :status => 500 } )
           end
 
@@ -625,8 +623,8 @@ module DataCollector
 
           cacheKey = Storage::Memcached.cacheKey( { :host => hostname, :pre => 'result', :service => v } )
 
-#           logger.debug( { :host => hostname, :pre => 'result', :service => v } )
-#           logger.debug( cacheKey )
+          logger.debug( { :host => hostname, :pre => 'result', :service => v } )
+          logger.debug( cacheKey )
 
           if( i.count > 1 )
             targetUrl = i.first.dig( 'target', 'url' )

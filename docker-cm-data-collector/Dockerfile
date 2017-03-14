@@ -32,7 +32,6 @@ RUN \
     rest-client \
     mysql2 \
     pg && \
-  mkdir /var/log/monitoring && \
   mkdir /var/cache/monitoring && \
   apk del --purge \
     build-base \
