@@ -12,8 +12,8 @@ class Icinga2Check_CM_Feeder < Icinga2Check
 
     super
 
-    host   = settings[:host]    ? settings[:host]   : nil
-    feeder = settings[:feeder]  ? settings[:feeder] : nil
+    host   = settings.dig(:host)
+    feeder = settings.dig(:feeder)
 
     host         = self.shortHostname( host )
 
@@ -52,8 +52,8 @@ class Icinga2Check_CM_Feeder < Icinga2Check
   def feederStatus( host, feederServer )
 
     config   = readConfig( 'caefeeder' )
-    warning  = config[:warning]  ? config[:warning]  : 2500
-    critical = config[:critical] ? config[:critical] : 10000
+    warning  = config.dig(:warning)  || 2500
+    critical = config.dig(:critical) || 10000
 
     # get our bean
     health      = @mbean.bean( host, feederServer, 'Health' )
@@ -72,14 +72,15 @@ class Icinga2Check_CM_Feeder < Icinga2Check
 
       logger.debug( JSON.pretty_generate( engineValue ) )
 
-      maxEntries     = engineValue['KeysCount']   ? engineValue['KeysCount']   : 0  # Number of (active) keys
-      currentEntries = engineValue['ValuesCount'] ? engineValue['ValuesCount'] : 0  # Number of (valid) values. It is less or equal to 'keysCount'
-      heartbeat      = engineValue['HeartBeat']   ? engineValue['HeartBeat']   : nil # 1 minute == 60000 ms
+      maxEntries     = engineValue.dig('KeysCount')   || 0  # Number of (active) keys
+      currentEntries = engineValue.dig('ValuesCount') || 0  # Number of (valid) values. It is less or equal to 'keysCount'
+      heartbeat      = engineValue.dig('HeartBeat')         # 1 minute == 60000 ms
 
       if( maxEntries == 0 && currentEntries == 0 )
 
+        status       = 'UNKNOWN'
         stateMessage = 'no Feederdata. maybe restarting?'
-        exitCode STATE_UNKNOWN
+        exitCode     = STATE_UNKNOWN
       else
 
         if( heartbeat >= 60000 )
@@ -125,8 +126,8 @@ class Icinga2Check_CM_Feeder < Icinga2Check
   def contentFeederStatus( host, feederServer )
 
     config   = readConfig( 'contentfeeder' )
-    warning  = config[:warning]  ? config[:warning]  : 2500
-    critical = config[:critical] ? config[:critical] : 10000
+    warning  = config.dig(:warning)  || 2500
+    critical = config.dig(:critical) || 10000
 
     data      = @mbean.bean( host, feederServer, 'Feeder' )
     dataValue = self.runningOrOutdated( data )

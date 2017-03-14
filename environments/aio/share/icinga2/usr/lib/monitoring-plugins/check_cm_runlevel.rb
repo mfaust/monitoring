@@ -10,8 +10,8 @@ class Icinga2Check_CM_Runlevel < Icinga2Check
 
     super
 
-    host         = settings[:host]        ? settings[:host]        : nil
-    application  = settings[:application] ? settings[:application] : nil
+    host         = settings.dig(:host)
+    application  = settings.dig(:application)
 
     host         = self.shortHostname( host )
 
@@ -27,7 +27,7 @@ class Icinga2Check_CM_Runlevel < Icinga2Check
     dataValue = self.runningOrOutdated( data )
 
     dataValue = dataValue.values.first
-    runlevel  = dataValue['RunLevel'] ? dataValue['RunLevel'] : false
+    runlevel  = dataValue.dig('RunLevel') || false
 
     # in maintenance mode the Server mbean is not available
     case runlevel.downcase
@@ -45,7 +45,7 @@ class Icinga2Check_CM_Runlevel < Icinga2Check
       exitCode = STATE_CRITICAL
     end
 
-    puts sprintf( '%s - RunLevel in %s Mode', status, runlevel )
+    puts sprintf( '%s - RunLevel in <b>%s</b> Mode', status, runlevel )
     exit exitCode
 
   end
