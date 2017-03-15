@@ -20,11 +20,16 @@ module Logging
 
     def configure_logger_for( classname )
 
-      logFile         = '/tmp/monitoring.log'
-      file            = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
+      logFile         = '/tmp/icinga-checks.log'
+      file            = File.new( logFile, File::WRONLY | File::APPEND | File::CREAT, 0666 )
       file.sync       = true
-      logger          = Logger.new( file, 'weekly', 1024000 )
 
+#       if( File.exists?( logFile ) )
+#         FileUtils.chmod( 0666, logFile )
+#         FileUtils.chown( 'nobody', 'nobody', logFile )
+#       end
+
+      logger                 = Logger.new( file, 'weekly', 1024000 )
 #      logger                 = Logger.new(STDOUT)
       logger.progname        = classname
       logger.level           = Logger::DEBUG
@@ -32,11 +37,6 @@ module Logging
       logger.formatter       = proc do |severity, datetime, progname, msg|
         "[#{datetime.strftime( logger.datetime_format )}] #{severity.ljust(5)} : #{progname} - #{msg}\n"
       end
-
-#       if( File.exists?( logFile ) )
-#         FileUtils.chmod( 0666, logFile )
-#         FileUtils.chown( 'nobody', 'nobody', logFile )
-#       end
 
       logger
     end

@@ -227,18 +227,15 @@ services:
       - ./data/monitoring:/var/cache/monitoring
       - ./share/icinga2:/usr/local/monitoring
       - ./share/icinga2/etc/cm-icinga2.yaml:/etc/cm-icinga2.yaml
-      - ./share/icinga2/usr/local/lib/mbean.rb:/usr/local/lib/mbean.rb:ro
-      - ./share/icinga2/usr/local/lib/tools.rb:/usr/local/lib/tools.rb:ro
-      - ./share/icinga2/usr/local/lib/storage.rb:/usr/local/lib/storage.rb:ro
-      - ./share/icinga2/usr/local/lib/logging.rb:/usr/local/lib/logging.rb:ro
-      - ./share/icinga2/usr/lib/monitoring-plugins/icingachecks.rb:/usr/local/lib/icingachecks.rb:ro
-      - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_feeder_status.rb:/usr/lib/monitoring-plugins/check_cm_feeder_status:ro
-      - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_cache.rb:/usr/lib/monitoring-plugins/check_cm_cache:ro
-      - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_memory.rb:/usr/lib/monitoring-plugins/check_cm_memory:ro
-      - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_license.rb:/usr/lib/monitoring-plugins/check_cm_license:ro
-      - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_capconnection.rb:/usr/lib/monitoring-plugins/check_cm_capconnection:ro
-      - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_runlevel.rb:/usr/lib/monitoring-plugins/check_cm_runlevel:ro
-      - ./share/icinga2/usr/lib/monitoring-plugins/check_ssl_cert:/usr/lib/monitoring-plugins/check_ssl_cert:ro
+      - ./share/icinga2/usr/lib/monitoring-plugins/tools:/usr/local/share/icinga2
+      - ./share/icinga2/usr/lib/monitoring-plugins/icingachecks.rb:/usr/local/lib/icingachecks.rb
+      - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_feeder_status.rb:/usr/lib/monitoring-plugins/check_cm_feeder_status
+      - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_cache.rb:/usr/lib/monitoring-plugins/check_cm_cache
+      - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_memory.rb:/usr/lib/monitoring-plugins/check_cm_memory
+      - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_license.rb:/usr/lib/monitoring-plugins/check_cm_license
+      - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_capconnection.rb:/usr/lib/monitoring-plugins/check_cm_capconnection
+      - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_runlevel.rb:/usr/lib/monitoring-plugins/check_cm_runlevel
+      - ./share/icinga2/usr/lib/monitoring-plugins/check_ssl_cert:/usr/lib/monitoring-plugins/check_ssl_cert
       - ./share/icinga2/etc/icinga2/objects:/etc/icinga2/objects
     links:
       - beanstalkd:beanstalkd

@@ -65,6 +65,8 @@ class Icinga2Check_CM_Feeder < Icinga2Check
 
     if( healthy == true )
 
+      healthMessage  = 'HEALTHY'
+
       engine      = @mbean.bean( host, feederServer, 'ProactiveEngine' )
 
       engineValue = self.runningOrOutdated( engine )
@@ -79,7 +81,7 @@ class Icinga2Check_CM_Feeder < Icinga2Check
       if( maxEntries == 0 && currentEntries == 0 )
 
         status       = 'UNKNOWN'
-        stateMessage = 'no Feederdata. maybe restarting?'
+        stateMessage = sprintf( '%d Elements for Feeder available. this feeder is maybe restarting?', maxEntries )
         exitCode     = STATE_UNKNOWN
       else
 
@@ -88,7 +90,6 @@ class Icinga2Check_CM_Feeder < Icinga2Check
           exit STATE_CRITICAL
         end
 
-        healthMessage  = 'HEALTHY'
         diffEntries    = ( maxEntries - currentEntries ).to_i
 
         if( maxEntries == currentEntries )
@@ -153,17 +154,22 @@ class Icinga2Check_CM_Feeder < Icinga2Check
         exitCode = STATE_CRITICAL
       end
 
+      puts sprintf( '%s - Pending Documents: %d , Pending Events: %d', status, pendingDocuments, pendingEvents )
+
     elsif( state == 'initializing' )
 
       status   = 'WARNING'
       exitCode = STATE_WARNING
+
+      puts sprintf( '%s - Feeder are in %s state', status, state )
     else
 
       status   = 'CRITICAL'
       exitCode = STATE_CRITICAL
+
+      puts sprintf( '%s - Feeder are in unknown state', status )
     end
 
-    puts sprintf( '%s - Pending Documents: %d , Pending Events: %d', status, pendingDocuments, pendingEvents )
     exit exitCode
 
   end
