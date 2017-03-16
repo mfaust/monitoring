@@ -46,7 +46,7 @@ services:
     port: 40099
 
   content-management-server:
-    description: Content Management Server
+    description: ContentServer CMS
     port: 40199
     port_http: 40180
     ior: true
@@ -56,7 +56,7 @@ services:
     - contentserver
 
   master-live-server:
-    description: Master Live Server
+    description: ContentServer MLS
     port: 40299
     port_http: 40280
     ior: true
@@ -120,7 +120,7 @@ services:
     application:
     - cae
     - caches
-    - caches-ibm
+    - caches-ecommerce
 
   studio:
     description: Studio
@@ -130,7 +130,7 @@ services:
     blob_cache: true
     application:
     - caches-studio
-    - caches-ibm
+    - caches-ecommerce
 
   adobe-drive:
     description: Adobe Drive
@@ -155,7 +155,7 @@ services:
     port: 41399
 
   replication-live-server:
-    description: Replication Live Server
+    description: ContentServer RLS
     port: 42099
     port_http: 42080
     ior: true
@@ -173,4 +173,4 @@ services:
     application:
     - cae
     - caches
-    - caches-ibm
+    - caches-ecommerce

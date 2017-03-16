@@ -29,7 +29,7 @@ module MBean
 
       memcacheKey = Storage::Memcached.cacheKey( { :host => host, :pre => 'result', :service => service } )
 
-      for y in 1..5
+      for y in 1..3
 
         result      = @mc.get( memcacheKey )
 
@@ -37,7 +37,7 @@ module MBean
           data = { service => result }
           break
         else
-          logger.debug( sprintf( 'Waiting for data %s ... %d', memcacheKey, y ) )
+  #        logger.debug( sprintf( 'Waiting for data %s ... %d', memcacheKey, y ) )
           sleep( 3 )
         end
       end

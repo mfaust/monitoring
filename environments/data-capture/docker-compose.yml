@@ -16,7 +16,7 @@ services:
 
   dnsdock:
     restart: always
-    image: bodsch/docker-dnsdock:1701-02
+    image: bodsch/docker-dnsdock:1703-02
     container_name: dnsdock
     hostname: dnsdock
     labels:
@@ -45,8 +45,6 @@ services:
       com.dnsdock.image: "beanstalkd"
       com.dnsdock.alias: "beanstalkd"
       com.dnsdock.ttl: "30"
-#    ports:
-#      - 11300:11300
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:
@@ -55,7 +53,7 @@ services:
 
   jolokia:
     restart: always
-    image: bodsch/docker-jolokia:1702-02
+    image: bodsch/docker-jolokia:latest
     container_name: jolokia
     hostname: jolokia
     labels:

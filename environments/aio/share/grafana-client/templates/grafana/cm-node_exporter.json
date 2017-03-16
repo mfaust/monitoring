@@ -46,7 +46,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasSub(collectd.%HOST%.NODE_EXPORTER-load.*, '(.*)-', '')",
+                "target": "aliasSub(*.%HOST%.NODE_EXPORTER-load.*, '(.*)-', '')",
                 "textEditor": false
               }
             ],
@@ -136,15 +136,15 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "alias(collectd.%HOST%.NODE_EXPORTER-filesystem.count-rootfs_total, 'total')"
+                "target": "alias(*.%HOST%.NODE_EXPORTER-filesystem.count-rootfs_total, 'total')"
               },
               {
                 "refId": "B",
-                "target": "alias(collectd.%HOST%.NODE_EXPORTER-filesystem.count-rootfs_free, 'free')"
+                "target": "alias(*.%HOST%.NODE_EXPORTER-filesystem.count-rootfs_free, 'free')"
               },
               {
                 "refId": "C",
-                "target": "alias(collectd.%HOST%.NODE_EXPORTER-filesystem.count-rootfs_used_percent, 'percent used')"
+                "target": "alias(*.%HOST%.NODE_EXPORTER-filesystem.count-rootfs_used_percent, 'percent used')"
               }
             ],
             "thresholds": [],
@@ -233,16 +233,16 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "alias(collectd.%HOST%.NODE_EXPORTER-memory.count-total, 'total')"
+                "target": "alias(*.%HOST%.NODE_EXPORTER-memory.count-total, 'total')"
               },
               {
                 "refId": "C",
-                "target": "alias(collectd.%HOST%.NODE_EXPORTER-memory.count-used, 'used')",
+                "target": "alias(*.%HOST%.NODE_EXPORTER-memory.count-used, 'used')",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "alias(collectd.%HOST%.NODE_EXPORTER-memory.count-used_percent, 'percent')",
+                "target": "alias(*.%HOST%.NODE_EXPORTER-memory.count-used_percent, 'percent')",
                 "textEditor": false
               }
             ],
@@ -331,15 +331,15 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "alias(collectd.%HOST%.NODE_EXPORTER-swap.count-total, 'total')"
+                "target": "alias(*.%HOST%.NODE_EXPORTER-swap.count-total, 'total')"
               },
               {
                 "refId": "B",
-                "target": "alias(collectd.%HOST%.NODE_EXPORTER-swap.count-used, 'used')"
+                "target": "alias(*.%HOST%.NODE_EXPORTER-swap.count-used, 'used')"
               },
               {
                 "refId": "C",
-                "target": "alias(collectd.%HOST%.NODE_EXPORTER-swap.count-used_percent, 'percent')"
+                "target": "alias(*.%HOST%.NODE_EXPORTER-swap.count-used_percent, 'percent')"
               }
             ],
             "thresholds": [],
@@ -421,13 +421,13 @@
               {
                 "hide": false,
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(smartSummarize(perSecond(collectd.%HOST%.NODE_EXPORTER-cpu.count-cpu[0-9]_user), '1m', 'avg'), '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(smartSummarize(perSecond(*.%HOST%.NODE_EXPORTER-cpu.count-cpu[0-9]_user), '1m', 'avg'), '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "hide": false,
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(smartSummarize(perSecond(collectd.%HOST%.NODE_EXPORTER-cpu.count-cpu[0-9]_iowait), '1m', 'avg'), '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(smartSummarize(perSecond(*.%HOST%.NODE_EXPORTER-cpu.count-cpu[0-9]_iowait), '1m', 'avg'), '(.*)-', ''))",
                 "textEditor": false
               }
             ],

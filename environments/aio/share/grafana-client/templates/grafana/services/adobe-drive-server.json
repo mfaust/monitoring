@@ -84,18 +84,17 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "alias(aliasSub(collectd.%HOST%.ADOBE_DRIVE_SERVER-CapConnection-heap_cache.count-size, '(.*)-', ''), 'max')",
+                "target": "alias(aliasSub(*.%HOST%.ADOBE_DRIVE_SERVER.CapConnection.heap.cache.size, '(.*)-', ''), 'max')",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "alias(aliasSub(collectd.%HOST%.ADOBE_DRIVE_SERVER-CapConnection-heap_cache.count-used, '(.*)-', ''), 'used')",
+                "target": "alias(aliasSub(*.%HOST%.ADOBE_DRIVE_SERVER.CapConnection.heap.cache.used, '(.*)-', ''), 'used')",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "alias(asPercent(#B, #A), 'percent')",
-                "targetFull": "alias(asPercent(alias(aliasSub(collectd.%HOST%.ADOBE_DRIVE_SERVER-CapConnection-heap_cache.count-used, '(.*)-', ''), 'used'), alias(aliasSub(collectd.%HOST%.ADOBE_DRIVE_SERVER-CapConnection-heap_cache.count-size, '(.*)-', ''), 'max')), 'percent')",
+                "target": "alias(aliasSub(*.%HOST%.ADOBE_DRIVE_SERVER.CapConnection.heap.cache.used_percent, '(.*)-', ''), 'percent')",
                 "textEditor": false
               }
             ],
@@ -188,17 +187,17 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "alias(collectd.%HOST%.ADOBE_DRIVE_SERVER-CapConnection-blob_cache.count-size, 'max')",
+                "target": "alias(*.%HOST%.ADOBE_DRIVE_SERVER.CapConnection.blob.cache.size, 'max')",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "alias(collectd.%HOST%.ADOBE_DRIVE_SERVER-CapConnection-blob_cache.count-used, 'used')",
+                "target": "alias(*.%HOST%.ADOBE_DRIVE_SERVER.CapConnection.blob.cache.used, 'used')",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "alias(collectd.%HOST%.ADOBE_DRIVE_SERVER-CapConnection-blob_cache.count-used_percent, 'percent')",
+                "target": "alias(*.%HOST%.ADOBE_DRIVE_SERVER.CapConnection.blob.cache.used_percent, 'percent')",
                 "textEditor": false
               }
             ],
@@ -284,7 +283,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.ADOBE_DRIVE_SERVER-CapConnection-su_sessions.count-sessions, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(*.%HOST%.ADOBE_DRIVE_SERVER.CapConnection.su_sessions.sessions, '(.*)-', ''))",
                 "textEditor": false
               }
             ],

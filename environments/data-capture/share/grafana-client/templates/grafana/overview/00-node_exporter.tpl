@@ -22,7 +22,7 @@
             "id": 70,
             "targets": [
               {
-                "target": "collectd.%HOST%.NODE_EXPORTER-uptime.uptime",
+                "target": "*.%HOST%.NODE_EXPORTER-uptime.uptime",
                 "refId": "A",
                 "textEditor": false
               }
@@ -106,7 +106,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.NODE_EXPORTER-memory.count-used_percent"
+                "target": "*.%HOST%.NODE_EXPORTER-memory.count-used_percent"
               }
             ],
             "thresholds": "80,90",
@@ -178,7 +178,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.NODE_EXPORTER-swap.count-used_percent"
+                "target": "*.%HOST%.NODE_EXPORTER-swap.count-used_percent"
               }
             ],
             "thresholds": "80,90",
@@ -250,7 +250,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.NODE_EXPORTER-filesystem.count-rootfs_used_percent"
+                "target": "*.%HOST%.NODE_EXPORTER-filesystem.count-rootfs_used_percent"
               }
             ],
             "thresholds": "80,90",

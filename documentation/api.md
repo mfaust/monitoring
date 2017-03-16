@@ -104,16 +104,16 @@ Aktuell funktionieren folgende Paramaeter:
         "development",
         "git-0000000"
       ],
-      "config": {
-        "display-name": "foo-bar",
-        "ports": [
-          3306,
-          9100,
-          28017
-        ]
-      },
       "annotation": true,
-      "overview": true
+      "overview": true,
+      "config": {
+        "ports": [50199,51099],
+        "display-name": "foo.bar.com",
+        "services": [
+          "cae-live-1": {},
+          "content-managment-server": { "port": 41000 }
+        ]
+      }
     }
 
 #### kompletter Aufruf

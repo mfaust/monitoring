@@ -43,7 +43,7 @@ module MessageQueue
     # @param [Integer, #read] ttr time to run -- is an integer number of seconds to allow a worker
     #        to run this job. This time is counted from the moment a worker reserves
     #        this job. If the worker does not delete, release, or bury the job within
-    # <ttr> seconds, the job will time out and the server will release the job.
+    #        <ttr> seconds, the job will time out and the server will release the job.
     #        The minimum ttr is 1. If the client sends 0, the server will silently
     #        increase the ttr to 1.
     # @param [Integer, #read] delay is an integer number of seconds to wait before putting the job in

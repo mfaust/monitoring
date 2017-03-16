@@ -79,9 +79,26 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CMS-QueryPool-query_pool.*, '(.*)-', ''))",
+                "target": "alias(*.%HOST%.CMS.QueryPool.queries.max, 'queries max')",
+                "textEditor": false
+              },
+              {
+                "refId": "B",
+                "target": "alias(*.%HOST%.CMS.QueryPool.queries.waiting, 'queries waiting')",
+                "textEditor": false
+              },
+              {
+                "refId": "C",
+                "target": "alias(*.%HOST%.CMS.QueryPool.executors.idle, 'executors idle')",
+                "textEditor": false
+              },
+              {
+                "refId": "D",
+                "target": "alias(*.%HOST%.CMS.QueryPool.executors.running, 'executors running')",
                 "textEditor": false
               }
+
+
             ],
             "timeFrom": null,
             "timeShift": null,
@@ -163,7 +180,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CMS-StatisticsResourceCache-stats_resourcecache.*, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.CMS.StatisticsResourceCache.cache.*)",
                 "textEditor": false
               }
             ],
@@ -247,7 +264,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.CMS-StatisticsJobResult-stats_jobresult.*, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.CMS.StatisticsJobResult.*)",
                 "textEditor": false
               }
             ],
@@ -301,23 +318,8 @@
             "id": 9,
             "targets": [
               {
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.CMS-Server-ResourceCache.count-entries, '(.*)-', ''), 'Cache Faults'))",
+                "target": "aliasByMetric(aliasSub(*.%HOST%.CMS.Server.ResourceCache.*, '(.*)-', ''))",
                 "refId": "A",
-                "textEditor": false
-              },
-              {
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.CMS-Server-ResourceCache.count-evicts, '(.*)-', ''), 'Cache Evicts'))",
-                "refId": "B",
-                "textEditor": false
-              },
-              {
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.CMS-Server-ResourceCache.count-hits, '(.*)-', ''), 'Cache Hits'))",
-                "refId": "C",
-                "textEditor": false
-              },
-              {
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.CMS-Server-ResourceCache.count-size, '(.*)-', ''), 'Cache Entries'))",
-                "refId": "D",
                 "textEditor": false
               }
             ],

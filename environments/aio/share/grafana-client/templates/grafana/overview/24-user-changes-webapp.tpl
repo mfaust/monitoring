@@ -25,7 +25,7 @@
             "id": 70,
             "targets": [
               {
-                "target": "collectd.%HOST%.USER_CHANGES-Runtime-uptime.uptime",
+                "target": "*.%HOST%.USER_CHANGES.Runtime.uptime",
                 "refId": "A",
                 "textEditor": false
               }
@@ -112,7 +112,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.USER_CHANGES-Memory-heap_memory.count-used_percent"
+                "target": "*.%HOST%.USER_CHANGES.Memory.heap_memory.used_percent"
               }
             ],
             "thresholds": "85,95",
@@ -187,7 +187,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.USER_CHANGES-CapConnection-open.count-open"
+                "target": "*.%HOST%.USER_CHANGES.CapConnection.open"
               }
             ],
             "thresholds": "0,1",
@@ -223,7 +223,7 @@
             "id": 49,
             "targets": [
               {
-                "target": "collectd.%HOST%.USER_CHANGES-CapConnection-heap_cache.count-used_percent",
+                "target": "*.%HOST%.USER_CHANGES.CapConnection.heap.cache.used_percent",
                 "refId": "A"
               }
             ],
@@ -298,7 +298,7 @@
             "id": 50,
             "targets": [
               {
-                "target": "collectd.%HOST%.USER_CHANGES-CapConnection-blob_cache.count-used_percent",
+                "target": "*.%HOST%.USER_CHANGES.CapConnection.blob.cache.used_percent",
                 "refId": "A"
               }
             ],
@@ -373,7 +373,7 @@
             "id": 50,
             "targets": [
               {
-                "target": "collectd.%HOST%.USER_CHANGES-CapConnection-su_sessions.count-sessions",
+                "target": "*.%HOST%.USER_CHANGES.CapConnection.su_sessions.sessions",
                 "refId": "A"
               }
             ],

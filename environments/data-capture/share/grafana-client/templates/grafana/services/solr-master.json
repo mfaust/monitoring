@@ -48,7 +48,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasSub(aliasSub(aliasByNode(collectd.%HOST%.SOLR_MASTER-core_$core-QueryResultCache.count-size, 2), '(.*)-(.*)', '\\1'),'(.*)-', '')",
+                "target": "aliasByNode(*.%HOST%.SOLR_MASTER.core_$core.QueryResultCache.size, 3)",
                 "textEditor": false
               }
             ],
@@ -134,7 +134,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasSub(aliasSub(aliasByNode(collectd.%HOST%.SOLR_MASTER-core_$core-QueryResultCache.count-hits, 2), '(.*)-(.*)', '\\1'),'(.*)-', '')",
+                "target": "aliasByNode(*.%HOST%.SOLR_MASTER.core_$core.QueryResultCache.hits, 3)",
                 "textEditor": false
               }
             ],
@@ -220,7 +220,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasSub(aliasSub(aliasByNode(collectd.%HOST%.SOLR_MASTER-core_$core-QueryResultCache.count-hitratio, 2), '(.*)-(.*)', '\\1'),'(.*)-', '')",
+                "target": "aliasByNode(*.%HOST%.SOLR_MASTER.core_$core.QueryResultCache.hitratio, 3)",
                 "textEditor": false
               }
             ],
@@ -306,7 +306,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasSub(aliasSub(aliasByNode(collectd.%HOST%.SOLR_MASTER-core_$core-DocumentCache.count-size, 2), '(.*)-(.*)', '\\1'),'(.*)-', '')",
+                "target": "aliasByNode(*.%HOST%.SOLR_MASTER.core_$core.DocumentCache.size, 3)",
                 "textEditor": false
               }
             ],
@@ -392,7 +392,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasSub(aliasSub(aliasByNode(collectd.%HOST%.SOLR_MASTER-core_$core-DocumentCache.count-hits, 2), '(.*)-(.*)', '\\1'),'(.*)-', '')",
+                "target": "aliasByNode(*.%HOST%.SOLR_MASTER.core_$core.DocumentCache.hits, 3)",
                 "textEditor": false
               }
             ],
@@ -478,7 +478,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasSub(aliasSub(aliasByNode(collectd.%HOST%.SOLR_MASTER-core_$core-DocumentCache.count-hitratio, 2), '(.*)-(.*)', '\\1'),'(.*)-', '')",
+                "target": "aliasByNode(*.%HOST%.SOLR_MASTER.core_$core.DocumentCache.hitratio, 3)",
                 "textEditor": false
               }
             ],
@@ -594,7 +594,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasSub(aliasSub(aliasByNode(collectd.%HOST%.SOLR_MASTER-core_$core-Select.count-avgTimePerRequest, 2), '(.*)-(.*)', '\\1'), '(.*)-', '')",
+                "target": "aliasByNode(*.%HOST%.SOLR_MASTER.core_$core.Select.avgTimePerRequest, 3)",
                 "textEditor": false
               }
             ],
@@ -680,7 +680,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasSub(aliasSub(aliasByNode(collectd.%HOST%.SOLR_MASTER-core_$core-Select.count-errors, 2), '(.*)-(.*)', '\\1'), '(.*)-', '')",
+                "target": "aliasByNode(*.%HOST%.SOLR_MASTER.core_$core.Select.errors, 3)",
                 "textEditor": false
               }
             ],
@@ -779,9 +779,9 @@
               "selected": false
             }
           ],
-          "query": "*.%HOST%.SOLR_MASTER-core_*",
+          "query": "*.%HOST%.SOLR*.*",
           "refresh": 1,
-          "regex": "/.*core_(.*)-.*$/",
+          "regex": "/.*core_(.*).*$/",
           "sort": 0,
           "tagValuesQuery": null,
           "tagsQuery": null,

@@ -1,35 +1,33 @@
 #!/usr/bin/ruby
 #
-# 12.08.2016 - Bodo Schulz
+# 14.03.2017 - Bodo Schulz
 #
 #
-# v1.1.0
+# v1.2.0
 
 # -----------------------------------------------------------------------------
+
+require 'rufus-scheduler'
 
 require_relative '../lib/collector'
 
 # -----------------------------------------------------------------------------
 
-logDirectory          = '/var/log/monitoring'
-cacheDirectory        = '/var/cache/monitoring'
 applicationConfigFile = '/etc/cm-application.yaml'
 serviceConfigFile     = '/etc/cm-service.yaml'
 
 
-jolokiaHost      = ENV['JOLOKIA_HOST']    ? ENV['JOLOKIA_HOST']    : 'localhost'
-jolokiaPort      = ENV['JOLOKIA_PORT']    ? ENV['JOLOKIA_PORT']    : 8080
-mqHost           = ENV['MQ_HOST']         ? ENV['MQ_HOST']         : 'localhost'
-mqPort           = ENV['MQ_PORT']         ? ENV['MQ_PORT']         : 11300
-mqQueue          = ENV['MQ_QUEUE']        ? ENV['MQ_QUEUE']        : 'mq-collector'
-memcacheHost     = ENV['MEMCACHE_HOST']   ? ENV['MEMCACHE_HOST']   : 'localhost'
-memcachePort     = ENV['MEMCACHE_PORT']   ? ENV['MEMCACHE_PORT']   : 11211
-scanDiscovery    = ENV['SCAN_DISCOVERY']  ? ENV['SCAN_DISCOVERY']  : '10m'
-intervall        = ENV['INTERVALL']       ? ENV['INTERVALL']       : 15
+jolokiaHost      = ENV.fetch('JOLOKIA_HOST'  , 'localhost' )
+jolokiaPort      = ENV.fetch('JOLOKIA_PORT'  , 8080 )
+mqHost           = ENV.fetch('MQ_HOST'       , 'localhost' )
+mqPort           = ENV.fetch('MQ_PORT'       , 11300 )
+mqQueue          = ENV.fetch('MQ_QUEUE'      , 'mq-collector' )
+memcacheHost     = ENV.fetch('MEMCACHE_HOST' , 'localhost' )
+memcachePort     = ENV.fetch('MEMCACHE_PORT' , 11211 )
+scanDiscovery    = ENV.fetch('SCAN_DISCOVERY', '10m' )
+interval         = ENV.fetch('INTERVAL'      , 15 )
 
 config = {
-  :logDirectory          => logDirectory,
-  :cacheDirectory        => cacheDirectory,
   :jolokiaHost           => jolokiaHost,
   :jolokiaPort           => jolokiaPort,
   :mqHost                => mqHost,
@@ -57,16 +55,27 @@ Signal.trap('QUIT') { stop = true }
 
 r = DataCollector::Collector.new( config )
 
-if( r != nil )
+scheduler = Rufus::Scheduler.new
 
-  until stop
-    r.run()
-    sleep( intervall.to_i )
+scheduler.every( interval.to_i, :first_in => 1 ) do
+
+  r.run()
+
+end
+
+
+scheduler.every( '5s' ) do
+
+  if( stop == true )
+
+    p "shutdown scheduler ..."
+
+    scheduler.shutdown(:kill)
   end
 
-else
-  exit 2
 end
+
+scheduler.join
 
 # -----------------------------------------------------------------------------
 

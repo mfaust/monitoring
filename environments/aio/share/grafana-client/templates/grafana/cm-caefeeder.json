@@ -82,30 +82,30 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$feeder-ProactiveEngine-feeder.count-diff, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(*.%HOST%.$feeder-ProactiveEngine-feeder.count-diff, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$feeder-ProactiveEngine-feeder.count-current, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(*.%HOST%.$feeder-ProactiveEngine-feeder.count-current, '(.*)-', ''))",
                 "textEditor": false,
                 "hide": true
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$feeder-ProactiveEngine-feeder.count-max, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(*.%HOST%.$feeder-ProactiveEngine-feeder.count-max, '(.*)-', ''))",
                 "textEditor": false,
                 "hide": true
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$feeder-ProactiveEngine-feeder.count-invalidations, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(*.%HOST%.$feeder-ProactiveEngine-feeder.count-invalidations, '(.*)-', ''))",
                 "textEditor": false,
                 "hide": true
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.$feeder-ProactiveEngine-feeder.count-heartbeat, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(*.%HOST%.$feeder-ProactiveEngine-feeder.count-heartbeat, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -195,18 +195,18 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "alias(aliasSub(collectd.%HOST%.$feeder-CapConnection-heap_cache.count-size, '(.*)-', ''), 'max')",
+                "target": "alias(aliasSub(*.%HOST%.$feeder.CapConnection.heap.cache.size, '(.*)-', ''), 'max')",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "alias(aliasSub(collectd.%HOST%.$feeder-CapConnection-heap_cache.count-used, '(.*)-', ''), 'used')",
+                "target": "alias(aliasSub(*.%HOST%.$feeder.CapConnection.heap.cache.used, '(.*)-', ''), 'used')",
                 "textEditor": false
               },
               {
                 "refId": "C",
                 "target": "alias(asPercent(#B, #A), 'percent')",
-                "targetFull": "alias(asPercent(alias(aliasSub(collectd.%HOST%.$feeder-CapConnection-heap_cache.count-used, '(.*)-', ''), 'used'), alias(aliasSub(collectd.%HOST%.$feeder-CapConnection-heap_cache.count-size, '(.*)-', ''), 'max')), 'percent')",
+                "targetFull": "alias(asPercent(alias(aliasSub(*.%HOST%.$feeder.CapConnection.heap.cache.used, '(.*)-', ''), 'used'), alias(aliasSub(*.%HOST%.$feeder.CapConnection.heap.cache.size, '(.*)-', ''), 'max')), 'percent')",
                 "textEditor": false
               }
             ],

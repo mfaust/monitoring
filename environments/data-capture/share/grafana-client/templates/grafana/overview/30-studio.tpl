@@ -25,7 +25,7 @@
             "id": 70,
             "targets": [
               {
-                "target": "collectd.%HOST%.STUDIO-Runtime-uptime.uptime",
+                "target": "*.%HOST%.STUDIO.Runtime.uptime",
                 "refId": "A",
                 "textEditor": false
               }
@@ -112,7 +112,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.STUDIO-Memory-heap_memory.count-used_percent"
+                "target": "*.%HOST%.STUDIO.Memory.heap_memory.used_percent"
               }
             ],
             "thresholds": "85,95",
@@ -187,7 +187,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.STUDIO-CapConnection-open.count-open"
+                "target": "*.%HOST%.STUDIO.CapConnection.open"
               }
             ],
             "thresholds": "0,1",
@@ -223,7 +223,7 @@
             "id": 49,
             "targets": [
               {
-                "target": "collectd.%HOST%.STUDIO-CapConnection-heap_cache.count-used_percent",
+                "target": "*.%HOST%.STUDIO.CapConnection.heap.cache.used_percent",
                 "refId": "A"
               }
             ],
@@ -298,7 +298,7 @@
             "id": 50,
             "targets": [
               {
-                "target": "collectd.%HOST%.STUDIO-CapConnection-blob_cache.count-used_percent",
+                "target": "*.%HOST%.STUDIO.CapConnection.blob.cache.used_percent",
                 "refId": "A"
               }
             ],
@@ -373,7 +373,7 @@
             "id": 50,
             "targets": [
               {
-                "target": "collectd.%HOST%.STUDIO-CapConnection-su_sessions.count-sessions",
+                "target": "*.%HOST%.STUDIO.CapConnection.su_sessions.sessions",
                 "refId": "A"
               }
             ],

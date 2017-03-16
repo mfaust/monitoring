@@ -25,7 +25,7 @@
             "id": 70,
             "targets": [
               {
-                "target": "collectd.%HOST%.CMS-Runtime-uptime.uptime",
+                "target": "*.%HOST%.CMS.Runtime.uptime",
                 "refId": "A",
                 "textEditor": false
               }
@@ -67,7 +67,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.CMS-Memory-heap_memory.count-used_percent"
+                "target": "*.%HOST%.CMS.Memory.heap_memory.used_percent"
               }
             ],
             "thresholds": "85,95",
@@ -84,7 +84,7 @@
             "id": 85,
             "targets": [
               {
-                "target": "collectd.%HOST%.CMS-Server-server.count-runlevel",
+                "target": "*.%HOST%.CMS.Server.runlevel",
                 "refId": "A"
               }
             ],
@@ -152,7 +152,7 @@
             "id": 63,
             "targets": [
               {
-                "target": "collectd.%HOST%.CMS-Server-license_until_hard.count-days",
+                "target": "*.%HOST%.CMS.Server.license.until.hard.days",
                 "refId": "A"
               }
             ],

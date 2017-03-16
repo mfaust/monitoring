@@ -51,7 +51,7 @@
               "threshold2Color": "rgba(234, 112, 112, 0.22)",
               "thresholdLine": false
             },
-            "id": 35,
+            "id": 6,
             "isNew": true,
             "legend": {
               "alignAsTable": true,
@@ -61,6 +61,7 @@
               "min": false,
               "rightSide": true,
               "show": true,
+              "sideWidth": 200,
               "total": false,
               "values": true
             },
@@ -79,7 +80,22 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MLS-QueryPool-query_pool.*, '(.*)-', ''))",
+                "target": "alias(*.%HOST%.MLS.QueryPool.queries.max, 'queries max')",
+                "textEditor": false
+              },
+              {
+                "refId": "B",
+                "target": "alias(*.%HOST%.MLS.QueryPool.queries.waiting, 'queries waiting')",
+                "textEditor": false
+              },
+              {
+                "refId": "C",
+                "target": "alias(*.%HOST%.MLS.QueryPool.executors.idle, 'executors idle')",
+                "textEditor": false
+              },
+              {
+                "refId": "D",
+                "target": "alias(*.%HOST%.MLS.QueryPool.executors.running, 'executors running')",
                 "textEditor": false
               }
             ],
@@ -135,7 +151,7 @@
               "threshold2": null,
               "threshold2Color": "rgba(234, 112, 112, 0.22)"
             },
-            "id": 36,
+            "id": 7,
             "isNew": true,
             "legend": {
               "alignAsTable": true,
@@ -145,6 +161,7 @@
               "min": false,
               "rightSide": true,
               "show": true,
+              "sideWidth": 200,
               "total": false,
               "values": true
             },
@@ -163,7 +180,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MLS-StatisticsResourceCache-stats_resourcecache.*, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.MLS.StatisticsResourceCache.cache.*)",
                 "textEditor": false
               }
             ],
@@ -219,7 +236,7 @@
               "threshold2": null,
               "threshold2Color": "rgba(234, 112, 112, 0.22)"
             },
-            "id": 37,
+            "id": 8,
             "isNew": true,
             "legend": {
               "alignAsTable": true,
@@ -229,6 +246,7 @@
               "min": false,
               "rightSide": true,
               "show": true,
+              "sideWidth": 200,
               "total": false,
               "values": true
             },
@@ -247,7 +265,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.MLS-StatisticsJobResult-stats_jobresult.*, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.MLS.StatisticsJobResult.*)",
                 "textEditor": false
               }
             ],
@@ -287,7 +305,7 @@
       },
       {
         "title": "Server Resource Cache",
-        "height": "150px",
+        "height": "200px",
         "editable": true,
         "collapse": false,
         "panels": [
@@ -298,26 +316,11 @@
             "editable": true,
             "type": "graph",
             "isNew": true,
-            "id": 38,
+            "id": 9,
             "targets": [
               {
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.MLS-Server-ResourceCache.count-entries, '(.*)-', ''), 'Cache Faults'))",
+                "target": "aliasByMetric(aliasSub(*.%HOST%.MLS.Server.ResourceCache.*, '(.*)-', ''))",
                 "refId": "A",
-                "textEditor": false
-              },
-              {
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.MLS-Server-ResourceCache.count-evicts, '(.*)-', ''), 'Cache Evicts'))",
-                "refId": "B",
-                "textEditor": false
-              },
-              {
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.MLS-Server-ResourceCache.count-hits, '(.*)-', ''), 'Cache Hits'))",
-                "refId": "C",
-                "textEditor": false
-              },
-              {
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.MLS-Server-ResourceCache.count-size, '(.*)-', ''), 'Cache Entries'))",
-                "refId": "D",
                 "textEditor": false
               }
             ],
@@ -360,6 +363,7 @@
             "percentage": false,
             "legend": {
               "show": true,
+              "sideWidth": 200,
               "values": true,
               "min": false,
               "max": false,

@@ -25,7 +25,7 @@
             "id": 70,
             "targets": [
               {
-                "target": "collectd.%HOST%.CAE_PREV-Runtime-uptime.uptime",
+                "target": "*.%HOST%.CAE_PREV.Runtime.uptime",
                 "refId": "A",
                 "textEditor": false
               }
@@ -112,7 +112,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.CAE_PREV-Memory-heap_memory.count-used_percent"
+                "target": "*.%HOST%.CAE_PREV.Memory.heap_memory.used_percent"
               }
             ],
             "thresholds": "85,95",
@@ -187,7 +187,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.CAE_PREV-CapConnection-open.count-open"
+                "target": "*.%HOST%.CAE_PREV.CapConnection.open"
               }
             ],
             "thresholds": "0,1",
@@ -223,7 +223,7 @@
             "id": 43,
             "targets": [
               {
-                "target": "collectd.%HOST%.CAE_PREV-CapConnection-heap_cache.count-used_percent",
+                "target": "*.%HOST%.CAE_PREV.CapConnection.heap.cache.used_percent",
                 "refId": "A"
               }
             ],
@@ -298,7 +298,7 @@
             "id": 50,
             "targets": [
               {
-                "target": "collectd.%HOST%.CAE_PREV-CapConnection-blob_cache.count-used_percent",
+                "target": "*.%HOST%.CAE_PREV.CapConnection.blob.cache.used_percent",
                 "refId": "A"
               }
             ],
@@ -373,7 +373,7 @@
             "id": 50,
             "targets": [
               {
-                "target": "collectd.%HOST%.CAE_PREV-CapConnection-su_sessions.count-sessions",
+                "target": "*.%HOST%.CAE_PREV.CapConnection.su_sessions.sessions",
                 "refId": "A"
               }
             ],

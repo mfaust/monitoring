@@ -3,7 +3,7 @@
 # 13.01.2017 - Bodo Schulz
 #
 #
-# v1.6.0
+# v1.7.0
 
 # -----------------------------------------------------------------------------
 
@@ -15,6 +15,7 @@ require 'fileutils'
 require 'time'
 require 'date'
 require 'time_difference'
+require 'rufus-scheduler'
 
 require_relative 'logging'
 require_relative 'jolokia'
@@ -125,8 +126,8 @@ module DataCollector
 
         d.each do |service,payload|
 
-#          logger.debug( 'merge Data between discovered Services and Property File' )
-#          logger.debug( service )
+          logger.debug( 'merge Data between discovered Services and Property File' )
+          logger.debug( service )
 
           dnsId       = payload.dig( :dns_id )
           discoveryId = payload.dig( :discovery_id )
@@ -208,19 +209,18 @@ module DataCollector
 
     def initialize( params = {} )
 
-      logDirectory        = params[:logDirectory]          ? params[:logDirectory]          : '/var/log/monitoring'
-      jolokiaHost         = params[:jolokiaHost]           ? params[:jolokiaHost]           : 'localhost'
-      jolokiaPort         = params[:jolokiaPort]           ? params[:jolokiaPort]           : 8080
-      memcacheHost        = params[:memcacheHost]          ? params[:memcacheHost]          : 'loclahost'
-      memcachePort        = params[:memcachePort]          ? params[:memcachePort]          : 11211
-      mqHost              = params[:mqHost]                ? params[:mqHost]                : 'localhost'
-      mqPort              = params[:mqPort]                ? params[:mqPort]                : 11300
-      @mqQueue            = params[:mqQueue]               ? params[:mqQueue]               : 'mq-collector'
-      @applicationConfig  = params[:applicationConfigFile] ? params[:applicationConfigFile] : nil
-      @serviceConfig      = params[:serviceConfigFile]     ? params[:serviceConfigFile]     : nil
+      jolokiaHost         = params.dig(:jolokiaHost)           || 'localhost'
+      jolokiaPort         = params.dig(:jolokiaPort)           ||  8080
+      memcacheHost        = params.dig(:memcacheHost)          || 'localhost'
+      memcachePort        = params.dig(:memcachePort)          || 11211
+      mqHost              = params.dig(:mqHost)                || 'localhost'
+      mqPort              = params.dig(:mqPort)                || 11300
+      @mqQueue            = params.dig(:mqQueue)               || 'mq-collector'
+      @applicationConfig  = params.dig(:applicationConfigFile)
+      @serviceConfig      = params.dig(:serviceConfigFile)
 
-      version            = '1.6.0'
-      date               = '2017-01-13'
+      version            = '1.7.0'
+      date               = '2017-03-14'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - DataCollector' )
@@ -232,21 +232,29 @@ module DataCollector
       logger.info( "    - message queue: #{mqHost}:#{mqPort}/#{@mqQueue}" )
       logger.info( '-----------------------------------------------------------------' )
 
-      @db                 = Storage::Database.new()
-      @mc                 = Storage::Memcached.new( { :host => memcacheHost, :port => memcachePort } )
-      @jolokia            = Jolokia::Client.new( { :host => jolokiaHost, :port => jolokiaPort } )
-
       @MQSettings = {
         :beanstalkHost => mqHost,
         :beanstalkPort => mqPort
       }
 
+      @db                 = Storage::Database.new()
+      @mc                 = Storage::Memcached.new( { :host => memcacheHost, :port => memcachePort } )
+      @jolokia            = Jolokia::Client.new( { :host => jolokiaHost, :port => jolokiaPort } )
+      @mq                 = MessageQueue::Consumer.new( @MQSettings )
+
       if( @applicationConfig == nil || @serviceConfig == nil )
         msg = 'no Configuration File given'
         logger.error( msg )
 
-        exit 1
+        fail msg
       end
+
+        # run internal scheduler to remove old data
+        scheduler = Rufus::Scheduler.new
+
+        scheduler.every( 10 ) do
+          clean()
+        end
 
     end
 
@@ -319,7 +327,7 @@ module DataCollector
 
           mysqlData = m.get()
 
-          if( mysqlData == false )
+          if( mysqlData == false || mysqlData == nil )
             mysqlData   = JSON.generate( { :status => 500 } )
           end
 
@@ -615,8 +623,8 @@ module DataCollector
 
           cacheKey = Storage::Memcached.cacheKey( { :host => hostname, :pre => 'result', :service => v } )
 
-#           logger.debug( { :host => hostname, :pre => 'result', :service => v } )
-#           logger.debug( cacheKey )
+          logger.debug( { :host => hostname, :pre => 'result', :service => v } )
+          logger.debug( cacheKey )
 
           if( i.count > 1 )
             targetUrl = i.first.dig( 'target', 'url' )
@@ -698,6 +706,9 @@ module DataCollector
 
 
         if( mbean.include?( 'Cache.Classes' ) )
+
+#           logger.debug( mbean )
+
           regex = /
             CacheClass=
             "(?<type>.+[a-zA-Z])"
@@ -705,8 +716,8 @@ module DataCollector
           parts           = mbean.match( regex )
           cacheClass      = parts['type'].to_s
 
-          if( cacheClass.include?( 'ecommerce.ibm' ) )
-            format   = 'CacheClassesIBM%s'
+          if( cacheClass.include?( 'ecommerce.' ) )
+            format   = 'CacheClassesECommerce%s'
           else
             format   = 'CacheClasses%s'
           end
@@ -821,6 +832,30 @@ module DataCollector
     end
 
 
+    def clean()
+
+      data = @mq.getJobFromTube( @mqQueue )
+
+      if( data.count() != 0 )
+
+        logger.debug( data )
+
+        payload = data.dig( :body, 'payload' )
+
+        logger.debug( payload )
+
+        cacheKey = Storage::Memcached.cacheKey( { :host => payload.dig('host'), :pre => 'prepare' } )
+
+        logger.debug( @mc.get( cacheKey ) )
+
+        @mc.set( cacheKey, nil )
+
+        logger.debug( @mc.get( cacheKey ) )
+
+      end
+    end
+
+
 
     def run()
 
@@ -828,16 +863,13 @@ module DataCollector
 
       monitoredServer = self.monitoredServer()
 
-#       logger.debug( "#{monitoredServer.keys}" )
-#       logger.debug( 'start' )
+      start = Time.now
 
       monitoredServer.each do |h,d|
 
-#        logger.info( sprintf( 'Host: %s', h ) )
-
         prepared = @mc.get( Storage::Memcached.cacheKey( { :host => h, :pre => 'prepare' } ) )
 
-        if( prepared == nil || prepared == false )
+        if( prepared.is_a?( NilClass ) || prepared.is_a?( FalseClass ) )
 
           result = false
 
@@ -867,7 +899,8 @@ module DataCollector
 
       end
 
-#       logger.debug( 'stop' )
+      finish = Time.now
+      logger.info( sprintf( 'collect data in %s seconds', finish - start ) )
 
     end
 

@@ -8,9 +8,9 @@ require 'yaml'
 require 'logger'
 require 'time_difference'
 
-require_relative '/usr/local/lib/logging'
-require_relative '/usr/local/lib/storage'
-require_relative '/usr/local/lib/mbean'
+require_relative '/usr/local/share/icinga2/logging'
+require_relative '/usr/local/share/icinga2/storage'
+require_relative '/usr/local/share/icinga2/mbean'
 
 # ---------------------------------------------------------------------------------------
 

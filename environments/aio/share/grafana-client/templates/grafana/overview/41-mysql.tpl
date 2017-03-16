@@ -25,7 +25,7 @@
             "id": 70,
             "targets": [
               {
-                "target": "collectd.%HOST%.MYSQL-uptime.uptime",
+                "target": "*.%HOST%.MYSQL.uptime",
                 "refId": "A",
                 "textEditor": false
               }

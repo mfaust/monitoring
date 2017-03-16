@@ -174,10 +174,12 @@ module MBean
 
     def beanAvailable?( host, service, bean, key = nil )
 
+      logger.debug( sprintf( 'beanAvailable?( %s, %s, %s, %s )', host, service, bean, key ) )
+
       data        = nil
       memcacheKey = Storage::Memcached.cacheKey( { :host => host, :pre => 'result', :service => service } )
 
-      for y in 1..10
+      for y in 1..20
 
         result      = @mc.get( memcacheKey )
 
@@ -185,8 +187,8 @@ module MBean
           data = { service => result }
           break
         else
-#           logger.debug( sprintf( 'Waiting for data %s ... %d', memcacheKey, y ) )
-          sleep( 5 )
+          logger.debug( sprintf( 'Waiting for data %s ... %d', memcacheKey, y ) )
+          sleep( 2 )
         end
       end
 

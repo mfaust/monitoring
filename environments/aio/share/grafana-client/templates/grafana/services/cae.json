@@ -83,18 +83,18 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "alias(aliasSub(collectd.%HOST%.%SERVICE%-CapConnection-heap_cache.count-size, '(.*)-', ''), 'max')",
+                "target": "alias(aliasSub(*.%HOST%.%SERVICE%.CapConnection.heap.cache.size, '(.*)-', ''), 'max')",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "alias(aliasSub(collectd.%HOST%.%SERVICE%-CapConnection-heap_cache.count-used, '(.*)-', ''), 'used')",
+                "target": "alias(aliasSub(*.%HOST%.%SERVICE%.CapConnection.heap.cache.used, '(.*)-', ''), 'used')",
                 "textEditor": false
               },
               {
                 "refId": "C",
                 "target": "alias(asPercent(#B, #A), 'percent')",
-                "targetFull": "alias(asPercent(alias(aliasSub(collectd.%HOST%.%SERVICE%-CapConnection-heap_cache.count-used, '(.*)-', ''), 'used'), alias(aliasSub(collectd.%HOST%.%SERVICE%-CapConnection-heap_cache.count-size, '(.*)-', ''), 'max')), 'percent')",
+                "targetFull": "alias(asPercent(alias(aliasSub(*.%HOST%.%SERVICE%.CapConnection.heap.cache.used, '(.*)-', ''), 'used'), alias(aliasSub(*.%HOST%.%SERVICE%.CapConnection.heap.cache.size, '(.*)-', ''), 'max')), 'percent')",
                 "textEditor": false
               }
             ],
@@ -181,12 +181,12 @@
             "targets": [
               {
                 "refId": "B",
-                "target": "alias(collectd.%HOST%.%SERVICE%-CapConnection-blob_cache.count-size, 'max')",
+                "target": "alias(*.%HOST%.%SERVICE%.CapConnection.blob.cache.size, 'max')",
                 "textEditor": false
               },
               {
                 "refId": "A",
-                "target": "alias(collectd.%HOST%.%SERVICE%-CapConnection-blob_cache.count-used, 'used')",
+                "target": "alias(*.%HOST%.%SERVICE%.CapConnection.blob.cache.used, 'used')",
                 "textEditor": false
               }
             ],
@@ -271,7 +271,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.%SERVICE%-CapConnection-su_sessions.count-sessions, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(*.%HOST%.%SERVICE%.CapConnection.su_sessions.sessions, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -357,7 +357,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.%SERVICE%-DataViewFactory.*, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(*.%HOST%.%SERVICE%-DataViewFactory.*, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
