@@ -253,10 +253,6 @@ class Monitoring
 #        "discovery": false,
 #        "icinga": false,
 #        "grafana": false,
-#        "services": [
-#          "cae-live-1": {},
-#          "content-managment-server": { "port": 41000 }
-#        ],
 #        "tags": [
 #          "development",
 #          "git-0000000"
@@ -265,7 +261,11 @@ class Monitoring
 #        "overview": true,
 #        "config": {
 #          "ports": [50199],
-#          "display-name": "foo.bar.com"
+#          "display-name": "foo.bar.com",
+#          "services": [
+#            "cae-live-1": {},
+#            "content-managment-server": { "port": 41000 }
+#          ]
 #        }
 #      }
 

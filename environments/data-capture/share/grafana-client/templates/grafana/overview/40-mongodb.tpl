@@ -25,7 +25,7 @@
             "id": 70,
             "targets": [
               {
-                "target": "collectd.%HOST%.MONGODB-uptime.uptime",
+                "target": "*.%HOST%.MONGODB.uptime",
                 "refId": "A",
                 "textEditor": false
               }
@@ -67,7 +67,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.MONGODB-heap_memory.count-used_percent"
+                "target": "*.%HOST%.MONGODB.memory.heap.used_percent"
               }
             ],
             "thresholds": "85,95",

@@ -51,7 +51,7 @@
               "threshold2Color": "rgba(234, 112, 112, 0.22)",
               "thresholdLine": false
             },
-            "id": 55,
+            "id": 6,
             "isNew": true,
             "legend": {
               "alignAsTable": true,
@@ -79,9 +79,26 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.RLS-QueryPool-query_pool.*, '(.*)-', ''))",
+                "target": "alias(*.%HOST%.RLS.QueryPool.queries.max, 'queries max')",
+                "textEditor": false
+              },
+              {
+                "refId": "B",
+                "target": "alias(*.%HOST%.RLS.QueryPool.queries.waiting, 'queries waiting')",
+                "textEditor": false
+              },
+              {
+                "refId": "C",
+                "target": "alias(*.%HOST%.RLS.QueryPool.executors.idle, 'executors idle')",
+                "textEditor": false
+              },
+              {
+                "refId": "D",
+                "target": "alias(*.%HOST%.RLS.QueryPool.executors.running, 'executors running')",
                 "textEditor": false
               }
+
+
             ],
             "timeFrom": null,
             "timeShift": null,
@@ -118,101 +135,6 @@
         "title": "Query Pool"
       },
       {
-        "title": "Sequence Numbers between MLS and RLS",
-        "height": "150px",
-        "editable": true,
-        "collapse": false,
-        "panels": [
-          {
-            "title": "Sequence Numbers between MLS and RLS",
-            "error": false,
-            "span": 12,
-            "editable": true,
-            "type": "graph",
-            "isNew": true,
-            "id": 100,
-            "targets": [
-              {
-                "target": "collectd.%HOST%.MLS-Server-Repository.count-sequence_number",
-                "refId": "A",
-                "hide": true
-              },
-              {
-                "target": "collectd.%HOST%.RLS-Replicator-completedSequenceNumber.count-count",
-                "refId": "B",
-                "hide": true
-              },
-              {
-                "target": "alias(diffSeries(#A, #B), 'diff to MLS')",
-                "refId": "C"
-              }
-            ],
-            "datasource": "graphite",
-            "renderer": "flot",
-            "yaxes": [
-              {
-                "label": null,
-                "show": true,
-                "logBase": 1,
-                "min": -1,
-                "max": null,
-                "format": "none"
-              },
-              {
-                "label": null,
-                "show": false,
-                "logBase": 1,
-                "min": null,
-                "max": null,
-                "format": "short"
-              }
-            ],
-            "xaxis": {
-              "show": true
-            },
-            "grid": {
-              "threshold1": null,
-              "threshold2": null,
-              "threshold1Color": "rgba(216, 200, 27, 0.27)",
-              "threshold2Color": "rgba(234, 112, 112, 0.22)"
-            },
-            "lines": true,
-            "fill": 0,
-            "linewidth": 1,
-            "points": false,
-            "pointradius": 5,
-            "bars": false,
-            "stack": false,
-            "percentage": false,
-            "legend": {
-              "show": true,
-              "values": true,
-              "min": false,
-              "max": false,
-              "current": true,
-              "total": false,
-              "avg": false,
-              "alignAsTable": true,
-              "rightSide": true
-            },
-            "nullPointMode": "connected",
-            "steppedLine": false,
-            "tooltip": {
-              "value_type": "cumulative",
-              "shared": true,
-              "sort": 0,
-              "msResolution": false
-            },
-            "timeFrom": null,
-            "timeShift": null,
-            "aliasColors": {},
-            "seriesOverrides": [],
-            "decimals": 0,
-            "links": []
-          }
-        ]
-      },
-      {
         "collapse": false,
         "editable": true,
         "height": "200px",
@@ -230,7 +152,7 @@
               "threshold2": null,
               "threshold2Color": "rgba(234, 112, 112, 0.22)"
             },
-            "id": 56,
+            "id": 7,
             "isNew": true,
             "legend": {
               "alignAsTable": true,
@@ -258,13 +180,13 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.RLS-StatisticsResourceCache-stats_resourcecache.*, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.RLS.StatisticsResourceCache.cache.*)",
                 "textEditor": false
               }
             ],
             "timeFrom": null,
             "timeShift": null,
-            "title": "Statistic Resourcecache",
+            "title": "Statistic Resource Cache",
             "tooltip": {
               "msResolution": false,
               "ordering": "alphabetical",
@@ -294,7 +216,7 @@
             ]
           }
         ],
-        "title": "statistics"
+        "title": "Statistic Resource Cache"
       },
       {
         "collapse": false,
@@ -314,7 +236,7 @@
               "threshold2": null,
               "threshold2Color": "rgba(234, 112, 112, 0.22)"
             },
-            "id": 57,
+            "id": 8,
             "isNew": true,
             "legend": {
               "alignAsTable": true,
@@ -342,7 +264,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.RLS-StatisticsJobResult-stats_jobresult.*, '(.*)-', ''))",
+                "target": "aliasByMetric(*.%HOST%.RLS.StatisticsJobResult.*)",
                 "textEditor": false
               }
             ],
@@ -378,7 +300,7 @@
             ]
           }
         ],
-        "title": "statistics"
+        "title": "Statistic Jobresult"
       },
       {
         "title": "Server Resource Cache",
@@ -393,26 +315,11 @@
             "editable": true,
             "type": "graph",
             "isNew": true,
-            "id": 58,
+            "id": 9,
             "targets": [
               {
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.RLS-Server-ResourceCache.count-entries, '(.*)-', ''), 'Cache Faults'))",
+                "target": "aliasByMetric(aliasSub(*.%HOST%.RLS.Server.ResourceCache.*, '(.*)-', ''))",
                 "refId": "A",
-                "textEditor": false
-              },
-              {
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.RLS-Server-ResourceCache.count-evicts, '(.*)-', ''), 'Cache Evicts'))",
-                "refId": "B",
-                "textEditor": false
-              },
-              {
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.RLS-Server-ResourceCache.count-hits, '(.*)-', ''), 'Cache Hits'))",
-                "refId": "C",
-                "textEditor": false
-              },
-              {
-                "target": "aliasByMetric(alias(aliasSub(collectd.%HOST%.RLS-Server-ResourceCache.count-size, '(.*)-', ''), 'Cache Entries'))",
-                "refId": "D",
                 "textEditor": false
               }
             ],

@@ -25,7 +25,7 @@
             "id": 70,
             "targets": [
               {
-                "target": "collectd.%HOST%.FEEDER_CONTENT-Runtime-uptime.uptime",
+                "target": "*.%HOST%.FEEDER_CONTENT.Runtime.uptime",
                 "refId": "A",
                 "textEditor": false
               }
@@ -112,7 +112,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.FEEDER_CONTENT-Memory-heap_memory.count-used_percent"
+                "target": "*.%HOST%.FEEDER_CONTENT.Memory.heap_memory.used_percent"
               }
             ],
             "thresholds": "85,95",
@@ -187,7 +187,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.FEEDER_CONTENT-CapConnection-open.count-open"
+                "target": "*.%HOST%.FEEDER_CONTENT.CapConnection.open"
               }
             ],
             "thresholds": "0,1",
@@ -223,7 +223,7 @@
             "id": 24,
             "targets": [
               {
-                "target": "collectd.%HOST%.FEEDER_CONTENT-CapConnection-heap_cache.count-used_percent",
+                "target": "*.%HOST%.FEEDER_CONTENT.CapConnection.heap.cache.used_percent",
                 "refId": "A"
               }
             ],
@@ -298,7 +298,7 @@
             "id": 25,
             "targets": [
               {
-                "target": "collectd.%HOST%.FEEDER_CONTENT-Feeder-server.count-pending_events",
+                "target": "*.%HOST%.FEEDER_CONTENT.Feeder.pending_events",
                 "refId": "A"
               }
             ],
@@ -373,7 +373,7 @@
             "id": 26,
             "targets": [
               {
-                "target": "collectd.%HOST%.FEEDER_CONTENT-Feeder-server.count-current_pending_documents",
+                "target": "*.%HOST%.FEEDER_CONTENT.Feeder.current_pending_documents",
                 "refId": "A"
               }
             ],

@@ -25,7 +25,7 @@
             "id": 70,
             "targets": [
               {
-                "target": "collectd.%HOST%.MLS-Runtime-uptime.uptime",
+                "target": "*.%HOST%.MLS.Runtime.uptime",
                 "refId": "A",
                 "textEditor": false
               }
@@ -112,7 +112,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.MLS-Memory-heap_memory.count-used_percent"
+                "target": "*.%HOST%.MLS.Memory.heap_memory.used_percent"
               }
             ],
             "thresholds": "85,95",
@@ -138,7 +138,7 @@
             "id": 85,
             "targets": [
               {
-                "target": "collectd.%HOST%.MLS-Server-server.count-runlevel",
+                "target": "*.%HOST%.MLS.Server.runlevel",
                 "refId": "A"
               }
             ],
@@ -206,7 +206,7 @@
             "id": 63,
             "targets": [
               {
-                "target": "collectd.%HOST%.MLS-Server-license_until_hard.count-days",
+                "target": "*.%HOST%.MLS.Server.license.until.hard.days",
                 "refId": "A"
               }
             ],
@@ -236,7 +236,7 @@
             "id": 9,
             "targets": [
               {
-                "target": "collectd.%HOST%.MLS-Server-Repository.count-sequence_number",
+                "target": "*.%HOST%.MLS.Server.Repository.SequenceNumber",
                 "refId": "A",
                 "hide": false
               }

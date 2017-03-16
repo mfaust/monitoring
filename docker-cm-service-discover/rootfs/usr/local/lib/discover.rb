@@ -634,7 +634,8 @@ class ServiceDiscovery
 
     @db.createDNS( { :ip => ip, :short => shortHostName, :long => longHostName } )
 
-    ports = @db.config( { :ip => ip, :short => shortHostName, :long => longHostName, :key => "ports" } )
+    ports    = @db.config( { :ip => ip, :short => shortHostName, :long => longHostName, :key => "ports" } )
+    services = @db.config( { :ip => ip, :short => shortHostName, :long => longHostName, :key => "services" } )
 
     if( ports != false )
       ports = ports.dig( shortHostName, 'ports' )
@@ -644,6 +645,7 @@ class ServiceDiscovery
     end
 
     logger.debug( "use ports: #{ports}" )
+    logger.debug( "additional services: #{services}" )
 
     discover = Hash.new()
     services = Hash.new()
@@ -659,6 +661,8 @@ class ServiceDiscovery
       if( open == true )
 
         names = self.discoverApplication( host, p )
+
+        logger.debug( "discovered services: #{names}" )
 
         if( names != nil )
 

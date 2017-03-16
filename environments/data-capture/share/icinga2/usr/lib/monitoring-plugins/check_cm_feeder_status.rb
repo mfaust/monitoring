@@ -12,8 +12,8 @@ class Icinga2Check_CM_Feeder < Icinga2Check
 
     super
 
-    host   = settings[:host]    ? settings[:host]   : nil
-    feeder = settings[:feeder]  ? settings[:feeder] : nil
+    host   = settings.dig(:host)
+    feeder = settings.dig(:feeder)
 
     host         = self.shortHostname( host )
 
@@ -52,8 +52,8 @@ class Icinga2Check_CM_Feeder < Icinga2Check
   def feederStatus( host, feederServer )
 
     config   = readConfig( 'caefeeder' )
-    warning  = config[:warning]  ? config[:warning]  : 2500
-    critical = config[:critical] ? config[:critical] : 10000
+    warning  = config.dig(:warning)  || 2500
+    critical = config.dig(:critical) || 10000
 
     # get our bean
     health      = @mbean.bean( host, feederServer, 'Health' )
@@ -65,18 +65,24 @@ class Icinga2Check_CM_Feeder < Icinga2Check
 
     if( healthy == true )
 
+      healthMessage  = 'HEALTHY'
+
       engine      = @mbean.bean( host, feederServer, 'ProactiveEngine' )
 
       engineValue = self.runningOrOutdated( engine )
       engineValue = engineValue.values.first
 
-      maxEntries     = engineValue['KeysCount']   ? engineValue['KeysCount']   : 0  # Number of (active) keys
-      currentEntries = engineValue['ValuesCount'] ? engineValue['ValuesCount'] : 0  # Number of (valid) values. It is less or equal to 'keysCount'
-      heartbeat      = engineValue['HeartBeat']   ? engineValue['HeartBeat']   : nil # 1 minute == 60000 ms
+      logger.debug( JSON.pretty_generate( engineValue ) )
+
+      maxEntries     = engineValue.dig('KeysCount')   || 0  # Number of (active) keys
+      currentEntries = engineValue.dig('ValuesCount') || 0  # Number of (valid) values. It is less or equal to 'keysCount'
+      heartbeat      = engineValue.dig('HeartBeat')         # 1 minute == 60000 ms
 
       if( maxEntries == 0 && currentEntries == 0 )
 
-        stateMessage = 'no Feederdata. maybe restarting?'
+        status       = 'UNKNOWN'
+        stateMessage = sprintf( '%d Elements for Feeder available. This feeder is maybe restarting?', maxEntries )
+        exitCode     = STATE_UNKNOWN
       else
 
         if( heartbeat >= 60000 )
@@ -84,7 +90,6 @@ class Icinga2Check_CM_Feeder < Icinga2Check
           exit STATE_CRITICAL
         end
 
-        healthMessage  = 'HEALTHY'
         diffEntries    = ( maxEntries - currentEntries ).to_i
 
         if( maxEntries == currentEntries )
@@ -122,8 +127,8 @@ class Icinga2Check_CM_Feeder < Icinga2Check
   def contentFeederStatus( host, feederServer )
 
     config   = readConfig( 'contentfeeder' )
-    warning  = config[:warning]  ? config[:warning]  : 2500
-    critical = config[:critical] ? config[:critical] : 10000
+    warning  = config.dig(:warning)  || 2500
+    critical = config.dig(:critical) || 10000
 
     data      = @mbean.bean( host, feederServer, 'Feeder' )
     dataValue = self.runningOrOutdated( data )
@@ -149,17 +154,22 @@ class Icinga2Check_CM_Feeder < Icinga2Check
         exitCode = STATE_CRITICAL
       end
 
+      puts sprintf( '%s - Pending Documents: %d , Pending Events: %d', status, pendingDocuments, pendingEvents )
+
     elsif( state == 'initializing' )
 
       status   = 'WARNING'
       exitCode = STATE_WARNING
+
+      puts sprintf( '%s - Feeder are in %s state', status, state )
     else
 
       status   = 'CRITICAL'
       exitCode = STATE_CRITICAL
+
+      puts sprintf( '%s - Feeder are in unknown state', status )
     end
 
-    puts sprintf( '%s - Pending Documents: %d , Pending Events: %d', status, pendingDocuments, pendingEvents )
     exit exitCode
 
   end

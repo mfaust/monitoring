@@ -25,7 +25,7 @@
             "id": 70,
             "targets": [
               {
-                "target": "collectd.%HOST%.FEEDER_LIVE-Runtime-uptime.uptime",
+                "target": "*.%HOST%.FEEDER_LIVE.Runtime.uptime",
                 "refId": "A",
                 "textEditor": false
               }
@@ -112,7 +112,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.FEEDER_LIVE-Memory-heap_memory.count-used_percent"
+                "target": "*.%HOST%.FEEDER_LIVE.Memory.heap_memory.used_percent"
               }
             ],
             "thresholds": "85,95",
@@ -187,7 +187,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "collectd.%HOST%.FEEDER_LIVE-CapConnection-open.count-open"
+                "target": "*.%HOST%.FEEDER_LIVE.CapConnection.open"
               }
             ],
             "thresholds": "0,1",
@@ -223,7 +223,7 @@
             "id": 31,
             "targets": [
               {
-                "target": "collectd.%HOST%.FEEDER_LIVE-CapConnection-heap_cache.count-used_percent",
+                "target": "*.%HOST%.FEEDER_LIVE.CapConnection.heap.cache.used_percent",
                 "refId": "A"
               }
             ],
@@ -298,7 +298,7 @@
             "id": 32,
             "targets": [
               {
-                "target": "collectd.%HOST%.FEEDER_LIVE-ProactiveEngine-feeder.count-diff",
+                "target": "*.%HOST%.FEEDER_LIVE.ProactiveEngine.feeder.entries.diff",
                 "refId": "A"
               }
             ],
@@ -373,7 +373,7 @@
             "id": 22,
             "targets": [
               {
-                "target": "collectd.%HOST%.FEEDER_LIVE-Health-feeder.gauge-healthy",
+                "target": "*.%HOST%.FEEDER_LIVE.Health.healthy",
                 "refId": "A"
               }
             ],
@@ -431,7 +431,7 @@
             "id": 96,
             "targets": [
               {
-                "target": "collectd.%HOST%.FEEDER_LIVE-ProactiveEngine-feeder.count-heartbeat",
+                "target": "*.%HOST%.FEEDER_LIVE.ProactiveEngine.feeder.heartbeat",
                 "refId": "A",
                 "textEditor": false
               }

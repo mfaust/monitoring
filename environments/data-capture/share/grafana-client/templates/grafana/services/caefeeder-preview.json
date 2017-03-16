@@ -56,7 +56,7 @@
               "avg": false,
               "current": true,
               "max": true,
-              "min": true,
+              "min": false,
               "rightSide": true,
               "show": true,
               "total": false,
@@ -82,30 +82,30 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_PREV-ProactiveEngine-feeder.count-diff, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(*.%HOST%.FEEDER_PREV.ProactiveEngine.feeder.entries.diff, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_PREV-ProactiveEngine-feeder.count-current, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(*.%HOST%.FEEDER_PREV.ProactiveEngine.feeder.entries.current, '(.*)-', ''))",
                 "textEditor": false,
                 "hide": true
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_PREV-ProactiveEngine-feeder.count-max, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(*.%HOST%.FEEDER_PREV.ProactiveEngine.feeder.entries.max, '(.*)-', ''))",
                 "textEditor": false,
                 "hide": true
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_PREV-ProactiveEngine-feeder.count-invalidations, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(*.%HOST%.FEEDER_PREV.ProactiveEngine.feeder.invalidations, '(.*)-', ''))",
                 "textEditor": false,
                 "hide": true
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_PREV-ProactiveEngine-feeder.count-heartbeat, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(*.%HOST%.FEEDER_PREV.ProactiveEngine.feeder.heartbeat, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -167,7 +167,7 @@
               "alignAsTable": true,
               "avg": false,
               "current": true,
-              "max": false,
+              "max": true,
               "min": false,
               "rightSide": true,
               "show": true,
@@ -195,18 +195,18 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "alias(aliasSub(collectd.%HOST%.FEEDER_PREV-CapConnection-heap_cache.count-size, '(.*)-', ''), 'max')",
+                "target": "alias(aliasSub(*.%HOST%.FEEDER_PREV.CapConnection.heap.cache.size, '(.*)-', ''), 'max')",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "alias(aliasSub(collectd.%HOST%.FEEDER_PREV-CapConnection-heap_cache.count-used, '(.*)-', ''), 'used')",
+                "target": "alias(aliasSub(*.%HOST%.FEEDER_PREV.CapConnection.heap.cache.used, '(.*)-', ''), 'used')",
                 "textEditor": false
               },
               {
                 "refId": "C",
                 "target": "alias(asPercent(#B, #A), 'percent')",
-                "targetFull": "alias(asPercent(alias(aliasSub(collectd.%HOST%.FEEDER_PREV-CapConnection-heap_cache.count-used, '(.*)-', ''), 'used'), alias(aliasSub(collectd.%HOST%.FEEDER_PREV-CapConnection-heap_cache.count-size, '(.*)-', ''), 'max')), 'percent')",
+                "targetFull": "alias(asPercent(alias(aliasSub(*.%HOST%.FEEDER_PREV.CapConnection.heap.cache.used, '(.*)-', ''), 'used'), alias(aliasSub(*.%HOST%.FEEDER_PREV.CapConnection.heap.cache.size, '(.*)-', ''), 'max')), 'percent')",
                 "textEditor": false
               }
             ],
@@ -268,7 +268,7 @@
               "alignAsTable": true,
               "avg": false,
               "current": true,
-              "max": false,
+              "max": true,
               "min": false,
               "rightSide": true,
               "show": true,
@@ -290,7 +290,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(collectd.%HOST%.FEEDER_PREV-ProactiveEngine-feeder.count-heartbeat, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(*.%HOST%.FEEDER_PREV.ProactiveEngine.feeder.heartbeat, '(.*)-', ''))",
                 "textEditor": false
               }
             ],

@@ -26,9 +26,12 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock
-    ports:
-      - 53:53
-    command: " --nameserver='10.1.2.63:53' --nameserver='10.1.2.14:53' --http=:80"
+#    ports:
+#      - 53:53
+#      - 8081:80
+    # You can use also Environment vars like this:
+    # command: "--nameserver='${DNS_1}:53' --nameserver='${DNS_2}:53' --http=:80"
+    command: " --nameserver='10.1.2.14:53' --nameserver='10.1.2.63:53' --http=:80"
     networks:
       mon:
         ipv4_address: 172.25.0.5
@@ -94,7 +97,7 @@ services:
     labels:
       com.dnsdock.image: "memcached"
       com.dnsdock.alias: "memcached"
-      com.dnsdock.ttl: "30"
+      com.dnsdock.ttl: "0"
     env_file:
       - env/memcached.env
     volumes:
@@ -166,8 +169,6 @@ services:
       - env/graphite.env
     depends_on:
       - memcached
-    ports:
-      - 8081:8080
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./data:/srv
@@ -183,7 +184,7 @@ services:
     labels:
       com.dnsdock.image: "grafana"
       com.dnsdock.alias: "grafana"
-      com.dnsdock.ttl: "30"
+      com.dnsdock.ttl: "0"
     env_file:
       - env/database.env
       - env/grafana.env
@@ -208,7 +209,7 @@ services:
     labels:
       com.dnsdock.image: "icinga2-core"
       com.dnsdock.alias: "icinga2-core"
-      com.dnsdock.ttl: "30"
+      com.dnsdock.ttl: "0"
     env_file:
       - env/database.env
       - env/icinga2.env
@@ -247,7 +248,7 @@ services:
 
   icingaweb2:
     restart: always
-    image: bodsch/docker-icingaweb2:1702-02
+    image: bodsch/docker-icingaweb2:1703-02
     container_name: icingaweb2
     hostname: icingaweb2
     labels:

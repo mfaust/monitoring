@@ -81,7 +81,7 @@ class Icinga2Check_CM_Feeder < Icinga2Check
       if( maxEntries == 0 && currentEntries == 0 )
 
         status       = 'UNKNOWN'
-        stateMessage = sprintf( '%d Elements for Feeder available. this feeder is maybe restarting?', maxEntries )
+        stateMessage = sprintf( '%d Elements for Feeder available. This feeder is maybe restarting?', maxEntries )
         exitCode     = STATE_UNKNOWN
       else
 

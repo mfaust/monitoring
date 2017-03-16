@@ -11,9 +11,8 @@ class Icinga2Check_CM_Licenses < Icinga2Check
   def initialize( settings = {} )
 
     super
-
-    host         = settings[:host]        ? settings[:host]        : nil
-    application  = settings[:application] ? settings[:application] : nil
+    host         = settings.dig(:host)
+    application  = settings.dig(:application)
 
     host         = self.shortHostname( host )
 
@@ -38,19 +37,19 @@ class Icinga2Check_CM_Licenses < Icinga2Check
   def check( host, application )
 
     config   = readConfig( 'license' )
-    warning  = config[:warning]  ? config[:warning]  : 50
-    critical = config[:critical] ? config[:critical] : 20
+    warning  = config.dig(:warning)  || 50
+    critical = config.dig(:critical) || 20
 
     # get our bean
     data      = @mbean.bean( host, application, 'Server' )
     dataValue = self.runningOrOutdated( data )
-    
+
     dataValue = dataValue.values.first
 
     t               = Date.parse( Time.now().to_s )
     today           = Time.new( t.year, t.month, t.day )
 
-    validUntilHard  = dataValue['LicenseValidUntilHard']    ? dataValue['LicenseValidUntilHard']     : nil
+    validUntilHard  = dataValue.dig('LicenseValidUntilHard')
 
     if( validUntilHard != nil )
 
@@ -70,7 +69,7 @@ class Icinga2Check_CM_Licenses < Icinga2Check
         exitCode = STATE_CRITICAL
       end
 
-      puts sprintf( '%s - Coremedia License is valid until %s - %d days left', status, licenseDate, validUntilDays )
+      puts sprintf( '%s - %d days left\nCoremedia License is valid until %s - ', status, validUntilDays, licenseDate )
     else
       puts sprintf( 'UNKNOWN - No valid Coremedia License found' )
       exitCode = STATE_UNKNOWN

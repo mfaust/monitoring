@@ -10,9 +10,9 @@ class Icinga2Check_CM_Memory < Icinga2Check
 
     super
 
-    host         = settings[:host]        ? settings[:host]        : nil
-    application  = settings[:application] ? settings[:application] : nil
-    memory       = settings[:memory]      ? settings[:memory]      : nil
+    host         = settings.dig(:host)
+    application  = settings.dig(:application)
+    memory       = settings.dig(:memory)
 
     host         = self.shortHostname( host )
 
@@ -24,8 +24,8 @@ class Icinga2Check_CM_Memory < Icinga2Check
   def check( host, application, type )
 
     config   = readConfig( type )
-    warning  = config[:warning]  ? config[:warning]  : 90
-    critical = config[:critical] ? config[:critical] : 95
+    warning  = config.dig(:warning)  || 90
+    critical = config.dig(:critical) || 95
 
     # get our bean
     data      = @mbean.bean( host, application, 'Memory' )
@@ -37,7 +37,7 @@ class Icinga2Check_CM_Memory < Icinga2Check
     when 'heap-mem'
 
       memoryType = 'Heap'
-      memory     = dataValue['HeapMemoryUsage'] ? dataValue['HeapMemoryUsage'] : nil
+      memory     = dataValue.dig('HeapMemoryUsage')
 
       warning  = 95
       critical = 98
@@ -45,7 +45,7 @@ class Icinga2Check_CM_Memory < Icinga2Check
     when 'perm-mem'
 
       memoryType = 'Perm'
-      memory     = dataValue['NonHeapMemoryUsage'] ? dataValue['NonHeapMemoryUsage'] : nil
+      memory     = dataValue.dig('NonHeapMemoryUsage')
 
       warning  = 99
       critical = 100
@@ -56,9 +56,9 @@ class Icinga2Check_CM_Memory < Icinga2Check
       exit STATE_UNKNOWN
     end
 
-    max       = memory['max']       ? memory['max']       : nil
-    used      = memory['used']      ? memory['used']      : nil
-    committed = memory['committed'] ? memory['committed'] : nil
+    max       = memory.dig('max')
+    used      = memory.dig('used')
+    committed = memory.dig('committed')
 
     if( max != -1 )
       percent  = ( 100 * used.to_i / max.to_i ).to_i
@@ -79,9 +79,9 @@ class Icinga2Check_CM_Memory < Icinga2Check
 
     case type
     when 'heap-mem'
-      puts sprintf( '%s - %s Memory: %d%% used (Commited: %s - Used: %s - Max: %s)', status, memoryType, percent, committed.to_filesize, used.to_filesize, max.to_filesize )
+      puts sprintf( '%s - %s Memory: %d%% used\nCommited: %s\nUsed: %s\nMax: %s', status, memoryType, percent, committed.to_filesize, used.to_filesize, max.to_filesize )
     else
-      puts sprintf( '%s - %s Memory: %d%% used (Commited: %s - Used: %s)', status, memoryType, percent, committed.to_filesize, used.to_filesize )
+      puts sprintf( '%s - %s Memory: %d%% used\nCommited: %s\nUsed: %s\n', status, memoryType, percent, committed.to_filesize, used.to_filesize )
     end
     exit exitCode
 
