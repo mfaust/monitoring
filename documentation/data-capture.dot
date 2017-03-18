@@ -1,0 +1,86 @@
+// create: dot data-capture.dot  -Tpng -o assets/data-capture.png
+
+digraph G {
+
+  nodesep=1.0 // increases the separation between nodes
+  ratio=1
+  overlap=false
+  start=1
+  concentrate=false
+
+  node [
+    fontname = "Courier New",
+    fontsize = 10,
+    height   = 0.2,
+    width    = 0.2,
+    shape    = box
+  ]
+  edge [
+    style=solid,
+    arrowhead="vee",
+    arrowtail="vee",
+    arrowsize="0.7",
+  ]
+
+  subgraph level0{
+    user                [label="USER",shape=box]
+  }
+  subgraph cluster_capture{
+    label = "Capture";
+
+    dnsdock             [label="dnsdock"]
+    beanstalkd          [label="beanstalkd"]
+    jolokia             [label="jolokia"]
+    memcached           [label="memcached"]
+    nginx               [label="nginx"]
+    carbonRelay         [label="carbon-relay"]
+    icinga2Satellite    [label="icinga2-satellite"]
+    cmServiceDiscover   [label="cm-service-discover"]
+    cmDataCollector     [label="cm-data-collector"]
+    cmCollectd          [label="cm-collectd"]
+    cmGrafanaClient     [label="cm-grafana-client"]
+    cmGraphiteClient    [label="cm-graphite-client"]
+    cmIcingaClient      [label="cm-icinga-client"]
+    cmMonitoring        [label="cm-monitoring"]
+
+    { rank=same; beanstalkd memcached icinga2Satellite jolokia }
+  }
+  subgraph cluster_cm{
+    label = "CoreMedia";
+    coremedia         [label="CoreMedia\nServices",shape=box,style=rounded];
+  }
+
+  user              -> nginx
+
+  nginx             -> cmMonitoring
+
+  cmMonitoring      -> beanstalkd
+
+  cmServiceDiscover -> beanstalkd [dir=both]
+  cmServiceDiscover -> jolokia  [dir=both]
+  cmServiceDiscover -> memcached
+
+  cmDataCollector   -> beanstalkd [dir=both]
+  cmDataCollector   -> jolokia
+  cmDataCollector   -> memcached
+
+  cmCollectd        -> memcached
+  cmCollectd        -> carbonRelay
+
+  cmGraphiteClient  -> beanstalkd
+  cmGraphiteClient  -> visualisation
+
+  cmIcingaClient    -> beanstalkd
+  cmIcingaClient    -> visualisation
+
+  cmGrafanaClient   -> beanstalkd [dir=both]
+  cmGrafanaClient   -> visualisation
+
+  icinga2Satellite  -> coremedia [style=dashed,label="ping"]
+  icinga2Satellite  -> memcached
+  icinga2Satellite  -> visualisation
+
+  jolokia           -> coremedia [dir=both,style=dashed,label="jmx"]
+
+  carbonRelay       -> visualisation
+}

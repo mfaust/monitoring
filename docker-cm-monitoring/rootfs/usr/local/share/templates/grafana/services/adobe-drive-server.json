@@ -1,8 +1,8 @@
 {
   "dashboard": {
     "id": null,
-    "title": "%SHORTHOST% Adobe Drive Server",
-    "originalTitle": "%SHORTHOST% Adobe Drive Server",
+    "title": "%SHORTHOST% %DESCRIPTION%",
+    "originalTitle": "%SHORTHOST% %DESCRIPTION%",
     "tags": [ "%TAG%" ],
     "style": "dark",
     "timezone": "browser",

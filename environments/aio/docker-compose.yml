@@ -16,7 +16,7 @@ services:
 
   dnsdock:
     restart: always
-    image: bodsch/docker-dnsdock:1612-01
+    image: bodsch/docker-dnsdock:1703-02
     container_name: dnsdock
     hostname: dnsdock
     labels:
@@ -26,16 +26,34 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock
-    ports:
-      - 53:53
-    command: "--nameserver='10.1.2.14:53' --http=:80 "
+#    ports:
+#      - 53:53
+#      - 8081:80
+    # You can use also Environment vars like this:
+    # command: "--nameserver='${DNS_1}:53' --nameserver='${DNS_2}:53' --http=:80"
+    command: " --nameserver='10.1.2.14:53' --nameserver='10.1.2.63:53' --http=:80"
     networks:
       mon:
         ipv4_address: 172.25.0.5
 
+  beanstalkd:
+    restart: always
+    image: bodsch/docker-beanstalkd:1702-02
+    container_name: beanstalkd
+    hostname: beanstalkd
+    labels:
+      com.dnsdock.image: "beanstalkd"
+      com.dnsdock.alias: "beanstalkd"
+      com.dnsdock.ttl: "30"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      mon:
+        ipv4_address: 172.25.0.6
+
   database:
     restart: always
-    image: bodsch/docker-mysql:1612-01
+    image: bodsch/docker-mysql:1702-02
     container_name: database
     hostname: database
     labels:
@@ -53,7 +71,7 @@ services:
 
   jolokia:
     restart: always
-    image: bodsch/docker-jolokia:1612-01
+    image: bodsch/docker-jolokia:latest
     container_name: jolokia
     hostname: jolokia
     labels:
@@ -73,13 +91,13 @@ services:
 
   memcached:
     restart: always
-    image: bodsch/docker-memcached:1612-01
+    image: bodsch/docker-memcached:1702-02
     container_name: memcached
     hostname: memcached
     labels:
       com.dnsdock.image: "memcached"
       com.dnsdock.alias: "memcached"
-      com.dnsdock.ttl: "30"
+      com.dnsdock.ttl: "0"
     env_file:
       - env/memcached.env
     volumes:
@@ -90,7 +108,7 @@ services:
 
   nginx:
     restart: always
-    image: bodsch/docker-nginx:1612-01
+    image: bodsch/docker-nginx:1702-02
     container_name: nginx
     hostname: nginx
     labels:
@@ -119,7 +137,7 @@ services:
 
   carbon:
     restart: always
-    image: bodsch/docker-go-carbon:1612-01
+    image: bodsch/docker-go-carbon:1702-02
     container_name: carbon
     hostname: carbon
     labels:
@@ -140,7 +158,7 @@ services:
 
   graphite:
     restart: always
-    image: bodsch/docker-graphite:1612-01
+    image: bodsch/docker-graphite:1702-02
     container_name: graphite
     hostname: graphite
     labels:
@@ -151,8 +169,6 @@ services:
       - env/graphite.env
     depends_on:
       - memcached
-    ports:
-      - 8081:8080
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./data:/srv
@@ -162,13 +178,13 @@ services:
 
   grafana:
     restart: always
-    image: bodsch/docker-grafana:1612-01
+    image: bodsch/docker-grafana:1702-02
     container_name: grafana
     hostname: grafana
     labels:
       com.dnsdock.image: "grafana"
       com.dnsdock.alias: "grafana"
-      com.dnsdock.ttl: "30"
+      com.dnsdock.ttl: "0"
     env_file:
       - env/database.env
       - env/grafana.env
@@ -187,21 +203,20 @@ services:
 
   icinga2-core:
     restart: always
-    image: bodsch/docker-icinga2:1612-01
+    image: bodsch/docker-icinga2:1703-01
     container_name: icinga2-core
     hostname: icinga2-core
     labels:
       com.dnsdock.image: "icinga2-core"
       com.dnsdock.alias: "icinga2-core"
-      com.dnsdock.ttl: "30"
+      com.dnsdock.ttl: "0"
     env_file:
       - env/database.env
       - env/icinga2.env
     depends_on:
+      - beanstalkd
       - database
       - memcached
-    extra_hosts:
-      - 'blueprint-box:192.168.252.100'
     ports:
       - 5665:5665
       - 6666:6666
@@ -212,19 +227,20 @@ services:
       - ./data/icinga2:/var/lib/icinga2/
       - ./data/monitoring:/var/cache/monitoring
       - ./share/icinga2:/usr/local/monitoring
-      - ../docker-cm-monitoring/rootfs/usr/local/lib/mbean.rb:/usr/local/lib/mbean.rb:ro
-      - ../docker-cm-monitoring/rootfs/usr/local/lib/tools.rb:/usr/local/lib/tools.rb:ro
-      - ./share/icinga2/usr/lib/monitoring-plugins/icingachecks.rb:/usr/local/lib/icingachecks.rb:ro
-      - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_memory_cache:/usr/lib/monitoring-plugins/check_cm_memory_cache:ro
-      - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_feeder_status.rb:/usr/lib/monitoring-plugins/check_cm_feeder_status:ro
-      - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_cache.rb:/usr/lib/monitoring-plugins/check_cm_cache:ro
-      - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_memory.rb:/usr/lib/monitoring-plugins/check_cm_memory:ro
-      - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_license.rb:/usr/lib/monitoring-plugins/check_cm_license:ro
-      - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_capconnection.rb:/usr/lib/monitoring-plugins/check_cm_capconnection:ro
-      - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_runlevel.rb:/usr/lib/monitoring-plugins/check_cm_runlevel:ro
-      - ./share/icinga2/usr/lib/monitoring-plugins/check_ssl_cert:/usr/lib/monitoring-plugins/check_ssl_cert:ro
+      - ./share/icinga2/etc/cm-icinga2.yaml:/etc/cm-icinga2.yaml
+      - ./share/icinga2/usr/lib/monitoring-plugins/tools:/usr/local/share/icinga2
+      - ./share/icinga2/usr/lib/monitoring-plugins/icingachecks.rb:/usr/local/lib/icingachecks.rb
+      - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_feeder_status.rb:/usr/lib/monitoring-plugins/check_cm_feeder_status
+      - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_cache.rb:/usr/lib/monitoring-plugins/check_cm_cache
+      - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_memory.rb:/usr/lib/monitoring-plugins/check_cm_memory
+      - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_license.rb:/usr/lib/monitoring-plugins/check_cm_license
+      - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_capconnection.rb:/usr/lib/monitoring-plugins/check_cm_capconnection
+      - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_runlevel.rb:/usr/lib/monitoring-plugins/check_cm_runlevel
+      - ./share/icinga2/usr/lib/monitoring-plugins/check_ssl_cert:/usr/lib/monitoring-plugins/check_ssl_cert
       - ./share/icinga2/etc/icinga2/objects:/etc/icinga2/objects
     links:
+      - beanstalkd:beanstalkd
+      - memcached:memcached
       - database:database
     networks:
       mon:
@@ -232,7 +248,7 @@ services:
 
   icingaweb2:
     restart: always
-    image: bodsch/docker-icingaweb2:1612-01
+    image: bodsch/docker-icingaweb2:1703-02
     container_name: icingaweb2
     hostname: icingaweb2
     labels:
@@ -297,23 +313,212 @@ services:
         ipv4_address: 172.25.0.40
 
 
-  cm-external-discover:
+
+
+
+
+
+  # single service
+  # use MQ to process data
+  cm-service-discover:
     restart: always
-    build: ../../docker-cm-external-discover
-    container_name: cm-external-discover
-    hostname: cm-external-discover
+    build: ../../docker-cm-service-discover
+    container_name: cm-service-discover
+    hostname: cm-service-discover
     labels:
-      com.dnsdock.image: "cm-external-discover"
-      com.dnsdock.alias: "cm-external-discover"
+      com.dnsdock.image: "cm-service-discover"
+      com.dnsdock.alias: "cm-service-discover"
       com.dnsdock.ttl: "30"
     env_file:
-      - env/cm-external-discover.env
+      - env/cm-service-discover.env
     depends_on:
-      - cm-monitoring
+      - jolokia
+      - memcached
+      - beanstalkd
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ./share/monitoring/etc/cm-monitoring.yaml:/etc/cm-monitoring.yaml
-      - ./data:/srv
+      - ./share/resolv.conf:/etc/resolv.conf:ro
+      - ./share/monitoring/etc/cm-service.yaml:/etc/cm-service.yaml
+      - ./share/monitoring/etc/cm-application.yaml:/etc/cm-application.yaml
+      - ./data/monitoring:/var/cache/monitoring
+    links:
+      - jolokia:jolokia
+      - memcached:memcached
+      - beanstalkd:beanstalkd
     networks:
       mon:
-        ipv4_address: 172.25.0.41
+        ipv4_address: 172.25.0.50
+
+  # single service
+  # use MQ to process data
+  cm-data-collector:
+    restart: always
+    build: ../../docker-cm-data-collector
+    container_name: cm-data-collector
+    hostname: cm-data-collector
+    labels:
+      com.dnsdock.image: "cm-data-collector"
+      com.dnsdock.alias: "cm-data-collector"
+      com.dnsdock.ttl: "30"
+    env_file:
+      - env/cm-data-collector.env
+    depends_on:
+      - jolokia
+      - memcached
+      - beanstalkd
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./share/resolv.conf:/etc/resolv.conf:ro
+      - ./share/monitoring/etc/cm-service.yaml:/etc/cm-service.yaml
+      - ./share/monitoring/etc/cm-application.yaml:/etc/cm-application.yaml
+      - ./data/monitoring:/var/cache/monitoring
+    links:
+      - jolokia:jolokia
+      - memcached:memcached
+      - beanstalkd:beanstalkd
+    networks:
+      mon:
+        ipv4_address: 172.25.0.51
+
+  # single service
+  # use MQ to process data
+  cm-collectd:
+    restart: always
+    build: ../../docker-cm-collectd
+    container_name: cm-collectd
+    hostname: cm-collectd
+    labels:
+      com.dnsdock.image: "cm-collectd"
+      com.dnsdock.alias: "cm-collectd"
+      com.dnsdock.ttl: "30"
+    env_file:
+      - env/cm-collectd.env
+    depends_on:
+      - memcached
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./share/resolv.conf:/etc/resolv.conf:ro
+      - ./share/monitoring/etc/cm-service.yaml:/etc/cm-service.yaml
+      - ./share/monitoring/etc/cm-application.yaml:/etc/cm-application.yaml
+      - ./share/monitoring/etc/cm-monitoring.yaml:/etc/cm-monitoring.yaml
+      - ./data/monitoring:/var/cache/monitoring
+    links:
+      - memcached:memcached
+      - beanstalkd:beanstalkd
+    networks:
+      mon:
+        ipv4_address: 172.25.0.52
+
+  # single service
+  # use MQ to process data
+  cm-grafana-client:
+    restart: always
+    build: ../../docker-cm-grafana-client
+    container_name: cm-grafana-client
+    hostname: cm-grafana-client
+    labels:
+      com.dnsdock.image: "cm-grafana-client"
+      com.dnsdock.alias: "cm-grafana-client"
+      com.dnsdock.ttl: "30"
+    env_file:
+      - env/cm-grafana-client.env
+    depends_on:
+      - beanstalkd
+      - memcached
+    extra_hosts:
+      # NOTE: external service
+      #- 'nginx-proxy:10.101.2.83'
+      - 'nginx-proxy:192.168.252.5'
+      #- 'nginx-proxy:192.168.0.5'
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./share/resolv.conf:/etc/resolv.conf:ro
+      - ./share/grafana-client/templates:/usr/local/share/templates:ro
+      - ./data/monitoring:/var/cache/monitoring
+    links:
+      - memcached:memcached
+      - beanstalkd:beanstalkd
+    networks:
+      mon:
+        ipv4_address: 172.25.0.53
+
+  # single service
+  # use MQ to process data
+  cm-graphite-client:
+    restart: always
+    build: ../../docker-cm-graphite-client
+    container_name: cm-graphite-client
+    hostname: cm-graphite-client
+    labels:
+      com.dnsdock.image: "cm-graphite-client"
+      com.dnsdock.alias: "cm-graphite-client"
+      com.dnsdock.ttl: "30"
+    env_file:
+      - env/cm-graphite-client.env
+    depends_on:
+      - beanstalkd
+    extra_hosts:
+      # NOTE: external service
+      #- 'nginx-proxy:10.101.2.83'
+      - 'nginx-proxy:192.168.252.5'
+      #- 'nginx-proxy:192.168.0.5'
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./share/resolv.conf:/etc/resolv.conf:ro
+    links:
+      - beanstalkd:beanstalkd
+    networks:
+      mon:
+        ipv4_address: 172.25.0.54
+
+  # single service
+  # use MQ to process data
+  cm-icinga-client:
+    restart: always
+    build: ../../docker-cm-icinga-client
+    container_name: cm-icinga-client
+    hostname: cm-icinga-client
+    labels:
+      com.dnsdock.image: "cm-icinga-client"
+      com.dnsdock.alias: "cm-icinga-client"
+      com.dnsdock.ttl: "30"
+    env_file:
+      - env/icinga2.env
+      - env/cm-icinga-client.env
+    depends_on:
+      - beanstalkd
+    #extra_hosts:
+      # NOTE: external service
+      #- 'nginx-proxy:10.101.2.83'
+      #- 'nginx-proxy:192.168.252.101'
+      #- 'nginx-proxy:192.168.0.5'
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./share/resolv.conf:/etc/resolv.conf:ro
+    networks:
+      mon:
+        ipv4_address: 172.25.0.55
+
+
+
+
+#  cm-external-discover:
+#    restart: always
+#    build: ../../docker-cm-external-discover
+#    container_name: cm-external-discover
+#    hostname: cm-external-discover
+#    labels:
+#      com.dnsdock.image: "cm-external-discover"
+#      com.dnsdock.alias: "cm-external-discover"
+#      com.dnsdock.ttl: "30"
+#    env_file:
+#      - env/cm-external-discover.env
+#    depends_on:
+#      - cm-monitoring
+#    volumes:
+#      - /etc/localtime:/etc/localtime:ro
+#      - ./share/monitoring/etc/cm-monitoring.yaml:/etc/cm-monitoring.yaml
+#      - ./data:/srv
+#    networks:
+#      mon:
+#        ipv4_address: 172.25.0.41

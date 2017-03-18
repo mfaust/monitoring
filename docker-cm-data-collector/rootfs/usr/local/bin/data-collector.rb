@@ -1,64 +1,44 @@
 #!/usr/bin/ruby
 #
-# 12.08.2016 - Bodo Schulz
+# 14.03.2017 - Bodo Schulz
 #
 #
-# v1.0.1
+# v1.2.0
 
 # -----------------------------------------------------------------------------
 
-require 'yaml'
+require 'rufus-scheduler'
 
-require_relative '../lib/data-collector'
+require_relative '../lib/collector'
 
 # -----------------------------------------------------------------------------
 
 applicationConfigFile = '/etc/cm-application.yaml'
 serviceConfigFile     = '/etc/cm-service.yaml'
-configFile            = '/etc/cm-monitoring.yaml'
 
-if( File.exist?( configFile ) )
 
-  config = YAML.load_file( configFile )
+jolokiaHost      = ENV.fetch('JOLOKIA_HOST'  , 'localhost' )
+jolokiaPort      = ENV.fetch('JOLOKIA_PORT'  , 8080 )
+mqHost           = ENV.fetch('MQ_HOST'       , 'localhost' )
+mqPort           = ENV.fetch('MQ_PORT'       , 11300 )
+mqQueue          = ENV.fetch('MQ_QUEUE'      , 'mq-collector' )
+memcacheHost     = ENV.fetch('MEMCACHE_HOST' , 'localhost' )
+memcachePort     = ENV.fetch('MEMCACHE_PORT' , 11211 )
+scanDiscovery    = ENV.fetch('SCAN_DISCOVERY', '10m' )
+interval         = ENV.fetch('INTERVAL'      , 15 )
 
-  @logDir           = config['logDirectory']         ? config['logDirectory']     : '/tmp/log'
-  @cacheDir         = config['cacheDirectory']       ? config['cacheDirectory']   : '/tmp/cache'
-  @jolokiaHost      = config['jolokia']['host']      ? config['jolokia']['host']  : 'localhost'
-  @jolokiaPort      = config['jolokia']['port']      ? config['jolokia']['port']  : 8080
-
-  @memcacheHost     = ENV['MEMCACHE_HOST']           ? ENV['MEMCACHE_HOST']       : nil
-  @memcachePort     = ENV['MEMCACHE_PORT']           ? ENV['MEMCACHE_PORT']       : nil
-
-  @scanDiscovery    = config['data-collector']['scan-discovery'] ? config['data-collector']['scan-discovery'] : '10m'
-
-else
-  puts "no configuration exists, use default settings"
-
-  @logDir        = '/tmp/log'
-  @cacheDir      = '/tmp/cache'
-  @jolokiaHost   = 'localhost'
-  @jolokiaPort   = 8080
-  @memcacheHost  = nil
-  @memcachePort  = nil
-  @scanDiscovery = '10m'
-
-end
-
-options = {
-  :logDirectory          => @logDir,
-  :cacheDirectory        => @cacheDir,
-  :jolokiaHost           => @jolokiaHost,
-  :jolokiaPort           => @jolokiaPort,
-  :memcacheHost          => @memcacheHost,
-  :memcachePort          => @memcachePort,
-  :scanDiscovery         => @scanDiscovery,
+config = {
+  :jolokiaHost           => jolokiaHost,
+  :jolokiaPort           => jolokiaPort,
+  :mqHost                => mqHost,
+  :mqPort                => mqPort,
+  :mqQueue               => mqQueue,
+  :memcacheHost          => memcacheHost,
+  :memcachePort          => memcachePort,
+  :scanDiscovery         => scanDiscovery,
   :applicationConfigFile => applicationConfigFile,
   :serviceConfigFile     => serviceConfigFile
 }
-
-# -----------------------------------------------------------------------------
-
-r = DataCollector.new( options )
 
 # -----------------------------------------------------------------------------
 
@@ -71,10 +51,32 @@ Signal.trap('HUP')  { stop = true }
 Signal.trap('TERM') { stop = true }
 Signal.trap('QUIT') { stop = true }
 
-until stop
-  # do your thing
+# -----------------------------------------------------------------------------
+
+r = DataCollector::Collector.new( config )
+
+scheduler = Rufus::Scheduler.new
+
+scheduler.every( interval.to_i, :first_in => 1 ) do
+
   r.run()
-  sleep( 15 )
+
 end
 
+
+scheduler.every( '5s' ) do
+
+  if( stop == true )
+
+    p "shutdown scheduler ..."
+
+    scheduler.shutdown(:kill)
+  end
+
+end
+
+scheduler.join
+
 # -----------------------------------------------------------------------------
+
+# EOF

@@ -1,0 +1,72 @@
+// create: dot overview.dot  -Tpng -o assets/overview.png
+
+digraph G {
+
+  nodesep=1.0 // increases the separation between nodes
+  ratio=1
+  overlap=false
+  start=1
+  concentrate=false
+  size="15,10";
+//  rankdir="LR";
+
+  node [
+    fontname="Courier New",
+    fontsize=10,
+    height=0.2,
+    width=0.2,
+    shape=box
+  ]
+  edge [
+    style=solid,
+    arrowhead="vee",
+    arrowtail="vee",
+    arrowsize="0.7",
+   ]
+
+  user                [label="USER",shape=box,style=rounded]
+  coremedia           [label="CoreMedia\nServices",shape=box,style=rounded]
+
+  nginx               [label="docker-nginx"]
+  database            [label="docker-mysql"]
+  icinga2core         [label="docker-icinga2"]
+  icingaweb2          [label="docker-icingaweb2"]
+  graphite            [label="docker-graphite"]
+  grafana             [label="docker-grafana"]
+  memcache            [label="docker-memcache"]
+  jolokia             [label="docker-jolokia"]
+  cmMonitoring        [label="docker-monitoring"]
+
+
+  user -> nginx
+
+  { rank=same; user coremedia }
+  { rank=same; icingaweb2 grafana cmMonitoring }
+  { rank=same; icinga2core jolokia }
+  { rank=same; graphite database memcache jolokia }
+
+  nginx -> cmMonitoring [dir=both]
+  nginx -> grafana
+  nginx -> graphite
+  nginx -> icinga2core
+  nginx -> icingaweb2
+
+  cmMonitoring -> coremedia [style=dashed,label="ping"]
+  cmMonitoring -> jolokia  [dir=both]
+  cmMonitoring -> memcache [dir=both]
+
+  icinga2core  -> database
+  icinga2core  -> coremedia
+  icinga2core  -> memcache
+
+  icingaweb2   -> database
+
+  grafana      -> database
+  grafana      -> graphite
+  grafana      -> memcache
+
+  graphite     -> database
+
+  jolokia      -> coremedia [dir=both]
+
+}

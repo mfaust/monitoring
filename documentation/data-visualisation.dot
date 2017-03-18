@@ -1,0 +1,64 @@
+// create: dot data-visualisation.dot  -Tpng -o assets/data-visualisation.png
+
+digraph G {
+
+  nodesep     = 0.5 // increases the separation between nodes
+  ratio       = 1.5
+  overlap     = true
+  start       = 1
+  concentrate = false
+
+  splines     = true
+
+
+  node [
+    fontname = "Courier New",
+    fontsize = 12,
+    height   = 0.2,
+    width    = 0.2,
+    shape    = box
+  ]
+  edge [
+    style     = solid,
+    arrowhead = "vee",
+    arrowtail = "vee",
+    arrowsize = "0.7",
+    splines   = "curved"
+  ]
+
+  subgraph level0{
+    user                [label = "USER",shape = none]
+  }
+  subgraph cluster_visualisation{
+    label = "Visualisation";
+
+    dnsdock             [label="dnsdock"]
+    memcached           [label="memcached"]
+    nginx               [label="nginx"]
+    carbon              [label="carbon"]
+    graphite            [label="graphite"]
+    grafana             [label="grafana"]
+    icinga2Master       [label="icinga2-master"]
+    icinga2Web          [label="icinga2-web"]
+    database            [label="database"]
+
+    { rank = same; icinga2Web icinga2Master grafana }
+    { rank = same; graphite carbon memcached }
+  }
+
+  { rank=min; user capture }  [style=invis]
+
+  user              -> nginx
+
+  capture           -> { nginx graphite carbon icinga2Master }  [weight=1000]
+
+  nginx             -> { grafana icinga2Web }                   [weight=1000]
+
+  grafana           -> { database memcached graphite }            [weight=1000]
+  grafana           -> carbon     [style=dashed, label="optional", weight=1000]
+
+  icinga2Master     -> database
+  icinga2Master     -> carbon     [style=dashed,label="optional", weight=1000]
+
+  icinga2Web        -> { database icinga2Master }
+}

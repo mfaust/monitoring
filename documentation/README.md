@@ -1,7 +1,9 @@
-Coremedia Monitoring
+CoreMedia Monitoring
 ====================
 
-Das Coremedia Monitoring basiert auf mehreren - durchaus voneinander abhängigen - Dockercontainer.
+Das CoreMedia Monitoring basiert auf einem Set von mehreren Dockercontainern, welche die genutzten Services kappseln.
+
+Der Einstaz von Docker ist nicht zwingend notwendig, wird aber in diesem Kontext genutzt um eine dynamische Entwicklung zu fördern.
 
 Ziel ist ein funktionierendes Monitoring-System, welches auf jedem System ausgerollt werden kann.
 
@@ -10,69 +12,51 @@ Ziel ist ein funktionierendes Monitoring-System, welches auf jedem System ausger
 
 Work-in-Progress
 
+
 # Docker Compose
 
-Im Verzeichniss `docker-compose-monitoring` befindet sich ein entsprechendes Compose File für ein komplettes Monitoring Setup.
+Im Verzeichniss `environments` befinden sich wetere Verzeichnisse, welche unterschiedliche Deploymentarten realisieren helfen.
 
-Es werden pre-compiled Container von [Docker Hub](https://hub.docker.com/r/bodsch/) benutzt, um möglichst den lokalen Compilevorgang zu reduzieren.
+ * `aio` bietet eine All-In-One Lösung, die alle Komponenten auf ein System zur Verfügung stellen kann.
+  Diese kann idealerweise auf einem dezidiertem Server oder einem Notebook installiert werden und bietet die geringsten Einstiegshürden
+ * `aws` bündelt ausschließlich Services zur Visualisierung der Monitoring Ergebnisse und bietet ein aktuelles **Grafana**  und **Icinga2**
+ * `customer` beinhaltet alle Services, die zur Datenerhebung benutzt werden. Diese Daten werden anschließend an einen definierten Endpunkt
+ (z.B. ein Setup, welches die `aws` Komponenten beinhaltet) reportet.
 
-Zusätzlich wird ein weiterer Docker Container (`cm-monitoring`) eingebunden, der initial und bei jeder weiteren Änderung gebaut werden muß.
+In diesen Unterverzeichnissen befindet sich jeweils eine `docker-compose` Datei, welches die benötigten Container verwaltet.
+
+Um den Startvorgang zu beschleunigen, werden pre-compiled Container von [Docker Hub](https://hub.docker.com/r/bodsch/) benutzt.
+Die einzelnen Container und deren Funktion sind [hier](./docker-container.md) beschrieben.
+
 
 
 ## Voraussetzung
 
 In jedem Fall ist eine funktionierende DNS Auflösung sehr, sehr (sehr^10) hilfreich!
 
-Der Zugriff auf die Ports xxx99 sollte gewährleistet sein.
+Der Zugriff auf die RMI Ports der Tomcats (xxx99) sollte gewährleistet sein.
 
 Sollten `mysql` und `mongodb` ebenfalls ins Monitoring aufgenommen werden, müssen deren Ports ebenfalls erreichbar sein.
 
 **Hinweis** Das Überwachen der `mysql` ist aktuell noch in einem sehr frühen Stadium, kann also zu Problemen führen!
 
 
-## Vorbereitungen & benötigte Software
+[Installation](./installation.md)
 
-Wir benötigen eine Docker Engine
+[API](./api.md)
 
- - [Mac](https://docs.docker.com/engine/installation/mac/)
- - [Linux](https://docs.docker.com/engine/installation/linux/ubuntulinux/)
- - [Windows](https://docs.docker.com/engine/installation/windows/)
+[JMX](./jmx.md)
 
-Und docker-compose:
+[Configuration](./configuration.md)
 
- - [docker-compose](https://docs.docker.com/compose/install/)
+[Docker Container](./docker-container.md)
 
+[Operation](./operations.md)
 
-## API
+[Service Discovery](./service-discovery.md)
 
-Wir haben versucht, möglichst alles über eine API aufrufbar zu bekommen:
+[Screenshots](./screenshots.md)
 
-@include(API.md)
-
-
-## Eigene Anpassungen
-
-Im Verzeichnis `~/devops/monitoring/docker-compose-monitoring/share` befinden sich alle Dateien, die beim Erstellen des `cm-monitoring` Containers in diesen hinein kopiert werden.
-
-### Anpassung für die DNS Auflösung
-
-Für die Anpassung der DNS Auflösung muß die Datei `resolv.conf` angepasst werden.
-
-### Dashboards
-
-Alle Dashboards, die automatisch hinzugefügt werden, befinden sich im Verzeichnis `~/devops/monitoring/docker-cm-monitoring/rootfs/usr/local/share/templates/grafana`
-
-**Mein Vorschlag für größere Änderungen beim Kunden**
-
-Kopiert das Verzeichnis `docker-cm-monitoring` (z.b. `docker-guj-monitoring`) und passt das `docker-compose.yml` File an.
-
-
-
-## Weiterentwicklung
-
-Das System befindet sich in Entwicklung.
-
-Zum Bauen eigener Graphen und System Checks wird es bestimmt mal einen Workshop geben. :)
 
 
 

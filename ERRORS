@@ -1,0 +1,80 @@
+
+cm-data-collector      | [2017-01-13 06:32:36::416] INFO  : DataCollector::Collector -
+cm-data-collector      | [2017-01-13 06:32:39::446] INFO  : DataCollector::Collector - Host: monitoring-16-01
+cm-data-collector      | W, [2017-01-13T06:32:44.448372 #1]  WARN -- : memcached:11211 failed (count: 0) Timeout::Error: execution expired
+cm-data-collector      | /usr/lib/ruby/gems/2.3.0/gems/dalli-2.7.6/lib/dalli/ring.rb:45:in `server_for_key': No server available (Dalli::RingError)
+cm-data-collector      |        from /usr/lib/ruby/gems/2.3.0/gems/dalli-2.7.6/lib/dalli/client.rb:361:in `perform'
+cm-data-collector      |        from /usr/lib/ruby/gems/2.3.0/gems/dalli-2.7.6/lib/dalli/client.rb:58:in `get'
+cm-data-collector      |        from /usr/local/lib/storage.rb:979:in `get'
+cm-data-collector      |        from /usr/local/lib/collector.rb:761:in `block in run'
+cm-data-collector      |        from /usr/local/lib/collector.rb:757:in `each'
+cm-data-collector      |        from /usr/local/lib/collector.rb:757:in `run'
+cm-data-collector      |        from /usr/local/bin/data-collector.rb:60:in `<main>'
+cm-data-collector      | [2017-01-13 06:38:51::158] ERROR : DataCollector::Collector - The Port 40299 on Host monitoring-16-01 is not open, skip sending data
+cm-data-collector      | [2017-01-13 06:38:51::163] ERROR : ExternalClients::MongoDb - An error occurred for connection: Failed to open TCP connection to monitoring-16-01:28017 (getaddrinfo: Name does not resolve)
+cm-data-collector      | [2017-01-13 06:38:51::168] ERROR : ExternalClients::MySQL - An error occurred for connection: Unknown MySQL server host 'monitoring-16-01' (-2)
+cm-data-collector      | [2017-01-13 06:38:51::171] ERROR : ExternalClients::MySQL - An error occurred for query: undefined method `query' for nil:NilClass
+cm-data-collector      | Did you mean?  to_query
+cm-data-collector      | [2017-01-13 06:38:51::178] ERROR : DataCollector::Collector - The Port 42099 on Host monitoring-16-01 is not open, skip sending data
+
+
+cm-collectd            | plugin_load: plugin "exec" successfully loaded.
+cm-collectd            | plugin_load: plugin "write_graphite" successfully loaded.
+cm-collectd            | Initialization complete, entering read-loop.
+cm-collectd            | write_graphite plugin: Connecting to carbon-relay:2003 via tcp failed. The last error was: failed to connect to remote host: Connection refused
+cm-collectd            | Filter subsystem: Built-in target `write': Dispatching value to all write plugins failed with status -1.
+cm-collectd            | write_graphite plugin: Successfully connected to carbon-relay:2003 via tcp.
+cm-collectd            | Filter subsystem: Built-in target `write': Some write plugin is back to normal operation. `write' succeeded.
+cm-collectd            | exec plugin: Unable to parse command, ignoring line: "[2017-01-13 06:38:31::906] INFO  : Collecd::Plugin - -----------------------------------------------------------------"
+cm-collectd            | exec plugin: Unable to parse command, ignoring line: "[2017-01-13 06:38:31::906] INFO  : Collecd::Plugin -  CoreMedia - CollectdPlugin"
+cm-collectd            | exec plugin: Unable to parse command, ignoring line: "[2017-01-13 06:38:31::906] INFO  : Collecd::Plugin -   Version 1.4.1-beta1 (2017-01-09)"
+cm-collectd            | exec plugin: Unable to parse command, ignoring line: "[2017-01-13 06:38:31::906] INFO  : Collecd::Plugin -   Copyright 2016-2017 Coremedia"
+cm-collectd            | exec plugin: Unable to parse command, ignoring line: "[2017-01-13 06:38:31::906] INFO  : Collecd::Plugin -   configured interval 20.000"
+cm-collectd            | exec plugin: Unable to parse command, ignoring line: "[2017-01-13 06:38:31::906] INFO  : Collecd::Plugin -   used Services:"
+cm-collectd            | exec plugin: Unable to parse command, ignoring line: "[2017-01-13 06:38:31::906] INFO  : Collecd::Plugin -     - Memcache     : memcached:11211"
+cm-collectd            | exec plugin: Unable to parse command, ignoring line: "[2017-01-13 06:38:31::906] INFO  : Collecd::Plugin - -----------------------------------------------------------------"
+cm-collectd            | exec plugin: Unable to parse command, ignoring line: "[2017-01-13 06:38:31::906] INFO  : Collecd::Plugin - "
+cm-collectd            | exec plugin: Unable to parse command, ignoring line: "[2017-01-13 06:38:35::028] ERROR : Collecd::Plugin - resultdata is not a Hash (mongodb)"
+cm-collectd            | exec plugin: Unable to parse command, ignoring line: "[2017-01-13 06:38:35::028] ERROR : Collecd::Plugin - resultdata is not a Hash (mysql)"
+cm-collectd            | -1 Parsing the values string failed.
+cm-collectd            | -1 Parsing the values string failed.
+cm-collectd            | -1 Parsing the values string failed.
+cm-collectd            | -1 Parsing the values string failed.
+
+
+cm-collectd            | exec plugin: Unable to parse command, ignoring line: "[2017-01-13 06:33:39::266] INFO  : Collecd::Plugin - "
+cm-collectd            | exec plugin: Unable to parse command, ignoring line: "W, [2017-01-13T06:33:44.269501 #41]  WARN -- : memcached:11211 failed (count: 0) Timeout::Error: execution expired"
+cm-data-collector      | /usr/lib/ruby/gems/2.3.0/gems/dalli-2.7.6/lib/dalli/ring.rb:45:in `server_for_key': No server available (Dalli::RingError)
+cm-data-collector      |        from /usr/lib/ruby/gems/2.3.0/gems/dalli-2.7.6/lib/dalli/client.rb:361:in `perform'
+cm-data-collector      |        from /usr/lib/ruby/gems/2.3.0/gems/dalli-2.7.6/lib/dalli/client.rb:58:in `get'
+cm-data-collector      |        from /usr/local/lib/storage.rb:979:in `get'
+cm-data-collector      |        from /usr/local/lib/collector.rb:761:in `block in run'
+cm-data-collector      |        from /usr/local/lib/collector.rb:757:in `each'
+cm-data-collector      |        from /usr/local/lib/collector.rb:757:in `run'
+cm-data-collector      |        from /usr/local/bin/data-collector.rb:60:in `<main>'
+cm-data-collector      | [2017-01-13 06:33:36::905] INFO  : DataCollector::Collector - -----------------------------------------------------------------
+cm-data-collector      | [2017-01-13 06:33:36::905] INFO  : DataCollector::Collector -  CoreMedia - DataCollector
+cm-data-collector      | [2017-01-13 06:33:36::905] INFO  : DataCollector::Collector -   Version 1.5.0 (2017-01-07)
+cm-data-collector      | [2017-01-13 06:33:36::905] INFO  : DataCollector::Collector -   Copyright 2016-2017 Coremedia
+cm-data-collector      | [2017-01-13 06:33:36::905] INFO  : DataCollector::Collector -   cache directory located at /var/cache/monitoring
+cm-data-collector      | [2017-01-13 06:33:36::906] INFO  : DataCollector::Collector -   Memcache Service memcached:11211
+cm-data-collector      | [2017-01-13 06:33:36::906] INFO  : DataCollector::Collector -   Message Queue Service beanstalkd:11300/mq-collector
+cm-data-collector      | [2017-01-13 06:33:36::906] INFO  : DataCollector::Collector - -----------------------------------------------------------------
+cm-data-collector      | [2017-01-13 06:33:36::906] INFO  : DataCollector::Collector -
+cm-data-collector      | [2017-01-13 06:33:39::932] INFO  : DataCollector::Collector - Host: monitoring-16-01
+cm-data-collector      | W, [2017-01-13T06:33:44.933178 #1]  WARN -- : memcached:11211 failed (count: 0) Timeout::Error: execution expired
+cm-collectd            | write_graphite plugin: getaddrinfo (carbon-relay, 2003, tcp) failed: Try again
+cm-collectd            | write_graphite plugin: getaddrinfo (carbon-relay, 2003, tcp) failed: Try again
+cm-collectd            | write_graphite plugin: getaddrinfo (carbon-relay, 2003, tcp) failed: Try again
+cm-collectd            | exec plugin: exec_read_one: error = /usr/lib/ruby/gems/2.3.0/gems/dalli-2.7.6/lib/dalli/ring.rb:45:in `server_for_key': No server available (Dalli::RingError)
+cm-collectd            | exec plugin: exec_read_one: error =    from /usr/lib/ruby/gems/2.3.0/gems/dalli-2.7.6/lib/dalli/client.rb:361:in `perform'
+cm-collectd            | exec plugin: exec_read_one: error =    from /usr/lib/ruby/gems/2.3.0/gems/dalli-2.7.6/lib/dalli/client.rb:58:in `get'
+cm-collectd            | exec plugin: exec_read_one: error =    from /usr/local/lib/storage.rb:979:in `get'
+cm-collectd            | exec plugin: exec_read_one: error =    from /usr/local/lib/collectd-plugin.rb:2194:in `block in run'
+cm-collectd            | exec plugin: exec_read_one: error =    from /usr/local/lib/collectd-plugin.rb:2186:in `each'
+cm-collectd            | exec plugin: exec_read_one: error =    from /usr/local/lib/collectd-plugin.rb:2186:in `run'
+cm-collectd            | exec plugin: exec_read_one: error =    from /usr/local/bin/collectd-plugin.rb:29:in `block in <main>'
+cm-collectd            | exec plugin: exec_read_one: error =    from /usr/local/bin/collectd-plugin.rb:28:in `loop'
+cm-collectd            | exec plugin: exec_read_one: error =    from /usr/local/bin/collectd-plugin.rb:28:in `<main>'
+
+

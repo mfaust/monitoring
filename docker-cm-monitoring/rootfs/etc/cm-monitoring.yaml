@@ -4,6 +4,9 @@
 logDirectory: /var/log/monitoring
 cacheDirectory: /var/cache/monitoring
 
+mq:
+  host: beanstalkd
+
 external-discover:
   backend:
     host: localhost
