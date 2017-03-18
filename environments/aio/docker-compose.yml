@@ -131,6 +131,7 @@ services:
       - ./share/nginx/etc/nginx/modules.d/01-proxy-graphite.conf:/etc/nginx/modules.d/01-proxy-graphite.conf:ro
       - ./share/nginx/etc/nginx/modules.d/01-proxy-icingaweb2.conf:/etc/nginx/modules.d/01-proxy-icingaweb2.conf:ro
       - ./share/nginx/etc/nginx/modules.d/01-proxy-rest-service.conf:/etc/nginx/modules.d/01-proxy-rest-service.conf:ro
+      - ./share/nginx/etc/nginx/modules.d/01-proxy-markdown-service.conf:/etc/nginx/modules.d/01-proxy-markdown-service.conf
     networks:
       mon:
         ipv4_address: 172.25.0.15
@@ -275,6 +276,26 @@ services:
       mon:
         ipv4_address: 172.25.0.31
 
+  markdown-service:
+    restart: always
+    image: bodsch/docker-markdown-service:latest
+    container_name: markdown-service
+    hostname: markdown-service
+    labels:
+      com.dnsdock.image: "markdown-service"
+      com.dnsdock.alias: "markdown-service"
+      com.dnsdock.ttl: "30"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./share/markdown-service/index.md:/var/www/index.md
+      - ./share/markdown-service/coremedia:/var/www
+    networks:
+      mon:
+        ipv4_address: 172.25.0.32
+
+
+  # CoreMEdia Glue and Logic
+
   cm-monitoring:
     restart: always
     build: ../../docker-cm-monitoring
@@ -311,12 +332,6 @@ services:
     networks:
       mon:
         ipv4_address: 172.25.0.40
-
-
-
-
-
-
 
   # single service
   # use MQ to process data
@@ -498,7 +513,6 @@ services:
     networks:
       mon:
         ipv4_address: 172.25.0.55
-
 
 
 
