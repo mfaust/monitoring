@@ -88,6 +88,7 @@ services:
       - ./share/nginx/etc/nginx/modules.d/01-proxy-grafana.conf:/etc/nginx/modules.d/01-proxy-grafana.conf:ro
       - ./share/nginx/etc/nginx/modules.d/01-proxy-graphite.conf:/etc/nginx/modules.d/01-proxy-graphite.conf:ro
       - ./share/nginx/etc/nginx/modules.d/01-proxy-icingaweb2.conf:/etc/nginx/modules.d/01-proxy-icingaweb2.conf:ro
+      - ./share/nginx/etc/nginx/modules.d/01-proxy-markdown-service.conf:/etc/nginx/modules.d/01-proxy-markdown-service.conf
     networks:
       mon:
         ipv4_address: 172.25.0.15
@@ -233,32 +234,20 @@ services:
       mon:
         ipv4_address: 172.25.0.31
 
-  # single service
 
-#  icinga2-cert-service:
-#    restart: always
-#    build: https://github.com/bodsch/docker-icinga2-cert-service.git
-#    container_name: icinga2-cert-service
-#    hostname: icinga2-cert-service
-#    labels:
-#      com.dnsdock.image: "icinga2-cert-service"
-#      com.dnsdock.alias: "icinga2-cert-service"
-#      com.dnsdock.ttl: "0"
-#    env_file:
-#      - env/icinga2.env
-#      - env/icinga2-cert-service.env
-#    depends_on:
-#      - nginx
-#      - icinga2-core
-#    ports:
-#      - 4567:4567
-#    volumes:
-#      - /etc/localtime:/etc/localtime:ro
-#      - ./share/resolv.conf:/etc/resolv.conf:ro
-#    volumes_from:
-#      - icinga2-core
-#    links:
-#      - icinga2-core
-#    networks:
-#      mon:
-#        ipv4_address: 172.25.0.40
+  markdown-service:
+    restart: always
+    image: bodsch/docker-markdown-service:latest
+    container_name: markdown-service
+    hostname: markdown-service
+    labels:
+      com.dnsdock.image: "markdown-service"
+      com.dnsdock.alias: "markdown-service"
+      com.dnsdock.ttl: "30"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./share/markdown-service/index.md:/var/www/index.md
+      - ./share/markdown-service/coremedia:/var/www
+    networks:
+      mon:
+        ipv4_address: 172.25.0.32
