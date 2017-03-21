@@ -172,7 +172,6 @@ services:
       - env/database.env
       - env/icinga2.env
     depends_on:
-      - beanstalkd
       - database
       - memcached
     ports:
@@ -198,7 +197,6 @@ services:
       - ./share/icinga2/usr/lib/monitoring-plugins/check_ssl_cert:/usr/lib/monitoring-plugins/check_ssl_cert
       - ./share/icinga2/etc/icinga2/objects:/etc/icinga2/objects
     links:
-      - beanstalkd:beanstalkd
       - memcached:memcached
       - database:database
     networks:
