@@ -1,13 +1,16 @@
 #!/usr/bin/ruby
+# suppres "warning: constant ::Fixnum is deprecated"
+$VERBOSE = nil
 
 require 'optparse'
 require 'json'
+require 'yaml'
 require 'logger'
 require 'time_difference'
 
-require_relative '/usr/local/lib/logging'
-require_relative '/usr/local/lib/storage'
-require_relative '/usr/local/lib/mbean'
+require_relative '/usr/local/share/icinga2/logging'
+require_relative '/usr/local/share/icinga2/storage'
+require_relative '/usr/local/share/icinga2/mbean'
 
 # ---------------------------------------------------------------------------------------
 
@@ -72,9 +75,9 @@ class Icinga2Check
         service = config[service] ? config[service] : nil
 
         if( service != nil )
-          usePercent = service['usePercent'] ? service['usePercent'] : nil
-          warning    = service['warning'] ? service['warning']       : nil
-          critical   = service['critical'] ? service['critical']     : nil
+          usePercent = service.dig('usePercent')
+          warning    = service.dig('warning')
+          critical   = service.dig('critical')
         end
       rescue YAML::ParserError => e
 
