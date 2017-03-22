@@ -6,7 +6,7 @@ require 'time'
 
 bs = Beaneater.new( 'localhost' )
 
-tube = bs.tubes['mq-icinga']
+tube = bs.tubes['mq-test']
 
       vars = {
         "coremedia" => {

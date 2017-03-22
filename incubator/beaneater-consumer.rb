@@ -2,11 +2,28 @@
 
 require 'beaneater'
 require 'json'
+require 'rufus-scheduler'
+
+# -----------------------------------------------------------------------------
+
+# NEVER FORK THE PROCESS!
+# the used supervisord will control all
+stop = false
+
+Signal.trap('INT')  { stop = true }
+Signal.trap('HUP')  { stop = true }
+Signal.trap('TERM') { stop = true }
+Signal.trap('QUIT') { stop = true }
+
+# -----------------------------------------------------------------------------
+
+interval = 10
 
 bs = Beaneater.new( 'localhost' )
 
-puts bs.tubes['mq-information'].stats
 puts ''
+puts bs.tubes['mq-test'].stats
+puts  ''
 
 
 def foo( id, body, state, stats )
@@ -15,24 +32,63 @@ def foo( id, body, state, stats )
   puts body
 
   sleep 2
+
+  return false
 end
 
-tube = bs.tubes.find('mq-information')
+scheduler = Rufus::Scheduler.new
 
-while( job = tube.peek(:buried) )
+tube = bs.tubes.find('mq-test')
 
-  foo( job.id, job.body, job.stats.state, bs.jobs[ job.id ].stats )
+scheduler.every( 5 ) do
 
-  job.delete
+  puts 'seek buried jobs'
+#  puts bs.tubes['mq-test'].stats
+  tube = bs.tubes.find('mq-test')
+
+  buried = tube.peek(:buried)
+
+  if( buried )
+
+    puts "found job #{buried.id}"
+
+    tube.kick(1)
+  end
+
+#  @beanstalk.tubes['some-tube'].kick(3)
+
+#   tube = bs.tubes.find('mq-test')
+#   tube = bs.tubes.watch!('mq-test')
+#
+#   puts '-----------------------------'
+#   puts tube.inspect
+#   puts '-----------------------------'
+#
+#   job = tube.peek(:buried)
+#
+#   puts job.inspect
+#
+#   # TODO
+#   # more robustnes
+#   if( job = tube.peek(:buried) )
+#
+#     puts 'found job: ' + job.id
+#
+#     # foo( job.id, job.body, job.stats.state, bs.jobs[ job.id ].stats )
+#     # job.delete
+#
+#     job.kick
+#
+#   end
 end
 
 #puts bs.tubes['mq-information'].peek(:buried)
 
+scheduler.every( interval, :first_in => 1 ) do
 
+  puts 'run into a scheduler'
 
-loop do
-
-  tube = bs.tubes.watch!('mq-information')
+  tube = bs.tubes.watch!('mq-test')
 
   job = bs.tubes.reserve
 
@@ -47,21 +103,48 @@ loop do
 #   job.touch
 
   begin
-    # processing job
-    foo( job.id, job.body, job.stats.state, bs.jobs[ job.id ].stats )
 
-    job.delete
+    # processing job
+    if( foo( job.id, job.body, job.stats.state, bs.jobs[ job.id ].stats ) == true )
+
+      job.delete
+    else
+
+      puts 'processing failed.'
+      puts 'bury job: ' + job.id
+
+#      job.reserve
+      job.bury
+
+      puts job.stats.state # => 'buried'
+
+    end
   rescue Exception => e
     job.bury
   end
 
   puts '-----------------------------'
-
-  puts bs.tubes['mq-information'].stats
+  puts bs.tubes['mq-test'].stats
   puts '-----------------------------'
 
 end
 
+scheduler.every( '5s' ) do
+
+  if( stop == true )
+
+    p "shutdown scheduler ..."
+
+    scheduler.shutdown(:kill)
+  end
+
+end
+
+
+scheduler.join
+
+
+# -----------------------------------------------------------------------------
 
 
 return
