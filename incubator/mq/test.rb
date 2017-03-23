@@ -1,4 +1,4 @@
-#!/usr/bin/ruby
+#!/usr/bin/env ruby
 
 require 'beaneater'
 require 'json'
@@ -46,40 +46,48 @@ queue = 'mq-test'
 p = MessageQueue::Producer.new( settings )
 c = MessageQueue::Consumer.new( settings )
 
-# PRODUCER
-scheduler.every( 45, :first_in => 1 ) do
+def proceed( job )
 
-  5.times do |i|
+  puts JSON.pretty_generate( job )
 
-    job = {
-      cmd:   'add',
-      payload: sprintf( "foo-bar-%s.com", i )
-    }.to_json
-
-    p.addJob( queue, job )
-  end
+  return false
 
 end
 
+# PRODUCER
+# scheduler.every( 45, :first_in => 1 ) do
+#
+#   5.times do |i|
+#
+#     job = {
+#       cmd:   'add',
+#       payload: sprintf( "foo-bar-%s.com", i )
+#     }.to_json
+#
+#     p.addJob( queue, job )
+#   end
+#
+# end
+
 # CONSUMER
-scheduler.every( 20, :first_in => 15 ) do
+scheduler.every( 10, :first_in => 1 ) do
 
   puts JSON.pretty_generate( c.tubeStatistics( queue ) )
 
-# exit
+  j = c.getJobFromTube( queue )
 
-#   loop do
-    j = c.getJobFromTube( queue )
+  if( j.count != 0 )
 
-    if( j.count == 0 )
-  #    break
+    jobId = j.dig( :id )
+
+    if( proceed( j ) == true )
+
+      c.deleteJob( queue, jobId )
     else
-      puts JSON.pretty_generate( j )
+
+      c.buryJob( queue, jobId )
     end
-
-    sleep(3)
-
-#   end
+  end
 
 end
 

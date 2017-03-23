@@ -29,6 +29,7 @@ module MessageQueue
         @b = Beaneater.new( sprintf( '%s:%s', beanstalkHost, beanstalkPort ) )
       rescue => e
         logger.error( e )
+        raise sprintf( 'ERROR: %s' , e )
       end
 
     end
@@ -85,6 +86,7 @@ module MessageQueue
         @b = Beaneater.new( sprintf( '%s:%s', beanstalkHost, beanstalkPort ) )
       rescue => e
         logger.error( e )
+        raise sprintf( 'ERROR: %s' , e )
       end
 
     end
@@ -126,7 +128,7 @@ module MessageQueue
     end
 
 
-    def getJobFromTube( tube )
+    def getJobFromTube( tube, delete = false )
 
       result = {}
 
@@ -158,7 +160,9 @@ module MessageQueue
               :body  => JSON.parse( job.body )
             }
 
-            job.delete
+            if( delete == true )
+              job.delete
+            end
 
           rescue Exception => e
             job.bury
@@ -193,6 +197,46 @@ module MessageQueue
 
     end
 
+
+    def deleteJob( tube, id )
+
+      logger.debug( sprintf( "deleteJob( #{tube}, #{id} )" ) )
+
+      if( @b )
+
+        job = @b.jobs.find( id )
+
+        if( job.exists? == true )
+
+#           logger.debug( job.inspect )
+#           logger.debug( job.stats )
+
+          job.delete
+        end
+
+      end
+
+    end
+
+    def buryJob( tube, id )
+
+      logger.debug( sprintf( "buryJob( #{tube}, #{id} )" ) )
+
+      if( @b )
+
+        job = @b.jobs.find( id )
+
+        if( job.exists? == true )
+
+#           logger.debug( job.inspect )
+#           logger.debug( job.stats )
+
+          job.bury
+        end
+
+      end
+
+    end
 
   end
 
