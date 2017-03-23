@@ -62,7 +62,7 @@ scheduler.every( 45, :first_in => 1 ) do
 end
 
 # CONSUMER
-scheduler.every( 20, :first_in => 1 ) do
+scheduler.every( 20, :first_in => 15 ) do
 
   puts JSON.pretty_generate( c.tubeStatistics( queue ) )
 
