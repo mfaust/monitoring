@@ -1,7 +1,7 @@
 #!/usr/bin/ruby
 #
-# 05.01.2017 - Bodo Schulz
-# v1.0.1
+# 24.03.2017 - Bodo Schulz
+# v1.2.0
 #
 # simplified API for Beanaeter (Client Class for beanstalk)
 
@@ -15,6 +15,7 @@ require_relative 'logging'
 # -----------------------------------------------------------------------------
 
 module MessageQueue
+
 
   class Producer
 
@@ -31,6 +32,10 @@ module MessageQueue
         logger.error( e )
         raise sprintf( 'ERROR: %s' , e )
       end
+
+      logger.info( '-----------------------------------------------------------------' )
+      logger.info( ' MessageQueue::Producer' )
+      logger.info( '-----------------------------------------------------------------' )
 
     end
 
@@ -72,22 +77,36 @@ module MessageQueue
   end
 
 
-
   class Consumer
 
     include Logging
 
     def initialize( params = {} )
 
-      beanstalkHost       = params[:beanstalkHost] ? params[:beanstalkHost] : 'beanstalkd'
-      beanstalkPort       = params[:beanstalkPort] ? params[:beanstalkPort] : 11300
+      beanstalkHost       = params.dig(:beanstalkHost) || 'beanstalkd'
+      beanstalkPort       = params.dig(:beanstalkPort) ||  11300
+      beanstalkQueue      = params.dig(:beanstalkQueue)
 
       begin
         @b = Beaneater.new( sprintf( '%s:%s', beanstalkHost, beanstalkPort ) )
+
+        if( beanstalkQueue != nil )
+
+          scheduler = Rufus::Scheduler.new
+
+          scheduler.every( 40 ) do
+            releaseBuriedJobs( beanstalkQueue )
+          end
+        end
+
       rescue => e
         logger.error( e )
         raise sprintf( 'ERROR: %s' , e )
       end
+
+      logger.info( '-----------------------------------------------------------------' )
+      logger.info( ' MessageQueue::Consumer' )
+      logger.info( '-----------------------------------------------------------------' )
 
     end
 
@@ -180,17 +199,19 @@ module MessageQueue
 
     def releaseBuriedJobs( tube )
 
+      logger.debug( sprintf( "releaseBuriedJobs( #{tube} )" ) )
+
       if( @b )
 
         tube = @b.tubes.find( tube.to_s )
 
         while( job = tube.peek( :buried ) )
 
-          logger.debug( job.stats )
+#           logger.debug( job.stats )
 
-          response = job.release()
+          response = job.kick()
 
-          logger.debug( response )
+#           logger.debug( response )
         end
 
       end
@@ -217,6 +238,7 @@ module MessageQueue
       end
 
     end
+
 
     def buryJob( tube, id )
 
