@@ -1,9 +1,0 @@
-{
-  "templates": ["generic-host"],
-  "attrs": {
-    "address": "cm7-ci.coremedia.com",
-    "display_name": "jenkins - cm7-ci",
-    "notes": "Jenkins",
-    "vars.type": "jenkins"
-  }
-}

@@ -1,0 +1,54 @@
+TYPE := cm-rest-service
+IMAGE_NAME := docker-${TYPE}
+
+JOLOKIA_IP := $(docker inspect --format '{{ .NetworkSettings.IPAddress }}' jolokia 2>/dev/null)
+GRAPHITE_IP := $(docker inspect --format '{{ .NetworkSettings.IPAddress }}' graphite 2>/dev/null)
+GRAFANA_IP := $(docker inspect --format '{{ .NetworkSettings.IPAddress }}' grafana 2>/dev/null)
+ICINGA2_IP := $(docker inspect --format '{{ .NetworkSettings.IPAddress }}' icinga2-core 2>/dev/null)
+
+
+build:
+	docker build \
+		--rm \
+		--quiet \
+		--tag=$(IMAGE_NAME) .
+	@echo Image tag: ${IMAGE_NAME}
+
+clean:
+	docker rmi \
+		${IMAGE_NAME}
+
+run:
+	docker run \
+		--detach \
+		--interactive \
+		--tty \
+		--hostname=${IMAGE_NAME} \
+		--name=${IMAGE_NAME} \
+		$(IMAGE_NAME)
+
+shell:
+	docker run \
+		--rm \
+		--interactive \
+		--tty \
+		--hostname=${IMAGE_NAME} \
+		--name=${IMAGE_NAME} \
+		$(IMAGE_NAME) \
+		/bin/sh
+
+exec:
+	docker exec \
+		--interactive \
+		--tty \
+		${IMAGE_NAME} \
+		/bin/sh
+
+stop:
+	docker kill \
+		${IMAGE_NAME}
+
+history:
+	docker history \
+		${IMAGE_NAME}
+

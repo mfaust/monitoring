@@ -298,7 +298,7 @@ services:
 
   cm-monitoring:
     restart: always
-    build: ../../docker-cm-monitoring
+    build: ../../docker-cm-rest-service
     container_name: cm-monitoring
     hostname: cm-monitoring
     labels:
@@ -337,7 +337,7 @@ services:
   # use MQ to process data
   cm-service-discover:
     restart: always
-    build: ../../docker-cm-service-discover
+    build: ../../docker-cm-service-discovery
     container_name: cm-service-discover
     hostname: cm-service-discover
     labels:
@@ -399,7 +399,7 @@ services:
   # use MQ to process data
   cm-collectd:
     restart: always
-    build: ../../docker-cm-collectd
+    build: ../../docker-cm-carbon-client
     container_name: cm-collectd
     hostname: cm-collectd
     labels:
