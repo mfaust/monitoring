@@ -205,14 +205,23 @@ module MessageQueue
 
         tube = @b.tubes.find( tube.to_s )
 
-        while( job = tube.peek( :buried ) )
+        buried = tube.peek( :buried )
 
-#           logger.debug( job.stats )
+        if( buried )
 
-          response = job.kick()
+          logger.debug( sprintf( 'found job: %d, kick them back into the \'ready\' queue', buried.id ) )
 
-#           logger.debug( response )
+          tube.kick(1)
         end
+
+#         while( job = tube.peek( :buried ) )
+#
+# #           logger.debug( job.stats )
+#
+#           response = job.kick()
+#
+# #           logger.debug( response )
+#         end
 
       end
 
@@ -229,10 +238,7 @@ module MessageQueue
 
         if( job.exists? == true )
 
-#           logger.debug( job.inspect )
-#           logger.debug( job.stats )
-
-          job.delete
+          response = job.delete
         end
 
       end
@@ -250,10 +256,7 @@ module MessageQueue
 
         if( job.exists? == true )
 
-#           logger.debug( job.inspect )
-#           logger.debug( job.stats )
-
-          job.bury
+          response = job.bury
         end
 
       end
