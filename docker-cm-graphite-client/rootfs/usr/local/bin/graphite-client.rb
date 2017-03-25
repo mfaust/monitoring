@@ -7,17 +7,20 @@
 
 # -----------------------------------------------------------------------------
 
+require 'rufus-scheduler'
+
 require_relative '../lib/graphite'
 
 # -----------------------------------------------------------------------------
 
-graphiteHost      = ENV['GRAPHITE_HOST']      ? ENV['GRAPHITE_HOST']       : 'localhost'
-graphitePort      = ENV['GRAPHITE_PORT']      ? ENV['GRAPHITE_PORT']       : 2003
-graphiteHttpPort  = ENV['GRAPHITE_HTTP_PORT'] ? ENV['GRAPHITE_HTTP_PORT']  : 8081
-graphitePath      = ENV['GRAPHITE_PATH']      ? ENV['GRAPHITE_PATH']       : nil
-mqHost            = ENV['MQ_HOST']            ? ENV['MQ_HOST']             : 'localhost'
-mqPort            = ENV['MQ_PORT']            ? ENV['MQ_PORT']             : 11300
-mqQueue           = ENV['MQ_QUEUE']           ? ENV['MQ_QUEUE']            : 'mq-graphite'
+graphiteHost       = ENV.fetch( 'GRAPHITE_HOST'     , 'localhost' )
+graphitePort       = ENV.fetch( 'GRAPHITE_PORT'     , 2003 )
+graphiteHttpPort   = ENV.fetch( 'GRAPHITE_HTTP_PORT', 8081 )
+graphitePath       = ENV.fetch( 'GRAPHITE_PATH'     , nil )
+mqHost             = ENV.fetch( 'MQ_HOST'           , 'localhost' )
+mqPort             = ENV.fetch( 'MQ_PORT'           , 11300 )
+mqQueue            = ENV.fetch( 'MQ_QUEUE'          , 'mq-graphite' )
+interval           = 15
 
 config = {
   :graphiteHost      => graphiteHost,
@@ -26,16 +29,10 @@ config = {
   :graphitePath      => graphitePath,
   :mqHost            => mqHost,
   :mqPort            => mqPort,
-  :mqQueue           => mqQueue,
-  :debug             => true
+  :mqQueue           => mqQueue
 }
 
 # ---------------------------------------------------------------------------------------
-
-g = Graphite::Client.new( config )
-
-# -----------------------------------------------------------------------------
-
 # NEVER FORK THE PROCESS!
 # the used supervisord will control all
 stop = false
@@ -45,18 +42,30 @@ Signal.trap('HUP')  { stop = true }
 Signal.trap('TERM') { stop = true }
 Signal.trap('QUIT') { stop = true }
 
-if( g != nil )
+# ---------------------------------------------------------------------------------------
 
-  until stop
-    # do your thing
-    g.queue()
-    sleep( 5 )
-  end
+g = Graphite::Client.new( config )
 
-else
-  exit 2
+scheduler = Rufus::Scheduler.new
+
+scheduler.every( interval, :first_in => 10 ) do
+
+  g.queue()
+
 end
 
-# -----------------------------------------------------------------------------
+
+scheduler.every( 5 ) do
+
+  if( stop == true )
+
+    p 'shutdown scheduler ...'
+
+    scheduler.shutdown(:kill)
+  end
+
+end
+
+scheduler.join
 
 # EOF
