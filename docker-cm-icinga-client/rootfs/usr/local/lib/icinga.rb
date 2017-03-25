@@ -17,7 +17,7 @@ require_relative 'icinga/network'
 require_relative 'icinga/status'
 require_relative 'icinga/host'
 require_relative 'icinga/service'
-require_relative 'icinga/message-queue'
+require_relative 'icinga/queue'
 
 # -------------------------------------------------------------------------------------------------------------------
 
@@ -35,15 +35,15 @@ module Icinga
 
     def initialize( params = {} )
 
-      @icingaHost       = params[:icingaHost]      ? params[:icingaHost]       : 'localhost'
-      @icingaApiPort    = params[:icingaApiPort]   ? params[:icingaApiPort]    : 5665
-      @icingaApiUser    = params[:icingaApiUser]   ? params[:icingaApiUser]    : nil
-      @icingaApiPass    = params[:icingaApiPass]   ? params[:icingaApiPass]    : nil
-      @icingaCluster    = params[:icingaCluster]   ? params[:icingaCluster]    : false
-      @icingaSatellite  = params[:icingaSatellite] ? params[:icingaSatellite]  : nil
-      mqHost            = params[:mqHost]          ? params[:mqHost]           : 'localhost'
-      mqPort            = params[:mqPort]          ? params[:mqPort]           : 11300
-      @mqQueue          = params[:mqQueue]         ? params[:mqQueue]          : 'mq-icinga'
+      @icingaHost       = params.dig(:icingaHost)    || 'localhost'
+      @icingaApiPort    = params.dig(:icingaApiPort) || 5665
+      @icingaApiUser    = params.dig(:icingaApiUser)
+      @icingaApiPass    = params.dig(:icingaApiPass)
+      @icingaCluster    = params.dig(:icingaCluster) || false
+      @icingaSatellite  = params.dig(:icingaSatellite)
+      mqHost            = params.dig(:mqHost)        || 'localhost'
+      mqPort            = params.dig(:mqPort)        || 11300
+      @mqQueue          = params.dig(:mqQueue)       || 'mq-icinga'
 
       @icingaApiUrlBase = sprintf( 'https://%s:%d', @icingaHost, @icingaApiPort )
       @nodeName         = Socket.gethostbyname( Socket.gethostname ).first
@@ -53,8 +53,8 @@ module Icinga
         :beanstalkPort => mqPort
       }
 
-      version              = '1.3.3-dev'
-      date                 = '2017-02-07'
+      version              = '1.4.0'
+      date                 = '2017-03-25'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' Icinga2 Management' )
@@ -87,10 +87,10 @@ module Icinga
 
     def checkCert( params = {} )
 
-      nodeName     = params[:nodeName]       ? params[:nodeName]       : 'localhost'
+      nodeName     = params.dig(:nodeName) || 'localhost'
 
-      user         = params[:user]           ? params[:user]           : 'admin'
-      password     = params[:password]       ? params[:password]       : ''
+      user         = params.dig(:user)     || 'admin'
+      password     = params.dig(:password) || ''
 
       # check whether pki files are there, otherwise use basic auth
       if File.file?( sprintf( 'pki/%s.crt', nodeName ) )

@@ -7,19 +7,22 @@
 
 # -----------------------------------------------------------------------------
 
+require 'rufus-scheduler'
+
 require_relative '../lib/icinga'
 
 # -----------------------------------------------------------------------------
 
-icingaHost      = ENV['ICINGA_HOST']              ? ENV['ICINGA_HOST']              : 'localhost'
-icingaApiPort   = ENV['ICINGA_API_PORT']          ? ENV['ICINGA_API_PORT']          : 5665
-icingaApiUser   = ENV['ICINGA_API_USER']          ? ENV['ICINGA_API_USER']          : 'admin'
-icingaApiPass   = ENV['ICINGA_API_PASSWORD']      ? ENV['ICINGA_API_PASSWORD']      : nil
-icingaCluster   = ENV['ICINGA_CLUSTER']           ? ENV['ICINGA_CLUSTER']           : false
-icingaSatellite = ENV['ICINGA_CLUSTER_SATELLITE'] ? ENV['ICINGA_CLUSTER_SATELLITE'] : nil
-mqHost          = ENV['MQ_HOST']                  ? ENV['MQ_HOST']                  : 'localhost'
-mqPort          = ENV['MQ_PORT']                  ? ENV['MQ_PORT']                  : 11300
-mqQueue         = ENV['MQ_QUEUE']                 ? ENV['MQ_QUEUE']                 : 'mq-icinga'
+icingaHost         = ENV.fetch( 'ICINGA_HOST'             , 'localhost' )
+icingaApiPort      = ENV.fetch( 'ICINGA_API_PORT'         , 5665 )
+icingaApiUser      = ENV.fetch( 'ICINGA_API_USER'         , 'admin' )
+icingaApiPass      = ENV.fetch( 'ICINGA_API_PASSWORD'     , nil )
+icingaCluster      = ENV.fetch( 'ICINGA_CLUSTER'          , false )
+icingaSatellite    = ENV.fetch( 'ICINGA_CLUSTER_SATELLITE', nil )
+mqHost             = ENV.fetch( 'MQ_HOST'                 , 'localhost' )
+mqPort             = ENV.fetch( 'MQ_PORT'                 , 11300 )
+mqQueue            = ENV.fetch( 'MQ_QUEUE'                , 'mq-icinga' )
+interval           = 10
 
 # convert string to bool
 icingaCluster   = icingaCluster.to_s.eql?('true') ? true : false
@@ -37,11 +40,6 @@ config = {
 }
 
 # ---------------------------------------------------------------------------------------
-
-i = Icinga::Client.new( config )
-
-# ---------------------------------------------------------------------------------------
-
 # NEVER FORK THE PROCESS!
 # the used supervisord will control all
 stop = false
@@ -51,16 +49,32 @@ Signal.trap('HUP')  { stop = true }
 Signal.trap('TERM') { stop = true }
 Signal.trap('QUIT') { stop = true }
 
-if( i != nil )
+# ---------------------------------------------------------------------------------------
 
-  until stop
-    # do your thing
-    i.queue()
-    sleep( 15 )
+i = Icinga::Client.new( config )
+
+scheduler = Rufus::Scheduler.new
+
+scheduler.every( interval, :first_in => 5 ) do
+
+  i.queue()
+
+end
+
+
+scheduler.every( 5 ) do
+
+  if( stop == true )
+
+    p 'shutdown scheduler ...'
+
+    scheduler.shutdown(:kill)
   end
 
 end
 
-# -----------------------------------------------------------------------------
+
+scheduler.join
+
 
 # EOF
