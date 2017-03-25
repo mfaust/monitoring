@@ -54,6 +54,16 @@ stop:
 	docker kill \
 		${IMAGE_NAME}
 
+package-info:
+	docker run \
+		--rm \
+		--interactive \
+		--tty \
+		--hostname=${IMAGE_NAME} \
+		--name=${IMAGE_NAME} \
+		$(IMAGE_NAME) \
+		apk -v info | sort
+
 history:
 	docker history \
 		${IMAGE_NAME}

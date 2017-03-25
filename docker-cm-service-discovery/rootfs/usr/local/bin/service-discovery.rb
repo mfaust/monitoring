@@ -22,7 +22,7 @@ jolokiaPort        = ENV.fetch( 'JOLOKIA_PORT', 8080 )
 mqHost             = ENV.fetch( 'MQ_HOST'     , 'localhost' )
 mqPort             = ENV.fetch( 'MQ_PORT'     , 11300 )
 mqQueue            = ENV.fetch( 'MQ_QUEUE'    , 'mq-discover' )
-interval           = 2
+interval           = 10
 
 config = {
   :jolokiaHost       => jolokiaHost,
