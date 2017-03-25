@@ -54,7 +54,9 @@ module DataCollector
 
         else
           logger.error( sprintf( 'Application Config File %s not found!', appConfigFile ) )
-          exit 1
+
+          raise( sprintf( 'Application Config File %s not found!', appConfigFile ) )
+
         end
       rescue => e
 
@@ -862,6 +864,13 @@ module DataCollector
       logger.debug( 'get monitored Servers' )
 
       monitoredServer = self.monitoredServer()
+
+      if( monitoredServer.count == 0 )
+
+        logger.info( 'no Servers for Monitoring found' )
+
+        return
+      end
 
       start = Time.now
 

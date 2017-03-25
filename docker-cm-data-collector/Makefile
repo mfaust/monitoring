@@ -7,6 +7,10 @@ build:
 		--rm --tag=$(IMAGE_NAME) .
 	@echo Image tag: ${IMAGE_NAME}
 
+clean:
+	docker rmi \
+		${IMAGE_NAME}
+
 run:
 	docker run \
 		--detach \
@@ -33,11 +37,6 @@ shell:
 		--env MQ_HOST=beanstalkd \
 		--env POLL_INTERVAL=10 \
 		--volume /etc/localtime:/etc/localtime:ro \
-		--volume ~/src/cm-xlabs/monitoring/environments/customer/share/resolv.conf:/etc/resolv.conf:ro \
-		--volume ~/src/cm-xlabs/monitoring/environments/customer/share/monitoring/etc/cm-application.yaml:/etc/cm-application.yaml \
-		--volume ~/src/cm-xlabs/monitoring/environments/customer/share/monitoring/etc/cm-service.yaml:/etc/cm-service.yaml \
-		--network=customer_mon \
-		--ip=172.25.0.100 \
 		--hostname=${IMAGE_NAME} \
 		--name=${IMAGE_NAME} \
 		$(IMAGE_NAME) \

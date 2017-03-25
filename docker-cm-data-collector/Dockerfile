@@ -1,54 +1,44 @@
 
-FROM bodsch/docker-ruby
+FROM alpine:latest
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
-LABEL version="1.2.0"
+ENV \
+  ALPINE_MIRROR="dl-cdn.alpinelinux.org" \
+  ALPINE_VERSION="v3.5" \
+  TERM=xterm \
+  APK_ADD="build-base imagemagick-dev mysql-dev postgresql-dev ruby-dev ruby-irb ruby-rdoc sqlite sqlite-dev zlib zlib-dev" \
+  APK_DEL="build-base imagemagick-dev ruby-dev ruby-rdoc zlib-dev" \
+  GEMS="beaneater bigdecimal dalli fileutils filesize ipaddress json mysql2 pg rest-client rufus-scheduler sequel sqlite3 time_difference tzinfo-data"
+
+LABEL version="1703-03.1"
 
 # ---------------------------------------------------------------------------------------
 
+WORKDIR /
+
 RUN \
+  echo "http://${ALPINE_MIRROR}/alpine/${ALPINE_VERSION}/main"       > /etc/apk/repositories && \
+  echo "http://${ALPINE_MIRROR}/alpine/${ALPINE_VERSION}/community" >> /etc/apk/repositories && \
   apk --quiet --no-cache update && \
   apk --quiet --no-cache upgrade && \
-  apk --quiet --no-cache add \
-    build-base \
-    bind-tools \
-    imagemagick-dev \
-    ruby-dev \
-    sqlite-dev \
-    sqlite \
-    mysql-dev \
-    postgresql-dev && \
-  gem install --no-rdoc --no-ri \
-    bigdecimal \
-    beaneater \
-    rufus-scheduler \
-    ipaddress \
-    resolve-hostname \
-    time_difference \
-    tzinfo-data \
-    sqlite3 \
-    sequel \
-    rest-client \
-    mysql2 \
-    pg && \
+  for apk in ${APK_ADD} ; \
+  do \
+    apk --quiet --no-cache add ${apk} ; \
+  done && \
+  for gem in ${GEMS} ; \
+  do \
+     gem install --quiet --no-rdoc --no-ri ${gem} ; \
+  done && \
+  for apk in ${APK_DEL} ; \
+  do \
+    apk del --quiet --purge ${apk} ; \
+  done && \
   mkdir /var/cache/monitoring && \
-  apk del --purge \
-    build-base \
-    imagemagick-dev \
-    ruby-dev \
-    zlib-dev \
-    supervisor \
-    bash \
-    nano \
-    curl \
-    ca-certificates \
-    ruby-io-console \
-    tree && \
-  rm -rf /var/cache/apk/*
+  rm -rf \
+    /tmp/* \
+    /var/cache/apk/*
 
 COPY rootfs/ /
 
-# ENTRYPOINT /usr/local/bin/external-discover.rb
-
-CMD ["/usr/local/bin/data-collector.rb"]
+CMD [ "/usr/local/bin/icinga-client.rb" ]
