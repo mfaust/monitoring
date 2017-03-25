@@ -16,6 +16,7 @@ module Grafana
       return postRequest(endpoint, properties)
     end
 
+
     def organizationUsers(org_id)
       endpoint = "/api/orgs/#{org_id}/users"
       @logger.info("Getting users in orgnaization ID #{org_id} (GET #{endpoint})") if @debug
@@ -29,11 +30,13 @@ module Grafana
       return postRequest(endpoint, user)
     end
 
+
     def updateOrganizationUser(org_id, user_id, properties={})
       endpoint = "/api/orgs/#{org_id}/users/#{user_id}"
       @logger.info("Updating user #{user_id} in organization #{org_id} (PATCH #{endpoint})") if @debug
       return patchRequest(endpoint, properties)
     end
+
 
     def deleteUserFromOrganization(org_id, user_id)
       endpoint = "/api/orgs/#{org_id}/users/#{user_id}"

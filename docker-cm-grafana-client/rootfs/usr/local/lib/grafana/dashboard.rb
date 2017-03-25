@@ -4,15 +4,22 @@ module Grafana
   module Dashboard
 
     def createSlug(text)
-      if text =~ /\s/
-        if text =~ /-/
-          text = text.gsub(/\s+/, "").downcase
+
+      if( text =~ /\s/ )
+
+        if( text =~ /-/ )
+          text = text.gsub( /\s+/, '' )
         else
-          text = text.gsub(/\s+/, "-").downcase
+          text = text.gsub( /\s+/, '-' )
         end
+
+        text.downcase
       end
+
       return text
+
     end
+
 
     def dashboard( name = '' )
 
@@ -24,6 +31,7 @@ module Grafana
       return getRequest( endpoint )
     end
 
+
     def createDashboard( properties = {} )
 
       endpoint = "/api/dashboards/db"
@@ -33,6 +41,7 @@ module Grafana
 
       return postRequest( endpoint, dashboard )
     end
+
 
     def deleteDashboard( name )
 
@@ -44,6 +53,7 @@ module Grafana
       return deleteRequest(endpoint)
     end
 
+
     def homeDashboard()
 
       endpoint = "/api/dashboards/home"
@@ -52,6 +62,7 @@ module Grafana
 
       return getRequest(endpoint)
     end
+
 
     def dashboardTags()
 
@@ -72,9 +83,9 @@ module Grafana
 
     def searchDashboards( params = {} )
 
-      query   = params[:query]     ? params[:query]   : nil
-      starred = params[:starred]   ? params[:starred] : nil
-      tags    = params[:tags]      ? params[:tags]    : nil
+      query   = params.dig(:query)
+      starred = params.dig(:starred)
+      tags    = params.dig(:tags)
       api     = Array.new()
 
       if( query != nil )

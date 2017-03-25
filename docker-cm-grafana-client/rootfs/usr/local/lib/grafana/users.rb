@@ -17,6 +17,7 @@ module Grafana
       return getRequest(endpoint)
     end
 
+
     def searchForUsersBy( search = {} )
       all_users = self.all_users()
       key, value = search.first
@@ -43,7 +44,7 @@ module Grafana
       return putRequest(endpoint,properties.to_json)
     end
 
-    
+
     def userOrganizations(userid)
 
       endpoint = "/api/users/#{userid}/orgs"

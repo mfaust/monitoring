@@ -831,8 +831,6 @@ module Grafana
     end
 
 
-
-
     module Annotations
 
       # add standard annotations to all Templates
@@ -891,8 +889,6 @@ module Grafana
       end
 
     end
-
-
 
 
     module Tags

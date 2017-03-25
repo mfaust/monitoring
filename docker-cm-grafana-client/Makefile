@@ -7,6 +7,10 @@ build:
 		--tag=$(IMAGE_NAME) .
 	@echo Image tag: ${IMAGE_NAME}
 
+clean:
+	docker rmi \
+		${IMAGE_NAME}
+
 run:
 	docker run \
 		--rm \
@@ -34,22 +38,14 @@ shell:
 		--rm \
 		--interactive \
 		--tty \
-		--env-file ~/src/cm-xlabs/monitoring/environments/customer/env/cm-grafana-client.env \
 		--label com.dnsdock.image=${TYPE} \
 		--label com.dnsdock.alias=${TYPE} \
 		--label com.dnsdock.ttl=30 \
 		--volume /etc/localtime:/etc/localtime:ro \
-		--volume ~/src/cm-xlabs/monitoring/environments/customer/share/resolv.conf:/etc/resolv.conf:ro \
-		--volume ~/src/cm-xlabs/monitoring/environments/customer/share/common/storage.rb:/usr/local/lib/storage.rb \
-		--volume ~/src/cm-xlabs/monitoring/environments/customer/share/common/logging.rb:/usr/local/lib/logging.rb \
-		--volume ~/src/cm-xlabs/monitoring/environments/customer/share/common/mbean.rb:/usr/local/lib/mbean.rb \
-		--volume ~/src/cm-xlabs/monitoring/docker-cm-monitoring/rootfs/usr/local/share/templates/grafana:/usr/local/share/templates/grafana \
-		--volume ~/src/cm-xlabs/monitoring/environments/customer/data/monitoring:/var/cache/monitoring \
-		--network=customer_mon \
-		--ip=172.25.0.100 \
 		--hostname=${IMAGE_NAME} \
 		--name=${IMAGE_NAME} \
-		$(IMAGE_NAME)
+		$(IMAGE_NAME) \
+		/bin/sh
 
 exec:
 	docker exec \
@@ -61,4 +57,18 @@ exec:
 stop:
 	docker kill \
 		${IMAGE_NAME}
+
+package-info:
+	docker run \
+		--rm \
+		--interactive \
+		--tty \
+		--hostname=${IMAGE_NAME} \
+		--name=${IMAGE_NAME} \
+		$(IMAGE_NAME) \
+		apk -v info | sort
+
+history:
+	docker \
+		history ${IMAGE_NAME}
 

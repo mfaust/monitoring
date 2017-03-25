@@ -1,3 +1,4 @@
+
 module Grafana
 
   module Snapshot
@@ -8,11 +9,13 @@ module Grafana
       return getRequest(endpoint)
     end
 
+
     def createSnapshot(dashboard={})
       endpoint = "/api/snapshot"
       @logger.info("Creating dashboard snapshot (POST #{endpoint})") if @debug
       return postRequest(endpoint, dashboard)
     end
+
 
     def deleteSnapshot(key)
       endpoint = "/api/snapshots-delete/#{key}"

@@ -14,11 +14,6 @@ require_relative 'tools'
 module Storage
 
 
-  class File
-
-  end
-
-
   class Database
 
     include Logging
