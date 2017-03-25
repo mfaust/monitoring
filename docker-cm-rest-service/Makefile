@@ -1,11 +1,6 @@
 TYPE := cm-rest-service
 IMAGE_NAME := docker-${TYPE}
 
-JOLOKIA_IP := $(docker inspect --format '{{ .NetworkSettings.IPAddress }}' jolokia 2>/dev/null)
-GRAPHITE_IP := $(docker inspect --format '{{ .NetworkSettings.IPAddress }}' graphite 2>/dev/null)
-GRAFANA_IP := $(docker inspect --format '{{ .NetworkSettings.IPAddress }}' grafana 2>/dev/null)
-ICINGA2_IP := $(docker inspect --format '{{ .NetworkSettings.IPAddress }}' icinga2-core 2>/dev/null)
-
 
 build:
 	docker build \
@@ -47,6 +42,16 @@ exec:
 stop:
 	docker kill \
 		${IMAGE_NAME}
+
+package-info:
+	docker run \
+		--rm \
+		--interactive \
+		--tty \
+		--hostname=${IMAGE_NAME} \
+		--name=${IMAGE_NAME} \
+		$(IMAGE_NAME) \
+		apk -v info | sort
 
 history:
 	docker history \
