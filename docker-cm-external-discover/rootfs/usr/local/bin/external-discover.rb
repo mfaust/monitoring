@@ -8,6 +8,7 @@
 # -----------------------------------------------------------------------------
 
 require 'yaml'
+require 'rufus-scheduler'
 
 require_relative '../lib/external-discover'
 
@@ -15,14 +16,14 @@ require_relative '../lib/external-discover'
 
 logDirectory     = '/var/log/monitoring'
 
-apiHost          = ENV['MONITORING_HOST']         ? ENV['MONITORING_HOST']         : nil
-apiPort          = ENV['MONITORING_PORT']         ? ENV['MONITORING_PORT']         : nil
-apiVersion       = ENV['MONITORING_API_VERSION']  ? ENV['MONITORING_API_VERSION']  : 2
+apiHost          = ENV.fetch('MONITORING_HOST', nil)
+apiPort          = ENV.fetch('MONITORING_PORT', nil)
+apiVersion       = ENV.fetch('MONITORING_API_VERSION', 2)
 
-discoveryHost    = ENV['DISCOVERY_HOST']          ? ENV['DISCOVERY_HOST']          : nil
-discoveryPort    = ENV['DISCOVERY_PORT']          ? ENV['DISCOVERY_PORT']          : nil
-discoveryPath    = ENV['DISCOVERY_PATH']          ? ENV['DISCOVERY_PATH']          : nil
-interval         = ENV['DISCOVERY_POLL_INTERVAL'] ? ENV['DISCOVERY_POLL_INTERVAL'] : 30
+discoveryHost    = ENV.fetch('DISCOVERY_HOST', nil)
+discoveryPort    = ENV.fetch('DISCOVERY_PORT', nil)
+discoveryPath    = ENV.fetch('DISCOVERY_PATH', nil)
+interval         = ENV.fetch('DISCOVERY_POLL_INTERVAL', 30)
 
 if( apiHost == nil || apiPort == nil || discoveryHost == nil || discoveryPort == nil || discoveryPath == nil )
   puts '=> missing configuration!'
@@ -32,7 +33,6 @@ if( apiHost == nil || apiPort == nil || discoveryHost == nil || discoveryPort ==
 end
 
 config = {
-  :logDirectory  => logDirectory,
   :apiHost       => apiHost,
   :apiPort       => 80,
   :apiVersion    => apiVersion,
@@ -42,13 +42,6 @@ config = {
 }
 
 # ---------------------------------------------------------------------------------------
-
-e = ExternalDiscovery::Client.new( config )
-
-sleep( 15 )
-
-# -----------------------------------------------------------------------------
-
 # NEVER FORK THE PROCESS!
 # the used supervisord will control all
 stop = false
@@ -58,11 +51,32 @@ Signal.trap('HUP')  { stop = true }
 Signal.trap('TERM') { stop = true }
 Signal.trap('QUIT') { stop = true }
 
-until stop
-  # do your thing
+# -----------------------------------------------------------------------------
+
+e = ExternalDiscovery::Client.new( config )
+
+scheduler = Rufus::Scheduler.new
+
+scheduler.every( interval.to_i, :first_in => 15 ) do
+
   e.run()
-  sleep( interval.to_i )
+
 end
+
+
+scheduler.every( 5 ) do
+
+  if( stop == true )
+
+    p 'shutdown scheduler ...'
+
+    scheduler.shutdown(:kill)
+  end
+
+end
+
+
+scheduler.join
 
 # -----------------------------------------------------------------------------
 
