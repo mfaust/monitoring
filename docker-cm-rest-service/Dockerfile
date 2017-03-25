@@ -7,7 +7,7 @@ ENV \
   ALPINE_MIRROR="dl-cdn.alpinelinux.org" \
   ALPINE_VERSION="v3.5" \
   TERM=xterm \
-  APK_ADD="build-base bind-tools drill imagemagick-dev mysql-dev ruby-dev ruby-irb ruby-io-console ruby-rdoc sqlite sqlite-dev zlib zlib-dev" \
+  APK_ADD="build-base bind-tools curl drill imagemagick-dev mysql-dev ruby-dev ruby-irb ruby-io-console ruby-rdoc sqlite sqlite-dev zlib zlib-dev" \
   APK_DEL="build-base imagemagick-dev ruby-dev ruby-io-console zlib-dev" \
   GEMS="beaneater bigdecimal dalli filesize fileutils ipaddress mysql2 resolve-hostname rest-client sequel sinatra sqlite3 thin"
 

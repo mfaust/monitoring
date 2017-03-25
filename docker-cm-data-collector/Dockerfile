@@ -41,4 +41,4 @@ RUN \
 
 COPY rootfs/ /
 
-CMD [ "/usr/local/bin/icinga-client.rb" ]
+CMD [ "/usr/local/bin/data-collector.rb" ]
