@@ -37,9 +37,11 @@ module Graphite
       @mqQueue          = params.dig(:mqQueue)          || 'mq-graphite'
 
       @graphiteURI      = sprintf( 'http://%s:%s%s', graphiteHost, graphiteHttpPort, graphitePath )
+
       @MQSettings = {
-        :beanstalkHost => mqHost,
-        :beanstalkPort => mqPort
+        :beanstalkHost  => mqHost,
+        :beanstalkPort  => mqPort,
+        :beanstalkQueue => @mqQueue
       }
 
       version              = '1.3.0'
@@ -54,6 +56,8 @@ module Graphite
       logger.info( "    - message Queue: #{mqHost}:#{mqPort}/#{@mqQueue}" )
       logger.info( '-----------------------------------------------------------------' )
       logger.info( '' )
+
+      @mqConsumer  = MessageQueue::Consumer.new( @MQSettings )
 
       begin
 

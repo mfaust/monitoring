@@ -9,13 +9,27 @@ module Graphite
     #
     def queue()
 
-#       logger.debug('queue()')
+      data = @mqConsumer.getJobFromTube( @mqQueue )
 
-      c = MessageQueue::Consumer.new( @MQSettings )
+      if( data.count() != 0 )
 
-      processQueue(
-        c.getJobFromTube( @mqQueue )
-      )
+        jobId  = data.dig( :id )
+
+        result = self.processQueue( data )
+
+        logger.debug( result )
+        logger.debug( result.class.to_s )
+
+        status = result.dig(:status).to_i
+
+        if( status == 200 || status == 500 )
+
+          @mqConsumer.deleteJob( @mqQueue, jobId )
+        else
+
+          @mqConsumer.buryJob( @mqQueue, jobId )
+        end
+      end
 
     end
 
@@ -31,31 +45,14 @@ module Graphite
         command    = data.dig( :body, 'cmd' )     || nil
         node       = data.dig( :body, 'node' )    || nil
         payload    = data.dig( :body, 'payload' ) || nil
-        timestamp  = payload.dig( 'timestamp' )
-#         logger.debug( timestamp )
-
-        if( timestamp != nil )
-
-          if( timestamp.is_a?( Time ) )
-
-#             logger.debug( 'is Time' )
-            timestamp = Time.parse( timestamp )
-
-            logger.debug( @timestamp )
-          end
-
-          @timestamp = timestamp.to_i
-
-#           logger.debug( @timestamp )
-        end
 
         if( command == nil )
-          logger.error( 'no command' )
+          logger.error( 'wrong command' )
           logger.error( data )
 
           return {
-            :status  => 400,
-            :message => 'no command',
+            :status  => 500,
+            :message => 'no command given',
             :request => data
           }
         end
@@ -65,16 +62,26 @@ module Graphite
           logger.error( data )
 
           return {
-            :status  => 400,
+            :status  => 500,
             :message => 'missing node or payload',
             :request => data
           }
         end
 
-        result = {
-          :status  => 400,
-          :message => sprintf( 'wrong command detected: %s', command )
-        }
+        timestamp  = payload.dig( 'timestamp' )
+#         logger.debug( timestamp )
+
+        if( timestamp != nil )
+
+          if( timestamp.is_a?( Time ) )
+
+            @timestamp = Time.parse( timestamp )
+
+            logger.debug( @timestamp )
+          end
+
+          @timestamp = timestamp.to_i
+        end
 
         logger.info( sprintf( 'add annotation \'%s\' for node %s', command, node ) )
 
@@ -84,6 +91,11 @@ module Graphite
           result = self.nodeAnnotation( node, command )
 
           logger.info( result )
+
+          return {
+            :status => 200
+          }
+
         when 'loadtest'
 
           argument = payload.dig( 'argument' )
@@ -97,6 +109,10 @@ module Graphite
 
           logger.info( result )
 
+          return {
+            :status => 200
+          }
+
         when 'deployment'
 
           message = payload.dig( 'message' )
@@ -105,6 +121,11 @@ module Graphite
           result = self.deploymentAnnotation( node, message, tags )
 
           logger.info( result )
+
+          return {
+            :status => 200
+          }
+
         when 'general'
 
           description = payload.dig( 'description' )
@@ -114,15 +135,19 @@ module Graphite
           result = self.generalAnnotation( node, description, message, tags )
 
           logger.info( result )
+
+          return {
+            :status => 200
+          }
+
         else
           logger.error( sprintf( 'wrong command detected: %s', command ) )
 
-          result = {
-            :status  => 400,
+          return {
+            :status  => 500,
             :message => sprintf( 'wrong command detected: %s', command )
           }
 
-          logger.info( result )
         end
 
         result[:request]    = data
@@ -145,7 +170,10 @@ module Graphite
         payload: data
       }.to_json
 
-      logger.debug( p.addJob( 'mq-information', job ) )
+      result = p.addJob( queue, job, ttr, delay )
+
+      logger.debug( job )
+      logger.debug( result )
 
     end
 
