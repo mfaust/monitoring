@@ -31,12 +31,6 @@ module Grafana
         end
       end
 
-
-#      c = MessageQueue::Consumer.new( @MQSettings )
-#      processQueue(
-#        c.getJobFromTube( @mqQueue )
-#      )
-
     end
 
 
