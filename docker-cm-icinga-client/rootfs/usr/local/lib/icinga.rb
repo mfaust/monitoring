@@ -49,8 +49,9 @@ module Icinga
       @nodeName         = Socket.gethostbyname( Socket.gethostname ).first
 
       @MQSettings = {
-        :beanstalkHost => mqHost,
-        :beanstalkPort => mqPort
+        :beanstalkHost  => mqHost,
+        :beanstalkPort  => mqPort,
+        :beanstalkQueue => @mqQueue
       }
 
       version              = '1.4.0'
@@ -77,8 +78,10 @@ module Icinga
       logger.debug( sprintf( '  api pass : %s', @icingaApiPass ) )
       logger.debug( sprintf( '  node name: %s', @nodeName ) )
 
-      @hasCert   = self.checkCert( { :user => @icingaApiUser, :password =>  @icingaApiPass } )
-      @headers   = { "Content-Type" => "application/json", "Accept" => "application/json" }
+      @hasCert     = self.checkCert( { :user => @icingaApiUser, :password =>  @icingaApiPass } )
+      @headers     = { "Content-Type" => "application/json", "Accept" => "application/json" }
+
+      @mqConsumer  = MessageQueue::Consumer.new( @MQSettings )
 
       return self
 

@@ -9,13 +9,27 @@ module Icinga
     #
     def queue()
 
-#       logger.debug('queue()')
+      data = @mqConsumer.getJobFromTube( @mqQueue )
 
-      c = MessageQueue::Consumer.new( @MQSettings )
+      if( data.count() != 0 )
 
-      processQueue(
-        c.getJobFromTube( @mqQueue )
-      )
+        jobId  = data.dig( :id )
+
+        result = self.processQueue( data )
+
+        logger.debug( result )
+        logger.debug( result.class.to_s )
+
+        status = result.dig(:status).to_i
+
+        if( status == 200 || status == 500 )
+
+          @mqConsumer.deleteJob( @mqQueue, jobId )
+        else
+
+          @mqConsumer.buryJob( @mqQueue, jobId )
+        end
+      end
 
     end
 
@@ -35,6 +49,7 @@ module Icinga
         if( command == nil )
           logger.error( 'wrong command' )
           logger.error( data )
+
           return {
             :status  => 500,
             :message => 'no command given'
@@ -44,36 +59,50 @@ module Icinga
         if( node == nil || payload == nil )
           logger.error( 'missing node or payload' )
           logger.error( data )
+
           return {
             :status  => 500,
             :message => 'missing node or payload'
           }
         end
 
-        result = {
-          :status  => 400,
-          :message => sprintf( 'wrong command detected: %s', command )
-        }
 
         case command
         when 'add'
           logger.info( sprintf( 'add node %s', node ) )
+
           result = self.addHost( { :host => node, :vars => payload } )
 
           logger.info( result )
+
+          return {
+            :status => 200
+          }
         when 'remove'
           logger.info( sprintf( 'remove checks for node %s', node ) )
+
           result = self.deleteHost( { :host => node } )
 
           logger.info( result )
+
+          return {
+            :status => 200
+          }
         when 'info'
           logger.info( sprintf( 'give information for node %s', node ) )
+
           result = self.listHost( { :host => node } )
+
+          logger.info( result )
+
+          return {
+            :status => 200
+          }
         else
           logger.error( sprintf( 'wrong command detected: %s', command ) )
 
-          result = {
-            :status  => 400,
+          return {
+            :status  => 500,
             :message => sprintf( 'wrong command detected: %s', command )
           }
 
