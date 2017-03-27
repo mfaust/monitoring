@@ -77,7 +77,7 @@ module Grafana
 
           @shortHostname        = @shortHostname.gsub( '.', '-' )
         else
-          logger.error( 'no DNS entry found' )
+          logger.warn( 'no DNS entry found' )
         end
 
       end
@@ -157,11 +157,11 @@ module Grafana
           serviceTemplate = self.templateForService( templateName )
 #           serviceTemplate = self.templateForService( serviceName )
 
-          logger.debug( sprintf( '  serviceName  %s', serviceName ) )
-          logger.debug( sprintf( '  description  %s', description ) )
-          logger.debug( sprintf( '  template     %s', template ) )
-          logger.debug( sprintf( '  templateName %s', templateName ) )
-          logger.debug( sprintf( '  cacheKey     %s', cacheKey ) )
+#           logger.debug( sprintf( '  serviceName  %s', serviceName ) )
+#           logger.debug( sprintf( '  description  %s', description ) )
+#           logger.debug( sprintf( '  template     %s', template ) )
+#           logger.debug( sprintf( '  templateName %s', templateName ) )
+#           logger.debug( sprintf( '  cacheKey     %s', cacheKey ) )
 
           if( ! ['mongodb', 'mysql', 'postgres'].include?( serviceName ) )
             additionalTemplatePaths << self.templateForService( 'tomcat' )
@@ -169,7 +169,7 @@ module Grafana
 
           if( ! serviceTemplate.to_s.empty? )
 
-            logger.debug( sprintf( "Found Template paths: %s, %s" , serviceTemplate , additionalTemplatePaths ) )
+#             logger.debug( sprintf( "Found Template paths: %s, %s" , serviceTemplate , additionalTemplatePaths ) )
 
             options = {
               :description             => description,
@@ -224,7 +224,7 @@ module Grafana
 
           logger.debug( 'found measurement data' )
 
-          logger.debug( JSON.pretty_generate( measurements ) )
+#           logger.debug( JSON.pretty_generate( measurements ) )
         rescue => e
           logger.error( e )
         end
@@ -628,11 +628,11 @@ module Grafana
 
         templateArray.each do |tpl|
 
-          logger.debug( tpl )
+#           logger.debug( tpl )
 
           if( File.exist?( tpl ) )
 
-            logger.debug( sprintf( '  => found %s', tpl ) )
+#             logger.debug( sprintf( '  => found %s', tpl ) )
             template = tpl
             break
           end
@@ -644,20 +644,7 @@ module Grafana
         end
 
         return template
-#
-#         return
-#
-#         template = sprintf( '%s/services/%s.json', @templateDirectory, serviceName )
-# #         logger.debug( template )
-#
-#         if( ! File.exist?( template ) )
-#
-#           logger.error( sprintf( 'no template for service %s found', serviceName ) )
-#
-#           template = nil
-#         end
-#
-#         return template
+
       end
 
 

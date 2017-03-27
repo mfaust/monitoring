@@ -9,13 +9,33 @@ module Grafana
     #
     def queue()
 
-#       logger.debug('queue()')
+      data = @mqConsumer.getJobFromTube( @mqQueue )
 
-      c = MessageQueue::Consumer.new( @MQSettings )
+      if( data.count() != 0 )
 
-      processQueue(
-        c.getJobFromTube( @mqQueue )
-      )
+        jobId  = data.dig( :id )
+
+        result = self.processQueue( data )
+
+        logger.debug( result )
+        logger.debug( result.class.to_s )
+
+        status = result.dig(:status).to_i
+
+        if( status == 200 || status == 500 )
+
+          @mqConsumer.deleteJob( @mqQueue, jobId )
+        else
+
+          @mqConsumer.buryJob( @mqQueue, jobId )
+        end
+      end
+
+
+#      c = MessageQueue::Consumer.new( @MQSettings )
+#      processQueue(
+#        c.getJobFromTube( @mqQueue )
+#      )
 
     end
 
@@ -39,37 +59,32 @@ module Grafana
         if( command == nil )
           logger.error( 'wrong command' )
           logger.error( data )
-          return
+
+          return {
+            :status  => 500,
+            :message => sprintf( 'wrong command detected: %s', command )
+          }
         end
 
         if( node == nil || payload == nil )
           logger.error( 'missing node or payload' )
           logger.error( data )
-          return
+
+          return {
+            :status  => 500,
+            :message => 'missing node or payload'
+          }
         end
-
-        result = {
-          :status  => 400,
-          :message => sprintf( 'wrong command detected: %s', command )
-        }
-
-#         logger.debug( payload )
-#         logger.debug( payload.class.to_s )
 
         if( payload.is_a?( String ) == true && payload.to_s != '' )
 
           payload  = JSON.parse( payload )
         end
 
-#         logger.debug( payload )
-#         logger.debug( payload.class.to_s )
-
         if( payload.is_a?( String ) == false )
 
           tags     = payload.dig( 'tags' )
           overview = payload.dig( 'overview' ) || true
-
-#           logger.debug( tags )
         end
 
         case command
@@ -84,46 +99,56 @@ module Grafana
           result = self.createDashboardForHost( { :host => node, :tags => tags, :overview => overview } )
 
           logger.info( result )
+
+          return {
+            :status  => 200
+          }
+
         when 'remove'
 #           logger.info( sprintf( 'remove dashboards for node %s', node ) )
           result = self.deleteDashboards( { :host => node } )
 
           logger.info( result )
+
+          return {
+            :status  => 200
+          }
+
         when 'info'
-#           logger.info( sprintf( 'give dashboards for %s back', node ) )
+
+          logger.info( sprintf( 'give dashboards for %s back', node ) )
           result = self.listDashboards( { :host => node } )
 
           self.sendMessage( { :cmd => 'info', :queue => 'mq-grafana-info', :payload => result, :ttr => 1, :delay => 0 } )
-#           self.sendMessage( result )
 
-          return
+          return {
+            :status  => 200
+          }
         else
           logger.error( sprintf( 'wrong command detected: %s', command ) )
 
-          result = {
-            :status  => 400,
+          return {
+            :status  => 500,
             :message => sprintf( 'wrong command detected: %s', command )
           }
         end
 
-        result[:request]    = data
-
-        logger.info( result )
-
-        logger.debug( '--------------------------------------------------------' )
+#        result[:request]    = data
+#        logger.info( result )
+#        logger.debug( '--------------------------------------------------------' )
       end
 
     end
 
 
-    def sendMessage( data = {} )
+    def sendMessage( params = {} )
 
-      cmd     = params[:cmd]     ? params[:cmd]     : nil
-      node    = params[:node]    ? params[:node]    : nil
-      queue   = params[:queue]   ? params[:queue]   : nil
-      payload = params[:payload] ? params[:payload] : {}
-      ttr     = params[:ttr]     ? params[:trr]     : 10
-      delay   = params[:delay]   ? params[:delay]   : 2
+      cmd     = params.dig(:cmd)
+      node    = params.dig(:node)
+      queue   = params.dig(:queue)
+      payload = params.dig(:payload) || {}
+      ttr     = params.dig(:ttr)     || 10
+      delay   = params.dig(:delay)   || 2
 
       if( cmd == nil || queue == nil || payload.count() == 0 )
         return
@@ -141,9 +166,10 @@ module Grafana
         payload: payload    # require
       }.to_json
 
-      logger.debug( JSON.pretty_generate( job ) )
+      result = p.addJob( queue, job, ttr, delay )
 
-      logger.debug( p.addJob( queue, job, ttr, delay ) )
+      logger.debug( job )
+      logger.debug( result )
 
     end
 

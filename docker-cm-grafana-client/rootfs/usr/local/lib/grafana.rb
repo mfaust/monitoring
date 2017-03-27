@@ -104,8 +104,9 @@ module Grafana
       @mqQueue     = params.dig(:mqQueue)  || 'mq-grafana'
 
       @MQSettings = {
-        :beanstalkHost => mqHost,
-        :beanstalkPort => mqPort
+        :beanstalkHost  => mqHost,
+        :beanstalkPort  => mqPort,
+        :beanstalkQueue => @mqQueue
       }
 
       proto        = ( ssl == true ? 'https' : 'http' )
@@ -114,6 +115,7 @@ module Grafana
       @db          = Storage::Database.new()
       @mc          = Storage::Memcached.new( { :host => memcacheHost, :port => memcachePort } )
       @mbean       = MBean::Client.new( { :memcache => @mc } )
+      @mqConsumer  = MessageQueue::Consumer.new( @MQSettings )
 
       if( params.has_key?(:timeout) && params[:timeout].to_i <= 0 )
         params[:timeout] = 5

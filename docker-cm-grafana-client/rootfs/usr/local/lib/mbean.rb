@@ -174,7 +174,7 @@ module MBean
 
     def beanAvailable?( host, service, bean, key = nil )
 
-      logger.debug( sprintf( 'beanAvailable?( %s, %s, %s, %s )', host, service, bean, key ) )
+#       logger.debug( sprintf( 'beanAvailable?( %s, %s, %s, %s )', host, service, bean, key ) )
 
       data        = nil
       memcacheKey = Storage::Memcached.cacheKey( { :host => host, :pre => 'result', :service => service } )
