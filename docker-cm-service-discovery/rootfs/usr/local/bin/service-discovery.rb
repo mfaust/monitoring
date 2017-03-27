@@ -9,7 +9,7 @@
 
 require 'rufus-scheduler'
 
-require_relative '../lib/discover'
+require_relative '../lib/discovery'
 
 # -----------------------------------------------------------------------------
 
@@ -45,7 +45,7 @@ Signal.trap('QUIT') { stop = true }
 
 # -----------------------------------------------------------------------------
 
-sd = ServiceDiscovery.new( config )
+sd = ServiceDiscovery::Client.new( config )
 
 scheduler = Rufus::Scheduler.new
 
