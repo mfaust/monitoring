@@ -8,6 +8,7 @@
 # -----------------------------------------------------------------------------
 
 require 'yaml'
+require 'rufus-scheduler'
 
 require_relative '../lib/logging'
 require_relative '../lib/tools'
@@ -46,7 +47,26 @@ class Monitoring
     logger.info( '-----------------------------------------------------------------' )
     logger.info( '' )
 
-    @db = Storage::Database.new()
+    @db         = Storage::Database.new()
+    @mqConsumer = MessageQueue::Consumer.new( @MQSettings )
+    
+
+#     infoQueues = [
+#       'mq-discover-info',
+#       'mq-grafana-info',
+#       'mq-icinga-info'
+#     ]
+#
+
+#     scheduler   = Rufus::Scheduler.new
+#
+#     scheduler.every( 40 ) do
+#
+#       infoQueues.each do |queue|
+#
+#         @mqConsumer.releaseBuriedJobs( queue )
+#       end
+#     end
 
   end
 
@@ -380,7 +400,7 @@ class Monitoring
         resultArray = Array.new()
         threads     = Array.new()
 
-        c = MessageQueue::Consumer.new( @MQSettings )
+#         c = MessageQueue::Consumer.new( @MQSettings )
 
         discoveryStatus  = nil
         discoveryPayload = nil
@@ -390,7 +410,7 @@ class Monitoring
 
         for y in 1..10
 
-          result      = c.getJobFromTube('mq-discover-info')
+          result      = @mqConsumer.getJobFromTube('mq-discover-info')
 
           if( result != nil )
             discoveryStatus = result
@@ -505,7 +525,7 @@ class Monitoring
 
       enableDiscovery = true # @enabledDiscovery
       enabledGrafana  = true # @enabledGrafana
-      enabledIcinga   = false # @enabledIcinga
+      enabledIcinga   = true # @enabledIcinga
 
 #
 #       if( payload != nil )
@@ -553,16 +573,21 @@ class Monitoring
 
       sleep( 8 )
 
-      c = MessageQueue::Consumer.new( @MQSettings )
+#       c = MessageQueue::Consumer.new( @MQSettings )
 
       resultArray = Array.new()
       threads     = Array.new()
 
       logger.debug('start')
-      if( enableDiscovery == true )
-        discoveryStatus = c.getJobFromTube('mq-discover-info')
 
+      if( enableDiscovery == true )
+
+        logger.debug( 'get data from queue' )
+        discoveryStatus = @mqConsumer.getJobFromTube( 'mq-discover-info', true )
+
+        logger.debug( discoveryStatus )
         if( discoveryStatus )
+
           result[host.to_s][:discovery] ||= {}
           discoveryStatus = discoveryStatus.dig( :body, 'payload' ) || {}
           result[host.to_s][:discovery] = discoveryStatus
@@ -570,7 +595,7 @@ class Monitoring
       end
 
       if( enabledGrafana == true )
-        grafanaStatus = c.getJobFromTube('mq-grafana-info')
+        grafanaStatus = @mqConsumer.getJobFromTube( 'mq-grafana-info', true )
 
         if( grafanaStatus )
           result[host.to_s][:grafana] ||= {}
@@ -580,7 +605,7 @@ class Monitoring
       end
 
       if( enabledIcinga == true )
-        icingaStatus = c.getJobFromTube('mq-icinga-info')
+        icingaStatus = @mqConsumer.getJobFromTube( 'mq-icinga-info', true )
 
         if( icingaStatus )
           result[host.to_s][:icinga] ||= {}

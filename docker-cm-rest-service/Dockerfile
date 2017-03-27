@@ -9,7 +9,7 @@ ENV \
   TERM=xterm \
   APK_ADD="build-base bind-tools curl drill imagemagick-dev mysql-dev ruby-dev ruby-irb ruby-io-console ruby-rdoc sqlite sqlite-dev zlib zlib-dev" \
   APK_DEL="build-base imagemagick-dev ruby-dev ruby-io-console zlib-dev" \
-  GEMS="beaneater bigdecimal dalli filesize fileutils ipaddress mysql2 resolve-hostname rest-client sequel sinatra sqlite3 thin"
+  GEMS="beaneater bigdecimal dalli filesize fileutils ipaddress mysql2 resolve-hostname rest-client rufus-scheduler sequel sinatra sqlite3 thin tzinfo-data"
 
 LABEL version="1703-03.1"
 
