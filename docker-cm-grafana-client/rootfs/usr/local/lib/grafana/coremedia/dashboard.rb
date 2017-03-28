@@ -379,7 +379,7 @@ module Grafana
 
               if( service == 'replication-live-server' )
 
-                tpl.gsub!( 'service_info-publisher' , 'service_info-webserver' )
+                tpl.gsub!( 'Server.ServiceInfo.publisher' , 'Server.ServiceInfo.webserver' )
                 tpl.gsub!( 'Publisher', 'Webserver' )
 
               end
