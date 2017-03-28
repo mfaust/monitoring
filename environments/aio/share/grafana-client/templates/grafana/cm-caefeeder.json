@@ -369,7 +369,7 @@
           "regex": "/^FEEDER_(?!CONTENT).*$/",
           "sort": 0,
           "datasource": "graphite",
-          "refresh": 0,
+          "refresh": 1,
           "hide": 0,
           "name": "feeder",
           "multi": false,

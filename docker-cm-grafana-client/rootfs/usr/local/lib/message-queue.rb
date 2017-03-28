@@ -94,7 +94,7 @@ module MessageQueue
 
           scheduler = Rufus::Scheduler.new
 
-          scheduler.every( '20s' ) do
+          scheduler.every( 40 ) do
             releaseBuriedJobs( beanstalkQueue )
           end
         else
