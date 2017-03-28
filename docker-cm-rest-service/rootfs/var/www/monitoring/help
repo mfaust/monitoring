@@ -63,16 +63,16 @@ Short description of the REST API
     curl \
       --silent \
       --request POST \
-      --data '{ "command": "create", "argument": "node" }' \
-      http://localhost/api/v2/host/${HOSTNAME} | \
+      --data '{ "command": "create" }' \
+      http://localhost/api/v2/annotation/${HOSTNAME} | \
       json_reformat
 
   - Create an annotation that the host was deleted
     curl \
       --silent \
       --request POST \
-      --data '{ "command": "destroy", "argument": "node" }' \
-      http://localhost/api/v2/host/${HOSTNAME} | \
+      --data '{ "command": "destroy" }' \
+      http://localhost/api/v2/annotation/${HOSTNAME} | \
       json_reformat
 
   - Create an annotation for starting a load test
@@ -80,7 +80,7 @@ Short description of the REST API
       --silent \
       --request POST \
       --data '{ "command": "loadtest", "argument": "start" }' \
-      http://localhost/api/v2/host/${HOSTNAME} | \
+      http://localhost/api/v2/annotation/${HOSTNAME} | \
       json_reformat
 
   - Creates an annotation for terminating a load test
@@ -88,7 +88,7 @@ Short description of the REST API
       --silent \
       --request POST \
       --data '{ "command": "loadtest", "argument": "stop" }' \
-      http://localhost/api/v2/host/${HOSTNAME} | \
+      http://localhost/api/v2/annotation/${HOSTNAME} | \
       json_reformat
 
   - Creates an annotation for a deployment
@@ -96,6 +96,6 @@ Short description of the REST API
       --silent \
       --request POST \
       --data '{ "command": "deployment", "message": "version 7.1.50", "tags": ["7.1.50"] }' \
-      http://localhost/api/v2/host/${HOSTNAME} | \
+      http://localhost/api/v2/annotation/${HOSTNAME} | \
       json_reformat
 

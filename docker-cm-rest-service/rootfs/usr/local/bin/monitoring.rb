@@ -49,7 +49,7 @@ class Monitoring
 
     @db         = Storage::Database.new()
     @mqConsumer = MessageQueue::Consumer.new( @MQSettings )
-    
+
 
 #     infoQueues = [
 #       'mq-discover-info',
@@ -791,15 +791,16 @@ class Monitoring
 
       if( payload != '' )
 
-        hash = payload
+        hash = JSON.parse( payload )
 
         result[:request] = hash
 
-        command      = hash[:command]     ? hash[:command]     : nil
-        argument     = hash[:argument]    ? hash[:argument]    : nil
-        message      = hash[:message]     ? hash[:message]     : nil
-        description  = hash[:description] ? hash[:description] : nil
-        tags         = hash[:tags]        ? hash[:tags]        : []
+        # BUUUG
+        command      = hash.dig('command')
+        argument     = hash.dig('argument')
+        message      = hash.dig('message')
+        description  = hash.dig('description')
+        tags         = hash.dig('tags')  || []
 
         if( command == 'create' || command == 'remove' )
 #         example:

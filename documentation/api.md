@@ -233,7 +233,7 @@ Zu jedem dieser Annotationen ist es möglich, über `--data` json formatierte Pa
       --silent \
       --request POST \
       --data '{ "command": "create" }' \
-      http://localhost/api/v2/host/${HOSTNAME} | \
+      http://localhost/api/v2/annotation/${HOSTNAME} | \
       json_reformat
 ```
 
@@ -246,7 +246,7 @@ Zu jedem dieser Annotationen ist es möglich, über `--data` json formatierte Pa
       --silent \
       --request POST \
       --data '{ "command": "destroy" }' \
-      http://localhost/api/v2/host/${HOSTNAME} | \
+      http://localhost/api/v2/annotation/${HOSTNAME} | \
       json_reformat
 ```
 
@@ -259,7 +259,7 @@ Zu jedem dieser Annotationen ist es möglich, über `--data` json formatierte Pa
       --silent \
       --request POST \
       --data '{ "command": "loadtest", "argument": "start" }' \
-      http://localhost/api/v2/host/${HOSTNAME} | \
+      http://localhost/api/v2/annotation/${HOSTNAME} | \
       json_reformat
 
 
@@ -267,7 +267,7 @@ Zu jedem dieser Annotationen ist es möglich, über `--data` json formatierte Pa
       --silent \
       --request POST \
       --data '{ "command": "loadtest", "argument": "stop" }' \
-      http://localhost/api/v2/host/${HOSTNAME} | \
+      http://localhost/api/v2/annotation/${HOSTNAME} | \
       json_reformat
 ```
 
@@ -280,7 +280,7 @@ Zu jedem dieser Annotationen ist es möglich, über `--data` json formatierte Pa
       --silent \
       --request POST \
       --data '{ "command": "deployment", "message": "version 7.1.50", "tags": ["7.1.50"] }' \
-      http://localhost/api/v2/host/${HOSTNAME} | \
+      http://localhost/api/v2/annotation/${HOSTNAME} | \
       json_reformat
 ```
 
