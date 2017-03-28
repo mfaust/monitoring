@@ -238,7 +238,7 @@ module MessageQueue
 
         job = @b.jobs.find( id )
 
-        if( job.exists? == true )
+        if( job != nil )
 
           response = job.delete
         end
