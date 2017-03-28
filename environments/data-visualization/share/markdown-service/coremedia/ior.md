@@ -14,9 +14,10 @@ Die IOR wird von Content-Servern zur Verfügung gestellt und kann über HTTP abg
  * RLS: `curl http://${SERVER}:42180/coremedia/ior`
 
 ----
+
 ## Operating
 
-| Fehler  | ToDo |
-| :------ | :-------- |
-| IOR steht nicht zur Verfügung | den Service kontrollieren und ggf. neu starten |
+ | Fehler  | ToDo      |
+ | :------ | :-------- |
+ | IOR steht nicht zur Verfügung | den Service kontrollieren und ggf. neu starten |
 
