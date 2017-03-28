@@ -43,7 +43,7 @@ Sollten `mysql` und `mongodb` ebenfalls ins Monitoring aufgenommen werden, müss
 
 [Installation](./installation.md)
 
-[Start](./fist-start.md)
+[Start](./first-start.md)
 
 [API](./api.md)
 
