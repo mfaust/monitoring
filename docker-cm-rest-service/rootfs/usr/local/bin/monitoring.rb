@@ -791,16 +791,29 @@ class Monitoring
 
       if( payload != '' )
 
-        hash = JSON.parse( payload )
+        if( payload.is_a?( String ) )
+
+          hash         = JSON.parse( payload )
+
+          command      = hash.dig('command')
+          argument     = hash.dig('argument')
+          message      = hash.dig('message')
+          description  = hash.dig('description')
+          tags         = hash.dig('tags')  || []
+
+        else
+
+          hash         = payload
+
+          command      = hash.dig(:command)
+          argument     = hash.dig(:argument)
+          message      = hash.dig(:message)
+          description  = hash.dig(:description)
+          tags         = hash.dig(:tags)  || []
+
+        end
 
         result[:request] = hash
-
-        # BUUUG
-        command      = hash.dig('command')
-        argument     = hash.dig('argument')
-        message      = hash.dig('message')
-        description  = hash.dig('description')
-        tags         = hash.dig('tags')  || []
 
         if( command == 'create' || command == 'remove' )
 #         example:
@@ -817,9 +830,7 @@ class Monitoring
           tags        = []
           self.messageQueue( { :cmd => command, :node => host, :queue => 'mq-graphite', :payload => { "timestamp": Time.now().to_i, "node" => host } } )
 
-#           @graphite.nodeAnnotation( host, command )
-
-        elsif( command == 'loadtest' && ( argument == 'start' || stop == 'stop' ) )
+        elsif( command == 'loadtest' && ( argument == 'start' || argument == 'stop' ) )
 
 #         example:
 #         {
@@ -838,8 +849,6 @@ class Monitoring
 
           self.messageQueue( { :cmd => 'loadtest', :node => host, :queue => 'mq-graphite', :payload => { "timestamp": Time.now().to_i, "argument" => argument } } )
 
-          # @graphite.loadtestAnnotation( host, argument )
-
         elsif( command == 'deployment' )
 
 #         example:
@@ -854,8 +863,6 @@ class Monitoring
           description = nil
           self.messageQueue( { :cmd => 'deployment', :node => host, :queue => 'mq-graphite', :payload => { "timestamp": Time.now().to_i, "message" => message, "tags" => tags } } )
 
-#           @graphite.deploymentAnnotation( host, message, tags )
-
         else
 #         example:
 #         {
@@ -869,7 +876,6 @@ class Monitoring
 #         }
           self.messageQueue( { :cmd => 'general', :node => host, :queue => 'mq-graphite', :payload => { "timestamp": Time.now().to_i, "message" => message, "tags" => tags, "description" => description } } )
 
-#           @graphite.generalAnnotation( host, description, message, tags )
         end
 
         status    = 200
