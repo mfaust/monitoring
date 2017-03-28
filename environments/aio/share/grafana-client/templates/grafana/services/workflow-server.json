@@ -1,9 +1,9 @@
 {
   "dashboard": {
     "id": null,
-    "title": "%SHORTHOST% Workflow Server",
-    "originalTitle": "%SHORTHOST% Workflow Server",
-    "tags": [ "%TAG%" ],
+    "title": "%SHORTHOST% ContentServer WFS",
+    "originalTitle": "%SHORTHOST% ContentServer WFS",
+    "tags": [ "%TAG%", "content-server" ],
     "style": "dark",
     "timezone": "browser",
     "editable": true,
@@ -16,7 +16,7 @@
         "height": "25px",
         "panels": [
           {
-            "content": "<h2><center>Workflowserver</center></h2>",
+            "content": "<h2><center>WFS</center></h2>",
             "editable": true,
             "error": false,
             "id": 1,
@@ -240,7 +240,7 @@
       {
         "collapse": false,
         "editable": true,
-        "height": "100px",
+        "height": "150px",
         "panels": [
           {
             "aliasColors": {},
@@ -262,7 +262,7 @@
               "alignAsTable": true,
               "avg": false,
               "current": true,
-              "max": false,
+              "max": true,
               "min": false,
               "rightSide": true,
               "show": true,
@@ -307,7 +307,7 @@
                 "label": null,
                 "logBase": 1,
                 "max": null,
-                "min": null,
+                "min": "0",
                 "show": true
               },
               {
@@ -321,7 +321,7 @@
             ]
           }
         ],
-        "title": "New row"
+        "title": "Lightweight Sessions"
       }
     ],
     "time": {

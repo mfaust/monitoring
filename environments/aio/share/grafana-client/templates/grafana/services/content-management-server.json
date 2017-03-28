@@ -304,7 +304,7 @@
       },
       {
         "title": "Server Resource Cache",
-        "height": "150px",
+        "height": "200px",
         "editable": true,
         "collapse": false,
         "panels": [

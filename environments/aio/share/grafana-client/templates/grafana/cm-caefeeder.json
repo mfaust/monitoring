@@ -56,7 +56,7 @@
               "avg": false,
               "current": true,
               "max": true,
-              "min": true,
+              "min": false,
               "rightSide": true,
               "show": true,
               "total": false,
@@ -82,30 +82,30 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$feeder-ProactiveEngine-feeder.count-diff, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(*.%HOST%.$feeder.ProactiveEngine.feeder.entries.diff, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$feeder-ProactiveEngine-feeder.count-current, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(*.%HOST%.$feeder.ProactiveEngine.feeder.entries.current, '(.*)-', ''))",
                 "textEditor": false,
                 "hide": true
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$feeder-ProactiveEngine-feeder.count-max, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(*.%HOST%.$feeder.ProactiveEngine.feeder.entries.max, '(.*)-', ''))",
                 "textEditor": false,
                 "hide": true
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$feeder-ProactiveEngine-feeder.count-invalidations, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(*.%HOST%.$feeder.ProactiveEngine.feeder.invalidations, '(.*)-', ''))",
                 "textEditor": false,
-                "hide": true
+                "hide": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$feeder-ProactiveEngine-feeder.count-heartbeat, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(*.%HOST%.$feeder.ProactiveEngine.feeder.heartbeat, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -246,6 +246,92 @@
           }
         ],
         "title": "UAPI Cache"
+      },
+      {
+        "collapse": false,
+        "editable": true,
+        "height": "150px",
+        "panels": [
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "decimals": 0,
+            "editable": true,
+            "error": false,
+            "fill": 3,
+            "grid": {
+              "threshold1": null,
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2": null,
+              "threshold2Color": "rgba(234, 112, 112, 0.22)"
+            },
+            "id": 12,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": true,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "span": 12,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(*.%HOST%.$feeder.CapConnection.su_sessions.sessions, '(.*)-', ''))",
+                "textEditor": false
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "Lightweight Sessions",
+            "tooltip": {
+              "msResolution": false,
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "none",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": "0",
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": false
+              }
+            ]
+          }
+        ],
+        "title": "Lightweight Sessions"
       }
     ],
     "time": {
@@ -279,8 +365,8 @@
         {
           "type": "query",
           "label": null,
-          "query": "*.*.*EEDER*Proactive*feeder",
-          "regex": "/(.*)-.*-.*/",
+          "query": "*.%HOST%.*",
+          "regex": "/^FEEDER_(?!CONTENT).*$/",
           "sort": 0,
           "datasource": "graphite",
           "refresh": 0,

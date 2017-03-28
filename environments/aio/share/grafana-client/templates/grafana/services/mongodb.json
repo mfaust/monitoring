@@ -213,7 +213,7 @@
       {
         "collapse": false,
         "editable": true,
-        "height": "350px",
+        "height": "200px",
         "panels": [
           {
             "aliasColors": {},

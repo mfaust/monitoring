@@ -594,7 +594,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByNode(*.%HOST%.SOLR_MASTER.core_$core.Select.avgTimePerRequest, 3)",
+                "target": "aliasByNode(*.%HOST%.SOLR_MASTER.core_$core.Select.requestPerSecond.avg, 3)",
                 "textEditor": false
               }
             ],
