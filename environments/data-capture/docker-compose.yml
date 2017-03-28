@@ -204,17 +204,17 @@ services:
 
   # single service
   # use MQ to process data
-  cm-collectd:
+  cm-carbon-client:
     restart: always
     build: ../../docker-cm-carbon-client
-    container_name: cm-collectd
-    hostname: cm-collectd
+    container_name: cm-carbon-client
+    hostname: cm-carbon-client
     labels:
-      com.dnsdock.image: "cm-collectd"
-      com.dnsdock.alias: "cm-collectd"
+      com.dnsdock.image: "cm-carbon-client"
+      com.dnsdock.alias: "cm-carbon-client"
       com.dnsdock.ttl: "30"
     env_file:
-      - env/cm-collectd.env
+      - env/cm-carbon-client.env
     depends_on:
       - memcached
     volumes:
