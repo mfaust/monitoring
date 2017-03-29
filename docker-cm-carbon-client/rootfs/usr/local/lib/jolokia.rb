@@ -3,7 +3,7 @@
 # 08.01.2017 - Bodo Schulz
 #
 #
-# v0.0.9
+# v1.0.1
 # -----------------------------------------------------------------------------
 
 require 'net/http'
@@ -18,21 +18,26 @@ module Jolokia
 
     def initialize( params = {} )
 
-      @Host = params[:host] ? params[:host] : 'localhost'
-      @Port = params[:port] ? params[:port] : 8080
+#       logger.debug( params )
 
+      @Host = params.dig(:host) || 'localhost'
+      @Port = params.dig(:port) || 8080
+      @Path = params.dig(:path) || '/jolokia'
     end
 
 
     def post( params = {} )
 
-      payload = params[:payload] ? params[:payload] : {}
-      timeout = params[:timeout] ? params[:timeout] : 10
+#       logger.debug( 'Jolokia.post()' )
+#       logger.debug( params )
+
+      payload = params.dig(:payload) || {}
+      timeout = params.dig(:timeout) || 10
 
       # HINT or QUESTION
       # check payload if is an valid json?
 
-      uri          = URI.parse( sprintf( 'http://%s:%s/jolokia', @Host, @Port ) )
+      uri          = URI.parse( sprintf( 'http://%s:%s%s', @Host, @Port, @Path ) )
       http         = Net::HTTP.new( uri.host, uri.port )
 
       request = Net::HTTP::Post.new(
@@ -49,12 +54,16 @@ module Jolokia
         use_ssl: uri.scheme == "https",
         :read_timeout => timeout
       ) do |http|
+
         begin
+
           http.request( request )
 
         rescue Exception => e
 
           logger.warn( sprintf( 'Cannot execute request to %s://%s:%s%s, cause: %s', uri.scheme, uri.hostname, uri.port, uri.request_uri, e ) )
+
+#           logger.debug( sprintf( ' -> request body: %s', request.body ) )
 
           return {
             :status  => 500,
@@ -62,6 +71,7 @@ module Jolokia
           }
 
         rescue => e
+
           logger.warn( sprintf( 'Cannot execute request to %s://%s:%s%s, cause: %s', uri.scheme, uri.hostname, uri.port, uri.request_uri, e ) )
 
           return {
@@ -72,9 +82,29 @@ module Jolokia
         end
       end
 
+      body = JSON.parse( response.body )
+
+#       logger.debug( 'done' )
+#       logger.debug( body.first )
+
+      requestStatus = body.first['status'] ? body.first['status'] : 500
+      requestError  = body.first['error']  ? body.first['error']  : nil
+
+#       logger.debug( requestStatus )
+#       logger.debug( requestError )
+
+      if( requestStatus != 200 )
+
+        # stacktrace found! :(
+        return {
+          :status   => requestStatus,
+          :message  => requestError
+        }
+      end
+
       return {
         :status  => 200,
-        :message => JSON.parse( response.body )
+        :message => body
       }
 
     end
@@ -82,8 +112,8 @@ module Jolokia
 
     def jolokiaIsAvailable?( params = {} )
 
-      host = params[:host] ? params[:host] : @Host
-      port = params[:port] ? params[:port] : @Port
+      host = params.dig(:host) ||  @Host
+      port = params.dig(:port) ||  @Port
 
       # if our jolokia proxy available?
       if( ! self.portOpen?( host, port ) )

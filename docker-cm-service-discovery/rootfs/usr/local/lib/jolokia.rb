@@ -3,7 +3,7 @@
 # 08.01.2017 - Bodo Schulz
 #
 #
-# v0.0.9
+# v1.0.1
 # -----------------------------------------------------------------------------
 
 require 'net/http'
@@ -20,9 +20,9 @@ module Jolokia
 
 #       logger.debug( params )
 
-      @Host = params[:host] ? params[:host] : 'localhost'
-      @Port = params[:port] ? params[:port] : 8080
-
+      @Host = params.dig(:host) || 'localhost'
+      @Port = params.dig(:port) || 8080
+      @Path = params.dig(:path) || '/jolokia'
     end
 
 
@@ -31,13 +31,13 @@ module Jolokia
 #       logger.debug( 'Jolokia.post()' )
 #       logger.debug( params )
 
-      payload = params[:payload] ? params[:payload] : {}
-      timeout = params[:timeout] ? params[:timeout] : 10
+      payload = params.dig(:payload) || {}
+      timeout = params.dig(:timeout) || 10
 
       # HINT or QUESTION
       # check payload if is an valid json?
 
-      uri          = URI.parse( sprintf( 'http://%s:%s/jolokia', @Host, @Port ) )
+      uri          = URI.parse( sprintf( 'http://%s:%s%s', @Host, @Port, @Path ) )
       http         = Net::HTTP.new( uri.host, uri.port )
 
       request = Net::HTTP::Post.new(
@@ -63,14 +63,12 @@ module Jolokia
 
           logger.warn( sprintf( 'Cannot execute request to %s://%s:%s%s, cause: %s', uri.scheme, uri.hostname, uri.port, uri.request_uri, e ) )
 
+#           logger.debug( sprintf( ' -> request body: %s', request.body ) )
+
           return {
             :status  => 500,
             :message => e
           }
-
-#           logger.debug( sprintf( ' -> request body: %s', request.body ) )
-
-          return
 
         rescue => e
 
@@ -114,8 +112,8 @@ module Jolokia
 
     def jolokiaIsAvailable?( params = {} )
 
-      host = params[:host] ? params[:host] : @Host
-      port = params[:port] ? params[:port] : @Port
+      host = params.dig(:host) ||  @Host
+      port = params.dig(:port) ||  @Port
 
       # if our jolokia proxy available?
       if( ! self.portOpen?( host, port ) )
