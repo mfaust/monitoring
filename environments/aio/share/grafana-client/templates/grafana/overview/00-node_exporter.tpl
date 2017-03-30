@@ -1,11 +1,11 @@
+
       {
         "collapse": false,
-        "editable": true,
         "height": "100px",
         "panels": [
           {
             "content": "<h3>Operating System</h3>",
-            "id": 100,
+            "id": 10,
             "links": [],
             "mode": "html",
             "span": 1,
@@ -13,42 +13,74 @@
             "type": "text"
           },
           {
-            "title": "Uptime",
-            "error": false,
-            "span": 1,
+            "cacheTimeout": null,
+            "colorBackground": false,
+            "colorValue": false,
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(237, 129, 40, 0.89)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "datasource": "graphite",
+            "decimals": null,
             "editable": true,
-            "type": "singlestat",
-            "isNew": true,
-            "id": 70,
+            "error": false,
+            "format": "none",
+            "gauge": {
+              "maxValue": 100,
+              "minValue": 0,
+              "show": false,
+              "thresholdLabels": false,
+              "thresholdMarkers": true
+            },
+            "id": 11,
+            "interval": null,
+            "links": [],
+            "mappingType": 1,
+            "mappingTypes": [
+              {
+                "name": "value to text",
+                "value": 1
+              },
+              {
+                "name": "range to text",
+                "value": 2
+              }
+            ],
+            "maxDataPoints": 100,
+            "nullPointMode": "connected",
+            "nullText": null,
+            "postfix": "",
+            "postfixFontSize": "50%",
+            "prefix": "",
+            "prefixFontSize": "50%",
+            "rangeMaps": [
+              {
+                "from": "null",
+                "text": "N/A",
+                "to": "null"
+              }
+            ],
+            "span": 1,
+            "sparkline": {
+              "fillColor": "rgba(31, 118, 189, 0.18)",
+              "full": false,
+              "lineColor": "rgb(31, 120, 193)",
+              "show": false
+            },
             "targets": [
               {
-                "target": "*.%HOST%.NODE_EXPORTER-uptime.uptime",
                 "refId": "A",
+                "target": "*.%HOST%.NODE_EXPORTER.load.shortterm",
                 "textEditor": false
               }
             ],
-            "links": [],
-            "datasource": "graphite",
-            "maxDataPoints": 100,
-            "interval": null,
-            "cacheTimeout": null,
-            "format": "ms",
-            "nullText": null,
-            "mappingType": 1,
-            "nullPointMode": "connected",
-            "valueName": "current",
-            "valueFontSize": "70%",
             "thresholds": "",
-            "colorBackground": false,
-            "colorValue": false,
-            "decimals": 0,
-            "valueMaps": [
-              {
-                "value": "0",
-                "op": "=",
-                "text": "OFFLINE"
-              }
-            ]
+            "title": "Load",
+            "type": "singlestat",
+            "valueFontSize": "70%",
+            "valueMaps": [],
+            "valueName": "current"
           },
           {
             "cacheTimeout": null,
@@ -106,7 +138,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "*.%HOST%.NODE_EXPORTER-memory.count-used_percent"
+                "target": "*.%HOST%.NODE_EXPORTER.memory.used_percent"
               }
             ],
             "thresholds": "80,90",
@@ -178,7 +210,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "*.%HOST%.NODE_EXPORTER-swap.count-used_percent"
+                "target": "*.%HOST%.NODE_EXPORTER.swap.used_percent"
               }
             ],
             "thresholds": "80,90",
@@ -250,7 +282,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "*.%HOST%.NODE_EXPORTER-filesystem.count-rootfs_used_percent"
+                "target": "*.%HOST%.NODE_EXPORTER.filesystem.rootfs.used_percent"
               }
             ],
             "thresholds": "80,90",
