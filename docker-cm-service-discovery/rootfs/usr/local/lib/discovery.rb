@@ -74,6 +74,9 @@ module ServiceDiscovery
 
     jolokiaHost        = settings.dig(:jolokiaHost) || 'localhost'
     jolokiaPort        = settings.dig(:jolokiaPort) || 8080
+    jolokiaPath        = settings.dig(:jolokiaPath) || '/jolokia'
+    jolokiaAuthUser    = settings.dig(:jolokiaAuthUser)
+    jolokiaAuthPass    = settings.dig(:jolokiaAuthPass)
     mqHost             = settings.dig(:mqHost)      || 'localhost'
     mqPort             = settings.dig(:mqPort)      || 11300
     @mqQueue           = settings.dig(:mqQueue)     || 'mq-discover'
@@ -101,7 +104,7 @@ module ServiceDiscovery
     logger.info( '' )
 
     @db                 = Storage::Database.new()
-    @jolokia            = Jolokia::Client.new( { :host => jolokiaHost, :port => jolokiaPort } )
+    @jolokia            = Jolokia::Client.new( { :host => jolokiaHost, :port => jolokiaPort, :path => jolokiaPath, :auth => { :user => jolokiaAuthUser, :pass => jolokiaAuthPass } } )
     @mqConsumer         = MessageQueue::Consumer.new( @MQSettings )
 
     self.readConfigurations()

@@ -213,6 +213,9 @@ module DataCollector
 
       jolokiaHost         = params.dig(:jolokiaHost)           || 'localhost'
       jolokiaPort         = params.dig(:jolokiaPort)           ||  8080
+      jolokiaPath         = params.dig(:jolokiaPath)           || '/jolokia'
+      jolokiaAuthUser     = params.dig(:jolokiaAuthUser)
+      jolokiaAuthPass     = params.dig(:jolokiaAuthPass)
       memcacheHost        = params.dig(:memcacheHost)          || 'localhost'
       memcachePort        = params.dig(:memcachePort)          || 11211
       mqHost              = params.dig(:mqHost)                || 'localhost'
@@ -241,7 +244,7 @@ module DataCollector
 
       @db                 = Storage::Database.new()
       @mc                 = Storage::Memcached.new( { :host => memcacheHost, :port => memcachePort } )
-      @jolokia            = Jolokia::Client.new( { :host => jolokiaHost, :port => jolokiaPort } )
+      @jolokia            = Jolokia::Client.new( { :host => jolokiaHost, :port => jolokiaPort, :path => jolokiaPath, :auth => { :user => jolokiaAuthUser, :pass => jolokiaAuthPass } } )
       @mq                 = MessageQueue::Consumer.new( @MQSettings )
 
       if( @applicationConfig == nil || @serviceConfig == nil )
