@@ -386,6 +386,100 @@
             "links": []
           }
         ]
+      },
+      {
+        "collapse": false,
+        "height": 250,
+        "panels": [
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "fill": 3,
+            "height": "200",
+            "id": 16,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": true,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "null",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "span": 12,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "hide": true,
+                "refId": "A",
+                "target": "alias(*.%HOST%.MLS.Server.Repository.SequenceNumber, 'seq MLS')"
+              },
+              {
+                "hide": true,
+                "refId": "B",
+                "target": "alias(*.%HOST%.RLS.Replicator.completedSequenceNumber, 'seq RLS')"
+              },
+              {
+                "refId": "C",
+                "target": "alias(diffSeries(#A, #B), 'MLS vs. RLS')",
+                "targetFull": "alias(diffSeries(*.%HOST%.MLS.Server.Repository.SequenceNumber, *.%HOST%.RLS.Replicator.completedSequenceNumber), 'MLS vs. RLS')"
+              }
+            ],
+            "thresholds": [],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "diff Sequence Numbers between MLS & RLS",
+            "tooltip": {
+              "shared": true,
+              "sort": 0,
+              "value_type": "individual"
+            },
+            "type": "graph",
+            "xaxis": {
+              "mode": "time",
+              "name": null,
+              "show": true,
+              "values": []
+            },
+            "yaxes": [
+              {
+                "format": "none",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": false
+              }
+            ]
+          }
+        ],
+        "repeat": null,
+        "repeatIteration": null,
+        "repeatRowId": null,
+        "showTitle": false,
+        "title": "diff Sequence Numbers between MLS & RLS",
+        "titleSize": "h6"
       }
     ],
     "time": {
