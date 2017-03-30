@@ -91,9 +91,9 @@ class Monitoring
 
       services          = @monitoringServices.reduce( :merge )
 
-      @enabledDiscovery = services['discovery'] && services['discovery'] == true  ? true : false
-      @enabledGrafana   = services['grafana']   && services['grafana'] == true    ? true : false
-      @enabledIcinga    = services['icinga2']   && services['icinga2'] == true    ? true : false
+      @enabledDiscovery = true # services['discovery'] && services['discovery'] == true  ? true : false
+      @enabledGrafana   = true # services['grafana']   && services['grafana'] == true    ? true : false
+      @enabledIcinga    = true # services['icinga2']   && services['icinga2'] == true    ? true : false
     end
 
   end
