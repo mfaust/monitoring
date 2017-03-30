@@ -8,6 +8,7 @@ services:
   node_exporter:
     description: node_exporter from Prometheus
     port: 9100
+    template: cm-node_exporter
 
   postgres:
     description: PostgreSQL
