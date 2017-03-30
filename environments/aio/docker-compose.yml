@@ -435,9 +435,7 @@ services:
       - memcached
     extra_hosts:
       # NOTE: external service
-      #- 'nginx-proxy:10.101.2.83'
       - 'nginx-proxy:192.168.252.5'
-      #- 'nginx-proxy:192.168.0.5'
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./share/resolv.conf:/etc/resolv.conf:ro
@@ -469,9 +467,7 @@ services:
       - beanstalkd
     extra_hosts:
       # NOTE: external service
-      #- 'nginx-proxy:10.101.2.83'
       - 'nginx-proxy:192.168.252.5'
-      #- 'nginx-proxy:192.168.0.5'
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./share/resolv.conf:/etc/resolv.conf:ro
@@ -497,11 +493,6 @@ services:
       - env/cm-icinga-client.env
     depends_on:
       - beanstalkd
-    #extra_hosts:
-      # NOTE: external service
-      #- 'nginx-proxy:10.101.2.83'
-      #- 'nginx-proxy:192.168.252.101'
-      #- 'nginx-proxy:192.168.0.5'
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./share/resolv.conf:/etc/resolv.conf:ro

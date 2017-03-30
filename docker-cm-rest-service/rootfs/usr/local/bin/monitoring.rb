@@ -385,11 +385,12 @@ class Monitoring
         self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-grafana', :payload => payload, :prio => 10, :ttr => 15, :delay => 10 } )
       end
 
-      if( enabledIcinga == true && enableDiscovery == true )
+      if( enabledIcinga == true  )
 
         logger.info( 'create icinga checks and notifications' )
 
         sleep( 4 )
+
         # in first, we need the discovered services ...
         logger.info( 'we need information from discovery service' )
         logger.debug( 'send message to \'mq-discover\'' )
@@ -408,7 +409,7 @@ class Monitoring
 #         discoveryStatus  = c.getJobFromTube('mq-discover-info')
 #         discoveryPayload = discoveryStatus.dig( :body, 'payload' )
 
-        for y in 1..10
+        for y in 1..15
 
           result      = @mqConsumer.getJobFromTube('mq-discover-info')
 

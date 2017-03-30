@@ -154,12 +154,21 @@ module CarbonData
         indexSize         = value.dig('indexSize')
         isMaster          = value.dig('isMaster')  || 1
         isSlave           = value.dig('isSlave')   || 0
+
+        logger.debug( sprintf( 'index size: %s', indexSize ) )
+
         # achtung!
         # indexSize ist irrsinnigerweise als human readable ausgeführt worden!
         if( indexSize != nil && ( indexSize.include?( 'bytes' ) ) )
           indexSize = indexSize.gsub!( 'ytes','' )
         end
+
+        logger.debug( sprintf( 'index size: %s', indexSize ) )
+        logger.debug( indexSize.class.to_s )
+
         indexSize         = Filesize.from( indexSize ).to_i
+
+        logger.debug( sprintf( 'index size: %s', indexSize ) )
 
       end
 

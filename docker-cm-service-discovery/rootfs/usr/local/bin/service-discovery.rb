@@ -17,14 +17,14 @@ logDirectory       = '/var/log/monitoring'
 cacheDirectory     = '/var/cache/monitoring'
 serviceConfigFile  = '/etc/cm-service.yaml'
 
-jolokiaHost        = ENV.fetch( 'JOLOKIA_HOST', 'localhost' )
-jolokiaPort        = ENV.fetch( 'JOLOKIA_PORT', 8080 )
-jolokiaPath        = ENV.fetch( 'JOLOKIA_PATH', '/jolokia' )
+jolokiaHost        = ENV.fetch( 'JOLOKIA_HOST'     , 'localhost' )
+jolokiaPort        = ENV.fetch( 'JOLOKIA_PORT'     , 8080 )
+jolokiaPath        = ENV.fetch( 'JOLOKIA_PATH'     , '/jolokia' )
 jolokiaAuthUser    = ENV.fetch( 'JOLOKIA_AUTH_USER', nil )
 jolokiaAuthPass    = ENV.fetch( 'JOLOKIA_AUTH_PASS', nil )
-mqHost             = ENV.fetch( 'MQ_HOST'     , 'localhost' )
-mqPort             = ENV.fetch( 'MQ_PORT'     , 11300 )
-mqQueue            = ENV.fetch( 'MQ_QUEUE'    , 'mq-discover' )
+mqHost             = ENV.fetch( 'MQ_HOST'          , 'localhost' )
+mqPort             = ENV.fetch( 'MQ_PORT'          , 11300 )
+mqQueue            = ENV.fetch( 'MQ_QUEUE'         , 'mq-discover' )
 interval           = 10
 
 config = {
