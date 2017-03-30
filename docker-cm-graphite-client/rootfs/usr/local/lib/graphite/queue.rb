@@ -13,6 +13,8 @@ module Graphite
 
       if( data.count() != 0 )
 
+        logger.debug( data )
+
         jobId  = data.dig( :id )
 
         result = self.processQueue( data )
@@ -154,6 +156,11 @@ module Graphite
 
 #         self.sendMessage( result )
       end
+
+      return {
+        :status  => 500,
+        :message => 'no data found'
+      }
 
     end
 
