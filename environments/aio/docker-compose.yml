@@ -197,14 +197,14 @@ services:
       mon:
         ipv4_address: 172.25.0.22
 
-  icinga2-core:
+  icinga2-master:
     restart: always
-    image: bodsch/docker-icinga2:1703-01
-    container_name: icinga2-core
-    hostname: icinga2-core
+    image: bodsch/docker-icinga2:1703-04
+    container_name: icinga2-master
+    hostname: icinga2-master
     labels:
-      com.dnsdock.image: "icinga2-core"
-      com.dnsdock.alias: "icinga2-core"
+      com.dnsdock.image: "icinga2-master"
+      com.dnsdock.alias: "icinga2-master"
       com.dnsdock.ttl: "0"
     env_file:
       - env/database.env
@@ -257,16 +257,16 @@ services:
       - env/icingaweb2.env
     depends_on:
       - database
-      - icinga2-core
+      - icinga2-master
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./data:/srv
       - ./share/icingaweb2:/usr/local/share
     volumes_from:
-      - icinga2-core
+      - icinga2-master
     links:
       - database:database
-      - icinga2-core:icinga2
+      - icinga2-master:icinga2
     networks:
       mon:
         ipv4_address: 172.25.0.31
@@ -305,7 +305,7 @@ services:
     depends_on:
       - jolokia
       - memcached
-      - icinga2-core
+      - icinga2-master
       - grafana
     extra_hosts:
       - 'blueprint-box:192.168.252.100'
@@ -318,7 +318,7 @@ services:
       - ./data/monitoring:/var/cache/monitoring
       - ./data:/srv
     links:
-      - icinga2-core:icinga2
+      - icinga2-master:icinga2
       - jolokia:jolokia
       - carbon:carbon
       - grafana:grafana
