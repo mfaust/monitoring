@@ -3,7 +3,7 @@
 # 08.01.2017 - Bodo Schulz
 #
 #
-# v1.0.1
+# v1.0.2
 # -----------------------------------------------------------------------------
 
 require 'net/http'
@@ -18,11 +18,14 @@ module Jolokia
 
     def initialize( params = {} )
 
-#       logger.debug( params )
+      logger.debug( JSON.pretty_generate( params ) )
 
-      @Host = params.dig(:host) || 'localhost'
-      @Port = params.dig(:port) || 8080
-      @Path = params.dig(:path) || '/jolokia'
+      @Host     = params.dig(:host) || 'localhost'
+      @Port     = params.dig(:port) || 8080
+      @Path     = params.dig(:path) || '/jolokia'
+      @authUser = params.dig(:auth, :user)
+      @authPass = params.dig(:auth, :pass)
+
     end
 
 
