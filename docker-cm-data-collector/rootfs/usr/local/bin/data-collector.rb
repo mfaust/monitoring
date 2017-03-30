@@ -17,19 +17,25 @@ applicationConfigFile = '/etc/cm-application.yaml'
 serviceConfigFile     = '/etc/cm-service.yaml'
 
 
-jolokiaHost      = ENV.fetch('JOLOKIA_HOST'  , 'localhost' )
-jolokiaPort      = ENV.fetch('JOLOKIA_PORT'  , 8080 )
-mqHost           = ENV.fetch('MQ_HOST'       , 'localhost' )
-mqPort           = ENV.fetch('MQ_PORT'       , 11300 )
-mqQueue          = ENV.fetch('MQ_QUEUE'      , 'mq-collector' )
-memcacheHost     = ENV.fetch('MEMCACHE_HOST' , 'localhost' )
-memcachePort     = ENV.fetch('MEMCACHE_PORT' , 11211 )
-scanDiscovery    = ENV.fetch('SCAN_DISCOVERY', '10m' )
-interval         = ENV.fetch('INTERVAL'      , 15 )
+jolokiaHost      = ENV.fetch('JOLOKIA_HOST'     , 'localhost' )
+jolokiaPort      = ENV.fetch('JOLOKIA_PORT'     , 8080 )
+jolokiaPath      = ENV.fetch('JOLOKIA_PATH'     , '/jolokia' )
+jolokiaAuthUser  = ENV.fetch('JOLOKIA_AUTH_USER', nil )
+jolokiaAuthPass  = ENV.fetch('JOLOKIA_AUTH_PASS', nil )
+mqHost           = ENV.fetch('MQ_HOST'          , 'localhost' )
+mqPort           = ENV.fetch('MQ_PORT'          , 11300 )
+mqQueue          = ENV.fetch('MQ_QUEUE'         , 'mq-collector' )
+memcacheHost     = ENV.fetch('MEMCACHE_HOST'    , 'localhost' )
+memcachePort     = ENV.fetch('MEMCACHE_PORT'    , 11211 )
+scanDiscovery    = ENV.fetch('SCAN_DISCOVERY'   , '10m' )
+interval         = ENV.fetch('INTERVAL'         , 15 )
 
 config = {
   :jolokiaHost           => jolokiaHost,
   :jolokiaPort           => jolokiaPort,
+  :jolokiaPath           => jolokiaPath,
+  :jolokiaAuthUser       => jolokiaAuthUser,
+  :jolokiaAuthPass       => jolokiaAuthPass,
   :mqHost                => mqHost,
   :mqPort                => mqPort,
   :mqQueue               => mqQueue,
