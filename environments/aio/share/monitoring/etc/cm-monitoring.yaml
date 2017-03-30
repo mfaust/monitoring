@@ -44,7 +44,7 @@ data-collector:
   scan-discovery: 10m
 
 icinga:
-  host: icinga2-core
+  host: icinga2-master
   port: 5665
   api:
     user: root
