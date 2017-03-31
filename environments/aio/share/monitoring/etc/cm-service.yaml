@@ -162,6 +162,7 @@ services:
     ior: true
     runlevel: true
     license: true
+    sequencenumbers: true
     application:
     - contentserver
 

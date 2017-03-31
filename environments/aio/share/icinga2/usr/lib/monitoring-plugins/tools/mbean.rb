@@ -25,9 +25,15 @@ module MBean
 
     def bean( host, service, mbean, useMemcache = true )
 
+#puts host
+#puts service
+#puts mbean
+
       data = Hash.new()
 
       memcacheKey = Storage::Memcached.cacheKey( { :host => host, :pre => 'result', :service => service } )
+
+#puts memcacheKey
 
       for y in 1..3
 
@@ -37,26 +43,28 @@ module MBean
           data = { service => result }
           break
         else
-  #        logger.debug( sprintf( 'Waiting for data %s ... %d', memcacheKey, y ) )
+          logger.debug( sprintf( 'Waiting for data %s ... %d', memcacheKey, y ) )
           sleep( 3 )
         end
       end
 
       # ---------------------------------------------------------------------------------------
 
+#logger.debug( data )
+
       begin
 
         s   = data[service] ? data[service] : nil
 
         if( s == nil )
-  #        logger.debug( sprintf( 'no service %s found', service ) )
+          logger.debug( sprintf( 'no service %s found', service ) )
           return false
         end
 
         mbeanExists  = s.detect { |s| s[mbean] }
 
         if( mbeanExists == nil )
-  #        logger.debug( sprintf( 'no mbean %s found', mbean ) )
+          logger.debug( sprintf( 'no mbean %s found', mbean ) )
           return false
         end
 
@@ -66,7 +74,7 @@ module MBean
         return mbeanExists
 
         if( mbeanStatus.to_i != 200 )
-  #        logger.debug( sprintf( 'mbean %s found, but status %d', mbean, mbeanStatus ) )
+          logger.debug( sprintf( 'mbean %s found, but status %d', mbean, mbeanStatus ) )
           return false
         end
 
@@ -263,7 +271,7 @@ module MBean
     end
 
 
-    def checkBean‎Consistency( mbean, data = {} )
+    def checkBeanConsistency( mbean, data = {} )
 
     status    = data.dig('status')    # ? data['status']    : 505
     timestamp = data.dig('timestamp') # ? data['timestamp'] : 0

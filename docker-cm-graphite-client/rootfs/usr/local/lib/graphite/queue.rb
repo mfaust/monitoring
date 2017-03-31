@@ -102,9 +102,13 @@ module Graphite
 
           argument = payload.dig( 'argument' )
 
-          if( argument != 'start' || argument != 'stop' )
+          if( argument != 'start' && argument != 'stop' )
             logger.error( sprintf( 'wrong argument for LOADTEST \'%s\'', argument ) )
-            return
+
+            return {
+              :status  => 500,
+              :message => sprintf( 'wrong argument for LOADTEST \'%s\'', argument )
+            }
           end
 
           result = self.loadtestAnnotation( node, argument )
