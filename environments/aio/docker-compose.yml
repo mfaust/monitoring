@@ -232,6 +232,7 @@ services:
       - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_license.rb:/usr/lib/monitoring-plugins/check_cm_license
       - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_capconnection.rb:/usr/lib/monitoring-plugins/check_cm_capconnection
       - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_runlevel.rb:/usr/lib/monitoring-plugins/check_cm_runlevel
+      - ./share/icinga2/usr/lib/monitoring-plugins/check_cm_sequencenumbers.rb:/usr/lib/monitoring-plugins/check_cm_sequencenumbers
       - ./share/icinga2/usr/lib/monitoring-plugins/check_ssl_cert:/usr/lib/monitoring-plugins/check_ssl_cert
       - ./share/icinga2/etc/icinga2/objects:/etc/icinga2/objects
     links:
