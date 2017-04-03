@@ -13,7 +13,7 @@ LABEL version="1704-01.1"
 
 WORKDIR /
 
-# VOLUME [ "/share" ]
+VOLUME [ "/share" ]
 
 ADD rootfs /
 

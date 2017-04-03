@@ -11,9 +11,10 @@ volumes:
 services:
 
   data:
-#    restart: always
     build: ../../docker-cm-data
-    container_name: data
+    container_name: 01-data
+    depends_on:
+      - dnsdock
     volumes:
       - /share:/share
 
@@ -24,15 +25,15 @@ services:
     container_name: dnsdock
     hostname: dnsdock
     labels:
-      com.dnsdock.image: "dnsdock"
-      com.dnsdock.alias: "dnsdock"
-      com.dnsdock.ttl: "30"
+      com.dnsdock.alias: dnsdock
+      com.dnsdock.ttl: '30'
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock
     # You can use also Environment vars like this:
     # command: "--nameserver='${DNS_1}:53' --nameserver='${DNS_2}:53' --http=:80"
-    command: " --nameserver='10.1.2.14:53' --nameserver='10.1.2.63:53' --http=:80"
+    # command: " --nameserver='10.1.2.14:53' --nameserver='10.1.2.63:53' --http=:80 --verbose"
+    command: " --nameserver='41.1.1.1:53' --http=:80 --ttl=120 --verbose"
 
 
   beanstalkd:
@@ -41,31 +42,27 @@ services:
     container_name: beanstalkd
     hostname: beanstalkd
     labels:
-      com.dnsdock.image: "beanstalkd"
-      com.dnsdock.alias: "beanstalkd"
-      com.dnsdock.ttl: "30"
+      com.dnsdock.alias: beanstalkd
+      com.dnsdock.ttl: '30'
     volumes:
       - /etc/localtime:/etc/localtime:ro
 
 
-  database:
-    restart: always
-    image: bodsch/docker-mysql:1704-01
-    container_name: database
-    hostname: database
-    labels:
-      com.dnsdock.image: "database"
-      com.dnsdock.alias: "database"
-      com.dnsdock.ttl: "30"
-    extends:
-      file: ../base.yaml
-      service: database
-#    env_file:
-#      - env/database.env
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - database:/srv
-
+#  database:
+#    restart: always
+#    image: bodsch/docker-mysql:1704-01
+#    container_name: database
+#    hostname: database
+#    labels:
+#      com.dnsdock.alias: database
+#      com.dnsdock.ttl: '30'
+#    extends:
+#      file: ../base.yaml
+#      service: database
+#    volumes:
+#      - /etc/localtime:/etc/localtime:ro
+#      - database:/srv
+#
 
   jolokia:
     restart: always
@@ -73,7 +70,6 @@ services:
     container_name: jolokia
     hostname: jolokia
     labels:
-      com.dnsdock.image: "jolokia"
       com.dnsdock.alias: "jolokia"
       com.dnsdock.ttl: "30"
     depends_on:
@@ -268,7 +264,7 @@ services:
       - /share/var/www/markdown-service:/var/www/
 
 
-  # CoreMEdia Glue and Logic
+  # CoreMedia Glue and Logic
 
   cm-rest-service:
     restart: always
@@ -276,9 +272,8 @@ services:
     container_name: cm-rest-service
     hostname: cm-rest-service
     labels:
-      com.dnsdock.image: "cm-rest-service"
-      com.dnsdock.alias: "cm-rest-service"
-      com.dnsdock.ttl: "30"
+      com.dnsdock.alias: cm-rest-service
+      com.dnsdock.ttl: '30'
     extends:
       file: ../base.yaml
       service: cm-rest-service
@@ -289,7 +284,6 @@ services:
       - memcached
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /share/etc/resolv.conf:/etc/resolv.conf:ro
       - /share/etc/cm-monitoring.yaml:/etc/cm-monitoring.yaml
       - /share/etc/cm-service.yaml:/etc/cm-service.yaml
       - /share/etc/cm-application.yaml:/etc/cm-application.yaml
@@ -322,7 +316,6 @@ services:
       - memcached
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /share/etc/resolv.conf:/etc/resolv.conf:ro
       - /share/etc/cm-service.yaml:/etc/cm-service.yaml
       - /share/etc/cm-application.yaml:/etc/cm-application.yaml
       - database:/var/cache/monitoring
@@ -353,7 +346,6 @@ services:
       - memcached
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /share/etc/resolv.conf:/etc/resolv.conf:ro
       - /share/etc/cm-service.yaml:/etc/cm-service.yaml
       - /share/etc/cm-application.yaml:/etc/cm-application.yaml
       - database:/var/cache/monitoring
@@ -382,7 +374,6 @@ services:
       - memcached
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /share/etc/resolv.conf:/etc/resolv.conf:ro
       - /share/etc/cm-monitoring.yaml:/etc/cm-monitoring.yaml
       - /share/etc/cm-service.yaml:/etc/cm-service.yaml
       - /share/etc/cm-application.yaml:/etc/cm-application.yaml
@@ -410,14 +401,13 @@ services:
     links:
       - beanstalkd
       - memcached
-    extra_hosts:
+    #extra_hosts:
       # TODO
       # use dnsdock for DNS offloading
       # NOTE: external service
-      - 'nginx-proxy:192.168.252.5'
+      #- 'nginx-proxy:192.168.252.5'
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /share/etc/resolv.conf:/etc/resolv.conf:ro
       - /share/usr/local/share/templates:/usr/local/share/templates
       - database:/var/cache/monitoring
 
@@ -450,7 +440,6 @@ services:
       - 'nginx-proxy:192.168.252.5'
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /share/etc/resolv.conf:/etc/resolv.conf:ro
 
 
   # single service
@@ -474,5 +463,4 @@ services:
       - beanstalkd
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /share/etc/resolv.conf:/etc/resolv.conf:ro
 

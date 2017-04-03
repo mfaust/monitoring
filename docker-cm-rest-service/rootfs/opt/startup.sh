@@ -6,7 +6,9 @@ set -e
 
 addDNS() {
 
-  if [ ! -z "${BLUEPRINT_BOX}" ]
+  hosts=
+
+  if [ -n "${ADDITIONAL_DNS}" ]
   then
 
     while ! nc -z dnsdock 80
@@ -16,15 +18,39 @@ addDNS() {
     done
     echo " "
 
-    sleep 5s
+    sleep 2s
 
-    curl \
-      http://dnsdock/services/blueprint-box \
-      --silent \
-      --request PUT \
-      --data-ascii "{\"name\":\"blueprint-box\",\"image\":\"blueprint-box\",\"ips\":[${BLUEPRINT_BOX}],\"ttl\":0}"
+    hosts=$(echo ${ADDITIONAL_DNS} | sed -e 's/,/ /g' -e 's/\s+/\n/g' | uniq)
+  fi
+
+
+  if [ -z "${hosts}" ]
+  then
+    echo "no hosts for add to dns"
+  else
+
+    for h in ${hosts}
+    do
+      echo "${h}"
+
+      host=$(echo "${h}" | cut -d: -f1)
+      ip=$(echo "${h}" | cut -d: -f2)
+
+      [ -n "${host}" ]
+      [ -n "${ip}" ]
+
+      echo "add host '${host}' with ip '${ip}' to dns"
+
+      curl \
+        http://dnsdock/services/${host} \
+        --silent \
+        --request PUT \
+        --data-ascii "{\"name\":\"${host}\",\"image\":\"${host}\",\"ips\":[\"${ip}\"],\"ttl\":0}"
+
+    done
 
   fi
+
 }
 
 run() {

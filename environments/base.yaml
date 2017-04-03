@@ -23,7 +23,7 @@ services:
 
   grafana:
     environment:
-      ORGANISATION: Coremedia
+      ORGANISATION: CoreMedia
       DATABASE_TYPE: mysql
       MYSQL_HOST: database
       # MYSQL_PORT: 3306
@@ -85,12 +85,14 @@ services:
 
   cm-rest-service:
     environment:
-      BLUEPRINT_BOX: '192.168.252.100'
+#      BLUEPRINT_BOX: '192.168.252.100'
+      # ADDITIONAL_DNS: 'blueprint-box:192.168.252.100,nginx-proxy:192.168.252.5'
       ADDITIONAL_DNS: 'blueprint-box:192.168.252.100'
+      TZ: 'Europe/Berlin'
 
   cm-service-discovery:
     environment:
-      # JOLOKIA_HOST: jolokia
+      JOLOKIA_HOST: jolokia
       # JOLOKIA_PORT: 8080
       # JOLOKIA_PATH: /jolokia
       # JOLOKIA_AUTH_USER:
@@ -99,10 +101,11 @@ services:
       # MQ_PORT: 11300
       # MQ_QUEUE: mq-discover
       INTERVAL: 20
+      TZ: 'Europe/Berlin'
 
   cm-data-collector:
     environment:
-      # JOLOKIA_HOST: jolokia
+      JOLOKIA_HOST: jolokia
       # JOLOKIA_PORT: 8080
       # JOLOKIA_PATH: /jolokia
       # JOLOKIA_AUTH_USER:
@@ -115,6 +118,7 @@ services:
       # OBSOLETE
       # SCAN_DISCOVERY: "10m"
       INTERVAL: 20
+      TZ: 'Europe/Berlin'
 
   cm-carbon-client:
     environment:
@@ -124,6 +128,7 @@ services:
       MEMCACHE_HOST: memcached
       # MEMCACHE_PORT: 11211
       # INTERVAL: 20
+      TZ: 'Europe/Berlin'
 
   cm-grafana-client:
     environment:
@@ -138,7 +143,8 @@ services:
       MQ_HOST: beanstalkd
       # MQ_PORT: 11300
       # MQ_QUEUE: mq-grafana
-      ADDITIONAL_DNS: 'nginx-proxy:192.168.252.5'
+      # Not needed: ADDITIONAL_DNS: 'nginx-proxy:192.168.252.5'
+      TZ: 'Europe/Berlin'
 
   cm-graphite-client:
     environment:
@@ -149,6 +155,7 @@ services:
       MQ_HOST: beanstalkd
       # MQ_PORT: 11300
       # MQ_QUEUE: mq-graphite
+      TZ: 'Europe/Berlin'
 
   cm-icinga-client:
     environment:
@@ -161,4 +168,4 @@ services:
       MQ_HOST: beanstalkd
       # MQ_PORT: 11300
       # MQ_QUEUE: mq-icinga
-
+      TZ: 'Europe/Berlin'
