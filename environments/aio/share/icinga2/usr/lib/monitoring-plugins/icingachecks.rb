@@ -49,7 +49,7 @@ class Icinga2Check
   def initialize( settings = {} )
 
     memcacheHost = ENV['MEMCACHE_HOST'] ? ENV['MEMCACHE_HOST'] : nil
-    memcachePort = ENV['MEMCACHE_PORT'] ? ENV['MEMCACHE_PORT'] : nil
+    memcachePort = ENV['MEMCACHE_PORT'] ? ENV['MEMCACHE_PORT'] : 11211
 
     logger.level = Logger::DEBUG
 

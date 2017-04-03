@@ -18,7 +18,7 @@ require_relative '../lib/carbon-writer'
 
 memcacheHost = ENV.fetch( 'MEMCACHE_HOST'    , 'localhost' )
 memcachePort = ENV.fetch( 'MEMCACHE_PORT'    , 11211 )
-interval     = ENV.fetch( 'COLLECTD_INTERVAL', 15 )
+interval     = ENV.fetch( 'INTERVAL'         , 20 )
 carbonHost   = ENV.fetch( 'GRAPHITE_HOST'    , 'carbon' )
 carbonPort   = ENV.fetch( 'GRAPHITE_PORT'    , 2003 )
 
