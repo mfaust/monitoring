@@ -1,0 +1,112 @@
+---
+
+# generelle konfiguration
+logDirectory: /var/log/monitoring
+cacheDirectory: /var/cache/monitoring
+
+mq:
+  host: beanstalkd
+
+monitoring-services:
+  - discovery: true
+  - grafana: true
+  - icinga2: true
+
+# fuer den rest-service
+rest-service:
+  port: 45678
+  bind: 0.0.0.0
+
+jolokia:
+  host: jolokia
+  port: 8080
+
+grafana:
+  host: nginx-proxy
+  port: 80
+  path: /grafana/
+  templateDirectory: /usr/local/share/templates/grafana
+
+# graphite ist hinter dem proxy erreichbar
+# nginx ist der hostname im docker-kontext
+# nginx-proxy ist der hostname im proxy-kontext
+graphite:
+  host: nginx-proxy
+  port: 2003
+  http-port: 80
+  fix-timezone: true
+  path: /graphite
+
+collectd-plugin:
+  interval: 15
+
+data-collector:
+  scan-discovery: 10m
+
+icinga:
+  host: icinga2-core
+  port: 5665
+  api:
+    user: root
+    pass: icinga
+
+
+external-discover:
+  backend:
+    host: localhost
+    port: 80
+    path: /
+  internal:
+    host: nginx
+    port: 80
+    path: /
+    version: 2
+
+
+service-checks:
+  http:
+  - proto: http
+    port:
+    vhost: overview.%HOST%
+    url:
+  - proto: https
+    port:
+    vhost: helios.%HOST%
+    url: /perfectchef
+  - proto: https
+    port:
+    vhost: helios.%HOST%
+    url: /perfectchef-de-de
+  - proto: https
+    port:
+    vhost: corporate.%HOST%
+    url: /perfectchef
+  - proto: https
+    port:
+    vhost: corporate.%HOST%
+    url: /perfectchef-de-de
+  - proto: https
+    port:
+    vhost: studio.%HOST%
+    url: /studio/
+  - proto: https
+    port:
+    vhost: preview-helios.%HOST%
+    url: /perfectchef
+  - proto: https
+    port:
+    vhost: preview-helios.%HOST%
+    url: /blueprint/servlet/perfectchef
+  - proto: https
+    port:
+    vhost: shop-helios.%HOST%
+    url: /webapp/wcs/stores/servlet/en/auroraesite
+  - proto: https
+    port:
+    vhost: shop-helios.%HOST%
+    url: /webapp/wcs/stores/servlet/en/aurorab2besite
+
+  ssl:
+  - vhost: studio.%HOST%
+
+
