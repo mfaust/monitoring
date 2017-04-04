@@ -8,6 +8,14 @@ volumes:
 
 services:
 
+  data:
+    build: ../../docker-cm-data
+    container_name: 01-data
+    depends_on:
+      - dnsdock
+    volumes:
+      - /share:/share
+
   dnsdock:
     restart: always
     image: bodsch/docker-dnsdock:1704-01
