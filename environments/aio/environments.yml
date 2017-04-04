@@ -1,4 +1,7 @@
 ---
+# environment variables for all services that need this
+# all commented out vars are set into the containers with the correct value
+# they are only examples an documentation
 
 version: '2.0'
 
@@ -85,13 +88,17 @@ services:
 
   cm-rest-service:
     environment:
-#      BLUEPRINT_BOX: '192.168.252.100'
+      TZ: 'Europe/Berlin'
+      # when we need an DNS entry for external services, we can use ADDITIONAL_DNS
+      # its an comma seperated list with following syntax:
+      # HOSTNAME:IP,HOSTNAME:IP, ...
+      # e.g.:
       # ADDITIONAL_DNS: 'blueprint-box:192.168.252.100,nginx-proxy:192.168.252.5'
       ADDITIONAL_DNS: 'blueprint-box:192.168.252.100'
-      TZ: 'Europe/Berlin'
 
   cm-service-discovery:
     environment:
+      TZ: 'Europe/Berlin'
       JOLOKIA_HOST: jolokia
       # JOLOKIA_PORT: 8080
       # JOLOKIA_PATH: /jolokia
@@ -101,10 +108,10 @@ services:
       # MQ_PORT: 11300
       # MQ_QUEUE: mq-discover
       INTERVAL: 20
-      TZ: 'Europe/Berlin'
 
   cm-data-collector:
     environment:
+      TZ: 'Europe/Berlin'
       JOLOKIA_HOST: jolokia
       # JOLOKIA_PORT: 8080
       # JOLOKIA_PATH: /jolokia
@@ -118,20 +125,20 @@ services:
       # OBSOLETE
       # SCAN_DISCOVERY: "10m"
       INTERVAL: 20
-      TZ: 'Europe/Berlin'
 
   cm-carbon-client:
     environment:
+      TZ: 'Europe/Berlin'
       # USE ONLY WITH carbon-c-relay !
       GRAPHITE_HOST: carbon
       # GRAPHITE_PORT: 2003
       MEMCACHE_HOST: memcached
       # MEMCACHE_PORT: 11211
       # INTERVAL: 20
-      TZ: 'Europe/Berlin'
 
   cm-grafana-client:
     environment:
+      TZ: 'Europe/Berlin'
       GRAFANA_HOST: nginx
       # GRAFANA_PORT: 80
       # GRAFANA_URL_PATH: /grafana
@@ -143,11 +150,15 @@ services:
       MQ_HOST: beanstalkd
       # MQ_PORT: 11300
       # MQ_QUEUE: mq-grafana
-      # Not needed: ADDITIONAL_DNS: 'nginx-proxy:192.168.252.5'
-      TZ: 'Europe/Berlin'
+      #
+      # when we need an DNS entry for external services, we can use ADDITIONAL_DNS
+      # in the cm-rest-service environment
+      # look above for more information!
+      # ADDITIONAL_DNS: 'nginx-proxy:192.168.252.5'
 
   cm-graphite-client:
     environment:
+      TZ: 'Europe/Berlin'
       GRAPHITE_HOST: nginx
       # GRAPHITE_PORT: 2003
       # GRAPHITE_HTTP_PORT: 80
@@ -155,10 +166,10 @@ services:
       MQ_HOST: beanstalkd
       # MQ_PORT: 11300
       # MQ_QUEUE: mq-graphite
-      TZ: 'Europe/Berlin'
 
   cm-icinga-client:
     environment:
+      TZ: 'Europe/Berlin'
       ICINGA_HOST: icinga2-master
       # ICINGA_API_PORT: 5665
       ICINGA_API_USER: root
@@ -168,4 +179,5 @@ services:
       MQ_HOST: beanstalkd
       # MQ_PORT: 11300
       # MQ_QUEUE: mq-icinga
-      TZ: 'Europe/Berlin'
+
+
