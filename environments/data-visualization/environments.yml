@@ -1,0 +1,88 @@
+---
+# environment variables for all services that need this
+# all commented out vars are set into the containers with the correct value
+# they are only examples an documentation
+
+version: '2.0'
+
+services:
+
+  database:
+    environment:
+      # MYSQL_SYSTEM_USER:
+      MYSQL_ROOT_PASS: database.pass
+
+  graphite:
+    environment:
+      # DATABASE_TYPE: sqlite
+      # MYSQL_HOST:
+      # MYSQL_PORT: 3306
+      # MYSQL_ROOT_USER: root
+      # MYSQL_ROOT_PASS:
+      MEMCACHE_HOST: memcached
+      # MEMCACHE_PORT: 11211
+      # DATABASE_GRAPHITE_PASS: graphite
+      USE_EXTERNAL_CARBON: 'true'
+
+  grafana:
+    environment:
+      ORGANISATION: CoreMedia
+      DATABASE_TYPE: mysql
+      MYSQL_HOST: database
+      # MYSQL_PORT: 3306
+      # MYSQL_ROOT_USER: root
+      MYSQL_ROOT_PASS: database.pass
+      GRAPHITE_HOST: graphite
+      # GRAPHITE_PORT: 2003
+      # GRAPHITE_HTTP_PORT: 8080
+      # we use an seperate carbon service
+      # IF NOT, then set then to $GRAPHITE_HOST
+      CARBON_HOST: carbon
+      # CARBON_PORT: 2003
+      MEMCACHE_HOST: memcached
+      # MEMCACHE_PORT: 11211
+      # DATABASE_GRAFANA_PASS: grafana
+
+  icinga2-master:
+    environment:
+      MYSQL_HOST: database
+      # MYSQL_PORT: 3306
+      # MYSQL_ROOT_USER: root
+      MYSQL_ROOT_PASS: database.pass
+      IDO_PASSWORD: ido.pass
+      IDO_DATABASE_NAME: icinga2core
+      # IDO_PASSWORD:
+      CARBON_HOST: carbon
+      # CARBON_PORT: 2003
+      # DASHING_API_USER: dashing
+      # DASHING_API_PASS: dashing.pass
+      ICINGA_CLUSTER: 'true'
+      ICINGA_MASTER: icinga2-master
+      ICINGA_CERT_SERVICE: false
+      ICINGA_CERT_SERVICE_BA_USER: admin
+      ICINGA_CERT_SERVICE_BA_PASSWORD: admin
+      ICINGA_CERT_SERVICE_API_USER: cert-service
+      ICINGA_CERT_SERVICE_API_PASSWORD: 47pswW14rzeV9MNFGruI
+      # ICINGA_CERT_SERVICE_SERVER: localhost
+      # ICINGA_CERT_SERVICE_PORT: 80
+      MEMCACHE_HOST: memcached
+      # MEMCACHE_PORT: 11211
+
+  icingaweb2:
+    environment:
+      MYSQL_HOST: database
+      # MYSQL_PORT: 3306
+      # MYSQL_ROOT_USER: root
+      MYSQL_ROOT_PASS: database.pass
+      # ICINGA2_HOST: icinga2-master
+      # ICINGA2_CMD_API_USER: command-api-user
+      # ICINGA2_CMD_API_PASS: command-api-pass
+      IDO_PASSWORD: ido.pass
+      IDO_DATABASE_NAME: icinga2core
+      # GRAPHITE_HOST:
+      # GRAPHITE_PORT:
+      # ICINGAWEB_ADMIN_USER: icinga
+      # ICINGAWEB_ADMIN_PASS: icinga
+      # LIVESTATUS_HOST:
+      # LIVESTATUS_PORT:
+
