@@ -89,6 +89,21 @@ services:
       mon:
         ipv4_address: 172.25.0.12
 
+  redis:
+    restart: always
+    image: bodsch/docker-redis:1704-01
+    container_name: redis
+    hostname: redis
+    labels:
+      com.dnsdock.image: "redis"
+      com.dnsdock.alias: "redis"
+      com.dnsdock.ttl: "0"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      mon:
+        ipv4_address: 172.25.0.13
+
   nginx:
     restart: always
     image: bodsch/docker-nginx:1702-02

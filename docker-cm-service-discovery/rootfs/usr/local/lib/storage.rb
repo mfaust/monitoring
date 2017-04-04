@@ -4,6 +4,7 @@ require 'rubygems'
 require 'json'
 require 'dalli'
 require 'sequel'
+require 'redis'
 require 'digest/md5'
 
 require_relative 'logging'
@@ -14,7 +15,443 @@ require_relative 'tools'
 module Storage
 
 
-  class File
+  class RedisClient
+
+    include Logging
+
+    OFFLINE  = 0
+    ONLINE   = 1
+    DELETE   = 98
+    PREPARE  = 99
+
+    def initialize( params = {} )
+
+      logger.debug( params )
+
+      @host   = params.dig(:redis, :host)
+      @port   = params.dig(:redis, :port)     || 6379
+      @db     = params.dig(:redis, :database) || 1
+
+#       self.prepare()
+    end
+
+    def prepare()
+
+      @redis = nil
+
+      begin
+        until( @redis != nil )
+
+          logger.debug( 'try ...' )
+
+          begin
+
+          @redis = Redis.new(
+            :host            => @host,
+            :port            => @port,
+            :db              => @db
+#            :connect_timeout => 1.0,
+#            :read_timeout    => 1.0,
+#            :write_timeout   => 0.5
+          )
+
+          rescue => e
+
+            logger.error( e )
+
+          end
+
+          sleep( 3 )
+        end
+      rescue => e
+        logger.error( e )
+      end
+
+
+    end
+
+
+    def checkDatabase()
+
+      if( @redis == nil )
+        self.prepare()
+
+        if( @redis == nil )
+          return false
+        end
+      end
+
+    end
+
+
+    def self.cacheKey( params = {} )
+
+      params   = Hash[params.sort]
+      checksum = Digest::MD5.hexdigest( params.to_s )
+
+      return checksum
+
+    end
+
+
+    def createConfig( params = {} )
+
+      if( self.checkDatabase() == false )
+        return false
+      end
+
+#       logger.debug( 'createConfig' )
+#       logger.debug( params )
+
+      dnsIp        = params[ :ip ]       ? params[ :ip ]       : nil
+      dnsShortname = params[ :short ]    ? params[ :short ]    : nil
+      dnsChecksum  = params[ :checksum ] ? params[ :checksum ] : nil
+      configKey    = params[ :key ]      ? params[ :key ]      : nil
+      configValues = params[ :value ]    ? params[ :value ]    : nil
+      data         = params[ :data ]     ? params[ :data ]     : nil
+
+#       logger.debug( data.class.to_s )
+
+      if( ( configKey == nil && configValues == nil ) && data.is_a?( Hash ) )
+
+        data.each do |k,v|
+
+          self.writeConfig( { :ip => dnsIp, :short => dnsShortname, :checksum => dnsChecksum, :data => data } )
+          self.writeConfig( { :ip => dnsIp, :short => dnsShortname, :checksum => dnsChecksum, :key => k.to_s, :value => v } )
+        end
+      else
+
+        self.writeConfig( params )
+      end
+
+    end
+
+
+    def writeConfig( params = {} )
+
+      if( self.checkDatabase() == false )
+        return false
+      end
+
+#       logger.debug( 'writeConfig' )
+#       logger.debug( params )
+
+      dnsIp        = params.dig(:ip)
+      dnsShortname = params.dig(:short)
+      dnsChecksum  = params.dig(:checksum)
+      data         = params.dig(:data)
+#      configKey    = params.dig(:key)
+#      configValues = params.dig(:value)
+
+      if( dnsIp == nil && dnsShortname == nil )
+
+        return false
+
+      else
+
+        cachekey = sprintf(
+          '%s-config',
+          Storage::RedisClient.cacheKey( { :ip => dnsIp, :shortname => dnsShortname } )
+        )
+
+#         logger.debug( { :ip => dnsIp, :shortname => dnsShortname, :key => configKey } )
+#         logger.debug( cachekey )
+
+        @redis.set( cachekey, {
+          :ip        => dnsIp.to_s,
+          :shortname => dnsShortname.to_s,
+          :data      => data.to_json,
+          :created   => DateTime.now()
+        } )
+
+      end
+
+    end
+
+
+    def removeConfig( params = {} )
+
+      if( self.checkDatabase() == false )
+        return false
+      end
+
+      dnsIp        = params.dig(:ip)
+      dnsShortname = params.dig(:short)
+      configKey    = params.dig(:key)
+
+      cachekey = sprintf(
+        '%s-config',
+        Storage::RedisClient.cacheKey( { :ip => dnsIp, :shortname => dnsShortname } )
+      )
+
+      @redis.del( cachekey )
+
+    end
+
+
+    def config( params = {} )
+
+      if( self.checkDatabase() == false )
+        return false
+      end
+
+#       logger.debug( 'config' )
+#       logger.debug( params )
+
+      dnsIp        = params.dig(:ip)
+      dnsShortname = params.dig(:short)
+      configKey    = params.dig(:key)
+
+      cachekey = sprintf(
+        '%s-config',
+        Storage::RedisClient.cacheKey( { :ip => dnsIp, :shortname => dnsShortname } )
+      )
+
+#       logger.debug( { :ip => dnsIp, :shortname => dnsShortname, :key => configKey } )
+#       logger.debug( cachekey )
+
+      result = @redis.get( cachekey )
+
+      return result
+
+    end
+
+
+
+    def createDNS( params = {} )
+
+      if( self.checkDatabase() == false )
+        return false
+      end
+
+      ip      = params.dig(:ip)
+      short   = params.dig(:short)
+      long    = params.dig(:long)
+
+      cachekey = sprintf(
+        '%s-dns',
+        Storage::RedisClient.cacheKey( { :ip => ip, :short => short } )
+      )
+
+      @redis.set( cachekey, {
+        :ip        => ip.to_s,
+        :shortname => short.to_s,
+        :longname  => long.to_s,
+        :checksum  => Digest::MD5.hexdigest( [ ip, short, long ].join ),
+        :created   => DateTime.now()
+      } )
+
+      self.setStatus( { :ip => ip, :short => short, :status => 99 } )
+
+    end
+
+
+    def removeDNS( params = {} )
+
+      if( self.checkDatabase() == false )
+        return false
+      end
+
+      ip      = params.dig(:ip)
+      short   = params.dig(:short)
+      long    = params.dig(:long)
+
+      cachekey = Storage::RedisClient.cacheKey( { :ip => ip, :short => short } )
+
+      self.setStatus( { :ip => ip, :short => short, :status => 99 } )
+
+      @redis.del( sprintf( '%s-measurements', cachekey ) )
+      @redis.del( sprintf( '%s-discovery'   , cachekey ) )
+      @redis.del( sprintf( '%s-status'      , cachekey ) )
+      @redis.del( sprintf( '%s-dns'         , cachekey ) )
+      @redis.del( cachekey )
+
+    end
+
+
+    def dnsData( params = {}  )
+
+      if( self.checkDatabase() == false )
+        return false
+      end
+
+      ip      = params.dig(:ip)
+      short   = params.dig(:short)
+      long    = params.dig(:long)
+
+      cachekey = sprintf(
+        '%s-dns',
+        Storage::RedisClient.cacheKey( { :ip => ip, :short => short } )
+      )
+
+      result = @redis.get( cachekey )
+
+      return result
+
+    end
+
+
+
+    def createDiscovery( params = {} )
+
+      if( self.checkDatabase() == false )
+        return false
+      end
+
+      logger.debug( 'createDiscovery()' )
+
+      dnsId        = params.dig(:id)
+      dnsIp        = params.dig(:ip)
+      dnsShortname = params.dig(:short)
+      dnsChecksum  = params.dig(:checksum)
+      port         = params.dig(:port)
+      service      = params.dig(:service)
+      data         = params.dig(:data)
+
+      if( service == nil && data.is_a?( Hash ) )
+
+        logger.debug( data )
+
+        data.each do |k,v|
+
+          p = v.dig( 'port' )
+
+          logger.debug( sprintf( '%s - %s - %s', dnsShortname, p, k ) )
+
+#          self.writeDiscovery( { :id => dnsId, :ip => dnsIp, :short => dnsShortname, :checksum => dnsChecksum, :port => p, :service => k, :data => v } )
+          self.writeDiscovery( { :ip => dnsIp, :short => dnsShortname, :checksum => dnsChecksum, :port => p, :service => k, :data => v } )
+
+        end
+
+      else
+
+        self.writeDiscovery( params )
+      end
+
+    end
+
+
+    def writeDiscovery( params = {} )
+
+      if( self.checkDatabase() == false )
+        return false
+      end
+
+      dnsIp        = params.dig(:ip)
+      dnsShortname = params.dig(:short)
+      dnsChecksum  = params.dig(:checksum)
+      port         = params.dig(:port)
+      service      = params.dig(:service)
+      data         = params.dig(:data)
+
+      cachekey = sprintf(
+        '%s-discovery',
+        Storage::RedisClient.cacheKey( { :ip => dnsIp, :shortname => dnsShortname } )
+      )
+
+      @redis.set( cachekey, {
+        :ip        => dnsIp.to_s,
+        :shortname => dnsShortname.to_s,
+        :port      => port.to_i,
+        :service   => service,
+        :data      => data.to_s,
+        :created   => DateTime.now()
+      } )
+
+    end
+
+
+    def discoveryData( params = {} )
+
+      if( self.checkDatabase() == false )
+        return false
+      end
+
+      ip      = params.dig(:ip)
+      short   = params.dig(:short)
+      service = params.dig(:service)
+
+      logger.debug( params )
+
+      cachekey = sprintf(
+        '%s-discovery',
+        Storage::RedisClient.cacheKey( { :ip => dnsIp, :shortname => dnsShortname } )
+      )
+
+      array     = Array.new()
+      result    = Hash.new()
+
+      if( ( ip != nil || short != nil ) )
+
+        if( ip != nil )
+          host = ip
+        end
+        if( short != nil )
+          host = short
+        end
+      else
+        host = nil
+      end
+
+      if( service == nil && host == nil )
+
+        logger.error( '( service == nil && host == nil )' )
+
+      #  { :short => 'monitoring-16-01', :service => 'replication-live-server' }
+      elsif( service != nil && host == nil )
+
+        logger.debug( '( service != nil && host == nil )' )
+
+
+      # { :short => 'monitoring-16-01' }
+      # { :ip => '10.2.14.156' }
+      elsif( service == nil && host != nil )
+
+        logger.debug( '( service == nil && host != nil )' )
+
+
+
+      elsif( service != nil && host != nil )
+
+        logger.debug( '( service != nil && host != nil )' )
+
+
+      end
+
+      return nil
+
+    end
+
+    def createMeasurements( params = {} )
+
+    end
+
+    def measurements( params = {} )
+
+    end
+
+
+    def nodes( params = {} )
+
+    end
+
+    def setStatus( params = {} )
+      logger.debug( 'setStatus()' )
+    end
+
+    def status( params = {} )
+
+
+    end
+
+
+    def parsedResponse( r )
+
+      return JSON.parse( r )
+    rescue JSON::ParserError => e
+      return r # do smth
+
+    end
 
   end
 
@@ -181,12 +618,12 @@ module Storage
         return false
       end
 
-      dnsIp        = params[ :ip ]       ? params[ :ip ]       : nil
-      dnsShortname = params[ :short ]    ? params[ :short ]    : nil
-      dnsChecksum  = params[ :checksum ] ? params[ :checksum ] : nil
-      configKey    = params[ :key ]      ? params[ :key ]      : nil
-      configValues = params[ :value ]    ? params[ :value ]    : nil
-      data         = params[ :data ]     ? params[ :data ]     : nil
+      dnsIp        = params.dig(:ip)
+      dnsShortname = params.dig(:short)
+      dnsChecksum  = params.dig(:checksum)
+      configKey    = params.dig(:key)
+      configValues = params.dig(:value)
+      data         = params.dig(:data)
 
       if( ( configKey == nil && configValues == nil ) && data.is_a?( Hash ) )
 
@@ -208,11 +645,13 @@ module Storage
         return false
       end
 
-      dnsIp        = params[ :ip ]       ? params[ :ip ]       : nil
-      dnsShortname = params[ :short ]    ? params[ :short ]    : nil
-      dnsChecksum  = params[ :checksum ] ? params[ :checksum ] : nil
-      configKey    = params[ :key ]      ? params[ :key ]      : nil
-      configValues = params[ :value ]    ? params[ :value ]    : nil
+      logger.debug( params )
+
+      dnsIp        = params.dig(:ip)
+      dnsShortname = params.dig(:short)
+      dnsChecksum  = params.dig(:checksum)
+      configKey    = params.dig(:key)
+      configValues = params.dig(:value)
 
       if( dnsIp == nil && dnsShortname == nil )
 
