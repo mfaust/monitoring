@@ -102,6 +102,7 @@ module ServiceDiscovery
     logger.info( '  Copyright 2016-2017 Coremedia' )
     logger.info( '  used Services:' )
     logger.info( "    - jolokia      : #{jolokiaHost}:#{jolokiaPort}" )
+    logger.info( "    - redis        : #{redisHost}:#{redisPort}" )
     logger.info( "    - message queue: #{mqHost}:#{mqPort}/#{@mqQueue}" )
     logger.info( '-----------------------------------------------------------------' )
     logger.info( '' )
@@ -317,8 +318,10 @@ module ServiceDiscovery
     dns      = @db.dnsData( { :ip => ip, :short => shortHostName } )
 
     if( dns == nil )
-      logger.debug( 'no data for ' + shortHostName )
+
+      logger.debug( 'no DNS data for ' + shortHostName )
     else
+
       dnsId        = dns[ :id ]
       dnsIp        = dns[ :ip ]
       dnsShortname = dns[ :shortname ]
@@ -327,10 +330,7 @@ module ServiceDiscovery
       dnsChecksum  = dns[ :checksum ]
 
       @redis.createDiscovery( {
-        :id       => dnsId,
-        :ip       => dnsIp,
         :short    => dnsShortname,
-        :checksum => dnsChecksum,
         :data     => services
       } )
 
