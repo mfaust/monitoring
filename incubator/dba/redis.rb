@@ -34,6 +34,11 @@ r.createConfig( config )
 puts r.dnsData( dns )
 puts r.config( { :ip => ip, :short => short, :key => 'ports' } )
 
-puts r.discoveryData( { :ip => ip, :short => short } )
+r.removeConfig( { :short => short, :key => 'ports' }  )
+puts r.config( { :ip => ip, :short => short, :key => 'ports' } )
+
+
+
+# puts r.discoveryData( { :ip => ip, :short => short } )
 # -----------------------------------------------------------------------------
 
