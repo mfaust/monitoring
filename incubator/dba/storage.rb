@@ -10,6 +10,52 @@ require 'digest/md5'
 require_relative 'logging'
 require_relative 'tools'
 
+
+
+
+# -----------------------------------------------------------------------------
+# Monkey patches
+
+# Modify `Object` (https://gist.github.com/Integralist/9503099)
+
+# None of the above solutions work with a multi-level hash
+# They only work on the first level: {:foo=>"bar", :level1=>{"level2"=>"baz"}}
+# The following two variations solve the problem in the same way
+# transform hash keys to symbols
+# multi_hash = { 'foo' => 'bar', 'level1' => { 'level2' => 'baz' } }
+# multi_hash = multi_hash.deep_string_keys
+
+class Object
+
+  def deep_symbolize_keys
+
+    if( self.is_a?( Hash ) )
+      return self.inject({}) do |memo, (k, v)|
+        memo.tap { |m| m[k.to_sym] = v.deep_string_keys }
+      end
+    elsif( self.is_a?( Array ) )
+      return self.map { |memo| memo.deep_string_keys }
+    end
+
+    self
+  end
+
+  def deep_string_keys
+
+    if( self.is_a?( Hash ) )
+      return self.inject({}) do |memo, (k, v)|
+        memo.tap { |m| m[k.to_s] = v.deep_string_keys }
+      end
+    elsif( self.is_a?( Array ) )
+      return self.map { |memo| memo.deep_string_keys }
+    end
+
+    self
+  end
+
+
+end
+
 # -----------------------------------------------------------------------------
 
 module Storage
@@ -53,7 +99,7 @@ module Storage
             :write_timeout   => 0.5
           )
 
-          sleep( 3 )
+#           sleep( 1 )
         end
       rescue => e
         logger.error( e )
@@ -103,12 +149,9 @@ module Storage
         Storage::RedisClient.cacheKey( { :short => short } )
       )
 
-      @redis.set( cachekey, {
-        :ip        => ip.to_s,
-        :shortname => short.to_s,
-        :longname  => long.to_s,
-        :created   => DateTime.now()
-      } )
+      toStore = { ip: ip, shortname: short, longname: long, created: DateTime.now() }.to_json
+
+      @redis.set( cachekey, toStore )
 
       self.setStatus( { :short => short, :status => 99 } )
 
@@ -159,10 +202,14 @@ module Storage
         return { :ip => nil, :shortname => nil, :longname => nil }
       end
 
+      if( result.is_a?( String ) )
+        result = JSON.parse( result )
+      end
+
       return {
-        :ip        => result.dig(:ip),
-        :shortname => result.dig(:shortname),
-        :longname  => result.dig(:longname)
+        :ip        => result.dig('ip'),
+        :shortname => result.dig('shortname'),
+        :longname  => result.dig('longname')
       }
     end
 
@@ -176,96 +223,53 @@ module Storage
         return false
       end
 
-#       logger.debug( 'createConfig' )
-#       logger.debug( params )
-
       dnsIp        = params.dig(:ip)
       dnsShortname = params.dig(:short)
-      configKey    = params.dig(:key)
-      configValues = params.dig(:value)
       data         = params.dig(:data)
-
-      logger.debug( data.class.to_s )
-
-      if( ( configKey == nil && configValues == nil ) && !data.is_a?( Hash ) )
-
-        data = {
-          :key   => configKey,
-          :value => configValues
-        }
-
-      end
 
       cachekey = sprintf(
         '%s-config',
         Storage::RedisClient.cacheKey( { :shortname => dnsShortname } )
       )
 
-      # TODO
-      # needs more tests
-      #
       if( append == true )
 
         existingData = @redis.get( cachekey )
 
-        data << existingData
+        if( existingData != nil )
 
-        data = data.reduce( :merge )
+          if( existingData.is_a?( String ) )
+            existingData = JSON.parse( existingData )
+          end
+
+          dataOrg = existingData.dig('data')
+
+          if( dataOrg.is_a?( Array ) )
+
+            # transform a Array to Hash
+            dataOrg = Hash[*dataOrg]
+
+          end
+
+          data = dataOrg.merge( data )
+
+          # transform hash keys to symbols
+
+          data = data.deep_string_keys
+
+#          data = data.reduce({}) do |memo, (k, v)|
+#            memo.merge({ k.to_sym => v})
+#          end
+
+        end
 
       end
 
-      logger.debug( data )
+      toStore = { ip: dnsIp, shortname: dnsShortname, data: data, created: DateTime.now() }.to_json
 
-      @redis.set( cachekey, {
-        :ip        => dnsIp.to_s,
-        :shortname => dnsShortname.to_s,
-        :data      => data,
-        :created   => DateTime.now()
-      } )
+      @redis.set( cachekey, toStore )
 
     end
-
-
-#     def writeConfig( params = {} )
-#
-#       if( self.checkDatabase() == false )
-#         return false
-#       end
-#
-# #       logger.debug( 'writeConfig' )
-# #       logger.debug( params )
-#
-#       dnsIp        = params.dig(:ip)
-#       dnsShortname = params.dig(:short)
-#       dnsChecksum  = params.dig(:checksum)
-#       configKey    = params.dig(:key)
-#       configValues = params.dig(:value)
-#
-#       if( dnsIp == nil && dnsShortname == nil )
-#
-#         return false
-#
-#       else
-#
-#         cachekey = sprintf(
-#           '%s-config',
-#           Storage::RedisClient.cacheKey( { :ip => dnsIp, :shortname => dnsShortname, :key => configKey } )
-#         )
-#
-# #         logger.debug( { :ip => dnsIp, :shortname => dnsShortname, :key => configKey } )
-# #         logger.debug( cachekey )
-#
-#         @redis.set( cachekey, {
-#           :ip        => dnsIp.to_s,
-#           :shortname => dnsShortname.to_s,
-#           :key       => configKey.to_s,
-#           :value     => configValues.to_s,
-#           :created   => DateTime.now()
-#         } )
-#
-#       end
-#
-#     end
 
 
     def removeConfig( params = {} )
@@ -288,11 +292,13 @@ module Storage
 
         existingData = @redis.get( cachekey )
 
-        logger.debug( existingData )
+        if( existingData.is_a?( String ) )
+          existingData = JSON.parse( existingData )
+        end
 
-        existingData = existingData.delete!( configKey.to_symbol )
+        data = existingData.dig('data').tap { |hs| hs.delete(configKey) }
 
-        logger.debug( existingData )
+        existingData['data'] = data
 
         self.createConfig( { :short => dnsShortname, :data => existingData } )
 
@@ -311,9 +317,6 @@ module Storage
         return false
       end
 
-#       logger.debug( 'config' )
-      logger.debug( params )
-
       dnsIp        = params.dig(:ip)
       dnsShortname = params.dig(:short)
       configKey    = params.dig(:key)
@@ -325,18 +328,28 @@ module Storage
 
       result = @redis.get( cachekey )
 
-      logger.debug( result )
+      if( result == nil )
+        return { :shortname => nil }
+      end
+
+      if( result.is_a?( String ) )
+        result = JSON.parse( result )
+      end
+
 
       if( configKey != nil )
 
-        result = result.dig( configKey.to_symbol )
+        logger.debug( result )
+        logger.debug( "data #{result.dig( 'data' )}" )
+
+        result = {
+          configKey.to_sym => result.dig( :data, configKey.to_sym )
+        }
+      else
+
+        result = result.dig( 'data' ).deep_string_keys
 
       end
-
-#       logger.debug( { :ip => dnsIp, :shortname => dnsShortname, :key => configKey } )
-      logger.debug( result )
-
-
 
       return result
 
@@ -344,40 +357,7 @@ module Storage
 
 
 
-    def createDiscovery( params = {} )
-
-      if( self.checkDatabase() == false )
-        return false
-      end
-
-      dnsId        = params.dig(:id)
-      dnsIp        = params.dig(:ip)
-      dnsShortname = params.dig(:short)
-      dnsChecksum  = params.dig(:checksum)
-      port         = params.dig(:port)
-      service      = params.dig(:service)
-      data         = params.dig(:data)
-
-      if( service == nil && data.is_a?( Hash ) )
-
-        data.each do |k,v|
-
-          p = v.dig( 'port' )
-          logger.debug( sprintf( '%s - %s - %s', dnsShortname, p, k ) )
-
-          self.writeDiscovery( { :id => dnsId, :ip => dnsIp, :short => dnsShortname, :checksum => dnsChecksum, :port => p, :service => k, :data => v } )
-
-        end
-
-      else
-
-        self.writeDiscovery( params )
-      end
-
-    end
-
-
-    def writeDiscovery( params = {} )
+    def createDiscovery( params = {}, append = false )
 
       if( self.checkDatabase() == false )
         return false
@@ -385,24 +365,44 @@ module Storage
 
       dnsIp        = params.dig(:ip)
       dnsShortname = params.dig(:short)
-      dnsChecksum  = params.dig(:checksum)
-      port         = params.dig(:port)
-      service      = params.dig(:service)
       data         = params.dig(:data)
 
       cachekey = sprintf(
         '%s-discovery',
-        Storage::RedisClient.cacheKey( { :ip => dnsIp, :shortname => dnsShortname } )
+        Storage::RedisClient.cacheKey( { :shortname => dnsShortname } )
       )
 
-      @redis.set( cachekey, {
-        :ip        => dnsIp.to_s,
-        :shortname => dnsShortname.to_s,
-        :port      => port.to_i,
-        :service   => service,
-        :data      => data.to_s,
-        :created   => DateTime.now()
-      } )
+      if( append == true )
+
+        existingData = @redis.get( cachekey )
+
+        if( existingData != nil )
+
+          if( existingData.is_a?( String ) )
+            existingData = JSON.parse( existingData )
+          end
+
+          dataOrg = existingData.dig('data')
+
+          if( dataOrg.is_a?( Array ) )
+
+            # transform a Array to Hash
+            dataOrg = Hash[*dataOrg]
+
+          end
+
+          data = dataOrg.merge( data )
+
+          # transform hash keys to symbols
+          data = data.deep_string_keys
+
+        end
+
+      end
+
+      toStore = { ip: dnsIp, shortname: dnsShortname, data: data, created: DateTime.now() }.to_json
+
+      @redis.set( cachekey, toStore )
 
     end
 
@@ -419,50 +419,26 @@ module Storage
 
       cachekey = sprintf(
         '%s-discovery',
-        Storage::RedisClient.cacheKey( { :ip => dnsIp, :shortname => dnsShortname } )
+        Storage::RedisClient.cacheKey( { :shortname => short } )
       )
 
-      array     = Array.new()
-      result    = Hash.new()
+      result = @redis.get( cachekey )
 
-      if( ( ip != nil || short != nil ) )
+      if( result == nil )
+        return { :shortname => nil }
+      end
 
-        if( ip != nil )
-          host = ip
-        end
-        if( short != nil )
-          host = short
-        end
+      if( result.is_a?( String ) )
+        result = JSON.parse( result )
+      end
+
+      if( service != nil )
+        result = { service.to_sym => result.dig( 'data', service ) }
       else
-        host = nil
+        result = result.dig( 'data' )
       end
 
-      if( service == nil && host == nil )
-
-        logger.error( '( service == nil && host == nil )' )
-
-      #  { :short => 'monitoring-16-01', :service => 'replication-live-server' }
-      elsif( service != nil && host == nil )
-
-        logger.debug( '( service != nil && host == nil )' )
-
-
-      # { :short => 'monitoring-16-01' }
-      # { :ip => '10.2.14.156' }
-      elsif( service == nil && host != nil )
-
-        logger.debug( '( service == nil && host != nil )' )
-
-
-
-      elsif( service != nil && host != nil )
-
-        logger.debug( '( service != nil && host != nil )' )
-
-
-      end
-
-      return nil
+      return result.deep_string_keys
 
     end
 
@@ -470,9 +446,66 @@ module Storage
 
     def createMeasurements( params = {} )
 
+      if( self.checkDatabase() == false )
+        return false
+      end
+
+      dnsIp        = params.dig(:ip)
+      dnsShortname = params.dig(:short)
+      data         = params.dig(:data)
+
+      cachekey = sprintf(
+        '%s-measurements',
+        Storage::RedisClient.cacheKey( { :short => dnsShortname } )
+      )
+
+      toStore = { shortname: dnsShortname, data: data, created: DateTime.now() }.to_json
+
+      @redis.set( cachekey, toStore )
+
     end
 
     def measurements( params = {} )
+
+      if( self.checkDatabase() == false )
+        return false
+      end
+
+      dnsIp        = params.dig(:ip)
+      dnsShortname = params.dig(:short)
+      application  = params.dig(:application)
+
+      cachekey = sprintf(
+        '%s-measurements',
+        Storage::RedisClient.cacheKey( { :short => dnsShortname } )
+      )
+
+      result = @redis.get( cachekey )
+
+      logger.debug( result )
+
+      if( result == nil )
+        return { :short => nil }
+      end
+
+      if( result.is_a?( String ) )
+        result = JSON.parse( result )
+      end
+
+      if( application != nil )
+
+        a = result.dig( 'data', application )
+
+        logger.debug( a )
+
+        result = { application => result.dig( 'data', application ) }
+      else
+        result = result.dig( 'data' )
+      end
+
+      result = result.dig( 'data' ).deep_string_keys
+
+      return result
 
     end
 

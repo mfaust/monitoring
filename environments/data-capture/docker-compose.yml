@@ -98,6 +98,8 @@ services:
       com.dnsdock.image: "redis"
       com.dnsdock.alias: "redis"
       com.dnsdock.ttl: "0"
+    ports:
+      - 6379:6379
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:
