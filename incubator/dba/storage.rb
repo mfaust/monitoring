@@ -7,58 +7,13 @@ require 'sequel'
 require 'redis'
 require 'digest/md5'
 
+require_relative 'monkey'
 require_relative 'logging'
 require_relative 'tools'
-
-
-
-
-# -----------------------------------------------------------------------------
-# Monkey patches
-
-# Modify `Object` (https://gist.github.com/Integralist/9503099)
-
-# None of the above solutions work with a multi-level hash
-# They only work on the first level: {:foo=>"bar", :level1=>{"level2"=>"baz"}}
-# The following two variations solve the problem in the same way
-# transform hash keys to symbols
-# multi_hash = { 'foo' => 'bar', 'level1' => { 'level2' => 'baz' } }
-# multi_hash = multi_hash.deep_string_keys
-
-class Object
-
-  def deep_symbolize_keys
-
-    if( self.is_a?( Hash ) )
-      return self.inject({}) do |memo, (k, v)|
-        memo.tap { |m| m[k.to_sym] = v.deep_string_keys }
-      end
-    elsif( self.is_a?( Array ) )
-      return self.map { |memo| memo.deep_string_keys }
-    end
-
-    self
-  end
-
-  def deep_string_keys
-
-    if( self.is_a?( Hash ) )
-      return self.inject({}) do |memo, (k, v)|
-        memo.tap { |m| m[k.to_s] = v.deep_string_keys }
-      end
-    elsif( self.is_a?( Array ) )
-      return self.map { |memo| memo.deep_string_keys }
-    end
-
-    self
-  end
-
-end
 
 # -----------------------------------------------------------------------------
 
 module Storage
-
 
   class RedisClient
 
@@ -77,6 +32,7 @@ module Storage
 
       self.prepare()
     end
+
 
     def prepare()
 
@@ -127,8 +83,27 @@ module Storage
     end
 
 
+    def get( key )
+
+      return @redis.get( key )
+
+    end
 
 
+    def set( key, value )
+
+      return @redis.set( key, value )
+    end
+
+
+    def delete( key )
+
+      return @redis.delete( key )
+    end
+
+
+    # -- dns ------------------------------------
+    #
     def createDNS( params = {} )
 
       if( self.checkDatabase() == false )
@@ -208,10 +183,13 @@ module Storage
         :longname  => result.dig('longname')
       }
     end
+    #
+    # -- dns ------------------------------------
 
 
 
-
+    # -- configurations -------------------------
+    #
 
     def createConfig( params = {}, append = false )
 
@@ -347,9 +325,12 @@ module Storage
       return result
 
     end
+    #
+    # -- configurations -------------------------
 
 
-
+    # -- discovery ------------------------------
+    #
     def createDiscovery( params = {}, append = false )
 
       if( self.checkDatabase() == false )
@@ -435,9 +416,12 @@ module Storage
       return result.deep_string_keys
 
     end
+    #
+    # -- discovery ------------------------------
 
 
-
+    # -- measurements ---------------------------
+    #
     def createMeasurements( params = {} )
 
       if( self.checkDatabase() == false )
@@ -495,12 +479,12 @@ module Storage
       return result
 
     end
+    #
+    # -- measurements ---------------------------
 
 
-
-
-
-
+    # -- nodes ----------------------------------
+    #
     def addNode( params = {} )
 
       if( self.checkDatabase() == false )
@@ -647,9 +631,11 @@ module Storage
       end
 
     end
+    #
+    # -- nodes ----------------------------------
 
-
-    # status
+    # -- status ---------------------------------
+    #
     def setStatus( params = {} )
 
       if( self.checkDatabase() == false )
@@ -731,7 +717,8 @@ module Storage
         :created => created
       }
     end
-
+    #
+    # -- status ---------------------------------
 
     def parsedResponse( r )
 
