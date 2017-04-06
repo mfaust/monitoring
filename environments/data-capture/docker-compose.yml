@@ -102,6 +102,7 @@ services:
       - 6379:6379
     volumes:
       - /etc/localtime:/etc/localtime:ro
+      - ./data/redis:/var/lib/redis
     networks:
       mon:
         ipv4_address: 172.25.0.13
