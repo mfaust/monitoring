@@ -28,7 +28,7 @@ mqQueue          = ENV.fetch('MQ_QUEUE'         , 'mq-collector' )
 memcacheHost     = ENV.fetch('MEMCACHE_HOST'    , 'localhost' )
 memcachePort     = ENV.fetch('MEMCACHE_PORT'    , 11211 )
 scanDiscovery    = ENV.fetch('SCAN_DISCOVERY'   , '10m' )
-interval         = ENV.fetch('INTERVAL'         , 15 )
+interval         = ENV.fetch('INTERVAL'         , 20 )
 
 config = {
   :jolokiaHost           => jolokiaHost,
