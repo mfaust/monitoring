@@ -465,6 +465,7 @@ module Storage
 
     end
 
+
     def measurements( params = {} )
 
       if( self.checkDatabase() == false )
@@ -514,12 +515,88 @@ module Storage
 
     end
 
+
+    # status
     def setStatus( params = {} )
-      logger.debug( 'setStatus()' )
+
+      if( self.checkDatabase() == false )
+        return false
+      end
+
+      short   = params.dig(:short)
+      status  = params.dig(:status) || 0
+
+      if( short == nil )
+        return {
+          :status  => 404,
+          :message => 'missing short hostname'
+        }
+      end
+
+      cachekey = sprintf(
+        '%s-dns',
+        Storage::RedisClient.cacheKey( { :shortname => dnsShortname } )
+      )
+
+      result = @redis.get( cachekey )
+
+      if( result == nil )
+        return {
+          :short => nil
+        }
+      end
+
+      if( result.is_a?( String ) )
+        result = JSON.parse( result )
+      end
+
+      logger.debug( result )
+
+      dataOrg = result.dig('data')
+
+      if( dataOrg.is_a?( Array ) )
+
+        # transform a Array to Hash
+        dataOrg = Hash[*dataOrg]
+
+        data = dataOrg.merge( data )
+      end
+
+
+      data = data.deep_string_keys
+
+      toStore = { short: short, data: data, created: DateTime.now() }.to_json
+
+      logger.debug( toStore )
+
+      @redis.set( cachekey, toStore )
+
     end
 
     def status( params = {} )
 
+      if( self.checkDatabase() == false )
+        return false
+      end
+
+      short   = params.dig(:short)
+      status  = params.dig(:status) || 0
+
+      if( short == nil )
+        return {
+          :status  => 404,
+          :message => 'missing short hostname'
+        }
+      end
+
+      cachekey = sprintf(
+        '%s-dns',
+        Storage::RedisClient.cacheKey( { :shortname => dnsShortname } )
+      )
+
+      result = @redis.get( cachekey )
+
+      logger.debug( result )
 
     end
 
