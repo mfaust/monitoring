@@ -27,6 +27,8 @@ d.createConfig( config )
 puts d.dnsData( dns )
 puts d.config( { :ip => ip, :key => 'ports' } )
 
+puts d.nodes( { :short => short } )
+puts d.nodes( { :status => 99 } )
 
 puts '============================================================'
 
@@ -34,7 +36,24 @@ r = Storage::RedisClient.new( { :redis => { :host => 'localhost' } } )
 
 puts 'dns: '
 # r.createDNS( dns )
+# r.createDNS( { :ip => '127.0.1.1', :short => "foo-bar", :long => "foo-bar.tld" } )
 puts r.dnsData( dns )
+
+# puts ''
+# puts 'status:'
+# puts '  - read'
+# puts r.status( { :short => short } )
+#
+# puts '  - set'
+# r.setStatus( { :short => short, :status => 1 } )
+# puts '  - get'
+# puts r.status( { :short => short } )
+
+
+# puts ''
+# puts 'nodes: '
+# puts r.nodes( { :short => short } )
+# puts r.nodes( { :status => 99 } )
 
 
 # puts ''
@@ -60,25 +79,21 @@ puts r.dnsData( dns )
 # puts r.config( { :short => short } )
 
 
-
 puts ''
 puts 'discovery:'
-
-#r.removeConfig( { :ip => ip, :short => short, :key => 'ports' } )
-# r.removeConfig( { :short => short, :key => 'ports' }  )
-
 puts '  - read'
 puts r.discoveryData( { :short => short } )
 puts JSON.pretty_generate( r.discoveryData( { :short => short, :service => 'cae-live-1' } ) )
 puts r.discoveryData( { :short => short } ).keys.sort
 
 
-
-puts ''
-puts 'measurements:'
-
-puts '  - read'
-puts r.measurements( { :short => short, :application => 'sitemanager' } )
+# puts ''
+# puts 'measurements:'
+# puts '  - read'
+# puts r.measurements( { :short => short } )
+# puts r.measurements( { :short => short, :application => 'cae-live-1' } )
+#
+#
 
 # -----------------------------------------------------------------------------
 

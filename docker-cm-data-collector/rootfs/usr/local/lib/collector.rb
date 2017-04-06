@@ -18,6 +18,7 @@ require 'time_difference'
 require 'rufus-scheduler'
 
 require_relative 'logging'
+require_relative 'monkey'
 require_relative 'jolokia'
 require_relative 'message-queue'
 require_relative 'storage'
@@ -132,27 +133,20 @@ module DataCollector
       dataForRedis = Array.new()
 
       data.each do |service,payload|
-
-          logger.debug( "service: #{service.to_s}" )
-          logger.debug( "payload: #{payload}" )
-
-          dataForRedis << { service.to_s => self.mergeData( service.to_s, tomcatApplication, payload ) }
-
+        dataForRedis << { service.to_s => self.mergeData( service.to_s, tomcatApplication, payload ) }
       end
 
-      # convert Array -> Hash *NARF*
-      # dataForRedis = dataForRedis.reduce( :merge )
+      dataForRedis = dataForRedis.deep_string_keys
 
-#       dataForRedis.compact!   # remove 'nil' from array
-#       dataForRedis.flatten!   # clean up and reduce depth
-
-      logger.debug( JSON.pretty_generate( dataForRedis ) )
+      # http://stackoverflow.com/questions/11856407/rails-mapping-array-of-hashes-onto-single-hash
+      # mapping array of hashes onto single hash
+      dataForRedis = dataForRedis.reduce( {} , :merge )
 
       @redis.createMeasurements( { :short => @host, :data => dataForRedis } )
 
-      logger.debug('')
-      logger.debug( ' == redis done ==' )
-      logger.debug('')
+#       logger.debug('')
+#       logger.debug( ' == redis done ==' )
+#       logger.debug('')
 
       # Database based
       #

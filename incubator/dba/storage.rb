@@ -53,7 +53,6 @@ class Object
     self
   end
 
-
 end
 
 # -----------------------------------------------------------------------------
@@ -72,13 +71,11 @@ module Storage
 
     def initialize( params = {} )
 
-      logger.debug( params )
-
       @host   = params.dig(:redis, :host)
       @port   = params.dig(:redis, :port)     || 6379
       @db     = params.dig(:redis, :database) || 1
 
-#       self.prepare()
+      self.prepare()
     end
 
     def prepare()
@@ -88,7 +85,7 @@ module Storage
       begin
         until( @redis != nil )
 
-          logger.debug( 'try ...' )
+#          logger.debug( 'try ...' )
 
           @redis = Redis.new(
             :host            => @host,
@@ -98,8 +95,6 @@ module Storage
             :read_timeout    => 1.0,
             :write_timeout   => 0.5
           )
-
-#           sleep( 1 )
         end
       rescue => e
         logger.error( e )
@@ -144,16 +139,15 @@ module Storage
       short   = params.dig(:short)
       long    = params.dig(:long)
 
-      cachekey = sprintf(
-        '%s-dns',
-        Storage::RedisClient.cacheKey( { :short => short } )
-      )
+      cachekey = Storage::RedisClient.cacheKey( { :short => short } )
 
       toStore = { ip: ip, shortname: short, longname: long, created: DateTime.now() }.to_json
 
-      @redis.set( cachekey, toStore )
+      @redis.set( sprintf( '%s-dns', cachekey ), toStore )
 
       self.setStatus( { :short => short, :status => 99 } )
+
+      self.addNode( { :short => short, :key => cachekey } )
 
     end
 
@@ -178,10 +172,12 @@ module Storage
       @redis.del( sprintf( '%s-dns'         , cachekey ) )
       @redis.del( cachekey )
 
+      self.removeNode( { :short => short, :key => cachekey } )
+
     end
 
 
-    def dnsData( params = {}  )
+    def dnsData( params = {} )
 
       if( self.checkDatabase() == false )
         return false
@@ -339,9 +335,6 @@ module Storage
 
       if( configKey != nil )
 
-        logger.debug( result )
-        logger.debug( "data #{result.dig( 'data' )}" )
-
         result = {
           configKey.to_sym => result.dig( :data, configKey.to_sym )
         }
@@ -369,7 +362,7 @@ module Storage
 
       cachekey = sprintf(
         '%s-discovery',
-        Storage::RedisClient.cacheKey( { :shortname => dnsShortname } )
+        Storage::RedisClient.cacheKey( { :short => dnsShortname } )
       )
 
       if( append == true )
@@ -400,7 +393,7 @@ module Storage
 
       end
 
-      toStore = { ip: dnsIp, shortname: dnsShortname, data: data, created: DateTime.now() }.to_json
+      toStore = { short: dnsShortname, data: data, created: DateTime.now() }.to_json
 
       @redis.set( cachekey, toStore )
 
@@ -413,19 +406,20 @@ module Storage
         return false
       end
 
-      ip      = params.dig(:ip)
       short   = params.dig(:short)
       service = params.dig(:service)
 
       cachekey = sprintf(
         '%s-discovery',
-        Storage::RedisClient.cacheKey( { :shortname => short } )
+        Storage::RedisClient.cacheKey( { :short => short } )
       )
 
       result = @redis.get( cachekey )
 
+      logger.debug( result )
+
       if( result == nil )
-        return { :shortname => nil }
+        return { :short => nil }
       end
 
       if( result.is_a?( String ) )
@@ -459,7 +453,7 @@ module Storage
         Storage::RedisClient.cacheKey( { :short => dnsShortname } )
       )
 
-      toStore = { shortname: dnsShortname, data: data, created: DateTime.now() }.to_json
+      toStore = { short: dnsShortname, data: data, created: DateTime.now() }.to_json
 
       @redis.set( cachekey, toStore )
 
@@ -483,8 +477,6 @@ module Storage
 
       result = @redis.get( cachekey )
 
-      logger.debug( result )
-
       if( result == nil )
         return { :short => nil }
       end
@@ -495,23 +487,164 @@ module Storage
 
       if( application != nil )
 
-        a = result.dig( 'data', application )
-
-        logger.debug( a )
-
         result = { application => result.dig( 'data', application ) }
       else
         result = result.dig( 'data' )
       end
-
-      result = result.dig( 'data' ).deep_string_keys
 
       return result
 
     end
 
 
+
+
+
+
+    def addNode( params = {} )
+
+      if( self.checkDatabase() == false )
+        return false
+      end
+
+      short  = params.dig(:short)
+      key    = params.dig(:key)
+
+
+      cachekey = 'nodes'
+
+      existingData = @redis.get( cachekey )
+
+      if( existingData != nil )
+
+        if( existingData.is_a?( String ) )
+          existingData = JSON.parse( existingData )
+        end
+
+        dataOrg = existingData.dig('data')
+
+        if( dataOrg == nil )
+
+          data = { key.to_s => short }
+
+        else
+
+          if( dataOrg.is_a?( Array ) )
+
+            # transform a Array to Hash
+            dataOrg = Hash[*dataOrg]
+          end
+
+          foundedKeys = dataOrg.keys
+
+          if( foundedKeys.include?( key.to_s ) == false )
+
+            data = dataOrg.merge( { key.to_s => short } )
+          else
+
+            # node already save -> GO OUT
+            return
+          end
+
+        end
+
+      else
+
+        data = { key.to_s => short }
+
+      end
+
+      # transform hash keys to symbols
+      data = data.deep_string_keys
+
+      toStore = { data: data }.to_json
+
+      @redis.set( cachekey, toStore )
+
+    end
+
+
+    def removeNode( params = {} )
+
+      if( self.checkDatabase() == false )
+        return false
+      end
+
+      short  = params.dig(:short)
+      key    = params.dig(:key)
+
+      cachekey = 'nodes'
+
+      # delete single config
+      if( configKey != nil )
+
+        existingData = @redis.get( cachekey )
+
+        if( existingData.is_a?( String ) )
+          existingData = JSON.parse( existingData )
+        end
+
+        data = existingData.dig('data').tap { |hs| hs.delete(key) }
+
+        existingData['data'] = data
+
+        self.createConfig( { :short => short, :data => existingData } )
+
+      else
+
+        # remove all data
+        @redis.del( cachekey )
+      end
+
+    end
+
+
     def nodes( params = {} )
+
+      if( self.checkDatabase() == false )
+        return false
+      end
+
+      short     = params.dig(:short)
+      status    = params.dig(:status)  # Database::ONLINE
+
+      cachekey  = 'nodes'
+
+      result    = @redis.get( cachekey )
+
+      if( result.is_a?( String ) )
+        result = JSON.parse( result )
+      end
+
+      if( short != nil )
+
+        result   = result.dig('data').values.select { |x| x == short }
+
+        return result.first.to_s
+
+      end
+
+      if( status != nil )
+
+        keys   = result.dig('data').values
+
+        result = Array.new()
+
+        keys.each do |k|
+
+          d = self.status( { :short => k } ).deep_string_keys
+
+          nodeStatus = d.dig('status') || 0
+
+          if( nodeStatus.to_i == status.to_i )
+
+            result << k.to_s
+          end
+        end
+
+        return result
+
+      end
 
     end
 
@@ -535,7 +668,7 @@ module Storage
 
       cachekey = sprintf(
         '%s-dns',
-        Storage::RedisClient.cacheKey( { :shortname => dnsShortname } )
+        Storage::RedisClient.cacheKey( { :short => short } )
       )
 
       result = @redis.get( cachekey )
@@ -550,28 +683,13 @@ module Storage
         result = JSON.parse( result )
       end
 
-      logger.debug( result )
+      result['status'] = status
+      result = result.to_json
 
-      dataOrg = result.dig('data')
-
-      if( dataOrg.is_a?( Array ) )
-
-        # transform a Array to Hash
-        dataOrg = Hash[*dataOrg]
-
-        data = dataOrg.merge( data )
-      end
-
-
-      data = data.deep_string_keys
-
-      toStore = { short: short, data: data, created: DateTime.now() }.to_json
-
-      logger.debug( toStore )
-
-      @redis.set( cachekey, toStore )
+      @redis.set( cachekey, result )
 
     end
+
 
     def status( params = {} )
 
@@ -591,13 +709,27 @@ module Storage
 
       cachekey = sprintf(
         '%s-dns',
-        Storage::RedisClient.cacheKey( { :shortname => dnsShortname } )
+        Storage::RedisClient.cacheKey( { :short => short } )
       )
 
       result = @redis.get( cachekey )
 
-      logger.debug( result )
+      if( result == nil )
+        return { :status  => 0, :created => nil }
+      end
 
+      if( result.is_a?( String ) )
+        result = JSON.parse( result )
+      end
+
+      status   = result.dig( 'status' ) || 0
+      created  = result.dig( 'created' )
+
+      return {
+        :short   => short,
+        :status  => status,
+        :created => created
+      }
     end
 
 
@@ -800,8 +932,6 @@ module Storage
       if( self.checkDatabase() == false )
         return false
       end
-
-      logger.debug( params )
 
       dnsIp        = params.dig(:ip)
       dnsShortname = params.dig(:short)
@@ -1124,7 +1254,6 @@ module Storage
         data.each do |k,v|
 
           p = v.dig( 'port' )
-#           logger.debug( sprintf( '%s - %s - %s', dnsShortname, p, k ) )
 
           self.writeDiscovery( { :id => dnsId, :ip => dnsIp, :short => dnsShortname, :checksum => dnsChecksum, :port => p, :service => k, :data => v } )
 
@@ -1222,7 +1351,6 @@ module Storage
       #  { :short => 'monitoring-16-01', :service => 'replication-live-server' }
       elsif( service != nil && host == nil )
 
-#         logger.debug( '( service != nil && host == nil )' )
         w = ( Sequel[:service => service.to_s] )
 
         rec = self.dbaData( w )
@@ -1282,13 +1410,10 @@ module Storage
 
         array = array.reduce( :merge )
 
-#         logger.debug( JSON.pretty_generate( array ) )
-
         return array
 
       elsif( service != nil && host != nil )
 
-#         logger.debug( '( service != nil && host != nil )' )
         w = (
           (Sequel[:ip => ip.to_s] ) |
           (Sequel[:shortname => short.to_s] )
@@ -1368,9 +1493,6 @@ module Storage
 
         dbaChecksum = rec.first[:checksum].to_s
 
-#         logger.debug( checksum )
-#         logger.debug( dbaChecksum )
-
         if( dbaChecksum != checksum )
 
           measurements.where(
@@ -1384,7 +1506,6 @@ module Storage
 
         elsif( dbaChecksum == checksum )
 
-#           logger.debug( 'identical data' )
           return
         else
           #
@@ -1448,8 +1569,6 @@ module Storage
       # { :ip => '10.2.14.156' }
       elsif( service == nil && host != nil )
 
-#         logger.debug( '( service == nil && host != nil )' )
-
         w = ( Sequel[:ip => ip.to_s] ) | ( Sequel[:shortname => short.to_s] )
 
         rec = self.dbaData( w )
@@ -1480,7 +1599,6 @@ module Storage
 
           array = array.reduce( :merge )
 
-#           logger.debug( JSON.pretty_generate( array ) )
         end
         return array
 
@@ -1658,7 +1776,6 @@ module Storage
 
       begin
         until( @mc != nil )
-#           logger.debug( 'try ...' )
           @mc = Dalli::Client.new( sprintf( '%s:%s', host, port ), memcacheOptions )
           sleep( 3 )
         end
@@ -1681,8 +1798,7 @@ module Storage
       result = {}
 
       if( @mc )
-#         logger.debug( @mc.stats( :items ) )
-#         sleep(4)
+
         result = @mc.get( key )
       end
 
