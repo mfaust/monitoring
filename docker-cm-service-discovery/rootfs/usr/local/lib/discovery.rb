@@ -81,6 +81,9 @@ module ServiceDiscovery
     mqPort             = settings.dig(:mqPort)      || 11300
     @mqQueue           = settings.dig(:mqQueue)     || 'mq-discover'
 
+    redisHost          = settings.dig(:redis, :host)
+    redisPort          = settings.dig(:redis, :port)
+
     @MQSettings = {
       :beanstalkHost  => mqHost,
       :beanstalkPort  => mqPort,
@@ -99,11 +102,13 @@ module ServiceDiscovery
     logger.info( '  Copyright 2016-2017 Coremedia' )
     logger.info( '  used Services:' )
     logger.info( "    - jolokia      : #{jolokiaHost}:#{jolokiaPort}" )
+    logger.info( "    - redis        : #{redisHost}:#{redisPort}" )
     logger.info( "    - message queue: #{mqHost}:#{mqPort}/#{@mqQueue}" )
     logger.info( '-----------------------------------------------------------------' )
     logger.info( '' )
 
     @db                 = Storage::Database.new()
+    @redis              = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
     @jolokia            = Jolokia::Client.new( { :host => jolokiaHost, :port => jolokiaPort, :path => jolokiaPath, :auth => { :user => jolokiaAuthUser, :pass => jolokiaAuthPass } } )
     @mqConsumer         = MessageQueue::Consumer.new( @MQSettings )
 
@@ -189,6 +194,8 @@ module ServiceDiscovery
     status  = 400
     message = 'Host not in Monitoring'
 
+    @redis.removeDNS( { :ip => host, :short => host, :long => host } )
+
     if( @db.removeDNS( { :ip => host, :short => host, :long => host } ) != nil )
 
       status  = 200
@@ -206,6 +213,8 @@ module ServiceDiscovery
   def addHost( host, options = {} )
 
     logger.info( sprintf( 'Adding host \'%s\'', host ) )
+
+    logger.debug( @redis.discoveryData( { :ip => host, :short => host, :long => host } ) )
 
     if( @db.discoveryData( { :ip => host, :short => host, :long => host } ) != nil )
 
@@ -231,6 +240,8 @@ module ServiceDiscovery
     # create DNS Information
     hostInfo      = hostResolve( host )
 
+    logger.debug( "hostResolve #{hostInfo}" )
+
     ip            = hostInfo.dig(:ip)
     shortHostName = hostInfo.dig(:short)
     longHostName  = hostInfo.dig(:long)
@@ -246,6 +257,14 @@ module ServiceDiscovery
         :message => 'Host not available'
       }
     end
+
+    @redis.createDNS( { :ip => ip, :short => shortHostName, :long => longHostName } )
+
+    ports    = @redis.config( { :ip => ip, :short => shortHostName, :long => longHostName, :key => "ports" } )
+    services = @redis.config( { :ip => ip, :short => shortHostName, :long => longHostName, :key => "services" } )
+
+    logger.debug( "redis  ports   : #{ports}" )
+    logger.debug( "redis  services: #{services}" )
 
     @db.createDNS( { :ip => ip, :short => shortHostName, :long => longHostName } )
 
@@ -294,17 +313,26 @@ module ServiceDiscovery
     # merge discovered services with cm-services.yaml
     services = self.createHostConfig( services )
 
-    dns      = @db.dnsData( { :short => shortHostName } )
+    logger.debug( @redis.dnsData( { :ip => ip, :short => shortHostName } ) )
+
+    dns      = @db.dnsData( { :ip => ip, :short => shortHostName } )
 
     if( dns == nil )
-      logger.debug( 'no data for ' + shortHostName )
+
+      logger.debug( 'no DNS data for ' + shortHostName )
     else
+
       dnsId        = dns[ :id ]
       dnsIp        = dns[ :ip ]
       dnsShortname = dns[ :shortname ]
       dnsLongname  = dns[ :longname ]
       dnsCreated   = dns[ :created ]
       dnsChecksum  = dns[ :checksum ]
+
+      @redis.createDiscovery( {
+        :short    => dnsShortname,
+        :data     => services
+      } )
 
       @db.createDiscovery( {
         :id       => dnsId,
@@ -362,6 +390,8 @@ module ServiceDiscovery
       logger.info( 'TODO - use Database insteed of File - ASAP' )
     else
 
+      logger.debug( @redis.discoveryData( { :ip => host, :short => host } ) )
+
       discoveryData  = @db.discoveryData( { :ip => host, :short => host } )
 
       if( discoveryData == nil )
@@ -383,6 +413,8 @@ module ServiceDiscovery
         services[s.first.to_sym] = s.last.dig(:data)
 
       end
+
+      logger.debug( @redis.status( { :ip => host, :short => host } ) )
 
       status         = @db.status( { :ip => host, :short => host } )
 

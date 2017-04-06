@@ -18,6 +18,7 @@ require 'time_difference'
 require 'rufus-scheduler'
 
 require_relative 'logging'
+require_relative 'monkey'
 require_relative 'jolokia'
 require_relative 'message-queue'
 require_relative 'storage'
@@ -77,10 +78,13 @@ module DataCollector
       serviceConfig      = settings[:serviceConfigFile]     ? settings[:serviceConfigFile]     : nil
 
       @host              = settings[:host]                  ? settings[:host]                  : nil
+      @redisHost         = settings.dig(:redis, :host)
+      @redisPort         = settings.dig(:redis, :port) || 6379
 
       @db                = Storage::Database.new()
 
-      @cfg = Config.new( settings )
+      @cfg                = Config.new( settings )
+      @redis              = Storage::RedisClient.new( { :redis => { :host => @redisHost } } )
 
     end
 
@@ -118,9 +122,38 @@ module DataCollector
       # Database
       tomcatApplication = Marshal.load( Marshal.dump( @cfg.jolokiaApplications ) )
 
+      # Redis based
+      data = @redis.discoveryData( { :short => @host } )
+
+      if( data == nil || data == false || data.count() == 0 )
+        logger.error( 'no discovery in database data found' )
+        return false
+      end
+
+      dataForRedis = Array.new()
+
+      data.each do |service,payload|
+        dataForRedis << { service.to_s => self.mergeData( service.to_s, tomcatApplication, payload ) }
+      end
+
+      dataForRedis = dataForRedis.deep_string_keys
+
+      # http://stackoverflow.com/questions/11856407/rails-mapping-array-of-hashes-onto-single-hash
+      # mapping array of hashes onto single hash
+      dataForRedis = dataForRedis.reduce( {} , :merge )
+
+      @redis.createMeasurements( { :short => @host, :data => dataForRedis } )
+
+#       logger.debug('')
+#       logger.debug( ' == redis done ==' )
+#       logger.debug('')
+
+      # Database based
+      #
       data = @db.discoveryData( { :ip => @host, :short => @host } )
 
-      if( data == nil )
+      if( data == nil || data == false )
+        logger.error( 'no discovery in database data found' )
         return false
       end
 
@@ -141,11 +174,6 @@ module DataCollector
         end
       end
 
-      if( data == nil || data == false )
-        logger.error( 'no DNS configuration found' )
-        return {}
-      end
-
       return true
 
     end
@@ -153,25 +181,46 @@ module DataCollector
 
     def mergeData( service, tomcatApplication, data = {} )
 
-      metricsTomcat     = tomcatApplication['tomcat']      # standard metrics for Tomcat
+      metricsTomcat     = tomcatApplication.dig('tomcat')      # standard metrics for Tomcat
 
+      configuredApplication = tomcatApplication.keys
+
+      logger.debug( configuredApplication )
 #      logger.debug( data )
 
-      application = data[:data]['application'] ? data[:data]['application'] : nil
-      solr_cores  = data[:data]['cores']       ? data[:data]['cores']       : nil
-      metrics     = data[:data]['metrics']     ? data[:data]['metrics']     : nil
+      if( data == nil || data.count() == 0 )
+        logger.debug( 'no data to merge' )
 
-      data[:data]['metrics'] = Array.new()
+        return {}
+      end
+
+      application = data.dig(:data, 'application') || data.dig(:application)
+      solr_cores  = data.dig(:data, 'cores')       || data.dig(:cores)
+      metrics     = data.dig(:data, 'metrics')     || data.dig(:metrics)
+
+      data[:data]            ||= {}
+      data[:data]['metrics'] ||= []
+
+      if( configuredApplication.include?( service ) )
+
+        logger.debug( "found #{service} in tomcat application" )
+
+        data[:data]['metrics'].push( metricsTomcat.dig('metrics') )
+        data[:data]['metrics'].push( tomcatApplication.dig( service, 'metrics' ) )
+      end
+
 
       if( application != nil )
 
+        data[:data]['metrics'].push( metricsTomcat.dig( 'metrics' ) )
+
         application.each do |a|
 
-          if( tomcatApplication[a] )
+          if( tomcatApplication.dig( a ) != nil )
 
-            applicationMetrics = tomcatApplication[a]['metrics']
+            logger.debug( "  add application metrics for #{a}" )
 
-#             logger.debug( "  add application metrics for #{a}" )
+            applicationMetrics = tomcatApplication.dig( a, 'metrics' )
 
             if( solr_cores != nil )
               data[:data]['metrics'].push( self.mergeSolrCores( applicationMetrics , solr_cores ) )
@@ -180,7 +229,7 @@ module DataCollector
             # remove unneeded Templates
             tomcatApplication[a]['metrics'].delete_if {|key| key['mbean'].match( '%CORE%' ) }
 
-            data[:data]['metrics'].push( metricsTomcat['metrics'] )
+#            data[:data]['metrics'].push( metricsTomcat['metrics'] )
             data[:data]['metrics'].push( applicationMetrics )
 
           end
@@ -188,13 +237,13 @@ module DataCollector
 
       end
 
-      if( tomcatApplication[service] )
-
-#         logger.debug( "found #{service} in tomcat application" )
-
-        data[:data]['metrics'].push( metricsTomcat['metrics'] )
-        data[:data]['metrics'].push( tomcatApplication[service]['metrics'] )
-      end
+#       if( tomcatApplication[service] )
+#
+# #         logger.debug( "found #{service} in tomcat application" )
+#
+#         data[:data]['metrics'].push( metricsTomcat['metrics'] )
+#         data[:data]['metrics'].push( tomcatApplication[service]['metrics'] )
+#       end
 
       data[:data]['metrics'].compact!   # remove 'nil' from array
       data[:data]['metrics'].flatten!   # clean up and reduce depth
@@ -221,6 +270,10 @@ module DataCollector
       mqHost              = params.dig(:mqHost)                || 'localhost'
       mqPort              = params.dig(:mqPort)                || 11300
       @mqQueue            = params.dig(:mqQueue)               || 'mq-collector'
+
+      @redisHost          = params.dig(:redis, :host)
+      @redisPort          = params.dig(:redis, :port)  || 6379
+
       @applicationConfig  = params.dig(:applicationConfigFile)
       @serviceConfig      = params.dig(:serviceConfigFile)
 
@@ -233,6 +286,7 @@ module DataCollector
       logger.info( '  Copyright 2016-2017 Coremedia' )
       logger.info( '  used Services:' )
       logger.info( "    - jolokia      : #{jolokiaHost}:#{jolokiaPort}" )
+      logger.info( "    - redis        : #{@redisHost}:#{@redisPort}" )
       logger.info( "    - memcache     : #{memcacheHost}:#{memcachePort}" )
       logger.info( "    - message queue: #{mqHost}:#{mqPort}/#{@mqQueue}" )
       logger.info( '-----------------------------------------------------------------' )
@@ -243,6 +297,7 @@ module DataCollector
       }
 
       @db                 = Storage::Database.new()
+      @redis              = Storage::RedisClient.new( { :redis => { :host => @redisHost } } )
       @mc                 = Storage::Memcached.new( { :host => memcacheHost, :port => memcachePort } )
       @jolokia            = Jolokia::Client.new( { :host => jolokiaHost, :port => jolokiaPort, :path => jolokiaPath, :auth => { :user => jolokiaAuthUser, :pass => jolokiaAuthPass } } )
       @mq                 = MessageQueue::Consumer.new( @MQSettings )
@@ -879,7 +934,8 @@ module DataCollector
 
       monitoredServer.each do |h,d|
 
-        prepared = @mc.get( Storage::Memcached.cacheKey( { :host => h, :pre => 'prepare' } ) )
+        # TODO
+        prepared = false # @mc.get( Storage::Memcached.cacheKey( { :host => h, :pre => 'prepare' } ) )
 
         if( prepared.is_a?( NilClass ) || prepared.is_a?( FalseClass ) )
 
@@ -890,7 +946,8 @@ module DataCollector
           options = {
             :host                  => h,
             :applicationConfigFile => @applicationConfig,
-            :serviceConfigFile     => @serviceConfig
+            :serviceConfigFile     => @serviceConfig,
+            :redis                 => { :host => @redisHost, :port => @redisPort }
           }
 
           p = Prepare.new( options )

@@ -27,6 +27,8 @@ mqPort           = ENV.fetch('MQ_PORT'          , 11300 )
 mqQueue          = ENV.fetch('MQ_QUEUE'         , 'mq-collector' )
 memcacheHost     = ENV.fetch('MEMCACHE_HOST'    , 'localhost' )
 memcachePort     = ENV.fetch('MEMCACHE_PORT'    , 11211 )
+redisHost        = ENV.fetch('REDIS_HOST'       , 'localhost' )
+redisPort        = ENV.fetch('REDIS_PORT'       , 6379 )
 scanDiscovery    = ENV.fetch('SCAN_DISCOVERY'   , '10m' )
 interval         = ENV.fetch('INTERVAL'         , 20 )
 
@@ -41,6 +43,7 @@ config = {
   :mqQueue               => mqQueue,
   :memcacheHost          => memcacheHost,
   :memcachePort          => memcachePort,
+  :redis                 => { :host => redisHost, :port => redisPort },
   :scanDiscovery         => scanDiscovery,
   :applicationConfigFile => applicationConfigFile,
   :serviceConfigFile     => serviceConfigFile

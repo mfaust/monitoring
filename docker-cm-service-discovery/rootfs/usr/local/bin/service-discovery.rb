@@ -25,6 +25,8 @@ jolokiaAuthPass    = ENV.fetch( 'JOLOKIA_AUTH_PASS', nil )
 mqHost             = ENV.fetch( 'MQ_HOST'          , 'localhost' )
 mqPort             = ENV.fetch( 'MQ_PORT'          , 11300 )
 mqQueue            = ENV.fetch( 'MQ_QUEUE'         , 'mq-discover' )
+redisHost          = ENV.fetch( 'REDIS_HOST'       , 'localhost' )
+redisPort          = ENV.fetch( 'REDIS_PORT'       , 6379 )
 interval           = ENV.fetch( 'INTERVAL'         , 20 )
 
 config = {
@@ -36,6 +38,7 @@ config = {
   :mqHost            => mqHost,
   :mqPort            => mqPort,
   :mqQueue           => mqQueue,
+  :redis             => { :host => redisHost, :port => redisPort },
   :serviceConfigFile => serviceConfigFile
 }
 

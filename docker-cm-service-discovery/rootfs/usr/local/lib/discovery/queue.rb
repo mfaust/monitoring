@@ -20,7 +20,9 @@ module ServiceDiscovery
         logger.debug( result )
         logger.debug( result.class.to_s )
 
-        if( result.dig(:status).to_i == 200 )
+        status = result.dig(:status).to_i
+
+        if( status == 200 || status == 500 )
 
           @mqConsumer.deleteJob( @mqQueue, jobId )
         else
@@ -46,36 +48,48 @@ module ServiceDiscovery
         if( command == nil )
           logger.error( 'wrong command' )
           logger.error( data )
-          return
+
+          return {
+            :status  => 500,
+            :message => 'no command given'
+          }
         end
 
         if( node == nil || payload == nil )
           logger.error( 'missing node or payload' )
           logger.error( data )
-          return
+
+          return {
+            :status  => 500,
+            :message => 'missing node or payload'
+          }
         end
 
-        result = {
-          :status  => 400,
-          :message => sprintf( 'wrong command detected: %s', command )
-        }
 
         case command
         when 'add'
           logger.info( sprintf( 'add node %s', node ) )
 
-          begin
+#           begin
             # TODO
             # check payload!
             # e.g. for 'force' ...
             result = self.addHost( node, payload )
 
+            logger.debug( result )
+
             @db.setStatus( { :ip => node, :short => node, :status => isRunning?( node ) } )
 
-#             logger.debug( result )
-          rescue
+            return {
+              :status  => 200,
+              :message => result
+            }
 
-          end
+#           rescue
+
+#           end
+
+
         when 'remove'
           logger.info( sprintf( 'remove node \'%s\'', node ) )
 
@@ -115,12 +129,19 @@ module ServiceDiscovery
 
           end
 
+          return {
+            :status => 200
+          }
+
         when 'refresh'
           logger.info( sprintf( 'refresh node %s', node ) )
 
           result = self.refreshHost( node )
 
-#           logger.debug( result )
+            return {
+              :status  => 200,
+              :message => result
+            }
 
         when 'info'
           logger.info( sprintf( 'give information for %s back', node ) )
@@ -154,19 +175,23 @@ module ServiceDiscovery
           }
 
         else
-  #         logger.error( sprintf( 'wrong command detected: %s', command ) )
+          logger.error( sprintf( 'wrong command detected: %s', command ) )
 
           result = {
-            :status  => 400,
+            :status  => 500,
             :message => sprintf( 'wrong command detected: %s', command )
           }
 
-#           logger.debug( result )
         end
 
-        logger.debug( result )
+        if( result.is_a?( String ) )
 
-        return result
+          result = JSON.parse( result )
+        end
+
+        result[:request]    = data
+
+        logger.debug( result )
 
   #       result[:request]    = data
 
