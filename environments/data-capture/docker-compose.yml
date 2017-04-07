@@ -24,15 +24,14 @@ services:
     image: bodsch/docker-dnsdock:1704-01
     container_name: dnsdock
     hostname: dnsdock
-    labels:
-      com.dnsdock.alias: dnsdock
-      com.dnsdock.ttl: '120'
+    ports:
+      - 172.17.0.1:53:53/udp
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock
     # You can use also Environment vars like this:
     # command: "--nameserver='${DNS_1}:53' --nameserver='${DNS_2}:53' --http=:80"
-    command: " --nameserver='10.1.2.14:53' --nameserver='10.1.2.63:53' --http=:80 --ttl=120 --verbose"
+    command: " --nameserver='10.1.2.14:53' --nameserver='10.1.2.63:53' --http=:80 --verbose"
 
 
   beanstalkd:
@@ -80,8 +79,7 @@ services:
     container_name: redis
     hostname: redis
     labels:
-      com.dnsdock.image: "redis"
-      com.dnsdock.alias: "redis"
+      com.dnsdock.alias: redis
       com.dnsdock.ttl: '120'
     volumes:
       - /etc/localtime:/etc/localtime:ro
@@ -118,8 +116,7 @@ services:
     labels:
       com.dnsdock.alias: carbon-relay
       com.dnsdock.ttl: '120'
-    ports:
-      - 2003:2003
+    dns: 172.17.0.1
     extends:
       file: environments.yml
       service: carbon-relay
@@ -135,6 +132,7 @@ services:
     labels:
       com.dnsdock.alias: icinga2-satellite
       com.dnsdock.ttl: '120'
+    dns: 172.17.0.1
     extends:
       file: environments.yml
       service: icinga2-satellite
@@ -231,6 +229,7 @@ services:
     labels:
       com.dnsdock.alias: cm-carbon-client
       com.dnsdock.ttl: '120'
+    dns: 172.17.0.1
     extends:
       file: environments.yml
       service: cm-carbon-client
@@ -257,6 +256,7 @@ services:
     labels:
       com.dnsdock.alias: cm-grafana-client
       com.dnsdock.ttl: '120'
+    dns: 172.17.0.1
     extends:
       file: environments.yml
       service: cm-grafana-client
@@ -281,6 +281,7 @@ services:
     labels:
       com.dnsdock.alias: cm-graphite-client
       com.dnsdock.ttl: '120'
+    dns: 172.17.0.1
     extends:
       file: environments.yml
       service: cm-graphite-client
@@ -301,6 +302,7 @@ services:
     labels:
       com.dnsdock.alias: cm-icinga-client
       com.dnsdock.ttl: '120'
+    dns: 172.17.0.1
     extends:
       file: environments.yml
       service: cm-icinga-client
@@ -321,6 +323,7 @@ services:
     labels:
       com.dnsdock.alias: cm-rest-service
       com.dnsdock.ttl: '120'
+    dns: 172.17.0.1
     extends:
       file: environments.yml
       service: cm-rest-service
@@ -337,4 +340,4 @@ services:
       - persistent:/var/cache/monitoring
       - persistent:/srv
 
-
+# EOF
