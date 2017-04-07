@@ -560,7 +560,7 @@ module Storage
       cachekey = 'nodes'
 
       # delete single config
-      if( configKey != nil )
+      if( key != nil )
 
         existingData = @redis.get( cachekey )
 

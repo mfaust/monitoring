@@ -11,6 +11,7 @@ require 'yaml'
 require 'fileutils'
 
 require_relative 'logging'
+require_relative 'utils/network'
 require_relative 'jolokia'
 require_relative 'message-queue'
 require_relative 'storage'
@@ -238,7 +239,7 @@ module ServiceDiscovery
     end
 
     # create DNS Information
-    hostInfo      = hostResolve( host )
+    hostInfo      = Utils::Network.resolv( host )
 
     logger.debug( "hostResolve #{hostInfo}" )
 
@@ -246,8 +247,10 @@ module ServiceDiscovery
     shortHostName = hostInfo.dig(:short)
     longHostName  = hostInfo.dig(:long)
 
+    logger.debug( sprintf( 'ping ip %s if running', ip ) )
+
     # second, if the that we whant monitored, available
-    if( isRunning?( ip ) == false )
+    if( Utils::Network.isRunning?( ip ) == false )
 
       logger.error( 'host not running' )
       logger.debug( hostInfo )
@@ -288,7 +291,7 @@ module ServiceDiscovery
 
     ports.each do |p|
 
-      open = portOpen?( longHostName, p )
+      open = Utils::Network.portOpen?( longHostName, p )
 
       logger.debug( sprintf( 'Host: %s | Port: %s   %s', host, p, open ? 'open' : 'closed' ) )
 
@@ -361,11 +364,20 @@ module ServiceDiscovery
     status  = 200
     message = 'initialize message'
 
-    hostInfo = hostResolve( host )
-    ip       = hostInfo[:ip] ? hostInfo[:ip] : nil
+    hostInfo = Utils::Network.resolv( host )
+    ip       = hostInfo.dig(:ip)
+
+    if( ip == nil )
+
+      return {
+        :status  => 400,
+        :message => 'Host not available'
+      }
+
+    end
 
     # second, if the that we want monitored, available
-    if( isRunning?( ip ) == false )
+    if( Utils::Network.isRunning?( ip ) == false )
 
       status  = 400
       message = 'Host not available'
@@ -510,36 +522,37 @@ module ServiceDiscovery
 #     end
   end
 
-
-  def hostInformation( file, host )
-
-    status   = isRunning?( host )
-    age      = File.mtime( file ).strftime("%Y-%m-%d %H:%M:%S")
-    services = Hash.new()
-
-    if( file != host )
-
-      data   = JSON.parse( File.read( file ) )
-
-      data.each do |d,v|
-
-        services[d.to_s] ||= {}
-        services[d.to_s] = {
-          :port        => v['port'],
-          :description => v['description']
-        }
-      end
-    end
-
-    return {
-      host => {
-        :status   => status ? 'online' : 'offline',
-        :services => services,
-        :created  => age
-      }
-    }
-
-  end
+  # OBSOLETE
+#   def hostInformation( file, host )
+#
+#
+#     status   = isRunning?( host )
+#     age      = File.mtime( file ).strftime("%Y-%m-%d %H:%M:%S")
+#     services = Hash.new()
+#
+#     if( file != host )
+#
+#       data   = JSON.parse( File.read( file ) )
+#
+#       data.each do |d,v|
+#
+#         services[d.to_s] ||= {}
+#         services[d.to_s] = {
+#           :port        => v['port'],
+#           :description => v['description']
+#         }
+#       end
+#     end
+#
+#     return {
+#       host => {
+#         :status   => status ? 'online' : 'offline',
+#         :services => services,
+#         :created  => age
+#       }
+#     }
+#
+#   end
 
 end
 

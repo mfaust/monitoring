@@ -484,7 +484,7 @@ class Monitoring
 
       result[host.to_sym] ||= {}
       result[host.to_sym][:request]   ||= {}
-      result[host.to_sym][:request]   = JSON.parse( payload )
+      result[host.to_sym][:request]   = ( payload )
       result[host.to_sym][:discovery] ||= {}
       result[host.to_sym][:discovery] = discoveryResult
 

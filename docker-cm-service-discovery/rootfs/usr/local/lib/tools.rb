@@ -7,12 +7,12 @@ require 'timeout'
 require 'socket'
 
 
-def isIp?( data )
-
-  require "ipaddress"
-
-  return IPAddress.valid?( data ) # "192.128.0.12"
-end
+# def isIp?( data )
+#
+#   require "ipaddress"
+#
+#   return IPAddress.valid?( data ) # "192.128.0.12"
+# end
 
 def validJson?( json )
   begin
@@ -75,100 +75,102 @@ end
 
 
 # return some Information about given Hostname
-def hostResolve( host )
-
-  require 'ipaddress'
-  require 'open3'
-
-  line = nil
-  long  = nil
-  short = nil
-  ip    = nil
-
-  if( IPAddress.valid?( host ) )
-
-    cmd = sprintf( 'dig -x %s +short', host )
-
-#     logger.debug( cmd )
-
-    Open3.popen3( cmd ) do |stdin, stdout, stderr, wait_thr|
-
-      returnValue = wait_thr.value
-      stdOut      = stdout.gets
-      stdErr      = stderr.gets
-
-      if( returnValue == 0 && !stdOut.to_s.empty? )
-        host = stdOut
-      else
-
-      end
-    end
-  end
-
-  line  = nil
-
-  cmd   = sprintf( 'host -t A %s', host )
-
-#   logger.debug( cmd )
-
-  Open3.popen3( cmd ) do |stdin, stdout, stderr, wait_thr|
-
-    returnValue = wait_thr.value
-    stdOut      = stdout.gets
-    stdErr      = stderr.gets
-
-    if( returnValue == 0 && !stdOut.to_s.empty? )
-      line = stdOut
-    else
-
-    end
-  end
-
-  if( line != nil )
-
-    parts = line.split( ' ' )
-
-    long  = parts.first.strip
-    ip    = parts.last.strip
-    short = long.split('.').first
-
-  end
-
-  result = {
-    :ip    => ip != nil ? ip : host,
-    :short => short,
-    :long  => long
-  }
-
-  return result
-
-end
+# def hostResolve( host )
+#
+#   require 'ipaddress'
+#   require 'open3'
+#
+#   line = nil
+#   long  = nil
+#   short = nil
+#   ip    = nil
+#
+#   if( IPAddress.valid?( host ) )
+#
+#     cmd = sprintf( 'dig -x %s +short', host )
+#
+# #     logger.debug( cmd )
+#
+#     Open3.popen3( cmd ) do |stdin, stdout, stderr, wait_thr|
+#
+#       returnValue = wait_thr.value
+#       stdOut      = stdout.gets
+#       stdErr      = stderr.gets
+#
+#       if( returnValue == 0 && !stdOut.to_s.empty? )
+#         host = stdOut
+#       else
+#
+#       end
+#     end
+#   end
+#
+#   line  = nil
+#
+#   cmd   = sprintf( 'host -t A %s', host )
+#
+# #   logger.debug( cmd )
+#
+#   Open3.popen3( cmd ) do |stdin, stdout, stderr, wait_thr|
+#
+#     returnValue = wait_thr.value
+#     stdOut      = stdout.gets
+#     stdErr      = stderr.gets
+#
+#     if( returnValue == 0 && !stdOut.to_s.empty? )
+#       line = stdOut
+#     else
+#
+#     end
+#   end
+#
+#   if( line != nil )
+#
+#     parts = line.split( ' ' )
+#
+#     long  = parts.first.strip
+#     ip    = parts.last.strip
+#     short = long.split('.').first
+#
+#   end
+#
+#   result = {
+#     :ip    => ip != nil ? ip : host,
+#     :short => short,
+#     :long  => long
+#   }
+#
+#   return result
+#
+# end
 
 
 # check if Node exists (simple ping)
 # result @bool
-def isRunning? ( ip )
+# def isRunning? ( ip )
+#
+#   puts "pinging IP #{ip} ... "
+#
+#   # first, ping check
+#   if( system( sprintf( 'ping -c1 -w1 %s > /dev/null', ip.to_s ) ) == true )
+#     return true
+#   else
+#     return false
+#   end
+#
+# end
 
-  # first, ping check
-  if( system( 'ping -c1 -w1 ' + ip.to_s + ' > /dev/null' ) == true )
-    return true
-  else
-    return false
-  end
 
-end
-
-
-def ip( host )
-
-  begin
-    ip = Socket.gethostbyname( host ).first
-  rescue => e
-    ip = host
-  end
-
-  return ip
-end
+# def ip( host )
+#
+#   begin
+#     ip = Socket.gethostbyname( host ).first
+#   rescue => e
+#     ip = host
+#   end
+#
+#   return ip
+# end
 
 
 def cacheKey( pre, host, v )
@@ -180,22 +182,22 @@ def cacheKey( pre, host, v )
 end
 
 
-
-def portOpen? ( host, port, seconds = 1 )
-
-  # => checks if a port is open or not on a remote host
-  Timeout::timeout( seconds ) do
-    begin
-      TCPSocket.new( host, port ).close
-      return true
-    rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH, SocketError => e
-      return false
-    end
-  end
-  rescue Timeout::Error => e
-    return false
-end
-
+# 
+# def portOpen? ( host, port, seconds = 1 )
+#
+#   # => checks if a port is open or not on a remote host
+#   Timeout::timeout( seconds ) do
+#     begin
+#       TCPSocket.new( host, port ).close
+#       return true
+#     rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH, SocketError => e
+#       return false
+#     end
+#   end
+#   rescue Timeout::Error => e
+#     return false
+# end
+#
 
 
 def normalizeService( service )

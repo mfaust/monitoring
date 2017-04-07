@@ -78,7 +78,18 @@ module ServiceDiscovery
 
             logger.debug( result )
 
-            @db.setStatus( { :ip => node, :short => node, :status => isRunning?( node ) } )
+
+            # BUG
+            # Use DNS entry and take the IP to check isAlive!
+            dns      = @redis.dnsData( { :short => node } )
+
+            logger.debug( dns )
+            ip = dns.dig(:ip) || dns.dig('ip')
+
+            networkStatus = Utils::Network.isRunning?( ip )
+
+            @redis.setStatus( { :ip => node, :short => node, :status => networkStatus } )
+            @db.setStatus( { :ip => node, :short => node, :status => networkStatus } )
 
             return {
               :status  => 200,
