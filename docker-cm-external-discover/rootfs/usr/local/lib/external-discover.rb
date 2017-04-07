@@ -11,30 +11,8 @@ require 'json'
 require 'dalli'
 require 'rest-client'
 
+require_relative 'monkey'
 require_relative 'logging'
-
-# -----------------------------------------------------------------------------
-
-# Monkey patches
-
-class Array
-  def compare( comparate )
-    to_set == comparate.to_set
-  end
-end
-
-class Hash
-  def filter( *args )
-    if( args.size == 1 )
-      if( args[0].is_a?( Symbol ) )
-        args[0] = args[0].to_s
-      end
-      self.select { |key| key.to_s.match( args.first ) }
-    else
-      self.select { |key| args.include?( key ) }
-    end
-  end
-end
 
 # -----------------------------------------------------------------------------
 
