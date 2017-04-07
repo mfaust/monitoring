@@ -21,6 +21,8 @@ services:
       # MYSQL_ROOT_PASS:
       MEMCACHE_HOST: memcached
       # MEMCACHE_PORT: 11211
+      REDIS_HOST: redis
+      # REDIS_PORT: 6379
       # DATABASE_GRAPHITE_PASS: graphite
       #
       # THIS TURN OFF THE INTERNAL CARBON!
@@ -46,6 +48,8 @@ services:
       # CARBON_PORT: 2003
       MEMCACHE_HOST: memcached
       # MEMCACHE_PORT: 11211
+      REDIS_HOST: redis
+      # REDIS_PORT: 6379
       # DATABASE_GRAFANA_PASS: grafana
 
   icinga2-master:
@@ -109,6 +113,10 @@ services:
       # JOLOKIA_PATH: /jolokia
       # JOLOKIA_AUTH_USER:
       # JOLOKIA_AUTH_PASS:
+      MEMCACHE_HOST: memcached
+      # MEMCACHE_PORT: 11211
+      REDIS_HOST: redis
+      # REDIS_PORT: 6379
       MQ_HOST: beanstalkd
       # MQ_PORT: 11300
       # MQ_QUEUE: mq-discover
@@ -127,6 +135,8 @@ services:
       # MQ_QUEUE: mq-collector
       MEMCACHE_HOST: memcached
       # MEMCACHE_PORT: 11211
+      REDIS_HOST: redis
+      # REDIS_PORT: 6379
       # OBSOLETE
       # SCAN_DISCOVERY: "10m"
       INTERVAL: 20
@@ -139,6 +149,8 @@ services:
       # GRAPHITE_PORT: 2003
       MEMCACHE_HOST: memcached
       # MEMCACHE_PORT: 11211
+      REDIS_HOST: redis
+      # REDIS_PORT: 6379
       # INTERVAL: 20
 
   cm-grafana-client:
@@ -152,6 +164,8 @@ services:
       # GRAFANA_TEMPLATE_PATH: /usr/local/share/templates/grafana
       MEMCACHE_HOST: memcached
       # MEMCACHE_PORT: 11211
+      REDIS_HOST: redis
+      # REDIS_PORT: 6379
       MQ_HOST: beanstalkd
       # MQ_PORT: 11300
       # MQ_QUEUE: mq-grafana

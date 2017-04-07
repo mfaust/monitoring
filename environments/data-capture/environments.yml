@@ -60,6 +60,8 @@ services:
       MQ_HOST: beanstalkd
       # MQ_PORT: 11300
       # MQ_QUEUE: mq-discover
+      REDIS_HOST: redis
+      # REDIS_PORT: 6379
       INTERVAL: 20
 
   cm-data-collector:
@@ -75,6 +77,8 @@ services:
       # MQ_QUEUE: mq-collector
       MEMCACHE_HOST: memcached
       # MEMCACHE_PORT: 11211
+      REDIS_HOST: redis
+      # REDIS_PORT: 6379
       # OBSOLETE
       # SCAN_DISCOVERY: "10m"
       INTERVAL: 20
@@ -87,6 +91,8 @@ services:
       # GRAPHITE_PORT: 2003
       MEMCACHE_HOST: memcached
       # MEMCACHE_PORT: 11211
+      REDIS_HOST: redis
+      # REDIS_PORT: 6379
       # INTERVAL: 20
 
   cm-grafana-client:
@@ -101,6 +107,8 @@ services:
       # GRAFANA_TEMPLATE_PATH: /usr/local/share/templates/grafana
       MEMCACHE_HOST: memcached
       # MEMCACHE_PORT: 11211
+      REDIS_HOST: redis
+      # REDIS_PORT: 6379
       MQ_HOST: beanstalkd
       # MQ_PORT: 11300
       # MQ_QUEUE: mq-grafana
@@ -111,7 +119,7 @@ services:
       # NOTICE: EXTERNAL-SERVICE
       GRAPHITE_HOST: nginx-proxy.docker
       # GRAPHITE_PORT: 2003
-      # GRAPHITE_HTTP_PORT: 80
+      GRAPHITE_HTTP_PORT: 80
       GRAPHITE_PATH: /graphite
       MQ_HOST: beanstalkd
       # MQ_PORT: 11300

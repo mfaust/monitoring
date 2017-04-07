@@ -63,6 +63,15 @@ module Graphite
           return JSON.parse( responseBody )
         end
 
+      rescue Errno::ECONNREFUSED
+
+        logger.error( 'connection to graphite service refused' )
+
+        return {
+          :status   => 500,
+          :message  => 'connection to graphite service refused'
+        }
+
       rescue => e
 
         logger.error( "Error: #{__method__}  on #{endpoint} error: '#{e}'" )

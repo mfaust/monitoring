@@ -189,7 +189,7 @@ module Sinatra
 
       result = m.addHost( host, payload )
 
-      status result[:status]
+      status result['status']
 
       result
 

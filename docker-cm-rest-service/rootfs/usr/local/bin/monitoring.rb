@@ -11,6 +11,7 @@ require 'yaml'
 require 'rufus-scheduler'
 
 require_relative '../lib/logging'
+require_relative '../lib/utils/network'
 require_relative '../lib/tools'
 require_relative '../lib/storage'
 require_relative '../lib/message-queue'
@@ -101,13 +102,13 @@ class Monitoring
 
   def checkAvailablility?( host )
 
-    hostInfo      = hostResolve( host )
+    hostInfo      = Utils::Network.resolv( host )
 
-    ip            = hostInfo[:ip]    ? hostInfo[:ip]    : nil # dnsResolve( host )
-    shortHostName = hostInfo[:short] ? hostInfo[:short] : nil # dnsResolve( host )
-    longHostName  = hostInfo[:long]  ? hostInfo[:long]  : nil # dnsResolve( host )
+    ip            = hostInfo.dig(:ip)
+    shortHostName = hostInfo.dig(:short)
+    longHostName  = hostInfo.dig(:long)
 
-    logger.debug( JSON.pretty_generate( hostInfo ) )
+#    logger.debug( JSON.pretty_generate( hostInfo ) )
 
     if( ip == nil || shortHostName == nil )
       return false
@@ -354,7 +355,7 @@ class Monitoring
       end
 
       # now, we can write an own configiguration per node when we add them, hurray
-      if( config.is_a?( Hash) )
+      if( config.is_a?( Hash ) )
 
         ip    = hostData.dig( :ip )
         short = hostData.dig( :short )
@@ -366,6 +367,8 @@ class Monitoring
         } )
 
       end
+
+      result[host.to_sym] ||= {}
 
       if( enableDiscovery == true )
 
@@ -480,10 +483,14 @@ class Monitoring
       }
 
       result[host.to_sym] ||= {}
+      result[host.to_sym][:request]   ||= {}
+      result[host.to_sym][:request]   = JSON.parse( payload )
       result[host.to_sym][:discovery] ||= {}
       result[host.to_sym][:discovery] = discoveryResult
 
-      return result
+      logger.debug( JSON.pretty_generate( discoveryResult ) )
+
+      return JSON.pretty_generate( discoveryResult )
 
     end
 
@@ -518,7 +525,12 @@ class Monitoring
       hostData = self.checkAvailablility?( host )
 
       if( hostData == false )
-        logger.info( 'host has no DNS Information' )
+
+        return {
+          :status  => 400,
+          :message => 'Host are not available (DNS Problem)'
+        }
+
       end
 
       result[host.to_s][:dns] ||= {}
@@ -579,7 +591,7 @@ class Monitoring
       resultArray = Array.new()
       threads     = Array.new()
 
-      logger.debug('start')
+#      logger.debug('start')
 
       if( enableDiscovery == true )
 
@@ -615,15 +627,13 @@ class Monitoring
         end
       end
 
-
-
 #      ['mq-icinga-info','mq-grafana-info','mq-discover-info'].each do |queue|
 #        resultArray << c.getJobFromTube( queue )
 #      end
 
-      logger.debug('end')
+#       logger.debug('end')
 #      logger.debug( resultArray )
-      logger.debug( result )
+#       logger.debug( result )
 
       return JSON.pretty_generate( result )
 

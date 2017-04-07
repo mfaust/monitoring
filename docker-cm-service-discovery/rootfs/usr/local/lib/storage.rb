@@ -1670,7 +1670,9 @@ module Storage
         # get dns data to prper create entry
         dnsData = self.dnsData( { :ip => ip, :short => short } )
 
-        statusId  = rec.first[:id].to_i
+        logger.debug( dnsData )
+
+        # statusId  = rec.first[:id].to_i
         dnsId     = rec.first[:dns_id].to_i
 
         @database[:status].insert(
