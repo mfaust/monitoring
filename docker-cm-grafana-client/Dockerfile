@@ -9,7 +9,7 @@ ENV \
   TERM=xterm \
   APK_ADD="build-base imagemagick-dev ruby-dev ruby-irb ruby-rdoc sqlite-dev zlib zlib-dev" \
   APK_DEL="build-base imagemagick-dev ruby-dev ruby-rdoc zlib-dev" \
-  GEMS="beaneater bigdecimal dalli fileutils filesize ipaddress json rest-client rufus-scheduler sequel sqlite3 time_difference tzinfo-data"
+  GEMS="beaneater bigdecimal dalli fileutils filesize ipaddress json redis rest-client rufus-scheduler sequel sqlite3 time_difference tzinfo-data"
 
 LABEL version="1703-03.1"
 

@@ -1,37 +1,46 @@
 
-FROM bodsch/docker-ruby
+FROM alpine:latest
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
-LABEL version="1703-02.1"
+ENV \
+  ALPINE_MIRROR="dl-cdn.alpinelinux.org" \
+  ALPINE_VERSION="v3.5" \
+  TERM=xterm \
+  APK_ADD="build-base bind-tools imagemagick-dev ruby-dev ruby-irb ruby-rdoc sqlite sqlite-dev zlib zlib-dev" \
+  APK_DEL="build-base imagemagick-dev ruby-dev ruby-rdoc zlib-dev" \
+  GEMS="beaneater bigdecimal dalli fileutils filesize json redis rest-client rufus-scheduler sequel sqlite3 time_difference tzinfo-data"
+
+LABEL version="1704-01.1"
+
+
+#FROM bodsch/docker-ruby
+#MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
+#LABEL version="1703-02.1"
 
 # ---------------------------------------------------------------------------------------
 
 RUN \
+  echo "http://${ALPINE_MIRROR}/alpine/${ALPINE_VERSION}/main"       > /etc/apk/repositories && \
+  echo "http://${ALPINE_MIRROR}/alpine/${ALPINE_VERSION}/community" >> /etc/apk/repositories && \
   apk --quiet --no-cache update && \
   apk --quiet --no-cache upgrade && \
-  apk --quiet --no-cache add \
-    build-base \
-    bind-tools \
-    imagemagick-dev \
-    ruby-dev \
-    sqlite-dev \
-    sqlite && \
-  gem install --no-rdoc --no-ri \
-    bigdecimal \
-    time_difference \
-    filesize \
-    tzinfo-data \
-    rufus-scheduler \
-    sqlite3 \
-    sequel && \
+  for apk in ${APK_ADD} ; \
+  do \
+    apk --quiet --no-cache add ${apk} ; \
+  done && \
+  for gem in ${GEMS} ; \
+  do \
+     gem install --quiet --no-rdoc --no-ri ${gem} ; \
+  done && \
+  for apk in ${APK_DEL} ; \
+  do \
+    apk del --quiet --purge ${apk} ; \
+  done && \
   mkdir /var/cache/monitoring && \
-  apk del --purge \
-    build-base \
-    imagemagick-dev \
-    ruby-dev \
-    zlib-dev && \
-  rm -rf /var/cache/apk/*
+  rm -rf \
+    /tmp/* \
+    /var/cache/apk/*
 
 COPY rootfs/ /
 
