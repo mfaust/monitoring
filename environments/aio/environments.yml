@@ -1,7 +1,7 @@
 ---
 # environment variables for all services that need this
 # all commented out vars are set into the containers with the correct value
-# they are only examples an documentation
+# they are only examples and documentation
 
 version: '2.0'
 
@@ -22,6 +22,9 @@ services:
       MEMCACHE_HOST: memcached
       # MEMCACHE_PORT: 11211
       # DATABASE_GRAPHITE_PASS: graphite
+      #
+      # THIS TURN OFF THE INTERNAL CARBON!
+      # USE THIS ONLY WITH AN OTHE CARBON-WRITER (e.g. bodsch/docker-go-carbon)
       USE_EXTERNAL_CARBON: 'true'
 
   grafana:
@@ -35,8 +38,10 @@ services:
       GRAPHITE_HOST: graphite
       # GRAPHITE_PORT: 2003
       # GRAPHITE_HTTP_PORT: 8080
-      # we use an seperate carbon service
-      # IF NOT, then set then to $GRAPHITE_HOST
+      #
+      # WE USE AN SEPERATE CARBON SERVICE
+      # IF NOT, THEN SET THEN TO $GRAPHITE_HOST
+      # (see above in this configuration part!)
       CARBON_HOST: carbon
       # CARBON_PORT: 2003
       MEMCACHE_HOST: memcached
@@ -129,7 +134,7 @@ services:
   cm-carbon-client:
     environment:
       TZ: 'Europe/Berlin'
-      # USE ONLY WITH carbon-c-relay !
+      # USE ONLY WITH AND EXTERNAL CARBON-WRITER!
       GRAPHITE_HOST: carbon
       # GRAPHITE_PORT: 2003
       MEMCACHE_HOST: memcached
@@ -150,11 +155,6 @@ services:
       MQ_HOST: beanstalkd
       # MQ_PORT: 11300
       # MQ_QUEUE: mq-grafana
-      #
-      # when we need an DNS entry for external services, we can use ADDITIONAL_DNS
-      # in the cm-rest-service environment
-      # look above for more information!
-      # ADDITIONAL_DNS: 'nginx-proxy:192.168.252.5'
 
   cm-graphite-client:
     environment:

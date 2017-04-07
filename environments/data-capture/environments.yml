@@ -1,7 +1,7 @@
 ---
 # environment variables for all services that need this
 # all commented out vars are set into the containers with the correct value
-# they are only examples an documentation
+# they are only examples and documentation
 
 version: '2.0'
 
@@ -104,11 +104,6 @@ services:
       MQ_HOST: beanstalkd
       # MQ_PORT: 11300
       # MQ_QUEUE: mq-grafana
-      #
-      # when we need an DNS entry for external services, we can use ADDITIONAL_DNS
-      # in the cm-rest-service environment
-      # look above for more information!
-      # ADDITIONAL_DNS: 'nginx-proxy:192.168.252.5'
 
   cm-graphite-client:
     environment:
