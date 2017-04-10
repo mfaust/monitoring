@@ -81,6 +81,8 @@ services:
     labels:
       com.dnsdock.alias: redis
       com.dnsdock.ttl: '120'
+    ports:
+      - 6379:6379
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - redis:/var/lib/redis
