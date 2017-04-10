@@ -5,7 +5,7 @@ module ServiceDiscovery
 
     def discoverApplication( host, port )
 
-  #     logger.debug( sprintf( 'discoverApplication( %s, %d )', host, port ) )
+      logger.debug( sprintf( 'discoverApplication( %s, %d )', host, port ) )
 
       services = Array.new
 
@@ -79,14 +79,23 @@ module ServiceDiscovery
   #
   #         return nil
 
-          return nil
+#           {:status=>500, :message=>"java.io.IOException : Failed to retrieve RMIServer stub: javax.naming.ConfigurationException [Root exception is java.rmi.UnknownHostException: Unknown host: master-17-tomcat; nested exception is: java.net.UnknownHostException: master-17-tomcat]"}
 
-          return {
+          if( response.include?( 'UnknownHostException' ) )
+            response = sprintf( 'Unknown Host: %s', host )
+          end
+
+          logger.debug( {
             :status  => responseStatus,
             :message => response
-          }
+          } )
+
+          return nil
 
         else
+
+#           logger.debug( response.class.to_s )
+#           logger.debug( response )
 
           body = response.dig(:message)
 
@@ -99,24 +108,26 @@ module ServiceDiscovery
             # #3  == engine
             engine = body[2]
 
-  #            logger.debug( JSON.pretty_generate( runtime ) )
-  #            logger.debug( JSON.pretty_generate( manager ) )
-  #            logger.debug( JSON.pretty_generate( engine ) )
+#             logger.debug( JSON.pretty_generate( runtime ) )
+#             logger.debug( JSON.pretty_generate( manager ) )
+#             logger.debug( JSON.pretty_generate( engine ) )
 
-            if( runtime['status'] && runtime['status'] == 200 )
+            status = runtime.dig('status') || 500
+            value  = runtime.dig('value')
 
-              value = runtime['value'] ? runtime['value'] : nil
+            if( status == 200 )
 
               if( value != nil )
 
-                classPath  = value['ClassPath'] ? value['ClassPath'] : nil
+                classPath  = value.dig('ClassPath')
 
                 if( classPath.include?( 'cm7-tomcat-installation' ) )
 
                   logger.debug( 'found pre cm160x Portstyle (‎possibly cm7.x)' )
-                  value = manager['value'] ? manager['value'] : nil
+                  value = manager.dig('value')
 
                   regex = /context=(.*?),/
+
                   value.each do |context,v|
 
                     part = context.match( regex )
@@ -141,11 +152,11 @@ module ServiceDiscovery
                   # caefeeder = caefeeder-preview, cae-feeder-live?
                   if( ( services.include?( 'coremedia' ) ) || ( services.include?( 'caefeeder' ) ) )
 
-                    value = engine['value'] ? engine['value'] : nil
+                    value = engine.dig('value')
 
-                    if( engine['status'].to_i == 200 )
+                    if( engine.dig('status').to_i == 200 )
 
-                      baseDir = value['baseDir'] ? value['baseDir'] : nil
+                      baseDir = value.dig('baseDir')
 
                       regex = /
                         ^                           # Starting at the front of the string
@@ -177,11 +188,11 @@ module ServiceDiscovery
                   # blueprint = cae-preview or delivery?editor
                   if( services.include?( 'blueprint' ) )
 
-                    value = engine['value'] ? engine['value'] : nil
+                    value = engine.dig('value')
 
-                    if( engine['status'].to_i == 200 )
+                    if( engine.dig('status').to_i == 200 )
 
-                      jvmRoute = value['jvmRoute'] ? value['jvmRoute'] : nil
+                      jvmRoute = value.dig('jvmRoute')
 
                       if( ( jvmRoute != nil ) && ( jvmRoute.include?( 'studio' ) ) )
                         services.delete( "blueprint" )
@@ -255,7 +266,7 @@ module ServiceDiscovery
 
       end
 
-      logger.debug( "  found services: #{services}" )
+#       logger.debug( "  found services: #{services}" )
 
       return services
     end

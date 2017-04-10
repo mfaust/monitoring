@@ -167,7 +167,7 @@ module ServiceDiscovery
       # the dicovered ports are IMPORTANT
       if( @serviceConfig['services'][d] )
 
-#         logger.debug( @serviceConfig['services'][d] )
+        logger.debug( @serviceConfig['services'][d] )
 
         data[d].merge!( @serviceConfig['services'][d] ) { |key, port| port }
 
@@ -297,7 +297,7 @@ module ServiceDiscovery
 
       if( open == true )
 
-        names = self.discoverApplication( host, p )
+        names = self.discoverApplication( longHostName, p )
 
         logger.debug( "discovered services: #{names}" )
 
@@ -314,14 +314,19 @@ module ServiceDiscovery
     end
 
     # merge discovered services with cm-services.yaml
+    #
     services = self.createHostConfig( services )
 
-    logger.debug( @redis.dnsData( { :ip => ip, :short => shortHostName } ) )
+    @redis.createDiscovery( {
+      :short    => shortHostName,
+      :data     => services
+    } )
 
+#     logger.debug( @redis.dnsData( { :ip => ip, :short => shortHostName } ) )
+#
     dns      = @db.dnsData( { :ip => ip, :short => shortHostName } )
 
     if( dns == nil )
-
       logger.debug( 'no DNS data for ' + shortHostName )
     else
 
@@ -331,11 +336,6 @@ module ServiceDiscovery
       dnsLongname  = dns[ :longname ]
       dnsCreated   = dns[ :created ]
       dnsChecksum  = dns[ :checksum ]
-
-      @redis.createDiscovery( {
-        :short    => dnsShortname,
-        :data     => services
-      } )
 
       @db.createDiscovery( {
         :id       => dnsId,
@@ -347,14 +347,10 @@ module ServiceDiscovery
 
     end
 
-    status  = 200
-    message = 'Host successful created'
-
-    @services = services
-
     return {
-      :status  => status,
-      :message => message
+      :status   => 200,
+      :message  => 'Host successful created',
+      :services => services
     }
   end
 
@@ -402,7 +398,6 @@ module ServiceDiscovery
       logger.info( 'TODO - use Database insteed of File - ASAP' )
     else
 
-      logger.debug( @redis.discoveryData( { :ip => host, :short => host } ) )
 
       discoveryData  = @db.discoveryData( { :ip => host, :short => host } )
 
@@ -425,8 +420,6 @@ module ServiceDiscovery
         services[s.first.to_sym] = s.last.dig(:data)
 
       end
-
-      logger.debug( @redis.status( { :ip => host, :short => host } ) )
 
       status         = @db.status( { :ip => host, :short => host } )
 
@@ -454,6 +447,60 @@ module ServiceDiscovery
         :services => services,
         :created  => created
       }
+
+      logger.debug( result )
+
+      # redis
+
+      # create DNS Information
+      hostInfo      = Utils::Network.resolv( host )
+
+      logger.debug( "hostResolve #{hostInfo}" )
+
+      ip            = hostInfo.dig(:ip)
+      shortHostName = hostInfo.dig(:short)
+      longHostName  = hostInfo.dig(:long)
+
+      discoveryData = @redis.discoveryData( { :short => shortHostName } )
+
+      discoveryData.each.each do |s|
+
+        data = s.last
+        data.reject! { |k| k == 'application' }
+        data.reject! { |k| k == 'template' }
+
+        services[s.first.to_sym] ||= {}
+        services[s.first.to_sym] = data
+
+      end
+
+      status         = @redis.status( { :short => shortHostName } )
+#       logger.debug( @redis.dnsData( { :ip => ip, :short => shortHostName } ) )
+      created        = status.dig( :created )
+      created        = Time.parse( created ).strftime( '%Y-%m-%d %H:%M:%S' )
+      online         = status.dig( :status )
+
+      case online
+      when 0, false
+        status = 'offline'
+      when 1, true
+        status = 'online'
+      when 98
+        status = 'delete'
+      when 99
+        status = 'prepare'
+      else
+        status = 'unknown'
+      end
+
+      result = {
+        :status   => 200,
+        :mode     => status,
+        :services => services,
+        :created  => created
+      }
+
+      logger.debug( result )
 
     end
 
