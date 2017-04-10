@@ -199,7 +199,7 @@ services:
 
   icinga2-master:
     restart: always
-    image: bodsch/docker-icinga2:1703-04
+    image: bodsch/docker-icinga2:1704-01
     container_name: icinga2-master
     hostname: icinga2-master
     labels:
