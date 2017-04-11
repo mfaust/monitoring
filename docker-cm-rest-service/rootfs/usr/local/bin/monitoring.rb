@@ -447,6 +447,8 @@ class Monitoring
 #               end
 #             end
 
+            logger.debug( services )
+
             services.each do |s|
               s.last.reject! { |k| k == 'template' }
               s.last.reject! { |k| k == 'application' }

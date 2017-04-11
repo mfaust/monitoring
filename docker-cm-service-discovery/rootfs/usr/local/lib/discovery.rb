@@ -3,7 +3,7 @@
 # 13.09.2016 - Bodo Schulz
 #
 #
-# v1.5.1
+# v1.6.0
 # -----------------------------------------------------------------------------
 
 require 'json'
@@ -94,8 +94,8 @@ module ServiceDiscovery
     @serviceConfig     = settings.dig(:serviceConfigFile)
     @scanPorts         = ports
 
-    version             = '1.5.1'
-    date                = '2017-03-27'
+    version             = '1.6.0'
+    date                = '2017-04-11'
 
     logger.info( '-----------------------------------------------------------------' )
     logger.info( ' CoreMedia - Service Discovery' )
@@ -250,6 +250,7 @@ module ServiceDiscovery
     logger.debug( sprintf( 'ping ip %s if running', ip ) )
 
     # second, if the that we whant monitored, available
+    #
     if( Utils::Network.isRunning?( ip ) == false )
 
       logger.error( 'host not running' )
@@ -398,57 +399,56 @@ module ServiceDiscovery
       logger.info( 'TODO - use Database insteed of File - ASAP' )
     else
 
-
-      discoveryData  = @db.discoveryData( { :ip => host, :short => host } )
-
-      if( discoveryData == nil )
-
-        return {
-          :status   => 404,
-          :message  => 'no host found'
-        }
-
-      end
-
-      hostServices   = discoveryData.dig( host )
-
-      hostServices.each do |s|
-
-        s.last.dig(:data).reject! { |k| k == :application }
-
-        services[s.first.to_sym] ||= {}
-        services[s.first.to_sym] = s.last.dig(:data)
-
-      end
-
-      status         = @db.status( { :ip => host, :short => host } )
-
-      created        = status.dig( :created )
-      created        = Time.parse( created ).strftime( '%Y-%m-%d %H:%M:%S' )
-
-      online         = status.dig( :status )
-
-      case online
-      when 0
-        status = 'offline'
-      when 1
-        status = 'online'
-      when 98
-        status = 'delete'
-      when 99
-        status = 'prepare'
-      else
-        status = 'unknown'
-      end
-
-      result = {
-        :status   => 200,
-        :mode     => status,
-        :services => services,
-        :created  => created
-      }
-
-      logger.debug( result )
+#       discoveryData  = @db.discoveryData( { :ip => host, :short => host } )
+#
+#       if( discoveryData == nil )
+#
+#         return {
+#           :status   => 404,
+#           :message  => 'no host found'
+#         }
+#
+#       end
+#
+#       hostServices   = discoveryData.dig( host )
+#
+#       hostServices.each do |s|
+#
+#         s.last.dig(:data).reject! { |k| k == :application }
+#
+#         services[s.first.to_sym] ||= {}
+#         services[s.first.to_sym] = s.last.dig(:data)
+#
+#       end
+#
+#       status         = @db.status( { :ip => host, :short => host } )
+#
+#       created        = status.dig( :created )
+#       created        = Time.parse( created ).strftime( '%Y-%m-%d %H:%M:%S' )
+#
+#       online         = status.dig( :status )
+#
+#       case online
+#       when 0
+#         status = 'offline'
+#       when 1
+#         status = 'online'
+#       when 98
+#         status = 'delete'
+#       when 99
+#         status = 'prepare'
+#       else
+#         status = 'unknown'
+#       end
+#
+#       result = {
+#         :status   => 200,
+#         :mode     => status,
+#         :services => services,
+#         :created  => created
+#       }
+#
+#       logger.debug( result )
 
       # redis
 
@@ -466,18 +466,46 @@ module ServiceDiscovery
       discoveryData.each.each do |s|
 
         data = s.last
-        data.reject! { |k| k == 'application' }
-        data.reject! { |k| k == 'template' }
+
+        if( data != nil )
+          data.reject! { |k| k == 'application' }
+          data.reject! { |k| k == 'template' }
+        end
 
         services[s.first.to_sym] ||= {}
         services[s.first.to_sym] = data
 
       end
 
-      status         = @redis.status( { :short => shortHostName } )
+      status         = nil # @redis.status( { :short => shortHostName } )
+
+      # BEHOLD
+      #
+        for y in 1..15
+
+          result      = @redis.status( { :short => shortHostName } )
+
+          if( result != nil )
+            status = result
+            break
+          else
+            logger.debug( sprintf( 'Waiting for data ... %d', y ) )
+            sleep( 4 )
+          end
+        end
+
+      logger.debug( status )
+
+
 #       logger.debug( @redis.dnsData( { :ip => ip, :short => shortHostName } ) )
       created        = status.dig( :created )
-      created        = Time.parse( created ).strftime( '%Y-%m-%d %H:%M:%S' )
+
+      if( created == nil )
+        created      = 'unknown'
+      else
+        created      = Time.parse( created ).strftime( '%Y-%m-%d %H:%M:%S' )
+      end
+
       online         = status.dig( :status )
 
       case online
@@ -500,7 +528,7 @@ module ServiceDiscovery
         :created  => created
       }
 
-      logger.debug( result )
+#       logger.debug( result )
 
     end
 

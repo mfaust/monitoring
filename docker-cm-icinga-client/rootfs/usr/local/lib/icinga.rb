@@ -12,6 +12,7 @@ require 'net/http'
 require 'uri'
 
 require_relative 'logging'
+require_relative 'utils/network'
 require_relative 'message-queue'
 require_relative 'icinga/network'
 require_relative 'icinga/status'

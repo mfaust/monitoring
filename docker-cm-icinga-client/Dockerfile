@@ -9,7 +9,7 @@ ENV \
   TERM=xterm \
   APK_ADD="build-base openssl-dev ruby-dev ruby-irb ruby-rdoc zlib zlib-dev" \
   APK_DEL="build-base ruby-dev ruby-rdoc zlib-dev" \
-  GEMS="beaneater dalli json openssl redis rest-client rufus-scheduler tzinfo-data"
+  GEMS="beaneater dalli ipaddress json openssl redis rest-client rufus-scheduler tzinfo-data"
 
 LABEL version="1703-03.1"
 

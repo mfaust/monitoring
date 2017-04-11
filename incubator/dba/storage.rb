@@ -11,6 +11,11 @@ require_relative 'monkey'
 require_relative 'logging'
 require_relative 'tools'
 
+
+# -----------------------------------------------------------------------------
+#
+# 2017-04-11 - 09:30
+#
 # -----------------------------------------------------------------------------
 
 module Storage
@@ -85,8 +90,22 @@ module Storage
 
     def get( key )
 
-      return @redis.get( key )
+      data =  @redis.get( key )
 
+      if( data == nil )
+        return nil
+      elsif( data == 'true' )
+        return true
+      elsif( data == 'false' )
+        return false
+      elsif( data.is_a?( String ) && data == '' )
+        return nil
+      else
+
+        data = JSON.parse( data, :quirks_mode => true )
+      end
+
+      return data.deep_string_keys
     end
 
 
@@ -254,7 +273,7 @@ module Storage
 
       dnsIp        = params.dig(:ip)
       dnsShortname = params.dig(:short)
-      configKey    = params.dig(:key)
+      key    = params.dig(:key)
 
       cachekey = sprintf(
         '%s-config',
@@ -262,7 +281,7 @@ module Storage
       )
 
       # delete single config
-      if( configKey != nil )
+      if( key != nil )
 
         existingData = @redis.get( cachekey )
 
@@ -270,7 +289,7 @@ module Storage
           existingData = JSON.parse( existingData )
         end
 
-        data = existingData.dig('data').tap { |hs| hs.delete(configKey) }
+        data = existingData.dig('data').tap { |hs| hs.delete(key) }
 
         existingData['data'] = data
 
@@ -293,7 +312,7 @@ module Storage
 
       dnsIp        = params.dig(:ip)
       dnsShortname = params.dig(:short)
-      configKey    = params.dig(:key)
+      key    = params.dig(:key)
 
       cachekey = sprintf(
         '%s-config',
@@ -311,10 +330,10 @@ module Storage
       end
 
 
-      if( configKey != nil )
+      if( key != nil )
 
         result = {
-          configKey.to_sym => result.dig( :data, configKey.to_sym )
+          key.to_sym => result.dig( :data, key.to_sym )
         }
       else
 
@@ -557,12 +576,12 @@ module Storage
       short  = params.dig(:short)
       key    = params.dig(:key)
 
-      cachekey = 'nodes'
+      key = 'nodes'
 
       # delete single config
-      if( configKey != nil )
+      if( key != nil )
 
-        existingData = @redis.get( cachekey )
+        existingData = @redis.get( key )
 
         if( existingData.is_a?( String ) )
           existingData = JSON.parse( existingData )
@@ -577,7 +596,7 @@ module Storage
       else
 
         # remove all data
-        @redis.del( cachekey )
+        @redis.del( key )
       end
 
     end
@@ -591,6 +610,10 @@ module Storage
 
       short     = params.dig(:short)
       status    = params.dig(:status)  # Database::ONLINE
+
+      if( status.is_a?( TrueClass ) || status.is_a?( FalseClass ) )
+        status = status ? 0 : 1
+      end
 
       cachekey  = 'nodes'
 
@@ -612,7 +635,7 @@ module Storage
 
         keys   = result.dig('data').values
 
-        result = Array.new()
+        result = Hash.new()
 
         keys.each do |k|
 
@@ -620,9 +643,20 @@ module Storage
 
           nodeStatus = d.dig('status') || 0
 
+          if( nodeStatus.is_a?( TrueClass ) || nodeStatus.is_a?( FalseClass ) )
+            nodeStatus = nodeStatus ? 0 : 1
+          end
+
           if( nodeStatus.to_i == status.to_i )
 
-            result << k.to_s
+            dnsData    = self.dnsData( { :short => k } )
+#             statusData = self.status( { :short => k } )
+
+#             logger.debug( statusData )
+
+            result[k.to_s] ||= {}
+            result[k.to_s] = dnsData
+
           end
         end
 
@@ -644,6 +678,10 @@ module Storage
 
       short   = params.dig(:short)
       status  = params.dig(:status) || 0
+
+      if( status.is_a?( TrueClass ) || status.is_a?( FalseClass ) )
+        status = status ? 0 : 1
+      end
 
       if( short == nil )
         return {
@@ -710,6 +748,24 @@ module Storage
 
       status   = result.dig( 'status' ) || 0
       created  = result.dig( 'created' )
+
+      if( status.is_a?( TrueClass ) || status.is_a?( FalseClass ) )
+        status = status ? 0 :1
+      end
+
+#       case status
+#       when 0, false
+#         status = 'offline'
+#       when 1, true
+#         status = 'online'
+#       when 98
+#         status = 'delete'
+#       when 99
+#         status = 'prepare'
+#       else
+#         status = 'unknown'
+#       end
+
 
       return {
         :short   => short,

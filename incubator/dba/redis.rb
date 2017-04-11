@@ -5,9 +5,9 @@ require_relative 'storage'
 
 # -----------------------------------------------------------------------------
 
-ip    = '10.2.12.0'
-short = 'content-master-17-cms'
-long  = 'content-master-17-cms.coremedia.vm'
+ip    = '10.2.19.241'
+short = 'master-17-tomcat'
+long  = 'master-17-tomcat.coremedia.vm'
 
 config   = { "ports": [200,400], "services": [ "cae-live", "rls" ] }
 config_1 = { "ports": [200,400] }
@@ -29,6 +29,7 @@ puts d.config( { :ip => ip, :key => 'ports' } )
 
 puts d.nodes( { :short => short } )
 puts d.nodes( { :status => 99 } )
+puts d.nodes( { :status => 1 } )
 
 puts '============================================================'
 
@@ -39,22 +40,23 @@ puts 'dns: '
 # r.createDNS( { :ip => '127.0.1.1', :short => "foo-bar", :long => "foo-bar.tld" } )
 puts r.dnsData( dns )
 
-# puts ''
-# puts 'status:'
-# puts '  - read'
-# puts r.status( { :short => short } )
-#
-# puts '  - set'
-# r.setStatus( { :short => short, :status => 1 } )
-# puts '  - get'
-# puts r.status( { :short => short } )
+puts ''
+puts 'status:'
+puts '  - read'
+puts r.status( { :short => short } )
+
+puts '  - set'
+r.setStatus( { :short => short, :status => 1 } )
+puts '  - get'
+puts r.status( { :short => short } )
 
 
-# puts ''
-# puts 'nodes: '
-# puts r.nodes( { :short => short } )
-# puts r.nodes( { :status => 99 } )
-
+puts ''
+puts 'nodes: '
+puts r.nodes( { :short => short } )
+puts r.nodes( { :status => 99 } )
+puts r.nodes( { :status => 1 } )
+puts '---------------------------------------------------------'
 
 # puts ''
 # puts 'config:'
@@ -79,21 +81,31 @@ puts r.dnsData( dns )
 # puts r.config( { :short => short } )
 
 
-puts ''
-puts 'discovery:'
-puts '  - read'
-puts r.discoveryData( { :short => short } )
-puts JSON.pretty_generate( r.discoveryData( { :short => short, :service => 'cae-live-1' } ) )
-puts r.discoveryData( { :short => short } ).keys.sort
+# puts ''
+# puts 'discovery:'
+# puts '  - read'
+# puts r.discoveryData( { :short => short } )
+# puts JSON.pretty_generate( r.discoveryData( { :short => short, :service => 'cae-live-1' } ) )
+# puts r.discoveryData( { :short => short } ).keys.sort
 
 
 # puts ''
 # puts 'measurements:'
 # puts '  - read'
-# puts r.measurements( { :short => short } )
+# # puts r.measurements( { :short => short } )
 # puts r.measurements( { :short => short, :application => 'cae-live-1' } )
 #
 #
+
+# data = r.get( Storage::RedisClient.cacheKey( { :host => short, :pre => 'collector' } ) )
+
+#data = eval(data)
+
+#if( data.is_a?(String))
+#  data = JSON.parse(data)
+#end
+
+# puts data
 
 # -----------------------------------------------------------------------------
 

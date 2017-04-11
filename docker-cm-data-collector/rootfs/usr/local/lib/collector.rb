@@ -18,6 +18,7 @@ require 'time_difference'
 require 'rufus-scheduler'
 
 require_relative 'logging'
+require_relative 'utils/network'
 require_relative 'monkey'
 require_relative 'jolokia'
 require_relative 'message-queue'
@@ -74,10 +75,10 @@ module DataCollector
 
     def initialize( settings = {} )
 
-      applicationConfig  = settings[:applicationConfigFile] ? settings[:applicationConfigFile] : nil
-      serviceConfig      = settings[:serviceConfigFile]     ? settings[:serviceConfigFile]     : nil
+      applicationConfig  = settings.dig(:applicationConfigFile)
+      serviceConfig      = settings.dig(:serviceConfigFile)
 
-      @host              = settings[:host]                  ? settings[:host]                  : nil
+      @host              = settings.dig(:host)
       @redisHost         = settings.dig(:redis, :host)
       @redisPort         = settings.dig(:redis, :port) || 6379
 
@@ -112,41 +113,15 @@ module DataCollector
 
     # merge Data between Property Files and discovered Services
     # creates mergedHostData.json for every Node
-    def buildMergedData()
+    def buildMergedData( host )
 
-      if( @host == nil )
+      if( host == nil )
         logger.error( 'no hostname found' )
         return {}
       end
 
       # Database
       tomcatApplication = Marshal.load( Marshal.dump( @cfg.jolokiaApplications ) )
-
-      # Redis based
-      data = @redis.discoveryData( { :short => @host } )
-
-      if( data == nil || data == false || data.count() == 0 )
-        logger.error( 'no discovery in database data found' )
-        return false
-      end
-
-      dataForRedis = Array.new()
-
-      data.each do |service,payload|
-        dataForRedis << { service.to_s => self.mergeData( service.to_s, tomcatApplication, payload ) }
-      end
-
-      dataForRedis = dataForRedis.deep_string_keys
-
-      # http://stackoverflow.com/questions/11856407/rails-mapping-array-of-hashes-onto-single-hash
-      # mapping array of hashes onto single hash
-      dataForRedis = dataForRedis.reduce( {} , :merge )
-
-      @redis.createMeasurements( { :short => @host, :data => dataForRedis } )
-
-#       logger.debug('')
-#       logger.debug( ' == redis done ==' )
-#       logger.debug('')
 
       # Database based
       #
@@ -168,11 +143,52 @@ module DataCollector
           discoveryId = payload.dig( :discovery_id )
 
           result      = self.mergeData( service, tomcatApplication, payload )
-#           logger.debug( JSON.pretty_generate( result ) )
+
+          logger.debug( JSON.pretty_generate( result ) )
 
           @db.createMeasurements( { :dns_id => dnsId, :discovery_id => discoveryId, :data => result } )
         end
       end
+
+      # Redis based
+      data = @redis.discoveryData( { :short => host } )
+
+      if( data == nil || data == false || data.count() == 0 )
+        logger.error( 'no discovery in database data found' )
+        return false
+      end
+
+      dataForRedis = Array.new()
+
+      data.each do |service,payload|
+
+        result      = self.mergeData( service.to_s, tomcatApplication, payload )
+
+        logger.debug( JSON.pretty_generate( result ) )
+
+        dataForRedis << { service.to_s => result }
+      end
+
+      dataForRedis = dataForRedis.deep_string_keys
+
+      # http://stackoverflow.com/questions/11856407/rails-mapping-array-of-hashes-onto-single-hash
+      # mapping array of hashes onto single hash
+      dataForRedis = dataForRedis.reduce( {} , :merge )
+
+      @redis.createMeasurements( { :short => host, :data => dataForRedis } )
+
+      logger.debug('')
+      logger.debug( ' == redis done ==' )
+      logger.debug('')
+
+      logger.debug('')
+      logger.debug( JSON.pretty_generate( dataForRedis ) )
+      logger.debug('')
+
+      logger.debug('')
+      logger.debug( ' == redis done ==' )
+      logger.debug('')
+
 
       return true
 
@@ -185,8 +201,9 @@ module DataCollector
 
       configuredApplication = tomcatApplication.keys
 
-      logger.debug( configuredApplication )
-#      logger.debug( data )
+      logger.debug( "look for service: '#{service}'" )
+      logger.debug( "configured Applications: #{configuredApplication}" )
+      logger.debug( data )
 
       if( data == nil || data.count() == 0 )
         logger.debug( 'no data to merge' )
@@ -194,12 +211,22 @@ module DataCollector
         return {}
       end
 
-      application = data.dig(:data, 'application') || data.dig(:application)
-      solr_cores  = data.dig(:data, 'cores')       || data.dig(:cores)
-      metrics     = data.dig(:data, 'metrics')     || data.dig(:metrics)
+      if( data.dig(:data) == nil )
+
+        application = data.dig(:application)
+        solr_cores  = data.dig(:cores)
+        metrics     = data.dig(:metrics)
+      else
+
+        application = data.dig(:data, 'application')
+        solr_cores  = data.dig(:data, 'cores')
+        metrics     = data.dig(:data, 'metrics')
+      end
 
       data[:data]            ||= {}
       data[:data]['metrics'] ||= []
+
+      logger.debug( data )
 
       if( configuredApplication.include?( service ) )
 
@@ -298,7 +325,7 @@ module DataCollector
 
       @db                 = Storage::Database.new()
       @redis              = Storage::RedisClient.new( { :redis => { :host => @redisHost } } )
-      @mc                 = Storage::Memcached.new( { :host => memcacheHost, :port => memcachePort } )
+#       @mc                 = Storage::Memcached.new( { :host => memcacheHost, :port => memcachePort } )
       @jolokia            = Jolokia::Client.new( { :host => jolokiaHost, :port => jolokiaPort, :path => jolokiaPath, :auth => { :user => jolokiaAuthUser, :pass => jolokiaAuthPass } } )
       @mq                 = MessageQueue::Consumer.new( @MQSettings )
 
@@ -469,8 +496,10 @@ module DataCollector
     #
     def monitoredServer()
 
-      d = @db.nodes( { :status => 1 } )
+      d = @redis.nodes( { :status => 1 } )
+#       logger.debug( d )
 
+#       d = @db.nodes( { :status => 1 } )
 #       logger.debug( d )
 
       return d
@@ -492,10 +521,14 @@ module DataCollector
 #       logger.debug( sprintf( 'create bulk checks for \'%s\'', host ) )
 
       # to improve performance, read initial collector Data from Database and store them into Memcache (or Redis)
-      key       = Storage::Memcached.cacheKey( { :host => host, :pre => 'collector' } )
-      data      = @mc.get( key )
+#       key       = Storage::Memcached.cacheKey( { :host => host, :pre => 'collector' } )
+#       data      = @mc.get( key )
+
+      key       = Storage::RedisClient.cacheKey( { :host => host, :pre => 'collector' } )
+      data      = @redis.get( key )
 
       # recreate the cache every 10 minutes
+      #
       if ( data != nil )
 
         today     = Time.now().to_s
@@ -513,15 +546,18 @@ module DataCollector
       if( data == nil )
 
         data = @db.measurements( { :ip => host, :short => host } )
+        logger.debug( data )
 
-#         logger.debug( data )
+        data = @redis.measurements( { :short => host } )
+        logger.debug( data )
 
         if( data == nil || data == false )
           return
         else
           data['timestamp'] = Time.now().to_s
 
-          @mc.set( key, data )
+#          @mc.set( key, data )
+          @redis.set( key, data )
         end
 
       end
@@ -532,7 +568,7 @@ module DataCollector
         return
       end
 
-      services = data.dig( host )
+      services = data # .dig( host )
 
       if( services == nil )
         logger.error( 'no services found. skip ...' )
@@ -546,8 +582,10 @@ module DataCollector
 
       services.each do |s|
 
-        port    = data.dig( host, s, :data, 'port' )
-        metrics = data.dig( host, s, :data, 'metrics' )
+        logger.debug( s )
+
+        port    = data.dig( host, s, :data, 'port' )    || -1
+        metrics = data.dig( host, s, :data, 'metrics' ) || []
         bulk    = Array.new()
 
         logger.debug( sprintf( '    %s (%d)', s, port ) )
@@ -721,7 +759,7 @@ module DataCollector
 #             logger.debug( result[v] )
           end
 
-          if( @mc.set( cacheKey, result[v] ) == false )
+          if( @redis.set( cacheKey, result[v] ) == false )
             logger.error( sprintf( 'value for key % can not be write', cacheKey ) )
             logger.error( { :host => hostname, :pre => 'result', :service => v } )
           end
@@ -904,14 +942,23 @@ module DataCollector
 
         logger.debug( payload )
 
-        cacheKey = Storage::Memcached.cacheKey( { :host => payload.dig('host'), :pre => 'prepare' } )
+#         logger.debug( '-- memcache' )
+#         cacheKey = Storage::Memcached.cacheKey( { :host => payload.dig('host'), :pre => 'prepare' } )
+#
+#         logger.debug( @mc.get( cacheKey ) )
+#         @mc.set( cacheKey, nil )
+#         logger.debug( @mc.get( cacheKey ) )
+#         logger.debug( '--------' )
 
-        logger.debug( @mc.get( cacheKey ) )
+#         logger.debug( '-- redis' )
+        cacheKey = Storage::RedisClient.cacheKey( { :host => payload.dig('host'), :pre => 'prepare' } )
 
-        @mc.set( cacheKey, nil )
+#         logger.debug( @redis.get( cacheKey ) )
 
-        logger.debug( @mc.get( cacheKey ) )
+        @redis.set( cacheKey, nil )
 
+#         logger.debug( @redis.get( cacheKey ) )
+#         logger.debug( '--------' )
       end
     end
 
@@ -932,12 +979,18 @@ module DataCollector
 
       start = Time.now
 
-      monitoredServer.each do |h,d|
+      monitoredServer.each do |h|
+
+        h = h.first
 
         # TODO
-        prepared = false # @mc.get( Storage::Memcached.cacheKey( { :host => h, :pre => 'prepare' } ) )
+        #
+#         prepared = @mc.get( Storage::Memcached.cacheKey( { :host => h, :pre => 'prepare' } ) )
+        prepared = @redis.get( Storage::RedisClient.cacheKey( { :host => h, :pre => 'prepare' } ) )
 
-        if( prepared.is_a?( NilClass ) || prepared.is_a?( FalseClass ) )
+        logger.debug( prepared )
+
+        if( prepared.is_a?( NilClass ) || prepared.is_a?( FalseClass ) || ( prepared.is_a?( String ) && prepared == '' ) )
 
           result = false
 
@@ -951,18 +1004,18 @@ module DataCollector
           }
 
           p = Prepare.new( options )
-          result = p.buildMergedData()
+          result = p.buildMergedData( h )
 
           if( result == true )
-            @mc.set( Storage::Memcached.cacheKey( { :host => h, :pre => 'prepare' } ), true )
+#             @mc.set( Storage::Memcached.cacheKey( { :host => h, :pre => 'prepare' } ), true )
+            @redis.set( Storage::RedisClient.cacheKey( { :host => h, :pre => 'prepare' } ), 'true' )
           end
         else
           # roger, we have prepared datas
           # use them and do what you must do
-          monitoredServer.each do |h,d|
+          monitoredServer.each do |h|
 
-            self.createBulkCheck( h )
-
+            self.createBulkCheck( h.first )
           end
         end
 
