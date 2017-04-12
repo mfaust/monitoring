@@ -71,17 +71,19 @@ module ServiceDiscovery
       55555     # resourced (https://github.com/resourced/resourced)
     ]
 
-    jolokiaHost        = settings.dig(:jolokiaHost) || 'localhost'
-    jolokiaPort        = settings.dig(:jolokiaPort) || 8080
-    jolokiaPath        = settings.dig(:jolokiaPath) || '/jolokia'
-    jolokiaAuthUser    = settings.dig(:jolokiaAuthUser)
-    jolokiaAuthPass    = settings.dig(:jolokiaAuthPass)
-    mqHost             = settings.dig(:mqHost)      || 'localhost'
-    mqPort             = settings.dig(:mqPort)      || 11300
-    @mqQueue           = settings.dig(:mqQueue)     || 'mq-discover'
+    jolokiaHost         = settings.dig(:jolokia, :host)           || 'localhost'
+    jolokiaPort         = settings.dig(:jolokia, :port)           ||  8080
+    jolokiaPath         = settings.dig(:jolokia, :path)           || '/jolokia'
+    jolokiaAuthUser     = settings.dig(:jolokia, :auth, :user)
+    jolokiaAuthPass     = settings.dig(:jolokia, :auth, :pass)
+    mqHost              = settings.dig(:mq, :host)                || 'localhost'
+    mqPort              = settings.dig(:mq, :port)                || 11300
+    @mqQueue            = settings.dig(:mq, :queue)               || 'mq-discover'
 
-    redisHost          = settings.dig(:redis, :host)
-    redisPort          = settings.dig(:redis, :port)
+    redisHost           = settings.dig(:redis, :host)
+    redisPort           = settings.dig(:redis, :port)             || 6379
+
+    @serviceConfig      = settings.dig(:configFiles, :service)
 
     @MQSettings = {
       :beanstalkHost  => mqHost,
@@ -89,7 +91,6 @@ module ServiceDiscovery
       :beanstalkQueue => @mqQueue
     }
 
-    @serviceConfig     = settings.dig(:serviceConfigFile)
     @scanPorts         = ports
 
     version             = '1.6.0'

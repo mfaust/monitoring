@@ -30,16 +30,28 @@ redisPort          = ENV.fetch( 'REDIS_PORT'       , 6379 )
 interval           = ENV.fetch( 'INTERVAL'         , 20 )
 
 config = {
-  :jolokiaHost       => jolokiaHost,
-  :jolokiaPort       => jolokiaPort,
-  :jolokiaPath       => jolokiaPath,
-  :jolokiaAuthUser   => jolokiaAuthUser,
-  :jolokiaAuthPass   => jolokiaAuthPass,
-  :mqHost            => mqHost,
-  :mqPort            => mqPort,
-  :mqQueue           => mqQueue,
-  :redis             => { :host => redisHost, :port => redisPort },
-  :serviceConfigFile => serviceConfigFile
+  :jolokia     => {
+    :host => jolokiaHost,
+    :port => jolokiaPort,
+    :path => jolokiaPath,
+    :auth => {
+      :user => jolokiaAuthUser,
+      :pass => jolokiaAuthPass
+    }
+  },
+  :mq          => {
+    :host  => mqHost,
+    :port  => mqPort,
+    :queue => mqQueue
+  },
+  :redis       => {
+    :host => redisHost,
+    :port => redisPort
+  },
+  :configFiles => {
+    :application => applicationConfigFile,
+    :service     => serviceConfigFile
+  }
 }
 
 # ---------------------------------------------------------------------------------------
