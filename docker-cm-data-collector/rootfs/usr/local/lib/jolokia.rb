@@ -3,12 +3,13 @@
 # 08.01.2017 - Bodo Schulz
 #
 #
-# v1.0.2
+# v1.1.0
 # -----------------------------------------------------------------------------
 
 require 'net/http'
 
 require_relative 'logging'
+require_relative 'utils/network'
 
 module Jolokia
 
@@ -18,7 +19,7 @@ module Jolokia
 
     def initialize( params = {} )
 
-      logger.debug( JSON.pretty_generate( params ) )
+#       logger.debug( JSON.pretty_generate( params ) )
 
       @Host     = params.dig(:host) || 'localhost'
       @Port     = params.dig(:port) || 8080
@@ -119,7 +120,7 @@ module Jolokia
       port = params.dig(:port) ||  @Port
 
       # if our jolokia proxy available?
-      if( ! self.portOpen?( host, port ) )
+      if( ! Utils::Network.portOpen?( host, port ) )
         logger.error( 'jolokia service is not available!' )
         return false
       end
@@ -127,23 +128,6 @@ module Jolokia
       return true
     end
 
-
-    def portOpen? ( host, port, seconds = 1 )
-
-      # => checks if a port is open or not on a remote host
-      Timeout::timeout( seconds ) do
-        begin
-          TCPSocket.new( host, port ).close
-          return true
-        rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH, SocketError => e
-          logger.error( e )
-          return false
-        end
-      end
-      rescue Timeout::Error => e
-        logger.error( e )
-        return false
-    end
   end
 
 end
