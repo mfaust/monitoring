@@ -15,8 +15,6 @@ require_relative 'utils/network'
 require_relative 'jolokia'
 require_relative 'message-queue'
 require_relative 'storage'
-require_relative 'tools'
-
 require_relative 'discovery/queue'
 require_relative 'discovery/discovery'
 

@@ -7,11 +7,11 @@ ENV \
   ALPINE_MIRROR="dl-cdn.alpinelinux.org" \
   ALPINE_VERSION="v3.5" \
   TERM=xterm \
-  APK_ADD="build-base bind-tools drill imagemagick-dev ruby-dev ruby-io-console ruby-rdoc sqlite-dev sqlite" \
+  APK_ADD="build-base bind-tools drill imagemagick-dev ruby-dev ruby-io-console ruby-rdoc" \
   APK_DEL="build-base imagemagick-dev ruby-dev ruby-io-console zlib-dev" \
-  GEMS="beaneater dalli filesize ipaddress redis resolve-hostname rufus-scheduler sequel sqlite3 tzinfo-data"
+  GEMS="beaneater filesize ipaddress redis resolve-hostname rufus-scheduler tzinfo-data"
 
-LABEL version="1703-03.1"
+LABEL version="1704-02.2"
 
 # ---------------------------------------------------------------------------------------
 
