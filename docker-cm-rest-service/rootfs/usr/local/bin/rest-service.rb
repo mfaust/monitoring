@@ -31,11 +31,11 @@ module Sinatra
 
       @restServicePort  = ENV.fetch( 'REST_SERVICE_PORT', 4567 )
       @restServiceBind  = ENV.fetch( 'REST_SERVICE_BIND', '0.0.0.0' )
-      mqHost            = ENV.fetch( 'MQ_HOST'          , 'localhost' )
-      mqPort            = ENV.fetch( 'MQ_PORT'          , 11300 )
-      mqQueue           = ENV.fetch( 'MQ_QUEUE'         , 'mq-rest-service' )
-      redisHost         = ENV.fetch( 'REDIS_HOST'       , 'localhost' )
-      redisPort         = ENV.fetch( 'REDIS_PORT'       , 6379 )
+      @mqHost           = ENV.fetch( 'MQ_HOST'          , 'localhost' )
+      @mqPort           = ENV.fetch( 'MQ_PORT'          , 11300 )
+      @mqQueue          = ENV.fetch( 'MQ_QUEUE'         , 'mq-rest-service' )
+      @redisHost        = ENV.fetch( 'REDIS_HOST'       , 'localhost' )
+      @redisPort        = ENV.fetch( 'REDIS_PORT'       , 6379 )
 
       FileUtils.chmod( 1775, @logDirectory )
       FileUtils.chown( 'nobody', 'nobody', @logDirectory )
@@ -61,13 +61,13 @@ module Sinatra
 
     config = {
       :mq          => {
-        :host  => mqHost,
-        :port  => mqPort,
-        :queue => mqQueue
+        :host  => @mqHost,
+        :port  => @mqPort,
+        :queue => @mqQueue
       },
       :redis       => {
-        :host => redisHost,
-        :port => redisPort
+        :host => @redisHost,
+        :port => @redisPort
       }
     }
 

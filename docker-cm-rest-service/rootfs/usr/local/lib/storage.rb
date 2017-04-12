@@ -626,6 +626,11 @@ module Storage
         result = JSON.parse( result )
       end
 
+      if( result == nil )
+
+        return []
+      end
+
       if( short != nil )
 
         result   = result.dig('data').values.select { |x| x == short }

@@ -42,7 +42,7 @@ services:
   cm-rest-service:
     environment:
       TZ: 'Europe/Berlin'
-      REST_SERVICE_PORT: 4567
+      REST_SERVICE_PORT: 45678
       REST_SERVICE_BIND: '0.0.0.0'
       MQ_HOST: beanstalkd
       # MQ_PORT: 11300
