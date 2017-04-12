@@ -32,14 +32,6 @@ require_relative 'carbon-data/operating-system/node-exporter'
 
 # -----------------------------------------------------------------------------
 
-class Time
-  def add_minutes(m)
-    self + (60 * m)
-  end
-end
-
-# -----------------------------------------------------------------------------
-
 module CarbonData
 
   class Consumer
@@ -58,37 +50,32 @@ module CarbonData
     include CarbonData::Database::Postgres
     include CarbonData::OperatingSystem::NodeExporter
 
-    def initialize( params = {} )
+    def initialize( settings = {} )
 
-      memcacheHost   = params.dig( :memcache, :host )
-      memcachePort   = params.dig( :memcache, :port )
+      redisHost           = settings.dig(:redis, :host)
+      redisPort           = settings.dig(:redis, :port)             || 6379
 
-#       @interval      = params[:interval]       ? params[:interval]       : 15
-#       @interval      = @interval.to_i
-
-      version              = '1.99.8'
-      date                 = '2017-03-03'
+      version             = '1.99.12'
+      date                = '2017-04-12'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - CarbonData' )
       logger.info( "  Version #{version} (#{date})" )
       logger.info( '  Copyright 2016-2017 Coremedia' )
-#       logger.info( "  configured interval #{@interval}" )
       logger.info( '  used Services:' )
-      logger.info( "    - memcache     : #{memcacheHost}:#{memcachePort}" )
+      logger.info( "    - redis        : #{redisHost}:#{redisPort}" )
       logger.info( '-----------------------------------------------------------------' )
       logger.info( '' )
 
-      @db          = Storage::Database.new()
-      @mc          = Storage::Memcached.new( { :host => memcacheHost, :port => memcachePort } )
-      @mbean       = MBean::Client.new( { :memcache => @mc } )
+      @redis       = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
+      @mbean       = MBean::Client.new( { :redis => @redis } )
 
     end
 
 
     def createGraphiteOutput( key, values )
 
-      logger.debug( sprintf( 'createGraphiteOutput( %s, values )', key ) )
+#       logger.debug( sprintf( 'createGraphiteOutput( %s, values )', key ) )
 
       graphiteOutput = Array.new()
 
@@ -137,18 +124,6 @@ module CarbonData
         graphiteOutput.push( self.clientsCapConnection( values ) )
       when /^MemoryPool*/
         graphiteOutput.push( self.clientsMemoryPool( key, values ) )
-  #     when 'MemoryPoolCMSOldGen'
-  #       graphiteOutput.push(self.ParseResult_MemoryPool( values ) )
-  #     when 'MemoryPoolCodeCache'
-  #       graphiteOutput.push(self.ParseResult_MemoryPool( values ) )
-  #     when 'MemoryPoolCompressedClassSpace'
-  #       graphiteOutput.push(self.ParseResult_MemoryPool( values ) )
-  #     when 'MemoryPoolMetaspace'
-  #       graphiteOutput.push(self.ParseResult_MemoryPool( values ) )
-  #     when 'MemoryPoolParEdenSpace'
-  #       graphiteOutput.push(self.ParseResult_MemoryPool( values ) )
-  #     when 'MemoryPoolParSurvivorSpace'
-  #       graphiteOutput.push(self.ParseResult_MemoryPool( values ) )
 
         # Feeder
       when 'Health'
@@ -185,12 +160,15 @@ module CarbonData
     end
 
 
-    def run( node )
+    def run( node = nil )
 
-#      monitoredServer =
-      data            = nil
+      if( node == nil )
+        logger.error( 'no node given' )
 
-#      logger.debug( "#{monitoredServer.keys}" )
+        return []
+      end
+
+      data    = nil
 
       node.each do |h,d|
 
@@ -199,47 +177,12 @@ module CarbonData
 
         logger.info( sprintf( 'Host: %s', h ) )
 
-        # to improve performance, read initial discovery Data from Database and store them into Memcache (or Redis)
-        key       = Storage::Memcached.cacheKey( { :host => h, :pre => 'discovery' } )
-        data      = @mc.get( key )
-
-        # recreate the cache every 10 minutes
-        if ( data != nil )
-
-          today     = Time.now().to_s
-          timestamp = data.dig( 'timestamp' ) || Time.now().to_s
-
-          x = self.timeParser( today, timestamp )
-#           logger.debug( x )
-
-          if( x[:minutes] >= 10 )
-            data = nil
-          end
-
-        end
-
-        if( data == nil )
-
-          data = @db.discoveryData( { :ip => h, :short => h } )
-#           logger.debug( data )
-
-          if( data == nil )
-            next
-          end
-
-          data = data[h]
-          data['timestamp'] = Time.now().to_s
-
-          if( data == nil )
-            next
-          else
-            @mc.set( key, data )
-          end
-
-        end
+        data = @redis.discoveryData( { :short => h } )
 
         # no discovery data found
+        #
         if( data == nil )
+          logger.warn( 'no discovery data found' )
           next
         end
 
@@ -254,9 +197,9 @@ module CarbonData
 
           logger.info( sprintf( '  - %s (%s)', service, @Service ) )
 
-          cacheKey     = Storage::Memcached.cacheKey( { :host => h, :pre => 'result', :service => service } )
+          cacheKey     = Storage::RedisClient.cacheKey( { :host => h, :pre => 'result', :service => service } )
 
-          result = @mc.get( cacheKey )
+          result = @redis.get( cacheKey )
 
           case service
           when 'mongodb'

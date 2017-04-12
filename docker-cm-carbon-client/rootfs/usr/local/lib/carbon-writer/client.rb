@@ -8,16 +8,32 @@ module CarbonWriter
 
     include Logging
 
-    def initialize( params = {} )
+    def initialize( settings = {} )
 
-      @graphiteHost = params.dig( :graphite, :host )
-      @graphitePort = params.dig( :graphite, :port )
-      @slice        = params.dig( :slice )
-      @buffer       = CarbonWriter::Buffer.new( { :cache => 4 * 60 * 60 } )
-      @memcacheHost = params.dig( :memcache, :host )
-      @memcachePort = params.dig( :memcache, :port )
+      redisHost           = settings.dig(:redis, :host)
+      redisPort           = settings.dig(:redis, :port)             || 6379
 
-      @carbonData   = CarbonData::Consumer.new( { :memcache => { :host => @memcacheHost, :port => @memcachePort } } )
+      @graphiteHost = settings.dig( :graphite, :host )
+      @graphitePort = settings.dig( :graphite, :port )
+#       @slice        = settings.dig( :slice )
+#       @memcacheHost = params.dig( :memcache, :host )
+#       @memcachePort = params.dig( :memcache, :port )
+
+      version             = '1.3.0'
+      date                = '2017-04-12'
+
+      logger.info( '-----------------------------------------------------------------' )
+      logger.info( ' CoreMedia - Carbon client' )
+      logger.info( "  Version #{version} (#{date})" )
+      logger.info( '  Copyright 2016-2017 Coremedia' )
+      logger.info( '  used Services:' )
+      logger.info( "    - carbon       : #{@graphiteHost}:#{@graphitePort}" )
+#       logger.info( "    - message queue: #{mqHost}:#{mqPort}/#{@mqQueue}" )
+#       logger.info( '-----------------------------------------------------------------' )
+      logger.info( '' )
+
+      @carbonData   = CarbonData::Consumer.new( { :redis => { :host => redisHost, :port => redisPort } } )
+#       @buffer       = CarbonWriter::Buffer.new( { :cache => 4 * 60 * 60 } )
 
     end
 
@@ -94,19 +110,19 @@ module CarbonWriter
         return
       end
 
-      metric = {
-        :key   => key,
-        :value => value,
-        :time  => normalizeTime( time, @slice )
-      }
-
-      @buffer.push( metric )
-
-      if( @buffer.new_records?() )
-
-#         logger.debug( @buffer.pull( :string ) )
-
-      end
+#       metric = {
+#         :key   => key,
+#         :value => value,
+#         :time  => normalizeTime( time, @slice )
+#       }
+#
+#       @buffer.push( metric )
+#
+#       if( @buffer.new_records?() )
+#
+# #         logger.debug( @buffer.pull( :string ) )
+#
+#       end
 
       begin
 
