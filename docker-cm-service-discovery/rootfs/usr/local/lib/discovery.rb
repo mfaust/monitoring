@@ -211,8 +211,6 @@ module ServiceDiscovery
 
     logger.info( sprintf( 'Adding host \'%s\'', host ) )
 
-    logger.debug( @redis.discoveryData( { :ip => host, :short => host, :long => host } ) )
-
 #    if( @db.discoveryData( { :ip => host, :short => host, :long => host } ) != nil )
     if( @redis.discoveryData( { :short => host } ) != nil )
 
@@ -234,6 +232,15 @@ module ServiceDiscovery
         :message => 'jolokia service is not available!'
       }
     end
+
+    # --------------------------------------------------------------------------------------------
+    # TODO
+    # read first the prepared DNS data
+    # second (if not valid data exists) create an valid entry ..
+
+    dns = @redis.dnsData( { :short => host } )
+
+    logger.debug( dns )
 
     # create DNS Information
     hostInfo      = Utils::Network.resolv( host )
@@ -260,17 +267,14 @@ module ServiceDiscovery
     end
 
     @redis.createDNS( { :ip => ip, :short => shortHostName, :long => longHostName } )
+    #
+    # --------------------------------------------------------------------------------------------
 
     ports    = @redis.config( { :short => shortHostName, :key => "ports" } )
     services = @redis.config( { :short => shortHostName, :key => "services" } )
 
-    logger.debug( "redis  ports   : #{ports}" )
-    logger.debug( "redis  services: #{services}" )
-
-#    @db.createDNS( { :ip => ip, :short => shortHostName, :long => longHostName } )
-
-#    ports    = @db.config( { :ip => ip, :short => shortHostName, :long => longHostName, :key => "ports" } )
-#    services = @db.config( { :ip => ip, :short => shortHostName, :long => longHostName, :key => "services" } )
+#     logger.debug( "redis  ports   : #{ports}" )
+#     logger.debug( "redis  services: #{services}" )
 
     if( ports != false )
       ports = ports.dig( shortHostName, 'ports' )
@@ -319,31 +323,6 @@ module ServiceDiscovery
       :short    => shortHostName,
       :data     => services
     } )
-
-#     logger.debug( @redis.dnsData( { :ip => ip, :short => shortHostName } ) )
-#
-#     dns      = @redis.dnsData( { :short => shortHostName } )
-#
-#     if( dns == nil )
-#       logger.debug( 'no DNS data for ' + shortHostName )
-#     else
-#
-#       dnsId        = dns[ :id ]
-#       dnsIp        = dns[ :ip ]
-#       dnsShortname = dns[ :shortname ]
-#       dnsLongname  = dns[ :longname ]
-#       dnsCreated   = dns[ :created ]
-#       dnsChecksum  = dns[ :checksum ]
-#
-#       @db.createDiscovery( {
-#         :id       => dnsId,
-#         :ip       => dnsIp,
-#         :short    => dnsShortname,
-#         :checksum => dnsChecksum,
-#         :data     => services
-#       } )
-#
-#     end
 
     return {
       :status   => 200,
@@ -394,6 +373,16 @@ module ServiceDiscovery
     if( host == nil )
 
       logger.info( 'TODO - use Database insteed of File - ASAP' )
+
+      nodes = @redis.nodes()
+
+#       nodes.each do |n|
+#
+#
+#       end
+
+      return nodes
+
     else
 
 #       discoveryData  = @db.discoveryData( { :ip => host, :short => host } )
