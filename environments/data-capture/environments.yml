@@ -75,7 +75,8 @@ services:
       MQ_HOST: beanstalkd
       # MQ_PORT: 11300
       # MQ_QUEUE: mq-collector
-      MEMCACHE_HOST: memcached
+      # MEMCACHE IS NOW OBSOLETE!
+      # MEMCACHE_HOST: memcached
       # MEMCACHE_PORT: 11211
       REDIS_HOST: redis
       # REDIS_PORT: 6379
@@ -89,7 +90,8 @@ services:
       # NOTICE: EXTERNAL-SERVICE
       GRAPHITE_HOST: carbon.docker
       # GRAPHITE_PORT: 2003
-      MEMCACHE_HOST: memcached
+      # MEMCACHE IS NOW OBSOLETE!
+      # MEMCACHE_HOST: memcached
       # MEMCACHE_PORT: 11211
       REDIS_HOST: redis
       # REDIS_PORT: 6379
@@ -105,7 +107,8 @@ services:
       # GRAFANA_API_USER: admin
       # GRAFANA_API_PASSWORD: admin
       # GRAFANA_TEMPLATE_PATH: /usr/local/share/templates/grafana
-      MEMCACHE_HOST: memcached
+      # MEMCACHE IS NOW OBSOLETE!
+      # MEMCACHE_HOST: memcached
       # MEMCACHE_PORT: 11211
       REDIS_HOST: redis
       # REDIS_PORT: 6379
