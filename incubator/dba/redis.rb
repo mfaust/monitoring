@@ -18,44 +18,66 @@ dns      = { :ip => ip, :short => short, :long => long }
 config   = { :ip => ip, :short => short, :data => config }
 config_1 = { :ip => ip, :short => short, :data => config_1 }
 config_2 = { :ip => ip, :short => short, :data => config_2 }
+#
+# d = Storage::Database.new( { :cacheDirectory => '/tmp' } )
+# d.createDNS( dns )
+# d.createConfig( config )
+# #d.removeConfig( { :ip => ip, :short => short, :key => 'ports' } )
+#
+# puts d.dnsData( dns )
+# puts d.config( { :ip => ip, :key => 'ports' } )
+#
+# puts d.nodes( { :short => short } )
+# puts d.nodes( { :status => 99 } )
+# puts d.nodes( { :status => 1 } )
+#
 
-d = Storage::Database.new( { :cacheDirectory => '/tmp' } )
-d.createDNS( dns )
-d.createConfig( config )
-#d.removeConfig( { :ip => ip, :short => short, :key => 'ports' } )
-
-puts d.dnsData( dns )
-puts d.config( { :ip => ip, :key => 'ports' } )
-
-puts d.nodes( { :short => short } )
-puts d.nodes( { :status => 99 } )
-puts d.nodes( { :status => 1 } )
-
-puts '============================================================'
 
 r = Storage::RedisClient.new( { :redis => { :host => 'localhost' } } )
 
-puts 'dns: '
-# r.createDNS( dns )
-# r.createDNS( { :ip => '127.0.1.1', :short => "foo-bar", :long => "foo-bar.tld" } )
-puts r.dnsData( dns )
+# puts r.delete( 'node' )
+# puts r.get( 'node' )
 
-puts ''
-puts 'status:'
-puts '  - read'
-puts r.status( { :short => short } )
+puts '============================================================'
 
-puts '  - set'
-r.setStatus( { :short => short, :status => 1 } )
-puts '  - get'
-puts r.status( { :short => short } )
+# puts 'dns: '
+# # r.createDNS( dns )
+# # r.createDNS( { :ip => '127.0.1.1', :short => "foo-bar", :long => "foo-bar.tld" } )
+# puts r.dnsData( dns )
+#
+# puts ''
+# puts 'status:'
+# puts '  - read'
+# puts r.status( { :short => short } )
+#
+# puts '  - set'
+# r.setStatus( { :short => short, :status => 1 } )
+# puts '  - get'
+# puts r.status( { :short => short } )
 
 
 puts ''
 puts 'nodes: '
-puts r.nodes( { :short => short } )
-puts r.nodes( { :status => 99 } )
-puts r.nodes( { :status => 1 } )
+puts '  - read'
+puts " - #{r.nodes()}"
+puts " - #{r.nodes( { :short => short } )}"
+puts " - #{r.nodes( { :status => 99 } )}"
+puts " - #{r.nodes( { :status => 1 } )}"
+puts '--------'
+
+puts '  - create'
+puts " - #{r.addNode( { :short => short })}"
+puts '--------'
+puts '  - read'
+puts " - #{r.nodes()}"
+puts '--------'
+puts ''
+# puts '  - remove'
+# puts " - #{r.removeNode( { :short => short } )}"
+# puts '--------'
+# puts '  - read'
+# puts " - #{r.nodes()}"
+puts '--------'
 puts '---------------------------------------------------------'
 
 # puts ''
@@ -106,6 +128,13 @@ puts '---------------------------------------------------------'
 #end
 
 # puts data
+#
+# cacheKey = Storage::RedisClient.cacheKey( { :host => short, :pre => 'result', :service => 'sitemanager' } )
+#
+# puts
+#
+# puts JSON.pretty_generate( r.get( cacheKey ) )
+
 
 # -----------------------------------------------------------------------------
 

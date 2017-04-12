@@ -102,7 +102,13 @@ module Storage
         return nil
       else
 
-        data = JSON.parse( data, :quirks_mode => true )
+        begin
+          data = eval( data )
+        rescue => e
+          logger.error( e )
+        end
+
+#         data = JSON.parse( data, :quirks_mode => true )
       end
 
       return data.deep_string_keys
@@ -117,7 +123,7 @@ module Storage
 
     def delete( key )
 
-      return @redis.delete( key )
+      return @redis.del( key )
     end
 
 
@@ -513,7 +519,6 @@ module Storage
       short  = params.dig(:short)
       key    = params.dig(:key)
 
-
       cachekey = 'nodes'
 
       existingData = @redis.get( cachekey )
@@ -574,30 +579,30 @@ module Storage
       end
 
       short  = params.dig(:short)
-      key    = params.dig(:key)
 
-      key = 'nodes'
+      logger.debug( params )
 
-      # delete single config
-      if( key != nil )
+      cachekey = 'nodes'
 
-        existingData = @redis.get( key )
+      existingData = @redis.get( cachekey )
 
-        if( existingData.is_a?( String ) )
-          existingData = JSON.parse( existingData )
-        end
-
-        data = existingData.dig('data').tap { |hs| hs.delete(key) }
-
-        existingData['data'] = data
-
-        self.createConfig( { :short => short, :data => existingData } )
-
-      else
-
-        # remove all data
-        @redis.del( key )
+      if( existingData.is_a?( String ) )
+        existingData = JSON.parse( existingData )
       end
+
+      data = existingData.dig('data')
+      data = data.tap { |hs,d| hs.delete(  Storage::RedisClient.cacheKey( { :short => short } ) ) }
+
+#       existingData['data'] = data
+
+      # transform hash keys to symbols
+#       data = data.deep_string_keys
+
+      toStore = { data: data }.to_json
+
+      logger.debug( toStore )
+
+      @redis.set( cachekey, toStore )
 
     end
 
@@ -650,19 +655,24 @@ module Storage
           if( nodeStatus.to_i == status.to_i )
 
             dnsData    = self.dnsData( { :short => k } )
-#             statusData = self.status( { :short => k } )
-
-#             logger.debug( statusData )
 
             result[k.to_s] ||= {}
             result[k.to_s] = dnsData
 
           end
+
         end
 
         return result
 
       end
+
+      #
+      #
+      result   = result.dig('data').values
+
+      return result
+
 
     end
     #
