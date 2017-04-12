@@ -514,7 +514,6 @@ module Storage
       short  = params.dig(:short)
       key    = params.dig(:key)
 
-
       cachekey = 'nodes'
 
       existingData = @redis.get( cachekey )
@@ -575,18 +574,21 @@ module Storage
       end
 
       short  = params.dig(:short)
-      key    = params.dig(:key)
-
-      key = 'nodes'
+#       key    = params.dig(:key) || 'nodes'
 
       # delete single config
-      if( key != nil )
+      #
+#       if( key != nil )
 
-        existingData = @redis.get( key )
+        existingData = @redis.get( 'nodes' )
+
+        logger.debug( existingData )
 
         if( existingData.is_a?( String ) )
           existingData = JSON.parse( existingData )
         end
+
+        logger.debug( existingData )
 
         data = existingData.dig('data').tap { |hs| hs.delete(key) }
 
@@ -594,11 +596,11 @@ module Storage
 
         self.createConfig( { :short => short, :data => existingData } )
 
-      else
+#       else
 
         # remove all data
-        @redis.del( key )
-      end
+#         @redis.del( key )
+#       end
 
     end
 
@@ -664,6 +666,10 @@ module Storage
         return result
 
       end
+
+      #
+      #
+      return result.dig('data').values
 
     end
     #

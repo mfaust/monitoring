@@ -49,7 +49,6 @@ config = {
     :port => redisPort
   },
   :configFiles => {
-    :application => applicationConfigFile,
     :service     => serviceConfigFile
   }
 }

@@ -107,7 +107,6 @@ module ServiceDiscovery
     logger.info( '-----------------------------------------------------------------' )
     logger.info( '' )
 
-    @db                 = Storage::Database.new()
     @redis              = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
     @jolokia            = Jolokia::Client.new( { :host => jolokiaHost, :port => jolokiaPort, :path => jolokiaPath, :auth => { :user => jolokiaAuthUser, :pass => jolokiaAuthPass } } )
     @mqConsumer         = MessageQueue::Consumer.new( @MQSettings )
@@ -194,9 +193,7 @@ module ServiceDiscovery
     status  = 400
     message = 'Host not in Monitoring'
 
-    @redis.removeDNS( { :ip => host, :short => host, :long => host } )
-
-    if( @db.removeDNS( { :ip => host, :short => host, :long => host } ) != nil )
+    if( @redis.removeDNS( { :short => host } ) != nil )
 
       status  = 200
       message = 'Host successful removed'
@@ -216,7 +213,8 @@ module ServiceDiscovery
 
     logger.debug( @redis.discoveryData( { :ip => host, :short => host, :long => host } ) )
 
-    if( @db.discoveryData( { :ip => host, :short => host, :long => host } ) != nil )
+#    if( @db.discoveryData( { :ip => host, :short => host, :long => host } ) != nil )
+    if( @redis.discoveryData( { :short => host } ) != nil )
 
       logger.error( 'Host already created' )
 
@@ -263,16 +261,16 @@ module ServiceDiscovery
 
     @redis.createDNS( { :ip => ip, :short => shortHostName, :long => longHostName } )
 
-    ports    = @redis.config( { :ip => ip, :short => shortHostName, :long => longHostName, :key => "ports" } )
-    services = @redis.config( { :ip => ip, :short => shortHostName, :long => longHostName, :key => "services" } )
+    ports    = @redis.config( { :short => shortHostName, :key => "ports" } )
+    services = @redis.config( { :short => shortHostName, :key => "services" } )
 
     logger.debug( "redis  ports   : #{ports}" )
     logger.debug( "redis  services: #{services}" )
 
-    @db.createDNS( { :ip => ip, :short => shortHostName, :long => longHostName } )
+#    @db.createDNS( { :ip => ip, :short => shortHostName, :long => longHostName } )
 
-    ports    = @db.config( { :ip => ip, :short => shortHostName, :long => longHostName, :key => "ports" } )
-    services = @db.config( { :ip => ip, :short => shortHostName, :long => longHostName, :key => "services" } )
+#    ports    = @db.config( { :ip => ip, :short => shortHostName, :long => longHostName, :key => "ports" } )
+#    services = @db.config( { :ip => ip, :short => shortHostName, :long => longHostName, :key => "services" } )
 
     if( ports != false )
       ports = ports.dig( shortHostName, 'ports' )
@@ -324,28 +322,28 @@ module ServiceDiscovery
 
 #     logger.debug( @redis.dnsData( { :ip => ip, :short => shortHostName } ) )
 #
-    dns      = @db.dnsData( { :ip => ip, :short => shortHostName } )
-
-    if( dns == nil )
-      logger.debug( 'no DNS data for ' + shortHostName )
-    else
-
-      dnsId        = dns[ :id ]
-      dnsIp        = dns[ :ip ]
-      dnsShortname = dns[ :shortname ]
-      dnsLongname  = dns[ :longname ]
-      dnsCreated   = dns[ :created ]
-      dnsChecksum  = dns[ :checksum ]
-
-      @db.createDiscovery( {
-        :id       => dnsId,
-        :ip       => dnsIp,
-        :short    => dnsShortname,
-        :checksum => dnsChecksum,
-        :data     => services
-      } )
-
-    end
+#     dns      = @redis.dnsData( { :short => shortHostName } )
+#
+#     if( dns == nil )
+#       logger.debug( 'no DNS data for ' + shortHostName )
+#     else
+#
+#       dnsId        = dns[ :id ]
+#       dnsIp        = dns[ :ip ]
+#       dnsShortname = dns[ :shortname ]
+#       dnsLongname  = dns[ :longname ]
+#       dnsCreated   = dns[ :created ]
+#       dnsChecksum  = dns[ :checksum ]
+#
+#       @db.createDiscovery( {
+#         :id       => dnsId,
+#         :ip       => dnsIp,
+#         :short    => dnsShortname,
+#         :checksum => dnsChecksum,
+#         :data     => services
+#       } )
+#
+#     end
 
     return {
       :status   => 200,
