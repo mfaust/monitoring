@@ -12,7 +12,7 @@ require 'rufus-scheduler'
 
 require_relative '../lib/logging'
 require_relative '../lib/utils/network'
-require_relative '../lib/tools'
+# require_relative '../lib/tools'
 require_relative '../lib/storage'
 require_relative '../lib/message-queue'
 
@@ -26,78 +26,90 @@ class Monitoring
 
   def initialize( settings = {} )
 
-    @configFile    = '/etc/cm-monitoring.yaml'
+    mqHost              = settings.dig(:mq, :host)      || 'localhost'
+    mqPort              = settings.dig(:mq, :port)      || 11300
+    mqQueue             = settings.dig(:mq, :queue)     || 'mq-rest-service'
+    redisHost           = settings.dig(:redis, :host)   || 'localhost'
+    redisPort           = settings.dig(:redis, :port)   || 6379
+
+    @MQSettings = {
+      :beanstalkHost  => mqHost,
+      :beanstalkPort  => mqPort,
+      :beanstalkQueue => mqQueue
+    }
+
+    @enabledDiscovery = true
+    @enabledGrafana   = true
+    @enabledIcinga    = true
+
+#     @configFile    = '/etc/cm-monitoring.yaml'
 
     logger.level           = Logger::DEBUG
 
-    self.readConfigFile()
+#     self.readConfigFile()
 
-    @MQSettings = {
-      :beanstalkHost       => @mqHost,
-      :beanstalkPort       => @mqPort
-    }
-
-    version              = '2.2.3'
-    date                 = '2017-01-17'
+    version              = '2.4.80'
+    date                 = '2017-04-12'
 
     logger.info( '-----------------------------------------------------------------' )
     logger.info( ' CoreMedia - Monitoring Service' )
     logger.info( "  Version #{version} (#{date})" )
     logger.info( '  Copyright 2016-2017 Coremedia' )
-    logger.info( '' )
+    logger.info( '  used Services:' )
+    logger.info( "    - redis        : #{redisHost}:#{redisPort}" )
+    logger.info( "    - message queue: #{mqHost}:#{mqPort}/#{mqQueue}" )
     logger.info( '-----------------------------------------------------------------' )
     logger.info( '' )
 
-    @db         = Storage::Database.new()
     @mqConsumer = MessageQueue::Consumer.new( @MQSettings )
+    @redis      = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
 
+    scheduler   = Rufus::Scheduler.new
+    scheduler.every( 40 ) do
 
-#     infoQueues = [
-#       'mq-discover-info',
-#       'mq-grafana-info',
-#       'mq-icinga-info'
-#     ]
-#
-
-#     scheduler   = Rufus::Scheduler.new
-#
-#     scheduler.every( 40 ) do
-#
-#       infoQueues.each do |queue|
-#
-#         @mqConsumer.releaseBuriedJobs( queue )
-#       end
-#     end
-
-  end
-
-
-  def readConfigFile()
-
-    config = YAML.load_file( @configFile )
-
-    @mqHost           = config['mq']['host']               ? config['mq']['host']               : 'localhost'
-    @mqPort           = config['mq']['port']               ? config['mq']['port']               : 11300
-    @mqQueue          = config['mq']['queue']              ? config['mq']['queue']              : 'mq-rest-service'
-
-    @serviceChecks    = config['service-checks']           ? config['service-checks']           : nil
-
-    @enabledDiscovery = false
-    @enabledGrafana   = false
-    @enabledIcinga    = false
-
-    @monitoringServices = config['monitoring-services']    ? config['monitoring-services']      : nil
-
-    if( @monitoringServices != nil )
-
-      services          = @monitoringServices.reduce( :merge )
-
-      @enabledDiscovery = true # services['discovery'] && services['discovery'] == true  ? true : false
-      @enabledGrafana   = true # services['grafana']   && services['grafana'] == true    ? true : false
-      @enabledIcinga    = true # services['icinga2']   && services['icinga2'] == true    ? true : false
+      self.createNodeInformation()
     end
 
   end
+
+
+  def createNodeInformation()
+
+    nodes = @redis.nodes( { :status => 1 } )
+
+    logger.debug( nodes )
+
+
+
+  end
+
+
+#   def readConfigFile()
+#
+#     config = YAML.load_file( @configFile )
+#
+#     @mqHost           = config['mq']['host']               ? config['mq']['host']               : 'localhost'
+#     @mqPort           = config['mq']['port']               ? config['mq']['port']               : 11300
+#     @mqQueue          = config['mq']['queue']              ? config['mq']['queue']              : 'mq-rest-service'
+#
+#     @serviceChecks    = config['service-checks']           ? config['service-checks']           : nil
+#
+#    @enabledDiscovery = false
+#    @enabledGrafana   = false
+#    @enabledIcinga    = false
+#
+#    @monitoringServices = config['monitoring-services']    ? config['monitoring-services']      : nil
+#
+#    if( @monitoringServices != nil )
+#
+#      services          = @monitoringServices.reduce( :merge )
+#
+#      @enabledDiscovery = true # services['discovery'] && services['discovery'] == true  ? true : false
+#      @enabledGrafana   = true # services['grafana']   && services['grafana'] == true    ? true : false
+#      @enabledIcinga    = true # services['icinga2']   && services['icinga2'] == true    ? true : false
+#    end
+#
+#   end
 
 
   def checkAvailablility?( host )
@@ -113,6 +125,9 @@ class Monitoring
     if( ip == nil || shortHostName == nil )
       return false
     else
+
+      @redis.createDNS( { :ip => ip, :short => shortHostName, :long => longHostName } )
+
       return hostInfo
     end
 
@@ -160,13 +175,10 @@ class Monitoring
 
       hash = JSON.parse( payload )
 
-      if( isIp?( host ) == true )
-        @db.createConfig( { :ip => host , :data => hash } )
-      else
-        shortName = host.split('.').first
+      hostInfo = Utils::Network.resolv( host )
+      host     = hostInfo.dig(:short)
 
-        @db.createConfig( { :short => shortName , :data => hash } )
-      end
+      @redis.createConfig( { :short => host , :data => hash } )
 
       status  = 200
       message = 'config successful written'
@@ -185,7 +197,10 @@ class Monitoring
 
     if( host.to_s != '' )
 
-      data = @db.config( { :ip => host, :short => host, :long => host } )
+      hostInfo = Utils::Network.resolv( host )
+      host     = hostInfo.dig(:short)
+
+      data     = @redis.config( { :short => host } )
 
       # logger.debug( data )
 
@@ -212,15 +227,13 @@ class Monitoring
     status       = 500
     message      = 'initialize error'
 
+
     if( host.to_s != '' )
 
-      if( isIp?( host ) == true )
-        data = @db.removeConfig( { :ip => host } )
-      else
-        shortName = host.split('.').first
+      hostInfo = Utils::Network.resolv( host )
+      host     = hostInfo.dig(:short)
 
-        data = @db.removeConfig( { :short => shortName } )
-      end
+      data     = @redis.removeConfig( { :short => host } )
 
       if( data != false )
         status = 200
@@ -288,8 +301,6 @@ class Monitoring
 
       end
 
-#       directory       = self.createCacheDirectory( host )
-
       force           = false
       enableDiscovery = @enabledDiscovery
       enabledGrafana  = @enabledGrafana
@@ -350,8 +361,6 @@ class Monitoring
         end
 
         logger.info( 'done' )
-
-        sleep( 2 )
       end
 
       # now, we can write an own configiguration per node when we add them, hurray
@@ -360,7 +369,7 @@ class Monitoring
         ip    = hostData.dig( :ip )
         short = hostData.dig( :short )
 
-        @db.createConfig( {
+        @redis.createConfig( {
           :ip    => ip,
           :short => short,
           :data  => config
@@ -370,14 +379,18 @@ class Monitoring
 
       result[host.to_sym] ||= {}
 
+      if( annotation == true )
+
+        logger.info( 'annotation for create' )
+        self.addAnnotation( host, { 'command': 'create', 'argument': 'node' } )
+      end
+
       if( enableDiscovery == true )
 
         logger.info( 'add node to discovery service' )
 
         logger.debug( 'send message to \'mq-discover\'' )
         self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-discover', :payload => payload, :prio => 1, :delay => 1 } )
-
-        sleep( 2 )
       end
 
       if( enabledGrafana == true )
@@ -385,26 +398,20 @@ class Monitoring
         logger.info( 'create grafana dashborads' )
 
         logger.debug( 'send message to \'mq-grafana\'' )
-        self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-grafana', :payload => payload, :prio => 10, :ttr => 15, :delay => 10 } )
+        self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-grafana', :payload => payload, :prio => 10, :ttr => 15, :delay => 15 } )
       end
 
       if( enabledIcinga == true  )
 
         logger.info( 'create icinga checks and notifications' )
 
-        sleep( 4 )
-
         # in first, we need the discovered services ...
         logger.info( 'we need information from discovery service' )
         logger.debug( 'send message to \'mq-discover\'' )
-        self.messageQueue( { :cmd => 'info', :node => host, :queue => 'mq-discover', :payload => {}, :prio => 2, :ttr => 1, :delay => 0 } )
-
-        sleep( 5 )
+        self.messageQueue( { :cmd => 'info', :node => host, :queue => 'mq-discover', :payload => {}, :prio => 2, :ttr => 1, :delay => 8 } )
 
         resultArray = Array.new()
         threads     = Array.new()
-
-#         c = MessageQueue::Consumer.new( @MQSettings )
 
         discoveryStatus  = nil
         discoveryPayload = nil
@@ -412,7 +419,7 @@ class Monitoring
 #         discoveryStatus  = c.getJobFromTube('mq-discover-info')
 #         discoveryPayload = discoveryStatus.dig( :body, 'payload' )
 
-        for y in 1..15
+        for y in 1..30
 
           result      = @mqConsumer.getJobFromTube('mq-discover-info')
 
@@ -424,6 +431,8 @@ class Monitoring
             sleep( 4 )
           end
         end
+
+        sleep( 8 )
 
         if( discoveryStatus != nil )
           discoveryPayload = discoveryStatus.dig( :body, 'payload' )
@@ -473,11 +482,7 @@ class Monitoring
         self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-icinga', :payload => discoveryPayload, :prio => 10, :ttr => 15, :delay => 10 } )
       end
 
-      if( annotation == true )
 
-        logger.info( 'annotation for create' )
-        self.addAnnotation( host, { "command": "create", "argument": "node" } )
-      end
 
       discoveryResult = {
         :status  => 200,
@@ -762,7 +767,7 @@ class Monitoring
 
       if( force == true )
         logger.info( 'remove configuration from db (force mode)' )
-        @db.removeConfig( { :ip => host, :short => host } )
+        @redis.removeConfig( { :short => host } )
       end
 
       discoveryResult = {
