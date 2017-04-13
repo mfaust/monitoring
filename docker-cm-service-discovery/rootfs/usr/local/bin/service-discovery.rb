@@ -26,6 +26,7 @@ mqQueue            = ENV.fetch( 'MQ_QUEUE'         , 'mq-discover' )
 redisHost          = ENV.fetch( 'REDIS_HOST'       , 'localhost' )
 redisPort          = ENV.fetch( 'REDIS_PORT'       , 6379 )
 interval           = ENV.fetch( 'INTERVAL'         , 30 )
+delay              = ENV.fetch( 'RUN_DELAY'        , 10 )
 
 config = {
   :jolokia     => {
@@ -67,7 +68,7 @@ sd = ServiceDiscovery::Client.new( config )
 
 scheduler = Rufus::Scheduler.new
 
-scheduler.every( interval, :first_in => 5 ) do
+scheduler.every( interval, :first_in => delay ) do
 
   sd.queue()
 

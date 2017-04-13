@@ -211,8 +211,14 @@ module ServiceDiscovery
 
     logger.info( sprintf( 'Adding host \'%s\'', host ) )
 
+    discoveryData = @redis.discoveryData( { :short => host } )
+
+    logger.debug( "#{discoveryData}" )
+
+    shortName = discoveryData.dig(:short)
+
 #    if( @db.discoveryData( { :ip => host, :short => host, :long => host } ) != nil )
-    if( @redis.discoveryData( { :short => host } ) != nil )
+    if( shortName != nil )
 
       logger.error( 'Host already created' )
 
@@ -270,17 +276,30 @@ module ServiceDiscovery
     #
     # --------------------------------------------------------------------------------------------
 
-    ports    = @redis.config( { :short => shortHostName, :key => "ports" } )
-    services = @redis.config( { :short => shortHostName, :key => "services" } )
+    ports    = @redis.config( { :short => shortHostName, :key => 'ports' } )
+    services = @redis.config( { :short => shortHostName, :key => 'services' } )
 
-#     logger.debug( "redis  ports   : #{ports}" )
-#     logger.debug( "redis  services: #{services}" )
+    ports    = (ports != nil)    ? ports.dig(:short)    : ports
+    services = (services != nil) ? services.dig(:short) : services
 
-    if( ports != false )
-      ports = ports.dig( shortHostName, 'ports' )
-    else
+#    logger.debug( "redis  ports   : #{ports.class.to_s}" )
+#    logger.debug( "redis  ports   : #{ports.count}" )
+    logger.debug( "redis  ports   : #{ports}" )
+#
+#    logger.debug( "redis  services: #{services.class.to_s}" )
+#    logger.debug( "redis  services: #{services.count}" )
+    logger.debug( "redis  services: #{services}" )
+
+    if( ports == nil )
       # our default known ports
       ports = @scanPorts
+    else
+      ports = ports.dig( shortHostName, 'ports' )
+    end
+
+    if( services == nil )
+      # our default known ports
+      services = []
     end
 
     logger.debug( "use ports: #{ports}" )

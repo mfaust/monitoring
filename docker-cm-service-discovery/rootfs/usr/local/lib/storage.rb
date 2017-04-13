@@ -223,7 +223,7 @@ module Storage
 
       cachekey = sprintf(
         '%s-config',
-        Storage::RedisClient.cacheKey( { :shortname => dnsShortname } )
+        Storage::RedisClient.cacheKey( { :short => dnsShortname } )
       )
 
       if( append == true )
@@ -278,7 +278,7 @@ module Storage
 
       cachekey = sprintf(
         '%s-config',
-        Storage::RedisClient.cacheKey( { :shortname => dnsShortname } )
+        Storage::RedisClient.cacheKey( { :short => dnsShortname } )
       )
 
       # delete single config
@@ -313,23 +313,24 @@ module Storage
 
       dnsIp        = params.dig(:ip)
       dnsShortname = params.dig(:short)
-      key    = params.dig(:key)
+      key          = params.dig(:key)
 
       cachekey = sprintf(
         '%s-config',
-        Storage::RedisClient.cacheKey( { :shortname => dnsShortname } )
+        Storage::RedisClient.cacheKey( { :short => dnsShortname } )
       )
 
       result = @redis.get( cachekey )
 
+      logger.debug( result )
+
       if( result == nil )
-        return { :shortname => nil }
+        return { :short => nil }
       end
 
       if( result.is_a?( String ) )
         result = JSON.parse( result )
       end
-
 
       if( key != nil )
 
@@ -574,33 +575,30 @@ module Storage
       end
 
       short  = params.dig(:short)
-#       key    = params.dig(:key) || 'nodes'
 
-      # delete single config
-      #
-#       if( key != nil )
+      logger.debug( params )
 
-        existingData = @redis.get( 'nodes' )
+      cachekey = 'nodes'
 
-        logger.debug( existingData )
+      existingData = @redis.get( cachekey )
 
-        if( existingData.is_a?( String ) )
-          existingData = JSON.parse( existingData )
-        end
+      if( existingData.is_a?( String ) )
+        existingData = JSON.parse( existingData )
+      end
 
-        logger.debug( existingData )
+      data = existingData.dig('data')
+      data = data.tap { |hs,d| hs.delete(  Storage::RedisClient.cacheKey( { :short => short } ) ) }
 
-        data = existingData.dig('data').tap { |hs| hs.delete(key) }
+#       existingData['data'] = data
 
-        existingData['data'] = data
+      # transform hash keys to symbols
+#       data = data.deep_string_keys
 
-        self.createConfig( { :short => short, :data => existingData } )
+      toStore = { data: data }.to_json
 
-#       else
+      logger.debug( toStore )
 
-        # remove all data
-#         @redis.del( key )
-#       end
+      @redis.set( cachekey, toStore )
 
     end
 
