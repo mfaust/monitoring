@@ -75,23 +75,31 @@ module ServiceDiscovery
           # e.g. for 'force' ...
           result = self.addHost( node, payload )
 
+          status  = result.dig(:status)
+          message = result.dig(:message)
+
           logger.debug( result )
 
+          if( status.to_i == 200 )
 
-          # BUG
-          # Use DNS entry and take the IP to check isAlive!
-          dns      = @redis.dnsData( { :short => node } )
+            @redis.setStatus( { :short => node, :status => Storage::RedisClient::ONLINE } )
+          end
 
-          logger.debug( dns )
-          ip = dns.dig(:ip) || dns.dig('ip')
-
-          networkStatus = Utils::Network.isRunning?( ip )
-
-          @redis.setStatus( { :short => node, :status => networkStatus } )
+# 
+#           # BUG
+#           # Use DNS entry and take the IP to check isAlive!
+#           dns      = @redis.dnsData( { :short => node } )
+#
+#           logger.debug( dns )
+#           ip = dns.dig(:ip) || dns.dig('ip')
+#
+#           networkStatus = Utils::Network.isRunning?( ip )
+#
+#           @redis.setStatus( { :short => node, :status => networkStatus } )
 
           return {
-            :status  => 200,
-            :message => result
+            :status  => status,
+            :message => message
           }
 
         when 'remove'
@@ -121,7 +129,7 @@ module ServiceDiscovery
 
             self.sendMessage( { :cmd => command, :queue => 'mq-collector', :payload => { :host => node, :pre => 'prepare' }, :ttr => 1, :delay => 0 } )
 
-            @redis.setStatus( { :short => node, :status => 98 } )
+            @redis.setStatus( { :short => node, :status => Storage::RedisClient::DELETE } )
 
             result = self.deleteHost( node )
 
