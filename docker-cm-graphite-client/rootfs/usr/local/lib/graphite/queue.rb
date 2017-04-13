@@ -71,7 +71,6 @@ module Graphite
         end
 
         timestamp  = payload.dig( 'timestamp' )
-#         logger.debug( timestamp )
 
         if( timestamp != nil )
 

@@ -1,9 +1,11 @@
 #!/usr/bin/ruby
 #
+# send graphite Annotations (or events) to our Graphite Service
+#
 #  28.08.2016 - bodsch
 #
 #
-# v1.3.0
+# v1.3.1
 # -----------------------------------------------------------------------------
 
 require 'rest-client'
@@ -28,13 +30,13 @@ module Graphite
 
     def initialize( params = {} )
 
-      graphiteHost      = params.dig(:graphiteHost)     || 'localhost'
-      graphiteHttpPort  = params.dig(:graphiteHttpPort) || 8081
-      graphitePort      = params.dig(:graphitePort)     || 2003
-      graphitePath      = params.dig(:graphitePath)
-      mqHost            = params.dig(:mqHost)           || 'localhost'
-      mqPort            = params.dig(:mqPort)           || 11300
-      @mqQueue          = params.dig(:mqQueue)          || 'mq-graphite'
+      graphiteHost      = params.dig(:graphite, :host)       || 'localhost'
+      graphitePort      = params.dig(:graphite, :port)       || 2003
+      graphiteHttpPort  = params.dig(:graphite, :http_port)  || 8081
+      graphitePath      = params.dig(:graphite, :path)
+      mqHost            = params.dig(:mq, :host)             || 'localhost'
+      mqPort            = params.dig(:mq, :port)             || 11300
+      @mqQueue          = params.dig(:mq, :queue)            || 'mq-graphite'
 
       @graphiteURI      = sprintf( 'http://%s:%s%s', graphiteHost, graphiteHttpPort, graphitePath )
 
@@ -44,7 +46,7 @@ module Graphite
         :beanstalkQueue => @mqQueue
       }
 
-      version              = '1.3.0'
+      version              = '1.3.1'
       date                 = '2017-03-25'
 
       logger.info( '-----------------------------------------------------------------' )
@@ -78,7 +80,6 @@ module Graphite
       return self
 
     end
-
 
   end
 
