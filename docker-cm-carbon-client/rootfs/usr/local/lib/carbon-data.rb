@@ -55,8 +55,8 @@ module CarbonData
       redisHost           = settings.dig(:redis, :host)
       redisPort           = settings.dig(:redis, :port)             || 6379
 
-      version             = '1.99.12'
-      date                = '2017-04-12'
+      version             = '2.0.0'
+      date                = '2017-04-13'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - CarbonData' )

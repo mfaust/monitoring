@@ -10,30 +10,25 @@ module CarbonWriter
 
     def initialize( settings = {} )
 
-      redisHost           = settings.dig(:redis, :host)
-      redisPort           = settings.dig(:redis, :port)             || 6379
+      redisHost     = settings.dig(:redis, :host)   || 'localhost'
+      redisPort     = settings.dig(:redis, :port)   || 6379
 
       @graphiteHost = settings.dig( :graphite, :host )
       @graphitePort = settings.dig( :graphite, :port )
-#       @slice        = settings.dig( :slice )
-#       @memcacheHost = params.dig( :memcache, :host )
-#       @memcachePort = params.dig( :memcache, :port )
 
-      version             = '1.3.0'
-      date                = '2017-04-12'
+      version             = '1.3.2'
+      date                = '2017-04-13'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - Carbon client' )
       logger.info( "  Version #{version} (#{date})" )
-      logger.info( '  Copyright 2016-2017 Coremedia' )
+      logger.info( '  Copyright 2017 Coremedia' )
       logger.info( '  used Services:' )
       logger.info( "    - carbon       : #{@graphiteHost}:#{@graphitePort}" )
-#       logger.info( "    - message queue: #{mqHost}:#{mqPort}/#{@mqQueue}" )
-#       logger.info( '-----------------------------------------------------------------' )
+      logger.info( '-----------------------------------------------------------------' )
       logger.info( '' )
 
       @carbonData   = CarbonData::Consumer.new( { :redis => { :host => redisHost, :port => redisPort } } )
-#       @buffer       = CarbonWriter::Buffer.new( { :cache => 4 * 60 * 60 } )
 
     end
 
@@ -110,23 +105,7 @@ module CarbonWriter
         return
       end
 
-#       metric = {
-#         :key   => key,
-#         :value => value,
-#         :time  => normalizeTime( time, @slice )
-#       }
-#
-#       @buffer.push( metric )
-#
-#       if( @buffer.new_records?() )
-#
-# #         logger.debug( @buffer.pull( :string ) )
-#
-#       end
-
       begin
-
-#        logger.debug( "#{key} #{value} #{time.to_i}" )
 
         self.socket.write( "carbon-writer.#{key} #{value.to_f} #{time.to_i}\n" )
 
@@ -146,20 +125,6 @@ module CarbonWriter
       end
 
       @socket = nil
-    end
-
-
-    private
-
-    def normalizeTime( time, slice )
-
-      if( slice.nil?() )
-        slice = 1
-      end
-
-      result = ((time || Time.now).to_i / slice * slice).to_i
-
-      return result
     end
 
   end

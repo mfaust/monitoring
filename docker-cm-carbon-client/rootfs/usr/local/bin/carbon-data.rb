@@ -30,9 +30,7 @@ config = {
   :graphite    => {
     :host => carbonHost,
     :port => carbonPort
-  },
-  :interval    => interval,
-  :cache       => ( 2 * 60 * 60 )
+  }
 }
 
 # -----------------------------------------------------------------------------

@@ -7,16 +7,11 @@ ENV \
   ALPINE_MIRROR="dl-cdn.alpinelinux.org" \
   ALPINE_VERSION="v3.5" \
   TERM=xterm \
-  APK_ADD="build-base bind-tools imagemagick-dev ruby-dev ruby-irb ruby-rdoc sqlite sqlite-dev zlib zlib-dev" \
+  APK_ADD="build-base bind-tools imagemagick-dev ruby-dev ruby-irb ruby-rdoc zlib zlib-dev" \
   APK_DEL="build-base imagemagick-dev ruby-dev ruby-rdoc zlib-dev" \
-  GEMS="beaneater bigdecimal dalli fileutils filesize json redis rest-client rufus-scheduler sequel sqlite3 time_difference tzinfo-data"
+  GEMS="beaneater bigdecimal fileutils filesize json redis rest-client rufus-scheduler time_difference tzinfo-data"
 
-LABEL version="1704-01.1"
-
-
-#FROM bodsch/docker-ruby
-#MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
-#LABEL version="1703-02.1"
+LABEL version="1704-02.1"
 
 # ---------------------------------------------------------------------------------------
 
