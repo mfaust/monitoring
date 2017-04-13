@@ -54,29 +54,28 @@ module Grafana
 
       def prepare( host )
 
-        dns = @db.dnsData( { :ip => host, :short => host } )
-
-#         logger.debug( dns.class.to_s )
-        logger.debug( dns )
+        dns = @redis.dnsData( { :ip => host, :short => host } )
 
         if( dns != nil )
-          dnsId        = dns[ :id ]
-          dnsIp        = dns[ :ip ]
-          dnsShortname = dns[ :shortname ]
-          dnsLongname  = dns[ :longname ]
-          dnsCreated   = dns[ :created ]
-          dnsChecksum  = dns[ :checksum ]
+
+          dnsIp        = dns.dig(:ip)
+          dnsShortname = dns.dig(:shortname)
+          dnsLongname  = dns.dig(:longname)
 
           @shortHostname  = @grafanaHostname = dnsShortname
 
-          config          = @db.config( { :ip => dnsIp, :key => 'display-name' } )
+          config          = @redis.config( { :short => dnsShortname, :key => 'display-name' } )
 
-          if( config != false )
-            @shortHostname = config.dig( dnsChecksum, 'display-name' ).first.to_s
+          if( config.dig( 'display-name' ) != nil )
+
+            @shortHostname = config.dig( 'display-name' ).to_s
+
+            logger.info( "use custom display-name from config: '#{@shortHostname}'" )
           end
 
-          @shortHostname        = @shortHostname.gsub( '.', '-' )
+          @shortHostname        = self.createSlug( @shortHostname ).gsub( '.', '-' )
         else
+
           logger.warn( 'no DNS entry found' )
         end
 
@@ -94,12 +93,9 @@ module Grafana
       #
       def createDashboardForHost( params = {} )
 
-#         logger.debug( 'createDashboardForHost()' )
-#         logger.debug( params )
-
-        host            = params[:host]     ? params[:host]     : nil
-        @additionalTags = params[:tags]     ? params[:tags]     : []
-        createOverview  = params[:overview] ? params[:overview] : false
+        host            = params.dig(:host)
+        @additionalTags = params.dig(:tags)     || []
+        createOverview  = params.dig(:overview) || false
 
         if( host == nil )
 
@@ -115,7 +111,7 @@ module Grafana
 
         self.prepare( host )
 
-        discovery = @db.discoveryData( { :ip => host, :short => host } )
+        discovery = @redis.discoveryData( { :ip => host, :short => host } )
 
         if( discovery == nil )
           return {
@@ -124,7 +120,7 @@ module Grafana
           }
         end
 
-        services       = discovery.dig( host ).keys
+        services       = discovery.keys
         logger.debug( "Found services: #{services}" )
 
         # fist, we must remove strange services
@@ -137,17 +133,13 @@ module Grafana
 
         serviceHash = Hash.new()
 
-        services.each do |service|
+        discovery.each do |service,serviceData|
 
           additionalTemplatePaths = Array.new()
 
-          serviceData = discovery.dig( host, service, :data )
-
-          logger.debug( serviceData )
-
-          description    = discovery.dig( host, service, :data, 'description' )
-          template       = discovery.dig( host, service, :data, 'template' )
-          cacheKey       = Storage::Memcached.cacheKey( { :host => host, :pre => 'result', :service => service } )
+          description    = serviceData.dig( 'description' )
+          template       = serviceData.dig( 'template' )
+          cacheKey       = Storage::RedisClient.cacheKey( { :host => host, :pre => 'result', :service => service } )
 
           # cae-live-1 -> cae-live
           serviceName     = self.removePostfix( service )
@@ -168,8 +160,6 @@ module Grafana
           end
 
           if( ! serviceTemplate.to_s.empty? )
-
-#             logger.debug( sprintf( "Found Template paths: %s, %s" , serviceTemplate , additionalTemplatePaths ) )
 
             options = {
               :description             => description,
@@ -216,20 +206,31 @@ module Grafana
         measurements = nil
 
         begin
-          until( measurements != nil )
-            logger.debug( sprintf( 'wait for measurements data for node \'%s\'', host ) )
-            measurements = @db.measurements( { :ip => host, :short => host } )
-            sleep( 8 )
+
+          for y in 1..30
+
+            result = @redis.measurements( { :short => host } )
+
+            if( result != nil )
+              measurements = result
+              break
+            else
+              logger.debug( sprintf( 'wait for measurements data for node \'%s\' ... %d', host, y ) )
+              sleep( 4 )
+            end
           end
 
-          logger.debug( 'found measurement data' )
+#           until( measurements != nil )
+#
+#             logger.debug( sprintf( 'wait for measurements data for node \'%s\'', host ) )
+#
+#             measurements = @redis.measurements( { :short => host } )
+#             sleep( 8 )
+#           end
 
-#           logger.debug( JSON.pretty_generate( measurements ) )
         rescue => e
           logger.error( e )
         end
-
-#        measurements = measurements.dig( host )
 
         # - at last - the LicenseInformation
         if( servicesTmp.include?( 'content-management-server' ) ||
@@ -237,7 +238,6 @@ module Grafana
             servicesTmp.include?( 'replication-live-server' ) )
           self.createLicenseTemplate( { :host => host, :services => services } )
         end
-
 
         dashboards = self.listDashboards( { :host => @shortHostname } )
         dashboards = dashboards.dig(:dashboards)
@@ -498,15 +498,9 @@ module Grafana
       # @return [Hash, #read]
       def listDashboards( params = {} )
 
-#         logger.debug( 'listDashboards()' )
-
-        host            = params[:host]     ? params[:host]     : nil
+        host            = params.dig(:host)
 
         data = self.searchDashboards( { :tags   => host } )
-
-#         logger.debug( data.class.to_s )
-#         logger.debug( data )
-#         logger.debug( '--------------------------------------' )
 
         if( data == nil || data == false )
 
@@ -518,13 +512,9 @@ module Grafana
 
         data = data.collect { |item| item['uri'] }
 
-#         logger.debug( data )
-
         data.each do |d|
           d.gsub!( sprintf( 'db/%s-', host ), '' )
         end
-
-        # logger.debug( JSON.pretty_generate( data ) )
 
         if( data.count == 0 )
 
@@ -544,8 +534,8 @@ module Grafana
 
       def deleteDashboards( params = {} )
 
-        host = params[:host] ? params[:host] : nil
-        tags = params[:tags] ? params[:tags] : []
+        host = params.dig(:host)
+        tags = params.dig(:tags) || []
 
         if( host == nil )
 
@@ -583,7 +573,8 @@ module Grafana
             :message     => 'No Dashboards found'
           }
         else
-          logger.debug( sprintf( 'found %d dashboards for delete', count ) )
+
+#           logger.debug( sprintf( 'found %d dashboards for delete', count ) )
 
           dashboards.each do |d|
 
@@ -593,7 +584,7 @@ module Grafana
             #  next
             #end
 
-            logger.debug( sprintf( '  - %s', d ) )
+#             logger.debug( sprintf( '  - %s', d ) )
 
             response = self.deleteRequest( sprintf( '/api/dashboards/db/%s-%s', host, d ) )
           end
@@ -628,8 +619,6 @@ module Grafana
 
         templateArray.each do |tpl|
 
-#           logger.debug( tpl )
-
           if( File.exist?( tpl ) )
 
 #             logger.debug( sprintf( '  => found %s', tpl ) )
@@ -657,7 +646,6 @@ module Grafana
         additionalTemplatePaths = params[:additionalTemplatePaths] ? params[:additionalTemplatePaths] : []
 
         logger.info( sprintf( 'Creating dashboard for \'%s\'', serviceName ) )
-#         logger.debug( sprintf( '  - template %s', File.basename( serviceTemplate ).strip ) )
 
         templateFile = File.read( serviceTemplate )
         templateJson = JSON.parse( templateFile )
@@ -667,8 +655,6 @@ module Grafana
         if( rows != nil )
 
           additionalTemplatePaths.each do |additionalTemplate|
-
-#             logger.debug( sprintf( '  - merge with template %s', File.basename( additionalTemplate ).strip ) )
 
             additionalTemplateFile = File.read( additionalTemplate )
             additionalTemplateJson = JSON.parse( additionalTemplateFile )
@@ -731,8 +717,6 @@ module Grafana
         intersect = dir & srv
 
         intersect.each do |service|
-
-#           logger.debug( service )
 
 #           service  = removePostfix( service )
           template = Dir.glob( sprintf( '%s/overview/**%s.tpl', @templateDirectory, service ) ).first

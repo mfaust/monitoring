@@ -86,22 +86,28 @@ module Grafana
     #
     #    g = Grafana::Client.new( config )
     # @return [bool, #read]
-    def initialize( params = {} )
+    def initialize( settings = {} )
 
 #      logger.debug( params )
 
-      host         = params.dig(:host)     || 'localhost'
-      port         = params.dig(:port)     || 80
-      user         = params.dig(:user)     || 'admin'
-      password     = params.dig(:password) || ''
-      urlPath      = params.dig(:url_path) || ''
-      ssl          = params.dig(:ssl)      || false
-      debug        = params.dig(:debug)    || false
-      memcacheHost = params.dig(:memcacheHost)
-      memcachePort = params.dig(:memcachePort)
-      mqHost       = params.dig(:mqHost)   || 'localhost'
-      mqPort       = params.dig(:mqPort)   || 11300
-      @mqQueue     = params.dig(:mqQueue)  || 'mq-grafana'
+      host         = settings.dig(:grafana, :host)          || 'localhost'
+      port         = settings.dig(:grafana, :port)          || 80
+      user         = settings.dig(:grafana, :user)          || 'admin'
+      password     = settings.dig(:grafana, :password)      || ''
+      urlPath      = settings.dig(:grafana, :url_path)      || ''
+      ssl          = settings.dig(:grafana, :ssl)           || false
+      timeout      = settings.dig(:grafana, :timeout)       || 5
+      open_timeout = settings.dig(:grafana, :open_timeout)  || 5
+      headers      = settings.dig(:grafana, :headers)       || {}
+
+      @templateDirectory = settings.dig(:templateDirectory) || '/usr/local/share/templates/grafana'
+
+      mqHost              = settings.dig(:mq, :host)        || 'localhost'
+      mqPort              = settings.dig(:mq, :port)        || 11300
+      @mqQueue            = settings.dig(:mq, :queue)       || 'mq-grafana'
+
+      redisHost           = settings.dig(:redis, :host)
+      redisPort           = settings.dig(:redis, :port)     || 6379
 
       @MQSettings = {
         :beanstalkHost  => mqHost,
@@ -109,52 +115,48 @@ module Grafana
         :beanstalkQueue => @mqQueue
       }
 
+      if( timeout.to_i <= 0 )
+        timeout = 5
+      end
+
+      if( open_timeout.to_i <= 0 )
+        open_timeout = 5
+      end
+
       proto        = ( ssl == true ? 'https' : 'http' )
+      @url  = sprintf( '%s://%s:%s%s', proto, host, port, urlPath )
 
       @apiInstance = nil
-      @db          = Storage::Database.new()
-      @mc          = Storage::Memcached.new( { :host => memcacheHost, :port => memcachePort } )
-      @mbean       = MBean::Client.new( { :memcache => @mc } )
+      @headers     = nil
+
+      @redis       = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
+      @mbean       = MBean::Client.new( { :redis => @redis } )
       @mqConsumer  = MessageQueue::Consumer.new( @MQSettings )
-
-      if( params.has_key?(:timeout) && params[:timeout].to_i <= 0 )
-        params[:timeout] = 5
-      end
-
-      if( params.has_key?(:open_timeout) && params[:open_timeout].to_i <= 0 )
-        params[:open_timeout] = 5
-      end
-
-      if( params.has_key?(:headers) && params[:headers].is_a?( Hash ) )
-        params[:headers] = {}
-      end
-
-      @templateDirectory = params.dig(:templateDirectory) || '/var/tmp/templates'
-
-      @url  = sprintf( '%s://%s:%s%s', proto, host, port, urlPath )
 
       begin
 
-        @apiInstance = RestClient::Resource.new(
-          @url,
-          :timeout      => params[:timeout],
-          :open_timeout => params[:open_timeout],
-          :headers      => params[:headers],
-          :verify_ssl   => false
-        )
+        until( @apiInstance != nil )
+
+          logger.debug( 'try to connect our grafana endpoint' )
+
+          @apiInstance = RestClient::Resource.new(
+            @url,
+            :timeout      => timeout,
+            :open_timeout => open_timeout,
+            :headers      => headers,
+            :verify_ssl   => false
+          )
+          sleep(3)
+        end
       rescue => e
         logger.error( e )
-
-        raise( e )
       end
 
-      @headers = nil
-
-      if( params[:headers] && params[:headers].has_key?(:authorization) )
+      if( settings.dig(:headers) && settings[:headers].has_key?(:authorization) )
         # API key Auth
         @headers = {
           :content_type  => 'application/json; charset=UTF-8',
-          :Authorization => params.dig( :headers, :authorization )
+          :Authorization => settings.dig( :headers, :authorization )
         }
       else
         # Regular login Auth
@@ -181,7 +183,7 @@ module Grafana
       user     = params.dig(:user)
       password = params.dig(:password)
 
-      logger.debug( "Attempting to establish user session" )
+#       logger.debug( 'Attempting to establish user session' )
 
       request_data = { 'User' => user, 'Password' => password }
 
@@ -212,7 +214,7 @@ module Grafana
         return false
       end
 
-      logger.debug("User session initiated")
+#       logger.debug("User session initiated")
     end
 
   end
