@@ -35,26 +35,36 @@ config_2 = { :ip => ip, :short => short, :data => config_2 }
 
 r = Storage::RedisClient.new( { :redis => { :host => 'localhost' } } )
 
-# puts r.delete( 'node' )
-# puts r.get( 'node' )
+#puts r.delete( 'node' )
+#puts r.get( 'node' )
 
 puts '============================================================'
 
-# puts 'dns: '
-# # r.createDNS( dns )
-# # r.createDNS( { :ip => '127.0.1.1', :short => "foo-bar", :long => "foo-bar.tld" } )
-# puts r.dnsData( dns )
-#
-# puts ''
-# puts 'status:'
-# puts '  - read'
-# puts r.status( { :short => short } )
-#
+puts 'dns: '
 # puts '  - set'
-# r.setStatus( { :short => short, :status => 1 } )
+# r.createDNS( dns )
+# r.createDNS( { :ip => '127.0.1.1', :short => "foo-bar", :long => "foo-bar.tld" } )
+
+puts '  - read'
+puts r.dnsData( dns )
+# puts r.dnsData( { :short => "foo-bar" } )
+#
+# puts '  - remove'
+# puts r.removeDNS( { :short => "foo-bar" } )
+#
+# puts r.dnsData( { :short => short } )
+# puts r.dnsData( { :short => "foo-bar" } )
+
+
+puts ''
+puts 'status:'
+puts '  - read'
+puts r.status( { :short => short } )
+
+# puts '  - set'
+# r.setStatus( { :short => short, :status => Storage::RedisClient::ONLINE } )
 # puts '  - get'
 # puts r.status( { :short => short } )
-
 
 puts ''
 puts 'nodes: '
@@ -65,23 +75,23 @@ puts " - #{r.nodes( { :status => 99 } )}"
 puts " - #{r.nodes( { :status => 1 } )}"
 puts '--------'
 
-puts '  - create'
-puts " - #{r.addNode( { :short => short })}"
-puts '--------'
-puts '  - read'
-puts " - #{r.nodes()}"
-puts '--------'
-puts ''
-# puts '  - remove'
-# puts " - #{r.removeNode( { :short => short } )}"
+# puts '  - create'
+# puts " - #{r.addNode( { :short => short })}"
 # puts '--------'
 # puts '  - read'
 # puts " - #{r.nodes()}"
-puts '--------'
-puts '---------------------------------------------------------'
-
+# puts '--------'
 # puts ''
-# puts 'config:'
+# # puts '  - remove'
+# # puts " - #{r.removeNode( { :short => short } )}"
+# # puts '--------'
+# # puts '  - read'
+# # puts " - #{r.nodes()}"
+# puts '--------'
+# puts '---------------------------------------------------------'
+
+puts ''
+puts 'config:'
 # puts '  - delete'
 # r.removeConfig( config )
 
@@ -91,11 +101,11 @@ puts '---------------------------------------------------------'
 # r.createConfig( config_2, true )
 # r.createConfig( { :short => short, :data => { "named": "rubbel-katz" } }, true )
 
-# puts '  - read'
-# puts r.config( { :short => short } )
-# puts r.config( { :short => short, :key => 'ports' } )
-# puts r.config( { :short => short, :key => 'services' } )
-# puts r.config( { :short => short, :key => 'named' } )
+puts '  - read'
+puts r.config( { :short => short } )
+puts r.config( { :short => short, :key => 'ports' } )
+puts r.config( { :short => short, :key => 'services' } )
+puts r.config( { :short => short, :key => 'named' } )
 
 # puts '  - delete'
 # # r.removeConfig( { :short => short, :key => 'named' } )
