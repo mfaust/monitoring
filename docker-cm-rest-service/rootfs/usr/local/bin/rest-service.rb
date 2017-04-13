@@ -27,40 +27,20 @@ module Sinatra
 
       set :environment, :production
 
-      # default configuration
-      @logDirectory     = '/tmp/log'
-      @cacheDir         = '/tmp/cache'
+      @logDirectory     = '/var/log'
 
-      @restServicePort  = 4567
-      @restServiceBind  = '0.0.0.0'
-
-      if( File.exist?( '/etc/cm-monitoring.yaml' ) )
-
-        config = YAML.load_file( '/etc/cm-monitoring.yaml' )
-
-        @logDirectory     = config['logDirectory']         ? config['logDirectory']         : '/tmp/log'
-        @cacheDir         = config['cacheDirectory']       ? config['cacheDirectory']       : '/tmp/cache'
-        @restServicePort  = config['rest-service']['port'] ? config['rest-service']['port'] : 4567
-        @restServiceBind  = config['rest-service']['bind'] ? config['rest-service']['bind'] : '0.0.0.0'
-
-      else
-        puts "no configuration exists, use default settings"
-      end
-
-
-      if( ! File.exist?( @logDirectory ) )
-        Dir.mkdir( @logDirectory )
-      end
-
-      if( ! File.exist?( @cacheDir ) )
-        Dir.mkdir( @cacheDir )
-      end
+      @restServicePort  = ENV.fetch( 'REST_SERVICE_PORT', 4567 )
+      @restServiceBind  = ENV.fetch( 'REST_SERVICE_BIND', '0.0.0.0' )
+      @mqHost           = ENV.fetch( 'MQ_HOST'          , 'localhost' )
+      @mqPort           = ENV.fetch( 'MQ_PORT'          , 11300 )
+      @mqQueue          = ENV.fetch( 'MQ_QUEUE'         , 'mq-rest-service' )
+      @redisHost        = ENV.fetch( 'REDIS_HOST'       , 'localhost' )
+      @redisPort        = ENV.fetch( 'REDIS_PORT'       , 6379 )
 
       FileUtils.chmod( 1775, @logDirectory )
-      FileUtils.chmod( 0775, @cacheDir )
       FileUtils.chown( 'nobody', 'nobody', @logDirectory )
 
-      file      = File.open( sprintf( '%s/rest-service.log', @logDirectory ), File::WRONLY | File::APPEND | File::CREAT )
+      file      = File.new( sprintf( '%s/rest-service.log', @logDirectory ), File::WRONLY | File::APPEND | File::CREAT )
       file.sync = true
 
       use Rack::CommonLogger, file
@@ -79,12 +59,19 @@ module Sinatra
 
     # -----------------------------------------------------------------------------
 
-    options = {
-     :logDirectory        => @logDirectory,
-     :monitoringServices  => @monitoringServices
+    config = {
+      :mq          => {
+        :host  => @mqHost,
+        :port  => @mqPort,
+        :queue => @mqQueue
+      },
+      :redis       => {
+        :host => @redisHost,
+        :port => @redisPort
+      }
     }
 
-    m = Monitoring.new( options )
+    m = Monitoring.new( config )
 
     # -----------------------------------------------------------------------------
 

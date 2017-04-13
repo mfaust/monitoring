@@ -1,4 +1,6 @@
-#!/bin/sh
+#
+#
+#
 
 set -e
 
@@ -53,13 +55,4 @@ addDNS() {
 
 }
 
-run() {
-
-  addDNS
-
-  /usr/local/bin/rest-service.rb
-}
-
-run
-
-#EOF
+addDNS

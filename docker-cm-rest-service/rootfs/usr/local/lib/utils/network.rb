@@ -166,6 +166,20 @@ module Utils
       return IPAddress.valid?( data ) # "192.128.0.12"  end
     end
 
+    # check if Node exists (simple ping)
+    # result @bool
+    def self.isRunning? ( ip )
+
+      puts "pinging IP #{ip} ... "
+
+      # first, ping check
+      if( system( sprintf( 'ping -c1 -w1 %s > /dev/null', ip.to_s ) ) == true )
+        return true
+      else
+        return false
+      end
+
+    end
 
   end
 end
