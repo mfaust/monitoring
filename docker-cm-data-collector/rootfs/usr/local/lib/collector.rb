@@ -203,7 +203,7 @@ module DataCollector
         data[:data]['metrics'] ||= []
       end
 
-      logger.debug( data )
+#       logger.debug( data )
 
       if( configuredApplication.include?( service ) )
 
@@ -259,13 +259,6 @@ module DataCollector
 
       end
 
-#       if( tomcatApplication[service] )
-#
-# #         logger.debug( "found #{service} in tomcat application" )
-#
-#         data[:data]['metrics'].push( metricsTomcat['metrics'] )
-#         data[:data]['metrics'].push( tomcatApplication[service]['metrics'] )
-#       end
 
       if( dataSource == 'redis' )
 
@@ -606,7 +599,7 @@ module DataCollector
       services      = data.keys
       servicesCount = services.count
 
-      logger.info( sprintf( '%d services for node \'%s\' found', servicesCount, host ) )
+      logger.info( sprintf( '%d services found', servicesCount ) )
 
       data.each do |s,d|
 
@@ -991,6 +984,49 @@ module DataCollector
     end
 
 
+    def prepareData( params = {} )
+
+      shortName  = params.dig(:hostname)
+      fqdn      = params.dig(:fqdn)
+
+      # TODO
+      #
+      prepared = @redis.get( Storage::RedisClient.cacheKey( { :host => shortName, :pre => 'prepare' } ) )
+
+#       logger.debug( prepared )
+#       logger.debug( prepared.class.to_s )
+
+      if( prepared.is_a?( NilClass ) || prepared.is_a?( FalseClass ) || ( prepared.is_a?( String ) && ( prepared == '' || prepared == 'false ' ) ) )
+
+        result = false
+
+        logger.debug( 'no prepared data found ...' )
+
+        start = Time.now
+
+        # no prepared data found ...
+        # generate it
+        options = {
+          :configFiles           => { :application => @applicationConfig, :service => @serviceConfig },
+          :applicationConfigFile => @applicationConfig,
+          :serviceConfigFile     => @serviceConfig,
+          :redis                 => { :host => @redisHost, :port => @redisPort }
+        }
+
+        p = Prepare.new( options )
+        result = p.buildMergedData( { :hostname => shortName, :fqdn => fqdn } )
+
+        if( result == true )
+          @redis.set( Storage::RedisClient.cacheKey( { :host => shortName, :pre => 'prepare' } ), { :prepared => true } )
+        end
+
+        finish = Time.now
+        logger.info( sprintf( 'build prepared data in %s seconds', finish - start ) )
+
+      end
+
+    end
+
 
     def run()
 
@@ -1005,8 +1041,6 @@ module DataCollector
         return
       end
 
-      start = Time.now
-
       monitoredServer.each do |h,d|
 
         h = h.first
@@ -1014,46 +1048,19 @@ module DataCollector
         shortName = d.dig(:shortname)
         fqdn      = d.dig(:longname)
 
-        logger.info( sprintf( '  - %s', fqdn ) )
+        start = Time.now
 
-        # TODO
-        #
-        prepared = @redis.get( Storage::RedisClient.cacheKey( { :host => shortName, :pre => 'prepare' } ) )
+        logger.info( sprintf( 'found %s for monitoring', fqdn ) )
 
-        if( prepared.is_a?( NilClass ) || prepared.is_a?( FalseClass ) || ( prepared.is_a?( String ) && ( prepared == '' || prepared == 'false ' ) ) )
+        # build prepared datas
+        self.prepareData( { :hostname => shortName, :fqdn => fqdn } )
 
-          result = false
+        # run checks
+        self.createBulkCheck( { :hostname => shortName, :fqdn => fqdn } )
 
-          logger.debug( 'no prepared data found ...' )
-
-          # no prepared data found ...
-          # generate it
-          options = {
-            :configFiles           => { :application => @applicationConfig, :service => @serviceConfig },
-            :applicationConfigFile => @applicationConfig,
-            :serviceConfigFile     => @serviceConfig,
-            :redis                 => { :host => @redisHost, :port => @redisPort }
-          }
-
-          p = Prepare.new( options )
-          result = p.buildMergedData( { :hostname => shortName, :fqdn => fqdn } )
-
-          if( result == true )
-            @redis.set( Storage::RedisClient.cacheKey( { :host => shortName, :pre => 'prepare' } ), 'true' )
-          end
-        else
-
-          # roger, we have prepared datas
-          # use them and do what you must do
-
-          self.createBulkCheck( { :hostname => shortName, :fqdn => fqdn } )
-
-        end
-
+        finish = Time.now
+        logger.info( sprintf( 'collect data in %s seconds', finish - start ) )
       end
-
-      finish = Time.now
-      logger.info( sprintf( 'collect data in %s seconds', finish - start ) )
 
     end
 
