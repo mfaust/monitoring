@@ -248,16 +248,28 @@ module ServiceDiscovery
 
     logger.debug( dns )
 
-    # create DNS Information
-    hostInfo      = Utils::Network.resolv( host )
+    if( dns.dig(:ip) == nil )
 
-    logger.debug( "hostResolve #{hostInfo}" )
+      # create DNS Information
+      dns      = Utils::Network.resolv( host )
 
-    ip            = hostInfo.dig(:ip)
-    shortHostName = hostInfo.dig(:short)
-    longHostName  = hostInfo.dig(:long)
+      logger.debug( "hostResolve #{hostInfo}" )
 
-    logger.debug( sprintf( 'ping ip %s if running', ip ) )
+      ip            = hostInfo.dig(:ip)
+      shortHostName = hostInfo.dig(:short)
+      longHostName  = hostInfo.dig(:long)
+
+      @redis.createDNS( { :ip => ip, :short => shortHostName, :long => longHostName } )
+    else
+
+      ip            = dns.dig(:ip)
+      shortHostName = dns.dig(:shortname)
+      longHostName  = dns.dig(:longname)
+    end
+
+#     logger.debug( sprintf( ' ip   %s ', ip ) )
+#     logger.debug( sprintf( ' host %s ', shortHostName ) )
+#     logger.debug( sprintf( ' fqdn %s ', longHostName ) )
 
     # second, if the that we whant monitored, available
     #
@@ -271,30 +283,19 @@ module ServiceDiscovery
         :message => 'Host not available'
       }
     end
-
-    @redis.createDNS( { :ip => ip, :short => shortHostName, :long => longHostName } )
     #
     # --------------------------------------------------------------------------------------------
 
+    logger.debug( 'ask for custom configurations' )
     ports    = @redis.config( { :short => shortHostName, :key => 'ports' } )
     services = @redis.config( { :short => shortHostName, :key => 'services' } )
 
-    ports    = (ports != nil)    ? ports.dig(:short)    : ports
-    services = (services != nil) ? services.dig(:short) : services
-
-#    logger.debug( "redis  ports   : #{ports.class.to_s}" )
-#    logger.debug( "redis  ports   : #{ports.count}" )
-    logger.debug( "redis  ports   : #{ports}" )
-#
-#    logger.debug( "redis  services: #{services.class.to_s}" )
-#    logger.debug( "redis  services: #{services.count}" )
-    logger.debug( "redis  services: #{services}" )
+    ports    = (ports != nil)    ? ports.dig( 'ports' )       : ports
+    services = (services != nil) ? services.dig( 'services' ) : services
 
     if( ports == nil )
       # our default known ports
       ports = @scanPorts
-    else
-      ports = ports.dig( shortHostName, 'ports' )
     end
 
     if( services == nil )
@@ -302,7 +303,7 @@ module ServiceDiscovery
       services = []
     end
 
-    logger.debug( "use ports: #{ports}" )
+    logger.debug( "use ports          : #{ports}" )
     logger.debug( "additional services: #{services}" )
 
     discover = Hash.new()

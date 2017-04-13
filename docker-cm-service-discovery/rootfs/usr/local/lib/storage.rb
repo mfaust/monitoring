@@ -153,19 +153,29 @@ module Storage
         return false
       end
 
-      ip      = params.dig(:ip)
       short   = params.dig(:short)
-      long    = params.dig(:long)
 
       cachekey = Storage::RedisClient.cacheKey( { :short => short } )
 
       self.setStatus( { :short => short, :status => 99 } )
 
-      @redis.del( sprintf( '%s-measurements', cachekey ) )
-      @redis.del( sprintf( '%s-discovery'   , cachekey ) )
-      @redis.del( sprintf( '%s-status'      , cachekey ) )
-      @redis.del( sprintf( '%s-dns'         , cachekey ) )
-      @redis.del( cachekey )
+      keys = [
+        sprintf( '%s-measurements', cachekey ),
+        sprintf( '%s-discovery'   , cachekey ),
+        sprintf( '%s-status'      , cachekey ),
+        sprintf( '%s-config'      , cachekey ),
+        sprintf( '%s-dns'         , cachekey ),
+        cachekey
+      ]
+
+      @redis.del( *keys )
+
+#       @redis.del( sprintf( '%s-measurements', cachekey ) )
+#       @redis.del( sprintf( '%s-discovery'   , cachekey ) )
+#       @redis.del( sprintf( '%s-status'      , cachekey ) )
+#       @redis.del( sprintf( '%s-dns'         , cachekey ) )
+#       @redis.del( cachekey )
+
 
       self.removeNode( { :short => short, :key => cachekey } )
 
@@ -190,7 +200,7 @@ module Storage
       result = @redis.get( cachekey )
 
       if( result == nil )
-        return { :ip => nil, :shortname => nil, :longname => nil }
+        return nil # { :ip => nil, :shortname => nil, :longname => nil }
       end
 
       if( result.is_a?( String ) )
@@ -322,8 +332,6 @@ module Storage
 
       result = @redis.get( cachekey )
 
-      logger.debug( result )
-
       if( result == nil )
         return { :short => nil }
       end
@@ -335,12 +343,11 @@ module Storage
       if( key != nil )
 
         result = {
-          key.to_sym => result.dig( :data, key.to_sym )
+          key.to_s => result.dig( 'data', key.to_s )
         }
       else
 
         result = result.dig( 'data' ).deep_string_keys
-
       end
 
       return result
