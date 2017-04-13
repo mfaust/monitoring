@@ -153,19 +153,29 @@ module Storage
         return false
       end
 
-      ip      = params.dig(:ip)
       short   = params.dig(:short)
-      long    = params.dig(:long)
 
       cachekey = Storage::RedisClient.cacheKey( { :short => short } )
 
       self.setStatus( { :short => short, :status => 99 } )
 
-      @redis.del( sprintf( '%s-measurements', cachekey ) )
-      @redis.del( sprintf( '%s-discovery'   , cachekey ) )
-      @redis.del( sprintf( '%s-status'      , cachekey ) )
-      @redis.del( sprintf( '%s-dns'         , cachekey ) )
-      @redis.del( cachekey )
+      keys = [
+        sprintf( '%s-measurements', cachekey ),
+        sprintf( '%s-discovery'   , cachekey ),
+        sprintf( '%s-status'      , cachekey ),
+        sprintf( '%s-config'      , cachekey ),
+        sprintf( '%s-dns'         , cachekey ),
+        cachekey
+      ]
+
+      @redis.del( *keys )
+
+#       @redis.del( sprintf( '%s-measurements', cachekey ) )
+#       @redis.del( sprintf( '%s-discovery'   , cachekey ) )
+#       @redis.del( sprintf( '%s-status'      , cachekey ) )
+#       @redis.del( sprintf( '%s-dns'         , cachekey ) )
+#       @redis.del( cachekey )
+
 
       self.removeNode( { :short => short, :key => cachekey } )
 
@@ -190,7 +200,7 @@ module Storage
       result = @redis.get( cachekey )
 
       if( result == nil )
-        return { :ip => nil, :shortname => nil, :longname => nil }
+        return nil # { :ip => nil, :shortname => nil, :longname => nil }
       end
 
       if( result.is_a?( String ) )
@@ -223,7 +233,7 @@ module Storage
 
       cachekey = sprintf(
         '%s-config',
-        Storage::RedisClient.cacheKey( { :shortname => dnsShortname } )
+        Storage::RedisClient.cacheKey( { :short => dnsShortname } )
       )
 
       if( append == true )
@@ -278,7 +288,7 @@ module Storage
 
       cachekey = sprintf(
         '%s-config',
-        Storage::RedisClient.cacheKey( { :shortname => dnsShortname } )
+        Storage::RedisClient.cacheKey( { :short => dnsShortname } )
       )
 
       # delete single config
@@ -313,33 +323,31 @@ module Storage
 
       dnsIp        = params.dig(:ip)
       dnsShortname = params.dig(:short)
-      key    = params.dig(:key)
+      key          = params.dig(:key)
 
       cachekey = sprintf(
         '%s-config',
-        Storage::RedisClient.cacheKey( { :shortname => dnsShortname } )
+        Storage::RedisClient.cacheKey( { :short => dnsShortname } )
       )
 
       result = @redis.get( cachekey )
 
       if( result == nil )
-        return { :shortname => nil }
+        return { :short => nil }
       end
 
       if( result.is_a?( String ) )
         result = JSON.parse( result )
       end
 
-
       if( key != nil )
 
         result = {
-          key.to_sym => result.dig( :data, key.to_sym )
+          key.to_s => result.dig( 'data', key.to_s )
         }
       else
 
         result = result.dig( 'data' ).deep_string_keys
-
       end
 
       return result
@@ -574,33 +582,30 @@ module Storage
       end
 
       short  = params.dig(:short)
-#       key    = params.dig(:key) || 'nodes'
 
-      # delete single config
-      #
-#       if( key != nil )
+      logger.debug( params )
 
-        existingData = @redis.get( 'nodes' )
+      cachekey = 'nodes'
 
-        logger.debug( existingData )
+      existingData = @redis.get( cachekey )
 
-        if( existingData.is_a?( String ) )
-          existingData = JSON.parse( existingData )
-        end
+      if( existingData.is_a?( String ) )
+        existingData = JSON.parse( existingData )
+      end
 
-        logger.debug( existingData )
+      data = existingData.dig('data')
+      data = data.tap { |hs,d| hs.delete(  Storage::RedisClient.cacheKey( { :short => short } ) ) }
 
-        data = existingData.dig('data').tap { |hs| hs.delete(key) }
+#       existingData['data'] = data
 
-        existingData['data'] = data
+      # transform hash keys to symbols
+#       data = data.deep_string_keys
 
-        self.createConfig( { :short => short, :data => existingData } )
+      toStore = { data: data }.to_json
 
-#       else
+      logger.debug( toStore )
 
-        # remove all data
-#         @redis.del( key )
-#       end
+      @redis.set( cachekey, toStore )
 
     end
 
@@ -624,11 +629,6 @@ module Storage
 
       if( result.is_a?( String ) )
         result = JSON.parse( result )
-      end
-
-      if( result == nil )
-
-        return []
       end
 
       if( short != nil )

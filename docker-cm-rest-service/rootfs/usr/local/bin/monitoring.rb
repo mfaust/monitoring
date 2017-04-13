@@ -366,11 +366,9 @@ class Monitoring
       # now, we can write an own configiguration per node when we add them, hurray
       if( config.is_a?( Hash ) )
 
-        ip    = hostData.dig( :ip )
         short = hostData.dig( :short )
 
         @redis.createConfig( {
-          :ip    => ip,
           :short => short,
           :data  => config
         } )
