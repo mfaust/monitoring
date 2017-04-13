@@ -70,6 +70,7 @@ services:
       REDIS_HOST: redis
       # REDIS_PORT: 6379
       INTERVAL: 20
+      RUN_DELAY: 10
 
   cm-data-collector:
     environment:

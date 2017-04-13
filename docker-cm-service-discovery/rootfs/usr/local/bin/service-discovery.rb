@@ -13,8 +13,6 @@ require_relative '../lib/discovery'
 
 # -----------------------------------------------------------------------------
 
-logDirectory       = '/var/log/monitoring'
-cacheDirectory     = '/var/cache/monitoring'
 serviceConfigFile  = '/etc/cm-service.yaml'
 
 jolokiaHost        = ENV.fetch( 'JOLOKIA_HOST'     , 'localhost' )
@@ -27,7 +25,8 @@ mqPort             = ENV.fetch( 'MQ_PORT'          , 11300 )
 mqQueue            = ENV.fetch( 'MQ_QUEUE'         , 'mq-discover' )
 redisHost          = ENV.fetch( 'REDIS_HOST'       , 'localhost' )
 redisPort          = ENV.fetch( 'REDIS_PORT'       , 6379 )
-interval           = ENV.fetch( 'INTERVAL'         , 20 )
+interval           = ENV.fetch( 'INTERVAL'         , 30 )
+delay              = ENV.fetch( 'RUN_DELAY'        , 10 )
 
 config = {
   :jolokia     => {
@@ -69,7 +68,7 @@ sd = ServiceDiscovery::Client.new( config )
 
 scheduler = Rufus::Scheduler.new
 
-scheduler.every( interval, :first_in => 5 ) do
+scheduler.every( interval, :first_in => delay ) do
 
   sd.queue()
 
