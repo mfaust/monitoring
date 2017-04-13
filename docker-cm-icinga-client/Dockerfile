@@ -7,7 +7,7 @@ ENV \
   ALPINE_MIRROR="dl-cdn.alpinelinux.org" \
   ALPINE_VERSION="v3.5" \
   TERM=xterm \
-  APK_ADD="build-base openssl-dev ruby-dev ruby-irb ruby-rdoc" \
+  APK_ADD="build-base bind-tools drill openssl-dev ruby-dev ruby-irb ruby-rdoc" \
   APK_DEL="build-base ruby-dev ruby-rdoc " \
   GEMS="beaneater ipaddress json openssl redis rest-client rufus-scheduler tzinfo-data"
 
