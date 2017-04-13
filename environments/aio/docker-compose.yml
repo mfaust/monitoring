@@ -3,6 +3,10 @@ version: '2.0'
 
 volumes:
   database:
+  persistent:
+  redis:
+  carbon:
+  icinga:
 
 services:
 
@@ -97,6 +101,7 @@ services:
       com.dnsdock.ttl: '120'
     volumes:
       - /etc/localtime:/etc/localtime:ro
+      - redis:/var/lib/redis
 
 
   nginx:
@@ -148,7 +153,7 @@ services:
       - 2003:2003/udp
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - database:/srv
+      - carbon:/srv
 
 
   graphite:
@@ -169,7 +174,7 @@ services:
       - memcached
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - database:/srv
+      - carbon:/srv
 
 
   grafana:
@@ -193,7 +198,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /share/opt/grafana/dashboards:/opt/grafana/dashboards
-      - database:/srv
+      - carbon:/srv
 
 
 
@@ -211,10 +216,10 @@ services:
     depends_on:
       - data
       - database
-      - memcached
+      - redis
     links:
       - database
-      - memcached
+      - redis
     ports:
       - 5665:5665
       - 6666:6666
@@ -233,9 +238,9 @@ services:
       - /share/usr/lib/monitoring-plugins/check_cm_runlevel.rb:/usr/lib/monitoring-plugins/check_cm_runlevel
       - /share/usr/lib/monitoring-plugins/check_cm_sequencenumbers.rb:/usr/lib/monitoring-plugins/check_cm_seqencenumbers
       - /share/usr/lib/monitoring-plugins/check_ssl_cert:/usr/lib/monitoring-plugins/check_ssl_cert
-      - database:/srv
-      - database:/var/lib/icinga2
-      - database:/var/cache/monitoring
+      - icinga:/srv
+      - icinga:/var/lib/icinga2
+      #- database:/var/cache/monitoring
 
 
   icingaweb2:
@@ -258,7 +263,7 @@ services:
       - icinga2-master:icinga2
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - database:/srv
+      - icinga:/srv
 
 
   markdown-service:
@@ -291,16 +296,16 @@ services:
       service: cm-rest-service
     depends_on:
       - data
-      - memcached
+      - redis
     links:
-      - memcached
+      - redis
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /share/etc/cm-monitoring.yaml:/etc/cm-monitoring.yaml
       - /share/etc/cm-service.yaml:/etc/cm-service.yaml
       - /share/etc/cm-application.yaml:/etc/cm-application.yaml
-      - database:/var/cache/monitoring
-      - database:/srv
+      #- database:/var/cache/monitoring
+      - persistent:/srv
 
 
   # single service
@@ -320,16 +325,16 @@ services:
       - data
       - jolokia
       - beanstalkd
-      - memcached
+      - redis
     links:
       - jolokia
       - beanstalkd
-      - memcached
+      - redis
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /share/etc/cm-service.yaml:/etc/cm-service.yaml
       - /share/etc/cm-application.yaml:/etc/cm-application.yaml
-      - database:/var/cache/monitoring
+      #- database:/var/cache/monitoring
 
 
   # single service
@@ -349,16 +354,16 @@ services:
       - data
       - jolokia
       - beanstalkd
-      - memcached
+      - redis
     links:
       - jolokia
       - beanstalkd
-      - memcached
+      - redis
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /share/etc/cm-service.yaml:/etc/cm-service.yaml
       - /share/etc/cm-application.yaml:/etc/cm-application.yaml
-      - database:/var/cache/monitoring
+      #- database:/var/cache/monitoring
 
 
   # single service
@@ -377,16 +382,16 @@ services:
     depends_on:
       - data
       - beanstalkd
-      - memcached
+      - redis
     links:
       - beanstalkd
-      - memcached
+      - redis
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /share/etc/cm-monitoring.yaml:/etc/cm-monitoring.yaml
       - /share/etc/cm-service.yaml:/etc/cm-service.yaml
       - /share/etc/cm-application.yaml:/etc/cm-application.yaml
-      - database:/var/cache/monitoring
+      #- database:/var/cache/monitoring
 
 
   # single service
@@ -405,14 +410,14 @@ services:
     depends_on:
       - data
       - beanstalkd
-      - memcached
+      - redis
     links:
       - beanstalkd
-      - memcached
+      - redis
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /share/usr/local/share/templates:/usr/local/share/templates
-      - database:/var/cache/monitoring
+      #- database:/var/cache/monitoring
 
 
   # single service
