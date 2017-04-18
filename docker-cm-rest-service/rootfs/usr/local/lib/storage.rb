@@ -425,8 +425,6 @@ module Storage
 
       result = @redis.get( cachekey )
 
-      logger.debug( result )
-
       if( result == nil )
         return { :short => nil }
       end
@@ -627,6 +625,10 @@ module Storage
 
       result    = @redis.get( cachekey )
 
+      if( result == nil )
+        return false
+      end
+
       if( result.is_a?( String ) )
         result = JSON.parse( result )
       end
@@ -641,7 +643,13 @@ module Storage
 
       if( status != nil )
 
-        keys   = result.dig('data').values
+        keys   = result.dig('data')
+
+        if( keys != nil )
+          keys = keys.values
+        else
+          return false
+        end
 
         result = Hash.new()
 
