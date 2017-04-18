@@ -158,7 +158,7 @@ services:
 
   graphite:
     restart: always
-    image: bodsch/docker-graphite:1704-01
+    image: bodsch/docker-graphite:1704-02
     container_name: graphite
     hostname: graphite
     labels:
@@ -204,7 +204,7 @@ services:
 
   icinga2-master:
     restart: always
-    image: bodsch/docker-icinga2:1704-01
+    image: bodsch/docker-icinga2:1704-02
     container_name: icinga2-master
     hostname: icinga2-master
     labels:
@@ -226,7 +226,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /share/etc/cm-icinga2.yaml:/etc/cm-icinga2.yaml
-      - /share/etc/icinga2/objects:/etc/icinga2/objects
+      - /share/etc/icinga2/objects.d:/etc/icinga2/objects.d
       - /share/usr/local/share/icinga2:/usr/local/share/icinga2
       - /share/usr/lib/monitoring-plugins/tools:/usr/local/share/icinga2
       - /share/usr/lib/monitoring-plugins/icingachecks.rb:/usr/local/lib/icingachecks.rb
@@ -301,11 +301,11 @@ services:
       - redis
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /share/etc/cm-monitoring.yaml:/etc/cm-monitoring.yaml
-      - /share/etc/cm-service.yaml:/etc/cm-service.yaml
-      - /share/etc/cm-application.yaml:/etc/cm-application.yaml
+      #- /share/etc/cm-monitoring.yaml:/etc/cm-monitoring.yaml
+      #- /share/etc/cm-service.yaml:/etc/cm-service.yaml
+      #- /share/etc/cm-application.yaml:/etc/cm-application.yaml
       #- database:/var/cache/monitoring
-      - persistent:/srv
+      #- persistent:/srv
 
 
   # single service
