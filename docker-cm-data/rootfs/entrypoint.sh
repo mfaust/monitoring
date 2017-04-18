@@ -2,7 +2,7 @@
 
 rm -rf /share/*
 
-mv /data/* /share
+mv -v /data/* /share
 echo "finished" > /share/finished
 
 exec "$@"
