@@ -60,20 +60,27 @@ module CarbonWriter
       start = Time.now
       nodes = @carbonData.nodes()
 
-      nodes.each do |n|
+      if( nodes.is_a?( FalseClass ) )
+        logger.debug( 'no nodes found' )
 
-        data = @carbonData.run( n )
+      else
 
-        if( data.is_a?( Array ) )
-          data.flatten!
-        end
+        nodes.each do |n|
 
-        finish = Time.now
+          data = @carbonData.run( n )
 
-        logger.info( sprintf( 'getting %s measurepoints in %s seconds', data.count, finish - start ) )
+          if( data.is_a?( Array ) )
+            data.flatten!
+          end
 
-        data.each do |m|
-          self.metric( m )
+          finish = Time.now
+
+          logger.info( sprintf( 'getting %s measurepoints in %s seconds', data.count, finish - start ) )
+
+          data.each do |m|
+            self.metric( m )
+          end
+
         end
 
       end

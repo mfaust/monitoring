@@ -1034,7 +1034,7 @@ module DataCollector
 
       monitoredServer = self.monitoredServer()
 
-      if( monitoredServer.count == 0 )
+      if( monitoredServer.is_a?( FalseClass ) || monitoredServer.count == 0 )
 
         logger.info( 'no Servers for Monitoring found' )
 
