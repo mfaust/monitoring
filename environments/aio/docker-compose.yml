@@ -223,6 +223,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /share/etc/cm-icinga2.yaml:/etc/cm-icinga2.yaml
+      - /share/etc/icinga2/icinga2.conf:/etc/icinga2/icinga2.conf
       - /share/etc/icinga2/objects.d:/etc/icinga2/objects.d
       - /share/usr/local/share/icinga2:/usr/local/share/icinga2
       - /share/usr/lib/monitoring-plugins/tools:/usr/local/share/icinga2
@@ -370,16 +371,11 @@ services:
       service: cm-carbon-client
     depends_on:
       - data
-      - beanstalkd
       - redis
     links:
-      - beanstalkd
       - redis
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /share/etc/cm-monitoring.yaml:/etc/cm-monitoring.yaml
-      - /share/etc/cm-service.yaml:/etc/cm-service.yaml
-      - /share/etc/cm-application.yaml:/etc/cm-application.yaml
 
 
   # single service
