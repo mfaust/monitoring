@@ -423,9 +423,11 @@ class Monitoring
 
           result      = @mqConsumer.getJobFromTube('mq-discover-info')
 
+          logger.debug( result.class.to_s )
+          logger.debug( result.count )
           logger.debug( result )
 
-          if( result != nil )
+          if( result != nil && result.count != 0 )
             discoveryStatus = result
             break
           else

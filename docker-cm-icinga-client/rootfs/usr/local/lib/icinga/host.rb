@@ -51,7 +51,7 @@ module Icinga
         payload['attrs']['zone'] = @icingaSatellite
       end
 
-#       logger.debug( JSON.pretty_generate( payload ) )
+      logger.debug( JSON.pretty_generate( payload ) )
 
       result = Network.put( {
         :host    => host,
