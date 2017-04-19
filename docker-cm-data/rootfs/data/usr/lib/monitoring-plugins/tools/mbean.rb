@@ -30,7 +30,7 @@ module MBean
 
       cacheKey = Storage::RedisClient.cacheKey( { :host => host, :pre => 'result', :service => service } )
 
-      for y in 1..10
+      for y in 1..5
 
         result      = @redis.get( cacheKey )
 

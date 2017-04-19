@@ -86,11 +86,11 @@ class Icinga2Check
 
     if( data == nil )
 
-      data = Utils::Network.hostResolve( hostname )
+      data = Utils::Network.resolv( hostname )
       @redis.set( memcacheKey, data )
     end
 
-    hostname = data.dig(:short)
+    hostname = data.dig('short')
 
     return hostname
 

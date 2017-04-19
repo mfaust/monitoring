@@ -757,37 +757,63 @@ module DataCollector
 
               response  = @jolokia.post( { :payload => i, :timeout => 15 } )
 
-              if( response[:status].to_i == 200 )
-                result[v] = self.reorganizeData( response[:message] )
+              jolokiaStatus  = response.dig(:status)
+              jolokiaMessage = response.dig(:message)
+
+
+              if( jolokiaStatus != nil && jolokiaStatus.to_i == 200 )
+
+                begin
+                  result[v] = self.reorganizeData( jolokiaMessage )
+                rescue => e
+                  logger.error( "i can\'t store data into result for service #{v}" )
+                  logger.error( e )
+                end
               end
             end
 
           else
 
+            d = ''
             case v
             when 'mysql'
               # MySQL
-              result[v] = self.mysqlData( fqdn )
+              d = self.mysqlData( fqdn )
             when 'mongodb'
               # MongoDB
-              result[v] = self.mongoDBData( fqdn )
+              d = self.mongoDBData( fqdn )
             when 'postgres'
               # Postgres
-              result[v] = self.postgresData( fqdn )
+              d = self.postgresData( fqdn )
             when 'node_exporter'
               # node_exporter
-              result[v] = self.nodeExporterData( fqdn )
+              d = self.nodeExporterData( fqdn )
             when 'resourced'
               #
-              result[v] = self.resourcedData( fqdn )
+              d = self.resourcedData( fqdn )
             else
               # all others
+            end
+
+            begin
+
+              logger.debug( d.class.to_s )
+              logger.debug( d.count )
+              logger.debug( d )
+
+              result[v] = d
+            rescue => e
+              logger.error( "i can't store data into result for service #{v}" )
+              logger.error( e )
             end
 
 #             logger.debug( result[v] )
           end
 
-          if( @redis.set( cacheKey, result[v] ) == false )
+          logger.debug( 'store result in our redis' )
+          redisResult = @redis.set( cacheKey, result[v] )
+
+          if( redisResult.is_a?( FalseClass ) || ( redisResult.is_a?( String ) && redisResult != 'OK' ) )
 
             logger.error( sprintf( 'value for key % can not be write', cacheKey ) )
             logger.error( { :host => hostname, :pre => 'result', :service => v } )
@@ -799,12 +825,17 @@ module DataCollector
 
 
     # reorganize data to later simple find
+    #
     def reorganizeData( data )
 
       if( data == nil )
         logger.error( "      no data for reorganize" )
         logger.error( "      skip" )
-        return nil
+
+        return {
+          :status  => 500,
+          :message => 'no data for reorganize'
+        }
       end
 
       result  = Array.new()
@@ -961,6 +992,7 @@ module DataCollector
 
       end
 
+      logger.debug( result.class.to_s )
       return result
     end
 

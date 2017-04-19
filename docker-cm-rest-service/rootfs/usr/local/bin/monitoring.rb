@@ -408,6 +408,8 @@ class Monitoring
         logger.debug( 'send message to \'mq-discover\'' )
         self.messageQueue( { :cmd => 'info', :node => host, :queue => 'mq-discover', :payload => {}, :prio => 2, :ttr => 1, :delay => 8 } )
 
+        sleep( 8 )
+
         resultArray = Array.new()
         threads     = Array.new()
 
@@ -421,6 +423,8 @@ class Monitoring
 
           result      = @mqConsumer.getJobFromTube('mq-discover-info')
 
+          logger.debug( result )
+
           if( result != nil )
             discoveryStatus = result
             break
@@ -430,7 +434,7 @@ class Monitoring
           end
         end
 
-        sleep( 8 )
+#         sleep( 8 )
 
         if( discoveryStatus != nil )
           discoveryPayload = discoveryStatus.dig( :body, 'payload' )
