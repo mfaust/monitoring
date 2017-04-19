@@ -14,6 +14,9 @@ services:
 
   graphite:
     environment:
+      # default database are sqlite.
+      # this is only needed, when we whant to use graphite dashboards.
+      # (WE DONT THIS!)
       # DATABASE_TYPE: sqlite
       # MYSQL_HOST:
       # MYSQL_PORT: 3306
@@ -71,7 +74,7 @@ services:
       ICINGA_CERT_SERVICE_API_PASSWORD: 47pswW14rzeV9MNFGruI
       # ICINGA_CERT_SERVICE_SERVER:
       # ICINGA_CERT_SERVICE_PORT: 80
-      ICINGA_CERT_SERVICE_PATH: /cert-service
+      ICINGA_CERT_SERVICE_PATH: /cert-service/
       # MEMCACHE IS NOW OBSOLETE!
       # MEMCACHE_HOST: memcached
       # MEMCACHE_PORT: 11211
