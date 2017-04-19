@@ -72,8 +72,11 @@ services:
       # ICINGA_CERT_SERVICE_SERVER:
       # ICINGA_CERT_SERVICE_PORT: 80
       ICINGA_CERT_SERVICE_PATH: /cert-service
-      MEMCACHE_HOST: memcached
+      # MEMCACHE IS NOW OBSOLETE!
+      # MEMCACHE_HOST: memcached
       # MEMCACHE_PORT: 11211
+      # REDIS_HOST: redis
+      # REDIS_PORT: 6379
       # Useful to send notification via email
       # ICINGA_SSMTP_RELAY_SERVER:
       # ICINGA_SSMTP_REWRITE_DOMAIN:
