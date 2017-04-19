@@ -1,7 +1,7 @@
 {
   "dashboard": {
     "id": null,
-    "title": "%SHORTHOST% Feeder Preview",
+    "title": "%SHORTHOST% CAE Feeder Preview",
     "tags": [ "%TAG%", "feeder" ],
     "style": "dark",
     "timezone": "browser",
@@ -15,7 +15,7 @@
         "height": "25px",
         "panels": [
           {
-            "content": "<h2><center>Preview Feeder</center></h2>",
+            "content": "<h2><center>CAE Preview Feeder</center></h2>",
             "editable": true,
             "error": false,
             "id": 31,
@@ -89,13 +89,13 @@
                 "refId": "B",
                 "target": "aliasByMetric(aliasSub(*.%HOST%.FEEDER_PREV.ProactiveEngine.feeder.entries.current, '(.*)-', ''))",
                 "textEditor": false,
-                "hide": true
+                "hide": false
               },
               {
                 "refId": "C",
                 "target": "aliasByMetric(aliasSub(*.%HOST%.FEEDER_PREV.ProactiveEngine.feeder.entries.max, '(.*)-', ''))",
                 "textEditor": false,
-                "hide": true
+                "hide": false
               },
               {
                 "refId": "D",
@@ -205,8 +205,7 @@
               },
               {
                 "refId": "C",
-                "target": "alias(asPercent(#B, #A), 'percent')",
-                "targetFull": "alias(asPercent(alias(aliasSub(*.%HOST%.FEEDER_PREV.CapConnection.heap.cache.used, '(.*)-', ''), 'used'), alias(aliasSub(*.%HOST%.FEEDER_PREV.CapConnection.heap.cache.size, '(.*)-', ''), 'max')), 'percent')",
+                "target": "alias(aliasSub(*.%HOST%.FEEDER_PREV.CapConnection.heap.cache.used_percent, '(.*)-', ''), 'percent')",
                 "textEditor": false
               }
             ],
@@ -246,87 +245,6 @@
           }
         ],
         "title": "UAPI Cache"
-      },
-      {
-        "title": "Heart Beat",
-        "height": "150px",
-        "editable": true,
-        "collapse": false,
-        "panels": [
-          {
-            "aliasColors": {},
-            "bars": false,
-            "datasource": "graphite",
-            "decimals": 0,
-            "editable": true,
-            "error": false,
-            "fill": 3,
-            "grid": {},
-            "id": 19,
-            "isNew": true,
-            "legend": {
-              "alignAsTable": true,
-              "avg": false,
-              "current": true,
-              "max": true,
-              "min": false,
-              "rightSide": true,
-              "show": true,
-              "total": false,
-              "values": true
-            },
-            "lines": true,
-            "linewidth": 1,
-            "links": [],
-            "nullPointMode": "connected",
-            "percentage": false,
-            "pointradius": 5,
-            "points": false,
-            "renderer": "flot",
-            "seriesOverrides": [],
-            "span": 12,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
-              {
-                "refId": "A",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.FEEDER_PREV.ProactiveEngine.feeder.heartbeat, '(.*)-', ''))",
-                "textEditor": false
-              }
-            ],
-            "timeFrom": null,
-            "timeShift": null,
-            "title": "Heart Beat",
-            "tooltip": {
-              "msResolution": false,
-              "ordering": "alphabetical",
-              "shared": true,
-              "sort": 0,
-              "value_type": "cumulative"
-            },
-            "type": "graph",
-            "xaxis": {
-              "show": true
-            },
-            "yaxes": [
-              {
-                "format": "ms",
-                "logBase": 1,
-                "max": null,
-                "min": 0,
-                "show": true
-              },
-              {
-                "format": "short",
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": false
-              }
-            ],
-            "thresholds": []
-          }
-        ]
       }
     ],
     "time": {
@@ -356,35 +274,7 @@
       ]
     },
     "templating": {
-      "list": [
-        {
-          "type": "query",
-          "label": null,
-          "query": "*.*.*EEDER*_LIVE-Proactive*feeder",
-          "regex": "/(.*)-.*-.*/",
-          "sort": 0,
-          "datasource": "graphite",
-          "refresh": 0,
-          "hide": 0,
-          "name": "feeder",
-          "multi": false,
-          "includeAll": false,
-          "allValue": null,
-          "options": [
-            {
-              "text": "FEEDER_LIVE",
-              "value": "FEEDER_LIVE",
-              "selected": false
-            }
-          ],
-          "current": {
-            "text": "FEEDER_LIVE",
-            "value": "FEEDER_LIVE"
-          },
-          "tagsQuery": null,
-          "tagValuesQuery": null
-        }
-      ]
+      "list": []
     },
     "annotations": {
       "list": [
