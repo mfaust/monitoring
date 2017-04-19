@@ -100,7 +100,7 @@ services:
     uapi_cache: true
     application:
     - caefeeder
-    template: cm-caefeeder
+#    template: cm-caefeeder
 
   caefeeder-live:
     description: CAEFeeder Live
@@ -110,7 +110,7 @@ services:
     uapi_cache: true
     application:
     - caefeeder
-    template: cm-caefeeder
+#    template: cm-caefeeder
 
   cae-preview:
     description: CAE Preview

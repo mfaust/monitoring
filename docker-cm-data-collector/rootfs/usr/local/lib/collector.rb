@@ -755,11 +755,10 @@ module DataCollector
 
             if( self.checkHostAndService( targetUrl ) == true )
 
-              response  = @jolokia.post( { :payload => i, :timeout => 15 } )
+              response       = @jolokia.post( { :payload => i, :timeout => 15 } )
 
               jolokiaStatus  = response.dig(:status)
               jolokiaMessage = response.dig(:message)
-
 
               if( jolokiaStatus != nil && jolokiaStatus.to_i == 200 )
 
@@ -796,11 +795,6 @@ module DataCollector
             end
 
             begin
-
-              logger.debug( d.class.to_s )
-              logger.debug( d.count )
-              logger.debug( d )
-
               result[v] = d
             rescue => e
               logger.error( "i can't store data into result for service #{v}" )
