@@ -5,13 +5,13 @@ MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
   ALPINE_MIRROR="dl-cdn.alpinelinux.org" \
-  ALPINE_VERSION="v3.5" \
+  ALPINE_VERSION="edge" \
   TERM=xterm \
   APK_ADD="build-base ruby ruby-dev" \
   APK_DEL="build-base ruby-dev" \
   GEMS="beaneater dalli json rest-client rufus-scheduler time_difference tzinfo-data"
 
-LABEL version="1703-03.1"
+LABEL version="1704-03.1"
 
 # ---------------------------------------------------------------------------------------
 
