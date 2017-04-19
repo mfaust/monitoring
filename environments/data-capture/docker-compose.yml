@@ -60,19 +60,6 @@ services:
       - /etc/localtime:/etc/localtime:ro
 
 
-  memcached:
-    restart: always
-    image: bodsch/docker-memcached:1704-01
-    container_name: memcached
-    hostname: memcached
-    labels:
-      com.dnsdock.alias: memcached
-      com.dnsdock.ttl: '120'
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-    command: "-l 0.0.0.0 -m 16 -u memcached"
-
-
   redis:
     restart: always
     image: bodsch/docker-redis:1704-01
@@ -140,9 +127,9 @@ services:
       service: icinga2-satellite
     depends_on:
       - data
-      - memcached
+      - redis
     links:
-      - memcached
+      - redis
     ports:
       - 5665:5665
       - 6666:6666
@@ -163,7 +150,6 @@ services:
       - /share/usr/lib/monitoring-plugins/check_ssl_cert:/usr/lib/monitoring-plugins/check_ssl_cert
       - persistent:/srv
       - persistent:/var/lib/icinga2
-#      - persistent:/var/cache/monitoring
 
 
   #
@@ -193,7 +179,6 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - /share/etc/cm-service.yaml:/etc/cm-service.yaml
       - /share/etc/cm-application.yaml:/etc/cm-application.yaml
-#      - persistent:/var/cache/monitoring
 
 
   cm-data-collector:
@@ -220,7 +205,6 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - /share/etc/cm-service.yaml:/etc/cm-service.yaml
       - /share/etc/cm-application.yaml:/etc/cm-application.yaml
-      #- persistent:/var/cache/monitoring
 
 
   cm-carbon-client:
@@ -244,10 +228,6 @@ services:
       - redis
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      #- /share/etc/cm-monitoring.yaml:/etc/cm-monitoring.yaml
-      #- /share/etc/cm-service.yaml:/etc/cm-service.yaml
-      #- /share/etc/cm-application.yaml:/etc/cm-application.yaml
-      #- persistent:/var/cache/monitoring
 
 
   cm-grafana-client:
@@ -266,15 +246,12 @@ services:
       - data
       - beanstalkd
       - redis
-      - memcached
     links:
       - beanstalkd
       - redis
-      - memcached
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /share/usr/local/share/templates:/usr/local/share/templates
-#      - persistent:/var/cache/monitoring
 
 
   cm-graphite-client:
@@ -338,10 +315,5 @@ services:
       - redis
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      #- /share/etc/cm-monitoring.yaml:/etc/cm-monitoring.yaml
-      #- /share/etc/cm-service.yaml:/etc/cm-service.yaml
-      #- /share/etc/cm-application.yaml:/etc/cm-application.yaml
-      #- persistent:/var/cache/monitoring
-      #- persistent:/srv
 
 # EOF

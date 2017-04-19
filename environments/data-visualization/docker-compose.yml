@@ -188,7 +188,6 @@ services:
       - /share/usr/lib/monitoring-plugins/check_ssl_cert:/usr/lib/monitoring-plugins/check_ssl_cert
       - icinga:/srv
       - icinga:/var/lib/icinga2
-      #- database:/var/cache/monitoring
 
 
   icingaweb2:

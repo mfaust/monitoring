@@ -31,9 +31,6 @@ services:
       ICINGA_CERT_SERVICE_SERVER: nginx-proxy.docker
       ICINGA_CERT_SERVICE_PORT: 80
       ICINGA_CERT_SERVICE_PATH: /cert-service/
-      # MEMCACHE IS NOW OBSOLETE!
-      # MEMCACHE_HOST: memcached
-      # MEMCACHE_PORT: 11211
       REDIS_HOST: redis
       # REDIS_PORT: 6379
 
@@ -87,13 +84,8 @@ services:
       MQ_HOST: beanstalkd
       # MQ_PORT: 11300
       # MQ_QUEUE: mq-collector
-      # MEMCACHE IS NOW OBSOLETE!
-      # MEMCACHE_HOST: memcached
-      # MEMCACHE_PORT: 11211
       REDIS_HOST: redis
       # REDIS_PORT: 6379
-      # OBSOLETE
-      # SCAN_DISCOVERY: "10m"
       INTERVAL: 20
 
   cm-carbon-client:
@@ -102,9 +94,6 @@ services:
       # NOTICE: EXTERNAL-SERVICE
       GRAPHITE_HOST: carbon.docker
       # GRAPHITE_PORT: 2003
-      # MEMCACHE IS NOW OBSOLETE!
-      # MEMCACHE_HOST: memcached
-      # MEMCACHE_PORT: 11211
       REDIS_HOST: redis
       # REDIS_PORT: 6379
       # INTERVAL: 20
@@ -119,9 +108,6 @@ services:
       # GRAFANA_API_USER: admin
       # GRAFANA_API_PASSWORD: admin
       # GRAFANA_TEMPLATE_PATH: /usr/local/share/templates/grafana
-      # MEMCACHE IS NOW OBSOLETE!
-      # MEMCACHE_HOST: memcached
-      # MEMCACHE_PORT: 11211
       REDIS_HOST: redis
       # REDIS_PORT: 6379
       MQ_HOST: beanstalkd

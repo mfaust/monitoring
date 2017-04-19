@@ -87,7 +87,7 @@ services:
       com.dnsdock.ttl: '120'
     volumes:
       - /etc/localtime:/etc/localtime:ro
-    command: "-l 0.0.0.0 -m 16 -u memcached"
+    command: "-l 0.0.0.0 -m 8 -u memcached"
 
 
   redis:
@@ -169,9 +169,6 @@ services:
       service: graphite
     depends_on:
       - data
-      - memcached
-    links:
-      - memcached
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - carbon:/srv
@@ -240,7 +237,6 @@ services:
       - /share/usr/lib/monitoring-plugins/check_ssl_cert:/usr/lib/monitoring-plugins/check_ssl_cert
       - icinga:/srv
       - icinga:/var/lib/icinga2
-      #- database:/var/cache/monitoring
 
 
   icingaweb2:
@@ -301,11 +297,6 @@ services:
       - redis
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      #- /share/etc/cm-monitoring.yaml:/etc/cm-monitoring.yaml
-      #- /share/etc/cm-service.yaml:/etc/cm-service.yaml
-      #- /share/etc/cm-application.yaml:/etc/cm-application.yaml
-      #- database:/var/cache/monitoring
-      #- persistent:/srv
 
 
   # single service
@@ -334,7 +325,6 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - /share/etc/cm-service.yaml:/etc/cm-service.yaml
       - /share/etc/cm-application.yaml:/etc/cm-application.yaml
-      #- database:/var/cache/monitoring
 
 
   # single service
@@ -363,7 +353,6 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - /share/etc/cm-service.yaml:/etc/cm-service.yaml
       - /share/etc/cm-application.yaml:/etc/cm-application.yaml
-      #- database:/var/cache/monitoring
 
 
   # single service
@@ -391,7 +380,6 @@ services:
       - /share/etc/cm-monitoring.yaml:/etc/cm-monitoring.yaml
       - /share/etc/cm-service.yaml:/etc/cm-service.yaml
       - /share/etc/cm-application.yaml:/etc/cm-application.yaml
-      #- database:/var/cache/monitoring
 
 
   # single service
@@ -417,7 +405,6 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /share/usr/local/share/templates:/usr/local/share/templates
-      #- database:/var/cache/monitoring
 
 
   # single service

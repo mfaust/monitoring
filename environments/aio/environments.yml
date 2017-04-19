@@ -19,14 +19,12 @@ services:
       # MYSQL_PORT: 3306
       # MYSQL_ROOT_USER: root
       # MYSQL_ROOT_PASS:
-      MEMCACHE_HOST: memcached
-      # MEMCACHE_PORT: 11211
       REDIS_HOST: redis
       # REDIS_PORT: 6379
       # DATABASE_GRAPHITE_PASS: graphite
       #
       # THIS TURN OFF THE INTERNAL CARBON!
-      # USE THIS ONLY WITH AN OTHE CARBON-WRITER (e.g. bodsch/docker-go-carbon)
+      # USE THIS ONLY WITH AN OTHER CARBON-WRITER (e.g. bodsch/docker-go-carbon)
       USE_EXTERNAL_CARBON: 'true'
 
   grafana:
@@ -75,8 +73,8 @@ services:
       # ICINGA_CERT_SERVICE_SERVER: localhost
       # ICINGA_CERT_SERVICE_PORT: 80
       ICINGA_API_USERS: root:icinga,icingaweb:icingaweb,dashing:dashing,cert:foo-bar
-      MEMCACHE_HOST: memcached
-      # MEMCACHE_PORT: 11211
+      REDIS_HOST: redis
+      # REDIS_PORT: 6379
       # Useful to send notification via email
       # ICINGA_SSMTP_RELAY_SERVER:
       # ICINGA_SSMTP_REWRITE_DOMAIN:
@@ -127,8 +125,6 @@ services:
       # JOLOKIA_PATH: /jolokia
       # JOLOKIA_AUTH_USER:
       # JOLOKIA_AUTH_PASS:
-      MEMCACHE_HOST: memcached
-      # MEMCACHE_PORT: 11211
       REDIS_HOST: redis
       # REDIS_PORT: 6379
       MQ_HOST: beanstalkd
@@ -147,12 +143,8 @@ services:
       MQ_HOST: beanstalkd
       # MQ_PORT: 11300
       # MQ_QUEUE: mq-collector
-      MEMCACHE_HOST: memcached
-      # MEMCACHE_PORT: 11211
       REDIS_HOST: redis
       # REDIS_PORT: 6379
-      # OBSOLETE
-      # SCAN_DISCOVERY: "10m"
       INTERVAL: 20
 
   cm-carbon-client:
@@ -161,8 +153,6 @@ services:
       # USE ONLY WITH AND EXTERNAL CARBON-WRITER!
       GRAPHITE_HOST: carbon
       # GRAPHITE_PORT: 2003
-      MEMCACHE_HOST: memcached
-      # MEMCACHE_PORT: 11211
       REDIS_HOST: redis
       # REDIS_PORT: 6379
       # INTERVAL: 20
@@ -176,8 +166,6 @@ services:
       # GRAFANA_API_USER: admin
       # GRAFANA_API_PASSWORD: admin
       # GRAFANA_TEMPLATE_PATH: /usr/local/share/templates/grafana
-      MEMCACHE_HOST: memcached
-      # MEMCACHE_PORT: 11211
       REDIS_HOST: redis
       # REDIS_PORT: 6379
       MQ_HOST: beanstalkd
