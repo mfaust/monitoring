@@ -74,9 +74,14 @@ class Icinga2Check_CM_Feeder < Icinga2Check
 
       logger.debug( JSON.pretty_generate( engineValue ) )
 
-      maxEntries     = engineValue.dig('KeysCount')   || 0  # Number of (active) keys
-      currentEntries = engineValue.dig('ValuesCount') || 0  # Number of (valid) values. It is less or equal to 'keysCount'
-      heartbeat      = engineValue.dig('HeartBeat')         # 1 minute == 60000 ms
+      maxEntries            = engineValue.dig('KeysCount')   || 0  # Number of (active) keys
+      currentEntries        = engineValue.dig('ValuesCount') || 0  # Number of (valid) values. It is less or equal to 'keysCount'
+      heartbeat             = engineValue.dig('HeartBeat')         # 1 minute == 60000 ms
+
+      sendSuccessTimeLatest = engineValue.dig('SendSuccessTimeLatest')  #  null | 2017-03-31T07:35:54Z
+      purgeTimeLatest       = engineValue.dig('PurgeTimeLatest')        # 2017-03-31T07:12:25Z | ERROR: RuntimeException thrown in RequiredModelMBean while trying to invoke operation getPurgeTimeLatest (class javax.management.MBeanException)
+
+
 
       if( maxEntries == 0 && currentEntries == 0 )
 
@@ -86,7 +91,7 @@ class Icinga2Check_CM_Feeder < Icinga2Check
       else
 
         if( heartbeat >= 60000 )
-          puts sprintf( 'CRITICAL - Feeder Heartbeat is more then 1 minute old (Heartbeat %d ms)', heartbeat )
+          puts sprintf( 'CRITICAL - Feeder Heartbeat is more then 1 minute old\n Heartbeat %d ms', heartbeat )
           exit STATE_CRITICAL
         end
 
@@ -95,7 +100,7 @@ class Icinga2Check_CM_Feeder < Icinga2Check
         if( maxEntries == currentEntries )
           stateMessage = sprintf( 'all %d Elements feeded (Heartbeat %d ms)', maxEntries, heartbeat )
         else
-          stateMessage = sprintf( '%d Elements of %d feeded. (%d left - Heartbeat %d ms)', currentEntries, maxEntries, diffEntries, heartbeat )
+          stateMessage = sprintf( '%d Elements of %d feeded.\n %d elements left\n Heartbeat %d ms', currentEntries, maxEntries, diffEntries, heartbeat )
         end
 
         if( diffEntries > critical )
@@ -154,7 +159,7 @@ class Icinga2Check_CM_Feeder < Icinga2Check
         exitCode = STATE_CRITICAL
       end
 
-      puts sprintf( '%s - Pending Documents: %d , Pending Events: %d', status, pendingDocuments, pendingEvents )
+      puts sprintf( 'Pending Documents: %d\nPending Events: %d', pendingDocuments, pendingEvents )
 
     elsif( state == 'initializing' )
 

@@ -64,7 +64,7 @@ class Icinga2Check_CM_Cache < Icinga2Check
       exitCode = STATE_CRITICAL
     end
 
-    puts sprintf( '%s - %s Cache: %d%% used\nused %s\nmax %s', status, type, percent, cacheCurrentUsed.to_filesize, cacheMax.to_filesize )
+    puts sprintf( '%s Cache\n%d%% used\nused %s\nmax %s', type, percent, cacheCurrentUsed.to_filesize, cacheMax.to_filesize )
 
     exit exitCode
 

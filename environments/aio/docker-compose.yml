@@ -223,7 +223,6 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /share/etc/cm-icinga2.yaml:/etc/cm-icinga2.yaml
-      - /share/etc/icinga2/icinga2.conf:/etc/icinga2/icinga2.conf
       - /share/etc/icinga2/objects.d:/etc/icinga2/objects.d
       - /share/usr/local/share/icinga2:/usr/local/share/icinga2
       - /share/usr/lib/monitoring-plugins/tools:/usr/local/share/icinga2
