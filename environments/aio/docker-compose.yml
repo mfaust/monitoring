@@ -7,6 +7,13 @@ volumes:
   carbon:
   icinga:
 
+networks:
+  mon:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.1.0/24
+
 services:
 
   data:
@@ -32,7 +39,9 @@ services:
     # You can use also Environment vars like this:
     # command: "--nameserver='${DNS_1}:53' --nameserver='${DNS_2}:53' --http=:80"
     command: " --nameserver='10.1.2.14:53' --nameserver='10.1.2.63:53' --http=:80 --ttl=120 --verbose"
-
+    networks:
+      mon:
+        ipv4_address: 192.168.1.5
 
   beanstalkd:
     restart: always
@@ -44,7 +53,9 @@ services:
       com.dnsdock.ttl: '120'
     volumes:
       - /etc/localtime:/etc/localtime:ro
-
+    networks:
+      mon:
+        ipv4_address: 192.168.1.6
 
   database:
     restart: always
@@ -60,7 +71,9 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - database:/srv
-
+    networks:
+      mon:
+        ipv4_address: 192.168.1.7
 
   jolokia:
     restart: always
@@ -70,11 +83,15 @@ services:
     labels:
       com.dnsdock.alias: jolokia
       com.dnsdock.ttl: '120'
+    dns: 192.168.1.5
     depends_on:
       - data
     volumes:
       - /etc/localtime:/etc/localtime:ro
-
+#      - /share/etc/resolv.conf:/etc/resolv.conf:ro
+    networks:
+      mon:
+        ipv4_address: 192.168.1.8
 
   memcached:
     restart: always
@@ -87,7 +104,9 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
     command: "-l 0.0.0.0 -m 8 -u memcached"
-
+    networks:
+      mon:
+        ipv4_address: 192.168.1.9
 
   redis:
     restart: always
@@ -101,7 +120,9 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - redis:/var/lib/redis
-
+    networks:
+      mon:
+        ipv4_address: 192.168.1.10
 
   nginx:
     restart: always
@@ -111,6 +132,7 @@ services:
     labels:
       com.dnsdock.alias: nginx-proxy
       com.dnsdock.ttl: '120'
+    dns: 192.168.1.5
     ports:
       - 80:80
     depends_on:
@@ -135,7 +157,9 @@ services:
       - /share/etc/nginx/modules.d/01-proxy-graphite.conf:/etc/nginx/modules.d/01-proxy-graphite.conf
       - /share/etc/nginx/modules.d/01-proxy-icingaweb2.conf:/etc/nginx/modules.d/01-proxy-icingaweb2.conf
       - /share/etc/nginx/modules.d/01-proxy-markdown-service.conf:/etc/nginx/modules.d/01-proxy-markdown-service.conf
-
+    networks:
+      mon:
+        ipv4_address: 192.168.1.11
 
   carbon:
     restart: always
@@ -145,6 +169,7 @@ services:
     labels:
       com.dnsdock.alias: carbon
       com.dnsdock.ttl: '120'
+    dns: 192.168.1.5
     depends_on:
       - data
     ports:
@@ -153,7 +178,9 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - carbon:/srv
-
+    networks:
+      mon:
+        ipv4_address: 192.168.1.12
 
   graphite:
     restart: always
@@ -163,6 +190,7 @@ services:
     labels:
       com.dnsdock.alias: graphite
       com.dnsdock.ttl: '120'
+    dns: 192.168.1.5
     extends:
       file: environments.yml
       service: graphite
@@ -171,7 +199,9 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - carbon:/srv
-
+    networks:
+      mon:
+        ipv4_address: 192.168.1.13
 
   grafana:
     restart: always
@@ -181,6 +211,7 @@ services:
     labels:
       com.dnsdock.alias: grafana
       com.dnsdock.ttl: '120'
+    dns: 192.168.1.5
     extends:
       file: environments.yml
       service: grafana
@@ -195,7 +226,9 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - /share/opt/grafana/dashboards:/opt/grafana/dashboards
       - carbon:/srv
-
+    networks:
+      mon:
+        ipv4_address: 192.168.1.14
 
 
   icinga2-master:
@@ -206,6 +239,7 @@ services:
     labels:
       com.dnsdock.alias: icinga2-master
       com.dnsdock.ttl: '120'
+    dns: 192.168.1.5
     extends:
       file: environments.yml
       service: icinga2-master
@@ -236,7 +270,9 @@ services:
       - /share/usr/lib/monitoring-plugins/check_ssl_cert:/usr/lib/monitoring-plugins/check_ssl_cert
       - icinga:/srv
       - icinga:/var/lib/icinga2
-
+    networks:
+      mon:
+        ipv4_address: 192.168.1.15
 
   icingaweb2:
     restart: always
@@ -246,6 +282,7 @@ services:
     labels:
       com.dnsdock.alias: icingaweb2
       com.dnsdock.ttl: '120'
+    dns: 192.168.1.5
     extends:
       file: environments.yml
       service: icingaweb2
@@ -259,7 +296,9 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - icinga:/srv
-
+    networks:
+      mon:
+        ipv4_address: 192.168.1.16
 
   markdown-service:
     restart: always
@@ -274,7 +313,9 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /share/www/markdown-service:/var/www
-
+    networks:
+      mon:
+        ipv4_address: 192.168.1.17
 
   # CoreMedia Glue and Logic
 
@@ -286,6 +327,7 @@ services:
     labels:
       com.dnsdock.alias: cm-rest-service
       com.dnsdock.ttl: '120'
+    dns: 192.168.1.5
     extends:
       file: environments.yml
       service: cm-rest-service
@@ -296,7 +338,9 @@ services:
       - redis
     volumes:
       - /etc/localtime:/etc/localtime:ro
-
+    networks:
+      mon:
+        ipv4_address: 192.168.1.18
 
   # single service
   # use MQ to process data
@@ -308,6 +352,7 @@ services:
     labels:
       com.dnsdock.alias: cm-service-discovery
       com.dnsdock.ttl: '120'
+    dns: 192.168.1.5
     extends:
       file: environments.yml
       service: cm-service-discovery
@@ -324,7 +369,9 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - /share/etc/cm-service.yaml:/etc/cm-service.yaml
       - /share/etc/cm-application.yaml:/etc/cm-application.yaml
-
+    networks:
+      mon:
+        ipv4_address: 192.168.1.19
 
   # single service
   # use MQ to process data
@@ -336,6 +383,7 @@ services:
     labels:
       com.dnsdock.alias: cm-data-collector
       com.dnsdock.ttl: '120'
+    dns: 192.168.1.5
     extends:
       file: environments.yml
       service: cm-data-collector
@@ -352,7 +400,9 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - /share/etc/cm-service.yaml:/etc/cm-service.yaml
       - /share/etc/cm-application.yaml:/etc/cm-application.yaml
-
+    networks:
+      mon:
+        ipv4_address: 192.168.1.20
 
   # single service
   # use MQ to process data
@@ -364,6 +414,7 @@ services:
     labels:
       com.dnsdock.alias: cm-carbon-client
       com.dnsdock.ttl: '120'
+    dns: 192.168.1.5
     extends:
       file: environments.yml
       service: cm-carbon-client
@@ -374,7 +425,9 @@ services:
       - redis
     volumes:
       - /etc/localtime:/etc/localtime:ro
-
+    networks:
+      mon:
+        ipv4_address: 192.168.1.21
 
   # single service
   # use MQ to process data
@@ -386,6 +439,7 @@ services:
     labels:
       com.dnsdock.alias: cm-grafana-client
       com.dnsdock.ttl: '120'
+    dns: 192.168.1.5
     extends:
       file: environments.yml
       service: cm-grafana-client
@@ -399,7 +453,9 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /share/usr/local/share/templates:/usr/local/share/templates
-
+    networks:
+      mon:
+        ipv4_address: 192.168.1.22
 
   # single service
   # use MQ to process data
@@ -411,6 +467,7 @@ services:
     labels:
       com.dnsdock.alias: cm-graphite-client
       com.dnsdock.ttl: '120'
+    dns: 192.168.1.5
     extends:
       file: environments.yml
       service: cm-graphite-client
@@ -421,7 +478,9 @@ services:
       - beanstalkd:beanstalkd
     volumes:
       - /etc/localtime:/etc/localtime:ro
-
+    networks:
+      mon:
+        ipv4_address: 192.168.1.23
 
   # single service
   # use MQ to process data
@@ -433,6 +492,7 @@ services:
     labels:
       com.dnsdock.alias: cm-icinga-client
       com.dnsdock.ttl: '120'
+    dns: 192.168.1.5
     extends:
       file: environments.yml
       service: cm-icinga-client
@@ -443,4 +503,6 @@ services:
       - beanstalkd
     volumes:
       - /etc/localtime:/etc/localtime:ro
-
+    networks:
+      mon:
+        ipv4_address: 192.168.1.24

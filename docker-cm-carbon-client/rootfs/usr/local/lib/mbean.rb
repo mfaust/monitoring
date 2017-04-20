@@ -284,6 +284,7 @@ module MBean
       if( self.beanTimeout?( timestamp ) )
 
         logger.error( sprintf( '  status: %d: %s (Host: \'%s\' :: Service: \'%s\' - mbean: \'%s\')', status, timestamp, host, service, mbean ) )
+        logger.debug( data )
         return false
       end
     end

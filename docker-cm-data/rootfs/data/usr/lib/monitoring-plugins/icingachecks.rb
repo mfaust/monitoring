@@ -151,10 +151,10 @@ class Icinga2Check
 #       logger.debug( sprintf( ' difference: %d', difference ) )
 
       if( difference > critical )
-         logger.error( sprintf( '  %d > %d', difference, critical ) )
+        logger.error( sprintf( '  %d > %d', difference, critical ) )
         result = STATE_CRITICAL
       elsif( difference > warning || difference == warning )
-         logger.warn( sprintf( '  %d >= %d', difference, warning ) )
+        logger.warn( sprintf( '  %d >= %d', difference, warning ) )
         result = STATE_WARNING
       else
         result = STATE_OK

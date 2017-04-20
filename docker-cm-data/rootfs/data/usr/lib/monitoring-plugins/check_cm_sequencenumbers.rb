@@ -71,7 +71,7 @@ class Icinga2Check_CM_SequenceNumbers < Icinga2Check
       exitCode = STATE_CRITICAL
     end
 
-    puts sprintf( 'RLS are %s Events behind the MLS\nMLS Sequence Number: %s\nRLS Sequence Number: %s', diff, mlsSequenceNumber.to_i, rlsControllerState.to_i )
+    puts sprintf( 'RLS are %s Events <b>behind</b> the MLS<br>MLS Sequence Number: %s<br>RLS Sequence Number: %s', diff, mlsSequenceNumber.to_i, rlsControllerState.to_i )
 
     exit exitCode
 

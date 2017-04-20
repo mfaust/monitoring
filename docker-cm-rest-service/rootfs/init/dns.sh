@@ -47,7 +47,7 @@ addDNS() {
         http://dnsdock/services/${host} \
         --silent \
         --request PUT \
-        --data-ascii "{\"name\":\"${host}\",\"image\":\"${host}\",\"ips\":[\"${ip}\"],\"ttl\":0}"
+        --data-ascii "{\"name\":\"${host}.docker\",\"image\":\"${host}\",\"ips\":[\"${ip}\"],\"ttl\":0,\"aliases\":[\"${host}\"]}"
 
     done
 
