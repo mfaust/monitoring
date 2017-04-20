@@ -639,11 +639,11 @@ module Grafana
 
       def createServiceTemplate( params = {} )
 
-        description             = params[:description]             ? params[:description]             : nil
-        serviceName             = params[:serviceName]             ? params[:serviceName]             : nil
-        normalizedName          = params[:normalizedName]          ? params[:normalizedName]          : nil
-        serviceTemplate         = params[:serviceTemplate]         ? params[:serviceTemplate]         : nil
-        additionalTemplatePaths = params[:additionalTemplatePaths] ? params[:additionalTemplatePaths] : []
+        description             = params.dig(:description)
+        serviceName             = params.dig(:serviceName)
+        normalizedName          = params.dig(:normalizedName)
+        serviceTemplate         = params.dig(:serviceTemplate)
+        additionalTemplatePaths = params.dig(:additionalTemplatePaths) || []
 
         logger.info( sprintf( 'Creating dashboard for \'%s\'', serviceName ) )
 

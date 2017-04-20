@@ -81,8 +81,6 @@ class Icinga2Check_CM_Feeder < Icinga2Check
       sendSuccessTimeLatest = engineValue.dig('SendSuccessTimeLatest')  #  null | 2017-03-31T07:35:54Z
       purgeTimeLatest       = engineValue.dig('PurgeTimeLatest')        # 2017-03-31T07:12:25Z | ERROR: RuntimeException thrown in RequiredModelMBean while trying to invoke operation getPurgeTimeLatest (class javax.management.MBeanException)
 
-
-
       if( maxEntries == 0 && currentEntries == 0 )
 
         status       = 'UNKNOWN'
@@ -91,17 +89,11 @@ class Icinga2Check_CM_Feeder < Icinga2Check
       else
 
         if( heartbeat >= 60000 )
-          puts sprintf( 'CRITICAL - Feeder Heartbeat is more then 1 minute old\n Heartbeat %d ms', heartbeat )
+          puts sprintf( 'Feeder Heartbeat is more then 1 minute old<br>Heartbeat %d ms', heartbeat )
           exit STATE_CRITICAL
         end
 
         diffEntries    = ( maxEntries - currentEntries ).to_i
-
-        if( maxEntries == currentEntries )
-          stateMessage = sprintf( 'all %d Elements feeded (Heartbeat %d ms)', maxEntries, heartbeat )
-        else
-          stateMessage = sprintf( '%d Elements of %d feeded.\n %d elements left\n Heartbeat %d ms', currentEntries, maxEntries, diffEntries, heartbeat )
-        end
 
         if( diffEntries > critical )
           status   = 'CRITICAL'
@@ -116,10 +108,17 @@ class Icinga2Check_CM_Feeder < Icinga2Check
           exitCode = STATE_OK
         end
 
-      end
+        if( maxEntries == currentEntries )
 
-      puts sprintf( '%s - %s - %s', status, healthMessage, stateMessage )
-      exit exitCode
+          puts sprintf( 'all %d Elements feeded<br>Heartbeat %d ms', maxEntries, heartbeat )
+          exit exitCode
+        else
+
+          puts sprintf( '%d Elements of %d feeded.<br>%d elements left<br>Heartbeat %d ms', currentEntries, maxEntries, diffEntries, heartbeat )
+          exit exitCode
+        end
+
+      end
 
     else
       puts sprintf( 'CRITICAL - NOT HEALTHY' )
@@ -159,20 +158,20 @@ class Icinga2Check_CM_Feeder < Icinga2Check
         exitCode = STATE_CRITICAL
       end
 
-      puts sprintf( 'Pending Documents: %d\nPending Events: %d', pendingDocuments, pendingEvents )
+      puts sprintf( 'Pending Documents: %d<br>Pending Events: %d', pendingDocuments, pendingEvents )
 
     elsif( state == 'initializing' )
 
       status   = 'WARNING'
       exitCode = STATE_WARNING
 
-      puts sprintf( '%s - Feeder are in %s state', status, state )
+      puts sprintf( 'Feeder are in <b>%s</b> state', state )
     else
 
       status   = 'CRITICAL'
       exitCode = STATE_CRITICAL
 
-      puts sprintf( '%s - Feeder are in unknown state', status )
+      puts 'Feeder are in unknown state'
     end
 
     exit exitCode

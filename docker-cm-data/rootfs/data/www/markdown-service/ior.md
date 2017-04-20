@@ -1,5 +1,4 @@
-IOR
-===
+## IOR
 
 **IOR** steht als Abkürzung für "_Interoperable Object Reference, eine Objektreferenz auf ein CORBA-Objekt_"
 

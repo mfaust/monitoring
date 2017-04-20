@@ -3,7 +3,6 @@ version: '2.0'
 
 volumes:
   database:
-  persistent:
   redis:
   carbon:
   icinga:
@@ -274,7 +273,7 @@ services:
       - data
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /share/var/www/markdown-service:/var/www
+      - /share/www/markdown-service:/var/www
 
 
   # CoreMedia Glue and Logic

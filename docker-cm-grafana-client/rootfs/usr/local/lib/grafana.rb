@@ -133,6 +133,25 @@ module Grafana
       @mbean       = MBean::Client.new( { :redis => @redis } )
       @mqConsumer  = MessageQueue::Consumer.new( @MQSettings )
 
+      self.createApiInstance( {
+        :timeout      => timeout,
+        :open_timeout => open_timeout,
+        :headers      => headers,
+        :user         => user,
+        :password     => password
+      } )
+
+    end
+
+
+    def createApiInstance( params = {} )
+
+      timeout      = params.dig(:timeout)
+      open_timeout = params.dig(:open_timeout)
+      headers      = params.dig(:headers)
+      user         = params.dig(:user)
+      password     = params.dig(:password)
+
       begin
 
         until( @apiInstance != nil )
@@ -146,17 +165,19 @@ module Grafana
             :headers      => headers,
             :verify_ssl   => false
           )
-          sleep(3)
+
+          sleep(5)
         end
       rescue => e
+
         logger.error( e )
       end
 
-      if( settings.dig(:headers) && settings[:headers].has_key?(:authorization) )
+      if( headers.has_key?(:authorization) )
         # API key Auth
         @headers = {
           :content_type  => 'application/json; charset=UTF-8',
-          :Authorization => settings.dig( :headers, :authorization )
+          :Authorization => headers.dig( :authorization )
         }
       else
         # Regular login Auth
@@ -186,6 +207,8 @@ module Grafana
 #       logger.debug( 'Attempting to establish user session' )
 
       request_data = { 'User' => user, 'Password' => password }
+
+#       self.ping_session()
 
       begin
         resp = @apiInstance['/login'].post(

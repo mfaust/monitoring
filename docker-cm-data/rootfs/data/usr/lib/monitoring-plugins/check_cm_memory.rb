@@ -31,7 +31,7 @@ class Icinga2Check_CM_Memory < Icinga2Check
     data      = @mbean.bean( host, application, 'Memory' )
     dataValue = self.runningOrOutdated( data )
 
-    dataValue = dataValue.values.first
+#     dataValue = dataValue.values.first
 
     case type
     when 'heap-mem'
@@ -79,9 +79,9 @@ class Icinga2Check_CM_Memory < Icinga2Check
 
     case type
     when 'heap-mem'
-      puts sprintf( '%s Memory\n %d%% used\nCommited: %s\nUsed: %s\nMax: %s', memoryType, percent, committed.to_filesize, used.to_filesize, max.to_filesize )
+      puts sprintf( '%d%% %s Memory used<br>Max: %s<br>Commited: %s<br>Used: %s', percent, memoryType, max.to_filesize, committed.to_filesize, used.to_filesize )
     else
-      puts sprintf( '%s Memory\n %d%% used\nCommited: %s\nUsed: %s\n', memoryType, percent, committed.to_filesize, used.to_filesize )
+      puts sprintf( '%d%% %s Memory used<br>Commited: %s<br>Used: %s', percent, memoryType, committed.to_filesize, used.to_filesize )
     end
     exit exitCode
 

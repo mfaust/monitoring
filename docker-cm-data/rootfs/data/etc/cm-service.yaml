@@ -52,6 +52,7 @@ services:
     ior: true
     runlevel: true
     license: true
+    heap_cache: true
     application:
     - contentserver
 
@@ -62,6 +63,7 @@ services:
     ior: true
     runlevel: true
     license: true
+    heap_cache: true
     application:
     - contentserver
 
@@ -71,6 +73,7 @@ services:
     cap_connection: true
     uapi_cache: true
     blob_cache: true
+    heap_cache: true
 
   content-feeder:
     description: Content Feeder
@@ -78,12 +81,14 @@ services:
     feeder: content
     cap_connection: true
     uapi_cache: true
+    heap_cache: true
 
   user-changes:
     description: User Changes
     port: 40599
     cap_connection: true
     uapi_cache: true
+    heap_cache: true
 
   elastic-worker:
     description: Elastic Worker
@@ -91,6 +96,7 @@ services:
     cap_connection: true
     uapi_cache: true
     blob_cache: true
+    heap_cache: true
 
   caefeeder-preview:
     description: CAEFeeder Preview
@@ -98,6 +104,7 @@ services:
     feeder: preview
     cap_connection: true
     uapi_cache: true
+    heap_cache: true
     application:
     - caefeeder
 #    template: cm-caefeeder
@@ -108,6 +115,7 @@ services:
     feeder: live
     cap_connection: true
     uapi_cache: true
+    heap_cache: true
     application:
     - caefeeder
 #    template: cm-caefeeder
@@ -117,6 +125,7 @@ services:
     port: 40999
     cap_connection: true
     uapi_cache: true
+    heap_cache: true
     application:
     - cae
     - caches
@@ -128,6 +137,7 @@ services:
     cap_connection: true
     uapi_cache: true
     blob_cache: true
+    heap_cache: true
     application:
     - caches-studio
     - caches-ecommerce
@@ -145,6 +155,7 @@ services:
     cap_connection: true
     uapi_cache: true
     blob_cache: true
+    heap_cache: true
 
   webdav:
     description: WebDAV
@@ -162,6 +173,7 @@ services:
     runlevel: true
     license: true
     sequencenumbers: true
+    heap_cache: true
     application:
     - contentserver
 
@@ -171,6 +183,7 @@ services:
     cap_connection: true
     uapi_cache: true
     blob_cache: true
+    heap_cache: true
     application:
     - cae
     - caches

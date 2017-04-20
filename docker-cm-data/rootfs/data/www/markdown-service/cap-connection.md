@@ -1,2 +1,1 @@
-CAP Connection
-==============
+## CAP Connection
