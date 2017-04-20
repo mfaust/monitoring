@@ -5,7 +5,7 @@ MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
   ALPINE_MIRROR="dl-cdn.alpinelinux.org" \
-  ALPINE_VERSION="edge" \
+  ALPINE_VERSION="v3.5" \
   TERM=xterm \
   APK_ADD="build-base imagemagick-dev mysql-dev postgresql-dev ruby-dev ruby-irb ruby-rdoc zlib zlib-dev" \
   APK_DEL="build-base imagemagick-dev ruby-dev ruby-rdoc zlib-dev" \
