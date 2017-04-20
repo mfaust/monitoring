@@ -110,6 +110,13 @@ services:
   cm-rest-service:
     environment:
       TZ: 'Europe/Berlin'
+      REST_SERVICE_PORT: 45678
+      REST_SERVICE_BIND: '0.0.0.0'
+      MQ_HOST: beanstalkd
+      # MQ_PORT: 11300
+      # MQ_QUEUE: mq-rest-service
+      REDIS_HOST: redis
+      # REDIS_PORT: 6379
       # when we need an DNS entry for external services, we can use ADDITIONAL_DNS
       # its an comma seperated list with following syntax:
       # HOSTNAME:IP,HOSTNAME:IP, ...
