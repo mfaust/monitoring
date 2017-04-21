@@ -37,9 +37,17 @@ addDNS() {
 
       host=$(echo "${h}" | cut -d: -f1)
       ip=$(echo "${h}" | cut -d: -f2)
+      aliases=
 
       [ -n "${host}" ]
       [ -n "${ip}" ]
+
+      if [ "${host}" == "blueprint-box" ]
+      then
+        aliases="\"aliases\":[\"${host}\", \"${ip}.xip.io\"]"
+      else
+        aliases="\"aliases\":[\"${host}\"]"
+      fi
 
       echo "add host '${host}' with ip '${ip}' to dns"
 
@@ -47,7 +55,7 @@ addDNS() {
         http://dnsdock/services/${host} \
         --silent \
         --request PUT \
-        --data-ascii "{\"name\":\"${host}.docker\",\"image\":\"${host}\",\"ips\":[\"${ip}\"],\"ttl\":0,\"aliases\":[\"${host}\"]}"
+        --data-ascii "{\"name\":\"${host}.docker\",\"image\":\"${host}\",\"ips\":[\"${ip}\"],\"ttl\":0,${aliases}}"
 
     done
 
