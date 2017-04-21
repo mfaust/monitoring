@@ -747,6 +747,8 @@ module DataCollector
 
           logger.debug( sprintf( '%d checks for service \'%s\' found', i.count, v ) )
 
+          result[v] ||= []
+
           cacheKey = Storage::RedisClient.cacheKey( { :host => hostname, :pre => 'result', :service => v } )
 
           if( i.count > 1 )
@@ -768,6 +770,9 @@ module DataCollector
                   logger.error( "i can\'t store data into result for service #{v}" )
                   logger.error( e )
                 end
+              else
+                logger.error( "jolokia status : #{jolokiaStatus}" )
+                logger.error( "jolokia message: #{jolokiaMessage}" )
               end
             end
 
@@ -801,11 +806,12 @@ module DataCollector
               logger.error( e )
             end
 
-#             logger.debug( result[v] )
           end
 
           logger.debug( 'store result in our redis' )
           redisResult = @redis.set( cacheKey, result[v] )
+
+logger.debug( JSON.pretty_generate( result[v] ) )
 
           if( redisResult.is_a?( FalseClass ) || ( redisResult.is_a?( String ) && redisResult != 'OK' ) )
 
