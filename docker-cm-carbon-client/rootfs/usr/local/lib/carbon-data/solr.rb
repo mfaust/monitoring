@@ -47,7 +47,7 @@ module CarbonData
       cumulative_hitratio  = 0
       cumulative_lookups   = 0
 
-      if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+      if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil )
 
   #      value = value.values.first
 
@@ -136,7 +136,7 @@ module CarbonData
       errors            = 0
       indexSize         = 0
 
-      if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+      if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil )
 
   #      value = value.values.first
 
@@ -217,7 +217,7 @@ module CarbonData
       timeouts               = 0
       errors                 = 0
 
-      if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+      if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil )
 
   #      value = value.values.first
 

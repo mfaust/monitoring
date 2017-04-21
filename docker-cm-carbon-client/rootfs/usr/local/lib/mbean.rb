@@ -264,7 +264,7 @@ module MBean
     end
 
 
-    def checkBean‎Consistency( mbean, data = {} )
+    def checkBeanConsistency( mbean, data = {} )
 
     status    = data.dig('status')    # ? data['status']    : 505
     timestamp = data.dig('timestamp') # ? data['timestamp'] : 0

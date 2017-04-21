@@ -13,7 +13,7 @@ module CarbonData
       uptime  = 0
       start   = 0
 
-      if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+      if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil )
 
         uptime   = value.dig('Uptime')
         start    = value.dig('StartTime')
@@ -50,7 +50,7 @@ module CarbonData
       fileDescriptorCountOpen    = 0
       vvailableProcessors        = 0
 
-      if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+      if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil )
 
         logger.debug( JSON.pretty_generate( value ) )
 
@@ -110,7 +110,7 @@ module CarbonData
       sessionCounter          = 0       # Total number of sessions created by this manager
       maxActive               = 0       # Maximum number of active sessions so far
 
-      if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+      if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil )
 
         value = value.values.first
 
@@ -208,7 +208,7 @@ module CarbonData
 
       end
 
-      if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+      if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil )
 
         memoryTypes.each do |m|
 
@@ -257,7 +257,7 @@ module CarbonData
       peak   = 0
       count  = 0
 
-      if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+      if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil )
 
         peak   = value.dig('PeakThreadCount')
         count  = value.dig('ThreadCount')
@@ -282,7 +282,7 @@ module CarbonData
       value     = data.dig('value')
       result    = []
 
-      if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+      if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil )
 
         lastGcInfo = value.dig('LastGcInfo')
 
@@ -380,7 +380,7 @@ module CarbonData
       totalLoaded = 0
       unloaded    = 0
 
-      if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+      if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil )
 
         loaded      = value.dig('LoadedClassCount')
         totalLoaded = value.dig('TotalLoadedClassCount')

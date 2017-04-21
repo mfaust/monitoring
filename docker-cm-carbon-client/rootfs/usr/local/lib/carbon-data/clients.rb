@@ -23,7 +23,7 @@ module CarbonData
       suSessions       = 0
       open             = -1 # 0: false, 1: true, -1: N/A
 
-      if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+      if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil )
 
         value = value.values.first
 
@@ -114,7 +114,7 @@ module CarbonData
       mbeanName = @mbean.beanName( bean )
       mbeanName = mbeanName.strip.tr( ' ', '_' )
 
-      if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil && usage != nil )
+      if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil && usage != nil )
 
         init      = usage.dig('init')
         max       = usage.dig('max')

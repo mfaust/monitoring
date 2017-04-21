@@ -18,7 +18,7 @@ module CarbonData
       activeTime   = 0
       totalTime    = 0
 
-      if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+      if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil )
 
         value = value.values.first
 
@@ -78,7 +78,7 @@ module CarbonData
       level     = 0
       missRate  = 0
 
-      if( @mbean.checkBean‎Consistency( key, data ) == true && value != nil )
+      if( @mbean.checkBeanConsistency( key, data ) == true && value != nil )
 
         value = value.values.first
 

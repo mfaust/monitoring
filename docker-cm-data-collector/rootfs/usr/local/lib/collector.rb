@@ -594,6 +594,7 @@ module DataCollector
         return
       end
 
+      # remove 'timestamp', we dont need it anymore
       data.reject! { |t| t[/timestamp/] }
 
       services      = data.keys
@@ -811,7 +812,7 @@ module DataCollector
           logger.debug( 'store result in our redis' )
           redisResult = @redis.set( cacheKey, result[v] )
 
-logger.debug( JSON.pretty_generate( result[v] ) )
+# logger.debug( JSON.pretty_generate( result[v] ) )
 
           if( redisResult.is_a?( FalseClass ) || ( redisResult.is_a?( String ) && redisResult != 'OK' ) )
 
