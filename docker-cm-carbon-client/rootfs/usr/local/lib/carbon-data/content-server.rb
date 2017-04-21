@@ -17,7 +17,7 @@ module CarbonData
       queriesMax       = 0
       queriesWaiting   = 0
 
-      if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+      if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil )
 
         value = value.values.first
 
@@ -66,7 +66,7 @@ module CarbonData
       busy   = 0
       min    = 0
 
-      if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+      if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil )
 
         value = value.values.first
 
@@ -207,7 +207,7 @@ module CarbonData
       end
 
 
-      if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+      if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil )
 
         value = value.values.first
 
@@ -437,7 +437,7 @@ module CarbonData
       successful    = 0
       unrecoverable = 0
 
-      if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+      if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil )
 
         value = value.values.first
 
@@ -481,7 +481,7 @@ module CarbonData
       misses   = 0
       hits     = 0
 
-      if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+      if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil )
 
         value = value.values.first
 

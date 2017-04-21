@@ -1,34 +1,4 @@
 {
-  "__inputs": [
-    {
-      "name": "DS_GRAPHITE",
-      "label": "graphite",
-      "description": "",
-      "type": "datasource",
-      "pluginId": "graphite",
-      "pluginName": "Graphite"
-    }
-  ],
-  "__requires": [
-    {
-      "type": "panel",
-      "id": "graph",
-      "name": "Graph",
-      "version": ""
-    },
-    {
-      "type": "grafana",
-      "id": "grafana",
-      "name": "Grafana",
-      "version": "4.0.0-beta1"
-    },
-    {
-      "type": "datasource",
-      "id": "graphite",
-      "name": "Graphite",
-      "version": "1.0.0"
-    }
-  ],
   "id": null,
   "revision": "1.0",
   "title": "Graphite Carbon Metrics",
@@ -105,7 +75,7 @@
             "enable": false
           },
           "bars": false,
-          "datasource": "${DS_GRAPHITE}",
+          "datasource": "graphite",
           "editable": true,
           "fill": 0,
           "grid": {
@@ -227,7 +197,7 @@
         {
           "aliasColors": {},
           "bars": false,
-          "datasource": "${DS_GRAPHITE}",
+          "datasource": "graphite",
           "editable": true,
           "error": false,
           "fill": 2,
@@ -302,7 +272,7 @@
         {
           "aliasColors": {},
           "bars": false,
-          "datasource": "${DS_GRAPHITE}",
+          "datasource": "graphite",
           "editable": true,
           "error": false,
           "fill": 2,
@@ -378,7 +348,7 @@
         {
           "aliasColors": {},
           "bars": false,
-          "datasource": "${DS_GRAPHITE}",
+          "datasource": "graphite",
           "editable": true,
           "error": false,
           "fill": 2,
@@ -454,7 +424,7 @@
         {
           "aliasColors": {},
           "bars": false,
-          "datasource": "${DS_GRAPHITE}",
+          "datasource": "graphite",
           "editable": true,
           "error": false,
           "fill": 2,
@@ -533,175 +503,6 @@
       "repeatRowId": null,
       "showTitle": false,
       "title": "New row",
-      "titleSize": "h6"
-    },
-    {
-      "collapse": true,
-      "editable": true,
-      "height": 172,
-      "isNew": false,
-      "panels": [
-        {
-          "aliasColors": {},
-          "bars": false,
-          "datasource": "${DS_GRAPHITE}",
-          "editable": true,
-          "error": false,
-          "fill": 2,
-          "id": 3,
-          "isNew": true,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": false
-          },
-          "lines": true,
-          "linewidth": 1,
-          "nullPointMode": "connected",
-          "percentage": false,
-          "pointradius": 5,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "span": 12,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "refId": "A",
-              "target": "collectd.docker-host.load.*.*"
-            }
-          ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "Panel Title",
-          "tooltip": {
-            "msResolution": false,
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            }
-          ]
-        }
-      ],
-      "repeat": null,
-      "repeatIteration": null,
-      "repeatRowId": null,
-      "showTitle": false,
-      "title": "New row",
-      "titleSize": "h6"
-    },
-    {
-      "collapse": true,
-      "height": 173,
-      "isNew": false,
-      "panels": [
-        {
-          "aliasColors": {},
-          "bars": false,
-          "datasource": "${DS_GRAPHITE}",
-          "editable": true,
-          "error": false,
-          "fill": 1,
-          "id": 4,
-          "isNew": true,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": false
-          },
-          "lines": true,
-          "linewidth": 1,
-          "nullPointMode": "connected",
-          "percentage": false,
-          "pointradius": 5,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "span": 12,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "refId": "A",
-              "target": "collectd.docker-host.df-root.*"
-            }
-          ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "Panel Title",
-          "tooltip": {
-            "msResolution": false,
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            }
-          ]
-        }
-      ],
-      "repeat": null,
-      "repeatIteration": null,
-      "repeatRowId": null,
-      "showTitle": false,
-      "title": "Dashboard Row",
       "titleSize": "h6"
     }
   ]

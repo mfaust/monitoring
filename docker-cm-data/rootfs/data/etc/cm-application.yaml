@@ -20,8 +20,6 @@ jolokia:
       - description: GarbageCollector ConcurrentMarkSweep
         mbean: java.lang:type=GarbageCollector,name=ConcurrentMarkSweep
         attribute: CollectionTime,CollectionCount,LastGcInfo
-      - description: information about the Operating System
-        mbean: java.lang:type=OperatingSystem
       - description: information about the Runtime System
         mbean: java.lang:type=Runtime
         attribute: Uptime,StartTime

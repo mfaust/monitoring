@@ -3,7 +3,7 @@
 # 14.03.2017 - Bodo Schulz
 #
 #
-# v1.2.0
+# v1.3.0
 
 # -----------------------------------------------------------------------------
 
@@ -25,28 +25,34 @@ jolokiaAuthPass  = ENV.fetch('JOLOKIA_AUTH_PASS', nil )
 mqHost           = ENV.fetch('MQ_HOST'          , 'localhost' )
 mqPort           = ENV.fetch('MQ_PORT'          , 11300 )
 mqQueue          = ENV.fetch('MQ_QUEUE'         , 'mq-collector' )
-memcacheHost     = ENV.fetch('MEMCACHE_HOST'    , 'localhost' )
-memcachePort     = ENV.fetch('MEMCACHE_PORT'    , 11211 )
 redisHost        = ENV.fetch('REDIS_HOST'       , 'localhost' )
 redisPort        = ENV.fetch('REDIS_PORT'       , 6379 )
-scanDiscovery    = ENV.fetch('SCAN_DISCOVERY'   , '10m' )
+# scanDiscovery    = ENV.fetch('SCAN_DISCOVERY'   , '10m' )
 interval         = ENV.fetch('INTERVAL'         , 20 )
 
 config = {
-  :jolokiaHost           => jolokiaHost,
-  :jolokiaPort           => jolokiaPort,
-  :jolokiaPath           => jolokiaPath,
-  :jolokiaAuthUser       => jolokiaAuthUser,
-  :jolokiaAuthPass       => jolokiaAuthPass,
-  :mqHost                => mqHost,
-  :mqPort                => mqPort,
-  :mqQueue               => mqQueue,
-  :memcacheHost          => memcacheHost,
-  :memcachePort          => memcachePort,
-  :redis                 => { :host => redisHost, :port => redisPort },
-  :scanDiscovery         => scanDiscovery,
-  :applicationConfigFile => applicationConfigFile,
-  :serviceConfigFile     => serviceConfigFile
+  :jolokia     => {
+    :host => jolokiaHost,
+    :port => jolokiaPort,
+    :path => jolokiaPath,
+    :auth => {
+      :user => jolokiaAuthUser,
+      :pass => jolokiaAuthPass
+    }
+  },
+  :mq          => {
+    :host  => mqHost,
+    :port  => mqPort,
+    :queue => mqQueue
+  },
+  :redis       => {
+    :host => redisHost,
+    :port => redisPort
+  },
+  :configFiles => {
+    :application => applicationConfigFile,
+    :service     => serviceConfigFile
+  }
 }
 
 # -----------------------------------------------------------------------------

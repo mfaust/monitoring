@@ -14,17 +14,18 @@ services:
 
   graphite:
     environment:
+      # default database are sqlite.
+      # this is only needed, when we whant to use graphite dashboards.
+      # (WE DONT THIS!)
       # DATABASE_TYPE: sqlite
       # MYSQL_HOST:
       # MYSQL_PORT: 3306
       # MYSQL_ROOT_USER: root
       # MYSQL_ROOT_PASS:
-      MEMCACHE_HOST: memcached
-      # MEMCACHE_PORT: 11211
       # DATABASE_GRAPHITE_PASS: graphite
       #
       # THIS TURN OFF THE INTERNAL CARBON!
-      # USE THIS ONLY WITH AN OTHE CARBON-WRITER (e.g. bodsch/docker-go-carbon)
+      # USE THIS ONLY WITH AN OTHER CARBON-WRITER (e.g. bodsch/docker-go-carbon)
       USE_EXTERNAL_CARBON: 'true'
 
   grafana:
@@ -61,6 +62,7 @@ services:
       # CARBON_PORT: 2003
       # DASHING_API_USER: dashing
       # DASHING_API_PASS: dashing.pass
+      ICINGA_API_USERS: root:icinga,icingaweb:icingaweb,cert-service:47pswW14rzeV9MNFGruI
       ICINGA_CLUSTER: 'true'
       ICINGA_MASTER: icinga2-master
       ICINGA_CERT_SERVICE: 'false'
@@ -68,10 +70,11 @@ services:
       ICINGA_CERT_SERVICE_BA_PASSWORD: admin
       ICINGA_CERT_SERVICE_API_USER: cert-service
       ICINGA_CERT_SERVICE_API_PASSWORD: 47pswW14rzeV9MNFGruI
-      # ICINGA_CERT_SERVICE_SERVER: localhost
+      # ICINGA_CERT_SERVICE_SERVER:
       # ICINGA_CERT_SERVICE_PORT: 80
-      MEMCACHE_HOST: memcached
-      # MEMCACHE_PORT: 11211
+      ICINGA_CERT_SERVICE_PATH: /cert-service/
+      # REDIS_HOST: redis
+      # REDIS_PORT: 6379
       # Useful to send notification via email
       # ICINGA_SSMTP_RELAY_SERVER:
       # ICINGA_SSMTP_REWRITE_DOMAIN:
@@ -87,9 +90,9 @@ services:
       # MYSQL_PORT: 3306
       # MYSQL_ROOT_USER: root
       MYSQL_ROOT_PASS: database.pass
-      # ICINGA2_HOST: icinga2-master
-      # ICINGA2_CMD_API_USER: command-api-user
-      # ICINGA2_CMD_API_PASS: command-api-pass
+      ICINGA2_HOST: icinga2-master
+      ICINGA2_CMD_API_USER: icingaweb
+      ICINGA2_CMD_API_PASS: icingaweb
       IDO_PASSWORD: ido.pass
       IDO_DATABASE_NAME: icinga2core
       # GRAPHITE_HOST:

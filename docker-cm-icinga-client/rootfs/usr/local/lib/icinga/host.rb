@@ -20,8 +20,16 @@ module Icinga
         }
       end
 
+      hostInfo      = Utils::Network.resolv( host )
+
+      logger.debug( "hostResolve #{hostInfo}" )
+
+      ip            = hostInfo.dig(:ip)
+      shortHostName = hostInfo.dig(:short)
+      fqdn  = hostInfo.dig(:long)
+
       # build FQDN
-      fqdn = Socket.gethostbyname( host ).first
+#       fqdn = Socket.gethostbyname( host ).first
 
       payload = {
         "templates" => [ "generic-host" ],
@@ -43,7 +51,7 @@ module Icinga
         payload['attrs']['zone'] = @icingaSatellite
       end
 
-#       logger.debug( JSON.pretty_generate( payload ) )
+      logger.debug( JSON.pretty_generate( payload ) )
 
       result = Network.put( {
         :host    => host,

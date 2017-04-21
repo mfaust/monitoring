@@ -7,7 +7,8 @@ module CarbonData
     #
     def monitoredServer()
 
-      d = @db.nodes( { :status => 1 } )
+      d = @redis.nodes( { :status => 1 } )
+#      d = @db.nodes( { :status => 1 } )
 
       return d
 

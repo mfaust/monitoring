@@ -1,28 +1,18 @@
 
-FROM alpine:latest
+FROM busybox:latest
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
-ENV \
-  ALPINE_MIRROR="dl-cdn.alpinelinux.org" \
-  ALPINE_VERSION="v3.5"
-
-LABEL version="1704-01.1"
+LABEL version="1704-03.2"
 
 # ---------------------------------------------------------------------------------------
 
-WORKDIR /
+WORKDIR /share
 
 VOLUME [ "/share" ]
 
-ADD rootfs /
+COPY rootfs /
 
-RUN \
-  mkdir -p /share && \
-  rm -rf \
-    /tmp/* \
-    /var/cache/apk/*
-
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT "/init/run.sh"
 
 CMD ["tail", "-f", "/dev/null"]

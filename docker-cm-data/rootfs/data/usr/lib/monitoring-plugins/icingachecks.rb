@@ -9,32 +9,12 @@ require 'logger'
 require 'time_difference'
 
 require_relative '/usr/local/share/icinga2/logging'
+require_relative '/usr/local/share/icinga2/utils/network'
 require_relative '/usr/local/share/icinga2/storage'
 require_relative '/usr/local/share/icinga2/mbean'
+require_relative '/usr/local/share/icinga2/monkey'
 
 # ---------------------------------------------------------------------------------------
-
-class Integer
-  def to_filesize
-    {
-      'B'  => 1024,
-      'KB' => 1024 * 1024,
-      'MB' => 1024 * 1024 * 1024,
-      'GB' => 1024 * 1024 * 1024 * 1024,
-      'TB' => 1024 * 1024 * 1024 * 1024 * 1024
-    }.each_pair { |e, s| return "#{(self.to_f / (s / 1024)).round(2)} #{e}" if self < s }
-  end
-end
-
-class Time
-  def add_minutes(m)
-    self + (60 * m)
-  end
-
-  def add_seconds(s)
-    self + s
-  end
-end
 
 class Icinga2Check
 
@@ -48,13 +28,15 @@ class Icinga2Check
 
   def initialize( settings = {} )
 
-    memcacheHost = ENV['MEMCACHE_HOST'] ? ENV['MEMCACHE_HOST'] : nil
-    memcachePort = ENV['MEMCACHE_PORT'] ? ENV['MEMCACHE_PORT'] : 11211
+    redisHost    = ENV.fetch( 'REDIS_HOST'       , 'localhost' )
+    redisPort    = ENV.fetch( 'REDIS_PORT'       , 6379 )
+
+#     memcacheHost = ENV['MEMCACHE_HOST'] ? ENV['MEMCACHE_HOST'] : nil
+#     memcachePort = ENV['MEMCACHE_PORT'] ? ENV['MEMCACHE_PORT'] : 11211
 
     logger.level = Logger::DEBUG
-
-    @mc          = Storage::Memcached.new( { :host => memcacheHost, :port => memcachePort } )
-    @mbean       = MBean::Client.new( { :memcache => @mc } )
+    @redis       = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
+    @mbean       = MBean::Client.new( { :redis => @redis } )
   end
 
 
@@ -72,7 +54,7 @@ class Icinga2Check
 
         config  = YAML.load_file( file )
 
-        service = config[service] ? config[service] : nil
+        service = config.dig(service)
 
         if( service != nil )
           usePercent = service.dig('usePercent')
@@ -98,17 +80,17 @@ class Icinga2Check
   def shortHostname( hostname )
 
     # look in the memcache
-    memcacheKey = Storage::Memcached.cacheKey( { :host => hostname, :type => 'dns' })
+    memcacheKey = Storage::RedisClient.cacheKey( { :host => hostname, :type => 'dns' })
 
-    data      = @mc.get( memcacheKey )
+    data      = @redis.get( memcacheKey )
 
     if( data == nil )
 
-      data = hostResolve( hostname )
-      @mc.set( memcacheKey, data )
+      data = Utils::Network.resolv( hostname )
+      @redis.set( memcacheKey, data )
     end
 
-    hostname = data.dig(:short)
+    hostname = data.dig('short')
 
     return hostname
 
@@ -122,9 +104,9 @@ class Icinga2Check
       exit STATE_CRITICAL
     end
 
-    dataStatus    = data['status']    ? data['status']    : 500
-    dataTimestamp = data['timestamp'] ? data['timestamp'] : nil
-    dataValue     = ( data != nil && data['value'] ) ? data['value'] : nil
+    dataStatus    = data.dig('status')    || 500
+    dataTimestamp = data.dig('timestamp')
+    dataValue     = data.dig('value')     # ( data != nil && data['value'] ) ? data['value'] : nil
 
     if( dataValue == nil )
       puts 'CRITICAL - Service not running!?'
@@ -169,10 +151,10 @@ class Icinga2Check
 #       logger.debug( sprintf( ' difference: %d', difference ) )
 
       if( difference > critical )
-         logger.error( sprintf( '  %d > %d', difference, critical ) )
+        logger.error( sprintf( '  %d > %d', difference, critical ) )
         result = STATE_CRITICAL
       elsif( difference > warning || difference == warning )
-         logger.warn( sprintf( '  %d >= %d', difference, warning ) )
+        logger.warn( sprintf( '  %d >= %d', difference, warning ) )
         result = STATE_WARNING
       else
         result = STATE_OK

@@ -8,16 +8,27 @@ module CarbonWriter
 
     include Logging
 
-    def initialize( params = {} )
+    def initialize( settings = {} )
 
-      @graphiteHost = params.dig( :graphite, :host )
-      @graphitePort = params.dig( :graphite, :port )
-      @slice        = params.dig( :slice )
-      @buffer       = CarbonWriter::Buffer.new( { :cache => 4 * 60 * 60 } )
-      @memcacheHost = params.dig( :memcache, :host )
-      @memcachePort = params.dig( :memcache, :port )
+      redisHost     = settings.dig(:redis, :host)   || 'localhost'
+      redisPort     = settings.dig(:redis, :port)   || 6379
 
-      @carbonData   = CarbonData::Consumer.new( { :memcache => { :host => @memcacheHost, :port => @memcachePort } } )
+      @graphiteHost = settings.dig( :graphite, :host )
+      @graphitePort = settings.dig( :graphite, :port )
+
+      version             = '1.3.2'
+      date                = '2017-04-13'
+
+      logger.info( '-----------------------------------------------------------------' )
+      logger.info( ' CoreMedia - Carbon client' )
+      logger.info( "  Version #{version} (#{date})" )
+      logger.info( '  Copyright 2017 Coremedia' )
+      logger.info( '  used Services:' )
+      logger.info( "    - carbon       : #{@graphiteHost}:#{@graphitePort}" )
+      logger.info( '-----------------------------------------------------------------' )
+      logger.info( '' )
+
+      @carbonData   = CarbonData::Consumer.new( { :redis => { :host => redisHost, :port => redisPort } } )
 
     end
 
@@ -49,20 +60,27 @@ module CarbonWriter
       start = Time.now
       nodes = @carbonData.nodes()
 
-      nodes.each do |n|
+      if( nodes.is_a?( FalseClass ) )
+        logger.debug( 'no nodes found' )
 
-        data = @carbonData.run( n )
+      else
 
-        if( data.is_a?( Array ) )
-          data.flatten!
-        end
+        nodes.each do |n|
 
-        finish = Time.now
+          data = @carbonData.run( n )
 
-        logger.info( sprintf( 'getting %s measurepoints in %s seconds', data.count, finish - start ) )
+          if( data.is_a?( Array ) )
+            data.flatten!
+          end
 
-        data.each do |m|
-          self.metric( m )
+          finish = Time.now
+
+          logger.info( sprintf( 'getting %s measurepoints in %s seconds', data.count, finish - start ) )
+
+          data.each do |m|
+            self.metric( m )
+          end
+
         end
 
       end
@@ -94,23 +112,7 @@ module CarbonWriter
         return
       end
 
-      metric = {
-        :key   => key,
-        :value => value,
-        :time  => normalizeTime( time, @slice )
-      }
-
-      @buffer.push( metric )
-
-      if( @buffer.new_records?() )
-
-#         logger.debug( @buffer.pull( :string ) )
-
-      end
-
       begin
-
-#        logger.debug( "#{key} #{value} #{time.to_i}" )
 
         self.socket.write( "carbon-writer.#{key} #{value.to_f} #{time.to_i}\n" )
 
@@ -130,20 +132,6 @@ module CarbonWriter
       end
 
       @socket = nil
-    end
-
-
-    private
-
-    def normalizeTime( time, slice )
-
-      if( slice.nil?() )
-        slice = 1
-      end
-
-      result = ((time || Time.now).to_i / slice * slice).to_i
-
-      return result
     end
 
   end

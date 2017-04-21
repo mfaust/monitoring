@@ -5,16 +5,24 @@ module Graphite
 
     # annotations werden direct in die graphite geschrieben
     # POST
-    # curl -v -H 'Accept: application/json' -X POST \
+    # curl \
+    #   --silent \
+    #   --header 'Accept: application/json' \
+    #   --request POST \
     #   http://localhost:8081/events/  \
-    #   -d '{ "what": "annotions test", "tags": ["monitoring-16-01"], "data": "test another adding annotion for <b>WTF</b>" }'
+    #   --data '{ "what": "annotions test", "tags": ["monitoring-16-01"], "data": "test another adding annotion for <b>WTF</b>" }'
     #
-    # curl -v -H 'Accept: application/json' -X POST \
+    # curl \
+    #   --silent \
+    #   --header 'Accept: application/json' \
+    #   --request POST \
     #   http://monitoring-16-build/graphite/events/ \
-    #   -d '{ "what": "annotions test", "tags": ["monitoring-16-01","loadtest"],  "data": "test another adding annotion for <b>WTF</b>" }'
+    #   --data '{ "what": "annotions test", "tags": ["monitoring-16-01","loadtest"],  "data": "test another adding annotion for <b>WTF</b>" }'
 
     # GET
-    # curl  'http://admin:admin@localhost/grafana/api/datasources/proxy/2/events/get_data?from=-12h&until=now&tags=monitoring-16-01%20created&intersection'
+    # curl \
+    #   --silent \
+    #   "http://admin:admin@localhost/grafana/api/datasources/proxy/2/events/get_data?from=-12h&until=now&tags=monitoring-16-01%20created&intersection"
 
     def annotion( what, tags, data )
 

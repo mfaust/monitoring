@@ -47,7 +47,7 @@ module CarbonData
       cumulative_hitratio  = 0
       cumulative_lookups   = 0
 
-      if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+      if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil )
 
   #      value = value.values.first
 
@@ -136,11 +136,9 @@ module CarbonData
       errors            = 0
       indexSize         = 0
 
-      if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+      if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil )
 
   #      value = value.values.first
-
-
 
         generation        = value.dig('generation')
         isMaster          = value.dig('isSlave')
@@ -155,7 +153,7 @@ module CarbonData
         isMaster          = value.dig('isMaster')  || 1
         isSlave           = value.dig('isSlave')   || 0
 
-        logger.debug( sprintf( 'index size: %s', indexSize ) )
+#         logger.debug( sprintf( 'index size: %s', indexSize ) )
 
         # achtung!
         # indexSize ist irrsinnigerweise als human readable ausgeführt worden!
@@ -163,12 +161,12 @@ module CarbonData
           indexSize = indexSize.gsub!( 'ytes','' )
         end
 
-        logger.debug( sprintf( 'index size: %s', indexSize ) )
-        logger.debug( indexSize.class.to_s )
+#         logger.debug( sprintf( 'index size: %s', indexSize ) )
+#         logger.debug( indexSize.class.to_s )
 
         indexSize         = Filesize.from( indexSize ).to_i
 
-        logger.debug( sprintf( 'index size: %s', indexSize ) )
+#         logger.debug( sprintf( 'index size: %s', indexSize ) )
 
       end
 
@@ -219,7 +217,7 @@ module CarbonData
       timeouts               = 0
       errors                 = 0
 
-      if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+      if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil )
 
   #      value = value.values.first
 

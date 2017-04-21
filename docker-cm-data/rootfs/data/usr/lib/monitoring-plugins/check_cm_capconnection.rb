@@ -30,7 +30,7 @@ class Icinga2Check_CM_CapConnection < Icinga2Check
 
     dataValue = dataValue.values.first
 
-    state = dataValue['Open'] ? dataValue['Open'] : false
+    state = dataValue.dig('Open') || false
 
     if( state == true )
       status   = 'OK'
@@ -40,7 +40,7 @@ class Icinga2Check_CM_CapConnection < Icinga2Check
       exitCode = STATE_CRITICAL
     end
 
-    puts sprintf( '%s - Cap Connection %s', status, state ? 'Open' : 'not existst' )
+    puts sprintf( 'Cap Connection <b>%s</b>', state ? 'open' : 'not exists' )
     exit exitCode
 
   end

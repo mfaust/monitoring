@@ -16,17 +16,21 @@ require_relative '../lib/carbon-writer'
 
 # -----------------------------------------------------------------------------
 
-memcacheHost = ENV.fetch( 'MEMCACHE_HOST'    , 'localhost' )
-memcachePort = ENV.fetch( 'MEMCACHE_PORT'    , 11211 )
-interval     = ENV.fetch( 'INTERVAL'         , 20 )
-carbonHost   = ENV.fetch( 'GRAPHITE_HOST'    , 'carbon' )
-carbonPort   = ENV.fetch( 'GRAPHITE_PORT'    , 2003 )
+redisHost          = ENV.fetch( 'REDIS_HOST'       , 'localhost' )
+redisPort          = ENV.fetch( 'REDIS_PORT'       , 6379 )
+interval           = ENV.fetch( 'INTERVAL'         , 20 )
+carbonHost         = ENV.fetch( 'GRAPHITE_HOST'    , 'carbon' )
+carbonPort         = ENV.fetch( 'GRAPHITE_PORT'    , 2003 )
 
 config = {
-  :memcache        => { :host => memcacheHost, :port => memcachePort },
-  :graphite        => { :host => carbonHost, :port => carbonPort },
-  :interval        => interval,
-  :cache           => ( 2 * 60 * 60 )
+  :redis       => {
+    :host => redisHost,
+    :port => redisPort
+  },
+  :graphite    => {
+    :host => carbonHost,
+    :port => carbonPort
+  }
 }
 
 # -----------------------------------------------------------------------------

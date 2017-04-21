@@ -13,7 +13,7 @@ module CarbonData
       # defaults
       healthy = -1 # 0: false, 1: true, -1: N/A
 
-      if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+      if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil )
 
         value = value.values.first
 
@@ -53,7 +53,7 @@ module CarbonData
       queueMaxSize   = 0  # (QueueMaxSize) Maximum number of items which had been waiting in the queue
       queueSize      = 0  # (QueueSize) Number of items waiting in the queue for being processed. Less or equal than 'queueCapacity'. Zero means that ProactiveEngine is idle.
 
-      if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+      if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil )
 
         value = value.values.first
 
@@ -123,7 +123,7 @@ module CarbonData
       indexContentDocuments   = 0
       currentPendingDocuments = 0
 
-      if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+      if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil )
 
         value = value.values.first
 
@@ -181,7 +181,7 @@ module CarbonData
       rotateCount        = 0   # count of rotates since system start
       accessCount        = 0   # count of accesses since system start
 
-      if( @mbean.checkBean‎Consistency( mbean, data ) == true && value != nil )
+      if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil )
 
         value = value.values.first
 

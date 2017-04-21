@@ -26,12 +26,13 @@ services:
       ICINGA_CERT_SERVICE: 'true'
       ICINGA_CERT_SERVICE_BA_USER: admin
       ICINGA_CERT_SERVICE_BA_PASSWORD: admin
-      ICINGA_CERT_SERVICE_API_USER: cert-service
-      ICINGA_CERT_SERVICE_API_PASSWORD: 47pswW14rzeV9MNFGruI
-      ICINGA_CERT_SERVICE_SERVER: icinga2-master.docker
-      ICINGA_CERT_SERVICE_PORT: 4567
-      MEMCACHE_HOST: memcached
-      # MEMCACHE_PORT: 11211
+      ICINGA_CERT_SERVICE_API_USER: root
+      ICINGA_CERT_SERVICE_API_PASSWORD: icinga
+      ICINGA_CERT_SERVICE_SERVER: nginx-proxy.docker
+      ICINGA_CERT_SERVICE_PORT: 80
+      ICINGA_CERT_SERVICE_PATH: /cert-service/
+      REDIS_HOST: redis
+      # REDIS_PORT: 6379
 
   carbon-relay:
     environment:
@@ -42,6 +43,13 @@ services:
   cm-rest-service:
     environment:
       TZ: 'Europe/Berlin'
+      REST_SERVICE_PORT: 45678
+      REST_SERVICE_BIND: '0.0.0.0'
+      MQ_HOST: beanstalkd
+      # MQ_PORT: 11300
+      # MQ_QUEUE: mq-rest-service
+      REDIS_HOST: redis
+      # REDIS_PORT: 6379
       # when we need an DNS entry for external services, we can use ADDITIONAL_DNS
       # its an comma seperated list with following syntax:
       # HOSTNAME:IP,HOSTNAME:IP, ...
@@ -63,6 +71,7 @@ services:
       REDIS_HOST: redis
       # REDIS_PORT: 6379
       INTERVAL: 20
+      RUN_DELAY: 10
 
   cm-data-collector:
     environment:
@@ -75,12 +84,8 @@ services:
       MQ_HOST: beanstalkd
       # MQ_PORT: 11300
       # MQ_QUEUE: mq-collector
-      MEMCACHE_HOST: memcached
-      # MEMCACHE_PORT: 11211
       REDIS_HOST: redis
       # REDIS_PORT: 6379
-      # OBSOLETE
-      # SCAN_DISCOVERY: "10m"
       INTERVAL: 20
 
   cm-carbon-client:
@@ -89,8 +94,6 @@ services:
       # NOTICE: EXTERNAL-SERVICE
       GRAPHITE_HOST: carbon.docker
       # GRAPHITE_PORT: 2003
-      MEMCACHE_HOST: memcached
-      # MEMCACHE_PORT: 11211
       REDIS_HOST: redis
       # REDIS_PORT: 6379
       # INTERVAL: 20
@@ -105,8 +108,6 @@ services:
       # GRAFANA_API_USER: admin
       # GRAFANA_API_PASSWORD: admin
       # GRAFANA_TEMPLATE_PATH: /usr/local/share/templates/grafana
-      MEMCACHE_HOST: memcached
-      # MEMCACHE_PORT: 11211
       REDIS_HOST: redis
       # REDIS_PORT: 6379
       MQ_HOST: beanstalkd
@@ -124,6 +125,8 @@ services:
       MQ_HOST: beanstalkd
       # MQ_PORT: 11300
       # MQ_QUEUE: mq-graphite
+      # INTERVAL: 15
+      # RUN_DELAY: 10
 
   cm-icinga-client:
     environment:
@@ -133,8 +136,9 @@ services:
       # ICINGA_API_PORT: 5665
       ICINGA_API_USER: root
       ICINGA_API_PASSWORD: icinga
-      # ICINGA_CLUSTER: 'false'
-      # ICINGA_CLUSTER_SATELLITE:
+      # we need the cluster-mode!
+      ICINGA_CLUSTER: 'true'
+      ICINGA_CLUSTER_SATELLITE: icinga2-satellite
       MQ_HOST: beanstalkd
       # MQ_PORT: 11300
       # MQ_QUEUE: mq-icinga

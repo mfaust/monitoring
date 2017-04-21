@@ -846,7 +846,7 @@
           ],
           "name": "Application",
           "query": "*.%HOST%.*",
-          "regex": "/^(?!MONGODB|MYSQL).*$/",
+          "regex": "/^(?!MONGODB|MYSQL|NODE_EXPORTER).*$/",
           "hide": 1,
           "sort": 0,
           "refresh": 1,

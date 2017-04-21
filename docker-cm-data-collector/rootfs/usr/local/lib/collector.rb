@@ -3,14 +3,13 @@
 # 13.01.2017 - Bodo Schulz
 #
 #
-# v1.7.0
+# v1.8.0
 
 # -----------------------------------------------------------------------------
 
 require 'json'
 require 'socket'
 require 'timeout'
-require 'dalli'
 require 'fileutils'
 require 'time'
 require 'date'
@@ -18,6 +17,7 @@ require 'time_difference'
 require 'rufus-scheduler'
 
 require_relative 'logging'
+require_relative 'utils/network'
 require_relative 'monkey'
 require_relative 'jolokia'
 require_relative 'message-queue'
@@ -35,10 +35,10 @@ module DataCollector
     attr_accessor :config
     attr_accessor :jolokiaApplications
 
-    def initialize( params = {} )
+    def initialize( settings = {} )
 
-      applicationConfig   = params[:applicationConfigFile] ? params[:applicationConfigFile] : nil
-      serviceConfig       = params[:serviceConfigFile]     ? params[:serviceConfigFile]     : nil
+      applicationConfig  = settings.dig( :configFiles, :application )
+      serviceConfig      = settings.dig( :configFiles, :service )
 
       @config             = nil
       jolokiaApplications = nil
@@ -74,14 +74,8 @@ module DataCollector
 
     def initialize( settings = {} )
 
-      applicationConfig  = settings[:applicationConfigFile] ? settings[:applicationConfigFile] : nil
-      serviceConfig      = settings[:serviceConfigFile]     ? settings[:serviceConfigFile]     : nil
-
-      @host              = settings[:host]                  ? settings[:host]                  : nil
       @redisHost         = settings.dig(:redis, :host)
       @redisPort         = settings.dig(:redis, :port) || 6379
-
-      @db                = Storage::Database.new()
 
       @cfg                = Config.new( settings )
       @redis              = Storage::RedisClient.new( { :redis => { :host => @redisHost } } )
@@ -112,18 +106,23 @@ module DataCollector
 
     # merge Data between Property Files and discovered Services
     # creates mergedHostData.json for every Node
-    def buildMergedData()
+    def buildMergedData( params = {} )
 
-      if( @host == nil )
+      host = params.dig(:hostname)
+      fqdn = params.dig(:fqdn)
+
+#       logger.debug( params )
+
+      if( host == nil )
         logger.error( 'no hostname found' )
         return {}
       end
 
-      # Database
+      #
       tomcatApplication = Marshal.load( Marshal.dump( @cfg.jolokiaApplications ) )
 
       # Redis based
-      data = @redis.discoveryData( { :short => @host } )
+      data = @redis.discoveryData( { :short => host } )
 
       if( data == nil || data == false || data.count() == 0 )
         logger.error( 'no discovery in database data found' )
@@ -133,7 +132,12 @@ module DataCollector
       dataForRedis = Array.new()
 
       data.each do |service,payload|
-        dataForRedis << { service.to_s => self.mergeData( service.to_s, tomcatApplication, payload ) }
+
+        result      = self.mergeData( service.to_s, tomcatApplication, payload )
+
+#         logger.debug( JSON.pretty_generate( result ) )
+
+        dataForRedis << { service.to_s => result }
       end
 
       dataForRedis = dataForRedis.deep_string_keys
@@ -142,37 +146,7 @@ module DataCollector
       # mapping array of hashes onto single hash
       dataForRedis = dataForRedis.reduce( {} , :merge )
 
-      @redis.createMeasurements( { :short => @host, :data => dataForRedis } )
-
-#       logger.debug('')
-#       logger.debug( ' == redis done ==' )
-#       logger.debug('')
-
-      # Database based
-      #
-      data = @db.discoveryData( { :ip => @host, :short => @host } )
-
-      if( data == nil || data == false )
-        logger.error( 'no discovery in database data found' )
-        return false
-      end
-
-      data.each do |host,d|
-
-        d.each do |service,payload|
-
-          logger.debug( 'merge Data between discovered Services and Property File' )
-          logger.debug( service )
-
-          dnsId       = payload.dig( :dns_id )
-          discoveryId = payload.dig( :discovery_id )
-
-          result      = self.mergeData( service, tomcatApplication, payload )
-#           logger.debug( JSON.pretty_generate( result ) )
-
-          @db.createMeasurements( { :dns_id => dnsId, :discovery_id => discoveryId, :data => result } )
-        end
-      end
+      @redis.createMeasurements( { :short => host, :data => dataForRedis } )
 
       return true
 
@@ -185,8 +159,12 @@ module DataCollector
 
       configuredApplication = tomcatApplication.keys
 
-      logger.debug( configuredApplication )
-#      logger.debug( data )
+#       logger.debug( '----------------------------------------------------------------------')
+#       logger.debug( "look for service: '#{service}'" )
+#       logger.debug( "configured Applications: #{configuredApplication}" )
+#       logger.debug( data )
+
+      dataSource = nil
 
       if( data == nil || data.count() == 0 )
         logger.debug( 'no data to merge' )
@@ -194,25 +172,60 @@ module DataCollector
         return {}
       end
 
-      application = data.dig(:data, 'application') || data.dig(:application)
-      solr_cores  = data.dig(:data, 'cores')       || data.dig(:cores)
-      metrics     = data.dig(:data, 'metrics')     || data.dig(:metrics)
+      if( data.dig(:data) == nil )
 
-      data[:data]            ||= {}
-      data[:data]['metrics'] ||= []
+        application = data.dig('application')
+        solr_cores  = data.dig('cores')
+        metrics     = data.dig('metrics')
+
+        dataSource  = 'redis'
+      else
+
+        application = data.dig(:data, 'application')
+        solr_cores  = data.dig(:data, 'cores')
+        metrics     = data.dig(:data, 'metrics')
+
+        dataSource  = 'sqlite'
+      end
+
+# logger.debug( "data source: '#{dataSource}'" )
+# logger.debug( "application: '#{application}'" )
+# logger.debug( "solr_cores : '#{solr_cores}'" )
+# logger.debug( "metrics    : '#{metrics}'" )
+#       logger.debug( '----------------------------------------------------------------------')
+
+      if( dataSource == 'redis' )
+
+        data['metrics'] ||= []
+      else
+
+        data[:data]            ||= {}
+        data[:data]['metrics'] ||= []
+      end
+
+#       logger.debug( data )
 
       if( configuredApplication.include?( service ) )
 
         logger.debug( "found #{service} in tomcat application" )
 
-        data[:data]['metrics'].push( metricsTomcat.dig('metrics') )
-        data[:data]['metrics'].push( tomcatApplication.dig( service, 'metrics' ) )
+        if( dataSource == 'redis' )
+          data['metrics'].push( metricsTomcat.dig('metrics') )
+          data['metrics'].push( tomcatApplication.dig( service, 'metrics' ) )
+        else
+          data[:data]['metrics'].push( metricsTomcat.dig('metrics') )
+          data[:data]['metrics'].push( tomcatApplication.dig( service, 'metrics' ) )
+        end
       end
 
 
       if( application != nil )
 
-        data[:data]['metrics'].push( metricsTomcat.dig( 'metrics' ) )
+        if( dataSource == 'redis' )
+          data['metrics'].push( metricsTomcat.dig( 'metrics' ) )
+        else
+          data[:data]['metrics'].push( metricsTomcat.dig( 'metrics' ) )
+        end
 
         application.each do |a|
 
@@ -223,32 +236,44 @@ module DataCollector
             applicationMetrics = tomcatApplication.dig( a, 'metrics' )
 
             if( solr_cores != nil )
-              data[:data]['metrics'].push( self.mergeSolrCores( applicationMetrics , solr_cores ) )
+
+              if( dataSource == 'redis' )
+                data['metrics'].push( self.mergeSolrCores( applicationMetrics , solr_cores ) )
+              else
+                data[:data]['metrics'].push( self.mergeSolrCores( applicationMetrics , solr_cores ) )
+              end
             end
 
             # remove unneeded Templates
             tomcatApplication[a]['metrics'].delete_if {|key| key['mbean'].match( '%CORE%' ) }
 
 #            data[:data]['metrics'].push( metricsTomcat['metrics'] )
-            data[:data]['metrics'].push( applicationMetrics )
+            if( dataSource == 'redis' )
+              data['metrics'].push( applicationMetrics )
+            else
 
+              data[:data]['metrics'].push( applicationMetrics )
+            end
           end
         end
 
       end
 
-#       if( tomcatApplication[service] )
-#
-# #         logger.debug( "found #{service} in tomcat application" )
-#
-#         data[:data]['metrics'].push( metricsTomcat['metrics'] )
-#         data[:data]['metrics'].push( tomcatApplication[service]['metrics'] )
-#       end
 
-      data[:data]['metrics'].compact!   # remove 'nil' from array
-      data[:data]['metrics'].flatten!   # clean up and reduce depth
+      if( dataSource == 'redis' )
 
-      return data[:data]
+        data['metrics'].compact!   # remove 'nil' from array
+        data['metrics'].flatten!   # clean up and reduce depth
+
+        return data
+
+      else
+        data[:data]['metrics'].compact!   # remove 'nil' from array
+        data[:data]['metrics'].flatten!   # clean up and reduce depth
+
+        return data[:data]
+      end
+
     end
 
   end
@@ -258,27 +283,25 @@ module DataCollector
 
     include Logging
 
-    def initialize( params = {} )
+    def initialize( settings = {} )
 
-      jolokiaHost         = params.dig(:jolokiaHost)           || 'localhost'
-      jolokiaPort         = params.dig(:jolokiaPort)           ||  8080
-      jolokiaPath         = params.dig(:jolokiaPath)           || '/jolokia'
-      jolokiaAuthUser     = params.dig(:jolokiaAuthUser)
-      jolokiaAuthPass     = params.dig(:jolokiaAuthPass)
-      memcacheHost        = params.dig(:memcacheHost)          || 'localhost'
-      memcachePort        = params.dig(:memcachePort)          || 11211
-      mqHost              = params.dig(:mqHost)                || 'localhost'
-      mqPort              = params.dig(:mqPort)                || 11300
-      @mqQueue            = params.dig(:mqQueue)               || 'mq-collector'
+      jolokiaHost         = settings.dig(:jolokia, :host)           || 'localhost'
+      jolokiaPort         = settings.dig(:jolokia, :port)           ||  8080
+      jolokiaPath         = settings.dig(:jolokia, :path)           || '/jolokia'
+      jolokiaAuthUser     = settings.dig(:jolokia, :auth, :user)
+      jolokiaAuthPass     = settings.dig(:jolokia, :auth, :pass)
+      mqHost              = settings.dig(:mq, :host)                || 'localhost'
+      mqPort              = settings.dig(:mq, :port)                || 11300
+      @mqQueue            = settings.dig(:mq, :queue)               || 'mq-collector'
 
-      @redisHost          = params.dig(:redis, :host)
-      @redisPort          = params.dig(:redis, :port)  || 6379
+      @redisHost          = settings.dig(:redis, :host)
+      @redisPort          = settings.dig(:redis, :port)  || 6379
 
-      @applicationConfig  = params.dig(:applicationConfigFile)
-      @serviceConfig      = params.dig(:serviceConfigFile)
+      @applicationConfig  = settings.dig(:configFiles, :application)
+      @serviceConfig      = settings.dig(:configFiles, :service)
 
-      version            = '1.7.0'
-      date               = '2017-03-14'
+      version            = '1.8.0'
+      date               = '2017-04-12'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - DataCollector' )
@@ -287,7 +310,6 @@ module DataCollector
       logger.info( '  used Services:' )
       logger.info( "    - jolokia      : #{jolokiaHost}:#{jolokiaPort}" )
       logger.info( "    - redis        : #{@redisHost}:#{@redisPort}" )
-      logger.info( "    - memcache     : #{memcacheHost}:#{memcachePort}" )
       logger.info( "    - message queue: #{mqHost}:#{mqPort}/#{@mqQueue}" )
       logger.info( '-----------------------------------------------------------------' )
 
@@ -296,9 +318,7 @@ module DataCollector
         :beanstalkPort => mqPort
       }
 
-      @db                 = Storage::Database.new()
       @redis              = Storage::RedisClient.new( { :redis => { :host => @redisHost } } )
-      @mc                 = Storage::Memcached.new( { :host => memcacheHost, :port => memcachePort } )
       @jolokia            = Jolokia::Client.new( { :host => jolokiaHost, :port => jolokiaPort, :path => jolokiaPath, :auth => { :user => jolokiaAuthUser, :pass => jolokiaAuthPass } } )
       @mq                 = MessageQueue::Consumer.new( @MQSettings )
 
@@ -338,7 +358,7 @@ module DataCollector
 
       port = 28017
 
-      result = portOpen?( host, port )
+      result = Utils::Network.portOpen?( host, port )
 
       if( result == false )
         logger.error( sprintf( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
@@ -357,10 +377,10 @@ module DataCollector
 
     def mysqlData( host, data = {} )
 
-      data = {}
-      user = data['user'] ? data['user'] : 'cm_management'
-      pass = data['pass'] ? data['pass'] : 'cm_management'
-      port = data['port'] ? data['port'] : 3306
+#      data = {}
+      user = data.dig('user') || 'cm_management'
+      pass = data.dig('pass') || 'cm_management'
+      port = data.dig('port') || 3306
 
       if( port != nil )
 
@@ -373,7 +393,7 @@ module DataCollector
         }
       end
 
-      result = portOpen?( host, port )
+      result = Utils::Network.portOpen?( host, port )
 
       if( result == false )
         logger.error( sprintf( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
@@ -405,19 +425,29 @@ module DataCollector
       # WiP and nore sure
       # return
 
-      user = data['user'] ? data['user'] : nil
-      pass = data['pass'] ? data['pass'] : nil
-      port = data['port'] ? data['port'] : 5432
+      user = data.dig('user')     || 'cm_management'
+      pass = data.dig('pass')     || 'cm_management'
+      port = data.dig('port')     || 5432
+      dbname = data.dig('dbname') || 'coremedia'
 
       if( port != nil )
 
         settings = {
-          'postgresHost' => host,
-          'postgresUser' => 'cm7management',
-          'postgresPass' => 'cm7management',
-          'postgresPort' => port,
-          'postgresDBName' => 'coremedia'
+          'postgresHost'   => host,
+          'postgresUser'   => user,
+          'postgresPass'   => pass,
+          'postgresPort'   => port,
+          'postgresDBName' => dbname
         }
+      end
+
+      result = Utils::Network.portOpen?( host, port )
+
+      if( result == false )
+        logger.error( sprintf( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
+
+        return JSON.parse( JSON.generate( { :status => 500 } ) )
+      else
 
         pgsql = ExternalClients::PostgresStatus.new( settings )
         data = pgsql.run()
@@ -431,11 +461,25 @@ module DataCollector
 
     def nodeExporterData( host, data = {} )
 
-      port = data[:port] ? data[:port] : 9100
+      port = data.dig(:port) || 9100
 
       if( port != nil )
 
-        m = ExternalClients::NodeExporter.new( { :host => host, :port => port } )
+        settings = {
+          :host => host,
+          :port => port
+        }
+      end
+
+      result = Utils::Network.portOpen?( host, port )
+
+      if( result == false )
+        logger.error( sprintf( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
+
+        return JSON.parse( JSON.generate( { :status => 500 } ) )
+      else
+
+        m = ExternalClients::NodeExporter.new( settings )
         nodeData = m.get()
 
         result   = JSON.generate( nodeData )
@@ -449,11 +493,26 @@ module DataCollector
 
     def resourcedData( host, data = {} )
 
-      port = data[:port] ? data[:port] : 55555
+      port = data.dig(:port) || 55555
 
       if( port != nil )
 
-        m = ExternalClients::Resouced.new( { :host => host, :port => port } )
+        settings = {
+          :host => host,
+          :port => port
+        }
+      end
+
+
+      result = Utils::Network.portOpen?( host, port )
+
+      if( result == false )
+        logger.error( sprintf( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
+
+        return JSON.parse( JSON.generate( { :status => 500 } ) )
+      else
+
+        m = ExternalClients::Resouced.new( settings )
         nodeData = m.get()
 
         result   = JSON.generate( nodeData )
@@ -469,9 +528,7 @@ module DataCollector
     #
     def monitoredServer()
 
-      d = @db.nodes( { :status => 1 } )
-
-#       logger.debug( d )
+      d = @redis.nodes( { :status => 1 } )
 
       return d
 
@@ -479,7 +536,12 @@ module DataCollector
 
     # create a singulary json for every services to send them to the jolokia service
     #
-    def createBulkCheck( host )
+    def createBulkCheck( params = {} )
+
+      host = params.dig(:hostname)
+      fqdn = params.dig(:fqdn)
+
+#       logger.debug( params )
 
       checks   = Array.new()
       array    = Array.new()
@@ -489,13 +551,15 @@ module DataCollector
         :timestamp   => Time.now().to_i
       }
 
-#       logger.debug( sprintf( 'create bulk checks for \'%s\'', host ) )
+      logger.debug( sprintf( 'create bulk checks for \'%s\'', host ) )
 
-      # to improve performance, read initial collector Data from Database and store them into Memcache (or Redis)
-      key       = Storage::Memcached.cacheKey( { :host => host, :pre => 'collector' } )
-      data      = @mc.get( key )
+      # to improve performance, read initial collector Data from Database and store them into Redis
+      #
+      key       = Storage::RedisClient.cacheKey( { :host => host, :pre => 'collector' } )
+      data      = @redis.get( key )
 
       # recreate the cache every 10 minutes
+      #
       if ( data != nil )
 
         today     = Time.now().to_s
@@ -512,8 +576,7 @@ module DataCollector
 
       if( data == nil )
 
-        data = @db.measurements( { :ip => host, :short => host } )
-
+        data = @redis.measurements( { :short => host } )
 #         logger.debug( data )
 
         if( data == nil || data == false )
@@ -521,36 +584,34 @@ module DataCollector
         else
           data['timestamp'] = Time.now().to_s
 
-          @mc.set( key, data )
+          @redis.set( key, data )
         end
 
       end
 
-#       data = @db.measurements( { :ip => host, :short => host } )
-
-      if( data == nil || data == false )
-        return
-      end
-
-      services = data.dig( host )
-
-      if( services == nil )
+      if( data == nil )
         logger.error( 'no services found. skip ...' )
         return
       end
 
-      services      = services.keys
+      # remove 'timestamp', we dont need it anymore
+      data.reject! { |t| t[/timestamp/] }
+
+      services      = data.keys
       servicesCount = services.count
 
-      logger.info( sprintf( '%d services for node \'%s\' found', servicesCount, host ) )
+      logger.info( sprintf( '%d services found', servicesCount ) )
 
-      services.each do |s|
+      data.each do |s,d|
 
-        port    = data.dig( host, s, :data, 'port' )
-        metrics = data.dig( host, s, :data, 'metrics' )
+#         logger.debug( s )
+#         logger.debug( d )
+
+        port    = d.dig( 'port' )    || -1
+        metrics = d.dig( 'metrics' ) || []
         bulk    = Array.new()
 
-        logger.debug( sprintf( '    %s (%d)', s, port ) )
+        logger.debug( sprintf( '    %s with port %d', s, port ) )
 
         if( metrics != nil && metrics.count == 0 )
           case s
@@ -578,7 +639,7 @@ module DataCollector
             target = {
               'type'   => 'read',
               'mbean'  => e['mbean'].to_s,
-              'target' => { 'url' => sprintf( "service:jmx:rmi:///jndi/rmi://%s:%s/jmxrmi", host, port ) },
+              'target' => { 'url' => sprintf( "service:jmx:rmi:///jndi/rmi://%s:%s/jmxrmi", fqdn, port ) },
               'config' => { 'ignoreErrors' => true, 'ifModifiedSince' => true, 'canonicalNaming' => true }
             }
 
@@ -604,12 +665,13 @@ module DataCollector
       checks.flatten!
 
       result[:hostname] = host
+      result[:fqdn]     = fqdn
       result[:services] = *services
       result[:checks]   = *checks
 
 #       logger.debug( JSON.pretty_generate( result ) )
         # send json to jolokia
-      self.sendChecksToJolokia( result )
+      self.collectMeasurements( result )
 
       checks.clear()
       result.clear()
@@ -640,9 +702,9 @@ module DataCollector
       destHost  = parts['host'].to_s.strip
       destPort  = parts['port'].to_s.strip
 
-#       logger.debug( sprintf( 'check Port %s on Host %s for sending data', destPort, destHost ) )
+      logger.debug( sprintf( 'check Port %s on Host %s for sending data', destPort, destHost ) )
 
-      result = portOpen?( destHost, destPort )
+      result = Utils::Network.portOpen?( destHost, destPort )
 
       if( result == false )
         logger.error( sprintf( 'The Port %s on Host %s is not open, skip sending data', destPort, destHost ) )
@@ -653,9 +715,12 @@ module DataCollector
     end
 
 
-    # send json data to jolokia and save the result in an memory storage (e.g. memcache)
+    # collect measurements data
+    #  - send json data to jolokia
+    #  - or get data from external services
+    # and save the result in an memory storage
     #
-    def sendChecksToJolokia( data )
+    def collectMeasurements( params = {} )
 
       if( @jolokia.jolokiaIsAvailable?() == false )
 
@@ -667,11 +732,13 @@ module DataCollector
         }
       end
 
-      hostname  = data[:hostname] ? data[:hostname] : nil
-      checks    = data[:checks]   ? data[:checks]   : nil
+      hostname  = params.dig(:hostname)
+      fqdn      = params.dig(:fqdn)
+      checks    = params.dig(:checks)
 
       result    = {
         :hostname  => hostname,
+        :fqdn      => fqdn,
         :timestamp => Time.now().to_i
       }
 
@@ -681,47 +748,74 @@ module DataCollector
 
           logger.debug( sprintf( '%d checks for service \'%s\' found', i.count, v ) )
 
-          cacheKey = Storage::Memcached.cacheKey( { :host => hostname, :pre => 'result', :service => v } )
+          result[v] ||= []
 
-          logger.debug( { :host => hostname, :pre => 'result', :service => v } )
-          logger.debug( cacheKey )
+          cacheKey = Storage::RedisClient.cacheKey( { :host => hostname, :pre => 'result', :service => v } )
 
           if( i.count > 1 )
+
             targetUrl = i.first.dig( 'target', 'url' )
 
             if( self.checkHostAndService( targetUrl ) == true )
 
-              response  = @jolokia.post( { :payload => i, :timeout => 15 } )
+              response       = @jolokia.post( { :payload => i, :timeout => 15 } )
 
-              if( response[:status].to_i == 200 )
-                result[v] = self.reorganizeData( response[:message] )
+              jolokiaStatus  = response.dig(:status)
+              jolokiaMessage = response.dig(:message)
+
+              if( jolokiaStatus != nil && jolokiaStatus.to_i == 200 )
+
+                begin
+                  result[v] = self.reorganizeData( jolokiaMessage )
+                rescue => e
+                  logger.error( "i can\'t store data into result for service #{v}" )
+                  logger.error( e )
+                end
+              else
+                logger.error( "jolokia status : #{jolokiaStatus}" )
+                logger.error( "jolokia message: #{jolokiaMessage}" )
               end
             end
+
           else
 
+            d = ''
             case v
             when 'mysql'
               # MySQL
-              result[v] = self.mysqlData( hostname )
+              d = self.mysqlData( fqdn )
             when 'mongodb'
               # MongoDB
-              result[v] = self.mongoDBData( hostname )
+              d = self.mongoDBData( fqdn )
             when 'postgres'
               # Postgres
-              result[v] = self.postgresData( hostname )
+              d = self.postgresData( fqdn )
             when 'node_exporter'
               # node_exporter
-              result[v] = self.nodeExporterData( hostname )
+              d = self.nodeExporterData( fqdn )
             when 'resourced'
-              result[v] = self.resourcedData( hostname )
+              #
+              d = self.resourcedData( fqdn )
             else
               # all others
             end
 
-#             logger.debug( result[v] )
+            begin
+              result[v] = d
+            rescue => e
+              logger.error( "i can't store data into result for service #{v}" )
+              logger.error( e )
+            end
+
           end
 
-          if( @mc.set( cacheKey, result[v] ) == false )
+          logger.debug( 'store result in our redis' )
+          redisResult = @redis.set( cacheKey, result[v] )
+
+# logger.debug( JSON.pretty_generate( result[v] ) )
+
+          if( redisResult.is_a?( FalseClass ) || ( redisResult.is_a?( String ) && redisResult != 'OK' ) )
+
             logger.error( sprintf( 'value for key % can not be write', cacheKey ) )
             logger.error( { :host => hostname, :pre => 'result', :service => v } )
           end
@@ -732,23 +826,34 @@ module DataCollector
 
 
     # reorganize data to later simple find
+    #
     def reorganizeData( data )
 
       if( data == nil )
         logger.error( "      no data for reorganize" )
         logger.error( "      skip" )
-        return nil
+
+        return {
+          :status  => 500,
+          :message => 'no data for reorganize'
+        }
       end
 
       result  = Array.new()
 
       data.each do |c|
 
-        mbean      = c['request']['mbean']
-        request    = c['request']
-        value      = c['value']
-        timestamp  = c['timestamp']
-        status     = c['status']
+        mbean      = c.dig('request', 'mbean')
+        request    = c.dig('request')
+        value      = c.dig('value')
+        timestamp  = c.dig('timestamp')
+        status     = c.dig('status')
+
+        if( request == nil )
+
+          logger.error( 'wrong data format ... skip reorganizing' )
+          next
+        end
 
         # "service:jmx:rmi:///jndi/rmi://moebius-16-tomcat:2222/jmxrmi"
         regex = /
@@ -759,7 +864,7 @@ module DataCollector
           (?<port>\d+)        # our port
         /x
 
-        uri   = request['target']['url']
+        uri   = request.dig('target', 'url')
         parts = uri.match( regex )
         host  = parts['host'].to_s.strip
         port  = parts['port'].to_s.strip
@@ -888,6 +993,7 @@ module DataCollector
 
       end
 
+      logger.debug( result.class.to_s )
       return result
     end
 
@@ -904,17 +1010,55 @@ module DataCollector
 
         logger.debug( payload )
 
-        cacheKey = Storage::Memcached.cacheKey( { :host => payload.dig('host'), :pre => 'prepare' } )
+        cacheKey = Storage::RedisClient.cacheKey( { :host => payload.dig('host'), :pre => 'prepare' } )
 
-        logger.debug( @mc.get( cacheKey ) )
-
-        @mc.set( cacheKey, nil )
-
-        logger.debug( @mc.get( cacheKey ) )
-
+        @redis.set( cacheKey, '' )
       end
     end
 
+
+    def prepareData( params = {} )
+
+      shortName  = params.dig(:hostname)
+      fqdn      = params.dig(:fqdn)
+
+      # TODO
+      #
+      prepared = @redis.get( Storage::RedisClient.cacheKey( { :host => shortName, :pre => 'prepare' } ) )
+
+#       logger.debug( prepared )
+#       logger.debug( prepared.class.to_s )
+
+      if( prepared.is_a?( NilClass ) || prepared.is_a?( FalseClass ) || ( prepared.is_a?( String ) && ( prepared == '' || prepared == 'false ' ) ) )
+
+        result = false
+
+        logger.debug( 'no prepared data found ...' )
+
+        start = Time.now
+
+        # no prepared data found ...
+        # generate it
+        options = {
+          :configFiles           => { :application => @applicationConfig, :service => @serviceConfig },
+          :applicationConfigFile => @applicationConfig,
+          :serviceConfigFile     => @serviceConfig,
+          :redis                 => { :host => @redisHost, :port => @redisPort }
+        }
+
+        p = Prepare.new( options )
+        result = p.buildMergedData( { :hostname => shortName, :fqdn => fqdn } )
+
+        if( result == true )
+          @redis.set( Storage::RedisClient.cacheKey( { :host => shortName, :pre => 'prepare' } ), { :prepared => true } )
+        end
+
+        finish = Time.now
+        logger.info( sprintf( 'build prepared data in %s seconds', finish - start ) )
+
+      end
+
+    end
 
 
     def run()
@@ -923,53 +1067,33 @@ module DataCollector
 
       monitoredServer = self.monitoredServer()
 
-      if( monitoredServer.count == 0 )
+      if( monitoredServer.is_a?( FalseClass ) || monitoredServer.count == 0 )
 
         logger.info( 'no Servers for Monitoring found' )
 
         return
       end
 
-      start = Time.now
-
       monitoredServer.each do |h,d|
 
-        # TODO
-        prepared = false # @mc.get( Storage::Memcached.cacheKey( { :host => h, :pre => 'prepare' } ) )
+        h = h.first
 
-        if( prepared.is_a?( NilClass ) || prepared.is_a?( FalseClass ) )
+        shortName = d.dig(:shortname)
+        fqdn      = d.dig(:longname)
 
-          result = false
+        start = Time.now
 
-          # no prepared data found ...
-          # generate it
-          options = {
-            :host                  => h,
-            :applicationConfigFile => @applicationConfig,
-            :serviceConfigFile     => @serviceConfig,
-            :redis                 => { :host => @redisHost, :port => @redisPort }
-          }
+        logger.info( sprintf( 'found %s for monitoring', fqdn ) )
 
-          p = Prepare.new( options )
-          result = p.buildMergedData()
+        # build prepared datas
+        self.prepareData( { :hostname => shortName, :fqdn => fqdn } )
 
-          if( result == true )
-            @mc.set( Storage::Memcached.cacheKey( { :host => h, :pre => 'prepare' } ), true )
-          end
-        else
-          # roger, we have prepared datas
-          # use them and do what you must do
-          monitoredServer.each do |h,d|
+        # run checks
+        self.createBulkCheck( { :hostname => shortName, :fqdn => fqdn } )
 
-            self.createBulkCheck( h )
-
-          end
-        end
-
+        finish = Time.now
+        logger.info( sprintf( 'collect data in %s seconds', finish - start ) )
       end
-
-      finish = Time.now
-      logger.info( sprintf( 'collect data in %s seconds', finish - start ) )
 
     end
 

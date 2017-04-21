@@ -11,6 +11,11 @@ require_relative 'monkey'
 require_relative 'logging'
 require_relative 'tools'
 
+
+# -----------------------------------------------------------------------------
+#
+# 2017-04-11 - 09:30
+#
 # -----------------------------------------------------------------------------
 
 module Storage
@@ -85,8 +90,28 @@ module Storage
 
     def get( key )
 
-      return @redis.get( key )
+      data =  @redis.get( key )
 
+      if( data == nil )
+        return nil
+      elsif( data == 'true' )
+        return true
+      elsif( data == 'false' )
+        return false
+      elsif( data.is_a?( String ) && data == '' )
+        return nil
+      else
+
+        begin
+          data = eval( data )
+        rescue => e
+          logger.error( e )
+        end
+
+#         data = JSON.parse( data, :quirks_mode => true )
+      end
+
+      return data.deep_string_keys
     end
 
 
@@ -98,7 +123,7 @@ module Storage
 
     def delete( key )
 
-      return @redis.delete( key )
+      return @redis.del( key )
     end
 
 
@@ -141,11 +166,22 @@ module Storage
 
       self.setStatus( { :short => short, :status => 99 } )
 
-      @redis.del( sprintf( '%s-measurements', cachekey ) )
-      @redis.del( sprintf( '%s-discovery'   , cachekey ) )
-      @redis.del( sprintf( '%s-status'      , cachekey ) )
-      @redis.del( sprintf( '%s-dns'         , cachekey ) )
-      @redis.del( cachekey )
+      keys = [
+        sprintf( '%s-measurements', cachekey ),
+        sprintf( '%s-discovery'   , cachekey ),
+        sprintf( '%s-status'      , cachekey ),
+        sprintf( '%s-config'      , cachekey ),
+        sprintf( '%s-dns'         , cachekey ),
+        cachekey
+      ]
+
+      @redis.del( *keys )
+
+#       @redis.del( sprintf( '%s-measurements', cachekey ) )
+#       @redis.del( sprintf( '%s-discovery'   , cachekey ) )
+#       @redis.del( sprintf( '%s-status'      , cachekey ) )
+#       @redis.del( sprintf( '%s-dns'         , cachekey ) )
+#       @redis.del( cachekey )
 
       self.removeNode( { :short => short, :key => cachekey } )
 
@@ -170,7 +206,7 @@ module Storage
       result = @redis.get( cachekey )
 
       if( result == nil )
-        return { :ip => nil, :shortname => nil, :longname => nil }
+        return nil # { :ip => nil, :short => nil, :longname => nil }
       end
 
       if( result.is_a?( String ) )
@@ -179,7 +215,7 @@ module Storage
 
       return {
         :ip        => result.dig('ip'),
-        :shortname => result.dig('shortname'),
+        :short     => result.dig('shortname'),
         :longname  => result.dig('longname')
       }
     end
@@ -203,7 +239,7 @@ module Storage
 
       cachekey = sprintf(
         '%s-config',
-        Storage::RedisClient.cacheKey( { :shortname => dnsShortname } )
+        Storage::RedisClient.cacheKey( { :short => dnsShortname } )
       )
 
       if( append == true )
@@ -254,15 +290,15 @@ module Storage
 
       dnsIp        = params.dig(:ip)
       dnsShortname = params.dig(:short)
-      configKey    = params.dig(:key)
+      key    = params.dig(:key)
 
       cachekey = sprintf(
         '%s-config',
-        Storage::RedisClient.cacheKey( { :shortname => dnsShortname } )
+        Storage::RedisClient.cacheKey( { :short => dnsShortname } )
       )
 
       # delete single config
-      if( configKey != nil )
+      if( key != nil )
 
         existingData = @redis.get( cachekey )
 
@@ -270,7 +306,7 @@ module Storage
           existingData = JSON.parse( existingData )
         end
 
-        data = existingData.dig('data').tap { |hs| hs.delete(configKey) }
+        data = existingData.dig('data').tap { |hs| hs.delete(key) }
 
         existingData['data'] = data
 
@@ -293,37 +329,34 @@ module Storage
 
       dnsIp        = params.dig(:ip)
       dnsShortname = params.dig(:short)
-      configKey    = params.dig(:key)
+      key          = params.dig(:key)
 
       cachekey = sprintf(
         '%s-config',
-        Storage::RedisClient.cacheKey( { :shortname => dnsShortname } )
+        Storage::RedisClient.cacheKey( { :short => dnsShortname } )
       )
 
       result = @redis.get( cachekey )
 
       if( result == nil )
-        return { :shortname => nil }
+        return { :short => nil }
       end
 
       if( result.is_a?( String ) )
         result = JSON.parse( result )
       end
 
-
-      if( configKey != nil )
+      if( key != nil )
 
         result = {
-          configKey.to_sym => result.dig( :data, configKey.to_sym )
+          key.to_s => result.dig( 'data', key.to_s )
         }
       else
 
         result = result.dig( 'data' ).deep_string_keys
-
       end
 
       return result
-
     end
     #
     # -- configurations -------------------------
@@ -494,7 +527,6 @@ module Storage
       short  = params.dig(:short)
       key    = params.dig(:key)
 
-
       cachekey = 'nodes'
 
       existingData = @redis.get( cachekey )
@@ -555,30 +587,30 @@ module Storage
       end
 
       short  = params.dig(:short)
-      key    = params.dig(:key)
+
+#       logger.debug( params )
 
       cachekey = 'nodes'
 
-      # delete single config
-      if( configKey != nil )
+      existingData = @redis.get( cachekey )
 
-        existingData = @redis.get( cachekey )
-
-        if( existingData.is_a?( String ) )
-          existingData = JSON.parse( existingData )
-        end
-
-        data = existingData.dig('data').tap { |hs| hs.delete(key) }
-
-        existingData['data'] = data
-
-        self.createConfig( { :short => short, :data => existingData } )
-
-      else
-
-        # remove all data
-        @redis.del( cachekey )
+      if( existingData.is_a?( String ) )
+        existingData = JSON.parse( existingData )
       end
+
+      data = existingData.dig('data')
+      data = data.tap { |hs,d| hs.delete(  Storage::RedisClient.cacheKey( { :short => short } ) ) }
+
+#       existingData['data'] = data
+
+      # transform hash keys to symbols
+#       data = data.deep_string_keys
+
+      toStore = { data: data }.to_json
+
+#       logger.debug( toStore )
+
+      @redis.set( cachekey, toStore )
 
     end
 
@@ -591,6 +623,10 @@ module Storage
 
       short     = params.dig(:short)
       status    = params.dig(:status)  # Database::ONLINE
+
+      if( status.is_a?( TrueClass ) || status.is_a?( FalseClass ) )
+        status = status ? 0 : 1
+      end
 
       cachekey  = 'nodes'
 
@@ -612,7 +648,7 @@ module Storage
 
         keys   = result.dig('data').values
 
-        result = Array.new()
+        result = Hash.new()
 
         keys.each do |k|
 
@@ -620,15 +656,31 @@ module Storage
 
           nodeStatus = d.dig('status') || 0
 
+          if( nodeStatus.is_a?( TrueClass ) || nodeStatus.is_a?( FalseClass ) )
+            nodeStatus = nodeStatus ? 0 : 1
+          end
+
           if( nodeStatus.to_i == status.to_i )
 
-            result << k.to_s
+            dnsData    = self.dnsData( { :short => k } )
+
+            result[k.to_s] ||= {}
+            result[k.to_s] = dnsData
+
           end
+
         end
 
         return result
 
       end
+
+      #
+      #
+      result   = result.dig('data').values
+
+      return result
+
 
     end
     #
@@ -644,6 +696,10 @@ module Storage
 
       short   = params.dig(:short)
       status  = params.dig(:status) || 0
+
+      if( status.is_a?( TrueClass ) || status.is_a?( FalseClass ) )
+        status = status ? 0 : 1
+      end
 
       if( short == nil )
         return {
@@ -710,6 +766,24 @@ module Storage
 
       status   = result.dig( 'status' ) || 0
       created  = result.dig( 'created' )
+
+      if( status.is_a?( TrueClass ) || status.is_a?( FalseClass ) )
+        status = status ? 0 :1
+      end
+
+#       case status
+#       when 0, false
+#         status = 'offline'
+#       when 1, true
+#         status = 'online'
+#       when 98
+#         status = 'delete'
+#       when 99
+#         status = 'prepare'
+#       else
+#         status = 'unknown'
+#       end
+
 
       return {
         :short   => short,
@@ -934,7 +1008,7 @@ module Storage
         rec = @database[:config].where(
           (
             ( Sequel[:ip        => dnsIp.to_s] ) |
-            ( Sequel[:shortname => dnsShortname.to_s] )
+            ( Sequel[:short => dnsShortname.to_s] )
           ) & (
             ( Sequel[:key   => configKey.to_s] ) &
             ( Sequel[:value => configValues.to_s] )
@@ -954,7 +1028,7 @@ module Storage
           elsif( dnsShortname != nil )
 
             @database[:config].insert(
-              :shortname => dnsShortname.to_s,
+              :short => dnsShortname.to_s,
               :key       => configKey.to_s,
               :value     => configValues.to_s,
               :created   => DateTime.now()
@@ -980,7 +1054,7 @@ module Storage
             elsif( dnsShortname != nil )
 
               @database[:config].where(
-                ( Sequel[:shortname => dnsShortname.to_s] ) &
+                ( Sequel[:short => dnsShortname.to_s] ) &
                 ( Sequel[:key       => configKey.to_s] )
               ).update(
                 :value      => configValues.to_s,
@@ -1006,7 +1080,7 @@ module Storage
 
       rec = @database[:config].select(:shortname).where(
         ( Sequel[:ip        => ip.to_s] ) |
-        ( Sequel[:shortname => short.to_s] ) |
+        ( Sequel[:short => short.to_s] ) |
         ( Sequel[:longname  => long.to_s] )
       ).to_a
 
@@ -1016,7 +1090,7 @@ module Storage
 
         if( configKey == nil )
 
-          @database[:config].where( Sequel[:shortname => shortname] ).delete
+          @database[:config].where( Sequel[:short => shortname] ).delete
         else
           @database[:config].where(
             ( Sequel[:shortname   => shortname] ) &
@@ -1051,7 +1125,7 @@ module Storage
 
         w = (
           ( Sequel[:ip        => ip.to_s] ) |
-          ( Sequel[:shortname => short.to_s] ) |
+          ( Sequel[:short => short.to_s] ) |
           ( Sequel[:longname  => long.to_s] )
         )
 
@@ -1059,7 +1133,7 @@ module Storage
 
         w = (
           ( Sequel[:ip        => ip.to_s] ) |
-          ( Sequel[:shortname => short.to_s] ) |
+          ( Sequel[:short => short.to_s] ) |
           ( Sequel[:longname  => long.to_s] )
         ) & (
           ( Sequel[:key => configKey.to_s] )
@@ -1129,7 +1203,7 @@ module Storage
 
       rec = dns.select(:id).where(
         :ip        => ip.to_s,
-        :shortname => short.to_s,
+        :short => short.to_s,
         :longname  => long.to_s
       ).to_a.first
 
@@ -1138,7 +1212,7 @@ module Storage
 
         insertedId = dns.insert(
           :ip        => ip.to_s,
-          :shortname => short.to_s,
+          :short => short.to_s,
           :longname  => long.to_s,
           :checksum  => Digest::MD5.hexdigest( [ ip, short, long ].join ),
           :created   => DateTime.now()
@@ -1163,7 +1237,7 @@ module Storage
 
       rec = @database[:dns].select( :id ).where(
         ( Sequel[:ip        => ip.to_s] ) |
-        ( Sequel[:shortname => short.to_s] ) |
+        ( Sequel[:short => short.to_s] ) |
         ( Sequel[:longname  => long.to_s] )
       ).to_a
 
@@ -1197,7 +1271,7 @@ module Storage
 
       rec = dns.where(
         (Sequel[:ip        => ip.to_s] ) |
-        (Sequel[:shortname => short.to_s] ) |
+        (Sequel[:short => short.to_s] ) |
         (Sequel[:longname  => long.to_s] )
       ).to_a
 
@@ -1208,7 +1282,7 @@ module Storage
         return {
           :id        => rec.first[:id].to_i,
           :ip        => rec.first[:ip].to_s,
-          :shortname => rec.first[:shortname].to_s,
+          :short => rec.first[:shortname].to_s,
           :longname  => rec.first[:longname].to_s,
           :created   => rec.first[:created].to_s,
           :checksum  => rec.first[:checksum].to_s
@@ -1371,7 +1445,7 @@ module Storage
       # { :ip => '10.2.14.156' }
       elsif( service == nil && host != nil )
 
-        w = ( Sequel[:ip => ip.to_s] ) | ( Sequel[:shortname => short.to_s] )
+        w = ( Sequel[:ip => ip.to_s] ) | ( Sequel[:short => short.to_s] )
 
         rec = self.dbaData( w )
 
@@ -1403,7 +1477,7 @@ module Storage
 
         w = (
           (Sequel[:ip => ip.to_s] ) |
-          (Sequel[:shortname => short.to_s] )
+          (Sequel[:short => short.to_s] )
         ) & (
           (Sequel[:service => service.to_s] )
         )
@@ -1556,7 +1630,7 @@ module Storage
       # { :ip => '10.2.14.156' }
       elsif( service == nil && host != nil )
 
-        w = ( Sequel[:ip => ip.to_s] ) | ( Sequel[:shortname => short.to_s] )
+        w = ( Sequel[:ip => ip.to_s] ) | ( Sequel[:short => short.to_s] )
 
         rec = self.dbaData( w )
 
@@ -1662,7 +1736,7 @@ module Storage
       # check existing status entry
       rec = @database[:v_status].select(:id, :dns_id).where(
         Sequel[:ip        => ip.to_s] |
-        Sequel[:shortname => short.to_s]
+        Sequel[:short => short.to_s]
       ).to_a
 
       if( rec.count() == 0 )
@@ -1709,7 +1783,7 @@ module Storage
 
 
       rec = @database[:v_status].select( :ip, :shortname, :created, :status ).where(
-        Sequel[:ip        => ip.to_s] | Sequel[:shortname => short.to_s]
+        Sequel[:ip        => ip.to_s] | Sequel[:short => short.to_s]
       ).to_a
 
       if( rec.count() == 0 )
@@ -1718,7 +1792,7 @@ module Storage
 
         return {
           :ip        => rec.first[:ip].to_s,
-          :shortname => rec.first[:shortname].to_s,
+          :short => rec.first[:shortname].to_s,
           :created   => rec.first[:created].to_s,
           :status    => rec.first[:status].to_i
         }

@@ -3,7 +3,7 @@
 # 13.09.2016 - Bodo Schulz
 #
 #
-# v1.5.1
+# v1.6.0
 # -----------------------------------------------------------------------------
 
 require 'json'
@@ -15,8 +15,6 @@ require_relative 'utils/network'
 require_relative 'jolokia'
 require_relative 'message-queue'
 require_relative 'storage'
-require_relative 'tools'
-
 require_relative 'discovery/queue'
 require_relative 'discovery/discovery'
 
@@ -73,17 +71,19 @@ module ServiceDiscovery
       55555     # resourced (https://github.com/resourced/resourced)
     ]
 
-    jolokiaHost        = settings.dig(:jolokiaHost) || 'localhost'
-    jolokiaPort        = settings.dig(:jolokiaPort) || 8080
-    jolokiaPath        = settings.dig(:jolokiaPath) || '/jolokia'
-    jolokiaAuthUser    = settings.dig(:jolokiaAuthUser)
-    jolokiaAuthPass    = settings.dig(:jolokiaAuthPass)
-    mqHost             = settings.dig(:mqHost)      || 'localhost'
-    mqPort             = settings.dig(:mqPort)      || 11300
-    @mqQueue           = settings.dig(:mqQueue)     || 'mq-discover'
+    jolokiaHost         = settings.dig(:jolokia, :host)           || 'localhost'
+    jolokiaPort         = settings.dig(:jolokia, :port)           ||  8080
+    jolokiaPath         = settings.dig(:jolokia, :path)           || '/jolokia'
+    jolokiaAuthUser     = settings.dig(:jolokia, :auth, :user)
+    jolokiaAuthPass     = settings.dig(:jolokia, :auth, :pass)
+    mqHost              = settings.dig(:mq, :host)                || 'localhost'
+    mqPort              = settings.dig(:mq, :port)                || 11300
+    @mqQueue            = settings.dig(:mq, :queue)               || 'mq-discover'
 
-    redisHost          = settings.dig(:redis, :host)
-    redisPort          = settings.dig(:redis, :port)
+    redisHost           = settings.dig(:redis, :host)
+    redisPort           = settings.dig(:redis, :port)             || 6379
+
+    @serviceConfig      = settings.dig(:configFiles, :service)
 
     @MQSettings = {
       :beanstalkHost  => mqHost,
@@ -91,11 +91,10 @@ module ServiceDiscovery
       :beanstalkQueue => @mqQueue
     }
 
-    @serviceConfig     = settings.dig(:serviceConfigFile)
     @scanPorts         = ports
 
-    version             = '1.5.1'
-    date                = '2017-03-27'
+    version             = '1.6.0'
+    date                = '2017-04-11'
 
     logger.info( '-----------------------------------------------------------------' )
     logger.info( ' CoreMedia - Service Discovery' )
@@ -108,7 +107,6 @@ module ServiceDiscovery
     logger.info( '-----------------------------------------------------------------' )
     logger.info( '' )
 
-    @db                 = Storage::Database.new()
     @redis              = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
     @jolokia            = Jolokia::Client.new( { :host => jolokiaHost, :port => jolokiaPort, :path => jolokiaPath, :auth => { :user => jolokiaAuthUser, :pass => jolokiaAuthPass } } )
     @mqConsumer         = MessageQueue::Consumer.new( @MQSettings )
@@ -195,9 +193,7 @@ module ServiceDiscovery
     status  = 400
     message = 'Host not in Monitoring'
 
-    @redis.removeDNS( { :ip => host, :short => host, :long => host } )
-
-    if( @db.removeDNS( { :ip => host, :short => host, :long => host } ) != nil )
+    if( @redis.removeDNS( { :short => host } ) != nil )
 
       status  = 200
       message = 'Host successful removed'
@@ -215,9 +211,14 @@ module ServiceDiscovery
 
     logger.info( sprintf( 'Adding host \'%s\'', host ) )
 
-    logger.debug( @redis.discoveryData( { :ip => host, :short => host, :long => host } ) )
+    discoveryData = @redis.discoveryData( { :short => host } )
 
-    if( @db.discoveryData( { :ip => host, :short => host, :long => host } ) != nil )
+    logger.debug( "#{discoveryData}" )
+
+    shortName = discoveryData.dig(:short)
+
+#    if( @db.discoveryData( { :ip => host, :short => host, :long => host } ) != nil )
+    if( shortName != nil )
 
       logger.error( 'Host already created' )
 
@@ -238,18 +239,40 @@ module ServiceDiscovery
       }
     end
 
-    # create DNS Information
-    hostInfo      = Utils::Network.resolv( host )
+    # --------------------------------------------------------------------------------------------
+    # TODO
+    # read first the prepared DNS data
+    # second (if not valid data exists) create an valid entry ..
 
-    logger.debug( "hostResolve #{hostInfo}" )
+    dns = @redis.dnsData( { :short => host } )
 
-    ip            = hostInfo.dig(:ip)
-    shortHostName = hostInfo.dig(:short)
-    longHostName  = hostInfo.dig(:long)
+    logger.debug( dns )
 
-    logger.debug( sprintf( 'ping ip %s if running', ip ) )
+    if( dns.dig(:ip) == nil )
+
+      # create DNS Information
+      dns      = Utils::Network.resolv( host )
+
+      logger.debug( "hostResolve #{hostInfo}" )
+
+      ip            = hostInfo.dig(:ip)
+      shortHostName = hostInfo.dig(:short)
+      longHostName  = hostInfo.dig(:long)
+
+      @redis.createDNS( { :ip => ip, :short => shortHostName, :long => longHostName } )
+    else
+
+      ip            = dns.dig(:ip)
+      shortHostName = dns.dig(:shortname)
+      longHostName  = dns.dig(:longname)
+    end
+
+#     logger.debug( sprintf( ' ip   %s ', ip ) )
+#     logger.debug( sprintf( ' host %s ', shortHostName ) )
+#     logger.debug( sprintf( ' fqdn %s ', longHostName ) )
 
     # second, if the that we whant monitored, available
+    #
     if( Utils::Network.isRunning?( ip ) == false )
 
       logger.error( 'host not running' )
@@ -260,28 +283,27 @@ module ServiceDiscovery
         :message => 'Host not available'
       }
     end
+    #
+    # --------------------------------------------------------------------------------------------
 
-    @redis.createDNS( { :ip => ip, :short => shortHostName, :long => longHostName } )
+    logger.debug( 'ask for custom configurations' )
+    ports    = @redis.config( { :short => shortHostName, :key => 'ports' } )
+    services = @redis.config( { :short => shortHostName, :key => 'services' } )
 
-    ports    = @redis.config( { :ip => ip, :short => shortHostName, :long => longHostName, :key => "ports" } )
-    services = @redis.config( { :ip => ip, :short => shortHostName, :long => longHostName, :key => "services" } )
+    ports    = (ports != nil)    ? ports.dig( 'ports' )       : ports
+    services = (services != nil) ? services.dig( 'services' ) : services
 
-    logger.debug( "redis  ports   : #{ports}" )
-    logger.debug( "redis  services: #{services}" )
-
-    @db.createDNS( { :ip => ip, :short => shortHostName, :long => longHostName } )
-
-    ports    = @db.config( { :ip => ip, :short => shortHostName, :long => longHostName, :key => "ports" } )
-    services = @db.config( { :ip => ip, :short => shortHostName, :long => longHostName, :key => "services" } )
-
-    if( ports != false )
-      ports = ports.dig( shortHostName, 'ports' )
-    else
+    if( ports == nil )
       # our default known ports
       ports = @scanPorts
     end
 
-    logger.debug( "use ports: #{ports}" )
+    if( services == nil )
+      # our default known ports
+      services = []
+    end
+
+    logger.debug( "use ports          : #{ports}" )
     logger.debug( "additional services: #{services}" )
 
     discover = Hash.new()
@@ -321,31 +343,6 @@ module ServiceDiscovery
       :short    => shortHostName,
       :data     => services
     } )
-
-#     logger.debug( @redis.dnsData( { :ip => ip, :short => shortHostName } ) )
-#
-    dns      = @db.dnsData( { :ip => ip, :short => shortHostName } )
-
-    if( dns == nil )
-      logger.debug( 'no DNS data for ' + shortHostName )
-    else
-
-      dnsId        = dns[ :id ]
-      dnsIp        = dns[ :ip ]
-      dnsShortname = dns[ :shortname ]
-      dnsLongname  = dns[ :longname ]
-      dnsCreated   = dns[ :created ]
-      dnsChecksum  = dns[ :checksum ]
-
-      @db.createDiscovery( {
-        :id       => dnsId,
-        :ip       => dnsIp,
-        :short    => dnsShortname,
-        :checksum => dnsChecksum,
-        :data     => services
-      } )
-
-    end
 
     return {
       :status   => 200,
@@ -396,59 +393,68 @@ module ServiceDiscovery
     if( host == nil )
 
       logger.info( 'TODO - use Database insteed of File - ASAP' )
+
+      nodes = @redis.nodes()
+
+#       nodes.each do |n|
+#
+#
+#       end
+
+      return nodes
+
     else
 
-
-      discoveryData  = @db.discoveryData( { :ip => host, :short => host } )
-
-      if( discoveryData == nil )
-
-        return {
-          :status   => 404,
-          :message  => 'no host found'
-        }
-
-      end
-
-      hostServices   = discoveryData.dig( host )
-
-      hostServices.each do |s|
-
-        s.last.dig(:data).reject! { |k| k == :application }
-
-        services[s.first.to_sym] ||= {}
-        services[s.first.to_sym] = s.last.dig(:data)
-
-      end
-
-      status         = @db.status( { :ip => host, :short => host } )
-
-      created        = status.dig( :created )
-      created        = Time.parse( created ).strftime( '%Y-%m-%d %H:%M:%S' )
-
-      online         = status.dig( :status )
-
-      case online
-      when 0
-        status = 'offline'
-      when 1
-        status = 'online'
-      when 98
-        status = 'delete'
-      when 99
-        status = 'prepare'
-      else
-        status = 'unknown'
-      end
-
-      result = {
-        :status   => 200,
-        :mode     => status,
-        :services => services,
-        :created  => created
-      }
-
-      logger.debug( result )
+#       discoveryData  = @db.discoveryData( { :ip => host, :short => host } )
+#
+#       if( discoveryData == nil )
+#
+#         return {
+#           :status   => 404,
+#           :message  => 'no host found'
+#         }
+#
+#       end
+#
+#       hostServices   = discoveryData.dig( host )
+#
+#       hostServices.each do |s|
+#
+#         s.last.dig(:data).reject! { |k| k == :application }
+#
+#         services[s.first.to_sym] ||= {}
+#         services[s.first.to_sym] = s.last.dig(:data)
+#
+#       end
+#
+#       status         = @db.status( { :ip => host, :short => host } )
+#
+#       created        = status.dig( :created )
+#       created        = Time.parse( created ).strftime( '%Y-%m-%d %H:%M:%S' )
+#
+#       online         = status.dig( :status )
+#
+#       case online
+#       when 0
+#         status = 'offline'
+#       when 1
+#         status = 'online'
+#       when 98
+#         status = 'delete'
+#       when 99
+#         status = 'prepare'
+#       else
+#         status = 'unknown'
+#       end
+#
+#       result = {
+#         :status   => 200,
+#         :mode     => status,
+#         :services => services,
+#         :created  => created
+#       }
+#
+#       logger.debug( result )
 
       # redis
 
@@ -466,18 +472,46 @@ module ServiceDiscovery
       discoveryData.each.each do |s|
 
         data = s.last
-        data.reject! { |k| k == 'application' }
-        data.reject! { |k| k == 'template' }
+
+        if( data != nil )
+          data.reject! { |k| k == 'application' }
+          data.reject! { |k| k == 'template' }
+        end
 
         services[s.first.to_sym] ||= {}
         services[s.first.to_sym] = data
 
       end
 
-      status         = @redis.status( { :short => shortHostName } )
+      status         = nil # @redis.status( { :short => shortHostName } )
+
+      # BEHOLD
+      #
+        for y in 1..15
+
+          result      = @redis.status( { :short => shortHostName } )
+
+          if( result != nil )
+            status = result
+            break
+          else
+            logger.debug( sprintf( 'Waiting for data ... %d', y ) )
+            sleep( 4 )
+          end
+        end
+
+      logger.debug( status )
+
+
 #       logger.debug( @redis.dnsData( { :ip => ip, :short => shortHostName } ) )
       created        = status.dig( :created )
-      created        = Time.parse( created ).strftime( '%Y-%m-%d %H:%M:%S' )
+
+      if( created == nil )
+        created      = 'unknown'
+      else
+        created      = Time.parse( created ).strftime( '%Y-%m-%d %H:%M:%S' )
+      end
+
       online         = status.dig( :status )
 
       case online
@@ -500,7 +534,7 @@ module ServiceDiscovery
         :created  => created
       }
 
-      logger.debug( result )
+#       logger.debug( result )
 
     end
 

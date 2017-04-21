@@ -131,7 +131,6 @@ module Grafana
       rescue RestClient::ExceptionWithResponse => e
 
         logger.error( "Error: #{__method__} #{methodType.upcase} on #{endpoint} error: '#{e}'" )
-
       end
 
     end
