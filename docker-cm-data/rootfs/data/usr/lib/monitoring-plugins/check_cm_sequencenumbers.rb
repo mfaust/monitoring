@@ -53,13 +53,13 @@ class Icinga2Check_CM_SequenceNumbers < Icinga2Check
       exit STATE_WARNING
     end
 
-    diff = mlsSequenceNumber.to_i - rlsControllerState.to_i
+    diff = mlsSequenceNumber.to_i - rlsSequenceNumber.to_i
 
     if( diff == warning || diff <= warning )
       status   = 'OK'
       exitCode = STATE_OK
 
-      puts 'RLS and MLS in sync'
+      puts sprintf( 'RLS and MLS in sync<br>MLS Sequence Number: %s<br>RLS Sequence Number: %s', mlsSequenceNumber.to_i, rlsSequenceNumber.to_i )
 
       exit exitCode
 
@@ -71,7 +71,7 @@ class Icinga2Check_CM_SequenceNumbers < Icinga2Check
       exitCode = STATE_CRITICAL
     end
 
-    puts sprintf( 'RLS are %s Events <b>behind</b> the MLS<br>MLS Sequence Number: %s<br>RLS Sequence Number: %s', diff, mlsSequenceNumber.to_i, rlsControllerState.to_i )
+    puts sprintf( 'RLS are %s Events <b>behind</b> the MLS<br>MLS Sequence Number: %s<br>RLS Sequence Number: %s', diff, mlsSequenceNumber.to_i, rlsSequenceNumber.to_i )
 
     exit exitCode
 
