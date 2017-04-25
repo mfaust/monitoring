@@ -122,7 +122,7 @@ services:
       # HOSTNAME:IP,HOSTNAME:IP, ...
       # e.g.:
       # ADDITIONAL_DNS: 'blueprint-box:192.168.252.100,nginx-proxy:192.168.252.5'
-      ADDITIONAL_DNS: 'blueprint-box:192.168.252.100'
+      ADDITIONAL_DNS: 'blueprint-box:192.168.252.100,tomcat-centos7:192.168.252.100'
 
   cm-service-discovery:
     environment:
@@ -184,7 +184,7 @@ services:
       TZ: 'Europe/Berlin'
       GRAPHITE_HOST: nginx
       # GRAPHITE_PORT: 2003
-      # GRAPHITE_HTTP_PORT: 80
+      GRAPHITE_HTTP_PORT: 80
       GRAPHITE_PATH: /graphite
       MQ_HOST: beanstalkd
       # MQ_PORT: 11300
