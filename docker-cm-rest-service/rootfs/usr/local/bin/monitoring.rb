@@ -11,8 +11,8 @@ require 'yaml'
 require 'rufus-scheduler'
 
 require_relative '../lib/logging'
+require_relative '../lib/cache'
 require_relative '../lib/utils/network'
-# require_relative '../lib/tools'
 require_relative '../lib/storage'
 require_relative '../lib/message-queue'
 
@@ -42,14 +42,10 @@ class Monitoring
     @enabledGrafana   = true
     @enabledIcinga    = true
 
-#     @configFile    = '/etc/cm-monitoring.yaml'
-
     logger.level           = Logger::DEBUG
 
-#     self.readConfigFile()
-
-    version              = '2.4.80'
-    date                 = '2017-04-12'
+    version              = '2.4.85'
+    date                 = '2017-04-28'
 
     logger.info( '-----------------------------------------------------------------' )
     logger.info( ' CoreMedia - Monitoring Service' )
@@ -61,11 +57,12 @@ class Monitoring
     logger.info( '-----------------------------------------------------------------' )
     logger.info( '' )
 
+    @cache      = Cache::Store.new()
     @mqConsumer = MessageQueue::Consumer.new( @MQSettings )
     @redis      = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
 
     scheduler   = Rufus::Scheduler.new
-    scheduler.every( 40 ) do
+    scheduler.every( 60, :first_in => 1 ) do
 
       self.createNodeInformation()
     end
@@ -73,43 +70,96 @@ class Monitoring
   end
 
 
+  # create a cache about all known monitored nodes
+  #
   def createNodeInformation()
 
-    nodes = @redis.nodes( { :status => 1 } )
+    logger.debug( 'create node information ...' )
+
+    result  = Hash.new()
+    nodes   = @redis.nodes()
 
     logger.debug( nodes )
 
+    if( nodes.count != 0 )
 
+      if( nodes.is_a?( Hash ) )
+        nodes = nodes.keys
+      end
+
+      nodes.each do |n|
+
+        logger.debug( n )
+
+        hostData = self.checkAvailablility?( n )
+
+        if( hostData == false )
+
+          result = {
+            :status  => 400,
+            :message => 'Host are not available (DNS Problem)'
+          }
+
+          logger.warn( result )
+
+          next
+        end
+
+        result[n.to_s] ||= {}
+        result[n.to_s][:dns] ||= {}
+        result[n.to_s][:dns] = hostData
+
+        hostConfiguration = self.getHostConfiguration( n )
+
+        if( hostConfiguration != nil )
+          hostConfigurationStatus  = hostConfiguration.dig(:status)  || 204
+          hostConfigurationMessage = hostConfiguration.dig(:message)
+        end
+
+        if( hostConfigurationStatus == 200 )
+          result[n.to_s][:custom_config] = hostConfigurationMessage
+        end
+
+        # get data from external services
+        self.messageQueue( { :cmd => 'info', :node => n, :queue => 'mq-icinga'  , :payload => {} } )
+        self.messageQueue( { :cmd => 'info', :node => n, :queue => 'mq-grafana' , :payload => {}, :ttr => 1, :delay => 0 } )
+        self.messageQueue( { :cmd => 'info', :node => n, :queue => 'mq-discover', :payload => {}, :ttr => 1, :delay => 0 } )
+
+        sleep( 8 )
+
+        resultArray = Array.new()
+        threads     = Array.new()
+
+        discoveryStatus = @mqConsumer.getJobFromTube( 'mq-discover-info', true )
+        grafanaStatus   = @mqConsumer.getJobFromTube( 'mq-grafana-info', true )
+        icingaStatus    = @mqConsumer.getJobFromTube( 'mq-icinga-info', true )
+
+        if( discoveryStatus )
+          discoveryStatus = discoveryStatus.dig( :body, 'payload' ) || {}
+          result[n.to_s][:discovery] ||= {}
+          result[n.to_s][:discovery] = discoveryStatus
+        end
+
+        if( grafanaStatus )
+          grafanaStatus = grafanaStatus.dig( :body, 'payload' ) || {}
+          result[n.to_s][:grafana] ||= {}
+          result[n.to_s][:grafana] = grafanaStatus
+        end
+
+        if( icingaStatus )
+          icingaStatus = icingaStatus.dig( :body, 'payload' ) || {}
+          result[n.to_s][:icinga] ||= {}
+          result[n.to_s][:icinga] = icingaStatus
+        end
+
+      end
+
+      @cache.set( 'information' , expiresIn: 320 ) { Cache::Data.new( result ) }
+
+    end
 
   end
 
-
-#   def readConfigFile()
-#
-#     config = YAML.load_file( @configFile )
-#
-#     @mqHost           = config['mq']['host']               ? config['mq']['host']               : 'localhost'
-#     @mqPort           = config['mq']['port']               ? config['mq']['port']               : 11300
-#     @mqQueue          = config['mq']['queue']              ? config['mq']['queue']              : 'mq-rest-service'
-#
-#     @serviceChecks    = config['service-checks']           ? config['service-checks']           : nil
-#
-#    @enabledDiscovery = false
-#    @enabledGrafana   = false
-#    @enabledIcinga    = false
-#
-#    @monitoringServices = config['monitoring-services']    ? config['monitoring-services']      : nil
-#
-#    if( @monitoringServices != nil )
-#
-#      services          = @monitoringServices.reduce( :merge )
-#
-#      @enabledDiscovery = true # services['discovery'] && services['discovery'] == true  ? true : false
-#      @enabledGrafana   = true # services['grafana']   && services['grafana'] == true    ? true : false
-#      @enabledIcinga    = true # services['icinga2']   && services['icinga2'] == true    ? true : false
-#    end
-#
-#   end
 
 
   def checkAvailablility?( host )
@@ -512,191 +562,34 @@ class Monitoring
 
   end
 
-
+  # use the predefined cache
+  #
   def listHost( host = nil, payload = nil )
 
-    status                = 500
-    message               = 'initialize error'
-
-    result                = Hash.new()
-    hash                  = Hash.new()
-
-    result = {
-      :status  => status,
-      :message => message
-    }
-
-    grafanaDashboardCount = 0
-    grafanaDashboards     = []
+    status  = 200
+    result  = Hash.new()
+    cache   = @cache.get( 'information' )
 
     if( host.to_s != '' )
 
       result[host.to_s] ||= {}
 
-      hostData = self.checkAvailablility?( host )
-
-      if( hostData == false )
-
-        return {
-          :status  => 400,
-          :message => 'Host are not available (DNS Problem)'
-        }
-
+      if( cache != nil )
+        h = cache.dig( host.to_s )
+        result[host.to_s] = h
       end
-
-      result[host.to_s][:dns] ||= {}
-      result[host.to_s][:dns] = hostData
-
-      enableDiscovery = true # @enabledDiscovery
-      enabledGrafana  = true # @enabledGrafana
-      enabledIcinga   = true # @enabledIcinga
-
-#
-#       if( payload != nil )
-#         payload = payload.dig( 'rack.request.form_vars' )
-#       end
-#
-#       if( payload != nil )
-#         enableDiscovery = payload.keys.include?('discovery')  ? payload['discovery']  : @enabledDiscovery
-#         enabledGrafana  = payload.keys.include?('grafana')    ? payload['grafana']    : @enabledGrafana
-#         enabledIcinga   = payload.keys.include?('icinga')     ? payload['icinga']     : @enabledIcinga
-#       end
-
-      logger.debug( ( hostData != false && hostData[:short] ) ? hostData[:short] : host  )
-
-      result[host.to_s] ||= {}
-
-      hostConfiguration        = self.getHostConfiguration( ( hostData != false && hostData[:short] ) ? hostData[:short] : host )
-
-      if( hostConfiguration != nil )
-        hostConfigurationStatus  = hostConfiguration.dig(:status)  || 204
-        hostConfigurationMessage = hostConfiguration.dig(:message)
-      end
-
-      if( hostConfigurationStatus == 200 )
-        result[host.to_s][:custom_config] = hostConfigurationMessage
-      end
-
-
-      if( enabledIcinga == true )
-        logger.info( 'get information from icinga' )
-        logger.debug( 'send message to \'mq-icinga\'' )
-        self.messageQueue( { :cmd => 'info', :node => host, :queue => 'mq-icinga', :payload => {} } )
-      end
-      if( enabledGrafana == true )
-        logger.info( 'get information from grafana' )
-        logger.debug( 'send message to \'mq-grafana\'' )
-        self.messageQueue( { :cmd => 'info', :node => host, :queue => 'mq-grafana', :payload => {}, :ttr => 1, :delay => 0 } )
-      end
-
-      if( enableDiscovery == true )
-        logger.info( 'get information from discovery service' )
-        logger.debug( 'send message to \'mq-discover\'' )
-        self.messageQueue( { :cmd => 'info', :node => host, :queue => 'mq-discover', :payload => {}, :ttr => 1, :delay => 0 } )
-      end
-
-      sleep( 8 )
-
-#       c = MessageQueue::Consumer.new( @MQSettings )
-
-      resultArray = Array.new()
-      threads     = Array.new()
-
-#      logger.debug('start')
-
-      if( enableDiscovery == true )
-
-        logger.debug( 'get data from queue' )
-        discoveryStatus = @mqConsumer.getJobFromTube( 'mq-discover-info', true )
-
-        logger.debug( discoveryStatus )
-        if( discoveryStatus )
-
-          result[host.to_s][:discovery] ||= {}
-          discoveryStatus = discoveryStatus.dig( :body, 'payload' ) || {}
-          result[host.to_s][:discovery] = discoveryStatus
-        end
-      end
-
-      if( enabledGrafana == true )
-        grafanaStatus = @mqConsumer.getJobFromTube( 'mq-grafana-info', true )
-
-        if( grafanaStatus )
-          result[host.to_s][:grafana] ||= {}
-          grafanaStatus = grafanaStatus.dig( :body, 'payload' ) || {}
-          result[host.to_s][:grafana] = grafanaStatus
-        end
-      end
-
-      if( enabledIcinga == true )
-        icingaStatus = @mqConsumer.getJobFromTube( 'mq-icinga-info', true )
-
-        if( icingaStatus )
-          result[host.to_s][:icinga] ||= {}
-          icingaStatus = icingaStatus.dig( :body, 'payload' ) || {}
-          result[host.to_s][:icinga] = icingaStatus
-        end
-      end
-
-#      ['mq-icinga-info','mq-grafana-info','mq-discover-info'].each do |queue|
-#        resultArray << c.getJobFromTube( queue )
-#      end
-
-#       logger.debug('end')
-#      logger.debug( resultArray )
-#       logger.debug( result )
-
-      return JSON.pretty_generate( result )
 
     else
 
-      return JSON.pretty_generate( { :status => 204, :message => 'not yet ready' } )
-
-      discoveryResult  = @serviceDiscovery.listHosts( host )
-      discoveryStatus  = discoveryResult[:status]
-      discoveryMessage = discoveryResult[:message]
-
-
-      if( discoveryStatus != 400 )
-
-        array = Array.new()
-
-        hosts = discoveryResult[:hosts] ? discoveryResult[:hosts] : []
-
-        if( hosts.count != 0 )
-
-          hosts = hosts.reduce( :merge ).keys
-
-          hosts.each do |h|
-
-            r  = @serviceDiscovery.listHosts( h )
-            s  = r[:status] ? r[:status] : 400
-
-            if( s != 400 )
-
-              dHost        = r[:hosts] ? r[:hosts] : nil
-
-              if( dHost != nil )
-                discoveryCreated      = dHost[h][:created] ? dHost[h][:created] : 'unknown'
-                discoveryOnline       = dHost[h][:status]  ? dHost[h][:status]  : 'unknown'
-              end
-            end
-
-            hash  = {
-              h.to_s => { :discovery => { :status => s, :created => discoveryCreated, :online => discoveryOnline } }
-            }
-
-            array.push( hash )
-
-          end
-
-          discoveryResult = array.reduce( :merge )
-        end
+      if( cache != nil )
+        result = cache
       end
 
-      return discoveryResult
-
     end
+
+    result[:status] = 200
+
+    return JSON.pretty_generate( result )
 
   end
 

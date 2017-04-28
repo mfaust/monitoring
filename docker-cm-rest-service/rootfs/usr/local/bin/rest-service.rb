@@ -187,7 +187,7 @@ module Sinatra
 
       result = m.listHost( nil, request.env )
 
-#       status = result[:status]
+      status result['status']
 
       result
 
@@ -199,7 +199,7 @@ module Sinatra
       host   = params[:host]
       result = m.listHost( host, request.env )
 
-#       status = result[:status]
+      status result['status']
 
       result
 
