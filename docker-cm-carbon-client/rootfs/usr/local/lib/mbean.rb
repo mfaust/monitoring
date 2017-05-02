@@ -84,7 +84,7 @@ module MBean
             return false
           end
 
-          if( mbeanValue.class.to_s == 'Hash' )
+          if( mbeanValue.is_a?( Hash ) )
             mbeanValue = mbeanValue.values.first
           end
 
