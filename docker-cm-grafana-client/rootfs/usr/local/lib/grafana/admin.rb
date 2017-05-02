@@ -15,20 +15,24 @@ module Grafana
 
       valid_perms = ['Viewer','Editor','Read Only Editor','Admin']
 
-      if perm.class.to_s == "String" && !valid_perms.include?(perm)
+      if( perm.is_a?( String ) && !valid_perms.include?(perm) )
         logger.warn("Basic user permissions include: #{valid_perms.join(',')}")
         return false
-      elsif perm.class.to_s == "Hash" &&
-        ( !perm.has_key?('isGrafanaAdmin') || ![true,false].include?(perm['isGrafanaAdmin']) )
+      elsif( perm.is_a?( Hash ) &&
+        ( !perm.has_key?('isGrafanaAdmin') || ![true,false].include?(perm['isGrafanaAdmin']) ) )
+
         logger.warn("Grafana admin permission must be either true or false")
+        
         return false
       end
 
       logger.info("Updating user ID #{id} permissions")
 
-      if perm.class.to_s == 'Hash'
+      if( perm.is_a?( Hash ) )
+
         endpoint = "/api/admin/users/#{id}/permissions"
         logger.info("Updating user ID #{id} permissions (PUT #{endpoint})")
+
         return putRequest(endpoint, {"isGrafanaAdmin" => perm['isGrafanaAdmin']}.to_json)
       else
         org = self.current_org()
@@ -62,7 +66,7 @@ module Grafana
       return postRequest(endpoint, properties.to_json)
     end
 
-    
+
     def updateUserPass(user_id,password)
 
       endpoint = " /api/admin/users/#{user_id}/#{password}"

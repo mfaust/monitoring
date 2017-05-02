@@ -993,7 +993,6 @@ module DataCollector
 
       end
 
-      logger.debug( result.class.to_s )
       return result
     end
 
@@ -1025,9 +1024,6 @@ module DataCollector
       # TODO
       #
       prepared = @redis.get( Storage::RedisClient.cacheKey( { :host => shortName, :pre => 'prepare' } ) )
-
-#       logger.debug( prepared )
-#       logger.debug( prepared.class.to_s )
 
       if( prepared.is_a?( NilClass ) || prepared.is_a?( FalseClass ) || ( prepared.is_a?( String ) && ( prepared == '' || prepared == 'false ' ) ) )
 

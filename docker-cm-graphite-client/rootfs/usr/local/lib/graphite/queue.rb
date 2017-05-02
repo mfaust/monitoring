@@ -19,9 +19,6 @@ module Graphite
 
         result = self.processQueue( data )
 
-        logger.debug( result )
-        logger.debug( result.class.to_s )
-
         status = result.dig(:status).to_i
 
         if( status == 200 || status == 500 )
