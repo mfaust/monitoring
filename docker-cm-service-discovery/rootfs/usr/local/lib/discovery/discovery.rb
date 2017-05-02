@@ -94,9 +94,6 @@ module ServiceDiscovery
 
         else
 
-#           logger.debug( response.class.to_s )
-#           logger.debug( response )
-
           body = response.dig(:message)
 
           if( body != nil )
@@ -119,7 +116,11 @@ module ServiceDiscovery
 
               if( value != nil )
 
+                logger.debug( 'parse runtime::value' )
+
                 classPath  = value.dig('ClassPath')
+
+                logger.debug( "found classPath: #{classPath}" )
 
                 if( classPath.include?( 'cm7-tomcat-installation' ) )
 
@@ -177,7 +178,9 @@ module ServiceDiscovery
 
                         logger.debug( sprintf( '  => %s', service ) )
                       else
+
                         logger.error( 'unknown error' )
+
                         logger.error( parts )
                       end
                     else
@@ -227,7 +230,12 @@ module ServiceDiscovery
 
   #                   logger.debug( sprintf( '  => %s', service ) )
                   else
-                    logger.error( 'unknown error' )
+
+                    # BUG
+                    # when we use solr-6.5, we lands here!
+                    # Solr 6.5 are not a coremedia tomcat application anymore
+                    logger.error( 'parse error for ClassPath' )
+                    logger.error( " => classPath: #{classPath}" )
                     logger.error( parts )
                   end
                 end

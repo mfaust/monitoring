@@ -17,9 +17,6 @@ module ServiceDiscovery
 
         result = self.processQueue( data )
 
-        logger.debug( result )
-        logger.debug( result.class.to_s )
-
         status = result.dig(:status).to_i
 
         if( status == 200 || status == 500 )
@@ -68,6 +65,7 @@ module ServiceDiscovery
 
         case command
         when 'add'
+
           logger.info( sprintf( 'add node %s', node ) )
 
           # TODO
@@ -75,27 +73,16 @@ module ServiceDiscovery
           # e.g. for 'force' ...
           result = self.addHost( node, payload )
 
+          logger.debug( result )
+
           status  = result.dig(:status)
           message = result.dig(:message)
 
-          logger.debug( result )
-
           if( status.to_i == 200 )
 
+            logger.debug( 'set node status to ONLINE' )
             @redis.setStatus( { :short => node, :status => Storage::RedisClient::ONLINE } )
           end
-
-# 
-#           # BUG
-#           # Use DNS entry and take the IP to check isAlive!
-#           dns      = @redis.dnsData( { :short => node } )
-#
-#           logger.debug( dns )
-#           ip = dns.dig(:ip) || dns.dig('ip')
-#
-#           networkStatus = Utils::Network.isRunning?( ip )
-#
-#           @redis.setStatus( { :short => node, :status => networkStatus } )
 
           return {
             :status  => status,
@@ -103,16 +90,12 @@ module ServiceDiscovery
           }
 
         when 'remove'
+
           logger.info( sprintf( 'remove node \'%s\'', node ) )
 
           # check first for existing node!
           #
           result = @redis.nodes( { :short => node } )
-#
-#           logger.debug( result.class.to_s )
-#           logger.debug( result )
-#
-#           nodeExists = result.count != 0 ? true : false
 
           if( result.to_s != node.to_s )
 
@@ -129,7 +112,7 @@ module ServiceDiscovery
 
             self.sendMessage( { :cmd => command, :queue => 'mq-collector', :payload => { :host => node, :pre => 'prepare' }, :ttr => 1, :delay => 0 } )
 
-            @redis.setStatus( { :short => node, :status => Storage::RedisClient::DELETE } )
+#             @redis.setStatus( { :short => node, :status => Storage::RedisClient::DELETE } )
 
             result = self.deleteHost( node )
 
@@ -144,6 +127,7 @@ module ServiceDiscovery
           }
 
         when 'refresh'
+
           logger.info( sprintf( 'refresh node %s', node ) )
 
           result = self.refreshHost( node )
@@ -154,6 +138,7 @@ module ServiceDiscovery
             }
 
         when 'info'
+
           logger.info( sprintf( 'give information for %s back', node ) )
 
           result = @redis.nodes( { :short => node } )

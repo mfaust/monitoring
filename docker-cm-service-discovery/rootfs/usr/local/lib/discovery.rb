@@ -12,6 +12,7 @@ require 'fileutils'
 
 require_relative 'logging'
 require_relative 'utils/network'
+require_relative 'cache'
 require_relative 'jolokia'
 require_relative 'message-queue'
 require_relative 'storage'
@@ -107,6 +108,8 @@ module ServiceDiscovery
     logger.info( '-----------------------------------------------------------------' )
     logger.info( '' )
 
+    @cache              = Cache::Store.new()
+
     @redis              = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
     @jolokia            = Jolokia::Client.new( { :host => jolokiaHost, :port => jolokiaPort, :path => jolokiaPath, :auth => { :user => jolokiaAuthUser, :pass => jolokiaAuthPass } } )
     @mqConsumer         = MessageQueue::Consumer.new( @MQSettings )
@@ -159,13 +162,13 @@ module ServiceDiscovery
 
     data.each do |d,v|
 
-      logger.debug( d )
+#       logger.debug( d )
 
       # merge data between discovered Services and our base configuration,
       # the dicovered ports are IMPORTANT
       if( @serviceConfig['services'][d] )
 
-        logger.debug( @serviceConfig['services'][d] )
+#         logger.debug( @serviceConfig['services'][d] )
 
         data[d].merge!( @serviceConfig['services'][d] ) { |key, port| port }
 
@@ -213,11 +216,8 @@ module ServiceDiscovery
 
     discoveryData = @redis.discoveryData( { :short => host } )
 
-    logger.debug( "#{discoveryData}" )
+    shortName     = discoveryData.dig(:short)
 
-    shortName = discoveryData.dig(:short)
-
-#    if( @db.discoveryData( { :ip => host, :short => host, :long => host } ) != nil )
     if( shortName != nil )
 
       logger.error( 'Host already created' )
@@ -244,39 +244,56 @@ module ServiceDiscovery
     # read first the prepared DNS data
     # second (if not valid data exists) create an valid entry ..
 
-    dns = @redis.dnsData( { :short => host } )
+    hostname = sprintf( 'dns-%s', host )
 
-    logger.debug( dns )
+    dns      = @cache.get( hostname )
 
-    if( dns.dig(:ip) == nil )
+#     logger.debug( dns )
 
-      # create DNS Information
-      dns      = Utils::Network.resolv( host )
+    if( dns == nil )
 
-      logger.debug( "hostResolve #{hostInfo}" )
+      dns = @redis.dnsData( { :short => host } )
 
-      ip            = hostInfo.dig(:ip)
-      shortHostName = hostInfo.dig(:short)
-      longHostName  = hostInfo.dig(:long)
+#       logger.debug( dns )
 
-      @redis.createDNS( { :ip => ip, :short => shortHostName, :long => longHostName } )
-    else
+      if( dns.dig(:ip) == nil )
 
-      ip            = dns.dig(:ip)
-      shortHostName = dns.dig(:shortname)
-      longHostName  = dns.dig(:longname)
+        # create DNS Information
+        dns      = Utils::Network.resolv( host )
+
+#         logger.debug( "hostResolve #{hostInfo}" )
+
+        ip            = hostInfo.dig(:ip)
+        shortHostName = hostInfo.dig(:short)
+        longHostName  = hostInfo.dig(:long)
+
+        @redis.createDNS( { :ip => ip, :short => shortHostName, :long => longHostName } )
+      else
+
+#         ip            = dns.dig(:ip)
+#         shortHostName = dns.dig(:shortname)
+#         longHostName  = dns.dig(:longname)
+      end
+
+      @cache.set( hostname , expiresIn: 60 ) { Cache::Data.new( { 'ip': ip, 'short': shortHostName, 'long': longHostName } ) }
+
     end
 
-#     logger.debug( sprintf( ' ip   %s ', ip ) )
-#     logger.debug( sprintf( ' host %s ', shortHostName ) )
-#     logger.debug( sprintf( ' fqdn %s ', longHostName ) )
+#     logger.debug( dns )
+
+    ip            = dns.dig(:ip)
+    shortHostName = dns.dig(:shortname)
+    longHostName  = dns.dig(:longname)
+
+    logger.debug( sprintf( ' ip   %s ', ip ) )
+    logger.debug( sprintf( ' host %s ', shortHostName ) )
+    logger.debug( sprintf( ' fqdn %s ', longHostName ) )
 
     # second, if the that we whant monitored, available
     #
     if( Utils::Network.isRunning?( ip ) == false )
 
       logger.error( 'host not running' )
-      logger.debug( hostInfo )
 
       return {
         :status  => 400,
@@ -386,77 +403,19 @@ module ServiceDiscovery
 
   def listHosts( host = nil )
 
+    logger.debug( "listHosts( #{host} )" )
+
     hosts    = Array.new()
     result   = Hash.new()
     services = Hash.new()
 
     if( host == nil )
 
-      logger.info( 'TODO - use Database insteed of File - ASAP' )
-
       nodes = @redis.nodes()
-
-#       nodes.each do |n|
-#
-#
-#       end
 
       return nodes
 
     else
-
-#       discoveryData  = @db.discoveryData( { :ip => host, :short => host } )
-#
-#       if( discoveryData == nil )
-#
-#         return {
-#           :status   => 404,
-#           :message  => 'no host found'
-#         }
-#
-#       end
-#
-#       hostServices   = discoveryData.dig( host )
-#
-#       hostServices.each do |s|
-#
-#         s.last.dig(:data).reject! { |k| k == :application }
-#
-#         services[s.first.to_sym] ||= {}
-#         services[s.first.to_sym] = s.last.dig(:data)
-#
-#       end
-#
-#       status         = @db.status( { :ip => host, :short => host } )
-#
-#       created        = status.dig( :created )
-#       created        = Time.parse( created ).strftime( '%Y-%m-%d %H:%M:%S' )
-#
-#       online         = status.dig( :status )
-#
-#       case online
-#       when 0
-#         status = 'offline'
-#       when 1
-#         status = 'online'
-#       when 98
-#         status = 'delete'
-#       when 99
-#         status = 'prepare'
-#       else
-#         status = 'unknown'
-#       end
-#
-#       result = {
-#         :status   => 200,
-#         :mode     => status,
-#         :services => services,
-#         :created  => created
-#       }
-#
-#       logger.debug( result )
-
-      # redis
 
       # create DNS Information
       hostInfo      = Utils::Network.resolv( host )
@@ -487,23 +446,21 @@ module ServiceDiscovery
 
       # BEHOLD
       #
-        for y in 1..15
+      for y in 1..15
 
-          result      = @redis.status( { :short => shortHostName } )
+        result      = @redis.status( { :short => shortHostName } )
 
-          if( result != nil )
-            status = result
-            break
-          else
-            logger.debug( sprintf( 'Waiting for data ... %d', y ) )
-            sleep( 4 )
-          end
+        if( result != nil )
+          status = result
+          break
+        else
+          logger.debug( sprintf( 'Waiting for data ... %d', y ) )
+          sleep( 4 )
         end
+      end
 
-      logger.debug( status )
+      logger.debug( JSON.pretty_generate( status ) )
 
-
-#       logger.debug( @redis.dnsData( { :ip => ip, :short => shortHostName } ) )
       created        = status.dig( :created )
 
       if( created == nil )
@@ -515,13 +472,13 @@ module ServiceDiscovery
       online         = status.dig( :status )
 
       case online
-      when 0, false
+      when Storage::RedisClient::OFFLINE, false
         status = 'offline'
-      when 1, true
+      when Storage::RedisClient::ONLINE, true
         status = 'online'
-      when 98
+      when Storage::RedisClient::DELETE
         status = 'delete'
-      when 99
+      when Storage::RedisClient::PREPARE
         status = 'prepare'
       else
         status = 'unknown'
@@ -534,106 +491,12 @@ module ServiceDiscovery
         :created  => created
       }
 
-#       logger.debug( result )
+      return result
 
     end
 
-    return result
-
-
-    # CODE are OBSOLETE
-
-#     if( host == nil )
-#
-#       data = @db.discoveryData()
-#
-#       Dir.chdir( @cacheDirectory )
-#       Dir.glob( "**" ) do |f|
-#
-#         if( FileTest.directory?( f ) )
-#           hosts.push( hostInformation( f, File.basename( f ) ) )
-#         end
-#       end
-#
-#       hosts.sort!{ |a,b| a['name'] <=> b['name'] }
-#
-#       status  = 200
-#       message = hosts
-#
-#       return {
-#         :status  => status,
-#         :hosts   => message
-#       }
-#
-#     else
-#
-#       cacheDirectory  = sprintf( '%s/%s', @cacheDirectory, host )
-#       discoveryFileName = 'discovery.json'
-#
-#       file      = sprintf( '%s/%s', cacheDirectory, discoveryFileName )
-#
-#       if( File.exist?( file ) == true )
-#
-#         data = File.read( file )
-#
-#         h              = hostInformation( file, File.basename( cacheDirectory ) )
-#         h['services' ] = JSON.parse( data )
-#
-#         status   = 200
-#         message  = h
-#         @services = h['services']
-#
-#         return {
-#           :status  => status,
-#           :hosts   => message
-#         }
-#
-#       else
-#
-#         status  = 404
-#         message = 'No discovery File found'
-#
-#         return {
-#           :status  => status,
-#           :hosts   => nil,
-#           :message => message
-#         }
-#       end
-#
-#     end
   end
 
-  # OBSOLETE
-#   def hostInformation( file, host )
-#
-#
-#     status   = isRunning?( host )
-#     age      = File.mtime( file ).strftime("%Y-%m-%d %H:%M:%S")
-#     services = Hash.new()
-#
-#     if( file != host )
-#
-#       data   = JSON.parse( File.read( file ) )
-#
-#       data.each do |d,v|
-#
-#         services[d.to_s] ||= {}
-#         services[d.to_s] = {
-#           :port        => v['port'],
-#           :description => v['description']
-#         }
-#       end
-#     end
-#
-#     return {
-#       host => {
-#         :status   => status ? 'online' : 'offline',
-#         :services => services,
-#         :created  => age
-#       }
-#     }
-#
-#   end
 
 end
 
