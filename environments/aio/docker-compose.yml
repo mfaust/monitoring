@@ -27,7 +27,7 @@ services:
 
   dnsdock:
     restart: always
-    image: bodsch/docker-dnsdock:1704-01
+    image: bodsch/docker-dnsdock:1705-01
     container_name: dnsdock
     hostname: dnsdock
     labels:
@@ -45,7 +45,7 @@ services:
 
   beanstalkd:
     restart: always
-    image: bodsch/docker-beanstalkd:1704-01
+    image: bodsch/docker-beanstalkd:1705-01
     container_name: beanstalkd
     hostname: beanstalkd
     labels:
@@ -59,7 +59,7 @@ services:
 
   database:
     restart: always
-    image: bodsch/docker-mysql:1704-01
+    image: bodsch/docker-mysql:1705-01
     container_name: database
     hostname: database
     labels:
@@ -110,7 +110,7 @@ services:
 
   redis:
     restart: always
-    image: bodsch/docker-redis:1704-01
+    image: bodsch/docker-redis:1705-01
     container_name: redis
     hostname: redis
     labels:
@@ -126,7 +126,7 @@ services:
 
   nginx:
     restart: always
-    image: bodsch/docker-nginx:1704-01
+    image: bodsch/docker-nginx:1705-01
     container_name: nginx
     hostname: nginx
     labels:
@@ -163,7 +163,7 @@ services:
 
   carbon:
     restart: always
-    image: bodsch/docker-go-carbon:1704-01
+    image: bodsch/docker-go-carbon:1705-01
     container_name: carbon
     hostname: carbon
     labels:
@@ -184,7 +184,7 @@ services:
 
   graphite:
     restart: always
-    image: bodsch/docker-graphite:1704-02
+    image: bodsch/docker-graphite:1705-01
     container_name: graphite
     hostname: graphite
     labels:
@@ -205,7 +205,7 @@ services:
 
   grafana:
     restart: always
-    image: bodsch/docker-grafana:1704-01
+    image: bodsch/docker-grafana:1705-01
     container_name: grafana
     hostname: grafana
     labels:
@@ -233,7 +233,7 @@ services:
 
   icinga2-master:
     restart: always
-    image: bodsch/docker-icinga2:1704-03
+    image: bodsch/docker-icinga2:1705-01
     container_name: icinga2-master
     hostname: icinga2-master
     labels:
@@ -275,7 +275,7 @@ services:
 
   icingaweb2:
     restart: always
-    image: bodsch/docker-icingaweb2:1704-02
+    image: bodsch/docker-icingaweb2:1705-01
     container_name: icingaweb2
     hostname: icingaweb2
     labels:
