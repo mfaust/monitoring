@@ -1,6 +1,6 @@
 #!/bin/bash
 
-HOST="monitoring-16-01.coremedia.vm"
+HOST="master-17-tomcat.coremedia.vm"
 
 rm -v *.urls
 
@@ -11,7 +11,7 @@ getUrls() {
   lynx -force_secure -dump -listonly http://${base} | grep "http://${base}" | awk -F' ' '{print $2}' | grep -v LYNXIMGMAP | grep -v "coremedia.vm:4" | sort | uniq >> ${HOST}.urls
 }
 
-for i in helios.monitoring-16-01.coremedia.vm preview-helios.monitoring-16-01.coremedia.vm/perfectchef-de-de 
+for i in preview.${HOST}/corporate-de-de preview.${HOST}/corporate shop-helios.${HOST}/webapp/wcs/stores/servlet/en/aurorab2besite shop-preview-production-helios.${HOST}/webapp/wcs/stores/servlet/en/auroraesite
 do
   getUrls $i
 done
