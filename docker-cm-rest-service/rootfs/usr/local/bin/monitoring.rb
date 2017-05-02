@@ -79,82 +79,90 @@ class Monitoring
     result  = Hash.new()
     nodes   = @redis.nodes()
 
-    logger.debug( nodes )
+#     logger.debug( nodes )
 
-    if( nodes.count != 0 )
+    if( nodes.is_a?( Hash ) || nodes.is_a?( Array ) )
 
-      if( nodes.is_a?( Hash ) )
-        nodes = nodes.keys
+      if( nodes.count != 0 )
+
+        if( nodes.is_a?( Hash ) )
+          nodes = nodes.keys
+        end
+
+        nodes.each do |n|
+
+#           logger.debug( n )
+
+          hostData = self.checkAvailablility?( n )
+
+          if( hostData == false )
+
+            result = {
+              :status  => 400,
+              :message => 'Host are not available (DNS Problem)'
+            }
+
+            logger.warn( result )
+
+            next
+          end
+
+          result[n.to_s] ||= {}
+          result[n.to_s][:dns] ||= {}
+          result[n.to_s][:dns] = hostData
+
+          hostConfiguration = self.getHostConfiguration( n )
+
+          if( hostConfiguration != nil )
+            hostConfigurationStatus  = hostConfiguration.dig(:status)  || 204
+            hostConfigurationMessage = hostConfiguration.dig(:message)
+          end
+
+          if( hostConfigurationStatus == 200 )
+            result[n.to_s][:custom_config] = hostConfigurationMessage
+          end
+
+          # get data from external services
+          self.messageQueue( { :cmd => 'info', :node => n, :queue => 'mq-icinga'  , :payload => {} } )
+          self.messageQueue( { :cmd => 'info', :node => n, :queue => 'mq-grafana' , :payload => {}, :ttr => 1, :delay => 0 } )
+          self.messageQueue( { :cmd => 'info', :node => n, :queue => 'mq-discover', :payload => {}, :ttr => 1, :delay => 0 } )
+
+          sleep( 8 )
+
+          resultArray = Array.new()
+          threads     = Array.new()
+
+          discoveryStatus = @mqConsumer.getJobFromTube( 'mq-discover-info', true )
+          grafanaStatus   = @mqConsumer.getJobFromTube( 'mq-grafana-info', true )
+          icingaStatus    = @mqConsumer.getJobFromTube( 'mq-icinga-info', true )
+
+          if( discoveryStatus )
+            discoveryStatus = discoveryStatus.dig( :body, 'payload' ) || {}
+            result[n.to_s][:discovery] ||= {}
+            result[n.to_s][:discovery] = discoveryStatus
+          end
+
+          if( grafanaStatus )
+            grafanaStatus = grafanaStatus.dig( :body, 'payload' ) || {}
+            result[n.to_s][:grafana] ||= {}
+            result[n.to_s][:grafana] = grafanaStatus
+          end
+
+          if( icingaStatus )
+            icingaStatus = icingaStatus.dig( :body, 'payload' ) || {}
+            result[n.to_s][:icinga] ||= {}
+            result[n.to_s][:icinga] = icingaStatus
+          end
+
+        end
+
+        @cache.set( 'information' , expiresIn: 320 ) { Cache::Data.new( result ) }
+
       end
 
-      nodes.each do |n|
+    else
 
-        logger.debug( n )
-
-        hostData = self.checkAvailablility?( n )
-
-        if( hostData == false )
-
-          result = {
-            :status  => 400,
-            :message => 'Host are not available (DNS Problem)'
-          }
-
-          logger.warn( result )
-
-          next
-        end
-
-        result[n.to_s] ||= {}
-        result[n.to_s][:dns] ||= {}
-        result[n.to_s][:dns] = hostData
-
-        hostConfiguration = self.getHostConfiguration( n )
-
-        if( hostConfiguration != nil )
-          hostConfigurationStatus  = hostConfiguration.dig(:status)  || 204
-          hostConfigurationMessage = hostConfiguration.dig(:message)
-        end
-
-        if( hostConfigurationStatus == 200 )
-          result[n.to_s][:custom_config] = hostConfigurationMessage
-        end
-
-        # get data from external services
-        self.messageQueue( { :cmd => 'info', :node => n, :queue => 'mq-icinga'  , :payload => {} } )
-        self.messageQueue( { :cmd => 'info', :node => n, :queue => 'mq-grafana' , :payload => {}, :ttr => 1, :delay => 0 } )
-        self.messageQueue( { :cmd => 'info', :node => n, :queue => 'mq-discover', :payload => {}, :ttr => 1, :delay => 0 } )
-
-        sleep( 8 )
-
-        resultArray = Array.new()
-        threads     = Array.new()
-
-        discoveryStatus = @mqConsumer.getJobFromTube( 'mq-discover-info', true )
-        grafanaStatus   = @mqConsumer.getJobFromTube( 'mq-grafana-info', true )
-        icingaStatus    = @mqConsumer.getJobFromTube( 'mq-icinga-info', true )
-
-        if( discoveryStatus )
-          discoveryStatus = discoveryStatus.dig( :body, 'payload' ) || {}
-          result[n.to_s][:discovery] ||= {}
-          result[n.to_s][:discovery] = discoveryStatus
-        end
-
-        if( grafanaStatus )
-          grafanaStatus = grafanaStatus.dig( :body, 'payload' ) || {}
-          result[n.to_s][:grafana] ||= {}
-          result[n.to_s][:grafana] = grafanaStatus
-        end
-
-        if( icingaStatus )
-          icingaStatus = icingaStatus.dig( :body, 'payload' ) || {}
-          result[n.to_s][:icinga] ||= {}
-          result[n.to_s][:icinga] = icingaStatus
-        end
-
-      end
-
-      @cache.set( 'information' , expiresIn: 320 ) { Cache::Data.new( result ) }
+      logger.debug( 'no nodes found' )
 
     end
 
@@ -333,12 +341,12 @@ class Monitoring
 
     logger.debug( sprintf( 'addHost( \'%s\', \'%s\' )', host, payload ) )
 
-    logger.info( sprintf( 'add node \'%s\' to monitoring', host ) )
-
     result    = Hash.new()
     hash      = Hash.new()
 
     if( host.to_s != '' )
+
+      logger.info( sprintf( 'add node \'%s\' to monitoring', host ) )
 
       hostData = self.checkAvailablility?( host )
 
@@ -466,23 +474,16 @@ class Monitoring
         discoveryStatus  = nil
         discoveryPayload = nil
 
-#         discoveryStatus  = c.getJobFromTube('mq-discover-info')
-#         discoveryPayload = discoveryStatus.dig( :body, 'payload' )
-
         for y in 1..30
 
           result      = @mqConsumer.getJobFromTube('mq-discover-info')
-
-          logger.debug( result.class.to_s )
-          logger.debug( result.count )
-          logger.debug( result )
 
           if( result != nil && result.count != 0 )
             discoveryStatus = result
             break
           else
             logger.debug( sprintf( 'Waiting for data %s ... %d', 'mq-discover-info', y ) )
-            sleep( 4 )
+            sleep( 5 )
           end
         end
 
@@ -536,8 +537,6 @@ class Monitoring
         self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-icinga', :payload => discoveryPayload, :prio => 10, :ttr => 15, :delay => 10 } )
       end
 
-
-
       discoveryResult = {
         :status  => 200,
         :message => 'send to MQ'
@@ -549,7 +548,10 @@ class Monitoring
       result[host.to_sym][:discovery] ||= {}
       result[host.to_sym][:discovery] = discoveryResult
 
-      logger.debug( JSON.pretty_generate( discoveryResult ) )
+#      logger.debug( JSON.pretty_generate( discoveryResult ) )
+#      logger.debug( JSON.pretty_generate( result ) )
+
+      self.createNodeInformation()
 
       return JSON.pretty_generate( discoveryResult )
 
@@ -570,6 +572,16 @@ class Monitoring
     result  = Hash.new()
     cache   = @cache.get( 'information' )
 
+    if( cache == nil )
+
+      result = {
+        :status  => 204,
+        :message => 'no host in monitoring found'
+      }
+
+      return JSON.pretty_generate( result )
+    end
+
     if( host.to_s != '' )
 
       result[host.to_s] ||= {}
@@ -587,7 +599,7 @@ class Monitoring
 
     end
 
-    result[:status] = 200
+    result[:status] = status
 
     return JSON.pretty_generate( result )
 
