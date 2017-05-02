@@ -126,6 +126,9 @@ module Storage
     #
     def createDNS( params = {} )
 
+#       logger.debug( "createDNS( #{params} )" )
+#       logger.debug( caller )
+
       if( self.checkDatabase() == false )
         return false
       end
@@ -136,13 +139,25 @@ module Storage
 
       cachekey = Storage::RedisClient.cacheKey( { :short => short } )
 
+      dns = @redis.get( sprintf( '%s-dns', cachekey ) )
+
+      if( dns != nil )
+
+        logger.warn( 'DNS Entry already created:' )
+        logger.warn( dns )
+
+        return
+      end
+
       toStore = { ip: ip, shortname: short, longname: long, created: DateTime.now() }.to_json
 
       @redis.set( sprintf( '%s-dns', cachekey ), toStore )
 
-      self.setStatus( { :short => short, :status => 99 } )
+#       self.setStatus( { :short => short, :status => Storage::RedisClient::PREPARE } )
 
       self.addNode( { :short => short, :key => cachekey } )
+
+#       self.setStatus( { :short => short, :status => Storage::RedisClient::ONLINE } )
 
     end
 
@@ -157,7 +172,7 @@ module Storage
 
       cachekey = Storage::RedisClient.cacheKey( { :short => short } )
 
-      self.setStatus( { :short => short, :status => 99 } )
+      self.setStatus( { :short => short, :status => Storage::RedisClient::DELETE } )
 
       keys = [
         sprintf( '%s-measurements', cachekey ),
@@ -425,6 +440,8 @@ module Storage
 
       result = @redis.get( cachekey )
 
+#       logger.debug( result )
+
       if( result == nil )
         return { :short => nil }
       end
@@ -581,7 +598,7 @@ module Storage
 
       short  = params.dig(:short)
 
-      logger.debug( params )
+#       logger.debug( params )
 
       cachekey = 'nodes'
 
@@ -601,7 +618,7 @@ module Storage
 
       toStore = { data: data }.to_json
 
-      logger.debug( toStore )
+#       logger.debug( toStore )
 
       @redis.set( cachekey, toStore )
 
@@ -625,6 +642,10 @@ module Storage
 
       result    = @redis.get( cachekey )
 
+      if( result == nil )
+        return false
+      end
+
       if( result.is_a?( String ) )
         result = JSON.parse( result )
       end
@@ -639,7 +660,13 @@ module Storage
 
       if( status != nil )
 
-        keys   = result.dig('data').values
+        keys   = result.dig('data')
+
+        if( keys != nil )
+          keys = keys.values
+        else
+          return false
+        end
 
         result = Hash.new()
 
@@ -682,6 +709,9 @@ module Storage
     #
     def setStatus( params = {} )
 
+#       logger.debug( "setStatus( #{params} )" )
+#       logger.debug( caller )
+
       if( self.checkDatabase() == false )
         return false
       end
@@ -720,12 +750,16 @@ module Storage
       result['status'] = status
       result = result.to_json
 
+#       logger.debug( result )
+
       @redis.set( cachekey, result )
 
     end
 
 
     def status( params = {} )
+
+#       logger.debug( "status( #{params} )" )
 
       if( self.checkDatabase() == false )
         return false
@@ -755,6 +789,8 @@ module Storage
       if( result.is_a?( String ) )
         result = JSON.parse( result )
       end
+
+#       logger.debug( result )
 
       status   = result.dig( 'status' ) || 0
       created  = result.dig( 'created' )
@@ -786,13 +822,13 @@ module Storage
     #
     # -- status ---------------------------------
 
-    def parsedResponse( r )
-
-      return JSON.parse( r )
-    rescue JSON::ParserError => e
-      return r # do smth
-
-    end
+#     def parsedResponse( r )
+#
+#       return JSON.parse( r )
+#     rescue JSON::ParserError => e
+#       return r # do smth
+#
+#     end
 
   end
 
