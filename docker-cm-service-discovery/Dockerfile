@@ -9,9 +9,9 @@ ENV \
   TERM=xterm \
   APK_ADD="build-base bind-tools drill imagemagick-dev ruby-dev ruby-io-console ruby-rdoc" \
   APK_DEL="build-base imagemagick-dev ruby-dev ruby-io-console zlib-dev" \
-  GEMS="beaneater filesize ipaddress redis resolve-hostname rufus-scheduler tzinfo-data"
+  GEMS="beaneater filesize ipaddress redis resolve-hostname rufus-scheduler semantic_logger tzinfo-data"
 
-LABEL version="1704-03.1"
+LABEL version="1705-01.2"
 
 # ---------------------------------------------------------------------------------------
 
