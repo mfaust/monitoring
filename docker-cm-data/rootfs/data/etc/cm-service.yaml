@@ -21,6 +21,16 @@ services:
     description: Resourced
     port: 55555
 
+  solr:
+    description: Solr
+    port: 40099
+    cores:
+    - live
+    - preview
+    - studio
+    application:
+    - solr
+
   solr-master:
     description: Solr Master
     port: 40099

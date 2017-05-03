@@ -1,6 +1,7 @@
 #!/usr/bin/ruby
 
 require 'logger'
+require 'semantic_logger'
 
 # -------------------------------------------------------------------------------------------------
 
@@ -14,6 +15,7 @@ module Logging
   @loggers = {}
 
   class << self
+
     def logger_for( classname )
       @loggers[classname] ||= configure_logger_for( classname )
     end

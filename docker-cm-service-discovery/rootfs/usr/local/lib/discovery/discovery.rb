@@ -116,11 +116,11 @@ module ServiceDiscovery
 
               if( value != nil )
 
-                logger.debug( 'parse runtime::value' )
+#                 logger.debug( 'parse runtime::value' )
 
                 classPath  = value.dig('ClassPath')
 
-                logger.debug( "found classPath: #{classPath}" )
+#                 logger.debug( "found classPath: #{classPath}" )
 
                 if( classPath.include?( 'cm7-tomcat-installation' ) )
 
@@ -147,7 +147,7 @@ module ServiceDiscovery
                     end
                   end
 
-                  logger.debug( services )
+#                   logger.debug( services )
 
                   # coremedia = cms, mls, rls?
                   # caefeeder = caefeeder-preview, cae-feeder-live?
@@ -208,6 +208,11 @@ module ServiceDiscovery
                       logger.error( sprintf( 'response status %d', engine['status'].to_i ) )
                     end
                   end
+
+                # Solr 6 Support
+                elsif( classPath.include?( 'solr-6' ) )
+
+                  services.push( 'solr' )
 
                 # cm160x - or all others
                 else
