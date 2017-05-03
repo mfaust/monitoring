@@ -36,7 +36,7 @@ module ServiceDiscovery
       if( data.count != 0 )
 
         logger.info( sprintf( 'process Message from Queue %s: %d', data.dig(:tube), data.dig(:id) ) )
-        logger.debug( data )
+#         logger.debug( data )
 
         command = data.dig( :body, 'cmd' )     || nil
         node    = data.dig( :body, 'node' )    || nil
@@ -71,9 +71,7 @@ module ServiceDiscovery
           # TODO
           # check payload!
           # e.g. for 'force' ...
-          result = self.addHost( node, payload )
-
-          logger.debug( result )
+          result  = self.addHost( node, payload )
 
           status  = result.dig(:status)
           message = result.dig(:message)
@@ -112,8 +110,6 @@ module ServiceDiscovery
 
             self.sendMessage( { :cmd => command, :queue => 'mq-collector', :payload => { :host => node, :pre => 'prepare' }, :ttr => 1, :delay => 0 } )
 
-#             @redis.setStatus( { :short => node, :status => Storage::RedisClient::DELETE } )
-
             result = self.deleteHost( node )
 
           rescue => e
@@ -143,8 +139,6 @@ module ServiceDiscovery
 
           result = @redis.nodes( { :short => node } )
 
-#           nodeExists = result.count != 0 ? true : false
-
           if( result.to_s != node.to_s )
 
             logger.info( 'node are not in database found' )
@@ -159,8 +153,6 @@ module ServiceDiscovery
           end
 
           result = self.listHosts( node )
-
-          logger.debug( result )
 
           self.sendMessage( { :cmd => 'info', :queue => 'mq-discover-info', :payload => result, :ttr => 1, :delay => 0 } )
 
@@ -186,7 +178,7 @@ module ServiceDiscovery
 
         result[:request]    = data
 
-        logger.debug( result )
+#        logger.debug( result )
 
       end
 

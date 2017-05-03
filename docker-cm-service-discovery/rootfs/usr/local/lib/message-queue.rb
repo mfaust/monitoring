@@ -59,17 +59,8 @@ module MessageQueue
     # @return [Hash,#read]
     def addJob( tube, job = {}, prio = 65536, ttr = 10, delay = 2 )
 
-#       logger.debug( sprintf( 'addJob( %s, job = {}, %s, %s, %s )', tube, prio, ttr, delay ) )
-
       if( @b )
-
-#         logger.debug( "add job to tube #{tube}" )
-#         logger.debug( job )
-
-#        tube = @b.use( tube.to_s )
         response = @b.tubes[ tube.to_s ].put( job , :prio => prio, :ttr => ttr, :delay => delay )
-
-#         logger.debug( response )
       end
 
     end
@@ -156,7 +147,6 @@ module MessageQueue
       if( @b )
 
         stats = self.tubeStatistics( tube )
-#         logger.debug( stats )
 
         if( stats.dig( :ready ) == 0 )
           return result
@@ -201,8 +191,6 @@ module MessageQueue
 
     def releaseBuriedJobs( tube )
 
-#       logger.debug( sprintf( "releaseBuriedJobs( #{tube} )" ) )
-
       if( @b )
 
         tube = @b.tubes.find( tube.to_s )
@@ -216,23 +204,12 @@ module MessageQueue
           tube.kick(1)
         end
 
-#         while( job = tube.peek( :buried ) )
-#
-# #           logger.debug( job.stats )
-#
-#           response = job.kick()
-#
-# #           logger.debug( response )
-#         end
-
       end
 
     end
 
 
     def deleteJob( tube, id )
-
-#       logger.debug( sprintf( "deleteJob( #{tube}, #{id} )" ) )
 
       if( @b )
 
@@ -249,8 +226,6 @@ module MessageQueue
 
 
     def buryJob( tube, id )
-
-#       logger.debug( sprintf( "buryJob( #{tube}, #{id} )" ) )
 
       if( @b )
 
