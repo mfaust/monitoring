@@ -77,8 +77,26 @@ class Monitoring
     logger.debug( 'create node information ...' )
 
     result  = Hash.new()
-    nodes   = @redis.nodes()
 
+    status  = @redis.nodes( { :status => Storage::RedisClient::OFFLINE } )
+
+    logger.debug( status )
+
+    # remove offline nodes
+    if( status.count != 0 )
+
+      status = status.keys
+
+      status.each do |node|
+
+        logger.info( sprintf( 'delete offline node %s', node ) )
+
+        @redis.removeDNS( { :short => node } )
+      end
+
+    end
+
+    nodes   = @redis.nodes()
 #     logger.debug( nodes )
 
     if( nodes.is_a?( Hash ) || nodes.is_a?( Array ) )
@@ -647,6 +665,9 @@ class Monitoring
         annotation      = hash.keys.include?('annotation') ? hash['annotation'] : true
       end
 
+      logger.debug( 'set node status to OFFLINE' )
+      @redis.setStatus( { :short => node, :status => Storage::RedisClient::OFFLINE } )
+
         logger.debug( sprintf( 'force      : %s', force            ? 'true' : 'false' ) )
         logger.debug( sprintf( 'discovery  : %s', enableDiscovery  ? 'true' : 'false' ) )
         logger.debug( sprintf( 'grafana    : %s', enabledGrafana   ? 'true' : 'false' ) )
@@ -686,6 +707,10 @@ class Monitoring
         :status  => 200,
         :message => 'send to MQ'
       }
+
+      sleep(4)
+
+      self.createNodeInformation()
 
       result[host.to_sym][:discovery] = discoveryResult
 

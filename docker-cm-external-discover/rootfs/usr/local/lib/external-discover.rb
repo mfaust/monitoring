@@ -233,8 +233,7 @@ logger.debug( responseBody )
       )
 
       payload = {
-        "grafana" => true,
-        "icinga2" => true
+        "force" => true
       }
 
       begin
@@ -347,13 +346,13 @@ logger.debug( responseBody )
       removedEntriesCount   = removedEntries.count
 
       logger.info( sprintf( 'live Data holds %d entries'    , liveDataCount ) )
-#       logger.debug( "  #{liveData}" )
+      logger.debug( "  #{liveData}" )
       logger.info( sprintf( 'historic Data holds %d entries', historicDataCount ) )
-#       logger.debug( "  #{historicData}" )
+      logger.debug( "  #{historicData}" )
       logger.info( sprintf( 'identical entries %d'          , identicalEntriesCount ) )
-#       logger.debug(  "  #{identicalEntries}" )
+      logger.debug(  "  #{identicalEntries}" )
       logger.info( sprintf( 'removed entries %d'            , removedEntriesCount ) )
-#       logger.debug(  "  #{removedEntries}" )
+      logger.debug(  "  #{removedEntries}" )
 
       logger.debug( '------------------------------------------------------------' )
 
@@ -400,10 +399,15 @@ logger.debug( responseBody )
 
         liveData.each do |l|
 
-          ip      = l["ip"]      ? l["ip"]      : nil
-          name    = l["name"]    ? l["name"]    : nil
-          state   = l["state"]   ? l["state"]   : 'running'
-          tags    = l["tags"]    ? l["tags"]    : []
+          ip      = l.dig('ip')
+          name    = l.dig('name')
+          state   = l.dig('state') || 'running'
+          tags    = l.dig('tags')  || []
+
+          if( name == nil )
+            logger.warn( 'no cname configured, skip' )
+            next
+          end
 
           # states from AWS:
           #  0 : pending
@@ -424,39 +428,39 @@ logger.debug( responseBody )
 
           if( result != nil )
 
-            logger.debug( result )
-
-            status = result.dig('status')
+            status = result.dig('status') || 400
 
             if( status.to_i == 200 )
               logger.info( 'node are in monitoring available' )
               next
             end
 
-            dnsStatus  = result.dig( ip, 'dns' )
+            discoveryStatus = 204
 
-            # check DNS resolving
-            if( dnsStatus == false )
-              logger.debug( '  DNS Problem! try IP' )
-              secondTest = net.fetch( ip )
-              if( secondTest != nil )
-                dnsStatus  = secondTest.dig( ip, 'dns' )
-                if( dnsStatus == false || dnsStatus == nil )
-                  logger.error( '  Host are not available. skip' )
-                  next
-                else
-                  result = secondTest
-                  name   = ip
-                end
-              end
-            else
-              name  = ip
-            end
-
-            discoveryStatus  = result.dig( name, 'discovery', 'status' )
-
-            logger.debug( discoveryStatus )
-            logger.debug( discoveryStatus.class.to_s )
+#             dnsStatus  = result.dig( ip, 'dns' )
+#
+#             # check DNS resolving
+#             if( dnsStatus == false )
+#               logger.debug( '  DNS Problem! try IP' )
+#               secondTest = net.fetch( ip )
+#               if( secondTest != nil )
+#                 dnsStatus  = secondTest.dig( ip, 'dns' )
+#                 if( dnsStatus == false || dnsStatus == nil )
+#                   logger.error( '  Host are not available. skip' )
+#                   next
+#                 else
+#                   result = secondTest
+#                   name   = ip
+#                 end
+#               end
+#             else
+#               name  = ip
+#             end
+#
+#             discoveryStatus  = result.dig( name, 'discovery', 'status' )
+#
+#             logger.debug( discoveryStatus )
+#             logger.debug( discoveryStatus.class.to_s )
 
             # {"status"=>400, "message"=>"Host are not available (DNS Problem)"}
             if( discoveryStatus == 400 )
@@ -471,7 +475,7 @@ logger.debug( responseBody )
               logger.debug( "tags: #{tags}" )
 
               # our positive list for Tags
-              useableTags = tags.filter( :customer, :environment, :tier )
+              useableTags = tags.filter( 'customer', 'environment', 'tier' )
 
               logger.debug( "useableTags: #{useableTags}" )
 
@@ -510,6 +514,8 @@ logger.debug( responseBody )
                   # successful
                   newArray << l
                 end
+
+                sleep(2)
 
               end
 
