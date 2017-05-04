@@ -12,6 +12,8 @@ require 'rest-client'
 
 require_relative 'monkey'
 require_relative 'logging'
+require_relative 'cache'
+require_relative 'utils/network'
 
 # -----------------------------------------------------------------------------
 
@@ -313,6 +315,43 @@ logger.debug( responseBody )
     end
 
 
+
+    def nsLookup( name )
+
+          # DNS
+          #
+          hostname = sprintf( 'dns-%s', name )
+
+          dns      = @cache.get( hostname )
+
+          logger.debug( dns )
+
+          if( dns == nil )
+
+            # create DNS Information
+            dns      = Utils::Network.resolv( ip )
+
+            ip    = dns.dig(:ip)
+            short = dns.dig(:short)
+            fqdn  = dns.dig(:long)
+
+            @cache.set( hostname , expiresIn: 120 ) { Cache::Data.new( { 'ip': ip, 'short': short, 'long': fqdn } ) }
+
+          else
+
+            ip    = dns.dig(:ip)
+            short = dns.dig(:short)
+            fqdn  = dns.dig(:long)
+
+          end
+          #
+          # ------------------------------------------------
+
+      return ip, short, fqdn
+
+    end
+
+
     def compareVersions()
 
       logger.debug( 'compare' )
@@ -399,12 +438,12 @@ logger.debug( responseBody )
 
         liveData.each do |l|
 
-          ip      = l.dig('ip')
-          name    = l.dig('name')
-          state   = l.dig('state') || 'running'
-          tags    = l.dig('tags')  || []
+          ip          = l.dig('ip')
+          displayName = l.dig('name')
+          state       = l.dig('state') || 'running'
+          tags        = l.dig('tags')  || []
 
-          if( name == nil )
+          if( displayName == nil )
             logger.warn( 'no cname configured, skip' )
             next
           end
@@ -435,16 +474,36 @@ logger.debug( responseBody )
               next
             end
 
-            discoveryStatus = 204
+            if( status.to_i == 204 )
 
+              discoveryStatus == status
+
+              ip, short, fqdn = self.nsLookup( ip )
+
+              if( ip != nil )
+                name = ip
+              else
+                discoveryStatus = 400
+              end
+            end
+
+#             discoveryStatus = 204
+#
 #             dnsStatus  = result.dig( ip, 'dns' )
 #
 #             # check DNS resolving
-#             if( dnsStatus == false )
-#               logger.debug( '  DNS Problem! try IP' )
+#             if( dnsStatus == false || dnsStatus == nil )
+#
+#               logger.debug( '  DNS Problem! try own ns lookup' )
+#
+#               ip, short, fqdn = self.nsLookup(ip )
+#
 #               secondTest = net.fetch( ip )
+#
 #               if( secondTest != nil )
+#
 #                 dnsStatus  = secondTest.dig( ip, 'dns' )
+#
 #                 if( dnsStatus == false || dnsStatus == nil )
 #                   logger.error( '  Host are not available. skip' )
 #                   next
@@ -487,7 +546,7 @@ logger.debug( responseBody )
               # - annotation = true
               d = JSON.generate( {
                 :tags       => useableTags,
-                :config     => { 'display-name' => name }
+                :config     => { 'display-name' => displayName }
               } )
 
               logger.debug( "data: #{d}" )
