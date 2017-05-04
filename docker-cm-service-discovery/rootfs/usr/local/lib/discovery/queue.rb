@@ -210,8 +210,8 @@ module ServiceDiscovery
 
       result = p.addJob( queue, job, ttr, delay )
 
-      logger.debug( job )
-      logger.debug( result )
+#       logger.debug( job )
+#       logger.debug( result )
 
     end
 

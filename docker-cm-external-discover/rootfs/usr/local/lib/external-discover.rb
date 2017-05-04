@@ -8,7 +8,6 @@
 # -----------------------------------------------------------------------------
 
 require 'json'
-require 'dalli'
 require 'rest-client'
 
 require_relative 'monkey'
@@ -26,9 +25,9 @@ module ExternalDiscovery
 
     def initialize( settings )
 
-      discoveryHost      = settings[:discoveryHost] ? settings[:discoveryHost] : nil
-      discoveryPort      = settings[:discoveryPort] ? settings[:discoveryPort] : nil
-      discoveryPath      = settings[:discoveryPath] ? settings[:discoveryPath] : nil
+      discoveryHost      = settings.dig(:discoveryHost)
+      discoveryPort      = settings.dig(:discoveryPort)
+      discoveryPath      = settings.dig(:discoveryPath)
 
       @discoveryUrl      = sprintf( 'http://%s:%d%s', discoveryHost, discoveryPort, discoveryPath )
 
@@ -43,7 +42,9 @@ module ExternalDiscovery
 
       @data = @mutex.synchronize { self.client() }
 
-      return @data # @mc.set( 'consumer__live__data' , @data )
+      logger.debug( @data )
+
+      return @data
 
     end
 
@@ -57,7 +58,9 @@ module ExternalDiscovery
       response = nil
 
       begin
+
         Net::HTTP.start( uri.host, uri.port ) do |http|
+
           request = Net::HTTP::Get.new( uri.request_uri )
 
           request.add_field('Content-Type', 'application/json')
@@ -81,14 +84,23 @@ module ExternalDiscovery
             # 412 – Precondition failed
             logger.error( sprintf( ' [%s] ', responseCode ) )
             logger.error( sprintf( '  %s  ', response.body ) )
+
+            return {
+              :status  => responseCode,
+              :message => response.body
+            }
           end
         end
       rescue Exception => e
-        logger.error( e )
-        logger.error( e.backtrace )
+#         logger.error( e )
+#         logger.error( e.backtrace )
 
-        status  = 404
         message = sprintf( 'internal error: %s', e )
+
+        return {
+          :status  => 404,
+          :message => message
+        }
       end
 
     end
@@ -287,7 +299,12 @@ module ExternalDiscovery
       logger.debug( 'compare' )
 
       liveData     = @data
-      historicData = @historic # @mc.get( 'consumer__historic__data' ) || []
+      historicData = @historic
+
+      logger.debug( liveData )
+      logger.debug( liveData.class.to_s )
+      logger.debug( historicData )
+      logger.debug( historicData.class.to_s )
 
       if( liveData.is_a?( Array ) == false )
         logger.error( 'liveData is not an Array' )
@@ -383,7 +400,18 @@ module ExternalDiscovery
           # get node data
           result = net.fetch( ip )
 
+          logger.debug( result )
+
           if( result != nil )
+
+            logger.debug( result )
+
+            status = result.dig('status')
+
+            if( status.to_i == 200 )
+              logger.info( 'node are in monitoring available' )
+              next
+            end
 
             dnsStatus  = result.dig( ip, 'dns' )
 
@@ -402,7 +430,7 @@ module ExternalDiscovery
                 end
               end
             else
-              name   = ip
+              name  = ip
             end
 
             discoveryStatus  = result.dig( name, 'discovery', 'status' )
@@ -413,24 +441,29 @@ module ExternalDiscovery
               next
 
             # not exists
-            elsif( discoveryStatus == 404 )
+            elsif( discoveryStatus == nil || discoveryStatus == 204 || discoveryStatus == 404 )
 
               logger.info( '  host not in monitoring ... try to add' )
+
+              logger.debug( "tags: #{tags}" )
 
               # our positive list for Tags
               useableTags = tags.filter( :customer, :environment, :tier )
 
-#               logger.debug( useableTags )
+              logger.debug( "useableTags: #{useableTags}" )
 
               # add to monitoring
+              # defaults:
+              # - discovery  = true
+              # - icinga     = true
+              # - grafana    = true
+              # - annotation = true
               d = JSON.generate( {
-                :discovery  => true,
-                :icinga     => false,
-                :grafana    => true,
-                :annotation => true,
                 :tags       => useableTags,
                 :config     => { 'display-name' => name }
               } )
+
+              logger.debug( "data: #{d}" )
 
               result = net.add( name, d )
 
@@ -465,7 +498,6 @@ module ExternalDiscovery
         logger.debug( newArray )
 
         @historic = newArray
-#         @mc.set( 'consumer__historic__data', newArray )
       end
 
 

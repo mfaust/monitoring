@@ -169,7 +169,8 @@ class Monitoring
   end
 
 
-
+  # check availability and create an DNS entry into our redis
+  #
   def checkAvailablility?( host )
 
     hostInfo      = Utils::Network.resolv( host )
@@ -178,11 +179,13 @@ class Monitoring
     shortHostName = hostInfo.dig(:short)
     longHostName  = hostInfo.dig(:long)
 
-#    logger.debug( JSON.pretty_generate( hostInfo ) )
+    logger.debug( JSON.pretty_generate( hostInfo ) )
 
     if( ip == nil || shortHostName == nil )
       return false
     else
+
+      logger.debug( 'create DNS Entry' )
 
       @redis.createDNS( { :ip => ip, :short => shortHostName, :long => longHostName } )
 

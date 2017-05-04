@@ -20,33 +20,11 @@ Short description of the REST API
       json_reformat
 
 
-  - Add customized configuration (eg. Ports)
-    curl \
-      --silent \
-      --request POST \
-      --data '{ "ports": [3306,9100,28017] }' \
-      http://localhost/api/v2/config/${HOSTNAME} | \
-      json_reformat
-
-  - List custom configuration
-    curl \
-      --silent \
-      http://localhost/api/v2/config/${HOSTNAME} | \
-      json_reformat
-
-  - Delete custom configuration
-    curl \
-      --silent \
-      --request DELETE \
-      http://localhost/api/v2/config/${HOSTNAME} | \
-      json_reformat
-
-
   - Adding a Host to monitoring
     curl \
       --silent \
       --request POST \
-      --data '{ "force": true }' \
+      --data '' \
       http://localhost/api/v2/host/${HOSTNAME} | \
       json_reformat
 
@@ -54,7 +32,6 @@ Short description of the REST API
     curl \
       --silent \
       --request DELETE \
-      --data '{ "grafana": true }' \
       http://localhost/api/v2/host/${HOSTNAME} | \
       json_reformat
 

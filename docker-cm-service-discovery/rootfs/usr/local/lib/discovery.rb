@@ -256,16 +256,16 @@ module ServiceDiscovery
 
 #       logger.debug( dns )
 
-      if( dns.dig(:ip) == nil )
+      if( dns == nil || dns.dig(:ip) == nil )
 
         # create DNS Information
         dns      = Utils::Network.resolv( host )
 
-#         logger.debug( "hostResolve #{hostInfo}" )
+#         logger.debug( "hostResolve #{dns}" )
 
-        ip            = hostInfo.dig(:ip)
-        shortHostName = hostInfo.dig(:short)
-        longHostName  = hostInfo.dig(:long)
+        ip            = dns.dig(:ip)
+        shortHostName = dns.dig(:short)
+        longHostName  = dns.dig(:long)
 
         @redis.createDNS( { :ip => ip, :short => shortHostName, :long => longHostName } )
       else
