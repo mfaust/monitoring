@@ -190,10 +190,30 @@ module ExternalDiscovery
       )
 
       begin
-        data   = restClient.get( @headers ).body
-        data   = JSON.parse( data )
 
-        return data
+        response     = restClient.get( @headers )
+
+        responseCode = response.code
+        responseBody = response.body
+
+logger.debug( response.class.to_s )
+logger.debug( response.inspect )
+logger.debug( response )
+
+logger.debug( responseCode )
+logger.debug( responseBody )
+
+        if( responseCode == 200 )
+
+          data   = JSON.parse( responseBody )
+
+          return data
+
+        elsif( responseCode == 204 )
+
+          return { 'status' => responseCode }
+
+        end
 
       rescue Exception => e
 
@@ -434,6 +454,9 @@ module ExternalDiscovery
             end
 
             discoveryStatus  = result.dig( name, 'discovery', 'status' )
+
+            logger.debug( discoveryStatus )
+            logger.debug( discoveryStatus.class.to_s )
 
             # {"status"=>400, "message"=>"Host are not available (DNS Problem)"}
             if( discoveryStatus == 400 )
