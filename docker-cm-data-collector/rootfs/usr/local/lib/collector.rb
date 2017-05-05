@@ -17,6 +17,7 @@ require 'time_difference'
 require 'rufus-scheduler'
 
 require_relative 'logging'
+require_relative 'cache'
 require_relative 'utils/network'
 require_relative 'monkey'
 require_relative 'jolokia'
@@ -1023,7 +1024,6 @@ module DataCollector
       shortName  = params.dig(:hostname)
       fqdn      = params.dig(:fqdn)
 
-
       prepared = @cache.get( shortName )
 
       if( prepared != nil )
@@ -1047,7 +1047,7 @@ module DataCollector
         result = p.buildMergedData( { :hostname => shortName, :fqdn => fqdn } )
 
         if( result == true )
-          @redis.set( Storage::RedisClient.cacheKey( { :host => shortName, :pre => 'prepare' } ), { :prepared => true } )
+          @cache.set( shortName, 'true', expiresIn: 320 )
         end
 
         finish = Time.now
