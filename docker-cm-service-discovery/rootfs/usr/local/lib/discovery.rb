@@ -282,8 +282,8 @@ module ServiceDiscovery
 #     logger.debug( dns )
 
     ip            = dns.dig(:ip)
-    shortHostName = dns.dig(:shortname)
-    longHostName  = dns.dig(:longname)
+    shortHostName = dns.dig(:short)
+    longHostName  = dns.dig(:long)
 
     logger.debug( sprintf( ' ip   %s ', ip ) )
     logger.debug( sprintf( ' host %s ', shortHostName ) )

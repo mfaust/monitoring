@@ -210,9 +210,34 @@ module ServiceDiscovery
                   end
 
                 # Solr 6 Support
+                #
                 elsif( classPath.include?( 'solr-6' ) )
 
                   services.push( 'solr' )
+
+                # CoreMedia on Cloud / SpingBoot
+                #
+                elsif( classPath.include?( '.war' ) )
+
+                  regex = /
+                    ^
+                    \/(?<service>.+[a-zA-Z0-9-])\.war$
+                  /x
+
+                  parts = classPath.match( regex )
+
+                  if( parts )
+                    service = parts['service'].to_s.strip
+                    services.push( service )
+
+                    # BUG
+                    # when we use solr-6.5, we lands here!
+                    # Solr 6.5 are not a coremedia tomcat application anymore
+                    logger.error( 'parse error for ClassPath' )
+                    logger.error( " => classPath: #{classPath}" )
+                    logger.error( parts )
+                  end
+
 
                 # cm160x - or all others
                 else

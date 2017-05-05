@@ -510,8 +510,11 @@ module ExternalDiscovery
 
           logger.info( sprintf( 'get information about %s (%s)', ip, displayName ) )
 
+          ip, short, fqdn = self.nsLookup( ip )
+
+
           # get node data
-          result = net.fetch( ip )
+          result = net.fetch( short )
 
 #           logger.debug( result )
 
@@ -526,22 +529,22 @@ module ExternalDiscovery
               next
             end
 
-            if( status.to_i == 204 )
-
-              logger.info( 'node not in monitoring found, get dns information' )
-
-              discoveryStatus = status
-
-              ip, short, fqdn = self.nsLookup( ip )
-
-#               logger.debug( ip )
-
-              if( ip != nil )
-                name = ip
-              else
-                discoveryStatus = 400
-              end
-            end
+#             if( status.to_i == 204 )
+#
+#               logger.info( 'node not in monitoring found, get dns information' )
+#
+#               discoveryStatus = status
+#
+#               ip, short, fqdn = self.nsLookup( ip )
+#
+# #               logger.debug( ip )
+#
+#               if( ip != nil )
+#                 name = ip
+#               else
+#                 discoveryStatus = 400
+#               end
+#             end
 
 
 #             logger.debug( discoveryStatus )
@@ -612,7 +615,7 @@ module ExternalDiscovery
 
               logger.debug( "data: #{d}" )
 
-              result = net.add( name, d )
+              result = net.add( short, d )
 
               logger.debug( result )
 

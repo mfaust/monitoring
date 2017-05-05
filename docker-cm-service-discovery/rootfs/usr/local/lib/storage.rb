@@ -141,17 +141,16 @@ module Storage
 
       dns = @redis.get( sprintf( '%s-dns', cachekey ) )
 
-      if( dns != nil )
+      if( dns == nil )
+
+        toStore = { ip: ip, shortname: short, longname: long, created: DateTime.now() }.to_json
+
+        @redis.set( sprintf( '%s-dns', cachekey ), toStore )
+      else
 
         logger.warn( 'DNS Entry already created:' )
         logger.warn( dns )
-
-        return
       end
-
-      toStore = { ip: ip, shortname: short, longname: long, created: DateTime.now() }.to_json
-
-      @redis.set( sprintf( '%s-dns', cachekey ), toStore )
 
 #       self.setStatus( { :short => short, :status => Storage::RedisClient::PREPARE } )
 
@@ -728,6 +727,24 @@ module Storage
           :status  => 404,
           :message => 'missing short hostname'
         }
+      end
+
+      if( Utils::Network.isIp?( short ) )
+
+        logger.debug( 'ip given' )
+
+        logger.debug( self.nodes() )
+
+        dns      = Utils::Network.resolv( host )
+
+        logger.debug( "hostResolve #{dns}" )
+
+#         ip            = dns.dig(:ip)
+        shortHostName = dns.dig(:short)
+#         longHostName  = dns.dig(:long)
+
+        short = dns.dig(:short)
+
       end
 
       cachekey = sprintf(
