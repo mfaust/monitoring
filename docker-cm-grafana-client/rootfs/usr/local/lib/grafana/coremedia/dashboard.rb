@@ -137,8 +137,14 @@ module Grafana
 
           additionalTemplatePaths = Array.new()
 
-          description    = serviceData.dig( 'description' )
-          template       = serviceData.dig( 'template' )
+          if( serviceData != nil )
+            description    = serviceData.dig( 'description' )
+            template       = serviceData.dig( 'template' )
+          else
+            description    = nil
+            template       = nil
+          end
+
           cacheKey       = Storage::RedisClient.cacheKey( { :host => host, :pre => 'result', :service => service } )
 
           # cae-live-1 -> cae-live
