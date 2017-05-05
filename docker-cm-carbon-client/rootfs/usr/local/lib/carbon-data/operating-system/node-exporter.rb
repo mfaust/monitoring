@@ -148,6 +148,12 @@ module CarbonData
               avail = d.dig('avail')
               size  = d.dig('size')
 
+              if( size.to_i == 0 )
+                logger.debug( 'zero size' )
+                logger.debug( d )
+                next
+              end
+
               used         = ( size.to_i - avail.to_i )
               usedPercent  = ( 100 * used.to_i / size.to_i ).to_i
 

@@ -504,7 +504,7 @@ module Storage
       result = @redis.get( cachekey )
 
       if( result == nil )
-        return { :short => nil }
+        return nil
       end
 
       if( result.is_a?( String ) )

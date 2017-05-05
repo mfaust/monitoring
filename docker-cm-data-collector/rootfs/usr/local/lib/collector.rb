@@ -558,35 +558,17 @@ module DataCollector
       # to improve performance, read initial collector Data from Database and store them into Redis
       #
       key       = Storage::RedisClient.cacheKey( { :host => host, :pre => 'collector' } )
-      data      = @redis.get( key )
-
-      # recreate the cache every 10 minutes
-      #
-      if ( data != nil )
-
-        today     = Time.now().to_s
-        timestamp = data.dig( 'timestamp' ) || Time.now().to_s
-
-        x = self.timeParser( today, timestamp )
-#         logger.debug( x )
-
-        if( x[:minutes] >= 10 )
-          data = nil
-        end
-
-      end
+      data      = @cache.get( key )
 
       if( data == nil )
 
         data = @redis.measurements( { :short => host } )
-#         logger.debug( data )
 
         if( data == nil || data == false )
+          @cache.unset( host )
           return
         else
-          data['timestamp'] = Time.now().to_s
-
-          @redis.set( key, data )
+          @cache.set( key ) { Cache::Data.new( data ) }
         end
 
       end
@@ -595,9 +577,6 @@ module DataCollector
         logger.error( 'no services found. skip ...' )
         return
       end
-
-      # remove 'timestamp', we dont need it anymore
-      data.reject! { |t| t[/timestamp/] }
 
       services      = data.keys
       servicesCount = services.count
@@ -1022,13 +1001,11 @@ module DataCollector
     def prepareData( params = {} )
 
       shortName  = params.dig(:hostname)
-      fqdn      = params.dig(:fqdn)
+      fqdn       = params.dig(:fqdn)
 
-      prepared = @cache.get( shortName )
+      prepared   = @cache.get( shortName )
 
-      if( prepared != nil )
-
-        result = false
+      if( prepared == nil )
 
         logger.debug( 'no prepared data found ...' )
 
@@ -1047,7 +1024,7 @@ module DataCollector
         result = p.buildMergedData( { :hostname => shortName, :fqdn => fqdn } )
 
         if( result == true )
-          @cache.set( shortName, 'true', expiresIn: 320 )
+          @cache.set( shortName, 'prepared', expiresIn: 320 )
         end
 
         finish = Time.now
