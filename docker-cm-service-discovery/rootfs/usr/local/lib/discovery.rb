@@ -270,9 +270,9 @@ module ServiceDiscovery
         @redis.createDNS( { :ip => ip, :short => shortHostName, :long => longHostName } )
       else
 
-#         ip            = dns.dig(:ip)
-#         shortHostName = dns.dig(:shortname)
-#         longHostName  = dns.dig(:longname)
+        ip            = dns.dig(:ip)
+        shortHostName = dns.dig(:shortname)
+        longHostName  = dns.dig(:longname)
       end
 
       @cache.set( hostname , expiresIn: 60 ) { Cache::Data.new( { 'ip': ip, 'short': shortHostName, 'long': longHostName } ) }
