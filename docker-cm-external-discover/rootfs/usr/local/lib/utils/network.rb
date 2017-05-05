@@ -37,11 +37,17 @@ module Utils
         #
         cmd = sprintf( 'dig -x %s +short', host )
 
+#         puts( cmd )
+
         Open3.popen3( cmd ) do |stdin, stdout, stderr, wait_thr|
 
           returnValue = wait_thr.value
           stdOut      = stdout.gets
           stdErr      = stderr.gets
+
+#           puts returnValue
+#           puts stdOut
+#           puts stdErr
 
           if( returnValue == 0 && !stdOut.to_s.empty? )
 

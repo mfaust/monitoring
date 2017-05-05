@@ -198,12 +198,12 @@ module ExternalDiscovery
         responseCode = response.code
         responseBody = response.body
 
-logger.debug( response.class.to_s )
-logger.debug( response.inspect )
-logger.debug( response )
-
-logger.debug( responseCode )
-logger.debug( responseBody )
+# logger.debug( response.class.to_s )
+# logger.debug( response.inspect )
+# logger.debug( response )
+#
+# logger.debug( responseCode )
+# logger.debug( responseBody )
 
         if( responseCode == 200 )
 
@@ -255,10 +255,15 @@ logger.debug( responseBody )
 
     def add( path, tags = {} )
 
+
+      logger.debug( "add( #{path}, #{tags} )" )
+
       url = sprintf( '%s/host/%s', @apiUrl, path )
 
       restClient = RestClient::Resource.new(
-        URI.encode( url )
+        URI.encode( url ),
+        :timeout      => 5,
+        :open_timeout => 5,
       )
 #
 # logger.debug( tags )
@@ -271,7 +276,32 @@ logger.debug( responseBody )
 
         return data
 
+      rescue RestClient::Exceptions::ReadTimeout => e
+
+        logger.error( e.inspect )
+#         logger.error( e.code )
+#         logger.error( e.body )
+
+
+        logger.error( e.message )
+
+        return {
+          :status  => 408,
+          :message => e.message
+        }
+
       rescue RestClient::ExceptionWithResponse => e
+
+        logger.error( e.inspect )
+        logger.error( e.message )
+
+        return {
+          :status  => 500,
+          :message => e.message
+        }
+
+        return nil
+      rescue => e
 
         logger.error( e.inspect )
 
@@ -301,8 +331,8 @@ logger.debug( responseBody )
       @discoveryUrl  = sprintf( 'http://%s:%d%s', @discoveryHost, @discoveryPort, @discoveryPath )
       @historic      = []
 
-      version        = '0.9.1'
-      date           = '2017-01-05'
+      version        = '0.9.20'
+      date           = '2017-05-05'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - External Discovery Service' )
@@ -312,57 +342,72 @@ logger.debug( responseBody )
       logger.info( "  Discovery System #{@discoveryUrl}" )
       logger.info( '-----------------------------------------------------------------' )
       logger.info( '' )
+
+      @cache         = Cache::Store.new()
+
     end
 
 
 
     def nsLookup( name )
 
-          # DNS
-          #
-          hostname = sprintf( 'dns-%s', name )
+      # DNS
+      #
+      hostname = sprintf( 'dns-%s', name )
 
-          dns      = @cache.get( hostname )
+#       logger.debug( hostname )
 
-          logger.debug( dns )
+      ip       = nil
+      short    = nil
+      fqdn     = nil
 
-          if( dns == nil )
+      dns      = @cache.get( hostname )
 
-            # create DNS Information
-            dns      = Utils::Network.resolv( ip )
+#       logger.debug( dns.class.to_s )
+#       logger.debug( dns )
 
-            ip    = dns.dig(:ip)
-            short = dns.dig(:short)
-            fqdn  = dns.dig(:long)
+      if( dns == nil )
 
-            @cache.set( hostname , expiresIn: 120 ) { Cache::Data.new( { 'ip': ip, 'short': short, 'long': fqdn } ) }
+        logger.debug( 'create DNS Information' )
+        # create DNS Information
+        dns      = Utils::Network.resolv( name )
 
-          else
+#         logger.debug( "#{dns}" )
 
-            ip    = dns.dig(:ip)
-            short = dns.dig(:short)
-            fqdn  = dns.dig(:long)
+        ip    = dns.dig(:ip)
+        short = dns.dig(:short)
+        fqdn  = dns.dig(:long)
 
-          end
-          #
-          # ------------------------------------------------
+        @cache.set( hostname , expiresIn: 120 ) { Cache::Data.new( { 'ip': ip, 'short': short, 'long': fqdn } ) }
+
+      else
+
+        logger.debug( 'found cached dns data' )
+
+        ip    = dns.dig(:ip)
+        short = dns.dig(:short)
+        fqdn  = dns.dig(:long)
+
+      end
+      #
+      # ------------------------------------------------
 
       return ip, short, fqdn
 
     end
 
 
-    def compareVersions()
+    def compareVersions( params = {} )
 
       logger.debug( 'compare' )
 
-      liveData     = @data
+      liveData     = params.dig( 'live' )
       historicData = @historic
 
-      logger.debug( liveData )
-      logger.debug( liveData.class.to_s )
-      logger.debug( historicData )
-      logger.debug( historicData.class.to_s )
+#       logger.debug( liveData )
+#       logger.debug( liveData.class.to_s )
+#       logger.debug( historicData )
+#       logger.debug( historicData.class.to_s )
 
       if( liveData.is_a?( Array ) == false )
         logger.error( 'liveData is not an Array' )
@@ -385,13 +430,13 @@ logger.debug( responseBody )
       removedEntriesCount   = removedEntries.count
 
       logger.info( sprintf( 'live Data holds %d entries'    , liveDataCount ) )
-      logger.debug( "  #{liveData}" )
+#       logger.debug( "  #{liveData}" )
       logger.info( sprintf( 'historic Data holds %d entries', historicDataCount ) )
-      logger.debug( "  #{historicData}" )
+#       logger.debug( "  #{historicData}" )
       logger.info( sprintf( 'identical entries %d'          , identicalEntriesCount ) )
-      logger.debug(  "  #{identicalEntries}" )
+#       logger.debug(  "  #{identicalEntries}" )
       logger.info( sprintf( 'removed entries %d'            , removedEntriesCount ) )
-      logger.debug(  "  #{removedEntries}" )
+#       logger.debug(  "  #{removedEntries}" )
 
       logger.debug( '------------------------------------------------------------' )
 
@@ -432,7 +477,8 @@ logger.debug( responseBody )
 
         logger.info( 'no historic data found, first run' )
 
-        newArray = Array.new()
+        discoveryStatus = 204
+        newArray        = Array.new()
 
         # add all founded nodes
 
@@ -448,6 +494,10 @@ logger.debug( responseBody )
             next
           end
 
+          if( displayName != 'cosmos-development-management-cms' )
+            next
+          end
+
           # states from AWS:
           #  0 : pending
           # 16 : running
@@ -458,16 +508,18 @@ logger.debug( responseBody )
 
           useableTags = Array.new()
 
-          logger.info( sprintf( 'get information about %s (%s)', ip, name ) )
+          logger.info( sprintf( 'get information about %s (%s)', ip, displayName ) )
 
           # get node data
           result = net.fetch( ip )
 
-          logger.debug( result )
+#           logger.debug( result )
 
           if( result != nil )
 
             status = result.dig('status') || 400
+
+# logger.debug( status )
 
             if( status.to_i == 200 )
               logger.info( 'node are in monitoring available' )
@@ -476,9 +528,13 @@ logger.debug( responseBody )
 
             if( status.to_i == 204 )
 
-              discoveryStatus == status
+              logger.info( 'node not in monitoring found, get dns information' )
+
+              discoveryStatus = status
 
               ip, short, fqdn = self.nsLookup( ip )
+
+#               logger.debug( ip )
 
               if( ip != nil )
                 name = ip
@@ -486,6 +542,10 @@ logger.debug( responseBody )
                 discoveryStatus = 400
               end
             end
+
+
+#             logger.debug( discoveryStatus )
+
 
 #             discoveryStatus = 204
 #
@@ -522,14 +582,15 @@ logger.debug( responseBody )
 #             logger.debug( discoveryStatus.class.to_s )
 
             # {"status"=>400, "message"=>"Host are not available (DNS Problem)"}
-            if( discoveryStatus == 400 )
-              logger.info( '  The DNS of this host are not resolveable ... skip' )
-              next
+            #if( discoveryStatus == 400 )
+            #  logger.info( '  The DNS of this host are not resolveable ... skip' )
+            #  next
+            #
+            ## not exists
+            #els
+            if( discoveryStatus == nil || discoveryStatus == 204 || discoveryStatus == 404 )
 
-            # not exists
-            elsif( discoveryStatus == nil || discoveryStatus == 204 || discoveryStatus == 404 )
-
-              logger.info( '  host not in monitoring ... try to add' )
+              logger.info( '  now, we try to add them' )
 
               logger.debug( "tags: #{tags}" )
 
@@ -555,10 +616,13 @@ logger.debug( responseBody )
 
               logger.debug( result )
 
+              logger.debug( '------------------------' )
+
+
               if( result != nil )
 
-                discoveryStatus  = result.dig( "status" )
-                discoveryMessage = result.dig( "message" )
+                discoveryStatus  = result.dig( :status )   || result.dig( 'status' )
+                discoveryMessage = result.dig( :message )  || result.dig( 'message' )
 
                 if( discoveryStatus == 400 )
                   # error
@@ -568,13 +632,16 @@ logger.debug( responseBody )
                   logger.error( sprintf( '  => %s', discoveryMessage ) )
 
                   newArray << l
+                elsif( discoveryStatus == 408 )
+                  # error
+                  logger.error( sprintf( '  => %s', discoveryMessage ) )
                 else
                   logger.info( 'Host successful added' )
                   # successful
                   newArray << l
                 end
 
-                sleep(2)
+                sleep(4)
 
               end
 
@@ -636,33 +703,27 @@ logger.debug( responseBody )
 
       consumer = DataConsumer.new( config )
 
-      threads << Thread.new {
+      data = consumer.client()
 
-        @data = consumer.getData()
-      }
+      logger.debug( JSON.pretty_generate( data ) )
 
-      threads.each {|t| t.join }
+      self.compareVersions( { 'live' => data } )
 
-      threads << Thread.new {
 
-        @data = self.compareVersions()
-      }
-
-      threads.each {|t| t.join }
-
-#      fork do
+#       threads << Thread.new {
 #
-#        @data = consumer.getData()
+#         @data = consumer.getData()
+#       }
 #
-#        logger.debug( @data )
-#      end
-
-
-#      fork do
-#        self.compareVersions()
-#      end
+#       threads.each {|t| t.join }
 #
-#      Process.waitall
+#       threads << Thread.new {
+#
+#         @data = self.compareVersions()
+#       }
+#
+#      threads.each {|t| t.join }
+
 
       logger.debug( 'done' )
 

@@ -7,9 +7,9 @@ ENV \
   ALPINE_MIRROR="dl-cdn.alpinelinux.org" \
   ALPINE_VERSION="edge" \
   TERM=xterm \
-  APK_ADD="build-base ruby ruby-dev" \
+  APK_ADD="build-base bind-tools drill ruby ruby-dev" \
   APK_DEL="build-base ruby-dev" \
-  GEMS="json rest-client rufus-scheduler time_difference tzinfo-data"
+  GEMS="ipaddress json rest-client rufus-scheduler time_difference tzinfo-data"
 
 LABEL version="1704-03.1"
 
