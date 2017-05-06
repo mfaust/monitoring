@@ -182,7 +182,9 @@ module Storage
         cachekey
       ]
 
-      @redis.del( *keys )
+      status = @redis.del( *keys )
+
+#       logger.debug( status )
 
 #       @redis.del( sprintf( '%s-measurements', cachekey ) )
 #       @redis.del( sprintf( '%s-discovery'   , cachekey ) )
@@ -191,7 +193,11 @@ module Storage
 #       @redis.del( cachekey )
 
 
-      self.removeNode( { :short => short, :key => cachekey } )
+      status = self.removeNode( { :short => short, :key => cachekey } )
+
+#       logger.debug( status )
+
+      return true
 
     end
 
@@ -442,7 +448,7 @@ module Storage
 #       logger.debug( result )
 
       if( result == nil )
-        return { :short => nil }
+        return nil
       end
 
       if( result.is_a?( String ) )
@@ -596,8 +602,6 @@ module Storage
       end
 
       short  = params.dig(:short)
-
-#       logger.debug( params )
 
       cachekey = 'nodes'
 
