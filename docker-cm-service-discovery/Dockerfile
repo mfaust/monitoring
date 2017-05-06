@@ -11,7 +11,7 @@ ENV \
   APK_DEL="build-base imagemagick-dev ruby-dev ruby-io-console zlib-dev" \
   GEMS="beaneater filesize ipaddress redis resolve-hostname rufus-scheduler tzinfo-data"
 
-LABEL version="1705-01.2"
+LABEL version="1704-03.1"
 
 # ---------------------------------------------------------------------------------------
 
