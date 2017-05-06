@@ -59,6 +59,7 @@ class Monitoring
 
     @cache      = Cache::Store.new()
     @mqConsumer = MessageQueue::Consumer.new( @MQSettings )
+    @mqProducer = MessageQueue::Producer.new( @MQSettings )
     @redis      = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
 
     scheduler   = Rufus::Scheduler.new
@@ -77,6 +78,30 @@ class Monitoring
     logger.debug( 'create node information ...' )
 
     result  = Hash.new()
+
+    status  = @redis.nodes( { :status => Storage::RedisClient::OFFLINE } )
+
+    logger.debug( status )
+
+    if( status == nil || status == false )
+
+      return
+    end
+
+    # remove offline nodes
+    if( status.count != 0 )
+
+      status = status.keys
+
+      status.each do |node|
+
+        logger.info( sprintf( ' - offline node %s', node ) )
+#         @redis.removeDNS( { :short => node } )
+      end
+
+    end
+
+
     nodes   = @redis.nodes()
 
 #     logger.debug( nodes )
@@ -203,8 +228,6 @@ class Monitoring
     ttr     = params.dig(:ttr)   || 10
     delay   = params.dig(:delay) || 2
 
-    p = MessageQueue::Producer.new( @MQSettings )
-
     job = {
       cmd:  command,
       node: node,
@@ -213,7 +236,7 @@ class Monitoring
       payload: data
     }.to_json
 
-    p.addJob( queue, job, prio, ttr, delay )
+    @mqProducer.addJob( queue, job, prio, ttr, delay )
 
   end
 
@@ -435,12 +458,6 @@ class Monitoring
 
       result[host.to_sym] ||= {}
 
-      if( annotation == true )
-
-        logger.info( 'annotation for create' )
-        self.addAnnotation( host, { 'command': 'create', 'argument': 'node' } )
-      end
-
       if( enableDiscovery == true )
 
         logger.info( 'add node to discovery service' )
@@ -514,8 +531,13 @@ class Monitoring
             logger.debug( services )
 
             services.each do |s|
-              s.last.reject! { |k| k == 'template' }
-              s.last.reject! { |k| k == 'application' }
+
+              logger.debug( " => service #{s}" )
+
+              if( s.last != nil )
+                s.last.reject! { |k| k == 'template' }
+                s.last.reject! { |k| k == 'application' }
+              end
             end
 
             if( discoveryPayload.is_a?( Hash ) )
@@ -536,6 +558,15 @@ class Monitoring
         logger.debug( 'send message to \'mq-icinga\'' )
         self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-icinga', :payload => discoveryPayload, :prio => 10, :ttr => 15, :delay => 10 } )
       end
+
+      # add annotation at last
+      #
+      if( annotation == true )
+
+        logger.info( 'annotation for create' )
+        self.addAnnotation( host, { 'command': 'create', 'argument': 'node' } )
+      end
+
 
       discoveryResult = {
         :status  => 200,
@@ -620,79 +651,92 @@ class Monitoring
     status    = 500
     message   = 'initialize error'
 
+    if( host.to_s == '' )
+
+      return {
+        :status  => 400,
+        :message => 'we need an node name for this'
+      }
+    end
+
+    # --------------------------------------------------------------------
+
     result    = Hash.new()
     hash      = Hash.new()
 
-    if( host.to_s != '' )
+    logger.info( sprintf( 'remove %s from monitoring', host ) )
 
-      logger.info( sprintf( 'remove %s from monitoring', host ) )
+    enableDiscovery = @enabledDiscovery
+    enabledGrafana  = @enabledGrafana
+    enabledIcinga   = @enabledIcinga
+    annotation      = true
 
-      enableDiscovery = @enabledDiscovery
-      enabledGrafana  = @enabledGrafana
-      enabledIcinga   = @enabledIcinga
-      annotation      = true
+    if( payload != '' )
 
-      if( payload != '' )
+      hash = JSON.parse( payload )
 
-        hash = JSON.parse( payload )
+      result[:request] = hash
 
-        result[:request] = hash
-
-        force           = hash.keys.include?('force')      ? hash['force']      : false
-        enabledGrafana  = hash.keys.include?('grafana')    ? hash['grafana']    : @enabledGrafana
-        enabledIcinga   = hash.keys.include?('icinga')     ? hash['icinga']     : @enabledIcinga
-        annotation      = hash.keys.include?('annotation') ? hash['annotation'] : true
-      end
-
-        logger.debug( sprintf( 'force      : %s', force            ? 'true' : 'false' ) )
-        logger.debug( sprintf( 'discovery  : %s', enableDiscovery  ? 'true' : 'false' ) )
-        logger.debug( sprintf( 'grafana    : %s', enabledGrafana   ? 'true' : 'false' ) )
-        logger.debug( sprintf( 'icinga     : %s', enabledIcinga    ? 'true' : 'false' ) )
-        logger.debug( sprintf( 'annotation : %s', annotation       ? 'true' : 'false' ) )
-
-      result[host.to_sym] ||= {}
-
-      if( annotation == true )
-        logger.info( 'annotation for remove' )
-        self.addAnnotation( host, { "command": "remove", "argument": "node" } )
-      end
-
-      if( enabledIcinga == true )
-        logger.info( 'remove icinga checks and notifications' )
-        logger.debug( 'send message to \'mq-icinga\'' )
-        self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-icinga', :payload => { "force" => true } } )
-      end
-      if( enabledGrafana == true )
-        logger.info( 'remove grafana dashborads' )
-        logger.debug( 'send message to \'mq-grafana\'' )
-        self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-grafana', :payload => { "force" => true } } )
-      end
-
-      if( enableDiscovery == true )
-        logger.info( 'remove node from discovery service' )
-        logger.debug( 'send message to \'mq-discover\'' )
-        self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-discover', :payload => { "force" => true } } )
-      end
-
-      if( force == true )
-        logger.info( 'remove configuration from db (force mode)' )
-        @redis.removeConfig( { :short => host } )
-      end
-
-      discoveryResult = {
-        :status  => 200,
-        :message => 'send to MQ'
-      }
-
-      result[host.to_sym][:discovery] = discoveryResult
-
-      return JSON.pretty_generate( result )
+      force           = hash.keys.include?('force')      ? hash['force']      : false
+      enabledGrafana  = hash.keys.include?('grafana')    ? hash['grafana']    : @enabledGrafana
+      enabledIcinga   = hash.keys.include?('icinga')     ? hash['icinga']     : @enabledIcinga
+      annotation      = hash.keys.include?('annotation') ? hash['annotation'] : true
     end
 
-    return JSON.pretty_generate( {
-      :status  => status,
-      :message => message
-    } )
+    logger.debug( 'set host status to OFFLINE' )
+    @redis.setStatus( { :short => host, :status => Storage::RedisClient::OFFLINE } )
+
+    logger.debug( sprintf( 'force      : %s', force            ? 'true' : 'false' ) )
+    logger.debug( sprintf( 'discovery  : %s', enableDiscovery  ? 'true' : 'false' ) )
+    logger.debug( sprintf( 'grafana    : %s', enabledGrafana   ? 'true' : 'false' ) )
+    logger.debug( sprintf( 'icinga     : %s', enabledIcinga    ? 'true' : 'false' ) )
+    logger.debug( sprintf( 'annotation : %s', annotation       ? 'true' : 'false' ) )
+
+    result[host.to_sym] ||= {}
+
+    if( annotation == true )
+      logger.info( 'annotation for remove' )
+      self.addAnnotation( host, { "command": "remove", "argument": "node" } )
+    end
+
+    if( enabledIcinga == true )
+      logger.info( 'remove icinga checks and notifications' )
+      logger.debug( 'send message to \'mq-icinga\'' )
+      self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-icinga', :payload => { "force" => true }, :prio => 0 } )
+    end
+    if( enabledGrafana == true )
+      logger.info( 'remove grafana dashborads' )
+      logger.debug( 'send message to \'mq-grafana\'' )
+      self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-grafana', :payload => { "force" => true }, :prio => 0 } )
+    end
+
+    if( enableDiscovery == true )
+      logger.info( 'remove node from discovery service' )
+      logger.debug( 'send message to \'mq-discover\'' )
+      self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-discover', :payload => { "force" => true }, :prio => 0 } )
+    end
+
+    if( force == true )
+      logger.info( 'remove configuration from db (force mode)' )
+      @redis.removeConfig( { :short => host } )
+    end
+
+    discoveryResult = {
+      :status  => 200,
+      :message => 'send to MQ'
+    }
+
+    result[host.to_sym][:discovery] = discoveryResult
+
+    logger.debug( JSON.pretty_generate( result ) )
+
+    return JSON.pretty_generate( result )
+
+#
+#   return JSON.pretty_generate( {
+#     :status  => status,
+#     :message => message
+#   } )
 
   end
 

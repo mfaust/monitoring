@@ -30,7 +30,7 @@ module MessageQueue
         @b = Beaneater.new( sprintf( '%s:%s', beanstalkHost, beanstalkPort ) )
       rescue => e
         logger.error( e )
-        raise sprintf( 'ERROR: %s' , e )
+#         raise sprintf( 'ERROR: %s' , e )
       end
 
       logger.info( '-----------------------------------------------------------------' )
@@ -103,7 +103,7 @@ module MessageQueue
 
       rescue => e
         logger.error( e )
-        raise sprintf( 'ERROR: %s' , e )
+#         raise sprintf( 'ERROR: %s' , e )
       end
 
       logger.info( '-----------------------------------------------------------------' )
