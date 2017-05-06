@@ -57,7 +57,7 @@ e = ExternalDiscovery::Client.new( config )
 
 scheduler = Rufus::Scheduler.new
 
-scheduler.every( interval.to_i, :first_in => 15 ) do
+scheduler.every( interval.to_i, :first_in => 5 ) do
 
   e.run()
 

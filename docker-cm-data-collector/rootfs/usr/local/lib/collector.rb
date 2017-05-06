@@ -17,6 +17,7 @@ require 'time_difference'
 require 'rufus-scheduler'
 
 require_relative 'logging'
+require_relative 'cache'
 require_relative 'utils/network'
 require_relative 'monkey'
 require_relative 'jolokia'
@@ -318,6 +319,7 @@ module DataCollector
         :beanstalkPort => mqPort
       }
 
+      @cache              = Cache::Store.new()
       @redis              = Storage::RedisClient.new( { :redis => { :host => @redisHost } } )
       @jolokia            = Jolokia::Client.new( { :host => jolokiaHost, :port => jolokiaPort, :path => jolokiaPath, :auth => { :user => jolokiaAuthUser, :pass => jolokiaAuthPass } } )
       @mq                 = MessageQueue::Consumer.new( @MQSettings )
@@ -556,35 +558,17 @@ module DataCollector
       # to improve performance, read initial collector Data from Database and store them into Redis
       #
       key       = Storage::RedisClient.cacheKey( { :host => host, :pre => 'collector' } )
-      data      = @redis.get( key )
-
-      # recreate the cache every 10 minutes
-      #
-      if ( data != nil )
-
-        today     = Time.now().to_s
-        timestamp = data.dig( 'timestamp' ) || Time.now().to_s
-
-        x = self.timeParser( today, timestamp )
-#         logger.debug( x )
-
-        if( x[:minutes] >= 10 )
-          data = nil
-        end
-
-      end
+      data      = @cache.get( key )
 
       if( data == nil )
 
         data = @redis.measurements( { :short => host } )
-#         logger.debug( data )
 
         if( data == nil || data == false )
+          @cache.unset( host )
           return
         else
-          data['timestamp'] = Time.now().to_s
-
-          @redis.set( key, data )
+          @cache.set( key ) { Cache::Data.new( data ) }
         end
 
       end
@@ -593,9 +577,6 @@ module DataCollector
         logger.error( 'no services found. skip ...' )
         return
       end
-
-      # remove 'timestamp', we dont need it anymore
-      data.reject! { |t| t[/timestamp/] }
 
       services      = data.keys
       servicesCount = services.count
@@ -1009,9 +990,10 @@ module DataCollector
 
         logger.debug( payload )
 
-        cacheKey = Storage::RedisClient.cacheKey( { :host => payload.dig('host'), :pre => 'prepare' } )
-
-        @redis.set( cacheKey, '' )
+        @cache.unset( payload.dig('host') )
+#        cacheKey = Storage::RedisClient.cacheKey( { :host => payload.dig('host'), :pre => 'prepare' } )
+#
+#        @redis.set( cacheKey, '' )
       end
     end
 
@@ -1019,15 +1001,11 @@ module DataCollector
     def prepareData( params = {} )
 
       shortName  = params.dig(:hostname)
-      fqdn      = params.dig(:fqdn)
+      fqdn       = params.dig(:fqdn)
 
-      # TODO
-      #
-      prepared = @redis.get( Storage::RedisClient.cacheKey( { :host => shortName, :pre => 'prepare' } ) )
+      prepared   = @cache.get( shortName )
 
-      if( prepared.is_a?( NilClass ) || prepared.is_a?( FalseClass ) || ( prepared.is_a?( String ) && ( prepared == '' || prepared == 'false ' ) ) )
-
-        result = false
+      if( prepared == nil )
 
         logger.debug( 'no prepared data found ...' )
 
@@ -1046,13 +1024,46 @@ module DataCollector
         result = p.buildMergedData( { :hostname => shortName, :fqdn => fqdn } )
 
         if( result == true )
-          @redis.set( Storage::RedisClient.cacheKey( { :host => shortName, :pre => 'prepare' } ), { :prepared => true } )
+          @cache.set( shortName, 'prepared', expiresIn: 320 )
         end
 
         finish = Time.now
         logger.info( sprintf( 'build prepared data in %s seconds', finish - start ) )
 
       end
+
+#      # TODO
+#      #
+#      prepared = @redis.get( Storage::RedisClient.cacheKey( { :host => shortName, :pre => 'prepare' } ) )
+#
+#      if( prepared.is_a?( NilClass ) || prepared.is_a?( FalseClass ) || ( prepared.is_a?( String ) && ( prepared == '' || prepared == 'false ' ) ) )
+#
+#        result = false
+#
+#        logger.debug( 'no prepared data found ...' )
+#
+#        start = Time.now
+#
+#        # no prepared data found ...
+#        # generate it
+#        options = {
+#          :configFiles           => { :application => @applicationConfig, :service => @serviceConfig },
+#          :applicationConfigFile => @applicationConfig,
+#          :serviceConfigFile     => @serviceConfig,
+#          :redis                 => { :host => @redisHost, :port => @redisPort }
+#        }
+#
+#        p = Prepare.new( options )
+#        result = p.buildMergedData( { :hostname => shortName, :fqdn => fqdn } )
+#
+#        if( result == true )
+#          @redis.set( Storage::RedisClient.cacheKey( { :host => shortName, :pre => 'prepare' } ), { :prepared => true } )
+#        end
+#
+#        finish = Time.now
+#        logger.info( sprintf( 'build prepared data in %s seconds', finish - start ) )
+#
+#      end
 
     end
 
