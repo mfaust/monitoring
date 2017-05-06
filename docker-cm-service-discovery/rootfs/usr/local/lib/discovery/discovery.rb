@@ -3,13 +3,19 @@ module ServiceDiscovery
 
   module Discovery
 
-    def discoverApplication( host, port )
+    # discorery application
+    #
+    def discoverApplication( params = {} )
 
-      logger.debug( sprintf( 'discoverApplication( %s, %d )', host, port ) )
+      logger.debug( "discoverApplication( #{params} )" )
 
-      services = Array.new
+      host = params.dig( :fqdn )
+      port = params.dig( :port )
 
-      if( port == 3306 || port == 5432 || port == 9100 || port == 28017 || port == 55555 )
+      fixedPorts = [3306,5432,9100,28017,55555]
+      services   = Array.new
+
+      if( fixedPorts.include?( port ) )
 
         case port
         when 3306
@@ -57,29 +63,12 @@ module ServiceDiscovery
         }
 
         response       = @jolokia.post( { :payload => array } )
-        responseStatus = response[:status].to_i
+        responseStatus = response.dig(:status).to_i
 
         if( responseStatus != 200 )
 
           response = response[:message]
           response.delete!( "\t" ).delete!( "\n" )
-
-  #         logger.debug( response )
-  #
-  #         regex    = [
-  #           /(.*)connection to:(?<host>.+[a-zA-Z0-9]);/i,
-  #           /(.*)Exception:(?<exception>.+\S)/i
-  #         ]
-  #
-  #         re = Regexp.union(regex)
-  #
-  #         all,host,exception = response.match( re ).to_a
-  #
-  #         logger.error( sprintf( '%s - %s', host.strip, exception.strip.tr('[]','') ) )
-  #
-  #         return nil
-
-#           {:status=>500, :message=>"java.io.IOException : Failed to retrieve RMIServer stub: javax.naming.ConfigurationException [Root exception is java.rmi.UnknownHostException: Unknown host: master-17-tomcat; nested exception is: java.net.UnknownHostException: master-17-tomcat]"}
 
           if( response.include?( 'UnknownHostException' ) )
             response = sprintf( 'Unknown Host: %s', host )
@@ -116,12 +105,16 @@ module ServiceDiscovery
 
               if( value != nil )
 
-#                 logger.debug( 'parse runtime::value' )
-
                 classPath  = value.dig('ClassPath')
 
 #                 logger.debug( "found classPath: #{classPath}" )
-
+                #
+                # CoreMedia 7.x == classPath 'cm7-tomcat-installation'
+                # Solr 6.5      == classPath 'solr-6'
+                # SpringBoot    == classPath '*.war'
+                # others        == CoreMedia > 9
+                #
+                # CoreMedia 7.x Installation
                 if( classPath.include?( 'cm7-tomcat-installation' ) )
 
                   logger.debug( 'found pre cm160x Portstyle (‎possibly cm7.x)' )
@@ -147,10 +140,9 @@ module ServiceDiscovery
                     end
                   end
 
-#                   logger.debug( services )
-
                   # coremedia = cms, mls, rls?
                   # caefeeder = caefeeder-preview, cae-feeder-live?
+                  #
                   if( ( services.include?( 'coremedia' ) ) || ( services.include?( 'caefeeder' ) ) )
 
                     value = engine.dig('value')
@@ -186,10 +178,10 @@ module ServiceDiscovery
                     else
                       logger.error( sprintf( 'response status %d', engine['status'].to_i ) )
                     end
-                  end
 
                   # blueprint = cae-preview or delivery?editor
-                  if( services.include?( 'blueprint' ) )
+                  #
+                  elsif( services.include?( 'blueprint' ) )
 
                     value = engine.dig('value')
 
@@ -207,6 +199,10 @@ module ServiceDiscovery
                     else
                       logger.error( sprintf( 'response status %d', engine['status'].to_i ) )
                     end
+                  else
+
+                    logger.warn( 'unknown service:' )
+                    logger.warn( services )
                   end
 
                 # Solr 6 Support
@@ -215,7 +211,7 @@ module ServiceDiscovery
 
                   services.push( 'solr' )
 
-                # CoreMedia on Cloud / SpingBoot
+                # CoreMedia on Cloud / SpringBoot
                 #
                 elsif( classPath.include?( '.war' ) )
 
@@ -304,12 +300,9 @@ module ServiceDiscovery
 
       end
 
-#       logger.debug( "  found services: #{services}" )
-
       return services
     end
 
   end
-
 
 end
