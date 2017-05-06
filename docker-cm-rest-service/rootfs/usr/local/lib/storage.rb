@@ -683,9 +683,7 @@ module Storage
           if( nodeStatus.to_i == status.to_i )
 
             dnsData    = self.dnsData( { :short => k } )
-#             statusData = self.status( { :short => k } )
-
-#             logger.debug( statusData )
+#             logger.debug( dnsData )
 
             result[k.to_s] ||= {}
             result[k.to_s] = dnsData

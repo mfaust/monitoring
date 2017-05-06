@@ -13,13 +13,16 @@ module ServiceDiscovery
 
       if( data.count() != 0 )
 
+        stats = @mqConsumer.tubeStatistics( @mqQueue )
+        logger.debug( { :total => stats.dig(:total), :ready => stats.dig(:ready), :delayed => stats.dig(:delayed), :buried => stats.dig(:buried) } )
+
         jobId  = data.dig( :id )
 
         result = self.processQueue( data )
 
         status = result.dig(:status).to_i
 
-        if( status == 200 || status == 500 )
+        if( status == 200 || status == 409 || status == 500 || status == 503 )
 
           @mqConsumer.deleteJob( @mqQueue, jobId )
         else
@@ -33,40 +36,41 @@ module ServiceDiscovery
 
     def processQueue( data = {} )
 
-      if( data.count != 0 )
+        logger.info( sprintf( 'process Message Id %d from Queue %s', data.dig(:id), data.dig(:tube) ) )
 
-        logger.info( sprintf( 'process Message from Queue %s: %d', data.dig(:tube), data.dig(:id) ) )
-#         logger.debug( data )
+        command = data.dig( :body, 'cmd' )
+        node    = data.dig( :body, 'node' )
+        payload = data.dig( :body, 'payload' )
 
-        command = data.dig( :body, 'cmd' )     || nil
-        node    = data.dig( :body, 'node' )    || nil
-        payload = data.dig( :body, 'payload' ) || nil
+        if( command == nil || node == nil || payload == nil )
 
-        if( command == nil )
-          logger.error( 'wrong command' )
-          logger.error( data )
+          if( command == nil )
+            logger.error( 'missing command' )
+            logger.error( data )
+            return { :status  => 500, :message => 'missing command' }
+          end
 
-          return {
-            :status  => 500,
-            :message => 'no command given'
-          }
+          if( node == nil )
+            logger.error( 'missing node' )
+            logger.error( data )
+            return { :status  => 500, :message => 'missing node' }
+          end
+
+          if( payload == nil )
+            logger.error( 'missing payload' )
+            logger.error( data )
+            return { :status  => 500, :message => 'missing payload' }
+          end
+
         end
 
-        if( node == nil || payload == nil )
-          logger.error( 'missing node or payload' )
-          logger.error( data )
+        logger.debug( sprintf( '  command: %s', command ) )
 
-          return {
-            :status  => 500,
-            :message => 'missing node or payload'
-          }
-        end
+        # add Node
+        #
+        if( command == 'add' )
 
-
-        case command
-        when 'add'
-
-          logger.info( sprintf( 'add node %s', node ) )
+          logger.info( sprintf( '  node %s', node ) )
 
           # TODO
           # check payload!
@@ -76,20 +80,20 @@ module ServiceDiscovery
           status  = result.dig(:status)
           message = result.dig(:message)
 
-          if( status.to_i == 200 )
-
-            logger.debug( 'set node status to ONLINE' )
-            @redis.setStatus( { :short => node, :status => Storage::RedisClient::ONLINE } )
-          end
-
-          return {
+          result = {
             :status  => status,
             :message => message
           }
 
-        when 'remove'
+          logger.debug( result )
 
-          logger.info( sprintf( 'remove node \'%s\'', node ) )
+          return result
+
+        # remove Node
+        #
+        elsif( command == 'remove' )
+
+          logger.info( sprintf( '  node %s', node ) )
 
           # check first for existing node!
           #
@@ -122,9 +126,11 @@ module ServiceDiscovery
             :status => 200
           }
 
-        when 'refresh'
+        # refresh Node
+        #
+        elsif( command == 'refresh' )
 
-          logger.info( sprintf( 'refresh node %s', node ) )
+          logger.info( sprintf( '  node %s', node ) )
 
           result = self.refreshHost( node )
 
@@ -133,9 +139,11 @@ module ServiceDiscovery
               :message => result
             }
 
-        when 'info'
+        # information about Node
+        #
+        elsif( command == 'info' )
 
-          logger.info( sprintf( 'give information for %s back', node ) )
+          logger.info( sprintf( '  node %s', node ) )
 
           result = @redis.nodes( { :short => node } )
 
@@ -154,6 +162,16 @@ module ServiceDiscovery
 
           result = self.listHosts( node )
 
+          status  = result.dig(:status)
+          message = result.dig(:message)
+
+          r = {
+            :status  => status,
+            :message => message
+          }
+
+          logger.debug( r )
+
           self.sendMessage( { :cmd => 'info', :queue => 'mq-discover-info', :payload => result, :ttr => 1, :delay => 0 } )
 
           return {
@@ -161,7 +179,10 @@ module ServiceDiscovery
             :message => 'information succesful send'
           }
 
+        # all others
+        #
         else
+
           logger.error( sprintf( 'wrong command detected: %s', command ) )
 
           result = {
@@ -180,7 +201,6 @@ module ServiceDiscovery
 
 #        logger.debug( result )
 
-      end
 
     end
 
@@ -198,8 +218,6 @@ module ServiceDiscovery
         return
       end
 
-      p = MessageQueue::Producer.new( @MQSettings )
-
       job = {
         cmd:  cmd,          # require
         node: node,         # require
@@ -208,10 +226,10 @@ module ServiceDiscovery
         payload: payload    # require
       }.to_json
 
-      result = p.addJob( queue, job, ttr, delay )
+      result = @mqProducer.addJob( queue, job, ttr, delay )
 
-      logger.debug( job )
-      logger.debug( result )
+#       logger.debug( job )
+#       logger.debug( result )
 
     end
 

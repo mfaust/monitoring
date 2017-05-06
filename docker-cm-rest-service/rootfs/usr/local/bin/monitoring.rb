@@ -103,7 +103,6 @@ class Monitoring
 
 
     nodes   = @redis.nodes()
-
 #     logger.debug( nodes )
 
     if( nodes.is_a?( Hash ) || nodes.is_a?( Array ) )
@@ -124,7 +123,7 @@ class Monitoring
 
             result = {
               :status  => 400,
-              :message => 'Host are not available (DNS Problem)'
+              :message => sprintf( 'Host \'%s\' are not available (DNS Problem)', n )
             }
 
             logger.warn( result )
@@ -194,20 +193,25 @@ class Monitoring
   end
 
 
-
+  # check availability and create an DNS entry into our redis
+  #
   def checkAvailablility?( host )
 
+    logger.debug( "checkAvailablility?( #{host} )" )
+
     hostInfo      = Utils::Network.resolv( host )
+
+    logger.debug( JSON.pretty_generate( hostInfo ) )
 
     ip            = hostInfo.dig(:ip)
     shortHostName = hostInfo.dig(:short)
     longHostName  = hostInfo.dig(:long)
 
-#    logger.debug( JSON.pretty_generate( hostInfo ) )
-
     if( ip == nil || shortHostName == nil )
       return false
     else
+
+      logger.debug( 'create DNS Entry' )
 
       @redis.createDNS( { :ip => ip, :short => shortHostName, :long => longHostName } )
 
@@ -358,6 +362,8 @@ class Monitoring
 #      }
 
   def addHost( host, payload )
+
+    logger.debug( "addHost( #{host}, payload )" )
 
     status    = 500
     message   = 'initialize error'
@@ -599,15 +605,19 @@ class Monitoring
   #
   def listHost( host = nil, payload = nil )
 
-    status  = 200
+    logger.debug( "listHost( #{host}, payload )" )
+
+    status  = 204
     result  = Hash.new()
     cache   = @cache.get( 'information' )
+
+    logger.debug( cache )
 
     if( cache == nil )
 
       result = {
         :status  => 204,
-        :message => 'no host in monitoring found'
+        :message => 'no hosts in monitoring found'
       }
 
       return JSON.pretty_generate( result )
@@ -615,17 +625,26 @@ class Monitoring
 
     if( host.to_s != '' )
 
-      result[host.to_s] ||= {}
+      h = cache.dig( host.to_s )
 
-      if( cache != nil )
-        h = cache.dig( host.to_s )
+      logger.debug( h )
+
+      if ( h != nil )
+        result[host.to_s] ||= {}
         result[host.to_s] = h
+
+        status = 200
+      else
+
+        status = 204
       end
 
     else
 
       if( cache != nil )
         result = cache
+
+        status = 200
       end
 
     end
@@ -728,15 +747,13 @@ class Monitoring
 
     result[host.to_sym][:discovery] = discoveryResult
 
+    sleep(4)
+
+    self.createNodeInformation()
+
     logger.debug( JSON.pretty_generate( result ) )
 
     return JSON.pretty_generate( result )
-
-#
-#   return JSON.pretty_generate( {
-#     :status  => status,
-#     :message => message
-#   } )
 
   end
 

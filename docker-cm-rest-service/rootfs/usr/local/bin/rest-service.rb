@@ -176,9 +176,15 @@ module Sinatra
 
       result = m.addHost( host, payload )
 
-      status result['status']
+      r = JSON.parse( result )
 
-      result
+      status = r['status']
+      body   = r['message']
+
+      halt status, {'Content-Type' => 'text/json'}, result
+
+#      status result['status']
+#      result
 
     end
 
@@ -187,9 +193,15 @@ module Sinatra
 
       result = m.listHost( nil, request.env )
 
-      status result['status']
+      r = JSON.parse( result )
 
-      result
+      status = r['status']
+      body   = r['message']
+
+      halt status, {'Content-Type' => 'text/json'}, result
+
+#      status result['status']
+#      result
 
     end
 
@@ -199,9 +211,12 @@ module Sinatra
       host   = params[:host]
       result = m.listHost( host, request.env )
 
-      status result['status']
+      r = JSON.parse( result )
 
-      result
+      status = r['status']
+      body   = r['message']
+
+      halt status, {'Content-Type' => 'text/json'}, result
 
     end
 

@@ -8,11 +8,12 @@
 # -----------------------------------------------------------------------------
 
 require 'json'
-require 'dalli'
 require 'rest-client'
 
 require_relative 'monkey'
 require_relative 'logging'
+require_relative 'cache'
+require_relative 'utils/network'
 
 # -----------------------------------------------------------------------------
 
@@ -26,9 +27,9 @@ module ExternalDiscovery
 
     def initialize( settings )
 
-      discoveryHost      = settings[:discoveryHost] ? settings[:discoveryHost] : nil
-      discoveryPort      = settings[:discoveryPort] ? settings[:discoveryPort] : nil
-      discoveryPath      = settings[:discoveryPath] ? settings[:discoveryPath] : nil
+      discoveryHost      = settings.dig(:discoveryHost)
+      discoveryPort      = settings.dig(:discoveryPort)
+      discoveryPath      = settings.dig(:discoveryPath)
 
       @discoveryUrl      = sprintf( 'http://%s:%d%s', discoveryHost, discoveryPort, discoveryPath )
 
@@ -43,7 +44,9 @@ module ExternalDiscovery
 
       @data = @mutex.synchronize { self.client() }
 
-      return @data # @mc.set( 'consumer__live__data' , @data )
+      logger.debug( @data )
+
+      return @data
 
     end
 
@@ -57,7 +60,9 @@ module ExternalDiscovery
       response = nil
 
       begin
+
         Net::HTTP.start( uri.host, uri.port ) do |http|
+
           request = Net::HTTP::Get.new( uri.request_uri )
 
           request.add_field('Content-Type', 'application/json')
@@ -81,14 +86,23 @@ module ExternalDiscovery
             # 412 – Precondition failed
             logger.error( sprintf( ' [%s] ', responseCode ) )
             logger.error( sprintf( '  %s  ', response.body ) )
+
+            return {
+              :status  => responseCode,
+              :message => response.body
+            }
           end
         end
       rescue Exception => e
-        logger.error( e )
-        logger.error( e.backtrace )
+#         logger.error( e )
+#         logger.error( e.backtrace )
 
-        status  = 404
         message = sprintf( 'internal error: %s', e )
+
+        return {
+          :status  => 404,
+          :message => message
+        }
       end
 
     end
@@ -178,10 +192,30 @@ module ExternalDiscovery
       )
 
       begin
-        data   = restClient.get( @headers ).body
-        data   = JSON.parse( data )
 
-        return data
+        response     = restClient.get( @headers )
+
+        responseCode = response.code
+        responseBody = response.body
+
+# logger.debug( response.class.to_s )
+# logger.debug( response.inspect )
+# logger.debug( response )
+#
+# logger.debug( responseCode )
+# logger.debug( responseBody )
+
+        if( responseCode == 200 )
+
+          data   = JSON.parse( responseBody )
+
+          return data
+
+        elsif( responseCode == 204 )
+
+          return { 'status' => responseCode }
+
+        end
 
       rescue Exception => e
 
@@ -201,8 +235,7 @@ module ExternalDiscovery
       )
 
       payload = {
-        "grafana" => true,
-        "icinga2" => true
+        "force" => true
       }
 
       begin
@@ -222,10 +255,15 @@ module ExternalDiscovery
 
     def add( path, tags = {} )
 
+
+      logger.debug( "add( #{path}, #{tags} )" )
+
       url = sprintf( '%s/host/%s', @apiUrl, path )
 
       restClient = RestClient::Resource.new(
-        URI.encode( url )
+        URI.encode( url ),
+        :timeout      => 5,
+        :open_timeout => 5,
       )
 #
 # logger.debug( tags )
@@ -238,7 +276,32 @@ module ExternalDiscovery
 
         return data
 
+      rescue RestClient::Exceptions::ReadTimeout => e
+
+        logger.error( e.inspect )
+#         logger.error( e.code )
+#         logger.error( e.body )
+
+
+        logger.error( e.message )
+
+        return {
+          :status  => 408,
+          :message => e.message
+        }
+
       rescue RestClient::ExceptionWithResponse => e
+
+        logger.error( e.inspect )
+        logger.error( e.message )
+
+        return {
+          :status  => 500,
+          :message => e.message
+        }
+
+        return nil
+      rescue => e
 
         logger.error( e.inspect )
 
@@ -268,8 +331,8 @@ module ExternalDiscovery
       @discoveryUrl  = sprintf( 'http://%s:%d%s', @discoveryHost, @discoveryPort, @discoveryPath )
       @historic      = []
 
-      version        = '0.9.1'
-      date           = '2017-01-05'
+      version        = '0.9.20'
+      date           = '2017-05-05'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - External Discovery Service' )
@@ -279,15 +342,72 @@ module ExternalDiscovery
       logger.info( "  Discovery System #{@discoveryUrl}" )
       logger.info( '-----------------------------------------------------------------' )
       logger.info( '' )
+
+      @cache         = Cache::Store.new()
+
     end
 
 
-    def compareVersions()
+
+    def nsLookup( name )
+
+      # DNS
+      #
+      hostname = sprintf( 'dns-%s', name )
+
+#       logger.debug( hostname )
+
+      ip       = nil
+      short    = nil
+      fqdn     = nil
+
+      dns      = @cache.get( hostname )
+
+#       logger.debug( dns.class.to_s )
+#       logger.debug( dns )
+
+      if( dns == nil )
+
+        logger.debug( 'create DNS Information' )
+        # create DNS Information
+        dns      = Utils::Network.resolv( name )
+
+#         logger.debug( "#{dns}" )
+
+        ip    = dns.dig(:ip)
+        short = dns.dig(:short)
+        fqdn  = dns.dig(:long)
+
+        @cache.set( hostname , expiresIn: 120 ) { Cache::Data.new( { 'ip': ip, 'short': short, 'long': fqdn } ) }
+
+      else
+
+        logger.debug( 'found cached dns data' )
+
+        ip    = dns.dig(:ip)
+        short = dns.dig(:short)
+        fqdn  = dns.dig(:long)
+
+      end
+      #
+      # ------------------------------------------------
+
+      return ip, short, fqdn
+
+    end
+
+
+    def compareVersions( params = {} )
 
       logger.debug( 'compare' )
 
-      liveData     = @data
-      historicData = @historic # @mc.get( 'consumer__historic__data' ) || []
+      liveData     = params.dig( 'live' )
+      historicData = @historic
+
+#       logger.debug( liveData )
+#       logger.debug( liveData.class.to_s )
+#       logger.debug( historicData )
+#       logger.debug( historicData.class.to_s )
 
       if( liveData.is_a?( Array ) == false )
         logger.error( 'liveData is not an Array' )
@@ -357,16 +477,26 @@ module ExternalDiscovery
 
         logger.info( 'no historic data found, first run' )
 
-        newArray = Array.new()
+        discoveryStatus = 204
+        newArray        = Array.new()
 
         # add all founded nodes
 
         liveData.each do |l|
 
-          ip      = l["ip"]      ? l["ip"]      : nil
-          name    = l["name"]    ? l["name"]    : nil
-          state   = l["state"]   ? l["state"]   : 'running'
-          tags    = l["tags"]    ? l["tags"]    : []
+          ip          = l.dig('ip')
+          displayName = l.dig('name')
+          state       = l.dig('state') || 'running'
+          tags        = l.dig('tags')  || []
+
+          if( displayName == nil )
+            logger.warn( 'no cname configured, skip' )
+            next
+          end
+
+          if( displayName != 'cosmos-development-management-cms' )
+            next
+          end
 
           # states from AWS:
           #  0 : pending
@@ -378,68 +508,124 @@ module ExternalDiscovery
 
           useableTags = Array.new()
 
-          logger.info( sprintf( 'get information about %s (%s)', ip, name ) )
+          logger.info( sprintf( 'get information about %s (%s)', ip, displayName ) )
+
+          ip, short, fqdn = self.nsLookup( ip )
+
 
           # get node data
-          result = net.fetch( ip )
+          result = net.fetch( short )
+
+#           logger.debug( result )
 
           if( result != nil )
 
-            dnsStatus  = result.dig( ip, 'dns' )
+            status = result.dig('status') || 400
 
-            # check DNS resolving
-            if( dnsStatus == false )
-              logger.debug( '  DNS Problem! try IP' )
-              secondTest = net.fetch( ip )
-              if( secondTest != nil )
-                dnsStatus  = secondTest.dig( ip, 'dns' )
-                if( dnsStatus == false || dnsStatus == nil )
-                  logger.error( '  Host are not available. skip' )
-                  next
-                else
-                  result = secondTest
-                  name   = ip
-                end
-              end
-            else
-              name   = ip
+# logger.debug( status )
+
+            if( status.to_i == 200 )
+              logger.info( 'node are in monitoring available' )
+              next
             end
 
-            discoveryStatus  = result.dig( name, 'discovery', 'status' )
+#             if( status.to_i == 204 )
+#
+#               logger.info( 'node not in monitoring found, get dns information' )
+#
+#               discoveryStatus = status
+#
+#               ip, short, fqdn = self.nsLookup( ip )
+#
+# #               logger.debug( ip )
+#
+#               if( ip != nil )
+#                 name = ip
+#               else
+#                 discoveryStatus = 400
+#               end
+#             end
+
+
+#             logger.debug( discoveryStatus )
+
+
+#             discoveryStatus = 204
+#
+#             dnsStatus  = result.dig( ip, 'dns' )
+#
+#             # check DNS resolving
+#             if( dnsStatus == false || dnsStatus == nil )
+#
+#               logger.debug( '  DNS Problem! try own ns lookup' )
+#
+#               ip, short, fqdn = self.nsLookup(ip )
+#
+#               secondTest = net.fetch( ip )
+#
+#               if( secondTest != nil )
+#
+#                 dnsStatus  = secondTest.dig( ip, 'dns' )
+#
+#                 if( dnsStatus == false || dnsStatus == nil )
+#                   logger.error( '  Host are not available. skip' )
+#                   next
+#                 else
+#                   result = secondTest
+#                   name   = ip
+#                 end
+#               end
+#             else
+#               name  = ip
+#             end
+#
+#             discoveryStatus  = result.dig( name, 'discovery', 'status' )
+#
+#             logger.debug( discoveryStatus )
+#             logger.debug( discoveryStatus.class.to_s )
 
             # {"status"=>400, "message"=>"Host are not available (DNS Problem)"}
-            if( discoveryStatus == 400 )
-              logger.info( '  The DNS of this host are not resolveable ... skip' )
-              next
+            #if( discoveryStatus == 400 )
+            #  logger.info( '  The DNS of this host are not resolveable ... skip' )
+            #  next
+            #
+            ## not exists
+            #els
+            if( discoveryStatus == nil || discoveryStatus == 204 || discoveryStatus == 404 )
 
-            # not exists
-            elsif( discoveryStatus == 404 )
+              logger.info( '  now, we try to add them' )
 
-              logger.info( '  host not in monitoring ... try to add' )
+              logger.debug( "tags: #{tags}" )
 
               # our positive list for Tags
-              useableTags = tags.filter( :customer, :environment, :tier )
+              useableTags = tags.filter( 'customer', 'environment', 'tier' )
 
-#               logger.debug( useableTags )
+              logger.debug( "useableTags: #{useableTags}" )
 
               # add to monitoring
+              # defaults:
+              # - discovery  = true
+              # - icinga     = true
+              # - grafana    = true
+              # - annotation = true
               d = JSON.generate( {
-                :discovery  => true,
-                :icinga     => false,
-                :grafana    => true,
-                :annotation => true,
                 :tags       => useableTags,
-                :config     => { 'display-name' => name }
+                :config     => { 'display-name' => displayName }
               } )
 
-              result = net.add( name, d )
+              logger.debug( "data: #{d}" )
+
+              result = net.add( short, d )
 
               logger.debug( result )
 
+              logger.debug( '------------------------' )
+
+
               if( result != nil )
 
-                discoveryStatus  = result.dig( "status" )
-                discoveryMessage = result.dig( "message" )
+                discoveryStatus  = result.dig( :status )   || result.dig( 'status' )
+                discoveryMessage = result.dig( :message )  || result.dig( 'message' )
 
                 if( discoveryStatus == 400 )
                   # error
@@ -449,11 +635,16 @@ module ExternalDiscovery
                   logger.error( sprintf( '  => %s', discoveryMessage ) )
 
                   newArray << l
+                elsif( discoveryStatus == 408 )
+                  # error
+                  logger.error( sprintf( '  => %s', discoveryMessage ) )
                 else
                   logger.info( 'Host successful added' )
                   # successful
                   newArray << l
                 end
+
+                sleep(4)
 
               end
 
@@ -465,7 +656,6 @@ module ExternalDiscovery
         logger.debug( newArray )
 
         @historic = newArray
-#         @mc.set( 'consumer__historic__data', newArray )
       end
 
 
@@ -516,33 +706,27 @@ module ExternalDiscovery
 
       consumer = DataConsumer.new( config )
 
-      threads << Thread.new {
+      data = consumer.client()
 
-        @data = consumer.getData()
-      }
+      logger.debug( JSON.pretty_generate( data ) )
 
-      threads.each {|t| t.join }
+      self.compareVersions( { 'live' => data } )
 
-      threads << Thread.new {
 
-        @data = self.compareVersions()
-      }
-
-      threads.each {|t| t.join }
-
-#      fork do
+#       threads << Thread.new {
 #
-#        @data = consumer.getData()
+#         @data = consumer.getData()
+#       }
 #
-#        logger.debug( @data )
-#      end
-
-
-#      fork do
-#        self.compareVersions()
-#      end
+#       threads.each {|t| t.join }
 #
-#      Process.waitall
+#       threads << Thread.new {
+#
+#         @data = self.compareVersions()
+#       }
+#
+#      threads.each {|t| t.join }
+
 
       logger.debug( 'done' )
 
