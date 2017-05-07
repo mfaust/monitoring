@@ -97,8 +97,8 @@ module ServiceDiscovery
 
     @scanPorts         = ports
 
-    version             = '1.6.0'
-    date                = '2017-04-11'
+    version             = '1.6.2'
+    date                = '2017-05-07'
 
     logger.info( '-----------------------------------------------------------------' )
     logger.info( ' CoreMedia - Service Discovery' )
