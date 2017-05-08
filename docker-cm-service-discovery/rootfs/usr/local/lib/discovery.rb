@@ -283,6 +283,21 @@ module ServiceDiscovery
       logger.debug( JSON.pretty_generate( discoveryData ) )
       logger.error( 'Host already created' )
 
+      # look for online status ...
+      #
+      status = @redis.status( { :short => host } )
+
+      logger.debug( status )
+      logger.debug( status.class.to_s )
+
+      status = status.dig(:status)
+
+      if( status != nil || status != Storage::RedisClient::OFFLINE )
+
+        logger.debug( 'set host status to ONLINE' )
+        status = @redis.setStatus( { :short => host, :status => Storage::RedisClient::ONLINE } )
+      end
+
       return {
         :status  => 409, # 409 Conflict
         :message => 'Host already created'
@@ -358,7 +373,8 @@ module ServiceDiscovery
     } )
 
     logger.debug( 'set host status to ONLINE' )
-    @redis.setStatus( { :short => host, :status => Storage::RedisClient::ONLINE } )
+    status = @redis.setStatus( { :short => host, :status => Storage::RedisClient::ONLINE } )
+    logger.debug( status )
 
     finish = Time.now
     logger.info( sprintf( 'finished in %s seconds', finish - start ) )

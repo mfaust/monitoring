@@ -102,6 +102,7 @@ module ServiceDiscovery
           result = @redis.nodes( { :short => node } )
 
           logger.debug( "redis: '#{result}' | node: '#{node}'" )
+          logger.debug( @redis.nodes() )
 
           if( result.to_s != node.to_s )
 
@@ -150,6 +151,7 @@ module ServiceDiscovery
           result = @redis.nodes( { :short => node } )
 
           logger.debug( "redis: '#{result}' | node: '#{node}'" )
+          logger.debug( @redis.nodes() )
 
           if( result.to_s != node.to_s )
 
