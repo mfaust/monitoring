@@ -295,6 +295,9 @@ module DataCollector
 
       d = @redis.nodes( { :status => Storage::RedisClient::ONLINE } )
 
+      logger.debug( d )
+      logger.debug( @redis.nodes( ) )
+
       return d
 
     end
@@ -764,13 +767,13 @@ module DataCollector
 
     def run()
 
-      logger.debug( 'get monitored Servers' )
+      logger.debug( 'get the online server for monitoring to collect their data' )
 
       monitoredServer = self.monitoredServer()
 
       if( monitoredServer.is_a?( FalseClass ) || monitoredServer.count == 0 )
 
-        logger.info( 'no Servers for Monitoring found' )
+        logger.info( 'no online server found' )
 
         return
       end
