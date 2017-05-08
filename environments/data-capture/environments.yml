@@ -91,8 +91,7 @@ services:
   cm-carbon-client:
     environment:
       TZ: 'Europe/Berlin'
-      # NOTICE: EXTERNAL-SERVICE
-      GRAPHITE_HOST: carbon.docker
+      GRAPHITE_HOST: carbon-relay
       # GRAPHITE_PORT: 2003
       REDIS_HOST: redis
       # REDIS_PORT: 6379
