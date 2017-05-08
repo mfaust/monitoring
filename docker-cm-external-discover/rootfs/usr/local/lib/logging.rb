@@ -20,12 +20,17 @@ module Logging
 
     def configure_logger_for( classname )
 
-#      logFile         = '/var/log/monitoring.log'
-#      file            = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
-#      file.sync       = true
-#      logger          = Logger.new( file, 'weekly', 1024000 )
+      logFile         = '/var/log/external-discover.log'
+      file            = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
+      file.sync       = true
+      logger          = Logger.new( file, 'weekly', 1024000 )
 
-      logger                 = Logger.new(STDOUT)
+      if( File.exists?( logFile ) )
+        FileUtils.chmod( 0666, logFile )
+        FileUtils.chown( 'nobody', 'nobody', logFile )
+      end
+
+#      logger                 = Logger.new(STDOUT)
       logger.progname        = classname
       logger.level           = Logger::DEBUG
       logger.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
@@ -33,10 +38,7 @@ module Logging
         "[#{datetime.strftime( logger.datetime_format )}] #{severity.ljust(5)} : #{progname} - #{msg}\n"
       end
 
-#      if( File.exists?( logFile ) )
-#        FileUtils.chmod( 0666, logFile )
-#        FileUtils.chown( 'nobody', 'nobody', logFile )
-#      end
+
 
       logger
     end
