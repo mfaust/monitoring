@@ -44,6 +44,10 @@ module ServiceDiscovery
       #
       # ------------------------------------------------
 
+      logger.debug( sprintf( ' ip   %s ', ip ) )
+      logger.debug( sprintf( ' host %s ', short ) )
+      logger.debug( sprintf( ' fqdn %s ', fqdn ) )
+
       return ip, short, fqdn
 
     end

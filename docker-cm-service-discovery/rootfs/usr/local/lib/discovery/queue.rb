@@ -36,7 +36,7 @@ module ServiceDiscovery
 
     def processQueue( data = {} )
 
-        logger.info( sprintf( 'process Message Id %d from Queue %s', data.dig(:id), data.dig(:tube) ) )
+        logger.info( sprintf( 'process Message ID %d from Queue \'%s\'', data.dig(:id), data.dig(:tube) ) )
 
         command = data.dig( :body, 'cmd' )
         node    = data.dig( :body, 'node' )
@@ -44,33 +44,37 @@ module ServiceDiscovery
 
         if( command == nil || node == nil || payload == nil )
 
+          status = 500
+
           if( command == nil )
-            logger.error( 'missing command' )
+            e = 'missing command'
+            logger.error( e )
             logger.error( data )
-            return { :status  => 500, :message => 'missing command' }
+            return { :status  => status, :message => e }
           end
 
           if( node == nil )
-            logger.error( 'missing node' )
+            e = 'missing node'
+            logger.error( e )
             logger.error( data )
-            return { :status  => 500, :message => 'missing node' }
+            return { :status  => status, :message => e }
           end
 
           if( payload == nil )
-            logger.error( 'missing payload' )
+            e = 'missing payload'
+            logger.error( e )
             logger.error( data )
-            return { :status  => 500, :message => 'missing payload' }
+            return { :status  => status, :message => e }
           end
 
         end
 
         logger.debug( sprintf( '  command: %s', command ) )
+        logger.info( sprintf( '  node %s', node ) )
 
         # add Node
         #
         if( command == 'add' )
-
-          logger.info( sprintf( '  node %s', node ) )
 
           # TODO
           # check payload!
@@ -93,25 +97,27 @@ module ServiceDiscovery
         #
         elsif( command == 'remove' )
 
-          logger.info( sprintf( '  node %s', node ) )
-
           # check first for existing node!
           #
           result = @redis.nodes( { :short => node } )
 
+          logger.debug( "redis: '#{result}' | node: '#{node}'" )
+
           if( result.to_s != node.to_s )
 
-            logger.info( 'node not in monitoring! skipping delete' )
+            logger.info( 'node not in monitoring. skipping delete' )
 
             return {
               :status  => 200,
-              :message => sprintf( 'node are not in database found. skipping delete ...' )
+              :message => sprintf( 'node not in monitoring. skipping delete ...' )
             }
 
           end
 
           begin
 
+            # remove node also from data-collector!
+            #
             self.sendMessage( { :cmd => command, :queue => 'mq-collector', :payload => { :host => node, :pre => 'prepare' }, :ttr => 1, :delay => 0 } )
 
             result = self.deleteHost( node )
@@ -130,8 +136,6 @@ module ServiceDiscovery
         #
         elsif( command == 'refresh' )
 
-          logger.info( sprintf( '  node %s', node ) )
-
           result = self.refreshHost( node )
 
             return {
@@ -143,22 +147,26 @@ module ServiceDiscovery
         #
         elsif( command == 'info' )
 
-          logger.info( sprintf( '  node %s', node ) )
-
           result = @redis.nodes( { :short => node } )
+
+          logger.debug( "redis: '#{result}' | node: '#{node}'" )
 
           if( result.to_s != node.to_s )
 
-            logger.info( 'node are not in database found' )
-
-            self.sendMessage( { :cmd => 'info', :queue => 'mq-discover-info', :payload => {}, :ttr => 1, :delay => 0 } )
+            logger.info( 'node not in monitoring. skipping info' )
 
             return {
               :status  => 200,
-              :message => sprintf( 'node are not in database found' )
+              :message => sprintf( 'node not in monitoring. skipping info ...' )
             }
 
           end
+
+#           self.sendMessage( { :cmd => 'info', :queue => 'mq-discover-info', :payload => {}, :ttr => 1, :delay => 0 } )
+#
+#           return {
+#             :status  => 200
+#           }
 
           result = self.listHosts( node )
 
@@ -200,7 +208,6 @@ module ServiceDiscovery
         result[:request]    = data
 
 #        logger.debug( result )
-
 
     end
 
