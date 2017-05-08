@@ -97,7 +97,7 @@ class Monitoring
     end
 
     nodes   = @redis.nodes()
-#     logger.debug( nodes )
+    logger.debug( nodes )
 
     if( nodes.is_a?( Hash ) || nodes.is_a?( Array ) )
 
@@ -181,6 +181,7 @@ class Monitoring
     else
 
       logger.debug( 'no nodes found' )
+      @cache.unset( 'information' )
 
     end
 
