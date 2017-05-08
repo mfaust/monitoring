@@ -20,7 +20,7 @@ module Logging
 
     def configure_logger_for( classname )
 
-      logFile         = '/var/log/monitoring.log'
+      logFile         = '/var/log/graphite-client.log'
       file            = File.new( logFile, File::WRONLY | File::APPEND | File::CREAT, 0666 )
       file.sync       = true
       logger          = Logger.new( file, 'weekly', 1024000 )
