@@ -36,180 +36,180 @@ module ServiceDiscovery
 
     def processQueue( data = {} )
 
-        logger.info( sprintf( 'process Message ID %d from Queue \'%s\'', data.dig(:id), data.dig(:tube) ) )
+      logger.info( sprintf( 'process Message ID %d from Queue \'%s\'', data.dig(:id), data.dig(:tube) ) )
 
-        command = data.dig( :body, 'cmd' )
-        node    = data.dig( :body, 'node' )
-        payload = data.dig( :body, 'payload' )
+      command = data.dig( :body, 'cmd' )
+      node    = data.dig( :body, 'node' )
+      payload = data.dig( :body, 'payload' )
 
-        if( command == nil || node == nil || payload == nil )
+      if( command == nil || node == nil || payload == nil )
 
-          status = 500
+        status = 500
 
-          if( command == nil )
-            e = 'missing command'
-            logger.error( e )
-            logger.error( data )
-            return { :status  => status, :message => e }
-          end
-
-          if( node == nil )
-            e = 'missing node'
-            logger.error( e )
-            logger.error( data )
-            return { :status  => status, :message => e }
-          end
-
-          if( payload == nil )
-            e = 'missing payload'
-            logger.error( e )
-            logger.error( data )
-            return { :status  => status, :message => e }
-          end
-
+        if( command == nil )
+          e = 'missing command'
+          logger.error( e )
+          logger.error( data )
+          return { :status  => status, :message => e }
         end
 
-        logger.debug( sprintf( '  command: %s', command ) )
-        logger.info( sprintf( '  node %s', node ) )
+        if( node == nil )
+          e = 'missing node'
+          logger.error( e )
+          logger.error( data )
+          return { :status  => status, :message => e }
+        end
 
-        # add Node
+        if( payload == nil )
+          e = 'missing payload'
+          logger.error( e )
+          logger.error( data )
+          return { :status  => status, :message => e }
+        end
+
+      end
+
+      logger.debug( sprintf( '  command: %s', command ) )
+      logger.info( sprintf( '  node %s', node ) )
+
+      # add Node
+      #
+      if( command == 'add' )
+
+        # TODO
+        # check payload!
+        # e.g. for 'force' ...
+        result  = self.addHost( node, payload )
+
+        status  = result.dig(:status)
+        message = result.dig(:message)
+
+        result = {
+          :status  => status,
+          :message => message
+        }
+
+        logger.debug( result )
+
+        return result
+
+      # remove Node
+      #
+      elsif( command == 'remove' )
+
+        # check first for existing node!
         #
-        if( command == 'add' )
+        result = @redis.nodes( { :short => node } )
 
-          # TODO
-          # check payload!
-          # e.g. for 'force' ...
-          result  = self.addHost( node, payload )
+        logger.debug( "redis: '#{result}' | node: '#{node}'" )
+        logger.debug( @redis.nodes() )
 
-          status  = result.dig(:status)
-          message = result.dig(:message)
+        if( result.to_s != node.to_s )
 
-          result = {
-            :status  => status,
-            :message => message
-          }
-
-          logger.debug( result )
-
-          return result
-
-        # remove Node
-        #
-        elsif( command == 'remove' )
-
-          # check first for existing node!
-          #
-          result = @redis.nodes( { :short => node } )
-
-          logger.debug( "redis: '#{result}' | node: '#{node}'" )
-          logger.debug( @redis.nodes() )
-
-          if( result.to_s != node.to_s )
-
-            logger.info( 'node not in monitoring. skipping delete' )
-
-            return {
-              :status  => 200,
-              :message => sprintf( 'node not in monitoring. skipping delete ...' )
-            }
-
-          end
-
-          begin
-
-            # remove node also from data-collector!
-            #
-            self.sendMessage( { :cmd => command, :queue => 'mq-collector', :payload => { :host => node, :pre => 'prepare' }, :ttr => 1, :delay => 0 } )
-
-            result = self.deleteHost( node )
-
-          rescue => e
-
-            logger.error( e )
-
-          end
-
-          return {
-            :status => 200
-          }
-
-        # refresh Node
-        #
-        elsif( command == 'refresh' )
-
-          result = self.refreshHost( node )
-
-            return {
-              :status  => 200,
-              :message => result
-            }
-
-        # information about Node
-        #
-        elsif( command == 'info' )
-
-          result = @redis.nodes( { :short => node } )
-
-          logger.debug( "redis: '#{result}' | node: '#{node}'" )
-          logger.debug( @redis.nodes() )
-
-          if( result.to_s != node.to_s )
-
-            logger.info( 'node not in monitoring. skipping info' )
-
-            return {
-              :status  => 200,
-              :message => sprintf( 'node not in monitoring. skipping info ...' )
-            }
-
-          end
-
-#           self.sendMessage( { :cmd => 'info', :queue => 'mq-discover-info', :payload => {}, :ttr => 1, :delay => 0 } )
-#
-#           return {
-#             :status  => 200
-#           }
-
-          result = self.listHosts( node )
-
-          status  = result.dig(:status)
-          message = result.dig(:message)
-
-          r = {
-            :status  => status,
-            :message => message
-          }
-
-          logger.debug( r )
-
-          self.sendMessage( { :cmd => 'info', :queue => 'mq-discover-info', :payload => result, :ttr => 1, :delay => 0 } )
+          logger.info( 'node not in monitoring. skipping delete' )
 
           return {
             :status  => 200,
-            :message => 'information succesful send'
-          }
-
-        # all others
-        #
-        else
-
-          logger.error( sprintf( 'wrong command detected: %s', command ) )
-
-          result = {
-            :status  => 500,
-            :message => sprintf( 'wrong command detected: %s', command )
+            :message => sprintf( 'node not in monitoring. skipping delete ...' )
           }
 
         end
 
-        if( result.is_a?( String ) )
+        begin
 
-          result = JSON.parse( result )
+          # remove node also from data-collector!
+          #
+          self.sendMessage( { :cmd => command, :queue => 'mq-collector', :payload => { :host => node, :pre => 'prepare' }, :ttr => 1, :delay => 0 } )
+
+          result = self.deleteHost( node )
+
+        rescue => e
+
+          logger.error( e )
+
         end
 
-        result[:request]    = data
+        return {
+          :status => 200
+        }
 
-#        logger.debug( result )
+      # refresh Node
+      #
+      elsif( command == 'refresh' )
+
+        result = self.refreshHost( node )
+
+          return {
+            :status  => 200,
+            :message => result
+          }
+
+      # information about Node
+      #
+      elsif( command == 'info' )
+
+        result = @redis.nodes( { :short => node } )
+
+        logger.debug( "redis: '#{result}' | node: '#{node}'" )
+        logger.debug( @redis.nodes() )
+
+        if( result.to_s != node.to_s )
+
+          logger.info( 'node not in monitoring. skipping info' )
+
+          return {
+            :status  => 200,
+            :message => sprintf( 'node not in monitoring. skipping info ...' )
+          }
+
+        end
+
+#         self.sendMessage( { :cmd => 'info', :queue => 'mq-discover-info', :payload => {}, :ttr => 1, :delay => 0 } )
+#
+#         return {
+#           :status  => 200
+#         }
+
+        result = self.listHosts( node )
+
+        status  = result.dig(:status)
+        message = result.dig(:message)
+
+        r = {
+          :status  => status,
+          :message => message
+        }
+
+        logger.debug( r )
+
+        self.sendMessage( { :cmd => 'info', :queue => 'mq-discover-info', :payload => result, :ttr => 1, :delay => 0 } )
+
+        return {
+          :status  => 200,
+          :message => 'information succesful send'
+        }
+
+      # all others
+      #
+      else
+
+        logger.error( sprintf( 'wrong command detected: %s', command ) )
+
+        result = {
+          :status  => 500,
+          :message => sprintf( 'wrong command detected: %s', command )
+        }
+
+      end
+
+      if( result.is_a?( String ) )
+
+        result = JSON.parse( result )
+      end
+
+      result[:request]    = data
+
+#      logger.debug( result )
 
     end
 

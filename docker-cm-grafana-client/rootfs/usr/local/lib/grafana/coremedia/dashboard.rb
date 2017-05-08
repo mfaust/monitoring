@@ -54,30 +54,49 @@ module Grafana
 
       def prepare( host )
 
-        dns = @redis.dnsData( { :ip => host, :short => host } )
+        # get a DNS record
+        #
+        ip, short, fqdn = self.nsLookup( host )
 
-        if( dns != nil )
+        @shortHostname  = @grafanaHostname = short
 
-          dnsIp        = dns.dig(:ip)
-          dnsShortname = dns.dig(:shortname)
-          dnsLongname  = dns.dig(:longname)
+        config          = @redis.config( { :short => short, :key => 'display-name' } )
 
-          @shortHostname  = @grafanaHostname = dnsShortname
+        if( config.dig( 'display-name' ) != nil )
 
-          config          = @redis.config( { :short => dnsShortname, :key => 'display-name' } )
+          @shortHostname = config.dig( 'display-name' ).to_s
 
-          if( config.dig( 'display-name' ) != nil )
-
-            @shortHostname = config.dig( 'display-name' ).to_s
-
-            logger.info( "use custom display-name from config: '#{@shortHostname}'" )
-          end
-
-          @shortHostname        = self.createSlug( @shortHostname ).gsub( '.', '-' )
-        else
-
-          logger.warn( 'no DNS entry found' )
+          logger.info( "use custom display-name from config: '#{@shortHostname}'" )
         end
+
+        @shortHostname        = self.createSlug( @shortHostname ).gsub( '.', '-' )
+
+        logger.debug( @shortHostname )
+
+#         dns = @redis.dnsData( { :ip => host, :short => host } )
+#
+#         if( dns != nil )
+#
+#           dnsIp        = dns.dig(:ip)
+#           dnsShortname = dns.dig(:shortname)
+#           dnsLongname  = dns.dig(:longname)
+#
+#           @shortHostname  = @grafanaHostname = dnsShortname
+#
+#           config          = @redis.config( { :short => dnsShortname, :key => 'display-name' } )
+#
+#           if( config.dig( 'display-name' ) != nil )
+#
+#             @shortHostname = config.dig( 'display-name' ).to_s
+#
+#             logger.info( "use custom display-name from config: '#{@shortHostname}'" )
+#           end
+#
+#           @shortHostname        = self.createSlug( @shortHostname ).gsub( '.', '-' )
+#         else
+#
+#           logger.warn( 'no DNS entry found' )
+#         end
 
       end
 
@@ -107,11 +126,13 @@ module Grafana
           }
         end
 
+        start = Time.now
+
         logger.info( sprintf( 'Adding dashboards for host \'%s\'', host ) )
 
         self.prepare( host )
 
-        discovery = @redis.discoveryData( { :ip => host, :short => host } )
+        discovery = @redis.discoveryData( { :short => host } )
 
         if( discovery == nil )
           return {
@@ -134,6 +155,9 @@ module Grafana
         serviceHash = Hash.new()
 
         discovery.each do |service,serviceData|
+
+          logger.debug( service )
+          logger.debug( serviceData )
 
           additionalTemplatePaths = Array.new()
 
@@ -265,6 +289,9 @@ module Grafana
           status  = 500
           message = 'Error for adding Dashboads'
         end
+
+        finish = Time.now
+        logger.info( sprintf( 'finished in %s seconds', finish - start ) )
 
         return {
           :status      => status,

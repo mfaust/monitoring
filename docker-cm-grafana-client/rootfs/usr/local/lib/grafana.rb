@@ -32,6 +32,7 @@ require_relative 'grafana/snapshot'
 require_relative 'grafana/login'
 require_relative 'grafana/admin'
 require_relative 'grafana/version'
+require_relative 'grafana/coremedia/tools'
 require_relative 'grafana/coremedia/dashboard'
 
 # -----------------------------------------------------------------------------
@@ -54,6 +55,7 @@ module Grafana
     include Grafana::Snapshot
     include Grafana::Login
     include Grafana::Admin
+    include Grafana::Coremedia::Tools
     include Grafana::Coremedia::Dashboard
     include Grafana::Coremedia::Templates
     include Grafana::Coremedia::Annotations
@@ -132,6 +134,7 @@ module Grafana
       @redis       = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
       @mbean       = MBean::Client.new( { :redis => @redis } )
       @mqConsumer  = MessageQueue::Consumer.new( @MQSettings )
+      @mqProducer  = MessageQueue::Producer.new( @MQSettings )
 
       self.createApiInstance( {
         :timeout      => timeout,
