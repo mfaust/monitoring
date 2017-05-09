@@ -9,9 +9,9 @@ ENV \
   TERM=xterm \
   APK_ADD="build-base bind-tools drill imagemagick-dev ruby-dev ruby-irb" \
   APK_DEL="build-base imagemagick-dev ruby-dev" \
-  GEMS="beaneater bigdecimal fileutils ipaddress json redis rest-client rufus-scheduler time_difference tzinfo-data"
+  GEMS="beaneater bigdecimal fileutils ipaddress json redis resolve-hostname rest-client rufus-scheduler time_difference tzinfo-data"
 
-LABEL version="1704-03.1"
+LABEL version="1705-02.1"
 
 # ---------------------------------------------------------------------------------------
 
