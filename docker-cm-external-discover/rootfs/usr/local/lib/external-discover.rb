@@ -494,7 +494,7 @@ module ExternalDiscovery
             next
           end
 
-          if( displayName != 'cosmos-development-management-cms' )
+          if( displayName != 'content-management-system' )
             next
           end
 
