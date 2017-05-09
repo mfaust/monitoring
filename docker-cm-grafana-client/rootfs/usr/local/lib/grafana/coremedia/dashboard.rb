@@ -185,7 +185,7 @@ module Grafana
 #           logger.debug( sprintf( '  templateName %s', templateName ) )
 #           logger.debug( sprintf( '  cacheKey     %s', cacheKey ) )
 
-          if( ! ['mongodb', 'mysql', 'postgres'].include?( serviceName ) )
+          if( ! ['mongodb', 'mysql', 'postgres', 'node_exporter'].include?( serviceName ) )
             additionalTemplatePaths << self.templateForService( 'tomcat' )
           end
 
@@ -229,6 +229,11 @@ module Grafana
           if( @mbean.beanAvailable?( host, 'cae-preview', 'CacheClassesECommerceAvailability' ) == true )
             namedTemplate.push( 'cm-cae-cache-classes-ibm.json' )
           end
+        end
+
+        # add Operation Datas for NodeExporter
+        if( service == 'node_exporter' )
+          namedTemplate.push( 'cm-node_exporter.json' )
         end
 
         self.createNamedTemplate( namedTemplate )
@@ -911,12 +916,19 @@ module Grafana
           template = JSON.parse( template )
         end
 
+        if( additionalTags.is_a?( Hash ) )
+
+          additionalTags = additionalTags.values
+        end
+
         currentTags = template.dig( 'dashboard', 'tags' )
 
         if( currentTags != nil && additionalTags.count() > 0 )
 
           currentTags << additionalTags
-          currentTags.flatten!.sort!
+
+          currentTags.flatten!
+          currentTags.sort!
 
           template['dashboard']['tags'] = currentTags
         end

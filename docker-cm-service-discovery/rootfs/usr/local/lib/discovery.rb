@@ -444,10 +444,6 @@ module ServiceDiscovery
       #
       ip, short, fqdn = self.nsLookup( host )
 
-      logger.debug( sprintf( ' ip   %s ', ip ) )
-      logger.debug( sprintf( ' host %s ', short ) )
-      logger.debug( sprintf( ' fqdn %s ', fqdn ) )
-
       discoveryData = @redis.discoveryData( { :short => short } )
 
       if( discoveryData == nil )
