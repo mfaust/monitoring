@@ -170,10 +170,10 @@ module ExternalDiscovery
 
     def initialize( settings )
 
-      @apiHost    = settings[:host]    ? settings[:host]      : 'localhost'
-      @apiPort    = settings[:port]    ? settings[:port]      : 80
-      @apiVersion = settings[:version] ? settings[:version]   : 2
-      @apiUrl     = settings[:url]     ? settings[:url]       : nil
+      @apiHost    = settings.dig(:host)    || 'localhost'
+      @apiPort    = settings.dig(:port)    || 80
+      @apiVersion = settings.dig(:version) || 2
+      @apiUrl     = settings.dig(:url)
 
       @headers     = {
         'Content-Type' => 'application/json',
@@ -255,7 +255,6 @@ module ExternalDiscovery
 
     def add( path, tags = {} )
 
-
       logger.debug( "add( #{path}, #{tags} )" )
 
       url = sprintf( '%s/host/%s', @apiUrl, path )
@@ -319,20 +318,20 @@ module ExternalDiscovery
 
     def initialize( settings = {} )
 
-      apiHost        = settings[:apiHost]       ? settings[:apiHost]       : nil
-      apiPort        = settings[:apiPort]       ? settings[:apiPort]       : nil
-      apiVersion     = settings[:apiVersion]    ? settings[:apiVersion]    : 2
+      apiHost        = settings.dig(:apiHost)
+      apiPort        = settings.dig(:apiPort)
+      apiVersion     = settings.dig(:apiVersion) || 2
 
-      @discoveryHost = settings[:discoveryHost] ? settings[:discoveryHost] : nil
-      @discoveryPort = settings[:discoveryPort] ? settings[:discoveryPort] : nil
-      @discoveryPath = settings[:discoveryPath] ? settings[:discoveryPath] : nil
+      @discoveryHost = settings.dig(:discoveryHost)
+      @discoveryPort = settings.dig(:discoveryPort)
+      @discoveryPath = settings.dig(:discoveryPath)
 
       @apiUrl        = sprintf( 'http://%s/api/v%s', apiHost, apiVersion )
       @discoveryUrl  = sprintf( 'http://%s:%d%s', @discoveryHost, @discoveryPort, @discoveryPath )
       @historic      = []
 
-      version        = '0.9.20'
-      date           = '2017-05-05'
+      version        = '0.9.25'
+      date           = '2017-05-09'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - External Discovery Service' )
@@ -494,7 +493,7 @@ module ExternalDiscovery
             next
           end
 
-          if( displayName != 'content-management-system' )
+          if( displayName != 'cosmos-development-management-cms' )
             next
           end
 
@@ -666,8 +665,8 @@ module ExternalDiscovery
 
         removedEntries.each do |r|
 
-          ip      = r["ip"]      ? r["ip"]      : nil
-          name    = r["name"]    ? r["name"]    : nil
+          ip      = r.dig('ip')
+          name    = r.dig('name')
 
           if( ip != nil && name != nil )
 
@@ -708,7 +707,7 @@ module ExternalDiscovery
 
       data = consumer.client()
 
-      logger.debug( JSON.pretty_generate( data ) )
+#       logger.debug( JSON.pretty_generate( data ) )
 
       self.compareVersions( { 'live' => data } )
 
