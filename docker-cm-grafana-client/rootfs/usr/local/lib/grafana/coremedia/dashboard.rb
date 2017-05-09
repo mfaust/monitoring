@@ -58,45 +58,24 @@ module Grafana
         #
         ip, short, fqdn = self.nsLookup( host )
 
-        @shortHostname  = @grafanaHostname = short
-
+        # read the configuration for an customized display name
+        #
         config          = @redis.config( { :short => short, :key => 'display-name' } )
 
         if( config.dig( 'display-name' ) != nil )
 
-          @shortHostname = config.dig( 'display-name' ).to_s
+          @grafanaHostname = config.dig( 'display-name' ).to_s
 
-          logger.info( "use custom display-name from config: '#{@shortHostname}'" )
+          logger.info( "use custom display-name from config: '#{@grafanaHostname}'" )
+        else
+
+          @grafanaHostname = short
         end
 
-        @shortHostname        = self.createSlug( @shortHostname ).gsub( '.', '-' )
+        @shortHostname    = short
+        @grafanaHostname  = self.createSlug( @grafanaHostname ).gsub( '.', '-' )
 
         logger.debug( @shortHostname )
-
-#         dns = @redis.dnsData( { :ip => host, :short => host } )
-#
-#         if( dns != nil )
-#
-#           dnsIp        = dns.dig(:ip)
-#           dnsShortname = dns.dig(:shortname)
-#           dnsLongname  = dns.dig(:longname)
-#
-#           @shortHostname  = @grafanaHostname = dnsShortname
-#
-#           config          = @redis.config( { :short => dnsShortname, :key => 'display-name' } )
-#
-#           if( config.dig( 'display-name' ) != nil )
-#
-#             @shortHostname = config.dig( 'display-name' ).to_s
-#
-#             logger.info( "use custom display-name from config: '#{@shortHostname}'" )
-#           end
-#
-#           @shortHostname        = self.createSlug( @shortHostname ).gsub( '.', '-' )
-#         else
-#
-#           logger.warn( 'no DNS entry found' )
-#         end
 
       end
 
@@ -149,7 +128,7 @@ module Grafana
         servicesTmp.delete( 'mysql' )
         servicesTmp.delete( 'postgres' )
         servicesTmp.delete( 'mongodb' )
-#         servicesTmp.delete( 'node_exporter' )
+        servicesTmp.delete( 'node_exporter' )
         servicesTmp.delete( 'demodata-generator' )
 
         serviceHash = Hash.new()
@@ -232,7 +211,7 @@ module Grafana
         end
 
         # add Operation Datas for NodeExporter
-        if( servicesTmp == 'node_exporter' )
+        services.include?('node_exporter' )
           namedTemplate.push( 'cm-node_exporter.json' )
         end
 
@@ -710,7 +689,7 @@ module Grafana
           :serviceName     => serviceName,
           :description     => description,
           :normalizedName  => normalizedName,
-          :grafanaHostname => @shortHostname,
+          :grafanaHostname => @grafanaHostname,
           :shortHostname   => @shortHostname
         } )
 
@@ -777,12 +756,12 @@ module Grafana
 
       def normalizeTemplate( params = {} )
 
-        template        = params[:template]        ? params[:template]        : nil
-        serviceName     = params[:serviceName]     ? params[:serviceName]     : nil
-        description     = params[:description]     ? params[:description]     : nil
-        normalizedName  = params[:normalizedName]  ? params[:normalizedName]  : nil
-        grafanaHostname = params[:grafanaHostname] ? params[:grafanaHostname] : nil
-        shortHostname   = params[:shortHostname]   ? params[:shortHostname]   : nil
+        template        = params.dig(:template)
+        serviceName     = params.dig(:serviceName)
+        description     = params.dig(:description)
+        normalizedName  = params.dig(:normalizedName)
+        grafanaHostname = params.dig(:grafanaHostname)
+        shortHostname   = params.dig(:shortHostname)
 
         if( template == nil )
           return false
@@ -800,8 +779,8 @@ module Grafana
         map = {
           '%DESCRIPTION%' => description,
           '%SERVICE%'     => normalizedName,
-          '%HOST%'        => grafanaHostname,
-          '%SHORTHOST%'   => shortHostname,
+          '%HOST%'        => shortHostname,
+          '%SHORTHOST%'   => grafanaHostname,
           '%TAG%'         => shortHostname
         }
 

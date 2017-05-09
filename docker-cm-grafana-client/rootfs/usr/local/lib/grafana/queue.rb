@@ -161,8 +161,6 @@ module Grafana
 
 #       logger.debug( JSON.pretty_generate( payload ) )
 
-      p = MessageQueue::Producer.new( @MQSettings )
-
       job = {
         cmd:  cmd,          # require
         node: node,         # require
