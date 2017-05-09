@@ -332,7 +332,7 @@ module Grafana
 
         json = self.normalizeTemplate( {
           :template        => template,
-          :grafanaHostname => @shortHostname,
+          :grafanaHostname => @grafanaHostname,
           :shortHostname   => @shortHostname
         } )
 
@@ -345,8 +345,8 @@ module Grafana
 
         logger.info( 'create License Templates' )
 
-        host            = params[:host]     ? params[:host]     : nil
-        services        = params[:services] ? params[:services] : []
+        host            = params.dig(:host)
+        services        = params.dig(:services) || []
 
         rows            = Array.new()
         contentServers  = ['content-management-server', 'master-live-server', 'replication-live-server']
@@ -453,7 +453,7 @@ module Grafana
 
         json = self.normalizeTemplate( {
           :template        => template,
-          :grafanaHostname => @shortHostname,
+          :grafanaHostname => @grafanaHostname,
           :shortHostname   => @shortHostname
         } )
 
@@ -485,7 +485,7 @@ module Grafana
 
               json = self.normalizeTemplate( {
                 :template        => templateJson,
-                :grafanaHostname => @shortHostname,
+                :grafanaHostname => @grafanaHostname,
                 :shortHostname   => @shortHostname
               } )
 
@@ -887,8 +887,8 @@ module Grafana
       #
       def addTags( params = {} )
 
-        template        = params[:template]        ? params[:template]        : nil
-        additionalTags  = params[:additionalTags]  ? params[:additionalTags]  : []
+        template        = params.dig(:template)
+        additionalTags  = params.dig(:additionalTags) || []
 
         # add tags
         if( template.is_a?( String ) )
