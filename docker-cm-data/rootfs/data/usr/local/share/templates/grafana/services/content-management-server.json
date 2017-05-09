@@ -180,7 +180,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.$host.CMS.StatisticsResourceCache.cache.*)",
+                "target": "aliasByMetric(perSecond(*.$host.CMS.StatisticsResourceCache.cache.*))",
                 "textEditor": false
               }
             ],
@@ -264,7 +264,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.$host.CMS.StatisticsJobResult.*)",
+                "target": "aliasByMetric(perSecond(*.$host.CMS.StatisticsJobResult.*))",
                 "textEditor": false
               }
             ],
