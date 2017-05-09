@@ -32,7 +32,7 @@
             "maxDataPoints": 100,
             "interval": null,
             "cacheTimeout": null,
-            "format": "ms",
+            "format": "s",
             "nullText": null,
             "mappingType": 1,
             "nullPointMode": "connected",

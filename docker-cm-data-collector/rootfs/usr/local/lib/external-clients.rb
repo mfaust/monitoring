@@ -271,7 +271,6 @@ module ExternalClients
   end
 
 
-
   class MongoDb
 
     include Logging
@@ -328,6 +327,7 @@ module ExternalClients
     end
 
   end
+
 
   class NodeExporter
 
@@ -586,12 +586,18 @@ module ExternalClients
       result = Hash.new()
       r      = Array.new
 
-      # blacklist
+      # blacklist | mount | egrep -v "(cgroup|none|sysfs|devtmpfs|tmpfs|devpts|proc)"
       data.reject! { |t| t[/iso9660/] }
       data.reject! { |t| t[/tmpfs/] }
       data.reject! { |t| t[/rpc_pipefs/] }
       data.reject! { |t| t[/nfs4/] }
       data.reject! { |t| t[/overlay/] }
+      data.reject! { |t| t[/cgroup/] }
+      data.reject! { |t| t[/devpts/] }
+      data.reject! { |t| t[/devtmpfs/] }
+      data.reject! { |t| t[/sysfs/] }
+      data.reject! { |t| t[/proc/] }
+      data.reject! { |t| t[/none/] }
       data.flatten!
 
       existingDevices = Array.new()

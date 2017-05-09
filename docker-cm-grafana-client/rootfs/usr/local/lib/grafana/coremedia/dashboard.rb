@@ -149,7 +149,7 @@ module Grafana
         servicesTmp.delete( 'mysql' )
         servicesTmp.delete( 'postgres' )
         servicesTmp.delete( 'mongodb' )
-        servicesTmp.delete( 'node_exporter' )
+#         servicesTmp.delete( 'node_exporter' )
         servicesTmp.delete( 'demodata-generator' )
 
         serviceHash = Hash.new()
@@ -232,7 +232,7 @@ module Grafana
         end
 
         # add Operation Datas for NodeExporter
-        if( service == 'node_exporter' )
+        if( servicesTmp == 'node_exporter' )
           namedTemplate.push( 'cm-node_exporter.json' )
         end
 
