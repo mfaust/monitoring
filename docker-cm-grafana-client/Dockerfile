@@ -7,7 +7,7 @@ ENV \
   ALPINE_MIRROR="dl-cdn.alpinelinux.org" \
   ALPINE_VERSION="v3.5" \
   TERM=xterm \
-  APK_ADD="build-base imagemagick-dev ruby-dev ruby-irb" \
+  APK_ADD="build-base bind-tools drill imagemagick-dev ruby-dev ruby-irb" \
   APK_DEL="build-base imagemagick-dev ruby-dev" \
   GEMS="beaneater bigdecimal fileutils ipaddress json redis rest-client rufus-scheduler time_difference tzinfo-data"
 
