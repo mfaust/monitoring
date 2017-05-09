@@ -1,4 +1,6 @@
 
+require_relative '../../utils/network'
+
 module Grafana
 
   module Coremedia
@@ -57,6 +59,6 @@ module Grafana
     end
 
   end
-  
+
 end
 
