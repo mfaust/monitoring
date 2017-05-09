@@ -421,7 +421,7 @@
             "value": "%HOST%",
             "text": "%HOST%"
           },
-          "hide": 0,
+          "hide": 2,
           "label": null,
           "name": "host",
           "options": [
@@ -433,7 +433,6 @@
           "query": "%HOST%",
           "type": "constant"
         }
-
       ]
     },
     "annotations": {

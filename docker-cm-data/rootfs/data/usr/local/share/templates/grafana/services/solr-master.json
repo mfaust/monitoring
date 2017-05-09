@@ -48,7 +48,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByNode(*.%HOST%.SOLR_MASTER.core_$core.QueryResultCache.size, 3)",
+                "target": "aliasByNode(*.$host.SOLR_MASTER.core_$core.QueryResultCache.size, 3)",
                 "textEditor": false
               }
             ],
@@ -134,7 +134,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByNode(*.%HOST%.SOLR_MASTER.core_$core.QueryResultCache.hits, 3)",
+                "target": "aliasByNode(*.$host.SOLR_MASTER.core_$core.QueryResultCache.hits, 3)",
                 "textEditor": false
               }
             ],
@@ -220,7 +220,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByNode(*.%HOST%.SOLR_MASTER.core_$core.QueryResultCache.hitratio, 3)",
+                "target": "aliasByNode(*.$host.SOLR_MASTER.core_$core.QueryResultCache.hitratio, 3)",
                 "textEditor": false
               }
             ],
@@ -306,7 +306,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByNode(*.%HOST%.SOLR_MASTER.core_$core.DocumentCache.size, 3)",
+                "target": "aliasByNode(*.$host.SOLR_MASTER.core_$core.DocumentCache.size, 3)",
                 "textEditor": false
               }
             ],
@@ -392,7 +392,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByNode(*.%HOST%.SOLR_MASTER.core_$core.DocumentCache.hits, 3)",
+                "target": "aliasByNode(*.$host.SOLR_MASTER.core_$core.DocumentCache.hits, 3)",
                 "textEditor": false
               }
             ],
@@ -478,7 +478,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByNode(*.%HOST%.SOLR_MASTER.core_$core.DocumentCache.hitratio, 3)",
+                "target": "aliasByNode(*.$host.SOLR_MASTER.core_$core.DocumentCache.hitratio, 3)",
                 "textEditor": false
               }
             ],
@@ -594,7 +594,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByNode(*.%HOST%.SOLR_MASTER.core_$core.Select.requestPerSecond.avg, 3)",
+                "target": "aliasByNode(*.$host.SOLR_MASTER.core_$core.Select.requestPerSecond.avg, 3)",
                 "textEditor": false
               }
             ],
@@ -680,7 +680,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByNode(*.%HOST%.SOLR_MASTER.core_$core.Select.errors, 3)",
+                "target": "aliasByNode(*.$host.SOLR_MASTER.core_$core.Select.errors, 3)",
                 "textEditor": false
               }
             ],
@@ -749,6 +749,23 @@
     "templating": {
       "list": [
         {
+          "current": {
+            "value": "%HOST%",
+            "text": "%HOST%"
+          },
+          "hide": 2,
+          "label": null,
+          "name": "host",
+          "options": [
+            {
+              "value": "%HOST%",
+              "text": "%HOST%"
+            }
+          ],
+          "query": "%HOST%",
+          "type": "constant"
+        },
+        {
           "allValue": null,
           "current": {
             "text": "live",
@@ -779,7 +796,7 @@
               "selected": false
             }
           ],
-          "query": "*.%HOST%.SOLR*.*",
+          "query": "*.$host.SOLR*.*",
           "refresh": 1,
           "regex": "/.*core_(.*).*$/",
           "sort": 0,
@@ -797,21 +814,21 @@
           "enable": true,
           "iconColor": "rgb(93, 227, 12)",
           "datasource": "events",
-          "tags": "%HOST% created&set=intersection"
+          "tags": "$host created&set=intersection"
         },
         {
           "name": "Load Tests",
           "enable": true,
           "iconColor": "rgb(26, 196, 220)",
           "datasource": "events",
-          "tags": "%HOST% loadtest&set=intersection"
+          "tags": "$host loadtest&set=intersection"
         },
         {
           "name": "Deployments",
           "enable": true,
           "iconColor": "rgb(176, 40, 253)",
           "datasource": "events",
-          "tags": "%HOST% deployment&set=intersection"
+          "tags": "$host deployment&set=intersection"
         }
       ]
     },

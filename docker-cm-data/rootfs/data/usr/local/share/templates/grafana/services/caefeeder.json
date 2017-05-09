@@ -82,30 +82,30 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$feeder.ProactiveEngine.feeder.entries.diff, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(*.$host.$feeder.ProactiveEngine.feeder.entries.diff, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$feeder.ProactiveEngine.feeder.entries.current, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(*.$host.$feeder.ProactiveEngine.feeder.entries.current, '(.*)-', ''))",
                 "textEditor": false,
                 "hide": true
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$feeder.ProactiveEngine.feeder.entries.max, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(*.$host.$feeder.ProactiveEngine.feeder.entries.max, '(.*)-', ''))",
                 "textEditor": false,
                 "hide": true
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$feeder.ProactiveEngine.feeder.invalidations, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(*.$host.$feeder.ProactiveEngine.feeder.invalidations, '(.*)-', ''))",
                 "textEditor": false,
                 "hide": true
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$feeder.ProactiveEngine.feeder.heartbeat, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(*.$host.$feeder.ProactiveEngine.feeder.heartbeat, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -195,18 +195,18 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "alias(aliasSub(*.%HOST%.$feeder.CapConnection.heap.cache.size, '(.*)-', ''), 'max')",
+                "target": "alias(aliasSub(*.$host.$feeder.CapConnection.heap.cache.size, '(.*)-', ''), 'max')",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "alias(aliasSub(*.%HOST%.$feeder.CapConnection.heap.cache.used, '(.*)-', ''), 'used')",
+                "target": "alias(aliasSub(*.$host.$feeder.CapConnection.heap.cache.used, '(.*)-', ''), 'used')",
                 "textEditor": false
               },
               {
                 "refId": "C",
                 "target": "alias(asPercent(#B, #A), 'percent')",
-                "targetFull": "alias(asPercent(alias(aliasSub(*.%HOST%.$feeder.CapConnection.heap.cache.used, '(.*)-', ''), 'used'), alias(aliasSub(*.%HOST%.$feeder.CapConnection.heap.cache.size, '(.*)-', ''), 'max')), 'percent')",
+                "targetFull": "alias(asPercent(alias(aliasSub(*.$host.$feeder.CapConnection.heap.cache.used, '(.*)-', ''), 'used'), alias(aliasSub(*.$host.$feeder.CapConnection.heap.cache.size, '(.*)-', ''), 'max')), 'percent')",
                 "textEditor": false
               }
             ],
@@ -277,6 +277,23 @@
     "templating": {
       "list": [
         {
+          "current": {
+            "value": "%HOST%",
+            "text": "%HOST%"
+          },
+          "hide": 2,
+          "label": null,
+          "name": "host",
+          "options": [
+            {
+              "value": "%HOST%",
+              "text": "%HOST%"
+            }
+          ],
+          "query": "%HOST%",
+          "type": "constant"
+        },
+        {
           "type": "query",
           "label": null,
           "query": "*.*.*EEDER*Proactive*feeder",
@@ -312,21 +329,21 @@
           "enable": true,
           "iconColor": "rgb(93, 227, 12)",
           "datasource": "events",
-          "tags": "%HOST% created&set=intersection"
+          "tags": "$host created&set=intersection"
         },
         {
           "name": "Load Tests",
           "enable": true,
           "iconColor": "rgb(26, 196, 220)",
           "datasource": "events",
-          "tags": "%HOST% loadtest&set=intersection"
+          "tags": "$host loadtest&set=intersection"
         },
         {
           "name": "Deployments",
           "enable": true,
           "iconColor": "rgb(176, 40, 253)",
           "datasource": "events",
-          "tags": "%HOST% deployment&set=intersection"
+          "tags": "$host deployment&set=intersection"
         }
       ]
     },

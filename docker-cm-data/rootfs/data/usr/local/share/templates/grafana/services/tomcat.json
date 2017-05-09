@@ -59,7 +59,25 @@
       ]
     },
     "templating": {
-      "list": []
+      "list": [
+        {
+          "current": {
+            "value": "%HOST%",
+            "text": "%HOST%"
+          },
+          "hide": 2,
+          "label": null,
+          "name": "host",
+          "options": [
+            {
+              "value": "%HOST%",
+              "text": "%HOST%"
+            }
+          ],
+          "query": "%HOST%",
+          "type": "constant"
+        }
+      ]
     },
     "annotations": {
       "list": []
