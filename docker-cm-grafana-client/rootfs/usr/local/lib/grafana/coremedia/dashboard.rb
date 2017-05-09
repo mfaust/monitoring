@@ -211,7 +211,7 @@ module Grafana
         end
 
         # add Operation Datas for NodeExporter
-        services.include?('node_exporter' )
+        if( services.include?('node_exporter' ) )
           namedTemplate.push( 'cm-node_exporter.json' )
         end
 
