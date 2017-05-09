@@ -106,7 +106,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "*.%HOST%.NODE_EXPORTER.memory.count-used_percent"
+                "target": "*.%HOST%.NODE_EXPORTER.memory.used_percent"
               }
             ],
             "thresholds": "80,90",
@@ -178,7 +178,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "*.%HOST%.NODE_EXPORTER.swap.count-used_percent"
+                "target": "*.%HOST%.NODE_EXPORTER.swap.used_percent"
               }
             ],
             "thresholds": "80,90",
@@ -250,7 +250,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "*.%HOST%.NODE_EXPORTER.filesystem.count-rootfs_used_percent"
+                "target": "*.%HOST%.NODE_EXPORTER.filesystem.*.used_percent"
               }
             ],
             "thresholds": "80,90",
