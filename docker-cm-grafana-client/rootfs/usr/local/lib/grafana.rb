@@ -16,6 +16,7 @@ require 'time_difference'
 require 'rest-client'
 
 require_relative 'logging'
+require_relative 'cache'
 require_relative 'message-queue'
 require_relative 'storage'
 require_relative 'mbean'
@@ -133,6 +134,7 @@ module Grafana
 
       @redis       = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
       @mbean       = MBean::Client.new( { :redis => @redis } )
+      @cache       = Cache::Store.new()
       @mqConsumer  = MessageQueue::Consumer.new( @MQSettings )
       @mqProducer  = MessageQueue::Producer.new( @MQSettings )
 
