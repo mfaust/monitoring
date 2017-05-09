@@ -28,6 +28,8 @@ services:
       ICINGA_CERT_SERVICE_BA_PASSWORD: admin
       ICINGA_CERT_SERVICE_API_USER: root
       ICINGA_CERT_SERVICE_API_PASSWORD: icinga
+      # NOTICE: EXTERNAL-SERVICE
+      # must beindentical with the icinga2-master!
       ICINGA_CERT_SERVICE_SERVER: nginx-proxy.docker
       ICINGA_CERT_SERVICE_PORT: 80
       ICINGA_CERT_SERVICE_PATH: /cert-service/
