@@ -253,7 +253,7 @@ module Grafana
           self.createLicenseTemplate( { :host => host, :services => services } )
         end
 
-        dashboards = self.listDashboards( { :host => @shortHostname } )
+        dashboards = self.listDashboards( { :host => @grafanaHostname } )
         dashboards = dashboards.dig(:dashboards)
 
         if( dashboards == nil )
@@ -568,7 +568,7 @@ module Grafana
 
         self.prepare( host )
 
-        dashboards = self.listDashboards( { :host => host } )
+        dashboards = self.listDashboards( { :host => @grafanaHostname } )
         dashboards = dashboards.dig(:dashboards)
 
         if( dashboards == nil )
