@@ -225,8 +225,8 @@ module ExternalDiscovery
 
       restClient = RestClient::Resource.new(
         URI.encode( url ),
-        :timeout      => 5,
-        :open_timeout => 5,
+        :timeout      => 25,
+        :open_timeout => 15,
       )
 #
 # logger.debug( tags )
@@ -699,7 +699,7 @@ module ExternalDiscovery
                   newArray << l
                 end
 
-                sleep(4)
+                sleep(10)
 
               end
 
@@ -775,18 +775,8 @@ module ExternalDiscovery
       finish = Time.now
       logger.info( sprintf( 'finished in %s seconds', finish - start ) )
 
-
-      logger.debug( JSON.pretty_generate( awsData ) )
-
-
-
-
-#       logger.debug( JSON.pretty_generate( data ) )
-
-#       self.compareVersions( { 'live' => data } )
-
-
-
+#       logger.debug( JSON.pretty_generate( awsData ) )
+      self.compareVersions( { 'live' => awsData } )
 
       logger.debug( 'done' )
 
