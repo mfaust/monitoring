@@ -263,7 +263,6 @@ module ExternalDiscovery
           :message => e.message
         }
 
-        return nil
       rescue => e
 
         logger.error( e.inspect )
@@ -334,7 +333,7 @@ module ExternalDiscovery
 
 
 
-    def nsLookup( name )
+    def nsLookup( name, expire = 120 )
 
       # DNS
       #
@@ -348,7 +347,7 @@ module ExternalDiscovery
 
       if( dns == nil )
 
-        logger.debug( 'create DNS Information' )
+        logger.debug( 'create cached DNS data' )
         # create DNS Information
         dns      = Utils::Network.resolv( name )
 
@@ -356,11 +355,16 @@ module ExternalDiscovery
         short = dns.dig(:short)
         fqdn  = dns.dig(:long)
 
-        @cache.set( hostname , expiresIn: 120 ) { Cache::Data.new( { 'ip': ip, 'short': short, 'long': fqdn } ) }
+        if( ip != nil && short != nil && fqdn != nil )
 
+          @cache.set( hostname , expiresIn: expire ) { Cache::Data.new( { 'ip': ip, 'short': short, 'long': fqdn } ) }
+        else
+          logger.error( 'no DNS data found!' )
+          logger.error( " => #{dns}" )
+        end
       else
 
-        logger.debug( 'found cached dns data' )
+        logger.debug( 're-use cached DNS data' )
 
         ip    = dns.dig(:ip)
         short = dns.dig(:short)
@@ -370,9 +374,54 @@ module ExternalDiscovery
       #
       # ------------------------------------------------
 
+      logger.debug( sprintf( ' ip   %s ', ip ) )
+      logger.debug( sprintf( ' host %s ', short ) )
+      logger.debug( sprintf( ' fqdn %s ', fqdn ) )
+
       return ip, short, fqdn
 
     end
+
+
+
+
+    def normalizeName( name, filter = [] )
+
+      filter.each do |f|
+
+        name.gsub!( f, '' )
+      end
+
+#      name.gsub!('-','')
+      name.gsub!('development-','dev ')
+      name.gsub!('production-' ,'prod ')
+      name.gsub!('caepreview' , 'cae preview')
+
+#       name = case name
+#         when 'cms'
+#           'content-management-server'
+#         when 'mls'
+#           'master-live-server'
+#         when 'rls'
+#           'replication-live-server'
+#         when 'wfs'
+#           'workflow-server'
+#         when 'delivery'
+#           'cae-live-1'
+#         when 'solr'
+#           'solr-master'
+#         when 'contentfeeder'
+#           'content-feeder'
+#         when 'workflow'
+#           'workflow-server'
+#         else
+#           name
+#       end
+
+      return name
+
+    end
+
 
 
     def compareVersions( params = {} )
@@ -452,19 +501,57 @@ module ExternalDiscovery
 
         liveData.each do |l|
 
-          ip          = l.dig('ip')
-          displayName = l.dig('name')
+#          fqdn        = l.dig('fqdn')
+#          name        = l.dig('name')
           state       = l.dig('state') || 'running'
+#          dns         = l.dig('dns')
           tags        = l.dig('tags')  || []
+          cname       = l.dig('tags', 'cname')
+          name        = l.dig('tags', 'name')
+          tier        = l.dig('tags', 'tier')
+          customer    = l.dig('tags', 'customer')
+          environment = l.dig('tags', 'environment')
+          ip          = l.dig('dns' , 'ip')
+          fqdn        = l.dig('dns' , 'name')
 
-          if( displayName == nil )
-            logger.warn( 'no cname configured, skip' )
+
+          # currently, we want only the dev environment
+          #
+          if( environment != 'development' )
             next
           end
 
-          if( displayName != 'cosmos-development-management-cms' )
+          if( cname == nil || cname == '.' )
+            logger.warn( "cname for '#{name}' are not configured, skip" )
             next
           end
+
+          if( tier == nil || tier == 'service' )
+            logger.warn( "tier for '#{name}' are not configured, skip" )
+            next
+          end
+
+          environment = case environment
+            when 'development'
+              'dev'
+            when 'production'
+              'prod'
+            else
+              environment
+            end
+
+          # -----------------------------------------------------------------------------
+
+          if( ! cname.include?( 'cms' ) )
+            next
+          end
+
+          displayName = normalizeName( name, [ 'cosmos-', 'delivery-', 'management-', 'storage-' ] )
+
+          logger.debug( "environment: #{environment}" )
+          logger.debug(" -> #{cname} - #{name}" )
+          logger.debug( "  ==> #{displayName}" )
+
 
           # states from AWS:
           #  0 : pending
@@ -476,10 +563,9 @@ module ExternalDiscovery
 
           useableTags = Array.new()
 
-          logger.info( sprintf( 'get information about %s (%s)', ip, displayName ) )
+          logger.info( sprintf( 'get information about %s (%s)', fqdn, cname ) )
 
-          ip, short, fqdn = self.nsLookup( ip )
-
+          ip, short, fqdn = self.nsLookup( fqdn )
 
           # get node data
           result = @networkClient.fetch( short )
@@ -489,8 +575,6 @@ module ExternalDiscovery
           if( result != nil )
 
             status = result.dig('status') || 400
-
-# logger.debug( status )
 
             if( status.to_i == 200 )
               logger.info( 'node are in monitoring available' )
@@ -606,6 +690,9 @@ module ExternalDiscovery
                 elsif( discoveryStatus == 408 )
                   # error
                   logger.error( sprintf( '  => %s', discoveryMessage ) )
+                elsif( discoveryStatus == 500 )
+                  # error
+                  logger.error( sprintf( '  => %s', discoveryMessage ) )
                 else
                   logger.info( 'Host successful added' )
                   # successful
@@ -639,7 +726,7 @@ module ExternalDiscovery
 
           if( ip != nil && name != nil )
 
-            logger.info( sprintf( 'remove host %s (%s) from monitoring', ip, name ) )
+            logger.info( sprintf( 'remove host %s (%s) from monitoring', fqdn, cname ) )
 
             result = @networkClient.remove( name )
 
@@ -665,6 +752,10 @@ module ExternalDiscovery
       @data   = Array.new()
       threads = Array.new()
 
+      logger.info( 'get AWS  data' )
+
+      start = Time.now
+
       awsData  = @cache.get( 'aws-data' )
 
       if( awsData == nil )
@@ -681,7 +772,13 @@ module ExternalDiscovery
 
       end
 
+      finish = Time.now
+      logger.info( sprintf( 'finished in %s seconds', finish - start ) )
+
+
       logger.debug( JSON.pretty_generate( awsData ) )
+
+
 
 
 #       logger.debug( JSON.pretty_generate( data ) )

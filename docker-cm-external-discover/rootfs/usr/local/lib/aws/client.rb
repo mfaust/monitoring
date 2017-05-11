@@ -50,27 +50,25 @@ module Aws
 
             res.instances.each do |inst|
 
-              iid     = inst[:instance_id]
-              istate  = inst[:state].name
-              ilaunch = inst[:launch_time]
-              iip     = inst[:private_ip_address]
-              ifqdn   = inst[:private_dns_name]
-              itags   = inst[:tags]
+              iid     = inst.dig(:instance_id)
+              istate  = inst.dig(:state).name
+              ilaunch = inst.dig(:launch_time)
+              iip     = inst.dig(:private_ip_address)
+              ifqdn   = inst.dig(:private_dns_name)
+              itags   = inst.dig(:tags)
 
               if( itags )
 
                 tags = Array.new()
                 itags.each do |t|
-                  tags << { t[:key] => t[:value] }
+                  tags << { t.dig(:key).downcase => t.dig(:value) }
                 end
               end
 
               tags = tags.reduce( :merge )
-              logger.debug(tags)
-              logger.debug(tags.class.to_s)
               tags = Hash[tags.sort]
 
-              useableTags = tags.filter( 'customer', 'environment', 'tier' )
+              useableTags = tags.filter( 'customer', 'environment', 'tier', 'cname', 'name' )
 
               entry = {
                 'fqdn'        => "#{iid}.#{domain}",
@@ -78,6 +76,10 @@ module Aws
                 'state'       => istate,
                 'uid'         => iid,
                 'launch_time' => ilaunch,
+                'dns'         => {
+                  'ip'    => iip,
+                  'name'  => ifqdn
+                },
                 'tags'        => useableTags
               }
 
@@ -93,8 +95,6 @@ module Aws
 
           raise e
         end
-
-        puts JSON.pretty_generate( result )
 
         return result
 
