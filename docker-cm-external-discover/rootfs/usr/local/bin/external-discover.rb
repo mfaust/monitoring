@@ -14,18 +14,14 @@ require_relative '../lib/external-discover'
 
 # -----------------------------------------------------------------------------
 
-logDirectory     = '/var/log/monitoring'
-
 apiHost          = ENV.fetch('MONITORING_HOST', nil)
-apiPort          = ENV.fetch('MONITORING_PORT', nil)
+apiPort          = ENV.fetch('MONITORING_PORT', 80)
 apiVersion       = ENV.fetch('MONITORING_API_VERSION', 2)
+awsRegion        = ENV.fetch('AWS_REGION', 'us-east-1')
+interval         = ENV.fetch('INTERVAL'         , 30 )
+delay            = ENV.fetch('RUN_DELAY'        , 10 )
 
-discoveryHost    = ENV.fetch('DISCOVERY_HOST', nil)
-discoveryPort    = ENV.fetch('DISCOVERY_PORT', nil)
-discoveryPath    = ENV.fetch('DISCOVERY_PATH', nil)
-interval         = ENV.fetch('DISCOVERY_POLL_INTERVAL', 30)
-
-if( apiHost == nil || apiPort == nil || discoveryHost == nil || discoveryPort == nil || discoveryPath == nil )
+if( apiHost == nil || apiPort == nil || awsRegion == nil )
   puts '=> missing configuration!'
   puts '=> please use the ENV Variables'
 
@@ -33,12 +29,15 @@ if( apiHost == nil || apiPort == nil || discoveryHost == nil || discoveryPort ==
 end
 
 config = {
-  :apiHost       => apiHost,
-  :apiPort       => 80,
-  :apiVersion    => apiVersion,
-  :discoveryHost => discoveryHost,
-  :discoveryPort => discoveryPort,
-  :discoveryPath => discoveryPath
+  :monitoring => {
+    :host    => apiHost,
+    :port    => apiPort,
+    :version => apiVersion,
+  },
+  :aws        => {
+    :region  => awsRegion,
+    :filter  => []
+  }
 }
 
 # ---------------------------------------------------------------------------------------
@@ -57,7 +56,7 @@ e = ExternalDiscovery::Client.new( config )
 
 scheduler = Rufus::Scheduler.new
 
-scheduler.every( interval.to_i, :first_in => 5 ) do
+scheduler.every( interval.to_i, :first_in => delay.to_i ) do
 
   e.run()
 

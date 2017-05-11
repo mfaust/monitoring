@@ -30,85 +30,29 @@ module ExternalDiscovery
 
     def initialize( settings )
 
-      discoveryHost      = settings.dig(:discoveryHost)
-      discoveryPort      = settings.dig(:discoveryPort)
-      discoveryPath      = settings.dig(:discoveryPath)
+      @filter  = settings.dig(:filter)
 
-  @filter = [
-    { name: 'instance-state-name', values: ['running']},
-    { name: 'tag-key', values: ['monitoring-enabled']}
-  ]
-
+      logger.info( '-----------------------------------------------------------------' )
+      logger.info( ' CoreMedia - External Discovery Service - AWS Data Consumer' )
+      logger.info( '-----------------------------------------------------------------' )
+      logger.info( '' )
 
       @awsClient = Aws::Ec2::Client.new()
-
-      @discoveryUrl      = sprintf( 'http://%s:%d%s', discoveryHost, discoveryPort, discoveryPath )
-
-      logger.debug( 'initialized' )
-
-      @total = 0
-      @mutex = Mutex.new
-    end
-
-
-    def getData()
-
-#       @data = @mutex.synchronize { self.client() }
-
-      @data = @awsClient.instances( { :filter => @filter } )
-
-      logger.debug( @data )
-
-      return @data
 
     end
 
 
     def client()
 
-      # `curl http://monitoring.develop.cosmos.internal:8080/api/aws
-
-      uri = URI( @discoveryUrl )
-
       response = nil
 
       begin
 
-        Net::HTTP.start( uri.host, uri.port ) do |http|
+        @data = @awsClient.instances( { :filter => @filter } )
 
-          request = Net::HTTP::Get.new( uri.request_uri )
-
-          request.add_field('Content-Type', 'application/json')
-
-          response     = http.request( request )
-          responseCode = response.code.to_i
-
-          if( responseCode == 200 )
-
-            responseBody  = JSON.parse( response.body )
-
-            return( responseBody )
-
-          # TODO
-          # Errorhandling
-          #if( responseCode != 200 )
-          elsif( responseCode != 200 )
-            # 200 – Created
-            # 400 – Errors (invalid json, missing or invalid fields, etc)
-            # 401 – Unauthorized
-            # 412 – Precondition failed
-            logger.error( sprintf( ' [%s] ', responseCode ) )
-            logger.error( sprintf( '  %s  ', response.body ) )
-
-            return {
-              :status  => responseCode,
-              :message => response.body
-            }
-          end
-        end
-      rescue Exception => e
-#         logger.error( e )
-#         logger.error( e.backtrace )
+      rescue => e
+        logger.error( e )
+        logger.error( e.backtrace )
 
         message = sprintf( 'internal error: %s', e )
 
@@ -116,7 +60,9 @@ module ExternalDiscovery
           :status  => 404,
           :message => message
         }
+
       end
+
 
     end
 
@@ -183,15 +129,20 @@ module ExternalDiscovery
 
     def initialize( settings )
 
-      @apiHost    = settings.dig(:host)    || 'localhost'
-      @apiPort    = settings.dig(:port)    || 80
-      @apiVersion = settings.dig(:version) || 2
-      @apiUrl     = settings.dig(:url)
+      @apiHost    = settings.dig(:monitoring, :host)    || 'localhost'
+      @apiPort    = settings.dig(:monitoring, :port)    || 80
+      @apiVersion = settings.dig(:monitoring, :version) || 2
+      @apiUrl     = settings.dig(:monitoring, :url)
 
       @headers     = {
         'Content-Type' => 'application/json',
         'Accept'       => 'application/json'
       }
+
+      logger.info( '-----------------------------------------------------------------' )
+      logger.info( ' CoreMedia - External Discovery Service - Monitoring NetworkClient' )
+      logger.info( '-----------------------------------------------------------------' )
+      logger.info( '' )
 
     end
 
@@ -331,31 +282,53 @@ module ExternalDiscovery
 
     def initialize( settings = {} )
 
-      apiHost        = settings.dig(:apiHost)
-      apiPort        = settings.dig(:apiPort)
-      apiVersion     = settings.dig(:apiVersion) || 2
+      # Monitoring
+      #
+      apiHost        = settings.dig(:monitoring, :host)    || 'localhost'
+      apiPort        = settings.dig(:monitoring, :port)    || 80
+      apiVersion     = settings.dig(:monitoring, :version) || 2
+      apiUrl         = sprintf( 'http://%s/api/v%s', apiHost, apiVersion )
 
-      @discoveryHost = settings.dig(:discoveryHost)
-      @discoveryPort = settings.dig(:discoveryPort)
-      @discoveryPath = settings.dig(:discoveryPath)
+      # AWS
+      #
+      awsRegion      = settings.dig(:aws, :region)
 
-      @apiUrl        = sprintf( 'http://%s/api/v%s', apiHost, apiVersion )
-      @discoveryUrl  = sprintf( 'http://%s:%d%s', @discoveryHost, @discoveryPort, @discoveryPath )
       @historic      = []
 
-      version        = '0.9.25'
-      date           = '2017-05-09'
+      version        = '0.10.2'
+      date           = '2017-05-11'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - External Discovery Service' )
       logger.info( "  Version #{version} (#{date})" )
-      logger.info( '  Copyright 2016 Coremedia' )
-      logger.info( "  Monitoring System #{@apiUrl}" )
-      logger.info( "  Discovery System #{@discoveryUrl}" )
+      logger.info( '  Copyright 2016-2017 Coremedia' )
+      logger.info( "  Monitoring System #{apiUrl}" )
       logger.info( '-----------------------------------------------------------------' )
       logger.info( '' )
 
+      if( awsRegion == nil )
+        logger.error( 'aws region are nil' )
+        raise 'aws region are nil'
+      end
+
+      config = {
+        :monitoring => {
+          :host    => apiHost,
+          :port    => apiPort,
+          :version => apiVersion,
+          :url     => apiUrl
+        }
+      }
+
+      filter = [
+        { name: 'instance-state-name', values: ['running'] },
+        { name: 'tag-key'            , values: ['monitoring-enabled'] }
+      ]
+
+      @dataConsumer  = DataConsumer.new( { :filter => filter } )
+      @networkClient = NetworkClient.new( config )
       @cache         = Cache::Store.new()
+
 
     end
 
@@ -367,24 +340,17 @@ module ExternalDiscovery
       #
       hostname = sprintf( 'dns-%s', name )
 
-#       logger.debug( hostname )
-
       ip       = nil
       short    = nil
       fqdn     = nil
 
       dns      = @cache.get( hostname )
 
-#       logger.debug( dns.class.to_s )
-#       logger.debug( dns )
-
       if( dns == nil )
 
         logger.debug( 'create DNS Information' )
         # create DNS Information
         dns      = Utils::Network.resolv( name )
-
-#         logger.debug( "#{dns}" )
 
         ip    = dns.dig(:ip)
         short = dns.dig(:short)
@@ -474,16 +440,6 @@ module ExternalDiscovery
         return f
       end
 
-
-      options = {
-        :host    => @apiHost,
-        :port    => @apiPort,
-        :version => @apiVersion,
-        :url     => @apiUrl
-      }
-
-      net   = NetworkClient.new( options )
-
       # we have nothing .. first run
       if( historicDataCount.to_i == 0 )
 
@@ -526,7 +482,7 @@ module ExternalDiscovery
 
 
           # get node data
-          result = net.fetch( short )
+          result = @networkClient.fetch( short )
 
 #           logger.debug( result )
 
@@ -627,7 +583,7 @@ module ExternalDiscovery
 
               logger.debug( "data: #{d}" )
 
-              result = net.add( short, d )
+              result = @networkClient.add( short, d )
 
               logger.debug( result )
 
@@ -685,7 +641,7 @@ module ExternalDiscovery
 
             logger.info( sprintf( 'remove host %s (%s) from monitoring', ip, name ) )
 
-            result = net.remove( name )
+            result = @networkClient.remove( name )
 
             if( result == nil )
               next
@@ -704,40 +660,35 @@ module ExternalDiscovery
     end
 
 
-
     def run()
 
       @data   = Array.new()
       threads = Array.new()
 
-      config = {
-        :discoveryHost => @discoveryHost,
-        :discoveryPort => @discoveryPort,
-        :discoveryPath => @discoveryPath
-      }
+      awsData  = @cache.get( 'aws-data' )
 
-      consumer = DataConsumer.new( config )
+      if( awsData == nil )
 
-      data = consumer.client()
+        logger.debug( 'get data from AWS' )
+
+        awsData = @dataConsumer.client()
+
+        @cache.set( 'aws-data' , expiresIn: 120 ) { Cache::Data.new( awsData ) }
+
+      else
+
+        logger.debug( 'found cached AWS data' )
+
+      end
+
+      logger.debug( JSON.pretty_generate( awsData ) )
+
 
 #       logger.debug( JSON.pretty_generate( data ) )
 
-      self.compareVersions( { 'live' => data } )
+#       self.compareVersions( { 'live' => data } )
 
 
-#       threads << Thread.new {
-#
-#         @data = consumer.getData()
-#       }
-#
-#       threads.each {|t| t.join }
-#
-#       threads << Thread.new {
-#
-#         @data = self.compareVersions()
-#       }
-#
-#      threads.each {|t| t.join }
 
 
       logger.debug( 'done' )
