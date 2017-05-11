@@ -83,7 +83,7 @@ class Monitoring
     logger.debug( status )
 
     # remove offline nodes
-    if( status.count != 0 )
+    if( status != nill && status.count != 0 )
 
       status = status.keys
 
