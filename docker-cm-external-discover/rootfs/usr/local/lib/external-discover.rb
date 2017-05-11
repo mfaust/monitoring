@@ -7,17 +7,20 @@
 
 # -----------------------------------------------------------------------------
 
+require 'aws-sdk'
 require 'json'
 require 'rest-client'
 
-require_relative 'monkey'
 require_relative 'logging'
+require_relative 'monkey'
+require_relative 'aws/client'
 require_relative 'cache'
 require_relative 'utils/network'
 
 # -----------------------------------------------------------------------------
 
 module ExternalDiscovery
+
 
   class DataConsumer
 
@@ -31,6 +34,14 @@ module ExternalDiscovery
       discoveryPort      = settings.dig(:discoveryPort)
       discoveryPath      = settings.dig(:discoveryPath)
 
+  @filter = [
+    { name: 'instance-state-name', values: ['running']},
+    { name: 'tag-key', values: ['monitoring-enabled']}
+  ]
+
+
+      @awsClient = Aws::Ec2::Client.new()
+
       @discoveryUrl      = sprintf( 'http://%s:%d%s', discoveryHost, discoveryPort, discoveryPath )
 
       logger.debug( 'initialized' )
@@ -42,7 +53,9 @@ module ExternalDiscovery
 
     def getData()
 
-      @data = @mutex.synchronize { self.client() }
+#       @data = @mutex.synchronize { self.client() }
+
+      @data = @awsClient.instances( { :filter => @filter } )
 
       logger.debug( @data )
 
