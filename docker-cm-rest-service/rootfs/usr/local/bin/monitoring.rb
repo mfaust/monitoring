@@ -59,6 +59,7 @@ class Monitoring
 
     @cache      = Cache::Store.new()
     @mqConsumer = MessageQueue::Consumer.new( @MQSettings )
+    @mqProducer = MessageQueue::Producer.new( @MQSettings )
     @redis      = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
 
     scheduler   = Rufus::Scheduler.new
@@ -225,8 +226,6 @@ class Monitoring
     ttr     = params.dig(:ttr)   || 10
     delay   = params.dig(:delay) || 2
 
-    p = MessageQueue::Producer.new( @MQSettings )
-
     job = {
       cmd:  command,
       node: node,
@@ -235,7 +234,7 @@ class Monitoring
       payload: data
     }.to_json
 
-    p.addJob( queue, job, prio, ttr, delay )
+    @mqProducer.addJob( queue, job, prio, ttr, delay )
 
   end
 
