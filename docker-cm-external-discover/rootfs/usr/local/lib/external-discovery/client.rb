@@ -116,10 +116,10 @@ module ExternalDiscovery
 
     def extractInstanceInformation( data = {} )
 
-      logger.debug( "extractInstanceInformation( #{data} )" )
+#      logger.debug( "extractInstanceInformation( #{data} )" )
 
 #      fqdn        = data.dig('fqdn')
-#      name        = data.dig('name')
+      uuid        = data.dig('name')
       state       = data.dig('state') || 'running'
 #      dns         = data.dig('dns')
       tags        = data.dig('tags')  || []
@@ -131,7 +131,7 @@ module ExternalDiscovery
       ip          = data.dig('dns' , 'ip')
       fqdn        = data.dig('dns' , 'name')
 
-      return ip, fqdn, state, tags, cname, name, tier, customer, environment
+      return uuid, ip, fqdn, state, tags, cname, name, tier, customer, environment
 
     end
 
@@ -139,7 +139,7 @@ module ExternalDiscovery
     def compareVersions( params = {} )
 
       liveData     = params.dig( 'live' )
-      historicData = @historic
+      historicData = @cache.get( 'historic' )
 
       if( liveData.is_a?( Array ) == false )
         logger.error( 'liveData is not an Array' )
@@ -177,23 +177,6 @@ module ExternalDiscovery
       # we need an better way to detect adding or removing!
       # or re-adding, when the node comes up with an new ip
 
-      # remove hosts
-      #
-      if( historicDataCount.to_i != 0 && removedEntriesCount.to_i != 0 )
-
-        # remove hosts from monitoring
-        #
-        removedEntries.each do |r|
-
-          ip, fqdn, state, tags, cname, name, tier, customer, environment = self.extractInstanceInformation( r )
-
-          if( ip != nil && fqdn != nil )
-
-            self.nodeDelete( { :ip => ip, :fqdn => fqdn, :cname => cname } )
-          end
-        end
-
-      end
 
       # we have nothing .. first run
       #
@@ -207,7 +190,7 @@ module ExternalDiscovery
 
         liveData.each do |l|
 
-          ip, fqdn, state, tags, cname, name, tier, customer, environment = self.extractInstanceInformation( l )
+          uuid, ip, fqdn, state, tags, cname, name, tier, customer, environment = self.extractInstanceInformation( l )
 
           # currently, we want only the dev environment
           #
@@ -240,6 +223,19 @@ module ExternalDiscovery
           nodeStatus = self.nodeStatus( { :short => short } )
 
           if( nodeStatus == true )
+# 
+#             uidCache = @cache.get( uuid )
+#
+#             logger.debug( uidCache )
+#
+#             if( ! uidCache )
+#               @cache.set( uuid ) { Cache::Data.new( l ) }
+#             end
+#
+#             logger.debug( uuid )
+
+            newArray << l
+
             next
           end
 
@@ -256,9 +252,29 @@ module ExternalDiscovery
 
         logger.debug( newArray )
 
-        @historic = newArray
+        @cache.set( 'historic' ) { Cache::Data.new( newArray ) }
 
       end
+
+
+      # remove hosts
+      #
+#       if( historicDataCount.to_i != 0 && removedEntriesCount.to_i != 0 )
+#
+#         # remove hosts from monitoring
+#         #
+#         removedEntries.each do |r|
+#
+#           uuid, ip, fqdn, state, tags, cname, name, tier, customer, environment = self.extractInstanceInformation( r )
+#
+#           if( ip != nil && fqdn != nil )
+#
+#             self.nodeDelete( { :ip => ip, :fqdn => fqdn, :cname => cname } )
+#           end
+#         end
+#
+#       end
+
 
     end
 
@@ -409,6 +425,9 @@ module ExternalDiscovery
         if( discoveryStatus.to_i == 200 )
 
           logger.info( '  is already in monitoring' )
+
+
+
           return true
         end
 
@@ -423,16 +442,15 @@ module ExternalDiscovery
 
       # add a blocking cache
       #
-      if( @jobs.jobs( { :running => 'true' } ) == true )
+      if( @jobs.jobs( { :fqdn => 'foo' } ) == true )
 
         logger.warn( 'we are working on this job' )
         return
       end
 
-      @jobs.add( { :running => 'true' } )
+      @jobs.add( { :fqdn => 'foo' } )
 
       start = Time.now
-
 
       @data   = Array.new()
       threads = Array.new()
@@ -455,13 +473,15 @@ module ExternalDiscovery
         logger.debug( 'found cached AWS data' )
       end
 
+      logger.debug( "AWS hold #{awsData.count} nodes" )
+
 #       logger.debug( JSON.pretty_generate( awsData ) )
       self.compareVersions( { 'live' => awsData } )
 
       finish = Time.now
       logger.info( sprintf( 'finished in %s seconds', finish - start ) )
 
-      @jobs.del( { :running => 'true' } )
+      @jobs.del( { :fqdn => 'foo' } )
 
       logger.debug( 'done' )
 

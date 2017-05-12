@@ -17,7 +17,7 @@ module ExternalDiscovery
 
       if( dns == nil )
 
-        logger.debug( 'create cached DNS data' )
+#         logger.debug( 'create cached DNS data' )
         # create DNS Information
         dns      = Utils::Network.resolv( name )
 
@@ -34,7 +34,7 @@ module ExternalDiscovery
         end
       else
 
-        logger.debug( 're-use cached DNS data' )
+#         logger.debug( 're-use cached DNS data' )
 
         ip    = dns.dig(:ip)
         short = dns.dig(:short)
@@ -44,9 +44,9 @@ module ExternalDiscovery
       #
       # ------------------------------------------------
 
-      logger.debug( sprintf( ' ip   %s ', ip ) )
-      logger.debug( sprintf( ' host %s ', short ) )
-      logger.debug( sprintf( ' fqdn %s ', fqdn ) )
+#       logger.debug( sprintf( ' ip   %s ', ip ) )
+#       logger.debug( sprintf( ' host %s ', short ) )
+#       logger.debug( sprintf( ' fqdn %s ', fqdn ) )
 
       return ip, short, fqdn
 
@@ -58,23 +58,28 @@ module ExternalDiscovery
 
         logger.debug( sprintf( 'findUid %s', uid ) )
 
-        f = {}
+        if( historic.is_a?(Array) && historic.count() > 0 )
 
-        historic.each do |h|
+          f = {}
 
-          f = h.select { |key, value| key.to_s.match(/^id/) }
+          historic.each do |h|
 
-          if( f[:id].to_s == uid )
-            f = h
-            break
-          else
-            f = {}
+            f = h.select { |key, value| key.to_s.match(/^id/) }
+
+            if( f[:id].to_s == uid )
+              f = h
+              break
+            else
+              f = {}
+            end
           end
+
+          return f
         end
 
-        return f
+      else
+        return nil
       end
-
 
   end
 
