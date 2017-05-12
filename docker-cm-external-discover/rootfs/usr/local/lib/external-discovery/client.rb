@@ -109,6 +109,8 @@ module ExternalDiscovery
 
     def extractInstanceInformation( data = {} )
 
+      logger.debug( "extractInstanceInformation( #{data} )" )
+
 #      fqdn        = data.dig('fqdn')
 #      name        = data.dig('name')
       state       = data.dig('state') || 'running'
@@ -216,22 +218,13 @@ module ExternalDiscovery
             next
           end
 
-          environment = case environment
-            when 'development'
-              'dev'
-            when 'production'
-              'prod'
-            else
-              environment
-            end
-
           # -----------------------------------------------------------------------------
 
           if( ! cname.include?( 'cms' ) )
             next
           end
 
-          if( self.addHost( { :ip => ip, :fqdn => fqdn, :cname => cname, :name => name, :tags => tags } ) == true )
+          if( self.addHost( { :ip => ip, :fqdn => fqdn, :cname => cname, :name => name, :customer => customer, :environment => environment, :tier => tier, :tags => tags } ) == true )
 
             newArray << l
 
@@ -257,6 +250,18 @@ module ExternalDiscovery
       fqdn        = params.dig(:fqdn)
       cname       = params.dig(:cname)
       name        = params.dig(:name)
+      customer    = params.dig(:customer)
+      environment = params.dig(:environment)
+      tier        = params.dig(:tier)
+
+      environment = case environment
+        when 'development'
+          'dev'
+        when 'production'
+          'prod'
+        else
+          environment
+        end
 
       displayName = normalizeName( name, [ 'cosmos-', 'delivery-', 'management-', 'storage-' ] )
 
@@ -313,7 +318,10 @@ module ExternalDiscovery
           # - annotation = true
           d = JSON.generate( {
             :tags       => useableTags,
-            :config     => { 'display-name' => displayName }
+            :config     => {
+              'display-name'        => displayName,
+              'graphite-identifier' => sprintf( '%s-%s-%s-%s', customer, environment, tier, ip )
+            }
           } )
 
           logger.debug( "data: #{d}" )
