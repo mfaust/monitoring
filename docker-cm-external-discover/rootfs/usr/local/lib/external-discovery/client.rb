@@ -119,7 +119,8 @@ module ExternalDiscovery
 #      logger.debug( "extractInstanceInformation( #{data} )" )
 
 #      fqdn        = data.dig('fqdn')
-      uuid        = data.dig('name')
+#      name        = data.dig('name')
+      uuid        = data.dig('uid')
       state       = data.dig('state') || 'running'
 #      dns         = data.dig('dns')
       tags        = data.dig('tags')  || []
@@ -145,6 +146,10 @@ module ExternalDiscovery
         logger.error( 'liveData is not an Array' )
 
         return
+      end
+
+      if( historicData == nil )
+        historicData = Array.new
       end
 
       if( historicData.is_a?( Array ) == false )
@@ -214,16 +219,16 @@ module ExternalDiscovery
 
           # currently, we want only the CMS
           #
-          if( ! cname.include?( 'cms' ) )
-            next
-          end
+#           if( ! cname.include?( 'cms' ) )
+#             next
+#           end
 
           logger.info( sprintf( 'get information about %s (%s)', fqdn, cname ) )
 
           nodeStatus = self.nodeStatus( { :short => short } )
 
           if( nodeStatus == true )
-# 
+#
 #             uidCache = @cache.get( uuid )
 #
 #             logger.debug( uidCache )
@@ -325,6 +330,7 @@ module ExternalDiscovery
       # - grafana    = true
       # - annotation = true
       d = JSON.generate( {
+        :force      => true,
         :tags       => useableTags,
         :config     => {
           'display-name'        => displayName,
@@ -466,6 +472,7 @@ module ExternalDiscovery
           @cache.set( 'aws-data' , expiresIn: 120 ) { Cache::Data.new( awsData ) }
         end
 
+        @jobs.del( { :fqdn => 'foo' } )
         return
 
       else
@@ -473,7 +480,7 @@ module ExternalDiscovery
         logger.debug( 'found cached AWS data' )
       end
 
-      logger.debug( "AWS hold #{awsData.count} nodes" )
+      logger.debug( sprintf( 'AWS hold %d nodes', awsData.count ) )
 
 #       logger.debug( JSON.pretty_generate( awsData ) )
       self.compareVersions( { 'live' => awsData } )

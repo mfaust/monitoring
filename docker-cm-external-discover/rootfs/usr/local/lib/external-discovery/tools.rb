@@ -54,32 +54,33 @@ module ExternalDiscovery
 
 
 
-      def findUid( historic, uid )
+    def findUid( historic, uid )
 
-        logger.debug( sprintf( 'findUid %s', uid ) )
+      logger.debug( sprintf( 'findUid %s', uid ) )
 
-        if( historic.is_a?(Array) && historic.count() > 0 )
+      if( historic.is_a?(Array) && historic.count() > 0 )
 
-          f = {}
+        f = {}
 
-          historic.each do |h|
+        historic.each do |h|
 
-            f = h.select { |key, value| key.to_s.match(/^id/) }
+          f = h.select { |key, value| key.to_s.match(/^id/) }
 
-            if( f[:id].to_s == uid )
-              f = h
-              break
-            else
-              f = {}
-            end
+          if( f[:id].to_s == uid )
+            f = h
+            break
+          else
+            f = {}
           end
-
-          return f
         end
+
+        return f
 
       else
         return nil
       end
+
+    end
 
   end
 
