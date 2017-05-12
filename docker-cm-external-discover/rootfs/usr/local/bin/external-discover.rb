@@ -45,10 +45,10 @@ config = {
 # the used supervisord will control all
 stop = false
 
-Signal.trap('INT')  { stop = true }
-Signal.trap('HUP')  { stop = true }
-Signal.trap('TERM') { stop = true }
-Signal.trap('QUIT') { stop = true }
+Signal.trap('INT')  { stop = true } # 2
+Signal.trap('HUP')  { stop = true } # 1
+Signal.trap('TERM') { stop = true } # 15
+Signal.trap('QUIT') { stop = true } # 3
 
 # -----------------------------------------------------------------------------
 

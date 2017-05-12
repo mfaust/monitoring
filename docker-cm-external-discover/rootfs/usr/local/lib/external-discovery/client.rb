@@ -9,7 +9,7 @@ module ExternalDiscovery
 
     include Logging
 
-#     include ExternalDiscovery::Tools
+    include ExternalDiscovery::Tools
 
     def initialize( settings = {} )
 
@@ -212,7 +212,7 @@ module ExternalDiscovery
             next
           end
 
-          ip, short, fqdn = self.nsLookup( fqdn )
+          ip, short, fqdn = nsLookup( fqdn )
 
           # -----------------------------------------------------------------------------
 
@@ -356,7 +356,7 @@ module ExternalDiscovery
 
       logger.info( sprintf( 'remove host %s (%s) from monitoring', fqdn, cname ) )
 
-      ip, short, fqdn = self.nsLookup( fqdn )
+      ip, short, fqdn = nsLookup( fqdn )
 
       result = @monitoringClient.remove( short )
 
@@ -417,7 +417,10 @@ module ExternalDiscovery
 
         awsData = @dataConsumer.instances()
 
-        @cache.set( 'aws-data' , expiresIn: 120 ) { Cache::Data.new( awsData ) }
+        if( awsData.is_a?(Array) && awsData.count() != 0 )
+          logger.debug( 'store data into cache' )
+          @cache.set( 'aws-data' , expiresIn: 120 ) { Cache::Data.new( awsData ) }
+        end
 
       else
 

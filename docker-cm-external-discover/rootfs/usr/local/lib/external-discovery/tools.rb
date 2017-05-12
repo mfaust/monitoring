@@ -1,7 +1,7 @@
 
 module ExternalDiscovery
 
-  class Tools
+  module Tools
 
     def nsLookup( name, expire = 120 )
 
