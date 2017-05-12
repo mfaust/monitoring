@@ -25,7 +25,7 @@ module ServiceDiscovery
         short = dns.dig(:short)
         fqdn  = dns.dig(:long)
 
-        if( ip != nil && short != nil && fqdb != nil )
+        if( ip != nil && short != nil && fqdn != nil )
 
           @cache.set( hostname , expiresIn: expire ) { Cache::Data.new( { 'ip': ip, 'short': short, 'long': fqdn } ) }
         else
@@ -43,6 +43,10 @@ module ServiceDiscovery
       end
       #
       # ------------------------------------------------
+
+      logger.debug( sprintf( ' ip   %s ', ip ) )
+      logger.debug( sprintf( ' host %s ', short ) )
+      logger.debug( sprintf( ' fqdn %s ', fqdn ) )
 
       return ip, short, fqdn
 

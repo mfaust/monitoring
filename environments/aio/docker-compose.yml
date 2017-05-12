@@ -337,6 +337,7 @@ services:
       - redis
     volumes:
       - /etc/localtime:/etc/localtime:ro
+      - ./logs:/var/log
     networks:
       mon:
         ipv4_address: 192.168.1.18
@@ -366,6 +367,7 @@ services:
       - redis
     volumes:
       - /etc/localtime:/etc/localtime:ro
+      - ./logs:/var/log
       - /share/etc/cm-service.yaml:/etc/cm-service.yaml
       - /share/etc/cm-application.yaml:/etc/cm-application.yaml
     networks:
@@ -397,6 +399,7 @@ services:
       - redis
     volumes:
       - /etc/localtime:/etc/localtime:ro
+      - ./logs:/var/log
       - /share/etc/cm-service.yaml:/etc/cm-service.yaml
       - /share/etc/cm-application.yaml:/etc/cm-application.yaml
     networks:
@@ -424,6 +427,7 @@ services:
       - redis
     volumes:
       - /etc/localtime:/etc/localtime:ro
+      - ./logs:/var/log
     networks:
       mon:
         ipv4_address: 192.168.1.21
@@ -451,6 +455,7 @@ services:
       - redis
     volumes:
       - /etc/localtime:/etc/localtime:ro
+      - ./logs:/var/log
       - /share/usr/local/share/templates:/usr/local/share/templates
     networks:
       mon:
@@ -477,6 +482,7 @@ services:
       - beanstalkd:beanstalkd
     volumes:
       - /etc/localtime:/etc/localtime:ro
+      - ./logs:/var/log
     networks:
       mon:
         ipv4_address: 192.168.1.23
@@ -502,6 +508,7 @@ services:
       - beanstalkd
     volumes:
       - /etc/localtime:/etc/localtime:ro
+      - ./logs:/var/log
     networks:
       mon:
         ipv4_address: 192.168.1.24

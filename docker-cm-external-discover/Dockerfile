@@ -9,7 +9,7 @@ ENV \
   TERM=xterm \
   APK_ADD="build-base bind-tools drill ruby ruby-dev" \
   APK_DEL="build-base ruby-dev" \
-  GEMS="ipaddress json rest-client rufus-scheduler time_difference tzinfo-data"
+  GEMS="aws-sdk ipaddress json rest-client rufus-scheduler time_difference tzinfo-data"
 
 LABEL version="1704-03.1"
 

@@ -44,8 +44,8 @@ class Monitoring
 
     logger.level           = Logger::DEBUG
 
-    version              = '2.4.85'
-    date                 = '2017-04-28'
+    version              = '2.4.86'
+    date                 = '2017-05-07'
 
     logger.info( '-----------------------------------------------------------------' )
     logger.info( ' CoreMedia - Monitoring Service' )
@@ -63,7 +63,7 @@ class Monitoring
     @redis      = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
 
     scheduler   = Rufus::Scheduler.new
-    scheduler.every( 60, :first_in => 1 ) do
+    scheduler.every( 45, :first_in => 1 ) do
 
       self.createNodeInformation()
     end
@@ -80,30 +80,23 @@ class Monitoring
     result  = Hash.new()
 
     status  = @redis.nodes( { :status => Storage::RedisClient::OFFLINE } )
-
     logger.debug( status )
 
-    if( status == nil || status == false )
-
-      return
-    end
-
-    # remove offline nodes
-    if( status.count != 0 )
-
-      status = status.keys
-
-      status.each do |node|
-
-        logger.info( sprintf( ' - offline node %s', node ) )
-#         @redis.removeDNS( { :short => node } )
-      end
-
-    end
-
+#     # remove offline nodes
+#     if( status.is_a?( Hash ) || status.is_a?( Array ) && status.count != 0 )
+#
+#       status = status.keys
+#
+#       status.each do |node|
+#
+#         logger.info( sprintf( 'delete offline node %s', node ) )
+#
+# #         @redis.removeDNS( { :short => node } )
+#       end
+#     end
 
     nodes   = @redis.nodes()
-#     logger.debug( nodes )
+    logger.debug( nodes )
 
     if( nodes.is_a?( Hash ) || nodes.is_a?( Array ) )
 
@@ -187,6 +180,7 @@ class Monitoring
     else
 
       logger.debug( 'no nodes found' )
+      @cache.unset( 'information' )
 
     end
 
@@ -702,8 +696,8 @@ class Monitoring
       annotation      = hash.keys.include?('annotation') ? hash['annotation'] : true
     end
 
-    logger.debug( 'set host status to OFFLINE' )
-    @redis.setStatus( { :short => host, :status => Storage::RedisClient::OFFLINE } )
+    logger.debug( 'set node status to DELETE' )
+    @redis.setStatus( { :short => host, :status => Storage::RedisClient::DELETE } )
 
     logger.debug( sprintf( 'force      : %s', force            ? 'true' : 'false' ) )
     logger.debug( sprintf( 'discovery  : %s', enableDiscovery  ? 'true' : 'false' ) )

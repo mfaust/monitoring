@@ -54,30 +54,28 @@ module Grafana
 
       def prepare( host )
 
-        dns = @redis.dnsData( { :ip => host, :short => host } )
+        # get a DNS record
+        #
+        ip, short, fqdn = self.nsLookup( host )
 
-        if( dns != nil )
+        # read the configuration for an customized display name
+        #
+        config          = @redis.config( { :short => short, :key => 'display-name' } )
 
-          dnsIp        = dns.dig(:ip)
-          dnsShortname = dns.dig(:shortname)
-          dnsLongname  = dns.dig(:longname)
+        if( config.dig( 'display-name' ) != nil )
 
-          @shortHostname  = @grafanaHostname = dnsShortname
+          @grafanaHostname = config.dig( 'display-name' ).to_s
 
-          config          = @redis.config( { :short => dnsShortname, :key => 'display-name' } )
-
-          if( config.dig( 'display-name' ) != nil )
-
-            @shortHostname = config.dig( 'display-name' ).to_s
-
-            logger.info( "use custom display-name from config: '#{@shortHostname}'" )
-          end
-
-          @shortHostname        = self.createSlug( @shortHostname ).gsub( '.', '-' )
+          logger.info( "use custom display-name from config: '#{@grafanaHostname}'" )
         else
 
-          logger.warn( 'no DNS entry found' )
+          @grafanaHostname = short
         end
+
+        @shortHostname    = short
+        @grafanaHostname  = @grafanaHostname.gsub( '.', '-' ) # self.createSlug( @grafanaHostname ).gsub( '.', '-' )
+
+        logger.debug( @shortHostname )
 
       end
 
@@ -107,11 +105,13 @@ module Grafana
           }
         end
 
+        start = Time.now
+
         logger.info( sprintf( 'Adding dashboards for host \'%s\'', host ) )
 
         self.prepare( host )
 
-        discovery = @redis.discoveryData( { :ip => host, :short => host } )
+        discovery = @redis.discoveryData( { :short => host } )
 
         if( discovery == nil )
           return {
@@ -135,10 +135,19 @@ module Grafana
 
         discovery.each do |service,serviceData|
 
+          logger.debug( service )
+          logger.debug( serviceData )
+
           additionalTemplatePaths = Array.new()
 
-          description    = serviceData.dig( 'description' )
-          template       = serviceData.dig( 'template' )
+          if( serviceData != nil )
+            description    = serviceData.dig( 'description' )
+            template       = serviceData.dig( 'template' )
+          else
+            description    = nil
+            template       = nil
+          end
+
           cacheKey       = Storage::RedisClient.cacheKey( { :host => host, :pre => 'result', :service => service } )
 
           # cae-live-1 -> cae-live
@@ -155,7 +164,7 @@ module Grafana
 #           logger.debug( sprintf( '  templateName %s', templateName ) )
 #           logger.debug( sprintf( '  cacheKey     %s', cacheKey ) )
 
-          if( ! ['mongodb', 'mysql', 'postgres'].include?( serviceName ) )
+          if( ! ['mongodb', 'mysql', 'postgres', 'node_exporter'].include?( serviceName ) )
             additionalTemplatePaths << self.templateForService( 'tomcat' )
           end
 
@@ -201,6 +210,11 @@ module Grafana
           end
         end
 
+        # add Operation Datas for NodeExporter
+        if( services.include?('node_exporter' ) )
+          namedTemplate.push( 'cm-node_exporter.json' )
+        end
+
         self.createNamedTemplate( namedTemplate )
 
         measurements = nil
@@ -239,7 +253,7 @@ module Grafana
           self.createLicenseTemplate( { :host => host, :services => services } )
         end
 
-        dashboards = self.listDashboards( { :host => @shortHostname } )
+        dashboards = self.listDashboards( { :host => @grafanaHostname } )
         dashboards = dashboards.dig(:dashboards)
 
         if( dashboards == nil )
@@ -259,6 +273,9 @@ module Grafana
           status  = 500
           message = 'Error for adding Dashboads'
         end
+
+        finish = Time.now
+        logger.info( sprintf( 'finished in %s seconds', finish - start ) )
 
         return {
           :status      => status,
@@ -315,7 +332,7 @@ module Grafana
 
         json = self.normalizeTemplate( {
           :template        => template,
-          :grafanaHostname => @shortHostname,
+          :grafanaHostname => @grafanaHostname,
           :shortHostname   => @shortHostname
         } )
 
@@ -328,8 +345,8 @@ module Grafana
 
         logger.info( 'create License Templates' )
 
-        host            = params[:host]     ? params[:host]     : nil
-        services        = params[:services] ? params[:services] : []
+        host            = params.dig(:host)
+        services        = params.dig(:services) || []
 
         rows            = Array.new()
         contentServers  = ['content-management-server', 'master-live-server', 'replication-live-server']
@@ -436,7 +453,7 @@ module Grafana
 
         json = self.normalizeTemplate( {
           :template        => template,
-          :grafanaHostname => @shortHostname,
+          :grafanaHostname => @grafanaHostname,
           :shortHostname   => @shortHostname
         } )
 
@@ -468,7 +485,7 @@ module Grafana
 
               json = self.normalizeTemplate( {
                 :template        => templateJson,
-                :grafanaHostname => @shortHostname,
+                :grafanaHostname => @grafanaHostname,
                 :shortHostname   => @shortHostname
               } )
 
@@ -551,7 +568,7 @@ module Grafana
 
         self.prepare( host )
 
-        dashboards = self.listDashboards( { :host => host } )
+        dashboards = self.listDashboards( { :host => @grafanaHostname } )
         dashboards = dashboards.dig(:dashboards)
 
         if( dashboards == nil )
@@ -672,7 +689,7 @@ module Grafana
           :serviceName     => serviceName,
           :description     => description,
           :normalizedName  => normalizedName,
-          :grafanaHostname => @shortHostname,
+          :grafanaHostname => @grafanaHostname,
           :shortHostname   => @shortHostname
         } )
 
@@ -739,12 +756,12 @@ module Grafana
 
       def normalizeTemplate( params = {} )
 
-        template        = params[:template]        ? params[:template]        : nil
-        serviceName     = params[:serviceName]     ? params[:serviceName]     : nil
-        description     = params[:description]     ? params[:description]     : nil
-        normalizedName  = params[:normalizedName]  ? params[:normalizedName]  : nil
-        grafanaHostname = params[:grafanaHostname] ? params[:grafanaHostname] : nil
-        shortHostname   = params[:shortHostname]   ? params[:shortHostname]   : nil
+        template        = params.dig(:template)
+        serviceName     = params.dig(:serviceName)
+        description     = params.dig(:description)
+        normalizedName  = params.dig(:normalizedName)
+        grafanaHostname = params.dig(:grafanaHostname)
+        shortHostname   = params.dig(:shortHostname)
 
         if( template == nil )
           return false
@@ -762,8 +779,8 @@ module Grafana
         map = {
           '%DESCRIPTION%' => description,
           '%SERVICE%'     => normalizedName,
-          '%HOST%'        => grafanaHostname,
-          '%SHORTHOST%'   => shortHostname,
+          '%HOST%'        => shortHostname,
+          '%SHORTHOST%'   => grafanaHostname,
           '%TAG%'         => shortHostname
         }
 
@@ -870,12 +887,17 @@ module Grafana
       #
       def addTags( params = {} )
 
-        template        = params[:template]        ? params[:template]        : nil
-        additionalTags  = params[:additionalTags]  ? params[:additionalTags]  : []
+        template        = params.dig(:template)
+        additionalTags  = params.dig(:additionalTags) || []
 
         # add tags
         if( template.is_a?( String ) )
           template = JSON.parse( template )
+        end
+
+        if( additionalTags.is_a?( Hash ) )
+
+          additionalTags = additionalTags.values
         end
 
         currentTags = template.dig( 'dashboard', 'tags' )
@@ -883,7 +905,9 @@ module Grafana
         if( currentTags != nil && additionalTags.count() > 0 )
 
           currentTags << additionalTags
-          currentTags.flatten!.sort!
+
+          currentTags.flatten!
+          currentTags.sort!
 
           template['dashboard']['tags'] = currentTags
         end

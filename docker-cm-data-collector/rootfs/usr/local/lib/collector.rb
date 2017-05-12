@@ -21,268 +21,24 @@ require_relative 'cache'
 require_relative 'utils/network'
 require_relative 'monkey'
 require_relative 'jolokia'
+require_relative 'job-queue'
 require_relative 'message-queue'
 require_relative 'storage'
 require_relative 'external-clients'
+
+require_relative 'collector/tools'
+require_relative 'collector/config'
+require_relative 'collector/prepare'
 
 # -----------------------------------------------------------------------------
 
 module DataCollector
 
-  class Config
-
-    include Logging
-
-    attr_accessor :config
-    attr_accessor :jolokiaApplications
-
-    def initialize( settings = {} )
-
-      applicationConfig  = settings.dig( :configFiles, :application )
-      serviceConfig      = settings.dig( :configFiles, :service )
-
-      @config             = nil
-      jolokiaApplications = nil
-
-      appConfigFile  = File.expand_path( applicationConfig )
-
-      begin
-
-        if( File.exist?( appConfigFile ) )
-
-          @config      = YAML.load_file( appConfigFile )
-
-          @jolokiaApplications = @config.dig( 'jolokia', 'applications' )
-
-        else
-          logger.error( sprintf( 'Application Config File %s not found!', appConfigFile ) )
-
-          raise( sprintf( 'Application Config File %s not found!', appConfigFile ) )
-
-        end
-      rescue => e
-
-      end
-
-    end
-
-  end
-
-
-  class Prepare
-
-    include Logging
-
-    def initialize( settings = {} )
-
-      @redisHost         = settings.dig(:redis, :host)
-      @redisPort         = settings.dig(:redis, :port) || 6379
-
-      @cfg                = Config.new( settings )
-      @redis              = Storage::RedisClient.new( { :redis => { :host => @redisHost } } )
-
-    end
-
-
-    def mergeSolrCores( metrics, cores = [] )
-
-      work = Array.new()
-
-      cores.each do |core|
-
-        metric = Marshal.load( Marshal.dump( metrics ) )
-
-        metric.each do |m|
-          mb = m['mbean']
-          mb.sub!( '%CORE%', core )
-        end
-
-        work.push( metric )
-      end
-
-      work.flatten!
-
-      return work
-    end
-
-    # merge Data between Property Files and discovered Services
-    # creates mergedHostData.json for every Node
-    def buildMergedData( params = {} )
-
-      host = params.dig(:hostname)
-      fqdn = params.dig(:fqdn)
-
-#       logger.debug( params )
-
-      if( host == nil )
-        logger.error( 'no hostname found' )
-        return {}
-      end
-
-      #
-      tomcatApplication = Marshal.load( Marshal.dump( @cfg.jolokiaApplications ) )
-
-      # Redis based
-      data = @redis.discoveryData( { :short => host } )
-
-      if( data == nil || data == false || data.count() == 0 )
-        logger.error( 'no discovery in database data found' )
-        return false
-      end
-
-      dataForRedis = Array.new()
-
-      data.each do |service,payload|
-
-        result      = self.mergeData( service.to_s, tomcatApplication, payload )
-
-#         logger.debug( JSON.pretty_generate( result ) )
-
-        dataForRedis << { service.to_s => result }
-      end
-
-      dataForRedis = dataForRedis.deep_string_keys
-
-      # http://stackoverflow.com/questions/11856407/rails-mapping-array-of-hashes-onto-single-hash
-      # mapping array of hashes onto single hash
-      dataForRedis = dataForRedis.reduce( {} , :merge )
-
-      @redis.createMeasurements( { :short => host, :data => dataForRedis } )
-
-      return true
-
-    end
-
-
-    def mergeData( service, tomcatApplication, data = {} )
-
-      metricsTomcat     = tomcatApplication.dig('tomcat')      # standard metrics for Tomcat
-
-      configuredApplication = tomcatApplication.keys
-
-#       logger.debug( '----------------------------------------------------------------------')
-#       logger.debug( "look for service: '#{service}'" )
-#       logger.debug( "configured Applications: #{configuredApplication}" )
-#       logger.debug( data )
-
-      dataSource = nil
-
-      if( data == nil || data.count() == 0 )
-        logger.debug( 'no data to merge' )
-
-        return {}
-      end
-
-      if( data.dig(:data) == nil )
-
-        application = data.dig('application')
-        solr_cores  = data.dig('cores')
-        metrics     = data.dig('metrics')
-
-        dataSource  = 'redis'
-      else
-
-        application = data.dig(:data, 'application')
-        solr_cores  = data.dig(:data, 'cores')
-        metrics     = data.dig(:data, 'metrics')
-
-        dataSource  = 'sqlite'
-      end
-
-# logger.debug( "data source: '#{dataSource}'" )
-# logger.debug( "application: '#{application}'" )
-# logger.debug( "solr_cores : '#{solr_cores}'" )
-# logger.debug( "metrics    : '#{metrics}'" )
-#       logger.debug( '----------------------------------------------------------------------')
-
-      if( dataSource == 'redis' )
-
-        data['metrics'] ||= []
-      else
-
-        data[:data]            ||= {}
-        data[:data]['metrics'] ||= []
-      end
-
-#       logger.debug( data )
-
-      if( configuredApplication.include?( service ) )
-
-        logger.debug( "found #{service} in tomcat application" )
-
-        if( dataSource == 'redis' )
-          data['metrics'].push( metricsTomcat.dig('metrics') )
-          data['metrics'].push( tomcatApplication.dig( service, 'metrics' ) )
-        else
-          data[:data]['metrics'].push( metricsTomcat.dig('metrics') )
-          data[:data]['metrics'].push( tomcatApplication.dig( service, 'metrics' ) )
-        end
-      end
-
-
-      if( application != nil )
-
-        if( dataSource == 'redis' )
-          data['metrics'].push( metricsTomcat.dig( 'metrics' ) )
-        else
-          data[:data]['metrics'].push( metricsTomcat.dig( 'metrics' ) )
-        end
-
-        application.each do |a|
-
-          if( tomcatApplication.dig( a ) != nil )
-
-            logger.debug( "  add application metrics for #{a}" )
-
-            applicationMetrics = tomcatApplication.dig( a, 'metrics' )
-
-            if( solr_cores != nil )
-
-              if( dataSource == 'redis' )
-                data['metrics'].push( self.mergeSolrCores( applicationMetrics , solr_cores ) )
-              else
-                data[:data]['metrics'].push( self.mergeSolrCores( applicationMetrics , solr_cores ) )
-              end
-            end
-
-            # remove unneeded Templates
-            tomcatApplication[a]['metrics'].delete_if {|key| key['mbean'].match( '%CORE%' ) }
-
-#            data[:data]['metrics'].push( metricsTomcat['metrics'] )
-            if( dataSource == 'redis' )
-              data['metrics'].push( applicationMetrics )
-            else
-
-              data[:data]['metrics'].push( applicationMetrics )
-            end
-          end
-        end
-
-      end
-
-
-      if( dataSource == 'redis' )
-
-        data['metrics'].compact!   # remove 'nil' from array
-        data['metrics'].flatten!   # clean up and reduce depth
-
-        return data
-
-      else
-        data[:data]['metrics'].compact!   # remove 'nil' from array
-        data[:data]['metrics'].flatten!   # clean up and reduce depth
-
-        return data[:data]
-      end
-
-    end
-
-  end
-
-
   class Collector
 
     include Logging
+
+    include DataCollector::Tools
 
     def initialize( settings = {} )
 
@@ -295,14 +51,14 @@ module DataCollector
       mqPort              = settings.dig(:mq, :port)                || 11300
       @mqQueue            = settings.dig(:mq, :queue)               || 'mq-collector'
 
-      @redisHost          = settings.dig(:redis, :host)
-      @redisPort          = settings.dig(:redis, :port)  || 6379
+      redisHost          = settings.dig(:redis, :host)
+      redisPort          = settings.dig(:redis, :port)  || 6379
 
-      @applicationConfig  = settings.dig(:configFiles, :application)
-      @serviceConfig      = settings.dig(:configFiles, :service)
+      applicationConfig  = settings.dig(:configFiles, :application)
+      serviceConfig      = settings.dig(:configFiles, :service)
 
-      version            = '1.8.0'
-      date               = '2017-04-12'
+      version            = '1.8.2'
+      date               = '2017-05-07'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - DataCollector' )
@@ -310,33 +66,40 @@ module DataCollector
       logger.info( '  Copyright 2016-2017 Coremedia' )
       logger.info( '  used Services:' )
       logger.info( "    - jolokia      : #{jolokiaHost}:#{jolokiaPort}" )
-      logger.info( "    - redis        : #{@redisHost}:#{@redisPort}" )
+      logger.info( "    - redis        : #{redisHost}:#{redisPort}" )
       logger.info( "    - message queue: #{mqHost}:#{mqPort}/#{@mqQueue}" )
       logger.info( '-----------------------------------------------------------------' )
 
-      @MQSettings = {
-        :beanstalkHost => mqHost,
-        :beanstalkPort => mqPort
-      }
-
-      @cache              = Cache::Store.new()
-      @redis              = Storage::RedisClient.new( { :redis => { :host => @redisHost } } )
-      @jolokia            = Jolokia::Client.new( { :host => jolokiaHost, :port => jolokiaPort, :path => jolokiaPath, :auth => { :user => jolokiaAuthUser, :pass => jolokiaAuthPass } } )
-      @mq                 = MessageQueue::Consumer.new( @MQSettings )
-
-      if( @applicationConfig == nil || @serviceConfig == nil )
+      if( applicationConfig == nil || serviceConfig == nil )
         msg = 'no Configuration File given'
         logger.error( msg )
 
         fail msg
       end
 
-        # run internal scheduler to remove old data
-        scheduler = Rufus::Scheduler.new
+      @MQSettings = {
+        :beanstalkHost => mqHost,
+        :beanstalkPort => mqPort
+      }
 
-        scheduler.every( 10 ) do
-          clean()
-        end
+      prepareSettings = {
+        :configFiles => { :application => applicationConfig, :service => serviceConfig },
+        :redis       => { :host => redisHost, :port => redisPort }
+      }
+
+      @cache     = Cache::Store.new()
+      @redis     = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
+      @jolokia   = Jolokia::Client.new( { :host => jolokiaHost, :port => jolokiaPort, :path => jolokiaPath, :auth => { :user => jolokiaAuthUser, :pass => jolokiaAuthPass } } )
+      @mq        = MessageQueue::Consumer.new( @MQSettings )
+      @prepare   = Prepare.new( prepareSettings )
+      @jobs      = JobQueue::Job.new()
+
+      # run internal scheduler to remove old data
+      scheduler = Rufus::Scheduler.new
+
+      scheduler.every( 10, :first_in => 10 ) do
+        clean()
+      end
 
     end
 
@@ -530,7 +293,10 @@ module DataCollector
     #
     def monitoredServer()
 
-      d = @redis.nodes( { :status => 1 } )
+      d = @redis.nodes( { :status => Storage::RedisClient::ONLINE } )
+
+      logger.debug( d )
+      logger.debug( @redis.nodes( ) )
 
       return d
 
@@ -727,7 +493,7 @@ module DataCollector
 
         c.each do |v,i|
 
-          logger.debug( sprintf( '%d checks for service \'%s\' found', i.count, v ) )
+          logger.info( sprintf( 'service \'%s\' has %d checks', v, i.count ) )
 
           result[v] ||= []
 
@@ -749,7 +515,7 @@ module DataCollector
                 begin
                   result[v] = self.reorganizeData( jolokiaMessage )
                 rescue => e
-                  logger.error( "i can\'t store data into result for service #{v}" )
+                  logger.error( "i can't store data into result for service #{v}" )
                   logger.error( e )
                 end
               else
@@ -790,7 +556,7 @@ module DataCollector
 
           end
 
-          logger.debug( 'store result in our redis' )
+#           logger.debug( 'store result in our redis' )
           redisResult = @redis.set( cacheKey, result[v] )
 
 # logger.debug( JSON.pretty_generate( result[v] ) )
@@ -998,108 +764,55 @@ module DataCollector
     end
 
 
-    def prepareData( params = {} )
-
-      shortName  = params.dig(:hostname)
-      fqdn       = params.dig(:fqdn)
-
-      prepared   = @cache.get( shortName )
-
-      if( prepared == nil )
-
-        logger.debug( 'no prepared data found ...' )
-
-        start = Time.now
-
-        # no prepared data found ...
-        # generate it
-        options = {
-          :configFiles           => { :application => @applicationConfig, :service => @serviceConfig },
-          :applicationConfigFile => @applicationConfig,
-          :serviceConfigFile     => @serviceConfig,
-          :redis                 => { :host => @redisHost, :port => @redisPort }
-        }
-
-        p = Prepare.new( options )
-        result = p.buildMergedData( { :hostname => shortName, :fqdn => fqdn } )
-
-        if( result == true )
-          @cache.set( shortName, 'prepared', expiresIn: 320 )
-        end
-
-        finish = Time.now
-        logger.info( sprintf( 'build prepared data in %s seconds', finish - start ) )
-
-      end
-
-#      # TODO
-#      #
-#      prepared = @redis.get( Storage::RedisClient.cacheKey( { :host => shortName, :pre => 'prepare' } ) )
-#
-#      if( prepared.is_a?( NilClass ) || prepared.is_a?( FalseClass ) || ( prepared.is_a?( String ) && ( prepared == '' || prepared == 'false ' ) ) )
-#
-#        result = false
-#
-#        logger.debug( 'no prepared data found ...' )
-#
-#        start = Time.now
-#
-#        # no prepared data found ...
-#        # generate it
-#        options = {
-#          :configFiles           => { :application => @applicationConfig, :service => @serviceConfig },
-#          :applicationConfigFile => @applicationConfig,
-#          :serviceConfigFile     => @serviceConfig,
-#          :redis                 => { :host => @redisHost, :port => @redisPort }
-#        }
-#
-#        p = Prepare.new( options )
-#        result = p.buildMergedData( { :hostname => shortName, :fqdn => fqdn } )
-#
-#        if( result == true )
-#          @redis.set( Storage::RedisClient.cacheKey( { :host => shortName, :pre => 'prepare' } ), { :prepared => true } )
-#        end
-#
-#        finish = Time.now
-#        logger.info( sprintf( 'build prepared data in %s seconds', finish - start ) )
-#
-#      end
-
-    end
-
 
     def run()
 
-      logger.debug( 'get monitored Servers' )
+      logger.debug( 'get the online server for monitoring to collect their data' )
 
       monitoredServer = self.monitoredServer()
 
       if( monitoredServer.is_a?( FalseClass ) || monitoredServer.count == 0 )
 
-        logger.info( 'no Servers for Monitoring found' )
+        logger.info( 'no online server found' )
 
         return
       end
 
       monitoredServer.each do |h,d|
 
-        h = h.first
+        h     = h.first
 
-        shortName = d.dig(:shortname)
-        fqdn      = d.dig(:longname)
+        short = d.dig(:shortname)
+        fqdn  = d.dig(:longname)
+
+        # add hostname to an blocking cache
+        #
+        if( @jobs.jobs( { :short => short, :fqdn => fqdn } ) == true )
+
+          logger.warn( 'we are working on this job' )
+
+          next
+        end
+
+        @jobs.add( { :short => short, :fqdn => fqdn } )
 
         start = Time.now
 
         logger.info( sprintf( 'found %s for monitoring', fqdn ) )
 
         # build prepared datas
-        self.prepareData( { :hostname => shortName, :fqdn => fqdn } )
+        #
+        @prepare.buildMergedData( { :hostname => short, :fqdn => fqdn } )
 
         # run checks
-        self.createBulkCheck( { :hostname => shortName, :fqdn => fqdn } )
+        #
+        self.createBulkCheck( { :hostname => short, :fqdn => fqdn } )
 
         finish = Time.now
         logger.info( sprintf( 'collect data in %s seconds', finish - start ) )
+
+        @jobs.del( { :short => short, :fqdn => fqdn } )
+
       end
 
     end

@@ -6,6 +6,41 @@ set -e
 
 # -------------------------------------------------------------------------------------------------
 
+isIp() {
+
+  TEST=$(echo "${IP}." | grep -E "([0-9]{1,3}\.){4}")
+
+  if [ "$TEST" ]
+  then
+    echo "$IP" | awk -F. '{
+      if ( (($1>=0) && ($1<=255)) &&
+           (($2>=0) && ($2<=255)) &&
+           (($3>=0) && ($3<=255)) &&
+           (($4>=0) && ($4<=255)) ) {
+        print 0
+#         print($0 " is a valid IP address.");
+      } else {
+        print 1
+#        print($0 ": IP address out of range!");
+      }
+    }'
+  else
+    echo 1
+#    echo "${IP} is not a valid IP address!"
+  fi
+}
+
+checkIP() {
+
+  if [ $(isIp ${1}) -eq 1 ]
+  then
+    echo $(host -t A ${1} | grep "has address" | cut -d ' ' -f 4)
+  else
+    echo ${1}
+  fi
+}
+
+
 addDNS() {
 
   hosts=
@@ -41,6 +76,8 @@ addDNS() {
 
       [ -n "${host}" ]
       [ -n "${ip}" ]
+
+      ip="$(checkIP ${ip})"
 
       if [ "${host}" == "blueprint-box" ]
       then

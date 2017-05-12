@@ -97,8 +97,8 @@ module ServiceDiscovery
 
     @scanPorts         = ports
 
-    version             = '1.6.0'
-    date                = '2017-04-11'
+    version             = '1.6.2'
+    date                = '2017-05-07'
 
     logger.info( '-----------------------------------------------------------------' )
     logger.info( ' CoreMedia - Service Discovery' )
@@ -121,11 +121,10 @@ module ServiceDiscovery
     self.readConfigurations()
   end
 
-
+  # read Service Configuration
+  #
   def readConfigurations()
 
-    # read Service Configuration
-    #
 #     logger.info( 'read defines of Services Properties' )
 
     if( @serviceConfig == nil )
@@ -163,27 +162,23 @@ module ServiceDiscovery
   #
   def createHostConfig( data )
 
-    logger.debug( "createHostConfig( #{data} )" )
+#    logger.debug( "createHostConfig( #{data} )" )
 
     data.each do |d,v|
-
-#       logger.debug( d )
 
       # merge data between discovered Services and our base configuration,
       # the dicovered ports are IMPORTANT
       #
       serviceData = @serviceConfig.dig( 'services', d )
 
-#       logger.debug( serviceData )
-
-      if( serviceData != nil ) # @serviceConfig['services'][d] )
+      if( serviceData != nil )
 
         logger.debug( @serviceConfig['services'][d] )
 
-        data[d].merge!( serviceData ) { |key, port| port } # @serviceConfig['services'][d] ) { |key, port| port }
+        data[d].merge!( serviceData ) { |key, port| port }
 
-        port       = data.dig( d, 'port' )      # [d]['port']      ? data[d]['port']      : nil
-        port_http  = data.dig( d, 'port_http' ) # [d]['port_http'] ? data[d]['port_http'] : nil
+        port       = data.dig( d, 'port' )
+        port_http  = data.dig( d, 'port_http' )
 
         if( port != nil && port_http != nil )
           # ATTENTION
@@ -196,7 +191,7 @@ module ServiceDiscovery
         end
 
       else
-        logger.debug( sprintf( 'missing entry \'%s\' in cm-service.yaml for merge with discovery data', d ) )
+        logger.warn( sprintf( 'missing entry \'%s\' in cm-service.yaml for merge with discovery data', d ) )
       end
     end
 
@@ -208,15 +203,11 @@ module ServiceDiscovery
   #
   def deleteHost( host )
 
-    logger.info( sprintf( 'delete Host \'%s\'',  host ) )
+#     logger.info( sprintf( 'delete Host \'%s\'',  host ) )
 
     # get a DNS record
     #
     ip, short, fqdn = self.nsLookup( host )
-
-    logger.debug( sprintf( ' ip   %s ', ip ) )
-    logger.debug( sprintf( ' host %s ', short ) )
-    logger.debug( sprintf( ' fqdn %s ', fqdn ) )
 
     status  = 400
     message = 'Host not in Monitoring'
@@ -258,13 +249,9 @@ module ServiceDiscovery
     #
     ip, short, fqdn = self.nsLookup( host )
 
-    logger.debug( sprintf( ' ip   %s ', ip ) )
-    logger.debug( sprintf( ' host %s ', short ) )
-    logger.debug( sprintf( ' fqdn %s ', fqdn ) )
-
     # add hostname to an blocking cache
     #
-    if( @jobs.jobs( { ip => ip, :short => short, :fqdn => fqdn } ) == true )
+    if( @jobs.jobs( { :ip => ip, :short => short, :fqdn => fqdn } ) == true )
 
       logger.warn( 'we are working on this job' )
 
@@ -274,7 +261,7 @@ module ServiceDiscovery
       }
     end
 
-    @jobs.add( { ip => ip, :short => short, :fqdn => fqdn } )
+    @jobs.add( { :ip => ip, :short => short, :fqdn => fqdn } )
 
     # if the destination host available (simple check with ping)
     #
@@ -295,6 +282,21 @@ module ServiceDiscovery
 
       logger.debug( JSON.pretty_generate( discoveryData ) )
       logger.error( 'Host already created' )
+
+      # look for online status ...
+      #
+      status = @redis.status( { :short => host } )
+
+      logger.debug( status )
+      logger.debug( status.class.to_s )
+
+      status = status.dig(:status)
+
+      if( status != nil || status != Storage::RedisClient::OFFLINE )
+
+        logger.debug( 'set host status to ONLINE' )
+        status = @redis.setStatus( { :short => host, :status => Storage::RedisClient::ONLINE } )
+      end
 
       return {
         :status  => 409, # 409 Conflict
@@ -371,14 +373,15 @@ module ServiceDiscovery
     } )
 
     logger.debug( 'set host status to ONLINE' )
-    @redis.setStatus( { :short => host, :status => Storage::RedisClient::ONLINE } )
+    status = @redis.setStatus( { :short => host, :status => Storage::RedisClient::ONLINE } )
+    logger.debug( status )
 
     finish = Time.now
     logger.info( sprintf( 'finished in %s seconds', finish - start ) )
 
-    @jobs.del( { ip => ip, :short => short, :fqdn => fqdn } )
+    @jobs.del( { :ip => ip, :short => short, :fqdn => fqdn } )
 
-    logger.debug( @redis.nodes() )
+#     logger.debug( @redis.nodes() )
 
     return {
       :status   => 200,
@@ -440,10 +443,6 @@ module ServiceDiscovery
       # get a DNS record
       #
       ip, short, fqdn = self.nsLookup( host )
-
-      logger.debug( sprintf( ' ip   %s ', ip ) )
-      logger.debug( sprintf( ' host %s ', short ) )
-      logger.debug( sprintf( ' fqdn %s ', fqdn ) )
 
       discoveryData = @redis.discoveryData( { :short => short } )
 

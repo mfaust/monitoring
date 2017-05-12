@@ -16,6 +16,7 @@ require 'time_difference'
 require 'rest-client'
 
 require_relative 'logging'
+require_relative 'cache'
 require_relative 'message-queue'
 require_relative 'storage'
 require_relative 'mbean'
@@ -32,6 +33,7 @@ require_relative 'grafana/snapshot'
 require_relative 'grafana/login'
 require_relative 'grafana/admin'
 require_relative 'grafana/version'
+require_relative 'grafana/coremedia/tools'
 require_relative 'grafana/coremedia/dashboard'
 
 # -----------------------------------------------------------------------------
@@ -54,6 +56,7 @@ module Grafana
     include Grafana::Snapshot
     include Grafana::Login
     include Grafana::Admin
+    include Grafana::Coremedia::Tools
     include Grafana::Coremedia::Dashboard
     include Grafana::Coremedia::Templates
     include Grafana::Coremedia::Annotations
@@ -131,7 +134,9 @@ module Grafana
 
       @redis       = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
       @mbean       = MBean::Client.new( { :redis => @redis } )
+      @cache       = Cache::Store.new()
       @mqConsumer  = MessageQueue::Consumer.new( @MQSettings )
+      @mqProducer  = MessageQueue::Producer.new( @MQSettings )
 
       self.createApiInstance( {
         :timeout      => timeout,
@@ -140,6 +145,8 @@ module Grafana
         :user         => user,
         :password     => password
       } )
+
+
 
     end
 
@@ -180,12 +187,28 @@ module Grafana
           :Authorization => headers.dig( :authorization )
         }
       else
-        # Regular login Auth
-        login = self.login( { :user => user, :password => password } )
 
-        if( login == false )
-          return nil
+#         logger.debug( "user: #{user}" )
+#         logger.debug( "password: #{password}" )
+
+        begin
+
+          logger.debug( 'try to login to our grafana instance' )
+
+          # Regular login Auth
+          login = self.login( { :user => user, :password => password } )
+
+          sleep(5)
+
+        rescue => e
+
+          logger.error( e )
+
         end
+
+#         if( login == false )
+#           return nil
+#         end
       end
 
       return self
@@ -211,6 +234,7 @@ module Grafana
 #       self.ping_session()
 
       begin
+
         resp = @apiInstance['/login'].post(
           request_data.to_json,
           { :content_type => 'application/json; charset=UTF-8' }
@@ -227,13 +251,21 @@ module Grafana
 
           return true
         else
+
+          logger.error( "Error running POST request on /login: #{resp.code.to_i}" )
+          logger.error( "#{resp}" )
+          logger.error( "Request data: #{request_data.to_json}" )
+
+          raise( 'can\'t login into grafana instance' )
           return false
         end
+
       rescue => e
 
         logger.error( "Error running POST request on /login: #{e}" )
         logger.error( "Request data: #{request_data.to_json}" )
 
+        raise( 'can\'t login into grafana instance' )
         return false
       end
 

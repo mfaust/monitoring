@@ -21,10 +21,10 @@ module MessageQueue
 
     include Logging
 
-    def initialize( params = {} )
+    def initialize( settings = {} )
 
-      beanstalkHost       = params[:beanstalkHost] ? params[:beanstalkHost] : 'beanstalkd'
-      beanstalkPort       = params[:beanstalkPort] ? params[:beanstalkPort] : 11300
+      beanstalkHost       = settings.dig(:beanstalkHost) || 'beanstalkd'
+      beanstalkPort       = settings.dig(:beanstalkPort) || 11300
 
       begin
         @b = Beaneater.new( sprintf( '%s:%s', beanstalkHost, beanstalkPort ) )
@@ -33,9 +33,9 @@ module MessageQueue
         raise sprintf( 'ERROR: %s' , e )
       end
 
-      logger.info( '-----------------------------------------------------------------' )
-      logger.info( ' MessageQueue::Producer' )
-      logger.info( '-----------------------------------------------------------------' )
+#       logger.info( '-----------------------------------------------------------------' )
+#       logger.info( ' MessageQueue::Producer' )
+#       logger.info( '-----------------------------------------------------------------' )
 
     end
 
@@ -72,11 +72,11 @@ module MessageQueue
 
     include Logging
 
-    def initialize( params = {} )
+    def initialize( settings = {} )
 
-      beanstalkHost       = params.dig(:beanstalkHost) || 'beanstalkd'
-      beanstalkPort       = params.dig(:beanstalkPort) ||  11300
-      beanstalkQueue      = params.dig(:beanstalkQueue)
+      beanstalkHost       = settings.dig(:beanstalkHost) || 'beanstalkd'
+      beanstalkPort       = settings.dig(:beanstalkPort) ||  11300
+      beanstalkQueue      = settings.dig(:beanstalkQueue)
 
       begin
         @b = Beaneater.new( sprintf( '%s:%s', beanstalkHost, beanstalkPort ) )
@@ -97,9 +97,9 @@ module MessageQueue
         raise sprintf( 'ERROR: %s' , e )
       end
 
-      logger.info( '-----------------------------------------------------------------' )
-      logger.info( ' MessageQueue::Consumer' )
-      logger.info( '-----------------------------------------------------------------' )
+#       logger.info( '-----------------------------------------------------------------' )
+#       logger.info( ' MessageQueue::Consumer' )
+#       logger.info( '-----------------------------------------------------------------' )
 
     end
 

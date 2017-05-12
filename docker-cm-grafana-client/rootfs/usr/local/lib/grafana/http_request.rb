@@ -58,6 +58,7 @@ module Grafana
       return self.issueRequest( 'PATCH', endpoint, patchdata )
     end
 
+#    private
     # Request executor - Private Function
     #
     # @private
@@ -66,6 +67,11 @@ module Grafana
     # @param [Hash, #read] data
     # @return [Mixed, #read]  return false at Error, or an JSON on success
     def issueRequest( methodType = 'GET', endpoint = '/', data = {} )
+
+      logger.debug( "issueRequest( #{methodType}, #{endpoint}, data )" )
+      logger.debug( @headers )
+      logger.debug( @apiInstance.inspect )
+      logger.debug( '------------------------------------------' )
 
       resultCodes = {
         200 => 'created',

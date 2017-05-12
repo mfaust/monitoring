@@ -62,13 +62,13 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(alias(perSecond(aliasSub(*.%HOST%.MYSQL.network.bytes.tx, '(.*)-', '')), 'in'))",
+                "target": "aliasByMetric(alias(perSecond(aliasSub(*.$host.MYSQL.network.bytes.tx, '(.*)-', '')), 'in'))",
                 "textEditor": false
               },
               {
                 "hide": false,
                 "refId": "B",
-                "target": "aliasByMetric(alias(perSecond(aliasSub(*.%HOST%.MYSQL.network.bytes.rx, '(.*)-', '')), 'out'))",
+                "target": "aliasByMetric(alias(perSecond(aliasSub(*.$host.MYSQL.network.bytes.rx, '(.*)-', '')), 'out'))",
                 "textEditor": false
               }
             ],
@@ -154,7 +154,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.%HOST%.MYSQL.threads.*)",
+                "target": "aliasByMetric(*.$host.MYSQL.threads.*)",
                 "textEditor": false
               }
             ],
@@ -240,7 +240,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.MYSQL.qcache.*, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(*.$host.MYSQL.qcache.*, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -330,7 +330,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(perSecond(aliasSub(*.%HOST%.MYSQL.innodb.pages.*, '(.*)-', '')), '^perSecond\\((.*)\\)$', '\\1'))",
+                "target": "aliasByMetric(aliasSub(perSecond(aliasSub(*.$host.MYSQL.innodb.pages.*, '(.*)-', '')), '^perSecond\\((.*)\\)$', '\\1'))",
                 "hide": false,
                 "textEditor": false
               }
@@ -419,7 +419,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(perSecond(aliasSub(*.%HOST%.MYSQL.innodb.rows.*, '(.*)-', '')), '^perSecond\\((.*)\\)$', '\\1'))",
+                "target": "aliasByMetric(aliasSub(perSecond(aliasSub(*.$host.MYSQL.innodb.rows.*, '(.*)-', '')), '^perSecond\\((.*)\\)$', '\\1'))",
                 "textEditor": false
               }
             ],
@@ -501,7 +501,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(aliasSub(perSecond(aliasSub(*.%HOST%.MYSQL.innodb.pages.*, '(.*)-', '')), '^perSecond\\((.*)\\)$', '\\1'), 'pages_(.*)', '\\1'))",
+                "target": "aliasByMetric(aliasSub(aliasSub(perSecond(aliasSub(*.$host.MYSQL.innodb.pages.*, '(.*)-', '')), '^perSecond\\((.*)\\)$', '\\1'), 'pages_(.*)', '\\1'))",
                 "textEditor": false
               }
             ],
@@ -569,6 +569,23 @@
     },
     "templating": {
       "list": [
+        {
+          "current": {
+            "value": "%HOST%",
+            "text": "%HOST%"
+          },
+          "hide": 2,
+          "label": null,
+          "name": "host",
+          "options": [
+            {
+              "value": "%HOST%",
+              "text": "%HOST%"
+            }
+          ],
+          "query": "%HOST%",
+          "type": "constant"
+        }
       ]
     },
     "annotations": {
@@ -578,21 +595,21 @@
           "enable": true,
           "iconColor": "rgb(93, 227, 12)",
           "datasource": "events",
-          "tags": "%HOST% created&set=intersection"
+          "tags": "$host created&set=intersection"
         },
         {
           "name": "Load Tests",
           "enable": true,
           "iconColor": "rgb(26, 196, 220)",
           "datasource": "events",
-          "tags": "%HOST% loadtest&set=intersection"
+          "tags": "$host loadtest&set=intersection"
         },
         {
           "name": "Deployments",
           "enable": true,
           "iconColor": "rgb(176, 40, 253)",
           "datasource": "events",
-          "tags": "%HOST% deployment&set=intersection"
+          "tags": "$host deployment&set=intersection"
         }
       ]
     },

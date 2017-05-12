@@ -141,17 +141,16 @@ module Storage
 
       dns = @redis.get( sprintf( '%s-dns', cachekey ) )
 
-      if( dns != nil )
+      if( dns == nil )
+
+        toStore = { ip: ip, shortname: short, longname: long, created: DateTime.now() }.to_json
+
+        @redis.set( sprintf( '%s-dns', cachekey ), toStore )
+      else
 
         logger.warn( 'DNS Entry already created:' )
         logger.warn( dns )
-
-        return
       end
-
-      toStore = { ip: ip, shortname: short, longname: long, created: DateTime.now() }.to_json
-
-      @redis.set( sprintf( '%s-dns', cachekey ), toStore )
 
 #       self.setStatus( { :short => short, :status => Storage::RedisClient::PREPARE } )
 
@@ -183,7 +182,9 @@ module Storage
         cachekey
       ]
 
-      @redis.del( *keys )
+      status = @redis.del( *keys )
+
+#       logger.debug( status )
 
 #       @redis.del( sprintf( '%s-measurements', cachekey ) )
 #       @redis.del( sprintf( '%s-discovery'   , cachekey ) )
@@ -192,7 +193,11 @@ module Storage
 #       @redis.del( cachekey )
 
 
-      self.removeNode( { :short => short, :key => cachekey } )
+      status = self.removeNode( { :short => short, :key => cachekey } )
+
+#       logger.debug( status )
+
+      return true
 
     end
 
@@ -443,7 +448,7 @@ module Storage
 #       logger.debug( result )
 
       if( result == nil )
-        return { :short => nil }
+        return nil
       end
 
       if( result.is_a?( String ) )
@@ -505,7 +510,7 @@ module Storage
       result = @redis.get( cachekey )
 
       if( result == nil )
-        return { :short => nil }
+        return nil
       end
 
       if( result.is_a?( String ) )
@@ -598,8 +603,6 @@ module Storage
 
       short  = params.dig(:short)
 
-#       logger.debug( params )
-
       cachekey = 'nodes'
 
       existingData = @redis.get( cachekey )
@@ -683,7 +686,9 @@ module Storage
           if( nodeStatus.to_i == status.to_i )
 
             dnsData    = self.dnsData( { :short => k } )
-#             logger.debug( dnsData )
+#             statusData = self.status( { :short => k } )
+
+#             logger.debug( statusData )
 
             result[k.to_s] ||= {}
             result[k.to_s] = dnsData
@@ -707,7 +712,7 @@ module Storage
     #
     def setStatus( params = {} )
 
-#       logger.debug( "setStatus( #{params} )" )
+      logger.debug( "setStatus( #{params} )" )
 #       logger.debug( caller )
 
       if( self.checkDatabase() == false )
@@ -726,6 +731,24 @@ module Storage
           :status  => 404,
           :message => 'missing short hostname'
         }
+      end
+
+      if( Utils::Network.isIp?( short ) )
+
+        logger.debug( 'ip given' )
+
+        logger.debug( self.nodes() )
+
+        dns      = Utils::Network.resolv( host )
+
+        logger.debug( "hostResolve #{dns}" )
+
+#         ip            = dns.dig(:ip)
+        shortHostName = dns.dig(:short)
+#         longHostName  = dns.dig(:long)
+
+        short = dns.dig(:short)
+
       end
 
       cachekey = sprintf(
@@ -748,16 +771,18 @@ module Storage
       result['status'] = status
       result = result.to_json
 
-#       logger.debug( result )
+      logger.debug( result )
 
-      @redis.set( cachekey, result )
+      s = @redis.set( cachekey, result )
+
+      logger.debug( s )
 
     end
 
 
     def status( params = {} )
 
-#       logger.debug( "status( #{params} )" )
+      logger.debug( "status( #{params} )" )
 
       if( self.checkDatabase() == false )
         return false

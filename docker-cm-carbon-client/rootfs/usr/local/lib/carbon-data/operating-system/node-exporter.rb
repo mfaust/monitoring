@@ -14,10 +14,30 @@ module CarbonData
 
     #      logger.debug( JSON.pretty_generate( value ) )
 
+          uptime     = value.dig('uptime')
           cpu        = value.dig('cpu')
           load       = value.dig('load')
           memory     = value.dig('memory')
           filesystem = value.dig('filesystem')
+
+          if( uptime != nil )
+
+            boot_time = uptime.dig('node_boot_time')
+            uptime    = uptime.dig('uptime')
+
+            if( boot_time != nil )
+              result << {
+                :key   => sprintf( '%s.%s.%s.%s'         , @Host, @Service, 'uptime', 'boot_time' ),
+                :value => boot_time
+              }
+            end
+            if( uptime != nil )
+              result << {
+                :key   => sprintf( '%s.%s.%s.%s'         , @Host, @Service, 'uptime', 'uptime' ),
+                :value => uptime
+              }
+            end
+          end
 
           if( cpu != nil )
 

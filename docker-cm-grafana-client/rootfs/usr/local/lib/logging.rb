@@ -20,7 +20,7 @@ module Logging
 
     def configure_logger_for( classname )
 
-      logFile         = '/var/log/monitoring.log'
+      logFile         = '/var/log/grafana-client.log'
       file            = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
       file.sync       = true
       logger          = Logger.new( file, 'weekly', 1024000 )

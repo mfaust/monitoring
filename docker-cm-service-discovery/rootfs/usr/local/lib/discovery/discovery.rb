@@ -7,7 +7,7 @@ module ServiceDiscovery
     #
     def discoverApplication( params = {} )
 
-      logger.debug( "discoverApplication( #{params} )" )
+#       logger.debug( "discoverApplication( #{params} )" )
 
       host = params.dig( :fqdn )
       port = params.dig( :port )
@@ -74,7 +74,7 @@ module ServiceDiscovery
             response = sprintf( 'Unknown Host: %s', host )
           end
 
-          logger.debug( {
+          logger.error( {
             :status  => responseStatus,
             :message => response
           } )
@@ -190,14 +190,15 @@ module ServiceDiscovery
                       jvmRoute = value.dig('jvmRoute')
 
                       if( ( jvmRoute != nil ) && ( jvmRoute.include?( 'studio' ) ) )
-                        services.delete( "blueprint" )
-                        services.push( "cae-preview" )
+                        services.delete( 'blueprint' )
+                        services.push( 'cae-preview' )
                       else
-                        services.delete( "blueprint" )
-                        services.push( "delivery" )
+                        services.delete( 'blueprint' )
+                        services.push( 'delivery' )
                       end
                     else
                       logger.error( sprintf( 'response status %d', engine['status'].to_i ) )
+                      logger.error( engine )
                     end
                   else
 

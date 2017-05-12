@@ -712,7 +712,7 @@ module Storage
     #
     def setStatus( params = {} )
 
-#       logger.debug( "setStatus( #{params} )" )
+      logger.debug( "setStatus( #{params} )" )
 #       logger.debug( caller )
 
       if( self.checkDatabase() == false )
@@ -771,16 +771,18 @@ module Storage
       result['status'] = status
       result = result.to_json
 
-#       logger.debug( result )
+      logger.debug( result )
 
-      @redis.set( cachekey, result )
+      s = @redis.set( cachekey, result )
+
+      logger.debug( s )
 
     end
 
 
     def status( params = {} )
 
-#       logger.debug( "status( #{params} )" )
+      logger.debug( "status( #{params} )" )
 
       if( self.checkDatabase() == false )
         return false
