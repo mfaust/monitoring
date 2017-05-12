@@ -226,11 +226,14 @@ module Sinatra
       host   = params[:host]
       result = m.removeHost( host, @request_paylod )
 
-      logger.debug( result )
-
-#       status result[:status]
-
-      result
+#       r = JSON.parse( result )
+#
+#       logger.debug( r )
+#
+#       status = r['status']
+#       body   = r['message']
+#
+#       halt status, {'Content-Type' => 'text/json'}, result
 
     end
 
