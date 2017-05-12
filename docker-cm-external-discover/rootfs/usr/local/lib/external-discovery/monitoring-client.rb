@@ -1,9 +1,4 @@
 
-require 'json'
-require 'rest-client'
-
-require_relative '../logging'
-
 # -----------------------------------------------------------------------------
 
 module ExternalDiscovery

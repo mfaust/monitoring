@@ -1,9 +1,6 @@
 
 require 'aws-sdk'
 
-require_relative '..logging'
-require_relative '../aws/client'
-
 # -----------------------------------------------------------------------------
 
 module ExternalDiscovery

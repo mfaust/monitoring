@@ -15,6 +15,7 @@ require_relative 'cache'
 require_relative 'utils/network'
 
 require_relative 'external-discovery/version'
+require_relative 'external-discovery/tools'
 require_relative 'external-discovery/client'
 require_relative 'external-discovery/data-consumer'
 require_relative 'external-discovery/monitoring-client'
