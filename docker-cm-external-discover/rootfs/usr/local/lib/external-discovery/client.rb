@@ -5,7 +5,7 @@ require_relative '../logging'
 require_relative '../monkey'
 require_relative '../cache'
 require_relative '../utils/network'
-require_relative 'external-discovery/tools'
+require_relative 'tools'
 
 # -----------------------------------------------------------------------------
 
