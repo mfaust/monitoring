@@ -73,7 +73,7 @@ module Grafana
         end
 
         @shortHostname    = short
-        @grafanaHostname  = self.createSlug( @grafanaHostname ).gsub( '.', '-' )
+        @grafanaHostname  = @grafanaHostname.gsub( '.', '-' ) # self.createSlug( @grafanaHostname ).gsub( '.', '-' )
 
         logger.debug( @shortHostname )
 
