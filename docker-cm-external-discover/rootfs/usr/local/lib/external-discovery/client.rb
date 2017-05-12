@@ -110,7 +110,7 @@ module ExternalDiscovery
 
       lastOktet   = ip.split('.').last
 
-      return = sprintf( '%s-%s-%s-%s', customer, environment, tier, lastOktet )
+      return sprintf( '%s-%s-%s-%s', customer, environment, tier, lastOktet )
     end
 
 
