@@ -182,7 +182,7 @@ module ExternalDiscovery
 
           if( ip != nil && fqdn != nil )
 
-            self.removeHost( { :ip => ip, :fqdn => fqdn, :cname => cname } )
+            self.nodeDelete( { :ip => ip, :fqdn => fqdn, :cname => cname } )
           end
         end
 
@@ -218,13 +218,25 @@ module ExternalDiscovery
             next
           end
 
+          ip, short, fqdn = self.nsLookup( fqdn )
+
           # -----------------------------------------------------------------------------
 
+          # currently, we want only the CMS
+          #
           if( ! cname.include?( 'cms' ) )
             next
           end
 
-          if( self.addHost( { :ip => ip, :fqdn => fqdn, :cname => cname, :name => name, :customer => customer, :environment => environment, :tier => tier, :tags => tags } ) == true )
+          logger.info( sprintf( 'get information about %s (%s)', fqdn, cname ) )
+
+          nodeStatus = self.nodeStatus( { :short => short } )
+
+          if( nodeStatus == true )
+            next
+          end
+
+          if( self.nodeAdd( { :ip => ip, :fqdn => fqdn, :cname => cname, :name => name, :customer => customer, :environment => environment, :tier => tier, :tags => tags } ) == true )
 
             newArray << l
 
@@ -244,7 +256,7 @@ module ExternalDiscovery
     end
 
 
-    def addHost( params = {} )
+    def nodeAdd( params = {} )
 
       ip          = params.dig(:ip)
       fqdn        = params.dig(:fqdn)
@@ -265,122 +277,84 @@ module ExternalDiscovery
 
       displayName = normalizeName( name, [ 'cosmos-', 'delivery-', 'management-', 'storage-' ] )
 
-      logger.debug( "environment: #{environment}" )
-      logger.debug(" -> #{cname} - #{name}" )
-      logger.debug( "  ==> #{displayName}" )
+#       logger.debug( "environment: #{environment}" )
+#       logger.debug(" -> #{cname} - #{name}" )
+#       logger.debug( "  ==> #{displayName}" )
 
       discoveryStatus = 204
       useableTags     = Array.new()
 
-      logger.info( sprintf( 'get information about %s (%s)', fqdn, cname ) )
+      logger.info( '  now, we try to add them' )
 
-      ip, short, fqdn = self.nsLookup( fqdn )
+      logger.debug( "original tags: #{tags}" )
 
-      # get node data
-      result = @monitoringClient.fetch( short )
+      # our positive list for Tags
+      useableTags = tags.filter( 'customer', 'environment', 'tier' )
 
-#       logger.debug( result )
+      logger.debug( "useable tags : #{useableTags}" )
+
+      # add to monitoring
+      # defaults:
+      # - discovery  = true
+      # - icinga     = true
+      # - grafana    = true
+      # - annotation = true
+      d = JSON.generate( {
+        :tags       => useableTags,
+        :config     => {
+          'display-name'        => displayName,
+          'graphite-identifier' => sprintf( '%s-%s-%s-%s', customer, environment, tier, ip )
+        }
+      } )
+
+      logger.debug( "data: #{d}" )
+
+      result = @monitoringClient.add( short, d )
+
+      logger.debug( result )
+
+      logger.debug( '------------------------' )
+
 
       if( result != nil )
 
-        discoveryStatus = result.dig('status') || 400
+        discoveryStatus  = result.dig( :status )   || result.dig( 'status' )
+        discoveryMessage = result.dig( :message )  || result.dig( 'message' )
 
-        if( discoveryStatus.to_i == 200 )
-
-          logger.info( 'node are already in monitoring' )
-          return true
-
-        end
-
-        # {"status"=>400, "message"=>"Host are not available (DNS Problem)"}
-        #if( discoveryStatus == 400 )
-        #  logger.info( '  The DNS of this host are not resolveable ... skip' )
-        #  next
-        #
-        ## not exists
-        #els
-        if( discoveryStatus == nil || discoveryStatus == 204 || discoveryStatus == 404 )
-
-          logger.info( '  now, we try to add them' )
-
-          logger.debug( "tags: #{tags}" )
-
-          # our positive list for Tags
-          useableTags = tags.filter( 'customer', 'environment', 'tier' )
-
-          logger.debug( "useableTags: #{useableTags}" )
-
-          # add to monitoring
-          # defaults:
-          # - discovery  = true
-          # - icinga     = true
-          # - grafana    = true
-          # - annotation = true
-          d = JSON.generate( {
-            :tags       => useableTags,
-            :config     => {
-              'display-name'        => displayName,
-              'graphite-identifier' => sprintf( '%s-%s-%s-%s', customer, environment, tier, ip )
-            }
-          } )
-
-          logger.debug( "data: #{d}" )
-
-          result = @monitoringClient.add( short, d )
-
-          logger.debug( result )
-
-          logger.debug( '------------------------' )
-
-
-          if( result != nil )
-
-            discoveryStatus  = result.dig( :status )   || result.dig( 'status' )
-            discoveryMessage = result.dig( :message )  || result.dig( 'message' )
-
-            if( discoveryStatus == 400 )
-              # error
-              logger.error( sprintf( '  => %s', discoveryMessage ) )
-
-              return false
-            elsif( discoveryStatus == 409 )
-              # Host already created
-              logger.error( sprintf( '  => %s', discoveryMessage ) )
-
-              return true
-            elsif( discoveryStatus == 408 )
-              # request timeout
-              logger.error( sprintf( '  => %s', discoveryMessage ) )
-
-              return false
-            elsif( discoveryStatus == 500 )
-              # internal error
-              logger.error( sprintf( '  => %s', discoveryMessage ) )
-
-              return false
-            else
-              logger.info( 'Host successful added' )
-              # successful
-              return true
-            end
-
-          end
-
-        else
-
-          logger.warn( 'unknown status?' )
-          logger.debug( result )
+        if( discoveryStatus == 400 )
+          # error
+          logger.error( sprintf( '  => %s', discoveryMessage ) )
 
           return false
+        elsif( discoveryStatus == 409 )
+          # Host already created
+          logger.error( sprintf( '  => %s', discoveryMessage ) )
 
+          return true
+        elsif( discoveryStatus == 408 )
+          # request timeout
+          logger.error( sprintf( '  => %s', discoveryMessage ) )
+
+          return false
+        elsif( discoveryStatus == 500 )
+          # internal error
+          logger.error( sprintf( '  => %s', discoveryMessage ) )
+
+          return false
+        else
+          logger.info( 'Host successful added' )
+          # successful
+          return true
         end
 
       end
 
+      return false
+
     end
 
 
-    def removeHost( params = {} )
+    def nodeDelete( params = {} )
 
       ip          = params.dig(:ip)
       fqdn        = params.dig(:fqdn)
@@ -403,6 +377,36 @@ module ExternalDiscovery
       logger.info( sprintf( '  %s - %s', discoveryStatus, discoveryMessage ) )
 
       return true
+    end
+
+    # return 'true', when node currently in monitoring
+    #
+    def nodeStatus( params = {} )
+
+      ip     = params.dig(:ip)
+      short  = params.dig(:short)
+      fqdn   = params.dig(:fqdn)
+
+      result = @monitoringClient.fetch( short )
+
+      logger.debug( result )
+
+      if( result != nil )
+
+        discoveryStatus = result.dig('status') || 400
+
+        logger.debug( "status: #{discoveryStatus}" )
+
+        if( discoveryStatus.to_i == 200 )
+
+          logger.info( '  is already in monitoring' )
+          return true
+        end
+
+      end
+
+      return false
+
     end
 
 
