@@ -101,6 +101,19 @@ module ExternalDiscovery
     end
 
 
+    def graphiteIdentifier( params = {} )
+
+      ip          = params.dig(:ip)
+      customer    = params.dig(:customer)
+      environment = params.dig(:environment)
+      tier        = params.dig(:tier)
+
+      lastOktet   = ip.split('.').last
+
+      return = sprintf( '%s-%s-%s-%s', customer, environment, tier, lastOktet )
+    end
+
+
     def extractInstanceInformation( data = {} )
 
       logger.debug( "extractInstanceInformation( #{data} )" )
@@ -230,7 +243,7 @@ module ExternalDiscovery
             next
           end
 
-          if( self.nodeAdd( { :ip => ip, :fqdn => fqdn, :cname => cname, :name => name, :customer => customer, :environment => environment, :tier => tier, :tags => tags } ) == true )
+          if( self.nodeAdd( { :ip => ip, :short => short, :fqdn => fqdn, :cname => cname, :name => name, :customer => customer, :environment => environment, :tier => tier, :tags => tags } ) == true )
 
             newArray << l
 
@@ -253,9 +266,11 @@ module ExternalDiscovery
     def nodeAdd( params = {} )
 
       ip          = params.dig(:ip)
+      short       = params.dig(:short)
       fqdn        = params.dig(:fqdn)
       cname       = params.dig(:cname)
       name        = params.dig(:name)
+      tags        = params.dig(:tags)
       customer    = params.dig(:customer)
       environment = params.dig(:environment)
       tier        = params.dig(:tier)
@@ -297,7 +312,7 @@ module ExternalDiscovery
         :tags       => useableTags,
         :config     => {
           'display-name'        => displayName,
-          'graphite-identifier' => sprintf( '%s-%s-%s-%s', customer, environment, tier, ip )
+          'graphite-identifier' => self.graphiteIdentifier( { :customer => customer, :environment => environment, :tier => tier, :ip => ip } )
         }
       } )
 
