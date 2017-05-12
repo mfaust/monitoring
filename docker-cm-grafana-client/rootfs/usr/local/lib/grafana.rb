@@ -146,6 +146,8 @@ module Grafana
         :password     => password
       } )
 
+
+
     end
 
 
@@ -185,12 +187,28 @@ module Grafana
           :Authorization => headers.dig( :authorization )
         }
       else
-        # Regular login Auth
-        login = self.login( { :user => user, :password => password } )
 
-        if( login == false )
-          return nil
+#         logger.debug( "user: #{user}" )
+#         logger.debug( "password: #{password}" )
+
+        begin
+
+          logger.debug( 'try to login to our grafana instance' )
+
+          # Regular login Auth
+          login = self.login( { :user => user, :password => password } )
+
+          sleep(5)
+
+        rescue => e
+
+          logger.error( e )
+
         end
+
+#         if( login == false )
+#           return nil
+#         end
       end
 
       return self
@@ -216,6 +234,7 @@ module Grafana
 #       self.ping_session()
 
       begin
+
         resp = @apiInstance['/login'].post(
           request_data.to_json,
           { :content_type => 'application/json; charset=UTF-8' }
@@ -232,13 +251,21 @@ module Grafana
 
           return true
         else
+
+          logger.error( "Error running POST request on /login: #{resp.code.to_i}" )
+          logger.error( "#{resp}" )
+          logger.error( "Request data: #{request_data.to_json}" )
+
+          raise( 'can\'t login into grafana instance' )
           return false
         end
+
       rescue => e
 
         logger.error( "Error running POST request on /login: #{e}" )
         logger.error( "Request data: #{request_data.to_json}" )
 
+        raise( 'can\'t login into grafana instance' )
         return false
       end
 

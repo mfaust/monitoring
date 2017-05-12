@@ -79,22 +79,20 @@ class Monitoring
     result  = Hash.new()
 
     status  = @redis.nodes( { :status => Storage::RedisClient::OFFLINE } )
-
     logger.debug( status )
 
-    # remove offline nodes
-    if( status.is_a?( Hash ) || status.is_a?( Array ) && status.count != 0 )
-
-      status = status.keys
-
-      status.each do |node|
-
-        logger.info( sprintf( 'delete offline node %s', node ) )
-
-#         @redis.removeDNS( { :short => node } )
-      end
-
-    end
+#     # remove offline nodes
+#     if( status.is_a?( Hash ) || status.is_a?( Array ) && status.count != 0 )
+#
+#       status = status.keys
+#
+#       status.each do |node|
+#
+#         logger.info( sprintf( 'delete offline node %s', node ) )
+#
+# #         @redis.removeDNS( { :short => node } )
+#       end
+#     end
 
     nodes   = @redis.nodes()
     logger.debug( nodes )

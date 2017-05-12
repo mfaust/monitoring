@@ -228,17 +228,6 @@ module ExternalDiscovery
           nodeStatus = self.nodeStatus( { :short => short } )
 
           if( nodeStatus == true )
-#
-#             uidCache = @cache.get( uuid )
-#
-#             logger.debug( uidCache )
-#
-#             if( ! uidCache )
-#               @cache.set( uuid ) { Cache::Data.new( l ) }
-#             end
-#
-#             logger.debug( uuid )
-
             newArray << l
 
             next
@@ -257,7 +246,7 @@ module ExternalDiscovery
 
         logger.debug( newArray )
 
-        @cache.set( 'historic' ) { Cache::Data.new( newArray ) }
+        @cache.set( 'historic', expiresIn: 320 ) { Cache::Data.new( newArray ) }
 
       end
 
@@ -316,12 +305,12 @@ module ExternalDiscovery
 
       logger.info( '  now, we try to add them' )
 
-      logger.debug( "original tags: #{tags}" )
+#       logger.debug( "original tags: #{tags}" )
 
       # our positive list for Tags
       useableTags = tags.filter( 'customer', 'environment', 'tier' )
 
-      logger.debug( "useable tags : #{useableTags}" )
+#       logger.debug( "useable tags : #{useableTags}" )
 
       # add to monitoring
       # defaults:
@@ -330,7 +319,7 @@ module ExternalDiscovery
       # - grafana    = true
       # - annotation = true
       d = JSON.generate( {
-        :force      => true,
+        :force      => false,
         :tags       => useableTags,
         :config     => {
           'display-name'        => displayName,
@@ -343,9 +332,6 @@ module ExternalDiscovery
       result = @monitoringClient.add( short, d )
 
       logger.debug( result )
-
-      logger.debug( '------------------------' )
-
 
       if( result != nil )
 
