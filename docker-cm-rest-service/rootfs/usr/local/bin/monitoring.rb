@@ -83,7 +83,7 @@ class Monitoring
     logger.debug( status )
 
     # remove offline nodes
-    if( nodes.is_a?( Hash ) || nodes.is_a?( Array ) && status.count != 0 )
+    if( status.is_a?( Hash ) || status.is_a?( Array ) && status.count != 0 )
 
       status = status.keys
 

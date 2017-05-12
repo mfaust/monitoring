@@ -15,7 +15,7 @@ module ExternalDiscovery
 
     include Logging
 
-    include ExternalDiscovery::Tools
+#     include ExternalDiscovery::Tools
 
     def initialize( settings = {} )
 
