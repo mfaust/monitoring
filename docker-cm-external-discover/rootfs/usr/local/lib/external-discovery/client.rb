@@ -129,15 +129,8 @@ module ExternalDiscovery
 
     def compareVersions( params = {} )
 
-#       logger.debug( 'compare' )
-
       liveData     = params.dig( 'live' )
       historicData = @historic
-
-#       logger.debug( liveData )
-#       logger.debug( liveData.class.to_s )
-#       logger.debug( historicData )
-#       logger.debug( historicData.class.to_s )
 
       if( liveData.is_a?( Array ) == false )
         logger.error( 'liveData is not an Array' )
@@ -159,15 +152,16 @@ module ExternalDiscovery
       identicalEntriesCount = identicalEntries.count
       removedEntriesCount   = removedEntries.count
 
+      logger.debug( '------------------------------------------------------------' )
       logger.info( sprintf( 'live Data holds %d entries'    , liveDataCount ) )
 #       logger.debug( "  #{liveData}" )
       logger.info( sprintf( 'historic Data holds %d entries', historicDataCount ) )
 #       logger.debug( "  #{historicData}" )
+      logger.debug( '------------------------------------------------------------' )
       logger.info( sprintf( 'identical entries %d'          , identicalEntriesCount ) )
 #       logger.debug(  "  #{identicalEntries}" )
       logger.info( sprintf( 'removed entries %d'            , removedEntriesCount ) )
 #       logger.debug(  "  #{removedEntries}" )
-
       logger.debug( '------------------------------------------------------------' )
 
       # TODO
@@ -183,19 +177,6 @@ module ExternalDiscovery
         removedEntries.each do |r|
 
           ip, fqdn, state, tags, cname, name, tier, customer, environment = self.extractInstanceInformation( r )
-
-# #          fqdn        = l.dig('fqdn')
-# #          name        = l.dig('name')
-#           state       = l.dig('state') || 'running'
-# #          dns         = l.dig('dns')
-#           tags        = l.dig('tags')  || []
-#           cname       = l.dig('tags', 'cname')
-#           name        = l.dig('tags', 'name')
-#           tier        = l.dig('tags', 'tier')
-#           customer    = l.dig('tags', 'customer')
-#           environment = l.dig('tags', 'environment')
-#           ip          = l.dig('dns' , 'ip')
-#           fqdn        = l.dig('dns' , 'name')
 
           if( ip != nil && fqdn != nil )
 
@@ -218,19 +199,6 @@ module ExternalDiscovery
         liveData.each do |l|
 
           ip, fqdn, state, tags, cname, name, tier, customer, environment = self.extractInstanceInformation( l )
-
-# #          fqdn        = l.dig('fqdn')
-# #          name        = l.dig('name')
-#           state       = l.dig('state') || 'running'
-# #          dns         = l.dig('dns')
-#           tags        = l.dig('tags')  || []
-#           cname       = l.dig('tags', 'cname')
-#           name        = l.dig('tags', 'name')
-#           tier        = l.dig('tags', 'tier')
-#           customer    = l.dig('tags', 'customer')
-#           environment = l.dig('tags', 'environment')
-#           ip          = l.dig('dns' , 'ip')
-#           fqdn        = l.dig('dns' , 'name')
 
           # currently, we want only the dev environment
           #
@@ -277,7 +245,6 @@ module ExternalDiscovery
         logger.debug( newArray )
 
         @historic = newArray
-
 
       end
 
