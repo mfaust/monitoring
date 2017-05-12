@@ -9,6 +9,7 @@ require 'json'
 require 'rest-client'
 
 require_relative 'logging'
+require_relative 'job-queue'
 require_relative 'monkey'
 require_relative 'aws/client'
 require_relative 'cache'

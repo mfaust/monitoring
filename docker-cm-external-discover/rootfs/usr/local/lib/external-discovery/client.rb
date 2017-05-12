@@ -56,9 +56,10 @@ module ExternalDiscovery
         { name: 'tag-key'            , values: ['monitoring-enabled'] }
       ]
 
+      @jobs             = JobQueue::Job.new()
+      @cache            = Cache::Store.new()
       @dataConsumer     = DataConsumer.new( { :filter => filter } )
       @monitoringClient = MonitoringClient.new( config )
-      @cache            = Cache::Store.new()
 
     end
 
@@ -103,14 +104,13 @@ module ExternalDiscovery
 
     def graphiteIdentifier( params = {} )
 
-      ip          = params.dig(:ip)
-      customer    = params.dig(:customer)
-      environment = params.dig(:environment)
-      tier        = params.dig(:tier)
+      customer  = params.dig(:customer)
+      name      = params.dig(:name)
+      ip        = params.dig(:ip)
 
-      lastOktet   = ip.split('.').last
+      lastOktet = ip.split('.').last
 
-      return sprintf( '%s-%s-%s-%s', customer, environment, tier, lastOktet )
+      return sprintf( '%s-%s-%s', customer, name.gsub(' ', '-'), lastOktet )
     end
 
 
@@ -312,7 +312,7 @@ module ExternalDiscovery
         :tags       => useableTags,
         :config     => {
           'display-name'        => displayName,
-          'graphite-identifier' => self.graphiteIdentifier( { :customer => customer, :environment => environment, :tier => tier, :ip => ip } )
+          'graphite-identifier' => self.graphiteIdentifier( { :customer => customer, :name => displayName, :ip => ip } )
         }
       } )
 
@@ -421,14 +421,25 @@ module ExternalDiscovery
 
     def run()
 
+      # add a blocking cache
+      #
+      if( @jobs.jobs( { :running => 'true' } ) == true )
+
+        logger.warn( 'we are working on this job' )
+        return
+      end
+
+      @jobs.add( { :running => 'true' } )
+
+      start = Time.now
+
+
       @data   = Array.new()
       threads = Array.new()
 
       awsData  = @cache.get( 'aws-data' )
 
       if( awsData == nil )
-
-        logger.debug( 'get data from AWS' )
 
         awsData = @dataConsumer.instances()
 
@@ -437,15 +448,20 @@ module ExternalDiscovery
           @cache.set( 'aws-data' , expiresIn: 120 ) { Cache::Data.new( awsData ) }
         end
 
+        return
+
       else
 
         logger.debug( 'found cached AWS data' )
-
       end
-
 
 #       logger.debug( JSON.pretty_generate( awsData ) )
       self.compareVersions( { 'live' => awsData } )
+
+      finish = Time.now
+      logger.info( sprintf( 'finished in %s seconds', finish - start ) )
+
+      @jobs.del( { :running => 'true' } )
 
       logger.debug( 'done' )
 
