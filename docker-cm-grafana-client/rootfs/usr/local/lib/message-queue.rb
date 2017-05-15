@@ -23,8 +23,8 @@ module MessageQueue
 
     def initialize( params = {} )
 
-      beanstalkHost       = params[:beanstalkHost] ? params[:beanstalkHost] : 'beanstalkd'
-      beanstalkPort       = params[:beanstalkPort] ? params[:beanstalkPort] : 11300
+      beanstalkHost       = params.dig(:beanstalkHost) || 'beanstalkd'
+      beanstalkPort       = params.dig(:beanstalkPort) || 11300
 
       begin
         @b = Beaneater.new( sprintf( '%s:%s', beanstalkHost, beanstalkPort ) )
@@ -32,10 +32,6 @@ module MessageQueue
         logger.error( e )
         raise sprintf( 'ERROR: %s' , e )
       end
-
-      logger.info( '-----------------------------------------------------------------' )
-      logger.info( ' MessageQueue::Producer' )
-      logger.info( '-----------------------------------------------------------------' )
 
     end
 
@@ -59,7 +55,7 @@ module MessageQueue
     # @return [Hash,#read]
     def addJob( tube, job = {}, prio = 65536, ttr = 10, delay = 2 )
 
-      logger.debug( sprintf( 'addJob( %s, job = {}, %s, %s, %s )', tube, prio, ttr, delay ) )
+#       logger.debug( sprintf( 'addJob( %s, job = {}, %s, %s, %s )', tube, prio, ttr, delay ) )
 
       if( @b )
 
@@ -69,7 +65,7 @@ module MessageQueue
 #        tube = @b.use( tube.to_s )
         response = @b.tubes[ tube.to_s ].put( job , :prio => prio, :ttr => ttr, :delay => delay )
 
-        logger.debug( response )
+#         logger.debug( response )
       end
 
     end
@@ -105,10 +101,6 @@ module MessageQueue
         logger.error( e )
         raise sprintf( 'ERROR: %s' , e )
       end
-
-      logger.info( '-----------------------------------------------------------------' )
-      logger.info( ' MessageQueue::Consumer' )
-      logger.info( '-----------------------------------------------------------------' )
 
     end
 
@@ -201,7 +193,7 @@ module MessageQueue
 
     def releaseBuriedJobs( tube )
 
-      logger.debug( sprintf( "releaseBuriedJobs( #{tube} )" ) )
+#       logger.debug( sprintf( "releaseBuriedJobs( #{tube} )" ) )
 
       if( @b )
 
@@ -216,15 +208,6 @@ module MessageQueue
           tube.kick(1)
         end
 
-#         while( job = tube.peek( :buried ) )
-#
-# #           logger.debug( job.stats )
-#
-#           response = job.kick()
-#
-# #           logger.debug( response )
-#         end
-
       end
 
     end
@@ -232,7 +215,7 @@ module MessageQueue
 
     def deleteJob( tube, id )
 
-      logger.debug( sprintf( "deleteJob( #{tube}, #{id} )" ) )
+#       logger.debug( sprintf( "deleteJob( #{tube}, #{id} )" ) )
 
       if( @b )
 
@@ -250,7 +233,7 @@ module MessageQueue
 
     def buryJob( tube, id )
 
-      logger.debug( sprintf( "buryJob( #{tube}, #{id} )" ) )
+#       logger.debug( sprintf( "buryJob( #{tube}, #{id} )" ) )
 
       if( @b )
 

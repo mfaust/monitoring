@@ -13,7 +13,6 @@ module Grafana
 
         logger.debug( 'client are not logged in, skip' )
         return
-
       end
 
       session = self.ping_session()
@@ -52,7 +51,7 @@ module Grafana
 
     def processQueue( data = {} )
 
-      logger.info( sprintf( 'process Message ID %d from Queue \'%s\'', data.dig(:id), data.dig(:tube) ) )
+      logger.debug( sprintf( 'process Message ID %d from Queue \'%s\'', data.dig(:id), data.dig(:tube) ) )
 
       command  = data.dig( :body, 'cmd' )
       node     = data.dig( :body, 'node' )
@@ -135,7 +134,7 @@ module Grafana
       #
       elsif( command == 'info' )
 
-        logger.info( sprintf( 'give dashboards for %s back', node ) )
+#         logger.info( sprintf( 'give dashboards for %s back', node ) )
         result = self.listDashboards( { :host => node } )
 
         self.sendMessage( { :cmd => 'info', :queue => 'mq-grafana-info', :payload => result, :ttr => 1, :delay => 0 } )
@@ -175,8 +174,6 @@ module Grafana
         return
       end
 
-#       logger.debug( JSON.pretty_generate( payload ) )
-
       job = {
         cmd:  cmd,          # require
         node: node,         # require
@@ -186,9 +183,6 @@ module Grafana
       }.to_json
 
       result = @mqProducer.addJob( queue, job, ttr, delay )
-
-      logger.debug( job )
-      logger.debug( result )
 
     end
 

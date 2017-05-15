@@ -26,7 +26,7 @@ module Grafana
       name = self.createSlug( name )
       endpoint = "/api/dashboards/db/#{name}"
 
-      logger.debug( "Attempting to get dashboard (GET /api/dashboards/db/#{name})" )
+#       logger.debug( "Attempting to get dashboard (GET /api/dashboards/db/#{name})" )
 
       return getRequest( endpoint )
     end
@@ -37,7 +37,7 @@ module Grafana
       endpoint = "/api/dashboards/db"
       dashboard = self.buildTemplate( properties )
 
-      logger.debug("Creating dashboard: #{properties['title']} (POST /api/dashboards/db)")
+#       logger.debug("Creating dashboard: #{properties['title']} (POST /api/dashboards/db)")
 
       return postRequest( endpoint, dashboard )
     end
@@ -48,7 +48,7 @@ module Grafana
       name = self.createSlug( name )
       endpoint = "/api/dashboards/db/#{name}"
 
-      logger.debug("Deleting dahsboard ID #{id} (DELETE #{endpoint})")
+#       logger.debug("Deleting dahsboard ID #{id} (DELETE #{endpoint})")
 
       return deleteRequest(endpoint)
     end
@@ -58,7 +58,7 @@ module Grafana
 
       endpoint = "/api/dashboards/home"
 
-      logger.debug("Attempting to get home dashboard (GET #{endpoint})")
+#       logger.debug("Attempting to get home dashboard (GET #{endpoint})")
 
       return getRequest(endpoint)
     end
@@ -68,7 +68,7 @@ module Grafana
 
       endpoint = "/api/dashboards/tags"
 
-      logger.debug("Attempting to get dashboard tags(GET #{endpoint})")
+#       logger.debug("Attempting to get dashboard tags(GET #{endpoint})")
 
       return getRequest(endpoint)
     end
@@ -109,7 +109,7 @@ module Grafana
 
       endpoint = sprintf( '/api/search/?%s' , api )
 
-      logger.debug("Attempting to search for dashboards (GET #{endpoint})")
+#       logger.debug("Attempting to search for dashboards (GET #{endpoint})")
 
       return getRequest( endpoint )
     end
