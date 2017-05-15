@@ -178,6 +178,7 @@ services:
       MQ_HOST: beanstalkd
       # MQ_PORT: 11300
       # MQ_QUEUE: mq-grafana
+      RUN_DELAY: 40
 
   cm-graphite-client:
     environment:
