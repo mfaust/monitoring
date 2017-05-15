@@ -95,8 +95,8 @@ module Grafana
 
       host         = settings.dig(:grafana, :host)          || 'localhost'
       port         = settings.dig(:grafana, :port)          || 80
-      @user        = settings.dig(:grafana, :user)          || 'admin'
-      @password    = settings.dig(:grafana, :password)      || ''
+      user         = settings.dig(:grafana, :user)          || 'admin'
+      password     = settings.dig(:grafana, :password)      || ''
       urlPath      = settings.dig(:grafana, :url_path)      || ''
       ssl          = settings.dig(:grafana, :ssl)           || false
       timeout      = settings.dig(:grafana, :timeout)       || 5
@@ -130,7 +130,6 @@ module Grafana
       @url  = sprintf( '%s://%s:%s%s', proto, host, port, urlPath )
 
       @apiInstance = nil
-      @loggedIn    = false
       @headers     = nil
 
       @redis       = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
@@ -139,43 +138,32 @@ module Grafana
       @mqConsumer  = MessageQueue::Consumer.new( @MQSettings )
       @mqProducer  = MessageQueue::Producer.new( @MQSettings )
 
-      @apiInstance = self.createApiInstance( {
+      self.createApiInstance( {
         :timeout      => timeout,
         :open_timeout => open_timeout,
-        :headers      => headers
+        :headers      => headers,
+        :user         => user,
+        :password     => password
       } )
-
-      for y in 1..15
-
-        @loggedIn = self.login( { :user => @user, :password => @password } )
-
-        if( @loggedIn == true )
-          break
-        else
-          logger.debug( sprintf( 'Attempting to establish user session ... %d', y ) )
-          sleep(4)
-        end
-      end
 
     end
 
 
-    # create an REST-API Instance
-    #
     def createApiInstance( params = {} )
 
       timeout      = params.dig(:timeout)
       open_timeout = params.dig(:open_timeout)
       headers      = params.dig(:headers)
-      instance     = nil
+      user         = params.dig(:user)
+      password     = params.dig(:password)
 
       begin
 
-        until( instance != nil )
+        until( @apiInstance != nil )
 
           logger.debug( 'try to connect our grafana endpoint' )
 
-          instance = RestClient::Resource.new(
+          @apiInstance = RestClient::Resource.new(
             @url,
             :timeout      => timeout,
             :open_timeout => open_timeout,
@@ -190,11 +178,39 @@ module Grafana
         logger.error( e )
       end
 
-      return instance
+      if( headers.has_key?(:authorization) )
+        # API key Auth
+        @headers = {
+          :content_type  => 'application/json; charset=UTF-8',
+          :Authorization => headers.dig( :authorization )
+        }
+      else
 
+#         logger.debug( "user: #{user}" )
+#         logger.debug( "password: #{password}" )
+
+        begin
+
+          logger.debug( 'try to login to our grafana instance' )
+
+          # Regular login Auth
+          login = self.login( { :user => user, :password => password } )
+
+          sleep(5)
+
+        rescue => e
+
+          logger.error( e )
+
+        end
+
+#         if( login == false )
+#           return nil
+#         end
+      end
+
+      return self
     end
-
-
 
     # Login into Grafana
     #
@@ -206,65 +222,52 @@ module Grafana
     # @return [bool, #read]
     def login( params = {} )
 
-      user     = params.dig(:user)      || @user
-      password = params.dig(:password)  || @password
-      headers  = params.dig(:headers)
+      user     = params.dig(:user)
+      password = params.dig(:password)
 
-      loggedIn = false
+#       logger.debug( 'Attempting to establish user session' )
 
-      if( headers != nil && headers.has_key?(:authorization) )
+      request_data = { 'User' => user, 'Password' => password }
 
-        # API key Auth
-        @headers = {
-          :content_type  => 'application/json; charset=UTF-8',
-          :Authorization => headers.dig( :authorization )
-        }
+#       self.ping_session()
 
-      else
+      begin
 
-        request_data = {
-          'User'     => user,
-          'Password' => password
-        }
+        resp = @apiInstance['/login'].post(
+          request_data.to_json,
+          { :content_type => 'application/json; charset=UTF-8' }
+        )
 
-        begin
+        @sessionCookies = resp.cookies
 
-          resp = @apiInstance['/login'].post(
-            request_data.to_json,
-            { :content_type => 'application/json; charset=UTF-8' }
-          )
+        if( resp.code.to_i == 200 )
 
-          if( resp.code.to_i == 200 )
+          @headers = {
+            :content_type => 'application/json; charset=UTF-8',
+            :cookies      => @sessionCookies
+          }
 
-            @sessionCookies = resp.cookies
+          return true
+        else
 
-            @headers = {
-              :content_type => 'application/json; charset=UTF-8',
-              :cookies      => @sessionCookies
-            }
-
-            loggedIn = true
-          else
-
-            logger.error( "Error running POST request on /login: #{resp.code.to_i}" )
-            logger.error( "#{resp}" )
-            logger.error( "Request data: #{request_data.to_json}" )
-
-            loggedIn = false
-          end
-
-        rescue => e
-
-          logger.error( "Error running POST request on /login: #{e}" )
+          logger.error( "Error running POST request on /login: #{resp.code.to_i}" )
+          logger.error( "#{resp}" )
           logger.error( "Request data: #{request_data.to_json}" )
 
-          loggedIn = false
+          raise( 'can\'t login into grafana instance' )
+          return false
         end
 
-        return loggedIn
+      rescue => e
 
+        logger.error( "Error running POST request on /login: #{e}" )
+        logger.error( "Request data: #{request_data.to_json}" )
+
+        raise( 'can\'t login into grafana instance' )
+        return false
       end
 
+#       logger.debug("User session initiated")
     end
 
   end

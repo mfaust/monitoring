@@ -519,6 +519,9 @@ module Grafana
 
         data = self.searchDashboards( { :tags   => host } )
 
+        logger.debug( data )
+        logger.debug( data.class.to_s )
+
         if( data == nil || data == false )
 
           return {

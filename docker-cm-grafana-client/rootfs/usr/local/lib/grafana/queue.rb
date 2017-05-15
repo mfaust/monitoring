@@ -9,7 +9,23 @@ module Grafana
     #
     def queue()
 
-      data = @mqConsumer.getJobFromTube( @mqQueue )
+      if( @loggedIn == false )
+
+        logger.debug( 'client are not logged in, skip' )
+        return
+
+      end
+
+      session = self.ping_session()
+      msg     = session.dig('message')
+
+      if( msg != nil && msg != 'Logged in' )
+
+        logger.debug( 'client are not logged in, skip' )
+        return
+      end
+
+      data    = @mqConsumer.getJobFromTube( @mqQueue )
 
       if( data.count() != 0 )
 

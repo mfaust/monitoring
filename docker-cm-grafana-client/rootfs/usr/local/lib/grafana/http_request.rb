@@ -70,8 +70,17 @@ module Grafana
 
       logger.debug( "issueRequest( #{methodType}, #{endpoint}, data )" )
       logger.debug( @headers )
+      logger.debug( @headers.class.to_s )
       logger.debug( @apiInstance.inspect )
       logger.debug( '------------------------------------------' )
+
+#       if( @headers == nil )
+#
+#         return {
+#           :status  => 400,
+#           :message => 'no valid connection to grafana server'
+#         }
+#       end
 
       resultCodes = {
         200 => 'created',

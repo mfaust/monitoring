@@ -111,7 +111,7 @@ module Grafana
 
       logger.debug("Attempting to search for dashboards (GET #{endpoint})")
 
-      return getRequest(endpoint)
+      return getRequest( endpoint )
     end
 
 
