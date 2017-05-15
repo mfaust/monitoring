@@ -173,15 +173,16 @@ class Monitoring
 
         end
 
-        @cache.set( 'information' , expiresIn: 320 ) { Cache::Data.new( result ) }
+        @cache.set( 'information' , expiresIn: 60 ) { Cache::Data.new( result ) }
 
+      else
+        logger.debug( 'no nodes found' )
+        @cache.unset( 'information' )
       end
 
     else
-
       logger.debug( 'no nodes found' )
       @cache.unset( 'information' )
-
     end
 
   end
