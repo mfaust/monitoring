@@ -3,7 +3,9 @@ module Icinga
 
   module Host
 
-    def addHost( params = {}, host = nil, vars = {} )
+    def addHost( params = {} )
+
+      logger.debug( "addHost( #{params} )" )
 
       code        = nil
       result      = {}
@@ -20,16 +22,27 @@ module Icinga
         }
       end
 
-      hostInfo      = Utils::Network.resolv( host )
+      start = Time.now
 
-      logger.debug( "hostResolve #{hostInfo}" )
+      # get a DNS record
+      #
+      ip, short, fqdn = self.nsLookup( host )
 
-      ip            = hostInfo.dig(:ip)
-      shortHostName = hostInfo.dig(:short)
-      fqdn  = hostInfo.dig(:long)
+      # add hostname to an blocking cache
+      #
+      if( @jobs.jobs( { :ip => ip, :short => short, :fqdn => fqdn } ) == true )
 
-      # build FQDN
-#       fqdn = Socket.gethostbyname( host ).first
+        logger.warn( 'we are working on this job' )
+
+        return {
+          :status  => 409, # 409 Conflict
+          :message => 'we are working on this job'
+        }
+      end
+
+      @jobs.add( { :ip => ip, :short => short, :fqdn => fqdn } )
+
+      services   = self.nodeInformation( { :host => host } )
 
       payload = {
         "templates" => [ "generic-host" ],
@@ -43,15 +56,15 @@ module Icinga
         }
       }
 
-      if( ! vars.empty? )
-        payload['attrs']['vars'] = vars
+      if( ! services.empty? )
+        payload['attrs']['vars'] = services
       end
 
       if( @icingaCluster == true && @icingaSatellite != nil )
         payload['attrs']['zone'] = @icingaSatellite
       end
 
-      logger.debug( JSON.pretty_generate( payload ) )
+#       logger.debug( JSON.pretty_generate( payload ) )
 
       result = Network.put( {
         :host    => host,
@@ -60,6 +73,11 @@ module Icinga
         :options => @options,
         :payload => payload
       } )
+
+      @jobs.del( { :ip => ip, :short => short, :fqdn => fqdn } )
+
+      finish = Time.now
+      logger.info( sprintf( 'finished in %s seconds', finish - start ) )
 
       return JSON.pretty_generate( result )
 
@@ -105,6 +123,68 @@ module Icinga
       } )
 
       return JSON.pretty_generate( result )
+
+    end
+
+
+    def nodeInformation( params = {} )
+
+#       logger.debug( "nodeInformation( #{params} )" )
+
+      host             = params.dig(:host) || nil
+
+      discoveryStatus  = nil
+      discoveryPayload = nil
+
+      # in first, we need the discovered services ...
+      logger.debug( 'in first, we need information from discovery service' )
+      logger.debug( 'send message to \'mq-discover\'' )
+
+      self.sendMessage( { :cmd => 'info', :node => host, :queue => 'mq-discover', :payload => {}, :prio => 2, :ttr => 1, :delay => 8 } )
+
+      for y in 1..30
+
+        result      = @mqConsumer.getJobFromTube('mq-discover-info')
+
+        if( result.is_a?( Hash ) && result.count != 0 && result.dig( :body, 'payload', 'services' ) != nil )
+
+          discoveryStatus = result
+          break
+        else
+          logger.debug( sprintf( 'Waiting for data %s ... %d', 'mq-discover-info', y ) )
+          sleep( 5 )
+        end
+      end
+
+      discoveryPayload = discoveryStatus.dig( :body, 'payload' )
+      services         = discoveryStatus.dig( :body, 'payload', 'services' )
+
+      discoveryPayload.reject! { |k| k == 'status' }
+      discoveryPayload.reject! { |k| k == 'mode' }
+
+      if( services != nil )
+
+        services.each do |s|
+
+#           logger.debug( " => service #{s}" )
+
+          if( s.last != nil )
+            s.last.reject! { |k| k == 'template' }
+            s.last.reject! { |k| k == 'application' }
+          end
+        end
+
+        if( discoveryPayload.is_a?( Hash ) )
+          discoveryPayload = discoveryPayload.to_json
+        end
+
+        payload = JSON.parse( discoveryPayload.split('"services":').join('"coremedia":') )
+      else
+
+        payload = {}
+      end
+
+      return payload
 
     end
 

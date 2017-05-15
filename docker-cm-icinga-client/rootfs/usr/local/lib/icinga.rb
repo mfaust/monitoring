@@ -13,7 +13,10 @@ require 'uri'
 
 require_relative 'logging'
 require_relative 'utils/network'
+require_relative 'cache'
+require_relative 'job-queue'
 require_relative 'message-queue'
+require_relative 'icinga/tools'
 require_relative 'icinga/network'
 require_relative 'icinga/status'
 require_relative 'icinga/host'
@@ -28,6 +31,7 @@ module Icinga
 
     include Logging
 
+    include Icinga::Tools
     include Icinga::Network
     include Icinga::Status
     include Icinga::Host
@@ -49,7 +53,7 @@ module Icinga
       @icingaApiUrlBase = sprintf( 'https://%s:%d', @icingaHost, @icingaApiPort )
       @nodeName         = Socket.gethostbyname( Socket.gethostname ).first
 
-      @MQSettings = {
+      mqSettings = {
         :beanstalkHost  => mqHost,
         :beanstalkPort  => mqPort,
         :beanstalkQueue => @mqQueue
@@ -79,10 +83,13 @@ module Icinga
       logger.debug( sprintf( '  api pass : %s', @icingaApiPass ) )
       logger.debug( sprintf( '  node name: %s', @nodeName ) )
 
-      @hasCert     = self.checkCert( { :user => @icingaApiUser, :password =>  @icingaApiPass } )
-      @headers     = { "Content-Type" => "application/json", "Accept" => "application/json" }
+      @cache      = Cache::Store.new()
+      @jobs       = JobQueue::Job.new()
+      @hasCert    = self.checkCert( { :user => @icingaApiUser, :password =>  @icingaApiPass } )
+      @headers    = { "Content-Type" => "application/json", "Accept" => "application/json" }
 
-      @mqConsumer  = MessageQueue::Consumer.new( @MQSettings )
+      @mqConsumer = MessageQueue::Consumer.new( mqSettings )
+      @mqProducer = MessageQueue::Producer.new( mqSettings )
 
       return self
 
