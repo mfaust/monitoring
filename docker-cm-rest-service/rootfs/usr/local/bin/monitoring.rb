@@ -478,85 +478,8 @@ class Monitoring
 
         logger.info( 'create icinga checks and notifications' )
 
-        # in first, we need the discovered services ...
-        logger.info( 'we need information from discovery service' )
-        logger.debug( 'send message to \'mq-discover\'' )
-        self.messageQueue( { :cmd => 'info', :node => host, :queue => 'mq-discover', :payload => {}, :prio => 2, :ttr => 1, :delay => 8 } )
-
-        sleep( 8 )
-
-        resultArray = Array.new()
-        threads     = Array.new()
-
-        discoveryStatus  = nil
-        discoveryPayload = nil
-
-        for y in 1..30
-
-          result      = @mqConsumer.getJobFromTube('mq-discover-info')
-
-          if( result != nil && result.count != 0 )
-            discoveryStatus = result
-            break
-          else
-            logger.debug( sprintf( 'Waiting for data %s ... %d', 'mq-discover-info', y ) )
-            sleep( 5 )
-          end
-        end
-
-#         sleep( 8 )
-
-        if( discoveryStatus != nil )
-          discoveryPayload = discoveryStatus.dig( :body, 'payload' )
-        end
-
-        if( discoveryPayload != nil )
-
-          services          = discoveryPayload.dig( 'services' )
-
-          if( services != nil )
-
-#             for y in 1..10
-#
-#               services          = discoveryPayload.dig( 'services' )
-#
-#               if( services != nil )
-#                 break
-#               else
-#                 logger.debug( sprintf( 'Waiting for data %s ... %d', 'mq-discover-info', y ) )
-#                 sleep( 3 )
-#               end
-#             end
-
-            logger.debug( services )
-
-            services.each do |s|
-
-              logger.debug( " => service #{s}" )
-
-              if( s.last != nil )
-                s.last.reject! { |k| k == 'template' }
-                s.last.reject! { |k| k == 'application' }
-              end
-            end
-
-            if( discoveryPayload.is_a?( Hash ) )
-              discoveryPayload = discoveryPayload.to_json
-            end
-
-            discoveryPayload = JSON.parse( discoveryPayload.split('"services":').join('"coremedia":') )
-
-          else
-
-            discoveryPayload = {}
-          end
-        else
-
-          discoveryPayload = {}
-        end
-
         logger.debug( 'send message to \'mq-icinga\'' )
-        self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-icinga', :payload => discoveryPayload, :prio => 10, :ttr => 15, :delay => 10 } )
+        self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-icinga', :payload => payload, :prio => 10, :ttr => 15, :delay => 15 } )
       end
 
       # add annotation at last
@@ -584,7 +507,7 @@ class Monitoring
 
       self.createNodeInformation()
 
-      return JSON.pretty_generate( discoveryResult )
+      return JSON.pretty_generate( result )
 
     end
 

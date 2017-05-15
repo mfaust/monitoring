@@ -13,13 +13,16 @@ module Icinga
 
       if( data.count() != 0 )
 
+        stats = @mqConsumer.tubeStatistics( @mqQueue )
+        logger.debug( { :total => stats.dig(:total), :ready => stats.dig(:ready), :delayed => stats.dig(:delayed), :buried => stats.dig(:buried) } )
+
         jobId  = data.dig( :id )
 
         result = self.processQueue( data )
 
         status = result.dig(:status).to_i
 
-        if( status == 200 || status == 500 )
+        if( status == 200 || status == 409 || status == 500 || status == 503 )
 
           @mqConsumer.deleteJob( @mqQueue, jobId )
         else
@@ -33,107 +36,137 @@ module Icinga
 
     def processQueue( data = {} )
 
-      if( data.count != 0 )
+      logger.info( sprintf( 'process Message ID %d from Queue \'%s\'', data.dig(:id), data.dig(:tube) ) )
 
-        logger.info( sprintf( 'process Message from Queue %s: %d', data.dig(:tube), data.dig(:id) ) )
-#         logger.debug( data )
-#         logger.debug( JSON.pretty_generate( data.dig( :body, 'payload' ) ) )
+      command = data.dig( :body, 'cmd' )
+      node    = data.dig( :body, 'node' )
+      payload = data.dig( :body, 'payload' )
 
-        command = data.dig( :body, 'cmd' )     || nil
-        node    = data.dig( :body, 'node' )    || nil
-        payload = data.dig( :body, 'payload' ) || nil
+      if( command == nil || node == nil || payload == nil )
+
+        status = 500
 
         if( command == nil )
-          logger.error( 'wrong command' )
+          e = 'missing command'
+          logger.error( e )
           logger.error( data )
-
-          return {
-            :status  => 500,
-            :message => 'no command given'
-          }
+          return { :status  => status, :message => e }
         end
 
-        if( node == nil || payload == nil )
-          logger.error( 'missing node or payload' )
+        if( node == nil )
+          e = 'missing node'
+          logger.error( e )
           logger.error( data )
-
-          return {
-            :status  => 500,
-            :message => 'missing node or payload'
-          }
+          return { :status  => status, :message => e }
         end
 
-
-        case command
-        when 'add'
-          logger.info( sprintf( 'add node %s', node ) )
-
-          result = self.addHost( { :host => node, :vars => payload } )
-
-          logger.info( result )
-
-          return {
-            :status => 200
-          }
-        when 'remove'
-          logger.info( sprintf( 'remove checks for node %s', node ) )
-
-          result = self.deleteHost( { :host => node } )
-
-          logger.info( result )
-
-          return {
-            :status => 200
-          }
-        when 'info'
-          logger.info( sprintf( 'give information for node %s', node ) )
-
-          result = self.listHost( { :host => node } )
-
-          logger.info( result )
-
-          return {
-            :status => 200
-          }
-        else
-          logger.error( sprintf( 'wrong command detected: %s', command ) )
-
-          return {
-            :status  => 500,
-            :message => sprintf( 'wrong command detected: %s', command )
-          }
-
-#          logger.info( result )
+        if( payload == nil )
+          e = 'missing payload'
+          logger.error( e )
+          logger.error( data )
+          return { :status  => status, :message => e }
         end
 
-        if( result.is_a?( String ) )
+      end
 
-          result = JSON.parse( result )
-        end
+      logger.debug( sprintf( '  command: %s', command ) )
+      logger.info( sprintf( '  node %s', node ) )
 
-        result[:request]    = data
 
-        logger.debug( result )
+      # add Node
+      #
+      if( command == 'add' )
+
+        logger.info( sprintf( 'add node %s', node ) )
+
+        result = self.addHost( { :host => node, :vars => payload } )
+
+        logger.info( result )
+
+        return {
+          :status => 200
+        }
+
+      # remove Node
+      #
+      elsif( command == 'remove' )
+
+        logger.info( sprintf( 'remove checks for node %s', node ) )
+
+        result = self.deleteHost( { :host => node } )
+
+        logger.info( result )
+
+        return {
+          :status => 200
+        }
+
+      # information about Node
+      #
+      elsif( command == 'info' )
+
+        logger.info( sprintf( 'give information for node %s', node ) )
+
+        result = self.listHost( { :host => node } )
+
+        logger.info( result )
+
+        return {
+          :status => 200
+        }
+
+      # all others
+      #
+      else
+
+        logger.error( sprintf( 'wrong command detected: %s', command ) )
+
+        return {
+          :status  => 500,
+          :message => sprintf( 'wrong command detected: %s', command )
+        }
+
+      end
+
+      if( result.is_a?( String ) )
+
+        result = JSON.parse( result )
+      end
+
+      result[:request]    = data
+
+#       logger.debug( result )
 
 #         self.sendMessage( result )
-      end
 
     end
 
 
-    def sendMessage( data = {} )
+    def sendMessage( params = {} )
 
-#       logger.debug( JSON.pretty_generate( data ) )
+      cmd     = params.dig(:cmd)     || 'information'
+      node    = params.dig(:node)
+      queue   = params.dig(:queue)   || 'mq-icinga'
+      payload = params.dig(:payload) || {}
+      ttr     = params.dig(:ttr)     || 10
+      delay   = params.dig(:delay)   || 2
 
-      p = MessageQueue::Producer.new( @MQSettings )
+      if( cmd == nil || queue == nil || payload.count() == 0 )
+        return
+      end
 
       job = {
-        cmd:  'information',
-        from: 'icinga',
-        payload: data
+        cmd:  cmd,          # require
+        node: node,         # require
+        timestamp: Time.now().strftime( '%Y-%m-%d %H:%M:%S' ), # optional
+        from: 'icinga',     # optional
+        payload: payload    # require
       }.to_json
 
-      logger.debug( p.addJob( 'mq-icinga', job ) )
+      result = @mqProducer.addJob( queue, job, ttr, delay )
+
+      logger.debug( job )
+      logger.debug( result )
 
     end
 
