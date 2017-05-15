@@ -24,8 +24,8 @@ mqPort              = ENV.fetch('MQ_PORT'               , 11300)
 mqQueue             = ENV.fetch('MQ_QUEUE'              , 'mq-grafana')
 redisHost           = ENV.fetch('REDIS_HOST'            , 'localhost' )
 redisPort           = ENV.fetch('REDIS_PORT'            , 6379 )
-interval            = ENV.fetch('INTERVAL'              , 10 )
-deplay              = ENV.fetch('RUN_DELAY'             , 10 )
+interval            = ENV.fetch('INTERVAL'              , 40 )
+delay               = ENV.fetch('RUN_DELAY'             , 30 )
 
 config = {
   :grafana => {
@@ -65,7 +65,7 @@ g = Grafana::Client.new( config )
 
 scheduler = Rufus::Scheduler.new
 
-scheduler.every( interval, :first_in => deplay ) do
+scheduler.every( interval, :first_in => delay ) do
 
    g.queue()
 
