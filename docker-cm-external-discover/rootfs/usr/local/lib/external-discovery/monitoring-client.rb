@@ -7,6 +7,8 @@ module ExternalDiscovery
 
     include Logging
 
+    attr_reader :monitoringData
+
     def initialize( settings )
 
       @apiHost    = settings.dig(:monitoring, :host)    || 'localhost'
@@ -23,6 +25,23 @@ module ExternalDiscovery
       logger.info( ' CoreMedia - External Discovery Service - Monitoring NetworkClient' )
       logger.info( '-----------------------------------------------------------------' )
       logger.info( '' )
+
+      begin
+
+        @monitoringData   = Hash.new()
+
+        # run internal scheduler to remove old data
+        scheduler = Rufus::Scheduler.new
+
+        scheduler.every( 45, :first_in => 10 ) do
+          self.getNodes()
+        end
+      rescue => e
+
+        logger.error( e )
+        raise e
+
+      end
 
     end
 
@@ -142,6 +161,54 @@ module ExternalDiscovery
       rescue => e
 
         logger.error( e.inspect )
+
+        return nil
+      end
+
+    end
+
+
+    def getNodes()
+
+      url = sprintf( '%s/host/%s', @apiUrl, path )
+
+      restClient = RestClient::Resource.new(
+        URI.encode( url )
+      )
+
+      begin
+
+        response     = restClient.get( @headers, params: { 'short': true } )
+
+        responseCode = response.code
+        responseBody = response.body
+
+logger.debug( response.class.to_s )
+logger.debug( response.inspect )
+logger.debug( response )
+
+logger.debug( responseCode )
+logger.debug( responseBody )
+
+        if( responseCode == 200 )
+
+          data   = JSON.parse( responseBody )
+
+          @monitoringData = data.dig('hosts')
+
+          return data
+        else
+
+          logger.debug( responseCode )
+          logger.debug( responseBody )
+
+          return nil
+        end
+
+      rescue Exception => e
+
+        logger.error( e )
+        logger.error( e.backtrace )
 
         return nil
       end

@@ -9,7 +9,7 @@ module ExternalDiscovery
 
     include Logging
 
-    attr_reader :data
+    attr_reader :awsData
 
     def initialize( settings )
 

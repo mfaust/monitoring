@@ -182,6 +182,12 @@ module ExternalDiscovery
       # we need an better way to detect adding or removing!
       # or re-adding, when the node comes up with an new ip
 
+      logger.debug( @monitoringClient.monitoringData )
+
+
+
+      return
+
 
       # we have nothing .. first run
       #
