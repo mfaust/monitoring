@@ -523,13 +523,16 @@ class Monitoring
   #
   def listHost( host = nil, payload = nil )
 
-    logger.debug( "listHost( #{host}, payload )" )
+#    logger.debug( "listHost( #{host}, #{payload} )" )
+
+    request = payload.dig('rack.request.query_hash')
+    short   = request.keys.include?('short')
 
     status  = 204
     result  = Hash.new()
     cache   = @cache.get( 'information' )
 
-    logger.debug( cache )
+#    logger.debug( cache )
 
     if( cache == nil )
 
@@ -541,16 +544,21 @@ class Monitoring
       return JSON.pretty_generate( result )
     end
 
+
+
     if( host.to_s != '' )
 
       h = cache.dig( host.to_s )
 
-      logger.debug( h )
-
       if ( h != nil )
-        result[host.to_s] ||= {}
-        result[host.to_s] = h
 
+        if( short == true )
+
+          result[:host] = host
+        else
+          result[host.to_s] ||= {}
+          result[host.to_s] = h
+        end
         status = 200
       else
 
@@ -560,7 +568,13 @@ class Monitoring
     else
 
       if( cache != nil )
-        result = cache
+
+        if( short == true )
+
+          result[:hosts] = cache.keys
+        else
+          result = cache
+        end
 
         status = 200
       end
