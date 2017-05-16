@@ -61,6 +61,7 @@ module Grafana
         # read the configuration for an customized display name
         #
         config          = @redis.config( { :short => short, :key => 'display-name' } )
+        identifier      = @redis.config( { :short => short, :key => 'graphite-identifier' } )
 
         if( config.dig( 'display-name' ) != nil )
 
@@ -72,10 +73,24 @@ module Grafana
           @grafanaHostname = short
         end
 
+
+        if( identifier.dig( 'graphite-identifier' ) != nil )
+
+          @storageIdentifier = identifier.dig( 'graphite-identifier' ).to_s
+
+          logger.info( "use custom storage identifier from config: '#{@storageIdentifier}'" )
+        else
+
+          @storageIdentifier = short
+        end
+
+
         @shortHostname    = short
-        @grafanaHostname  = @grafanaHostname.gsub( '.', '-' ) # self.createSlug( @grafanaHostname ).gsub( '.', '-' )
+        @grafanaHostname  = self.createSlug( @grafanaHostname ).gsub( '.', '-' )
 
         logger.debug( @shortHostname )
+        logger.debug( @grafanaHostname )
+        logger.debug( @storageIdentifier )
 
       end
 
@@ -148,7 +163,7 @@ module Grafana
             template       = nil
           end
 
-          cacheKey       = Storage::RedisClient.cacheKey( { :host => host, :pre => 'result', :service => service } )
+#           cacheKey       = Storage::RedisClient.cacheKey( { :host => host, :pre => 'result', :service => service } )
 
           # cae-live-1 -> cae-live
           serviceName     = self.removePostfix( service )
@@ -256,6 +271,8 @@ module Grafana
         dashboards = self.listDashboards( { :host => @grafanaHostname } )
         dashboards = dashboards.dig(:dashboards)
 
+        # TODO
+        # clearer!
         if( dashboards == nil )
 
           return {
@@ -331,13 +348,15 @@ module Grafana
         )
 
         json = self.normalizeTemplate( {
-          :template        => template,
-          :grafanaHostname => @grafanaHostname,
-          :shortHostname   => @shortHostname
+          :template          => template,
+          :grafanaHostname   => @grafanaHostname,
+          :storageIdentifier => @storageIdentifier,
+          :shortHostname     => @shortHostname
         } )
 
         response = self.postRequest( '/api/dashboards/db' , json )
 
+        logger.debug( "#{response}" )
       end
 
 
@@ -452,13 +471,15 @@ module Grafana
         )
 
         json = self.normalizeTemplate( {
-          :template        => template,
-          :grafanaHostname => @grafanaHostname,
-          :shortHostname   => @shortHostname
+          :template          => template,
+          :grafanaHostname   => @grafanaHostname,
+          :storageIdentifier => @storageIdentifier,
+          :shortHostname     => @shortHostname
         } )
 
-        self.postRequest( '/api/dashboards/db' , json )
+        response = self.postRequest( '/api/dashboards/db' , json )
 
+        logger.debug( "#{response}" )
       end
 
 
@@ -484,13 +505,15 @@ module Grafana
               templateJson = self.addAnnotations( File.read( filename ) )
 
               json = self.normalizeTemplate( {
-                :template        => templateJson,
-                :grafanaHostname => @grafanaHostname,
-                :shortHostname   => @shortHostname
+                :template          => templateJson,
+                :grafanaHostname   => @grafanaHostname,
+                :storageIdentifier => @storageIdentifier,
+                :shortHostname     => @shortHostname
               } )
 
-              self.postRequest( '/api/dashboards/db' , json )
+              response = self.postRequest( '/api/dashboards/db' , json )
 
+              logger.debug( "#{response}" )
             end
           end
         end
@@ -685,15 +708,18 @@ module Grafana
         templateJson = self.addAnnotations( templateJson )
 
         json = self.normalizeTemplate( {
-          :template        => templateJson,
-          :serviceName     => serviceName,
-          :description     => description,
-          :normalizedName  => normalizedName,
-          :grafanaHostname => @grafanaHostname,
-          :shortHostname   => @shortHostname
+          :template          => templateJson,
+          :serviceName       => serviceName,
+          :description       => description,
+          :normalizedName    => normalizedName,
+          :grafanaHostname   => @grafanaHostname,
+          :storageIdentifier => @storageIdentifier,
+          :shortHostname     => @shortHostname
         } )
 
         response = self.postRequest( '/api/dashboards/db' , json )
+
+        logger.debug( "#{response}" )
 
       end
 
@@ -756,12 +782,15 @@ module Grafana
 
       def normalizeTemplate( params = {} )
 
-        template        = params.dig(:template)
-        serviceName     = params.dig(:serviceName)
-        description     = params.dig(:description)
-        normalizedName  = params.dig(:normalizedName)
-        grafanaHostname = params.dig(:grafanaHostname)
-        shortHostname   = params.dig(:shortHostname)
+        logger.debug( "normalizeTemplate( #{params} )" )
+
+        template          = params.dig(:template)
+        serviceName       = params.dig(:serviceName)
+        description       = params.dig(:description)
+        normalizedName    = params.dig(:normalizedName)
+        grafanaHostname   = params.dig(:grafanaHostname)
+        storageIdentifier = params.dig(:storageIdentifier)
+        shortHostname     = params.dig(:shortHostname)
 
         if( template == nil )
           return false
@@ -777,11 +806,13 @@ module Grafana
 
         # replace Template Vars
         map = {
-          '%DESCRIPTION%' => description,
-          '%SERVICE%'     => normalizedName,
-          '%HOST%'        => shortHostname,
-          '%SHORTHOST%'   => grafanaHostname,
-          '%TAG%'         => shortHostname
+          '%DESCRIPTION%'        => description,
+          '%SERVICE%'            => normalizedName,
+          '%HOST%'               => shortHostname,
+          '%SHORTHOST%'          => grafanaHostname,
+#          '%%' =>
+          '%STORAGE_IDENTIFIER%' => storageIdentifier,
+          '%TAG%'                => shortHostname
         }
 
         re = Regexp.new( map.keys.map { |x| Regexp.escape(x) }.join( '|' ) )
