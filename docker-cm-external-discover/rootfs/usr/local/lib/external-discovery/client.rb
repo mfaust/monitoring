@@ -75,6 +75,7 @@ module ExternalDiscovery
       name.gsub!('development-','dev ')
       name.gsub!('production-' ,'prod ')
       name.gsub!('caepreview' , 'cae preview')
+      name.gsub!( '-',' ' )
 
 #       name = case name
 #         when 'cms'
@@ -104,13 +105,15 @@ module ExternalDiscovery
 
     def graphiteIdentifier( params = {} )
 
-      customer  = params.dig(:customer)
       name      = params.dig(:name)
-      ip        = params.dig(:ip)
 
-      lastOktet = ip.split('.').last
+      name.gsub!('development-','dev-')
+      name.gsub!('production-' ,'prod-')
+      name.gsub!('storage-'    , '')
+      name.gsub!(' ', '-')
 
-      return sprintf( '%s-%s-%s', customer, name.gsub(' ', '-'), lastOktet )
+      return name
+
     end
 
 
@@ -118,29 +121,50 @@ module ExternalDiscovery
 
 #      logger.debug( "extractInstanceInformation( #{data} )" )
 
-#      fqdn        = data.dig('fqdn')
-#      name        = data.dig('name')
+#       {
+#         "fqdn": "i-0130817e34d231f1d.monitoring",
+#         "name": "i-0130817e34d231f1d",
+#         "state": "running",
+#         "uid": "i-0130817e34d231f1d",
+#         "launch_time": "2017-05-16 05:32:41 UTC",
+#         "dns": {
+#           "ip": "172.31.11.111",
+#           "short": "ip-172-31-11-111",
+#           "name": "ip-172-31-11-111.ec2.internal"
+#         },
+#         "tags": {
+#           "cname": "management-solr.development.cosmos.internal.",
+#           "customer": "cosmos",
+#           "environment": "development",
+#           "name": "cosmos-development-storage-management-solr",
+#           "tier": "storage"
+#         },
+#         "checksum": "c17e8c86ffeea56ae72049212d8e153a"
+#       }
+
+      fqdn        = data.dig('fqdn')
+#       name        = data.dig('name')
       uuid        = data.dig('uid')
       state       = data.dig('state') || 'running'
-#      dns         = data.dig('dns')
       tags        = data.dig('tags')  || []
       cname       = data.dig('tags', 'cname')
       name        = data.dig('tags', 'name')
       tier        = data.dig('tags', 'tier')
       customer    = data.dig('tags', 'customer')
       environment = data.dig('tags', 'environment')
-      ip          = data.dig('dns' , 'ip')
-      fqdn        = data.dig('dns' , 'name')
+      dns_ip      = data.dig('dns' , 'ip')
+      dns_short   = data.dig('dns' , 'short')
+      dns_fqdn    = data.dig('dns' , 'name')
 
-      return uuid, ip, fqdn, state, tags, cname, name, tier, customer, environment
+      return uuid, dns_ip, dns_short, dns_fqdn, fqdn, name, state, tags, cname, name, tier, customer, environment
 
     end
 
 
     def compareVersions( params = {} )
 
-      liveData     = params.dig( 'live' )
-      historicData = @cache.get( 'historic' )
+      liveData     = params.dig( 'aws' )
+      historicData = params.dig( 'monitoring' )
 
       if( liveData.is_a?( Array ) == false )
         logger.error( 'liveData is not an Array' )
@@ -150,6 +174,12 @@ module ExternalDiscovery
 
       if( historicData == nil )
         historicData = Array.new
+      end
+
+      if( historicData.is_a?( Hash ) )
+        historicData = Array[*historicData]
+#        logger.debug( historicData.class.to_s )
+#        logger.debug( historicData )
       end
 
       if( historicData.is_a?( Array ) == false )
@@ -182,11 +212,49 @@ module ExternalDiscovery
       # we need an better way to detect adding or removing!
       # or re-adding, when the node comes up with an new ip
 
-      logger.debug( @monitoringClient.monitoringData )
+      liveData.each do |l|
 
+        uuid, dns_ip, dns_short, dns_fqdn, fqdn, name, state, tags, cname, name, tier, customer, environment = self.extractInstanceInformation( l )
+
+        # currently, we want only the dev environment
+        #
+        if( environment != 'development' )
+          next
+        end
+
+        if( cname == nil || cname == '.' )
+          logger.warn( "cname for '#{name}' are not configured, skip" )
+          next
+        end
+
+        if( tier == nil || tier == 'service' )
+          logger.warn( "tier for '#{name}' are not configured, skip" )
+          next
+        end
+
+        ip, short, fqdn = nsLookup( fqdn )
+
+        if( historicData.include?( dns_short ) ||  historicData.include?( fqdn ) )
+          logger.info( sprintf( 'node %s / %s (%s) exists', uuid, dns_fqdn, cname ) )
+          next
+        end
+
+        logger.info( sprintf( 'add node %s / %s (%s)', uuid, dns_fqdn, cname ) )
+
+        if( self.nodeAdd( { :ip => ip, :short => short, :fqdn => fqdn, :cname => cname, :name => name, :customer => customer, :environment => environment, :tier => tier, :tags => tags } ) == true )
+
+          sleep(5)
+        end
+
+        sleep(2)
+
+      end
+
+      sleep(20)
 
 
       return
+
 
 
       # we have nothing .. first run
@@ -201,7 +269,7 @@ module ExternalDiscovery
 
         liveData.each do |l|
 
-          uuid, ip, fqdn, state, tags, cname, name, tier, customer, environment = self.extractInstanceInformation( l )
+          uuid, dns_ip, dns_short, dns_fqdn, fqdn, name, state, tags, cname, name, tier, customer, environment = self.extractInstanceInformation( l )
 
           # currently, we want only the dev environment
           #
@@ -229,7 +297,7 @@ module ExternalDiscovery
 #             next
 #           end
 
-          logger.info( sprintf( 'get information about %s (%s)', fqdn, cname ) )
+          logger.info( sprintf( 'get information about %s / %s (%s)', uuid, dns_fqdn, cname ) )
 
           nodeStatus = self.nodeStatus( { :short => short } )
 
@@ -252,7 +320,37 @@ module ExternalDiscovery
 
         logger.debug( newArray )
 
-        @cache.set( 'historic', expiresIn: 320 ) { Cache::Data.new( newArray ) }
+#        @cache.set( 'historic', expiresIn: 320 ) { Cache::Data.new( newArray ) }
+      else
+
+#        logger.debug( JSON.pretty_generate( liveData ) )
+#        logger.debug( liveData.class.to_s )
+
+        historicData.each do |n|
+
+          # logger.debug( liveData.include?( n  ) )
+
+          a = liveData.select {|short| short.dig('dns','short') == n }
+
+          logger.debug( a )
+          if( a )
+            logger.debug( 'node exists' )
+            next
+          else
+            logger.debug( 'node not exists' )
+
+            uuid, dns_ip, dns_short, dns_fqdn, fqdn, name, state, tags, cname, name, tier, customer, environment = self.extractInstanceInformation( l )
+
+            if( self.nodeAdd( { :ip => ip, :short => short, :fqdn => fqdn, :cname => cname, :name => name, :customer => customer, :environment => environment, :tier => tier, :tags => tags } ) == true )
+
+#               newArray << l
+
+              sleep(5)
+            end
+
+          end
+
+        end
 
       end
 
@@ -265,7 +363,7 @@ module ExternalDiscovery
 #         #
 #         removedEntries.each do |r|
 #
-#           uuid, ip, fqdn, state, tags, cname, name, tier, customer, environment = self.extractInstanceInformation( r )
+#           uuid, dns_ip, dns_short, dns_fqdn, fqdn, name, state, tags, cname, name, tier, customer, environment = self.extractInstanceInformation( r )
 #
 #           if( ip != nil && fqdn != nil )
 #
@@ -300,8 +398,7 @@ module ExternalDiscovery
           environment
         end
 
-      displayName = normalizeName( name, [ 'cosmos-', 'delivery-', 'management-', 'storage-' ] )
-
+#       displayName = normalizeName( name, [ 'storage-' ] )
 #       logger.debug( "environment: #{environment}" )
 #       logger.debug(" -> #{cname} - #{name}" )
 #       logger.debug( "  ==> #{displayName}" )
@@ -328,14 +425,14 @@ module ExternalDiscovery
         :force      => false,
         :tags       => useableTags,
         :config     => {
-          'display-name'        => displayName,
-          'graphite-identifier' => self.graphiteIdentifier( { :customer => customer, :name => displayName, :ip => ip } )
+          'display-name'        => self.normalizeName( name, [ 'storage-' ] ),
+          'graphite-identifier' => self.graphiteIdentifier( { :name => name } )
         }
       } )
 
       logger.debug( "data: #{d}" )
 
-      result = @monitoringClient.add( short, d )
+      result = @monitoringClient.add( ip, d )
 
       logger.debug( result )
 
@@ -453,7 +550,9 @@ module ExternalDiscovery
       @data   = Array.new()
       threads = Array.new()
 
-      awsData  = @cache.get( 'aws-data' )
+      awsData        = @cache.get( 'aws-data' )
+      monitoringData = @monitoringClient.monitoringData # @cache.get( 'monitoring-data' )
+
 
       if( awsData == nil )
 
@@ -472,10 +571,32 @@ module ExternalDiscovery
         logger.debug( 'found cached AWS data' )
       end
 
-      logger.debug( sprintf( 'AWS hold %d nodes', awsData.count ) )
+
+#       if( monitoringData == nil )
+#
+#         monitoringData = @monitoringClient.monitoringData
+#
+# #        if( monitoringData.is_a?(Array) && monitoringData.count() != 0 )
+#           logger.debug( 'store data into cache' )
+#           @cache.set( 'monitoring-data' , expiresIn: 120 ) { Cache::Data.new( monitoringData ) }
+# #        end
+#
+# #        @jobs.del( { :fqdn => 'foo' } )
+# #        return
+#
+#       else
+#
+#         logger.debug( 'found cached Monitoring data' )
+#       end
+
+
+
+
+      logger.debug( sprintf( 'AWS hold %d nodes'       , awsData.count ) )
+      logger.debug( sprintf( 'Monitoring hold %d nodes', monitoringData.count ) )
 
 #       logger.debug( JSON.pretty_generate( awsData ) )
-      self.compareVersions( { 'live' => awsData } )
+      self.compareVersions( { 'aws' => awsData, 'monitoring' => monitoringData } )
 
       finish = Time.now
       logger.info( sprintf( 'finished in %s seconds', finish - start ) )

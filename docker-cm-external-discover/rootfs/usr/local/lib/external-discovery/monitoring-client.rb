@@ -33,7 +33,7 @@ module ExternalDiscovery
         # run internal scheduler to remove old data
         scheduler = Rufus::Scheduler.new
 
-        scheduler.every( 45, :first_in => 10 ) do
+        scheduler.every( 45, :first_in => 5 ) do
           self.getNodes()
         end
       rescue => e
@@ -170,25 +170,17 @@ module ExternalDiscovery
 
     def getNodes()
 
-      url = sprintf( '%s/host/%s', @apiUrl, path )
+      logger.info( 'get Monitoring data' )
+      start = Time.now
 
-      restClient = RestClient::Resource.new(
-        URI.encode( url )
-      )
+      url = sprintf( '%s/host', @apiUrl )
 
       begin
 
-        response     = restClient.get( @headers, params: { 'short': true } )
+        response     = RestClient.get( url, params: { 'short': true } )
 
         responseCode = response.code
         responseBody = response.body
-
-logger.debug( response.class.to_s )
-logger.debug( response.inspect )
-logger.debug( response )
-
-logger.debug( responseCode )
-logger.debug( responseBody )
 
         if( responseCode == 200 )
 
@@ -196,13 +188,13 @@ logger.debug( responseBody )
 
           @monitoringData = data.dig('hosts')
 
-          return data
         else
 
           logger.debug( responseCode )
           logger.debug( responseBody )
 
-          return nil
+          @monitoringData = {}
+
         end
 
       rescue Exception => e
@@ -210,8 +202,12 @@ logger.debug( responseBody )
         logger.error( e )
         logger.error( e.backtrace )
 
-        return nil
+        @monitoringData = {}
+
       end
+
+      finish = Time.now
+      logger.info( sprintf( 'finished in %s seconds', finish - start ) )
 
     end
 

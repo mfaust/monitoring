@@ -739,7 +739,7 @@ module Storage
 
         logger.debug( self.nodes() )
 
-        dns      = Utils::Network.resolv( host )
+        dns      = Utils::Network.resolv( short )
 
         logger.debug( "hostResolve #{dns}" )
 
