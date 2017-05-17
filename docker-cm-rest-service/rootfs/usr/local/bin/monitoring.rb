@@ -80,7 +80,7 @@ class Monitoring
     result  = Hash.new()
 
     status  = @redis.nodes( { :status => Storage::RedisClient::OFFLINE } )
-    logger.debug( status )
+#     logger.debug( status )
 
 #     # remove offline nodes
 #     if( status.is_a?( Hash ) || status.is_a?( Array ) && status.count != 0 )
@@ -96,7 +96,7 @@ class Monitoring
 #     end
 
     nodes   = @redis.nodes()
-    logger.debug( nodes )
+#     logger.debug( nodes )
 
     if( nodes.is_a?( Hash ) || nodes.is_a?( Array ) )
 
@@ -140,18 +140,79 @@ class Monitoring
           end
 
           # get data from external services
-          self.messageQueue( { :cmd => 'info', :node => n, :queue => 'mq-icinga'  , :payload => {} } )
-          self.messageQueue( { :cmd => 'info', :node => n, :queue => 'mq-grafana' , :payload => {}, :ttr => 1, :delay => 0 } )
-          self.messageQueue( { :cmd => 'info', :node => n, :queue => 'mq-discover', :payload => {}, :ttr => 1, :delay => 0 } )
+          self.messageQueue( { :cmd => 'info', :node => n, :queue => 'mq-icinga'  , :prio => 1, :payload => {} } )
+          self.messageQueue( { :cmd => 'info', :node => n, :queue => 'mq-grafana' , :prio => 1, :payload => {}, :ttr => 1, :delay => 0 } )
+          self.messageQueue( { :cmd => 'info', :node => n, :queue => 'mq-discover', :prio => 1, :payload => {}, :ttr => 1, :delay => 0 } )
 
-          sleep( 8 )
+#          sleep( 8 )
 
           resultArray = Array.new()
           threads     = Array.new()
 
-          discoveryStatus = @mqConsumer.getJobFromTube( 'mq-discover-info', true )
-          grafanaStatus   = @mqConsumer.getJobFromTube( 'mq-grafana-info', true )
-          icingaStatus    = @mqConsumer.getJobFromTube( 'mq-icinga-info', true )
+          discoveryStatus = Hash.new()
+          grafanaStatus   = Hash.new()
+          icingaStatus    = Hash.new()
+
+
+          for y in 1..30
+
+            result      = @mqConsumer.getJobFromTube('mq-discover-info')
+
+            if( result.is_a?( Hash ) && result.count != 0 && result.dig( :body, 'payload', 'services' ) != nil )
+
+              discoveryStatus = result
+              break
+            else
+              logger.debug( sprintf( 'Waiting for data %s ... %d', 'mq-discover-info', y ) )
+              sleep( 5 )
+            end
+          end
+
+          for y in 1..30
+
+            result      = @mqConsumer.getJobFromTube('mq-discover-info')
+
+            if( result.is_a?( Hash ) && result.count != 0 && result.dig( :body, 'payload', 'services' ) != nil )
+
+              discoveryStatus = result
+              break
+            else
+              logger.debug( sprintf( 'Waiting for data %s ... %d', 'mq-discover-info', y ) )
+              sleep( 5 )
+            end
+          end
+
+          for y in 1..30
+
+            result      = @mqConsumer.getJobFromTube('mq-grafana-info')
+
+            if( result.is_a?( Hash ) && result.count != 0 && result.dig( :body, 'payload' ) != nil )
+
+              grafanaStatus = result
+              break
+            else
+              logger.debug( sprintf( 'Waiting for data %s ... %d', 'mq-grafana-info', y ) )
+              sleep( 5 )
+            end
+          end
+
+          for y in 1..30
+
+            result      = @mqConsumer.getJobFromTube('mq-icinga-info')
+
+            if( result.is_a?( Hash ) && result.count != 0 && result.dig( :body, 'payload' ) != nil )
+
+              icingaStatus = result
+              break
+            else
+              logger.debug( sprintf( 'Waiting for data %s ... %d', 'mq-icinga-info', y ) )
+              sleep( 5 )
+            end
+          end
+
+#           discoveryStatus = @mqConsumer.getJobFromTube( 'mq-discover-info', true )
+#           grafanaStatus   = @mqConsumer.getJobFromTube( 'mq-grafana-info', true )
+#           icingaStatus    = @mqConsumer.getJobFromTube( 'mq-icinga-info', true )
 
           if( discoveryStatus )
             discoveryStatus = discoveryStatus.dig( :body, 'payload' ) || {}
@@ -192,11 +253,11 @@ class Monitoring
   #
   def checkAvailablility?( host )
 
-    logger.debug( "checkAvailablility?( #{host} )" )
+#     logger.debug( "checkAvailablility?( #{host} )" )
 
     hostInfo      = Utils::Network.resolv( host )
 
-    logger.debug( JSON.pretty_generate( hostInfo ) )
+#     logger.debug( JSON.pretty_generate( hostInfo ) )
 
     ip            = hostInfo.dig(:ip)
     shortHostName = hostInfo.dig(:short)
@@ -358,12 +419,10 @@ class Monitoring
 
   def addHost( host, payload )
 
-    logger.debug( "addHost( #{host}, payload )" )
+    logger.debug( sprintf( 'addHost( \'%s\', \'%s\' )', host, payload ) )
 
     status    = 500
     message   = 'initialize error'
-
-    logger.debug( sprintf( 'addHost( \'%s\', \'%s\' )', host, payload ) )
 
     result    = Hash.new()
     hash      = Hash.new()
@@ -426,19 +485,16 @@ class Monitoring
 
         if( enabledGrafana == true )
           logger.info( 'remove grafana dashborads' )
-          logger.debug( 'send message to \'mq-grafana\'' )
           self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-grafana', :payload => payload, :prio => 0 } )
         end
 
         if( enabledIcinga == true )
           logger.info( 'remove icinga checks and notifications' )
-          logger.debug( 'send message to \'mq-icinga\'' )
           self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-icinga', :payload => payload, :prio => 0 } )
         end
 
         if( enableDiscovery == true )
           logger.info( 'remove node from discovery service' )
-          logger.debug( 'send message to \'mq-discover\'' )
           self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-discover', :payload => payload, :prio => 0 } )
         end
 
@@ -462,24 +518,18 @@ class Monitoring
       if( enableDiscovery == true )
 
         logger.info( 'add node to discovery service' )
-
-        logger.debug( 'send message to \'mq-discover\'' )
         self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-discover', :payload => payload, :prio => 1, :delay => 1 } )
       end
 
       if( enabledGrafana == true )
 
         logger.info( 'create grafana dashborads' )
-
-        logger.debug( 'send message to \'mq-grafana\'' )
         self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-grafana', :payload => payload, :prio => 10, :ttr => 15, :delay => 15 } )
       end
 
       if( enabledIcinga == true  )
 
         logger.info( 'create icinga checks and notifications' )
-
-        logger.debug( 'send message to \'mq-icinga\'' )
         self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-icinga', :payload => payload, :prio => 10, :ttr => 15, :delay => 15 } )
       end
 
@@ -652,18 +702,15 @@ class Monitoring
 
     if( enabledIcinga == true )
       logger.info( 'remove icinga checks and notifications' )
-      logger.debug( 'send message to \'mq-icinga\'' )
       self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-icinga', :payload => { "force" => true }, :prio => 0 } )
     end
     if( enabledGrafana == true )
       logger.info( 'remove grafana dashborads' )
-      logger.debug( 'send message to \'mq-grafana\'' )
       self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-grafana', :payload => { "force" => true }, :prio => 0 } )
     end
 
     if( enableDiscovery == true )
       logger.info( 'remove node from discovery service' )
-      logger.debug( 'send message to \'mq-discover\'' )
       self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-discover', :payload => { "force" => true }, :prio => 0 } )
     end
 

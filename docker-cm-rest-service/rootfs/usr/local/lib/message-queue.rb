@@ -63,6 +63,16 @@ module MessageQueue
 
       if( @b )
 
+        # TODO
+        # BUGFIX
+        # ASAP
+        # check if job already in the queue
+
+        tube = @b.tubes.watch!( tube.to_s )
+
+        logger.debug( tube )
+
+
 #         logger.debug( "add job to tube #{tube}" )
 #         logger.debug( job )
 
