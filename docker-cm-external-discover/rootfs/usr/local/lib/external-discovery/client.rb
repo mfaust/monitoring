@@ -196,17 +196,17 @@ module ExternalDiscovery
       identicalEntriesCount = identicalEntries.count
       removedEntriesCount   = removedEntries.count
 
-      logger.debug( '------------------------------------------------------------' )
-      logger.info( sprintf( 'live Data holds %d entries'    , liveDataCount ) )
-#       logger.debug( "  #{liveData}" )
-      logger.info( sprintf( 'historic Data holds %d entries', historicDataCount ) )
-#       logger.debug( "  #{historicData}" )
-      logger.debug( '------------------------------------------------------------' )
-      logger.info( sprintf( 'identical entries %d'          , identicalEntriesCount ) )
-#       logger.debug(  "  #{identicalEntries}" )
-      logger.info( sprintf( 'removed entries %d'            , removedEntriesCount ) )
-#       logger.debug(  "  #{removedEntries}" )
-      logger.debug( '------------------------------------------------------------' )
+#       logger.debug( '------------------------------------------------------------' )
+#       logger.info( sprintf( 'live Data holds %d entries'    , liveDataCount ) )
+# #       logger.debug( "  #{liveData}" )
+#       logger.info( sprintf( 'historic Data holds %d entries', historicDataCount ) )
+# #       logger.debug( "  #{historicData}" )
+#       logger.debug( '------------------------------------------------------------' )
+#       logger.info( sprintf( 'identical entries %d'          , identicalEntriesCount ) )
+# #       logger.debug(  "  #{identicalEntries}" )
+#       logger.info( sprintf( 'removed entries %d'            , removedEntriesCount ) )
+# #       logger.debug(  "  #{removedEntries}" )
+#       logger.debug( '------------------------------------------------------------' )
 
       # TODO
       # we need an better way to detect adding or removing!
@@ -216,6 +216,8 @@ module ExternalDiscovery
 
         uuid, dns_ip, dns_short, dns_fqdn, fqdn, name, state, tags, cname, name, tier, customer, environment = self.extractInstanceInformation( l )
 
+        logger.debug( sprintf( '  %s', name ) )
+
         # currently, we want only the dev environment
         #
         if( environment != 'development' )
@@ -223,7 +225,7 @@ module ExternalDiscovery
         end
 
         if( cname == nil || cname == '.' )
-          logger.warn( "cname for '#{name}' are not configured, skip" )
+          logger.warn( "cname for '#{name}' are not configured, take #{name}" )
           next
         end
 
@@ -233,6 +235,11 @@ module ExternalDiscovery
         end
 
         ip, short, fqdn = nsLookup( fqdn )
+
+        if( ip == nil || short == nil || fqdn == nil )
+          logger.error( 'DNS problem, skip' )
+          next
+        end
 
         if( historicData.include?( dns_short ) ||  historicData.include?( fqdn ) )
           logger.info( sprintf( 'node %s / %s (%s) exists', uuid, dns_fqdn, cname ) )
@@ -406,8 +413,6 @@ module ExternalDiscovery
       discoveryStatus = 204
       useableTags     = Array.new()
 
-      logger.info( '  now, we try to add them' )
-
 #       logger.debug( "original tags: #{tags}" )
 
       # our positive list for Tags
@@ -545,14 +550,11 @@ module ExternalDiscovery
 
       @jobs.add( { :fqdn => 'foo' } )
 
-      start = Time.now
-
       @data   = Array.new()
       threads = Array.new()
 
       awsData        = @cache.get( 'aws-data' )
-      monitoringData = @monitoringClient.monitoringData # @cache.get( 'monitoring-data' )
-
+      monitoringData = @monitoringClient.monitoringData
 
       if( awsData == nil )
 
@@ -571,39 +573,19 @@ module ExternalDiscovery
         logger.debug( 'found cached AWS data' )
       end
 
-
-#       if( monitoringData == nil )
-#
-#         monitoringData = @monitoringClient.monitoringData
-#
-# #        if( monitoringData.is_a?(Array) && monitoringData.count() != 0 )
-#           logger.debug( 'store data into cache' )
-#           @cache.set( 'monitoring-data' , expiresIn: 120 ) { Cache::Data.new( monitoringData ) }
-# #        end
-#
-# #        @jobs.del( { :fqdn => 'foo' } )
-# #        return
-#
-#       else
-#
-#         logger.debug( 'found cached Monitoring data' )
-#       end
-
-
-
+      start = Time.now
 
       logger.debug( sprintf( 'AWS hold %d nodes'       , awsData.count ) )
       logger.debug( sprintf( 'Monitoring hold %d nodes', monitoringData.count ) )
 
-#       logger.debug( JSON.pretty_generate( awsData ) )
+      logger.debug( 'look to insert new nodes, or delete removed ...' )
+
       self.compareVersions( { 'aws' => awsData, 'monitoring' => monitoringData } )
 
       finish = Time.now
       logger.info( sprintf( 'finished in %s seconds', finish - start ) )
 
       @jobs.del( { :fqdn => 'foo' } )
-
-      logger.debug( 'done' )
 
     end
 

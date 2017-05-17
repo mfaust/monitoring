@@ -82,8 +82,26 @@ module ExternalDiscovery
 
       rescue Exception => e
 
-        logger.error( e )
-        return nil
+        logger.error( e.inspect )
+        logger.error( e.message )
+        logger.error( e.code )
+
+        return {
+          :status  => e.code,
+          :message => e.message
+        }
+
+      rescue => e
+
+        logger.error( e.inspect )
+        logger.error( e.message )
+        logger.error( e.code )
+
+        return {
+          :status  => 500,
+          :message => e.message
+        }
+
       end
 
     end
@@ -102,15 +120,34 @@ module ExternalDiscovery
       }
 
       begin
-        data   = restClient.delete()
-        data   = JSON.parse( data )
+        response  = restClient.delete()
+
+        data   = JSON.parse( response )
 
         return data
 
       rescue RestClient::ExceptionWithResponse => e
 
         logger.error( e.inspect )
-        return nil
+        logger.error( e.message )
+        logger.error( e.code )
+
+        return {
+          :status  => e.code,
+          :message => e.message
+        }
+
+      rescue => e
+
+        logger.error( e.inspect )
+        logger.error( e.message )
+        logger.error( e.code )
+
+        return {
+          :status  => 500,
+          :message => e.message
+        }
+
       end
 
     end
@@ -127,12 +164,12 @@ module ExternalDiscovery
         :timeout      => 25,
         :open_timeout => 15,
       )
-#
-# logger.debug( tags )
 
       begin
-        data   = restClient.post( tags )
-        data   = JSON.parse( data )
+
+        response = restClient.post( tags )
+
+        data   = JSON.parse( response )
 
         logger.debug( data )
 
@@ -142,9 +179,10 @@ module ExternalDiscovery
 
         logger.error( e.inspect )
         logger.error( e.message )
+        logger.error( e.code )
 
         return {
-          :status  => 408,
+          :status  => e.code,
           :message => e.message
         }
 
@@ -152,17 +190,24 @@ module ExternalDiscovery
 
         logger.error( e.inspect )
         logger.error( e.message )
+        logger.error( e.code )
 
         return {
-          :status  => 500,
+          :status  => e.code,
           :message => e.message
         }
 
       rescue => e
 
         logger.error( e.inspect )
+        logger.error( e.message )
+        logger.error( e.code )
 
-        return nil
+        return {
+          :status  => 500,
+          :message => e.message
+        }
+
       end
 
     end
