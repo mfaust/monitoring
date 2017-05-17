@@ -139,7 +139,7 @@ module Grafana
 #         logger.info( sprintf( 'give dashboards for %s back', node ) )
         result = self.listDashboards( { :host => node } )
 
-        self.sendMessage( { :cmd => 'info', :queue => 'mq-grafana-info', :payload => result, :ttr => 1, :delay => 0 } )
+        self.sendMessage( { :cmd => 'info', :host => node, :queue => 'mq-grafana-info', :payload => result, :ttr => 1, :delay => 0 } )
 
         return {
           :status  => 200,

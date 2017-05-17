@@ -92,6 +92,8 @@ module Grafana
         logger.debug( @grafanaHostname )
         logger.debug( @storageIdentifier )
 
+        return ip, short, fqdn
+
       end
 
       # creates an Grafana Dashboard for Coremedia Services
@@ -124,13 +126,14 @@ module Grafana
 
         logger.info( sprintf( 'Adding dashboards for host \'%s\'', host ) )
 
-        self.prepare( host )
+        ip, short, fqdn = self.prepare( host )
 
-        discovery = @redis.discoveryData( { :short => host } )
+        discovery = @redis.discoveryData( { :short => short } )
 
         if( discovery == nil )
+
           return {
-            :status    => 500,
+            :status    => 400,
             :message   => 'no discovery data found'
           }
         end
