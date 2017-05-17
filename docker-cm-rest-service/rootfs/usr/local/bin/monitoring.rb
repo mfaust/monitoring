@@ -530,7 +530,6 @@ class Monitoring
     #
     if( annotation == true )
 
-<<<<<<< HEAD
       logger.info( 'annotation for create' )
       self.addAnnotation( host, { 'command': 'create', 'argument': 'node' } )
     end
