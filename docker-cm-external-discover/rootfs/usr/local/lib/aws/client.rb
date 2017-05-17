@@ -78,6 +78,7 @@ module Aws
                 'launch_time' => ilaunch,
                 'dns'         => {
                   'ip'    => iip,
+                  'short' => ifqdn.split('.').first,
                   'name'  => ifqdn
                 },
                 'tags'        => useableTags

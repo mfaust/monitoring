@@ -7,6 +7,8 @@ module ExternalDiscovery
 
     include Logging
 
+    attr_reader :monitoringData
+
     def initialize( settings )
 
       @apiHost    = settings.dig(:monitoring, :host)    || 'localhost'
@@ -24,6 +26,23 @@ module ExternalDiscovery
       logger.info( '-----------------------------------------------------------------' )
       logger.info( '' )
 
+      begin
+
+        @monitoringData   = Hash.new()
+
+        # run internal scheduler to remove old data
+        scheduler = Rufus::Scheduler.new
+
+        scheduler.every( 45, :first_in => 5 ) do
+          self.getNodes()
+        end
+      rescue => e
+
+        logger.error( e )
+        raise e
+
+      end
+
     end
 
 
@@ -39,7 +58,7 @@ module ExternalDiscovery
 
         response     = restClient.get( @headers )
 
-        responseCode = response.code
+        responseCode = response.http_code
         responseBody = response.body
 
 # logger.debug( response.class.to_s )
@@ -63,8 +82,26 @@ module ExternalDiscovery
 
       rescue Exception => e
 
-        logger.error( e )
-        return nil
+        logger.error( e.inspect )
+        logger.error( e.message )
+        logger.error( e.http_code )
+
+        return {
+          :status  => e.http_code,
+          :message => e.message
+        }
+
+      rescue => e
+
+        logger.error( e.inspect )
+        logger.error( e.message )
+        logger.error( e.http_code )
+
+        return {
+          :status  => 500,
+          :message => e.message
+        }
+
       end
 
     end
@@ -83,15 +120,34 @@ module ExternalDiscovery
       }
 
       begin
-        data   = restClient.delete()
-        data   = JSON.parse( data )
+        response  = restClient.delete()
+
+        data   = JSON.parse( response )
 
         return data
 
       rescue RestClient::ExceptionWithResponse => e
 
         logger.error( e.inspect )
-        return nil
+        logger.error( e.message )
+        logger.error( e.http_code )
+
+        return {
+          :status  => e.http_code,
+          :message => e.message
+        }
+
+      rescue => e
+
+        logger.error( e.inspect )
+        logger.error( e.message )
+        logger.error( e.http_code )
+
+        return {
+          :status  => 500,
+          :message => e.message
+        }
+
       end
 
     end
@@ -108,12 +164,12 @@ module ExternalDiscovery
         :timeout      => 25,
         :open_timeout => 15,
       )
-#
-# logger.debug( tags )
 
       begin
-        data   = restClient.post( tags )
-        data   = JSON.parse( data )
+
+        response = restClient.post( tags )
+
+        data   = JSON.parse( response )
 
         logger.debug( data )
 
@@ -123,9 +179,10 @@ module ExternalDiscovery
 
         logger.error( e.inspect )
         logger.error( e.message )
+        logger.error( e.http_code )
 
         return {
-          :status  => 408,
+          :status  => e.http_code,
           :message => e.message
         }
 
@@ -133,18 +190,69 @@ module ExternalDiscovery
 
         logger.error( e.inspect )
         logger.error( e.message )
+        logger.error( e.http_code )
 
         return {
-          :status  => 500,
+          :status  => e.http_code,
           :message => e.message
         }
 
       rescue => e
 
         logger.error( e.inspect )
+        logger.error( e.message )
+        logger.error( e.http_code )
 
-        return nil
+        return {
+          :status  => 500,
+          :message => e.message
+        }
+
       end
+
+    end
+
+
+    def getNodes()
+
+      logger.info( 'get Monitoring data' )
+      start = Time.now
+
+      url = sprintf( '%s/host', @apiUrl )
+
+      begin
+
+        response     = RestClient.get( url, params: { 'short': true } )
+
+        responseCode = response.code
+        responseBody = response.body
+
+        if( responseCode == 200 )
+
+          data   = JSON.parse( responseBody )
+
+          @monitoringData = data.dig('hosts')
+
+        else
+
+          logger.debug( responseCode )
+          logger.debug( responseBody )
+
+          @monitoringData = {}
+
+        end
+
+      rescue Exception => e
+
+        logger.error( e )
+        logger.error( e.backtrace )
+
+        @monitoringData = {}
+
+      end
+
+      finish = Time.now
+      logger.info( sprintf( 'finished in %s seconds', finish - start ) )
 
     end
 
