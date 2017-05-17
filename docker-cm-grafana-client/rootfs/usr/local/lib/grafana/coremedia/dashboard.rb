@@ -276,7 +276,7 @@ module Grafana
         if( dashboards == nil )
 
           return {
-            :status      => 500,
+            :status      => 404,
             :message     => 'no dashboards added'
           }
         end
@@ -287,7 +287,7 @@ module Grafana
           status  = 200
           message = sprintf( '%d dashboards added', count )
         else
-          status  = 500
+          status  = 404
           message = 'Error for adding Dashboads'
         end
 

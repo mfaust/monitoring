@@ -114,7 +114,8 @@ module Grafana
         logger.info( result )
 
         return {
-          :status  => 200
+          :status  => 200,
+          :message => result
         }
 
       # remove Node
@@ -127,7 +128,8 @@ module Grafana
         logger.info( result )
 
         return {
-          :status  => 200
+          :status  => 200,
+          :message => result
         }
 
       # information about Node
@@ -140,7 +142,8 @@ module Grafana
         self.sendMessage( { :cmd => 'info', :queue => 'mq-grafana-info', :payload => result, :ttr => 1, :delay => 0 } )
 
         return {
-          :status  => 200
+          :status  => 200,
+          :message => result
         }
 
       # all others
