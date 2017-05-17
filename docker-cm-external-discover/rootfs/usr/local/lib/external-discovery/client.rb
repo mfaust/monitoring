@@ -427,7 +427,7 @@ module ExternalDiscovery
       # - grafana    = true
       # - annotation = true
       d = JSON.generate( {
-        :force      => false,
+        :force      => true,
         :tags       => useableTags,
         :config     => {
           'display-name'        => self.normalizeName( name, [ 'storage-' ] ),
