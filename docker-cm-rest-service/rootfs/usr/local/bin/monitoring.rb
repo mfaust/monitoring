@@ -154,13 +154,13 @@ class Monitoring
           icingaStatus    = Hash.new()
 
 
-          for y in 1..30
+          for y in 1..5
 
-            result      = @mqConsumer.getJobFromTube('mq-discover-info')
+            r      = @mqConsumer.getJobFromTube('mq-discover-info')
 
-            if( result.is_a?( Hash ) && result.count != 0 && result.dig( :body, 'payload', 'services' ) != nil )
+            if( r.is_a?( Hash ) && r.count != 0 && r.dig( :body, 'payload', 'services' ) != nil )
 
-              discoveryStatus = result
+              discoveryStatus = r
               break
             else
               logger.debug( sprintf( 'Waiting for data %s ... %d', 'mq-discover-info', y ) )
@@ -168,27 +168,13 @@ class Monitoring
             end
           end
 
-          for y in 1..30
+          for y in 1..2
 
-            result      = @mqConsumer.getJobFromTube('mq-discover-info')
+            r      = @mqConsumer.getJobFromTube('mq-grafana-info')
 
-            if( result.is_a?( Hash ) && result.count != 0 && result.dig( :body, 'payload', 'services' ) != nil )
+            if( r.is_a?( Hash ) && r.count != 0 && r.dig( :body, 'payload' ) != nil )
 
-              discoveryStatus = result
-              break
-            else
-              logger.debug( sprintf( 'Waiting for data %s ... %d', 'mq-discover-info', y ) )
-              sleep( 5 )
-            end
-          end
-
-          for y in 1..30
-
-            result      = @mqConsumer.getJobFromTube('mq-grafana-info')
-
-            if( result.is_a?( Hash ) && result.count != 0 && result.dig( :body, 'payload' ) != nil )
-
-              grafanaStatus = result
+              grafanaStatus = r
               break
             else
               logger.debug( sprintf( 'Waiting for data %s ... %d', 'mq-grafana-info', y ) )
@@ -196,13 +182,13 @@ class Monitoring
             end
           end
 
-          for y in 1..30
+          for y in 1..2
 
-            result      = @mqConsumer.getJobFromTube('mq-icinga-info')
+            r      = @mqConsumer.getJobFromTube('mq-icinga-info')
 
-            if( result.is_a?( Hash ) && result.count != 0 && result.dig( :body, 'payload' ) != nil )
+            if( r.is_a?( Hash ) && r.count != 0 && r.dig( :body, 'payload' ) != nil )
 
-              icingaStatus = result
+              icingaStatus = r
               break
             else
               logger.debug( sprintf( 'Waiting for data %s ... %d', 'mq-icinga-info', y ) )
