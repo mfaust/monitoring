@@ -445,11 +445,13 @@ class Monitoring
     tags            = []
     config          = {}
 
+    result[host.to_s] ||= {}
+
     if( payload.to_s != '' )
 
       hash = JSON.parse( payload )
 
-      result[:request] = hash
+      result[host.to_s]['request'] = hash
 
       force           = hash.keys.include?('force')        ? hash['force']        : false
       enableDiscovery = hash.keys.include?('discovery')    ? hash['discovery']    : @enabledDiscovery
@@ -533,22 +535,8 @@ class Monitoring
     end
 
 
-    discoveryResult = {
-      :status  => 200,
-      :message => 'send to MQ'
-    }
-
-    result[:status]                   = 200
-    result[host.to_sym]             ||= {}
-    result[host.to_sym][:request]   ||= {}
-    result[host.to_sym][:request]     = payload
-#    result[host.to_sym][:discovery] ||= {}
-    result[host.to_sym][:discovery]   = 'the message queue is informed ...' # discoveryResult
-
-    logger.debug( 'addHost() - done (or not)' )
-    logger.debug( JSON.pretty_generate( result ) )
-
-#     self.createNodeInformation()
+    result['status']    = 200
+    result['message']   = 'the message queue is informed ...'
 
     return JSON.pretty_generate( result )
 
