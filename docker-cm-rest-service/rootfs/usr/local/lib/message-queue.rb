@@ -9,6 +9,7 @@
 
 require 'beaneater'
 require 'json'
+require 'digest/md5'
 
 require_relative 'logging'
 
@@ -61,7 +62,20 @@ module MessageQueue
 
 #       logger.debug( sprintf( 'addJob( %s, job = {}, %s, %s, %s )', tube, prio, ttr, delay ) )
 
+      # job = {"cmd":"add","node":"172.31.31.212","timestamp":"2017-05-17 09:33:50","from":"rest-service","payload":"{\"force\":false,\"tags\":{\"customer\":\"cosmos\",\"environment\":\"development\",\"tier\":\"management\"},\"config\":{\"display-name\":\"cosmos-dev-management-cms\",\"graphite-identifier\":\"cosmos-dev-management-cms\"}}"}
+
+
       if( @b )
+
+        # TODO
+        # BUGFIX
+        # ASAP
+        # check if job already in the queue
+
+        if( self.jobExists?( tube.to_s, job ) == true )
+          return
+        end
+
 
 #         logger.debug( "add job to tube #{tube}" )
 #         logger.debug( job )
@@ -71,6 +85,68 @@ module MessageQueue
 
 #         logger.debug( response )
       end
+
+    end
+
+
+
+    def jobExists?( tube, job )
+
+      logger.debug( "jobExists?( #{tube}, job )" )
+
+      if( job.is_a?( String ) )
+        job = JSON.parse(job)
+      end
+
+      job.reject! { |k| k == 'timestamp' }
+      job.reject! { |k| k == 'payload' }
+
+      logger.debug( "  look for job: #{job} )" )
+      job = self.checksum(job)
+
+      if( @b )
+
+        t = @b.tubes[ tube.to_s ]
+
+        logger.debug('--------------------------------------')
+        while t.peek(:ready)
+
+          j = t.reserve
+
+          b = JSON.parse( j.body )
+
+          # body="{\"cmd\":\"info\",\"node\":\"ip-172-31-41-41\",\"timestamp\":\"2017-05-17 09:02:23\",\"from\":\"rest-service\",\"payload\":{}}
+          if( b.is_a?( String ) )
+            b = JSON.parse( b )
+          end
+
+          b.reject! { |k| k == 'timestamp' }
+          b.reject! { |k| k == 'payload' }
+
+          logger.debug( "  found job: #{b}" )
+
+          b = self.checksum(b)
+
+          if( job == b )
+            logger.debug( 'job already in queue' )
+            return true
+          else
+            return false
+          end
+
+        end
+        logger.debug('--------------------------------------')
+
+      end
+
+
+    end
+
+
+    def checksum( params = {} )
+
+      params = Hash[params.sort]
+      return Digest::MD5.hexdigest(params.to_s)
 
     end
 
@@ -215,15 +291,6 @@ module MessageQueue
 
           tube.kick(1)
         end
-
-#         while( job = tube.peek( :buried ) )
-#
-# #           logger.debug( job.stats )
-#
-#           response = job.kick()
-#
-# #           logger.debug( response )
-#         end
 
       end
 
