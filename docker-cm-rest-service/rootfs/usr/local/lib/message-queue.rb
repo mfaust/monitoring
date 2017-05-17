@@ -92,25 +92,25 @@ module MessageQueue
 
     def jobExists?( tube, job )
 
-      logger.debug( "jobExists?( #{tube}, #{job} )" )
+      logger.debug( "jobExists?( #{tube}, job )" )
 
       if( job.is_a?( String ) )
         job = JSON.parse(job)
       end
 
       job.reject! { |k| k == 'timestamp' }
+      job.reject! { |k| k == 'payload' }
 
-#       logger.debug( "#{job} )" )
+      logger.debug( "  look for job: #{job} )" )
       job = self.checksum(job)
 
       if( @b )
 
         t = @b.tubes[ tube.to_s ]
-#         logger.debug( t )
-#        c = t.peek(:ready).count
 
-
+        logger.debug('--------------------------------------')
         while t.peek(:ready)
+
           j = t.reserve
 
           b = JSON.parse( j.body )
@@ -121,8 +121,10 @@ module MessageQueue
           end
 
           b.reject! { |k| k == 'timestamp' }
+          b.reject! { |k| k == 'payload' }
 
-#           logger.debug( b )
+          logger.debug( "  found job: #{b}" )
+
           b = self.checksum(b)
 
           if( job == b )
@@ -133,6 +135,7 @@ module MessageQueue
           end
 
         end
+        logger.debug('--------------------------------------')
 
       end
 

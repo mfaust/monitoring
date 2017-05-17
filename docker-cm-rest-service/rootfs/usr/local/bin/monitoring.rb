@@ -44,8 +44,8 @@ class Monitoring
 
     logger.level           = Logger::DEBUG
 
-    version              = '2.4.86'
-    date                 = '2017-05-07'
+    version              = '2.4.92'
+    date                 = '2017-05-17'
 
     logger.info( '-----------------------------------------------------------------' )
     logger.info( ' CoreMedia - Monitoring Service' )
@@ -63,7 +63,7 @@ class Monitoring
     @redis      = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
 
     scheduler   = Rufus::Scheduler.new
-    scheduler.every( 45, :first_in => 1 ) do
+    scheduler.every( 60, :first_in => 1 ) do
 
       self.createNodeInformation()
     end
@@ -147,7 +147,7 @@ class Monitoring
 #          sleep( 8 )
 
           resultArray = Array.new()
-          threads     = Array.new()
+#           threads     = Array.new()
 
           discoveryStatus = Hash.new()
           grafanaStatus   = Hash.new()
@@ -413,145 +413,144 @@ class Monitoring
     result    = Hash.new()
     hash      = Hash.new()
 
-    if( host.to_s != '' )
+    if( host.to_s == '' )
 
-      logger.info( sprintf( 'add node \'%s\' to monitoring', host ) )
-
-      hostData = self.checkAvailablility?( host )
-
-      if( hostData == false )
-
-        return {
-          :status  => 400,
-          :message => 'Host are not available (DNS Problem)'
-        }
-
-      end
-
-      force           = false
-      enableDiscovery = @enabledDiscovery
-      enabledGrafana  = @enabledGrafana
-      enabledIcinga   = @enabledIcinga
-      annotation      = true
-      grafanaOverview = true
-      services        = []
-      tags            = []
-      config          = {}
-
-      if( payload.to_s != '' )
-
-        hash = JSON.parse( payload )
-
-        result[:request] = hash
-
-        force           = hash.keys.include?('force')        ? hash['force']        : false
-        enableDiscovery = hash.keys.include?('discovery')    ? hash['discovery']    : @enabledDiscovery
-        enabledGrafana  = hash.keys.include?('grafana')      ? hash['grafana']      : @enabledGrafana
-        enabledIcinga   = hash.keys.include?('icinga')       ? hash['icinga']       : @enabledIcinga
-        annotation      = hash.keys.include?('annotation')   ? hash['annotation']   : true
-        grafanaOverview = hash.keys.include?('overview')     ? hash['overview']     : true
-        services        = hash.keys.include?('services')     ? hash['services']     : []
-        tags            = hash.keys.include?('tags')         ? hash['tags']         : []
-        config          = hash.keys.include?('config')       ? hash['config']       : {}
-      end
-
-      logger.debug( sprintf( 'force      : %s', force            ? 'true' : 'false' ) )
-      logger.debug( sprintf( 'discovery  : %s', enableDiscovery  ? 'true' : 'false' ) )
-      logger.debug( sprintf( 'grafana    : %s', enabledGrafana   ? 'true' : 'false' ) )
-      logger.debug( sprintf( 'icinga     : %s', enabledIcinga    ? 'true' : 'false' ) )
-      logger.debug( sprintf( 'annotation : %s', annotation       ? 'true' : 'false' ) )
-      logger.debug( sprintf( 'overview   : %s', grafanaOverview  ? 'true' : 'false' ) )
-      logger.debug( sprintf( 'services   : %s', services ) )
-      logger.debug( sprintf( 'tags       : %s', tags ) )
-      logger.debug( sprintf( 'config     : %s', config ) )
-
-      if( force == true )
-
-        logger.info( 'force mode ...' )
-
-        if( enabledGrafana == true )
-          logger.info( 'remove grafana dashborads' )
-          self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-grafana', :payload => payload, :prio => 0 } )
-        end
-
-        if( enabledIcinga == true )
-          logger.info( 'remove icinga checks and notifications' )
-          self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-icinga', :payload => payload, :prio => 0 } )
-        end
-
-        if( enableDiscovery == true )
-          logger.info( 'remove node from discovery service' )
-          self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-discover', :payload => payload, :prio => 0 } )
-        end
-
-        logger.info( 'done' )
-      end
-
-      # now, we can write an own configiguration per node when we add them, hurray
-      if( config.is_a?( Hash ) )
-
-        short = hostData.dig( :short )
-
-        @redis.createConfig( {
-          :short => short,
-          :data  => config
-        } )
-
-      end
-
-      result[host.to_sym] ||= {}
-
-      if( enableDiscovery == true )
-
-        logger.info( 'add node to discovery service' )
-        self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-discover', :payload => payload, :prio => 1, :delay => 1 } )
-      end
-
-      if( enabledGrafana == true )
-
-        logger.info( 'create grafana dashborads' )
-        self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-grafana', :payload => payload, :prio => 10, :ttr => 15, :delay => 15 } )
-      end
-
-      if( enabledIcinga == true  )
-
-        logger.info( 'create icinga checks and notifications' )
-        self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-icinga', :payload => payload, :prio => 10, :ttr => 15, :delay => 15 } )
-      end
-
-      # add annotation at last
-      #
-      if( annotation == true )
-
-        logger.info( 'annotation for create' )
-        self.addAnnotation( host, { 'command': 'create', 'argument': 'node' } )
-      end
-
-
-      discoveryResult = {
-        :status  => 200,
-        :message => 'send to MQ'
-      }
-
-      result[host.to_sym] ||= {}
-      result[host.to_sym][:request]   ||= {}
-      result[host.to_sym][:request]   = ( payload )
-      result[host.to_sym][:discovery] ||= {}
-      result[host.to_sym][:discovery] = discoveryResult
-
-#      logger.debug( JSON.pretty_generate( discoveryResult ) )
-#      logger.debug( JSON.pretty_generate( result ) )
-
-      self.createNodeInformation()
-
-      return JSON.pretty_generate( result )
+      return JSON.pretty_generate( {
+        :status  => 400,
+        :message => 'no hostname given'
+      } )
 
     end
 
-    return JSON.pretty_generate( {
-      :status  => status,
-      :message => message
-    } )
+    logger.info( sprintf( 'add node \'%s\' to monitoring', host ) )
+
+    hostData = self.checkAvailablility?( host )
+
+    if( hostData == false )
+
+      return {
+        :status  => 400,
+        :message => 'Host are not available (DNS Problem)'
+      }
+
+    end
+
+    force           = false
+    enableDiscovery = @enabledDiscovery
+    enabledGrafana  = @enabledGrafana
+    enabledIcinga   = @enabledIcinga
+    annotation      = true
+    grafanaOverview = true
+    services        = []
+    tags            = []
+    config          = {}
+
+    if( payload.to_s != '' )
+
+      hash = JSON.parse( payload )
+
+      result[:request] = hash
+
+      force           = hash.keys.include?('force')        ? hash['force']        : false
+      enableDiscovery = hash.keys.include?('discovery')    ? hash['discovery']    : @enabledDiscovery
+      enabledGrafana  = hash.keys.include?('grafana')      ? hash['grafana']      : @enabledGrafana
+      enabledIcinga   = hash.keys.include?('icinga')       ? hash['icinga']       : @enabledIcinga
+      annotation      = hash.keys.include?('annotation')   ? hash['annotation']   : true
+      grafanaOverview = hash.keys.include?('overview')     ? hash['overview']     : true
+      services        = hash.keys.include?('services')     ? hash['services']     : []
+      tags            = hash.keys.include?('tags')         ? hash['tags']         : []
+      config          = hash.keys.include?('config')       ? hash['config']       : {}
+    end
+
+    logger.debug( sprintf( 'force      : %s', force            ? 'true' : 'false' ) )
+    logger.debug( sprintf( 'discovery  : %s', enableDiscovery  ? 'true' : 'false' ) )
+    logger.debug( sprintf( 'grafana    : %s', enabledGrafana   ? 'true' : 'false' ) )
+    logger.debug( sprintf( 'icinga     : %s', enabledIcinga    ? 'true' : 'false' ) )
+    logger.debug( sprintf( 'annotation : %s', annotation       ? 'true' : 'false' ) )
+    logger.debug( sprintf( 'overview   : %s', grafanaOverview  ? 'true' : 'false' ) )
+    logger.debug( sprintf( 'services   : %s', services ) )
+    logger.debug( sprintf( 'tags       : %s', tags ) )
+    logger.debug( sprintf( 'config     : %s', config ) )
+
+    if( force == true )
+
+      logger.info( 'force mode ...' )
+
+      if( enabledGrafana == true )
+        logger.info( 'remove grafana dashborads' )
+        self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-grafana', :payload => payload, :prio => 0 } )
+      end
+
+      if( enabledIcinga == true )
+        logger.info( 'remove icinga checks and notifications' )
+        self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-icinga', :payload => payload, :prio => 0 } )
+      end
+
+      if( enableDiscovery == true )
+        logger.info( 'remove node from discovery service' )
+        self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-discover', :payload => payload, :prio => 0 } )
+      end
+
+      logger.info( 'done' )
+    end
+
+    # now, we can write an own configiguration per node when we add them, hurray
+    if( config.is_a?( Hash ) )
+
+      short = hostData.dig( :short )
+
+      @redis.createConfig( {
+        :short => short,
+        :data  => config
+      } )
+
+    end
+
+    if( enableDiscovery == true )
+
+      logger.info( 'add node to discovery service' )
+      self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-discover', :payload => payload, :prio => 1, :delay => 1 } )
+    end
+
+    if( enabledGrafana == true )
+
+      logger.info( 'create grafana dashborads' )
+      self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-grafana', :payload => payload, :prio => 10, :ttr => 15, :delay => 15 } )
+    end
+
+    if( enabledIcinga == true  )
+
+      logger.info( 'create icinga checks and notifications' )
+      self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-icinga', :payload => payload, :prio => 10, :ttr => 15, :delay => 15 } )
+    end
+
+    # add annotation at last
+    #
+    if( annotation == true )
+
+      logger.info( 'annotation for create' )
+      self.addAnnotation( host, { 'command': 'create', 'argument': 'node' } )
+    end
+
+
+    discoveryResult = {
+      :status  => 200,
+      :message => 'send to MQ'
+    }
+
+    result[:status]                   = 200
+    result[host.to_sym]             ||= {}
+    result[host.to_sym][:request]   ||= {}
+    result[host.to_sym][:request]     = payload
+#    result[host.to_sym][:discovery] ||= {}
+    result[host.to_sym][:discovery]   = 'the message queue is informed ...' # discoveryResult
+
+    logger.debug( 'addHost() - done (or not)' )
+    logger.debug( JSON.pretty_generate( result ) )
+
+#     self.createNodeInformation()
+
+    return JSON.pretty_generate( result )
 
   end
 
@@ -710,11 +709,15 @@ class Monitoring
       :message => 'send to MQ'
     }
 
-    result[host.to_sym][:discovery] = discoveryResult
+    result[host.to_sym] ||= {}
+    result[host.to_sym][:request]   ||= {}
+    result[host.to_sym][:request]     = payload
+    result[host.to_sym][:discovery] ||= {}
+    result[host.to_sym][:discovery]   = discoveryResult
 
-    sleep(4)
-
-    self.createNodeInformation()
+#     sleep(4)
+#
+#     self.createNodeInformation()
 
     logger.debug( JSON.pretty_generate( result ) )
 
