@@ -506,7 +506,9 @@ class Monitoring
 #      logger.debug( JSON.pretty_generate( discoveryResult ) )
 #      logger.debug( JSON.pretty_generate( result ) )
 
-      self.createNodeInformation()
+      Thread.new() {
+        self.createNodeInformation()
+      }
 
       return JSON.pretty_generate( result )
 
