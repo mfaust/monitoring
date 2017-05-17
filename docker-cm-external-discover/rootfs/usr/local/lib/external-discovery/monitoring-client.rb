@@ -224,7 +224,7 @@ module ExternalDiscovery
 
         response     = RestClient.get( url, params: { 'short': true } )
 
-        responseCode = response.http_code
+        responseCode = response.code
         responseBody = response.body
 
         if( responseCode == 200 )
