@@ -58,7 +58,7 @@ module ExternalDiscovery
 
         response     = restClient.get( @headers )
 
-        responseCode = response.code
+        responseCode = response.http_code
         responseBody = response.body
 
 # logger.debug( response.class.to_s )
@@ -84,10 +84,10 @@ module ExternalDiscovery
 
         logger.error( e.inspect )
         logger.error( e.message )
-        logger.error( e.code )
+        logger.error( e.http_code )
 
         return {
-          :status  => e.code,
+          :status  => e.http_code,
           :message => e.message
         }
 
@@ -95,7 +95,7 @@ module ExternalDiscovery
 
         logger.error( e.inspect )
         logger.error( e.message )
-        logger.error( e.code )
+        logger.error( e.http_code )
 
         return {
           :status  => 500,
@@ -130,10 +130,10 @@ module ExternalDiscovery
 
         logger.error( e.inspect )
         logger.error( e.message )
-        logger.error( e.code )
+        logger.error( e.http_code )
 
         return {
-          :status  => e.code,
+          :status  => e.http_code,
           :message => e.message
         }
 
@@ -141,7 +141,7 @@ module ExternalDiscovery
 
         logger.error( e.inspect )
         logger.error( e.message )
-        logger.error( e.code )
+        logger.error( e.http_code )
 
         return {
           :status  => 500,
@@ -179,10 +179,10 @@ module ExternalDiscovery
 
         logger.error( e.inspect )
         logger.error( e.message )
-        logger.error( e.code )
+        logger.error( e.http_code )
 
         return {
-          :status  => e.code,
+          :status  => e.http_code,
           :message => e.message
         }
 
@@ -190,10 +190,10 @@ module ExternalDiscovery
 
         logger.error( e.inspect )
         logger.error( e.message )
-        logger.error( e.code )
+        logger.error( e.http_code )
 
         return {
-          :status  => e.code,
+          :status  => e.http_code,
           :message => e.message
         }
 
@@ -201,7 +201,7 @@ module ExternalDiscovery
 
         logger.error( e.inspect )
         logger.error( e.message )
-        logger.error( e.code )
+        logger.error( e.http_code )
 
         return {
           :status  => 500,
@@ -224,7 +224,7 @@ module ExternalDiscovery
 
         response     = RestClient.get( url, params: { 'short': true } )
 
-        responseCode = response.code
+        responseCode = response.http_code
         responseBody = response.body
 
         if( responseCode == 200 )
