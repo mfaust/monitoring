@@ -95,7 +95,7 @@ class Monitoring
 #       end
 #     end
 
-    nodes   = @redis.nodes()
+    nodes   = @redis.nodes({ :status => Storage::RedisClient::ONLINE })
 #     logger.debug( nodes )
 
     if( nodes.is_a?( Hash ) || nodes.is_a?( Array ) )
