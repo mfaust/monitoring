@@ -88,7 +88,7 @@ module MessageQueue
       job.reject! { |k| k == 'timestamp' }
       job.reject! { |k| k == 'payload' }
 
-      job = self.checksum(job)
+      j = self.checksum(job)
 
       if( @b )
 
@@ -109,7 +109,7 @@ module MessageQueue
 
           b = self.checksum(b)
 
-          if( job == b )
+          if( j == b )
             logger.warn( "  job '#{job}' already in queue .." )
             return true
           else

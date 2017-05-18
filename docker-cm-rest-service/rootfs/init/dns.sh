@@ -3,6 +3,7 @@
 #
 
 set -e
+#set -x
 
 # -------------------------------------------------------------------------------------------------
 
@@ -34,7 +35,15 @@ checkIP() {
 
   if [ $(isIp ${1}) -eq 1 ]
   then
-    echo $(host -t A ${1} | grep "has address" | cut -d ' ' -f 4)
+    name=$(host -t A ${1} | grep "has address" | cut -d ' ' -f 4)
+
+    if [ -z ${name} ]
+    then
+      echo ${1}
+    else
+      echo ${name}
+    fi
+#    echo $(host -t A ${1} | grep "has address" | cut -d ' ' -f 4)
   else
     echo ${1}
   fi
@@ -78,6 +87,12 @@ addDNS() {
       [ -n "${ip}" ]
 
       ip="$(checkIP ${ip})"
+
+      if [ -z ${ip} ]
+      then
+        echo " [E] - the ip can't resolve! :("
+        continue
+      fi
 
       if [ "${host}" == "blueprint-box" ]
       then

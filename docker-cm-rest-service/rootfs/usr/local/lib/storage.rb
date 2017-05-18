@@ -782,7 +782,7 @@ module Storage
 
     def status( params = {} )
 
-      logger.debug( "status( #{params} )" )
+#       logger.debug( "status( #{params} )" )
 
       if( self.checkDatabase() == false )
         return false
@@ -822,6 +822,19 @@ module Storage
         status = status ? 0 :1
       end
 
+      message = case status
+        when Storage::RedisClient::OFFLINE
+          'offline'
+        when Storage::RedisClient::ONLINE
+          'online'
+        when Storage::RedisClient::DELETE
+          'delete'
+        when Storage::RedisClient::PREPARE
+          'prepare'
+        else
+          'unknown'
+        end
+
 #       case status
 #       when 0, false
 #         status = 'offline'
@@ -839,6 +852,7 @@ module Storage
       return {
         :short   => short,
         :status  => status,
+        :message => message,
         :created => created
       }
     end
