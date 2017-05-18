@@ -277,7 +277,7 @@ module MessageQueue
 
       if( @b )
 
-        job = t.jobs.find( id )
+        job = @b.jobs.find( id )
 
         if( job != nil )
           response = job.delete
