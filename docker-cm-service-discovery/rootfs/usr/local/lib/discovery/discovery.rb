@@ -108,17 +108,17 @@ module ServiceDiscovery
 #             logger.debug( JSON.pretty_generate( runtime ) )
 #             logger.debug( JSON.pretty_generate( manager ) )
 #             logger.debug( JSON.pretty_generate( engine ) )
-            logger.debug( JSON.pretty_generate( information ) )
+#             logger.debug( JSON.pretty_generate( information ) )
 
             # since 1706 (maybe), we support an special bean to give us a unique and static application name
             # thanks to Frauke!
 
-            status = serviceInfo.dig('status') || 500
-            value  = serviceInfo.dig('value')  || 'to be defined'
+            status = information.dig('status') || 500
+            value  = information.dig('value')  || 'to be defined'
 
             if( status == 200 && value != 'to be defined' )
 
-              value = serviceInfo.dig('value')
+              value = information.dig('value')
               value = value.values.first
 
               logger.debug( "Application are '#{value}'" )
