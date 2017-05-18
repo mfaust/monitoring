@@ -73,7 +73,7 @@ class Monitoring
 
   # create a cache about all known monitored nodes
   #
-  def createNodeInformation()
+  def createNodeInformation( fullInformation = false )
 
     logger.info( 'create node information ...' )
 
@@ -98,7 +98,6 @@ class Monitoring
 #     end
 
     nodes   = @redis.nodes() # { :status => Storage::RedisClient::ONLINE })
-#     logger.debug( nodes )
 
     if( nodes.is_a?( Hash ) || nodes.is_a?( Array ) )
 
@@ -110,12 +109,7 @@ class Monitoring
 
         nodes.each do |n|
 
-#           logger.debug( n )
-
           ip, short, fqdn = self.nsLookup( n )
-
-#           hostData = self.checkAvailablility?( n )
-#          if( hostData == false )
 
           if( ip == nil && short == nil && fqdn == nil )
 
@@ -175,61 +169,63 @@ class Monitoring
             d.reject! { |k| k == 'template' }
           end
 
-#          result[n.to_s][:services] ||= {}
           result[n.to_s][:services] ||= discoveryData
 
-          # get data from external services
-          #
-          self.messageQueue( { :cmd => 'info', :node => n, :queue => 'mq-grafana' , :prio => 1, :payload => {}, :ttr => 1, :delay => 0 } )
-          self.messageQueue( { :cmd => 'info', :node => n, :queue => 'mq-icinga'  , :prio => 1, :payload => {}, :ttr => 1, :delay => 0 } )
+          if( fullInformation == true )
 
-          sleep( 1 )
+            # get data from external services
+            #
+            self.messageQueue( { :cmd => 'info', :node => n, :queue => 'mq-grafana' , :prio => 1, :payload => {}, :ttr => 1, :delay => 0 } )
+            self.messageQueue( { :cmd => 'info', :node => n, :queue => 'mq-icinga'  , :prio => 1, :payload => {}, :ttr => 1, :delay => 0 } )
 
-          grafanaStatus   = Hash.new()
-          icingaStatus    = Hash.new()
+            sleep( 1 )
 
-          for y in 1..4
+            grafanaStatus   = Hash.new()
+            icingaStatus    = Hash.new()
 
-            r      = @mqConsumer.getJobFromTube('mq-grafana-info')
+            for y in 1..4
 
-            logger.debug( r.dig( :body, 'payload' ) )
+              r      = @mqConsumer.getJobFromTube('mq-grafana-info')
 
-            if( r.is_a?( Hash ) && r.count != 0 && r.dig( :body, 'payload' ) != nil )
+              logger.debug( r.dig( :body, 'payload' ) )
 
-              grafanaStatus = r
-              break
-            else
-              logger.debug( sprintf( 'Waiting for data %s ... %d', 'mq-grafana-info', y ) )
-              sleep( 2 )
+              if( r.is_a?( Hash ) && r.count != 0 && r.dig( :body, 'payload' ) != nil )
+
+                grafanaStatus = r
+                break
+              else
+                logger.debug( sprintf( 'Waiting for data %s ... %d', 'mq-grafana-info', y ) )
+                sleep( 2 )
+              end
             end
-          end
 
-          for y in 1..4
+            for y in 1..4
 
-            r      = @mqConsumer.getJobFromTube('mq-icinga-info')
+              r      = @mqConsumer.getJobFromTube('mq-icinga-info')
 
-            logger.debug( r.dig( :body, 'payload' ) )
+              logger.debug( r.dig( :body, 'payload' ) )
 
-            if( r.is_a?( Hash ) && r.count != 0 && r.dig( :body, 'payload' ) != nil )
+              if( r.is_a?( Hash ) && r.count != 0 && r.dig( :body, 'payload' ) != nil )
 
-              icingaStatus = r
-              break
-            else
-              logger.debug( sprintf( 'Waiting for data %s ... %d', 'mq-icinga-info', y ) )
-              sleep( 2 )
+                icingaStatus = r
+                break
+              else
+                logger.debug( sprintf( 'Waiting for data %s ... %d', 'mq-icinga-info', y ) )
+                sleep( 2 )
+              end
             end
-          end
 
-          if( grafanaStatus )
-            grafanaStatus = grafanaStatus.dig( :body, 'payload' ) || {}
-            result[n.to_s][:grafana] ||= {}
-            result[n.to_s][:grafana] = grafanaStatus
-          end
+            if( grafanaStatus )
+              grafanaStatus = grafanaStatus.dig( :body, 'payload' ) || {}
+#              result[n.to_s][:grafana] ||= {}
+              result[n.to_s][:grafana] ||= grafanaStatus
+            end
 
-          if( icingaStatus )
-            icingaStatus = icingaStatus.dig( :body, 'payload' ) || {}
-            result[n.to_s][:icinga] ||= {}
-            result[n.to_s][:icinga] = icingaStatus
+            if( icingaStatus )
+              icingaStatus = icingaStatus.dig( :body, 'payload' ) || {}
+#              result[n.to_s][:icinga] ||= {}
+              result[n.to_s][:icinga] ||= icingaStatus
+            end
           end
 
         end
