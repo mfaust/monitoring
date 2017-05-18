@@ -39,6 +39,8 @@ module ServiceDiscovery
 
         targetUrl = sprintf( "service:jmx:rmi:///jndi/rmi://%s:%s/jmxrmi", host, port )
 
+
+
         array << {
           :type      => "read",
           :mbean     => "java.lang:type=Runtime",
@@ -58,6 +60,13 @@ module ServiceDiscovery
           :type      => "read",
           :mbean     => "Catalina:type=Engine",
           :attribute => [ 'baseDir', 'jvmRoute' ],
+          :target    => { :url => targetUrl },
+          :config    => { "ignoreErrors" => true, "ifModifiedSince" => true, "canonicalNaming" => true }
+        }
+
+        array << {
+          :type      => "read",
+          :mbean     => "com.coremedia:type=serviceInfo,application=*",
           :target    => { :url => targetUrl },
           :config    => { "ignoreErrors" => true, "ifModifiedSince" => true, "canonicalNaming" => true }
         }
@@ -93,10 +102,28 @@ module ServiceDiscovery
             manager = body[1]
             # #3  == engine
             engine = body[2]
+            # #4  == serviceInfo
+            information = body[3]
 
 #             logger.debug( JSON.pretty_generate( runtime ) )
 #             logger.debug( JSON.pretty_generate( manager ) )
 #             logger.debug( JSON.pretty_generate( engine ) )
+            logger.debug( JSON.pretty_generate( information ) )
+
+            # since 1706 (maybe), we support an special bean to give us a unique and static application name
+            # thanks to Frauke!
+
+            status = serviceInfo.dig('status') || 500
+            value  = serviceInfo.dig('value')  || 'to be defined'
+
+            if( status == 200 && value != 'to be defined' )
+
+              value = serviceInfo.dig('value')
+              value = value.values.first
+
+              logger.debug( "Application are '#{value}'" )
+
+            end
 
             status = runtime.dig('status') || 500
             value  = runtime.dig('value')

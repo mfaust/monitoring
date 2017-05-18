@@ -163,6 +163,8 @@ module Storage
 
     def removeDNS( params = {} )
 
+      logger.debug( "removeDNS( #{params} )" )
+
       if( self.checkDatabase() == false )
         return false
       end
@@ -184,7 +186,7 @@ module Storage
 
       status = @redis.del( *keys )
 
-#       logger.debug( status )
+      logger.debug( status )
 
 #       @redis.del( sprintf( '%s-measurements', cachekey ) )
 #       @redis.del( sprintf( '%s-discovery'   , cachekey ) )
@@ -195,7 +197,7 @@ module Storage
 
       status = self.removeNode( { :short => short, :key => cachekey } )
 
-#       logger.debug( status )
+      logger.debug( status )
 
       return true
 

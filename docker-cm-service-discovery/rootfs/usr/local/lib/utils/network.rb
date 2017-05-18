@@ -119,7 +119,7 @@ module Utils
         :long  => long
       }
 
-      puts( result )
+#       puts( result )
 
       return result
 
@@ -170,7 +170,7 @@ module Utils
     # result @bool
     def self.isRunning? ( ip )
 
-      puts "pinging IP #{ip} ... "
+#       puts "pinging IP #{ip} ... "
 
       # first, ping check
       if( system( sprintf( 'ping -c1 -w1 %s > /dev/null', ip.to_s ) ) == true )
