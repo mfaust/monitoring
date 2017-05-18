@@ -153,8 +153,6 @@ class Monitoring
           #
           discoveryData = @redis.discoveryData( { :short => short } )
 
-          logger.debug( discoveryData )
-
           if( discoveryData == nil )
 
             return {
@@ -230,7 +228,7 @@ class Monitoring
 
         end
 
-        logger.debug( JSON.pretty_generate( result ) )
+#         logger.debug( JSON.pretty_generate( result ) )
 
         @cache.set( 'information' ) { Cache::Data.new( result ) }
 
@@ -264,7 +262,7 @@ class Monitoring
 
     if( dns == nil )
 
-      logger.debug( 'create cached DNS data' )
+#       logger.debug( 'create cached DNS data' )
       # create DNS Information
       dns      = Utils::Network.resolv( name )
 
@@ -283,7 +281,7 @@ class Monitoring
       end
     else
 
-      logger.debug( 're-use cached DNS data' )
+#       logger.debug( 're-use cached DNS data' )
 
       ip    = dns.dig(:ip)
       short = dns.dig(:short)
@@ -296,21 +294,16 @@ class Monitoring
     dns    = @redis.dnsData( { :short => short } )
     status = @redis.status( { :short => short } )
 
-logger.debug( dns )
-logger.debug( dns.class.to_s )
-logger.debug( status )
-logger.debug( status.class.to_s )
-
     if( dns == nil )
 
+      logger.debug( 'create DNS entry in the our storage system' )
       status = @redis.createDNS( { :ip => ip, :short => short, :long => fqdn } )
-
-      logger.debug( status )
+#       logger.debug( status )
     end
 
-    logger.debug( sprintf( ' ip   %s ', ip ) )
-    logger.debug( sprintf( ' host %s ', short ) )
-    logger.debug( sprintf( ' fqdn %s ', fqdn ) )
+    logger.debug( sprintf( '  ip   %s ', ip ) )
+    logger.debug( sprintf( '  host %s ', short ) )
+    logger.debug( sprintf( '  fqdn %s ', fqdn ) )
 
     return ip, short, fqdn
 
