@@ -778,13 +778,20 @@ class Monitoring
       annotation      = hash.keys.include?('annotation') ? hash['annotation'] : true
     end
 
-    if( alreadyInMonitoring == false )
+    if( alreadyInMonitoring == false && force == false )
       logger.warn( "node '#{host}' is not in monitoring" )
 
       return JSON.pretty_generate( {
         'status'  => 200,
         'message' => "node '#{host}' is not in monitoring"
       })
+    end
+
+    if( alreadyInMonitoring == false && force == true )
+      logger.warn( "node '#{host}' is not in monitoring" )
+      logger.warn( "but force delete" )
+
+      annotation = false
     end
 
     logger.debug( 'set node status to DELETE' )
