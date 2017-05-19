@@ -140,6 +140,7 @@ services:
     - cae
     - caches
     - caches-ecommerce
+    - caches-ecommerce-fragment
 
   studio:
     description: Studio
@@ -198,3 +199,4 @@ services:
     - cae
     - caches
     - caches-ecommerce
+    - caches-ecommerce-fragment
