@@ -243,6 +243,8 @@ module Storage
 
     def createConfig( params = {}, append = false )
 
+      logger.debug( "createConfig( #{params}, #{append} )" )
+
       if( self.checkDatabase() == false )
         return false
       end
@@ -291,7 +293,11 @@ module Storage
 
       toStore = { ip: dnsIp, shortname: dnsShortname, data: data, created: DateTime.now() }.to_json
 
-      @redis.set( cachekey, toStore )
+      logger.debug( toStore )
+
+      result = @redis.set( cachekey, toStore )
+
+      logger.debug( result )
 
     end
 
@@ -304,7 +310,7 @@ module Storage
 
       dnsIp        = params.dig(:ip)
       dnsShortname = params.dig(:short)
-      key    = params.dig(:key)
+      key          = params.dig(:key)
 
       cachekey = sprintf(
         '%s-config',
@@ -337,6 +343,8 @@ module Storage
 
     def config( params = {} )
 
+      logger.debug( "config( #{params} )" )
+
       if( self.checkDatabase() == false )
         return false
       end
@@ -351,6 +359,8 @@ module Storage
       )
 
       result = @redis.get( cachekey )
+
+      logger.debug( result )
 
       if( result == nil )
         return { :short => nil }

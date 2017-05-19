@@ -593,6 +593,8 @@ class Monitoring
       })
     end
 
+    short = hostData.dig( :short )
+
     if( force == true )
 
       logger.info( 'force mode ...' )
@@ -612,13 +614,20 @@ class Monitoring
         self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-discover', :payload => payload, :prio => 0 } )
       end
 
+      sleep(1)
+
+      logger.debug( 'remove configuration' )
+      @redis.removeConfig( { :short => short } )
+
       logger.info( 'done' )
+
+      sleep(1)
     end
 
     # now, we can write an own configiguration per node when we add them, hurray
     if( config.is_a?( Hash ) )
 
-      short = hostData.dig( :short )
+      logger.debug( "write configuration: #{config}" )
 
       @redis.createConfig( {
         :short => short,
@@ -819,7 +828,7 @@ class Monitoring
 
     if( enableDiscovery == true )
       logger.info( 'remove node from discovery service' )
-      self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-discover', :payload => { "force" => true }, :prio => 0 } )
+      self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-discover', :payload => { "force" => true }, :prio => 0, :delay => 5 } )
     end
 
     if( force == true )
@@ -912,7 +921,7 @@ class Monitoring
           message     = nil
           description = nil
           tags        = []
-          self.messageQueue( { :cmd => command, :node => host, :queue => 'mq-graphite', :payload => { "timestamp": Time.now().to_i, "node" => host } } )
+          self.messageQueue( { :cmd => command, :node => host, :queue => 'mq-graphite', :payload => { "timestamp": Time.now().to_i, "node" => host }, :prio => 0 } )
 
         elsif( command == 'loadtest' && ( argument == 'start' || argument == 'stop' ) )
 
@@ -931,7 +940,7 @@ class Monitoring
           description = nil
           tags        = []
 
-          self.messageQueue( { :cmd => 'loadtest', :node => host, :queue => 'mq-graphite', :payload => { "timestamp": Time.now().to_i, "argument" => argument } } )
+          self.messageQueue( { :cmd => 'loadtest', :node => host, :queue => 'mq-graphite', :payload => { "timestamp": Time.now().to_i, "argument" => argument }, :prio => 0 } )
 
         elsif( command == 'deployment' )
 
@@ -945,7 +954,7 @@ class Monitoring
 #           ]
 #         }
           description = nil
-          self.messageQueue( { :cmd => 'deployment', :node => host, :queue => 'mq-graphite', :payload => { "timestamp": Time.now().to_i, "message" => message, "tags" => tags } } )
+          self.messageQueue( { :cmd => 'deployment', :node => host, :queue => 'mq-graphite', :payload => { "timestamp": Time.now().to_i, "message" => message, "tags" => tags }, :prio => 0 } )
 
         else
 #         example:
@@ -958,7 +967,7 @@ class Monitoring
 #             "git-0000000"
 #           ]
 #         }
-          self.messageQueue( { :cmd => 'general', :node => host, :queue => 'mq-graphite', :payload => { "timestamp": Time.now().to_i, "message" => message, "tags" => tags, "description" => description } } )
+          self.messageQueue( { :cmd => 'general', :node => host, :queue => 'mq-graphite', :payload => { "timestamp": Time.now().to_i, "message" => message, "tags" => tags, "description" => description }, :prio => 0 } )
 
         end
 
