@@ -21,10 +21,10 @@ module CarbonData
       end
 
       result << {
-        :key   => sprintf( '%s.%s.%s.%s', @Host, @Service, mbean, 'uptime' ),
+        :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, mbean, 'uptime' ),
         :value => uptime
       } << {
-        :key   => sprintf( '%s.%s.%s.%s', @Host, @Service, mbean, 'starttime' ),
+        :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, mbean, 'starttime' ),
         :value => start
       }
 
@@ -88,11 +88,19 @@ module CarbonData
     end
 
 
-    def tomcatManager( data = {} )
+    def  tomcatManager( data = {} )
 
       result    = []
       mbean     = 'Manager'
       value     = data.dig('value')
+      status    = data.dig('status') || 404
+
+      if( status == 404 )
+
+        # solr 6 has no tomcat and also no manager mbean
+        logger.debug( "status 404 for service #{@Service} and bean #{mbean}" )
+        return
+      end
 
       # defaults
       processingTime          = 0       # Time spent doing housekeeping and expiration
@@ -133,44 +141,44 @@ module CarbonData
 
       result << {
         # PUTVAL master-17-tomcat/WFS-Manager-processing/count-time interval=15 N:4
-        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, 'processing', 'time' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'processing', 'time' ),
         :value => processingTime
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, 'sessions', 'count' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'sessions', 'count' ),
         :value => sessionCounter
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, 'sessions', 'expired' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'sessions', 'expired' ),
         :value => expiredSessions
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, 'sessions', 'alive_avg' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'sessions', 'alive_avg' ),
         :value => sessionAverageAliveTime
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, 'sessions', 'rejected' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'sessions', 'rejected' ),
         :value => rejectedSessions
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, 'sessions', 'duplicates' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'sessions', 'duplicates' ),
         :value => duplicates
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, 'sessions', 'max_alive' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'sessions', 'max_alive' ),
         :value => sessionMaxAliveTime
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, 'sessions', 'expire_rate' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'sessions', 'expire_rate' ),
         :value => sessionExpireRate
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, 'sessions', 'create_rate' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'sessions', 'create_rate' ),
         :value => sessionCreateRate
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, 'sessions', 'max_active' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'sessions', 'max_active' ),
         :value => maxActive
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, 'sessions', 'expire_freq' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'sessions', 'expire_freq' ),
         :value => processExpiresFrequency
       }
 
       if( maxActiveSessions.to_i != -1 )
 
         result << {
-          :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, 'sessions', 'max_active_allowed' ),
+          :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'sessions', 'max_active_allowed' ),
           :value => maxActiveSessions
         }
       end
@@ -222,19 +230,19 @@ module CarbonData
           type      = memType( m )
 
           result << {
-            :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, type, 'init' ),
+            :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, type, 'init' ),
             :value => init
           } << {
-            :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, type, 'max' ),
+            :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, type, 'max' ),
             :value => max
           } << {
-            :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, type, 'used' ),
+            :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, type, 'used' ),
             :value => used
           } << {
-            :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, type, 'used_percent' ),
+            :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, type, 'used_percent' ),
             :value => percent
           } << {
-            :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, type, 'committed' ),
+            :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, type, 'committed' ),
             :value => committed
           }
 
@@ -265,10 +273,10 @@ module CarbonData
       end
 
       result << {
-        :key   => sprintf( '%s.%s.%s.%s'   , @Host, @Service, mbean, 'peak' ),
+        :key   => sprintf( '%s.%s.%s.%s'   , @identifier, @Service, mbean, 'peak' ),
         :value => peak
       } << {
-        :key   => sprintf( '%s.%s.%s.%s'   , @Host, @Service, mbean, 'count' ),
+        :key   => sprintf( '%s.%s.%s.%s'   , @identifier, @Service, mbean, 'count' ),
         :value => count
       }
 
@@ -294,10 +302,10 @@ module CarbonData
           mbean.gsub!( 'GC', 'GarbageCollector.' )
 
           result << {
-            :key   => sprintf( '%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'threads', 'count' ),
+            :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'threads', 'count' ),
             :value => threadCount
           } << {
-            :key   => sprintf( '%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'duration', 'time' ),
+            :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'duration', 'time' ),
             :value => duration
           }
 
@@ -330,16 +338,16 @@ module CarbonData
 #                type      = type.strip.tr( ' ', '_' ).downcase
 #
 #                result << {
-#                  :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'duration', gcType, type, 'init' ),
+#                  :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'duration', gcType, type, 'init' ),
 #                  :value => init
 #                } << {
-#                  :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'duration', gcType, type, 'committed' ),
+#                  :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'duration', gcType, type, 'committed' ),
 #                  :value => committed
 #                } << {
-#                  :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'duration', gcType, type, 'max' ),
+#                  :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'duration', gcType, type, 'max' ),
 #                  :value => max
 #                } << {
-#                  :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'duration', gcType, type, 'used' ),
+#                  :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'duration', gcType, type, 'used' ),
 #                  :value => used
 #                }
 #
@@ -389,13 +397,13 @@ module CarbonData
       end
 
       result << {
-        :key   => sprintf( '%s.%s.%s.%s'   , @Host, @Service, mbean, 'loaded' ),
+        :key   => sprintf( '%s.%s.%s.%s'   , @identifier, @Service, mbean, 'loaded' ),
         :value => loaded
       } << {
-        :key   => sprintf( '%s.%s.%s.%s'   , @Host, @Service, mbean, 'total' ),
+        :key   => sprintf( '%s.%s.%s.%s'   , @identifier, @Service, mbean, 'total' ),
         :value => totalLoaded
       } << {
-        :key   => sprintf( '%s.%s.%s.%s'   , @Host, @Service, mbean, 'unloaded' ),
+        :key   => sprintf( '%s.%s.%s.%s'   , @identifier, @Service, mbean, 'unloaded' ),
         :value => unloaded
       }
 

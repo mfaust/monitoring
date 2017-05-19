@@ -712,7 +712,7 @@ module Storage
     #
     def setStatus( params = {} )
 
-      logger.debug( "setStatus( #{params} )" )
+#       logger.debug( "setStatus( #{params} )" )
 #       logger.debug( caller )
 
       if( self.checkDatabase() == false )
@@ -782,7 +782,7 @@ module Storage
 
     def status( params = {} )
 
-      logger.debug( "status( #{params} )" )
+#       logger.debug( "status( #{params} )" )
 
       if( self.checkDatabase() == false )
         return false

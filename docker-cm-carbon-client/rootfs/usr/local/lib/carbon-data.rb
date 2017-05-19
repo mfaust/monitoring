@@ -15,9 +15,11 @@ require 'filesize'
 require 'fileutils'
 
 require_relative 'logging'
+require_relative 'cache'
 require_relative 'storage'
 require_relative 'mbean'
 
+require_relative 'carbon-data/version'
 require_relative 'carbon-data/utils'
 require_relative 'carbon-data/tomcat'
 require_relative 'carbon-data/cae'
@@ -52,11 +54,11 @@ module CarbonData
 
     def initialize( settings = {} )
 
-      redisHost           = settings.dig(:redis, :host)
-      redisPort           = settings.dig(:redis, :port)             || 6379
+      redisHost = settings.dig(:redis, :host)
+      redisPort = settings.dig(:redis, :port)             || 6379
 
-      version             = '2.0.0'
-      date                = '2017-04-13'
+      version   = CarbonData::VERSION # '2.0.0'
+      date      = CarbonData::DATE    # '2017-04-13'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - CarbonData' )
@@ -67,8 +69,9 @@ module CarbonData
       logger.info( '-----------------------------------------------------------------' )
       logger.info( '' )
 
-      @redis       = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
-      @mbean       = MBean::Client.new( { :redis => @redis } )
+      @cache  = Cache::Store.new()
+      @redis  = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
+      @mbean  = MBean::Client.new( { :redis => @redis } )
 
     end
 
@@ -160,6 +163,51 @@ module CarbonData
     end
 
 
+    def storagePath( host )
+
+#       logger.debug( "storagePath( #{host} )" )
+
+      key    = sprintf( 'config-%s', host )
+      data   = @cache.get( key )
+
+      result = host
+
+#       logger.debug( "cached data: #{data}" )
+
+#      logger.debug( @redis.config( { :short => host } ) )
+
+      if( data == nil )
+
+        identifier = @redis.config( { :short => host, :key => 'graphite-identifier' } )
+
+#         logger.debug( "identifier #1: #{identifier}" )
+
+        if( identifier != nil )
+
+          identifier = identifier.dig( 'graphite-identifier' )
+
+#           logger.debug( "identifier #2: #{identifier}" )
+
+          if( identifier != nil )
+            result     = identifier
+          end
+
+          @cache.set( key, expiresIn: 320 ) { Cache::Data.new( result ) }
+        end
+
+      else
+
+        result = data
+      end
+
+#       logger.debug( "result: #{result}" )
+
+      return result
+
+    end
+
+
+
     def run( node = nil )
 
       if( node == nil )
@@ -172,7 +220,7 @@ module CarbonData
 
       node.each do |h,d|
 
-        @Host = h
+        @identifier    = self.storagePath( h )
         graphiteOutput = Array.new()
 
         logger.info( sprintf( 'Host: %s', h ) )
@@ -207,7 +255,7 @@ module CarbonData
             if( result.is_a?( Hash ) )
               graphiteOutput.push( self.databaseMongoDB( result ) )
             else
-              logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @Host, service ) )
+              logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
             end
 
           when 'mysql'
@@ -215,7 +263,7 @@ module CarbonData
             if( result.is_a?( Hash ) )
               graphiteOutput.push( self.databaseMySQL( result ) )
             else
-              logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @Host, service ) )
+              logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
             end
 
           when 'postgres'
@@ -223,7 +271,7 @@ module CarbonData
             if( result.is_a?( Hash ) )
               graphiteOutput.push( self.databasePostgres( result ) )
             else
-              logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @Host, service ) )
+              logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
             end
 
           when 'node_exporter'
@@ -231,7 +279,7 @@ module CarbonData
             if( result.is_a?( Hash ) )
               graphiteOutput.push( self.operatingSystemNodeExporter( result ) )
             else
-              logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @Host, service ) )
+              logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
             end
 
           else

@@ -90,6 +90,10 @@ module CarbonWriter
 
     def metric( metric = {} )
 
+      if( metric == nil )
+        return
+      end
+
       key   = metric.dig(:key)
       value = metric.dig(:value)
       time  = metric.dig(:time) || Time.now
@@ -113,6 +117,8 @@ module CarbonWriter
       end
 
       begin
+
+#         logger.debug( " = carbon-writer.#{key} #{value.to_f} #{time.to_i}" )
 
         self.socket.write( "carbon-writer.#{key} #{value.to_f} #{time.to_i}\n" )
 
