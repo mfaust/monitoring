@@ -25,7 +25,7 @@
             "id": 70,
             "targets": [
               {
-                "target": "*.%HOST%.CMS.Runtime.uptime",
+                "target": "carbon-writer.$host.CMS.Runtime.uptime",
                 "refId": "A",
                 "textEditor": false
               }
@@ -67,7 +67,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "*.%HOST%.CMS.Memory.heap_memory.used_percent"
+                "target": "carbon-writer.$host.CMS.Memory.heap_memory.used_percent"
               }
             ],
             "thresholds": "85,95",
@@ -84,7 +84,7 @@
             "id": 85,
             "targets": [
               {
-                "target": "*.%HOST%.CMS.Server.runlevel",
+                "target": "carbon-writer.$host.CMS.Server.runlevel",
                 "refId": "A"
               }
             ],
@@ -152,7 +152,7 @@
             "id": 63,
             "targets": [
               {
-                "target": "*.%HOST%.CMS.Server.license.until.hard.days",
+                "target": "carbon-writer.$host.CMS.Server.license.until.hard.days",
                 "refId": "A"
               }
             ],

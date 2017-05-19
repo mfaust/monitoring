@@ -25,7 +25,7 @@
             "id": 70,
             "targets": [
               {
-                "target": "*.%HOST%.MONGODB.uptime",
+                "target": "carbon-writer.$host.MONGODB.uptime",
                 "refId": "A",
                 "textEditor": false
               }
@@ -67,7 +67,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "*.%HOST%.MONGODB.memory.heap.used_percent"
+                "target": "carbon-writer.$host.MONGODB.memory.heap.used_percent"
               }
             ],
             "thresholds": "85,95",

@@ -62,19 +62,19 @@
       "list": [
         {
           "current": {
-            "value": "%HOST%",
-            "text": "%HOST%"
+            "value": "%STORAGE_IDENTIFIER%",
+            "text": "%STORAGE_IDENTIFIER%"
           },
           "hide": 2,
           "label": null,
           "name": "host",
           "options": [
             {
-              "value": "%HOST%",
-              "text": "%HOST%"
+              "value": "%STORAGE_IDENTIFIER%",
+              "text": "%STORAGE_IDENTIFIER%"
             }
           ],
-          "query": "%HOST%",
+          "query": "%STORAGE_IDENTIFIER%",
           "type": "constant"
         }
       ]

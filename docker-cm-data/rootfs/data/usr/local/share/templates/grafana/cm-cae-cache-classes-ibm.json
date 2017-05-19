@@ -69,27 +69,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceAvailability.capacity)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceAvailability.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceAvailability.level)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceAvailability.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceAvailability.evicted)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceAvailability.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceAvailability.removed)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceAvailability.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceAvailability.missRate)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceAvailability.missRate)",
                 "textEditor": false
               }
             ],
@@ -179,27 +179,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceCategory.capacity)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceCategory.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceCategory.level)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceCategory.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceCategory.evicted)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceCategory.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceCategory.removed)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceCategory.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceCategory.missRate)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceCategory.missRate)",
                 "textEditor": false
               }
             ],
@@ -297,27 +297,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceCommerceUser.capacity)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceCommerceUser.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceCommerceUser.level)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceCommerceUser.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceCommerceUser.evicted)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceCommerceUser.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceCommerceUser.removed)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceCommerceUser.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceCommerceUser.missRate)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceCommerceUser.missRate)",
                 "textEditor": false
               }
             ],
@@ -407,27 +407,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceContract.capacity)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceContract.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceContract.level)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceContract.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceContract.evicted)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceContract.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceContract.removed)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceContract.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceContract.missRate)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceContract.missRate)",
                 "textEditor": false
               }
             ],
@@ -525,27 +525,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceContractIdsByUser.capacity)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceContractIdsByUser.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceContractIdsByUser.level)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceContractIdsByUser.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceContractIdsByUser.evicted)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceContractIdsByUser.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceContractIdsByUser.removed)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceContractIdsByUser.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceContractIdsByUser.missRate)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceContractIdsByUser.missRate)",
                 "textEditor": false
               }
             ],
@@ -635,27 +635,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceContractsByUser.capacity)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceContractsByUser.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceContractsByUser.level)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceContractsByUser.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceContractsByUser.evicted)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceContractsByUser.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceContractsByUser.removed)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceContractsByUser.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceContractsByUser.missRate)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceContractsByUser.missRate)",
                 "textEditor": false
               }
             ],
@@ -753,27 +753,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceDynamicPrice.capacity)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceDynamicPrice.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceDynamicPrice.level)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceDynamicPrice.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceDynamicPrice.evicted)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceDynamicPrice.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceDynamicPrice.removed)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceDynamicPrice.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceDynamicPrice.missRate)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceDynamicPrice.missRate)",
                 "textEditor": false
               }
             ],
@@ -863,27 +863,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceMarketingSpot.capacity)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceMarketingSpot.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceMarketingSpot.level)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceMarketingSpot.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceMarketingSpot.evicted)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceMarketingSpot.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceMarketingSpot.removed)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceMarketingSpot.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceMarketingSpot.missRate)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceMarketingSpot.missRate)",
                 "textEditor": false
               }
             ],
@@ -981,27 +981,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceMarketingSpots.capacity)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceMarketingSpots.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceMarketingSpots.level)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceMarketingSpots.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceMarketingSpots.evicted)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceMarketingSpots.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceMarketingSpots.removed)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceMarketingSpots.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceMarketingSpots.missRate)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceMarketingSpots.missRate)",
                 "textEditor": false
               }
             ],
@@ -1091,27 +1091,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommercePreviewToken.capacity)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommercePreviewToken.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommercePreviewToken.level)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommercePreviewToken.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommercePreviewToken.evicted)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommercePreviewToken.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommercePreviewToken.removed)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommercePreviewToken.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommercePreviewToken.missRate)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommercePreviewToken.missRate)",
                 "textEditor": false
               }
             ],
@@ -1209,27 +1209,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceProduct.capacity)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceProduct.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceProduct.level)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceProduct.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceProduct.evicted)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceProduct.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceProduct.removed)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceProduct.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceProduct.missRate)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceProduct.missRate)",
                 "textEditor": false
               }
             ],
@@ -1319,27 +1319,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceProductsByCategory.capacity)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceProductsByCategory.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceProductsByCategory.level)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceProductsByCategory.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceProductsByCategory.evicted)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceProductsByCategory.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceProductsByCategory.removed)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceProductsByCategory.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceProductsByCategory.missRate)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceProductsByCategory.missRate)",
                 "textEditor": false
               }
             ],
@@ -1437,27 +1437,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceSegment.capacity)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceSegment.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceSegment.level)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceSegment.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceSegment.evicted)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceSegment.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceSegment.removed)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceSegment.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceSegment.missRate)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceSegment.missRate)",
                 "textEditor": false
               }
             ],
@@ -1547,27 +1547,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceSegments.capacity)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceSegments.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceSegments.level)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceSegments.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceSegments.evicted)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceSegments.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceSegments.removed)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceSegments.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceSegments.missRate)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceSegments.missRate)",
                 "textEditor": false
               }
             ],
@@ -1665,27 +1665,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceSegmentsByUser.capacity)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceSegmentsByUser.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceSegmentsByUser.level)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceSegmentsByUser.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceSegmentsByUser.evicted)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceSegmentsByUser.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceSegmentsByUser.removed)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceSegmentsByUser.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceSegmentsByUser.missRate)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceSegmentsByUser.missRate)",
                 "textEditor": false
               }
             ],
@@ -1775,27 +1775,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceStaticPrice.capacity)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceStaticPrice.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceStaticPrice.level)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceStaticPrice.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceStaticPrice.evicted)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceStaticPrice.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceStaticPrice.removed)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceStaticPrice.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceStaticPrice.missRate)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceStaticPrice.missRate)",
                 "textEditor": false
               }
             ],
@@ -1893,27 +1893,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceStoreInfo.capacity)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceStoreInfo.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceStoreInfo.level)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceStoreInfo.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceStoreInfo.evicted)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceStoreInfo.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceStoreInfo.removed)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceStoreInfo.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceStoreInfo.missRate)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceStoreInfo.missRate)",
                 "textEditor": false
               }
             ],
@@ -2003,27 +2003,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceSubCategories.capacity)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceSubCategories.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceSubCategories.level)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceSubCategories.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceSubCategories.evicted)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceSubCategories.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceSubCategories.removed)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceSubCategories.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceSubCategories.missRate)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceSubCategories.missRate)",
                 "textEditor": false
               }
             ],
@@ -2121,27 +2121,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceTopCategories.capacity)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceTopCategories.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceTopCategories.level)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceTopCategories.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceTopCategories.evicted)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceTopCategories.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceTopCategories.removed)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceTopCategories.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceTopCategories.missRate)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceTopCategories.missRate)",
                 "textEditor": false
               }
             ],
@@ -2231,27 +2231,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceUserIsLoggedIn.capacity)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceUserIsLoggedIn.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceUserIsLoggedIn.level)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceUserIsLoggedIn.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceUserIsLoggedIn.evicted)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceUserIsLoggedIn.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceUserIsLoggedIn.removed)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceUserIsLoggedIn.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceUserIsLoggedIn.missRate)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceUserIsLoggedIn.missRate)",
                 "textEditor": false
               }
             ],
@@ -2349,27 +2349,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceWorkspaces.capacity)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceWorkspaces.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceWorkspaces.level)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceWorkspaces.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceWorkspaces.evicted)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceWorkspaces.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceWorkspaces.removed)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceWorkspaces.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ECommerceWorkspaces.missRate)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ECommerceWorkspaces.missRate)",
                 "textEditor": false
               }
             ],
@@ -2459,27 +2459,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.SearchTermExternalReferenceResolver.capacity)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.SearchTermExternalReferenceResolver.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.SearchTermExternalReferenceResolver.level)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.SearchTermExternalReferenceResolver.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.SearchTermExternalReferenceResolver.evicted)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.SearchTermExternalReferenceResolver.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.SearchTermExternalReferenceResolver.removed)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.SearchTermExternalReferenceResolver.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.SearchTermExternalReferenceResolver.missRate)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.SearchTermExternalReferenceResolver.missRate)",
                 "textEditor": false
               }
             ],
@@ -2548,6 +2548,23 @@
       "list": [
         {
           "current": {
+            "value": "%STORAGE_IDENTIFIER%",
+            "text": "%STORAGE_IDENTIFIER%"
+          },
+          "hide": 2,
+          "label": null,
+          "name": "host",
+          "options": [
+            {
+              "value": "%STORAGE_IDENTIFIER%",
+              "text": "%STORAGE_IDENTIFIER%"
+            }
+          ],
+          "query": "%STORAGE_IDENTIFIER%",
+          "type": "constant"
+        },
+        {
+          "current": {
             "text": "CAE_LIVE",
             "value": "CAE_LIVE"
           },
@@ -2573,7 +2590,7 @@
               "selected": false
             }
           ],
-          "query": "*.%HOST%.*",
+          "query": "carbon-writer.$host.*",
           "refresh": 1,
           "regex": "/^(CAE_(.*)|STUDIO).*$/",
           "tags": [],
@@ -2590,21 +2607,21 @@
           "enable": true,
           "iconColor": "rgb(93, 227, 12)",
           "datasource": "events",
-          "tags": "%HOST% created&set=intersection"
+          "tags": "$host created&set=intersection"
         },
         {
           "name": "Load Tests",
           "enable": true,
           "iconColor": "rgb(26, 196, 220)",
           "datasource": "events",
-          "tags": "%HOST% loadtest&set=intersection"
+          "tags": "$host loadtest&set=intersection"
         },
         {
           "name": "Deployments",
           "enable": true,
           "iconColor": "rgb(176, 40, 253)",
           "datasource": "events",
-          "tags": "%HOST% deployment&set=intersection"
+          "tags": "$host deployment&set=intersection"
         }
       ]
     },

@@ -25,7 +25,7 @@
             "id": 70,
             "targets": [
               {
-                "target": "*.%HOST%.RLS.Runtime.uptime",
+                "target": "carbon-writer.$host.RLS.Runtime.uptime",
                 "refId": "A",
                 "textEditor": false
               }
@@ -112,7 +112,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "*.%HOST%.RLS.Memory.heap_memory.used_percent"
+                "target": "carbon-writer.$host.RLS.Memory.heap_memory.used_percent"
               }
             ],
             "thresholds": "85,95",
@@ -138,7 +138,7 @@
             "id": 85,
             "targets": [
               {
-                "target": "*.%HOST%.RLS.Server.runlevel",
+                "target": "carbon-writer.$host.RLS.Server.runlevel",
                 "refId": "A"
               }
             ],
@@ -206,7 +206,7 @@
             "id": 63,
             "targets": [
               {
-                "target": "*.%HOST%.RLS.Server.license.until.hard.days",
+                "target": "carbon-writer.$host.RLS.Server.license.until.hard.days",
                 "refId": "A"
               }
             ],
@@ -236,7 +236,7 @@
             "id": 14,
             "targets": [
               {
-                "target": "*.%HOST%.RLS.Replicator.completedSequenceNumber",
+                "target": "carbon-writer.$host.RLS.Replicator.completedSequenceNumber",
                 "refId": "A",
                 "hide": false
               }
@@ -312,12 +312,12 @@
             "id": 15,
             "targets": [
               {
-                "target": "*.%HOST%.MLS.Server.Repository.SequenceNumber",
+                "target": "carbon-writer.$host.MLS.Server.Repository.SequenceNumber",
                 "refId": "A",
                 "hide": true
               },
               {
-                "target": "*.%HOST%.RLS.Replicator.completedSequenceNumber",
+                "target": "carbon-writer.$host.RLS.Replicator.completedSequenceNumber",
                 "refId": "B",
                 "hide": true
               },

@@ -84,17 +84,17 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "alias(aliasSub(*.$host.ADOBE_DRIVE_SERVER.CapConnection.heap.cache.size, '(.*)-', ''), 'max')",
+                "target": "alias(aliasSub(carbon-writer.$host.ADOBE_DRIVE_SERVER.CapConnection.heap.cache.size, '(.*)-', ''), 'max')",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "alias(aliasSub(*.$host.ADOBE_DRIVE_SERVER.CapConnection.heap.cache.used, '(.*)-', ''), 'used')",
+                "target": "alias(aliasSub(carbon-writer.$host.ADOBE_DRIVE_SERVER.CapConnection.heap.cache.used, '(.*)-', ''), 'used')",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "alias(aliasSub(*.$host.ADOBE_DRIVE_SERVER.CapConnection.heap.cache.used_percent, '(.*)-', ''), 'percent')",
+                "target": "alias(aliasSub(carbon-writer.$host.ADOBE_DRIVE_SERVER.CapConnection.heap.cache.used_percent, '(.*)-', ''), 'percent')",
                 "textEditor": false
               }
             ],
@@ -187,17 +187,17 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "alias(*.$host.ADOBE_DRIVE_SERVER.CapConnection.blob.cache.size, 'max')",
+                "target": "alias(carbon-writer.$host.ADOBE_DRIVE_SERVER.CapConnection.blob.cache.size, 'max')",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "alias(*.$host.ADOBE_DRIVE_SERVER.CapConnection.blob.cache.used, 'used')",
+                "target": "alias(carbon-writer.$host.ADOBE_DRIVE_SERVER.CapConnection.blob.cache.used, 'used')",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "alias(*.$host.ADOBE_DRIVE_SERVER.CapConnection.blob.cache.used_percent, 'percent')",
+                "target": "alias(carbon-writer.$host.ADOBE_DRIVE_SERVER.CapConnection.blob.cache.used_percent, 'percent')",
                 "textEditor": false
               }
             ],
@@ -283,7 +283,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(*.$host.ADOBE_DRIVE_SERVER.CapConnection.su_sessions.sessions, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(carbon-writer.$host.ADOBE_DRIVE_SERVER.CapConnection.su_sessions.sessions, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -353,19 +353,19 @@
       "list": [
         {
           "current": {
-            "value": "%HOST%",
-            "text": "%HOST%"
+            "value": "%STORAGE_IDENTIFIER%",
+            "text": "%STORAGE_IDENTIFIER%"
           },
           "hide": 2,
           "label": null,
           "name": "host",
           "options": [
             {
-              "value": "%HOST%",
-              "text": "%HOST%"
+              "value": "%STORAGE_IDENTIFIER%",
+              "text": "%STORAGE_IDENTIFIER%"
             }
           ],
-          "query": "%HOST%",
+          "query": "%STORAGE_IDENTIFIER%",
           "type": "constant"
         }
       ]

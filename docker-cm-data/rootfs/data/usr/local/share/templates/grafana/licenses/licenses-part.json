@@ -33,7 +33,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "*.%HOST%.%SERVICE%.Server.ServiceInfo.feeder.concurrent.diff"
+                "target": "carbon-writer.$host.%SERVICE%.Server.ServiceInfo.feeder.concurrent.diff"
               }
             ],
             "thresholds": "",
@@ -58,7 +58,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "*.%HOST%.%SERVICE%.Server.ServiceInfo.feeder.named.diff"
+                "target": "carbon-writer.$host.%SERVICE%.Server.ServiceInfo.feeder.named.diff"
               }
             ],
             "thresholds": "",
@@ -96,7 +96,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "*.%HOST%.%SERVICE%.Server.ServiceInfo.publisher.concurrent.diff"
+                "target": "carbon-writer.$host.%SERVICE%.Server.ServiceInfo.publisher.concurrent.diff"
               }
             ],
             "thresholds": "",
@@ -121,7 +121,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "*.%HOST%.%SERVICE%.Server.ServiceInfo.publisher.named.diff"
+                "target": "carbon-writer.$host.%SERVICE%.Server.ServiceInfo.publisher.named.diff"
               }
             ],
             "thresholds": "",
@@ -159,7 +159,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "*.%HOST%.%SERVICE%.Server.ServiceInfo.replicator.concurrent.diff"
+                "target": "carbon-writer.$host.%SERVICE%.Server.ServiceInfo.replicator.concurrent.diff"
               }
             ],
             "thresholds": "",
@@ -184,7 +184,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "*.%HOST%.%SERVICE%.Server.ServiceInfo.replicator.named.diff"
+                "target": "carbon-writer.$host.%SERVICE%.Server.ServiceInfo.replicator.named.diff"
               }
             ],
             "thresholds": "",
@@ -222,7 +222,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "*.%HOST%.%SERVICE%.Server.ServiceInfo.system.concurrent.diff"
+                "target": "carbon-writer.$host.%SERVICE%.Server.ServiceInfo.system.concurrent.diff"
               }
             ],
             "thresholds": "",
@@ -247,7 +247,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "*.%HOST%.%SERVICE%.Server.ServiceInfo.system.named.diff"
+                "target": "carbon-writer.$host.%SERVICE%.Server.ServiceInfo.system.named.diff"
               }
             ],
             "thresholds": "",

@@ -22,7 +22,7 @@
             "id": 70,
             "targets": [
               {
-                "target": "*.%HOST%.NODE_EXPORTER.uptime.uptime",
+                "target": "carbon-writer.$host.NODE_EXPORTER.uptime.uptime",
                 "refId": "A",
                 "textEditor": false
               }
@@ -106,7 +106,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "*.%HOST%.NODE_EXPORTER.memory.used_percent"
+                "target": "carbon-writer.$host.NODE_EXPORTER.memory.used_percent"
               }
             ],
             "thresholds": "80,90",
@@ -178,7 +178,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "*.%HOST%.NODE_EXPORTER.swap.used_percent"
+                "target": "carbon-writer.$host.NODE_EXPORTER.swap.used_percent"
               }
             ],
             "thresholds": "80,90",
@@ -250,7 +250,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "*.%HOST%.NODE_EXPORTER.filesystem.*.used_percent"
+                "target": "carbon-writer.$host.NODE_EXPORTER.filesystem.*.used_percent"
               }
             ],
             "thresholds": "80,90",

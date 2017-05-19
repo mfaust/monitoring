@@ -163,6 +163,8 @@ jolokia:
         attribute: Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate
 
     caches-ecommerce-fragment:
+      description: "CAE Fragment Resolver (eCommerce)"
+      metrics:
       - mbean: com.coremedia:type=Cache.Classes,CacheClass="com.coremedia.livecontext.fragment.resolver.SearchTermExternalReferenceResolver",application=*
         attribute: Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate
 

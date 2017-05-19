@@ -80,22 +80,22 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "alias(*.$host.MLS.QueryPool.queries.max, 'queries max')",
+                "target": "alias(carbon-writer.$host.MLS.QueryPool.queries.max, 'queries max')",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "alias(*.$host.MLS.QueryPool.queries.waiting, 'queries waiting')",
+                "target": "alias(carbon-writer.$host.MLS.QueryPool.queries.waiting, 'queries waiting')",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "alias(*.$host.MLS.QueryPool.executors.idle, 'executors idle')",
+                "target": "alias(carbon-writer.$host.MLS.QueryPool.executors.idle, 'executors idle')",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "alias(*.$host.MLS.QueryPool.executors.running, 'executors running')",
+                "target": "alias(carbon-writer.$host.MLS.QueryPool.executors.running, 'executors running')",
                 "textEditor": false
               }
             ],
@@ -180,7 +180,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.$host.MLS.StatisticsResourceCache.cache.*)",
+                "target": "aliasByMetric(carbon-writer.$host.MLS.StatisticsResourceCache.cache.*)",
                 "textEditor": false
               }
             ],
@@ -265,7 +265,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.$host.MLS.StatisticsJobResult.*)",
+                "target": "aliasByMetric(carbon-writer.$host.MLS.StatisticsJobResult.*)",
                 "textEditor": false
               }
             ],
@@ -319,7 +319,7 @@
             "id": 9,
             "targets": [
               {
-                "target": "aliasByMetric(aliasSub(*.$host.MLS.Server.ResourceCache.*, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(carbon-writer.$host.MLS.Server.ResourceCache.*, '(.*)-', ''))",
                 "refId": "A",
                 "textEditor": false
               }
@@ -420,19 +420,19 @@
       "list": [
         {
           "current": {
-            "value": "%HOST%",
-            "text": "%HOST%"
+            "value": "%STORAGE_IDENTIFIER%",
+            "text": "%STORAGE_IDENTIFIER%"
           },
           "hide": 2,
           "label": null,
           "name": "host",
           "options": [
             {
-              "value": "%HOST%",
-              "text": "%HOST%"
+              "value": "%STORAGE_IDENTIFIER%",
+              "text": "%STORAGE_IDENTIFIER%"
             }
           ],
-          "query": "%HOST%",
+          "query": "%STORAGE_IDENTIFIER%",
           "type": "constant"
         }
       ]

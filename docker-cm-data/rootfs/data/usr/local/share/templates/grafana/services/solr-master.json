@@ -48,7 +48,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByNode(*.$host.SOLR_MASTER.core_$core.QueryResultCache.size, 3)",
+                "target": "aliasByNode(carbon-writer.$host.SOLR_MASTER.core_$core.QueryResultCache.size, 3)",
                 "textEditor": false
               }
             ],
@@ -134,7 +134,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByNode(*.$host.SOLR_MASTER.core_$core.QueryResultCache.hits, 3)",
+                "target": "aliasByNode(carbon-writer.$host.SOLR_MASTER.core_$core.QueryResultCache.hits, 3)",
                 "textEditor": false
               }
             ],
@@ -220,7 +220,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByNode(*.$host.SOLR_MASTER.core_$core.QueryResultCache.hitratio, 3)",
+                "target": "aliasByNode(carbon-writer.$host.SOLR_MASTER.core_$core.QueryResultCache.hitratio, 3)",
                 "textEditor": false
               }
             ],
@@ -306,7 +306,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByNode(*.$host.SOLR_MASTER.core_$core.DocumentCache.size, 3)",
+                "target": "aliasByNode(carbon-writer.$host.SOLR_MASTER.core_$core.DocumentCache.size, 3)",
                 "textEditor": false
               }
             ],
@@ -392,7 +392,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByNode(*.$host.SOLR_MASTER.core_$core.DocumentCache.hits, 3)",
+                "target": "aliasByNode(carbon-writer.$host.SOLR_MASTER.core_$core.DocumentCache.hits, 3)",
                 "textEditor": false
               }
             ],
@@ -478,7 +478,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByNode(*.$host.SOLR_MASTER.core_$core.DocumentCache.hitratio, 3)",
+                "target": "aliasByNode(carbon-writer.$host.SOLR_MASTER.core_$core.DocumentCache.hitratio, 3)",
                 "textEditor": false
               }
             ],
@@ -594,7 +594,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByNode(*.$host.SOLR_MASTER.core_$core.Select.requestPerSecond.avg, 3)",
+                "target": "aliasByNode(carbon-writer.$host.SOLR_MASTER.core_$core.Select.requestPerSecond.avg, 3)",
                 "textEditor": false
               }
             ],
@@ -680,7 +680,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByNode(*.$host.SOLR_MASTER.core_$core.Select.errors, 3)",
+                "target": "aliasByNode(carbon-writer.$host.SOLR_MASTER.core_$core.Select.errors, 3)",
                 "textEditor": false
               }
             ],
@@ -750,19 +750,19 @@
       "list": [
         {
           "current": {
-            "value": "%HOST%",
-            "text": "%HOST%"
+            "value": "%STORAGE_IDENTIFIER%",
+            "text": "%STORAGE_IDENTIFIER%"
           },
           "hide": 2,
           "label": null,
           "name": "host",
           "options": [
             {
-              "value": "%HOST%",
-              "text": "%HOST%"
+              "value": "%STORAGE_IDENTIFIER%",
+              "text": "%STORAGE_IDENTIFIER%"
             }
           ],
-          "query": "%HOST%",
+          "query": "%STORAGE_IDENTIFIER%",
           "type": "constant"
         },
         {
@@ -796,7 +796,7 @@
               "selected": false
             }
           ],
-          "query": "*.$host.SOLR*.*",
+          "query": "carbon-writer.$host.SOLR*.*",
           "refresh": 1,
           "regex": "/.*core_(.*).*$/",
           "sort": 0,
