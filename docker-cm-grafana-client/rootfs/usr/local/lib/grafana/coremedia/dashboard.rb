@@ -63,6 +63,8 @@ module Grafana
         config          = @redis.config( { :short => short, :key => 'display-name' } )
         identifier      = @redis.config( { :short => short, :key => 'graphite-identifier' } )
 
+        logger.debug( @redis.config( { :short => short } ) )
+
         if( config.dig( 'display-name' ) != nil )
 
           @grafanaHostname = config.dig( 'display-name' ).to_s
@@ -88,9 +90,9 @@ module Grafana
         @shortHostname    = short
         @grafanaHostname  = self.createSlug( @grafanaHostname ).gsub( '.', '-' )
 
-        logger.debug( @shortHostname )
-        logger.debug( @grafanaHostname )
-        logger.debug( @storageIdentifier )
+        logger.debug( "short hostname    : #{@shortHostname}" )
+        logger.debug( "grafana hostname  : #{@grafanaHostname}" )
+        logger.debug( "storage Identifier: #{@storageIdentifier}" )
 
         return ip, short, fqdn
 
@@ -337,7 +339,25 @@ module Grafana
                 "time_options": [ "1m", "3m", "5m", "15m" ]
               },
               "templating": {
-                "list": []
+                "list": [
+                  {
+                    "current": {
+                      "value": "%STORAGE_IDENTIFIER%",
+                      "text": "%STORAGE_IDENTIFIER%"
+                    },
+                    "hide": 2,
+                    "label": null,
+                    "name": "host",
+                    "options": [
+                      {
+                        "value": "%STORAGE_IDENTIFIER%",
+                        "text": "%STORAGE_IDENTIFIER%"
+                      }
+                    ],
+                    "query": "%STORAGE_IDENTIFIER%",
+                    "type": "constant"
+                  }
+                ]
               },
               "annotations": {
                 "list": []
@@ -460,7 +480,25 @@ module Grafana
                 "time_options": [ "2m", "15m" ]
               },
               "templating": {
-                "list": []
+                "list": [
+                  {
+                    "current": {
+                      "value": "%STORAGE_IDENTIFIER%",
+                      "text": "%STORAGE_IDENTIFIER%"
+                    },
+                    "hide": 2,
+                    "label": null,
+                    "name": "host",
+                    "options": [
+                      {
+                        "value": "%STORAGE_IDENTIFIER%",
+                        "text": "%STORAGE_IDENTIFIER%"
+                      }
+                    ],
+                    "query": "%STORAGE_IDENTIFIER%",
+                    "type": "constant"
+                  }
+                ]
               },
               "annotations": {
                 "list": []
@@ -785,7 +823,7 @@ module Grafana
 
       def normalizeTemplate( params = {} )
 
-        logger.debug( "normalizeTemplate( #{params} )" )
+#        logger.debug( "normalizeTemplate( #{params} )" )
 
         template          = params.dig(:template)
         serviceName       = params.dig(:serviceName)
@@ -869,28 +907,28 @@ module Grafana
                 "enable": false,
                 "iconColor": "rgb(93, 227, 12)",
                 "datasource": "events",
-                "tags": "%HOST% created&set=intersection"
+                "tags": "%STORAGE_IDENTIFIER% created&set=intersection"
               },
               {
                 "name": "destoyed",
                 "enable": false,
                 "iconColor": "rgb(227, 57, 12)",
                 "datasource": "events",
-                "tags": "%HOST% destroyed&set=intersection"
+                "tags": "%STORAGE_IDENTIFIER% destroyed&set=intersection"
               },
               {
                 "name": "Load Tests",
                 "enable": false,
                 "iconColor": "rgb(26, 196, 220)",
                 "datasource": "events",
-                "tags": "%HOST% loadtest&set=intersection"
+                "tags": "%STORAGE_IDENTIFIER% loadtest&set=intersection"
               },
               {
                 "name": "Deployments",
                 "enable": false,
                 "iconColor": "rgb(176, 40, 253)",
                 "datasource": "events",
-                "tags": "%HOST% deployment&set=intersection"
+                "tags": "%STORAGE_IDENTIFIER% deployment&set=intersection"
               }
             ]
           }

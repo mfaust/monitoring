@@ -3,6 +3,51 @@ module Graphite
 
   module Annotions
 
+    def nodeTag( host )
+
+#       logger.debug( "storagePath( #{host} )" )
+
+      key    = sprintf( 'config-%s', host )
+      data   = @cache.get( key )
+
+      result = host
+
+#       logger.debug( "cached data: #{data}" )
+
+#      logger.debug( @redis.config( { :short => host } ) )
+
+      if( data == nil )
+
+        identifier = @redis.config( { :short => host, :key => 'graphite-identifier' } )
+
+#         logger.debug( "identifier #1: #{identifier}" )
+
+        if( identifier != nil )
+
+          identifier = identifier.dig( 'graphite-identifier' )
+
+#           logger.debug( "identifier #2: #{identifier}" )
+
+          if( identifier != nil )
+            result     = identifier
+          end
+
+          @cache.set( key, expiresIn: 320 ) { Cache::Data.new( result ) }
+        end
+
+      else
+
+        result = data
+      end
+
+#       logger.debug( "result: #{result}" )
+
+      return result
+
+    end
+
+
+
     # annotations werden direct in die graphite geschrieben
     # POST
     # curl \
@@ -34,7 +79,7 @@ module Graphite
         # str = str + (60 * 60 * 2)
         _when = Time.parse(str.to_s).to_i
       else
-          _when = @timestamp
+        _when = @timestamp
       end
 
       uri = URI( @graphiteURI )
@@ -109,7 +154,8 @@ module Graphite
         time     = Time.at( @timestamp ).strftime( '%Y-%m-%d %H:%M:%S' )
       end
 
-      tag << host
+#      tag << host
+      tag << self.nodeTag( host )
 
       case type
       when 'create'
@@ -139,7 +185,8 @@ module Graphite
         time     = Time.at( @timestamp ).strftime( '%Y-%m-%d %H:%M:%S' )
       end
 
-      tag << host
+#      tag << host
+      tag << self.nodeTag( host )
       tag << 'loadtest'
 
       case type
@@ -168,7 +215,8 @@ module Graphite
         time     = Time.at( @timestamp ).strftime( '%Y-%m-%d %H:%M:%S' )
       end
 
-      tag << host
+#      tag << host
+      tag << self.nodeTag( host )
       tag << 'deployment'
 
       if( tags.count != 0 )
@@ -195,7 +243,8 @@ module Graphite
         time     = Time.at( @timestamp ).strftime( '%Y-%m-%d %H:%M:%S' )
       end
 
-      tag << host
+#      tag << host
+      tag << self.nodeTag( host )
       tag.push( customTags )
 
       message = sprintf( '%s <b>%s</b> (%s)', descr, host, time )

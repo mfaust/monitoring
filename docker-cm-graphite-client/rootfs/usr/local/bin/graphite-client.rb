@@ -20,6 +20,8 @@ graphitePath       = ENV.fetch( 'GRAPHITE_PATH'     , nil )
 mqHost             = ENV.fetch( 'MQ_HOST'           , 'localhost' )
 mqPort             = ENV.fetch( 'MQ_PORT'           , 11300 )
 mqQueue            = ENV.fetch( 'MQ_QUEUE'          , 'mq-graphite' )
+redisHost          = ENV.fetch( 'REDIS_HOST'        , 'localhost' )
+redisPort          = ENV.fetch( 'REDIS_PORT'        , 6379 )
 interval           = ENV.fetch( 'INTERVAL'          , 15 )
 delay              = ENV.fetch( 'RUN_DELAY'         , 10 )
 
@@ -34,8 +36,11 @@ config = {
     :host  => mqHost,
     :port  => mqPort,
     :queue => mqQueue
+  },
+  :redis    => {
+    :host  => redisHost,
+    :port  => redisPort
   }
-
 }
 
 # ---------------------------------------------------------------------------------------

@@ -11,7 +11,7 @@ ENV \
   APK_DEL="build-base ruby-dev" \
   GEMS="beaneater json redis rest-client rufus-scheduler tzinfo-data"
 
-LABEL version="1704-03.1"
+LABEL version="1705-03.1"
 
 # ---------------------------------------------------------------------------------------
 

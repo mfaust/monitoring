@@ -337,8 +337,6 @@ module Storage
 
     def config( params = {} )
 
-      logger.debug( "config( #{params} )" )
-
       if( self.checkDatabase() == false )
         return false
       end
@@ -353,8 +351,6 @@ module Storage
       )
 
       result = @redis.get( cachekey )
-
-      logger.debug( result )
 
       if( result == nil )
         return { :short => nil }
@@ -716,7 +712,7 @@ module Storage
     #
     def setStatus( params = {} )
 
-      logger.debug( "setStatus( #{params} )" )
+#       logger.debug( "setStatus( #{params} )" )
 #       logger.debug( caller )
 
       if( self.checkDatabase() == false )
@@ -786,7 +782,7 @@ module Storage
 
     def status( params = {} )
 
-      logger.debug( "status( #{params} )" )
+#       logger.debug( "status( #{params} )" )
 
       if( self.checkDatabase() == false )
         return false

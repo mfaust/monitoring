@@ -150,6 +150,7 @@ module Grafana
         @loggedIn = self.login( { :user => @user, :password => @password } )
 
         if( @loggedIn == true )
+          logger.debug( 'login successful' )
           break
         else
           logger.debug( sprintf( 'Attempting to establish user session ... %d', y ) )
