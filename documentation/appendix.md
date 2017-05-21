@@ -2,6 +2,10 @@
 
 ## Eigene Anpassungen
 
+**OBSOLETE**
+
+must be rewrite!
+
 Im Verzeichnis `~/devops/monitoring/docker-compose-monitoring/share` befinden sich alle Dateien, die beim Erstellen des `cm-monitoring` Containers in diesen hinein kopiert werden.
 
 ### Anpassung für die DNS Auflösung
