@@ -363,6 +363,30 @@ module ServiceDiscovery
     # TODO
     # merge discovered services with additional services
     #
+    if( services )
+
+      logger.debug( JSON.pretty_generate( discoveredServices ) )
+
+      services.each do |s|
+
+        logger.debug( "  - #{s}" )
+
+        serviceData = @serviceConfig.dig( 'services', s )
+
+        if( serviceData != nil )
+
+          logger.debug( serviceData )
+
+          discoveredServices[s] ||= []
+          discoveredServices[s] << serviceData
+#           discoveredServices[s].merge!( serviceData ) { |key, port| port }
+        end
+      end
+
+      logger.debug( JSON.pretty_generate( discoveredServices ) )
+
+    end
+
 
     # merge discovered services with cm-services.yaml
     #
