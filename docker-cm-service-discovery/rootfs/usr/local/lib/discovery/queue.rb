@@ -119,7 +119,7 @@ module ServiceDiscovery
 
           # remove node also from data-collector!
           #
-          self.sendMessage( { :cmd => command, :queue => 'mq-collector', :payload => { :host => node, :pre => 'prepare' }, :ttr => 1, :delay => 0 } )
+          self.sendMessage( { :cmd => command, :node => node, :queue => 'mq-collector', :payload => { :host => node, :pre => 'prepare' }, :ttr => 1, :delay => 0 } )
 
           result = self.deleteHost( node )
 
@@ -182,7 +182,7 @@ module ServiceDiscovery
 
         logger.debug( r )
 
-        self.sendMessage( { :cmd => 'info', :queue => 'mq-discover-info', :payload => result, :ttr => 1, :delay => 0 } )
+        self.sendMessage( { :cmd => 'info', :node => node, :queue => 'mq-discover-info', :payload => result, :ttr => 1, :delay => 0 } )
 
         return {
           :status  => 200,
