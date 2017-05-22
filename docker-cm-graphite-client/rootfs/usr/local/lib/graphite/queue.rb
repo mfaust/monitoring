@@ -169,15 +169,13 @@ module Graphite
 
       logger.debug( JSON.pretty_generate( data ) )
 
-      p = MessageQueue::Producer.new( @MQSettings )
-
       job = {
         cmd:  'information',
         from: 'graphite',
         payload: data
       }.to_json
 
-      result = p.addJob( queue, job, ttr, delay )
+      result = @mqProducer.addJob( queue, job, 1, ttr, delay )
 
       logger.debug( job )
       logger.debug( result )

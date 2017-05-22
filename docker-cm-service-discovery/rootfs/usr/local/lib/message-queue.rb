@@ -85,10 +85,7 @@ module MessageQueue
         job = JSON.parse(job)
       end
 
-      job.reject! { |k| k == 'timestamp' }
-      job.reject! { |k| k == 'payload' }
-
-      j = self.checksum(job)
+      j_checksum = self.checksum(job)
 
       if( @b )
 
@@ -104,12 +101,9 @@ module MessageQueue
             b = JSON.parse( b )
           end
 
-          b.reject! { |k| k == 'timestamp' }
-          b.reject! { |k| k == 'payload' }
+          b_checksum = self.checksum(b)
 
-          b = self.checksum(b)
-
-          if( j == b )
+          if( j_checksum == b_checksum )
             logger.warn( "  job '#{job}' already in queue .." )
             return true
           else
@@ -121,10 +115,13 @@ module MessageQueue
     end
 
 
-    def checksum( params = {} )
+    def checksum( p )
 
-      params = Hash[params.sort]
-      return Digest::MD5.hexdigest(params.to_s)
+      p.reject! { |k| k == 'timestamp' }
+      p.reject! { |k| k == 'payload' }
+
+      p = Hash[p.sort]
+      return Digest::MD5.hexdigest(p.to_s)
     end
 
   end
