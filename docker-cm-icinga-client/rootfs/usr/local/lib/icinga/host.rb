@@ -67,8 +67,8 @@ module Icinga
 #       logger.debug( JSON.pretty_generate( payload ) )
 
       result = Network.put( {
-        :host    => host,
-        :url     => sprintf( '%s/v1/objects/hosts/%s', @icingaApiUrlBase, host ),
+        :host    => short,
+        :url     => sprintf( '%s/v1/objects/hosts/%s', @icingaApiUrlBase, short ),
         :headers => @headers,
         :options => @options,
         :payload => payload
@@ -96,9 +96,11 @@ module Icinga
         }
       end
 
+      ip, short, fqdn = self.nsLookup( host )
+
       result = Network.delete( {
         :host    => host,
-        :url     => sprintf( '%s/v1/objects/hosts/%s?cascade=1', @icingaApiUrlBase, host ),
+        :url     => sprintf( '%s/v1/objects/hosts/%s?cascade=1', @icingaApiUrlBase, short ),
         :headers => @headers,
         :options => @options
       } )
@@ -115,11 +117,21 @@ module Icinga
 
       host = params.dig(:host) || nil
 
+      if( host == nil )
+
+        return {
+          :status  => 500,
+          :message => 'internal Server Error'
+        }
+      end
+
+      ip, short, fqdn = self.nsLookup( host )
+
       result = Network.get( {
-        :host => host,
-        :url  => sprintf( '%s/v1/objects/hosts/%s', @icingaApiUrlBase, host ),
-        :headers  => @headers,
-        :options  => @options
+        :host    => short,
+        :url     => sprintf( '%s/v1/objects/hosts/%s', @icingaApiUrlBase, short ),
+        :headers => @headers,
+        :options => @options
       } )
 
       return JSON.pretty_generate( result )

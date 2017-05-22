@@ -59,7 +59,9 @@ module Icinga
         }
       rescue Errno::ECONNREFUSED => e
 
-        $stderr.puts "Server refusing connection; retrying in 5s..."
+        logger.error( e )
+
+#        $stderr.puts "Server refusing connection; retrying in 5s..."
 
       end
 
@@ -135,7 +137,9 @@ module Icinga
 
       rescue Errno::ECONNREFUSED => e
 
-        $stderr.puts "Server refusing connection; retrying in 5s..."
+        logger.error( e )
+
+#         $stderr.puts "Server refusing connection; retrying in 5s..."
 
       end
 
@@ -209,7 +213,9 @@ module Icinga
         end
       rescue Errno::ECONNREFUSED => e
 
-        $stderr.puts "Server refusing connection; retrying in 5s..."
+        logger.error( e )
+
+#         $stderr.puts "Server refusing connection; retrying in 5s..."
 
       end
 
