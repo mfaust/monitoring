@@ -224,10 +224,6 @@ module ServiceDiscovery
       ttr     = params.dig(:ttr)   || 10
       delay   = params.dig(:delay) || 2
 
-      if( cmd == nil || queue == nil || payload.count() == 0 )
-        return
-      end
-
       job = {
         cmd:  command,      # require
         node: node,         # require
