@@ -126,6 +126,8 @@ services:
       MQ_HOST: beanstalkd
       # MQ_PORT: 11300
       # MQ_QUEUE: mq-graphite
+      REDIS_HOST: redis
+      # REDIS_PORT: 6379
       # INTERVAL: 15
       # RUN_DELAY: 10
 

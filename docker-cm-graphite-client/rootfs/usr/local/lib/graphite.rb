@@ -67,6 +67,7 @@ module Graphite
       @cache       = Cache::Store.new()
       @redis       = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
       @mqConsumer  = MessageQueue::Consumer.new( @MQSettings )
+      @mqProducer  = MessageQueue::Producer.new( @MQSettings )
 
       begin
 

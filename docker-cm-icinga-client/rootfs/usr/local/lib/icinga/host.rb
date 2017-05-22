@@ -42,7 +42,7 @@ module Icinga
 
       @jobs.add( { :ip => ip, :short => short, :fqdn => fqdn } )
 
-      services   = self.nodeInformation( { :host => host } )
+      services   = self.nodeInformation( { :host => short } )
 
       payload = {
         "templates" => [ "generic-host" ],
@@ -137,7 +137,7 @@ module Icinga
       discoveryPayload = nil
 
       # in first, we need the discovered services ...
-      logger.debug( 'in first, we need information from discovery service' )
+      logger.debug( sprintf( 'in first, we need information from discovery service for node \'%s\'', host ) )
       logger.debug( 'send message to \'mq-discover\'' )
 
       self.sendMessage( { :cmd => 'info', :node => host, :queue => 'mq-discover', :payload => {}, :prio => 2, :ttr => 1, :delay => 8 } )
