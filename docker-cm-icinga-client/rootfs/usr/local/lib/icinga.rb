@@ -40,18 +40,19 @@ module Icinga
 
     def initialize( params = {} )
 
-      @icingaHost       = params.dig(:icingaHost)    || 'localhost'
-      @icingaApiPort    = params.dig(:icingaApiPort) || 5665
-      @icingaApiUser    = params.dig(:icingaApiUser)
-      @icingaApiPass    = params.dig(:icingaApiPass)
-      @icingaCluster    = params.dig(:icingaCluster) || false
-      @icingaSatellite  = params.dig(:icingaSatellite)
-      mqHost            = params.dig(:mqHost)        || 'localhost'
-      mqPort            = params.dig(:mqPort)        || 11300
-      @mqQueue          = params.dig(:mqQueue)       || 'mq-icinga'
+      @icingaHost           = params.dig(:icingaHost)    || 'localhost'
+      @icingaApiPort        = params.dig(:icingaApiPort) || 5665
+      @icingaApiUser        = params.dig(:icingaApiUser)
+      @icingaApiPass        = params.dig(:icingaApiPass)
+      @icingaCluster        = params.dig(:icingaCluster) || false
+      @icingaSatellite      = params.dig(:icingaSatellite)
+      @icingaNotifications  = params.dig(:icingaNotifications) || false
+      mqHost                = params.dig(:mqHost)        || 'localhost'
+      mqPort                = params.dig(:mqPort)        || 11300
+      @mqQueue              = params.dig(:mqQueue)       || 'mq-icinga'
 
-      @icingaApiUrlBase = sprintf( 'https://%s:%d', @icingaHost, @icingaApiPort )
-      @nodeName         = Socket.gethostbyname( Socket.gethostname ).first
+      @icingaApiUrlBase     = sprintf( 'https://%s:%d', @icingaHost, @icingaApiPort )
+      @nodeName             = Socket.gethostbyname( Socket.gethostname ).first
 
       mqSettings = {
         :beanstalkHost  => mqHost,
@@ -71,6 +72,7 @@ module Icinga
       if( @icingaCluster )
         logger.info( sprintf( '    satellite endpoint: %s', @icingaSatellite ) )
       end
+      logger.info( sprintf( '    notifications enabled: %s', @icingaNotifications ? 'true' : 'false' ) )
       logger.info( '  used Services:' )
       logger.info( "    - message Queue: #{mqHost}:#{mqPort}/#{@mqQueue}" )
       logger.info( '-----------------------------------------------------------------' )

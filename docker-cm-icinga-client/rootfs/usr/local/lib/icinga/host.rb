@@ -52,7 +52,7 @@ module Icinga
           "max_check_attempts"   => 3,
           "check_interval"       => 60,
           "retry_interval"       => 45,
-          "enable_notifications" => false
+          "enable_notifications" => @icingaNotifications
         }
       }
 
@@ -129,7 +129,7 @@ module Icinga
 
     def nodeInformation( params = {} )
 
-#       logger.debug( "nodeInformation( #{params} )" )
+      logger.debug( "nodeInformation( #{params} )" )
 
       host             = params.dig(:host) || nil
 
@@ -146,6 +146,9 @@ module Icinga
 
         result      = @mqConsumer.getJobFromTube('mq-discover-info')
 
+        logger.debug( result.class.to_s )
+        logger.debug( result )
+
         if( result.is_a?( Hash ) && result.count != 0 && result.dig( :body, 'payload', 'services' ) != nil )
 
           discoveryStatus = result
@@ -154,6 +157,13 @@ module Icinga
           logger.debug( sprintf( 'Waiting for data %s ... %d', 'mq-discover-info', y ) )
           sleep( 5 )
         end
+      end
+
+      if( discoveryStatus == nil )
+        logger.warn( 'we hab no discovery datas' )
+        logger.debug( discoveryStatus )
+
+        return {}
       end
 
       discoveryPayload = discoveryStatus.dig( :body, 'payload' )
