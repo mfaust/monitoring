@@ -52,7 +52,7 @@ module Icinga
           "max_check_attempts"   => 3,
           "check_interval"       => 60,
           "retry_interval"       => 45,
-          "enable_notifications" => @icingaNotifications
+          "enable_notifications" => @icingaNotifications ? 'true' : 'false'
         }
       }
 
@@ -176,7 +176,7 @@ module Icinga
 
         services.each do |s|
 
-#           logger.debug( " => service #{s}" )
+          logger.debug( " => service #{s}" )
 
           if( s.last != nil )
             s.last.reject! { |k| k == 'template' }
