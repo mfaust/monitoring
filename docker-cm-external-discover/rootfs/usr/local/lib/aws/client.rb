@@ -70,7 +70,17 @@ module Aws
 
               logger.debug( JSON.pretty_generate( tags ) )
 
-              useableTags = tags.filter( 'customer', 'environment', 'tier', 'cname', 'name', 'monitoring-services' )
+              if( tags.key?('monitoring-services') )
+                tags['services'] = tags.delete('monitoring-services')
+              end
+
+              useableTags = tags.filter( 'customer', 'environment', 'tier', 'name', 'services' )
+
+              if( useableTags.key?('services') )
+                useableTags['services'] = useableTags['services'].split(',')
+              else
+                useableTags['services'] = []
+              end
 
               entry = {
                 'fqdn'        => "#{iid}.#{domain}",

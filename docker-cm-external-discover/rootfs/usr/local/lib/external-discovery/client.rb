@@ -433,7 +433,9 @@ module ExternalDiscovery
         :tags       => useableTags,
         :config     => {
           'display-name'        => self.normalizeName( name, [ 'storage-' ] ),
-          'graphite-identifier' => self.graphiteIdentifier( { :name => name } )
+          'graphite-identifier' => self.graphiteIdentifier( { :name => name } ),
+          'tags'                => useableTags,
+          'services'            => tags.dig('services')
         }
       } )
 

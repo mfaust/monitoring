@@ -33,7 +33,7 @@ module ExternalDiscovery
         # run internal scheduler to remove old data
         scheduler = Rufus::Scheduler.new
 
-        scheduler.every( 45, :first_in => 5 ) do
+        scheduler.every( 40, :first_in => 1 ) do
           self.getNodes()
         end
       rescue => e
