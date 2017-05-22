@@ -2,9 +2,10 @@
 
 require 'rubygems'
 require 'json'
-require 'dalli'
-require 'sequel'
-require 'redis'
+# require 'dalli'
+# require 'sequel'
+# require 'redis'
+require 'mysql2'
 require 'digest/md5'
 
 require_relative 'monkey'
@@ -60,8 +61,6 @@ module Storage
       rescue => e
         logger.error( e )
       end
-
-
     end
 
 
@@ -805,7 +804,370 @@ module Storage
   end
 
 
-  class Database
+  class MySQL
+
+    include Logging
+
+    OFFLINE  = 0
+    ONLINE   = 1
+    DELETE   = 98
+    PREPARE  = 99
+
+    def initialize( params = {} )
+
+      host            = params.dig(:mysql, :host)
+      user            = params.dig(:mysql, :user)
+      pass            = params.dig(:mysql, :password)
+      @schema         = params.dig(:mysql, :schema)
+      read_timeout    = params.dig(:mysql, :timeout, :read)    || 5
+      write_timeout   = params.dig(:mysql, :timeout, :write)   || 5
+      connect_timeout = params.dig(:mysql, :timeout, :connect) || 5
+
+      @client     = nil
+
+      begin
+
+        until( @client != nil )
+
+          @client = Mysql2::Client.new(
+            :host            => host,
+            :username        => user,
+            :password        => pass,
+            :database        => @schema,
+            :read_timeout    => read_timeout,
+            :write_timeout   => write_timeout,
+            :connect_timeout => connect_timeout,
+            :encoding        => 'utf8',
+            :reconnect       => true
+          )
+
+          logger.info( 'create database connection' )
+          sleep( 3 )
+        end
+      rescue Exception => e
+        logger.error( "An error occurred for connection: #{e}" )
+
+        raise( e )
+      rescue => e
+        logger.error( e )
+
+        raise( e )
+      end
+
+      # SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = 'DBName'
+      @client.query('SET storage_engine=InnoDB')
+      @client.query("CREATE DATABASE if not exists #{@schema}")
+
+      self.prepare()
+
+    end
+
+
+    def prepare()
+
+      @client.query( "USE #{@schema}" )
+
+      @client.query(
+        "CREATE TABLE IF NOT EXISTS dns (
+          id         int(11) not null AUTO_INCREMENT,
+          ip         varchar(16) not null default '',
+          name       varchar(160) not null default '',
+          fqdn       varchar(160) not null default '',
+          status     enum('offline','online','delete','prepare','unknown') default 'unknown',
+          creation   DATETIME DEFAULT   CURRENT_TIMESTAMP,
+          changed    DATETIME ON UPDATE CURRENT_TIMESTAMP,
+          PRIMARY KEY (`ID`),
+          key(`ip`) )"
+      )
+
+      @client.query(
+        "CREATE TABLE IF NOT EXISTS config (
+          `key`      varchar(128),
+          `value`    text not null,
+          dns_ip     varchar(16),
+          creation   DATETIME DEFAULT   CURRENT_TIMESTAMP,
+          changed    DATETIME ON UPDATE CURRENT_TIMESTAMP,
+          KEY(`key`),
+          FOREIGN KEY (`dns_ip`)
+          REFERENCES dns(`ip`)
+          ON DELETE CASCADE
+        )"
+      )
+
+      @client.query(
+        "CREATE TABLE IF NOT EXISTS discovery (
+          service    varchar(128) not null,
+          port       int(4) not null,
+          data       text not null,
+          dns_ip     varchar(16),
+          creation   DATETIME DEFAULT   CURRENT_TIMESTAMP,
+          changed    DATETIME ON UPDATE CURRENT_TIMESTAMP,
+          KEY(`service`),
+          FOREIGN KEY (`dns_ip`)
+          REFERENCES dns(`ip`)
+          ON DELETE CASCADE
+        )"
+      )
+
+    end
+
+    def toJson( data )
+
+      h = Hash.new()
+
+      data.each do |k|
+
+        # "Variable_name"=>"Innodb_buffer_pool_pages_free", "Value"=>"1"
+        h[k['Variable_name']] =  k['Value']
+      end
+
+      return h
+
+    end
+
+    # -- dns ------------------------------------
+    #
+    def createDNS( params = {} )
+
+      if( ! @client )
+        return false
+      end
+
+      logger.debug( " createDNS( #{params} )")
+
+      ip    = params.dig(:ip)
+      name  = params.dig(:short)
+      fqdn  = params.dig(:fqdn)
+
+      statement = sprintf('SELECT count(ip) as count FROM dns WHERE ip = \'%s\' or name = \'%s\' or fqdn = \'%s\'', ip, name, fqdn )
+      result    = @client.query( statement, :as => :hash )
+
+#      logger.debug( statement )
+#      logger.debug( result.to_a )
+
+      if( result.to_a.first.dig('count').to_i == 0 )
+
+        statement = sprintf('insert into dns ( ip, name, fqdn, status ) values ( \'%s\', \'%s\', \'%s\', \'prepare\' )', ip, name, fqdn )
+        result    = @client.query( statement, :as => :hash )
+
+        logger.debug( result.to_a )
+      end
+    end
+
+
+    def removeDNS( params = {} )
+
+      if( ! @client )
+        return false
+      end
+
+      ip    = params.dig(:ip)
+      name  = params.dig(:short)
+      fqdn  = params.dig(:fqdn)
+
+      statement = sprintf('delete FROM dns WHERE ip = \'%s\' or name = \'%s\' or fqdn = \'%s\'', ip, name, fqdn )
+      result    = @client.query( statement, :as => :hash )
+
+#      logger.debug( statement )
+#      logger.debug( result.to_a )
+    end
+
+
+    def dnsData( params = {}  )
+
+      if( ! @client )
+        return false
+      end
+
+      ip    = params.dig(:ip)
+      name  = params.dig(:short)
+      fqdn  = params.dig(:fqdn)
+
+      statement = sprintf('SELECT ip, name, fqdn FROM dns WHERE ip = \'%s\' or name = \'%s\' or fqdn = \'%s\'', ip, name, fqdn )
+#      logger.debug( statement )
+      result    = @client.query( statement, :as => :hash )
+
+      if( result.count != 0 )
+
+        headers = result.fields # <= that's an array of field names, in order
+        result.each(:as => :hash) do |row|
+          return row
+        end
+      end
+
+      return nil
+
+    end
+    #
+    # -- dns ------------------------------------
+
+
+    def nodes( params = {} )
+
+      if( ! @client )
+        return false
+      end
+
+      result = nil
+      ip     = params.dig(:ip)
+      name   = params.dig(:short)
+      fqdn   = params.dig(:fqdn)
+      status = params.dig(:status) # Database::ONLINE
+
+      logger.debug( " nodes( #{params} )")
+
+
+      if( status != nil )
+        w = sprintf( 'WHERE status = \'%s\'' )
+      else
+        w = nil
+      end
+
+      statement = sprintf('SELECT ip, name, fqdn, status FROM dns %s', w )
+      logger.debug( statement )
+
+      result    = @client.query( statement, :as => :hash )
+
+      if( result.count != 0 )
+
+        headers = result.fields # <= that's an array of field names, in order
+        result.each(:as => :hash) do |row|
+          return row
+        end
+      end
+
+      return nil
+
+
+
+      rec = @database[:v_status].select().where( w ) .to_a
+
+      if( rec.count() != 0 )
+
+        groupByHost = rec.group_by { |k| k[:shortname] }
+
+        return groupByHost
+      end
+
+      return Hash.new()
+
+    end
+
+
+    def setStatus( params = {} )
+
+      if( self.checkDatabase() == false )
+        return false
+      end
+
+      dnsId   = params[ :dns_id ] ? params[ :dns_id ] : nil
+      ip      = params[ :ip ]     ? params[ :ip ]     : nil
+      short   = params[ :short ]  ? params[ :short ]  : nil
+      long    = params[ :long ]   ? params[ :long ]   : nil
+      status  = params[ :status ] ? params[ :status ] : 0
+
+      if( ip == nil || short == nil )
+        return
+      end
+
+      # shortway insert ...
+      if( dnsId != nil )
+
+        @database[:status].insert(
+          :dns_id   => dnsId.to_i,
+          :status   => status
+        )
+        return
+      end
+
+      # check existing status entry
+      rec = @database[:v_status].select(:id, :dns_id).where(
+        Sequel[:ip        => ip.to_s] |
+        Sequel[:short => short.to_s]
+      ).to_a
+
+      if( rec.count() == 0 )
+
+        # get dns data to prper create entry
+        dnsData = self.dnsData( { :ip => ip, :short => short } )
+
+        statusId  = rec.first[:id].to_i
+        dnsId     = rec.first[:dns_id].to_i
+
+        @database[:status].insert(
+          :dns_id   => dnsId.to_i,
+          :status   => status
+        )
+
+      else
+
+        # update status
+        statusId  = rec.first[:id].to_i
+        dnsId     = rec.first[:dns_id].to_i
+
+        @database[:status].where(
+          ( Sequel[:id     => statusId] &
+            Sequel[:dns_id => dnsId]
+          )
+        ).update(
+          :status     => status,
+          :updated    => DateTime.now()
+        )
+      end
+
+    end
+
+
+    def status( params = {} )
+
+      if( ! @client )
+        return false
+      end
+
+      ip    = params.dig(:ip)
+      name  = params.dig(:short)
+      fqdn  = params.dig(:fqdn)
+
+      logger.debug( " status( #{params} )")
+
+      statement = sprintf('SELECT ip, name, fqdn, status FROM dns WHERE ip = \'%s\' or name = \'%s\' or fqdn = \'%s\'', ip, name, fqdn )
+#      logger.debug( statement )
+      result    = @client.query( statement, :as => :hash )
+
+      if( result.count != 0 )
+
+        headers = result.fields # <= that's an array of field names, in order
+        result.each(:as => :hash) do |row|
+          return row
+        end
+      end
+
+      return nil
+
+
+#       rec = @database[:v_status].select( :ip, :shortname, :created, :status ).where(
+#         Sequel[:ip        => ip.to_s] | Sequel[:short => short.to_s]
+#       ).to_a
+#
+#       if( rec.count() == 0 )
+#         return nil
+#       else
+#
+#         return {
+#           :ip        => rec.first[:ip].to_s,
+#           :short => rec.first[:shortname].to_s,
+#           :created   => rec.first[:created].to_s,
+#           :status    => rec.first[:status].to_i
+#         }
+#
+#       end
+
+    end
+
+
+  end
+
+  class Sqlite
 
     include Logging
 
