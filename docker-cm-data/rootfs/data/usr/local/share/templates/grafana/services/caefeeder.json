@@ -295,8 +295,8 @@
         {
           "type": "query",
           "label": null,
-          "query": "*.*.*EEDER*Proactive*feeder",
-          "regex": "/(.*)-.*-.*/",
+          "query": "carbon-writer.$host.*",
+          "regex": "/.*FEEDER(?!_CONTENT).*$/",
           "sort": 0,
           "datasource": "graphite",
           "refresh": 0,

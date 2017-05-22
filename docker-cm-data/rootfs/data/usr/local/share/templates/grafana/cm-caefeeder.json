@@ -383,7 +383,7 @@
           "type": "query",
           "label": null,
           "query": "carbon-writer.$host.*",
-          "regex": "/^FEEDER_(?!CONTENT).*$/",
+          "regex": "/.*FEEDER(?!_CONTENT).*$/",
           "sort": 0,
           "datasource": "graphite",
           "refresh": 1,

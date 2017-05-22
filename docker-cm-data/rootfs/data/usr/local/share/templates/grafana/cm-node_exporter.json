@@ -46,7 +46,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasSub(carbon-writer.$host.NODE_EXPORTER.load.*, '(.*)-', '')",
+                "target": "aliasSub(carbon-writer.$host.NODE_EXPORTER.load.*, '(.*)\.', '')",
                 "textEditor": false
               }
             ],
@@ -136,15 +136,15 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "alias(carbon-writer.$host.NODE_EXPORTER.filesystem.rootfs_total, 'total')"
+                "target": "alias(carbon-writer.$host.NODE_EXPORTER.filesystem.*.total, 'total')"
               },
               {
                 "refId": "B",
-                "target": "alias(carbon-writer.$host.NODE_EXPORTER.filesystem.rootfs_free, 'free')"
+                "target": "alias(carbon-writer.$host.NODE_EXPORTER.filesystem.*.free, 'free')"
               },
               {
                 "refId": "C",
-                "target": "alias(carbon-writer.$host.NODE_EXPORTER.filesystem.rootfs_used_percent, 'percent used')"
+                "target": "alias(carbon-writer.$host.NODE_EXPORTER.filesystem.*.used_percent, 'percent used')"
               }
             ],
             "thresholds": [],
@@ -387,7 +387,7 @@
       },
       {
         "collapse": false,
-        "height": 250,
+        "height": 150,
         "panels": [
           {
             "aliasColors": {},
@@ -419,22 +419,20 @@
             "steppedLine": false,
             "targets": [
               {
-                "hide": false,
-                "refId": "B",
-                "target": "aliasByMetric(aliasSub(smartSummarize(perSecond(carbon-writer.$host.NODE_EXPORTER.cpu.cpu[0-9]_user), '1m', 'avg'), '(.*)-', ''))",
+                "refId": "A",
+                "target": "alias(perSecond(carbon-writer.$host.NODE_EXPORTER.cpu.cpu[0-9].user), 'user')",
                 "textEditor": false
               },
               {
-                "hide": false,
-                "refId": "C",
-                "target": "aliasByMetric(aliasSub(smartSummarize(perSecond(carbon-writer.$host.NODE_EXPORTER.cpu.cpu[0-9]_iowait), '1m', 'avg'), '(.*)-', ''))",
+                "refId": "B",
+                "target": "alias(perSecond(carbon-writer.$host.NODE_EXPORTER.cpu.cpu[0-9].iowait), 'iowait')",
                 "textEditor": false
               }
             ],
             "thresholds": [],
             "timeFrom": null,
             "timeShift": null,
-            "title": "Panel Title",
+            "title": "CPU",
             "tooltip": {
               "shared": true,
               "sort": 0,
@@ -471,7 +469,7 @@
         "repeatIteration": null,
         "repeatRowId": null,
         "showTitle": false,
-        "title": "Dashboard Row",
+        "title": "CPU",
         "titleSize": "h6"
       }
     ],
