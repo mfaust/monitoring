@@ -68,7 +68,9 @@ module Aws
               tags = tags.reduce( :merge )
               tags = Hash[tags.sort]
 
-              useableTags = tags.filter( 'customer', 'environment', 'tier', 'cname', 'name' )
+              logger.debug( JSON.pretty_generate( tags ) )
+
+              useableTags = tags.filter( 'customer', 'environment', 'tier', 'cname', 'name', 'monitoring-services' )
 
               entry = {
                 'fqdn'        => "#{iid}.#{domain}",

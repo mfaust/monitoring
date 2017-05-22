@@ -294,6 +294,8 @@ module ExternalDiscovery
             next
           end
 
+          tags << { "uuid" => uuid }
+
           ip, short, fqdn = nsLookup( fqdn )
 
           # -----------------------------------------------------------------------------
