@@ -363,7 +363,7 @@ module ServiceDiscovery
     # TODO
     # merge discovered services with additional services
     #
-    if( services )
+    if( services.is_a?( Array ) && services.count >= 1 )
 
       logger.debug( JSON.pretty_generate( discoveredServices ) )
 
