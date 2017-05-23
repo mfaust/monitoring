@@ -1212,6 +1212,411 @@ module Storage
     end
 
 
+    # -- configurations -------------------------
+    #
+    def createConfig( params = {} )
+
+      if( ! @client )
+        return false
+      end
+
+      ip     = params.dig(:ip)
+      name   = params.dig(:short)
+      fqdn   = params.dig(:fqdn)
+      key    = params.dig(:key)
+      values = params.dig(:value)
+      data   = params.dig(:data)
+
+      logger.debug( " createConfig( #{params} )")
+
+      if( ( key == nil && values == nil ) && data.is_a?( Hash ) )
+
+        data.each do |k,v|
+
+          self.writeConfig( { :ip => ip, :short => name, :fqdn => fqdn, :key => k, :value => v } )
+        end
+      else
+
+        self.writeConfig( params )
+      end
+
+      return nil
+
+#       if( self.checkDatabase() == false )
+#         return false
+#       end
+#
+#       dnsIp        = params.dig(:ip)
+#       dnsShortname = params.dig(:short)
+#       dnsChecksum  = params.dig(:checksum)
+#       configKey    = params.dig(:key)
+#       configValues = params.dig(:value)
+#       data         = params.dig(:data)
+#
+#       if( ( configKey == nil && configValues == nil ) && data.is_a?( Hash ) )
+#
+#         data.each do |k,v|
+#
+#           self.writeConfig( { :ip => dnsIp, :short => dnsShortname, :checksum => dnsChecksum, :key => k, :value => v } )
+#         end
+#       else
+#
+#         self.writeConfig( params )
+#       end
+
+    end
+
+    # PRIVATE
+    def writeConfig( params = {} )
+
+      ip     = params.dig(:ip)
+      name   = params.dig(:short)
+      fqdn   = params.dig(:fqdn)
+      key    = params.dig(:key)
+      values = params.dig(:value)
+      data   = params.dig(:data)
+
+      logger.debug( " writeConfig( #{params} )")
+
+
+      if( ip == nil )
+
+        dns = self.dnsData( params )
+
+        if( dns != nil )
+          ip   = dns.dig('ip')
+        else
+
+          return false
+        end
+      end
+
+
+        statement = sprintf(
+          'select * from config where `key` = \'%s\' and `value` = \'%s\' and dns_ip = \'%s\'',
+          key, values, ip
+        )
+
+        logger.debug( statement )
+
+        result    = @client.query( statement, :as => :hash )
+
+#         logger.debug( result.class.to_s )
+#         logger.debug( result.inspect )
+#         logger.debug( result.size )
+
+        if( result.size == 0 )
+
+          statement = sprintf('insert into config ( `key`, `value`, dns_ip ) values ( \'%s\', \'%s\', \'%s\' )', key, values, ip )
+          logger.debug( statement  )
+
+          result    = @client.query( statement, :as => :hash )
+
+          logger.debug( result.to_a )
+        else
+
+          dbaValues = nil
+
+          result.each do |row|
+            dbaValues    = row.dig('value')
+          end
+
+          logger.debug( "#{values} vs. #{dbaValues}" )
+
+          if( dbaValues.to_s != values.to_s )
+
+            statement = sprintf('update config set `value` = \'%s\' where dns_ip = \'%s\' and `key` = \'%s\'', values, ip, key )
+            logger.debug( statement )
+
+            result    = @client.query( statement, :as => :hash )
+
+            logger.debug( result.to_a )
+          end
+
+        return nil
+
+
+
+
+#         rec = @database[:config].where(
+#           (
+#             ( Sequel[:ip        => dnsIp.to_s] ) |
+#             ( Sequel[:short => dnsShortname.to_s] )
+#           ) & (
+#             ( Sequel[:key   => configKey.to_s] ) &
+#             ( Sequel[:value => configValues.to_s] )
+#           )
+#         ).to_a
+#
+#         if( rec.count() == 0 )
+#
+#           if( dnsIp != nil )
+#             @database[:config].insert(
+#               :ip       => dnsIp.to_s,
+#               :key      => configKey.to_s,
+#               :value    => configValues.to_s,
+#               :created  => DateTime.now()
+#             )
+#
+#           elsif( dnsShortname != nil )
+#
+#             @database[:config].insert(
+#               :short => dnsShortname.to_s,
+#               :key       => configKey.to_s,
+#               :value     => configValues.to_s,
+#               :created   => DateTime.now()
+#             )
+#           end
+#         else
+#
+#           # prüfen, ob 'value' identisch ist
+#           dbaValues    = rec.first[:value]
+#           configValues = configValues.to_s
+#
+#           if( dbaValues != configValues )
+#
+#             if( dnsIp != nil )
+#
+#               @database[:config].where(
+#                 ( Sequel[:ip  => dnsIp.to_s] ) &
+#                 ( Sequel[:key => configKey.to_s] )
+#               ).update(
+#                 :value      => configValues.to_s,
+#                 :created    => DateTime.now()
+#               )
+#             elsif( dnsShortname != nil )
+#
+#               @database[:config].where(
+#                 ( Sequel[:short => dnsShortname.to_s] ) &
+#                 ( Sequel[:key       => configKey.to_s] )
+#               ).update(
+#                 :value      => configValues.to_s,
+#                 :created    => DateTime.now()
+#               )
+#             end
+#           end
+#         end
+      end
+    end
+
+
+    def removeConfig( params = {} )
+
+      if( ! @client )
+        return false
+      end
+
+      ip    = params.dig(:ip)
+      name  = params.dig(:short)
+      fqdn  = params.dig(:fqdn)
+      key   = params.dig(:key)
+
+      logger.debug( " removeConfig( #{params} )")
+
+      dns = self.dnsData( params )
+
+      if( dns != nil )
+
+        ip   = dns.dig('ip')
+        more = nil
+
+        logger.debug( ip )
+
+        if( key != nil )
+          more = sprintf( 'and `key` = \'%s\'', key )
+        end
+
+        statement = sprintf('DELETE FROM config WHERE dns_ip = \'%s\' %s', ip, more )
+        logger.debug( statement )
+
+        begin
+          result    = @client.query( statement, :as => :hash )
+          return true
+        rescue => e
+          logger.error( e)
+          return false
+        end
+
+      end
+
+      return nil
+#
+#       ip        = params[ :ip ]    ? params[ :ip ]    : nil
+#       short     = params[ :short ] ? params[ :short ] : nil
+#       long      = params[ :long ]  ? params[ :long ]  : nil
+#       configKey = params[ :key ]   ? params[ :key ]   : nil
+#
+#       rec = @database[:config].select(:shortname).where(
+#         ( Sequel[:ip        => ip.to_s] ) |
+#         ( Sequel[:short => short.to_s] ) |
+#         ( Sequel[:longname  => long.to_s] )
+#       ).to_a
+#
+#       if( rec.count() != 0 )
+#
+#         shortname = rec.first[:shortname]
+#
+#         if( configKey == nil )
+#
+#           @database[:config].where( Sequel[:short => shortname] ).delete
+#         else
+#           @database[:config].where(
+#             ( Sequel[:shortname   => shortname] ) &
+#             ( Sequel[:key  => configKey] )
+#           ).delete
+#         end
+#       end
+    end
+
+    def parsedResponse( r )
+
+      return JSON.parse( r )
+    rescue JSON::ParserError => e
+      return r # do smth
+
+    end
+
+
+    def config( params = {} )
+
+      if( ! @client )
+        return false
+      end
+
+      ip     = params.dig(:ip)
+      name   = params.dig(:short)
+      fqdn   = params.dig(:fqdn)
+      key    = params.dig(:key)
+
+#       logger.debug( " config( #{params} )")
+
+      statement = sprintf(
+        'select dns.fqdn, config.`key`, config.`value` from dns, config where dns.ip = config.dns_ip'
+      )
+
+      if( key != nil )
+        statement = sprintf( '%s and `key` = \'%s\'', statement, key )
+      end
+
+#       logger.debug( statement )
+
+      r    = @client.query( statement, :as => :hash )
+
+#       logger.debug( r.size )
+
+      if( r.size == 0 )
+        return nil
+      end
+
+      array   = Array.new
+      result  = Hash.new()
+
+      r.each do |row|
+
+#         logger.debug( row )
+
+        fqdn  = row.dig('fqdn')
+        key   = row.dig('key')
+        value = row.dig('value')
+
+#         logger.debug(fqdn)
+
+        result[fqdn.to_s] ||= {}
+        result[fqdn.to_s][key.to_s] ||= self.parsedResponse( value )
+
+      end
+
+#       logger.debug( result )
+
+      return result
+
+
+  #       return nil
+#
+#
+#
+#       if( self.checkDatabase() == false )
+#         return false
+#       end
+#
+#       ip        = params[ :ip ]    ? params[ :ip ]    : nil
+#       short     = params[ :short ] ? params[ :short ] : nil
+#       long      = params[ :long ]  ? params[ :long ]  : nil
+#       configKey = params[ :key ]   ? params[ :key ]   : nil
+#
+#       array     = Array.new()
+#       result    = Hash.new()
+#
+#       def dbaData( w )
+#
+#         return  @database[:v_config].select( :ip, :shortname, :checksum, :key, :value ).where( w ).to_a
+#
+#       end
+#
+#       if( configKey == nil )
+#
+#         w = (
+#           ( Sequel[:ip        => ip.to_s] ) |
+#           ( Sequel[:short => short.to_s] ) |
+#           ( Sequel[:longname  => long.to_s] )
+#         )
+#
+#       else
+#
+#         w = (
+#           ( Sequel[:ip        => ip.to_s] ) |
+#           ( Sequel[:short => short.to_s] ) |
+#           ( Sequel[:longname  => long.to_s] )
+#         ) & (
+#           ( Sequel[:key => configKey.to_s] )
+#         )
+#
+#       end
+#
+#       def collectValues( hashes )
+#
+#         {}.tap{ |r| hashes.each{ |h| h.each{ |k,v| ( r[k]||=[] ) << v } } }
+#       end
+#
+#       rec = self.dbaData( w )
+#
+#       if( rec.count() != 0 )
+#
+#         dnsShortName  = rec.first.dig( :checksum ).to_s
+#
+#         result[dnsShortName.to_s] ||= {}
+#         result[dnsShortName.to_s]['dns'] ||= {}
+#         result[dnsShortName.to_s]['dns']['ip']        = rec.first.dig( :ip ).to_s
+#         result[dnsShortName.to_s]['dns']['shortname'] = rec.first.dig( :shortname ).to_s
+#
+#         groupByKey = rec.group_by { |k| k[:key] }
+#
+#         groupByKey.each do |g,v|
+#
+#           c = collectValues(
+#             v.map do |hash|
+#               { value:  ( hash[:value] ) }
+#             end
+#           )
+#
+#           values = c.select { |h| h['value'] }
+#
+#           result[dnsShortName.to_s][g.to_s] ||= {}
+#           result[dnsShortName.to_s][g.to_s] = values[:value].flatten.sort
+#
+#           array << result
+#         end
+#       else
+#         return false
+#       end
+#
+#       array = array.reduce( :merge )
+#
+#       return array
+
+    end
+    #
+    # -- configurations -------------------------
 
 
 

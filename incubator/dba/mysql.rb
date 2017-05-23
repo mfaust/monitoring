@@ -1,4 +1,4 @@
-#!/usr/bin/ruby
+#!/usr/bin/env ruby
 
 
 require_relative 'storage'
@@ -35,9 +35,9 @@ config_2 = { :ip => ip, :short => short, :data => config_2 }
 
 r = Storage::MySQL.new( {
   :mysql => {
-    :host => 'localhost',
-    :user => 'bodsch',
-    :password => '7naiy6is',
+    :host => '127.0.0.1',
+    :user => 'root',
+    :password => 'database.pass',
     :schema => 'test'
   }
 } )
@@ -57,10 +57,10 @@ puts r.dnsData()
 puts r.dnsData( dns )
 puts r.dnsData( { :short => "foo-bar" } )
 
-# puts '  - remove'
-# puts r.removeDNS( { :short => "foo-bar" } )
-# puts r.dnsData( { :short => short } )
-# puts r.dnsData( { :short => "foo-bar" } )
+puts '  - remove'
+puts r.removeDNS( { :short => "foo-bar" } )
+puts r.dnsData( { :short => short } )
+puts r.dnsData( { :short => "foo-bar" } )
 
 
 puts ''
@@ -100,14 +100,15 @@ puts '--------'
 
 puts ''
 puts 'config:'
-# puts '  - delete'
-# r.removeConfig( config )
+#puts '  - delete'
+#r.removeConfig( { :ip => '127.0.10.10' } )
+#r.removeConfig( config )
 
-# puts '  - create'
-# r.createConfig( config )
-# r.createConfig( config_1, true )
-# r.createConfig( config_2, true )
-# r.createConfig( { :short => short, :data => { "named": "rubbel-katz" } }, true )
+puts '  - create'
+r.createConfig( config )
+r.createConfig( config_1 )
+r.createConfig( config_2 )
+r.createConfig( { :short => short, :data => { "named": "rubbel-katz" } } )
 
 puts '  - read'
 puts r.config( { :short => short } )
@@ -115,10 +116,10 @@ puts r.config( { :short => short, :key => 'ports' } )
 puts r.config( { :short => short, :key => 'services' } )
 puts r.config( { :short => short, :key => 'named' } )
 
-# puts '  - delete'
-# # r.removeConfig( { :short => short, :key => 'named' } )
-# r.removeConfig( { :short => short, :key => 'ports' } )
-# puts r.config( { :short => short } )
+puts '  - delete'
+r.removeConfig( { :short => short, :key => 'named' } )
+r.removeConfig( { :short => short, :key => 'ports' } )
+puts r.config( { :short => short } )
 
 
 # puts ''
