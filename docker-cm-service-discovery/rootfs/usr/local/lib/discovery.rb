@@ -173,7 +173,7 @@ module ServiceDiscovery
 
       if( serviceData != nil )
 
-        logger.debug( @serviceConfig['services'][d] )
+#         logger.debug( @serviceConfig['services'][d] )
 
         data[d].merge!( serviceData ) { |key, port| port }
 
@@ -365,25 +365,15 @@ module ServiceDiscovery
     #
     if( services.is_a?( Array ) && services.count >= 1 )
 
-      logger.debug( JSON.pretty_generate( discoveredServices ) )
-
       services.each do |s|
-
-        logger.debug( "  - #{s}" )
 
         serviceData = @serviceConfig.dig( 'services', s )
 
         if( serviceData != nil )
 
-          logger.debug( serviceData )
-
-          discoveredServices[s] ||= []
-          discoveredServices[s] << serviceData
-#           discoveredServices[s].merge!( serviceData ) { |key, port| port }
+          discoveredServices[s] ||= serviceData.filter( 'port' )
         end
       end
-
-      logger.debug( JSON.pretty_generate( discoveredServices ) )
 
     end
 
