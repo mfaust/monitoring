@@ -68,7 +68,7 @@ module Aws
               tags = tags.reduce( :merge )
               tags = Hash[tags.sort]
 
-              logger.debug( JSON.pretty_generate( tags ) )
+#               logger.debug( JSON.pretty_generate( tags ) )
 
               if( tags.key?('monitoring-services') )
                 tags['services'] = tags.delete('monitoring-services')

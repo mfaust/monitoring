@@ -230,7 +230,7 @@ module ExternalDiscovery
         end
 
         if( tier == nil || tier == 'service' )
-          logger.warn( "tier for '#{name}' are not configured, skip" )
+          logger.warn( "wrong tier #{tier} - '#{name}' will be ignored ..." )
           next
         end
 

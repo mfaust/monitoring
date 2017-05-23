@@ -16,6 +16,7 @@ require_relative 'utils/network'
 require_relative 'cache'
 require_relative 'job-queue'
 require_relative 'message-queue'
+require_relative 'storage'
 require_relative 'icinga/tools'
 require_relative 'icinga/network'
 require_relative 'icinga/status'
@@ -38,18 +39,26 @@ module Icinga
     include Icinga::Service
     include Icinga::Queue
 
-    def initialize( params = {} )
+    def initialize( settings = {} )
 
-      @icingaHost           = params.dig(:icingaHost)    || 'localhost'
-      @icingaApiPort        = params.dig(:icingaApiPort) || 5665
-      @icingaApiUser        = params.dig(:icingaApiUser)
-      @icingaApiPass        = params.dig(:icingaApiPass)
-      @icingaCluster        = params.dig(:icingaCluster) || false
-      @icingaSatellite      = params.dig(:icingaSatellite)
-      @icingaNotifications  = params.dig(:icingaNotifications) || false
-      mqHost                = params.dig(:mqHost)        || 'localhost'
-      mqPort                = params.dig(:mqPort)        || 11300
-      @mqQueue              = params.dig(:mqQueue)       || 'mq-icinga'
+      @icingaHost           = settings.dig(:icinga, :host)            || 'localhost'
+      @icingaApiPort        = settings.dig(:icinga, :api, :port)      || 5665
+      @icingaApiUser        = settings.dig(:icinga, :api, :user)
+      @icingaApiPass        = settings.dig(:icinga, :api, :password)
+      @icingaCluster        = settings.dig(:icinga, :cluster)         || false
+      @icingaSatellite      = settings.dig(:icinga, :satellite)
+      @icingaNotifications  = settings.dig(:icinga, :notifications)   || false
+
+      mqHost                = settings.dig(:mq, :host)                || 'localhost'
+      mqPort                = settings.dig(:mq, :port)                || 11300
+      @mqQueue              = settings.dig(:mq, :queue)               || 'mq-icinga'
+
+      redisHost             = settings.dig(:redis, :host)
+      redisPort             = settings.dig(:redis, :port)             || 6379
+
+#       mqHost                = params.dig(:mqHost)        || 'localhost'
+#       mqPort                = params.dig(:mqPort)        || 11300
+#       @mqQueue              = params.dig(:mqQueue)       || 'mq-icinga'
 
       @icingaApiUrlBase     = sprintf( 'https://%s:%d', @icingaHost, @icingaApiPort )
       @nodeName             = Socket.gethostbyname( Socket.gethostname ).first
@@ -74,6 +83,7 @@ module Icinga
       end
       logger.info( sprintf( '    notifications enabled: %s', @icingaNotifications ? 'true' : 'false' ) )
       logger.info( '  used Services:' )
+      logger.info( "    - redis        : #{redisHost}:#{redisPort}" )
       logger.info( "    - message Queue: #{mqHost}:#{mqPort}/#{@mqQueue}" )
       logger.info( '-----------------------------------------------------------------' )
       logger.info( '' )
@@ -87,11 +97,12 @@ module Icinga
 
       @cache      = Cache::Store.new()
       @jobs       = JobQueue::Job.new()
-      @hasCert    = self.checkCert( { :user => @icingaApiUser, :password =>  @icingaApiPass } )
-      @headers    = { "Content-Type" => "application/json", "Accept" => "application/json" }
-
+      @redis      = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
       @mqConsumer = MessageQueue::Consumer.new( mqSettings )
       @mqProducer = MessageQueue::Producer.new( mqSettings )
+
+      @hasCert    = self.checkCert( { :user => @icingaApiUser, :password =>  @icingaApiPass } )
+      @headers    = { "Content-Type" => "application/json", "Accept" => "application/json" }
 
       return self
 

@@ -23,23 +23,37 @@ icingaNotifications = ENV.fetch( 'ENABLE_NOTIFICATIONS'    , false )
 mqHost              = ENV.fetch( 'MQ_HOST'                 , 'localhost' )
 mqPort              = ENV.fetch( 'MQ_PORT'                 , 11300 )
 mqQueue             = ENV.fetch( 'MQ_QUEUE'                , 'mq-icinga' )
-interval            = 10
+redisHost           = ENV.fetch( 'REDIS_HOST'              , 'localhost' )
+redisPort           = ENV.fetch( 'REDIS_PORT'              , 6379 )
+interval            = ENV.fetch( 'INTERVAL'                , 20 )
+delay               = ENV.fetch( 'RUN_DELAY'               , 10 )
 
 # convert string to bool
 icingaCluster   = icingaCluster.to_s.eql?('true') ? true : false
 notifications   = notifications.to_s.eql?('true') ? true : false
 
 config = {
-  :icingaHost          => icingaHost,
-  :icingaApiPort       => icingaApiPort,
-  :icingaApiUser       => icingaApiUser,
-  :icingaApiPass       => icingaApiPass,
-  :icingaCluster       => icingaCluster,
-  :icingaSatellite     => icingaSatellite,
-  :icingaNotifications => icingaNotifications,
-  :mqHost              => mqHost,
-  :mqPort              => mqPort,
-  :mqQueue             => mqQueue
+  :icinga      => {
+    :host         => icingaHost,
+    :cluster      => icingaCluster,
+    :satellite    => icingaSatellite,
+    :notification => icingaNotifications,
+    :api => {
+      :port     => icingaApiPort,
+      :user     => icingaApiUser,
+      :password => icingaApiPass
+    }
+  },
+  :mq          => {
+    :host  => mqHost,
+    :port  => mqPort,
+    :queue => mqQueue
+  },
+  :redis       => {
+    :host => redisHost,
+    :port => redisPort
+  }
+
 }
 
 # ---------------------------------------------------------------------------------------
@@ -58,7 +72,7 @@ i = Icinga::Client.new( config )
 
 scheduler = Rufus::Scheduler.new
 
-scheduler.every( interval, :first_in => 5 ) do
+scheduler.every( interval, :first_in => delay ) do
 
   i.queue()
 
