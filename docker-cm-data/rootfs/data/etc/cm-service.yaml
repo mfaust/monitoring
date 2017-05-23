@@ -188,9 +188,48 @@ services:
     application:
     - contentserver
 
+  cae-live:
+    description: CAE Live
+    port: 42199
+    cap_connection: true
+    uapi_cache: true
+    blob_cache: true
+    heap_cache: true
+    application:
+    - cae
+    - caches
+    - caches-ecommerce
+    - caches-ecommerce-fragment
+
   cae-live-1:
     description: CAE Live 1
     port: 42199
+    cap_connection: true
+    uapi_cache: true
+    blob_cache: true
+    heap_cache: true
+    application:
+    - cae
+    - caches
+    - caches-ecommerce
+    - caches-ecommerce-fragment
+
+  cae-live-2:
+    description: CAE Live 2
+    port: 42299
+    cap_connection: true
+    uapi_cache: true
+    blob_cache: true
+    heap_cache: true
+    application:
+    - cae
+    - caches
+    - caches-ecommerce
+    - caches-ecommerce-fragment
+
+  cae-live-3:
+    description: CAE Live 3
+    port: 42399
     cap_connection: true
     uapi_cache: true
     blob_cache: true

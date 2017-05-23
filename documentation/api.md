@@ -82,7 +82,7 @@ Das hinzufügen wird über einen `POST` Request ermöglicht. Hierbei kann über 
 
 Aktuell funktionieren folgende Paramaeter:
 
-| Paramerter   | Typ     | default | Beschreibung |
+| Parameter   | Typ     | default | Beschreibung |
 | :---------   | :-----: | :-----: | :----------- |
 | `force`      | bool    | false   | wenn `true` gesetzt ist, werden alle vorher gefundenen Informationen über die Node gelöscht **ACHTUNG** dazu zählt auch eine ggf. vorher durchgefürte _Custom Configuration_ |
 | `discovery`  | bool    | true    | schaltet die automatische ServiceDiscovery der CoreMedia Applicationen ab |
@@ -107,14 +107,27 @@ Aktuell funktionieren folgende Paramaeter:
       "annotation": true,
       "overview": true,
       "config": {
+        "graphite-identifier": "development-system",
         "ports": [50199,51099],
         "display-name": "foo.bar.com",
-        "services": [
-          "cae-live-1": {},
-          "content-managment-server": { "port": 41000 }
-        ]
+        "services": ["cae-live","content-managment-server"]
       }
     }
+
+#### Configuration
+
+Zur Zeit können folgende Parameter bei `config` benutzt werden:
+
+| Parameter             | Beschreibung                                                                                     | Beispiel                                              |
+| :---------            | :-----------                                                                                     | :-------                                              |
+| `graphite-identifier` | bestimmt den Speicherpfad für die TSDB                                                           | `"graphite-identifier": "development-system"`         |
+|                       | wird bei Cloud-Services benötigt                                                                 |                                                       |
+| `ports`               | überschreibt die feste default Portliste der CoreMedia Applikationen mit einem eigen Portbereich | `"ports": [50199,51099]`                              |
+|                       | dadurch ist es möglich auf ggf. geänderte Portbereiche Rücksicht nehmen zu können                |                                                       |
+| `display-name`        | ändert den Anzeigenamen in _Grafana_                                                             | `"display-name": "foo.bar.com"`                       |
+| `services`            | **ergänzt** die durch die Service-Discovery gefundenen Services                                  | `"services": ["cae-live","content-managment-server"]` |
+|                       | dadurch ist es möglich, eine definierte Liste von Services festzulegen, die existieren müssen    |                                                       |
+
 
 #### kompletter Aufruf
 ```
@@ -152,7 +165,7 @@ Auch hier ist es möglich das löschen über `--data` Parameter feingranular zu 
 
 Aktuell funktionieren folgende Paramaeter:
 
-| Paramerter   | Typ     | default | Beschreibung |
+| Parameter   | Typ     | default | Beschreibung |
 | :---------   | :-----: | :-----: | :----------- |
 | `force`      | bool    | false   | wenn `true` gesetzt ist, werden alle vorher gefundenen Informationen über die Node gelöscht **ACHTUNG** dazu zählt auch eine ggf. vorher durchgefürte _Custom Configuration_ |
 | `icinga`     | bool    | true    | deaktiviert den Icinga Support |
