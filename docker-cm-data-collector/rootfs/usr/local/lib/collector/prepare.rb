@@ -70,15 +70,15 @@ module DataCollector
       start = Time.now
 
       #
-      tomcatApplication = Marshal.load( Marshal.dump( @cfg.jolokiaApplications ) )
+#      tomcatApplication = Marshal.load( Marshal.dump( @cfg.jolokiaApplications ) )
 
 #       logger.debug( tomcatApplication )
 
-      testData = @cfg.jolokiaApplications.clone
+      tomcatApplication = @cfg.jolokiaApplications.clone
 
-      if( tomcatApplication == testData )
-        logger.debug( 'identical' )
-      end
+#       if( tomcatApplication == testData )
+#         logger.debug( 'identical' )
+#       end
 
       # Redis based
       data = @redis.discoveryData( { :short => short } )
@@ -123,6 +123,8 @@ module DataCollector
 
 
     def mergeData( service, tomcatApplication, data = {} )
+
+      logger.debug( "mergeData( #{service} )" )
 
       metricsTomcat     = tomcatApplication.dig('tomcat')      # standard metrics for Tomcat
 
