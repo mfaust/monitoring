@@ -1008,7 +1008,7 @@ module Storage
         return false
       end
 
-      result = nil
+      result = Array.new
       ip     = params.dig(:ip)
       name   = params.dig(:short)
       fqdn   = params.dig(:fqdn)
@@ -1016,24 +1016,57 @@ module Storage
 
       logger.debug( " nodes( #{params} )")
 
+      w = Array.new
 
+      if( ip != nil )
+        w << sprintf( 'ip like \'%%%s%%\'', ip )
+      end
+      if( name != nil )
+        w << sprintf( 'name like \'%%%s%%\'', name )
+      end
+      if( fqdn != nil )
+        w << sprintf( 'fqdn like \'%%%s%%\'', fqdn )
+      end
       if( status != nil )
-        w = sprintf( 'WHERE status = \'%s\'' )
+
+        status = case status
+          when Storage::MySQL::ONLINE
+            'online'
+          when  Storage::MySQL::OFFLINE
+            'offline'
+          when Storage::MySQL::DELETE
+            'delete'
+          when Storage::MySQL::PREPARE
+            'prepare'
+          else
+            'unknown'
+          end
+        w << sprintf( 'status = \'%s\'', status )
+      end
+
+      if( w.count != 0 )
+        w = w.join( ' or ' )
+        w = sprintf( 'where %s', w )
       else
         w = nil
       end
 
-      statement = sprintf('SELECT ip, name, fqdn, status FROM dns %s', w )
-      logger.debug( statement )
+      statement = sprintf('SELECT ip, name, fqdn, status FROM dns %s', w  )
 
-      result    = @client.query( statement, :as => :hash )
+#       logger.debug( statement )
 
-      if( result.count != 0 )
+      res    = @client.query( statement, :as => :hash )
 
-        headers = result.fields # <= that's an array of field names, in order
-        result.each(:as => :hash) do |row|
-          return row
+      if( res.count != 0 )
+
+        headers = res.fields # <= that's an array of field names, in order
+        res.each(:as => :hash) do |row|
+
+          result << row.dig('fqdn')
+#           logger.debug( row )
         end
+
+        return result
       end
 
       return nil
@@ -1055,6 +1088,40 @@ module Storage
 
 
     def setStatus( params = {} )
+
+      if( ! @client )
+        return false
+      end
+
+      ip     = params.dig(:ip)
+      name   = params.dig(:short)
+      fqdn   = params.dig(:fqdn)
+      status = params.dig(:status) # Database::ONLINE
+
+      logger.debug( " status( #{params} )")
+
+      w = Array.new
+
+      if( status != nil )
+
+        status = case status
+          when Storage::MySQL::ONLINE
+            'online'
+          when  Storage::MySQL::OFFLINE
+            'offline'
+          when Storage::MySQL::DELETE
+            'delete'
+          when Storage::MySQL::PREPARE
+            'prepare'
+          else
+            'unknown'
+          end
+        w << sprintf( 'status = \'%s\'', status )
+      end
+
+
+
+      return
 
       if( self.checkDatabase() == false )
         return false
@@ -1131,7 +1198,6 @@ module Storage
       logger.debug( " status( #{params} )")
 
       statement = sprintf('SELECT ip, name, fqdn, status FROM dns WHERE ip = \'%s\' or name = \'%s\' or fqdn = \'%s\'', ip, name, fqdn )
-#      logger.debug( statement )
       result    = @client.query( statement, :as => :hash )
 
       if( result.count != 0 )
@@ -1143,26 +1209,12 @@ module Storage
       end
 
       return nil
-
-
-#       rec = @database[:v_status].select( :ip, :shortname, :created, :status ).where(
-#         Sequel[:ip        => ip.to_s] | Sequel[:short => short.to_s]
-#       ).to_a
-#
-#       if( rec.count() == 0 )
-#         return nil
-#       else
-#
-#         return {
-#           :ip        => rec.first[:ip].to_s,
-#           :short => rec.first[:shortname].to_s,
-#           :created   => rec.first[:created].to_s,
-#           :status    => rec.first[:status].to_i
-#         }
-#
-#       end
-
     end
+
+
+
+
+
 
 
   end

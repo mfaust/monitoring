@@ -53,13 +53,14 @@ r.createDNS( dns )
 r.createDNS( { :ip => '127.0.1.1', :short => "foo-bar", :fqdn => "foo-bar.tld" } )
 
 puts '  - read'
+puts r.dnsData()
 puts r.dnsData( dns )
 puts r.dnsData( { :short => "foo-bar" } )
 
-puts '  - remove'
-puts r.removeDNS( { :short => "foo-bar" } )
-puts r.dnsData( { :short => short } )
-puts r.dnsData( { :short => "foo-bar" } )
+# puts '  - remove'
+# puts r.removeDNS( { :short => "foo-bar" } )
+# puts r.dnsData( { :short => short } )
+# puts r.dnsData( { :short => "foo-bar" } )
 
 
 puts ''
@@ -67,18 +68,19 @@ puts 'status:'
 puts '  - read'
 puts r.status( { :short => short } )
 
-# puts '  - set'
-# r.setStatus( { :short => short, :status => Storage::RedisClient::ONLINE } )
-# puts '  - get'
-# puts r.status( { :short => short } )
+puts '  - set'
+r.setStatus( { :short => short, :status => Storage::MySQL::ONLINE } )
+puts '  - get'
+puts r.status( { :short => short } )
 
 puts ''
 puts 'nodes: '
 puts '  - read'
 puts " - #{r.nodes()}"
-puts " - #{r.nodes( { :short => short } )}"
-puts " - #{r.nodes( { :status => 99 } )}"
-puts " - #{r.nodes( { :status => 1 } )}"
+puts " - #{r.nodes( { :ip => '127.0.1.1', :short => short } )}"
+puts " - #{r.nodes( { :status => Storage::MySQL::DELETE } )}"
+puts " - #{r.nodes( { :status => Storage::MySQL::ONLINE } )}"
+puts " - #{r.nodes( { :short=>"master-17-tomcat", :status => Storage::MySQL::PREPARE } )}"
 puts '--------'
 
 # puts '  - create'
