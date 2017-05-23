@@ -71,11 +71,11 @@ module ExternalDiscovery
       end
 
 #      name.gsub!('-','')
-      name.gsub!('development-','dev-')
-      name.gsub!('production-' ,'prod-')
+      name.gsub!('development-','dev ')
+      name.gsub!('production-' ,'prod ')
       name.gsub!('caepreview'  ,'cae preview')
-      name.gsub!('management-' ,'mgmt-')
-      name.gsub!('delivery-'   ,'live-')
+      name.gsub!('management-' ,'mgmt ')
+      name.gsub!('delivery-'   ,'deli ')
       name.gsub!( '-',' ' )
 
 #       name = case name
