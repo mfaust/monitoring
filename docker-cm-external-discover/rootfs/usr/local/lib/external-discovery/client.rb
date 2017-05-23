@@ -67,14 +67,15 @@ module ExternalDiscovery
     def normalizeName( name, filter = [] )
 
       filter.each do |f|
-
         name.gsub!( f, '' )
       end
 
 #      name.gsub!('-','')
-      name.gsub!('development-','dev ')
-      name.gsub!('production-' ,'prod ')
-      name.gsub!('caepreview' , 'cae preview')
+      name.gsub!('development-','dev- ')
+      name.gsub!('production-' ,'prod-')
+      name.gsub!('caepreview'  ,'cae preview')
+      name.gsub!('management-' ,'mgmt-')
+      name.gsub!('delivery-'   ,'live-')
       name.gsub!( '-',' ' )
 
 #       name = case name
@@ -110,6 +111,8 @@ module ExternalDiscovery
       name.gsub!('development-','dev-')
       name.gsub!('production-' ,'prod-')
       name.gsub!('storage-'    , '')
+      name.gsub!('management-' ,'mgmt-')
+      name.gsub!('delivery-'   ,'live-')
       name.gsub!(' ', '-')
 
       return name
@@ -225,12 +228,13 @@ module ExternalDiscovery
         end
 
         if( cname == nil || cname == '.' )
-          logger.warn( "cname for '#{name}' are not configured, take #{name}" )
-          next
+          logger.warn( "  cname for '#{name}' are not configured, take #{name}" )
+          cname = name
+#          next
         end
 
         if( tier == nil || tier == 'service' )
-          logger.warn( "wrong tier #{tier} - '#{name}' will be ignored ..." )
+          logger.warn( "  wrong tier #{tier} - '#{name}' will be ignored ..." )
           next
         end
 
@@ -242,11 +246,11 @@ module ExternalDiscovery
         end
 
         if( historicData.include?( dns_short ) ||  historicData.include?( fqdn ) )
-          logger.info( sprintf( 'node %s / %s (%s) exists', uuid, dns_fqdn, cname ) )
+          logger.info( sprintf( '  node %s / %s (%s) exists', uuid, dns_fqdn, cname ) )
           next
         end
 
-        logger.info( sprintf( 'add node %s / %s (%s)', uuid, dns_fqdn, cname ) )
+        logger.info( sprintf( '  add node %s / %s (%s)', uuid, dns_fqdn, cname ) )
 
         if( self.nodeAdd( { :ip => ip, :short => short, :fqdn => fqdn, :cname => cname, :name => name, :customer => customer, :environment => environment, :tier => tier, :tags => tags } ) == true )
 
@@ -352,8 +356,6 @@ module ExternalDiscovery
 
             if( self.nodeAdd( { :ip => ip, :short => short, :fqdn => fqdn, :cname => cname, :name => name, :customer => customer, :environment => environment, :tier => tier, :tags => tags } ) == true )
 
-#               newArray << l
-
               sleep(5)
             end
 
@@ -429,7 +431,7 @@ module ExternalDiscovery
       # - grafana    = true
       # - annotation = true
       d = JSON.generate( {
-        :force      => true,
+        :force      => false,
         :tags       => useableTags,
         :config     => {
           'display-name'        => self.normalizeName( name, [ 'storage-' ] ),
