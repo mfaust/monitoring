@@ -7,6 +7,11 @@ version: '2.0'
 
 services:
 
+  database:
+    environment:
+      # MYSQL_SYSTEM_USER:
+      MYSQL_ROOT_PASS: database.pass
+
   icinga2-satellite:
     environment:
       # MYSQL_HOST: database
@@ -142,6 +147,7 @@ services:
       # we need the cluster-mode!
       ICINGA_CLUSTER: 'true'
       ICINGA_CLUSTER_SATELLITE: icinga2-satellite
+      ENABLE_NOTIFICATIONS: 'true'
       MQ_HOST: beanstalkd
       # MQ_PORT: 11300
       # MQ_QUEUE: mq-icinga

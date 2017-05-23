@@ -204,8 +204,11 @@ services:
       ICINGA_API_PASSWORD: icinga
       # ICINGA_CLUSTER: 'false'
       # ICINGA_CLUSTER_SATELLITE:
+      ENABLE_NOTIFICATIONS: 'true'
       MQ_HOST: beanstalkd
       # MQ_PORT: 11300
       # MQ_QUEUE: mq-icinga
+      REDIS_HOST: redis
+      # REDIS_PORT: 6379
 
 
