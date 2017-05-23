@@ -75,7 +75,7 @@ module ExternalDiscovery
       name.gsub!('production-' ,'prod ')
       name.gsub!('caepreview'  ,'cae preview')
       name.gsub!('management-' ,'mgmt ')
-      name.gsub!('delivery-'   ,'deli ')
+      name.gsub!('delivery-'   ,'live ')
       name.gsub!( '-',' ' )
 
 #       name = case name
