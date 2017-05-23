@@ -71,7 +71,7 @@ module ExternalDiscovery
       end
 
 #      name.gsub!('-','')
-      name.gsub!('development-','dev- ')
+      name.gsub!('development-','dev-')
       name.gsub!('production-' ,'prod-')
       name.gsub!('caepreview'  ,'cae preview')
       name.gsub!('management-' ,'mgmt-')
