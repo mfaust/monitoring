@@ -48,7 +48,7 @@ module Icinga
         "templates" => [ "generic-host" ],
         "attrs" => {
           "address"              => fqdn,
-          "display_name"         => host,
+          "display_name"         => self.nodeTag( host ),
           "max_check_attempts"   => 3,
           "check_interval"       => 60,
           "retry_interval"       => 45,

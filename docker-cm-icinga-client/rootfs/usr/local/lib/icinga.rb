@@ -56,10 +56,6 @@ module Icinga
       redisHost             = settings.dig(:redis, :host)
       redisPort             = settings.dig(:redis, :port)             || 6379
 
-#       mqHost                = params.dig(:mqHost)        || 'localhost'
-#       mqPort                = params.dig(:mqPort)        || 11300
-#       @mqQueue              = params.dig(:mqQueue)       || 'mq-icinga'
-
       @icingaApiUrlBase     = sprintf( 'https://%s:%d', @icingaHost, @icingaApiPort )
       @nodeName             = Socket.gethostbyname( Socket.gethostname ).first
 
@@ -69,8 +65,8 @@ module Icinga
         :beanstalkQueue => @mqQueue
       }
 
-      version              = '1.4.0'
-      date                 = '2017-03-25'
+      version              = '1.4.4'
+      date                 = '2017-05-23'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' Icinga2 Management' )
