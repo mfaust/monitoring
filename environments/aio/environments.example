@@ -1,0 +1,214 @@
+---
+# environment variables for all services that need this
+# all commented out vars are set into the containers with the correct value
+# they are only examples and documentation
+
+version: '2.0'
+
+services:
+
+  database:
+    environment:
+      # MYSQL_SYSTEM_USER:
+      MYSQL_ROOT_PASS: database.pass
+
+  graphite:
+    environment:
+      # DATABASE_TYPE: sqlite
+      # MYSQL_HOST:
+      # MYSQL_PORT: 3306
+      # MYSQL_ROOT_USER: root
+      # MYSQL_ROOT_PASS:
+      REDIS_HOST: redis
+      # REDIS_PORT: 6379
+      # DATABASE_GRAPHITE_PASS: graphite
+      #
+      # THIS TURN OFF THE INTERNAL CARBON!
+      # USE THIS ONLY WITH AN OTHER CARBON-WRITER (e.g. bodsch/docker-go-carbon)
+      USE_EXTERNAL_CARBON: 'true'
+
+  grafana:
+    environment:
+      ORGANISATION: CoreMedia
+      DATABASE_TYPE: mysql
+      MYSQL_HOST: database
+      # MYSQL_PORT: 3306
+      # MYSQL_ROOT_USER: root
+      MYSQL_ROOT_PASS: database.pass
+      GRAPHITE_HOST: graphite
+      # GRAPHITE_PORT: 2003
+      # GRAPHITE_HTTP_PORT: 8080
+      #
+      # WE USE AN SEPERATE CARBON SERVICE
+      # IF NOT, THEN SET THEN TO $GRAPHITE_HOST
+      # (see above in this configuration part!)
+      CARBON_HOST: carbon
+      # CARBON_PORT: 2003
+      MEMCACHE_HOST: memcached
+      # MEMCACHE_PORT: 11211
+      REDIS_HOST: redis
+      # REDIS_PORT: 6379
+      # DATABASE_GRAFANA_PASS: grafana
+
+  icinga2-master:
+    environment:
+      MYSQL_HOST: database
+      # MYSQL_PORT: 3306
+      # MYSQL_ROOT_USER: root
+      MYSQL_ROOT_PASS: database.pass
+      IDO_PASSWORD: ido.pass
+      IDO_DATABASE_NAME: icinga2core
+      # IDO_PASSWORD:
+      # CARBON_HOST: carbon
+      # CARBON_PORT: 2003
+      # DASHING_API_USER: dashing
+      # DASHING_API_PASS: dashing.pass
+      ICINGA_CLUSTER: 'false'
+      ICINGA_MASTER: icinga2-master
+      # ICINGA_CERT_SERVICE: 'false'
+      # ICINGA_CERT_SERVICE_BA_USER: admin
+      # ICINGA_CERT_SERVICE_BA_PASSWORD: admin
+      # ICINGA_CERT_SERVICE_API_USER:
+      # ICINGA_CERT_SERVICE_API_PASSWORD:
+      # ICINGA_CERT_SERVICE_SERVER: localhost
+      # ICINGA_CERT_SERVICE_PORT: 80
+      ICINGA_API_USERS: root:icinga,icingaweb:icingaweb,dashing:dashing,cert:foo-bar
+      REDIS_HOST: redis
+      # REDIS_PORT: 6379
+      # Useful to send notification via email
+      # ICINGA_SSMTP_RELAY_SERVER:
+      # ICINGA_SSMTP_REWRITE_DOMAIN:
+      # ICINGA_SSMTP_RELAY_USE_STARTTLS:
+      # ICINGA_SSMTP_SENDER_EMAIL:
+      # ICINGA_SSMTP_SMTPAUTH_USER:
+      # ICINGA_SSMTP_SMTPAUTH_PASS:
+      # ICINGA_SSMTP_ALIASES:
+
+
+  icingaweb2:
+    environment:
+      MYSQL_HOST: database
+      # MYSQL_PORT: 3306
+      # MYSQL_ROOT_USER: root
+      MYSQL_ROOT_PASS: database.pass
+      # ICINGA2_HOST: icinga2-master
+      # ICINGA2_CMD_API_USER: command-api-user
+      # ICINGA2_CMD_API_PASS: command-api-pass
+      IDO_PASSWORD: ido.pass
+      IDO_DATABASE_NAME: icinga2core
+      # GRAPHITE_HOST:
+      # GRAPHITE_PORT:
+      # ICINGAWEB_ADMIN_USER: icinga
+      # ICINGAWEB_ADMIN_PASS: icinga
+      # LIVESTATUS_HOST:
+      # LIVESTATUS_PORT:
+      ICINGA2_HOST: icinga2-master
+      # ICINGA2_PORT: 5665
+      ICINGA2_CMD_API_USER: icingaweb
+      ICINGA2_CMD_API_PASS: icingaweb
+
+  cm-rest-service:
+    environment:
+      TZ: 'Europe/Berlin'
+      REST_SERVICE_PORT: 45678
+      REST_SERVICE_BIND: '0.0.0.0'
+      MQ_HOST: beanstalkd
+      # MQ_PORT: 11300
+      # MQ_QUEUE: mq-rest-service
+      REDIS_HOST: redis
+      # REDIS_PORT: 6379
+      # when we need an DNS entry for external services, we can use ADDITIONAL_DNS
+      # its an comma seperated list with following syntax:
+      # HOSTNAME:IP,HOSTNAME:IP, ...
+      # e.g.:
+      # ADDITIONAL_DNS: 'blueprint-box:192.168.252.100,nginx-proxy:192.168.252.5'
+      ADDITIONAL_DNS: 'blueprint-box:192.168.252.100,tomcat-centos7:192.168.252.100'
+
+  cm-service-discovery:
+    environment:
+      TZ: 'Europe/Berlin'
+      JOLOKIA_HOST: jolokia
+      # JOLOKIA_PORT: 8080
+      # JOLOKIA_PATH: /jolokia
+      # JOLOKIA_AUTH_USER:
+      # JOLOKIA_AUTH_PASS:
+      REDIS_HOST: redis
+      # REDIS_PORT: 6379
+      MQ_HOST: beanstalkd
+      # MQ_PORT: 11300
+      # MQ_QUEUE: mq-discover
+      INTERVAL: 20
+
+  cm-data-collector:
+    environment:
+      TZ: 'Europe/Berlin'
+      JOLOKIA_HOST: jolokia
+      # JOLOKIA_PORT: 8080
+      # JOLOKIA_PATH: /jolokia
+      # JOLOKIA_AUTH_USER:
+      # JOLOKIA_AUTH_PASS:
+      MQ_HOST: beanstalkd
+      # MQ_PORT: 11300
+      # MQ_QUEUE: mq-collector
+      REDIS_HOST: redis
+      # REDIS_PORT: 6379
+      INTERVAL: 20
+
+  cm-carbon-client:
+    environment:
+      TZ: 'Europe/Berlin'
+      # USE ONLY WITH AND EXTERNAL CARBON-WRITER!
+      GRAPHITE_HOST: carbon
+      # GRAPHITE_PORT: 2003
+      REDIS_HOST: redis
+      # REDIS_PORT: 6379
+      # INTERVAL: 20
+
+  cm-grafana-client:
+    environment:
+      TZ: 'Europe/Berlin'
+      GRAFANA_HOST: nginx
+      # GRAFANA_PORT: 80
+      # GRAFANA_URL_PATH: /grafana
+      # GRAFANA_API_USER: admin
+      # GRAFANA_API_PASSWORD: admin
+      # GRAFANA_TEMPLATE_PATH: /usr/local/share/templates/grafana
+      REDIS_HOST: redis
+      # REDIS_PORT: 6379
+      MQ_HOST: beanstalkd
+      # MQ_PORT: 11300
+      # MQ_QUEUE: mq-grafana
+      RUN_DELAY: 40
+
+  cm-graphite-client:
+    environment:
+      TZ: 'Europe/Berlin'
+      GRAPHITE_HOST: nginx
+      # GRAPHITE_PORT: 2003
+      GRAPHITE_HTTP_PORT: 80
+      GRAPHITE_PATH: /graphite
+      MQ_HOST: beanstalkd
+      # MQ_PORT: 11300
+      # MQ_QUEUE: mq-graphite
+      REDIS_HOST: redis
+      # REDIS_PORT: 6379
+      # INTERVAL: 15
+      # RUN_DELAY: 10
+
+  cm-icinga-client:
+    environment:
+      TZ: 'Europe/Berlin'
+      ICINGA_HOST: icinga2-master
+      # ICINGA_API_PORT: 5665
+      ICINGA_API_USER: root
+      ICINGA_API_PASSWORD: icinga
+      # ICINGA_CLUSTER: 'false'
+      # ICINGA_CLUSTER_SATELLITE:
+      ENABLE_NOTIFICATIONS: 'true'
+      MQ_HOST: beanstalkd
+      # MQ_PORT: 11300
+      # MQ_QUEUE: mq-icinga
+      REDIS_HOST: redis
+      # REDIS_PORT: 6379
+
+
