@@ -125,7 +125,8 @@ module CarbonData
 
       def replicatorData()
 
-        result       = []
+        result                  = []
+        completedSequenceNumber = 0
 
         replicatorData = @mbean.bean( @identifier, @serviceName, 'Replicator' )
 

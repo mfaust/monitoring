@@ -243,13 +243,13 @@ module Grafana
 
           for y in 1..30
 
-            result = @redis.measurements( { :short => host } )
+            result = @redis.measurements( { :short => short } )
 
             if( result != nil )
               measurements = result
               break
             else
-              logger.debug( sprintf( 'wait for measurements data for node \'%s\' ... %d', host, y ) )
+              logger.debug( sprintf( 'wait for measurements data for node \'%s\' ... %d', short, y ) )
               sleep( 4 )
             end
           end
