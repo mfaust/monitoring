@@ -56,6 +56,8 @@ module Icinga
         }
       }
 
+      # TODO: add groups
+      #
       if( ! services.empty? )
         payload['attrs']['vars'] = services
       end
@@ -145,9 +147,6 @@ module Icinga
 
       host             = params.dig(:host) || nil
 
-#       discoveryStatus  = Hash.new
-#       discoveryPayload = Hash.new
-
       # in first, we need the discovered services ...
       logger.debug( sprintf( 'in first, we need information from discovery service for node \'%s\'', host ) )
 
@@ -188,71 +187,6 @@ module Icinga
       logger.debug( JSON.pretty_generate( payload ) )
 
       return payload
-
-
-#       logger.debug( 'send message to \'mq-discover\'' )
-#
-#       self.sendMessage( { :cmd => 'info', :node => host, :queue => 'mq-discover', :payload => {}, :prio => 2, :ttr => 1, :delay => 8 } )
-#
-#       for y in 1..30
-#
-#         result      = @mqConsumer.getJobFromTube('mq-discover-info')
-#
-#         logger.debug( result.class.to_s )
-#         logger.debug( result )
-#
-# #         body        = result.dig( :body )
-# #         node        = body.dig( 'node' )
-# #         services    = body.dig( 'payload', 'services' )
-#
-#         if( result.is_a?( Hash ) && result.count != 0 && result.dig( :body, 'payload', 'services' ) )
-#
-#           discoveryStatus = result
-#           break
-#         else
-#           logger.debug( sprintf( 'Waiting for data %s from %s ... %d', host, 'mq-discover-info', y ) )
-#           sleep( 5 )
-#         end
-#       end
-#
-#       if( discoveryStatus == nil )
-#         logger.warn( 'we hab no discovery datas' )
-#         logger.debug( discoveryStatus )
-#
-#         return {}
-#       end
-#
-#       discoveryPayload = discoveryStatus.dig( :body, 'payload' )
-#       services         = discoveryStatus.dig( :body, 'payload', 'services' )
-#
-#       discoveryPayload.reject! { |k| k == 'status' }
-#       discoveryPayload.reject! { |k| k == 'mode' }
-#
-#       if( services != nil )
-#
-#         services.each do |s|
-#
-#           logger.debug( " => service #{s}" )
-#
-#           if( s.last != nil )
-#             s.last.reject! { |k| k == 'template' }
-#             s.last.reject! { |k| k == 'application' }
-#           end
-#         end
-#
-#         if( discoveryPayload.is_a?( Hash ) )
-#           discoveryPayload = discoveryPayload.to_json
-#         end
-#
-#         payload = JSON.parse( discoveryPayload.split('"services":').join('"coremedia":') )
-#       else
-#
-#         payload = {}
-#       end
-#
-#       logger.debug( JSON.pretty_generate( payload ) )
-#
-#       return payload
 
     end
 
