@@ -17,15 +17,15 @@ applicationConfigFile = '/etc/cm-application.yaml'
 serviceConfigFile     = '/etc/cm-service.yaml'
 
 
-jolokiaHost      = ENV.fetch('JOLOKIA_HOST'     , 'localhost' )
+jolokiaHost      = ENV.fetch('JOLOKIA_HOST'     , 'jolokia' )
 jolokiaPort      = ENV.fetch('JOLOKIA_PORT'     , 8080 )
 jolokiaPath      = ENV.fetch('JOLOKIA_PATH'     , '/jolokia' )
 jolokiaAuthUser  = ENV.fetch('JOLOKIA_AUTH_USER', nil )
 jolokiaAuthPass  = ENV.fetch('JOLOKIA_AUTH_PASS', nil )
-mqHost           = ENV.fetch('MQ_HOST'          , 'localhost' )
+mqHost           = ENV.fetch('MQ_HOST'          , 'beanstalkd' )
 mqPort           = ENV.fetch('MQ_PORT'          , 11300 )
 mqQueue          = ENV.fetch('MQ_QUEUE'         , 'mq-collector' )
-redisHost        = ENV.fetch('REDIS_HOST'       , 'localhost' )
+redisHost        = ENV.fetch('REDIS_HOST'       , 'redis' )
 redisPort        = ENV.fetch('REDIS_PORT'       , 6379 )
 # scanDiscovery    = ENV.fetch('SCAN_DISCOVERY'   , '10m' )
 interval         = ENV.fetch('INTERVAL'         , 20 )

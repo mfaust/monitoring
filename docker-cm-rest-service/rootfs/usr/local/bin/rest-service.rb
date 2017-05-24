@@ -31,10 +31,10 @@ module Sinatra
 
       @restServicePort  = ENV.fetch( 'REST_SERVICE_PORT', 4567 )
       @restServiceBind  = ENV.fetch( 'REST_SERVICE_BIND', '0.0.0.0' )
-      @mqHost           = ENV.fetch( 'MQ_HOST'          , 'localhost' )
+      @mqHost           = ENV.fetch( 'MQ_HOST'          , 'beanstalkd' )
       @mqPort           = ENV.fetch( 'MQ_PORT'          , 11300 )
       @mqQueue          = ENV.fetch( 'MQ_QUEUE'         , 'mq-rest-service' )
-      @redisHost        = ENV.fetch( 'REDIS_HOST'       , 'localhost' )
+      @redisHost        = ENV.fetch( 'REDIS_HOST'       , 'redis' )
       @redisPort        = ENV.fetch( 'REDIS_PORT'       , 6379 )
 
       FileUtils.chmod( 1775, @logDirectory )

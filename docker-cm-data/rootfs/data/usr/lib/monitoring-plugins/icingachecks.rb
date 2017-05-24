@@ -28,7 +28,7 @@ class Icinga2Check
 
   def initialize( settings = {} )
 
-    redisHost    = ENV.fetch( 'REDIS_HOST'       , 'localhost' )
+    redisHost    = ENV.fetch( 'REDIS_HOST'       , 'redis' )
     redisPort    = ENV.fetch( 'REDIS_PORT'       , 6379 )
 
 #     memcacheHost = ENV['MEMCACHE_HOST'] ? ENV['MEMCACHE_HOST'] : nil
