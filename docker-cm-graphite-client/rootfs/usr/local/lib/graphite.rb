@@ -16,6 +16,7 @@ require_relative 'logging'
 require_relative 'cache'
 require_relative 'storage'
 require_relative 'message-queue'
+require_relative 'graphite/tools'
 require_relative 'graphite/annotations'
 require_relative 'graphite/queue'
 
@@ -27,6 +28,7 @@ module Graphite
 
     include Logging
 
+    include Graphite::Tools
     include Graphite::Annotions
     include Graphite::Queue
 
