@@ -1,17 +1,17 @@
 
-FROM alpine:latest
+FROM alpine:3.6
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
-  ALPINE_MIRROR="dl-cdn.alpinelinux.org" \
-  ALPINE_VERSION="v3.5" \
+  ALPINE_MIRROR="mirror1.hs-esslingen.de/pub/Mirrors" \
+  ALPINE_VERSION="v3.6" \
   TERM=xterm \
   APK_ADD="build-base bind-tools curl drill imagemagick-dev ruby-dev ruby-irb ruby-io-console ruby-rdoc zlib zlib-dev" \
   APK_DEL="build-base imagemagick-dev ruby-dev ruby-io-console zlib-dev" \
   GEMS="beaneater bigdecimal fileutils ipaddress resolve-hostname redis rufus-scheduler sinatra thin tzinfo-data"
 
-LABEL version="1704-03.1"
+LABEL version="1705-04.1"
 
 # ---------------------------------------------------------------------------------------
 

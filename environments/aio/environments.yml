@@ -21,6 +21,7 @@ services:
 
   grafana:
     environment:
+      URL_PATH: /grafana/
       ORGANISATION: CoreMedia
       DATABASE_TYPE: mysql
       MYSQL_HOST: database

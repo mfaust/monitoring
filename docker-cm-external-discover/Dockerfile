@@ -1,17 +1,17 @@
 
-FROM alpine:latest
+FROM alpine:3.6
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
-  ALPINE_MIRROR="dl-cdn.alpinelinux.org" \
-  ALPINE_VERSION="edge" \
+  ALPINE_MIRROR="mirror1.hs-esslingen.de/pub/Mirrors" \
+  ALPINE_VERSION="v3.6" \
   TERM=xterm \
   APK_ADD="build-base bind-tools drill ruby ruby-dev" \
   APK_DEL="build-base ruby-dev" \
   GEMS="aws-sdk ipaddress json rest-client rufus-scheduler time_difference tzinfo-data"
 
-LABEL version="1704-03.1"
+LABEL version="1705-04.1"
 
 # ---------------------------------------------------------------------------------------
 

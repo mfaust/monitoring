@@ -3,7 +3,7 @@ FROM busybox:latest
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
-LABEL version="1704-03.2"
+LABEL version="1705-04.1"
 
 # ---------------------------------------------------------------------------------------
 
