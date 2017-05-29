@@ -69,7 +69,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.master-17-tomcat.$Application.MemoryPool.Par_Eden_Space.committed)",
+                "target": "aliasByMetric(carbon-writer.$host.$Application.MemoryPool.Par_Eden_Space.committed)",
                 "textEditor": false
               },
               {

@@ -4,7 +4,7 @@
         "height": "100px",
         "panels": [
           {
-            "content": "<h3><center><bold><a href=\"/grafana/dashboard/db/%SHORTHOST%-feeder-live\">Feeder Live</a></bold></center></h3>",
+            "content": "<h3><center><bold><a href=\"/grafana/dashboard/db/%SHORTHOST%-cae-feeder-live\">Feeder Live</a></bold></center></h3>",
             "editable": true,
             "error": false,
             "id": 27,
