@@ -34,7 +34,7 @@ module Graphite
         # str = str + (60 * 60 * 2)
         _when = Time.parse(str.to_s).to_i
       else
-          _when = @timestamp
+        _when = @timestamp
       end
 
       uri = URI( @graphiteURI )
@@ -109,7 +109,8 @@ module Graphite
         time     = Time.at( @timestamp ).strftime( '%Y-%m-%d %H:%M:%S' )
       end
 
-      tag << host
+#      tag << host
+      tag << self.nodeTag( host )
 
       case type
       when 'create'
@@ -139,7 +140,8 @@ module Graphite
         time     = Time.at( @timestamp ).strftime( '%Y-%m-%d %H:%M:%S' )
       end
 
-      tag << host
+#      tag << host
+      tag << self.nodeTag( host )
       tag << 'loadtest'
 
       case type
@@ -168,7 +170,8 @@ module Graphite
         time     = Time.at( @timestamp ).strftime( '%Y-%m-%d %H:%M:%S' )
       end
 
-      tag << host
+#      tag << host
+      tag << self.nodeTag( host )
       tag << 'deployment'
 
       if( tags.count != 0 )
@@ -195,7 +198,8 @@ module Graphite
         time     = Time.at( @timestamp ).strftime( '%Y-%m-%d %H:%M:%S' )
       end
 
-      tag << host
+#      tag << host
+      tag << self.nodeTag( host )
       tag.push( customTags )
 
       message = sprintf( '%s <b>%s</b> (%s)', descr, host, time )

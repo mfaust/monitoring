@@ -8,7 +8,6 @@ module CarbonData
 
       result    = []
       mbean     = 'CapConnection'
-#       format    = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
       value     = data.dig('value')
 
       # defaults
@@ -47,49 +46,36 @@ module CarbonData
 
 
       result << {
-        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @Host, @Service, mbean, 'blob', 'cache', 'size' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'blob', 'cache', 'size' ),
         :value => blobCacheSize
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @Host, @Service, mbean, 'blob', 'cache', 'used' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'blob', 'cache', 'used' ),
         :value => blobCacheLevel
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @Host, @Service, mbean, 'blob', 'cache', 'fault' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'blob', 'cache', 'fault' ),
         :value => blobCacheFaults
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @Host, @Service, mbean, 'blob', 'cache', 'used_percent' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'blob', 'cache', 'used_percent' ),
         :value => blobCachePercent
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @Host, @Service, mbean, 'heap', 'cache', 'size' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'heap', 'cache', 'size' ),
         :value => heapCacheSize
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @Host, @Service, mbean, 'heap', 'cache', 'used' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'heap', 'cache', 'used' ),
         :value => heapCacheLevel
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @Host, @Service, mbean, 'heap', 'cache', 'fault' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'heap', 'cache', 'fault' ),
         :value => heapCacheFaults
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @Host, @Service, mbean, 'heap', 'cache', 'used_percent' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'heap', 'cache', 'used_percent' ),
         :value => heapCachePercent
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'su_sessions', 'sessions' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'su_sessions', 'sessions' ),
         :value => suSessions
       } << {
-        :key   => sprintf( '%s.%s.%s.%s'      , @Host, @Service, mbean, 'open' ),
+        :key   => sprintf( '%s.%s.%s.%s'      , @identifier, @Service, mbean, 'open' ),
         :value => open
       }
-
-#       result.push( sprintf( format, @Host, @Service, mbean, 'blob_cache', 'size'        , @interval, blobCacheSize ) )
-#       result.push( sprintf( format, @Host, @Service, mbean, 'blob_cache', 'used'        , @interval, blobCacheLevel ) )
-#       result.push( sprintf( format, @Host, @Service, mbean, 'blob_cache', 'fault'       , @interval, blobCacheFaults ) )
-#       result.push( sprintf( format, @Host, @Service, mbean, 'blob_cache', 'used_percent', @interval, blobCachePercent ) )
-#
-#       result.push( sprintf( format, @Host, @Service, mbean, 'heap_cache', 'size'        , @interval, heapCacheSize ) )
-#       result.push( sprintf( format, @Host, @Service, mbean, 'heap_cache', 'used'        , @interval, heapCacheLevel ) )
-#       result.push( sprintf( format, @Host, @Service, mbean, 'heap_cache', 'fault'       , @interval, heapCacheFaults ) )
-#       result.push( sprintf( format, @Host, @Service, mbean, 'heap_cache', 'used_percent', @interval, heapCachePercent ) )
-#
-#       result.push( sprintf( format, @Host, @Service, mbean, 'su_sessions', 'sessions'   , @interval, suSessions ) )
-#       result.push( sprintf( format, @Host, @Service, mbean, 'open'       , 'open'       , @interval, open ) )
 
       return result
 
@@ -102,8 +88,8 @@ module CarbonData
       mbean   = 'MemoryPool'
       value   = data.dig('value')
       request = data.dig('request')
-      bean    = data.dig('request', 'mbean') # ( request != nil && request['mbean'] ) ? request['mbean'] : nil
-      usage   = data.dig('value', 'Usage')   # ( value != nil && ['Usage'] )          ? value['Usage']   : nil
+      bean    = data.dig('request', 'mbean')
+      usage   = data.dig('value', 'Usage')
 
       # defaults
       init      = 0
@@ -131,19 +117,19 @@ module CarbonData
 
 
       result << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, mbeanName, 'init' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, mbeanName, 'init' ),
         :value => init
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, mbeanName, 'committed' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, mbeanName, 'committed' ),
         :value => committed
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, mbeanName, 'max' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, mbeanName, 'max' ),
         :value => max
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, mbeanName, 'used_percent' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, mbeanName, 'used_percent' ),
         :value => percent
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @Host, @Service, mbean, mbeanName, 'used' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, mbeanName, 'used' ),
         :value => used
       }
 

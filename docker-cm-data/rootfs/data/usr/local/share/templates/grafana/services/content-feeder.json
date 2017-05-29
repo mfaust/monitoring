@@ -84,18 +84,17 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "alias(aliasSub(*.$host.FEEDER_CONTENT.CapConnection.heap.cache.size, '(.*)-', ''), 'max')",
+                "target": "alias(aliasSub(carbon-writer.$host.FEEDER_CONTENT.CapConnection.heap.cache.size, '(.*)-', ''), 'max')",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "alias(aliasSub(*.$host.FEEDER_CONTENT.CapConnection.heap.cache.used, '(.*)-', ''), 'used')",
+                "target": "alias(aliasSub(carbon-writer.$host.FEEDER_CONTENT.CapConnection.heap.cache.used, '(.*)-', ''), 'used')",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "alias(asPercent(#B, #A), 'percent')",
-                "targetFull": "alias(asPercent(alias(aliasSub(*.$host.FEEDER_CONTENT.CapConnection.heap.cache.used, '(.*)-', ''), 'used'), alias(aliasSub(*.$host.FEEDER_CONTENT.CapConnection.heap.cache.size, '(.*)-', ''), 'max')), 'percent')",
+                "target": "alias(aliasSub(carbon-writer.$host.FEEDER_CONTENT.CapConnection.heap.cache.used_percent, '(.*)-', ''), 'percent')",
                 "textEditor": false
               }
             ],
@@ -182,11 +181,11 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(alias(aliasSub(*.$host.FEEDER_CONTENT.Feeder.index_content_documents, '.*-', ''), 'Content Documents'))"
+                "target": "aliasByMetric(alias(aliasSub(carbon-writer.$host.FEEDER_CONTENT.Feeder.index_content_documents, '.*-', ''), 'Content Documents'))"
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(alias(aliasSub(*.$host.FEEDER_CONTENT.Feeder.index_documents, '.*-', ''), 'Documents'))"
+                "target": "aliasByMetric(alias(aliasSub(carbon-writer.$host.FEEDER_CONTENT.Feeder.index_documents, '.*-', ''), 'Documents'))"
               }
             ],
             "timeFrom": null,
@@ -262,11 +261,11 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(alias(aliasSub(*.$host.FEEDER_CONTENT.Feeder.current_pending_documents, '.*-', ''), 'Pending Documents'))"
+                "target": "aliasByMetric(alias(aliasSub(carbon-writer.$host.FEEDER_CONTENT.Feeder.current_pending_documents, '.*-', ''), 'Pending Documents'))"
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(alias(aliasSub(*.$host.FEEDER_CONTENT.Feeder.pending_events, '.*-', ''), 'Pending Events'))"
+                "target": "aliasByMetric(alias(aliasSub(carbon-writer.$host.FEEDER_CONTENT.Feeder.pending_events, '.*-', ''), 'Pending Events'))"
               }
             ],
             "timeFrom": null,
@@ -350,7 +349,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(*.$host.FEEDER_CONTENT.CapConnection.su_sessions.sessions, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(carbon-writer.$host.FEEDER_CONTENT.CapConnection.su_sessions.sessions, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -420,19 +419,19 @@
       "list": [
         {
           "current": {
-            "value": "%HOST%",
-            "text": "%HOST%"
+            "value": "%STORAGE_IDENTIFIER%",
+            "text": "%STORAGE_IDENTIFIER%"
           },
           "hide": 2,
           "label": null,
           "name": "host",
           "options": [
             {
-              "value": "%HOST%",
-              "text": "%HOST%"
+              "value": "%STORAGE_IDENTIFIER%",
+              "text": "%STORAGE_IDENTIFIER%"
             }
           ],
-          "query": "%HOST%",
+          "query": "%STORAGE_IDENTIFIER%",
           "type": "constant"
         }
       ]

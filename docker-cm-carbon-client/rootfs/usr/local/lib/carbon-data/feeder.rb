@@ -7,7 +7,6 @@ module CarbonData
 
       result      = []
       mbean       = 'Health'
-#       format      = 'PUTVAL %s/%s-%s-%s/gauge-%s interval=%s N:%s'
       value       = data.dig('value')
 
       # defaults
@@ -25,11 +24,9 @@ module CarbonData
       end
 
       result << {
-        :key   => sprintf( '%s.%s.%s.%s', @Host, @Service, mbean, 'healthy' ),
+        :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, mbean, 'healthy' ),
         :value => healthy
       }
-
-#       result.push( sprintf( format, @Host, @Service, mbean, 'feeder', 'healthy', @interval, healthy ) )
 
       return result
     end
@@ -40,7 +37,6 @@ module CarbonData
 
       result      = []
       mbean       = 'ProactiveEngine'
-#       format      = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
       value       = data.dig('value')
 
       # defaults
@@ -72,39 +68,30 @@ module CarbonData
 
 
       result << {
-        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @Host, @Service, mbean, 'feeder', 'entries', 'max' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'feeder', 'entries', 'max' ),
         :value => maxEntries
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @Host, @Service, mbean, 'feeder', 'entries', 'current' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'feeder', 'entries', 'current' ),
         :value => currentEntries
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @Host, @Service, mbean, 'feeder', 'entries', 'diff' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'feeder', 'entries', 'diff' ),
         :value => diffEntries
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'feeder', 'invalidations' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'feeder', 'invalidations' ),
         :value => invalidations
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'feeder', 'heartbeat' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'feeder', 'heartbeat' ),
         :value => heartbeat
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'queue', 'capacity' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'queue', 'capacity' ),
         :value => queueCapacity
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'queue', 'max_waiting' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'queue', 'max_waiting' ),
         :value => queueMaxSize
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'queue', 'waiting' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'queue', 'waiting' ),
         :value => queueSize
       }
-
-#       result.push( sprintf( format, @Host, @Service, mbean, 'feeder', 'max'          , @interval, maxEntries ) )
-#       result.push( sprintf( format, @Host, @Service, mbean, 'feeder', 'current'      , @interval, currentEntries ) )
-#       result.push( sprintf( format, @Host, @Service, mbean, 'feeder', 'diff'         , @interval, diffEntries ) )
-#       result.push( sprintf( format, @Host, @Service, mbean, 'feeder', 'invalidations', @interval, invalidations ) )
-#       result.push( sprintf( format, @Host, @Service, mbean, 'feeder', 'heartbeat'    , @interval, heartbeat ) )
-#       result.push( sprintf( format, @Host, @Service, mbean, 'queue' , 'capacity'     , @interval, queueCapacity ) )
-#       result.push( sprintf( format, @Host, @Service, mbean, 'queue' , 'max_waiting'  , @interval, queueMaxSize ) )
-#       result.push( sprintf( format, @Host, @Service, mbean, 'queue' , 'waiting'      , @interval, queueSize ) )
 
       return result
     end
@@ -114,7 +101,6 @@ module CarbonData
 
       result = []
       mbean  = 'Feeder'
-#       format = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
       value       = data.dig('value')
 
       # defaults
@@ -135,23 +121,18 @@ module CarbonData
       end
 
       result << {
-        :key   => sprintf( '%s.%s.%s.%s'   , @Host, @Service, mbean, 'pending_events' ),
+        :key   => sprintf( '%s.%s.%s.%s'   , @identifier, @Service, mbean, 'pending_events' ),
         :value => pendingEvents
       } << {
-        :key   => sprintf( '%s.%s.%s.%s'   , @Host, @Service, mbean, 'index_documents' ),
+        :key   => sprintf( '%s.%s.%s.%s'   , @identifier, @Service, mbean, 'index_documents' ),
         :value => indexDocuments
       } << {
-        :key   => sprintf( '%s.%s.%s.%s'   , @Host, @Service, mbean, 'index_content_documents' ),
+        :key   => sprintf( '%s.%s.%s.%s'   , @identifier, @Service, mbean, 'index_content_documents' ),
         :value => indexContentDocuments
       } << {
-        :key   => sprintf( '%s.%s.%s.%s'   , @Host, @Service, mbean, 'current_pending_documents' ),
+        :key   => sprintf( '%s.%s.%s.%s'   , @identifier, @Service, mbean, 'current_pending_documents' ),
         :value => currentPendingDocuments
       }
-
-#       result.push( sprintf( format, @Host, @Service, mbean, 'server', 'pending_events'            , @interval, pendingEvents ) )
-#       result.push( sprintf( format, @Host, @Service, mbean, 'server', 'index_documents'           , @interval, indexDocuments ) )
-#       result.push( sprintf( format, @Host, @Service, mbean, 'server', 'index_content_documents'   , @interval, indexContentDocuments ) )
-#       result.push( sprintf( format, @Host, @Service, mbean, 'server', 'current_pending_documents' , @interval, currentPendingDocuments ) )
 
       return result
 
@@ -162,7 +143,6 @@ module CarbonData
 
       result    = []
       mbean     = 'TransformedBlobCacheManager'
-#       format    = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
       value     = data.dig('value')
 
       # defaults
@@ -203,70 +183,53 @@ module CarbonData
       end
 
       result << {
-        :key   => sprintf( '%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'cache', 'size' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'cache', 'size' ),
         :value => cacheSize
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'cache', 'level' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'cache', 'level' ),
         :value => cacheLevel
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'cache', 'initial_level' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'cache', 'initial_level' ),
         :value => cacheInitialLevel
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @Host, @Service, mbean, 'cache', 'new_gen', 'size' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'cache', 'new_gen', 'size' ),
         :value => newGenCacheSize
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @Host, @Service, mbean, 'cache', 'new_gen', 'level' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'cache', 'new_gen', 'level' ),
         :value => newGenCacheLevel
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @Host, @Service, mbean, 'cache', 'new_gen', 'initial_level' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'cache', 'new_gen', 'initial_level' ),
         :value => newGenCacheInitialLevel
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @Host, @Service, mbean, 'cache', 'old_gen', 'size' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'cache', 'old_gen', 'size' ),
         :value => oldGenCacheLevel
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @Host, @Service, mbean, 'cache', 'old_gen', 'initial_level' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'cache', 'old_gen', 'initial_level' ),
         :value => oldGenCacheInitialLevel
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'fault', 'count' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'fault', 'count' ),
         :value => fault
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'fault', 'size' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'fault', 'size' ),
         :value => faultSize
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'recall', 'count' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'recall', 'count' ),
         :value => recall
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s'   , @Host, @Service, mbean, 'recall', 'size' ),
+        :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'recall', 'size' ),
         :value => recallSize
       } << {
-        :key   => sprintf( '%s.%s.%s.%s'      , @Host, @Service, mbean, 'rotate' ),
+        :key   => sprintf( '%s.%s.%s.%s'      , @identifier, @Service, mbean, 'rotate' ),
         :value => rotate
       } << {
-        :key   => sprintf( '%s.%s.%s.%s'      , @Host, @Service, mbean, 'access' ),
+        :key   => sprintf( '%s.%s.%s.%s'      , @identifier, @Service, mbean, 'access' ),
         :value => access
       }
-
-#      result.push( sprintf( format, @Host, @Service, mbean, 'cache'       , 'size'          , @interval, cacheSize ) )
-#      result.push( sprintf( format, @Host, @Service, mbean, 'cache'       , 'level'         , @interval, cacheLevel ) )
-#      result.push( sprintf( format, @Host, @Service, mbean, 'cache'       , 'initial_level' , @interval, cacheInitialLevel ) )
-#      result.push( sprintf( format, @Host, @Service, mbean, 'newGen_cache', 'size'          , @interval, newGenCacheSize ) )
-#      result.push( sprintf( format, @Host, @Service, mbean, 'newGen_cache', 'level'         , @interval, newGenCacheLevel ) )
-#      result.push( sprintf( format, @Host, @Service, mbean, 'newGen_cache', 'initial_level' , @interval, newGenCacheInitialLevel ) )
-#      result.push( sprintf( format, @Host, @Service, mbean, 'oldGen_cache', 'level'         , @interval, oldGenCacheLevel ) )
-#      result.push( sprintf( format, @Host, @Service, mbean, 'oldGen_cache', 'initial_level' , @interval, oldGenCacheInitialLevel ) )
-#      result.push( sprintf( format, @Host, @Service, mbean, 'fault'       , 'count'         , @interval, fault ) )
-#      result.push( sprintf( format, @Host, @Service, mbean, 'fault'       , 'size'          , @interval, faultSize ) )
-#      result.push( sprintf( format, @Host, @Service, mbean, 'recall'      , 'count'         , @interval, recall ) )
-#      result.push( sprintf( format, @Host, @Service, mbean, 'recall'      , 'size'          , @interval, recallSize ) )
-#      result.push( sprintf( format, @Host, @Service, mbean, 'rotate'      , 'count'         , @interval, rotate ) )
-#      result.push( sprintf( format, @Host, @Service, mbean, 'access'      , 'count'         , @interval, access ) )
 
       return result
 
     end
 
-
   end
-
 
 end

@@ -144,26 +144,23 @@ module Icinga
 
     def sendMessage( params = {} )
 
-      cmd     = params.dig(:cmd)     || 'information'
+      command = params.dig(:cmd)
       node    = params.dig(:node)
-      queue   = params.dig(:queue)   || 'mq-icinga'
-      payload = params.dig(:payload) || {}
-      ttr     = params.dig(:ttr)     || 10
-      delay   = params.dig(:delay)   || 2
-
-      if( cmd == nil || queue == nil || payload.count() == 0 )
-        return
-      end
+      queue   = params.dig(:queue)
+      data    = params.dig(:payload)
+      prio    = params.dig(:prio)  || 65536
+      ttr     = params.dig(:ttr)   || 10
+      delay   = params.dig(:delay) || 2
 
       job = {
-        cmd:  cmd,          # require
+        cmd:  command,      # require
         node: node,         # require
         timestamp: Time.now().strftime( '%Y-%m-%d %H:%M:%S' ), # optional
         from: 'icinga',     # optional
-        payload: payload    # require
+        payload: data       # require
       }.to_json
 
-      result = @mqProducer.addJob( queue, job, ttr, delay )
+      result = @mqProducer.addJob( queue, job, prio, ttr, delay )
 
       logger.debug( job )
       logger.debug( result )

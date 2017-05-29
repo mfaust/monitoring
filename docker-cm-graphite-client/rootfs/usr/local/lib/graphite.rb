@@ -13,7 +13,10 @@ require 'uri'
 require 'time'
 
 require_relative 'logging'
+require_relative 'cache'
+require_relative 'storage'
 require_relative 'message-queue'
+require_relative 'graphite/tools'
 require_relative 'graphite/annotations'
 require_relative 'graphite/queue'
 
@@ -25,6 +28,7 @@ module Graphite
 
     include Logging
 
+    include Graphite::Tools
     include Graphite::Annotions
     include Graphite::Queue
 
@@ -37,6 +41,8 @@ module Graphite
       mqHost            = params.dig(:mq, :host)             || 'localhost'
       mqPort            = params.dig(:mq, :port)             || 11300
       @mqQueue          = params.dig(:mq, :queue)            || 'mq-graphite'
+      redisHost         = params.dig(:redis, :host)
+      redisPort         = params.dig(:redis, :port)          || 6379
 
       @graphiteURI      = sprintf( 'http://%s:%s%s', graphiteHost, graphiteHttpPort, graphitePath )
 
@@ -56,10 +62,14 @@ module Graphite
       logger.info( '  used Services:' )
       logger.info( "    - graphite     : #{@graphiteURI}" )
       logger.info( "    - message Queue: #{mqHost}:#{mqPort}/#{@mqQueue}" )
+      logger.info( "    - redis        : #{redisHost}:#{redisPort}" )
       logger.info( '-----------------------------------------------------------------' )
       logger.info( '' )
 
+      @cache       = Cache::Store.new()
+      @redis       = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
       @mqConsumer  = MessageQueue::Consumer.new( @MQSettings )
+      @mqProducer  = MessageQueue::Producer.new( @MQSettings )
 
       begin
 

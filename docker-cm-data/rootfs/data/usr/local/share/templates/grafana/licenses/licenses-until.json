@@ -38,7 +38,7 @@
           "id": 63,
           "targets": [
             {
-              "target": "*.%HOST%.%SERVICE%.Server.license.until.soft.days",
+              "target": "carbon-writer.$host.%SERVICE%.Server.license.until.soft.days",
               "refId": "A"
             }
           ],
@@ -68,7 +68,7 @@
           "id": 63,
           "targets": [
             {
-              "target": "*.%HOST%.%SERVICE%.Server.license.until.soft.weeks",
+              "target": "carbon-writer.$host.%SERVICE%.Server.license.until.soft.weeks",
               "refId": "A"
             }
           ],
@@ -92,7 +92,7 @@
           "id": 62,
           "targets": [
             {
-              "target": "*.%HOST%.%SERVICE%.Server.license.until.soft.month",
+              "target": "carbon-writer.$host.%SERVICE%.Server.license.until.soft.month",
               "refId": "A"
             }
           ],
@@ -141,7 +141,7 @@
           "id": 63,
           "targets": [
             {
-              "target": "*.%HOST%.%SERVICE%.Server.license.until.hard.days",
+              "target": "carbon-writer.$host.%SERVICE%.Server.license.until.hard.days",
               "refId": "A"
             }
           ],
@@ -171,7 +171,7 @@
           "id": 63,
           "targets": [
             {
-              "target": "*.%HOST%.%SERVICE%.Server.license.until.hard.weeks",
+              "target": "carbon-writer.$host.%SERVICE%.Server.license.until.hard.weeks",
               "refId": "A"
             }
           ],
@@ -195,7 +195,7 @@
           "id": 62,
           "targets": [
             {
-              "target": "*.%HOST%.%SERVICE%.Server.license.until.hard.month",
+              "target": "carbon-writer.$host.%SERVICE%.Server.license.until.hard.month",
               "refId": "A"
             }
           ],

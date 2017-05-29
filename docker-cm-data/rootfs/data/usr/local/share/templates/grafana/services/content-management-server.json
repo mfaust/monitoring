@@ -79,22 +79,22 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "alias(*.$host.CMS.QueryPool.queries.max, 'queries max')",
+                "target": "alias(carbon-writer.$host.CMS.QueryPool.queries.max, 'queries max')",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "alias(*.$host.CMS.QueryPool.queries.waiting, 'queries waiting')",
+                "target": "alias(carbon-writer.$host.CMS.QueryPool.queries.waiting, 'queries waiting')",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "alias(*.$host.CMS.QueryPool.executors.idle, 'executors idle')",
+                "target": "alias(carbon-writer.$host.CMS.QueryPool.executors.idle, 'executors idle')",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "alias(*.$host.CMS.QueryPool.executors.running, 'executors running')",
+                "target": "alias(carbon-writer.$host.CMS.QueryPool.executors.running, 'executors running')",
                 "textEditor": false
               }
 
@@ -180,7 +180,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(perSecond(*.$host.CMS.StatisticsResourceCache.cache.*))",
+                "target": "aliasByMetric(perSecond(carbon-writer.$host.CMS.StatisticsResourceCache.cache.*))",
                 "textEditor": false
               }
             ],
@@ -264,7 +264,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(perSecond(*.$host.CMS.StatisticsJobResult.*))",
+                "target": "aliasByMetric(perSecond(carbon-writer.$host.CMS.StatisticsJobResult.*))",
                 "textEditor": false
               }
             ],
@@ -318,7 +318,7 @@
             "id": 9,
             "targets": [
               {
-                "target": "aliasByMetric(aliasSub(*.$host.CMS.Server.ResourceCache.*, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(carbon-writer.$host.CMS.Server.ResourceCache.*, '(.*)-', ''))",
                 "refId": "A",
                 "textEditor": false
               }
@@ -418,19 +418,19 @@
       "list": [
         {
           "current": {
-            "value": "%HOST%",
-            "text": "%HOST%"
+            "value": "%STORAGE_IDENTIFIER%",
+            "text": "%STORAGE_IDENTIFIER%"
           },
           "hide": 2,
           "label": null,
           "name": "host",
           "options": [
             {
-              "value": "%HOST%",
-              "text": "%HOST%"
+              "value": "%STORAGE_IDENTIFIER%",
+              "text": "%STORAGE_IDENTIFIER%"
             }
           ],
-          "query": "%HOST%",
+          "query": "%STORAGE_IDENTIFIER%",
           "type": "constant"
         }
       ]

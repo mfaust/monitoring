@@ -1,7 +1,7 @@
 #!/usr/bin/ruby
 #
-# 05.01.2017 - Bodo Schulz
-# v1.0.1
+# 24.03.2017 - Bodo Schulz
+# v1.3.0
 #
 # simplified API for Beanaeter (Client Class for beanstalk)
 
@@ -9,12 +9,14 @@
 
 require 'beaneater'
 require 'json'
-require 'logger'
+require 'digest/md5'
+
 require_relative 'logging'
 
 # -----------------------------------------------------------------------------
 
 module MessageQueue
+
 
   class Producer
 
@@ -22,14 +24,20 @@ module MessageQueue
 
     def initialize( params = {} )
 
-      beanstalkHost       = params[:beanstalkHost] ? params[:beanstalkHost] : 'beanstalkd'
-      beanstalkPort       = params[:beanstalkPort] ? params[:beanstalkPort] : 11300
+      beanstalkHost       = params.dig(:beanstalkHost) || 'beanstalkd'
+      beanstalkPort       = params.dig(:beanstalkPort) || 11300
 
       begin
         @b = Beaneater.new( sprintf( '%s:%s', beanstalkHost, beanstalkPort ) )
       rescue => e
         logger.error( e )
+        @b = nil
+#        raise sprintf( 'ERROR: %s' , e )
       end
+
+#       logger.info( '-----------------------------------------------------------------' )
+#       logger.info( ' MessageQueue::Producer' )
+#       logger.info( '-----------------------------------------------------------------' )
 
     end
 
@@ -43,7 +51,7 @@ module MessageQueue
     # @param [Integer, #read] ttr time to run -- is an integer number of seconds to allow a worker
     #        to run this job. This time is counted from the moment a worker reserves
     #        this job. If the worker does not delete, release, or bury the job within
-    #        <ttr> seconds, the job will time out and the server will release the job.
+    # <ttr> seconds, the job will time out and the server will release the job.
     #        The minimum ttr is 1. If the client sends 0, the server will silently
     #        increase the ttr to 1.
     # @param [Integer, #read] delay is an integer number of seconds to wait before putting the job in
@@ -51,16 +59,17 @@ module MessageQueue
     # @example send a Job to Beanaeter
     #    addJob()
     # @return [Hash,#read]
+    #
     def addJob( tube, job = {}, prio = 65536, ttr = 10, delay = 2 )
-
-      logger.debug( sprintf( 'addJob( %s, job = {}, %s, %s, %s )', tube, prio, ttr, delay ) )
 
       if( @b )
 
-        logger.debug( "add job to tube #{tube}" )
-        logger.debug( job )
+        # check if job already in the queue
+        #
+        if( self.jobExists?( tube.to_s, job ) == true )
+          return
+        end
 
-#        tube = @b.use( tube.to_s )
         response = @b.tubes[ tube.to_s ].put( job , :prio => prio, :ttr => ttr, :delay => delay )
 
         logger.debug( response )
@@ -68,8 +77,54 @@ module MessageQueue
 
     end
 
-  end
 
+
+    def jobExists?( tube, job )
+
+      if( job.is_a?( String ) )
+        job = JSON.parse(job)
+      end
+
+      j_checksum = self.checksum(job)
+
+      if( @b )
+
+        t = @b.tubes[ tube.to_s ]
+
+        while t.peek(:ready)
+
+          j = t.reserve
+
+          b = JSON.parse( j.body )
+
+          if( b.is_a?( String ) )
+            b = JSON.parse( b )
+          end
+
+          b_checksum = self.checksum(b)
+
+          if( j_checksum == b_checksum )
+            logger.warn( "  job '#{job}' already in queue .." )
+            return true
+          else
+            return false
+          end
+
+        end
+      end
+    end
+
+
+    def checksum( p )
+
+      p.reject! { |k| k == 'timestamp' }
+      p.reject! { |k| k == 'payload' }
+
+      p = Hash[p.sort]
+      return Digest::MD5.hexdigest(p.to_s)
+    end
+
+  end
 
 
   class Consumer
@@ -78,20 +133,40 @@ module MessageQueue
 
     def initialize( params = {} )
 
-      beanstalkHost       = params[:beanstalkHost] ? params[:beanstalkHost] : 'beanstalkd'
-      beanstalkPort       = params[:beanstalkPort] ? params[:beanstalkPort] : 11300
+      beanstalkHost         = params.dig(:beanstalkHost)         || 'beanstalkd'
+      beanstalkPort         = params.dig(:beanstalkPort)         ||  11300
+      beanstalkQueue        = params.dig(:beanstalkQueue)
+      releaseBuriedInterval = params.dig(:releaseBuriedInterval) || 40
 
       begin
         @b = Beaneater.new( sprintf( '%s:%s', beanstalkHost, beanstalkPort ) )
+
+        if( beanstalkQueue != nil )
+
+          scheduler = Rufus::Scheduler.new
+
+          scheduler.every( releaseBuriedInterval ) do
+            releaseBuriedJobs( beanstalkQueue )
+          end
+        else
+          logger.info( 'no Queue defined. Skip releaseBuriedJobs() Part' )
+        end
+
       rescue => e
         logger.error( e )
+        raise sprintf( 'ERROR: %s' , e )
       end
+
+#       logger.info( '-----------------------------------------------------------------' )
+#       logger.info( ' MessageQueue::Consumer' )
+#       logger.info( '-----------------------------------------------------------------' )
 
     end
 
 
     def tubeStatistics( tube )
 
+      queue       = nil
       jobsTotal   = 0
       jobsReady   = 0
       jobsDelayed = 0
@@ -105,6 +180,7 @@ module MessageQueue
 
           if( tubeStats )
 
+            queue       = tubeStats[ :name ]
             jobsTotal   = tubeStats[ :total_jobs ]
             jobsReady   = tubeStats[ :current_jobs_ready ]
             jobsDelayed = tubeStats[ :current_jobs_delayed ]
@@ -116,6 +192,7 @@ module MessageQueue
       end
 
       return {
+        :queue   => queue,
         :total   => jobsTotal.to_i,
         :ready   => jobsReady.to_i,
         :delayed => jobsDelayed.to_i,
@@ -126,14 +203,13 @@ module MessageQueue
     end
 
 
-    def getJobFromTube( tube )
+    def getJobFromTube( tube, delete = false )
 
       result = {}
 
       if( @b )
 
         stats = self.tubeStatistics( tube )
-#         logger.debug( stats )
 
         if( stats.dig( :ready ) == 0 )
           return result
@@ -158,7 +234,9 @@ module MessageQueue
               :body  => JSON.parse( job.body )
             }
 
-            job.delete
+            if( delete == true )
+              job.delete
+            end
 
           rescue Exception => e
             job.bury
@@ -170,7 +248,6 @@ module MessageQueue
       end
 
       return result
-
     end
 
 
@@ -180,19 +257,45 @@ module MessageQueue
 
         tube = @b.tubes.find( tube.to_s )
 
-        while( job = tube.peek( :buried ) )
+        buried = tube.peek( :buried )
 
-          logger.debug( job.stats )
+        if( buried )
+          logger.info( sprintf( 'found job: %d, kick them back into the \'ready\' queue', buried.id ) )
 
-          response = job.release()
-
-          logger.debug( response )
+          tube.kick(1)
         end
-
       end
-
     end
 
+
+    def deleteJob( tube, id )
+
+#       logger.debug( sprintf( "deleteJob( #{tube}, #{id} )" ) )
+
+      if( @b )
+
+        job = @b.jobs.find( id )
+
+        if( job != nil )
+          response = job.delete
+        end
+      end
+    end
+
+
+    def buryJob( tube, id )
+
+#       logger.debug( sprintf( "buryJob( #{tube}, #{id} )" ) )
+
+      if( @b )
+
+        job = @b.jobs.find( id )
+
+        if( job != nil )
+          response = job.bury
+        end
+      end
+    end
 
   end
 

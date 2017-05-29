@@ -9,7 +9,7 @@ module ExternalDiscovery
 
     include Logging
 
-    attr_reader :data
+    attr_reader :awsData
 
     def initialize( settings )
 
@@ -27,7 +27,7 @@ module ExternalDiscovery
         # run internal scheduler to remove old data
         scheduler = Rufus::Scheduler.new
 
-        scheduler.every( 30, :first_in => 10 ) do
+        scheduler.every( 45, :first_in => 5 ) do
           self.getInstances()
         end
       rescue => e

@@ -69,27 +69,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.master-17-tomcat.$Application.MemoryPool.Par_Eden_Space.committed)",
+                "target": "aliasByMetric(carbon-writer.$host.$Application.MemoryPool.Par_Eden_Space.committed)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$Application.MemoryPool.Par_Eden_Space.max, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(carbon-writer.$host.$Application.MemoryPool.Par_Eden_Space.max, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$Application.MemoryPool.Par_Eden_Space.used, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(carbon-writer.$host.$Application.MemoryPool.Par_Eden_Space.used, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "alias(smartSummarize(aliasSub(*.%HOST%.$Application.MemoryPool.Par_Eden_Space.used_percent, '(.*)-', ''), '3m', 'avg'), 'percent (avg)')",
+                "target": "alias(smartSummarize(aliasSub(carbon-writer.$host.$Application.MemoryPool.Par_Eden_Space.used_percent, '(.*)-', ''), '3m', 'avg'), 'percent (avg)')",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(alias(aliasSub(*.%HOST%.$Application.MemoryPool.Par_Eden_Space.used_percent, '(.*)-', ''), 'percent'))",
+                "target": "aliasByMetric(alias(aliasSub(carbon-writer.$host.$Application.MemoryPool.Par_Eden_Space.used_percent, '(.*)-', ''), 'percent'))",
                 "textEditor": false,
                 "hide": true
               }
@@ -189,27 +189,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$Application.MemoryPool.Par_Survivor_Space.committed, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(carbon-writer.$host.$Application.MemoryPool.Par_Survivor_Space.committed, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$Application.MemoryPool.Par_Survivor_Space.max, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(carbon-writer.$host.$Application.MemoryPool.Par_Survivor_Space.max, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$Application.MemoryPool.Par_Survivor_Space.used, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(carbon-writer.$host.$Application.MemoryPool.Par_Survivor_Space.used, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "alias(smartSummarize(aliasSub(*.%HOST%.$Application.MemoryPool.Par_Survivor_Space.used_percent, '(.*)-', ''), '5m', 'avg'), 'percent (avg)')",
+                "target": "alias(smartSummarize(aliasSub(carbon-writer.$host.$Application.MemoryPool.Par_Survivor_Space.used_percent, '(.*)-', ''), '5m', 'avg'), 'percent (avg)')",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(alias(aliasSub(*.%HOST%.$Application.MemoryPool.Par_Survivor_Space.used_percent, '(.*)-', ''), 'percent'))",
+                "target": "aliasByMetric(alias(aliasSub(carbon-writer.$host.$Application.MemoryPool.Par_Survivor_Space.used_percent, '(.*)-', ''), 'percent'))",
                 "textEditor": false,
                 "hide": true
               }
@@ -308,27 +308,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$Application.MemoryPool.CMS_Old_Gen.committed, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(carbon-writer.$host.$Application.MemoryPool.CMS_Old_Gen.committed, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$Application.MemoryPool.CMS_Old_Gen.max, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(carbon-writer.$host.$Application.MemoryPool.CMS_Old_Gen.max, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$Application.MemoryPool.CMS_Old_Gen.used, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(carbon-writer.$host.$Application.MemoryPool.CMS_Old_Gen.used, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "alias(smartSummarize(aliasSub(*.%HOST%.$Application.MemoryPool.CMS_Old_Gen.used_percent, '(.*)-', ''), '5m', 'avg'), 'percent (avg)')",
+                "target": "alias(smartSummarize(aliasSub(carbon-writer.$host.$Application.MemoryPool.CMS_Old_Gen.used_percent, '(.*)-', ''), '5m', 'avg'), 'percent (avg)')",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(alias(aliasSub(*.%HOST%.$Application.MemoryPool.CMS_Old_Gen.used_percent, '(.*)-', ''), 'percent'))",
+                "target": "aliasByMetric(alias(aliasSub(carbon-writer.$host.$Application.MemoryPool.CMS_Old_Gen.used_percent, '(.*)-', ''), 'percent'))",
                 "textEditor": false,
                 "hide": true
               }
@@ -427,28 +427,28 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$Application.MemoryPool.Metaspace.committed, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(carbon-writer.$host.$Application.MemoryPool.Metaspace.committed, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "hide": true,
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$Application.MemoryPool.Metaspace.max, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(carbon-writer.$host.$Application.MemoryPool.Metaspace.max, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$Application.MemoryPool.Metaspace.used, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(carbon-writer.$host.$Application.MemoryPool.Metaspace.used, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "alias(smartSummarize(aliasSub(*.%HOST%.$Application.MemoryPool.Metaspace.used_percent, '(.*)-', ''), '5m', 'avg'), 'percent (avg)')",
+                "target": "alias(smartSummarize(aliasSub(carbon-writer.$host.$Application.MemoryPool.Metaspace.used_percent, '(.*)-', ''), '5m', 'avg'), 'percent (avg)')",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(alias(aliasSub(*.%HOST%.$Application.MemoryPool.Metaspace.used_percent, '(.*)-', ''), 'percent'))",
+                "target": "aliasByMetric(alias(aliasSub(carbon-writer.$host.$Application.MemoryPool.Metaspace.used_percent, '(.*)-', ''), 'percent'))",
                 "textEditor": false,
                 "hide": true
               }
@@ -547,27 +547,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$Application.MemoryPool.Code_Cache.committed, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(carbon-writer.$host.$Application.MemoryPool.Code_Cache.committed, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$Application.MemoryPool.Code_Cache.max, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(carbon-writer.$host.$Application.MemoryPool.Code_Cache.max, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$Application.MemoryPool.Code_Cache.used, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(carbon-writer.$host.$Application.MemoryPool.Code_Cache.used, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "alias(smartSummarize(aliasSub(*.%HOST%.$Application.MemoryPool.Code_Cache.used_percent, '(.*)-', ''), '5m', 'avg'), 'percent (avg)')",
+                "target": "alias(smartSummarize(aliasSub(carbon-writer.$host.$Application.MemoryPool.Code_Cache.used_percent, '(.*)-', ''), '5m', 'avg'), 'percent (avg)')",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(alias(aliasSub(*.%HOST%.$Application.MemoryPool.Code_Cache.used_percent, '(.*)-', ''), 'percent'))",
+                "target": "aliasByMetric(alias(aliasSub(carbon-writer.$host.$Application.MemoryPool.Code_Cache.used_percent, '(.*)-', ''), 'percent'))",
                 "textEditor": false,
                 "hide": true
               }
@@ -666,27 +666,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$Application.MemoryPool.Compressed_Class_Space.committed, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(carbon-writer.$host.$Application.MemoryPool.Compressed_Class_Space.committed, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$Application.MemoryPool.Compressed_Class_Space.max, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(carbon-writer.$host.$Application.MemoryPool.Compressed_Class_Space.max, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$Application.MemoryPool.Compressed_Class_Space.used, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(carbon-writer.$host.$Application.MemoryPool.Compressed_Class_Space.used, '(.*)-', ''))",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "alias(smartSummarize(aliasSub(*.%HOST%.$Application.MemoryPool.Compressed_Class_Space.used_percent, '(.*)-', ''), '5m', 'avg'), 'percent (avg)')",
+                "target": "alias(smartSummarize(aliasSub(carbon-writer.$host.$Application.MemoryPool.Compressed_Class_Space.used_percent, '(.*)-', ''), '5m', 'avg'), 'percent (avg)')",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(alias(aliasSub(*.%HOST%.$Application.MemoryPool.Compressed_Class_Space.used_percent, '(.*)-', ''), 'percent'))",
+                "target": "aliasByMetric(alias(aliasSub(carbon-writer.$host.$Application.MemoryPool.Compressed_Class_Space.used_percent, '(.*)-', ''), 'percent'))",
                 "textEditor": false,
                 "hide": true
               }
@@ -756,6 +756,23 @@
 
     "templating": {
       "list": [
+        {
+          "current": {
+            "value": "%STORAGE_IDENTIFIER%",
+            "text": "%STORAGE_IDENTIFIER%"
+          },
+          "hide": 2,
+          "label": null,
+          "name": "host",
+          "options": [
+            {
+              "value": "%STORAGE_IDENTIFIER%",
+              "text": "%STORAGE_IDENTIFIER%"
+            }
+          ],
+          "query": "%STORAGE_IDENTIFIER%",
+          "type": "constant"
+        },
         {
           "allValue": null,
           "current": {
@@ -845,7 +862,7 @@
             }
           ],
           "name": "Application",
-          "query": "*.%HOST%.*",
+          "query": "carbon-writer.$host.*",
           "regex": "/^(?!MONGODB|MYSQL|NODE_EXPORTER).*$/",
           "hide": 1,
           "sort": 0,
@@ -864,21 +881,21 @@
           "enable": true,
           "iconColor": "rgb(93, 227, 12)",
           "datasource": "events",
-          "tags": "%HOST% created&set=intersection"
+          "tags": "$host created&set=intersection"
         },
         {
           "name": "Load Tests",
           "enable": true,
           "iconColor": "rgb(26, 196, 220)",
           "datasource": "events",
-          "tags": "%HOST% loadtest&set=intersection"
+          "tags": "$host loadtest&set=intersection"
         },
         {
           "name": "Deployments",
           "enable": true,
           "iconColor": "rgb(176, 40, 253)",
           "datasource": "events",
-          "tags": "%HOST% deployment&set=intersection"
+          "tags": "$host deployment&set=intersection"
         }
       ]
     },

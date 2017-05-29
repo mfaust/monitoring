@@ -7,12 +7,9 @@ module CarbonData
 
       def operatingSystemNodeExporter( value = {} )
 
-        format = 'PUTVAL %s/%s-%s/%s-%s interval=%s N:%s'
         result = []
 
         if( value != nil )
-
-    #      logger.debug( JSON.pretty_generate( value ) )
 
           uptime     = value.dig('uptime')
           cpu        = value.dig('cpu')
@@ -27,17 +24,18 @@ module CarbonData
 
             if( boot_time != nil )
               result << {
-                :key   => sprintf( '%s.%s.%s.%s'         , @Host, @Service, 'uptime', 'boot_time' ),
+                :key   => sprintf( '%s.%s.%s.%s'         , @identifier, @Service, 'uptime', 'boot_time' ),
                 :value => boot_time
               }
             end
             if( uptime != nil )
               result << {
-                :key   => sprintf( '%s.%s.%s.%s'         , @Host, @Service, 'uptime', 'uptime' ),
+                :key   => sprintf( '%s.%s.%s.%s'         , @identifier, @Service, 'uptime', 'uptime' ),
                 :value => uptime
               }
             end
           end
+
 
           if( cpu != nil )
 
@@ -52,12 +50,9 @@ module CarbonData
                 if( point != nil )
 
                   result << {
-                    :key   => sprintf( '%s.%s.%s.%s.%s'         , @Host, @Service, 'cpu', c, m ),
+                    :key   => sprintf( '%s.%s.%s.%s.%s'         , @identifier, @Service, 'cpu', c, m ),
                     :value => point
                   }
-                  # collectd.h3_xanhaem_de.cpu.*.cpu.idle.value
-#                   result.push( sprintf( 'PUTVAL %s/%s-cpu/count-%s_%s interval=%s N:%s', @Host, @Service, c, m, @interval, point ) )
-    ##              result.push( sprintf( 'PUTVAL %s/%s-%s/cpu_%s interval=%s N:%s', @Host, @Service, c, m, @interval, point ) )
                 end
               end
             end
@@ -73,11 +68,9 @@ module CarbonData
               if( point != nil )
 
                 result << {
-                  :key   => sprintf( '%s.%s.%s.%s'         , @Host, @Service, 'load', m ),
+                  :key   => sprintf( '%s.%s.%s.%s'         , @identifier, @Service, 'load', m ),
                   :value => point
                 }
-
-#                 result.push( sprintf( format, @Host, @Service, 'load', 'count', m, @interval, point ) )
               end
             end
           end
@@ -113,55 +106,41 @@ module CarbonData
             end
 
             result << {
-              :key   => sprintf( '%s.%s.%s.%s'         , @Host, @Service, 'memory', 'available' ),
+              :key   => sprintf( '%s.%s.%s.%s'         , @identifier, @Service, 'memory', 'available' ),
               :value => memAvailable
             } << {
-              :key   => sprintf( '%s.%s.%s.%s'         , @Host, @Service, 'memory', 'free' ),
+              :key   => sprintf( '%s.%s.%s.%s'         , @identifier, @Service, 'memory', 'free' ),
               :value => memFree
             } << {
-              :key   => sprintf( '%s.%s.%s.%s'         , @Host, @Service, 'memory', 'total' ),
+              :key   => sprintf( '%s.%s.%s.%s'         , @identifier, @Service, 'memory', 'total' ),
               :value => memTotal
             } << {
-              :key   => sprintf( '%s.%s.%s.%s'         , @Host, @Service, 'memory', 'used' ),
+              :key   => sprintf( '%s.%s.%s.%s'         , @identifier, @Service, 'memory', 'used' ),
               :value => memUsed
             } << {
-              :key   => sprintf( '%s.%s.%s.%s'         , @Host, @Service, 'memory', 'used_percent' ),
+              :key   => sprintf( '%s.%s.%s.%s'         , @identifier, @Service, 'memory', 'used_percent' ),
               :value => memUsedPercent
             } << {
-              :key   => sprintf( '%s.%s.%s.%s'         , @Host, @Service, 'swap', 'cached' ),
+              :key   => sprintf( '%s.%s.%s.%s'         , @identifier, @Service, 'swap', 'cached' ),
               :value => swapCached
             } << {
-              :key   => sprintf( '%s.%s.%s.%s'         , @Host, @Service, 'swap', 'free' ),
+              :key   => sprintf( '%s.%s.%s.%s'         , @identifier, @Service, 'swap', 'free' ),
               :value => swapFree
             } << {
-              :key   => sprintf( '%s.%s.%s.%s'         , @Host, @Service, 'swap', 'total' ),
+              :key   => sprintf( '%s.%s.%s.%s'         , @identifier, @Service, 'swap', 'total' ),
               :value => swapTotal
             } << {
-              :key   => sprintf( '%s.%s.%s.%s'         , @Host, @Service, 'swap', 'used' ),
+              :key   => sprintf( '%s.%s.%s.%s'         , @identifier, @Service, 'swap', 'used' ),
               :value => swapUsed
             } << {
-              :key   => sprintf( '%s.%s.%s.%s'         , @Host, @Service, 'swap', 'used_percent' ),
+              :key   => sprintf( '%s.%s.%s.%s'         , @identifier, @Service, 'swap', 'used_percent' ),
               :value => swapUsedPercent
             }
-
-#             result.push( sprintf( format, @Host, @Service, 'memory', 'count', 'available'    , @interval, memAvailable ) )
-#             result.push( sprintf( format, @Host, @Service, 'memory', 'count', 'free'         , @interval, memFree ) )
-#             result.push( sprintf( format, @Host, @Service, 'memory', 'count', 'total'        , @interval, memTotal ) )
-#             result.push( sprintf( format, @Host, @Service, 'memory', 'count', 'used'         , @interval, memUsed ) )
-#             result.push( sprintf( format, @Host, @Service, 'memory', 'count', 'used_percent' , @interval, memUsedPercent ) )
-#
-#             result.push( sprintf( format, @Host, @Service, 'swap'  , 'count', 'cached'       , @interval, swapCached ) )
-#             result.push( sprintf( format, @Host, @Service, 'swap'  , 'count', 'free'         , @interval, swapFree ) )
-#             result.push( sprintf( format, @Host, @Service, 'swap'  , 'count', 'total'        , @interval, swapTotal ) )
-#             result.push( sprintf( format, @Host, @Service, 'swap'  , 'count', 'used'         , @interval, swapUsed ) )
-#             result.push( sprintf( format, @Host, @Service, 'swap'  , 'count', 'used_percent' , @interval, swapUsedPercent ) )
 
           end
 
 
           if( filesystem != nil )
-
-            format = 'PUTVAL %s/%s-filesystem/count-%s_%s interval=%s N:%s'
 
             filesystem.each do |f,d|
 
@@ -178,134 +157,21 @@ module CarbonData
               usedPercent  = ( 100 * used.to_i / size.to_i ).to_i
 
               result << {
-                :key   => sprintf( '%s.%s.%s.%s.%s'         , @Host, @Service, 'filesystem', f, 'total' ),
+                :key   => sprintf( '%s.%s.%s.%s.%s'         , @identifier, @Service, 'filesystem', f, 'total' ),
                 :value => size
               } << {
-                :key   => sprintf( '%s.%s.%s.%s.%s'         , @Host, @Service, 'filesystem', f, 'free' ),
+                :key   => sprintf( '%s.%s.%s.%s.%s'         , @identifier, @Service, 'filesystem', f, 'free' ),
                 :value => avail
               } << {
-                :key   => sprintf( '%s.%s.%s.%s.%s'         , @Host, @Service, 'filesystem', f, 'used' ),
+                :key   => sprintf( '%s.%s.%s.%s.%s'         , @identifier, @Service, 'filesystem', f, 'used' ),
                 :value => used
               } << {
-                :key   => sprintf( '%s.%s.%s.%s.%s'         , @Host, @Service, 'filesystem', f, 'used_percent' ),
+                :key   => sprintf( '%s.%s.%s.%s.%s'         , @identifier, @Service, 'filesystem', f, 'used_percent' ),
                 :value => usedPercent
               }
 
-#               result.push( sprintf( format, @Host, @Service, f, 'total'        , @interval, size ) )
-#               result.push( sprintf( format, @Host, @Service, f, 'free'         , @interval, avail ) )
-#               result.push( sprintf( format, @Host, @Service, f, 'used'         , @interval, used ) )
-#               result.push( sprintf( format, @Host, @Service, f, 'used_percent' , @interval, usedPercent ) )
             end
           end
-
-
-    #  "network": {
-    #    "docker0": {
-    #      "receive": {
-    #        "bytes": "0",
-    #        "compressed": "0",
-    #        "drop": "0",
-    #        "errs": "0",
-    #        "fifo": "0",
-    #        "frame": "0",
-    #        "multicast": "0",
-    #        "packets": "0"
-    #      },
-    #      "transmit": {
-    #        "bytes": "0",
-    #        "compressed": "0",
-    #        "drop": "0",
-    #        "errs": "0",
-    #        "fifo": "0",
-    #        "frame": "0",
-    #        "multicast": "0",
-    #        "packets": "0"
-    #      }
-    #    },
-    #    "eth0": {
-    #      "receive": {
-    #        "bytes": "150430429312",
-    #        "compressed": "0",
-    #        "drop": "0",
-    #        "errs": "0",
-    #        "fifo": "0",
-    #        "frame": "0",
-    #        "multicast": "7",
-    #        "packets": "676887217"
-    #      },
-    #      "transmit": {
-    #        "bytes": "232584909545",
-    #        "compressed": "0",
-    #        "drop": "0",
-    #        "errs": "0",
-    #        "fifo": "0",
-    #        "frame": "0",
-    #        "multicast": "0",
-    #        "packets": "651601311"
-    #      }
-    #    },
-    #    "lo": {
-    #      "receive": {
-    #        "bytes": "42496402339",
-    #        "compressed": "0",
-    #        "drop": "0",
-    #        "errs": "0",
-    #        "fifo": "0",
-    #        "frame": "0",
-    #        "multicast": "0",
-    #        "packets": "102897397"
-    #      },
-    #      "transmit": {
-    #        "bytes": "42496402339",
-    #        "compressed": "0",
-    #        "drop": "0",
-    #        "errs": "0",
-    #        "fifo": "0",
-    #        "frame": "0",
-    #        "multicast": "0",
-    #        "packets": "102897397"
-    #      }
-    #    }
-    #  },
-    #  "disk": {
-    #    "dm-0": {
-    #      "bytes": {
-    #        "read": "328886272",
-    #        "written": "229814784"
-    #      },
-    #      "io": {
-    #        "now": "0"
-    #      }
-    #    },
-    #    "sda": {
-    #      "bytes": {
-    #        "read": "1764546560",
-    #        "written": "71720772096"
-    #      },
-    #      "io": {
-    #        "now": "0"
-    #      }
-    #    },
-    #    "sr0": {
-    #      "bytes": {
-    #        "read": "0",
-    #        "written": "0"
-    #      },
-    #      "io": {
-    #        "now": "0"
-    #      }
-    #    }
-    #  },
-    #  "filesystem": {
-    #    "/dev/sda1": {
-    #      "avail": "32145022976",
-    #      "files": "41936640",
-    #      "free": "32145022976",
-    #      "readonly": "0",
-    #      "size": "42932649984"
-    #    }
-    #  }
-    #}
 
         end
 

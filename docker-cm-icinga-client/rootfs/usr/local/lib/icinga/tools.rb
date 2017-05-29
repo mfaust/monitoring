@@ -54,6 +54,40 @@ module Icinga
 
     end
 
+
+    def nodeTag( host )
+
+#       logger.debug( "nodeTag( #{host} )" )
+
+      key    = sprintf( 'config-%s', host )
+      data   = @cache.get( key )
+
+      result = host
+
+      if( data == nil )
+
+        identifier = @redis.config( { :short => host, :key => 'graphite-identifier' } )
+
+        if( identifier != nil )
+
+          identifier = identifier.dig( 'graphite-identifier' )
+
+          if( identifier != nil )
+            result     = identifier
+          end
+
+          @cache.set( key, expiresIn: 320 ) { Cache::Data.new( result ) }
+        end
+
+      else
+
+        result = data
+      end
+
+      return result
+
+    end
+
   end
 
 end

@@ -83,18 +83,17 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "alias(aliasSub(*.$host.%SERVICE%.CapConnection.heap.cache.size, '(.*)-', ''), 'max')",
+                "target": "alias(aliasSub(carbon-writer.$host.%SERVICE%.CapConnection.heap.cache.size, '(.*)-', ''), 'max')",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "alias(aliasSub(*.$host.%SERVICE%.CapConnection.heap.cache.used, '(.*)-', ''), 'used')",
+                "target": "alias(aliasSub(carbon-writer.$host.%SERVICE%.CapConnection.heap.cache.used, '(.*)-', ''), 'used')",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "alias(asPercent(#B, #A), 'percent')",
-                "targetFull": "alias(asPercent(alias(aliasSub(*.$host.%SERVICE%.CapConnection.heap.cache.used, '(.*)-', ''), 'used'), alias(aliasSub(*.$host.%SERVICE%.CapConnection.heap.cache.size, '(.*)-', ''), 'max')), 'percent')",
+                "target": "alias(carbon-writer.$host.%SERVICE%.CapConnection.heap.cache.used_percent, 'percent')",
                 "textEditor": false
               }
             ],
@@ -181,12 +180,12 @@
             "targets": [
               {
                 "refId": "B",
-                "target": "alias(*.$host.%SERVICE%.CapConnection.blob.cache.size, 'max')",
+                "target": "alias(carbon-writer.$host.%SERVICE%.CapConnection.blob.cache.size, 'max')",
                 "textEditor": false
               },
               {
                 "refId": "A",
-                "target": "alias(*.$host.%SERVICE%.CapConnection.blob.cache.used, 'used')",
+                "target": "alias(carbon-writer.$host.%SERVICE%.CapConnection.blob.cache.used, 'used')",
                 "textEditor": false
               }
             ],
@@ -271,7 +270,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(*.$host.%SERVICE%.CapConnection.su_sessions.sessions, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(carbon-writer.$host.%SERVICE%.CapConnection.su_sessions.sessions, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -357,7 +356,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(*.$host.%SERVICE%-DataViewFactory.*, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(carbon-writer.$host.%SERVICE%-DataViewFactory.*, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -427,19 +426,19 @@
       "list": [
         {
           "current": {
-            "value": "%HOST%",
-            "text": "%HOST%"
+            "value": "%STORAGE_IDENTIFIER%",
+            "text": "%STORAGE_IDENTIFIER%"
           },
           "hide": 2,
           "label": null,
           "name": "host",
           "options": [
             {
-              "value": "%HOST%",
-              "text": "%HOST%"
+              "value": "%STORAGE_IDENTIFIER%",
+              "text": "%STORAGE_IDENTIFIER%"
             }
           ],
-          "query": "%HOST%",
+          "query": "%STORAGE_IDENTIFIER%",
           "type": "constant"
         }
       ]

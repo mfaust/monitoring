@@ -25,7 +25,7 @@
             "id": 70,
             "targets": [
               {
-                "target": "*.%HOST%.CAE_PREV.Runtime.uptime",
+                "target": "carbon-writer.$host.CAE_PREV.Runtime.uptime",
                 "refId": "A",
                 "textEditor": false
               }
@@ -112,7 +112,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "*.%HOST%.CAE_PREV.Memory.heap_memory.used_percent"
+                "target": "carbon-writer.$host.CAE_PREV.Memory.heap_memory.used_percent"
               }
             ],
             "thresholds": "85,95",
@@ -187,7 +187,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "*.%HOST%.CAE_PREV.CapConnection.open"
+                "target": "carbon-writer.$host.CAE_PREV.CapConnection.open"
               }
             ],
             "thresholds": "0,1",
@@ -223,7 +223,7 @@
             "id": 43,
             "targets": [
               {
-                "target": "*.%HOST%.CAE_PREV.CapConnection.heap.cache.used_percent",
+                "target": "carbon-writer.$host.CAE_PREV.CapConnection.heap.cache.used_percent",
                 "refId": "A"
               }
             ],
@@ -298,7 +298,7 @@
             "id": 50,
             "targets": [
               {
-                "target": "*.%HOST%.CAE_PREV.CapConnection.blob.cache.used_percent",
+                "target": "carbon-writer.$host.CAE_PREV.CapConnection.blob.cache.used_percent",
                 "refId": "A"
               }
             ],
@@ -373,7 +373,7 @@
             "id": 50,
             "targets": [
               {
-                "target": "*.%HOST%.CAE_PREV.CapConnection.su_sessions.sessions",
+                "target": "carbon-writer.$host.CAE_PREV.CapConnection.su_sessions.sessions",
                 "refId": "A"
               }
             ],

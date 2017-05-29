@@ -4,7 +4,7 @@
         "height": "100px",
         "panels": [
           {
-            "content": "<h3><center><bold><a href=\"/grafana/dashboard/db/%SHORTHOST%-workflow-server\">WFS</a></bold></center></h3>",
+            "content": "<h3><center><bold><a href=\"/grafana/dashboard/db/%SHORTHOST%-contentserver-wfs\">WFS</a></bold></center></h3>",
             "editable": true,
             "error": false,
             "id": 16,
@@ -25,7 +25,7 @@
             "id": 70,
             "targets": [
               {
-                "target": "*.%HOST%.WFS.Runtime.uptime",
+                "target": "carbon-writer.$host.WFS.Runtime.uptime",
                 "refId": "A",
                 "textEditor": false
               }
@@ -112,7 +112,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "*.%HOST%.WFS.Memory.heap_memory.used_percent"
+                "target": "carbon-writer.$host.WFS.Memory.heap_memory.used_percent"
               }
             ],
             "thresholds": "85,95",
@@ -187,7 +187,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "*.%HOST%.WFS.CapConnection.open"
+                "target": "carbon-writer.$host.WFS.CapConnection.open"
               }
             ],
             "thresholds": "0,1",
@@ -223,7 +223,7 @@
             "id": 49,
             "targets": [
               {
-                "target": "*.%HOST%.WFS.CapConnection.heap.cache.used_percent",
+                "target": "carbon-writer.$host.WFS.CapConnection.heap.cache.used_percent",
                 "refId": "A"
               }
             ],
@@ -298,7 +298,7 @@
             "id": 50,
             "targets": [
               {
-                "target": "*.%HOST%.WFS.CapConnection.blob.cache.used_percent",
+                "target": "carbon-writer.$host.WFS.CapConnection.blob.cache.used_percent",
                 "refId": "A"
               }
             ],
@@ -373,7 +373,7 @@
             "id": 50,
             "targets": [
               {
-                "target": "*.%HOST%.WFS.CapConnection.su_sessions.sessions",
+                "target": "carbon-writer.$host.WFS.CapConnection.su_sessions.sessions",
                 "refId": "A"
               }
             ],

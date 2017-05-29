@@ -119,7 +119,7 @@ module ServiceDiscovery
 
           # remove node also from data-collector!
           #
-          self.sendMessage( { :cmd => command, :queue => 'mq-collector', :payload => { :host => node, :pre => 'prepare' }, :ttr => 1, :delay => 0 } )
+          self.sendMessage( { :cmd => command, :node => node, :queue => 'mq-collector', :payload => { :host => node, :pre => 'prepare' }, :ttr => 1, :delay => 0 } )
 
           result = self.deleteHost( node )
 
@@ -182,7 +182,7 @@ module ServiceDiscovery
 
         logger.debug( r )
 
-        self.sendMessage( { :cmd => 'info', :queue => 'mq-discover-info', :payload => result, :ttr => 1, :delay => 0 } )
+        self.sendMessage( { :cmd => 'info', :node => node, :queue => 'mq-discover-info', :payload => result, :ttr => 1, :delay => 0 } )
 
         return {
           :status  => 200,
@@ -216,29 +216,26 @@ module ServiceDiscovery
 
     def sendMessage( params = {} )
 
-      cmd     = params.dig(:cmd)
+      command = params.dig(:cmd)
       node    = params.dig(:node)
       queue   = params.dig(:queue)
-      payload = params.dig(:payload) || {}
-      ttr     = params.dig(:ttr)     || 10
-      delay   = params.dig(:delay)   || 2
-
-      if( cmd == nil || queue == nil || payload.count() == 0 )
-        return
-      end
+      data    = params.dig(:payload)
+      prio    = params.dig(:prio)  || 65536
+      ttr     = params.dig(:ttr)   || 10
+      delay   = params.dig(:delay) || 2
 
       job = {
-        cmd:  cmd,          # require
+        cmd:  command,      # require
         node: node,         # require
         timestamp: Time.now().strftime( '%Y-%m-%d %H:%M:%S' ), # optional
         from: 'discovery',  # optional
-        payload: payload    # require
+        payload: data       # require
       }.to_json
 
-      result = @mqProducer.addJob( queue, job, ttr, delay )
+      result = @mqProducer.addJob( queue, job, prio, ttr, delay )
 
-#       logger.debug( job )
-#       logger.debug( result )
+      logger.debug( job )
+      logger.debug( result )
 
     end
 

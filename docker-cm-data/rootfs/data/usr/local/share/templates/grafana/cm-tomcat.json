@@ -87,31 +87,31 @@
               {
                 "hide": false,
                 "refId": "A",
-                "target": "aliasByMetric(*.%HOST%.$Application.Memory.heap_memory.max)",
+                "target": "aliasByMetric(carbon-writer.$host.$Application.Memory.heap_memory.max)",
                 "textEditor": false
               },
               {
                 "hide": false,
                 "refId": "B",
-                "target": "aliasByMetric(*.%HOST%.$Application.Memory.heap_memory.committed)",
+                "target": "aliasByMetric(carbon-writer.$host.$Application.Memory.heap_memory.committed)",
                 "textEditor": false
               },
               {
                 "hide": false,
                 "refId": "C",
-                "target": "aliasByMetric(*.%HOST%.$Application.Memory.heap_memory.used)",
+                "target": "aliasByMetric(carbon-writer.$host.$Application.Memory.heap_memory.used)",
                 "textEditor": false
               },
               {
                 "hide": false,
                 "refId": "D",
-                "target": "alias(smartSummarize(aliasSub(*.%HOST%.$Application.Memory.heap_memory.used_percent, '(.*)-', ''), '3m', 'avg'), 'percent (avg)')",
+                "target": "alias(smartSummarize(aliasSub(carbon-writer.$host.$Application.Memory.heap_memory.used_percent, '(.*)-', ''), '3m', 'avg'), 'percent (avg)')",
                 "textEditor": false
               },
               {
                 "hide": true,
                 "refId": "E",
-                "target": "aliasByMetric(alias(aliasSub(*.%HOST%.$Application.Memory.heap_memory.used_percent, '(.*)-', ''), 'percent'))",
+                "target": "aliasByMetric(alias(aliasSub(carbon-writer.$host.$Application.Memory.heap_memory.used_percent, '(.*)-', ''), 'percent'))",
                 "textEditor": false
               }
             ],
@@ -211,24 +211,24 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.%HOST%.$Application.Memory.perm_memory.committed)",
+                "target": "aliasByMetric(carbon-writer.$host.$Application.Memory.perm_memory.committed)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(*.%HOST%.$Application.Memory.perm_memory.used)",
+                "target": "aliasByMetric(carbon-writer.$host.$Application.Memory.perm_memory.used)",
                 "textEditor": false
               },
               {
                 "hide": false,
                 "refId": "C",
-                "target": "alias(smartSummarize(aliasSub(*.%HOST%.$Application.Memory.perm_memory.used_percent, '(.*)-', ''), '3m', 'avg'), 'percent (avg)')",
+                "target": "alias(smartSummarize(aliasSub(carbon-writer.$host.$Application.Memory.perm_memory.used_percent, '(.*)-', ''), '3m', 'avg'), 'percent (avg)')",
                 "textEditor": false
               },
               {
                 "hide": true,
                 "refId": "D",
-                "target": "aliasByMetric(alias(aliasSub(*.%HOST%.$Application.Memory.perm_memory.used_percent, '(.*)-', ''), 'percent'))",
+                "target": "aliasByMetric(alias(aliasSub(carbon-writer.$host.$Application.Memory.perm_memory.used_percent, '(.*)-', ''), 'percent'))",
                 "textEditor": false
               }
             ],
@@ -330,12 +330,12 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(alias(aliasSub(*.%HOST%.$Application.GarbageCollector.ParNew.duration.time, '(.*)-', ''), 'Par New'))",
+                "target": "aliasByMetric(alias(aliasSub(carbon-writer.$host.$Application.GarbageCollector.ParNew.duration.time, '(.*)-', ''), 'Par New'))",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(alias(aliasSub(*.%HOST%.$Application.GarbageCollector.ConcurrentMarkSweep.duration.time, '(.*)-', ''), 'Con Mark Sweep'))",
+                "target": "aliasByMetric(alias(aliasSub(carbon-writer.$host.$Application.GarbageCollector.ConcurrentMarkSweep.duration.time, '(.*)-', ''), 'Con Mark Sweep'))",
                 "textEditor": false
               }
             ],
@@ -437,12 +437,12 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.%HOST%.$Application.Threading.count)",
+                "target": "aliasByMetric(carbon-writer.$host.$Application.Threading.count)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(*.%HOST%.$Application.Threading.peak)",
+                "target": "aliasByMetric(carbon-writer.$host.$Application.Threading.peak)",
                 "textEditor": false
               }
             ],
@@ -544,7 +544,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(*.%HOST%.$Application.Manager.sessions.*, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(carbon-writer.$host.$Application.Manager.sessions.*, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -622,8 +622,25 @@
     "templating": {
       "list": [
         {
+          "current": {
+            "value": "%STORAGE_IDENTIFIER%",
+            "text": "%STORAGE_IDENTIFIER%"
+          },
+          "hide": 2,
+          "label": null,
+          "name": "host",
+          "options": [
+            {
+              "value": "%STORAGE_IDENTIFIER%",
+              "text": "%STORAGE_IDENTIFIER%"
+            }
+          ],
+          "query": "%STORAGE_IDENTIFIER%",
+          "type": "constant"
+        },
+        {
           "name": "Application",
-          "query": "*.%HOST%.*",
+          "query": "carbon-writer.$host.*",
           "regex": "/^(?!MONGODB|MYSQL|NODE_EXPORTER).*$/",
           "hide": 1,
           "sort": 0,
@@ -642,21 +659,21 @@
           "enable": true,
           "iconColor": "rgb(93, 227, 12)",
           "datasource": "events",
-          "tags": "%HOST% created&set=intersection"
+          "tags": "$host created&set=intersection"
         },
         {
           "name": "Load Tests",
           "enable": true,
           "iconColor": "rgb(26, 196, 220)",
           "datasource": "events",
-          "tags": "%HOST% loadtest&set=intersection"
+          "tags": "$host loadtest&set=intersection"
         },
         {
           "name": "Deployments",
           "enable": true,
           "iconColor": "rgb(176, 40, 253)",
           "datasource": "events",
-          "tags": "%HOST% deployment&set=intersection"
+          "tags": "$host deployment&set=intersection"
         }
       ]
     },

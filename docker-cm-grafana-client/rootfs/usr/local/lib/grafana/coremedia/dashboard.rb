@@ -61,6 +61,9 @@ module Grafana
         # read the configuration for an customized display name
         #
         config          = @redis.config( { :short => short, :key => 'display-name' } )
+        identifier      = @redis.config( { :short => short, :key => 'graphite-identifier' } )
+
+        logger.debug( @redis.config( { :short => short } ) )
 
         if( config.dig( 'display-name' ) != nil )
 
@@ -72,10 +75,26 @@ module Grafana
           @grafanaHostname = short
         end
 
-        @shortHostname    = short
-        @grafanaHostname  = @grafanaHostname.gsub( '.', '-' ) # self.createSlug( @grafanaHostname ).gsub( '.', '-' )
 
-        logger.debug( @shortHostname )
+        if( identifier.dig( 'graphite-identifier' ) != nil )
+
+          @storageIdentifier = identifier.dig( 'graphite-identifier' ).to_s
+
+          logger.info( "use custom storage identifier from config: '#{@storageIdentifier}'" )
+        else
+
+          @storageIdentifier = short
+        end
+
+
+        @shortHostname    = short
+        @grafanaHostname  = self.createSlug( @grafanaHostname ).gsub( '.', '-' )
+
+        logger.debug( "short hostname    : #{@shortHostname}" )
+        logger.debug( "grafana hostname  : #{@grafanaHostname}" )
+        logger.debug( "storage Identifier: #{@storageIdentifier}" )
+
+        return ip, short, fqdn
 
       end
 
@@ -109,13 +128,14 @@ module Grafana
 
         logger.info( sprintf( 'Adding dashboards for host \'%s\'', host ) )
 
-        self.prepare( host )
+        ip, short, fqdn = self.prepare( host )
 
-        discovery = @redis.discoveryData( { :short => host } )
+        discovery = @redis.discoveryData( { :short => short } )
 
         if( discovery == nil )
+
           return {
-            :status    => 500,
+            :status    => 400,
             :message   => 'no discovery data found'
           }
         end
@@ -148,7 +168,7 @@ module Grafana
             template       = nil
           end
 
-          cacheKey       = Storage::RedisClient.cacheKey( { :host => host, :pre => 'result', :service => service } )
+#           cacheKey       = Storage::RedisClient.cacheKey( { :host => host, :pre => 'result', :service => service } )
 
           # cae-live-1 -> cae-live
           serviceName     = self.removePostfix( service )
@@ -223,13 +243,13 @@ module Grafana
 
           for y in 1..30
 
-            result = @redis.measurements( { :short => host } )
+            result = @redis.measurements( { :short => short } )
 
             if( result != nil )
               measurements = result
               break
             else
-              logger.debug( sprintf( 'wait for measurements data for node \'%s\' ... %d', host, y ) )
+              logger.debug( sprintf( 'wait for measurements data for node \'%s\' ... %d', short, y ) )
               sleep( 4 )
             end
           end
@@ -256,10 +276,12 @@ module Grafana
         dashboards = self.listDashboards( { :host => @grafanaHostname } )
         dashboards = dashboards.dig(:dashboards)
 
+        # TODO
+        # clearer!
         if( dashboards == nil )
 
           return {
-            :status      => 500,
+            :status      => 404,
             :message     => 'no dashboards added'
           }
         end
@@ -270,7 +292,7 @@ module Grafana
           status  = 200
           message = sprintf( '%d dashboards added', count )
         else
-          status  = 500
+          status  = 404
           message = 'Error for adding Dashboads'
         end
 
@@ -317,7 +339,25 @@ module Grafana
                 "time_options": [ "1m", "3m", "5m", "15m" ]
               },
               "templating": {
-                "list": []
+                "list": [
+                  {
+                    "current": {
+                      "value": "%STORAGE_IDENTIFIER%",
+                      "text": "%STORAGE_IDENTIFIER%"
+                    },
+                    "hide": 2,
+                    "label": null,
+                    "name": "host",
+                    "options": [
+                      {
+                        "value": "%STORAGE_IDENTIFIER%",
+                        "text": "%STORAGE_IDENTIFIER%"
+                      }
+                    ],
+                    "query": "%STORAGE_IDENTIFIER%",
+                    "type": "constant"
+                  }
+                ]
               },
               "annotations": {
                 "list": []
@@ -331,13 +371,15 @@ module Grafana
         )
 
         json = self.normalizeTemplate( {
-          :template        => template,
-          :grafanaHostname => @grafanaHostname,
-          :shortHostname   => @shortHostname
+          :template          => template,
+          :grafanaHostname   => @grafanaHostname,
+          :storageIdentifier => @storageIdentifier,
+          :shortHostname     => @shortHostname
         } )
 
         response = self.postRequest( '/api/dashboards/db' , json )
 
+        logger.debug( "#{response}" )
       end
 
 
@@ -438,7 +480,25 @@ module Grafana
                 "time_options": [ "2m", "15m" ]
               },
               "templating": {
-                "list": []
+                "list": [
+                  {
+                    "current": {
+                      "value": "%STORAGE_IDENTIFIER%",
+                      "text": "%STORAGE_IDENTIFIER%"
+                    },
+                    "hide": 2,
+                    "label": null,
+                    "name": "host",
+                    "options": [
+                      {
+                        "value": "%STORAGE_IDENTIFIER%",
+                        "text": "%STORAGE_IDENTIFIER%"
+                      }
+                    ],
+                    "query": "%STORAGE_IDENTIFIER%",
+                    "type": "constant"
+                  }
+                ]
               },
               "annotations": {
                 "list": []
@@ -452,13 +512,15 @@ module Grafana
         )
 
         json = self.normalizeTemplate( {
-          :template        => template,
-          :grafanaHostname => @grafanaHostname,
-          :shortHostname   => @shortHostname
+          :template          => template,
+          :grafanaHostname   => @grafanaHostname,
+          :storageIdentifier => @storageIdentifier,
+          :shortHostname     => @shortHostname
         } )
 
-        self.postRequest( '/api/dashboards/db' , json )
+        response = self.postRequest( '/api/dashboards/db' , json )
 
+        logger.debug( "#{response}" )
       end
 
 
@@ -484,13 +546,15 @@ module Grafana
               templateJson = self.addAnnotations( File.read( filename ) )
 
               json = self.normalizeTemplate( {
-                :template        => templateJson,
-                :grafanaHostname => @grafanaHostname,
-                :shortHostname   => @shortHostname
+                :template          => templateJson,
+                :grafanaHostname   => @grafanaHostname,
+                :storageIdentifier => @storageIdentifier,
+                :shortHostname     => @shortHostname
               } )
 
-              self.postRequest( '/api/dashboards/db' , json )
+              response = self.postRequest( '/api/dashboards/db' , json )
 
+              logger.debug( "#{response}" )
             end
           end
         end
@@ -685,15 +749,18 @@ module Grafana
         templateJson = self.addAnnotations( templateJson )
 
         json = self.normalizeTemplate( {
-          :template        => templateJson,
-          :serviceName     => serviceName,
-          :description     => description,
-          :normalizedName  => normalizedName,
-          :grafanaHostname => @grafanaHostname,
-          :shortHostname   => @shortHostname
+          :template          => templateJson,
+          :serviceName       => serviceName,
+          :description       => description,
+          :normalizedName    => normalizedName,
+          :grafanaHostname   => @grafanaHostname,
+          :storageIdentifier => @storageIdentifier,
+          :shortHostname     => @shortHostname
         } )
 
         response = self.postRequest( '/api/dashboards/db' , json )
+
+        logger.debug( "#{response}" )
 
       end
 
@@ -756,12 +823,15 @@ module Grafana
 
       def normalizeTemplate( params = {} )
 
-        template        = params.dig(:template)
-        serviceName     = params.dig(:serviceName)
-        description     = params.dig(:description)
-        normalizedName  = params.dig(:normalizedName)
-        grafanaHostname = params.dig(:grafanaHostname)
-        shortHostname   = params.dig(:shortHostname)
+#        logger.debug( "normalizeTemplate( #{params} )" )
+
+        template          = params.dig(:template)
+        serviceName       = params.dig(:serviceName)
+        description       = params.dig(:description)
+        normalizedName    = params.dig(:normalizedName)
+        grafanaHostname   = params.dig(:grafanaHostname)
+        storageIdentifier = params.dig(:storageIdentifier)
+        shortHostname     = params.dig(:shortHostname)
 
         if( template == nil )
           return false
@@ -777,11 +847,13 @@ module Grafana
 
         # replace Template Vars
         map = {
-          '%DESCRIPTION%' => description,
-          '%SERVICE%'     => normalizedName,
-          '%HOST%'        => shortHostname,
-          '%SHORTHOST%'   => grafanaHostname,
-          '%TAG%'         => shortHostname
+          '%DESCRIPTION%'        => description,
+          '%SERVICE%'            => normalizedName,
+          '%HOST%'               => shortHostname,
+          '%SHORTHOST%'          => grafanaHostname,
+#          '%%' =>
+          '%STORAGE_IDENTIFIER%' => storageIdentifier,
+          '%TAG%'                => shortHostname
         }
 
         re = Regexp.new( map.keys.map { |x| Regexp.escape(x) }.join( '|' ) )
@@ -835,28 +907,28 @@ module Grafana
                 "enable": false,
                 "iconColor": "rgb(93, 227, 12)",
                 "datasource": "events",
-                "tags": "%HOST% created&set=intersection"
+                "tags": "%STORAGE_IDENTIFIER% created&set=intersection"
               },
               {
                 "name": "destoyed",
                 "enable": false,
                 "iconColor": "rgb(227, 57, 12)",
                 "datasource": "events",
-                "tags": "%HOST% destroyed&set=intersection"
+                "tags": "%STORAGE_IDENTIFIER% destroyed&set=intersection"
               },
               {
                 "name": "Load Tests",
                 "enable": false,
                 "iconColor": "rgb(26, 196, 220)",
                 "datasource": "events",
-                "tags": "%HOST% loadtest&set=intersection"
+                "tags": "%STORAGE_IDENTIFIER% loadtest&set=intersection"
               },
               {
                 "name": "Deployments",
                 "enable": false,
                 "iconColor": "rgb(176, 40, 253)",
                 "datasource": "events",
-                "tags": "%HOST% deployment&set=intersection"
+                "tags": "%STORAGE_IDENTIFIER% deployment&set=intersection"
               }
             ]
           }

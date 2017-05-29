@@ -62,13 +62,13 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(alias(perSecond(aliasSub(*.$host.MYSQL.network.bytes.tx, '(.*)-', '')), 'in'))",
+                "target": "aliasByMetric(alias(perSecond(aliasSub(carbon-writer.$host.MYSQL.network.bytes.tx, '(.*)-', '')), 'in'))",
                 "textEditor": false
               },
               {
                 "hide": false,
                 "refId": "B",
-                "target": "aliasByMetric(alias(perSecond(aliasSub(*.$host.MYSQL.network.bytes.rx, '(.*)-', '')), 'out'))",
+                "target": "aliasByMetric(alias(perSecond(aliasSub(carbon-writer.$host.MYSQL.network.bytes.rx, '(.*)-', '')), 'out'))",
                 "textEditor": false
               }
             ],
@@ -154,7 +154,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.$host.MYSQL.threads.*)",
+                "target": "aliasByMetric(carbon-writer.$host.MYSQL.threads.*)",
                 "textEditor": false
               }
             ],
@@ -240,7 +240,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(*.$host.MYSQL.qcache.*, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(carbon-writer.$host.MYSQL.qcache.*, '(.*)-', ''))",
                 "textEditor": false
               }
             ],
@@ -330,7 +330,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(perSecond(aliasSub(*.$host.MYSQL.innodb.pages.*, '(.*)-', '')), '^perSecond\\((.*)\\)$', '\\1'))",
+                "target": "aliasByMetric(aliasSub(perSecond(aliasSub(carbon-writer.$host.MYSQL.innodb.pages.*, '(.*)-', '')), '^perSecond\\((.*)\\)$', '\\1'))",
                 "hide": false,
                 "textEditor": false
               }
@@ -419,7 +419,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(perSecond(aliasSub(*.$host.MYSQL.innodb.rows.*, '(.*)-', '')), '^perSecond\\((.*)\\)$', '\\1'))",
+                "target": "aliasByMetric(aliasSub(perSecond(aliasSub(carbon-writer.$host.MYSQL.innodb.rows.*, '(.*)-', '')), '^perSecond\\((.*)\\)$', '\\1'))",
                 "textEditor": false
               }
             ],
@@ -501,7 +501,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(aliasSub(perSecond(aliasSub(*.$host.MYSQL.innodb.pages.*, '(.*)-', '')), '^perSecond\\((.*)\\)$', '\\1'), 'pages_(.*)', '\\1'))",
+                "target": "aliasByMetric(aliasSub(aliasSub(perSecond(aliasSub(carbon-writer.$host.MYSQL.innodb.pages.*, '(.*)-', '')), '^perSecond\\((.*)\\)$', '\\1'), 'pages_(.*)', '\\1'))",
                 "textEditor": false
               }
             ],
@@ -571,19 +571,19 @@
       "list": [
         {
           "current": {
-            "value": "%HOST%",
-            "text": "%HOST%"
+            "value": "%STORAGE_IDENTIFIER%",
+            "text": "%STORAGE_IDENTIFIER%"
           },
           "hide": 2,
           "label": null,
           "name": "host",
           "options": [
             {
-              "value": "%HOST%",
-              "text": "%HOST%"
+              "value": "%STORAGE_IDENTIFIER%",
+              "text": "%STORAGE_IDENTIFIER%"
             }
           ],
-          "query": "%HOST%",
+          "query": "%STORAGE_IDENTIFIER%",
           "type": "constant"
         }
       ]

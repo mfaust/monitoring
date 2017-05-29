@@ -4,7 +4,7 @@
         "height": "100px",
         "panels": [
           {
-            "content": "<h3><center><bold><a href=\"/grafana/dashboard/db/%SHORTHOST%-feeder-live\">Feeder Live</a></bold></center></h3>",
+            "content": "<h3><center><bold><a href=\"/grafana/dashboard/db/%SHORTHOST%-cae-feeder-live\">Feeder Live</a></bold></center></h3>",
             "editable": true,
             "error": false,
             "id": 27,
@@ -25,7 +25,7 @@
             "id": 70,
             "targets": [
               {
-                "target": "*.%HOST%.FEEDER_LIVE.Runtime.uptime",
+                "target": "carbon-writer.$host.FEEDER_LIVE.Runtime.uptime",
                 "refId": "A",
                 "textEditor": false
               }
@@ -112,7 +112,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "*.%HOST%.FEEDER_LIVE.Memory.heap_memory.used_percent"
+                "target": "carbon-writer.$host.FEEDER_LIVE.Memory.heap_memory.used_percent"
               }
             ],
             "thresholds": "85,95",
@@ -187,7 +187,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "*.%HOST%.FEEDER_LIVE.CapConnection.open"
+                "target": "carbon-writer.$host.FEEDER_LIVE.CapConnection.open"
               }
             ],
             "thresholds": "0,1",
@@ -223,7 +223,7 @@
             "id": 31,
             "targets": [
               {
-                "target": "*.%HOST%.FEEDER_LIVE.CapConnection.heap.cache.used_percent",
+                "target": "carbon-writer.$host.FEEDER_LIVE.CapConnection.heap.cache.used_percent",
                 "refId": "A"
               }
             ],
@@ -298,7 +298,7 @@
             "id": 32,
             "targets": [
               {
-                "target": "*.%HOST%.FEEDER_LIVE.ProactiveEngine.feeder.entries.diff",
+                "target": "carbon-writer.$host.FEEDER_LIVE.ProactiveEngine.feeder.entries.diff",
                 "refId": "A"
               }
             ],
@@ -373,7 +373,7 @@
             "id": 22,
             "targets": [
               {
-                "target": "*.%HOST%.FEEDER_LIVE.Health.healthy",
+                "target": "carbon-writer.$host.FEEDER_LIVE.Health.healthy",
                 "refId": "A"
               }
             ],
@@ -431,7 +431,7 @@
             "id": 96,
             "targets": [
               {
-                "target": "*.%HOST%.FEEDER_LIVE.ProactiveEngine.feeder.heartbeat",
+                "target": "carbon-writer.$host.FEEDER_LIVE.ProactiveEngine.feeder.heartbeat",
                 "refId": "A",
                 "textEditor": false
               }

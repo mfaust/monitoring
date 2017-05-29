@@ -3,145 +3,74 @@
 # all commented out vars are set into the containers with the correct value
 # they are only examples and documentation
 
+# FOR ALL ENVIRONMENT VARS LOOK INTO environments.example
+
 version: '2.0'
 
 services:
 
+  database:
+    environment:
+      MYSQL_ROOT_PASS: database.pass
+
   icinga2-satellite:
     environment:
-      # MYSQL_HOST: database
-      # MYSQL_PORT: 3306
-      # MYSQL_ROOT_USER: root
-      # MYSQL_ROOT_PASS: database.pass
-      # IDO_PASSWORD: ido.pass
-      # IDO_DATABASE_NAME: icinga2core
-      # IDO_PASSWORD:
-      # CARBON_HOST: carbon
-      # CARBON_PORT: 2003
-      # DASHING_API_USER: dashing
-      # DASHING_API_PASS: dashing.pass
       ICINGA_CLUSTER: 'true'
-      # NOTICE: EXTERNAL-SERVICE
       ICINGA_MASTER: icinga2-master.docker
       ICINGA_CERT_SERVICE: 'true'
       ICINGA_CERT_SERVICE_BA_USER: admin
       ICINGA_CERT_SERVICE_BA_PASSWORD: admin
       ICINGA_CERT_SERVICE_API_USER: root
       ICINGA_CERT_SERVICE_API_PASSWORD: icinga
-      # NOTICE: EXTERNAL-SERVICE
-      # must beindentical with the icinga2-master!
       ICINGA_CERT_SERVICE_SERVER: nginx-proxy.docker
       ICINGA_CERT_SERVICE_PORT: 80
       ICINGA_CERT_SERVICE_PATH: /cert-service/
-      REDIS_HOST: redis
-      # REDIS_PORT: 6379
 
   carbon-relay:
     environment:
-      # NOTICE: EXTERNAL-SERVICE
       GRAPHITE_HOST: carbon.docker
-      # GRAPHITE_PORT: 2003
 
   cm-rest-service:
     environment:
       TZ: 'Europe/Berlin'
       REST_SERVICE_PORT: 45678
       REST_SERVICE_BIND: '0.0.0.0'
-      MQ_HOST: beanstalkd
-      # MQ_PORT: 11300
-      # MQ_QUEUE: mq-rest-service
-      REDIS_HOST: redis
-      # REDIS_PORT: 6379
-      # when we need an DNS entry for external services, we can use ADDITIONAL_DNS
-      # its an comma seperated list with following syntax:
-      # HOSTNAME:IP,HOSTNAME:IP, ...
-      # e.g.:
-      # ADDITIONAL_DNS: 'blueprint-box:192.168.252.100,nginx-proxy:192.168.252.5'
       ADDITIONAL_DNS: 'graphite:192.168.252.5,carbon:192.168.252.5,nginx-proxy:192.168.252.5,icinga2-master:192.168.252.5'
 
   cm-service-discovery:
     environment:
       TZ: 'Europe/Berlin'
-      JOLOKIA_HOST: jolokia
-      # JOLOKIA_PORT: 8080
-      # JOLOKIA_PATH: /jolokia
-      # JOLOKIA_AUTH_USER:
-      # JOLOKIA_AUTH_PASS:
-      MQ_HOST: beanstalkd
-      # MQ_PORT: 11300
-      # MQ_QUEUE: mq-discover
-      REDIS_HOST: redis
-      # REDIS_PORT: 6379
       INTERVAL: 20
       RUN_DELAY: 10
 
   cm-data-collector:
     environment:
       TZ: 'Europe/Berlin'
-      JOLOKIA_HOST: jolokia
-      # JOLOKIA_PORT: 8080
-      # JOLOKIA_PATH: /jolokia
-      # JOLOKIA_AUTH_USER:
-      # JOLOKIA_AUTH_PASS:
-      MQ_HOST: beanstalkd
-      # MQ_PORT: 11300
-      # MQ_QUEUE: mq-collector
-      REDIS_HOST: redis
-      # REDIS_PORT: 6379
       INTERVAL: 20
 
   cm-carbon-client:
     environment:
       TZ: 'Europe/Berlin'
       GRAPHITE_HOST: carbon-relay
-      # GRAPHITE_PORT: 2003
-      REDIS_HOST: redis
-      # REDIS_PORT: 6379
-      # INTERVAL: 20
 
   cm-grafana-client:
     environment:
       TZ: 'Europe/Berlin'
-      # NOTICE: EXTERNAL-SERVICE
       GRAFANA_HOST: nginx-proxy.docker
-      # GRAFANA_PORT: 80
-      # GRAFANA_URL_PATH: /grafana
-      # GRAFANA_API_USER: admin
-      # GRAFANA_API_PASSWORD: admin
-      # GRAFANA_TEMPLATE_PATH: /usr/local/share/templates/grafana
-      REDIS_HOST: redis
-      # REDIS_PORT: 6379
-      MQ_HOST: beanstalkd
-      # MQ_PORT: 11300
-      # MQ_QUEUE: mq-grafana
 
   cm-graphite-client:
     environment:
       TZ: 'Europe/Berlin'
-      # NOTICE: EXTERNAL-SERVICE
       GRAPHITE_HOST: nginx-proxy.docker
-      # GRAPHITE_PORT: 2003
       GRAPHITE_HTTP_PORT: 80
       GRAPHITE_PATH: /graphite
-      MQ_HOST: beanstalkd
-      # MQ_PORT: 11300
-      # MQ_QUEUE: mq-graphite
-      # INTERVAL: 15
-      # RUN_DELAY: 10
 
   cm-icinga-client:
     environment:
       TZ: 'Europe/Berlin'
-      # NOTICE: EXTERNAL-SERVICE
       ICINGA_HOST: icinga2-master.docker
-      # ICINGA_API_PORT: 5665
       ICINGA_API_USER: root
       ICINGA_API_PASSWORD: icinga
-      # we need the cluster-mode!
       ICINGA_CLUSTER: 'true'
       ICINGA_CLUSTER_SATELLITE: icinga2-satellite
-      MQ_HOST: beanstalkd
-      # MQ_PORT: 11300
-      # MQ_QUEUE: mq-icinga
-
-
+      ENABLE_NOTIFICATIONS: 'true'

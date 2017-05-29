@@ -29,7 +29,25 @@
       ]
     },
     "templating": {
-      "list": []
+      "list": [
+        {
+          "current": {
+            "value": "%STORAGE_IDENTIFIER%",
+            "text": "%STORAGE_IDENTIFIER%"
+          },
+          "hide": 2,
+          "label": null,
+          "name": "host",
+          "options": [
+            {
+              "value": "%STORAGE_IDENTIFIER%",
+              "text": "%STORAGE_IDENTIFIER%"
+            }
+          ],
+          "query": "%STORAGE_IDENTIFIER%",
+          "type": "constant"
+        }
+      ]
     },
     "annotations": {
       "list": []

@@ -25,7 +25,7 @@
             "id": 70,
             "targets": [
               {
-                "target": "*.%HOST%.SOLR_MASTER.Runtime.uptime",
+                "target": "carbon-writer.$host.SOLR_MASTER.Runtime.uptime",
                 "refId": "A",
                 "textEditor": false
               }
@@ -112,7 +112,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "*.%HOST%.SOLR_MASTER.Memory.heap_memory.used_percent"
+                "target": "carbon-writer.$host.SOLR_MASTER.Memory.heap_memory.used_percent"
               }
             ],
             "thresholds": "85,95",

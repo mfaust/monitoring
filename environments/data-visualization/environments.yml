@@ -3,29 +3,18 @@
 # all commented out vars are set into the containers with the correct value
 # they are only examples and documentation
 
+# FOR ALL ENVIRONMENT VARS LOOK INTO environments.example
+
 version: '2.0'
 
 services:
 
   database:
     environment:
-      # MYSQL_SYSTEM_USER:
       MYSQL_ROOT_PASS: database.pass
 
   graphite:
     environment:
-      # default database are sqlite.
-      # this is only needed, when we whant to use graphite dashboards.
-      # (WE DONT THIS!)
-      # DATABASE_TYPE: sqlite
-      # MYSQL_HOST:
-      # MYSQL_PORT: 3306
-      # MYSQL_ROOT_USER: root
-      # MYSQL_ROOT_PASS:
-      # DATABASE_GRAPHITE_PASS: graphite
-      #
-      # THIS TURN OFF THE INTERNAL CARBON!
-      # USE THIS ONLY WITH AN OTHER CARBON-WRITER (e.g. bodsch/docker-go-carbon)
       USE_EXTERNAL_CARBON: 'true'
 
   grafana:
@@ -33,35 +22,18 @@ services:
       ORGANISATION: CoreMedia
       DATABASE_TYPE: mysql
       MYSQL_HOST: database
-      # MYSQL_PORT: 3306
-      # MYSQL_ROOT_USER: root
       MYSQL_ROOT_PASS: database.pass
       GRAPHITE_HOST: graphite
-      # GRAPHITE_PORT: 2003
-      # GRAPHITE_HTTP_PORT: 8080
-      #
-      # WE USE AN SEPERATE CARBON SERVICE
-      # IF NOT, THEN SET THEN TO $GRAPHITE_HOST
-      # (see above in this configuration part!)
       CARBON_HOST: carbon
-      # CARBON_PORT: 2003
       MEMCACHE_HOST: memcached
-      # MEMCACHE_PORT: 11211
-      # DATABASE_GRAFANA_PASS: grafana
 
   icinga2-master:
     environment:
       MYSQL_HOST: database
-      # MYSQL_PORT: 3306
-      # MYSQL_ROOT_USER: root
       MYSQL_ROOT_PASS: database.pass
       IDO_PASSWORD: ido.pass
       IDO_DATABASE_NAME: icinga2core
-      # IDO_PASSWORD:
       CARBON_HOST: carbon
-      # CARBON_PORT: 2003
-      # DASHING_API_USER: dashing
-      # DASHING_API_PASS: dashing.pass
       ICINGA_API_USERS: root:icinga,icingaweb:icingaweb,cert-service:47pswW14rzeV9MNFGruI
       ICINGA_CLUSTER: 'true'
       ICINGA_MASTER: icinga2-master
@@ -70,35 +42,14 @@ services:
       ICINGA_CERT_SERVICE_BA_PASSWORD: admin
       ICINGA_CERT_SERVICE_API_USER: cert-service
       ICINGA_CERT_SERVICE_API_PASSWORD: 47pswW14rzeV9MNFGruI
-      # ICINGA_CERT_SERVICE_SERVER:
-      # ICINGA_CERT_SERVICE_PORT: 80
       ICINGA_CERT_SERVICE_PATH: /cert-service/
-      # REDIS_HOST: redis
-      # REDIS_PORT: 6379
-      # Useful to send notification via email
-      # ICINGA_SSMTP_RELAY_SERVER:
-      # ICINGA_SSMTP_REWRITE_DOMAIN:
-      # ICINGA_SSMTP_RELAY_USE_STARTTLS:
-      # ICINGA_SSMTP_SENDER_EMAIL:
-      # ICINGA_SSMTP_SMTPAUTH_USER:
-      # ICINGA_SSMTP_SMTPAUTH_PASS:
-      # ICINGA_SSMTP_ALIASES:
 
   icingaweb2:
     environment:
       MYSQL_HOST: database
-      # MYSQL_PORT: 3306
-      # MYSQL_ROOT_USER: root
       MYSQL_ROOT_PASS: database.pass
       ICINGA2_HOST: icinga2-master
       ICINGA2_CMD_API_USER: icingaweb
       ICINGA2_CMD_API_PASS: icingaweb
       IDO_PASSWORD: ido.pass
       IDO_DATABASE_NAME: icinga2core
-      # GRAPHITE_HOST:
-      # GRAPHITE_PORT:
-      # ICINGAWEB_ADMIN_USER: icinga
-      # ICINGAWEB_ADMIN_PASS: icinga
-      # LIVESTATUS_HOST:
-      # LIVESTATUS_PORT:
-

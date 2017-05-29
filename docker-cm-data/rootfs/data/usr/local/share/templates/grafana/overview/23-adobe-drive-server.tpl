@@ -25,7 +25,7 @@
             "id": 70,
             "targets": [
               {
-                "target": "*.%HOST%.ADOBE_DRIVE_SERVER.Runtime.uptime",
+                "target": "carbon-writer.$host.ADOBE_DRIVE_SERVER.Runtime.uptime",
                 "refId": "A",
                 "textEditor": false
               }
@@ -112,7 +112,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "*.%HOST%.ADOBE_DRIVE_SERVER.Memory.heap_memory.used_percent"
+                "target": "carbon-writer.$host.ADOBE_DRIVE_SERVER.Memory.heap_memory.used_percent"
               }
             ],
             "thresholds": "85,95",
@@ -187,7 +187,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "*.%HOST%.ADOBE_DRIVE_SERVER.CapConnection.open"
+                "target": "carbon-writer.$host.ADOBE_DRIVE_SERVER.CapConnection.open"
               }
             ],
             "thresholds": "0,1",
@@ -223,7 +223,7 @@
             "id": 49,
             "targets": [
               {
-                "target": "*.%HOST%.ADOBE_DRIVE_SERVER.CapConnection.heap.cache.used_percent",
+                "target": "carbon-writer.$host.ADOBE_DRIVE_SERVER.CapConnection.heap.cache.used_percent",
                 "refId": "A"
               }
             ],
@@ -298,7 +298,7 @@
             "id": 50,
             "targets": [
               {
-                "target": "*.%HOST%.ADOBE_DRIVE_SERVER.CapConnection.blob.cache.used_percent",
+                "target": "carbon-writer.$host.ADOBE_DRIVE_SERVER.CapConnection.blob.cache.used_percent",
                 "refId": "A"
               }
             ],
@@ -373,7 +373,7 @@
             "id": 50,
             "targets": [
               {
-                "target": "*.%HOST%.ADOBE_DRIVE_SERVER.CapConnection.su_sessions.sessions",
+                "target": "carbon-writer.$host.ADOBE_DRIVE_SERVER.CapConnection.su_sessions.sessions",
                 "refId": "A"
               }
             ],

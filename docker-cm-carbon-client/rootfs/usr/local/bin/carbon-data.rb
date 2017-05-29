@@ -16,11 +16,12 @@ require_relative '../lib/carbon-writer'
 
 # -----------------------------------------------------------------------------
 
-redisHost          = ENV.fetch( 'REDIS_HOST'       , 'localhost' )
-redisPort          = ENV.fetch( 'REDIS_PORT'       , 6379 )
-interval           = ENV.fetch( 'INTERVAL'         , 20 )
-carbonHost         = ENV.fetch( 'GRAPHITE_HOST'    , 'carbon' )
-carbonPort         = ENV.fetch( 'GRAPHITE_PORT'    , 2003 )
+redisHost  = ENV.fetch('REDIS_HOST'    , 'redis' )
+redisPort  = ENV.fetch('REDIS_PORT'    , 6379 )
+carbonHost = ENV.fetch('GRAPHITE_HOST' , 'carbon' )
+carbonPort = ENV.fetch('GRAPHITE_PORT' , 2003 )
+interval   = ENV.fetch('INTERVAL'      , 40 )
+delay      = ENV.fetch('RUN_DELAY'     , 1 )
 
 config = {
   :redis       => {
@@ -50,7 +51,7 @@ writer = CarbonWriter.new( config )
 
 scheduler = Rufus::Scheduler.new
 
-scheduler.every( interval, :first_in => 1 ) do
+scheduler.every( interval, :first_in => delay ) do
 
   writer.run()
 

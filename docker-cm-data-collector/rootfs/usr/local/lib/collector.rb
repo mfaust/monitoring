@@ -746,7 +746,7 @@ module DataCollector
 
     def clean()
 
-      data = @mq.getJobFromTube( @mqQueue )
+      data = @mq.getJobFromTube( @mqQueue, true )
 
       if( data.count() != 0 )
 
@@ -757,9 +757,6 @@ module DataCollector
         logger.debug( payload )
 
         @cache.unset( payload.dig('host') )
-#        cacheKey = Storage::RedisClient.cacheKey( { :host => payload.dig('host'), :pre => 'prepare' } )
-#
-#        @redis.set( cacheKey, '' )
       end
     end
 

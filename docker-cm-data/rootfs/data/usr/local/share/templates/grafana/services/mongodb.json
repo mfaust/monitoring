@@ -61,12 +61,12 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(alias(perSecond(aliasSub(*.$host.MONGODB.network.bytes.rx, '(.*)-', '')), 'out'))",
+                "target": "aliasByMetric(alias(perSecond(aliasSub(carbon-writer.$host.MONGODB.network.bytes.rx, '(.*)-', '')), 'out'))",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(alias(perSecond(aliasSub(*.$host.MONGODB.network.bytes.tx, '(.*)-', '')), 'in'))",
+                "target": "aliasByMetric(alias(perSecond(aliasSub(carbon-writer.$host.MONGODB.network.bytes.tx, '(.*)-', '')), 'in'))",
                 "textEditor": false
               }
             ],
@@ -160,17 +160,17 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.$host.MONGODB.memory.heap.size)",
+                "target": "aliasByMetric(carbon-writer.$host.MONGODB.memory.heap.size)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(*.$host.MONGODB.memory.heap.used)",
+                "target": "aliasByMetric(carbon-writer.$host.MONGODB.memory.heap.used)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(alias(*.$host.MONGODB.memory.heap.used_percent, 'percent'))",
+                "target": "aliasByMetric(alias(carbon-writer.$host.MONGODB.memory.heap.used_percent, 'percent'))",
                 "textEditor": false
               }
             ],
@@ -256,37 +256,37 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(perSecond(*.$host.MONGODB.commands.insert), '^perSecond\\((.*)\\)$', '\\1'))",
+                "target": "aliasByMetric(aliasSub(perSecond(carbon-writer.$host.MONGODB.commands.insert), '^perSecond\\((.*)\\)$', '\\1'))",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(aliasSub(perSecond(*.$host.MONGODB.commands.update), '^perSecond\\((.*)\\)$', '\\1'))",
+                "target": "aliasByMetric(aliasSub(perSecond(carbon-writer.$host.MONGODB.commands.update), '^perSecond\\((.*)\\)$', '\\1'))",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(aliasSub(perSecond(*.$host.MONGODB.commands.delete), '^perSecond\\((.*)\\)$', '\\1'))",
+                "target": "aliasByMetric(aliasSub(perSecond(carbon-writer.$host.MONGODB.commands.delete), '^perSecond\\((.*)\\)$', '\\1'))",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(aliasSub(perSecond(*.$host.MONGODB.commands.find), '^perSecond\\((.*)\\)$', '\\1'))",
+                "target": "aliasByMetric(aliasSub(perSecond(carbon-writer.$host.MONGODB.commands.find), '^perSecond\\((.*)\\)$', '\\1'))",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(aliasSub(perSecond(*.$host.MONGODB.commands.findAndModify), '^perSecond\\((.*)\\)$', '\\1'))",
+                "target": "aliasByMetric(aliasSub(perSecond(carbon-writer.$host.MONGODB.commands.findAndModify), '^perSecond\\((.*)\\)$', '\\1'))",
                 "textEditor": false
               },
               {
                 "refId": "F",
-                "target": "aliasByMetric(aliasSub(perSecond(*.$host.MONGODB.commands.listCollections), '^perSecond\\((.*)\\)$', '\\1'))",
+                "target": "aliasByMetric(aliasSub(perSecond(carbon-writer.$host.MONGODB.commands.listCollections), '^perSecond\\((.*)\\)$', '\\1'))",
                 "textEditor": false
               },
               {
                 "refId": "G",
-                "target": "aliasByMetric(aliasSub(perSecond(*.$host.MONGODB.commands.renameCollections), '^perSecond\\((.*)\\)$', '\\1'))",
+                "target": "aliasByMetric(aliasSub(perSecond(carbon-writer.$host.MONGODB.commands.renameCollections), '^perSecond\\((.*)\\)$', '\\1'))",
                 "textEditor": false
               }
             ],
@@ -372,7 +372,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.$host.MONGODB.connections.current)",
+                "target": "aliasByMetric(carbon-writer.$host.MONGODB.connections.current)",
                 "textEditor": false
               }
             ],
@@ -444,19 +444,19 @@
       "list": [
         {
           "current": {
-            "value": "%HOST%",
-            "text": "%HOST%"
+            "value": "%STORAGE_IDENTIFIER%",
+            "text": "%STORAGE_IDENTIFIER%"
           },
           "hide": 2,
           "label": null,
           "name": "host",
           "options": [
             {
-              "value": "%HOST%",
-              "text": "%HOST%"
+              "value": "%STORAGE_IDENTIFIER%",
+              "text": "%STORAGE_IDENTIFIER%"
             }
           ],
-          "query": "%HOST%",
+          "query": "%STORAGE_IDENTIFIER%",
           "type": "constant"
         }
       ]

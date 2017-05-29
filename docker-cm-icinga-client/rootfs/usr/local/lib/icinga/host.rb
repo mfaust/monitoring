@@ -42,20 +42,22 @@ module Icinga
 
       @jobs.add( { :ip => ip, :short => short, :fqdn => fqdn } )
 
-      services   = self.nodeInformation( { :host => host } )
+      services   = self.nodeInformation( { :host => short } )
 
       payload = {
         "templates" => [ "generic-host" ],
         "attrs" => {
           "address"              => fqdn,
-          "display_name"         => host,
+          "display_name"         => self.nodeTag( host ),
           "max_check_attempts"   => 3,
           "check_interval"       => 60,
           "retry_interval"       => 45,
-          "enable_notifications" => false
+          "enable_notifications" => @icingaNotifications ? true : false
         }
       }
 
+      # TODO: add groups
+      #
       if( ! services.empty? )
         payload['attrs']['vars'] = services
       end
@@ -67,8 +69,8 @@ module Icinga
 #       logger.debug( JSON.pretty_generate( payload ) )
 
       result = Network.put( {
-        :host    => host,
-        :url     => sprintf( '%s/v1/objects/hosts/%s', @icingaApiUrlBase, host ),
+        :host    => short,
+        :url     => sprintf( '%s/v1/objects/hosts/%s', @icingaApiUrlBase, short ),
         :headers => @headers,
         :options => @options,
         :payload => payload
@@ -96,9 +98,11 @@ module Icinga
         }
       end
 
+      ip, short, fqdn = self.nsLookup( host )
+
       result = Network.delete( {
         :host    => host,
-        :url     => sprintf( '%s/v1/objects/hosts/%s?cascade=1', @icingaApiUrlBase, host ),
+        :url     => sprintf( '%s/v1/objects/hosts/%s?cascade=1', @icingaApiUrlBase, short ),
         :headers => @headers,
         :options => @options
       } )
@@ -115,11 +119,21 @@ module Icinga
 
       host = params.dig(:host) || nil
 
+      if( host == nil )
+
+        return {
+          :status  => 500,
+          :message => 'internal Server Error'
+        }
+      end
+
+      ip, short, fqdn = self.nsLookup( host )
+
       result = Network.get( {
-        :host => host,
-        :url  => sprintf( '%s/v1/objects/hosts/%s', @icingaApiUrlBase, host ),
-        :headers  => @headers,
-        :options  => @options
+        :host    => short,
+        :url     => sprintf( '%s/v1/objects/hosts/%s', @icingaApiUrlBase, short ),
+        :headers => @headers,
+        :options => @options
       } )
 
       return JSON.pretty_generate( result )
@@ -129,38 +143,28 @@ module Icinga
 
     def nodeInformation( params = {} )
 
-#       logger.debug( "nodeInformation( #{params} )" )
+      logger.debug( "nodeInformation( #{params} )" )
 
       host             = params.dig(:host) || nil
 
-      discoveryStatus  = nil
-      discoveryPayload = nil
-
       # in first, we need the discovered services ...
-      logger.debug( 'in first, we need information from discovery service' )
-      logger.debug( 'send message to \'mq-discover\'' )
-
-      self.sendMessage( { :cmd => 'info', :node => host, :queue => 'mq-discover', :payload => {}, :prio => 2, :ttr => 1, :delay => 8 } )
+      logger.debug( sprintf( 'in first, we need information from discovery service for node \'%s\'', host ) )
 
       for y in 1..30
 
-        result      = @mqConsumer.getJobFromTube('mq-discover-info')
+        result = @redis.discoveryData( { :short => host } )
 
-        if( result.is_a?( Hash ) && result.count != 0 && result.dig( :body, 'payload', 'services' ) != nil )
+        if( result.is_a?( Hash ) && result.count != 0 )
 
-          discoveryStatus = result
+          services = result
           break
         else
-          logger.debug( sprintf( 'Waiting for data %s ... %d', 'mq-discover-info', y ) )
+          logger.debug( sprintf( 'waiting for data for node %s ... %d', host, y ) )
           sleep( 5 )
         end
       end
 
-      discoveryPayload = discoveryStatus.dig( :body, 'payload' )
-      services         = discoveryStatus.dig( :body, 'payload', 'services' )
-
-      discoveryPayload.reject! { |k| k == 'status' }
-      discoveryPayload.reject! { |k| k == 'mode' }
+      logger.debug( "#{services}" )
 
       if( services != nil )
 
@@ -174,15 +178,13 @@ module Icinga
           end
         end
 
-        if( discoveryPayload.is_a?( Hash ) )
-          discoveryPayload = discoveryPayload.to_json
-        end
-
-        payload = JSON.parse( discoveryPayload.split('"services":').join('"coremedia":') )
+        payload = { "coremedia": services }
       else
 
         payload = {}
       end
+
+      logger.debug( JSON.pretty_generate( payload ) )
 
       return payload
 

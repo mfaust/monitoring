@@ -173,7 +173,7 @@ module ServiceDiscovery
 
       if( serviceData != nil )
 
-        logger.debug( @serviceConfig['services'][d] )
+#         logger.debug( @serviceConfig['services'][d] )
 
         data[d].merge!( serviceData ) { |key, port| port }
 
@@ -203,7 +203,7 @@ module ServiceDiscovery
   #
   def deleteHost( host )
 
-#     logger.info( sprintf( 'delete Host \'%s\'',  host ) )
+    logger.info( sprintf( 'delete Host \'%s\'',  host ) )
 
     # get a DNS record
     #
@@ -261,8 +261,6 @@ module ServiceDiscovery
       }
     end
 
-    @jobs.add( { :ip => ip, :short => short, :fqdn => fqdn } )
-
     # if the destination host available (simple check with ping)
     #
     if( Utils::Network.isRunning?( fqdn ) == false )
@@ -272,7 +270,6 @@ module ServiceDiscovery
         :message => sprintf( 'Host %s are unavailable', host )
       }
     end
-
 
     # check discovered datas from the past
     #
@@ -306,6 +303,10 @@ module ServiceDiscovery
     end
 
     # -----------------------------------------------------------------------------------
+
+    # block this job..
+    #
+    @jobs.add( { :ip => ip, :short => short, :fqdn => fqdn } )
 
     # get customized configurations of ports and services
     #
@@ -362,6 +363,20 @@ module ServiceDiscovery
     # TODO
     # merge discovered services with additional services
     #
+    if( services.is_a?( Array ) && services.count >= 1 )
+
+      services.each do |s|
+
+        serviceData = @serviceConfig.dig( 'services', s )
+
+        if( serviceData != nil )
+
+          discoveredServices[s] ||= serviceData.filter( 'port' )
+        end
+      end
+
+    end
+
 
     # merge discovered services with cm-services.yaml
     #

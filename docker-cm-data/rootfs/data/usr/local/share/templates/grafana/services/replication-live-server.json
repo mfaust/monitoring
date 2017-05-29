@@ -79,22 +79,22 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "alias(*.$host.RLS.QueryPool.queries.max, 'queries max')",
+                "target": "alias(carbon-writer.$host.RLS.QueryPool.queries.max, 'queries max')",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "alias(*.$host.RLS.QueryPool.queries.waiting, 'queries waiting')",
+                "target": "alias(carbon-writer.$host.RLS.QueryPool.queries.waiting, 'queries waiting')",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "alias(*.$host.RLS.QueryPool.executors.idle, 'executors idle')",
+                "target": "alias(carbon-writer.$host.RLS.QueryPool.executors.idle, 'executors idle')",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "alias(*.$host.RLS.QueryPool.executors.running, 'executors running')",
+                "target": "alias(carbon-writer.$host.RLS.QueryPool.executors.running, 'executors running')",
                 "textEditor": false
               }
 
@@ -180,7 +180,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.$host.RLS.StatisticsResourceCache.cache.*)",
+                "target": "aliasByMetric(carbon-writer.$host.RLS.StatisticsResourceCache.cache.*)",
                 "textEditor": false
               }
             ],
@@ -264,7 +264,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.$host.RLS.StatisticsJobResult.*)",
+                "target": "aliasByMetric(carbon-writer.$host.RLS.StatisticsJobResult.*)",
                 "textEditor": false
               }
             ],
@@ -318,7 +318,7 @@
             "id": 9,
             "targets": [
               {
-                "target": "aliasByMetric(aliasSub(*.$host.RLS.Server.ResourceCache.*, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(carbon-writer.$host.RLS.Server.ResourceCache.*, '(.*)-', ''))",
                 "refId": "A",
                 "textEditor": false
               }
@@ -425,17 +425,17 @@
               {
                 "hide": true,
                 "refId": "A",
-                "target": "alias(*.$host.MLS.Server.Repository.SequenceNumber, 'seq MLS')"
+                "target": "alias(carbon-writer.$host.MLS.Server.Repository.SequenceNumber, 'seq MLS')"
               },
               {
                 "hide": true,
                 "refId": "B",
-                "target": "alias(*.$host.RLS.Replicator.completedSequenceNumber, 'seq RLS')"
+                "target": "alias(carbon-writer.$host.RLS.Replicator.completedSequenceNumber, 'seq RLS')"
               },
               {
                 "refId": "C",
                 "target": "alias(diffSeries(#A, #B), 'MLS vs. RLS')",
-                "targetFull": "alias(diffSeries(*.$host.MLS.Server.Repository.SequenceNumber, *.$host.RLS.Replicator.completedSequenceNumber), 'MLS vs. RLS')"
+                "targetFull": "alias(diffSeries(carbon-writer.$host.MLS.Server.Repository.SequenceNumber, carbon-writer.$host.RLS.Replicator.completedSequenceNumber), 'MLS vs. RLS')"
               }
             ],
             "thresholds": [],
@@ -512,19 +512,19 @@
       "list": [
         {
           "current": {
-            "value": "%HOST%",
-            "text": "%HOST%"
+            "value": "%STORAGE_IDENTIFIER%",
+            "text": "%STORAGE_IDENTIFIER%"
           },
           "hide": 2,
           "label": null,
           "name": "host",
           "options": [
             {
-              "value": "%HOST%",
-              "text": "%HOST%"
+              "value": "%STORAGE_IDENTIFIER%",
+              "text": "%STORAGE_IDENTIFIER%"
             }
           ],
-          "query": "%HOST%",
+          "query": "%STORAGE_IDENTIFIER%",
           "type": "constant"
         }
       ]

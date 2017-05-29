@@ -46,7 +46,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasSub(*.%HOST%.NODE_EXPORTER.load.*, '(.*)-', '')",
+                "target": "aliasSub(carbon-writer.$host.NODE_EXPORTER.load.*, '(.*)\.', '')",
                 "textEditor": false
               }
             ],
@@ -136,15 +136,15 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "alias(*.%HOST%.NODE_EXPORTER.filesystem.rootfs_total, 'total')"
+                "target": "alias(carbon-writer.$host.NODE_EXPORTER.filesystem.*.total, 'total')"
               },
               {
                 "refId": "B",
-                "target": "alias(*.%HOST%.NODE_EXPORTER.filesystem.rootfs_free, 'free')"
+                "target": "alias(carbon-writer.$host.NODE_EXPORTER.filesystem.*.free, 'free')"
               },
               {
                 "refId": "C",
-                "target": "alias(*.%HOST%.NODE_EXPORTER.filesystem.rootfs_used_percent, 'percent used')"
+                "target": "alias(carbon-writer.$host.NODE_EXPORTER.filesystem.*.used_percent, 'percent used')"
               }
             ],
             "thresholds": [],
@@ -233,16 +233,16 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "alias(*.%HOST%.NODE_EXPORTER.memory.total, 'total')"
+                "target": "alias(carbon-writer.$host.NODE_EXPORTER.memory.total, 'total')"
               },
               {
                 "refId": "C",
-                "target": "alias(*.%HOST%.NODE_EXPORTER.memory.used, 'used')",
+                "target": "alias(carbon-writer.$host.NODE_EXPORTER.memory.used, 'used')",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "alias(*.%HOST%.NODE_EXPORTER.memory.used_percent, 'percent')",
+                "target": "alias(carbon-writer.$host.NODE_EXPORTER.memory.used_percent, 'percent')",
                 "textEditor": false
               }
             ],
@@ -331,15 +331,15 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "alias(*.%HOST%.NODE_EXPORTER.swap.total, 'total')"
+                "target": "alias(carbon-writer.$host.NODE_EXPORTER.swap.total, 'total')"
               },
               {
                 "refId": "B",
-                "target": "alias(*.%HOST%.NODE_EXPORTER.swap.used, 'used')"
+                "target": "alias(carbon-writer.$host.NODE_EXPORTER.swap.used, 'used')"
               },
               {
                 "refId": "C",
-                "target": "alias(*.%HOST%.NODE_EXPORTER.swap.used_percent, 'percent')"
+                "target": "alias(carbon-writer.$host.NODE_EXPORTER.swap.used_percent, 'percent')"
               }
             ],
             "thresholds": [],
@@ -387,7 +387,7 @@
       },
       {
         "collapse": false,
-        "height": 250,
+        "height": 150,
         "panels": [
           {
             "aliasColors": {},
@@ -419,22 +419,20 @@
             "steppedLine": false,
             "targets": [
               {
-                "hide": false,
-                "refId": "B",
-                "target": "aliasByMetric(aliasSub(smartSummarize(perSecond(*.%HOST%.NODE_EXPORTER.cpu.cpu[0-9]_user), '1m', 'avg'), '(.*)-', ''))",
+                "refId": "A",
+                "target": "alias(perSecond(carbon-writer.$host.NODE_EXPORTER.cpu.cpu[0-9].user), 'user')",
                 "textEditor": false
               },
               {
-                "hide": false,
-                "refId": "C",
-                "target": "aliasByMetric(aliasSub(smartSummarize(perSecond(*.%HOST%.NODE_EXPORTER.cpu.cpu[0-9]_iowait), '1m', 'avg'), '(.*)-', ''))",
+                "refId": "B",
+                "target": "alias(perSecond(carbon-writer.$host.NODE_EXPORTER.cpu.cpu[0-9].iowait), 'iowait')",
                 "textEditor": false
               }
             ],
             "thresholds": [],
             "timeFrom": null,
             "timeShift": null,
-            "title": "Panel Title",
+            "title": "CPU",
             "tooltip": {
               "shared": true,
               "sort": 0,
@@ -471,7 +469,7 @@
         "repeatIteration": null,
         "repeatRowId": null,
         "showTitle": false,
-        "title": "Dashboard Row",
+        "title": "CPU",
         "titleSize": "h6"
       }
     ],
@@ -501,7 +499,27 @@
         "30d"
       ]
     },
-    "templating": { },
+    "templating": {
+      "list": [
+        {
+          "current": {
+            "value": "%STORAGE_IDENTIFIER%",
+            "text": "%STORAGE_IDENTIFIER%"
+          },
+          "hide": 2,
+          "label": null,
+          "name": "host",
+          "options": [
+            {
+              "value": "%STORAGE_IDENTIFIER%",
+              "text": "%STORAGE_IDENTIFIER%"
+            }
+          ],
+          "query": "%STORAGE_IDENTIFIER%",
+          "type": "constant"
+        }
+      ]
+    },
     "annotations": {
       "list": [
         {
@@ -509,21 +527,21 @@
           "enable": true,
           "iconColor": "rgb(93, 227, 12)",
           "datasource": "events",
-          "tags": "%HOST% created&set=intersection"
+          "tags": "$host created&set=intersection"
         },
         {
           "name": "Load Tests",
           "enable": true,
           "iconColor": "rgb(26, 196, 220)",
           "datasource": "events",
-          "tags": "%HOST% loadtest&set=intersection"
+          "tags": "$host loadtest&set=intersection"
         },
         {
           "name": "Deployments",
           "enable": true,
           "iconColor": "rgb(176, 40, 253)",
           "datasource": "events",
-          "tags": "%HOST% deployment&set=intersection"
+          "tags": "$host deployment&set=intersection"
         }
       ]
     },

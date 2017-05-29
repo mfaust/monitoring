@@ -114,7 +114,8 @@ module Grafana
         logger.info( result )
 
         return {
-          :status  => 200
+          :status  => 200,
+          :message => result
         }
 
       # remove Node
@@ -127,7 +128,8 @@ module Grafana
         logger.info( result )
 
         return {
-          :status  => 200
+          :status  => 200,
+          :message => result
         }
 
       # information about Node
@@ -137,10 +139,11 @@ module Grafana
 #         logger.info( sprintf( 'give dashboards for %s back', node ) )
         result = self.listDashboards( { :host => node } )
 
-        self.sendMessage( { :cmd => 'info', :queue => 'mq-grafana-info', :payload => result, :ttr => 1, :delay => 0 } )
+        self.sendMessage( { :cmd => 'info', :host => node, :queue => 'mq-grafana-info', :payload => result, :ttr => 1, :delay => 0 } )
 
         return {
-          :status  => 200
+          :status  => 200,
+          :message => result
         }
 
       # all others
@@ -163,26 +166,26 @@ module Grafana
 
     def sendMessage( params = {} )
 
-      cmd     = params.dig(:cmd)
+      command = params.dig(:cmd)
       node    = params.dig(:node)
       queue   = params.dig(:queue)
-      payload = params.dig(:payload) || {}
-      ttr     = params.dig(:ttr)     || 10
-      delay   = params.dig(:delay)   || 2
-
-      if( cmd == nil || queue == nil || payload.count() == 0 )
-        return
-      end
+      data    = params.dig(:payload)
+      prio    = params.dig(:prio)  || 65536
+      ttr     = params.dig(:ttr)   || 10
+      delay   = params.dig(:delay) || 2
 
       job = {
-        cmd:  cmd,          # require
+        cmd:  command,      # require
         node: node,         # require
         timestamp: Time.now().strftime( '%Y-%m-%d %H:%M:%S' ), # optional
         from: 'grafana',    # optional
-        payload: payload    # require
+        payload: data       # require
       }.to_json
 
-      result = @mqProducer.addJob( queue, job, ttr, delay )
+      result = @mqProducer.addJob( queue, job, prio, ttr, delay )
+
+      logger.debug( job )
+      logger.debug( result )
 
     end
 

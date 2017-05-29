@@ -25,7 +25,7 @@
             "id": 70,
             "targets": [
               {
-                "target": "*.%HOST%.MYSQL.uptime",
+                "target": "carbon-writer.$host.MYSQL.uptime",
                 "refId": "A",
                 "textEditor": false
               }

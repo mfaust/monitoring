@@ -74,27 +74,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.AMAsset.capacity)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.AMAsset.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.AMAsset.level)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.AMAsset.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.AMAsset.evicted)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.AMAsset.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.AMAsset.removed)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.AMAsset.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.AMAsset.missRate)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.AMAsset.missRate)",
                 "textEditor": false
               }
             ],
@@ -189,27 +189,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ContentBeanBackedPageGridPlacement.capacity)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ContentBeanBackedPageGridPlacement.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ContentBeanBackedPageGridPlacement.level)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ContentBeanBackedPageGridPlacement.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ContentBeanBackedPageGridPlacement.evicted)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ContentBeanBackedPageGridPlacement.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ContentBeanBackedPageGridPlacement.removed)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ContentBeanBackedPageGridPlacement.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ContentBeanBackedPageGridPlacement.missRate)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ContentBeanBackedPageGridPlacement.missRate)",
                 "textEditor": false
               }
             ],
@@ -311,27 +311,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.PageGridImpl.capacity)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.PageGridImpl.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.PageGridImpl.level)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.PageGridImpl.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.PageGridImpl.evicted)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.PageGridImpl.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.PageGridImpl.removed)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.PageGridImpl.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.PageGridImpl.missRate)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.PageGridImpl.missRate)",
                 "textEditor": false
               }
             ],
@@ -426,27 +426,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.SolrQueryCacheKey.capacity)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.SolrQueryCacheKey.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.SolrQueryCacheKey.level)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.SolrQueryCacheKey.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.SolrQueryCacheKey.evicted)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.SolrQueryCacheKey.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.SolrQueryCacheKey.removed)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.SolrQueryCacheKey.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.SolrQueryCacheKey.missRate)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.SolrQueryCacheKey.missRate)",
                 "textEditor": false
               }
             ],
@@ -548,27 +548,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Page.capacity)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.Page.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Page.level)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.Page.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Page.evicted)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.Page.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Page.removed)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.Page.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Page.missRate)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.Page.missRate)",
                 "textEditor": false
               }
             ],
@@ -663,27 +663,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Aspect.capacity)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.Aspect.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Aspect.level)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.Aspect.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Aspect.evicted)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.Aspect.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Aspect.removed)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.Aspect.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Aspect.missRate)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.Aspect.missRate)",
                 "textEditor": false
               }
             ],
@@ -785,27 +785,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ViewLookup.capacity)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ViewLookup.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ViewLookup.level)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ViewLookup.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ViewLookup.evicted)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ViewLookup.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ViewLookup.removed)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ViewLookup.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ViewLookup.missRate)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ViewLookup.missRate)",
                 "textEditor": false
               }
             ],
@@ -900,27 +900,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.LoadedImageCacheKey.capacity)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.LoadedImageCacheKey.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.LoadedImageCacheKey.level)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.LoadedImageCacheKey.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.LoadedImageCacheKey.evicted)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.LoadedImageCacheKey.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.LoadedImageCacheKey.removed)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.LoadedImageCacheKey.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.LoadedImageCacheKey.missRate)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.LoadedImageCacheKey.missRate)",
                 "textEditor": false
               }
             ],
@@ -1022,27 +1022,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Object.capacity)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.Object.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Object.level)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.Object.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Object.evicted)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.Object.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Object.removed)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.Object.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Object.missRate)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.Object.missRate)",
                 "textEditor": false
               }
             ],
@@ -1137,27 +1137,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.AssumesIdentity.capacity)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.AssumesIdentity.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.AssumesIdentity.level)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.AssumesIdentity.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.AssumesIdentity.evicted)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.AssumesIdentity.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.AssumesIdentity.removed)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.AssumesIdentity.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.AssumesIdentity.missRate)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.AssumesIdentity.missRate)",
                 "textEditor": false
               }
             ],
@@ -1259,27 +1259,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.DIGEST.capacity)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.DIGEST.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.DIGEST.level)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.DIGEST.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.DIGEST.evicted)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.DIGEST.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.DIGEST.removed)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.DIGEST.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.DIGEST.missRate)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.DIGEST.missRate)",
                 "textEditor": false
               }
             ],
@@ -1374,27 +1374,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Disk.capacity)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.Disk.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Disk.level)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.Disk.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Disk.evicted)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.Disk.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Disk.removed)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.Disk.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Disk.missRate)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.Disk.missRate)",
                 "textEditor": false
               }
             ],
@@ -1496,27 +1496,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Heap.capacity)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.Heap.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Heap.level)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.Heap.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Heap.evicted)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.Heap.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Heap.removed)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.Heap.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Heap.missRate)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.Heap.missRate)",
                 "textEditor": false
               }
             ],
@@ -1611,27 +1611,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Unlimited.capacity)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.Unlimited.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Unlimited.level)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.Unlimited.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Unlimited.evicted)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.Unlimited.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Unlimited.removed)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.Unlimited.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.Unlimited.missRate)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.Unlimited.missRate)",
                 "textEditor": false
               }
             ],
@@ -1733,27 +1733,27 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ALWAYS_STAY_IN_CACHE.capacity)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ALWAYS_STAY_IN_CACHE.capacity)",
                 "textEditor": false
               },
               {
                 "refId": "B",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ALWAYS_STAY_IN_CACHE.level)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ALWAYS_STAY_IN_CACHE.level)",
                 "textEditor": false
               },
               {
                 "refId": "C",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ALWAYS_STAY_IN_CACHE.evicted)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ALWAYS_STAY_IN_CACHE.evicted)",
                 "textEditor": false
               },
               {
                 "refId": "D",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ALWAYS_STAY_IN_CACHE.removed)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ALWAYS_STAY_IN_CACHE.removed)",
                 "textEditor": false
               },
               {
                 "refId": "E",
-                "target": "aliasByMetric(*.%HOST%.$service.CacheClasses.ALWAYS_STAY_IN_CACHE.missRate)",
+                "target": "aliasByMetric(carbon-writer.$host.$service.CacheClasses.ALWAYS_STAY_IN_CACHE.missRate)",
                 "textEditor": false
               }
             ],
@@ -1822,6 +1822,23 @@
       "list": [
         {
           "current": {
+            "value": "%STORAGE_IDENTIFIER%",
+            "text": "%STORAGE_IDENTIFIER%"
+          },
+          "hide": 2,
+          "label": null,
+          "name": "host",
+          "options": [
+            {
+              "value": "%STORAGE_IDENTIFIER%",
+              "text": "%STORAGE_IDENTIFIER%"
+            }
+          ],
+          "query": "%STORAGE_IDENTIFIER%",
+          "type": "constant"
+        },
+        {
+          "current": {
             "text": "CAE_LIVE",
             "value": "CAE_LIVE"
           },
@@ -1847,7 +1864,7 @@
               "selected": false
             }
           ],
-          "query": "*.%HOST%.*",
+          "query": "carbon-writer.$host.*",
           "refresh": 1,
           "regex": "/^(CAE_(.*)|STUDIO).*$/",
           "tags": [],
@@ -1864,21 +1881,21 @@
           "enable": true,
           "iconColor": "rgb(93, 227, 12)",
           "datasource": "events",
-          "tags": "%HOST% created&set=intersection"
+          "tags": "$host created&set=intersection"
         },
         {
           "name": "Load Tests",
           "enable": true,
           "iconColor": "rgb(26, 196, 220)",
           "datasource": "events",
-          "tags": "%HOST% loadtest&set=intersection"
+          "tags": "$host loadtest&set=intersection"
         },
         {
           "name": "Deployments",
           "enable": true,
           "iconColor": "rgb(176, 40, 253)",
           "datasource": "events",
-          "tags": "%HOST% deployment&set=intersection"
+          "tags": "$host deployment&set=intersection"
         }
       ]
     },
