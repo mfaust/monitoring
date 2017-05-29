@@ -11,7 +11,7 @@ require 'sinatra/base'
 require 'logger'
 require 'json'
 require 'yaml'
-require 'fileutils'
+# require 'fileutils'
 require 'resolve/hostname'
 
 require_relative 'monitoring'
@@ -29,13 +29,19 @@ module Sinatra
 
       @logDirectory     = '/var/log'
 
-      @restServicePort  = ENV.fetch( 'REST_SERVICE_PORT', 4567 )
-      @restServiceBind  = ENV.fetch( 'REST_SERVICE_BIND', '0.0.0.0' )
-      @mqHost           = ENV.fetch( 'MQ_HOST'          , 'beanstalkd' )
-      @mqPort           = ENV.fetch( 'MQ_PORT'          , 11300 )
-      @mqQueue          = ENV.fetch( 'MQ_QUEUE'         , 'mq-rest-service' )
-      @redisHost        = ENV.fetch( 'REDIS_HOST'       , 'redis' )
-      @redisPort        = ENV.fetch( 'REDIS_PORT'       , 6379 )
+      @restServicePort  = ENV.fetch('REST_SERVICE_PORT'      , 4567 )
+      @restServiceBind  = ENV.fetch('REST_SERVICE_BIND'      , '0.0.0.0' )
+      @mqHost           = ENV.fetch('MQ_HOST'                , 'beanstalkd' )
+      @mqPort           = ENV.fetch('MQ_PORT'                , 11300 )
+      @mqQueue          = ENV.fetch('MQ_QUEUE'               , 'mq-rest-service' )
+      @redisHost        = ENV.fetch('REDIS_HOST'             , 'redis' )
+      @redisPort        = ENV.fetch('REDIS_PORT'             , 6379 )
+
+      @mysqlHost        = ENV.fetch('MYSQL_HOST'             , 'database')
+      @mysqlSchema      = ENV.fetch('DISCOVERY_DATABASE_NAME', 'discovery')
+      @mysqlUser        = ENV.fetch('DISCOVERY_DATABASE_USER', 'discovery')
+      @mysqlPassword    = ENV.fetch('DISCOVERY_DATABASE_PASS', 'discovery')
+
 
       FileUtils.chmod( 1775, @logDirectory )
       FileUtils.chown( 'nobody', 'nobody', @logDirectory )
@@ -60,14 +66,20 @@ module Sinatra
     # -----------------------------------------------------------------------------
 
     config = {
-      :mq          => {
-        :host  => @mqHost,
-        :port  => @mqPort,
-        :queue => @mqQueue
+      :mq       => {
+        :host      => @mqHost,
+        :port      => @mqPort,
+        :queue     => @mqQueue
       },
-      :redis       => {
-        :host => @redisHost,
-        :port => @redisPort
+      :redis    => {
+        :host      => @redisHost,
+        :port      => @redisPort
+      },
+      :mysql    => {
+        :host      => @mysqlHost,
+        :schema    => @mysqlSchema,
+        :user      => @mysqlUser,
+        :password  => @mysqlPassword
       }
     }
 
