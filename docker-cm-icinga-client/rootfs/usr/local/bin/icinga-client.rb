@@ -8,8 +8,9 @@
 # -----------------------------------------------------------------------------
 
 require 'rufus-scheduler'
+require 'icinga2'
 
-require_relative '../lib/icinga'
+require_relative '../lib/icinga-dev'
 
 # -----------------------------------------------------------------------------
 
@@ -29,15 +30,15 @@ interval            = ENV.fetch( 'INTERVAL'                , 20 )
 delay               = ENV.fetch( 'RUN_DELAY'               , 10 )
 
 # convert string to bool
-icingaCluster   = icingaCluster.to_s.eql?('true') ? true : false
-notifications   = notifications.to_s.eql?('true') ? true : false
+icingaCluster       = icingaCluster.to_s.eql?('true') ? true : false
+icingaNotifications = icingaNotifications.to_s.eql?('true') ? true : false
 
 config = {
   :icinga      => {
-    :host         => icingaHost,
-    :cluster      => icingaCluster,
-    :satellite    => icingaSatellite,
-    :notification => icingaNotifications,
+    :host          => icingaHost,
+    :cluster       => icingaCluster,
+    :satellite     => icingaSatellite,
+    :notifications => icingaNotifications,
     :api => {
       :port     => icingaApiPort,
       :user     => icingaApiUser,
@@ -68,7 +69,9 @@ Signal.trap('QUIT') { stop = true }
 
 # ---------------------------------------------------------------------------------------
 
-i = Icinga::Client.new( config )
+i = CMIcinga2.new( config )
+
+# i = Icinga2::Client.new( config )
 
 scheduler = Rufus::Scheduler.new
 

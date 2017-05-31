@@ -12,14 +12,25 @@ module JobQueue
       @jobs  = Cache::Store.new()
     end
 
+    def cacheKey( params = {} )
+
+      params   = Hash[params.sort]
+      checksum = Digest::MD5.hexdigest( params.to_s )
+
+      return checksum
+
+    end
+
     def add( params = {} )
 
-      ip    = params.dig(:ip)
-      short = params.dig(:short)
-      fqdn  = params.dig(:fqdn)
+      checksum = self.cacheKey(params)
+
+#       ip    = params.dig(:ip)
+#       short = params.dig(:short)
+#       fqdn  = params.dig(:fqdn)
 
       if( self.jobs( params ) == false )
-        @jobs.set( fqdn ) { Cache::Data.new( 'true' ) }
+        @jobs.set( checksum ) { Cache::Data.new( 'true' ) }
       end
 
     end
@@ -27,21 +38,24 @@ module JobQueue
 
     def del( params = {} )
 
-      ip    = params.dig(:ip)
-      short = params.dig(:short)
-      fqdn  = params.dig(:fqdn)
+#       ip    = params.dig(:ip)
+#       short = params.dig(:short)
+#       fqdn  = params.dig(:fqdn)
+      checksum = self.cacheKey(params)
 
-      @jobs.unset( fqdn )
+      @jobs.unset( checksum )
     end
 
 
     def jobs( params = {} )
 
-      ip    = params.dig(:ip)
-      short = params.dig(:short)
-      fqdn  = params.dig(:fqdn)
+#       ip    = params.dig(:ip)
+#       short = params.dig(:short)
+#       fqdn  = params.dig(:fqdn)
 
-      current = @jobs.get( fqdn )
+      checksum = self.cacheKey(params)
+
+      current = @jobs.get( checksum )
 
       if( current == nil )
         # no entry found

@@ -1,7 +1,7 @@
 
 require_relative '../cache'
 
-module Icinga2
+class CMIcinga2 < Icinga2::Client
 
   module Tools
 
@@ -87,6 +87,57 @@ module Icinga2
       return result
 
     end
+
+
+    def nodeInformation( params = {} )
+
+      logger.debug( "nodeInformation( #{params} )" )
+
+      host             = params.dig(:host) || nil
+
+      # in first, we need the discovered services ...
+      logger.debug( sprintf( 'in first, we need information from discovery service for node \'%s\'', host ) )
+
+      for y in 1..30
+
+        result = @redis.discoveryData( { :short => host } )
+
+        if( result.is_a?( Hash ) && result.count != 0 )
+
+          services = result
+          break
+        else
+          logger.debug( sprintf( 'waiting for data for node %s ... %d', host, y ) )
+          sleep( 5 )
+        end
+      end
+
+      logger.debug( "#{services}" )
+
+      if( services != nil )
+
+        services.each do |s|
+
+#           logger.debug( " => service #{s}" )
+
+          if( s.last != nil )
+            s.last.reject! { |k| k == 'template' }
+            s.last.reject! { |k| k == 'application' }
+          end
+        end
+
+        payload = { "coremedia": services }
+      else
+
+        payload = {}
+      end
+
+      logger.debug( JSON.pretty_generate( payload ) )
+
+      return payload
+
+    end
+
 
   end
 
