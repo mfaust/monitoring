@@ -1,5 +1,5 @@
 
-class CMIcinga2 < Icinga2::Client
+module Icinga2
 
   module Queue
 
@@ -9,19 +9,12 @@ class CMIcinga2 < Icinga2::Client
     #
     def queue()
 
-#       logger.debug( "CMIcinga2::Queue.queue()" )
-
       data = @mqConsumer.getJobFromTube( @mqQueue )
 
       if( data.count() != 0 )
 
         stats = @mqConsumer.tubeStatistics( @mqQueue )
-        logger.debug( {
-          :total   => stats.dig(:total),
-          :ready   => stats.dig(:ready),
-          :delayed => stats.dig(:delayed),
-          :buried  => stats.dig(:buried)
-        } )
+        logger.debug( { :total => stats.dig(:total), :ready => stats.dig(:ready), :delayed => stats.dig(:delayed), :buried => stats.dig(:buried) } )
 
         jobId  = data.dig( :id )
 
@@ -79,52 +72,16 @@ class CMIcinga2 < Icinga2::Client
       logger.debug( sprintf( '  command: %s', command ) )
       logger.info( sprintf( '  node %s', node ) )
 
-      ip, short, fqdn = self.nsLookup( node )
-
-      if( @jobs.jobs( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } ) == true )
-
-        logger.warn( 'we are working on this job' )
-
-        return {
-          :status  => 409, # 409 Conflict
-          :message => 'we are working on this job'
-        }
-      end
-
-      @jobs.add( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
-
 
       # add Node
       #
       if( command == 'add' )
 
         logger.info( sprintf( 'add node %s', node ) )
-#        logger.debug( payload )
-#        payload = JSON.parse( payload )
 
-        services   = self.nodeInformation( { :host => short } )
-
-        # TODO: add groups
-        #
-        if( ! services.empty? )
-          payload = services
-        else
-          payload = {}
-        end
-
-        logger.debug( payload )
-
-#         if( @icingaCluster == true && @icingaSatellite != nil )
-#           payload['attrs']['zone'] = @icingaSatellite
-#         end
-
-        # TODO
-        # full API support
-        result = self.addHost( { :name => node, :fqdn => fqdn, :enable_notifications => @icingaNotifications, :vars => payload } )
+        result = self.addHost( { :host => node, :vars => payload } )
 
         logger.info( result )
-
-        @jobs.del( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
 
         return {
           :status => 200
@@ -136,11 +93,9 @@ class CMIcinga2 < Icinga2::Client
 
         logger.info( sprintf( 'remove checks for node %s', node ) )
 
-        result = self.deleteHost( { :name => node } )
+        result = self.deleteHost( { :host => node } )
 
         logger.info( result )
-
-        @jobs.del( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
 
         return {
           :status => 200
@@ -152,11 +107,9 @@ class CMIcinga2 < Icinga2::Client
 
         logger.info( sprintf( 'give information for node %s', node ) )
 
-        result = self.listHost( { :name => node } )
+        result = self.listHost( { :host => node } )
 
         logger.info( result )
-
-        @jobs.del( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
 
         return {
           :status => 200
@@ -167,8 +120,6 @@ class CMIcinga2 < Icinga2::Client
       else
 
         logger.error( sprintf( 'wrong command detected: %s', command ) )
-
-        @jobs.del( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
 
         return {
           :status  => 500,
