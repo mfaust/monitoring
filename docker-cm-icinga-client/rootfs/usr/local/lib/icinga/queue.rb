@@ -98,6 +98,8 @@ class CMIcinga2 < Icinga2::Client
       if( command == 'add' )
 
         logger.info( sprintf( 'add node %s', node ) )
+#        logger.debug( payload )
+#        payload = JSON.parse( payload )
 
         services   = self.nodeInformation( { :host => short } )
 

@@ -7,9 +7,9 @@ ENV \
   ALPINE_MIRROR="mirror1.hs-esslingen.de/pub/Mirrors" \
   ALPINE_VERSION="v3.6" \
   TERM=xterm \
-  APK_ADD="build-base bind-tools curl drill imagemagick-dev ruby-dev ruby-irb ruby-io-console ruby-rdoc zlib zlib-dev" \
-  APK_DEL="build-base imagemagick-dev ruby-dev ruby-io-console zlib-dev" \
-  GEMS="beaneater bigdecimal fileutils ipaddress resolve-hostname redis rufus-scheduler sinatra thin tzinfo-data"
+  APK_ADD="build-base bind-tools curl drill imagemagick-dev mariadb-client mariadb-dev ruby-dev ruby-irb ruby-io-console ruby-rdoc zlib zlib-dev" \
+  APK_DEL="build-base imagemagick-dev mariadb-dev ruby-dev ruby-io-console zlib-dev" \
+  GEMS="beaneater ipaddress mysql2 resolve-hostname redis rufus-scheduler sinatra thin tzinfo-data"
 
 LABEL version="1705-04.1"
 
@@ -34,7 +34,6 @@ RUN \
   do \
     apk del --quiet --purge ${apk} ; \
   done && \
-  mkdir /var/cache/monitoring && \
   rm -rf \
     /tmp/* \
     /var/cache/apk/*

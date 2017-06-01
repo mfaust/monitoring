@@ -27,6 +27,9 @@ shell:
 		--rm \
 		--interactive \
 		--tty \
+		--env MYSQL_HOST=172.17.0.1 \
+		--env MYSQL_ROOT_USER=root \
+		--env MYSQL_ROOT_PASS=m3B.yCZB \
 		--hostname=${IMAGE_NAME} \
 		--name=${IMAGE_NAME} \
 		$(IMAGE_NAME) \
@@ -56,4 +59,3 @@ package-info:
 history:
 	docker history \
 		${IMAGE_NAME}
-

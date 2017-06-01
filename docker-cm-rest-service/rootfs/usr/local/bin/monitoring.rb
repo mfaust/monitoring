@@ -32,6 +32,11 @@ class Monitoring
     redisHost           = settings.dig(:redis, :host)   || 'localhost'
     redisPort           = settings.dig(:redis, :port)   || 6379
 
+    mysqlHost           = settings.dig(:mysql, :host)
+    mysqlSchema         = settings.dig(:mysql, :schema)
+    mysqlUser           = settings.dig(:mysql, :user)
+    mysqlPassword       = settings.dig(:mysql, :password)
+
     @MQSettings = {
       :beanstalkHost  => mqHost,
       :beanstalkPort  => mqPort,
