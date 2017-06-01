@@ -9,6 +9,7 @@ class CMIcinga2 < Icinga2::Client
     #
     def queue()
 
+#       logger.debug( "CMIcinga2::Queue.queue()" )
       data = @mqConsumer.getJobFromTube( @mqQueue )
 
       if( data.count() != 0 )
