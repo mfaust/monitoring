@@ -7,11 +7,11 @@ ENV \
   ALPINE_MIRROR="mirror1.hs-esslingen.de/pub/Mirrors" \
   ALPINE_VERSION="v3.6" \
   TERM=xterm \
-  APK_ADD="build-base bind-tools drill openssl-dev ruby-dev ruby-irb ruby-rdoc" \
-  APK_DEL="build-base ruby-dev ruby-rdoc " \
+  APK_ADD="build-base bind-tools drill git openssl-dev ruby-dev ruby-irb ruby-rdoc" \
+  APK_DEL="build-base git ruby-dev ruby-rdoc " \
   GEMS="beaneater ipaddress json openssl redis rest-client rufus-scheduler tzinfo-data"
 
-LABEL version="1705-04.1"
+LABEL version="1706-01.1"
 
 # ---------------------------------------------------------------------------------------
 
@@ -30,12 +30,18 @@ RUN \
   do \
      gem install --quiet --no-rdoc --no-ri ${gem} ; \
   done && \
+  [ -d /opt ] || mkdir /opt && \
+  cd /opt && \
+  git clone https://github.com/bodsch/ruby-icinga2.git && \
+  cd ruby-icinga2 && \
+  gem install --quiet --no-rdoc --no-ri ./icinga2*gem && \
   for apk in ${APK_DEL} ; \
   do \
     apk del --quiet --purge ${apk} ; \
   done && \
   mkdir /var/cache/monitoring && \
   rm -rf \
+    /opt/* \
     /tmp/* \
     /var/cache/apk/*
 

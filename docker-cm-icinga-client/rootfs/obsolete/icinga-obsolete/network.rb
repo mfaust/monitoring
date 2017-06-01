@@ -150,11 +150,11 @@ module Icinga
 
     def self.delete( params = {} )
 
-      host    = params.dig(:host)    || nil
+#      host    = params.dig(:host)    || nil
       url     = params.dig(:url)     || nil
       headers = params.dig(:headers) || nil
       options = params.dig(:options) || nil
-      payload = params.dig(:payload) || nil
+#      payload = params.dig(:payload) || nil
 
       headers['X-HTTP-Method-Override'] = 'DELETE'
 
