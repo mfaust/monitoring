@@ -8,9 +8,8 @@
 # -----------------------------------------------------------------------------
 
 require 'rufus-scheduler'
-require 'icinga2'
 
-require_relative '../lib/icinga-dev'
+require_relative '../lib/icinga'
 
 # -----------------------------------------------------------------------------
 

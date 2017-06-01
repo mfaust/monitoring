@@ -5,8 +5,6 @@ module JobQueue
 
   class Job
 
-    include Logging
-
     def initialize( settings = {} )
 
       @jobs  = Cache::Store.new()
@@ -25,10 +23,6 @@ module JobQueue
 
       checksum = self.cacheKey(params)
 
-#       ip    = params.dig(:ip)
-#       short = params.dig(:short)
-#       fqdn  = params.dig(:fqdn)
-
       if( self.jobs( params ) == false )
         @jobs.set( checksum ) { Cache::Data.new( 'true' ) }
       end
@@ -38,9 +32,6 @@ module JobQueue
 
     def del( params = {} )
 
-#       ip    = params.dig(:ip)
-#       short = params.dig(:short)
-#       fqdn  = params.dig(:fqdn)
       checksum = self.cacheKey(params)
 
       @jobs.unset( checksum )
@@ -49,13 +40,8 @@ module JobQueue
 
     def jobs( params = {} )
 
-#       ip    = params.dig(:ip)
-#       short = params.dig(:short)
-#       fqdn  = params.dig(:fqdn)
-
       checksum = self.cacheKey(params)
-
-      current = @jobs.get( checksum )
+      current  = @jobs.get( checksum )
 
       if( current == nil )
         # no entry found

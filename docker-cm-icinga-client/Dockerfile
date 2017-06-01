@@ -11,7 +11,7 @@ ENV \
   APK_DEL="build-base git ruby-dev ruby-rdoc " \
   GEMS="beaneater ipaddress json openssl redis rest-client rufus-scheduler tzinfo-data"
 
-LABEL version="1705-04.4"
+LABEL version="1706-01.1"
 
 # ---------------------------------------------------------------------------------------
 
@@ -41,6 +41,7 @@ RUN \
   done && \
   mkdir /var/cache/monitoring && \
   rm -rf \
+    /opt/* \
     /tmp/* \
     /var/cache/apk/*
 
