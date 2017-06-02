@@ -1,4 +1,5 @@
 
+require 'aws-sdk'
 require 'digest/md5'
 
 require_relative '../logging'
