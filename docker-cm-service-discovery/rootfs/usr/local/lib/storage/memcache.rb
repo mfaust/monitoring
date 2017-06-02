@@ -1,6 +1,8 @@
 
 require 'dalli'
 
+module Database
+
   class Memcached
 
     include Logging
@@ -66,5 +68,5 @@ require 'dalli'
 
   end
 
-
+end
 
