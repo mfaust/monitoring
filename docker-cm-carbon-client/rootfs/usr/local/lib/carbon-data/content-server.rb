@@ -145,13 +145,13 @@ module CarbonData
 
             replicatorValue         = replicatorValue.values.first
 
-            connectionUp            = replicatorValue.dig('ConnectionUp') || false
+            connectionUp            = replicatorValue.dig('ConnectionUp')                  || false
             controllerState         = replicatorValue.dig('ControllerState')
             completedSequenceNumber = replicatorValue.dig('LatestCompletedSequenceNumber') || 0
-            enabled                 = replicatorValue.dig('Enabled') || false
-            pipelineUp              = replicatorValue.dig('PipelineUp') || false
-            uncompletedCount        = replicatorValue.dig('UncompletedCount') || 0
-            completedCount          = replicatorValue.dig('CompletedCount') || 0
+            enabled                 = replicatorValue.dig('Enabled')                       || false
+            pipelineUp              = replicatorValue.dig('PipelineUp')                    || false
+            uncompletedCount        = replicatorValue.dig('UncompletedCount')              || 0
+            completedCount          = replicatorValue.dig('CompletedCount')                || 0
 
             controllerState.downcase!
 

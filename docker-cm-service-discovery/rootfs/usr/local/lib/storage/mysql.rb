@@ -154,7 +154,6 @@ module Storage
         result    = @client.query( statement, :as => :hash )
 
         logger.debug( statement )
-
         logger.debug( result.to_a )
       end
     end
@@ -167,7 +166,6 @@ module Storage
       end
 
       logger.debug( " removeDNS( #{params} )")
-
       ip    = params.dig(:ip)
       name  = params.dig(:short)
       fqdn  = params.dig(:fqdn)
@@ -468,7 +466,6 @@ module Storage
       data   = params.dig(:data)
 
       logger.debug( " writeConfig( #{params} )")
-
       if( key == nil || values == nil )
         return false
       end
@@ -674,6 +671,8 @@ module Storage
       fqdn   = params.dig(:fqdn)
       key    = params.dig(:key)
 
+      result = nil
+
       logger.debug( " config( #{params} )")
 
       statement = sprintf(
@@ -688,8 +687,6 @@ module Storage
 
       r    = @client.query( statement, :as => :hash )
 
-#       logger.debug( r.size )
-
       if( r.size == 0 )
         return nil
       end
@@ -699,20 +696,13 @@ module Storage
 
       r.each do |row|
 
-#         logger.debug( row )
-
         fqdn  = row.dig('fqdn')
         key   = row.dig('key')
         value = row.dig('value')
 
-#         logger.debug(fqdn)
-
-        result[fqdn.to_s] ||= {}
-        result[fqdn.to_s][key.to_s] ||= self.parsedResponse( value )
+        result[key.to_s] ||= self.parsedResponse( value )
 
       end
-
-#       logger.debug( result )
 
       return result
 
@@ -820,7 +810,6 @@ module Storage
       data    = params.dig(:data)
 
       logger.debug( " createDiscovery( #{params}, #{append} )")
-
       if( ip == nil )
 
         dns = self.dnsData( { :ip => ip, :short => name, fqdn => fqdn } )
@@ -941,7 +930,6 @@ module Storage
       name      = params.dig(:short)
       fqdn      = params.dig(:fqdn)
       service   = params.dig(:service)
-
       result    = Hash.new()
       statement = nil
 
@@ -986,7 +974,6 @@ module Storage
         )
 
         r = Array.new()
-
         logger.debug( statement )
         res     = @client.query( statement, :as => :hash )
 
@@ -1016,13 +1003,11 @@ module Storage
           end
 
           return result
-
         end
 
         return nil
 
       end
-
 
 
 

@@ -51,14 +51,19 @@ module DataCollector
       mqPort              = settings.dig(:mq, :port)                || 11300
       @mqQueue            = settings.dig(:mq, :queue)               || 'mq-collector'
 
-      redisHost          = settings.dig(:redis, :host)
-      redisPort          = settings.dig(:redis, :port)  || 6379
+      redisHost           = settings.dig(:redis, :host)
+      redisPort           = settings.dig(:redis, :port)  || 6379
 
-      applicationConfig  = settings.dig(:configFiles, :application)
-      serviceConfig      = settings.dig(:configFiles, :service)
+      applicationConfig   = settings.dig(:configFiles, :application)
+      serviceConfig       = settings.dig(:configFiles, :service)
 
-      version            = '1.8.2'
-      date               = '2017-05-07'
+      mysqlHost           = settings.dig(:mysql, :host)
+      mysqlSchema         = settings.dig(:mysql, :schema)
+      mysqlUser           = settings.dig(:mysql, :user)
+      mysqlPassword       = settings.dig(:mysql, :password)
+
+      version            = '1.9.0'
+      date               = '2017-06-03'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - DataCollector' )
@@ -67,6 +72,9 @@ module DataCollector
       logger.info( '  used Services:' )
       logger.info( "    - jolokia      : #{jolokiaHost}:#{jolokiaPort}" )
       logger.info( "    - redis        : #{redisHost}:#{redisPort}" )
+      if( mysqlHost != nil )
+        logger.info( "    - mysql        : #{mysqlHost}@#{mysqlSchema}" )
+      end
       logger.info( "    - message queue: #{mqHost}:#{mqPort}/#{@mqQueue}" )
       logger.info( '-----------------------------------------------------------------' )
 
@@ -93,6 +101,32 @@ module DataCollector
       @mq        = MessageQueue::Consumer.new( @MQSettings )
       @prepare   = Prepare.new( prepareSettings )
       @jobs      = JobQueue::Job.new()
+      @database   = nil
+
+      if( mysqlHost != nil )
+
+        begin
+
+          until( @database != nil )
+
+            logger.debug( 'try to connect our database endpoint' )
+
+            @database   = Storage::MySQL.new( {
+              :mysql => {
+                :host     => mysqlHost,
+                :user     => mysqlUser,
+                :password => mysqlPassword,
+                :schema   => mysqlSchema
+              }
+            } )
+
+            sleep(5)
+          end
+        rescue => e
+
+          logger.error( e )
+        end
+      end
 
       # run internal scheduler to remove old data
       scheduler = Rufus::Scheduler.new
@@ -293,10 +327,16 @@ module DataCollector
     #
     def monitoredServer()
 
-      d = @redis.nodes( { :status => Storage::RedisClient::ONLINE } )
+      if( @database != nil )
+        nodes = @database.nodes( { :status => [ Storage::MySQL::ONLINE ] } )
 
-      logger.debug( d )
-      logger.debug( @redis.nodes( ) )
+        logger.debug( "database: #{nodes}" )
+
+        return nodes
+      end
+
+      d = @redis.nodes( { :status => Storage::RedisClient::ONLINE } )
+      logger.debug( "redis: #{d}" )
 
       return d
 
@@ -556,10 +596,12 @@ module DataCollector
 
           end
 
+#           if( v == 'replication-live-server' )
+#             logger.debug( JSON.pretty_generate( result.dig(v) ) )
+#           end
+
 #           logger.debug( 'store result in our redis' )
           redisResult = @redis.set( cacheKey, result[v] )
-
-# logger.debug( JSON.pretty_generate( result[v] ) )
 
           if( redisResult.is_a?( FalseClass ) || ( redisResult.is_a?( String ) && redisResult != 'OK' ) )
 
@@ -768,19 +810,28 @@ module DataCollector
 
       monitoredServer = self.monitoredServer()
 
-      if( monitoredServer.is_a?( FalseClass ) || monitoredServer.count == 0 )
+      if( monitoredServer == nil || monitoredServer.is_a?( FalseClass ) || monitoredServer.count == 0 )
 
         logger.info( 'no online server found' )
 
         return
       end
 
-      monitoredServer.each do |h,d|
+#       monitoredServer.each do |h,d|
+      monitoredServer.each do |h|
+        # get dns data!
+        #
 
-        h     = h.first
+        ip, short, fqdn = self.nsLookup( h )
 
-        short = d.dig(:shortname)
-        fqdn  = d.dig(:longname)
+#         logger.debug( h )
+#         logger.debug( d )
+#
+#         h     = h.first
+#
+#         short         = d.dig(:shortname)
+#         fqdn          = d.dig(:longname)
+        discoveryData = nil
 
         # add hostname to an blocking cache
         #
@@ -795,11 +846,21 @@ module DataCollector
 
         start = Time.now
 
-        logger.info( sprintf( 'found %s for monitoring', fqdn ) )
+        logger.info( sprintf( 'found \'%s\' for monitoring', fqdn ) )
+
+        if( @database != nil )
+
+          # TODO
+          # discussion
+          # we need this in realtime, or can we cache this for ... 1 minute or more?
+          #
+          discoveryData    = @database.discoveryData( { :ip => ip, :short => short, :fqdn => fqdn } )
+#          logger.debug( "database: #{discoveryData}" )
+        end
 
         # build prepared datas
         #
-        @prepare.buildMergedData( { :hostname => short, :fqdn => fqdn } )
+        @prepare.buildMergedData( { :hostname => short, :fqdn => fqdn, :data => discoveryData } )
 
         # run checks
         #

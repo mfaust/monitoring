@@ -61,6 +61,8 @@ services:
       TZ: 'Europe/Berlin'
       REST_SERVICE_PORT: 45678
       REST_SERVICE_BIND: '0.0.0.0'
+      MYSQL_HOST: database
+      MYSQL_ROOT_PASS: database.pass
       # when we need an DNS entry for external services, we can use ADDITIONAL_DNS
       # its an comma seperated list with following syntax:
       # HOSTNAME:IP,HOSTNAME:IP, ...

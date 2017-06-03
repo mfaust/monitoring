@@ -9,12 +9,12 @@ module DataCollector
 
     def initialize( settings = {} )
 
-      @redisHost   = settings.dig(:redis, :host)
-      @redisPort   = settings.dig(:redis, :port) || 6379
+      @redisHost     = settings.dig(:redis, :host)
+      @redisPort     = settings.dig(:redis, :port) || 6379
 
-      @cfg         = Config.new( settings )
-      @redis       = Storage::RedisClient.new( { :redis => { :host => @redisHost } } )
-      @cache       = Cache::Store.new()
+      @cfg           = Config.new( settings )
+      @redis         = Storage::RedisClient.new( { :redis => { :host => @redisHost } } )
+      @cache         = Cache::Store.new()
 
     end
 
@@ -44,10 +44,11 @@ module DataCollector
     # creates mergedHostData.json for every Node
     def buildMergedData( params = {} )
 
-      logger.debug( "buildMergedData( #{params} )" )
+#       logger.debug( "buildMergedData( #{params} )" )
 
       short = params.dig(:hostname)
       fqdn  = params.dig(:fqdn)
+      data  = params.dig(:data)
 
       if( short == nil )
         logger.error( 'no hostname found' )
@@ -80,8 +81,12 @@ module DataCollector
 #         logger.debug( 'identical' )
 #       end
 
-      # Redis based
-      data = @redis.discoveryData( { :short => short } )
+      if( data == nil )
+
+        # Redis based
+        logger.debug( 'use redis' )
+        data = @redis.discoveryData( { :short => short } )
+      end
 
       if( data == nil || data == false || data.count() == 0 )
         logger.error( 'no discovery data found' )

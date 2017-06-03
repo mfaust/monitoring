@@ -15,18 +15,22 @@ require_relative '../lib/discovery'
 
 serviceConfigFile  = '/etc/cm-service.yaml'
 
-jolokiaHost        = ENV.fetch( 'JOLOKIA_HOST'     , 'jolokia' )
-jolokiaPort        = ENV.fetch( 'JOLOKIA_PORT'     , 8080 )
-jolokiaPath        = ENV.fetch( 'JOLOKIA_PATH'     , '/jolokia' )
-jolokiaAuthUser    = ENV.fetch( 'JOLOKIA_AUTH_USER', nil )
-jolokiaAuthPass    = ENV.fetch( 'JOLOKIA_AUTH_PASS', nil )
-mqHost             = ENV.fetch( 'MQ_HOST'          , 'beanstalkd' )
-mqPort             = ENV.fetch( 'MQ_PORT'          , 11300 )
-mqQueue            = ENV.fetch( 'MQ_QUEUE'         , 'mq-discover' )
-redisHost          = ENV.fetch( 'REDIS_HOST'       , 'redis' )
-redisPort          = ENV.fetch( 'REDIS_PORT'       , 6379 )
-interval           = ENV.fetch( 'INTERVAL'         , 20 )
-delay              = ENV.fetch( 'RUN_DELAY'        , 10 )
+jolokiaHost        = ENV.fetch('JOLOKIA_HOST'           , 'jolokia' )
+jolokiaPort        = ENV.fetch('JOLOKIA_PORT'           , 8080 )
+jolokiaPath        = ENV.fetch('JOLOKIA_PATH'           , '/jolokia' )
+jolokiaAuthUser    = ENV.fetch('JOLOKIA_AUTH_USER'      , nil )
+jolokiaAuthPass    = ENV.fetch('JOLOKIA_AUTH_PASS'      , nil )
+mqHost             = ENV.fetch('MQ_HOST'                , 'beanstalkd' )
+mqPort             = ENV.fetch('MQ_PORT'                , 11300 )
+mqQueue            = ENV.fetch('MQ_QUEUE'               , 'mq-discover' )
+redisHost          = ENV.fetch('REDIS_HOST'             , 'redis' )
+redisPort          = ENV.fetch('REDIS_PORT'             , 6379 )
+mysqlHost          = ENV.fetch('MYSQL_HOST'             , 'database')
+mysqlSchema        = ENV.fetch('DISCOVERY_DATABASE_NAME', 'discovery')
+mysqlUser          = ENV.fetch('DISCOVERY_DATABASE_USER', 'discovery')
+mysqlPassword      = ENV.fetch('DISCOVERY_DATABASE_PASS', 'discovery')
+interval           = ENV.fetch('INTERVAL'               , 20 )
+delay              = ENV.fetch('RUN_DELAY'              , 10 )
 
 config = {
   :jolokia     => {
@@ -49,6 +53,12 @@ config = {
   },
   :configFiles => {
     :service     => serviceConfigFile
+  },
+  :mysql    => {
+    :host      => mysqlHost,
+    :schema    => mysqlSchema,
+    :user      => mysqlUser,
+    :password  => mysqlPassword
   }
 }
 

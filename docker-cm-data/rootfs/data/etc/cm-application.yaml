@@ -203,7 +203,7 @@ jolokia:
       metrics:
       - description: Information about Replication between MLS and RLS
         mbean: com.coremedia:type=Replicator,application=*
-        attribute: ConnectionUp,ControllerState,Enabled,PipelineUp,IncomingCount,CompletedCount,UncompletedCount,LatestCompletedSequenceNumber,LatestCompletedArrival,LatestCompletionDuration,LatestIncomingSequenceNumber,LatestIncomingArrival
+        attribute: ConnectionUp,ControllerState,Enabled,PipelineUp,IncomingCount,CompletedCount,UncompletedCount,LatestCompletedSequenceNumber,LatestCompletedArrival,LatestCompletionDuration,LatestIncomingSequenceNumber,LatestIncomingArrival,MasterLiveServerIORUrl
 
     workflow-server:
       description: Workflow Server

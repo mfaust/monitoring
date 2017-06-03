@@ -49,8 +49,8 @@ class Monitoring
 
     logger.level           = Logger::DEBUG
 
-    version              = '2.4.92'
-    date                 = '2017-05-17'
+    version              = '2.4.95'
+    date                 = '2017-06-02'
 
     logger.info( '-----------------------------------------------------------------' )
     logger.info( ' CoreMedia - Monitoring Service' )
@@ -58,6 +58,9 @@ class Monitoring
     logger.info( '  Copyright 2016-2017 Coremedia' )
     logger.info( '  used Services:' )
     logger.info( "    - redis        : #{redisHost}:#{redisPort}" )
+    if( mysqlHost != nil )
+      logger.info( "    - mysql        : #{mysqlHost}@#{mysqlSchema}" )
+    end
     logger.info( "    - message queue: #{mqHost}:#{mqPort}/#{mqQueue}" )
     logger.info( '-----------------------------------------------------------------' )
     logger.info( '' )
@@ -66,12 +69,38 @@ class Monitoring
     @mqConsumer = MessageQueue::Consumer.new( @MQSettings )
     @mqProducer = MessageQueue::Producer.new( @MQSettings )
     @redis      = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
+    @database   = nil
 
-    scheduler   = Rufus::Scheduler.new
-    scheduler.every( 45, :first_in => 1 ) do
+    if( mysqlHost != nil )
 
-      self.createNodeInformation()
+      begin
+
+        until( @database != nil )
+
+          logger.debug( 'try to connect our database endpoint' )
+
+          @database   = Storage::MySQL.new( {
+            :mysql => {
+              :host     => mysqlHost,
+              :user     => mysqlUser,
+              :password => mysqlPassword,
+              :schema   => mysqlSchema
+            }
+          } )
+
+          sleep(5)
+        end
+      rescue => e
+
+        logger.error( e )
+      end
     end
+
+#     scheduler   = Rufus::Scheduler.new
+#     scheduler.every( 45, :first_in => 1 ) do
+#
+#       self.createNodeInformation()
+#     end
 
   end
 
@@ -102,7 +131,14 @@ class Monitoring
 #       end
 #     end
 
+    if( @database != nil )
+      nodes = @database.nodes( { :status => [ Storage::MySQL::ONLINE, Storage::MySQL::PREPARE ] } )
+
+      logger.debug( "database: #{nodes}" )
+    end
+
     nodes   = @redis.nodes() # { :status => Storage::RedisClient::ONLINE })
+    logger.debug( "redis: #{nodes}" )
 
     if( nodes.is_a?( Hash ) || nodes.is_a?( Array ) )
 
@@ -134,9 +170,17 @@ class Monitoring
           #
           result[n.to_s][:dns] ||= { 'ip' => ip, 'short' => short, 'fqdn' => fqdn }
 
+          if( @database != nil )
+            status = @database.status( { :short => short } )
+
+            logger.debug( "database: #{status}" )
+          end
+
           status  = @redis.status( { :short => short } )
           created = status.dig(:created)
           message = status.dig(:message)
+
+          logger.debug( "redis: #{status}" )
 
           # STATUS data
           #
@@ -156,7 +200,14 @@ class Monitoring
 
           # get discovery data
           #
+          if( @database != nil )
+            discoveryData = @database.discoveryData( { :short => short } )
+
+            logger.debug( "database: #{discoveryData}" )
+          end
+
           discoveryData = @redis.discoveryData( { :short => short } )
+          logger.debug( "redis: #{discoveryData}" )
 
           if( discoveryData == nil )
 
@@ -296,14 +347,32 @@ class Monitoring
     #
     # ------------------------------------------------
 
+    if( @database != nil )
+      dns    = @database.dnsData( { :short => short } )
+      status = @database.status( { :short => short } )
+
+      logger.debug( "database: #{dns}" )
+      logger.debug( "database: #{status}" )
+
+      if( dns == nil )
+
+        logger.debug( 'create DNS entry in the our storage system' )
+
+        status = @database.createDNS( { :ip => ip, :short => short, :fqdn => fqdn } )
+        logger.debug( status )
+      end
+    end
+
     dns    = @redis.dnsData( { :short => short } )
     status = @redis.status( { :short => short } )
+
+    logger.debug( "redis: #{dns}" )
+    logger.debug( "redis: #{status}" )
 
     if( dns == nil )
 
       logger.debug( 'create DNS entry in the our storage system' )
       status = @redis.createDNS( { :ip => ip, :short => short, :long => fqdn } )
-#       logger.debug( status )
     end
 
     logger.debug( sprintf( '  ip   %s ', ip ) )
@@ -622,7 +691,15 @@ class Monitoring
       sleep(1)
 
       logger.debug( 'remove configuration' )
-      @redis.removeConfig( { :short => short } )
+
+      if( @database != nil )
+        status = @database.removeConfig( { :short => short } )
+
+        logger.debug( "database: #{status}" )
+      end
+
+      status = @redis.removeConfig( { :short => short } )
+      logger.debug( "redis: #{status}" )
 
       logger.info( 'done' )
 
@@ -634,10 +711,19 @@ class Monitoring
 
       logger.debug( "write configuration: #{config}" )
 
-      @redis.createConfig( {
+
+      if( @database != nil )
+        status = @database.createConfig( { :short => short, :data => config } )
+
+        logger.debug( "database: #{status}" )
+      end
+
+
+      status = @redis.createConfig( {
         :short => short,
         :data  => config
       } )
+      logger.debug( "redis: #{status}" )
 
     end
 
@@ -679,6 +765,8 @@ class Monitoring
   def listHost( host = nil, payload = nil )
 
 #    logger.debug( "listHost( #{host}, #{payload} )" )
+
+    self.createNodeInformation()
 
     request = payload.dig('rack.request.query_hash')
     short   = request.keys.include?('short')
@@ -809,7 +897,15 @@ class Monitoring
     end
 
     logger.debug( 'set node status to DELETE' )
-    @redis.setStatus( { :short => host, :status => Storage::RedisClient::DELETE } )
+
+    if( @database != nil )
+      status = @database.setStatus( { :short => host, :status => Storage::MySQL::DELETE } )
+
+      logger.debug( "database: #{status}" )
+    end
+
+    status = @redis.setStatus( { :short => host, :status => Storage::RedisClient::DELETE } )
+    logger.debug( "redis: #{status}" )
 
     logger.debug( sprintf( 'force      : %s', force            ? 'true' : 'false' ) )
     logger.debug( sprintf( 'discovery  : %s', enableDiscovery  ? 'true' : 'false' ) )
