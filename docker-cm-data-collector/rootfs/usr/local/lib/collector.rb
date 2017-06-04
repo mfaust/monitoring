@@ -62,8 +62,8 @@ module DataCollector
       mysqlUser           = settings.dig(:mysql, :user)
       mysqlPassword       = settings.dig(:mysql, :password)
 
-      version            = '1.9.0'
-      date               = '2017-06-03'
+      version            = '1.9.1'
+      date               = '2017-06-04'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - DataCollector' )
@@ -109,8 +109,6 @@ module DataCollector
 
           until( @database != nil )
 
-            logger.debug( 'try to connect our database endpoint' )
-
             @database   = Storage::MySQL.new( {
               :mysql => {
                 :host     => mysqlHost,
@@ -120,7 +118,6 @@ module DataCollector
               }
             } )
 
-            sleep(5)
           end
         rescue => e
 
@@ -327,18 +324,18 @@ module DataCollector
     #
     def monitoredServer()
 
-      if( @database != nil )
+#       if( @database != nil )
         nodes = @database.nodes( { :status => [ Storage::MySQL::ONLINE ] } )
 
-        logger.debug( "database: #{nodes}" )
+#         logger.debug( "database: #{nodes}" )
+#         logger.debug( nodes.class.to_s )
 
         return nodes
-      end
+#       end
 
-      d = @redis.nodes( { :status => Storage::RedisClient::ONLINE } )
-      logger.debug( "redis: #{d}" )
-
-      return d
+#       d = @redis.nodes( { :status => Storage::RedisClient::ONLINE } )
+#       logger.debug( "redis: #{d}" )
+#       return d
 
     end
 
@@ -349,7 +346,12 @@ module DataCollector
       host = params.dig(:hostname)
       fqdn = params.dig(:fqdn)
 
-#       logger.debug( params )
+      logger.debug( "createBulkCheck( #{params} )" )
+
+      if( host == nil )
+        logger.warn( 'no host name for bulk checks' )
+        return
+      end
 
       checks   = Array.new()
       array    = Array.new()
@@ -810,6 +812,8 @@ module DataCollector
 
       monitoredServer = self.monitoredServer()
 
+#       logger.debug( monitoredServer )
+
       if( monitoredServer == nil || monitoredServer.is_a?( FalseClass ) || monitoredServer.count == 0 )
 
         logger.info( 'no online server found' )
@@ -855,7 +859,7 @@ module DataCollector
           # we need this in realtime, or can we cache this for ... 1 minute or more?
           #
           discoveryData    = @database.discoveryData( { :ip => ip, :short => short, :fqdn => fqdn } )
-#          logger.debug( "database: #{discoveryData}" )
+# #          logger.debug( "database: #{discoveryData}" )
         end
 
         # build prepared datas

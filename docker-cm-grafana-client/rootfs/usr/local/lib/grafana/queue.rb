@@ -102,6 +102,39 @@ module Grafana
       logger.debug( sprintf( '  command: %s', command ) )
       logger.info( sprintf( '  node %s', node ) )
 
+      ip, short, fqdn = self.nsLookup( node )
+
+      if( ip == nil && short == nil && fqdn == nil )
+
+        # no DNS data?
+        #
+        logger.warn( 'we found no dns data!' )
+
+        # ask grafana
+        #
+        result = self.listDashboards( { :host => node } )
+
+        logger.debug( result )
+
+        return {
+          :status  => 500,
+          :message => 'no dns data found'
+        }
+      end
+
+      if( @jobs.jobs( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } ) == true )
+
+        logger.warn( 'we are working on this job' )
+
+        return {
+          :status  => 409, # 409 Conflict
+          :message => 'we are working on this job'
+        }
+      end
+
+      @jobs.add( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
+
+
       # add Node
       #
       if( command == 'add' )
@@ -112,6 +145,8 @@ module Grafana
         result = self.createDashboardForHost( { :host => node, :tags => tags, :overview => overview } )
 
         logger.info( result )
+
+        @jobs.del( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
 
         return {
           :status  => 200,
@@ -127,6 +162,8 @@ module Grafana
 
         logger.info( result )
 
+        @jobs.del( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
+
         return {
           :status  => 200,
           :message => result
@@ -141,6 +178,8 @@ module Grafana
 
         self.sendMessage( { :cmd => 'info', :host => node, :queue => 'mq-grafana-info', :payload => result, :ttr => 1, :delay => 0 } )
 
+        @jobs.del( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
+
         return {
           :status  => 200,
           :message => result
@@ -150,6 +189,8 @@ module Grafana
       #
       else
         logger.error( sprintf( 'wrong command detected: %s', command ) )
+
+        @jobs.del( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
 
         return {
           :status  => 500,

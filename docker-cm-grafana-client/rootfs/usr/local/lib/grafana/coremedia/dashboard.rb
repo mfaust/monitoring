@@ -65,13 +65,13 @@ module Grafana
         #
 
 #         if( @database != nil )
-          config      = @database.config( { :ip => ip, :short => short, :fqdn => fqdn } )
+#           config      = @database.config( { :ip => ip, :short => short, :fqdn => fqdn } )
           display     = @database.config( { :ip => ip, :short => short, :fqdn => fqdn, :key => 'display-name' } )
           identifier  = @database.config( { :ip => ip, :short => short, :fqdn => fqdn, :key => 'graphite-identifier' } )
 
-          logger.debug( "database: #{config}" )
-          logger.debug( "database: #{display}" )
-          logger.debug( "database: #{identifier}" )
+#           logger.debug( "database: #{config}" )
+#           logger.debug( "database: #{display}" )
+#           logger.debug( "database: #{identifier}" )
 
 #         end
 
@@ -91,7 +91,7 @@ module Grafana
         end
 
 
-        if( identifier != nill && identifier.dig( 'graphite-identifier' ) != nil )
+        if( identifier != nil && identifier.dig( 'graphite-identifier' ) != nil )
 
           @storageIdentifier = identifier.dig( 'graphite-identifier' ).to_s
 
@@ -142,7 +142,8 @@ module Grafana
 
         ip, short, fqdn = self.prepare( host )
 
-        discovery = @redis.discoveryData( { :short => short } )
+        discovery    = @database.discoveryData( { :ip => ip, :short => short, :fqdn => fqdn } )
+#        discovery = @redis.discoveryData( { :short => short } )
 
         if( discovery == nil )
 
@@ -167,8 +168,8 @@ module Grafana
 
         discovery.each do |service,serviceData|
 
-          logger.debug( service )
-          logger.debug( serviceData )
+#           logger.debug( service )
+#           logger.debug( serviceData )
 
           additionalTemplatePaths = Array.new()
 
@@ -418,7 +419,7 @@ module Grafana
 
           if( @mbean.beanAvailable?( host, service, 'Server', 'LicenseValidUntilHard' ) == true )
 
-            logger.info( sprintf( 'found License Information for Service %s', service ) )
+            logger.info( sprintf( '  - found License Information for Service %s', service ) )
 
             if( File.exist?( licenseUntil ) )
 
@@ -440,7 +441,7 @@ module Grafana
 
           if( @mbean.beanAvailable?( host, service, 'Server', 'ServiceInfos' ) == true )
 
-            logger.info( sprintf( 'found Service Information for Service %s', service ) )
+            logger.info( sprintf( '  - found Service Information for Service %s', service ) )
 
             if( File.exist?( licensePart ) )
 
@@ -462,7 +463,7 @@ module Grafana
 
         if( rows.count == 1 )
           # only the license Head is into the array
-          logger.info( 'We have no information about Licenses' )
+          logger.info( 'we have no information about licenses' )
           return
         end
 
@@ -838,7 +839,7 @@ module Grafana
 
         response = self.postRequest( '/api/dashboards/db' , json )
 
-        logger.debug( "#{response}" )
+#         logger.debug( "#{response}" )
 
       end
 

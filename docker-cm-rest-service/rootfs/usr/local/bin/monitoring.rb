@@ -29,9 +29,6 @@ class Monitoring
     mqHost              = settings.dig(:mq, :host)      || 'localhost'
     mqPort              = settings.dig(:mq, :port)      || 11300
     mqQueue             = settings.dig(:mq, :queue)     || 'mq-rest-service'
-    redisHost           = settings.dig(:redis, :host)   || 'localhost'
-    redisPort           = settings.dig(:redis, :port)   || 6379
-
     mysqlHost           = settings.dig(:mysql, :host)
     mysqlSchema         = settings.dig(:mysql, :schema)
     mysqlUser           = settings.dig(:mysql, :user)
@@ -49,18 +46,15 @@ class Monitoring
 
     logger.level           = Logger::DEBUG
 
-    version              = '2.4.95'
-    date                 = '2017-06-02'
+    version              = '2.4.98'
+    date                 = '2017-06-04'
 
     logger.info( '-----------------------------------------------------------------' )
     logger.info( ' CoreMedia - Monitoring Service' )
     logger.info( "  Version #{version} (#{date})" )
     logger.info( '  Copyright 2016-2017 Coremedia' )
     logger.info( '  used Services:' )
-    logger.info( "    - redis        : #{redisHost}:#{redisPort}" )
-    if( mysqlHost != nil )
-      logger.info( "    - mysql        : #{mysqlHost}@#{mysqlSchema}" )
-    end
+    logger.info( "    - mysql        : #{mysqlHost}@#{mysqlSchema}" )
     logger.info( "    - message queue: #{mqHost}:#{mqPort}/#{mqQueue}" )
     logger.info( '-----------------------------------------------------------------' )
     logger.info( '' )
@@ -68,7 +62,6 @@ class Monitoring
     @cache      = Cache::Store.new()
     @mqConsumer = MessageQueue::Consumer.new( @MQSettings )
     @mqProducer = MessageQueue::Producer.new( @MQSettings )
-    @redis      = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
     @database   = nil
 
     if( mysqlHost != nil )
@@ -76,8 +69,6 @@ class Monitoring
       begin
 
         until( @database != nil )
-
-          logger.debug( 'try to connect our database endpoint' )
 
           @database   = Storage::MySQL.new( {
             :mysql => {
@@ -88,19 +79,12 @@ class Monitoring
             }
           } )
 
-          sleep(5)
         end
       rescue => e
 
         logger.error( e )
       end
     end
-
-#     scheduler   = Rufus::Scheduler.new
-#     scheduler.every( 45, :first_in => 1 ) do
-#
-#       self.createNodeInformation()
-#     end
 
   end
 
@@ -111,34 +95,12 @@ class Monitoring
 
     logger.info( 'create node information ...' )
 
-    start = Time.now
-
+    start   = Time.now
     result  = Hash.new()
 
-#     status  = @redis.nodes( { :status => Storage::RedisClient::OFFLINE } )
-#     logger.debug( status )
-
-#     # remove offline nodes
-#     if( status.is_a?( Hash ) || status.is_a?( Array ) && status.count != 0 )
-#
-#       status = status.keys
-#
-#       status.each do |node|
-#
-#         logger.info( sprintf( 'delete offline node %s', node ) )
-#
-# #         @redis.removeDNS( { :short => node } )
-#       end
-#     end
-
-    if( @database != nil )
-      nodes = @database.nodes( { :status => [ Storage::MySQL::ONLINE, Storage::MySQL::PREPARE ] } )
-
-      logger.debug( "database: #{nodes}" )
-    end
-
-    nodes   = @redis.nodes() # { :status => Storage::RedisClient::ONLINE })
-    logger.debug( "redis: #{nodes}" )
+    # get nodes with ONLINE or PREPARE state
+    #
+    nodes = @database.nodes( { :status => [ Storage::MySQL::ONLINE, Storage::MySQL::PREPARE ] } )
 
     if( nodes.is_a?( Hash ) || nodes.is_a?( Array ) )
 
@@ -170,44 +132,23 @@ class Monitoring
           #
           result[n.to_s][:dns] ||= { 'ip' => ip, 'short' => short, 'fqdn' => fqdn }
 
-          if( @database != nil )
-            status = @database.status( { :short => short } )
-
-            logger.debug( "database: #{status}" )
-          end
-
-          status  = @redis.status( { :short => short } )
-          created = status.dig(:created)
-          message = status.dig(:message)
-
-          logger.debug( "redis: #{status}" )
+          status  = @database.status( { :short => short } )
+          created = status.dig('creation')
+          message = status.dig('status')
 
           # STATUS data
           #
           result[n.to_s][:status] ||= { 'created' => created, 'status' => message }
 
-          hostConfiguration = self.getHostConfiguration( n )
+          hostConfiguration = @database.config( { :short => n } ) # self.getHostConfiguration( n )
 
           if( hostConfiguration != nil )
-            hostConfigurationStatus  = hostConfiguration.dig(:status)  || 204
-            hostConfigurationMessage = hostConfiguration.dig(:message)
+            result[n.to_s][:custom_config] = hostConfiguration
           end
-
-          if( hostConfigurationStatus == 200 )
-            result[n.to_s][:custom_config] = hostConfigurationMessage
-          end
-
 
           # get discovery data
           #
-          if( @database != nil )
-            discoveryData = @database.discoveryData( { :short => short } )
-
-            logger.debug( "database: #{discoveryData}" )
-          end
-
-          discoveryData = @redis.discoveryData( { :short => short } )
-          logger.debug( "redis: #{discoveryData}" )
+          discoveryData = @database.discoveryData( { :short => short } )
 
           if( discoveryData == nil )
 
@@ -225,6 +166,8 @@ class Monitoring
 
           result[n.to_s][:services] ||= discoveryData
 
+          # realy needed?
+          #
           if( fullInformation == true )
 
             # get data from external services
@@ -241,14 +184,14 @@ class Monitoring
 
               r      = @mqConsumer.getJobFromTube('mq-grafana-info')
 
-              logger.debug( r.dig( :body, 'payload' ) )
+#               logger.debug( r.dig( :body, 'payload' ) )
 
               if( r.is_a?( Hash ) && r.count != 0 && r.dig( :body, 'payload' ) != nil )
 
                 grafanaStatus = r
                 break
               else
-                logger.debug( sprintf( 'Waiting for data %s ... %d', 'mq-grafana-info', y ) )
+#                 logger.debug( sprintf( 'Waiting for data %s ... %d', 'mq-grafana-info', y ) )
                 sleep( 2 )
               end
             end
@@ -257,44 +200,40 @@ class Monitoring
 
               r      = @mqConsumer.getJobFromTube('mq-icinga-info')
 
-              logger.debug( r.dig( :body, 'payload' ) )
+#               logger.debug( r.dig( :body, 'payload' ) )
 
               if( r.is_a?( Hash ) && r.count != 0 && r.dig( :body, 'payload' ) != nil )
 
                 icingaStatus = r
                 break
               else
-                logger.debug( sprintf( 'Waiting for data %s ... %d', 'mq-icinga-info', y ) )
+#                 logger.debug( sprintf( 'Waiting for data %s ... %d', 'mq-icinga-info', y ) )
                 sleep( 2 )
               end
             end
 
             if( grafanaStatus )
               grafanaStatus = grafanaStatus.dig( :body, 'payload' ) || {}
-#              result[n.to_s][:grafana] ||= {}
               result[n.to_s][:grafana] ||= grafanaStatus
             end
 
             if( icingaStatus )
               icingaStatus = icingaStatus.dig( :body, 'payload' ) || {}
-#              result[n.to_s][:icinga] ||= {}
               result[n.to_s][:icinga] ||= icingaStatus
             end
           end
 
         end
 
-#         logger.debug( JSON.pretty_generate( result ) )
-
         @cache.set( 'information' ) { Cache::Data.new( result ) }
 
       else
-        logger.debug( 'no nodes found' )
+#         logger.debug( 'no nodes found' )
         @cache.unset( 'information' )
       end
 
     else
-      logger.debug( 'no nodes found' )
+#       logger.debug( 'no nodes found' )
       @cache.unset( 'information' )
     end
 
@@ -318,7 +257,6 @@ class Monitoring
 
     if( dns == nil )
 
-#       logger.debug( 'create cached DNS data' )
       # create DNS Information
       dns      = Utils::Network.resolv( name )
 
@@ -337,8 +275,6 @@ class Monitoring
       end
     else
 
-#       logger.debug( 're-use cached DNS data' )
-
       ip    = dns.dig(:ip)
       short = dns.dig(:short)
       fqdn  = dns.dig(:long)
@@ -347,37 +283,19 @@ class Monitoring
     #
     # ------------------------------------------------
 
-    if( @database != nil )
-      dns    = @database.dnsData( { :short => short } )
-      status = @database.status( { :short => short } )
-
-      logger.debug( "database: #{dns}" )
-      logger.debug( "database: #{status}" )
-
-      if( dns == nil )
-
-        logger.debug( 'create DNS entry in the our storage system' )
-
-        status = @database.createDNS( { :ip => ip, :short => short, :fqdn => fqdn } )
-        logger.debug( status )
-      end
-    end
-
-    dns    = @redis.dnsData( { :short => short } )
-    status = @redis.status( { :short => short } )
-
-    logger.debug( "redis: #{dns}" )
-    logger.debug( "redis: #{status}" )
+    dns    = @database.dnsData( { :short => short } )
+#     status = @database.status( { :short => short } )
 
     if( dns == nil )
 
-      logger.debug( 'create DNS entry in the our storage system' )
-      status = @redis.createDNS( { :ip => ip, :short => short, :long => fqdn } )
+#       logger.debug( 'create dns entry in our storage backend' )
+
+      status = @database.createDNS( { :ip => ip, :short => short, :fqdn => fqdn } )
     end
 
-    logger.debug( sprintf( '  ip   %s ', ip ) )
-    logger.debug( sprintf( '  host %s ', short ) )
-    logger.debug( sprintf( '  fqdn %s ', fqdn ) )
+#     logger.debug( sprintf( '  ip   %s ', ip ) )
+#     logger.debug( sprintf( '  host %s ', short ) )
+#     logger.debug( sprintf( '  fqdn %s ', fqdn ) )
 
     return ip, short, fqdn
 
@@ -406,8 +324,6 @@ class Monitoring
   #
   def checkAvailablility?( host )
 
-#     logger.debug( "checkAvailablility?( #{host} )" )
-
     ip, short, fqdn = self.nsLookup( host )
 
     if( ip == nil && short == nil && fqdn == nil )
@@ -419,25 +335,6 @@ class Monitoring
       :short => short,
       :fqdn  => fqdn
     }
-
-#     hostInfo      = Utils::Network.resolv( host )
-#
-# #     logger.debug( JSON.pretty_generate( hostInfo ) )
-#
-#     ip            = hostInfo.dig(:ip)
-#     shortHostName = hostInfo.dig(:short)
-#     longHostName  = hostInfo.dig(:long)
-#
-#     if( ip == nil || shortHostName == nil )
-#       return false
-#     else
-#
-#       logger.debug( 'create DNS Entry' )
-#
-#       @redis.createDNS( { :ip => ip, :short => shortHostName, :long => longHostName } )
-#
-#       return hostInfo
-#     end
 
   end
 
@@ -467,96 +364,96 @@ class Monitoring
 
   # -- CONFIGURE ------------------------------------------------------------------------
   #
-  def writeHostConfiguration( host, payload )
-
-    status       = 500
-    message      = 'initialize error'
-
-    current = Hash.new()
-    hash    = Hash.new()
-
-    if( host.to_s != '' )
-
-#       directory = self.createCacheDirectory( host )
-
-      hash = JSON.parse( payload )
-
-      hostInfo = Utils::Network.resolv( host )
-      host     = hostInfo.dig(:short)
-
-      @redis.createConfig( { :short => host , :data => hash } )
-
-      status  = 200
-      message = 'config successful written'
-
-    end
-
-    return JSON.pretty_generate( {
-      :status  => status,
-      :message => message
-    } )
-
-  end
-
-
-  def getHostConfiguration( host )
-
-    if( host.to_s != '' )
-
-      hostInfo = Utils::Network.resolv( host )
-      host     = hostInfo.dig(:short)
-
-      data     = @redis.config( { :short => host } )
-
-      # logger.debug( data )
-
-      if( data != false )
-
-       return {
-          :status  => 200,
-          :message => data
-        }
-      end
-
-    end
-
-    return {
-      :status  => 204,
-      :message => 'no configuration found'
-    }
-
-  end
-
-
-  def removeHostConfiguration( host )
-
-    status       = 500
-    message      = 'initialize error'
-
-
-    if( host.to_s != '' )
-
-      hostInfo = Utils::Network.resolv( host )
-      host     = hostInfo.dig(:short)
-
-      data     = @redis.removeConfig( { :short => host } )
-
-      if( data != false )
-        status = 200
-        message = 'configuration succesfull removed'
-      else
-        status  = 404
-        message = 'No configuration found'
-      end
-    end
-
-    return JSON.pretty_generate( {
-      :status  => status,
-      :message => message
-    } )
-
-  end
-
+#   def writeHostConfiguration( host, payload )
+#
+#     status       = 500
+#     message      = 'initialize error'
+#
+#     current = Hash.new()
+#     hash    = Hash.new()
+#
+#     if( host.to_s != '' )
+#
+# #       directory = self.createCacheDirectory( host )
+#
+#       hash = JSON.parse( payload )
+#
+#       hostInfo = Utils::Network.resolv( host )
+#       host     = hostInfo.dig(:short)
+#
+#       @redis.createConfig( { :short => host , :data => hash } )
+#
+#       status  = 200
+#       message = 'config successful written'
+#
+#     end
+#
+#     return JSON.pretty_generate( {
+#       :status  => status,
+#       :message => message
+#     } )
+#
+#   end
+#
+#
+#   def getHostConfiguration( host )
+#
+#     if( host.to_s != '' )
+#
+#       hostInfo = Utils::Network.resolv( host )
+#       host     = hostInfo.dig(:short)
+#
+#       data     = @redis.config( { :short => host } )
+#
+#       # logger.debug( data )
+#
+#       if( data != false )
+#
+#        return {
+#           :status  => 200,
+#           :message => data
+#         }
+#       end
+#
+#     end
+#
+#     return {
+#       :status  => 204,
+#       :message => 'no configuration found'
+#     }
+#
+#   end
+#
+#
+#   def removeHostConfiguration( host )
+#
+#     status       = 500
+#     message      = 'initialize error'
+#
+#
+#     if( host.to_s != '' )
+#
+#       hostInfo = Utils::Network.resolv( host )
+#       host     = hostInfo.dig(:short)
+#
+#       data     = @redis.removeConfig( { :short => host } )
+#
+#       if( data != false )
+#         status = 200
+#         message = 'configuration succesfull removed'
+#       else
+#         status  = 404
+#         message = 'No configuration found'
+#       end
+#     end
+#
+#     return JSON.pretty_generate( {
+#       :status  => status,
+#       :message => message
+#     } )
+#
+#   end
+#
 
   # -- HOST -----------------------------------------------------------------------------
   #
@@ -584,7 +481,7 @@ class Monitoring
 
   def addHost( host, payload )
 
-    logger.debug( sprintf( 'addHost( \'%s\', \'%s\' )', host, payload ) )
+#     logger.debug( sprintf( 'addHost( \'%s\', \'%s\' )', host, payload ) )
 
     status    = 500
     message   = 'initialize error'
@@ -690,16 +587,8 @@ class Monitoring
 
       sleep(1)
 
-      logger.debug( 'remove configuration' )
-
-      if( @database != nil )
-        status = @database.removeConfig( { :short => short } )
-
-        logger.debug( "database: #{status}" )
-      end
-
-      status = @redis.removeConfig( { :short => short } )
-      logger.debug( "redis: #{status}" )
+#       logger.debug( 'remove configuration' )
+      status = @database.removeConfig( { :short => short } )
 
       logger.info( 'done' )
 
@@ -709,22 +598,8 @@ class Monitoring
     # now, we can write an own configiguration per node when we add them, hurray
     if( config.is_a?( Hash ) )
 
-      logger.debug( "write configuration: #{config}" )
-
-
-      if( @database != nil )
-        status = @database.createConfig( { :short => short, :data => config } )
-
-        logger.debug( "database: #{status}" )
-      end
-
-
-      status = @redis.createConfig( {
-        :short => short,
-        :data  => config
-      } )
-      logger.debug( "redis: #{status}" )
-
+#       logger.debug( "write configuration: #{config}" )
+      status = @database.createConfig( { :short => short, :data => config } )
     end
 
     if( enableDiscovery == true )
@@ -750,7 +625,7 @@ class Monitoring
     if( annotation == true )
 
       logger.info( 'annotation for create' )
-      self.addAnnotation( host, { 'command': 'create', 'argument': 'node' } )
+      self.addAnnotation( host, { "command": "create", "argument": "node", "config": config } )
     end
 
     result['status']    = 200
@@ -764,18 +639,13 @@ class Monitoring
   #
   def listHost( host = nil, payload = nil )
 
-#    logger.debug( "listHost( #{host}, #{payload} )" )
-
     self.createNodeInformation()
 
     request = payload.dig('rack.request.query_hash')
     short   = request.keys.include?('short')
 
-    status  = 204
     result  = Hash.new()
     cache   = @cache.get( 'information' )
-
-#    logger.debug( cache )
 
     if( cache == nil )
 
@@ -896,16 +766,12 @@ class Monitoring
       annotation = false
     end
 
-    logger.debug( 'set node status to DELETE' )
+    # read the customized configuration
+    #
+    config = @database.config( { :short => host } )
 
-    if( @database != nil )
-      status = @database.setStatus( { :short => host, :status => Storage::MySQL::DELETE } )
-
-      logger.debug( "database: #{status}" )
-    end
-
-    status = @redis.setStatus( { :short => host, :status => Storage::RedisClient::DELETE } )
-    logger.debug( "redis: #{status}" )
+#     logger.debug( 'set node status to DELETE' )
+    status = @database.setStatus( { :short => host, :status => Storage::MySQL::DELETE } )
 
     logger.debug( sprintf( 'force      : %s', force            ? 'true' : 'false' ) )
     logger.debug( sprintf( 'discovery  : %s', enableDiscovery  ? 'true' : 'false' ) )
@@ -915,7 +781,7 @@ class Monitoring
 
     if( annotation == true )
       logger.info( 'annotation for remove' )
-      self.addAnnotation( host, { "command": "remove", "argument": "node" } )
+      self.addAnnotation( host, { "command": "remove", "argument": "node", "config": config } )
     end
 
     if( enabledIcinga == true )
@@ -932,34 +798,12 @@ class Monitoring
       self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-discover', :payload => { "force" => true }, :prio => 0, :delay => 5 } )
     end
 
-    if( force == true )
-      logger.info( 'remove configuration from db (force mode)' )
-      @redis.removeConfig( { :short => host } )
-    end
+    @database.removeDNS( { :short => host } )
 
     result['status']    = 200
     result['message']   = 'the message queue is informed ...'
 
     return JSON.pretty_generate( result )
-
-#     discoveryResult = {
-#       :status  => 200,
-#       :message => 'send to MQ'
-#     }
-#
-#     result[host.to_sym] ||= {}
-#     result[host.to_sym][:request]   ||= {}
-#     result[host.to_sym][:request]     = payload
-#     result[host.to_sym][:discovery] ||= {}
-#     result[host.to_sym][:discovery]   = discoveryResult
-#
-# #     sleep(4)
-# #
-# #     self.createNodeInformation()
-#
-#     logger.debug( JSON.pretty_generate( result ) )
-#
-#     return JSON.pretty_generate( result )
 
   end
 
@@ -994,7 +838,7 @@ class Monitoring
           message      = hash.dig('message')
           description  = hash.dig('description')
           tags         = hash.dig('tags')  || []
-
+          config       = hash.dig('config')
         else
 
           hash         = payload
@@ -1004,7 +848,7 @@ class Monitoring
           message      = hash.dig(:message)
           description  = hash.dig(:description)
           tags         = hash.dig(:tags)  || []
-
+          config       = hash.dig(:config)
         end
 
         result[:request] = hash
@@ -1022,7 +866,7 @@ class Monitoring
           message     = nil
           description = nil
           tags        = []
-          self.messageQueue( { :cmd => command, :node => host, :queue => 'mq-graphite', :payload => { "timestamp": Time.now().to_i, "node" => host }, :prio => 0 } )
+          self.messageQueue( { :cmd => command, :node => host, :queue => 'mq-graphite', :payload => { "timestamp": Time.now().to_i, "config": config, "node" => host }, :prio => 0 } )
 
         elsif( command == 'loadtest' && ( argument == 'start' || argument == 'stop' ) )
 
@@ -1041,7 +885,7 @@ class Monitoring
           description = nil
           tags        = []
 
-          self.messageQueue( { :cmd => 'loadtest', :node => host, :queue => 'mq-graphite', :payload => { "timestamp": Time.now().to_i, "argument" => argument }, :prio => 0 } )
+          self.messageQueue( { :cmd => 'loadtest', :node => host, :queue => 'mq-graphite', :payload => { "timestamp": Time.now().to_i, "config": config, "argument" => argument }, :prio => 0 } )
 
         elsif( command == 'deployment' )
 
@@ -1055,7 +899,7 @@ class Monitoring
 #           ]
 #         }
           description = nil
-          self.messageQueue( { :cmd => 'deployment', :node => host, :queue => 'mq-graphite', :payload => { "timestamp": Time.now().to_i, "message" => message, "tags" => tags }, :prio => 0 } )
+          self.messageQueue( { :cmd => 'deployment', :node => host, :queue => 'mq-graphite', :payload => { "timestamp": Time.now().to_i, "config": config, "message" => message, "tags" => tags }, :prio => 0 } )
 
         else
 #         example:
@@ -1068,7 +912,7 @@ class Monitoring
 #             "git-0000000"
 #           ]
 #         }
-          self.messageQueue( { :cmd => 'general', :node => host, :queue => 'mq-graphite', :payload => { "timestamp": Time.now().to_i, "message" => message, "tags" => tags, "description" => description }, :prio => 0 } )
+          self.messageQueue( { :cmd => 'general', :node => host, :queue => 'mq-graphite', :payload => { "timestamp": Time.now().to_i, "config": config, "message" => message, "tags" => tags, "description" => description }, :prio => 0 } )
 
         end
 

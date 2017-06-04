@@ -35,39 +35,54 @@ module Graphite
 
     def processQueue( data = {} )
 
+      @identifier         = nil
+
       if( data.count != 0 )
 
         logger.info( sprintf( 'process Message from Queue %s: %d', data.dig(:tube), data.dig(:id) ) )
 
         @timestamp = nil
 
-        command    = data.dig( :body, 'cmd' )     || nil
-        node       = data.dig( :body, 'node' )    || nil
-        payload    = data.dig( :body, 'payload' ) || nil
+        command    = data.dig(:body, 'cmd')
+        node       = data.dig(:body, 'node')
+        payload    = data.dig(:body, 'payload')
 
-        if( command == nil )
-          logger.error( 'wrong command' )
-          logger.error( data )
+        #
+        #
+        if( command == nil || node == nil || payload == nil )
 
-          return {
-            :status  => 500,
-            :message => 'no command given',
-            :request => data
-          }
+          status = 500
+
+          if( command == nil )
+            e = 'missing command'
+            logger.error( e )
+            logger.error( data )
+            return { :status  => status, :message => e }
+          end
+
+          if( node == nil )
+            e = 'missing node'
+            logger.error( e )
+            logger.error( data )
+            return { :status  => status, :message => e }
+          end
+
+          if( payload == nil )
+            e = 'missing payload'
+            logger.error( e )
+            logger.error( data )
+            return { :status  => status, :message => e }
+          end
+
         end
 
-        if( node == nil || payload == nil )
-          logger.error( 'missing node or payload' )
-          logger.error( data )
+        if( payload.is_a?( String ) == true && payload.to_s != '' )
 
-          return {
-            :status  => 500,
-            :message => 'missing node or payload',
-            :request => data
-          }
+          payload  = JSON.parse( payload )
         end
 
-        timestamp  = payload.dig( 'timestamp' )
+        timestamp  = payload.dig('timestamp')
+        config     = payload.dig('config')
 
         if( timestamp != nil )
 
@@ -80,6 +95,18 @@ module Graphite
 
           @timestamp = timestamp.to_i
         end
+
+        if( config != nil )
+
+          if( config.is_a?( String ) == true && config.to_s != '' )
+
+            config  = JSON.parse( config )
+          end
+
+          @identifier = config.dig('graphite-identifier')
+        end
+
+
 
         logger.info( sprintf( 'add annotation \'%s\' for node %s', command, node ) )
 

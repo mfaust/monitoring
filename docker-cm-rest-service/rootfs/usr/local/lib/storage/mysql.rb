@@ -20,41 +20,36 @@ module Storage
       user            = params.dig(:mysql, :user)
       pass            = params.dig(:mysql, :password)
       @schema         = params.dig(:mysql, :schema)
-      read_timeout    = params.dig(:mysql, :timeout, :read)    || 5
-      write_timeout   = params.dig(:mysql, :timeout, :write)   || 5
-      connect_timeout = params.dig(:mysql, :timeout, :connect) || 5
-
-      logger.debug( params )
+      read_timeout    = params.dig(:mysql, :timeout, :read)    || 15
+      write_timeout   = params.dig(:mysql, :timeout, :write)   || 15
+      connect_timeout = params.dig(:mysql, :timeout, :connect) || 15
 
       @client     = nil
 
       begin
 
-        until( @client != nil )
+        retries ||= 0
 
-          @client = Mysql2::Client.new(
-            :host            => host,
-            :username        => user,
-            :password        => pass,
-            :database        => @schema,
-            :read_timeout    => read_timeout,
-            :write_timeout   => write_timeout,
-            :connect_timeout => connect_timeout,
-            :encoding        => 'utf8',
-            :reconnect       => true
-          )
+        @client = Mysql2::Client.new(
+          :host            => host,
+          :username        => user,
+          :password        => pass,
+          :database        => @schema,
+          :read_timeout    => read_timeout,
+          :write_timeout   => write_timeout,
+          :connect_timeout => connect_timeout,
+          :encoding        => 'utf8',
+          :reconnect       => true
+        )
 
-          logger.info( 'create database connection' )
+        logger.info( sprintf( 'try to create the database connection (%d)', retries ) )
+      rescue
+        if( retries < 10 )
+
           sleep( 3 )
+          retries += 1
+          retry
         end
-      rescue Exception => e
-        logger.error( "An error occurred for connection: #{e}" )
-
-        raise( e )
-      rescue => e
-        logger.error( e )
-
-        raise( e )
       end
 
       # SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = 'DBName'
@@ -73,24 +68,25 @@ module Storage
       @client.query(
         "CREATE TABLE IF NOT EXISTS dns (
           id         int(11) not null AUTO_INCREMENT,
-          ip         varchar(16) not null default '',
-          name       varchar(160) not null default '',
-          fqdn       varchar(160) not null default '',
+          ip         varchar(16)  not null,
+          name       varchar(160) not null,
+          fqdn       varchar(255) not null,
           status     enum('offline','online','delete','prepare','unknown') default 'unknown',
           creation   DATETIME DEFAULT   CURRENT_TIMESTAMP,
-          changed    DATETIME ON UPDATE CURRENT_TIMESTAMP,
           PRIMARY KEY (`ID`),
-          key(`ip`) )"
+          key(`ip`),
+          unique( ip, name, fqdn, status )
+        )"
       )
 
       @client.query(
         "CREATE TABLE IF NOT EXISTS config (
-          `key`      varchar(128),
-          `value`    text not null,
+          `key`      varchar(128) not null,
+          `value`    varchar(255) not null,
           dns_ip     varchar(16),
           creation   DATETIME DEFAULT   CURRENT_TIMESTAMP,
-          changed    DATETIME ON UPDATE CURRENT_TIMESTAMP,
           KEY(`key`),
+          unique( `key`, `value`, dns_ip ),
           FOREIGN KEY (`dns_ip`)
           REFERENCES dns(`ip`)
           ON DELETE CASCADE
@@ -104,8 +100,8 @@ module Storage
           data       text not null,
           dns_ip     varchar(16),
           creation   DATETIME DEFAULT   CURRENT_TIMESTAMP,
-          changed    DATETIME ON UPDATE CURRENT_TIMESTAMP,
           KEY(`service`),
+          unique( service, port, dns_ip),
           FOREIGN KEY (`dns_ip`)
           REFERENCES dns(`ip`)
           ON DELETE CASCADE
@@ -210,6 +206,10 @@ module Storage
     # -- dns ------------------------------------
 
 
+    #
+    #
+    # @return nil or Hash
+    #
     def nodes( params = {} )
 
       if( ! @client )
@@ -222,7 +222,7 @@ module Storage
       fqdn   = params.dig(:fqdn)
       status = params.dig(:status) # Database::ONLINE or [ Storage::MySQL::ONLINE, Storage::MySQL::PREPARE ]
 
-      logger.debug( " nodes( #{params} )")
+#       logger.debug( " nodes( #{params} )")
 
       w = Array.new
 
@@ -284,9 +284,24 @@ module Storage
 
       statement = sprintf('SELECT ip, name, fqdn, status FROM dns %s', w  )
 
-      logger.debug( statement )
+      res = self.exec( statement )
 
-      res    = @client.query( statement, :as => :hash )
+#       begin
+#
+#         retries ||= 1
+#
+#         res    = @client.query( statement, :as => :hash )
+#
+#         logger.info( sprintf( ' %d try to execute statement', retries ) )
+#       rescue
+#
+#         if( retries < 5 )
+#
+#           sleep( 3 )
+#           retries += 1
+#           retry
+#         end
+#       end
 
       if( res.count != 0 )
 
@@ -300,19 +315,6 @@ module Storage
       end
 
       return nil
-
-
-
-      rec = @database[:v_status].select().where( w ) .to_a
-
-      if( rec.count() != 0 )
-
-        groupByHost = rec.group_by { |k| k[:shortname] }
-
-        return groupByHost
-      end
-
-      return Hash.new()
 
     end
 
@@ -359,7 +361,9 @@ module Storage
 
         statement = sprintf( 'update dns set status = \'%s\' where ip = \'%s\'', status, ip )
 
-        result    = @client.query( statement, :as => :hash )
+        res = self.exec( statement )
+
+#        result    = @client.query( statement, :as => :hash )
 
 #         logger.debug( statement )
 #         logger.debug( result.to_a )
@@ -384,7 +388,7 @@ module Storage
 
       logger.debug( " status( #{params} )")
 
-      statement = sprintf('SELECT ip, name, fqdn, status FROM dns WHERE ip = \'%s\' or name = \'%s\' or fqdn = \'%s\'', ip, name, fqdn )
+      statement = sprintf('SELECT ip, name, fqdn, status, creation FROM dns WHERE ip = \'%s\' or name = \'%s\' or fqdn = \'%s\'', ip, name, fqdn )
       result    = @client.query( statement, :as => :hash )
 
       logger.debug( statement )
@@ -482,112 +486,66 @@ module Storage
         end
       end
 
+      statement = sprintf(
+        'replace into config ( `key`, `value`, dns_ip ) values ( \'%s\', \'%s\', \'%s\' )',
+        key, values, ip
+      )
 
-        statement = sprintf(
-          'select * from config where `key` = \'%s\' and `value` = \'%s\' and dns_ip = \'%s\'',
-          key, values, ip
-        )
-
-        logger.debug( statement )
-
+      begin
         result    = @client.query( statement, :as => :hash )
 
-#         logger.debug( result.class.to_s )
-#         logger.debug( result.inspect )
-#         logger.debug( result.size )
+        return true
+      rescue => e
+        logger.error( e )
+      end
 
-        if( result.size == 0 )
-
-          statement = sprintf('insert into config ( `key`, `value`, dns_ip ) values ( \'%s\', \'%s\', \'%s\' )', key, values, ip )
-          logger.debug( statement  )
-
-          result    = @client.query( statement, :as => :hash )
-
-          logger.debug( result.to_a )
-        else
-
-          dbaValues = nil
-
-          result.each do |row|
-            dbaValues    = row.dig('value')
-          end
-
-          logger.debug( "#{values} vs. #{dbaValues}" )
-
-          if( dbaValues.to_s != values.to_s )
-
-            statement = sprintf('update config set `value` = \'%s\' where dns_ip = \'%s\' and `key` = \'%s\'', values, ip, key )
-            logger.debug( statement )
-
-            result    = @client.query( statement, :as => :hash )
-
-            logger.debug( result.to_a )
-          end
-
-        return nil
+      return nil
 
 
 
-
-#         rec = @database[:config].where(
-#           (
-#             ( Sequel[:ip        => dnsIp.to_s] ) |
-#             ( Sequel[:short => dnsShortname.to_s] )
-#           ) & (
-#             ( Sequel[:key   => configKey.to_s] ) &
-#             ( Sequel[:value => configValues.to_s] )
-#           )
-#         ).to_a
+#         statement = sprintf(
+#           'select * from config where `key` = \'%s\' and `value` = \'%s\' and dns_ip = \'%s\'',
+#           key, values, ip
+#         )
 #
-#         if( rec.count() == 0 )
+#         logger.debug( statement )
 #
-#           if( dnsIp != nil )
-#             @database[:config].insert(
-#               :ip       => dnsIp.to_s,
-#               :key      => configKey.to_s,
-#               :value    => configValues.to_s,
-#               :created  => DateTime.now()
-#             )
+#         result    = @client.query( statement, :as => :hash )
 #
-#           elsif( dnsShortname != nil )
+# #         logger.debug( result.class.to_s )
+# #         logger.debug( result.inspect )
+# #         logger.debug( result.size )
 #
-#             @database[:config].insert(
-#               :short => dnsShortname.to_s,
-#               :key       => configKey.to_s,
-#               :value     => configValues.to_s,
-#               :created   => DateTime.now()
-#             )
-#           end
+#         if( result.size == 0 )
+#
+#           statement = sprintf('insert into config ( `key`, `value`, dns_ip ) values ( \'%s\', \'%s\', \'%s\' )', key, values, ip )
+#           logger.debug( statement  )
+#
+#           result    = @client.query( statement, :as => :hash )
+#
+#           logger.debug( result.to_a )
 #         else
 #
-#           # prüfen, ob 'value' identisch ist
-#           dbaValues    = rec.first[:value]
-#           configValues = configValues.to_s
+#           dbaValues = nil
 #
-#           if( dbaValues != configValues )
-#
-#             if( dnsIp != nil )
-#
-#               @database[:config].where(
-#                 ( Sequel[:ip  => dnsIp.to_s] ) &
-#                 ( Sequel[:key => configKey.to_s] )
-#               ).update(
-#                 :value      => configValues.to_s,
-#                 :created    => DateTime.now()
-#               )
-#             elsif( dnsShortname != nil )
-#
-#               @database[:config].where(
-#                 ( Sequel[:short => dnsShortname.to_s] ) &
-#                 ( Sequel[:key       => configKey.to_s] )
-#               ).update(
-#                 :value      => configValues.to_s,
-#                 :created    => DateTime.now()
-#               )
-#             end
+#           result.each do |row|
+#             dbaValues    = row.dig('value')
 #           end
-#         end
-      end
+#
+#           logger.debug( "#{values} vs. #{dbaValues}" )
+#
+#           if( dbaValues.to_s != values.to_s )
+#
+#             statement = sprintf('update config set `value` = \'%s\' where dns_ip = \'%s\' and `key` = \'%s\'', values, ip, key )
+#             logger.debug( statement )
+#
+#             result    = @client.query( statement, :as => :hash )
+#
+#             logger.debug( result.to_a )
+#           end
+#
+#         return nil
+#      end
     end
 
 
@@ -676,8 +634,25 @@ module Storage
       logger.debug( " config( #{params} )")
 
       statement = sprintf(
-        'select dns.fqdn, config.`key`, config.`value` from dns, config where dns.ip = config.dns_ip'
+        'select d.fqdn, c.`key`, c.`value` from dns as d, config as c where d.ip = c.dns_ip'
       )
+
+      if( ip != nil || name != nil || fqdn != nil )
+
+        if( ip == nil )
+
+          dns = self.dnsData( params )
+
+          if( dns != nil )
+            ip   = dns.dig('ip')
+          else
+
+            return false
+          end
+        end
+
+        statement = sprintf( '%s and d.ip = \'%s\'', statement, ip )
+      end
 
       if( key != nil )
         statement = sprintf( '%s and `key` = \'%s\'', statement, key )
@@ -688,6 +663,8 @@ module Storage
       r    = @client.query( statement, :as => :hash )
 
       if( r.size == 0 )
+
+        logger.debug( 'no result' )
         return nil
       end
 
@@ -854,65 +831,20 @@ module Storage
       service = params.dig(:service)
       data    = params.dig(:data)
 
-      logger.debug( " writeDiscovery( #{params} )")
-
       statement = sprintf(
-        'select port, service, dns_ip from discovery where `port` = \'%s\' and `service` = \'%s\' and dns_ip = \'%s\'',
-        port, service, ip
+        'replace into discovery ( port, service, data, dns_ip ) values ( %s, \'%s\', \'%s\', \'%s\' )',
+        port, service, data.to_s, ip
       )
 
-      logger.debug( statement )
-
-      result    = @client.query( statement, :as => :hash )
-
-      if( result.size == 0 )
-
-        statement = sprintf('insert into discovery ( `port`, `service`, data, dns_ip ) values ( \'%s\', \'%s\', \'%s\', \'%s\' )', port, service, data.to_s, ip )
-        logger.debug( statement  )
-
+      begin
         result    = @client.query( statement, :as => :hash )
 
-#         logger.debug( result.to_a )
-      else
-
-        dbaValues = nil
-
-        result.each do |row|
-          dbaValues    = row.dig('value')
-        end
-
-        logger.debug( "#{values} vs. #{dbaValues}" )
-
-        if( dbaValues.to_s != values.to_s )
-
-          statement = sprintf('update discovery set `data` = \'%s\' where dns_ip = \'%s\' and `port` = \'%s\' and `service` = \'%s\'', data.to_s, ip, port, service )
-          logger.debug( statement )
-
-          result    = @client.query( statement, :as => :hash )
-
-#           logger.debug( result.to_a )
-        end
+        return true
+      rescue => e
+        logger.error( e )
+      end
 
       return nil
-
-#
-#       rec = discovery.where(
-#         (Sequel[:dns_id   => dnsId.to_i] ) &
-#         (Sequel[:service  => service.to_s] )
-#       ).to_a
-#
-#       if( rec.count() == 0 )
-#
-#         return discovery.insert(
-#
-#           :dns_id     => dnsId.to_i,
-#           :port       => port.to_i,
-#           :service    => service,
-#           :data       => data.to_s,
-#           :created    => DateTime.now()
-#         )
-#
-      end
 
     end
 
@@ -1059,6 +991,34 @@ module Storage
       return JSON.parse( r )
     rescue JSON::ParserError => e
       return r # do smth
+
+    end
+
+    def exec( statement )
+
+      result = nil
+      logger.debug( statement )
+
+      begin
+        retries ||= 1
+
+        result = @client.query( statement, :as => :hash )
+
+        logger.debug( sprintf( ' %d try to execute statement', retries ) )
+      rescue
+
+        if( retries < 5 )
+
+          sleep( 2 )
+          retries += 1
+          retry
+        end
+      end
+
+      logger.debug( result.class.to_s )
+      logger.debug( result.inspect )
+
+      return result
 
     end
 

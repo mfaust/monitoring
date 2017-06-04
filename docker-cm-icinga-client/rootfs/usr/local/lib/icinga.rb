@@ -49,6 +49,11 @@ class CMIcinga2 < Icinga2::Client
       redisHost             = settings.dig(:redis, :host)
       redisPort             = settings.dig(:redis, :port)             || 6379
 
+      mysqlHost           = settings.dig(:mysql, :host)
+      mysqlSchema         = settings.dig(:mysql, :schema)
+      mysqlUser           = settings.dig(:mysql, :user)
+      mysqlPassword       = settings.dig(:mysql, :password)
+
       @icingaApiUrlBase     = sprintf( 'https://%s:%d', @icingaHost, @icingaApiPort )
       @nodeName             = Socket.gethostbyname( Socket.gethostname ).first
 
@@ -75,6 +80,9 @@ class CMIcinga2 < Icinga2::Client
       logger.info( sprintf( '    notifications enabled: %s', @icingaNotifications ? 'true' : 'false' ) )
       logger.info( '  used Services:' )
       logger.info( "    - redis        : #{redisHost}:#{redisPort}" )
+      if( mysqlHost != nil )
+        logger.info( "    - mysql        : #{mysqlHost}@#{mysqlSchema}" )
+      end
       logger.info( "    - message Queue: #{mqHost}:#{mqPort}/#{@mqQueue}" )
       logger.info( '-----------------------------------------------------------------' )
       logger.info( '' )
@@ -91,6 +99,29 @@ class CMIcinga2 < Icinga2::Client
       @redis      = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
       @mqConsumer = MessageQueue::Consumer.new( mqSettings )
       @mqProducer = MessageQueue::Producer.new( mqSettings )
+      @database   = nil
+
+      if( mysqlHost != nil )
+
+        begin
+
+          until( @database != nil )
+
+            @database   = Storage::MySQL.new( {
+              :mysql => {
+                :host     => mysqlHost,
+                :user     => mysqlUser,
+                :password => mysqlPassword,
+                :schema   => mysqlSchema
+              }
+            } )
+
+          end
+        rescue => e
+
+          logger.error( e )
+        end
+      end
 
   end
 

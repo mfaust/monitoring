@@ -54,11 +54,16 @@ module CarbonData
 
     def initialize( settings = {} )
 
-      redisHost = settings.dig(:redis, :host)
-      redisPort = settings.dig(:redis, :port)             || 6379
+      redisHost           = settings.dig(:redis, :host)
+      redisPort           = settings.dig(:redis, :port)             || 6379
 
-      version   = CarbonData::VERSION # '2.0.0'
-      date      = CarbonData::DATE    # '2017-04-13'
+      mysqlHost           = settings.dig(:mysql, :host)
+      mysqlSchema         = settings.dig(:mysql, :schema)
+      mysqlUser           = settings.dig(:mysql, :user)
+      mysqlPassword       = settings.dig(:mysql, :password)
+
+      version             = CarbonData::VERSION # '2.0.0'
+      date                = CarbonData::DATE    # '2017-04-13'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - CarbonData' )
@@ -66,13 +71,38 @@ module CarbonData
       logger.info( '  Copyright 2016-2017 Coremedia' )
       logger.info( '  used Services:' )
       logger.info( "    - redis        : #{redisHost}:#{redisPort}" )
+      if( mysqlHost != nil )
+        logger.info( "    - mysql        : #{mysqlHost}@#{mysqlSchema}" )
+      end
       logger.info( '-----------------------------------------------------------------' )
       logger.info( '' )
 
       @cache  = Cache::Store.new()
       @redis  = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
       @mbean  = MBean::Client.new( { :redis => @redis } )
+      @database   = nil
 
+      if( mysqlHost != nil )
+
+        begin
+
+          until( @database != nil )
+
+            @database   = Storage::MySQL.new( {
+              :mysql => {
+                :host     => mysqlHost,
+                :user     => mysqlUser,
+                :password => mysqlPassword,
+                :schema   => mysqlSchema
+              }
+            } )
+
+          end
+        rescue => e
+
+          logger.error( e )
+        end
+      end
     end
 
 
@@ -178,7 +208,8 @@ module CarbonData
 
       if( data == nil )
 
-        identifier = @redis.config( { :short => host, :key => 'graphite-identifier' } )
+        identifier  = @database.config( { :short => host, :key => 'graphite-identifier' } )
+#        identifier = @redis.config( { :short => host, :key => 'graphite-identifier' } )
 
 #         logger.debug( "identifier #1: #{identifier}" )
 
@@ -208,9 +239,11 @@ module CarbonData
 
 
 
-    def run( node = nil )
+    def run( host = nil )
 
-      if( node == nil )
+      logger.debug( "run( #{host} )" )
+
+      if( host == nil )
         logger.error( 'no node given' )
 
         return []
@@ -218,20 +251,21 @@ module CarbonData
 
       data    = nil
 
-      node.each do |h,d|
+#      node.each do |h,d|
 
-        @identifier    = self.storagePath( h )
+        @identifier    = self.storagePath( host )
         graphiteOutput = Array.new()
 
-        logger.info( sprintf( 'Host: %s', h ) )
+        logger.info( sprintf( 'Host: %s', host ) )
 
-        data = @redis.discoveryData( { :short => h } )
+        data    = @database.discoveryData( { :short => host, :fqdn => host } )
+#        data = @redis.discoveryData( { :short => h } )
 
         # no discovery data found
         #
         if( data == nil )
           logger.warn( 'no discovery data found' )
-          next
+          return graphiteOutput
         end
 
         data.each do |service, d|
@@ -245,7 +279,7 @@ module CarbonData
 
           logger.info( sprintf( '  - %s (%s)', service, @Service ) )
 
-          cacheKey     = Storage::RedisClient.cacheKey( { :host => h, :pre => 'result', :service => service } )
+          cacheKey     = Storage::RedisClient.cacheKey( { :host => host, :pre => 'result', :service => service } )
 
           result = @redis.get( cacheKey )
 
@@ -299,7 +333,7 @@ module CarbonData
         end
 
         return graphiteOutput
-      end
+#      end
     end
 
   end

@@ -81,12 +81,12 @@ module DataCollector
 #         logger.debug( 'identical' )
 #       end
 
-      if( data == nil )
-
-        # Redis based
-        logger.debug( 'use redis' )
-        data = @redis.discoveryData( { :short => short } )
-      end
+#       if( data == nil )
+#
+#         # Redis based
+#         logger.debug( 'use redis' )
+#         data = @redis.discoveryData( { :short => short } )
+#       end
 
       if( data == nil || data == false || data.count() == 0 )
         logger.error( 'no discovery data found' )

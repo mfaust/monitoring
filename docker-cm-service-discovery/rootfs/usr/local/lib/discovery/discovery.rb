@@ -7,8 +7,6 @@ module ServiceDiscovery
     #
     def discoverApplication( params = {} )
 
-#       logger.debug( "discoverApplication( #{params} )" )
-
       host = params.dig( :fqdn )
       port = params.dig( :port )
 
@@ -36,7 +34,7 @@ module ServiceDiscovery
 
         # hash for the NEW Port-Schema
         # since cm160x every application runs in his own container with unique port schema
-
+        #
         targetUrl = sprintf( "service:jmx:rmi:///jndi/rmi://%s:%s/jmxrmi", host, port )
 
         array << {
@@ -93,14 +91,9 @@ module ServiceDiscovery
             engine      = body[2]  # #3  == engine
             information = body[3]  # #4  == serviceInfo
 
-#             logger.debug( JSON.pretty_generate( runtime ) )
-#             logger.debug( JSON.pretty_generate( manager ) )
-#             logger.debug( JSON.pretty_generate( engine ) )
-#             logger.debug( JSON.pretty_generate( information ) )
-
             # since 1706 (maybe), we support an special bean to give us a unique and static application name
             # thanks to Frauke!
-
+            #
             status = information.dig('status') || 500
 
             if( status == 200 )
@@ -112,7 +105,6 @@ module ServiceDiscovery
               if( value != 'to be defined' )
 
                 logger.debug( "Application are '#{value}'" )
-
 
                 services.push( value )
 
@@ -134,8 +126,6 @@ module ServiceDiscovery
 
                   classPath  = value.dig('ClassPath')
 
-  #                 logger.debug( "found classPath: #{classPath}" )
-                  #
                   # CoreMedia 7.x == classPath 'cm7-tomcat-installation'
                   # Solr 6.5      == classPath 'solr-6'
                   # SpringBoot    == classPath '*.war'
@@ -294,6 +284,7 @@ module ServiceDiscovery
         end
 
         # normalize service names
+        #
         services.map! {|service|
 
           case service

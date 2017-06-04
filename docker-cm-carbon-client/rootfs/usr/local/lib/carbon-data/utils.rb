@@ -7,10 +7,14 @@ module CarbonData
     #
     def monitoredServer()
 
-      d = @redis.nodes( { :status => 1 } )
+      nodes = @database.nodes( { :status => [ Storage::MySQL::ONLINE ] } )
+
+#       logger.debug( "database: #{nodes}" )
+
+#      d = @redis.nodes( { :status => 1 } )
 #      d = @db.nodes( { :status => 1 } )
 
-      return d
+      return nodes
 
     end
 

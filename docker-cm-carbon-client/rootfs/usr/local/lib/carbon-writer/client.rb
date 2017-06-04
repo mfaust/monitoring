@@ -13,11 +13,16 @@ module CarbonWriter
       redisHost     = settings.dig(:redis, :host)   || 'localhost'
       redisPort     = settings.dig(:redis, :port)   || 6379
 
+      mysqlHost     = settings.dig(:mysql, :host)
+      mysqlSchema   = settings.dig(:mysql, :schema)
+      mysqlUser     = settings.dig(:mysql, :user)
+      mysqlPassword = settings.dig(:mysql, :password)
+
       @graphiteHost = settings.dig( :graphite, :host )
       @graphitePort = settings.dig( :graphite, :port )
 
-      version             = '1.3.2'
-      date                = '2017-04-13'
+      version             = '1.4.0'
+      date                = '2017-06-04'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - Carbon client' )
@@ -28,7 +33,7 @@ module CarbonWriter
       logger.info( '-----------------------------------------------------------------' )
       logger.info( '' )
 
-      @carbonData   = CarbonData::Consumer.new( { :redis => { :host => redisHost, :port => redisPort } } )
+      @carbonData   = CarbonData::Consumer.new( { :redis => { :host => redisHost, :port => redisPort }, :mysql => { :host => mysqlHost, :schema => mysqlSchema, :user => mysqlUser, :password  => mysqlPassword } } )
 
     end
 
@@ -60,9 +65,8 @@ module CarbonWriter
       start = Time.now
       nodes = @carbonData.nodes()
 
-      if( nodes.is_a?( FalseClass ) )
-        logger.debug( 'no nodes found' )
-
+      if( nodes == nil || nodes.is_a?( FalseClass ) )
+        logger.info( 'no online server found' )
       else
 
         nodes.each do |n|
@@ -118,7 +122,7 @@ module CarbonWriter
 
       begin
 
-#         logger.debug( " = carbon-writer.#{key} #{value.to_f} #{time.to_i}" )
+#        logger.debug( " = carbon-writer.#{key} #{value.to_f} #{time.to_i}" )
 
         self.socket.write( "carbon-writer.#{key} #{value.to_f} #{time.to_i}\n" )
 

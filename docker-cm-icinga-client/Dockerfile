@@ -7,11 +7,11 @@ ENV \
   ALPINE_MIRROR="mirror1.hs-esslingen.de/pub/Mirrors" \
   ALPINE_VERSION="v3.6" \
   TERM=xterm \
-  APK_ADD="build-base bind-tools drill git openssl-dev ruby-dev ruby-irb ruby-rdoc" \
+  APK_ADD="build-base bind-tools drill git mariadb-dev libressl-dev ruby-dev ruby-irb ruby-rdoc" \
   APK_DEL="build-base git ruby-dev ruby-rdoc " \
-  GEMS="beaneater ipaddress json openssl redis rest-client rufus-scheduler tzinfo-data"
+  GEMS="beaneater ipaddress json mysql2 openssl redis rest-client rufus-scheduler tzinfo-data"
 
-LABEL version="1706-01.1"
+LABEL version="1706-01.2"
 
 # ---------------------------------------------------------------------------------------
 

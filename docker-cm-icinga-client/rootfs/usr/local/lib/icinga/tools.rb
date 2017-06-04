@@ -66,7 +66,8 @@ class CMIcinga2 < Icinga2::Client
 
       if( data == nil )
 
-        identifier = @redis.config( { :short => host, :key => 'graphite-identifier' } )
+        identifier = @database.config( { :short => host, :key => 'graphite-identifier' } )
+#        identifier = @redis.config( { :short => host, :key => 'graphite-identifier' } )
 
         if( identifier != nil )
 
@@ -93,14 +94,15 @@ class CMIcinga2 < Icinga2::Client
 
       logger.debug( "nodeInformation( #{params} )" )
 
-      host             = params.dig(:host) || nil
+      host             = params.dig(:host)
 
       # in first, we need the discovered services ...
       logger.debug( sprintf( 'in first, we need information from discovery service for node \'%s\'', host ) )
 
       for y in 1..30
 
-        result = @redis.discoveryData( { :short => host } )
+        result = @database.discoveryData( { :short => host } )
+#        result = @redis.discoveryData( { :short => host } )
 
         if( result.is_a?( Hash ) && result.count != 0 )
 
@@ -132,7 +134,7 @@ class CMIcinga2 < Icinga2::Client
         payload = {}
       end
 
-      logger.debug( JSON.pretty_generate( payload ) )
+#       logger.debug( JSON.pretty_generate( payload ) )
 
       return payload
 

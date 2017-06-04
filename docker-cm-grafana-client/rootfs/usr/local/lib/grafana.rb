@@ -18,6 +18,7 @@ require 'rest-client'
 
 require_relative 'logging'
 require_relative 'cache'
+require_relative 'job-queue'
 require_relative 'message-queue'
 require_relative 'storage'
 require_relative 'mbean'
@@ -159,6 +160,7 @@ module Grafana
       @redis       = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
       @mbean       = MBean::Client.new( { :redis => @redis } )
       @cache       = Cache::Store.new()
+      @jobs        = JobQueue::Job.new()
       @mqConsumer  = MessageQueue::Consumer.new( @MQSettings )
       @mqProducer  = MessageQueue::Producer.new( @MQSettings )
       @database    = nil
@@ -169,8 +171,6 @@ module Grafana
 
           until( @database != nil )
 
-            logger.debug( 'try to connect our database endpoint' )
-
             @database   = Storage::MySQL.new( {
               :mysql => {
                 :host     => mysqlHost,
@@ -180,7 +180,6 @@ module Grafana
               }
             } )
 
-            sleep(5)
           end
         rescue => e
 
