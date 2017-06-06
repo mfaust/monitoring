@@ -16,12 +16,16 @@ require_relative '../lib/carbon-writer'
 
 # -----------------------------------------------------------------------------
 
-redisHost  = ENV.fetch('REDIS_HOST'    , 'redis' )
-redisPort  = ENV.fetch('REDIS_PORT'    , 6379 )
-carbonHost = ENV.fetch('GRAPHITE_HOST' , 'carbon' )
-carbonPort = ENV.fetch('GRAPHITE_PORT' , 2003 )
-interval   = ENV.fetch('INTERVAL'      , 40 )
-delay      = ENV.fetch('RUN_DELAY'     , 1 )
+redisHost         = ENV.fetch('REDIS_HOST'             , 'redis' )
+redisPort         = ENV.fetch('REDIS_PORT'             , 6379 )
+carbonHost        = ENV.fetch('GRAPHITE_HOST'          , 'carbon' )
+carbonPort        = ENV.fetch('GRAPHITE_PORT'          , 2003 )
+mysqlHost         = ENV.fetch('MYSQL_HOST'             , 'database')
+mysqlSchema       = ENV.fetch('DISCOVERY_DATABASE_NAME', 'discovery')
+mysqlUser         = ENV.fetch('DISCOVERY_DATABASE_USER', 'discovery')
+mysqlPassword     = ENV.fetch('DISCOVERY_DATABASE_PASS', 'discovery')
+interval          = ENV.fetch('INTERVAL'               , 30 )
+delay             = ENV.fetch('RUN_DELAY'              , 10 )
 
 config = {
   :redis       => {
@@ -31,6 +35,12 @@ config = {
   :graphite    => {
     :host => carbonHost,
     :port => carbonPort
+  },
+  :mysql    => {
+    :host      => mysqlHost,
+    :schema    => mysqlSchema,
+    :user      => mysqlUser,
+    :password  => mysqlPassword
   }
 }
 

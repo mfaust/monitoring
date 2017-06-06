@@ -7,11 +7,11 @@ ENV \
   ALPINE_MIRROR="mirror1.hs-esslingen.de/pub/Mirrors" \
   ALPINE_VERSION="v3.6" \
   TERM=xterm \
-  APK_ADD="build-base imagemagick-dev mysql-dev postgresql-dev ruby-dev ruby-irb ruby-rdoc zlib zlib-dev" \
+  APK_ADD="build-base bind-tools drill imagemagick-dev mariadb-client mariadb-dev postgresql-dev ruby-dev ruby-irb ruby-rdoc zlib zlib-dev" \
   APK_DEL="build-base imagemagick-dev ruby-dev ruby-rdoc zlib-dev" \
-  GEMS="beaneater bigdecimal fileutils filesize ipaddress json mysql2 pg redis rest-client rufus-scheduler time_difference tzinfo-data"
+  GEMS="beaneater bigdecimal fileutils ipaddress json mysql2 pg redis rest-client rufus-scheduler time_difference tzinfo-data"
 
-LABEL version="1705-04.1"
+LABEL version="1706-01.2"
 
 # ---------------------------------------------------------------------------------------
 

@@ -28,8 +28,8 @@ class Icinga2Check
 
   def initialize( settings = {} )
 
-    redisHost    = ENV.fetch( 'REDIS_HOST'       , 'redis' )
-    redisPort    = ENV.fetch( 'REDIS_PORT'       , 6379 )
+    redisHost    = ENV.fetch( 'REDIS_HOST', 'redis' )
+    redisPort    = ENV.fetch( 'REDIS_PORT', 6379 )
 
     logger.level = Logger::DEBUG
     @redis       = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
@@ -74,20 +74,28 @@ class Icinga2Check
   end
 
 
-  def shortHostname( hostname )
+  def hostname( hostname )
+
+    logger.debug( "hostname( #{hostname} )" )
 
     # look in the memcache
-    memcacheKey = Storage::RedisClient.cacheKey( { :host => hostname, :type => 'dns' })
+    memcacheKey = Storage::RedisClient.cacheKey( { :host => hostname, :type => 'dns' } )
+
+#     logger.debug( { :host => hostname, :type => 'dns' } )
+#     logger.debug( memcacheKey )
 
     data      = @redis.get( memcacheKey )
 
     if( data == nil )
 
       data = Utils::Network.resolv( hostname )
+
+#       logger.debug( data )
+
       @redis.set( memcacheKey, data )
     end
 
-    hostname = data.dig('short')
+    hostname = data.dig('long')
 
     return hostname
 

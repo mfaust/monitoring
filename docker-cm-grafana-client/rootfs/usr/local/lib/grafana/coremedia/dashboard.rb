@@ -58,36 +58,28 @@ module Grafana
         #
         ip, short, fqdn = self.nsLookup( host )
 
+        @shortHostname     = short  # (%HOST%)
+        @grafanaHostname   = fqdn   # name for the grafana title (%SHORTNAME%)
+        @storageIdentifier = fqdn   # identifier for an storage path (%STORAGE_IDENTIFIER%) (useful for cloud stack on aws with changing hostnames)
+
         # read the configuration for an customized display name
         #
-        config          = @redis.config( { :short => short, :key => 'display-name' } )
-        identifier      = @redis.config( { :short => short, :key => 'graphite-identifier' } )
+        display     = @database.config( { :ip => ip, :short => short, :fqdn => fqdn, :key => 'display-name' } )
+        identifier  = @database.config( { :ip => ip, :short => short, :fqdn => fqdn, :key => 'graphite-identifier' } )
 
-        logger.debug( @redis.config( { :short => short } ) )
+        if( display != nil && display.dig( 'display-name' ) != nil )
 
-        if( config.dig( 'display-name' ) != nil )
-
-          @grafanaHostname = config.dig( 'display-name' ).to_s
-
+          @grafanaHostname = display.dig( 'display-name' ).to_s
           logger.info( "use custom display-name from config: '#{@grafanaHostname}'" )
-        else
-
-          @grafanaHostname = short
         end
 
 
-        if( identifier.dig( 'graphite-identifier' ) != nil )
+        if( identifier != nil && identifier.dig( 'graphite-identifier' ) != nil )
 
           @storageIdentifier = identifier.dig( 'graphite-identifier' ).to_s
-
           logger.info( "use custom storage identifier from config: '#{@storageIdentifier}'" )
-        else
-
-          @storageIdentifier = short
         end
 
-
-        @shortHostname    = short
         @grafanaHostname  = self.createSlug( @grafanaHostname ).gsub( '.', '-' )
 
         logger.debug( "short hostname    : #{@shortHostname}" )
@@ -130,7 +122,8 @@ module Grafana
 
         ip, short, fqdn = self.prepare( host )
 
-        discovery = @redis.discoveryData( { :short => short } )
+        discovery    = @database.discoveryData( { :ip => ip, :short => short, :fqdn => fqdn } )
+#        discovery = @redis.discoveryData( { :short => short } )
 
         if( discovery == nil )
 
@@ -155,9 +148,6 @@ module Grafana
 
         discovery.each do |service,serviceData|
 
-          logger.debug( service )
-          logger.debug( serviceData )
-
           additionalTemplatePaths = Array.new()
 
           if( serviceData != nil )
@@ -167,8 +157,6 @@ module Grafana
             description    = nil
             template       = nil
           end
-
-#           cacheKey       = Storage::RedisClient.cacheKey( { :host => host, :pre => 'result', :service => service } )
 
           # cae-live-1 -> cae-live
           serviceName     = self.removePostfix( service )
@@ -406,7 +394,7 @@ module Grafana
 
           if( @mbean.beanAvailable?( host, service, 'Server', 'LicenseValidUntilHard' ) == true )
 
-            logger.info( sprintf( 'found License Information for Service %s', service ) )
+            logger.info( sprintf( '  - found License Information for Service %s', service ) )
 
             if( File.exist?( licenseUntil ) )
 
@@ -428,7 +416,7 @@ module Grafana
 
           if( @mbean.beanAvailable?( host, service, 'Server', 'ServiceInfos' ) == true )
 
-            logger.info( sprintf( 'found Service Information for Service %s', service ) )
+            logger.info( sprintf( '  - found Service Information for Service %s', service ) )
 
             if( File.exist?( licensePart ) )
 
@@ -450,7 +438,7 @@ module Grafana
 
         if( rows.count == 1 )
           # only the license Head is into the array
-          logger.info( 'We have no information about Licenses' )
+          logger.info( 'we have no information about licenses' )
           return
         end
 
@@ -579,9 +567,9 @@ module Grafana
       # @return [Hash, #read]
       def listDashboards( params = {} )
 
-        host            = params.dig(:host)
+        tags            = params.dig(:tags)
 
-        data = self.searchDashboards( { :tags   => host } )
+        data = self.searchDashboards( { :tags => tags } )
 
         if( data == nil || data == false )
 
@@ -594,7 +582,7 @@ module Grafana
         data = data.collect { |item| item['uri'] }
 
         data.each do |d|
-          d.gsub!( sprintf( 'db/%s-', host ), '' )
+          d.gsub!( sprintf( 'db/%s-', tags ), '' )
         end
 
         if( data.count == 0 )
@@ -616,6 +604,7 @@ module Grafana
       def deleteDashboards( params = {} )
 
         host = params.dig(:host)
+        fqdn = params.dig(:fqdn)
         tags = params.dig(:tags) || []
 
         if( host == nil )
@@ -628,11 +617,11 @@ module Grafana
           }
         end
 
-        logger.info( sprintf( 'remove dashboards for host %s', host ) )
-
         self.prepare( host )
 
-        dashboards = self.listDashboards( { :host => @grafanaHostname } )
+        logger.info( sprintf( 'remove dashboards for host %s (%s)', host, @grafanaHostname ) )
+
+        dashboards = self.listDashboards( { :tags => host } )
         dashboards = dashboards.dig(:dashboards)
 
         if( dashboards == nil )
@@ -725,8 +714,73 @@ module Grafana
         normalizedName          = params.dig(:normalizedName)
         serviceTemplate         = params.dig(:serviceTemplate)
         additionalTemplatePaths = params.dig(:additionalTemplatePaths) || []
+        mlsIdentifier           = @storageIdentifier
 
         logger.info( sprintf( 'Creating dashboard for \'%s\'', serviceName ) )
+
+        if( serviceName == 'replication-live-server' )
+
+          mlsIOR = nil
+
+          logger.info( 'search Master Live Server IOR for the Replication Live Server' )
+
+          bean = @mbean.bean( @shortHostname, serviceName, 'Replicator' )
+
+          if( bean != nil )
+
+#             logger.debug( JSON.pretty_generate( bean ) )
+
+            value = bean.dig( 'value' )
+
+            if( value != nil )
+
+              value = value.values.first
+
+              mlsIOR = value.dig( 'MasterLiveServerIORUrl' )
+
+#               logger.debug( " => IOR: #{mlsIOR}" )
+
+              if( mlsIOR != nil )
+
+                uri = URI.parse( mlsIOR )
+                host = uri.host
+
+#                 logger.debug( " => IOR: #{host}" )
+
+                ip, short, fqdn = self.nsLookup( host )
+
+#                 logger.debug( " => IOR: #{ip}" )
+#                 logger.debug( " => IOR: #{short}" )
+#                 logger.debug( " => IOR: #{fqdn}" )
+
+                dns = @database.dnsData( { :ip => ip, :short => short, :fqdn => fqdn } )
+#                 logger.debug( " => IOR: #{dns}" )
+
+                realIP    = dns.dig('ip')
+                realShort = dns.dig('name')
+                realFqdn  = dns.dig('fqdn')
+
+                if( @shortHostname != realShort )
+
+                  identifier  = @database.config( { :ip => realIP, :short => realShort, :fqdn => realFqdn, :key => 'graphite-identifier' } )
+
+                  if( identifier.dig( 'graphite-identifier' ) != nil )
+
+                    mlsIdentifier = identifier.dig( 'graphite-identifier' ).to_s
+
+                    logger.info( "use custom storage identifier from config: '#{mlsIdentifier}'" )
+                  end
+                else
+                  logger.info( 'the Master Live Server runs on the same host as Replication Live Server' )
+                end
+              end
+            end
+          end
+
+#           logger.debug( '-----------------------------' )
+#           logger.debug( mlsIdentifier )
+#           logger.debug( '-----------------------------' )
+        end
 
         templateFile = File.read( serviceTemplate )
         templateJson = JSON.parse( templateFile )
@@ -755,12 +809,13 @@ module Grafana
           :normalizedName    => normalizedName,
           :grafanaHostname   => @grafanaHostname,
           :storageIdentifier => @storageIdentifier,
-          :shortHostname     => @shortHostname
+          :shortHostname     => @shortHostname,
+          :mlsIdentifier     => mlsIdentifier
         } )
 
         response = self.postRequest( '/api/dashboards/db' , json )
 
-        logger.debug( "#{response}" )
+#         logger.debug( "#{response}" )
 
       end
 
@@ -832,6 +887,7 @@ module Grafana
         grafanaHostname   = params.dig(:grafanaHostname)
         storageIdentifier = params.dig(:storageIdentifier)
         shortHostname     = params.dig(:shortHostname)
+        mlsIdentifier     = params.dig(:mlsIdentifier)
 
         if( template == nil )
           return false
@@ -847,13 +903,13 @@ module Grafana
 
         # replace Template Vars
         map = {
-          '%DESCRIPTION%'        => description,
-          '%SERVICE%'            => normalizedName,
-          '%HOST%'               => shortHostname,
-          '%SHORTHOST%'          => grafanaHostname,
-#          '%%' =>
-          '%STORAGE_IDENTIFIER%' => storageIdentifier,
-          '%TAG%'                => shortHostname
+          '%DESCRIPTION%'            => description,
+          '%SERVICE%'                => normalizedName,
+          '%HOST%'                   => shortHostname,
+          '%SHORTHOST%'              => grafanaHostname,
+          '%STORAGE_IDENTIFIER%'     => storageIdentifier,
+          '%MLS_STORAGE_IDENTIFIER%' => mlsIdentifier,
+          '%TAG%'                    => shortHostname
         }
 
         re = Regexp.new( map.keys.map { |x| Regexp.escape(x) }.join( '|' ) )
@@ -997,3 +1053,4 @@ module Grafana
 
   end
 end
+

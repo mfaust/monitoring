@@ -15,7 +15,7 @@
         "height": 42,
         "panels": [
           {
-            "content": "<h3><center><a href=\"/grafana/dashboard/db/%STORAGE_IDENTIFIER%-tomcats?var-Application=%SERVICE%\">Tomcat</a></center></h3>",
+            "content": "<h3><center><a href=\"/grafana/dashboard/db/%SHORTHOST%-tomcats?var-Application=%SERVICE%\">Tomcat</a></center></h3>",
             "id": 23,
             "links": [],
             "mode": "html",

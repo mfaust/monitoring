@@ -14,7 +14,7 @@ class Icinga2Check_CM_Memory < Icinga2Check
     application  = settings.dig(:application)
     memory       = settings.dig(:memory)
 
-    host         = self.shortHostname( host )
+    host         = self.hostname( host )
 
     self.check( host, application, memory )
 

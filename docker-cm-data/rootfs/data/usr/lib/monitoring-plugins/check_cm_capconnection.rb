@@ -10,11 +10,11 @@ class Icinga2Check_CM_CapConnection < Icinga2Check
 
     super
 
-    host         = settings[:host]        ? settings[:host]        : nil
-    application  = settings[:application] ? settings[:application] : nil
-    memory       = settings[:memory]      ? settings[:memory]      : nil
+    host         = settings.dig(:host)
+    application  = settings.dig(:application)
+    memory       = settings.dig(:memory)
 
-    host         = self.shortHostname( host )
+    host         = self.hostname( host )
 
     self.check( host, application, memory )
 

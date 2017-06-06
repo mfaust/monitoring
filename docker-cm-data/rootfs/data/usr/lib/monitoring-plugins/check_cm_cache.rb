@@ -14,7 +14,7 @@ class Icinga2Check_CM_Cache < Icinga2Check
     application  = settings.dig(:application)
     cache        = settings.dig(:cache)
 
-    host         = self.shortHostname( host )
+    host         = self.hostname( host )
 
     self.check( host, application, cache )
 

@@ -55,52 +55,56 @@ class CMIcinga2 < Icinga2::Client
     end
 
 
-    def nodeTag( host )
-
-#       logger.debug( "nodeTag( #{host} )" )
-
-      key    = sprintf( 'config-%s', host )
-      data   = @cache.get( key )
-
-      result = host
-
-      if( data == nil )
-
-        identifier = @redis.config( { :short => host, :key => 'graphite-identifier' } )
-
-        if( identifier != nil )
-
-          identifier = identifier.dig( 'graphite-identifier' )
-
-          if( identifier != nil )
-            result     = identifier
-          end
-
-          @cache.set( key, expiresIn: 320 ) { Cache::Data.new( result ) }
-        end
-
-      else
-
-        result = data
-      end
-
-      return result
-
-    end
+#     def nodeTag( host )
+#
+# #       logger.debug( "nodeTag( #{host} )" )
+#
+#       key    = sprintf( 'config-%s', host )
+#       data   = @cache.get( key )
+#
+#       result = host
+#
+#       if( data == nil )
+#
+#         identifier = @database.config( { :short => host, :key => 'graphite-identifier' } )
+# #        identifier = @redis.config( { :short => host, :key => 'graphite-identifier' } )
+#
+#         if( identifier != nil )
+#
+#           identifier = identifier.dig( 'graphite-identifier' )
+#
+#           if( identifier != nil )
+#             result     = identifier
+#           end
+#
+#           @cache.set( key, expiresIn: 320 ) { Cache::Data.new( result ) }
+#         end
+#
+#       else
+#
+#         result = data
+#       end
+#
+#       return result
+#
+#     end
 
 
     def nodeInformation( params = {} )
 
       logger.debug( "nodeInformation( #{params} )" )
 
-      host             = params.dig(:host) || nil
+      ip      = params.dig(:ip)
+      host    = params.dig(:host)
+      fqdn    = params.dig(:fqdn)
 
       # in first, we need the discovered services ...
-      logger.debug( sprintf( 'in first, we need information from discovery service for node \'%s\'', host ) )
-
+      #
       for y in 1..30
 
-        result = @redis.discoveryData( { :short => host } )
+        result = @database.discoveryData( { :ip => ip, :short => host, :fqdn => fqdn } )
+
+        logger.debug( result.class.to_s )
 
         if( result.is_a?( Hash ) && result.count != 0 )
 
@@ -112,13 +116,11 @@ class CMIcinga2 < Icinga2::Client
         end
       end
 
-      logger.debug( "#{services}" )
+#       logger.debug( "#{services}" )
 
       if( services != nil )
 
         services.each do |s|
-
-#           logger.debug( " => service #{s}" )
 
           if( s.last != nil )
             s.last.reject! { |k| k == 'template' }
@@ -131,8 +133,6 @@ class CMIcinga2 < Icinga2::Client
 
         payload = {}
       end
-
-      logger.debug( JSON.pretty_generate( payload ) )
 
       return payload
 

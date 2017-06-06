@@ -13,8 +13,8 @@ class Icinga2Check_CM_SequenceNumbers < Icinga2Check
     mls         = settings.dig(:mls)
     rls         = settings.dig(:rls)
 
-    hostMls     = self.shortHostname( mls )
-    hostRls     = self.shortHostname( rls )
+    hostMls     = self.hostname( mls )
+    hostRls     = self.hostname( rls )
 
     self.check( hostMls, hostRls )
 

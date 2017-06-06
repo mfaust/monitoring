@@ -13,8 +13,6 @@ require 'uri'
 require 'time'
 
 require_relative 'logging'
-require_relative 'cache'
-require_relative 'storage'
 require_relative 'message-queue'
 require_relative 'graphite/tools'
 require_relative 'graphite/annotations'
@@ -32,19 +30,17 @@ module Graphite
     include Graphite::Annotions
     include Graphite::Queue
 
-    def initialize( params = {} )
+    def initialize( settings = {} )
 
-      graphiteHost      = params.dig(:graphite, :host)       || 'localhost'
-      graphitePort      = params.dig(:graphite, :port)       || 2003
-      graphiteHttpPort  = params.dig(:graphite, :http_port)  || 8081
-      graphitePath      = params.dig(:graphite, :path)
-      mqHost            = params.dig(:mq, :host)             || 'localhost'
-      mqPort            = params.dig(:mq, :port)             || 11300
-      @mqQueue          = params.dig(:mq, :queue)            || 'mq-graphite'
-      redisHost         = params.dig(:redis, :host)
-      redisPort         = params.dig(:redis, :port)          || 6379
+      graphiteHost        = settings.dig(:graphite, :host)       || 'localhost'
+      graphitePort        = settings.dig(:graphite, :port)       || 2003
+      graphiteHttpPort    = settings.dig(:graphite, :http_port)  || 8081
+      graphitePath        = settings.dig(:graphite, :path)
+      mqHost              = settings.dig(:mq, :host)             || 'localhost'
+      mqPort              = settings.dig(:mq, :port)             || 11300
+      @mqQueue            = settings.dig(:mq, :queue)            || 'mq-graphite'
 
-      @graphiteURI      = sprintf( 'http://%s:%s%s', graphiteHost, graphiteHttpPort, graphitePath )
+      @graphiteURI        = sprintf( 'http://%s:%s%s', graphiteHost, graphiteHttpPort, graphitePath )
 
       @MQSettings = {
         :beanstalkHost  => mqHost,
@@ -52,8 +48,8 @@ module Graphite
         :beanstalkQueue => @mqQueue
       }
 
-      version              = '1.3.1'
-      date                 = '2017-03-25'
+      version              = '1.4.2'
+      date                 = '2017-06-04'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - Graphite Client' )
@@ -62,12 +58,9 @@ module Graphite
       logger.info( '  used Services:' )
       logger.info( "    - graphite     : #{@graphiteURI}" )
       logger.info( "    - message Queue: #{mqHost}:#{mqPort}/#{@mqQueue}" )
-      logger.info( "    - redis        : #{redisHost}:#{redisPort}" )
       logger.info( '-----------------------------------------------------------------' )
       logger.info( '' )
 
-      @cache       = Cache::Store.new()
-      @redis       = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
       @mqConsumer  = MessageQueue::Consumer.new( @MQSettings )
       @mqProducer  = MessageQueue::Producer.new( @MQSettings )
 

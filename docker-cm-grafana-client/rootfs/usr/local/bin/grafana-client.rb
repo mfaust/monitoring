@@ -13,19 +13,23 @@ require_relative '../lib/grafana'
 
 # -----------------------------------------------------------------------------
 
-grafanaHost         = ENV.fetch('GRAFANA_HOST'          , 'localhost')
-grafanaPort         = ENV.fetch('GRAFANA_PORT'          , 80)
-grafanaUrlPath      = ENV.fetch('GRAFANA_URL_PATH'      , '/grafana')
-grafanaApiUser      = ENV.fetch('GRAFANA_API_USER'      , 'admin')
-grafanaApiPassword  = ENV.fetch('GRAFANA_API_PASSWORD'  , 'admin')
-grafanaTemplatePath = ENV.fetch('GRAFANA_TEMPLATE_PATH' , '/usr/local/share/templates/grafana')
-mqHost              = ENV.fetch('MQ_HOST'               , 'beanstalkd')
-mqPort              = ENV.fetch('MQ_PORT'               , 11300)
-mqQueue             = ENV.fetch('MQ_QUEUE'              , 'mq-grafana')
-redisHost           = ENV.fetch('REDIS_HOST'            , 'redis' )
-redisPort           = ENV.fetch('REDIS_PORT'            , 6379 )
-interval            = ENV.fetch('INTERVAL'              , 40 )
-delay               = ENV.fetch('RUN_DELAY'             , 30 )
+grafanaHost         = ENV.fetch('GRAFANA_HOST'           , 'localhost')
+grafanaPort         = ENV.fetch('GRAFANA_PORT'           , 80)
+grafanaUrlPath      = ENV.fetch('GRAFANA_URL_PATH'       , '/grafana')
+grafanaApiUser      = ENV.fetch('GRAFANA_API_USER'       , 'admin')
+grafanaApiPassword  = ENV.fetch('GRAFANA_API_PASSWORD'   , 'admin')
+grafanaTemplatePath = ENV.fetch('GRAFANA_TEMPLATE_PATH'  , '/usr/local/share/templates/grafana')
+mqHost              = ENV.fetch('MQ_HOST'                , 'beanstalkd')
+mqPort              = ENV.fetch('MQ_PORT'                , 11300)
+mqQueue             = ENV.fetch('MQ_QUEUE'               , 'mq-grafana')
+redisHost           = ENV.fetch('REDIS_HOST'             , 'redis' )
+redisPort           = ENV.fetch('REDIS_PORT'             , 6379 )
+mysqlHost           = ENV.fetch('MYSQL_HOST'             , 'database')
+mysqlSchema         = ENV.fetch('DISCOVERY_DATABASE_NAME', 'discovery')
+mysqlUser           = ENV.fetch('DISCOVERY_DATABASE_USER', 'discovery')
+mysqlPassword       = ENV.fetch('DISCOVERY_DATABASE_PASS', 'discovery')
+interval            = ENV.fetch('INTERVAL'               , 40 )
+delay               = ENV.fetch('RUN_DELAY'              , 30 )
 
 config = {
   :grafana => {
@@ -46,6 +50,12 @@ config = {
   :redis       => {
     :host => redisHost,
     :port => redisPort
+  },
+  :mysql    => {
+    :host      => mysqlHost,
+    :schema    => mysqlSchema,
+    :user      => mysqlUser,
+    :password  => mysqlPassword
   }
 }
 
