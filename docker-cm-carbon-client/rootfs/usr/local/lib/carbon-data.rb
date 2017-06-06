@@ -223,7 +223,7 @@ module CarbonData
 
     def run( fqdn = nil )
 
-      logger.debug( "run( #{fqdn} )" )
+#       logger.debug( "run( #{fqdn} )" )
 
       if( fqdn == nil )
         logger.error( 'no node given' )
@@ -248,9 +248,6 @@ module CarbonData
       end
 
       data.each do |service, d|
-
-        logger.debug( service )
-        logger.debug( d )
 
         @serviceName = service
         @Service     = self.normalizeService( service )

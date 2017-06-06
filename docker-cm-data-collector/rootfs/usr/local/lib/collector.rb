@@ -248,7 +248,7 @@ module DataCollector
         pgsql = ExternalClients::PostgresStatus.new( settings )
         data = pgsql.run()
 
-        logger.debug( data )
+#         logger.debug( data )
 
       end
 
@@ -324,19 +324,9 @@ module DataCollector
     #
     def monitoredServer()
 
-#       if( @database != nil )
-        nodes = @database.nodes( { :status => [ Storage::MySQL::ONLINE ] } )
+      nodes = @database.nodes( { :status => [ Storage::MySQL::ONLINE ] } )
 
-#         logger.debug( "database: #{nodes}" )
-#         logger.debug( nodes.class.to_s )
-
-        return nodes
-#       end
-
-#       d = @redis.nodes( { :status => Storage::RedisClient::ONLINE } )
-#       logger.debug( "redis: #{d}" )
-#       return d
-
+      return nodes
     end
 
     # create a singulary json for every services to send them to the jolokia service
@@ -346,7 +336,7 @@ module DataCollector
       host = params.dig(:hostname)
       fqdn = params.dig(:fqdn)
 
-      logger.debug( "createBulkCheck( #{params} )" )
+#       logger.debug( "createBulkCheck( #{params} )" )
 
       if( host == nil )
         logger.warn( 'no host name for bulk checks' )
@@ -361,7 +351,7 @@ module DataCollector
         :timestamp   => Time.now().to_i
       }
 
-      logger.debug( sprintf( 'create bulk checks for \'%s\'', host ) )
+#       logger.debug( sprintf( 'create bulk checks for \'%s\'', host ) )
 
       # to improve performance, read initial collector Data from Database and store them into Redis
       #
@@ -393,14 +383,11 @@ module DataCollector
 
       data.each do |s,d|
 
-#         logger.debug( s )
-#         logger.debug( d )
-
         port    = d.dig( 'port' )    || -1
         metrics = d.dig( 'metrics' ) || []
         bulk    = Array.new()
 
-        logger.debug( sprintf( '    %s with port %d', s, port ) )
+#         logger.debug( sprintf( '    %s with port %d', s, port ) )
 
         if( metrics != nil && metrics.count == 0 )
           case s
@@ -491,7 +478,7 @@ module DataCollector
       destHost  = parts['host'].to_s.strip
       destPort  = parts['port'].to_s.strip
 
-      logger.debug( sprintf( 'check Port %s on Host %s for sending data', destPort, destHost ) )
+#       logger.debug( sprintf( 'check Port %s on Host %s for sending data', destPort, destHost ) )
 
       result = Utils::Network.portOpen?( destHost, destPort )
 
@@ -541,7 +528,6 @@ module DataCollector
 
           result[v] ||= []
 
-          logger.debug( { :host => fqdn, :pre => 'result', :service => v } )
           cacheKey = Storage::RedisClient.cacheKey( { :host => fqdn, :pre => 'result', :service => v } )
 
           if( i.count > 1 )
@@ -811,7 +797,7 @@ module DataCollector
 
     def run()
 
-      logger.debug( 'get the online server for monitoring to collect their data' )
+#      logger.debug( 'get the online server for monitoring to collect their data' )
 
       monitoredServer = self.monitoredServer()
 
@@ -824,20 +810,12 @@ module DataCollector
         return
       end
 
-#       monitoredServer.each do |h,d|
       monitoredServer.each do |h|
+
         # get dns data!
         #
-
         ip, short, fqdn = self.nsLookup( h )
 
-#         logger.debug( h )
-#         logger.debug( d )
-#
-#         h     = h.first
-#
-#         short         = d.dig(:shortname)
-#         fqdn          = d.dig(:longname)
         discoveryData = nil
 
         # add hostname to an blocking cache
@@ -862,7 +840,6 @@ module DataCollector
           # we need this in realtime, or can we cache this for ... 1 minute or more?
           #
           discoveryData    = @database.discoveryData( { :ip => ip, :short => short, :fqdn => fqdn } )
-# #          logger.debug( "database: #{discoveryData}" )
         end
 
         # build prepared datas
