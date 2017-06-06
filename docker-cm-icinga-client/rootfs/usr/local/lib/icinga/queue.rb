@@ -45,9 +45,10 @@ class CMIcinga2 < Icinga2::Client
 
       logger.info( sprintf( 'process Message ID %d from Queue \'%s\'', data.dig(:id), data.dig(:tube) ) )
 
-      command = data.dig( :body, 'cmd' )
-      node    = data.dig( :body, 'node' )
-      payload = data.dig( :body, 'payload' )
+      command     = data.dig( :body, 'cmd' )
+      node        = data.dig( :body, 'node' )
+      payload     = data.dig( :body, 'payload' )
+      @identifier = nil
 
       if( command == nil || node == nil || payload == nil )
 
@@ -91,6 +92,27 @@ class CMIcinga2 < Icinga2::Client
         }
       end
 
+#       logger.debug( payload )
+#       logger.debug( payload.class.to_s )
+#
+#       if( payload.is_a?( String ) == true && payload.to_s != '' )
+#         payload  = JSON.parse( payload )
+#       end
+#
+#       logger.debug( payload )
+#       logger.debug( payload.class.to_s )
+#
+#       config     = payload.dig('config')
+#
+#       if( config != nil )
+#
+#         if( config.is_a?( String ) == true && config.to_s != '' )
+#           config  = JSON.parse( config )
+#         end
+#
+#         @identifier = config.dig('graphite-identifier')
+#       end
+
       @jobs.add( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
 
 
@@ -102,7 +124,7 @@ class CMIcinga2 < Icinga2::Client
 #        logger.debug( payload )
 #        payload = JSON.parse( payload )
 
-        services   = self.nodeInformation( { :host => short } )
+        services   = self.nodeInformation( { :ip => ip, :host => short, :fqdn => fqdn } )
 
         # TODO: add groups
         #

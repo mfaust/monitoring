@@ -35,159 +35,150 @@ module Graphite
 
     def processQueue( data = {} )
 
-      @identifier         = nil
 
-      if( data.count != 0 )
+      logger.info( sprintf( 'process Message ID %d from Queue \'%s\'', data.dig(:id), data.dig(:tube) ) )
 
-        logger.info( sprintf( 'process Message from Queue %s: %d', data.dig(:tube), data.dig(:id) ) )
+      command    = data.dig(:body, 'cmd')
+      node       = data.dig(:body, 'node')
+      payload    = data.dig(:body, 'payload')
+      @timestamp = nil
 
-        @timestamp = nil
+      #
+      #
+      if( command == nil || node == nil || payload == nil )
 
-        command    = data.dig(:body, 'cmd')
-        node       = data.dig(:body, 'node')
-        payload    = data.dig(:body, 'payload')
+        status = 500
 
-        #
-        #
-        if( command == nil || node == nil || payload == nil )
-
-          status = 500
-
-          if( command == nil )
-            e = 'missing command'
-            logger.error( e )
-            logger.error( data )
-            return { :status  => status, :message => e }
-          end
-
-          if( node == nil )
-            e = 'missing node'
-            logger.error( e )
-            logger.error( data )
-            return { :status  => status, :message => e }
-          end
-
-          if( payload == nil )
-            e = 'missing payload'
-            logger.error( e )
-            logger.error( data )
-            return { :status  => status, :message => e }
-          end
-
+        if( command == nil )
+          e = 'missing command'
+          logger.error( e )
+          logger.error( data )
+          return { :status  => status, :message => e }
         end
 
-        if( payload.is_a?( String ) == true && payload.to_s != '' )
-
-          payload  = JSON.parse( payload )
+        if( node == nil )
+          e = 'missing node'
+          logger.error( e )
+          logger.error( data )
+          return { :status  => status, :message => e }
         end
 
-        timestamp  = payload.dig('timestamp')
-        config     = payload.dig('config')
-
-        if( timestamp != nil )
-
-          if( timestamp.is_a?( Time ) )
-
-            @timestamp = Time.parse( timestamp )
-
-            logger.debug( @timestamp )
-          end
-
-          @timestamp = timestamp.to_i
+        if( payload == nil )
+          e = 'missing payload'
+          logger.error( e )
+          logger.error( data )
+          return { :status  => status, :message => e }
         end
 
-        if( config != nil )
+      end
 
-          if( config.is_a?( String ) == true && config.to_s != '' )
+      if( payload.is_a?( String ) == true && payload.to_s != '' )
+        payload  = JSON.parse( payload )
+      end
 
-            config  = JSON.parse( config )
-          end
+      timestamp  = payload.dig('timestamp')
+      config     = payload.dig('config')
+      fqdn       = payload.dig('fqdn')
 
-          @identifier = config.dig('graphite-identifier')
+      @identifier = fqdn
+
+
+      if( timestamp != nil )
+
+        if( timestamp.is_a?( Time ) )
+
+          @timestamp = Time.parse( timestamp )
+
+          logger.debug( @timestamp )
         end
 
+        @timestamp = timestamp.to_i
+      end
+
+      if( config != nil )
+
+        if( config.is_a?( String ) == true && config.to_s != '' )
+
+          config  = JSON.parse( config )
+        end
+
+        @identifier = config.dig('graphite-identifier')
+      end
 
 
-        logger.info( sprintf( 'add annotation \'%s\' for node %s', command, node ) )
+      logger.debug( JSON.pretty_generate( payload ) )
 
-        case command
-        when 'create', 'remove'
 
-          result = self.nodeAnnotation( node, command )
+      logger.info( sprintf( 'add annotation \'%s\' for node %s', command, fqdn ) )
 
-          logger.info( result )
+      case command
+      when 'create', 'remove'
 
-          return {
-            :status => 200
-          }
+        result = self.nodeAnnotation( fqdn, command )
 
-        when 'loadtest'
+        logger.info( result )
 
-          argument = payload.dig( 'argument' )
+        return {
+          :status => 200
+        }
 
-          if( argument != 'start' && argument != 'stop' )
-            logger.error( sprintf( 'wrong argument for LOADTEST \'%s\'', argument ) )
+      when 'loadtest'
 
-            return {
-              :status  => 500,
-              :message => sprintf( 'wrong argument for LOADTEST \'%s\'', argument )
-            }
-          end
+        argument = payload.dig( 'argument' )
 
-          result = self.loadtestAnnotation( node, argument )
-
-          logger.info( result )
-
-          return {
-            :status => 200
-          }
-
-        when 'deployment'
-
-          message = payload.dig( 'message' )
-          tags    = payload.dig( 'tags' ) || []
-
-          result = self.deploymentAnnotation( node, message, tags )
-
-          logger.info( result )
-
-          return {
-            :status => 200
-          }
-
-        when 'general'
-
-          description = payload.dig( 'description' )
-          message     = payload.dig( 'message' )
-          tags        = payload.dig( 'tags' ) || []
-
-          result = self.generalAnnotation( node, description, message, tags )
-
-          logger.info( result )
-
-          return {
-            :status => 200
-          }
-
-        else
-          logger.error( sprintf( 'wrong command detected: %s', command ) )
+        if( argument != 'start' && argument != 'stop' )
+          logger.error( sprintf( 'wrong argument for LOADTEST \'%s\'', argument ) )
 
           return {
             :status  => 500,
-            :message => sprintf( 'wrong command detected: %s', command )
+            :message => sprintf( 'wrong argument for LOADTEST \'%s\'', argument )
           }
-
         end
 
-        result[:request]    = data
+        result = self.loadtestAnnotation( fqdn, argument )
 
-#         self.sendMessage( result )
+        logger.info( result )
+
+        return {
+          :status => 200
+        }
+
+      when 'deployment'
+
+        message = payload.dig( 'message' )
+        tags    = payload.dig( 'tags' ) || []
+
+        result = self.deploymentAnnotation( fqdn, message, tags )
+
+        logger.info( result )
+
+        return {
+          :status => 200
+        }
+
+      when 'general'
+
+        description = payload.dig( 'description' )
+        message     = payload.dig( 'message' )
+        tags        = payload.dig( 'tags' ) || []
+
+        result = self.generalAnnotation( fqdn, description, message, tags )
+
+        logger.info( result )
+
+        return {
+          :status => 200
+        }
+
+      else
+        logger.error( sprintf( 'wrong command detected: %s', command ) )
+
+        return {
+          :status  => 500,
+          :message => sprintf( 'wrong command detected: %s', command )
+        }
+
       end
-
-      return {
-        :status  => 500,
-        :message => 'no data found'
-      }
 
     end
 

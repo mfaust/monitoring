@@ -11,9 +11,6 @@ module CarbonData
 
 #       logger.debug( "database: #{nodes}" )
 
-#      d = @redis.nodes( { :status => 1 } )
-#      d = @db.nodes( { :status => 1 } )
-
       return nodes
 
     end

@@ -108,8 +108,6 @@ module CarbonData
 
     def createGraphiteOutput( key, values )
 
-#       logger.debug( sprintf( 'createGraphiteOutput( %s, values )', key ) )
-
       graphiteOutput = Array.new()
 
       case key
@@ -182,42 +180,29 @@ module CarbonData
       end
 
       return graphiteOutput
-
     end
 
 
     def nodes()
 
       return self.monitoredServer()
-
     end
 
 
     def storagePath( host )
-
-#       logger.debug( "storagePath( #{host} )" )
 
       key    = sprintf( 'config-%s', host )
       data   = @cache.get( key )
 
       result = host
 
-#       logger.debug( "cached data: #{data}" )
-
-#      logger.debug( @redis.config( { :short => host } ) )
-
       if( data == nil )
 
-        identifier  = @database.config( { :short => host, :key => 'graphite-identifier' } )
-#        identifier = @redis.config( { :short => host, :key => 'graphite-identifier' } )
+        identifier  = @database.config( { :short => host, :fqdn => host, :key => 'graphite-identifier' } )
 
-#         logger.debug( "identifier #1: #{identifier}" )
-
-        if( identifier != nil )
+        if( identifier != false && identifier != nil )
 
           identifier = identifier.dig( 'graphite-identifier' )
-
-#           logger.debug( "identifier #2: #{identifier}" )
 
           if( identifier != nil )
             result     = identifier
@@ -231,19 +216,16 @@ module CarbonData
         result = data
       end
 
-#       logger.debug( "result: #{result}" )
-
       return result
-
     end
 
 
 
-    def run( host = nil )
+    def run( fqdn = nil )
 
-      logger.debug( "run( #{host} )" )
+      logger.debug( "run( #{fqdn} )" )
 
-      if( host == nil )
+      if( fqdn == nil )
         logger.error( 'no node given' )
 
         return []
@@ -251,89 +233,88 @@ module CarbonData
 
       data    = nil
 
-#      node.each do |h,d|
+      @identifier    = self.storagePath( fqdn )
+      graphiteOutput = Array.new()
 
-        @identifier    = self.storagePath( host )
-        graphiteOutput = Array.new()
+      logger.info( sprintf( 'Host: %s', fqdn ) )
 
-        logger.info( sprintf( 'Host: %s', host ) )
+      data    = @database.discoveryData( { :short => fqdn, :fqdn => fqdn } )
 
-        data    = @database.discoveryData( { :short => host, :fqdn => host } )
-#        data = @redis.discoveryData( { :short => h } )
-
-        # no discovery data found
-        #
-        if( data == nil )
-          logger.warn( 'no discovery data found' )
-          return graphiteOutput
-        end
-
-        data.each do |service, d|
-
-          @serviceName = service
-          @Service     = self.normalizeService( service )
-
-          if( service.downcase == 'timestamp' )
-            next
-          end
-
-          logger.info( sprintf( '  - %s (%s)', service, @Service ) )
-
-          cacheKey     = Storage::RedisClient.cacheKey( { :host => host, :pre => 'result', :service => service } )
-
-          result = @redis.get( cacheKey )
-
-          case service
-          when 'mongodb'
-
-            if( result.is_a?( Hash ) )
-              graphiteOutput.push( self.databaseMongoDB( result ) )
-            else
-              logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
-            end
-
-          when 'mysql'
-
-            if( result.is_a?( Hash ) )
-              graphiteOutput.push( self.databaseMySQL( result ) )
-            else
-              logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
-            end
-
-          when 'postgres'
-
-            if( result.is_a?( Hash ) )
-              graphiteOutput.push( self.databasePostgres( result ) )
-            else
-              logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
-            end
-
-          when 'node_exporter'
-
-            if( result.is_a?( Hash ) )
-              graphiteOutput.push( self.operatingSystemNodeExporter( result ) )
-            else
-              logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
-            end
-
-          else
-
-            if( result != nil )
-
-              result.each do |r|
-                key    = r.keys.first
-                values = r.values.first
-
-                graphiteOutput.push( self.createGraphiteOutput( key, values ) )
-
-              end
-            end
-          end
-
-        end
-
+      # no discovery data found
+      #
+      if( data == nil )
+        logger.warn( 'no discovery data found' )
         return graphiteOutput
-#      end
+      end
+
+      data.each do |service, d|
+
+        logger.debug( service )
+        logger.debug( d )
+
+        @serviceName = service
+        @Service     = self.normalizeService( service )
+
+        if( service.downcase == 'timestamp' )
+          next
+        end
+
+        logger.info( sprintf( '  - %s (%s)', service, @Service ) )
+
+        cacheKey     = Storage::RedisClient.cacheKey( { :host => fqdn, :pre => 'result', :service => service } )
+
+        result = @redis.get( cacheKey )
+
+        case service
+        when 'mongodb'
+
+          if( result.is_a?( Hash ) )
+            graphiteOutput.push( self.databaseMongoDB( result ) )
+          else
+            logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
+          end
+
+        when 'mysql'
+
+          if( result.is_a?( Hash ) )
+            graphiteOutput.push( self.databaseMySQL( result ) )
+          else
+            logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
+          end
+
+        when 'postgres'
+
+          if( result.is_a?( Hash ) )
+            graphiteOutput.push( self.databasePostgres( result ) )
+          else
+            logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
+          end
+
+        when 'node_exporter'
+
+          if( result.is_a?( Hash ) )
+            graphiteOutput.push( self.operatingSystemNodeExporter( result ) )
+          else
+            logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
+          end
+
+        else
+
+          if( result != nil )
+
+            result.each do |r|
+              key    = r.keys.first
+              values = r.values.first
+
+              graphiteOutput.push( self.createGraphiteOutput( key, values ) )
+
+            end
+          end
+        end
+
+      end
+
+      return graphiteOutput
     end
 
   end

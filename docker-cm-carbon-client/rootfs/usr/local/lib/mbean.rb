@@ -19,7 +19,7 @@ module MBean
         @redis = redis
       end
 
-      logger.level = Logger::DEBUG
+      logger.level = Logger::INFO
     end
 
 
@@ -28,9 +28,10 @@ module MBean
 
       data = Hash.new()
 
+      logger.debug( { :host => host, :pre => 'result', :service => service } )
       cacheKey = Storage::RedisClient.cacheKey( { :host => host, :pre => 'result', :service => service } )
 
-      for y in 1..3
+      for y in 1..10
 
         result      = @redis.get( cacheKey )
 
@@ -38,7 +39,6 @@ module MBean
           data = { service => result }
           break
         else
-  #        logger.debug( sprintf( 'Waiting for data %s ... %d', cacheKey, y ) )
           sleep( 3 )
         end
       end
@@ -50,14 +50,14 @@ module MBean
         s   = data.dig(service)
 
         if( s == nil )
-  #        logger.debug( sprintf( 'no service %s found', service ) )
+          # no service found
           return false
         end
 
         mbeanExists  = s.detect { |s| s[mbean] }
 
         if( mbeanExists == nil )
-  #        logger.debug( sprintf( 'no mbean %s found', mbean ) )
+          # no mbean $mbean found
           return false
         end
 
@@ -67,7 +67,7 @@ module MBean
         return mbeanExists
 
         if( mbeanStatus.to_i != 200 )
-  #        logger.debug( sprintf( 'mbean %s found, but status %d', mbean, mbeanStatus ) )
+          #mbean $mbean found, but status != 200
           return false
         end
 
@@ -76,11 +76,10 @@ module MBean
           result = true
         elsif( mbeanExists != nil && key != nil )
 
-  #        logger.debug( sprintf( 'look for key %s', key ) )
-
           mbeanValue = mbeanExists.dig('value')
 
           if( mbeanValue == nil )
+            # mbean value are nil
             return false
           end
 
@@ -113,8 +112,6 @@ module MBean
 
       result = false
 
-      logger.debug( sprintf( 'supportMbean?( %s, %s, mbean, %s )', data, service, key ) )
-
       if( data == nil )
         logger.error( 'no data given' )
         return false
@@ -123,14 +120,14 @@ module MBean
       s   = data.dig(service)
 
       if( s == nil )
-        logger.debug( sprintf( 'no service %s found', service ) )
+        # no service found
         return false
       end
 
       mbeanExists  = s.detect { |s| s[mbean] }
 
       if( mbeanExists == nil )
-        logger.debug( sprintf( 'no mbean %s found', mbean ) )
+        # no mbean $mbean found
         return false
       end
 
@@ -138,8 +135,7 @@ module MBean
       mbeanStatus  = mbeanExists.dig('status') || 999
 
       if( mbeanStatus.to_i != 200 )
-
-        logger.debug( sprintf( 'mbean %s found, but status %d', mbean, mbeanStatus ) )
+        # mbean $mbean found, but status != 200
         return false
       end
 
@@ -147,8 +143,6 @@ module MBean
 
         result = true
       elsif( mbeanExists != nil && key != nil )
-
-        logger.debug( sprintf( 'look for key %s', key ) )
 
         mbeanValue = mbeanExists.dig('value')
 
@@ -176,6 +170,8 @@ module MBean
     def beanAvailable?( host, service, bean, key = nil )
 
       data     = nil
+
+      logger.debug( { :host => host, :pre => 'result', :service => service } )
       cacheKey = Storage::RedisClient.cacheKey( { :host => host, :pre => 'result', :service => service } )
 
       for y in 1..10
@@ -186,7 +182,6 @@ module MBean
           data = { service => result }
           break
         else
-          logger.debug( sprintf( 'Waiting for data %s ... %d', cacheKey, y ) )
           sleep( 3 )
         end
       end
@@ -284,7 +279,6 @@ module MBean
       if( self.beanTimeout?( timestamp ) )
 
         logger.error( sprintf( '  status: %d: %s (Host: \'%s\' :: Service: \'%s\' - mbean: \'%s\')', status, timestamp, host, service, mbean ) )
-        logger.debug( data )
         return false
       end
     end

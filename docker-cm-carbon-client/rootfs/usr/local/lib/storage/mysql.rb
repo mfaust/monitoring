@@ -388,7 +388,7 @@ module Storage
 
       logger.debug( " status( #{params} )")
 
-      statement = sprintf('SELECT ip, name, fqdn, status, creation FROM dns WHERE ip = \'%s\' or name = \'%s\' or fqdn = \'%s\'', ip, name, fqdn )
+      statement = sprintf('select ip, name, fqdn, status, creation from dns where ip = \'%s\' or name = \'%s\' or fqdn = \'%s\'', ip, name, fqdn )
       result    = @client.query( statement, :as => :hash )
 
       logger.debug( statement )
@@ -435,28 +435,6 @@ module Storage
 
       return nil
 
-#       if( self.checkDatabase() == false )
-#         return false
-#       end
-#
-#       dnsIp        = params.dig(:ip)
-#       dnsShortname = params.dig(:short)
-#       dnsChecksum  = params.dig(:checksum)
-#       configKey    = params.dig(:key)
-#       configValues = params.dig(:value)
-#       data         = params.dig(:data)
-#
-#       if( ( configKey == nil && configValues == nil ) && data.is_a?( Hash ) )
-#
-#         data.each do |k,v|
-#
-#           self.writeConfig( { :ip => dnsIp, :short => dnsShortname, :checksum => dnsChecksum, :key => k, :value => v } )
-#         end
-#       else
-#
-#         self.writeConfig( params )
-#       end
-
     end
 
     # PRIVATE
@@ -501,51 +479,6 @@ module Storage
 
       return nil
 
-
-
-#         statement = sprintf(
-#           'select * from config where `key` = \'%s\' and `value` = \'%s\' and dns_ip = \'%s\'',
-#           key, values, ip
-#         )
-#
-#         logger.debug( statement )
-#
-#         result    = @client.query( statement, :as => :hash )
-#
-# #         logger.debug( result.class.to_s )
-# #         logger.debug( result.inspect )
-# #         logger.debug( result.size )
-#
-#         if( result.size == 0 )
-#
-#           statement = sprintf('insert into config ( `key`, `value`, dns_ip ) values ( \'%s\', \'%s\', \'%s\' )', key, values, ip )
-#           logger.debug( statement  )
-#
-#           result    = @client.query( statement, :as => :hash )
-#
-#           logger.debug( result.to_a )
-#         else
-#
-#           dbaValues = nil
-#
-#           result.each do |row|
-#             dbaValues    = row.dig('value')
-#           end
-#
-#           logger.debug( "#{values} vs. #{dbaValues}" )
-#
-#           if( dbaValues.to_s != values.to_s )
-#
-#             statement = sprintf('update config set `value` = \'%s\' where dns_ip = \'%s\' and `key` = \'%s\'', values, ip, key )
-#             logger.debug( statement )
-#
-#             result    = @client.query( statement, :as => :hash )
-#
-#             logger.debug( result.to_a )
-#           end
-#
-#         return nil
-#      end
     end
 
 
@@ -575,7 +508,14 @@ module Storage
           more = sprintf( 'and `key` = \'%s\'', key )
         end
 
-        statement = sprintf('DELETE FROM config WHERE dns_ip = \'%s\' %s', ip, more )
+        statement = sprintf(
+          'delete
+            from config
+          where
+            %s and
+            ( ip = \'%s\' or name = \'%s\' or fqdn = \'%s\' )',
+          more, ip, name, fqdn
+        )
         logger.debug( statement )
 
         begin
@@ -589,32 +529,7 @@ module Storage
       end
 
       return nil
-#
-#       ip        = params[ :ip ]    ? params[ :ip ]    : nil
-#       short     = params[ :short ] ? params[ :short ] : nil
-#       long      = params[ :long ]  ? params[ :long ]  : nil
-#       configKey = params[ :key ]   ? params[ :key ]   : nil
-#
-#       rec = @database[:config].select(:shortname).where(
-#         ( Sequel[:ip        => ip.to_s] ) |
-#         ( Sequel[:short => short.to_s] ) |
-#         ( Sequel[:longname  => long.to_s] )
-#       ).to_a
-#
-#       if( rec.count() != 0 )
-#
-#         shortname = rec.first[:shortname]
-#
-#         if( configKey == nil )
-#
-#           @database[:config].where( Sequel[:short => shortname] ).delete
-#         else
-#           @database[:config].where(
-#             ( Sequel[:shortname   => shortname] ) &
-#             ( Sequel[:key  => configKey] )
-#           ).delete
-#         end
-#       end
+
     end
 
 
@@ -637,26 +552,17 @@ module Storage
         'select d.fqdn, c.`key`, c.`value` from dns as d, config as c where d.ip = c.dns_ip'
       )
 
-      if( ip != nil || name != nil || fqdn != nil )
-
-        if( ip == nil )
-
-          dns = self.dnsData( params )
-
-          if( dns != nil )
-            ip   = dns.dig('ip')
-          else
-
-            return false
-          end
-        end
-
-        statement = sprintf( '%s and d.ip = \'%s\'', statement, ip )
-      end
-
       if( key != nil )
         statement = sprintf( '%s and `key` = \'%s\'', statement, key )
       end
+
+      statement = sprintf(
+        '%s and ( ip = \'%s\' or name = \'%s\' or fqdn = \'%s\' )',
+        statement,
+        ip,
+        name,
+        fqdn
+      )
 
       logger.debug( statement )
 
@@ -682,90 +588,6 @@ module Storage
       end
 
       return result
-
-
-  #       return nil
-#
-#
-#
-#       if( self.checkDatabase() == false )
-#         return false
-#       end
-#
-#       ip        = params[ :ip ]    ? params[ :ip ]    : nil
-#       short     = params[ :short ] ? params[ :short ] : nil
-#       long      = params[ :long ]  ? params[ :long ]  : nil
-#       configKey = params[ :key ]   ? params[ :key ]   : nil
-#
-#       array     = Array.new()
-#       result    = Hash.new()
-#
-#       def dbaData( w )
-#
-#         return  @database[:v_config].select( :ip, :shortname, :checksum, :key, :value ).where( w ).to_a
-#
-#       end
-#
-#       if( configKey == nil )
-#
-#         w = (
-#           ( Sequel[:ip        => ip.to_s] ) |
-#           ( Sequel[:short => short.to_s] ) |
-#           ( Sequel[:longname  => long.to_s] )
-#         )
-#
-#       else
-#
-#         w = (
-#           ( Sequel[:ip        => ip.to_s] ) |
-#           ( Sequel[:short => short.to_s] ) |
-#           ( Sequel[:longname  => long.to_s] )
-#         ) & (
-#           ( Sequel[:key => configKey.to_s] )
-#         )
-#
-#       end
-#
-#       def collectValues( hashes )
-#
-#         {}.tap{ |r| hashes.each{ |h| h.each{ |k,v| ( r[k]||=[] ) << v } } }
-#       end
-#
-#       rec = self.dbaData( w )
-#
-#       if( rec.count() != 0 )
-#
-#         dnsShortName  = rec.first.dig( :checksum ).to_s
-#
-#         result[dnsShortName.to_s] ||= {}
-#         result[dnsShortName.to_s]['dns'] ||= {}
-#         result[dnsShortName.to_s]['dns']['ip']        = rec.first.dig( :ip ).to_s
-#         result[dnsShortName.to_s]['dns']['shortname'] = rec.first.dig( :shortname ).to_s
-#
-#         groupByKey = rec.group_by { |k| k[:key] }
-#
-#         groupByKey.each do |g,v|
-#
-#           c = collectValues(
-#             v.map do |hash|
-#               { value:  ( hash[:value] ) }
-#             end
-#           )
-#
-#           values = c.select { |h| h['value'] }
-#
-#           result[dnsShortName.to_s][g.to_s] ||= {}
-#           result[dnsShortName.to_s][g.to_s] = values[:value].flatten.sort
-#
-#           array << result
-#         end
-#       else
-#         return false
-#       end
-#
-#       array = array.reduce( :merge )
-#
-#       return array
 
     end
     #
@@ -849,9 +671,6 @@ module Storage
     end
 
 
-
-
-
     def discoveryData( params = {} )
 
       if( ! @client )
@@ -895,14 +714,27 @@ module Storage
       if( service != nil )
 
         statement = sprintf(
-          'select name, fqdn, port, service, dns_ip, data from dns, discovery where ip = dns_ip and `service` = \'%s\' and dns_ip = \'%s\'',
-          service, ip
+          'select
+            dns.ip, dns.name, dns.fqdn, d.port, d.service, d.data
+          from dns, discovery as d
+          where
+            dns.ip = d.dns_ip and
+            d.`service` = \'%s\' and (
+              dns.ip = \'%s\' or dns.name = \'%s\' or dns.fqdn = \'%s\'
+            )',
+          service, ip, name, fqdn
         )
       elsif( service == nil )
 
         statement = sprintf(
-          'select name, fqdn, port, service, dns_ip, data from dns, discovery where ip = dns_ip and dns_ip = \'%s\'',
-          ip
+          'select
+            dns.ip, dns.name, dns.fqdn, d.port, d.service, d.data
+          from dns, discovery as d
+          where
+            dns.ip = d.dns_ip and (
+              dns.ip = \'%s\' or dns.name = \'%s\' or dns.fqdn = \'%s\'
+            )',
+          ip, name, fqdn
         )
 
         r = Array.new()
@@ -941,44 +773,7 @@ module Storage
 
       end
 
-
-
       return nil
-
-#       if( ip == nil )
-#
-#         dns = self.dnsData( params )
-#
-#         if( dns != nil )
-#           ip   = dns.dig('ip')
-#         else
-#
-#           return false
-#         end
-#       end
-#
-#       # TODO
-#       # also WITHOUT 'service'
-#       statement = sprintf(
-#         'select * from discovery where `service` = \'%s\' and dns_ip = \'%s\'',
-#         service, ip
-#       )
-#
-# #      statement = sprintf('SELECT * FROM discovery WHERE ip = \'%s\' or name = \'%s\' or fqdn = \'%s\'', ip, name, fqdn )
-#       result    = @client.query( statement, :as => :hash )
-#
-#       logger.debug( statement )
-#
-#       if( result.count != 0 )
-#
-#         headers = result.fields # <= that's an array of field names, in order
-#         result.each(:as => :hash) do |row|
-#           return row
-#         end
-#       end
-#
-#       return nil
-
 
     end
     #

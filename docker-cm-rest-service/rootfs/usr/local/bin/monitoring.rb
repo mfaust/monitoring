@@ -304,6 +304,8 @@ class Monitoring
 
   def nodeExists( node )
 
+    self.createNodeInformation()
+
     cache   = @cache.get( 'information' )
 
     if( cache == nil )
@@ -515,6 +517,12 @@ class Monitoring
 
     end
 
+    logger.debug( JSON.pretty_generate( hostData ) )
+
+    ip              = hostData.dig(:ip)
+    short           = hostData.dig(:short)
+    fqdn            = hostData.dig(:fqdn)
+
     force           = false
     enableDiscovery = @enabledDiscovery
     enabledGrafana  = @enabledGrafana
@@ -564,7 +572,6 @@ class Monitoring
       })
     end
 
-    short = hostData.dig( :short )
 
     if( force == true )
 
@@ -599,7 +606,7 @@ class Monitoring
     if( config.is_a?( Hash ) )
 
 #       logger.debug( "write configuration: #{config}" )
-      status = @database.createConfig( { :short => short, :data => config } )
+      status = @database.createConfig( { :ip => ip, :short => short, :fqdn => fqdn, :data => config } )
     end
 
     if( enableDiscovery == true )
@@ -625,7 +632,7 @@ class Monitoring
     if( annotation == true )
 
       logger.info( 'annotation for create' )
-      self.addAnnotation( host, { "command": "create", "argument": "node", "config": config } )
+      self.addAnnotation( host, { :command => 'create', :argument => 'node', :config => config, :fqdn => fqdn } )
     end
 
     result['status']    = 200
@@ -727,6 +734,7 @@ class Monitoring
     logger.info( sprintf( 'remove node \'%s\' from monitoring', host ) )
 
     alreadyInMonitoring = self.nodeExists( host )
+    hostData            = self.checkAvailablility?( host )
 
     result    = Hash.new()
     hash      = Hash.new()
@@ -766,12 +774,16 @@ class Monitoring
       annotation = false
     end
 
+    ip    = hostData.dig(:ip)
+    short = hostData.dig(:short)
+    fqdn  = hostData.dig(:fqdn)
+
     # read the customized configuration
     #
-    config = @database.config( { :short => host } )
+    config = @database.config( { :ip => ip, :short => host, :fqdn => fqdn } )
 
 #     logger.debug( 'set node status to DELETE' )
-    status = @database.setStatus( { :short => host, :status => Storage::MySQL::DELETE } )
+    status = @database.setStatus( { :ip => ip, :short => host, :fqdn => fqdn, :status => Storage::MySQL::DELETE } )
 
     logger.debug( sprintf( 'force      : %s', force            ? 'true' : 'false' ) )
     logger.debug( sprintf( 'discovery  : %s', enableDiscovery  ? 'true' : 'false' ) )
@@ -781,7 +793,7 @@ class Monitoring
 
     if( annotation == true )
       logger.info( 'annotation for remove' )
-      self.addAnnotation( host, { "command": "remove", "argument": "node", "config": config } )
+      self.addAnnotation( host, { :command => 'remove', :argument => 'node', :config => config, :fqdn => fqdn } )
     end
 
     if( enabledIcinga == true )
@@ -813,119 +825,156 @@ class Monitoring
 
   def addAnnotation( host, payload )
 
+    logger.debug( "addAnnotation( #{host}, #{payload} )" )
+
     status                = 500
     message               = 'initialize error'
 
     result                = Hash.new()
     hash                  = Hash.new()
 
-    if( host.to_s != '' )
+    if( host.to_s == '' &&  payload == '' )
 
-      command      = nil
-      argument     = nil
-      message      = nil
-      description  = nil
-      tags         = []
+      return JSON.pretty_generate( {
+        :status  => 404,
+        :message => 'missing arguments for annotations'
+      } )
+    end
 
-      if( payload != '' )
+    command      = nil
+    argument     = nil
+    message      = nil
+    description  = nil
+    tags         = []
 
-        if( payload.is_a?( String ) )
+    if( payload.is_a?( String ) )
+      hash         = JSON.parse( payload )
+    end
 
-          hash         = JSON.parse( payload )
+    hash         = payload
 
-          command      = hash.dig('command')
-          argument     = hash.dig('argument')
-          message      = hash.dig('message')
-          description  = hash.dig('description')
-          tags         = hash.dig('tags')  || []
-          config       = hash.dig('config')
-        else
+    command      = hash.dig(:command)
+    argument     = hash.dig(:argument)
+    message      = hash.dig(:message)
+    description  = hash.dig(:description)
+    tags         = hash.dig(:tags)  || []
+    config       = hash.dig(:config)
+    fqdn         = hash.dig(:fqdn)
 
-          hash         = payload
 
-          command      = hash.dig(:command)
-          argument     = hash.dig(:argument)
-          message      = hash.dig(:message)
-          description  = hash.dig(:description)
-          tags         = hash.dig(:tags)  || []
-          config       = hash.dig(:config)
-        end
-
-        result[:request] = hash
-
-        if( command == 'create' || command == 'remove' )
-#         example:
-#         {
-#           "command": "create"
-#         }
+    if( command == 'create' || command == 'remove' )
+#     example:
+#     {
+#       "command": "create"
+#     }
 #
-#         {
-#           "command": "destroy"
-#         }
+#     {
+#       "command": "destroy"
+#     }
 
-          message     = nil
-          description = nil
-          tags        = []
-          self.messageQueue( { :cmd => command, :node => host, :queue => 'mq-graphite', :payload => { "timestamp": Time.now().to_i, "config": config, "node" => host }, :prio => 0 } )
+      message     = nil
+      description = nil
+      tags        = []
 
-        elsif( command == 'loadtest' && ( argument == 'start' || argument == 'stop' ) )
+      self.messageQueue({
+        :cmd     => command,
+        :node    => host,
+        :queue   => 'mq-graphite',
+        :payload => {
+          :timestamp => Time.now().to_i,
+          :config    => config,
+          :fqdn      => fqdn,
+          :node      => host
+        },
+        :prio => 0
+      })
 
-#         example:
-#         {
-#           "command": "loadtest",
-#           "argument": "start"
-#         }
+    elsif( command == 'loadtest' && ( argument == 'start' || argument == 'stop' ) )
+
+#     example:
+#     {
+#       "command": "loadtest",
+#       "argument": "start"
+#     }
 #
-#         {
-#           "command": "loadtest",
-#           "argument": "stop"
-#         }
+#     {
+#       "command": "loadtest",
+#       "argument": "stop"
+#     }
 
-          message     = nil
-          description = nil
-          tags        = []
+      message     = nil
+      description = nil
+      tags        = []
 
-          self.messageQueue( { :cmd => 'loadtest', :node => host, :queue => 'mq-graphite', :payload => { "timestamp": Time.now().to_i, "config": config, "argument" => argument }, :prio => 0 } )
+      self.messageQueue({
+        :cmd     => 'loadtest',
+        :node    => host,
+        :queue   => 'mq-graphite',
+        :payload => {
+          :timestamp => Time.now().to_i,
+          :config    => config,
+          :fqdn      => fqdn,
+          :argument  => argument
+        },
+        :prio => 0
+      })
 
-        elsif( command == 'deployment' )
+    elsif( command == 'deployment' )
 
-#         example:
-#         {
-#           "command": "deployment",
-#           "message": "version 7.1.50",
-#           "tags": [
-#             "development",
-#             "git-0000000"
-#           ]
-#         }
-          description = nil
-          self.messageQueue( { :cmd => 'deployment', :node => host, :queue => 'mq-graphite', :payload => { "timestamp": Time.now().to_i, "config": config, "message" => message, "tags" => tags }, :prio => 0 } )
+#     example:
+#     {
+#       "command": "deployment",
+#       "message": "version 7.1.50",
+#       "tags": [
+#         "development",
+#         "git-0000000"
+#       ]
+#     }
+      description = nil
+      self.messageQueue({
+        :cmd => 'deployment',
+        :node => host,
+        :queue => 'mq-graphite',
+        :payload => {
+          :timestamp => Time.now().to_i,
+          :config    => config,
+          :fqdn      => fqdn,
+          :message   => message,
+          :tags      => tags
+        },
+        :prio => 0
+      })
 
-        else
-#         example:
-#         {
-#           "command": "",
-#           "message": "date: 2016-12-24, last-cristmas",
-#           "description": "never so ho-ho-ho",
-#           "tags": [
-#             "development",
-#             "git-0000000"
-#           ]
-#         }
-          self.messageQueue( { :cmd => 'general', :node => host, :queue => 'mq-graphite', :payload => { "timestamp": Time.now().to_i, "config": config, "message" => message, "tags" => tags, "description" => description }, :prio => 0 } )
-
-        end
-
-        status    = 200
-        message   = 'annotation succesfull created'
-      else
-
-        status    = 400
-        message   = 'annotation data not set'
-
-      end
+    else
+#     example:
+#     {
+#       "command": "",
+#       "message": "date: 2016-12-24, last-cristmas",
+#       "description": "never so ho-ho-ho",
+#       "tags": [
+#         "development",
+#         "git-0000000"
+#       ]
+#     }
+      self.messageQueue({
+        :cmd => 'general',
+        :node => host,
+        :queue => 'mq-graphite',
+        :payload => {
+          :timestamp => Time.now().to_i,
+          :config    => config,
+          :fqdn      => fqdn,
+          :message   => message,
+          :tags      => tags,
+          :description => description
+        },
+        :prio => 0
+      })
 
     end
+
+    status    = 200
+    message   = 'annotation succesfull created'
 
     return JSON.pretty_generate( {
       :status  => status,

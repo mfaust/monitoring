@@ -511,6 +511,8 @@ module DataCollector
     #
     def collectMeasurements( params = {} )
 
+#       logger.debug( "collectMeasurements( #{params} )" )
+
       if( @jolokia.jolokiaIsAvailable?() == false )
 
         logger.error( 'jolokia service is not available!' )
@@ -539,7 +541,8 @@ module DataCollector
 
           result[v] ||= []
 
-          cacheKey = Storage::RedisClient.cacheKey( { :host => hostname, :pre => 'result', :service => v } )
+          logger.debug( { :host => fqdn, :pre => 'result', :service => v } )
+          cacheKey = Storage::RedisClient.cacheKey( { :host => fqdn, :pre => 'result', :service => v } )
 
           if( i.count > 1 )
 
@@ -608,7 +611,7 @@ module DataCollector
           if( redisResult.is_a?( FalseClass ) || ( redisResult.is_a?( String ) && redisResult != 'OK' ) )
 
             logger.error( sprintf( 'value for key % can not be write', cacheKey ) )
-            logger.error( { :host => hostname, :pre => 'result', :service => v } )
+            logger.error( { :host => fqdn, :pre => 'result', :service => v } )
           end
 
         end

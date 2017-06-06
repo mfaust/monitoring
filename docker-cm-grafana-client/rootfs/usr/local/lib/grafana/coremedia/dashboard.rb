@@ -58,35 +58,18 @@ module Grafana
         #
         ip, short, fqdn = self.nsLookup( host )
 
-        @grafanaHostname   = short
-        @storageIdentifier = short
+        @shortHostname     = short  # (%HOST%)
+        @grafanaHostname   = fqdn   # name for the grafana title (%SHORTNAME%)
+        @storageIdentifier = fqdn   # identifier for an storage path (%STORAGE_IDENTIFIER%) (useful for cloud stack on aws with changing hostnames)
 
         # read the configuration for an customized display name
         #
-
-#         if( @database != nil )
-#           config      = @database.config( { :ip => ip, :short => short, :fqdn => fqdn } )
-          display     = @database.config( { :ip => ip, :short => short, :fqdn => fqdn, :key => 'display-name' } )
-          identifier  = @database.config( { :ip => ip, :short => short, :fqdn => fqdn, :key => 'graphite-identifier' } )
-
-#           logger.debug( "database: #{config}" )
-#           logger.debug( "database: #{display}" )
-#           logger.debug( "database: #{identifier}" )
-
-#         end
-
-#         config          = @redis.config( { :short => short, :key => 'display-name' } )
-#         identifier      = @redis.config( { :short => short, :key => 'graphite-identifier' } )
-#
-#         logger.debug( "redis: #{@redis.config( { :short => short } )}" )
-#         logger.debug( "redis: #{config}" )
-#         logger.debug( "redis: #{identifier}" )
-
+        display     = @database.config( { :ip => ip, :short => short, :fqdn => fqdn, :key => 'display-name' } )
+        identifier  = @database.config( { :ip => ip, :short => short, :fqdn => fqdn, :key => 'graphite-identifier' } )
 
         if( display != nil && display.dig( 'display-name' ) != nil )
 
           @grafanaHostname = display.dig( 'display-name' ).to_s
-
           logger.info( "use custom display-name from config: '#{@grafanaHostname}'" )
         end
 
@@ -94,12 +77,9 @@ module Grafana
         if( identifier != nil && identifier.dig( 'graphite-identifier' ) != nil )
 
           @storageIdentifier = identifier.dig( 'graphite-identifier' ).to_s
-
           logger.info( "use custom storage identifier from config: '#{@storageIdentifier}'" )
         end
 
-
-        @shortHostname    = short
         @grafanaHostname  = self.createSlug( @grafanaHostname ).gsub( '.', '-' )
 
         logger.debug( "short hostname    : #{@shortHostname}" )
@@ -168,9 +148,6 @@ module Grafana
 
         discovery.each do |service,serviceData|
 
-#           logger.debug( service )
-#           logger.debug( serviceData )
-
           additionalTemplatePaths = Array.new()
 
           if( serviceData != nil )
@@ -180,8 +157,6 @@ module Grafana
             description    = nil
             template       = nil
           end
-
-#           cacheKey       = Storage::RedisClient.cacheKey( { :host => host, :pre => 'result', :service => service } )
 
           # cae-live-1 -> cae-live
           serviceName     = self.removePostfix( service )

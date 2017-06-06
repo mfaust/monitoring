@@ -28,6 +28,7 @@ module MBean
 
       data = Hash.new()
 
+      logger.debug( { :host => host, :pre => 'result', :service => service } )
       cacheKey = Storage::RedisClient.cacheKey( { :host => host, :pre => 'result', :service => service } )
 
       for y in 1..10
@@ -82,7 +83,7 @@ module MBean
             return false
           end
 
-          if( mbeanValue.class.to_s == 'Hash' )
+          if( mbeanValue.is_a?( Hash ) )
             mbeanValue = mbeanValue.values.first
           end
 
@@ -169,6 +170,8 @@ module MBean
     def beanAvailable?( host, service, bean, key = nil )
 
       data     = nil
+
+      logger.debug( { :host => host, :pre => 'result', :service => service } )
       cacheKey = Storage::RedisClient.cacheKey( { :host => host, :pre => 'result', :service => service } )
 
       for y in 1..10
@@ -256,7 +259,7 @@ module MBean
     end
 
 
-    def checkBean‎Consistency( mbean, data = {} )
+    def checkBeanConsistency( mbean, data = {} )
 
     status    = data.dig('status')    # ? data['status']    : 505
     timestamp = data.dig('timestamp') # ? data['timestamp'] : 0

@@ -23,8 +23,6 @@ icingaNotifications = ENV.fetch('ENABLE_NOTIFICATIONS'    , false )
 mqHost              = ENV.fetch('MQ_HOST'                 , 'beanstalkd' )
 mqPort              = ENV.fetch('MQ_PORT'                 , 11300 )
 mqQueue             = ENV.fetch('MQ_QUEUE'                , 'mq-icinga' )
-redisHost           = ENV.fetch('REDIS_HOST'              , 'redis' )
-redisPort           = ENV.fetch('REDIS_PORT'              , 6379 )
 mysqlHost           = ENV.fetch('MYSQL_HOST'              , 'database')
 mysqlSchema         = ENV.fetch('DISCOVERY_DATABASE_NAME' , 'discovery')
 mysqlUser           = ENV.fetch('DISCOVERY_DATABASE_USER' , 'discovery')
@@ -52,10 +50,6 @@ config = {
     :host  => mqHost,
     :port  => mqPort,
     :queue => mqQueue
-  },
-  :redis       => {
-    :host => redisHost,
-    :port => redisPort
   },
   :mysql    => {
     :host      => mysqlHost,

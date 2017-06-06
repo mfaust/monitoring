@@ -9,9 +9,9 @@ ENV \
   TERM=xterm \
   APK_ADD="build-base bind-tools drill git mariadb-dev libressl-dev ruby-dev ruby-irb ruby-rdoc" \
   APK_DEL="build-base git ruby-dev ruby-rdoc " \
-  GEMS="beaneater ipaddress json mysql2 openssl redis rest-client rufus-scheduler tzinfo-data"
+  GEMS="beaneater ipaddress json mysql2 openssl rest-client rufus-scheduler tzinfo-data"
 
-LABEL version="1706-01.2"
+LABEL version="1706-02.1"
 
 # ---------------------------------------------------------------------------------------
 
