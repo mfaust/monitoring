@@ -567,9 +567,9 @@ module Grafana
       # @return [Hash, #read]
       def listDashboards( params = {} )
 
-        host            = params.dig(:host)
+        tags            = params.dig(:tags)
 
-        data = self.searchDashboards( { :tags   => host } )
+        data = self.searchDashboards( { :tags => tags } )
 
         if( data == nil || data == false )
 
@@ -582,7 +582,7 @@ module Grafana
         data = data.collect { |item| item['uri'] }
 
         data.each do |d|
-          d.gsub!( sprintf( 'db/%s-', host ), '' )
+          d.gsub!( sprintf( 'db/%s-', tags ), '' )
         end
 
         if( data.count == 0 )
@@ -604,6 +604,7 @@ module Grafana
       def deleteDashboards( params = {} )
 
         host = params.dig(:host)
+        fqdn = params.dig(:fqdn)
         tags = params.dig(:tags) || []
 
         if( host == nil )
@@ -616,11 +617,11 @@ module Grafana
           }
         end
 
-        logger.info( sprintf( 'remove dashboards for host %s', host ) )
-
         self.prepare( host )
 
-        dashboards = self.listDashboards( { :host => @grafanaHostname } )
+        logger.info( sprintf( 'remove dashboards for host %s (%s)', host, @grafanaHostname ) )
+
+        dashboards = self.listDashboards( { :tags => host } )
         dashboards = dashboards.dig(:dashboards)
 
         if( dashboards == nil )

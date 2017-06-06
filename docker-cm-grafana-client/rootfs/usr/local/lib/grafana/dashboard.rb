@@ -83,6 +83,8 @@ module Grafana
 
     def searchDashboards( params = {} )
 
+      logger.debug( "searchDashboards( #{params} )" )
+
       query   = params.dig(:query)
       starred = params.dig(:starred)
       tags    = params.dig(:tags)
@@ -109,7 +111,7 @@ module Grafana
 
       endpoint = sprintf( '/api/search/?%s' , api )
 
-#       logger.debug("Attempting to search for dashboards (GET #{endpoint})")
+      logger.debug("Attempting to search for dashboards (GET #{endpoint})")
 
       return getRequest( endpoint )
     end

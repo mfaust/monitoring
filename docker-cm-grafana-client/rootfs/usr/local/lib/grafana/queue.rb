@@ -158,7 +158,7 @@ module Grafana
       elsif( command == 'remove' )
 
 #         logger.info( sprintf( 'remove dashboards for node %s', node ) )
-        result = self.deleteDashboards( { :host => node } )
+        result = self.deleteDashboards( { :ip => ip, :host => node, :fqdn => fqdn } )
 
         logger.info( result )
 
