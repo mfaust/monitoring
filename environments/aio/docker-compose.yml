@@ -486,7 +486,7 @@ services:
       - data
       - beanstalkd
     links:
-      - beanstalkd:beanstalkd
+      - beanstalkd
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./logs:/var/log

@@ -2,13 +2,7 @@
 #
 #
 
-require 'rubygems'
-require 'json'
 require 'redis'
-require 'digest/md5'
-
-# require_relative 'monkey'
-# require_relative 'logging'
 
 # ---------------------------------------------------------------------------------------
 
