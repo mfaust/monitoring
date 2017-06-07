@@ -102,8 +102,8 @@ module ServiceDiscovery
 
       @scanPorts         = ports
 
-      version             = '1.7.0'
-      date                = '2017-06-02'
+      version             = '1.7.1'
+      date                = '2017-06-06'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - Service Discovery' )
@@ -111,9 +111,7 @@ module ServiceDiscovery
       logger.info( '  Copyright 2016-2017 Coremedia' )
       logger.info( '  used Services:' )
       logger.info( "    - jolokia      : #{jolokiaHost}:#{jolokiaPort}" )
-      if( mysqlHost != nil )
-        logger.info( "    - mysql        : #{mysqlHost}@#{mysqlSchema}" )
-      end
+      logger.info( "    - mysql        : #{mysqlHost}@#{mysqlSchema}" )
       logger.info( "    - message queue: #{mqHost}:#{mqPort}/#{@mqQueue}" )
       logger.info( '-----------------------------------------------------------------' )
       logger.info( '' )
@@ -123,32 +121,15 @@ module ServiceDiscovery
       @jolokia    = Jolokia::Client.new( { :host => jolokiaHost, :port => jolokiaPort, :path => jolokiaPath, :auth => { :user => jolokiaAuthUser, :pass => jolokiaAuthPass } } )
       @mqConsumer = MessageQueue::Consumer.new( @MQSettings )
       @mqProducer = MessageQueue::Producer.new( @MQSettings )
-      @database   = nil
 
-      if( mysqlHost != nil )
-
-        begin
-
-          until( @database != nil )
-
-            logger.debug( 'try to connect our database endpoint' )
-
-            @database   = Storage::MySQL.new( {
-              :mysql => {
-                :host     => mysqlHost,
-                :user     => mysqlUser,
-                :password => mysqlPassword,
-                :schema   => mysqlSchema
-              }
-            } )
-
-            sleep(5)
-          end
-        rescue => e
-
-          logger.error( e )
-        end
-      end
+      @database   = Storage::MySQL.new({
+        :mysql => {
+          :host     => mysqlHost,
+          :user     => mysqlUser,
+          :password => mysqlPassword,
+          :schema   => mysqlSchema
+        }
+      })
 
       self.readConfigurations()
     end

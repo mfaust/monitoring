@@ -55,41 +55,6 @@ class CMIcinga2 < Icinga2::Client
     end
 
 
-#     def nodeTag( host )
-#
-# #       logger.debug( "nodeTag( #{host} )" )
-#
-#       key    = sprintf( 'config-%s', host )
-#       data   = @cache.get( key )
-#
-#       result = host
-#
-#       if( data == nil )
-#
-#         identifier = @database.config( { :short => host, :key => 'graphite-identifier' } )
-# #        identifier = @redis.config( { :short => host, :key => 'graphite-identifier' } )
-#
-#         if( identifier != nil )
-#
-#           identifier = identifier.dig( 'graphite-identifier' )
-#
-#           if( identifier != nil )
-#             result     = identifier
-#           end
-#
-#           @cache.set( key, expiresIn: 320 ) { Cache::Data.new( result ) }
-#         end
-#
-#       else
-#
-#         result = data
-#       end
-#
-#       return result
-#
-#     end
-
-
     def nodeInformation( params = {} )
 
       logger.debug( "nodeInformation( #{params} )" )
@@ -115,8 +80,6 @@ class CMIcinga2 < Icinga2::Client
           sleep( 5 )
         end
       end
-
-#       logger.debug( "#{services}" )
 
       if( services != nil )
 

@@ -140,8 +140,8 @@ module Grafana
       @loggedIn    = false
       @headers     = nil
 
-      version            = '1.9.0'
-      date               = '2017-06-03'
+      version            = '1.9.1'
+      date               = '2017-06-06'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - Grafana Client' )
@@ -150,9 +150,7 @@ module Grafana
       logger.info( '  used Services:' )
       logger.info( "    - grafana      : #{host}:#{port}#{urlPath}" )
       logger.info( "    - redis        : #{redisHost}:#{redisPort}" )
-      if( mysqlHost != nil )
-        logger.info( "    - mysql        : #{mysqlHost}@#{mysqlSchema}" )
-      end
+      logger.info( "    - mysql        : #{mysqlHost}@#{mysqlSchema}" )
       logger.info( "    - message queue: #{mqHost}:#{mqPort}/#{@mqQueue}" )
       logger.info( '-----------------------------------------------------------------' )
 
@@ -163,35 +161,21 @@ module Grafana
       @jobs        = JobQueue::Job.new()
       @mqConsumer  = MessageQueue::Consumer.new( @MQSettings )
       @mqProducer  = MessageQueue::Producer.new( @MQSettings )
-      @database    = nil
 
-      if( mysqlHost != nil )
+      @database    = Storage::MySQL.new({
+        :mysql => {
+          :host     => mysqlHost,
+          :user     => mysqlUser,
+          :password => mysqlPassword,
+          :schema   => mysqlSchema
+        }
+      })
 
-        begin
-
-          until( @database != nil )
-
-            @database   = Storage::MySQL.new( {
-              :mysql => {
-                :host     => mysqlHost,
-                :user     => mysqlUser,
-                :password => mysqlPassword,
-                :schema   => mysqlSchema
-              }
-            } )
-
-          end
-        rescue => e
-
-          logger.error( e )
-        end
-      end
-
-      @apiInstance = self.createApiInstance( {
+      @apiInstance = self.createApiInstance({
         :timeout      => timeout,
         :open_timeout => open_timeout,
         :headers      => headers
-      } )
+      })
 
       for y in 1..15
 

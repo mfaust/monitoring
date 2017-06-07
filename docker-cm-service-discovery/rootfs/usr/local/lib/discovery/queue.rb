@@ -99,7 +99,6 @@ module ServiceDiscovery
 
         # check first for existing node!
         #
-        #result = @redis.nodes( { :short => node } )
         result = @database.nodes( { :short => node } )
 
         logger.debug( "database: '#{result}' | node: '#{node}'" )
