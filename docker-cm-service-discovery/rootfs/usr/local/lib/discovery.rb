@@ -324,8 +324,8 @@ module ServiceDiscovery
       #
       logger.debug( 'ask for custom configurations' )
 
-      ports    = @database.config( { :short => short, :key => 'ports' } )
-      services = @database.config( { :short => short, :key => 'services' } )
+      ports    = @database.config( { :ip => ip, :short => short, :fqdn => fqdn, :key => 'ports' } )
+      services = @database.config( { :ip => ip, :short => short, :fqdn => fqdn, :key => 'services' } )
 
       ports    = (ports != nil)    ? ports.dig( 'ports' )       : ports
       services = (services != nil) ? services.dig( 'services' ) : services

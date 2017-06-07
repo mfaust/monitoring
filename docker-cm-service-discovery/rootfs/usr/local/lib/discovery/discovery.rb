@@ -108,6 +108,8 @@ module ServiceDiscovery
 
                 services.push( value )
 
+                # clear othe results
+                #
                 runtime = nil
                 manager = nil
                 engine  = nil

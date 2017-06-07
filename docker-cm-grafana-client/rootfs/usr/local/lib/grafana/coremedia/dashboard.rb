@@ -720,6 +720,9 @@ module Grafana
 
         if( serviceName == 'replication-live-server' )
 
+          # OBSOLETE
+          # this part should be moved to docker-cm-data-collector (collector.rb)!
+          #
           mlsIOR = nil
 
           logger.info( 'search Master Live Server IOR for the Replication Live Server' )

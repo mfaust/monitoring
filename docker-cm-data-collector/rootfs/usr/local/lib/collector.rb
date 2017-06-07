@@ -62,8 +62,8 @@ module DataCollector
       mysqlUser           = settings.dig(:mysql, :user)
       mysqlPassword       = settings.dig(:mysql, :password)
 
-      version            = '1.9.1'
-      date               = '2017-06-04'
+      version            = '1.9.2'
+      date               = '2017-06-07'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - DataCollector' )
@@ -72,9 +72,7 @@ module DataCollector
       logger.info( '  used Services:' )
       logger.info( "    - jolokia      : #{jolokiaHost}:#{jolokiaPort}" )
       logger.info( "    - redis        : #{redisHost}:#{redisPort}" )
-      if( mysqlHost != nil )
-        logger.info( "    - mysql        : #{mysqlHost}@#{mysqlSchema}" )
-      end
+      logger.info( "    - mysql        : #{mysqlHost}@#{mysqlSchema}" )
       logger.info( "    - message queue: #{mqHost}:#{mqPort}/#{@mqQueue}" )
       logger.info( '-----------------------------------------------------------------' )
 
@@ -355,7 +353,7 @@ module DataCollector
 
       # to improve performance, read initial collector Data from Database and store them into Redis
       #
-      key       = Storage::RedisClient.cacheKey( { :host => host, :pre => 'collector' } )
+      key       = Storage::RedisClient.cacheKey( { :host => fqdn, :pre => 'collector' } )
       data      = @cache.get( key )
 
       if( data == nil )
@@ -387,6 +385,8 @@ module DataCollector
         metrics = d.dig( 'metrics' ) || []
         bulk    = Array.new()
 
+        # only to see which service
+        #
 #         logger.debug( sprintf( '    %s with port %d', s, port ) )
 
         if( metrics != nil && metrics.count == 0 )
@@ -412,21 +412,35 @@ module DataCollector
 
           metrics.each do |e|
 
+            mbean     = e.dig('mbean')
+            attribute = e.dig('attribute')
+
+            if( mbean == nil )
+              logger.error( '\'mbean\' are nil!' )
+              next
+            end
+
             target = {
               'type'   => 'read',
-              'mbean'  => e['mbean'].to_s,
+              'mbean'  => mbean.to_s,
               'target' => { 'url' => sprintf( "service:jmx:rmi:///jndi/rmi://%s:%s/jmxrmi", fqdn, port ) },
               'config' => { 'ignoreErrors' => true, 'ifModifiedSince' => true, 'canonicalNaming' => true }
             }
 
             attributes = []
-            if( e['attribute'] )
-              e['attribute'].split(',').each do |t|
-                attributes.push( t.to_s )
-              end
 
-              target['attribute'] = attributes
+            if( attribute != nil )
+
+              attributes = attribute.split(',')
             end
+
+#             if( e['attribute'] )
+#               e['attribute'].split(',').each do |t|
+#                 attributes.push( t.to_s )
+#               end
+#
+#               target['attribute'] = attributes
+#             end
 
             bulk.push( target )
           end
@@ -587,9 +601,14 @@ module DataCollector
 
           end
 
-#           if( v == 'replication-live-server' )
-#             logger.debug( JSON.pretty_generate( result.dig(v) ) )
-#           end
+          if( v == 'replication-live-server' )
+
+            logger.debug( 'try to chekc MLS url!' )
+
+            self.parseMLSIor( { :fqdn => fqdn, :result => result.dig(v) } )
+
+            logger.debug( JSON.pretty_generate( result.dig(v) ) )
+          end
 
 #           logger.debug( 'store result in our redis' )
           redisResult = @redis.set( cacheKey, result[v] )
@@ -602,6 +621,73 @@ module DataCollector
 
         end
       end
+    end
+
+
+    def parseMLSIor( params = {} )
+
+      mlsIOR = nil
+
+      ip   = params.dig(:ip)
+      host = params.dig(:host)
+      fqdn = params.dig(:fqdn)
+
+      logger.info( 'search Master Live Server IOR for the Replication Live Server' )
+
+      bean = @mbean.bean( @shortHostname, serviceName, 'Replicator' )
+
+      if( bean != nil )
+
+        logger.debug( JSON.pretty_generate( bean ) )
+
+        value = bean.dig( 'value' )
+
+        if( value != nil )
+
+          value = value.values.first
+
+          mlsIOR = value.dig( 'MasterLiveServerIORUrl' )
+
+#           logger.debug( " => IOR: #{mlsIOR}" )
+
+          if( mlsIOR != nil )
+
+            uri = URI.parse( mlsIOR )
+            host = uri.host
+
+#             logger.debug( " => IOR: #{host}" )
+
+            ip, short, fqdn = self.nsLookup( host )
+
+#             logger.debug( " => IOR: #{ip}" )
+#             logger.debug( " => IOR: #{short}" )
+#             logger.debug( " => IOR: #{fqdn}" )
+
+            dns = @database.dnsData( { :ip => ip, :short => short, :fqdn => fqdn } )
+#             logger.debug( " => IOR: #{dns}" )
+
+            realIP    = dns.dig('ip')
+            realShort = dns.dig('name')
+            realFqdn  = dns.dig('fqdn')
+
+            if( @shortHostname != realShort )
+
+              identifier  = @database.config( { :ip => realIP, :short => realShort, :fqdn => realFqdn, :key => 'graphite-identifier' } )
+
+              if( identifier.dig( 'graphite-identifier' ) != nil )
+
+                mlsIdentifier = identifier.dig( 'graphite-identifier' ).to_s
+
+                logger.info( "use custom storage identifier from config: '#{mlsIdentifier}'" )
+              end
+            else
+              logger.info( 'the Master Live Server runs on the same host as Replication Live Server' )
+            end
+          end
+        end
+      end
+
+
     end
 
 
