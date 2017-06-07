@@ -312,19 +312,24 @@
             "id": 15,
             "targets": [
               {
-                "target": "carbon-writer.$host.MLS.Server.Repository.SequenceNumber",
+                "hide": false,
                 "refId": "A",
-                "hide": true
+                "target": "carbon-writer.$host.RLS.SequenceNumber.diffToMLS"
               },
               {
-                "target": "carbon-writer.$host.RLS.Replicator.completedSequenceNumber",
+                "target": "carbon-writer.$host.MLS.Server.Repository.SequenceNumber",
                 "refId": "B",
                 "hide": true
               },
               {
-                "target": "diffSeries(#A, #B)",
+                "target": "carbon-writer.$host.RLS.Replicator.completedSequenceNumber",
                 "refId": "C",
-                "textEditor": true
+                "hide": true
+              },
+              {
+                "target": "diffSeries(#B, #C)",
+                "refId": "D",
+                "hide": true
               }
             ],
             "links": [],

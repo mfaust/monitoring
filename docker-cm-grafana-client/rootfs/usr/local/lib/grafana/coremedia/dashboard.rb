@@ -720,44 +720,24 @@ module Grafana
 
         if( serviceName == 'replication-live-server' )
 
-          # OBSOLETE
-          # this part should be moved to docker-cm-data-collector (collector.rb)!
-          #
-          mlsIOR = nil
-
           logger.info( 'search Master Live Server IOR for the Replication Live Server' )
 
           bean = @mbean.bean( @shortHostname, serviceName, 'Replicator' )
 
-          if( bean != nil )
-
-#             logger.debug( JSON.pretty_generate( bean ) )
+          if( bean != nil && bean != false )
 
             value = bean.dig( 'value' )
-
             if( value != nil )
 
               value = value.values.first
 
-              mlsIOR = value.dig( 'MasterLiveServerIORUrl' )
+              mls = value.dig( 'MasterLiveServer', 'host' )
 
-#               logger.debug( " => IOR: #{mlsIOR}" )
+              if( mls != nil )
 
-              if( mlsIOR != nil )
-
-                uri = URI.parse( mlsIOR )
-                host = uri.host
-
-#                 logger.debug( " => IOR: #{host}" )
-
-                ip, short, fqdn = self.nsLookup( host )
-
-#                 logger.debug( " => IOR: #{ip}" )
-#                 logger.debug( " => IOR: #{short}" )
-#                 logger.debug( " => IOR: #{fqdn}" )
+                ip, short, fqdn = self.nsLookup( mls )
 
                 dns = @database.dnsData( { :ip => ip, :short => short, :fqdn => fqdn } )
-#                 logger.debug( " => IOR: #{dns}" )
 
                 realIP    = dns.dig('ip')
                 realShort = dns.dig('name')
@@ -774,15 +754,11 @@ module Grafana
                     logger.info( "use custom storage identifier from config: '#{mlsIdentifier}'" )
                   end
                 else
-                  logger.info( 'the Master Live Server runs on the same host as Replication Live Server' )
+                  logger.info( 'the Master Live Server runs on the same host as the Replication Live Server' )
                 end
               end
             end
           end
-
-#           logger.debug( '-----------------------------' )
-#           logger.debug( mlsIdentifier )
-#           logger.debug( '-----------------------------' )
         end
 
         templateFile = File.read( serviceTemplate )

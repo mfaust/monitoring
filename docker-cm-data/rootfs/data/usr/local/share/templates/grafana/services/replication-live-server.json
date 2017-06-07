@@ -412,7 +412,7 @@
             "lines": true,
             "linewidth": 1,
             "links": [],
-            "nullPointMode": "null",
+            "nullPointMode": "connected",
             "percentage": false,
             "pointradius": 5,
             "points": false,
@@ -433,7 +433,13 @@
                 "target": "alias(carbon-writer.$host.RLS.Replicator.completedSequenceNumber, 'seq RLS')"
               },
               {
+                "hide": false,
                 "refId": "C",
+                "target": "alias(carbon-writer.$host.RLS.SequenceNumber.diffToMLS, 'diff to MLS')"
+              },
+              {
+                "hide": true,
+                "refId": "D",
                 "target": "alias(diffSeries(#A, #B), 'MLS vs. RLS')",
                 "targetFull": "alias(diffSeries(carbon-writer.$mls.MLS.Server.Repository.SequenceNumber, carbon-writer.$host.RLS.Replicator.completedSequenceNumber), 'MLS vs. RLS')"
               }
@@ -460,7 +466,7 @@
                 "label": null,
                 "logBase": 1,
                 "max": null,
-                "min": null,
+                "min": "-5",
                 "show": true
               },
               {

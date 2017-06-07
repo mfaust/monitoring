@@ -558,7 +558,14 @@ module DataCollector
               if( jolokiaStatus != nil && jolokiaStatus.to_i == 200 )
 
                 begin
-                  result[v] = self.reorganizeData( jolokiaMessage )
+
+                  data = self.reorganizeData( jolokiaMessage )
+
+                  if( v == 'replication-live-server' )
+                    data = self.parseMLSIor( { :fqdn => fqdn, :data => data } )
+                  end
+
+                  result[v] = data
                 rescue => e
                   logger.error( "i can't store data into result for service #{v}" )
                   logger.error( e )
@@ -601,15 +608,6 @@ module DataCollector
 
           end
 
-          if( v == 'replication-live-server' )
-
-            logger.debug( 'try to chekc MLS url!' )
-
-            self.parseMLSIor( { :fqdn => fqdn, :result => result.dig(v) } )
-
-            logger.debug( JSON.pretty_generate( result.dig(v) ) )
-          end
-
 #           logger.debug( 'store result in our redis' )
           redisResult = @redis.set( cacheKey, result[v] )
 
@@ -624,69 +622,60 @@ module DataCollector
     end
 
 
+    # the RLS give us his MLS as URL: "MasterLiveServerIORUrl": "http://tomcat-centos7:40280/coremedia/ior"
+    # we extract the value with the real hostname for later usage:
+    # "MasterLiveServer": {
+    #   "scheme": "http",
+    #   "host": "tomcat-centos7",
+    #   "port": 40280,
+    #   "path": "/coremedia/ior"
+    # }
+    #
     def parseMLSIor( params = {} )
 
       mlsIOR = nil
 
-      ip   = params.dig(:ip)
-      host = params.dig(:host)
-      fqdn = params.dig(:fqdn)
+      fqdn   = params.dig(:fqdn)
+      data   = params.dig(:data)
 
       logger.info( 'search Master Live Server IOR for the Replication Live Server' )
 
-      bean = @mbean.bean( @shortHostname, serviceName, 'Replicator' )
+      d = data.select {|d| d.dig('Replicator') }
 
-      if( bean != nil )
+      value = d.first.dig( 'Replicator','value' )
 
-        logger.debug( JSON.pretty_generate( bean ) )
+      if( value != nil )
 
-        value = bean.dig( 'value' )
+        value  = value.values.first
+        mlsIOR = value.dig( 'MasterLiveServerIORUrl' )
 
-        if( value != nil )
+        if( mlsIOR != nil )
 
-          value = value.values.first
+          uri    = URI.parse( mlsIOR )
+          scheme = uri.scheme
+          host   = uri.host
+          port   = uri.port
+          path   = uri.path
 
-          mlsIOR = value.dig( 'MasterLiveServerIORUrl' )
+          ip, short, fqdn = self.nsLookup( host )
 
-#           logger.debug( " => IOR: #{mlsIOR}" )
+          dns = @database.dnsData( { :ip => ip, :short => short, :fqdn => fqdn } )
 
-          if( mlsIOR != nil )
+          realIP    = dns.dig('ip')   || ip
+          realShort = dns.dig('name') || short
+          realFqdn  = dns.dig('fqdn') || fqdn
 
-            uri = URI.parse( mlsIOR )
-            host = uri.host
-
-#             logger.debug( " => IOR: #{host}" )
-
-            ip, short, fqdn = self.nsLookup( host )
-
-#             logger.debug( " => IOR: #{ip}" )
-#             logger.debug( " => IOR: #{short}" )
-#             logger.debug( " => IOR: #{fqdn}" )
-
-            dns = @database.dnsData( { :ip => ip, :short => short, :fqdn => fqdn } )
-#             logger.debug( " => IOR: #{dns}" )
-
-            realIP    = dns.dig('ip')
-            realShort = dns.dig('name')
-            realFqdn  = dns.dig('fqdn')
-
-            if( @shortHostname != realShort )
-
-              identifier  = @database.config( { :ip => realIP, :short => realShort, :fqdn => realFqdn, :key => 'graphite-identifier' } )
-
-              if( identifier.dig( 'graphite-identifier' ) != nil )
-
-                mlsIdentifier = identifier.dig( 'graphite-identifier' ).to_s
-
-                logger.info( "use custom storage identifier from config: '#{mlsIdentifier}'" )
-              end
-            else
-              logger.info( 'the Master Live Server runs on the same host as Replication Live Server' )
-            end
-          end
+          value['MasterLiveServer'] = {
+            'scheme' => scheme,
+            'host'   => realShort,
+            'port'   => port,
+            'path'   => path
+          }
         end
-      end
 
+      end
+#       logger.debug( JSON.pretty_generate( data ) )
+      return data
 
     end
 
