@@ -452,7 +452,7 @@ module ExternalDiscovery
           :display-name        => self.normalizeName( name, [ 'storage-' ] ),
           :graphite-identifier => self.graphiteIdentifier( { :name => name } ),
           :tags                => useableTags,
-          :aws                 => { :region => region, :uuid => uuid }
+          :aws                 => { :region => region, :uuid => uuid },
           :services            => tags.dig('services')
         }
       })
