@@ -122,7 +122,7 @@ module ExternalDiscovery
 
     def extractInstanceInformation( data = {} )
 
-#      logger.debug( "extractInstanceInformation( #{data} )" )
+      logger.debug( "extractInstanceInformation( #{data} )" )
 
 #       {
 #         "fqdn": "i-0130817e34d231f1d.monitoring",
@@ -165,6 +165,8 @@ module ExternalDiscovery
 
 
     def compareVersions( params = {} )
+
+      logger.debug( "compareVersions( #{params} )" )
 
       liveData     = params.dig( 'aws' )
       historicData = params.dig( 'monitoring' )
@@ -432,12 +434,21 @@ module ExternalDiscovery
       discoveryStatus = 204
       useableTags     = Array.new()
 
-#       logger.debug( "original tags: #{tags}" )
+      logger.debug( "original tags: #{tags}" )
 
       # our positive list for Tags
+      #
       useableTags = tags.filter( 'customer', 'environment', 'tier' )
 
-#       logger.debug( "useable tags : #{useableTags}" )
+      logger.debug( "useable tags : #{useableTags}" )
+
+      # display-name for grafana and icinga
+      #
+      displayName  = self.normalizeName( name, [ 'storage-' ] )
+
+      # graphite identifier for graphite and grafana
+      #
+      graphiteIdentifier = self.graphiteIdentifier( { :name => name } )
 
       # add to monitoring
       # defaults:
@@ -449,17 +460,23 @@ module ExternalDiscovery
         :force      => false,
         :tags       => useableTags,
         :config     => {
-          'display-name'        => self.normalizeName( name, [ 'storage-' ] ),
-          'graphite-identifier' => self.graphiteIdentifier( { :name => name } ),
+          'display-name'        => displayName,
+          'graphite-identifier' => graphiteIdentifier,
           'tags'                => useableTags,
-          'aws'                 => { 'region' => region, 'uuid' => uuid },
+          'aws'                 => {
+            'region'      => region,
+            'uuid'        => uuid,
+            'customer'    => customer,
+            'environment' => environment,
+            'tier'        => tier
+          },
           'services'            => tags.dig('services')
         }
       })
 
       logger.debug( "data: #{d}" )
 
-      result = @monitoringClient.add( fqdn, d )
+      result = @monitoringClient.add( ip, d )
 
       logger.debug( result )
 
@@ -564,13 +581,13 @@ module ExternalDiscovery
 
       # add a blocking cache
       #
-      if( @jobs.jobs( { :fqdn => 'foo' } ) == true )
+      if( @jobs.jobs( { :status => 'running' } ) == true )
 
         logger.warn( 'we are working on this job' )
         return
       end
 
-      @jobs.add( { :fqdn => 'foo' } )
+      @jobs.add( { :status => 'running' } )
 
       @data   = Array.new()
       threads = Array.new()
@@ -587,7 +604,7 @@ module ExternalDiscovery
           @cache.set( 'aws-data' , expiresIn: 120 ) { Cache::Data.new( awsData ) }
         end
 
-        @jobs.del( { :fqdn => 'foo' } )
+        @jobs.del( { :status => 'running' } )
         return
 
       else
@@ -607,7 +624,7 @@ module ExternalDiscovery
       finish = Time.now
       logger.info( sprintf( 'finished in %s seconds', finish - start ) )
 
-      @jobs.del( { :fqdn => 'foo' } )
+      @jobs.del( { :status => 'running' } )
 
     end
 

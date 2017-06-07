@@ -124,7 +124,7 @@ module ExternalDiscovery
 
     def instances()
 
-       return @awsData
+      return @awsData
     end
   end
 
