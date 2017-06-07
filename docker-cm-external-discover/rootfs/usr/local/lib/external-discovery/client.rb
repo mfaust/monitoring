@@ -449,11 +449,11 @@ module ExternalDiscovery
         :force      => false,
         :tags       => useableTags,
         :config     => {
-          :display-name        => self.normalizeName( name, [ 'storage-' ] ),
-          :graphite-identifier => self.graphiteIdentifier( { :name => name } ),
-          :tags                => useableTags,
-          :aws                 => { :region => region, :uuid => uuid },
-          :services            => tags.dig('services')
+          'display-name'        => self.normalizeName( name, [ 'storage-' ] ),
+          'graphite-identifier' => self.graphiteIdentifier( { :name => name } ),
+          'tags'                => useableTags,
+          'aws'                 => { :region => region, :uuid => uuid },
+          'services'            => tags.dig('services')
         }
       })
 
