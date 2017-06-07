@@ -102,8 +102,8 @@ module ServiceDiscovery
 
       @scanPorts         = ports
 
-      version             = '1.7.0'
-      date                = '2017-06-02'
+      version             = '1.7.1'
+      date                = '2017-06-06'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - Service Discovery' )
@@ -111,33 +111,25 @@ module ServiceDiscovery
       logger.info( '  Copyright 2016-2017 Coremedia' )
       logger.info( '  used Services:' )
       logger.info( "    - jolokia      : #{jolokiaHost}:#{jolokiaPort}" )
-      logger.info( "    - redis        : #{redisHost}:#{redisPort}" )
-      if( mysqlHost != nil )
-        logger.info( "    - mysql        : #{mysqlHost}@#{mysqlSchema}" )
-      end
+      logger.info( "    - mysql        : #{mysqlHost}@#{mysqlSchema}" )
       logger.info( "    - message queue: #{mqHost}:#{mqPort}/#{@mqQueue}" )
       logger.info( '-----------------------------------------------------------------' )
       logger.info( '' )
 
       @cache      = Cache::Store.new()
       @jobs       = JobQueue::Job.new()
-      @redis      = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
       @jolokia    = Jolokia::Client.new( { :host => jolokiaHost, :port => jolokiaPort, :path => jolokiaPath, :auth => { :user => jolokiaAuthUser, :pass => jolokiaAuthPass } } )
       @mqConsumer = MessageQueue::Consumer.new( @MQSettings )
       @mqProducer = MessageQueue::Producer.new( @MQSettings )
-      @database   = nil
 
-      if( mysqlHost != nil )
-
-        @database   = Storage::MySQL.new( {
-          :mysql => {
-            :host     => mysqlHost,
-            :user     => mysqlUser,
-            :password => mysqlPassword,
-            :schema   => mysqlSchema
-          }
-        } )
-      end
+      @database   = Storage::MySQL.new({
+        :mysql => {
+          :host     => mysqlHost,
+          :user     => mysqlUser,
+          :password => mysqlPassword,
+          :schema   => mysqlSchema
+        }
+      })
 
       self.readConfigurations()
     end
@@ -145,8 +137,6 @@ module ServiceDiscovery
     # read Service Configuration
     #
     def readConfigurations()
-
-  #     logger.info( 'read defines of Services Properties' )
 
       if( @serviceConfig == nil )
         puts 'missing service config file'
@@ -182,8 +172,6 @@ module ServiceDiscovery
     # merge hashes of configured (cm-service.yaml) and discovered data (discovery.json)
     #
     def createHostConfig( data )
-
-  #    logger.debug( "createHostConfig( #{data} )" )
 
       data.each do |d,v|
 
@@ -233,15 +221,7 @@ module ServiceDiscovery
       status  = 400
       message = 'Host not in Monitoring'
 
-      if( @database != nil )
-        result = @database.removeDNS( { :short => short } )
-
-        logger.debug( "database: #{result}" )
-      end
-
-      result = @redis.removeDNS( { :short => short } )
-
-      logger.debug( "redis: #{result}" )
+      result  = @database.removeDNS( { :short => short } )
 
       if( result != nil )
 
@@ -300,61 +280,31 @@ module ServiceDiscovery
 
       # check discovered datas from the past
       #
-      if( @database != nil )
-
-        discoveryData    = @database.discoveryData( { :short => short } )
-        logger.debug( "database: #{discoveryData}" )
-
-        if( discoveryData != nil )
-
-          logger.debug( JSON.pretty_generate( discoveryData ) )
-          logger.error( 'Host already created' )
-
-          # look for online status ...
-          #
-          status = @database.status( { :short => host } )
-
-          logger.debug( status )
-          logger.debug( status.class.to_s )
-
-          status = status.dig(:status)
-
-          if( status != nil || status != Storage::MySQL::OFFLINE )
-
-            logger.debug( 'set host status to ONLINE' )
-            status = @database.setStatus( { :short => host, :status => Storage::MySQL::ONLINE } )
-          end
-
-#           return {
-#             :status  => 409, # 409 Conflict
-#             :message => 'Host already created'
-#           }
-
-        end
-
-      end
-
-
-      discoveryData = @redis.discoveryData( { :short => host } )
+      discoveryData    = @database.discoveryData( { :short => short } )
 
       if( discoveryData != nil )
 
-        logger.debug( JSON.pretty_generate( discoveryData ) )
-        logger.error( 'Host already created' )
+        logger.warn( 'Host already created' )
 
         # look for online status ...
         #
-        status = @redis.status( { :short => host } )
+        status = @database.status( { :short => host } )
 
-        logger.debug( status )
-        logger.debug( status.class.to_s )
+        if( status == nil )
+
+          logger.warn( 'host not found' )
+          return {
+            :status   => 404,
+            :message  => 'Host not found'
+          }
+        end
 
         status = status.dig(:status)
 
-        if( status != nil || status != Storage::RedisClient::OFFLINE )
+        if( status != nil || status != Storage::MySQL::OFFLINE )
 
           logger.debug( 'set host status to ONLINE' )
-          status = @redis.setStatus( { :short => host, :status => Storage::RedisClient::ONLINE } )
+          status = @database.setStatus( { :short => host, :status => Storage::MySQL::ONLINE } )
         end
 
         return {
@@ -373,19 +323,9 @@ module ServiceDiscovery
       # get customized configurations of ports and services
       #
       logger.debug( 'ask for custom configurations' )
-      if( @database != nil )
-        ports    = @database.config( { :short => short, :key => 'ports' } )
-        services = @database.config( { :short => short, :key => 'services' } )
 
-        logger.debug( "database: #{ports}" )
-        logger.debug( "database: #{services}" )
-      end
-
-      ports    = @redis.config( { :short => short, :key => 'ports' } )
-      services = @redis.config( { :short => short, :key => 'services' } )
-
-      logger.debug( "redis: #{ports}" )
-      logger.debug( "redis: #{services}" )
+      ports    = @database.config( { :ip => ip, :short => short, :fqdn => fqdn, :key => 'ports' } )
+      services = @database.config( { :ip => ip, :short => short, :fqdn => fqdn, :key => 'services' } )
 
       ports    = (ports != nil)    ? ports.dig( 'ports' )       : ports
       services = (services != nil) ? services.dig( 'services' ) : services
@@ -455,31 +395,15 @@ module ServiceDiscovery
       #
       discoveredServices = self.createHostConfig( discoveredServices )
 
-      if( @database != nil )
-        result    = @database.createDiscovery( { :short => short, :data => discoveredServices } )
-        logger.debug( "database: #{result}" )
-      end
-
-      result = @redis.createDiscovery( {
-        :short    => short,
-        :data     => discoveredServices
-      } )
-      logger.debug( "redis: #{result}" )
+      result    = @database.createDiscovery( { :short => short, :data => discoveredServices } )
 
       logger.debug( 'set host status to ONLINE' )
-      if( @database != nil )
-        result    = @database.setStatus( { :short => host, :status => Storage::MySQL::ONLINE } )
-        logger.debug( "database: #{result}" )
-      end
-      status = @redis.setStatus( { :short => host, :status => Storage::RedisClient::ONLINE } )
-      logger.debug( "redis: #{result}" )
+      result    = @database.setStatus( { :short => host, :status => Storage::MySQL::ONLINE } )
 
       finish = Time.now
       logger.info( sprintf( 'finished in %s seconds', finish - start ) )
 
       @jobs.del( { :ip => ip, :short => short, :fqdn => fqdn } )
-
-  #     logger.debug( @redis.nodes() )
 
       return {
         :status   => 200,
@@ -508,6 +432,7 @@ module ServiceDiscovery
       end
 
       # second, if the that we want monitored, available
+      #
       if( Utils::Network.isRunning?( ip ) == false )
 
         status  = 400
@@ -532,23 +457,20 @@ module ServiceDiscovery
 
       if( host == nil )
 
-        nodes = @redis.nodes()
+        # all nodes, no filter
+        #
+        # TODO
+        # what is with offline or other hosts?
+        nodes = @database.nodes()
 
         return nodes
-
       else
 
         # get a DNS record
         #
         ip, short, fqdn = self.nsLookup( host )
 
-        if( @database != nil )
-          discoveryData    = @database.discoveryData( { :short => short } )
-          logger.debug( "database: #{discoveryData}" )
-        end
-
-        discoveryData = @redis.discoveryData( { :short => short } )
-        logger.debug( "database: #{discoveryData}" )
+        discoveryData   = @database.discoveryData( { :short => short } )
 
         if( discoveryData == nil )
 
@@ -579,13 +501,7 @@ module ServiceDiscovery
         #
         for y in 1..15
 
-          if( @database != nil )
-            result    = @database.status( { :short => short } )
-            logger.debug( "database: #{result}" )
-          end
-
-          result      = @redis.status( { :short => short } )
-          logger.debug( "redis: #{result}" )
+          result    = @database.status( { :short => short } )
 
           if( result != nil )
             status = result
@@ -606,23 +522,27 @@ module ServiceDiscovery
           created      = Time.parse( created ).strftime( '%Y-%m-%d %H:%M:%S' )
         end
 
-        # parse the online state
-        #
-        online         = status.dig( :status )
+        if( ! status.ia_a?( String ) )
 
-        # and transform the state to human readable
-        #
-        case online
-        when Storage::RedisClient::OFFLINE
-          status = 'offline'
-        when Storage::RedisClient::ONLINE
-          status = 'online'
-        when Storage::RedisClient::DELETE
-          status = 'delete'
-        when Storage::RedisClient::PREPARE
-          status = 'prepare'
-        else
-          status = 'unknown'
+          # parse the online state
+          #
+          online         = status.dig( :status )
+
+          # and transform the state to human readable
+          #
+          case online
+          when Storage::RedisClient::OFFLINE
+            status = 'offline'
+          when Storage::RedisClient::ONLINE
+            status = 'online'
+          when Storage::RedisClient::DELETE
+            status = 'delete'
+          when Storage::RedisClient::PREPARE
+            status = 'prepare'
+          else
+            status = 'unknown'
+          end
+
         end
 
         result = {

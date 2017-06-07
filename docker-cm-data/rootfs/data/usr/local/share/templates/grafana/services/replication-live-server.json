@@ -180,7 +180,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(carbon-writer.$host.RLS.StatisticsResourceCache.cache.*)",
+                "target": "aliasByMetric(perSecond(carbon-writer.$host.RLS.StatisticsResourceCache.cache.*))",
                 "textEditor": false
               }
             ],
@@ -264,7 +264,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(carbon-writer.$host.RLS.StatisticsJobResult.*)",
+                "target": "aliasByMetric(perSecond(carbon-writer.$host.RLS.StatisticsJobResult.*))",
                 "textEditor": false
               }
             ],
@@ -412,7 +412,7 @@
             "lines": true,
             "linewidth": 1,
             "links": [],
-            "nullPointMode": "null",
+            "nullPointMode": "connected",
             "percentage": false,
             "pointradius": 5,
             "points": false,
@@ -425,7 +425,7 @@
               {
                 "hide": true,
                 "refId": "A",
-                "target": "alias(carbon-writer.$host.MLS.Server.Repository.SequenceNumber, 'seq MLS')"
+                "target": "alias(carbon-writer.$mls.MLS.Server.Repository.SequenceNumber, 'seq MLS')"
               },
               {
                 "hide": true,
@@ -433,9 +433,15 @@
                 "target": "alias(carbon-writer.$host.RLS.Replicator.completedSequenceNumber, 'seq RLS')"
               },
               {
+                "hide": false,
                 "refId": "C",
+                "target": "alias(carbon-writer.$host.RLS.SequenceNumber.diffToMLS, 'diff to MLS')"
+              },
+              {
+                "hide": true,
+                "refId": "D",
                 "target": "alias(diffSeries(#A, #B), 'MLS vs. RLS')",
-                "targetFull": "alias(diffSeries(carbon-writer.$host.MLS.Server.Repository.SequenceNumber, carbon-writer.$host.RLS.Replicator.completedSequenceNumber), 'MLS vs. RLS')"
+                "targetFull": "alias(diffSeries(carbon-writer.$mls.MLS.Server.Repository.SequenceNumber, carbon-writer.$host.RLS.Replicator.completedSequenceNumber), 'MLS vs. RLS')"
               }
             ],
             "thresholds": [],
@@ -460,7 +466,7 @@
                 "label": null,
                 "logBase": 1,
                 "max": null,
-                "min": null,
+                "min": "-5",
                 "show": true
               },
               {
@@ -525,6 +531,23 @@
             }
           ],
           "query": "%STORAGE_IDENTIFIER%",
+          "type": "constant"
+        },
+        {
+          "current": {
+            "value": "%MLS_STORAGE_IDENTIFIER%",
+            "text": "%MLS_STORAGE_IDENTIFIER%"
+          },
+          "hide": 2,
+          "label": null,
+          "name": "mls",
+          "options": [
+            {
+              "value": "%MLS_STORAGE_IDENTIFIER%",
+              "text": "%MLS_STORAGE_IDENTIFIER%"
+            }
+          ],
+          "query": "%MLS_STORAGE_IDENTIFIER%",
           "type": "constant"
         }
       ]

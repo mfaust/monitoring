@@ -145,13 +145,13 @@ module CarbonData
 
             replicatorValue         = replicatorValue.values.first
 
-            connectionUp            = replicatorValue.dig('ConnectionUp') || false
+            connectionUp            = replicatorValue.dig('ConnectionUp')                  || false
             controllerState         = replicatorValue.dig('ControllerState')
             completedSequenceNumber = replicatorValue.dig('LatestCompletedSequenceNumber') || 0
-            enabled                 = replicatorValue.dig('Enabled') || false
-            pipelineUp              = replicatorValue.dig('PipelineUp') || false
-            uncompletedCount        = replicatorValue.dig('UncompletedCount') || 0
-            completedCount          = replicatorValue.dig('CompletedCount') || 0
+            enabled                 = replicatorValue.dig('Enabled')                       || false
+            pipelineUp              = replicatorValue.dig('PipelineUp')                    || false
+            uncompletedCount        = replicatorValue.dig('UncompletedCount')              || 0
+            completedCount          = replicatorValue.dig('CompletedCount')                || 0
 
             controllerState.downcase!
 
@@ -165,9 +165,76 @@ module CarbonData
               :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, 'Replicator', 'completed' ),
               :value => completedCount
             }
+          end
 
-            return completedSequenceNumber, result
+          return completedSequenceNumber, result
+        end
+      end
 
+      def mlsSequenceNumber( rlsSequenceNumber )
+
+        logger.debug( "mlsSequenceNumber( #{rlsSequenceNumber} )" )
+
+        result            = []
+        mlsSequenceNumber = 0
+
+#         logger.debug( @identifier )
+#         logger.debug( @serviceName )
+
+        replicatorData = @mbean.bean( @identifier, @serviceName, 'Replicator' )
+
+        if( replicatorData == false )
+
+          logger.error( sprintf( 'No mbean \'Replicator\' for Service %s found!', @serviceName ) )
+
+          return mlsSequenceNumber, result
+
+        else
+
+          replicatorStatus = replicatorData.dig('status') || 505
+          replicatorValue  = replicatorData.dig('value')
+
+          if( replicatorStatus == 200 && replicatorValue != nil )
+
+            replicatorValue   = replicatorValue.values.first
+
+            masterLiveServer  = replicatorValue.dig('MasterLiveServer','host')
+
+#             logger.debug( replicatorValue.dig('MasterLiveServer') )
+
+            # {:host=>"blueprint-box", :pre=>"result", :service=>"master-live-server"}
+            repositoryData    = @mbean.bean( masterLiveServer, 'master-live-server', 'Server' )
+
+            if( repositoryData == false )
+
+              logger.error( 'No mbean \'Server\' for Service \'master-live-server\' found!' )
+
+              return mlsSequenceNumber, result
+
+            else
+
+              repositoryStatus = repositoryData.dig('status') || 505
+              repositoryValue  = repositoryData.dig('value')
+
+              if( repositoryStatus == 200 && repositoryValue != nil )
+
+                repositoryValue         = repositoryValue.values.first
+
+#                 logger.debug( repositoryValue )
+
+                mlsSequenceNumber  = repositoryValue.dig('RepositorySequenceNumber')
+
+                diffSequenceNumber = mlsSequenceNumber.to_i - rlsSequenceNumber.to_i
+
+                result << {
+                  :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, 'SequenceNumber', 'diffToMLS' ),
+                  :value => diffSequenceNumber
+                }
+
+              end
+
+              return mlsSequenceNumber, result
+            end
           end
         end
       end
@@ -199,6 +266,12 @@ module CarbonData
 
           if( replicatorResult != nil && replicatorResult.count != 0 )
             result << replicatorResult
+          end
+
+          mlsSequenceNumber, mlsSequenceResult = mlsSequenceNumber( incomingCount )
+
+          if( mlsSequenceResult != nil && mlsSequenceResult.count != 0 )
+            result << mlsSequenceResult
           end
         end
 

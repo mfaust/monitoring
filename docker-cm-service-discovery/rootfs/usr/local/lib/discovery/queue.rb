@@ -99,12 +99,12 @@ module ServiceDiscovery
 
         # check first for existing node!
         #
-        result = @redis.nodes( { :short => node } )
+        result = @database.nodes( { :short => node } )
 
-        logger.debug( "redis: '#{result}' | node: '#{node}'" )
-        logger.debug( @redis.nodes() )
+        logger.debug( "database: '#{result}' | node: '#{node}'" )
+        logger.debug( @database.nodes() )
 
-        if( result.to_s != node.to_s )
+        if( result != nil && result.to_s != node.to_s )
 
           logger.info( 'node not in monitoring. skipping delete' )
 

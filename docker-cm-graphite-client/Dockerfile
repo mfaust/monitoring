@@ -9,9 +9,9 @@ ENV \
   TERM=xterm \
   APK_ADD="build-base ruby ruby-dev " \
   APK_DEL="build-base ruby-dev" \
-  GEMS="beaneater json redis rest-client rufus-scheduler tzinfo-data"
+  GEMS="beaneater json rest-client rufus-scheduler tzinfo-data"
 
-LABEL version="1705-04.1"
+LABEL version="1706-01.2"
 
 # ---------------------------------------------------------------------------------------
 

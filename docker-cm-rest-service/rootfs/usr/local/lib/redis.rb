@@ -7,8 +7,8 @@ require 'json'
 require 'redis'
 require 'digest/md5'
 
-require_relative 'monkey'
-require_relative 'logging'
+# require_relative '../monkey'
+# require_relative '../logging'
 
 # ---------------------------------------------------------------------------------------
 
@@ -243,6 +243,8 @@ module Storage
 
     def createConfig( params = {}, append = false )
 
+      logger.debug( "createConfig( #{params}, #{append} )" )
+
       if( self.checkDatabase() == false )
         return false
       end
@@ -291,7 +293,11 @@ module Storage
 
       toStore = { ip: dnsIp, shortname: dnsShortname, data: data, created: DateTime.now() }.to_json
 
-      @redis.set( cachekey, toStore )
+      logger.debug( toStore )
+
+      result = @redis.set( cachekey, toStore )
+
+      logger.debug( result )
 
     end
 
@@ -304,7 +310,7 @@ module Storage
 
       dnsIp        = params.dig(:ip)
       dnsShortname = params.dig(:short)
-      key    = params.dig(:key)
+      key          = params.dig(:key)
 
       cachekey = sprintf(
         '%s-config',
@@ -337,6 +343,8 @@ module Storage
 
     def config( params = {} )
 
+      logger.debug( "config( #{params} )" )
+
       if( self.checkDatabase() == false )
         return false
       end
@@ -351,6 +359,8 @@ module Storage
       )
 
       result = @redis.get( cachekey )
+
+      logger.debug( result )
 
       if( result == nil )
         return { :short => nil }
@@ -712,7 +722,7 @@ module Storage
     #
     def setStatus( params = {} )
 
-#       logger.debug( "setStatus( #{params} )" )
+      logger.debug( "setStatus( #{params} )" )
 #       logger.debug( caller )
 
       if( self.checkDatabase() == false )
@@ -822,6 +832,19 @@ module Storage
         status = status ? 0 :1
       end
 
+      message = case status
+        when Storage::RedisClient::OFFLINE
+          'offline'
+        when Storage::RedisClient::ONLINE
+          'online'
+        when Storage::RedisClient::DELETE
+          'delete'
+        when Storage::RedisClient::PREPARE
+          'prepare'
+        else
+          'unknown'
+        end
+
 #       case status
 #       when 0, false
 #         status = 'offline'
@@ -839,6 +862,7 @@ module Storage
       return {
         :short   => short,
         :status  => status,
+        :message => message,
         :created => created
       }
     end

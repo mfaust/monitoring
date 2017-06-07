@@ -46,8 +46,10 @@ class CMIcinga2 < Icinga2::Client
       mqPort                = settings.dig(:mq, :port)                || 11300
       @mqQueue              = settings.dig(:mq, :queue)               || 'mq-icinga'
 
-      redisHost             = settings.dig(:redis, :host)
-      redisPort             = settings.dig(:redis, :port)             || 6379
+      mysqlHost           = settings.dig(:mysql, :host)
+      mysqlSchema         = settings.dig(:mysql, :schema)
+      mysqlUser           = settings.dig(:mysql, :user)
+      mysqlPassword       = settings.dig(:mysql, :password)
 
       @icingaApiUrlBase     = sprintf( 'https://%s:%d', @icingaHost, @icingaApiPort )
       @nodeName             = Socket.gethostbyname( Socket.gethostname ).first
@@ -60,8 +62,8 @@ class CMIcinga2 < Icinga2::Client
 
       super( settings )
 
-      version              = '1.6.2'
-      date                 = '2017-06-01'
+      version              = '1.6.3'
+      date                 = '2017-06-06'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - Icinga2 Client' )
@@ -74,7 +76,7 @@ class CMIcinga2 < Icinga2::Client
       end
       logger.info( sprintf( '    notifications enabled: %s', @icingaNotifications ? 'true' : 'false' ) )
       logger.info( '  used Services:' )
-      logger.info( "    - redis        : #{redisHost}:#{redisPort}" )
+      logger.info( "    - mysql        : #{mysqlHost}@#{mysqlSchema}" )
       logger.info( "    - message Queue: #{mqHost}:#{mqPort}/#{@mqQueue}" )
       logger.info( '-----------------------------------------------------------------' )
       logger.info( '' )
@@ -88,9 +90,17 @@ class CMIcinga2 < Icinga2::Client
 
       @cache      = Cache::Store.new()
       @jobs       = JobQueue::Job.new()
-      @redis      = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
       @mqConsumer = MessageQueue::Consumer.new( mqSettings )
       @mqProducer = MessageQueue::Producer.new( mqSettings )
+
+      @database   = Storage::MySQL.new( {
+        :mysql => {
+          :host     => mysqlHost,
+          :user     => mysqlUser,
+          :password => mysqlPassword,
+          :schema   => mysqlSchema
+        }
+      } )
 
   end
 

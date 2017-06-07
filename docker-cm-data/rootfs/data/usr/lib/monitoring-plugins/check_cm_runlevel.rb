@@ -13,7 +13,7 @@ class Icinga2Check_CM_Runlevel < Icinga2Check
     host         = settings.dig(:host)
     application  = settings.dig(:application)
 
-    host         = self.shortHostname( host )
+    host         = self.hostname( host )
 
     self.check( host, application )
 

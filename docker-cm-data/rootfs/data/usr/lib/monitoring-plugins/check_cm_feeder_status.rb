@@ -15,7 +15,7 @@ class Icinga2Check_CM_Feeder < Icinga2Check
     host   = settings.dig(:host)
     feeder = settings.dig(:feeder)
 
-    host         = self.shortHostname( host )
+    host         = self.hostname( host )
 
     feederServer = self.validate( feeder )
 
