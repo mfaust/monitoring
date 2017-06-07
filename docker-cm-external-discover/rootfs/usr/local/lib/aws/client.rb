@@ -51,6 +51,8 @@ module Aws
 
             res.instances.each do |inst|
 
+              logger.debug(inst)
+
               iid     = inst.dig(:instance_id)
               istate  = inst.dig(:state).name
               ilaunch = inst.dig(:launch_time)
@@ -88,11 +90,12 @@ module Aws
                 'name'        => iid,
                 'state'       => istate,
                 'uid'         => iid,
+                'region'      => @region,
                 'launch_time' => ilaunch,
                 'dns'         => {
                   'ip'    => iip,
                   'short' => ifqdn.split('.').first,
-                  'name'  => ifqdn
+                  'fqdn'  => ifqdn
                 },
                 'tags'        => useableTags
               }

@@ -157,7 +157,7 @@ module ExternalDiscovery
       environment = data.dig('tags', 'environment')
       dns_ip      = data.dig('dns' , 'ip')
       dns_short   = data.dig('dns' , 'short')
-      dns_fqdn    = data.dig('dns' , 'name')
+      dns_fqdn    = data.dig('dns' , 'fqdn')
 
       return uuid, dns_ip, dns_short, dns_fqdn, fqdn, name, state, tags, cname, name, tier, customer, environment
 
@@ -252,7 +252,20 @@ module ExternalDiscovery
 
         logger.info( sprintf( '  add node %s / %s (%s)', uuid, dns_fqdn, cname ) )
 
-        if( self.nodeAdd( { :ip => ip, :short => short, :fqdn => fqdn, :cname => cname, :name => name, :customer => customer, :environment => environment, :tier => tier, :tags => tags } ) == true )
+        result = self.nodeAdd({
+          :ip          => ip,
+          :short       => short,
+          :fqdn        => fqdn,
+          :uuid        => uuid,
+          :cname       => cname,
+          :name        => name,
+          :customer    => customer,
+          :environment => environment,
+          :tier        => tier,
+          :tags        => tags
+        })
+
+        if( result == true )
 
           sleep(5)
         end
@@ -393,6 +406,8 @@ module ExternalDiscovery
       ip          = params.dig(:ip)
       short       = params.dig(:short)
       fqdn        = params.dig(:fqdn)
+      uuid        = params.dig(:uuid)
+      region      = params.dig(:region)
       cname       = params.dig(:cname)
       name        = params.dig(:name)
       tags        = params.dig(:tags)
@@ -430,20 +445,21 @@ module ExternalDiscovery
       # - icinga     = true
       # - grafana    = true
       # - annotation = true
-      d = JSON.generate( {
+      d = JSON.generate({
         :force      => false,
         :tags       => useableTags,
         :config     => {
-          'display-name'        => self.normalizeName( name, [ 'storage-' ] ),
-          'graphite-identifier' => self.graphiteIdentifier( { :name => name } ),
-          'tags'                => useableTags,
-          'services'            => tags.dig('services')
+          :display-name        => self.normalizeName( name, [ 'storage-' ] ),
+          :graphite-identifier => self.graphiteIdentifier( { :name => name } ),
+          :tags                => useableTags,
+          :aws                 => { :region => region, :uuid => uuid }
+          :services            => tags.dig('services')
         }
-      } )
+      })
 
       logger.debug( "data: #{d}" )
 
-      result = @monitoringClient.add( ip, d )
+      result = @monitoringClient.add( fqdn, d )
 
       logger.debug( result )
 
