@@ -158,21 +158,17 @@ class Monitoring
         #
         discoveryData = @database.discoveryData( { :ip => ip, :short => short, :fqdn => fqdn } )
 
-        if( discoveryData == nil )
+        if( discoveryData != nil )
 
-          return {
-            :status   => 204,
-            :message  => 'no node data found'
-          }
+          discoveryData.each do |a,d|
+
+            d.reject! { |k| k == 'application' }
+            d.reject! { |k| k == 'template' }
+          end
+
+          result[n.to_s][:services] ||= discoveryData
+
         end
-
-        discoveryData.each do |a,d|
-
-          d.reject! { |k| k == 'application' }
-          d.reject! { |k| k == 'template' }
-        end
-
-        result[n.to_s][:services] ||= discoveryData
 
         # realy needed?
         #

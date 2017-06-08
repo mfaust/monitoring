@@ -90,8 +90,7 @@ module Storage
           creation   DATETIME DEFAULT   CURRENT_TIMESTAMP,
           KEY(`key`),
           unique( `key`, `value`, dns_ip ),
-          FOREIGN KEY (`dns_ip`)
-          REFERENCES dns(`ip`)
+          FOREIGN KEY (`dns_ip`) REFERENCES dns(`ip`)
           ON DELETE CASCADE
         )"
       )
@@ -99,14 +98,26 @@ module Storage
       @client.query(
         "CREATE TABLE IF NOT EXISTS discovery (
           service    varchar(128) not null,
-          port       int(4) not null,
-          data       text not null,
+          port       int(4)       not null,
+          data       text         not null,
           dns_ip     varchar(16),
           creation   DATETIME DEFAULT   CURRENT_TIMESTAMP,
-          KEY(`service`),
-          unique( service, port, dns_ip),
-          FOREIGN KEY (`dns_ip`)
-          REFERENCES dns(`ip`)
+          KEY(`service`,`port`),
+          unique( service, port, dns_ip ),
+          FOREIGN KEY (`dns_ip`) REFERENCES dns(`ip`)
+          ON DELETE CASCADE
+        )"
+      )
+
+      @client.query(
+        "create table if not exists measurements (
+          measurements         text not null,
+          discovery_service    varchar(128),
+          discovery_port       int(4),
+          dns_ip               varchar(16),
+          unique( discovery_service, discovery_port, dns_ip ),
+          FOREIGN KEY (`dns_ip`)         REFERENCES dns(`ip`),
+          FOREIGN KEY (`discovery_service`) REFERENCES discovery(`service`)
           ON DELETE CASCADE
         )"
       )
@@ -292,28 +303,6 @@ module Storage
         '%s and ( %s )',
         statement, w
       )
-#      statement = sprintf('select ip, name, fqdn, status from dns %s', w  )
-
-      w.clear
-
-#       if( ip != nil )
-#         w << sprintf( 'ip like \'%%%s%%\'', ip )
-#       end
-#       if( name != nil )
-#         w << sprintf( 'name like \'%%%s%%\'', name )
-#       end
-#       if( fqdn != nil )
-#         w << sprintf( 'fqdn like \'%%%s%%\'', fqdn )
-#       end
-#
-#       if( w.count != 0 )
-#         w = w.join( ' or ' )
-#
-#         statement = sprintf(
-#           '%s and ( %s )',
-#           statement, w
-#         )
-#       end
 
       res = self.exec( statement )
 
@@ -811,6 +800,148 @@ module Storage
     # -- discovery ------------------------------
 
 
+    # -- measurements ---------------------------
+    #
+    def createMeasurements( params = {} )
+
+      if( ! @client )
+        return false
+      end
+
+      ip        = params.dig(:ip)
+      name      = params.dig(:short)
+      fqdn      = params.dig(:fqdn)
+      data      = params.dig(:data)
+      result    = Hash.new()
+
+      logger.debug( " createMeasurements( #{params} )")
+
+
+
+
+
+
+
+
+
+
+
+      return nil
+    end
+
+
+    # PRIVATE
+    def writeMeasurements( params = {} )
+
+      ip      = params.dig(:ip)
+      name    = params.dig(:short)
+      fqdn    = params.dig(:fqdn)
+      port    = params.dig(:port)
+      service = params.dig(:service)
+      data    = params.dig(:data)
+
+      statement = sprintf(
+        'replace into measurements ( discovery_port, discovery_service, measurements, dns_ip ) values ( %s, \'%s\', \'%s\', \'%s\' )',
+        port, service, data.to_s, ip
+      )
+
+      begin
+        result    = @client.query( statement, :as => :hash )
+
+        return true
+      rescue => e
+        logger.error( e )
+      end
+
+      return nil
+
+    end
+
+
+    def measurements( params = {} )
+
+      if( ! @client )
+        return false
+      end
+
+      ip        = params.dig(:ip)
+      name      = params.dig(:short)
+      fqdn      = params.dig(:fqdn)
+      service   = params.dig(:service)
+      result    = Hash.new()
+
+      logger.debug( " measurements( #{params} )")
+
+      # should be inpossible!
+      #
+      if( service == nil && name == nil )
+
+        logger.error( '( service == nil && name == nil )' )
+        return false
+      end
+
+      # select m.measurements, d.* from discovery as d, measurements as m, dns where dns.ip = m.dns_ip
+
+      if( service == nil )
+
+        statement = sprintf(
+          'select
+            m.measurements,
+            dns.ip, dns.name, dns.fqdn, d.port, d.service
+          from discovery as d, measurements as m, dns
+          where
+            dns.ip = m.dns_ip and
+            d.service = m.discovery_service and (
+              dns.ip = \'%s\' or dns.name = \'%s\' or dns.fqdn = \'%s\'
+            )',
+          ip, name, fqdn
+        )
+
+        r = Array.new()
+        logger.debug( statement )
+
+        res     = @client.query( statement, :as => :hash )
+
+        if( res.count != 0 )
+
+          headers = res.fields # <= that's an array of field names, in order
+          res.each(:as => :hash) do |row|
+
+            name     = row.dig('name').to_s
+            fqdn     = row.dig('fqdn').to_s
+            service  = row.dig('service').to_s
+            dnsIp    = row.dig('dns_ip').to_i
+            data     = row.dig('data')
+
+            if( data == nil )
+              next
+            end
+
+            data = data.gsub( '=>', ':' )
+            data = self.parsedResponse( data )
+
+            result[service.to_s] = data
+          end
+
+          if( result.is_a?( Array ) )
+            result = Hash[*result]
+          end
+
+          return result
+        end
+
+        return nil
+
+      end
+
+
+      return nil
+    end
+    #
+    # -- measurements ---------------------------
+
+
+
 
     def parsedResponse( r )
 
@@ -842,9 +973,9 @@ module Storage
         end
       end
 
-      logger.debug( result.class.to_s )
-      logger.debug( result.inspect )
-      logger.debug( result.size )
+#       logger.debug( result.class.to_s )
+#       logger.debug( result.inspect )
+#       logger.debug( result.size )
 
       return result
 

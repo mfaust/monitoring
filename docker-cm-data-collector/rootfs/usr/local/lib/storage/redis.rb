@@ -480,16 +480,16 @@ module Storage
         return false
       end
 
-      dnsIp        = params.dig(:ip)
       dnsShortname = params.dig(:short)
+      fqdn         = params.dig(:fqdn)
       data         = params.dig(:data)
 
       cachekey = sprintf(
         '%s-measurements',
-        Storage::RedisClient.cacheKey( { :short => dnsShortname } )
+        Storage::RedisClient.cacheKey( { :short => dnsShortname, :fqdn => fqdn } )
       )
 
-      toStore = { short: dnsShortname, data: data, created: DateTime.now() }.to_json
+      toStore = { fqdn: fqdn, short: dnsShortname, data: data, created: DateTime.now() }.to_json
 
       @redis.set( cachekey, toStore )
 
@@ -502,13 +502,13 @@ module Storage
         return false
       end
 
-      dnsIp        = params.dig(:ip)
       dnsShortname = params.dig(:short)
+      fqdn         = params.dig(:fqdn)
       application  = params.dig(:application)
 
       cachekey = sprintf(
         '%s-measurements',
-        Storage::RedisClient.cacheKey( { :short => dnsShortname } )
+        Storage::RedisClient.cacheKey( { :short => dnsShortname, :fqdn => fqdn } )
       )
 
       result = @redis.get( cachekey )
