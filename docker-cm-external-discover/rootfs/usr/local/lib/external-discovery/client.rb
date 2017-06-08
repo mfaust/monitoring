@@ -223,9 +223,10 @@ module ExternalDiscovery
 
         logger.debug( sprintf( '  %s', name ) )
 
-        # currently, we want only the dev environment
+        # PRIMARY FILTER
+        # currently, we want only the prod environment
         #
-        if( environment != 'development' )
+        if( environment != 'production' )
           next
         end
 
