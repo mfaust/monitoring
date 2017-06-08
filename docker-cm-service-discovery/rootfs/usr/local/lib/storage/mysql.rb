@@ -323,7 +323,7 @@ module Storage
 #         end
 #       end
 
-      if( res.size != 0 )
+      if( res != nil && res.size != 0 )
 
         headers = res.fields # <= that's an array of field names, in order
         res.each(:as => :hash) do |row|
