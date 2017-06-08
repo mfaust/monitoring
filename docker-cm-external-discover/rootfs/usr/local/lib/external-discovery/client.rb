@@ -74,8 +74,8 @@ module ExternalDiscovery
       name.gsub!('development-','dev ')
       name.gsub!('production-' ,'prod ')
       name.gsub!('caepreview'  ,'cae preview')
-      name.gsub!('management-' ,'mgmt ')
-      name.gsub!('delivery-'   ,'live ')
+      name.gsub!('management-' ,'be ')
+      name.gsub!('delivery-'   ,'fe ')
       name.gsub!( '-',' ' )
 
 #       name = case name
@@ -111,8 +111,8 @@ module ExternalDiscovery
       name.gsub!('development-','dev-')
       name.gsub!('production-' ,'prod-')
       name.gsub!('storage-'    , '')
-      name.gsub!('management-' ,'mgmt-')
-      name.gsub!('delivery-'   ,'live-')
+      name.gsub!('management-' ,'be-')
+      name.gsub!('delivery-'   ,'fe-')
       name.gsub!(' ', '-')
 
       return name
