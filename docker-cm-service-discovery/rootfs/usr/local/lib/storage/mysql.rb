@@ -628,7 +628,7 @@ module Storage
       service = params.dig(:service)
       data    = params.dig(:data)
 
-      logger.debug( " createDiscovery( #{params}, #{append} )")
+#       logger.debug( " createDiscovery( #{params}, #{append} )")
       if( ip == nil )
 
         dns = self.dnsData( { :ip => ip, :short => name, fqdn => fqdn } )

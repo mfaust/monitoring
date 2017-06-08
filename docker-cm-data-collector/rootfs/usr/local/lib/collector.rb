@@ -634,10 +634,11 @@ module DataCollector
 
       mlsIOR = nil
 
-      fqdn   = params.dig(:fqdn)
-      data   = params.dig(:data)
+      fqdn    = params.dig(:fqdn)
+      data    = params.dig(:data)
+      mlsHost = fqdn
 
-      logger.info( 'search Master Live Server IOR for the Replication Live Server' )
+      logger.info( '  search Master Live Server IOR for the Replication Live Server' )
 
       d = data.select {|d| d.dig('Replicator') }
 
@@ -662,17 +663,19 @@ module DataCollector
 
           realIP    = dns.dig('ip')   || ip
           realShort = dns.dig('name') || short
-          realFqdn  = dns.dig('fqdn') || fqdn
+          mlsHost   = dns.dig('fqdn') || fqdn
 
           value['MasterLiveServer'] = {
             'scheme' => scheme,
-            'host'   => realShort,
+            'host'   => mlsHost,
             'port'   => port,
             'path'   => path
           }
         end
 
       end
+
+      logger.info( sprintf( '  found \'%s\'', mlsHost ) )
 #       logger.debug( JSON.pretty_generate( data ) )
       return data
 

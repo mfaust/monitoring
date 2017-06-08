@@ -279,14 +279,14 @@ class Monitoring
     #
     # ------------------------------------------------
 
-    dns    = @database.dnsData( { :ip => ip, :short => short, :fqdn => fqdn } )
-
-    if( dns == nil )
-
-      status = @database.createDNS( { :ip => ip, :short => short, :fqdn => fqdn } )
-
-      @cache.set( hostname , expiresIn: expire ) { Cache::Data.new( { 'ip': ip, 'short': short, 'long': fqdn } ) }
-    end
+#     dns    = @database.dnsData( { :ip => ip, :short => short, :fqdn => fqdn } )
+#
+#     if( dns == nil )
+#
+#       status = @database.createDNS( { :ip => ip, :short => short, :fqdn => fqdn } )
+#
+#       @cache.set( hostname , expiresIn: expire ) { Cache::Data.new( { 'ip': ip, 'short': short, 'long': fqdn } ) }
+#     end
 
 #     logger.debug( sprintf( '  ip   %s ', ip ) )
 #     logger.debug( sprintf( '  host %s ', short ) )
@@ -526,7 +526,7 @@ class Monitoring
 
     end
 
-#     logger.debug( JSON.pretty_generate( hostData ) )
+    logger.debug( JSON.pretty_generate( hostData ) )
 
     ip              = hostData.dig(:ip)
     short           = hostData.dig(:short)
@@ -611,7 +611,13 @@ class Monitoring
       sleep(1)
     end
 
+
+    # create a valid DNS entry
+    #
+    status = @database.createDNS( { :ip => ip, :short => short, :fqdn => fqdn } )
+
     # now, we can write an own configiguration per node when we add them, hurray
+    #
     if( config.is_a?( Hash ) )
 
 #       logger.debug( "write configuration: #{config}" )
@@ -662,9 +668,11 @@ class Monitoring
     request = payload.dig('rack.request.query_hash')
     short   = request.keys.include?('short')
 
+    logger.debug( data )
+
     result  = Hash.new()
 
-    if( data == nil )
+    if( data == nil || data.count == 0 )
 
       return JSON.pretty_generate({
         :status  => 204,

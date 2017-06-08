@@ -221,7 +221,7 @@ module ServiceDiscovery
       status  = 400
       message = 'Host not in Monitoring'
 
-      result  = @database.removeDNS( { :short => short } )
+      result  = @database.removeDNS( { :ip => ip, :short => short, :fqdn => fqdn } )
 
       if( result != nil )
 
@@ -395,10 +395,10 @@ module ServiceDiscovery
       #
       discoveredServices = self.createHostConfig( discoveredServices )
 
-      result    = @database.createDiscovery( { :short => short, :data => discoveredServices } )
+      result    = @database.createDiscovery( { :ip => ip, :short => short, :fqdn => fqdn, :data => discoveredServices } )
 
       logger.debug( 'set host status to ONLINE' )
-      result    = @database.setStatus( { :short => host, :status => Storage::MySQL::ONLINE } )
+      result    = @database.setStatus( { :ip => ip, :short => short, :fqdn => fqdn, :status => Storage::MySQL::ONLINE } )
 
       finish = Time.now
       logger.info( sprintf( 'finished in %s seconds', finish - start ) )
@@ -470,7 +470,7 @@ module ServiceDiscovery
         #
         ip, short, fqdn = self.nsLookup( host )
 
-        discoveryData   = @database.discoveryData( { :short => short } )
+        discoveryData   = @database.discoveryData( { :ip => ip, :short => short, :fqdn => fqdn } )
 
         if( discoveryData == nil )
 
