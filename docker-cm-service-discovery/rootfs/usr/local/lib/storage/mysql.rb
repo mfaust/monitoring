@@ -109,20 +109,21 @@ module Storage
         )"
       )
 
-      @client.query(
-        "create table if not exists measurements (
-          measurements         text not null,
-          discovery_service    varchar(128),
-          discovery_port       int(4),
-          dns_ip               varchar(16),
-          unique( discovery_service, discovery_port, dns_ip ),
-          FOREIGN KEY (`dns_ip`)         REFERENCES dns(`ip`),
-          FOREIGN KEY (`discovery_service`) REFERENCES discovery(`service`)
-          ON DELETE CASCADE
-        )"
-      )
+#       @client.query(
+#         "create table if not exists measurements (
+#           measurements         text not null,
+#           discovery_service    varchar(128),
+#           discovery_port       int(4),
+#           dns_ip               varchar(16),
+#           unique( discovery_service, discovery_port, dns_ip ),
+#           FOREIGN KEY (`dns_ip`)         REFERENCES dns(`ip`),
+#           FOREIGN KEY (`discovery_service`) REFERENCES discovery(`service`)
+#           ON DELETE CASCADE
+#         )"
+#       )
 
     end
+
 
     def toJson( data )
 

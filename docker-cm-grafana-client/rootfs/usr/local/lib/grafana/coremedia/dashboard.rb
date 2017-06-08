@@ -122,8 +122,24 @@ module Grafana
 
         ip, short, fqdn = self.prepare( host )
 
-        discovery    = @database.discoveryData( { :ip => ip, :short => short, :fqdn => fqdn } )
-#        discovery = @redis.discoveryData( { :short => short } )
+
+        begin
+
+          for y in 1..15
+
+            discovery    = @database.discoveryData( { :ip => ip, :short => short, :fqdn => fqdn } )
+
+            if( discovery != nil )
+              break
+            else
+              logger.debug( sprintf( 'wait for discovery data for node \'%s\' ... %d', fqdn, y ) )
+              sleep( 4 )
+            end
+          end
+
+        rescue => e
+          logger.error( e )
+        end
 
         if( discovery == nil )
 

@@ -63,19 +63,29 @@ module ServiceDiscovery
 
         response       = @jolokia.post( { :payload => array } )
         responseStatus = response.dig(:status).to_i
+        responseBody   = response.dig(:message)
 
         if( responseStatus != 200 )
 
-          response = response[:message]
-          response.delete!( "\t" ).delete!( "\n" )
+#           logger.error( response )
+#           logger.error( responseStatus )
 
-          if( response.include?( 'UnknownHostException' ) )
-            response = sprintf( 'Unknown Host: %s', host )
+          if( responseBody != nil )
+
+            responseBody.delete!( "\t" )
+            responseBody.delete!( "\n" )
+
+            if( responseBody.include?( 'UnknownHostException' ) )
+              responseBody = sprintf( 'Unknown Host: %s', host )
+            end
+          else
+
+            responseBody = 'bad status'
           end
 
           logger.error( {
             :status  => responseStatus,
-            :message => response
+            :message => responseBody
           } )
 
           return nil
