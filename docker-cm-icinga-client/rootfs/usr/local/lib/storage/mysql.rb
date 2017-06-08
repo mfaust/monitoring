@@ -225,19 +225,22 @@ module Storage
       fqdn   = params.dig(:fqdn)
       status = params.dig(:status) # Database::ONLINE or [ Storage::MySQL::ONLINE, Storage::MySQL::PREPARE ]
 
-#       logger.debug( " nodes( #{params} )")
+      logger.debug( " nodes( #{params} )")
+
+      if( ip == nil && name == nil && fqdn == nil )
+        statement = 'select ip, name, fqdn, status from dns where 1 '
+      else
+
+        statement = sprintf(
+          'select ip, name, fqdn, status from dns where ip = \'%s\' or name = \'%s\' or fqdn = \'%s\' ',
+          ip,
+          name,
+          fqdn
+        )
+
+      end
 
       w = Array.new
-
-      if( ip != nil )
-        w << sprintf( 'ip like \'%%%s%%\'', ip )
-      end
-      if( name != nil )
-        w << sprintf( 'name like \'%%%s%%\'', name )
-      end
-      if( fqdn != nil )
-        w << sprintf( 'fqdn like \'%%%s%%\'', fqdn )
-      end
 
       if( status != nil )
 
@@ -280,12 +283,37 @@ module Storage
 
       if( w.count != 0 )
         w = w.join( ' or ' )
-        w = sprintf( 'where %s', w )
+#         w = sprintf( 'where %s', w )
       else
         w = nil
       end
 
-      statement = sprintf('SELECT ip, name, fqdn, status FROM dns %s', w  )
+      statement = sprintf(
+        '%s and ( %s )',
+        statement, w
+      )
+#      statement = sprintf('select ip, name, fqdn, status from dns %s', w  )
+
+      w.clear
+
+#       if( ip != nil )
+#         w << sprintf( 'ip like \'%%%s%%\'', ip )
+#       end
+#       if( name != nil )
+#         w << sprintf( 'name like \'%%%s%%\'', name )
+#       end
+#       if( fqdn != nil )
+#         w << sprintf( 'fqdn like \'%%%s%%\'', fqdn )
+#       end
+#
+#       if( w.count != 0 )
+#         w = w.join( ' or ' )
+#
+#         statement = sprintf(
+#           '%s and ( %s )',
+#           statement, w
+#         )
+#       end
 
       res = self.exec( statement )
 
@@ -306,7 +334,7 @@ module Storage
 #         end
 #       end
 
-      if( res.count != 0 )
+      if( res.size != 0 )
 
         headers = res.fields # <= that's an array of field names, in order
         res.each(:as => :hash) do |row|
@@ -794,8 +822,9 @@ module Storage
 
     def exec( statement )
 
+      logger.debug( "exec( #{statement} )" )
+
       result = nil
-      logger.debug( statement )
 
       begin
         retries ||= 1
@@ -815,6 +844,7 @@ module Storage
 
       logger.debug( result.class.to_s )
       logger.debug( result.inspect )
+      logger.debug( result.size )
 
       return result
 
