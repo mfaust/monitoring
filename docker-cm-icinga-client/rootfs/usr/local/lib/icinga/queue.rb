@@ -22,6 +22,13 @@ class CMIcinga2 < Icinga2::Client
           :buried  => stats.dig(:buried)
         } )
 
+        if( stats.dig(:ready).to_i > 10 )
+          logger.warn( 'more then 10 jobs in queue ... just wait' )
+
+          @mqConsumer.cleanQueue( @mqQueue )
+          return
+        end
+
         jobId  = data.dig( :id )
 
         result = self.processQueue( data )

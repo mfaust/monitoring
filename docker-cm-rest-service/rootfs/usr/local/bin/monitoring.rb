@@ -299,15 +299,17 @@ class Monitoring
 
   def nodeExists?( host )
 
-#     logger.debug( "nodeExists?( #{host} )" )
+    logger.debug( "nodeExists?( #{host} )" )
 
-    d = self.nodeInformations( { :host => host } )
+    ip, short, fqdn = self.nsLookup( host )
+
+    d = self.nodeInformations( { :host => fqdn } )
 
     if( d == nil )
       return false
     end
 
-    if( d.keys.first == host )
+    if( d.keys.first == fqdn )
       return true
     else
       return false

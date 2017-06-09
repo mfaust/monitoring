@@ -22,7 +22,7 @@ module ExternalDiscovery
 
       # AWS
       #
-      awsRegion      = settings.dig(:aws, :region)
+      @awsRegion     = settings.dig(:aws, :region)
 
       @historic      = []
 
@@ -37,7 +37,7 @@ module ExternalDiscovery
       logger.info( '-----------------------------------------------------------------' )
       logger.info( '' )
 
-      if( awsRegion == nil )
+      if( @awsRegion == nil )
         logger.error( 'aws region are nil' )
         raise 'aws region are nil'
       end
@@ -468,7 +468,7 @@ module ExternalDiscovery
           'environment'         => environment,
           'tier'                => tier,
           'aws'                 => {
-            'region'  => region,
+            'region'  => @awsRegion,
             'uuid'    => uuid
           },
           'services'            => tags.dig('services')
