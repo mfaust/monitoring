@@ -464,12 +464,12 @@ module ExternalDiscovery
           'display-name'        => displayName,
           'graphite-identifier' => graphiteIdentifier,
           'tags'                => useableTags,
+          'customer'            => customer,
+          'environment'         => environment,
+          'tier'                => tier,
           'aws'                 => {
-            'region'      => region,
-            'uuid'        => uuid,
-            'customer'    => customer,
-            'environment' => environment,
-            'tier'        => tier
+            'region'  => region,
+            'uuid'    => uuid
           },
           'services'            => tags.dig('services')
         }

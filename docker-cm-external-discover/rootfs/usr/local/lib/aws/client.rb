@@ -90,7 +90,7 @@ module Aws
                 'name'        => iid,
                 'state'       => istate,
                 'uid'         => iid,
-                'region'      => @region,
+                'region'      => region,
                 'launch_time' => ilaunch,
                 'dns'         => {
                   'ip'    => iip,

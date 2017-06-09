@@ -14,6 +14,7 @@ module ExternalDiscovery
     def initialize( settings )
 
       @filter  = settings.dig(:filter)
+      @region  = settings.dig(:aws, :region) || 'us-east-1'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - External Discovery Service - AWS Data Consumer' )
@@ -21,7 +22,7 @@ module ExternalDiscovery
       logger.info( '' )
 
       begin
-        @awsClient = Aws::Ec2::Client.new()
+        @awsClient = Aws::Ec2::Client.new( { :aws => { :region => 'us-east-1' } } )
         @awsData   = Hash.new()
 
         # run internal scheduler to remove old data
@@ -47,7 +48,7 @@ module ExternalDiscovery
 
       begin
 
-        @awsData = @awsClient.instances( { :filter => @filter } )
+        @awsData = @awsClient.instances( { :region => @region, :filter => @filter } )
 
       rescue => e
         logger.error( e )
