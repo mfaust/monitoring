@@ -122,7 +122,7 @@ module ExternalDiscovery
 
     def extractInstanceInformation( data = {} )
 
-      logger.debug( "extractInstanceInformation( #{data} )" )
+#       logger.debug( "extractInstanceInformation( #{data} )" )
 
 #       {
 #         "fqdn": "i-0130817e34d231f1d.monitoring",
@@ -166,7 +166,7 @@ module ExternalDiscovery
 
     def compareVersions( params = {} )
 
-      logger.debug( "compareVersions( #{params} )" )
+#       logger.debug( "compareVersions( #{params} )" )
 
       liveData     = params.dig( 'aws' )
       historicData = params.dig( 'monitoring' )
@@ -248,7 +248,7 @@ module ExternalDiscovery
           next
         end
 
-        if( historicData.include?( dns_short ) ||  historicData.include?( fqdn ) )
+        if( historicData.include?( dns_short ) || historicData.include?( fqdn ) )
           logger.info( sprintf( '  node %s / %s (%s) exists', uuid, dns_fqdn, cname ) )
           next
         end

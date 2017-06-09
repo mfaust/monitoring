@@ -662,9 +662,12 @@ module Grafana
             #  next
             #end
 
-#             logger.debug( sprintf( '  - %s', d ) )
+#            request = sprintf( '/api/dashboards/db/%s-%s', host, d )
+            request = sprintf( '/api/dashboards/%s', d )
 
-            response = self.deleteRequest( sprintf( '/api/dashboards/db/%s-%s', host, d ) )
+            logger.debug( sprintf( '  - %s (%s)', d, request ) )
+
+            response = self.deleteRequest( request )
           end
 
           logger.info( sprintf( '%d dashboards deleted', count ) )
@@ -728,9 +731,12 @@ module Grafana
 
         if( serviceName == 'replication-live-server' )
 
-          logger.info( 'search Master Live Server IOR for the Replication Live Server' )
+          logger.info( '  search Master Live Server IOR for the Replication Live Server' )
 
-          bean = @mbean.bean( @shortHostname, serviceName, 'Replicator' )
+          # 'Server'
+          ip, short, fqdn = self.nsLookup( @shortHostname )
+
+          bean = @mbean.bean( fqdn, serviceName, 'Replicator' )
 
           if( bean != nil && bean != false )
 
@@ -759,10 +765,10 @@ module Grafana
 
                     mlsIdentifier = identifier.dig( 'graphite-identifier' ).to_s
 
-                    logger.info( "use custom storage identifier from config: '#{mlsIdentifier}'" )
+                    logger.info( "  use custom storage identifier from config: '#{mlsIdentifier}'" )
                   end
                 else
-                  logger.info( 'the Master Live Server runs on the same host as the Replication Live Server' )
+                  logger.info( '  the Master Live Server runs on the same host as the Replication Live Server' )
                 end
               end
             end

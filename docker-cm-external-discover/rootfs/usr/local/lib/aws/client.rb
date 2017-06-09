@@ -51,7 +51,7 @@ module Aws
 
             res.instances.each do |inst|
 
-              logger.debug(inst)
+#               logger.debug(inst)
 
               iid     = inst.dig(:instance_id)
               istate  = inst.dig(:state).name
