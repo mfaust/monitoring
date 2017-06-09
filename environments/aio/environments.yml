@@ -56,6 +56,13 @@ services:
       ICINGA2_CMD_API_USER: icingaweb
       ICINGA2_CMD_API_PASS: icingaweb
 
+  dashing:
+    environment:
+      ICINGA_HOST: icinga2-master
+      ICINGA_API_USER: dashing
+      ICINGA_API_PASSWORD: dashing
+      ICINGAWEB_HOST: icingaweb2
+
   cm-rest-service:
     environment:
       TZ: 'Europe/Berlin'
