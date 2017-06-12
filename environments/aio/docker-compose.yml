@@ -321,7 +321,7 @@ services:
 
   dashing:
     restart: always
-    image: bodsch/docker-dashing:1706-01.dev
+    image: bodsch/docker-smashing-icinga2:latest
     container_name: dashing
     hostname: dashing
     labels:
