@@ -1,4 +1,5 @@
 
+require 'aws-sdk'
 require 'digest/md5'
 
 require_relative '../logging'
@@ -50,6 +51,8 @@ module Aws
 
             res.instances.each do |inst|
 
+#               logger.debug(inst)
+
               iid     = inst.dig(:instance_id)
               istate  = inst.dig(:state).name
               ilaunch = inst.dig(:launch_time)
@@ -87,11 +90,12 @@ module Aws
                 'name'        => iid,
                 'state'       => istate,
                 'uid'         => iid,
+                'region'      => region,
                 'launch_time' => ilaunch,
                 'dns'         => {
                   'ip'    => iip,
                   'short' => ifqdn.split('.').first,
-                  'name'  => ifqdn
+                  'fqdn'  => ifqdn
                 },
                 'tags'        => useableTags
               }
@@ -110,6 +114,66 @@ module Aws
         end
 
         return result
+
+      end
+
+    end
+
+
+    class Sns
+
+      def initialize( settings = {} )
+
+        @region  = settings.dig(:aws, :region) || 'us-east-1'
+
+        begin
+
+          Aws.config.update( { region: @region } )
+
+          @awsClient = Aws::EC2::Client.new()
+        rescue => e
+
+          raise e
+        end
+
+      end
+
+
+      def createSubscription( params = {} )
+
+        region   = params.dig(:region)  || @region
+        topic    = params.dig(:topic)
+        protocol = params.dig(:protocol)
+        endpoint = params.dig(:endpoint)
+
+        sns = Aws::SNS::Resource.new( region: region )
+
+        topic = sns.topic( sprintf( 'arn:aws:sns:%s:%s', region, topic ) ) # us-west-2:123456789:MyGroovyTopic')
+
+        sub = topic.subscribe({
+          protocol: protocol,
+          endpoint: endpoint
+        })
+
+        puts sub.arn
+
+
+      end
+
+
+      def sendMessage( params = {} )
+
+        region   = params.dig(:region)  || @region
+        topic    = params.dig(:topic)
+        message  = params.dig(:message)
+
+        sns = Aws::SNS::Resource.new( region: region )
+
+        topic = sns.topic( sprintf( 'arn:aws:sns:%s:%s', region, topic ) ) #  'arn:aws:sns:us-west-2:123456789:MyGroovyTopic')
+
+        topic.publish({
+          message: message
+        })
 
       end
 

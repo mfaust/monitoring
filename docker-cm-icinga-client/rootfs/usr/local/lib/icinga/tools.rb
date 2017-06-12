@@ -63,13 +63,17 @@ class CMIcinga2 < Icinga2::Client
       host    = params.dig(:host)
       fqdn    = params.dig(:fqdn)
 
+      awsConfig  = @database.config( { :ip => ip, :short => host, :fqdn => fqdn, :key => 'aws' } )
+
+#       logger.debug( awsConfig )
+
       # in first, we need the discovered services ...
       #
       for y in 1..30
 
         result = @database.discoveryData( { :ip => ip, :short => host, :fqdn => fqdn } )
 
-        logger.debug( result.class.to_s )
+#         logger.debug( result.class.to_s )
 
         if( result.is_a?( Hash ) && result.count != 0 )
 
@@ -97,10 +101,36 @@ class CMIcinga2 < Icinga2::Client
         payload = {}
       end
 
+      if( awsConfig )
+
+#         awsConfig.each do |a,v|
+#
+#           v = JSON.parse(v)
+#         end
+
+#        awsConfig = JSON.parse( awsConfig )
+
+        awsConfig = awsConfig.dig('aws')
+#:w        awsConfig = awsConfig.gsub( '=>', ':' )
+
+        payload['aws'] = self.parsedResponse( awsConfig )
+      end
+
+logger.debug( payload )
+
       return payload
 
     end
 
+
+
+    def parsedResponse( r )
+
+      return JSON.parse( r )
+    rescue JSON::ParserError => e
+      return r # do smth
+
+    end
 
   end
 

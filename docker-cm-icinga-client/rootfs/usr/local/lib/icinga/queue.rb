@@ -10,7 +10,6 @@ class CMIcinga2 < Icinga2::Client
     def queue()
 
 #       logger.debug( "CMIcinga2::Queue.queue()" )
-
       data = @mqConsumer.getJobFromTube( @mqQueue )
 
       if( data.count() != 0 )
@@ -22,6 +21,13 @@ class CMIcinga2 < Icinga2::Client
           :delayed => stats.dig(:delayed),
           :buried  => stats.dig(:buried)
         } )
+
+        if( stats.dig(:ready).to_i > 10 )
+          logger.warn( 'more then 10 jobs in queue ... just wait' )
+
+          @mqConsumer.cleanQueue( @mqQueue )
+          return
+        end
 
         jobId  = data.dig( :id )
 

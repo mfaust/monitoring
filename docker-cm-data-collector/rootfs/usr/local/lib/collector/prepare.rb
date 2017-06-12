@@ -115,7 +115,7 @@ module DataCollector
       # mapping array of hashes onto single hash
       dataForRedis = dataForRedis.reduce( {} , :merge )
 
-      @redis.createMeasurements( { :short => short, :data => dataForRedis } )
+      @redis.createMeasurements( { :short => short, :fqdn => fqdn, :data => dataForRedis } )
 
       @cache.set( short, 'prepared', expiresIn: 320 )
 

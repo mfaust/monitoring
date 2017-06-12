@@ -9,6 +9,8 @@ module Utils
 
     def self.resolv( host )
 
+      # puts( "resolv( #{host} )" )
+
       line  = nil
       long  = nil
       short = nil
@@ -75,7 +77,6 @@ module Utils
         end
       end
 
-
       # the host command above was disfunctional
       # we try the ruby resolv class
       if( line == nil )
@@ -107,9 +108,22 @@ module Utils
 
         parts = line.split( ' ' )
 
-        long  = parts.first.strip
-        ip    = parts.last.strip
-        short = long.split('.').first
+        #
+        #
+        if( line.include?('is an alias for') == true ) # mls.development.cosmos.internal is an alias for ip-172-31-41-204.ec2.internal.
+
+          fqdn  = parts.last.strip
+
+          r     = self.resolv( fqdn )
+
+          ip    = r.dig(:ip)
+          short = r.dig(:short)
+          long  = r.dig(:long)
+        else
+          long  = parts.first.strip
+          ip    = parts.last.strip
+          short = long.split('.').first
+        end
 
       end
 
@@ -170,7 +184,7 @@ module Utils
     # result @bool
     def self.isRunning? ( ip )
 
-      puts "pinging IP #{ip} ... "
+#       puts "pinging IP #{ip} ... "
 
       # first, ping check
       if( system( sprintf( 'ping -c1 -w1 %s > /dev/null', ip.to_s ) ) == true )

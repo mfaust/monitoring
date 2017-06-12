@@ -155,11 +155,10 @@ module DataCollector
       result = Utils::Network.portOpen?( host, port )
 
       if( result == false )
-        logger.error( sprintf( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
+        logger.warn( sprintf( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
 
         return JSON.parse( JSON.generate( { :status => 500 } ) )
       else
-
 
         m = ExternalClients::MongoDb.new( { :host => host, :port => port } )
 
@@ -190,7 +189,7 @@ module DataCollector
       result = Utils::Network.portOpen?( host, port )
 
       if( result == false )
-        logger.error( sprintf( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
+        logger.warn( sprintf( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
 
         return JSON.parse( JSON.generate( { :status => 500 } ) )
       else
@@ -238,7 +237,7 @@ module DataCollector
       result = Utils::Network.portOpen?( host, port )
 
       if( result == false )
-        logger.error( sprintf( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
+        logger.warn( sprintf( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
 
         return JSON.parse( JSON.generate( { :status => 500 } ) )
       else
@@ -268,7 +267,7 @@ module DataCollector
       result = Utils::Network.portOpen?( host, port )
 
       if( result == false )
-        logger.error( sprintf( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
+        logger.warn( sprintf( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
 
         return JSON.parse( JSON.generate( { :status => 500 } ) )
       else
@@ -301,7 +300,7 @@ module DataCollector
       result = Utils::Network.portOpen?( host, port )
 
       if( result == false )
-        logger.error( sprintf( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
+        logger.warn( sprintf( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
 
         return JSON.parse( JSON.generate( { :status => 500 } ) )
       else
@@ -358,7 +357,7 @@ module DataCollector
 
       if( data == nil )
 
-        data = @redis.measurements( { :short => host } )
+        data = @redis.measurements( { :short => host, :fqdn => fqdn } )
 
         if( data == nil || data == false )
           @cache.unset( host )
@@ -497,7 +496,7 @@ module DataCollector
       result = Utils::Network.portOpen?( destHost, destPort )
 
       if( result == false )
-        logger.error( sprintf( 'The Port %s on Host %s is not open, skip sending data', destPort, destHost ) )
+        logger.warn( sprintf( 'The Port %s on Host %s is not open, skip sending data', destPort, destHost ) )
       end
 
       return result
@@ -635,10 +634,11 @@ module DataCollector
 
       mlsIOR = nil
 
-      fqdn   = params.dig(:fqdn)
-      data   = params.dig(:data)
+      fqdn    = params.dig(:fqdn)
+      data    = params.dig(:data)
+      mlsHost = fqdn
 
-      logger.info( 'search Master Live Server IOR for the Replication Live Server' )
+      logger.info( '  search Master Live Server IOR for the Replication Live Server' )
 
       d = data.select {|d| d.dig('Replicator') }
 
@@ -663,17 +663,19 @@ module DataCollector
 
           realIP    = dns.dig('ip')   || ip
           realShort = dns.dig('name') || short
-          realFqdn  = dns.dig('fqdn') || fqdn
+          mlsHost   = dns.dig('fqdn') || fqdn
 
           value['MasterLiveServer'] = {
             'scheme' => scheme,
-            'host'   => realShort,
+            'host'   => mlsHost,
             'port'   => port,
             'path'   => path
           }
         end
 
       end
+
+      logger.info( sprintf( '  found \'%s\'', mlsHost ) )
 #       logger.debug( JSON.pretty_generate( data ) )
       return data
 

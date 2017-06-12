@@ -46,8 +46,8 @@ class Monitoring
 
     logger.level           = Logger::DEBUG
 
-    version              = '2.4.98'
-    date                 = '2017-06-04'
+    version              = '2.4.101'
+    date                 = '2017-06-08'
 
     logger.info( '-----------------------------------------------------------------' )
     logger.info( ' CoreMedia - Monitoring Service' )
@@ -62,55 +62,59 @@ class Monitoring
     @cache      = Cache::Store.new()
     @mqConsumer = MessageQueue::Consumer.new( @MQSettings )
     @mqProducer = MessageQueue::Producer.new( @MQSettings )
-    @database   = nil
 
-    if( mysqlHost != nil )
-
-      begin
-
-        until( @database != nil )
-
-          @database   = Storage::MySQL.new( {
-            :mysql => {
-              :host     => mysqlHost,
-              :user     => mysqlUser,
-              :password => mysqlPassword,
-              :schema   => mysqlSchema
-            }
-          } )
-
-        end
-      rescue => e
-
-        logger.error( e )
-      end
-    end
+    @database   = Storage::MySQL.new({
+      :mysql => {
+        :host     => mysqlHost,
+        :user     => mysqlUser,
+        :password => mysqlPassword,
+        :schema   => mysqlSchema
+      }
+    })
 
   end
 
 
-  # create a cache about all known monitored nodes
+  # get informations for one or all nodes back
   #
-  def createNodeInformation( fullInformation = false )
+  def nodeInformations( params = {} )
 
-    logger.info( 'create node information ...' )
+#     logger.debug( "nodeInformations( #{params} )" )
 
-    start   = Time.now
+    host            = params.dig(:host)
+    status          = params.dig(:status) || [ Storage::MySQL::ONLINE, Storage::MySQL::PREPARE ]
+    fullInformation = params.dig(:full)   || false
+
+    ip              = nil
+    short           = nil
+    fqdn            = nil
+
     result  = Hash.new()
+
+    if( host != nil )
+
+      ip, short, fqdn = self.nsLookup( host )
+
+      if( ip == nil && short == nil && fqdn == nil )
+
+        return nil
+      end
+
+      params = { :ip => ip, :short => short, :fqdn => fqdn, :status => status }
+    else
+
+      params = { :status => status }
+    end
 
     # get nodes with ONLINE or PREPARE state
     #
-    nodes = @database.nodes( { :status => [ Storage::MySQL::ONLINE, Storage::MySQL::PREPARE ] } )
+    nodes = @database.nodes( params )
 
-    if( nodes.is_a?( Hash ) || nodes.is_a?( Array ) )
+    if( nodes.is_a?( Array ) && nodes.count != 0 )
 
-      if( nodes.count != 0 )
+      nodes.each do |n|
 
-        if( nodes.is_a?( Hash ) )
-          nodes = nodes.keys
-        end
-
-        nodes.each do |n|
+        if( ip == nil && short == nil && fqdn == nil )
 
           ip, short, fqdn = self.nsLookup( n )
 
@@ -126,37 +130,35 @@ class Monitoring
             next
           end
 
-          result[n.to_s] ||= {}
+        end
 
-          # DNS data
-          #
-          result[n.to_s][:dns] ||= { 'ip' => ip, 'short' => short, 'fqdn' => fqdn }
+        result[n.to_s] ||= {}
 
-          status  = @database.status( { :short => short } )
-          created = status.dig('creation')
-          message = status.dig('status')
+        # DNS data
+        #
+        result[n.to_s][:dns] ||= { 'ip' => ip, 'short' => short, 'fqdn' => fqdn }
 
-          # STATUS data
-          #
-          result[n.to_s][:status] ||= { 'created' => created, 'status' => message }
+        status  = @database.status( { :ip => ip, :short => short, :fqdn => fqdn } )
+        # {"ip"=>"192.168.252.100", "name"=>"blueprint-box", "fqdn"=>"blueprint-box", "status"=>"online", "creation"=>2017-06-07 11:07:57 +0000}
 
-          hostConfiguration = @database.config( { :short => n } ) # self.getHostConfiguration( n )
+        created = status.dig('creation')
+        message = status.dig('status')
 
-          if( hostConfiguration != nil )
-            result[n.to_s][:custom_config] = hostConfiguration
-          end
+        # STATUS data
+        #
+        result[n.to_s][:status] ||= { 'created' => created, 'status' => message }
 
-          # get discovery data
-          #
-          discoveryData = @database.discoveryData( { :short => short } )
+        hostConfiguration = @database.config( { :ip => ip, :short => short, :fqdn => fqdn } )
 
-          if( discoveryData == nil )
+        if( hostConfiguration != nil )
+          result[n.to_s][:custom_config] = hostConfiguration
+        end
 
-            return {
-              :status   => 204,
-              :message  => 'no node data found'
-            }
-          end
+        # get discovery data
+        #
+        discoveryData = @database.discoveryData( { :ip => ip, :short => short, :fqdn => fqdn } )
+
+        if( discoveryData != nil )
 
           discoveryData.each do |a,d|
 
@@ -166,9 +168,11 @@ class Monitoring
 
           result[n.to_s][:services] ||= discoveryData
 
-          # realy needed?
-          #
-          if( fullInformation == true )
+        end
+
+        # realy needed?
+        #
+          if( fullInformation != nil && fullInformation == true )
 
             # get data from external services
             #
@@ -223,22 +227,14 @@ class Monitoring
             end
           end
 
-        end
 
-        @cache.set( 'information' ) { Cache::Data.new( result ) }
-
-      else
-#         logger.debug( 'no nodes found' )
-        @cache.unset( 'information' )
+        ip    = nil
+        short = nil
+        fqdn  = nil
       end
-
-    else
-#       logger.debug( 'no nodes found' )
-      @cache.unset( 'information' )
     end
 
-    finish = Time.now
-    logger.info( sprintf( 'finished in %s seconds', finish - start ) )
+    return result
 
   end
 
@@ -283,15 +279,14 @@ class Monitoring
     #
     # ------------------------------------------------
 
-    dns    = @database.dnsData( { :short => short } )
-#     status = @database.status( { :short => short } )
-
-    if( dns == nil )
-
-#       logger.debug( 'create dns entry in our storage backend' )
-
-      status = @database.createDNS( { :ip => ip, :short => short, :fqdn => fqdn } )
-    end
+#     dns    = @database.dnsData( { :ip => ip, :short => short, :fqdn => fqdn } )
+#
+#     if( dns == nil )
+#
+#       status = @database.createDNS( { :ip => ip, :short => short, :fqdn => fqdn } )
+#
+#       @cache.set( hostname , expiresIn: expire ) { Cache::Data.new( { 'ip': ip, 'short': short, 'long': fqdn } ) }
+#     end
 
 #     logger.debug( sprintf( '  ip   %s ', ip ) )
 #     logger.debug( sprintf( '  host %s ', short ) )
@@ -302,23 +297,37 @@ class Monitoring
   end
 
 
-  def nodeExists( node )
+  def nodeExists?( host )
 
-    self.createNodeInformation()
+    logger.debug( "nodeExists?( #{host} )" )
 
-    cache   = @cache.get( 'information' )
+    ip, short, fqdn = self.nsLookup( host )
 
-    if( cache == nil )
+    d = self.nodeInformations( { :host => fqdn } )
+
+    if( d == nil )
       return false
     end
 
-    h = cache.dig( node.to_s )
-
-    if ( h == nil )
-      return false
-    else
+    if( d.keys.first == fqdn )
       return true
+    else
+      return false
     end
+
+#     cache   = @cache.get( 'information' )
+#
+#     if( cache == nil )
+#       return false
+#     end
+#
+#     h = cache.dig( node.to_s )
+#
+#     if ( h == nil )
+#       return false
+#     else
+#       return true
+#     end
 
   end
 
@@ -504,16 +513,18 @@ class Monitoring
 
     logger.info( sprintf( 'add node \'%s\' to monitoring', host ) )
 
-    alreadyInMonitoring = self.nodeExists( host )
+    alreadyInMonitoring = self.nodeExists?( host )
+
+#     logger.debug( alreadyInMonitoring ? 'true' : 'false' )
 
     hostData = self.checkAvailablility?( host )
 
     if( hostData == false )
 
-      return {
+      return JSON.pretty_generate({
         :status  => 400,
         :message => 'Host are not available (DNS Problem)'
-      }
+      })
 
     end
 
@@ -552,15 +563,15 @@ class Monitoring
       config          = hash.keys.include?('config')       ? hash['config']       : {}
     end
 
-    logger.debug( sprintf( 'force      : %s', force            ? 'true' : 'false' ) )
-    logger.debug( sprintf( 'discovery  : %s', enableDiscovery  ? 'true' : 'false' ) )
-    logger.debug( sprintf( 'grafana    : %s', enabledGrafana   ? 'true' : 'false' ) )
-    logger.debug( sprintf( 'icinga     : %s', enabledIcinga    ? 'true' : 'false' ) )
-    logger.debug( sprintf( 'annotation : %s', annotation       ? 'true' : 'false' ) )
-    logger.debug( sprintf( 'overview   : %s', grafanaOverview  ? 'true' : 'false' ) )
-    logger.debug( sprintf( 'services   : %s', services ) )
-    logger.debug( sprintf( 'tags       : %s', tags ) )
-    logger.debug( sprintf( 'config     : %s', config ) )
+#    logger.debug( sprintf( 'force      : %s', force            ? 'true' : 'false' ) )
+#    logger.debug( sprintf( 'discovery  : %s', enableDiscovery  ? 'true' : 'false' ) )
+#    logger.debug( sprintf( 'grafana    : %s', enabledGrafana   ? 'true' : 'false' ) )
+#    logger.debug( sprintf( 'icinga     : %s', enabledIcinga    ? 'true' : 'false' ) )
+#    logger.debug( sprintf( 'annotation : %s', annotation       ? 'true' : 'false' ) )
+#    logger.debug( sprintf( 'overview   : %s', grafanaOverview  ? 'true' : 'false' ) )
+#    logger.debug( sprintf( 'services   : %s', services ) )
+#    logger.debug( sprintf( 'tags       : %s', tags ) )
+#    logger.debug( sprintf( 'config     : %s', config ) )
 
 
     if( force == false && alreadyInMonitoring == true )
@@ -595,14 +606,20 @@ class Monitoring
       sleep(1)
 
 #       logger.debug( 'remove configuration' )
-      status = @database.removeConfig( { :short => short } )
+      status = @database.removeConfig( { :ip => ip, :short => short, :fqdn => fqdn } )
 
       logger.info( 'done' )
 
       sleep(1)
     end
 
+
+    # create a valid DNS entry
+    #
+    status = @database.createDNS( { :ip => ip, :short => short, :fqdn => fqdn } )
+
     # now, we can write an own configiguration per node when we add them, hurray
+    #
     if( config.is_a?( Hash ) )
 
 #       logger.debug( "write configuration: #{config}" )
@@ -642,33 +659,34 @@ class Monitoring
 
   end
 
-  # use the predefined cache
+  #  - http://localhost/api/v2/host
+  #  - http://localhost/api/v2/host?short
+  #  - http://localhost/api/v2/host/blueprint-box
   #
   def listHost( host = nil, payload = nil )
 
-    self.createNodeInformation()
+    data = self.nodeInformations()
 
     request = payload.dig('rack.request.query_hash')
     short   = request.keys.include?('short')
 
+    logger.debug( data )
+
     result  = Hash.new()
-    cache   = @cache.get( 'information' )
 
-    if( cache == nil )
+    if( data == nil || data.count == 0 )
 
-      result = {
+      return JSON.pretty_generate({
         :status  => 204,
         :message => 'no hosts in monitoring found'
-      }
-
-      return JSON.pretty_generate( result )
+      })
     end
 
 
 
     if( host.to_s != '' )
 
-      h = cache.dig( host.to_s )
+      h = data.dig( host.to_s )
 
       if ( h != nil )
 
@@ -687,13 +705,13 @@ class Monitoring
 
     else
 
-      if( cache != nil )
+      if( data != nil )
 
         if( short == true )
 
-          result[:hosts] = cache.keys
+          result[:hosts] = data.keys
         else
-          result = cache
+          result = data
         end
 
         status = 200
@@ -733,7 +751,7 @@ class Monitoring
 
     logger.info( sprintf( 'remove node \'%s\' from monitoring', host ) )
 
-    alreadyInMonitoring = self.nodeExists( host )
+    alreadyInMonitoring = self.nodeExists?( host )
     hostData            = self.checkAvailablility?( host )
 
     result    = Hash.new()
@@ -785,11 +803,11 @@ class Monitoring
 #     logger.debug( 'set node status to DELETE' )
     status = @database.setStatus( { :ip => ip, :short => host, :fqdn => fqdn, :status => Storage::MySQL::DELETE } )
 
-    logger.debug( sprintf( 'force      : %s', force            ? 'true' : 'false' ) )
-    logger.debug( sprintf( 'discovery  : %s', enableDiscovery  ? 'true' : 'false' ) )
-    logger.debug( sprintf( 'grafana    : %s', enabledGrafana   ? 'true' : 'false' ) )
-    logger.debug( sprintf( 'icinga     : %s', enabledIcinga    ? 'true' : 'false' ) )
-    logger.debug( sprintf( 'annotation : %s', annotation       ? 'true' : 'false' ) )
+#    logger.debug( sprintf( 'force      : %s', force            ? 'true' : 'false' ) )
+#    logger.debug( sprintf( 'discovery  : %s', enableDiscovery  ? 'true' : 'false' ) )
+#    logger.debug( sprintf( 'grafana    : %s', enabledGrafana   ? 'true' : 'false' ) )
+#    logger.debug( sprintf( 'icinga     : %s', enabledIcinga    ? 'true' : 'false' ) )
+#    logger.debug( sprintf( 'annotation : %s', annotation       ? 'true' : 'false' ) )
 
     if( annotation == true )
       logger.info( 'annotation for remove' )
@@ -827,11 +845,11 @@ class Monitoring
 
     logger.debug( "addAnnotation( #{host}, #{payload} )" )
 
-    status                = 500
-    message               = 'initialize error'
+    status  = 500
+    message = 'initialize error'
 
-    result                = Hash.new()
-    hash                  = Hash.new()
+    result  = Hash.new()
+    hash    = Hash.new()
 
     if( host.to_s == '' &&  payload == '' )
 
@@ -841,26 +859,29 @@ class Monitoring
       } )
     end
 
-    command      = nil
-    argument     = nil
-    message      = nil
-    description  = nil
-    tags         = []
+    ip, short, fqdn = self.nsLookup( host )
+
+    command     = nil
+    argument    = nil
+    message     = nil
+    description = nil
+    tags        = []
 
     if( payload.is_a?( String ) )
       hash         = JSON.parse( payload )
     end
 
-    hash         = payload
+    logger.debug( JSON.pretty_generate( hash ) )
 
-    command      = hash.dig(:command)
-    argument     = hash.dig(:argument)
-    message      = hash.dig(:message)
-    description  = hash.dig(:description)
-    tags         = hash.dig(:tags)  || []
-    config       = hash.dig(:config)
-    fqdn         = hash.dig(:fqdn)
+#    hash         = payload
 
+    command      = hash.dig('command')
+    argument     = hash.dig('argument')
+    message      = hash.dig('message')
+    description  = hash.dig('description')
+    tags         = hash.dig('tags')  || []
+    config       = hash.dig('config')
+    fqdn         = hash.dig('fqdn')  || fqdn
 
     if( command == 'create' || command == 'remove' )
 #     example:
@@ -1010,3 +1031,4 @@ end
 # ------------------------------------------------------------------------------------------
 
 # EOF
+

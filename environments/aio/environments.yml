@@ -61,7 +61,9 @@ services:
       ICINGA_HOST: icinga2-master
       ICINGA_API_USER: dashing
       ICINGA_API_PASSWORD: dashing
-      ICINGAWEB_URL: http://localhost/icinga
+      ICINGAWEB_URL: /icinga
+      PROXY_PATH: /dashing
+
 
   cm-rest-service:
     environment:

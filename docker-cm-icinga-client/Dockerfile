@@ -9,9 +9,9 @@ ENV \
   TERM=xterm \
   APK_ADD="build-base bind-tools drill git mariadb-dev libressl-dev ruby-dev ruby-irb ruby-rdoc" \
   APK_DEL="build-base git ruby-dev ruby-rdoc " \
-  GEMS="beaneater ipaddress json mysql2 openssl rest-client rufus-scheduler tzinfo-data"
+  GEMS="beaneater ipaddress icinga2 json mysql2 rufus-scheduler tzinfo-data"
 
-LABEL version="1706-02.1"
+LABEL version="1706-02.2"
 
 # ---------------------------------------------------------------------------------------
 
@@ -30,11 +30,6 @@ RUN \
   do \
      gem install --quiet --no-rdoc --no-ri ${gem} ; \
   done && \
-  [ -d /opt ] || mkdir /opt && \
-  cd /opt && \
-  git clone https://github.com/bodsch/ruby-icinga2.git && \
-  cd ruby-icinga2 && \
-  gem install --quiet --no-rdoc --no-ri ./icinga2*gem && \
   for apk in ${APK_DEL} ; \
   do \
     apk del --quiet --purge ${apk} ; \

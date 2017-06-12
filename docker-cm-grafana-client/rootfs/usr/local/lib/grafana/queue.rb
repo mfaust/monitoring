@@ -29,7 +29,19 @@ module Grafana
       if( data.count() != 0 )
 
         stats = @mqConsumer.tubeStatistics( @mqQueue )
-        logger.debug( { :total => stats.dig(:total), :ready => stats.dig(:ready), :delayed => stats.dig(:delayed), :buried => stats.dig(:buried) } )
+        logger.debug( {
+          :total   => stats.dig(:total),
+          :ready   => stats.dig(:ready),
+          :delayed => stats.dig(:delayed),
+          :buried  => stats.dig(:buried)
+        } )
+
+        if( stats.dig(:ready).to_i > 10 )
+          logger.warn( 'more then 10 jobs in queue ... just wait' )
+
+          @mqConsumer.cleanQueue( @mqQueue )
+          return
+        end
 
         jobId  = data.dig( :id )
 

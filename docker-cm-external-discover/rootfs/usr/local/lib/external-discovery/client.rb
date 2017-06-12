@@ -22,7 +22,7 @@ module ExternalDiscovery
 
       # AWS
       #
-      awsRegion      = settings.dig(:aws, :region)
+      @awsRegion     = settings.dig(:aws, :region)
 
       @historic      = []
 
@@ -37,7 +37,7 @@ module ExternalDiscovery
       logger.info( '-----------------------------------------------------------------' )
       logger.info( '' )
 
-      if( awsRegion == nil )
+      if( @awsRegion == nil )
         logger.error( 'aws region are nil' )
         raise 'aws region are nil'
       end
@@ -74,8 +74,8 @@ module ExternalDiscovery
       name.gsub!('development-','dev ')
       name.gsub!('production-' ,'prod ')
       name.gsub!('caepreview'  ,'cae preview')
-      name.gsub!('management-' ,'mgmt ')
-      name.gsub!('delivery-'   ,'live ')
+      name.gsub!('management-' ,'be ')
+      name.gsub!('delivery-'   ,'fe ')
       name.gsub!( '-',' ' )
 
 #       name = case name
@@ -111,8 +111,8 @@ module ExternalDiscovery
       name.gsub!('development-','dev-')
       name.gsub!('production-' ,'prod-')
       name.gsub!('storage-'    , '')
-      name.gsub!('management-' ,'mgmt-')
-      name.gsub!('delivery-'   ,'live-')
+      name.gsub!('management-' ,'be-')
+      name.gsub!('delivery-'   ,'fe-')
       name.gsub!(' ', '-')
 
       return name
@@ -122,7 +122,7 @@ module ExternalDiscovery
 
     def extractInstanceInformation( data = {} )
 
-#      logger.debug( "extractInstanceInformation( #{data} )" )
+#       logger.debug( "extractInstanceInformation( #{data} )" )
 
 #       {
 #         "fqdn": "i-0130817e34d231f1d.monitoring",
@@ -157,7 +157,7 @@ module ExternalDiscovery
       environment = data.dig('tags', 'environment')
       dns_ip      = data.dig('dns' , 'ip')
       dns_short   = data.dig('dns' , 'short')
-      dns_fqdn    = data.dig('dns' , 'name')
+      dns_fqdn    = data.dig('dns' , 'fqdn')
 
       return uuid, dns_ip, dns_short, dns_fqdn, fqdn, name, state, tags, cname, name, tier, customer, environment
 
@@ -165,6 +165,8 @@ module ExternalDiscovery
 
 
     def compareVersions( params = {} )
+
+#       logger.debug( "compareVersions( #{params} )" )
 
       liveData     = params.dig( 'aws' )
       historicData = params.dig( 'monitoring' )
@@ -221,9 +223,10 @@ module ExternalDiscovery
 
         logger.debug( sprintf( '  %s', name ) )
 
-        # currently, we want only the dev environment
+        # PRIMARY FILTER
+        # currently, we want only the prod environment
         #
-        if( environment != 'development' )
+        if( environment != 'production' )
           next
         end
 
@@ -245,14 +248,27 @@ module ExternalDiscovery
           next
         end
 
-        if( historicData.include?( dns_short ) ||  historicData.include?( fqdn ) )
+        if( historicData.include?( dns_short ) || historicData.include?( fqdn ) )
           logger.info( sprintf( '  node %s / %s (%s) exists', uuid, dns_fqdn, cname ) )
           next
         end
 
         logger.info( sprintf( '  add node %s / %s (%s)', uuid, dns_fqdn, cname ) )
 
-        if( self.nodeAdd( { :ip => ip, :short => short, :fqdn => fqdn, :cname => cname, :name => name, :customer => customer, :environment => environment, :tier => tier, :tags => tags } ) == true )
+        result = self.nodeAdd({
+          :ip          => ip,
+          :short       => short,
+          :fqdn        => fqdn,
+          :uuid        => uuid,
+          :cname       => cname,
+          :name        => name,
+          :customer    => customer,
+          :environment => environment,
+          :tier        => tier,
+          :tags        => tags
+        })
+
+        if( result == true )
 
           sleep(5)
         end
@@ -393,6 +409,8 @@ module ExternalDiscovery
       ip          = params.dig(:ip)
       short       = params.dig(:short)
       fqdn        = params.dig(:fqdn)
+      uuid        = params.dig(:uuid)
+      region      = params.dig(:region)
       cname       = params.dig(:cname)
       name        = params.dig(:name)
       tags        = params.dig(:tags)
@@ -417,12 +435,21 @@ module ExternalDiscovery
       discoveryStatus = 204
       useableTags     = Array.new()
 
-#       logger.debug( "original tags: #{tags}" )
+      logger.debug( "original tags: #{tags}" )
 
       # our positive list for Tags
+      #
       useableTags = tags.filter( 'customer', 'environment', 'tier' )
 
-#       logger.debug( "useable tags : #{useableTags}" )
+      logger.debug( "useable tags : #{useableTags}" )
+
+      # display-name for grafana and icinga
+      #
+      displayName  = self.normalizeName( name, [ 'storage-' ] )
+
+      # graphite identifier for graphite and grafana
+      #
+      graphiteIdentifier = self.graphiteIdentifier( { :name => name } )
 
       # add to monitoring
       # defaults:
@@ -430,16 +457,23 @@ module ExternalDiscovery
       # - icinga     = true
       # - grafana    = true
       # - annotation = true
-      d = JSON.generate( {
+      d = JSON.generate({
         :force      => false,
         :tags       => useableTags,
         :config     => {
-          'display-name'        => self.normalizeName( name, [ 'storage-' ] ),
-          'graphite-identifier' => self.graphiteIdentifier( { :name => name } ),
+          'display-name'        => displayName,
+          'graphite-identifier' => graphiteIdentifier,
           'tags'                => useableTags,
+          'customer'            => customer,
+          'environment'         => environment,
+          'tier'                => tier,
+          'aws'                 => {
+            'region'  => @awsRegion,
+            'uuid'    => uuid
+          },
           'services'            => tags.dig('services')
         }
-      } )
+      })
 
       logger.debug( "data: #{d}" )
 
@@ -548,13 +582,13 @@ module ExternalDiscovery
 
       # add a blocking cache
       #
-      if( @jobs.jobs( { :fqdn => 'foo' } ) == true )
+      if( @jobs.jobs( { :status => 'running' } ) == true )
 
         logger.warn( 'we are working on this job' )
         return
       end
 
-      @jobs.add( { :fqdn => 'foo' } )
+      @jobs.add( { :status => 'running' } )
 
       @data   = Array.new()
       threads = Array.new()
@@ -571,7 +605,7 @@ module ExternalDiscovery
           @cache.set( 'aws-data' , expiresIn: 120 ) { Cache::Data.new( awsData ) }
         end
 
-        @jobs.del( { :fqdn => 'foo' } )
+        @jobs.del( { :status => 'running' } )
         return
 
       else
@@ -591,7 +625,7 @@ module ExternalDiscovery
       finish = Time.now
       logger.info( sprintf( 'finished in %s seconds', finish - start ) )
 
-      @jobs.del( { :fqdn => 'foo' } )
+      @jobs.del( { :status => 'running' } )
 
     end
 

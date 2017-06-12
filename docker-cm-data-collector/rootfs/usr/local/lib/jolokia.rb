@@ -59,29 +59,63 @@ module Jolokia
         :read_timeout => timeout
       ) do |http|
 
+        max_retries   = 3
+        times_retried = 0
+
         begin
 
           http.request( request )
 
+        rescue Net::ReadTimeout => e
+
+          if( times_retried < max_retries )
+
+            times_retried += 1
+            logger.warn( sprintf( 'Cannot execute request to %s://%s:%s%s, cause: %s', uri.scheme, uri.hostname, uri.port, uri.request_uri, e ) )
+            logger.warn( "   retry #{times_retried}/#{max_retries}" )
+            logger.debug( sprintf( ' -> request body: %s', request.body ) )
+
+            sleep( 2 )
+            retry
+          else
+            logger.error( "Exiting request ..." )
+
+            return {
+              :status  => 500,
+              :message => sprintf( 'Net::ReadTimeout for request: %s://%s:%s%s', uri.scheme, uri.hostname, uri.port, uri.request_uri )
+            }
+          end
+
+#        rescue Timeout::Error, Errno::EINVAL, Errno::ECONNRESET, EOFError, Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError => e
+        rescue Errno::EINVAL, Errno::ECONNRESET, EOFError, Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError => e
+
+          logger.warn( sprintf( 'Cannot execute request to %s://%s:%s%s, cause: %s', uri.scheme, uri.hostname, uri.port, uri.request_uri, e ) )
+          logger.debug( sprintf( ' -> request body: %s', request.body ) )
+
+          return {
+            :status  => 500,
+            :message => e
+          }
+
         rescue Exception => e
 
           logger.warn( sprintf( 'Cannot execute request to %s://%s:%s%s, cause: %s', uri.scheme, uri.hostname, uri.port, uri.request_uri, e ) )
+          logger.debug( sprintf( ' -> request body: %s', request.body ) )
 
+          return {
+            :status  => 500,
+            :message => e
+          }
+
+#         rescue => e
+#
+#           logger.warn( sprintf( 'Cannot execute request to %s://%s:%s%s, cause: %s', uri.scheme, uri.hostname, uri.port, uri.request_uri, e ) )
 #           logger.debug( sprintf( ' -> request body: %s', request.body ) )
-
-          return {
-            :status  => 500,
-            :message => e
-          }
-
-        rescue => e
-
-          logger.warn( sprintf( 'Cannot execute request to %s://%s:%s%s, cause: %s', uri.scheme, uri.hostname, uri.port, uri.request_uri, e ) )
-
-          return {
-            :status  => 500,
-            :message => e
-          }
+#
+#           return {
+#             :status  => 500,
+#             :message => e
+#           }
 
         end
       end
