@@ -845,11 +845,11 @@ class Monitoring
 
     logger.debug( "addAnnotation( #{host}, #{payload} )" )
 
-    status                = 500
-    message               = 'initialize error'
+    status  = 500
+    message = 'initialize error'
 
-    result                = Hash.new()
-    hash                  = Hash.new()
+    result  = Hash.new()
+    hash    = Hash.new()
 
     if( host.to_s == '' &&  payload == '' )
 
@@ -859,11 +859,13 @@ class Monitoring
       } )
     end
 
-    command      = nil
-    argument     = nil
-    message      = nil
-    description  = nil
-    tags         = []
+    ip, short, fqdn = self.nsLookup( host )
+
+    command     = nil
+    argument    = nil
+    message     = nil
+    description = nil
+    tags        = []
 
     if( payload.is_a?( String ) )
       hash         = JSON.parse( payload )
@@ -879,8 +881,7 @@ class Monitoring
     description  = hash.dig('description')
     tags         = hash.dig('tags')  || []
     config       = hash.dig('config')
-    fqdn         = hash.dig('fqdn')
-
+    fqdn         = hash.dig('fqdn')  || fqdn
 
     if( command == 'create' || command == 'remove' )
 #     example:
