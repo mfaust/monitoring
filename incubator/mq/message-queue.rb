@@ -9,6 +9,7 @@
 
 require 'beaneater'
 require 'json'
+require 'digest/md5'
 
 require_relative 'logging'
 
@@ -23,8 +24,8 @@ module MessageQueue
 
     def initialize( params = {} )
 
-      beanstalkHost       = params[:beanstalkHost] ? params[:beanstalkHost] : 'beanstalkd'
-      beanstalkPort       = params[:beanstalkPort] ? params[:beanstalkPort] : 11300
+      beanstalkHost       = params.dig(:beanstalkHost) || 'beanstalkd'
+      beanstalkPort       = params.dig(:beanstalkPort) || 11300
 
       begin
         @b = Beaneater.new( sprintf( '%s:%s', beanstalkHost, beanstalkPort ) )
@@ -74,6 +75,55 @@ module MessageQueue
 
     end
 
+
+    def jobExists?( tube, job )
+
+      if( job.is_a?( String ) )
+        job = JSON.parse(job)
+      end
+
+      job.reject! { |k| k == 'timestamp' }
+      job.reject! { |k| k == 'payload' }
+
+      job = self.checksum(job)
+
+      if( @b )
+
+        t = @b.tubes[ tube.to_s ]
+
+        while t.peek(:ready)
+
+          j = t.reserve
+
+          b = JSON.parse( j.body )
+
+          if( b.is_a?( String ) )
+            b = JSON.parse( b )
+          end
+
+          b.reject! { |k| k == 'timestamp' }
+          b.reject! { |k| k == 'payload' }
+
+          b = self.checksum(b)
+
+          if( job == b )
+            logger.warn( "  job '#{job}' already in queue .." )
+            return true
+          else
+            return false
+          end
+
+        end
+      end
+    end
+
+
+    def checksum( params = {} )
+
+      params = Hash[params.sort]
+      return Digest::MD5.hexdigest(params.to_s)
+    end
+
   end
 
 
@@ -94,9 +144,11 @@ module MessageQueue
 
           scheduler = Rufus::Scheduler.new
 
-          scheduler.every( 40 ) do
+          scheduler.every( '20s' ) do
             releaseBuriedJobs( beanstalkQueue )
           end
+        else
+          logger.info( 'no Queue defined. Skip releaseBuriedJobs() Part' )
         end
 
       rescue => e
@@ -113,6 +165,7 @@ module MessageQueue
 
     def tubeStatistics( tube )
 
+      queue       = nil
       jobsTotal   = 0
       jobsReady   = 0
       jobsDelayed = 0
@@ -126,6 +179,7 @@ module MessageQueue
 
           if( tubeStats )
 
+            queue       = tubeStats[ :name ]
             jobsTotal   = tubeStats[ :total_jobs ]
             jobsReady   = tubeStats[ :current_jobs_ready ]
             jobsDelayed = tubeStats[ :current_jobs_delayed ]
@@ -137,6 +191,7 @@ module MessageQueue
       end
 
       return {
+        :queue   => queue,
         :total   => jobsTotal.to_i,
         :ready   => jobsReady.to_i,
         :delayed => jobsDelayed.to_i,
@@ -154,7 +209,6 @@ module MessageQueue
       if( @b )
 
         stats = self.tubeStatistics( tube )
-#         logger.debug( stats )
 
         if( stats.dig( :ready ) == 0 )
           return result
@@ -193,13 +247,10 @@ module MessageQueue
       end
 
       return result
-
     end
 
 
     def releaseBuriedJobs( tube )
-
-      logger.debug( sprintf( "releaseBuriedJobs( #{tube} )" ) )
 
       if( @b )
 
@@ -209,22 +260,11 @@ module MessageQueue
 
         if( buried )
 
-          logger.debug( sprintf( 'found job: %d, kick them back into the \'ready\' queue', buried.id ) )
+          logger.info( sprintf( 'found job: %d, kick them back into the \'ready\' queue', buried.id ) )
 
           tube.kick(1)
         end
-
-#         while( job = tube.peek( :buried ) )
-#
-# #           logger.debug( job.stats )
-#
-#           response = job.kick()
-#
-# #           logger.debug( response )
-#         end
-
       end
-
     end
 
 
@@ -236,8 +276,9 @@ module MessageQueue
 
         job = @b.jobs.find( id )
 
-        if( job.exists? == true )
+        logger.debug( "found job: #{job}" )
 
+        if( job != nil )
           response = job.delete
         end
 
@@ -252,15 +293,29 @@ module MessageQueue
 
       if( @b )
 
+#         t   = @b.tubes[tube]
+#         logger.debug( t.class.to_s )
+#         logger.debug( t.inspect )
+#
+#         j_ready = t.peek(:ready)
+#         j_bury  = t.peek(:buried)
+#
+#         logger.debug( "ready    : #{j_ready}" )
+#         logger.debug( "buried   : #{j_bury}" )
+#
+# #         j = t.reserve(1)
+# #         j = t.find( id )
+# #         logger.debug( j )
+
         job = @b.jobs.find( id )
 
-        if( job.exists? == true )
+        logger.debug( "found job: #{job}" )
 
+        if( job != nil )
           response = job.bury
         end
 
       end
-
     end
 
   end

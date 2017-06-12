@@ -203,6 +203,82 @@ module MessageQueue
     end
 
 
+    def cleanQueue( tube )
+
+      b = Array.new()
+
+      sleep(0.3)
+      timeout = nil
+      jobs = []
+
+      begin
+        100.times do |i|
+          jobs << @b.tubes[tube].reserve(timeout)
+          timeout = 0
+        end
+      rescue Beaneater::TimedOutError
+        # nothing to do
+      end
+
+      jobs.map do |j|
+
+#         logger.debug( JSON.pretty_generate( {
+#                   'id'    => j.id,
+#                   'tube'  => j.stats.tube,
+#                   'state' => j.stats.state,
+#                   'ttr'   => j.stats.ttr,
+#                   'prio'  => j.stats.pri,
+#                   'age'   => j.stats.age,
+#                   'delay' => j.stats.delay,
+#                   'body'  => JSON.parse( j.body )
+#                 } )
+
+        body = JSON.parse( j.body )
+
+        body['id'] = j.id
+        body.reject! { |k| k == 'timestamp' }
+        body.reject! { |k| k == 'payload' }
+        body = Hash[body.sort]
+
+        logger.debug( body )
+        b << body
+      end
+
+      # sort reverse
+      #
+      b = b.sort_by { |x| x['id'].to_i }.reverse
+
+      logger.debug( b.count )
+      logger.debug( b )
+
+      # unique entries
+      #
+      c = b.uniq { |t| [ t['cmd'], t['node'] ] }
+
+      identicalEntries      = b & c
+      removedEntries        = b - c
+
+      jobs.map do |j|
+
+        removedEntries.each do |r|
+
+          if j.id == r.dig('id' )
+
+            self.deleteJob( tube, j.id )
+
+#            logger.debug( "remove job id: #{j.id}" )
+#            logger.debug( r )
+#            j.delete
+          end
+
+        end
+
+      end
+
+    end
+
+
+
     def getJobFromTube( tube, delete = false )
 
       result = {}
@@ -270,7 +346,7 @@ module MessageQueue
 
     def deleteJob( tube, id )
 
-#       logger.debug( sprintf( "deleteJob( #{tube}, #{id} )" ) )
+      logger.debug( sprintf( "deleteJob( #{tube}, #{id} )" ) )
 
       if( @b )
 
@@ -285,7 +361,7 @@ module MessageQueue
 
     def buryJob( tube, id )
 
-#       logger.debug( sprintf( "buryJob( #{tube}, #{id} )" ) )
+      logger.debug( sprintf( "buryJob( #{tube}, #{id} )" ) )
 
       if( @b )
 

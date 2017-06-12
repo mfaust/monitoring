@@ -171,21 +171,25 @@ module Grafana
         }
       })
 
-      @apiInstance = self.createApiInstance({
-        :timeout      => timeout,
-        :open_timeout => open_timeout,
-        :headers      => headers
-      })
+      until( @apiInstance != nil )
+
+        @apiInstance = self.createApiInstance({
+          :timeout      => timeout,
+          :open_timeout => open_timeout,
+          :headers      => headers
+        })
+
+      end
 
       for y in 1..15
 
         @loggedIn = self.login( { :user => @user, :password => @password } )
 
         if( @loggedIn == true )
-          logger.debug( 'login successful' )
+          logger.info( 'login successful' )
           break
         else
-          logger.debug( sprintf( 'Attempting to establish user session ... %d', y ) )
+          logger.info( sprintf( 'Attempting to establish user session ... %d', y ) )
           sleep(5)
         end
       end
@@ -204,9 +208,11 @@ module Grafana
 
       begin
 
+        retries ||= 0
+
         until( instance != nil )
 
-          logger.debug( 'try to connect our grafana endpoint' )
+          logger.info( sprintf( 'try to connect our grafana endpoint (%d)', retries ) )
 
           instance = RestClient::Resource.new(
             @url,
@@ -217,6 +223,8 @@ module Grafana
           )
 
           sleep(5)
+
+          retries += 1
         end
       rescue => e
 

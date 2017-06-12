@@ -50,7 +50,7 @@ jolokia:
       metrics:
       - description: Base Measurement Points for ALL Content Server
         mbean: com.coremedia:application=*,type=Server
-        attribute: RunLevel,ResourceCacheHits,ResourceCacheEvicts,ResourceCacheEntries,ResourceCacheInterval,ResourceCacheSize,RepositorySequenceNumber,ConnectionCount,Uptime,ServiceInfos,LicenseValidFrom,LicenseValidUntilHard,LicenseValidUntilSoft
+        attribute: RunLevel,ResourceCacheHits,ResourceCacheEvicts,ResourceCacheEntries,ResourceCacheInterval,ResourceCacheSize,RepositorySequenceNumber,ConnectionCount,Uptime,ServiceInfos,LicenseValidFrom,LicenseValidUntilHard,LicenseValidUntilSoft,MasterLiveServerIORUrl
       - description: Connection Pool for DBA Connections
         mbean: com.coremedia:application=*,bean=ConnectionPool,type=Store
         attribute: BusyConnections,OpenConnections,IdleConnections,MaxConnections,MinConnections

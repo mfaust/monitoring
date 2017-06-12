@@ -122,8 +122,24 @@ module Grafana
 
         ip, short, fqdn = self.prepare( host )
 
-        discovery    = @database.discoveryData( { :ip => ip, :short => short, :fqdn => fqdn } )
-#        discovery = @redis.discoveryData( { :short => short } )
+
+        begin
+
+          for y in 1..15
+
+            discovery    = @database.discoveryData( { :ip => ip, :short => short, :fqdn => fqdn } )
+
+            if( discovery != nil )
+              break
+            else
+              logger.debug( sprintf( 'wait for discovery data for node \'%s\' ... %d', fqdn, y ) )
+              sleep( 4 )
+            end
+          end
+
+        rescue => e
+          logger.error( e )
+        end
 
         if( discovery == nil )
 
@@ -231,7 +247,7 @@ module Grafana
 
           for y in 1..30
 
-            result = @redis.measurements( { :short => short } )
+            result = @redis.measurements( { :short => short, :fqdn => fqdn } )
 
             if( result != nil )
               measurements = result
@@ -241,14 +257,6 @@ module Grafana
               sleep( 4 )
             end
           end
-
-#           until( measurements != nil )
-#
-#             logger.debug( sprintf( 'wait for measurements data for node \'%s\'', host ) )
-#
-#             measurements = @redis.measurements( { :short => host } )
-#             sleep( 8 )
-#           end
 
         rescue => e
           logger.error( e )
@@ -654,9 +662,12 @@ module Grafana
             #  next
             #end
 
-#             logger.debug( sprintf( '  - %s', d ) )
+#            request = sprintf( '/api/dashboards/db/%s-%s', host, d )
+            request = sprintf( '/api/dashboards/%s', d )
 
-            response = self.deleteRequest( sprintf( '/api/dashboards/db/%s-%s', host, d ) )
+            logger.debug( sprintf( '  - %s (%s)', d, request ) )
+
+            response = self.deleteRequest( request )
           end
 
           logger.info( sprintf( '%d dashboards deleted', count ) )
@@ -720,9 +731,12 @@ module Grafana
 
         if( serviceName == 'replication-live-server' )
 
-          logger.info( 'search Master Live Server IOR for the Replication Live Server' )
+          logger.info( '  search Master Live Server IOR for the Replication Live Server' )
 
-          bean = @mbean.bean( @shortHostname, serviceName, 'Replicator' )
+          # 'Server'
+          ip, short, fqdn = self.nsLookup( @shortHostname )
+
+          bean = @mbean.bean( fqdn, serviceName, 'Replicator' )
 
           if( bean != nil && bean != false )
 
@@ -751,10 +765,10 @@ module Grafana
 
                     mlsIdentifier = identifier.dig( 'graphite-identifier' ).to_s
 
-                    logger.info( "use custom storage identifier from config: '#{mlsIdentifier}'" )
+                    logger.info( "  use custom storage identifier from config: '#{mlsIdentifier}'" )
                   end
                 else
-                  logger.info( 'the Master Live Server runs on the same host as the Replication Live Server' )
+                  logger.info( '  the Master Live Server runs on the same host as the Replication Live Server' )
                 end
               end
             end

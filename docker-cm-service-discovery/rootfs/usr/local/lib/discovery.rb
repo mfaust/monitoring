@@ -221,7 +221,7 @@ module ServiceDiscovery
       status  = 400
       message = 'Host not in Monitoring'
 
-      result  = @database.removeDNS( { :short => short } )
+      result  = @database.removeDNS( { :ip => ip, :short => short, :fqdn => fqdn } )
 
       if( result != nil )
 
@@ -280,7 +280,7 @@ module ServiceDiscovery
 
       # check discovered datas from the past
       #
-      discoveryData    = @database.discoveryData( { :short => short } )
+      discoveryData    = @database.discoveryData( { :ip => ip, :short => short, :fqdn => fqdn } )
 
       if( discoveryData != nil )
 
@@ -288,7 +288,7 @@ module ServiceDiscovery
 
         # look for online status ...
         #
-        status = @database.status( { :short => host } )
+        status = @database.status( { :ip => ip, :short => short, :fqdn => fqdn } )
 
         if( status == nil )
 
@@ -304,7 +304,7 @@ module ServiceDiscovery
         if( status != nil || status != Storage::MySQL::OFFLINE )
 
           logger.debug( 'set host status to ONLINE' )
-          status = @database.setStatus( { :short => host, :status => Storage::MySQL::ONLINE } )
+          status = @database.setStatus( { :ip => ip, :short => short, :fqdn => fqdn, :status => Storage::MySQL::ONLINE } )
         end
 
         return {
@@ -395,10 +395,10 @@ module ServiceDiscovery
       #
       discoveredServices = self.createHostConfig( discoveredServices )
 
-      result    = @database.createDiscovery( { :short => short, :data => discoveredServices } )
+      result    = @database.createDiscovery( { :ip => ip, :short => short, :fqdn => fqdn, :data => discoveredServices } )
 
       logger.debug( 'set host status to ONLINE' )
-      result    = @database.setStatus( { :short => host, :status => Storage::MySQL::ONLINE } )
+      result    = @database.setStatus( { :ip => ip, :short => short, :fqdn => fqdn, :status => Storage::MySQL::ONLINE } )
 
       finish = Time.now
       logger.info( sprintf( 'finished in %s seconds', finish - start ) )
@@ -470,7 +470,7 @@ module ServiceDiscovery
         #
         ip, short, fqdn = self.nsLookup( host )
 
-        discoveryData   = @database.discoveryData( { :short => short } )
+        discoveryData   = @database.discoveryData( { :ip => ip, :short => short, :fqdn => fqdn } )
 
         if( discoveryData == nil )
 
@@ -501,7 +501,7 @@ module ServiceDiscovery
         #
         for y in 1..15
 
-          result    = @database.status( { :short => short } )
+          result    = @database.status( { :ip => ip, :short => short, :fqdn => fqdn } )
 
           if( result != nil )
             status = result
