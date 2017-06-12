@@ -159,6 +159,7 @@ services:
       - /share/etc/nginx/modules.d/01-proxy-grafana.conf:/etc/nginx/modules.d/01-proxy-grafana.conf
       - /share/etc/nginx/modules.d/01-proxy-graphite.conf:/etc/nginx/modules.d/01-proxy-graphite.conf
       - /share/etc/nginx/modules.d/01-proxy-icingaweb2.conf:/etc/nginx/modules.d/01-proxy-icingaweb2.conf
+      - /share/etc/nginx/modules.d/01-proxy-dashing.conf:/etc/nginx/modules.d/01-proxy-dashing.conf
       - /share/etc/nginx/modules.d/01-proxy-markdown-service.conf:/etc/nginx/modules.d/01-proxy-markdown-service.conf
     networks:
       mon:
