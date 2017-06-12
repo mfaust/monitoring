@@ -48,6 +48,9 @@ module Graphite
 
       endpoint = sprintf( '%s/events/', uri.request_uri )
 
+      logger.debug( data )
+      logger.debug( endpoint )
+
       begin
 
         response     = @apiInstance[ '/events/' ].post( data.to_json, { 'Content-Type' => 'application/json' } )

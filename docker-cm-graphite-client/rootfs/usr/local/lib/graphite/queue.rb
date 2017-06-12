@@ -89,9 +89,11 @@ module Graphite
         payload  = JSON.parse( payload )
       end
 
+      logger.debug( JSON.pretty_generate( payload ) )
+
       timestamp  = payload.dig('timestamp')
       config     = payload.dig('config')
-      fqdn       = payload.dig('fqdn')
+      fqdn       = payload.dig('fqdn') || node
 
       @identifier = fqdn
 
@@ -118,11 +120,10 @@ module Graphite
         @identifier = config.dig('graphite-identifier')
       end
 
-
       logger.debug( JSON.pretty_generate( payload ) )
 
 
-      logger.info( sprintf( 'add annotation \'%s\' for node %s', command, fqdn ) )
+      logger.info( sprintf( 'add annotation \'%s\' for node \'%s\'', command, fqdn ) )
 
       case command
       when 'create', 'remove'
