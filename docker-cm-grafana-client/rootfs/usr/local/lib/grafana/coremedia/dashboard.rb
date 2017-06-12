@@ -587,11 +587,12 @@ module Grafana
           }
         end
 
-        data = data.collect { |item| item['uri'] }
-
-        data.each do |d|
-          d.gsub!( sprintf( 'db/%s-', tags ), '' )
-        end
+        # [
+        #   {"id"=>39, "title"=>"blueprint-box - Cache Classes (CM)", "uri"=>"db/blueprint-box-cache-classes-cm", "type"=>"dash-db", "tags"=>["blueprint-box"], "isStarred"=>false},
+        #   {"id"=>40, "title"=>"blueprint-box - Cache Classes (Livecontext)", "uri"=>"db/blueprint-box-cache-classes-livecontext", "type"=>"dash-db", "tags"=>["blueprint-box"], "isStarred"=>false},
+        # ...
+        # ]
+        logger.debug( data )
 
         if( data.count == 0 )
 
@@ -599,6 +600,15 @@ module Grafana
             :status     => 204,
             :message    => 'no Dashboards found'
           }
+        end
+
+        # get all elements from tyoe 'uri'
+        # and remove the path and the tag-name'
+        data = data.collect { |item| item['uri'] }
+
+        # db/blueprint-box-cache-classes-cm => cache-classes-cm
+        data.each do |d|
+          d.gsub!( sprintf( 'db/%s-', tags ), '' )
         end
 
         return {
@@ -630,55 +640,77 @@ module Grafana
         logger.info( sprintf( 'remove dashboards for host %s (%s)', host, @grafanaHostname ) )
 
         dashboards = self.listDashboards( { :tags => host } )
-        dashboards = dashboards.dig(:dashboards)
 
-        if( dashboards == nil )
+        status = dashboards.dig(:status)
 
-          return {
-            :status      => 500,
-            :message     => 'no dashboards found'
-          }
-
-        end
-
-        count      = dashboards.count()
-
-        if( count.to_i == 0 )
+        if( status.to_i == 204 )
 
           return {
-            :status      => 204,
-            :name        => host,
-            :message     => 'No Dashboards found'
+            :status     => 204,
+            :name       => host,
+            :message    => 'no Dashboards found'
           }
-        else
 
-#           logger.debug( sprintf( 'found %d dashboards for delete', count ) )
+        elsif( status.to_i == 200 )
 
-          dashboards.each do |d|
+          logger.debug( dashboards )
 
-            # TODO
-            #if( (i.include?"group") && ( !host.include?"group") )
-            #  # Don't delete group templates except if deletion is forced
-            #  next
-            #end
+          dashboards = dashboards.dig(:dashboards)
 
-#            request = sprintf( '/api/dashboards/db/%s-%s', host, d )
-            request = sprintf( '/api/dashboards/%s', d )
+          logger.debug( dashboards )
 
-            logger.debug( sprintf( '  - %s (%s)', d, request ) )
+          if( dashboards == nil )
 
-            response = self.deleteRequest( request )
+            return {
+              :status      => 500,
+              :message     => 'no dashboards found'
+            }
+
           end
 
-          logger.info( sprintf( '%d dashboards deleted', count ) )
+          count      = dashboards.count()
 
-          return {
-            :status      => 200,
-            :name        => host,
-            :message     => sprintf( '%d dashboards deleted', count )
-          }
+          if( count.to_i == 0 )
 
+            return {
+              :status      => 204,
+              :name        => host,
+              :message     => 'no Dashboards found'
+            }
+          else
+
+            logger.debug( sprintf( 'found %d dashboards for delete', count ) )
+
+            dashboards.each do |d|
+
+              # TODO
+              #if( (i.include?"group") && ( !host.include?"group") )
+              #  # Don't delete group templates except if deletion is forced
+              #  next
+              #end
+
+              # add 'db' and hostname to the request
+              #
+
+              request = sprintf( '/api/dashboards/db/%s-%s', host, d )
+#              request = sprintf( '/api/dashboards/%s', d )
+
+              logger.debug( sprintf( '  - %s (%s)', d, request ) )
+
+              response = self.deleteRequest( request )
+            end
+
+            logger.info( sprintf( '%d dashboards deleted', count ) )
+
+            return {
+              :status      => 200,
+              :name        => host,
+              :message     => sprintf( '%d dashboards deleted', count )
+            }
+
+          end
         end
+
       end
 
     end

@@ -843,7 +843,7 @@ class Monitoring
 
   def addAnnotation( host, payload )
 
-#     logger.debug( "addAnnotation( #{host}, #{payload} )" )
+    logger.debug( "addAnnotation( #{host}, #{payload} )" )
 
     status                = 500
     message               = 'initialize error'
@@ -869,15 +869,17 @@ class Monitoring
       hash         = JSON.parse( payload )
     end
 
-    hash         = payload
+    logger.debug( JSON.pretty_generate( hash ) )
 
-    command      = hash.dig(:command)
-    argument     = hash.dig(:argument)
-    message      = hash.dig(:message)
-    description  = hash.dig(:description)
-    tags         = hash.dig(:tags)  || []
-    config       = hash.dig(:config)
-    fqdn         = hash.dig(:fqdn)
+#    hash         = payload
+
+    command      = hash.dig('command')
+    argument     = hash.dig('argument')
+    message      = hash.dig('message')
+    description  = hash.dig('description')
+    tags         = hash.dig('tags')  || []
+    config       = hash.dig('config')
+    fqdn         = hash.dig('fqdn')
 
 
     if( command == 'create' || command == 'remove' )
