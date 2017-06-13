@@ -114,7 +114,7 @@ module Aws
           raise e
         end
 
-        logger.debug( JSON.pretty_generate( result ) )
+#         logger.debug( JSON.pretty_generate( result ) )
 
         return result
 

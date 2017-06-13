@@ -233,7 +233,9 @@ module ExternalDiscovery
         #  - cosmos-production-delivery-mls
         #  - cosmos-development-delivery-rls-cae
         #
-        if( !['management-cms','delivery-mls','delivery-rls-cae'].include?(cname) )
+        if( !['management-cms','delivery-mls','delivery-rls-cae'].include?(name) )
+
+          logger.debug( "skip: '#{name}'" )
           next
         end
 

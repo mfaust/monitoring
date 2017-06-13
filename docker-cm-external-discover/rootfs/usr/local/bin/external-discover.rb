@@ -19,7 +19,7 @@ apiPort          = ENV.fetch('MONITORING_PORT', 80)
 apiVersion       = ENV.fetch('MONITORING_API_VERSION', 2)
 awsRegion        = ENV.fetch('AWS_REGION', 'us-east-1')
 awsEnvironment   = ENV.fetch('AWS_ENVIRONMENT', 'development')
-serviceEnabled   = ENV.fetch('SERVICE_ENABLED', false)
+serviceEnabled   = ENV.fetch('SERVICE_ENABLED', true)
 interval         = ENV.fetch('INTERVAL'         , 40 )
 delay            = ENV.fetch('RUN_DELAY'        , 10 )
 
