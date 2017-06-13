@@ -74,11 +74,11 @@ module Aws
 
 #               logger.debug( JSON.pretty_generate( tags ) )
 
-              if( tags.key?('monitoring-services') )
-                tags['services'] = tags.delete('monitoring-services')
-              end
+#               if( tags.key?('monitoring-services') )
+#                 tags['services'] = tags.delete('monitoring-services')
+#               end
 
-              useableTags = tags.filter( 'customer', 'environment', 'tier', 'name', 'services' )
+              useableTags = tags.filter( 'customer', 'environment', 'tier', 'name', 'cm_apps' )
 
               if( useableTags.key?('services') )
                 useableTags['services'] = useableTags['services'].split(',')

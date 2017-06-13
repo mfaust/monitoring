@@ -53,6 +53,16 @@ module ExternalDiscovery
     end
 
 
+    def getFqdn( data )
+
+      b = Array.new
+      data.each do |x|
+        b <<  x.select { |key, value| key.to_s.match(/^dns/) }.values.first.dig('fqdn')
+      end
+      b
+    end
+
+
 
     def findUid( historic, uid )
 
@@ -81,6 +91,87 @@ module ExternalDiscovery
       end
 
     end
+
+
+
+    def normalizeName( n, filter = [] )
+
+      filter.each do |f|
+        n.gsub!( f, '' )
+      end
+
+      n.gsub!('development-','dev ')
+      n.gsub!('production-' ,'prod ')
+      n.gsub!('caepreview'  ,'cae preview')
+      n.gsub!('management-' ,'be ')
+      n.gsub!('delivery-'   ,'fe ')
+      n.gsub!( '-',' ' )
+
+      return n
+
+    end
+
+
+    def graphiteIdentifier( params = {} )
+
+      name      = params.dig(:name)
+
+      name.gsub!('development-','dev-')
+      name.gsub!('production-' ,'prod-')
+      name.gsub!('storage-'    , '')
+      name.gsub!('management-' ,'be-')
+      name.gsub!('delivery-'   ,'fe-')
+      name.gsub!(' ', '-')
+
+      return name
+
+    end
+
+
+    def extractInstanceInformation( data = {} )
+
+#       logger.debug( "extractInstanceInformation( #{data} )" )
+
+#       {
+#         "fqdn": "i-0130817e34d231f1d.monitoring",
+#         "name": "i-0130817e34d231f1d",
+#         "state": "running",
+#         "uid": "i-0130817e34d231f1d",
+#         "launch_time": "2017-05-16 05:32:41 UTC",
+#         "dns": {
+#           "ip": "172.31.11.111",
+#           "short": "ip-172-31-11-111",
+#           "name": "ip-172-31-11-111.ec2.internal"
+#         },
+#         "tags": {
+#           "cname": "management-solr.development.cosmos.internal.",
+#           "customer": "cosmos",
+#           "environment": "development",
+#           "name": "cosmos-development-storage-management-solr",
+#           "tier": "storage"
+#         },
+#         "checksum": "c17e8c86ffeea56ae72049212d8e153a"
+#       }
+
+      fqdn        = data.dig('fqdn')
+#       name        = data.dig('name')
+      uuid        = data.dig('uid')
+      state       = data.dig('state') || 'running'
+      tags        = data.dig('tags')  || []
+      cname       = data.dig('tags', 'cname')
+      name        = data.dig('tags', 'name')
+      tier        = data.dig('tags', 'tier')
+      customer    = data.dig('tags', 'customer')
+      environment = data.dig('tags', 'environment')
+      dns_ip      = data.dig('dns' , 'ip')
+      dns_short   = data.dig('dns' , 'short')
+      dns_fqdn    = data.dig('dns' , 'fqdn')
+
+      return uuid, dns_ip, dns_short, dns_fqdn, fqdn, name, state, tags, cname, name, tier, customer, environment
+
+    end
+
+
 
   end
 
