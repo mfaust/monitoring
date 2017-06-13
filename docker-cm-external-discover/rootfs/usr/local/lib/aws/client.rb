@@ -1,5 +1,6 @@
 
 require 'aws-sdk'
+require 'time'
 require 'digest/md5'
 
 require_relative '../logging'
@@ -37,6 +38,8 @@ module Aws
         domain  = params.dig(:domain) || 'monitoring'
         result  = Array.new()
 
+        currentTime = Time.now.to_i
+
         if( filter == nil )
           logger.error( 'the param \'filter\' can not be nil!' )
           return result
@@ -61,8 +64,14 @@ module Aws
               ifqdn   = inst.dig(:private_dns_name)
               itags   = inst.dig(:tags)
 
-              if( itags )
+              ilaunch = Time.parse(ilaunch).to_i
 
+              if( ilaunch + 60 <= currentTime ) # add 60 seconds
+                logger.debug( "node #{iid} just started ... skip" )
+                next
+              end
+
+              if( itags )
                 tags = Array.new()
                 itags.each do |t|
                   tags << { t.dig(:key).downcase => t.dig(:value) }
