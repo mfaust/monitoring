@@ -81,7 +81,8 @@ module Aws
               useableTags = tags.filter( 'customer', 'environment', 'tier', 'name', 'cm_apps' )
 
               if( useableTags.key?('services') )
-                useableTags['services'] = useableTags['services'].split(',')
+                useableTags['services'] = useableTags['services'].split(' ')
+                useableTags['services'] << 'node_exporter'
               else
                 useableTags['services'] = []
               end
