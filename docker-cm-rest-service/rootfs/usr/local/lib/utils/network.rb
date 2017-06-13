@@ -108,6 +108,13 @@ module Utils
 
         parts = line.split( ' ' )
 
+        # / # host -t A 172.31.41.133
+        # Host 133.41.31.172.in-addr.arpa. not found: 3(NXDOMAIN)
+        if( line.include?('not found') == true )
+          # panikmodus => ON
+          return { :ip => nil, :short => nil, :fqdn => nil }
+        end
+
         #
         #
         if( line.include?('is an alias for') == true ) # mls.development.cosmos.internal is an alias for ip-172-31-41-204.ec2.internal.
