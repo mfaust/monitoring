@@ -128,7 +128,7 @@ module CarbonData
         result                  = []
         completedSequenceNumber = 0
 
-        replicatorData = @mbean.bean( @identifier, @serviceName, 'Replicator' )
+        replicatorData = @mbean.bean( @Server, @serviceName, 'Replicator' )
 
         if( replicatorData == false )
 
@@ -181,7 +181,7 @@ module CarbonData
 #         logger.debug( @identifier )
 #         logger.debug( @serviceName )
 
-        replicatorData = @mbean.bean( @identifier, @serviceName, 'Replicator' )
+        replicatorData = @mbean.bean( @Server, @serviceName, 'Replicator' )
 
         if( replicatorData == false )
 

@@ -234,6 +234,7 @@ module CarbonData
       data    = nil
 
       @identifier    = self.storagePath( fqdn )
+      @Server        = fqdn
       graphiteOutput = Array.new()
 
       logger.info( sprintf( 'Host: %s', fqdn ) )
