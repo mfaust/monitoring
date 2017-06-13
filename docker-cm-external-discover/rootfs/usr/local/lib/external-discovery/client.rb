@@ -22,7 +22,8 @@ module ExternalDiscovery
 
       # AWS
       #
-      @awsRegion     = settings.dig(:aws, :region)
+      @awsRegion      = settings.dig(:aws, :region)
+      @awsEnvironment = settings.dig(:aws, :environment)
 
       @historic      = []
 
@@ -53,7 +54,7 @@ module ExternalDiscovery
 
       filter = [
         { name: 'instance-state-name', values: ['running'] },
-        { name: 'tag-key'            , values: ['monitoring-enabled'] }
+        { name: 'tag-key'            , values: ['monitoring-enabled',@awsEnvironment] },
       ]
 
       @jobs             = JobQueue::Job.new()
@@ -193,6 +194,8 @@ module ExternalDiscovery
         return
       end
 
+      unknownHost = Array.new()
+
       identicalEntries      = liveData & historicData
       removedEntries        = liveData - historicData
 
@@ -226,17 +229,17 @@ module ExternalDiscovery
         # PRIMARY FILTER
         # currently, we want only the prod environment
         #
-        if( environment != 'production' )
+        if( environment != 'development' )
           next
         end
 
         if( cname == nil || cname == '.' )
-          logger.warn( "  cname for '#{name}' are not configured, take #{name}" )
+#           logger.warn( "  cname for '#{name}' are not configured, take #{name}" )
           cname = name
 #          next
         end
 
-        if( tier == nil || tier == 'service' )
+        if( tier == nil || tier == 'service' || tier == 'storage' )
           logger.warn( "  wrong tier #{tier} - '#{name}' will be ignored ..." )
           next
         end
@@ -251,6 +254,21 @@ module ExternalDiscovery
         if( historicData.include?( dns_short ) || historicData.include?( fqdn ) )
           logger.info( sprintf( '  node %s / %s (%s) exists', uuid, dns_fqdn, cname ) )
           next
+        else
+
+          unknownHost << {
+            :ip          => ip,
+            :short       => short,
+            :fqdn        => fqdn,
+            :uuid        => uuid,
+            :cname       => cname,
+            :name        => name,
+            :customer    => customer,
+            :environment => environment,
+            :tier        => tier,
+            :tags        => tags
+          }
+
         end
 
         logger.info( sprintf( '  add node %s / %s (%s)', uuid, dns_fqdn, cname ) )
@@ -270,7 +288,7 @@ module ExternalDiscovery
 
         if( result == true )
 
-          sleep(5)
+          sleep(8)
         end
 
         sleep(2)

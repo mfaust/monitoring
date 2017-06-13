@@ -42,6 +42,7 @@ module Aws
           return result
         end
 
+        logger.debug( filter )
 
         begin
 
@@ -113,73 +114,13 @@ module Aws
           raise e
         end
 
+        logger.debug( JSON.pretty_generate( result ) )
+
         return result
 
       end
 
     end
-
-
-    class Sns
-
-      def initialize( settings = {} )
-
-        @region  = settings.dig(:aws, :region) || 'us-east-1'
-
-        begin
-
-          Aws.config.update( { region: @region } )
-
-          @awsClient = Aws::EC2::Client.new()
-        rescue => e
-
-          raise e
-        end
-
-      end
-
-
-      def createSubscription( params = {} )
-
-        region   = params.dig(:region)  || @region
-        topic    = params.dig(:topic)
-        protocol = params.dig(:protocol)
-        endpoint = params.dig(:endpoint)
-
-        sns = Aws::SNS::Resource.new( region: region )
-
-        topic = sns.topic( sprintf( 'arn:aws:sns:%s:%s', region, topic ) ) # us-west-2:123456789:MyGroovyTopic')
-
-        sub = topic.subscribe({
-          protocol: protocol,
-          endpoint: endpoint
-        })
-
-        puts sub.arn
-
-
-      end
-
-
-      def sendMessage( params = {} )
-
-        region   = params.dig(:region)  || @region
-        topic    = params.dig(:topic)
-        message  = params.dig(:message)
-
-        sns = Aws::SNS::Resource.new( region: region )
-
-        topic = sns.topic( sprintf( 'arn:aws:sns:%s:%s', region, topic ) ) #  'arn:aws:sns:us-west-2:123456789:MyGroovyTopic')
-
-        topic.publish({
-          message: message
-        })
-
-      end
-
-    end
-
   end
-
 end
 
