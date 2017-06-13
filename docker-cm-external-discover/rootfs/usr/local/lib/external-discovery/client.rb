@@ -54,7 +54,8 @@ module ExternalDiscovery
 
       filter = [
         { name: 'instance-state-name', values: ['running'] },
-        { name: 'tag-key'            , values: ['monitoring-enabled',@awsEnvironment] },
+        { name: 'tag-key'            , values: ['monitoring-enabled'] },
+        { name: 'tag:environment'    , values: [@awsEnvironment] }
       ]
 
       @jobs             = JobQueue::Job.new()
@@ -227,9 +228,12 @@ module ExternalDiscovery
         logger.debug( sprintf( '  %s', name ) )
 
         # PRIMARY FILTER
-        # currently, we want only the prod environment
+        # currently, we want only the following services:
+        #  - cosmos-development-management-cms
+        #  - cosmos-production-delivery-mls
+        #  - cosmos-development-delivery-rls-cae
         #
-        if( environment != 'development' )
+        if( !['management-cms','delivery-mls','delivery-rls-cae'].include?(cname) )
           next
         end
 
