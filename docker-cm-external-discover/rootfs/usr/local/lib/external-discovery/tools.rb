@@ -63,6 +63,11 @@ module ExternalDiscovery
     end
 
 
+    def entry_with_fqdn( data, fqdn )
+
+      data.find{ |x| x.dig('dns','fqdn') == fqdn }
+    end
+
 
     def findUid( historic, uid )
 

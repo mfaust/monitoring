@@ -95,98 +95,72 @@ module ExternalDiscovery
 
       unknownHost = Array.new()
 
-#       identicalEntries      = aws_data & monitoring_data
-#       removedEntries        = aws_data - monitoring_data
-#
-#       aws_dataCount         = aws_data.count
-#       monitoring_dataCount     = monitoring_data.count
-#       identicalEntriesCount = identicalEntries.count
-#       removedEntriesCount   = removedEntries.count
-
-#       logger.debug( '------------------------------------------------------------' )
-#       logger.info( sprintf( 'live Data holds %d entries'    , aws_dataCount ) )
-# #       logger.debug( "  #{aws_data}" )
-#       logger.info( sprintf( 'historic Data holds %d entries', monitoring_dataCount ) )
-# #       logger.debug( "  #{monitoring_data}" )
-#       logger.debug( '------------------------------------------------------------' )
-#       logger.info( sprintf( 'identical entries %d'          , identicalEntriesCount ) )
-# #       logger.debug(  "  #{identicalEntries}" )
-#       logger.info( sprintf( 'removed entries %d'            , removedEntriesCount ) )
-# #       logger.debug(  "  #{removedEntries}" )
-#       logger.debug( '------------------------------------------------------------' )
-
       ## get all dns_fqdn entries
       #
-      aws_data_ex = getFqdn( aws_data )
+      aws = getFqdn( aws_data )
 
-      logger.debug( "AWS: #{aws_data_ex}" )
+      logger.debug( "AWS: #{aws_data}" )
 
+      identicalEntries      = aws & monitoring_data
+      removedEntries        = aws - monitoring_data
+      newEntries            = aws - identicalEntries
 
+      aws_dataCount         = aws_data.count
+      monitoring_dataCount  = monitoring_data.count
+      identicalEntriesCount = identicalEntries.count
+      newEntriesCount       = newEntries.count
+
+      logger.debug( '------------------------------------------------------------' )
+      logger.info( sprintf( 'AWS holds %d entries', aws_dataCount ) )
+      logger.info( sprintf( 'MON holds %d entries', monitoring_dataCount ) )
+      logger.debug( '------------------------------------------------------------' )
+      logger.info( sprintf( 'identical entries %d', identicalEntriesCount ) )
+      logger.debug(  "  #{identicalEntries}" )
+      logger.info( sprintf( 'new entries %d', newEntriesCount ) )
+      logger.debug(  "  #{newEntries}" )
+      logger.debug( '------------------------------------------------------------' )
 
       # TODO
       # we need an better way to detect adding or removing!
       # or re-adding, when the node comes up with an new ip
 
-      aws_data.each do |l|
+      newEntries.each do |a|
 
-        data = l.clone
+        d           = entry_with_fqdn( aws_data, a )
 
-        uuid, dns_ip, dns_short, dns_fqdn, fqdn, name, state, tags, cname, name, tier, customer, environment = self.extractInstanceInformation( data )
+        aws_state       = d.dig('state') || 'running'
+        aws_uuid        = d.dig('uid')
+        aws_region      = d.dig('region')
+        aws_tags        = d.dig('tags')  || []
+        tag_name        = d.dig('tags', 'name')
+        tag_tier        = d.dig('tags', 'tier')
+        tag_customer    = d.dig('tags', 'customer')
+        tag_environment = d.dig('tags', 'environment')
+        tag_cm_apps     = d.dig('tags', 'cm_apps')
+        dns_ip          = d.dig('dns', 'ip')
+        dns_short       = d.dig('dns', 'short')
+        dns_fqdn        = d.dig('dns', 'fqdn')
 
-        # PRIMARY FILTER
-        # currently, we want only the following services:
-        #  - cosmos-development-management-cms
-        #  - cosmos-production-delivery-mls
-        #  - cosmos-development-delivery-rls-cae
-        #
-        if( !['cosmos-development-management-cms','cosmos-development-delivery-mls','cosmos-development-delivery-rls-cae'].include?(name) )
-          logger.debug( "skip: '#{name}'" )
+        logger.debug(d)
+
+        if( !['cosmos-development-management-cms','cosmos-development-delivery-mls','cosmos-development-delivery-rls-cae'].include?(tag_name) )
+          logger.debug( "skip: '#{tag_name}'" )
           next
         end
 
-#         if( cname == nil || cname == '.' )
-#           logger.warn( "  cname not configured - '#{name}' will be ignored ..." )
-#           next
-#         end
+#        ip, short, fqdn = nsLookup( dns_fqdn )
+#
+#        if( ip == nil || short == nil || fqdn == nil )
+#          logger.error( 'DNS problem, skip' )
+#          next
+#        end
 
-        if( tier == nil || tier == 'service' || tier == 'storage' )
-          logger.warn( "  wrong tier #{tier} - '#{name}' will be ignored ..." )
-          next
-        end
-
-        ip, short, fqdn = nsLookup( fqdn )
-
-        if( ip == nil || short == nil || fqdn == nil )
-          logger.error( 'DNS problem, skip' )
-          next
-        end
-
-        logger.debug( monitoring_data )
-        logger.debug( "#{name}: #{ip} - #{short} - #{fqdn} | #{dns_ip} - #{dns_short} - #{dns_fqdn}" )
-
-        if( monitoring_data.include?( dns_fqdn ) || monitoring_data.include?( fqdn ) )
-          logger.info( sprintf( '  node %s / %s (%s) exists', uuid, dns_fqdn, name ) )
-          next
-        else
-
-          unknownHost << {
-            :ip          => ip,
-            :short       => short,
-            :fqdn        => fqdn,
-            :uuid        => uuid,
-            :cname       => cname,
-            :name        => name,
-            :customer    => customer,
-            :environment => environment,
-            :tier        => tier,
-            :tags        => tags
-          }
-
-        end
+#         logger.debug(d)
+        logger.debug( "#{tag_name}: #{dns_ip} - #{dns_short} - #{dns_fqdn}" )
 
         logger.info( sprintf( '  add node %s / %s (%s)', uuid, dns_fqdn, cname ) )
 
-        result = self.nodeAdd({
+        params = {
           :ip          => ip,
           :short       => short,
           :fqdn        => fqdn,
@@ -197,7 +171,11 @@ module ExternalDiscovery
           :environment => environment,
           :tier        => tier,
           :tags        => tags
-        })
+        }
+
+        logger.debug(params)
+
+        result = self.nodeAdd(params)
 
         if( result == true )
 
@@ -208,7 +186,89 @@ module ExternalDiscovery
 
       end
 
-      aws_data = nil
+
+#       aws_data.each do |l|
+#
+#         data = l.clone
+#
+#         uuid, dns_ip, dns_short, dns_fqdn, fqdn, name, state, tags, cname, name, tier, customer, environment = self.extractInstanceInformation( data )
+#
+#         # PRIMARY FILTER
+#         # currently, we want only the following services:
+#         #  - cosmos-development-management-cms
+#         #  - cosmos-production-delivery-mls
+#         #  - cosmos-development-delivery-rls-cae
+#         #
+#         if( !['cosmos-development-management-cms','cosmos-development-delivery-mls','cosmos-development-delivery-rls-cae'].include?(name) )
+#           logger.debug( "skip: '#{name}'" )
+#           next
+#         end
+#
+# #         if( cname == nil || cname == '.' )
+# #           logger.warn( "  cname not configured - '#{name}' will be ignored ..." )
+# #           next
+# #         end
+#
+#         if( tier == nil || tier == 'service' || tier == 'storage' )
+#           logger.warn( "  wrong tier #{tier} - '#{name}' will be ignored ..." )
+#           next
+#         end
+#
+#         ip, short, fqdn = nsLookup( fqdn )
+#
+#         if( ip == nil || short == nil || fqdn == nil )
+#           logger.error( 'DNS problem, skip' )
+#           next
+#         end
+#
+#         logger.debug( monitoring_data )
+#         logger.debug( "#{name}: #{ip} - #{short} - #{fqdn} | #{dns_ip} - #{dns_short} - #{dns_fqdn}" )
+#
+#         if( monitoring_data.include?( dns_fqdn ) || monitoring_data.include?( fqdn ) )
+#           logger.info( sprintf( '  node %s / %s (%s) exists', uuid, dns_fqdn, name ) )
+#           next
+#         else
+#
+#           unknownHost << {
+#             :ip          => ip,
+#             :short       => short,
+#             :fqdn        => fqdn,
+#             :uuid        => uuid,
+#             :cname       => cname,
+#             :name        => name,
+#             :customer    => customer,
+#             :environment => environment,
+#             :tier        => tier,
+#             :tags        => tags
+#           }
+#
+#         end
+#
+#         logger.info( sprintf( '  add node %s / %s (%s)', uuid, dns_fqdn, cname ) )
+#
+#         result = self.nodeAdd({
+#           :ip          => ip,
+#           :short       => short,
+#           :fqdn        => fqdn,
+#           :uuid        => uuid,
+#           :cname       => cname,
+#           :name        => name,
+#           :customer    => customer,
+#           :environment => environment,
+#           :tier        => tier,
+#           :tags        => tags
+#         })
+#
+#         if( result == true )
+#
+#           sleep(8)
+#         end
+#
+#         sleep(2)
+#
+#       end
+#
+#       aws_data = nil
 
       sleep(20)
 
@@ -406,25 +466,27 @@ module ExternalDiscovery
       @data   = Array.new()
       threads = Array.new()
 
-      awsData        = @cache.get( 'aws-data' )
+#      awsData        = @cache.get( 'aws-data' )
+      awsData        = @dataConsumer.instances()
+
       monitoringData = @monitoringClient.monitoringData
 
-      if( awsData == nil )
-
-        awsData = @dataConsumer.instances()
-
-        if( awsData.is_a?(Array) && awsData.count() != 0 )
-          logger.debug( 'store data into cache' )
-          @cache.set( 'aws-data' , expiresIn: 120 ) { Cache::Data.new( awsData ) }
-        end
-
-        @jobs.del( { :status => 'running' } )
-        return
-
-      else
-
-        logger.debug( 'found cached AWS data' )
-      end
+#       if( awsData == nil )
+#
+#         awsData = @dataConsumer.instances()
+#
+#         if( awsData.is_a?(Array) && awsData.count() != 0 )
+#           logger.debug( 'store data into cache' )
+#           @cache.set( 'aws-data' , expiresIn: 120 ) { Cache::Data.new( awsData ) }
+#         end
+#
+#         @jobs.del( { :status => 'running' } )
+#         return
+#
+#       else
+#
+#         logger.debug( 'found cached AWS data' )
+#       end
 
       start = Time.now
 
@@ -433,7 +495,7 @@ module ExternalDiscovery
 
       logger.debug( 'look to insert new nodes, or delete removed ...' )
 
-      self.compareVersions( aws: awsData, monitoring: monitoringData )
+      self.compareVersions( { 'aws' => awsData, 'monitoring' => monitoringData } )
 
       finish = Time.now
       logger.info( sprintf( 'finished in %s seconds', finish - start ) )
