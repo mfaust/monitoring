@@ -65,9 +65,10 @@ module Aws
               itags   = inst.dig(:tags)
 
               ilaunch = ilaunch.to_i
+              launch_time_diff = currentTime - ilaunch
 
-              if( ilaunch + 60 <= currentTime ) # add 60 seconds
-                logger.debug( "node #{iid} just started ... skip" )
+              if( launch_time_diff < 60 ) # add 60 seconds
+                logger.debug( "node #{iid} started at #{Time.at(ilaunch + 60).strftime('%Y-%m-%d %H:%M:%S')} (#{Time.at(currentTime).strftime('%Y-%m-%d %H:%M:%S')}) .. skip" )
                 next
               end
 
@@ -81,13 +82,11 @@ module Aws
               tags = tags.reduce( :merge )
               tags = Hash[tags.sort]
 
-#               logger.debug( JSON.pretty_generate( tags ) )
+              if( tags.key?('cm_apps') )
+                tags['services'] = tags.delete('cm_apps')
+              end
 
-#               if( tags.key?('monitoring-services') )
-#                 tags['services'] = tags.delete('monitoring-services')
-#               end
-
-              useableTags = tags.filter( 'customer', 'environment', 'tier', 'name', 'cm_apps' )
+              useableTags = tags.filter( 'customer', 'environment', 'tier', 'name', 'services' )
 
               if( useableTags.key?('services') )
                 useableTags['services'] = useableTags['services'].split(' ')

@@ -116,7 +116,7 @@ class CMIcinga2 < Icinga2::Client
 #           config  = JSON.parse( config )
 #         end
 #
-#         @identifier = config.dig('graphite-identifier')
+#         @identifier = config.dig('graphite_identifier')
 #       end
 
       @jobs.add( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
@@ -130,7 +130,15 @@ class CMIcinga2 < Icinga2::Client
 #        logger.debug( payload )
 #        payload = JSON.parse( payload )
 
-        services   = self.nodeInformation( { :ip => ip, :host => short, :fqdn => fqdn } )
+        services     = self.nodeInformation( { :ip => ip, :host => short, :fqdn => fqdn } )
+        display_name = @database.config( { :ip => ip, :short => host, :fqdn => fqdn, :key => 'display_name' } )
+
+        logger.debug( display_name )
+        logger.debug( display_name.class.to_s )
+
+        if( display_name.nil? )
+          display_name = fqdn
+        end
 
         # TODO: add groups
         #
@@ -140,7 +148,7 @@ class CMIcinga2 < Icinga2::Client
           payload = {}
         end
 
-        logger.debug( payload )
+#         logger.debug( payload )
 
 #         if( @icingaCluster == true && @icingaSatellite != nil )
 #           payload['attrs']['zone'] = @icingaSatellite
@@ -148,7 +156,17 @@ class CMIcinga2 < Icinga2::Client
 
         # TODO
         # full API support
-        result = self.addHost( { :name => node, :fqdn => fqdn, :enable_notifications => @icingaNotifications, :vars => payload } )
+        params = {
+          :name => node,
+          :fqdn => fqdn,
+          :display_name => display_name,
+          :enable_notifications => @icingaNotifications,
+          :vars => payload
+        }
+
+        logger.debug(params)
+
+        result = self.addHost(params)
 
         logger.info( result )
 
@@ -164,7 +182,7 @@ class CMIcinga2 < Icinga2::Client
 
         logger.info( sprintf( 'remove checks for node %s', node ) )
 
-        result = self.deleteHost( { :name => node } )
+        result = self.deleteHost( { :name => node, :fqdn => fqdn } )
 
         logger.info( result )
 

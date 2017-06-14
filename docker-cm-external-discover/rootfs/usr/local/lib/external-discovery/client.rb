@@ -99,7 +99,7 @@ module ExternalDiscovery
       #
       aws = getFqdn( aws_data )
 
-      logger.debug( "AWS: #{aws_data}" )
+#       logger.debug( "AWS: #{aws_data}" )
 
       identicalEntries      = aws & monitoring_data
       removedEntries        = aws - monitoring_data
@@ -141,50 +141,47 @@ module ExternalDiscovery
         dns_short       = d.dig('dns', 'short')
         dns_fqdn        = d.dig('dns', 'fqdn')
 
-        logger.debug(d)
-
         if( !['cosmos-development-management-cms','cosmos-development-delivery-mls','cosmos-development-delivery-rls-cae'].include?(tag_name) )
           logger.debug( "skip: '#{tag_name}'" )
           next
         end
 
-#        ip, short, fqdn = nsLookup( dns_fqdn )
-#
-#        if( ip == nil || short == nil || fqdn == nil )
-#          logger.error( 'DNS problem, skip' )
-#          next
-#        end
+#        logger.debug( "#{tag_name}: #{dns_ip} - #{dns_short} - #{dns_fqdn}" )
+        logger.info( sprintf( '  add node %s / %s (%s)', aws_uuid, dns_fqdn, tag_name ) )
 
-#         logger.debug(d)
-        logger.debug( "#{tag_name}: #{dns_ip} - #{dns_short} - #{dns_fqdn}" )
+        display_name = graphite_identifier = graphiteIdentifier( { :name => tag_name } )
+        environment =
+            case environment
+            when 'development'
+              'dev'
+            when 'production'
+              'prod'
+            else
+              environment
+            end
 
-        logger.info( sprintf( '  add node %s / %s (%s)', aws_uuid, dns_fqdn, aws_name ) )
-
-        display_name        = displayName( aws_name, [ 'storage-' ] )
-        graphite_identifier = graphiteIdentifier( { :name => aws_name } )
+        params = {
+          :ip          => dns_ip,
+          :short       => dns_short,
+          :fqdn        => dns_fqdn,
+          :uuid        => aws_uuid,
+          :region      => aws_region,
+          :tags        => aws_tags,
+          :name        => tag_name,
+          :customer    => tag_customer,
+          :environment => environment,
+          :tier        => tag_tier,
+          :display_name => display_name,
+          :graphite_identifier => graphite_identifier
+        }
 
         logger.debug( "display name: #{display_name}" )
         logger.debug( "graphite identifier: #{graphite_identifier}" )
-
-        params = {
-          :ip          => ip,
-          :short       => short,
-          :fqdn        => fqdn,
-          :uuid        => uuid,
-          :cname       => cname,
-          :name        => name,
-          :customer    => customer,
-          :environment => environment,
-          :tier        => tier,
-          :tags        => tags
-        }
-
         logger.debug("params: #{params}")
 
         result = self.nodeAdd(params)
 
         if( result == true )
-
           sleep(8)
         end
 
@@ -290,26 +287,13 @@ module ExternalDiscovery
       fqdn        = params.dig(:fqdn)
       uuid        = params.dig(:uuid)
       region      = params.dig(:region)
-      cname       = params.dig(:cname)
-      name        = params.dig(:name)
       tags        = params.dig(:tags)
+      name        = params.dig(:name)
       customer    = params.dig(:customer)
       environment = params.dig(:environment)
       tier        = params.dig(:tier)
-
-      environment = case environment
-        when 'development'
-          'dev'
-        when 'production'
-          'prod'
-        else
-          environment
-        end
-
-#       displayName = normalizeName( name, [ 'storage-' ] )
-#       logger.debug( "environment: #{environment}" )
-#       logger.debug(" -> #{cname} - #{name}" )
-#       logger.debug( "  ==> #{displayName}" )
+      display_name = params.dig(:display_name)
+      graphite_identifier = params.dig(:graphite_identifier)
 
       discoveryStatus = 204
       useableTags     = Array.new()
@@ -322,45 +306,38 @@ module ExternalDiscovery
 
       logger.debug( "useable tags : #{useableTags}" )
 
-      # display-name for grafana and icinga
-      #
-      displayName  = self.normalizeName( name, [ 'storage-' ] )
-
-      # graphite identifier for graphite and grafana
-      #
-      graphiteIdentifier = self.graphiteIdentifier( { :name => name } )
-
       # add to monitoring
       # defaults:
       # - discovery  = true
       # - icinga     = true
       # - grafana    = true
       # - annotation = true
-      d = JSON.generate({
+      d = {
         :force      => false,
         :tags       => useableTags,
         :config     => {
-          'display-name'        => displayName,
-          'graphite-identifier' => graphiteIdentifier,
-          'tags'                => useableTags,
-          'customer'            => customer,
-          'environment'         => environment,
-          'tier'                => tier,
-          'aws'                 => {
-            'region'  => @awsRegion,
-            'uuid'    => uuid
+          :display_name        => display_name,
+          :graphite_identifier => graphite_identifier,
+          :tags                => useableTags,
+          :customer            => customer,
+          :environment         => environment,
+          :tier                => tier,
+          :aws                 => {
+            :region  => region,
+            :uuid    => uuid,
+            :name    => name
           },
-          'services'            => tags.dig('services')
+          :services            => tags.dig('services')
         }
-      })
+      }
 
-      logger.debug( "data: #{d}" )
+#       logger.debug( JSON.pretty_generate( d ) )
 
-      result = @monitoringClient.add( ip, d )
+      result = @monitoringClient.add( ip, JSON.generate(d) )
 
       logger.debug( result )
 
-      if( result != nil )
+      if( result.is_a?(Hash) )
 
         discoveryStatus  = result.dig( :status )   || result.dig( 'status' )
         discoveryMessage = result.dig( :message )  || result.dig( 'message' )

@@ -63,6 +63,11 @@ module ExternalDiscovery
     end
 
 
+    def filter_data( data )
+      b = data.keep_if { |x| x.dig(:tags,:tier) != 'storage' }
+      b = data.keep_if { |x| ['cosmos-development-management-feeder','cosmos-development-delivery-mls'].include?( x.dig(:tags,:name) ) }
+    end
+
     def entry_with_fqdn( data, fqdn )
 
       data.find{ |x| x.dig('dns','fqdn') == fqdn }

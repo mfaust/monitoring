@@ -117,7 +117,7 @@ module Graphite
           config  = JSON.parse( config )
         end
 
-        @identifier = config.dig('graphite-identifier')
+        @identifier = config.dig('graphite_identifier')
       end
 
       logger.debug( JSON.pretty_generate( payload ) )

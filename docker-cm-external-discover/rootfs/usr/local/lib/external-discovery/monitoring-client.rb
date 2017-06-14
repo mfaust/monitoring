@@ -194,12 +194,10 @@ module ExternalDiscovery
           sleep( 4 )
           retry
         else
-
           return {
             :status  => 408, # 408 Request Timeout
             :message => e.message
           }
-
         end
 
       rescue RestClient::ExceptionWithResponse => e

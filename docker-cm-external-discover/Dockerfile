@@ -7,7 +7,7 @@ ENV \
   ALPINE_MIRROR="mirror1.hs-esslingen.de/pub/Mirrors" \
   ALPINE_VERSION="v3.6" \
   TERM=xterm \
-  APK_ADD="build-base bind-tools drill ruby ruby-dev" \
+  APK_ADD="build-base bind-tools drill ruby ruby-dev nano" \
   APK_DEL="build-base ruby-dev" \
   GEMS="aws-sdk ipaddress json rest-client rufus-scheduler time_difference tzinfo-data"
 

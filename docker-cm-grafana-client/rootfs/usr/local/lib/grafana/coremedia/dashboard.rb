@@ -64,19 +64,19 @@ module Grafana
 
         # read the configuration for an customized display name
         #
-        display     = @database.config( { :ip => ip, :short => short, :fqdn => fqdn, :key => 'display-name' } )
-        identifier  = @database.config( { :ip => ip, :short => short, :fqdn => fqdn, :key => 'graphite-identifier' } )
+        display     = @database.config( { :ip => ip, :short => short, :fqdn => fqdn, :key => 'display_name' } )
+        identifier  = @database.config( { :ip => ip, :short => short, :fqdn => fqdn, :key => 'graphite_identifier' } )
 
-        if( display != nil && display.dig( 'display-name' ) != nil )
+        if( display != nil && display.dig( 'display_name' ) != nil )
 
-          @grafanaHostname = display.dig( 'display-name' ).to_s
-          logger.info( "use custom display-name from config: '#{@grafanaHostname}'" )
+          @grafanaHostname = display.dig( 'display_name' ).to_s
+          logger.info( "use custom display_name from config: '#{@grafanaHostname}'" )
         end
 
 
-        if( identifier != nil && identifier.dig( 'graphite-identifier' ) != nil )
+        if( identifier != nil && identifier.dig( 'graphite_identifier' ) != nil )
 
-          @storageIdentifier = identifier.dig( 'graphite-identifier' ).to_s
+          @storageIdentifier = identifier.dig( 'graphite_identifier' ).to_s
           logger.info( "use custom storage identifier from config: '#{@storageIdentifier}'" )
         end
 
@@ -791,11 +791,11 @@ module Grafana
 
                 if( @shortHostname != realShort )
 
-                  identifier  = @database.config( { :ip => realIP, :short => realShort, :fqdn => realFqdn, :key => 'graphite-identifier' } )
+                  identifier  = @database.config( { :ip => realIP, :short => realShort, :fqdn => realFqdn, :key => 'graphite_identifier' } )
 
-                  if( identifier.dig( 'graphite-identifier' ) != nil )
+                  if( identifier.dig( 'graphite_identifier' ) != nil )
 
-                    mlsIdentifier = identifier.dig( 'graphite-identifier' ).to_s
+                    mlsIdentifier = identifier.dig( 'graphite_identifier' ).to_s
 
                     logger.info( "  use custom storage identifier from config: '#{mlsIdentifier}'" )
                   end

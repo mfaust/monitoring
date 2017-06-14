@@ -198,11 +198,11 @@ module CarbonData
 
       if( data == nil )
 
-        identifier  = @database.config( { :short => host, :fqdn => host, :key => 'graphite-identifier' } )
+        identifier  = @database.config( { :short => host, :fqdn => host, :key => 'graphite_identifier' } )
 
         if( identifier != false && identifier != nil )
 
-          identifier = identifier.dig( 'graphite-identifier' )
+          identifier = identifier.dig( 'graphite_identifier' )
 
           if( identifier != nil )
             result     = identifier

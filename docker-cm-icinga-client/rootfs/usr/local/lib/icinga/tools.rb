@@ -65,7 +65,7 @@ class CMIcinga2 < Icinga2::Client
 
       awsConfig  = @database.config( { :ip => ip, :short => host, :fqdn => fqdn, :key => 'aws' } )
 
-#       logger.debug( awsConfig )
+      logger.debug( "awsConfig: #{awsConfig}" )
 
       # in first, we need the discovered services ...
       #
@@ -80,7 +80,7 @@ class CMIcinga2 < Icinga2::Client
           services = result
           break
         else
-          logger.debug( sprintf( 'waiting for data for node %s ... %d', host, y ) )
+          logger.debug( sprintf( 'waiting for data for node %s ... %d', fqdn, y ) )
           sleep( 5 )
         end
       end
@@ -95,13 +95,15 @@ class CMIcinga2 < Icinga2::Client
           end
         end
 
-        payload = { "coremedia": services }
+        payload = { 'coremedia': services }
       else
 
         payload = {}
       end
 
       if( awsConfig )
+
+        logger.debug(awsConfig.class.to_s)
 
 #         awsConfig.each do |a,v|
 #
@@ -111,12 +113,12 @@ class CMIcinga2 < Icinga2::Client
 #        awsConfig = JSON.parse( awsConfig )
 
         awsConfig = awsConfig.dig('aws')
-#:w        awsConfig = awsConfig.gsub( '=>', ':' )
+#        awsConfig = awsConfig.gsub( '=>', ':' )
 
-        payload['aws'] = self.parsedResponse( awsConfig )
+        payload['aws'] = awsConfig # self.parsedResponse( awsConfig )
       end
 
-logger.debug( payload )
+logger.debug( "payload: #{payload}" )
 
       return payload
 
