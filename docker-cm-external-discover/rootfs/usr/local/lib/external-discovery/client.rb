@@ -160,6 +160,12 @@ module ExternalDiscovery
 
         logger.info( sprintf( '  add node %s / %s (%s)', uuid, dns_fqdn, cname ) )
 
+        display_name        = displayName( cname, [ 'storage-' ] )
+        graphite_identifier = graphiteIdentifier( { :name => cname } )
+
+        logger.debug( "display name: #{display_name}" )
+        logger.debug( "graphite identifier: #{graphite_identifier}" )
+
         params = {
           :ip          => ip,
           :short       => short,
@@ -173,7 +179,7 @@ module ExternalDiscovery
           :tags        => tags
         }
 
-        logger.debug(params)
+        logger.debug("params: #{params}")
 
         result = self.nodeAdd(params)
 
