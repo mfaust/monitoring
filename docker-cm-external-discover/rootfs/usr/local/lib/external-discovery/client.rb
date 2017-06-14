@@ -158,10 +158,10 @@ module ExternalDiscovery
 #         logger.debug(d)
         logger.debug( "#{tag_name}: #{dns_ip} - #{dns_short} - #{dns_fqdn}" )
 
-        logger.info( sprintf( '  add node %s / %s (%s)', uuid, dns_fqdn, cname ) )
+        logger.info( sprintf( '  add node %s / %s (%s)', aws_uuid, dns_fqdn, aws_name ) )
 
-        display_name        = displayName( cname, [ 'storage-' ] )
-        graphite_identifier = graphiteIdentifier( { :name => cname } )
+        display_name        = displayName( aws_name, [ 'storage-' ] )
+        graphite_identifier = graphiteIdentifier( { :name => aws_name } )
 
         logger.debug( "display name: #{display_name}" )
         logger.debug( "graphite identifier: #{graphite_identifier}" )

@@ -64,7 +64,7 @@ module Aws
               ifqdn   = inst.dig(:private_dns_name)
               itags   = inst.dig(:tags)
 
-              ilaunch = Time.parse(ilaunch).to_i
+              ilaunch = ilaunch.to_i
 
               if( ilaunch + 60 <= currentTime ) # add 60 seconds
                 logger.debug( "node #{iid} just started ... skip" )
