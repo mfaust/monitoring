@@ -79,12 +79,12 @@ class Icinga2Check
     logger.debug( "hostname( #{hostname} )" )
 
     # look in the memcache
-    memcacheKey = Storage::RedisClient.cacheKey( { :host => hostname, :type => 'dns' } )
+    cache_key = Storage::RedisClient.cacheKey( { :host => hostname, :type => 'dns' } )
 
 #     logger.debug( { :host => hostname, :type => 'dns' } )
-#     logger.debug( memcacheKey )
+#     logger.debug( cache_key )
 
-    data      = @redis.get( memcacheKey )
+    data      = @redis.get( cache_key )
 
     if( data == nil )
 
@@ -92,7 +92,7 @@ class Icinga2Check
 
 #       logger.debug( data )
 
-      @redis.set( memcacheKey, data )
+      @redis.set( cache_key, data )
     end
 
     hostname = data.dig('long')
@@ -105,7 +105,7 @@ class Icinga2Check
   def runningOrOutdated( data )
 
     if( data == false )
-      puts 'CRITICAL - Service not running!?'
+      puts 'CRITICAL - no data found - service not running!?'
       exit STATE_CRITICAL
     end
 
@@ -114,7 +114,7 @@ class Icinga2Check
     dataValue     = data.dig('value')     # ( data != nil && data['value'] ) ? data['value'] : nil
 
     if( dataValue == nil )
-      puts 'CRITICAL - Service not running!?'
+      puts 'CRITICAL - missing monitoring data - service not running!?'
       exit STATE_CRITICAL
     end
 
@@ -138,6 +138,12 @@ class Icinga2Check
   #  critical at 60000 ms == 60 seconds
   def beanTimeout?( timestamp, warning = 30, critical = 60 )
 
+    logger.debug( "beanTimeout?( #{timestamp}, #{warning}, #{critical} )" )
+
+    config   = readConfig( 'timeout' )
+    warning  = config.dig(:warning)  || warning
+    critical = config.dig(:critical) || critical
+
     result = false
     quorum = 5 # add 5 seconds
 
@@ -151,9 +157,11 @@ class Icinga2Check
       difference = TimeDifference.between( t, n ).in_each_component
       difference = difference[:seconds].round
 
-#       logger.debug( sprintf( ' now       : %s', n.to_datetime.strftime("%d %m %Y %H:%M:%S") ) )
-#       logger.debug( sprintf( ' timestamp : %s', t.to_datetime.strftime("%d %m %Y %H:%M:%S") ) )
-#       logger.debug( sprintf( ' difference: %d', difference ) )
+      logger.debug( sprintf( ' now       : %s', n.to_datetime.strftime("%d %m %Y %H:%M:%S") ) )
+      logger.debug( sprintf( ' timestamp : %s', t.to_datetime.strftime("%d %m %Y %H:%M:%S") ) )
+      logger.debug( sprintf( ' difference: %d', difference ) )
+      logger.debug( sprintf( '   warning : %d', warning ) )
+      logger.debug( sprintf( '   critical: %d', critical ) )
 
       if( difference > critical )
         logger.error( sprintf( '  %d > %d', difference, critical ) )

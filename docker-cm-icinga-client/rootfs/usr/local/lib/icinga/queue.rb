@@ -131,13 +131,15 @@ class CMIcinga2 < Icinga2::Client
 #        payload = JSON.parse( payload )
 
         services     = self.nodeInformation( { :ip => ip, :host => short, :fqdn => fqdn } )
-        display_name = @database.config( { :ip => ip, :short => host, :fqdn => fqdn, :key => 'display_name' } )
+        display_name = @database.config( { :ip => ip, :short => short, :fqdn => fqdn, :key => 'display_name' } )
 
         logger.debug( display_name )
         logger.debug( display_name.class.to_s )
 
         if( display_name.nil? )
           display_name = fqdn
+        else
+          display_name = display_name.dig('display_name') || fqdn
         end
 
         # TODO: add groups

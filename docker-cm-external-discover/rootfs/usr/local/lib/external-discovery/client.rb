@@ -55,6 +55,7 @@ module ExternalDiscovery
       filter = [
         { name: 'instance-state-name', values: ['running'] },
         { name: 'tag-key'            , values: ['monitoring-enabled'] },
+        { name: 'tag:monitoring-enabled', values: ['true'] },
         { name: 'tag:environment'    , values: [@awsEnvironment] }
       ]
 
@@ -102,12 +103,14 @@ module ExternalDiscovery
 #       logger.debug( "AWS: #{aws_data}" )
 
       identicalEntries      = aws & monitoring_data
-      removedEntries        = aws - monitoring_data
+      removedEntries        = monitoring_data - aws
       newEntries            = aws - identicalEntries
+
 
       aws_dataCount         = aws_data.count
       monitoring_dataCount  = monitoring_data.count
       identicalEntriesCount = identicalEntries.count
+      removedEntriesCount   = removedEntries.count
       newEntriesCount       = newEntries.count
 
       logger.debug( '------------------------------------------------------------' )
@@ -118,7 +121,19 @@ module ExternalDiscovery
       logger.debug(  "  #{identicalEntries}" )
       logger.info( sprintf( 'new entries %d', newEntriesCount ) )
       logger.debug(  "  #{newEntries}" )
+      logger.info( sprintf( 'removed entries %d', removedEntriesCount ) )
+      logger.debug(  "  #{removedEntries}" )
       logger.debug( '------------------------------------------------------------' )
+
+      removedEntries.each do |r|
+
+        logger.info( sprintf( '  remove node %s', r ) )
+
+        result = self.nodeDelete( { :ip => r } )
+
+        logger.debug( result )
+      end
+
 
       # TODO
       # we need an better way to detect adding or removing!
@@ -378,14 +393,12 @@ module ExternalDiscovery
     def nodeDelete( params = {} )
 
       ip          = params.dig(:ip)
-      fqdn        = params.dig(:fqdn)
-      cname       = params.dig(:cname)
 
-      logger.info( sprintf( 'remove host %s (%s) from monitoring', fqdn, cname ) )
+      ip, short, fqdn = nsLookup( ip )
 
-      ip, short, fqdn = nsLookup( fqdn )
+      logger.info( sprintf( 'remove host %s (%s) from monitoring', fqdn, ip ) )
 
-      result = @monitoringClient.remove( short )
+      result = @monitoringClient.remove( ip )
 
       if( result == nil )
         logger.error( 'what going on?' )

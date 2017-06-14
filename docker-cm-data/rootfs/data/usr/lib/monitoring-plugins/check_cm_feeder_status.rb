@@ -57,6 +57,7 @@ class Icinga2Check_CM_Feeder < Icinga2Check
 
     # get our bean
     health      = @mbean.bean( host, feederServer, 'Health' )
+    engine      = @mbean.bean( host, feederServer, 'ProactiveEngine' )
 
     healthValue = self.runningOrOutdated( health )
     healthValue = healthValue.values.first
@@ -67,12 +68,10 @@ class Icinga2Check_CM_Feeder < Icinga2Check
 
       healthMessage  = 'HEALTHY'
 
-      engine      = @mbean.bean( host, feederServer, 'ProactiveEngine' )
-
       engineValue = self.runningOrOutdated( engine )
       engineValue = engineValue.values.first
 
-      logger.debug( JSON.pretty_generate( engineValue ) )
+#       logger.debug( JSON.pretty_generate( engineValue ) )
 
       maxEntries            = engineValue.dig('KeysCount')   || 0  # Number of (active) keys
       currentEntries        = engineValue.dig('ValuesCount') || 0  # Number of (valid) values. It is less or equal to 'keysCount'

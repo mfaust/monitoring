@@ -105,17 +105,10 @@ class CMIcinga2 < Icinga2::Client
 
         logger.debug(awsConfig.class.to_s)
 
-#         awsConfig.each do |a,v|
-#
-#           v = JSON.parse(v)
-#         end
-
-#        awsConfig = JSON.parse( awsConfig )
-
         awsConfig = awsConfig.dig('aws')
-#        awsConfig = awsConfig.gsub( '=>', ':' )
+        awsConfig = awsConfig.gsub( '=>', ':' )
 
-        payload['aws'] = awsConfig # self.parsedResponse( awsConfig )
+        payload['aws'] = self.parsedResponse( awsConfig )
       end
 
 logger.debug( "payload: #{payload}" )
