@@ -13,6 +13,11 @@ class Icinga2Check_CM_SequenceNumbers < Icinga2Check
     mls         = settings.dig(:mls)
     rls         = settings.dig(:rls)
 
+    if( mls.nil? )
+
+      mls = detect_mls(rls)
+    end
+
     hostMls     = self.hostname( mls )
     hostRls     = self.hostname( rls )
 
@@ -77,6 +82,38 @@ class Icinga2Check_CM_SequenceNumbers < Icinga2Check
 
   end
 
+
+
+  def detect_mls( rls )
+
+    cache_key = format('sequence-mls-%s',rls)
+    mls       = @cache.get(cache_key)
+
+    if(mls.nil?)
+
+      bean = @mbean.bean( rls, 'replication-live-server', 'Replicator' )
+
+      if(bean.is_a?(Hash))
+
+        value = bean.dig( 'value' )
+        if( !value.nil? )
+          value = value.values.first
+          mls = value.dig( 'MasterLiveServer', 'host' )
+
+          if(!mls.nil?)
+            @cache.set(cache_key, expiresIn: 320 ) { Cache::Data.new( mls ) }
+          else
+            mls = rls
+          end
+        end
+      end
+
+    end
+
+    mls
+
+  end
+
 end
 
 # ---------------------------------------------------------------------------------------
@@ -87,7 +124,6 @@ OptionParser.new do |opts|
 
   opts.banner = "Usage: check_cm_sequencenumbers.rb [options]"
 
-  opts.on( '-m', '--mls NAME'       , 'Host with running Master-Live-Server')                   { |v| options[:mls]  = v }
   opts.on( '-r', '--rls NAME'       , 'Host with running Replication-Live-Server')              { |v| options[:rls]  = v }
 
 end.parse!

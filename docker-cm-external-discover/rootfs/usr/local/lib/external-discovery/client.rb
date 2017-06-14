@@ -125,6 +125,8 @@ module ExternalDiscovery
       logger.debug(  "  #{removedEntries}" )
       logger.debug( '------------------------------------------------------------' )
 
+      # remove nodes from monitoring
+      #
       removedEntries.each do |r|
 
         logger.info( sprintf( '  remove node %s', r ) )
@@ -139,6 +141,8 @@ module ExternalDiscovery
       # we need an better way to detect adding or removing!
       # or re-adding, when the node comes up with an new ip
 
+      # add new nodes
+      #
       newEntries.each do |a|
 
         d           = entry_with_fqdn( aws_data, a )
@@ -161,7 +165,6 @@ module ExternalDiscovery
           next
         end
 
-#        logger.debug( "#{tag_name}: #{dns_ip} - #{dns_short} - #{dns_fqdn}" )
         logger.info( sprintf( '  add node %s / %s (%s)', aws_uuid, dns_fqdn, tag_name ) )
 
         display_name = graphite_identifier = graphiteIdentifier( { :name => tag_name } )
@@ -203,90 +206,6 @@ module ExternalDiscovery
         sleep(2)
 
       end
-
-
-#       aws_data.each do |l|
-#
-#         data = l.clone
-#
-#         uuid, dns_ip, dns_short, dns_fqdn, fqdn, name, state, tags, cname, name, tier, customer, environment = self.extractInstanceInformation( data )
-#
-#         # PRIMARY FILTER
-#         # currently, we want only the following services:
-#         #  - cosmos-development-management-cms
-#         #  - cosmos-production-delivery-mls
-#         #  - cosmos-development-delivery-rls-cae
-#         #
-#         if( !['cosmos-development-management-cms','cosmos-development-delivery-mls','cosmos-development-delivery-rls-cae'].include?(name) )
-#           logger.debug( "skip: '#{name}'" )
-#           next
-#         end
-#
-# #         if( cname == nil || cname == '.' )
-# #           logger.warn( "  cname not configured - '#{name}' will be ignored ..." )
-# #           next
-# #         end
-#
-#         if( tier == nil || tier == 'service' || tier == 'storage' )
-#           logger.warn( "  wrong tier #{tier} - '#{name}' will be ignored ..." )
-#           next
-#         end
-#
-#         ip, short, fqdn = nsLookup( fqdn )
-#
-#         if( ip == nil || short == nil || fqdn == nil )
-#           logger.error( 'DNS problem, skip' )
-#           next
-#         end
-#
-#         logger.debug( monitoring_data )
-#         logger.debug( "#{name}: #{ip} - #{short} - #{fqdn} | #{dns_ip} - #{dns_short} - #{dns_fqdn}" )
-#
-#         if( monitoring_data.include?( dns_fqdn ) || monitoring_data.include?( fqdn ) )
-#           logger.info( sprintf( '  node %s / %s (%s) exists', uuid, dns_fqdn, name ) )
-#           next
-#         else
-#
-#           unknownHost << {
-#             :ip          => ip,
-#             :short       => short,
-#             :fqdn        => fqdn,
-#             :uuid        => uuid,
-#             :cname       => cname,
-#             :name        => name,
-#             :customer    => customer,
-#             :environment => environment,
-#             :tier        => tier,
-#             :tags        => tags
-#           }
-#
-#         end
-#
-#         logger.info( sprintf( '  add node %s / %s (%s)', uuid, dns_fqdn, cname ) )
-#
-#         result = self.nodeAdd({
-#           :ip          => ip,
-#           :short       => short,
-#           :fqdn        => fqdn,
-#           :uuid        => uuid,
-#           :cname       => cname,
-#           :name        => name,
-#           :customer    => customer,
-#           :environment => environment,
-#           :tier        => tier,
-#           :tags        => tags
-#         })
-#
-#         if( result == true )
-#
-#           sleep(8)
-#         end
-#
-#         sleep(2)
-#
-#       end
-#
-#       aws_data = nil
 
       sleep(20)
 

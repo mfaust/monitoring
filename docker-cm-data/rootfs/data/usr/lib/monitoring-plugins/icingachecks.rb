@@ -12,6 +12,7 @@ require_relative '/usr/local/share/icinga2/logging'
 require_relative '/usr/local/share/icinga2/utils/network'
 require_relative '/usr/local/share/icinga2/storage'
 require_relative '/usr/local/share/icinga2/mbean'
+require_relative '/usr/local/share/icinga2/cache'
 require_relative '/usr/local/share/icinga2/monkey'
 
 # ---------------------------------------------------------------------------------------
@@ -34,6 +35,7 @@ class Icinga2Check
     logger.level = Logger::DEBUG
     @redis       = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
     @mbean       = MBean::Client.new( { :redis => @redis } )
+    @cache       = Cache::Store.new()
   end
 
 
@@ -138,7 +140,7 @@ class Icinga2Check
   #  critical at 60000 ms == 60 seconds
   def beanTimeout?( timestamp, warning = 30, critical = 60 )
 
-    logger.debug( "beanTimeout?( #{timestamp}, #{warning}, #{critical} )" )
+#     logger.debug( "beanTimeout?( #{timestamp}, #{warning}, #{critical} )" )
 
     config   = readConfig( 'timeout' )
     warning  = config.dig(:warning)  || warning
@@ -157,11 +159,11 @@ class Icinga2Check
       difference = TimeDifference.between( t, n ).in_each_component
       difference = difference[:seconds].round
 
-      logger.debug( sprintf( ' now       : %s', n.to_datetime.strftime("%d %m %Y %H:%M:%S") ) )
-      logger.debug( sprintf( ' timestamp : %s', t.to_datetime.strftime("%d %m %Y %H:%M:%S") ) )
-      logger.debug( sprintf( ' difference: %d', difference ) )
-      logger.debug( sprintf( '   warning : %d', warning ) )
-      logger.debug( sprintf( '   critical: %d', critical ) )
+#       logger.debug( sprintf( ' now       : %s', n.to_datetime.strftime("%d %m %Y %H:%M:%S") ) )
+#       logger.debug( sprintf( ' timestamp : %s', t.to_datetime.strftime("%d %m %Y %H:%M:%S") ) )
+#       logger.debug( sprintf( ' difference: %d', difference ) )
+#       logger.debug( sprintf( '   warning : %d', warning ) )
+#       logger.debug( sprintf( '   critical: %d', critical ) )
 
       if( difference > critical )
         logger.error( sprintf( '  %d > %d', difference, critical ) )
