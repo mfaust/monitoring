@@ -157,7 +157,7 @@ class CMIcinga2 < Icinga2::Client
         # TODO
         # full API support
         params = {
-          :name => node,
+          :name => ip,
           :fqdn => fqdn,
           :display_name => display_name,
           :enable_notifications => @icingaNotifications,
@@ -182,7 +182,7 @@ class CMIcinga2 < Icinga2::Client
 
         logger.info( sprintf( 'remove checks for node %s', node ) )
 
-        result = self.deleteHost( { :name => node, :fqdn => fqdn } )
+        result = self.deleteHost( { :name => ip, :fqdn => fqdn } )
 
         logger.info( result )
 
@@ -198,7 +198,7 @@ class CMIcinga2 < Icinga2::Client
 
         logger.info( sprintf( 'give information for node %s', node ) )
 
-        result = self.listHost( { :name => node } )
+        result = self.listHost( { :name => ip } )
 
         logger.info( result )
 
