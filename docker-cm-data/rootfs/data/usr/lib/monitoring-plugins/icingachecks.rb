@@ -12,7 +12,7 @@ require_relative '/usr/local/share/icinga2/logging'
 require_relative '/usr/local/share/icinga2/utils/network'
 require_relative '/usr/local/share/icinga2/storage'
 require_relative '/usr/local/share/icinga2/mbean'
-require_relative '/usr/local/share/icinga2/cache'
+#require_relative '/usr/local/share/icinga2/cache'
 require_relative '/usr/local/share/icinga2/monkey'
 
 # ---------------------------------------------------------------------------------------
@@ -35,7 +35,7 @@ class Icinga2Check
     logger.level = Logger::DEBUG
     @redis       = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
     @mbean       = MBean::Client.new( { :redis => @redis } )
-    @cache       = Cache::Store.new()
+#     @cache       = Cache::Store.new()
   end
 
 

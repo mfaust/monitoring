@@ -168,7 +168,7 @@ class CMIcinga2 < Icinga2::Client
 
         logger.debug(params)
 
-        result = self.addHost(params)
+        result = self.add_host(params)
 
         logger.info( result )
 
@@ -184,7 +184,7 @@ class CMIcinga2 < Icinga2::Client
 
         logger.info( sprintf( 'remove checks for node %s', node ) )
 
-        result = self.deleteHost( { :name => ip, :fqdn => fqdn } )
+        result = self.delete_host( { :name => ip, :fqdn => fqdn } )
 
         logger.info( result )
 
@@ -200,7 +200,7 @@ class CMIcinga2 < Icinga2::Client
 
         logger.info( sprintf( 'give information for node %s', node ) )
 
-        result = self.listHost( { :name => ip } )
+        result = self.hosts( { :name => ip } )
 
         logger.info( result )
 

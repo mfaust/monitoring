@@ -754,6 +754,15 @@ class Monitoring
     alreadyInMonitoring = self.nodeExists?( host )
     hostData            = self.checkAvailablility?( host )
 
+    if( hostData == false )
+      logger.warn( "DNS PROBLEMS" )
+
+      return JSON.pretty_generate( {
+        'status'  => 404,
+        'message' => "we have problems with our dns to resolve '#{host}' :("
+      })
+    end
+
     result    = Hash.new()
     hash      = Hash.new()
 

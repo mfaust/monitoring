@@ -87,7 +87,7 @@ class Icinga2Check_CM_SequenceNumbers < Icinga2Check
   def detect_mls( rls )
 
     cache_key = format('sequence-mls-%s',rls)
-    mls       = @cache.get(cache_key)
+    mls       = @redis.get(cache_key)
 
     if(mls.nil?)
 
@@ -101,7 +101,8 @@ class Icinga2Check_CM_SequenceNumbers < Icinga2Check
           mls = value.dig( 'MasterLiveServer', 'host' )
 
           if(!mls.nil?)
-            @cache.set(cache_key, expiresIn: 320 ) { Cache::Data.new( mls ) }
+            @redis.set(cache_key, mls)
+            @redis.expire(cache_key, 320)
           else
             mls = rls
           end

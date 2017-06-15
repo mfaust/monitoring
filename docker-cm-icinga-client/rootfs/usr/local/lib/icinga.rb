@@ -4,13 +4,6 @@
 #
 #
 
-# require 'rest-client'
-# require 'openssl'
-#
-# require 'json'
-# require 'net/http'
-# require 'uri'
-
 require 'icinga2'
 
 require_relative 'logging'
