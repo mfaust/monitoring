@@ -20,7 +20,7 @@ module Logging
 
     def configure_logger_for( classname )
 
-      logFile         = '/var/log/icinga2-checks.log'
+      logFile         = '/tmp/icinga2-checks.log'
       file            = File.new( logFile, File::WRONLY | File::APPEND | File::CREAT, 0666 )
       file.sync       = true
 
