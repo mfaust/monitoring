@@ -77,6 +77,8 @@ module Utils
         end
       end
 
+      puts line
+
       # the host command above was disfunctional
       # we try the ruby resolv class
       if( line == nil )
@@ -107,6 +109,11 @@ module Utils
       if( line != nil )
 
         parts = line.split( ' ' )
+
+        if(line.include?('has no A record') == true )
+
+
+        end
 
         # / # host -t A 172.31.41.133
         # Host 133.41.31.172.in-addr.arpa. not found: 3(NXDOMAIN)
