@@ -111,8 +111,8 @@ module Utils
         parts = line.split( ' ' )
 
         if(line.include?('has no A record') == true )
-
-
+          # panikmodus => ON
+          return { :ip => nil, :short => nil, :fqdn => nil }
         end
 
         # / # host -t A 172.31.41.133
