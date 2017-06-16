@@ -11,7 +11,7 @@ ENV \
   APK_DEL="build-base imagemagick-dev ruby-dev ruby-io-console zlib-dev" \
   GEMS="beaneater ipaddress mysql2 resolve-hostname redis rufus-scheduler sinatra thin tzinfo-data"
 
-LABEL version="1706-01.1"
+LABEL version="1706-02.3"
 
 # ---------------------------------------------------------------------------------------
 

@@ -29,6 +29,8 @@ class Monitoring
     mqHost              = settings.dig(:mq, :host)      || 'localhost'
     mqPort              = settings.dig(:mq, :port)      || 11300
     mqQueue             = settings.dig(:mq, :queue)     || 'mq-rest-service'
+    redisHost           = settings.dig(:redis, :host)
+    redisPort           = settings.dig(:redis, :port)
     mysqlHost           = settings.dig(:mysql, :host)
     mysqlSchema         = settings.dig(:mysql, :schema)
     mysqlUser           = settings.dig(:mysql, :user)
@@ -60,6 +62,7 @@ class Monitoring
     logger.info( '' )
 
     @cache      = Cache::Store.new()
+    @redis      = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
     @mqConsumer = MessageQueue::Consumer.new( @MQSettings )
     @mqProducer = MessageQueue::Producer.new( @MQSettings )
 
@@ -243,13 +246,15 @@ class Monitoring
 
     # DNS
     #
-    hostname = sprintf( 'dns-%s', name )
+    cache_key = sprintf( 'dns::%s', name )
+
+    logger.debug("cache_key: #{cache_key}")
 
     ip       = nil
     short    = nil
     fqdn     = nil
 
-    dns      = @cache.get( hostname )
+    dns      = @cache.get( cache_key )
 
     if( dns == nil )
 
@@ -262,7 +267,8 @@ class Monitoring
 
       if( ip != nil && short != nil && fqdn != nil )
 
-        @cache.set( hostname , expiresIn: expire ) { Cache::Data.new( { 'ip': ip, 'short': short, 'long': fqdn } ) }
+        @redis.set(format('dns::%s',fqdn), { 'ip': ip, 'short': short, 'long': fqdn }.to_json, 320 )
+        @cache.set(cache_key , expiresIn: expire ) { Cache::Data.new( { 'ip': ip, 'short': short, 'long': fqdn } ) }
       else
         logger.error( 'no DNS data found!' )
         logger.error( " => #{dns}" )
@@ -276,6 +282,9 @@ class Monitoring
       fqdn  = dns.dig(:long)
 
     end
+
+    logger.debug( "redis: #{@redis.get(format('dns::%s',fqdn))}" )
+
     #
     # ------------------------------------------------
 
@@ -583,6 +592,15 @@ class Monitoring
       })
     end
 
+    # insert the DNS data into the payload
+    #
+    if( payload.is_a?(String) && payload.to_s != '' )
+      payload = JSON.parse(payload)
+      payload['dns'] = hostData
+      payload = JSON.generate(payload)
+    else
+      payload['dns'] ||= hostData
+    end
 
     if( force == true )
 
@@ -590,27 +608,27 @@ class Monitoring
 
       if( enabledGrafana == true )
         logger.info( 'remove grafana dashborads' )
-        self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-grafana', :payload => payload, :prio => 0 } )
+        self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-grafana', :payload => payload, :prio => 1 } )
       end
 
       if( enabledIcinga == true )
         logger.info( 'remove icinga checks and notifications' )
-        self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-icinga', :payload => payload, :prio => 0 } )
+        self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-icinga', :payload => payload, :prio => 1 } )
       end
 
       if( enableDiscovery == true )
         logger.info( 'remove node from discovery service' )
-        self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-discover', :payload => payload, :prio => 0 } )
+        self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-discover', :payload => payload, :prio => 1 } )
       end
 
-      sleep(1)
+      sleep(2)
 
 #       logger.debug( 'remove configuration' )
       status = @database.removeConfig( { :ip => ip, :short => short, :fqdn => fqdn } )
 
       logger.info( 'done' )
 
-      sleep(1)
+      sleep(2)
     end
 
 
@@ -629,19 +647,19 @@ class Monitoring
     if( enableDiscovery == true )
 
       logger.info( 'add node to discovery service' )
-      self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-discover', :payload => payload, :prio => 1, :delay => 1 } )
+      self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-discover', :payload => payload, :prio => 1, :delay => 2 } )
     end
 
     if( enabledGrafana == true )
 
       logger.info( 'create grafana dashborads' )
-      self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-grafana', :payload => payload, :prio => 10, :ttr => 15, :delay => 15 } )
+      self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-grafana', :payload => payload, :prio => 10, :ttr => 15, :delay => 10 } )
     end
 
     if( enabledIcinga == true  )
 
       logger.info( 'create icinga checks and notifications' )
-      self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-icinga', :payload => payload, :prio => 10, :ttr => 15, :delay => 15 } )
+      self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-icinga', :payload => payload, :prio => 10, :ttr => 15, :delay => 10 } )
     end
 
     # add annotation at last
@@ -828,7 +846,7 @@ class Monitoring
       self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-icinga', :payload => { "force" => true }, :prio => 0 } )
     end
     if( enabledGrafana == true )
-      logger.info( 'remove grafana dashborads' )
+      logger.info( 'remove grafana dashboards' )
       self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-grafana', :payload => { "force" => true }, :prio => 0 } )
     end
 

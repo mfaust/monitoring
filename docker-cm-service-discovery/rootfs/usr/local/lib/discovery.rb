@@ -102,8 +102,8 @@ module ServiceDiscovery
 
       @scanPorts         = ports
 
-      version             = '1.7.1'
-      date                = '2017-06-06'
+      version             = '1.7.3'
+      date                = '2017-06-16'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - Service Discovery' )
@@ -221,12 +221,26 @@ module ServiceDiscovery
       status  = 400
       message = 'Host not in Monitoring'
 
-      result  = @database.removeDNS( { :ip => ip, :short => short, :fqdn => fqdn } )
+      # DELETE ONLY WHEN THES STATUS ARE DELETED!
+      #
+      params = params = { :ip => ip, :short => short, :fqdn => fqdn, :status => [ Storage::MySQL::DELETE ] }
+      nodes = @database.nodes( params )
 
-      if( result != nil )
+      logger.debug( nodes )
+
+      if( nodes.is_a?( Array ) && nodes.count != 0 )
+
+        result  = @database.removeDNS( { :ip => ip, :short => short, :fqdn => fqdn } )
+
+        if( result != nil )
+          status  = 200
+          message = 'Host successful removed'
+        end
+
+      else
 
         status  = 200
-        message = 'Host successful removed'
+        message = 'no deleted hosts found'
       end
 
       return {
@@ -256,17 +270,17 @@ module ServiceDiscovery
       #
       ip, short, fqdn = self.nsLookup( host )
 
-      # add hostname to an blocking cache
-      #
-      if( @jobs.jobs( { :ip => ip, :short => short, :fqdn => fqdn } ) == true )
-
-        logger.warn( 'we are working on this job' )
-
-        return {
-          :status  => 409, # 409 Conflict
-          :message => 'we are working on this job'
-        }
-      end
+#       # add hostname to an blocking cache
+#       #
+#       if( @jobs.jobs( { :ip => ip, :short => short, :fqdn => fqdn } ) == true )
+#
+#         logger.warn( 'we are working on this job' )
+#
+#         return {
+#           :status  => 409, # 409 Conflict
+#           :message => 'we are working on this job'
+#         }
+#       end
 
       # if the destination host available (simple check with ping)
       #
@@ -318,7 +332,7 @@ module ServiceDiscovery
 
       # block this job..
       #
-      @jobs.add( { :ip => ip, :short => short, :fqdn => fqdn } )
+#       @jobs.add( { :ip => ip, :short => short, :fqdn => fqdn } )
 
       # get customized configurations of ports and services
       #
@@ -403,7 +417,7 @@ module ServiceDiscovery
       finish = Time.now
       logger.info( sprintf( 'finished in %s seconds', finish - start ) )
 
-      @jobs.del( { :ip => ip, :short => short, :fqdn => fqdn } )
+#       @jobs.del( { :ip => ip, :short => short, :fqdn => fqdn } )
 
       return {
         :status   => 200,
