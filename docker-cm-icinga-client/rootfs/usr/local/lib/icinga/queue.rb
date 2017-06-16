@@ -83,10 +83,25 @@ class CMIcinga2 < Icinga2::Client
 
       end
 
-      logger.debug( sprintf( '  command: %s', command ) )
-      logger.info( sprintf( '  node %s', node ) )
+      if( payload.is_a?( String ) == true && payload.to_s != '' )
+        payload  = JSON.parse( payload )
+      end
 
-      ip, short, fqdn = self.nsLookup( node )
+      logger.debug( JSON.pretty_generate( payload ) )
+
+      if( payload.is_a?( String ) == false )
+        dns      = payload.dig('dns')
+      end
+
+      logger.info( sprintf( '  %s node %s', command , node ) )
+
+      if !dns.nil?
+        ip    = dns.dig('ip')
+        short = dns.dig('short')
+        fqdn  = dns.dig('fqdn')
+      else
+        ip, short, fqdn = self.nsLookup( node )
+      end
 
       if( @jobs.jobs( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } ) == true )
 
@@ -97,6 +112,10 @@ class CMIcinga2 < Icinga2::Client
           :message => 'we are working on this job'
         }
       end
+
+      @jobs.add( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
+
+      @cache.set( format( 'dns-%s', node ) , expiresIn: 320 ) { Cache::Data.new( { 'ip': ip, 'short': short, 'long': fqdn } ) }
 
 #       logger.debug( payload )
 #       logger.debug( payload.class.to_s )
@@ -118,9 +137,6 @@ class CMIcinga2 < Icinga2::Client
 #
 #         @identifier = config.dig('graphite_identifier')
 #       end
-
-      @jobs.add( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
-
 
       # add Node
       #
