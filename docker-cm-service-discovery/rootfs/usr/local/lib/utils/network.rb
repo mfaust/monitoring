@@ -90,17 +90,9 @@ module Utils
           return self.resolv( ip )
 
         rescue => e
-
           puts ( e )
-
-          return {
-            :ip    => nil,
-            :short => nil,
-            :long  => nil
-          }
-
+          return { :ip    => nil, :short => nil, :long  => nil }
         end
-
       end
 
       # finalize
@@ -112,14 +104,14 @@ module Utils
 
         if(line.include?('has no A record') == true )
           # panikmodus => ON
-          return { :ip => nil, :short => nil, :fqdn => nil }
+          return { :ip => nil, :short => nil, :long => nil }
         end
 
         # / # host -t A 172.31.41.133
         # Host 133.41.31.172.in-addr.arpa. not found: 3(NXDOMAIN)
         if( line.include?('not found') == true )
           # panikmodus => ON
-          return { :ip => nil, :short => nil, :fqdn => nil }
+          return { :ip => nil, :short => nil, :long => nil }
         end
 
         #
