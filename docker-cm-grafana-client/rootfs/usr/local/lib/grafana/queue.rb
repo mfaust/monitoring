@@ -49,7 +49,7 @@ module Grafana
 
         status = result.dig(:status).to_i
 
-        if( status == 200 || status == 500 )
+        if( status == 200 || status == 409 || status == 500 || status == 503 )
 
           @mqConsumer.deleteJob( @mqQueue, jobId )
         else
@@ -71,7 +71,7 @@ module Grafana
       tags     = []
       overview = true
 
-#       logger.debug( payload )
+      logger.debug( payload )
 
       if( command == nil || node == nil || payload == nil )
 
@@ -101,25 +101,30 @@ module Grafana
       end
 
       if( payload.is_a?( String ) == true && payload.to_s != '' )
-
         payload  = JSON.parse( payload )
       end
 
       if( payload.is_a?( String ) == false )
 
-        tags     = payload.dig( 'tags' )
-        overview = payload.dig( 'overview' ) || true
+        tags     = payload.dig('tags')
+        overview = payload.dig('overview') || true
+        dns      = payload.dig('dns')
       end
 
-      logger.debug( sprintf( '  command: %s', command ) )
-      logger.info( sprintf( '  node %s', node ) )
+      logger.info( sprintf( '  %s node %s', command , node ) )
 
-      ip, short, fqdn = self.nsLookup( node )
+      if !dns.nil?
+        ip    = dns.dig('ip')
+        short = dns.dig('short')
+        fqdn  = dns.dig('fqdn')
+      else
+        ip, short, fqdn = self.nsLookup( node )
+      end
 
+      # no DNS data?
+      #
       if( ip == nil && short == nil && fqdn == nil )
 
-        # no DNS data?
-        #
         logger.warn( 'we found no dns data!' )
 
         # ask grafana
@@ -146,6 +151,7 @@ module Grafana
 
       @jobs.add( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
 
+      @cache.set( format( 'dns-%s', node ) , expiresIn: 320 ) { Cache::Data.new( { 'ip': ip, 'short': short, 'long': fqdn } ) }
 
       # add Node
       #

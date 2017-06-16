@@ -82,6 +82,9 @@ module Grafana
 
         @grafanaHostname  = self.createSlug( @grafanaHostname ).gsub( '.', '-' )
 
+        logger.debug( format('ip   : %s', ip))
+        logger.debug( format('short: %s', short))
+        logger.debug( format('fqdn : %s', fqdn))
         logger.debug( "short hostname    : #{@shortHostname}" )
         logger.debug( "grafana hostname  : #{@grafanaHostname}" )
         logger.debug( "storage Identifier: #{@storageIdentifier}" )
@@ -121,7 +124,6 @@ module Grafana
         logger.info( sprintf( 'Adding dashboards for host \'%s\'', host ) )
 
         ip, short, fqdn = self.prepare( host )
-
 
         begin
 
@@ -592,7 +594,7 @@ module Grafana
         #   {"id"=>40, "title"=>"blueprint-box - Cache Classes (Livecontext)", "uri"=>"db/blueprint-box-cache-classes-livecontext", "type"=>"dash-db", "tags"=>["blueprint-box"], "isStarred"=>false},
         # ...
         # ]
-        logger.debug( data )
+#         logger.debug( data )
 
         if( data.count == 0 )
 
@@ -635,7 +637,7 @@ module Grafana
           }
         end
 
-        self.prepare( host )
+        ip, short, fqdn = self.prepare( host )
 
         logger.info( sprintf( 'remove dashboards for host %s (%s)', host, @grafanaHostname ) )
 
@@ -653,11 +655,9 @@ module Grafana
 
         elsif( status.to_i == 200 )
 
-          logger.debug( dashboards )
-
+#           logger.debug( dashboards )
           dashboards = dashboards.dig(:dashboards)
-
-          logger.debug( dashboards )
+#           logger.debug( dashboards )
 
           if( dashboards == nil )
 
