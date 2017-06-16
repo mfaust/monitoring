@@ -99,6 +99,7 @@ module Jolokia
             :status  => 500,
             :message => error
           }
+        end
 
 #         rescue Exception => e
 #
