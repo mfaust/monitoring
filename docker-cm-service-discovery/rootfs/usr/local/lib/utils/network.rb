@@ -77,7 +77,7 @@ module Utils
         end
       end
 
-      puts line
+#       puts line
 
       # the host command above was disfunctional
       # we try the ruby resolv class
@@ -147,7 +147,7 @@ module Utils
         :long  => long
       }
 
-      puts( result )
+      puts( "result: #{result}" )
 
       return result
 

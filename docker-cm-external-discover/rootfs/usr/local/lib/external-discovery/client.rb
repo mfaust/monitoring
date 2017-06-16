@@ -324,8 +324,10 @@ module ExternalDiscovery
         return false
       end
 
-      discoveryStatus  = result.dig( name, 'discovery', 'status' )
-      discoveryMessage = result.dig( name, 'discovery', 'message' )
+      logger.debug( result )
+
+      discoveryStatus  = result.dig('status')
+      discoveryMessage = result.dig('message')
 
       logger.info( sprintf( '  %s - %s', discoveryStatus, discoveryMessage ) )
 
