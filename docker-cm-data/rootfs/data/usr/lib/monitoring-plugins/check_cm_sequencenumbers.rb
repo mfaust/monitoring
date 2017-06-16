@@ -35,7 +35,19 @@ class Icinga2Check_CM_SequenceNumbers < Icinga2Check
     critical = config.dig(:critical) || 500
 
     # get our bean
+    rlsData      = @mbean.bean( rls, 'replication-live-server', 'Replicator' )
     mlsData      = @mbean.bean( mls, 'master-live-server', 'Server' )
+
+    logger.debug( "rls data: #{rlsData.class.to_s}" )
+    logger.debug( "mls data: #{mlsData.class.to_s}" )
+
+    if ( rlsData == nil || rlsData == false ) && ( mlsData == nil || mlsData == false )
+
+      puts sprintf( 'RLS or MLS has no data' )
+      exit STATE_WARNING
+    end
+
+
     mlsDataValue = self.runningOrOutdated( mlsData )
 
     mlsDataValue      = mlsDataValue.values.first
@@ -43,7 +55,7 @@ class Icinga2Check_CM_SequenceNumbers < Icinga2Check
     mlsRunLevel       = mlsDataValue.dig('RunLevel').downcase
 
     # get our bean
-    rlsData      = @mbean.bean( rls, 'replication-live-server', 'Replicator' )
+
     rlsDataValue = self.runningOrOutdated( rlsData )
 
     rlsDataValue        = rlsDataValue.values.first
@@ -101,8 +113,13 @@ class Icinga2Check_CM_SequenceNumbers < Icinga2Check
           mls = value.dig( 'MasterLiveServer', 'host' )
 
           if(!mls.nil?)
-            @redis.set(cache_key, mls)
-            @redis.expire(cache_key, 320)
+#            @redis.set(cache_key, mls)
+
+            value = Redis::Value.new(cache_key, @redis)
+            value.value = mls
+            value.expire(320)
+
+#            @redis.expire(cache_key, 320)
           else
             mls = rls
           end
