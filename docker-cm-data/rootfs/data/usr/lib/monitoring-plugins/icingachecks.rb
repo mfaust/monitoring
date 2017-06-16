@@ -80,10 +80,10 @@ class Icinga2Check
 
     logger.debug( "hostname( #{hostname} )" )
 
-    logger.debug( "redis: #{@redis.get(format('dns::%s',fqdn))}" )
+    logger.debug( "redis: #{@redis.get(format('dns::%s',hostname))}" )
 
     # look in our cache
-    cache_key = format('dns::%s',fqdn) # Storage::RedisClient.cacheKey( { :host => hostname, :type => 'dns' } )
+    cache_key = format('dns::%s',hostname) # Storage::RedisClient.cacheKey( { :host => hostname, :type => 'dns' } )
 
     data      = @redis.get( cache_key )
 
@@ -96,7 +96,7 @@ class Icinga2Check
       @redis.set( cache_key, data, 120 )
     end
 
-    hostname = data.dig('fqdn')
+    hostname = data.dig('long')
 
     return hostname
 
