@@ -642,20 +642,33 @@ module DataCollector
 
       d = data.select {|d| d.dig('Replicator') }
 
-      logger.debug(d.class.to_s)
-      logger.debug(d)
+      if(!d.is_a?(Array))
+        data
+      end
+
+#       logger.debug(d.class.to_s) # ARRAY
+#       logger.debug(d)
 
       value = d.first.dig( 'Replicator','value' )
 
-      logger.debug(value.class.to_s)
-      logger.debug(value)
+      if(!value.is_a?(Hash))
+        data
+      end
+
+#       logger.debug(value.class.to_s) # HASH
+#       logger.debug(value)
 
       if( value != nil )
 
         value  = value.values.first
-        logger.debug(value.class.to_s)
-        logger.debug(value)
-        
+
+        if(!value.is_a?(Hash))
+          data
+        end
+
+#         logger.debug(value.class.to_s) # HASH
+#         logger.debug(value)
+
         mlsIOR = value.dig( 'MasterLiveServerIORUrl' )
 
         if( mlsIOR != nil )
@@ -666,13 +679,30 @@ module DataCollector
           port   = uri.port
           path   = uri.path
 
-          ip, short, fqdn = self.nsLookup( host )
+          logger.debug( format('search dns entry for \'%s\'', host) )
 
-          dns = @database.dnsData( { :ip => ip, :short => short, :fqdn => fqdn } )
+          ip, short, fqdn = self.nsLookup(host)
 
-          realIP    = dns.dig('ip')   || ip
-          realShort = dns.dig('name') || short
-          mlsHost   = dns.dig('fqdn') || fqdn
+          if( !ip.nil? && !short.nil? && !fqdn.nil? )
+
+            logger.debug( "found: #{ :ip => ip, :short => short, :fqdn => fqdn }" )
+
+#             dns = @database.dnsData( { :ip => ip, :short => short, :fqdn => fqdn } )
+#
+#             if(dns.nil)
+              realIP    = ip
+              realShort = short
+              mlsHost   = fqdn
+#             else
+#               realIP    = dns.dig('ip')
+#               realShort = dns.dig('name')
+#               mlsHost   = dns.dig('fqdn')
+#             end
+          else
+            realIP    = ''
+            realShort = ''
+            mlsHost   = host
+          end
 
           value['MasterLiveServer'] = {
             'scheme' => scheme,
@@ -685,7 +715,7 @@ module DataCollector
       end
 
       logger.info( sprintf( '  found \'%s\'', mlsHost ) )
-#       logger.debug( JSON.pretty_generate( data ) )
+      logger.debug( JSON.pretty_generate(value.dig('MasterLiveServer')) )
       return data
 
     end
