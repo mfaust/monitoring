@@ -642,11 +642,20 @@ module DataCollector
 
       d = data.select {|d| d.dig('Replicator') }
 
+      logger.debug(d.class.to_s)
+      logger.debug(d)
+
       value = d.first.dig( 'Replicator','value' )
+
+      logger.debug(value.class.to_s)
+      logger.debug(value)
 
       if( value != nil )
 
         value  = value.values.first
+        logger.debug(value.class.to_s)
+        logger.debug(value)
+        
         mlsIOR = value.dig( 'MasterLiveServerIORUrl' )
 
         if( mlsIOR != nil )
