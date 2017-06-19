@@ -646,17 +646,11 @@ module DataCollector
         data
       end
 
-#       logger.debug(d.class.to_s) # ARRAY
-#       logger.debug(d)
-
       value = d.first.dig( 'Replicator','value' )
 
       if(!value.is_a?(Hash))
         data
       end
-
-#       logger.debug(value.class.to_s) # HASH
-#       logger.debug(value)
 
       if( value != nil )
 
@@ -665,9 +659,6 @@ module DataCollector
         if(!value.is_a?(Hash))
           data
         end
-
-#         logger.debug(value.class.to_s) # HASH
-#         logger.debug(value)
 
         mlsIOR = value.dig( 'MasterLiveServerIORUrl' )
 
@@ -681,23 +672,16 @@ module DataCollector
 
           logger.debug( format('search dns entry for \'%s\'', host) )
 
-          ip, short, fqdn = self.nsLookup(host)
+          ip, short, fqdn = self.nsLookup(host,60)
 
           if( !ip.nil? && !short.nil? && !fqdn.nil? )
 
             logger.debug( "found: #{ip} , #{short} , #{fqdn}" )
 
-#             dns = @database.dnsData( { :ip => ip, :short => short, :fqdn => fqdn } )
-#
-#             if(dns.nil)
-              realIP    = ip
-              realShort = short
-              mlsHost   = fqdn
-#             else
-#               realIP    = dns.dig('ip')
-#               realShort = dns.dig('name')
-#               mlsHost   = dns.dig('fqdn')
-#             end
+            realIP    = ip
+            realShort = short
+            mlsHost   = fqdn
+
           else
             realIP    = ''
             realShort = ''
@@ -715,7 +699,7 @@ module DataCollector
       end
 
       logger.info( sprintf( '  found \'%s\'', mlsHost ) )
-      logger.debug( JSON.pretty_generate(value.dig('MasterLiveServer')) )
+#       logger.debug( JSON.pretty_generate(value.dig('MasterLiveServer')) )
       return data
 
     end
