@@ -685,7 +685,7 @@ module DataCollector
 
           if( !ip.nil? && !short.nil? && !fqdn.nil? )
 
-            logger.debug( "found: #{ :ip => ip, :short => short, :fqdn => fqdn }" )
+            logger.debug( "found: #{ip} , #{short} , #{fqdn}" )
 
 #             dns = @database.dnsData( { :ip => ip, :short => short, :fqdn => fqdn } )
 #
