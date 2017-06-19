@@ -42,7 +42,8 @@ module Storage
           :write_timeout   => write_timeout,
           :connect_timeout => connect_timeout,
           :encoding        => 'utf8',
-          :reconnect       => true
+          :reconnect       => true,
+          :flags           => Mysql2::Client::MULTI_STATEMENTS
         )
 
         logger.info( sprintf( 'try to create the database connection (%d)', retries ) )
