@@ -7,15 +7,19 @@ module ServiceDiscovery
     #
     def discoverApplication( params = {} )
 
-      host = params.dig( :fqdn )
-      port = params.dig( :port )
+      host = params.dig(:fqdn)
+      port = params.dig(:port)
 
-      fixedPorts = [3306,5432,9100,28017,55555]
+      fixedPorts = [80,443,3306,5432,9100,28017,55555]
       services   = Array.new
 
       if( fixedPorts.include?( port ) )
 
         case port
+        when 80
+          services.push('www_proxy')
+        when 443
+          services.push('www_proxy_ssl')
         when 3306
           services.push('mysql')
         when 5432

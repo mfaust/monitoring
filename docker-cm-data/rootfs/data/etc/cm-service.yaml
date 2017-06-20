@@ -1,6 +1,15 @@
 
 ---
 services:
+
+  http_proxy:
+    description: HTTP Proxy (Apache/nginx)
+    port: 80
+
+  https_proxy:
+    description: HTTPS Proxy (Apache/nginx)
+    port: 443
+
   mysql:
     description: MySQL
     port: 3306

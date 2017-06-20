@@ -272,18 +272,6 @@ module ServiceDiscovery
       #
       ip, short, fqdn = self.nsLookup( host )
 
-#       # add hostname to an blocking cache
-#       #
-#       if( @jobs.jobs( { :ip => ip, :short => short, :fqdn => fqdn } ) == true )
-#
-#         logger.warn( 'we are working on this job' )
-#
-#         return {
-#           :status  => 409, # 409 Conflict
-#           :message => 'we are working on this job'
-#         }
-#       end
-
       # if the destination host available (simple check with ping)
       #
       if( Utils::Network.isRunning?( fqdn ) == false )
@@ -331,10 +319,6 @@ module ServiceDiscovery
       end
 
       # -----------------------------------------------------------------------------------
-
-      # block this job..
-      #
-#       @jobs.add( { :ip => ip, :short => short, :fqdn => fqdn } )
 
       # get customized configurations of ports and services
       #
@@ -417,9 +401,7 @@ module ServiceDiscovery
       result    = @database.setStatus( { :ip => ip, :short => short, :fqdn => fqdn, :status => Storage::MySQL::ONLINE } )
 
       finish = Time.now
-      logger.info( sprintf( 'finished in %s seconds', finish - start ) )
-
-#       @jobs.del( { :ip => ip, :short => short, :fqdn => fqdn } )
+      logger.info( sprintf( 'finished in %s seconds', (finish - start).round(2) ) )
 
       return {
         :status   => 200,

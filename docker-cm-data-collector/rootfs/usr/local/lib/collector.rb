@@ -981,7 +981,7 @@ module DataCollector
         self.createBulkCheck( { :hostname => short, :fqdn => fqdn } )
 
         finish = Time.now
-        logger.info( sprintf( 'collect data in %s seconds', finish - start ) )
+        logger.info( sprintf( 'collect data in %s seconds', (finish - start).round(2) ) )
 
         @jobs.del( { :short => short, :fqdn => fqdn } )
 

@@ -57,12 +57,10 @@ module DataCollector
 
       # check our cache for prepared data
       #
-      prepared   = @cache.get( short )
+      prepared   = @cache.get( fqdn )
 
       if( prepared != nil )
-
         logger.debug( 'prepared data already created' )
-
         return
       end
       #
@@ -71,15 +69,7 @@ module DataCollector
       start = Time.now
 
       #
-#      tomcatApplication = Marshal.load( Marshal.dump( @cfg.jolokiaApplications ) )
-
-#       logger.debug( tomcatApplication )
-
       tomcatApplication = @cfg.jolokiaApplications.clone
-
-#       if( tomcatApplication == testData )
-#         logger.debug( 'identical' )
-#       end
 
 #       if( data == nil )
 #
@@ -117,10 +107,10 @@ module DataCollector
 
       @redis.createMeasurements( { :short => short, :fqdn => fqdn, :data => dataForRedis } )
 
-      @cache.set( short, 'prepared', expiresIn: 320 )
+      @cache.set( fqdn, 'prepared', expiresIn: 320 )
 
       finish = Time.now
-      logger.info( sprintf( 'build prepared data in %s seconds', finish - start ) )
+      logger.info( sprintf( 'build prepared data in %s seconds', (finish - start).round(2) ) )
 
       return true
 
