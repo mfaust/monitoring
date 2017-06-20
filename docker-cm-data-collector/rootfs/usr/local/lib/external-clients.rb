@@ -11,6 +11,8 @@ module ExternalClients
 
   class MySQL
 
+    attr_reader :client
+
     include Logging
 
     def initialize( params = {} )
@@ -35,15 +37,11 @@ module ExternalClients
           :read_timeout    => 5,
           :connect_timeout => 5
         )
-
-      rescue Exception => e
+      rescue => e
         logger.error( "An error occurred for connection: #{e}" )
-
-        return false
+        return nil
       end
-
-      return self
-
+      self
     end
 
 

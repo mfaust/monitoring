@@ -99,29 +99,14 @@ module DataCollector
       @mq        = MessageQueue::Consumer.new( @MQSettings )
       @prepare   = Prepare.new( prepareSettings )
       @jobs      = JobQueue::Job.new()
-      @database   = nil
-
-      if( mysqlHost != nil )
-
-        begin
-
-          until( @database != nil )
-
-            @database   = Storage::MySQL.new( {
-              :mysql => {
-                :host     => mysqlHost,
-                :user     => mysqlUser,
-                :password => mysqlPassword,
-                :schema   => mysqlSchema
-              }
-            } )
-
-          end
-        rescue => e
-
-          logger.error( e )
-        end
-      end
+      @database  = Storage::MySQL.new( {
+        :mysql => {
+          :host     => mysqlHost,
+          :user     => mysqlUser,
+          :password => mysqlPassword,
+          :schema   => mysqlSchema
+        }
+      } )
 
       # run internal scheduler to remove old data
       scheduler = Rufus::Scheduler.new
@@ -170,13 +155,20 @@ module DataCollector
 
     def mysqlData( host, data = {} )
 
-#      data = {}
-      user = data.dig('user') || 'cm_management'
-      pass = data.dig('pass') || 'cm_management'
+      user = data.dig('user') || 'monitoring'
+      pass = data.dig('pass') || 'monitoring'
       port = data.dig('port') || 3306
+      cache_key = format('mysql-%s', host)
 
-      if( port != nil )
+      cached_data = @cache.get( cache_key )
 
+      unless( cached_data.nil? )
+        user = cached_data.dig(:user)
+        pass = cached_data.dig(:pass)
+        port = cached_data.dig(:port)
+      end
+
+      unless( port.nil? )
         # TODO
         # we need an low-level-priv User for Monitoring!
         settings = {
@@ -189,14 +181,52 @@ module DataCollector
       result = Utils::Network.portOpen?( host, port )
 
       if( result == false )
-        logger.warn( sprintf( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
+        logger.warn( sprintf( 'The Port \'%s\' on Host \'%s\' is not open, skip ...', port, host ) )
 
         return JSON.parse( JSON.generate( { :status => 500 } ) )
       else
 
-        m = ExternalClients::MySQL.new( { :host => host, :username => user, :password => pass } )
+        m = ExternalClients::MySQL.new( settings )
 
-        if( m != nil || m != false )
+        if( m.client == nil )
+
+          fallback = {
+            coremedia: 'coremedia',
+            cm_caefeeder: 'cm_caefeeder',
+            cm_mcaefeeder: 'cm_mcaefeeder',
+            cm_management: 'cm_management',
+            cm_master: 'cm_master'
+          }
+
+          fallback.each do |u,p|
+
+            settings = {
+              :host     => host,
+              :username => u,
+              :password => p
+            }
+
+            m = ExternalClients::MySQL.new( settings )
+
+            if( m.client != nil )
+
+              user = u.clone
+              pass = p.clone
+              break
+            end
+          end
+
+        end
+
+        unless( m.client.nil? )
+
+          logger.debug( "save settings:" )
+          logger.debug( "  user: #{user}" )
+          logger.debug( "  pass: #{pass}" )
+
+          # TODO
+          # set cached_data
+          @cache.set( cache_key , expiresIn: 640 ) { Cache::Data.new( { 'user': user, 'pass': pass, 'port': port } ) }
 
           mysqlData = m.get()
 
