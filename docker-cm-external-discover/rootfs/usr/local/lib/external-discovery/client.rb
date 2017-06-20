@@ -134,6 +134,8 @@ module ExternalDiscovery
         result = self.nodeDelete( { :ip => r } )
 
         logger.debug( result )
+
+        sleep(4)
       end
 
 
@@ -160,7 +162,20 @@ module ExternalDiscovery
         dns_short       = d.dig('dns', 'short')
         dns_fqdn        = d.dig('dns', 'fqdn')
 
-        if( !['cosmos-development-management-cms','cosmos-development-delivery-mls','cosmos-development-delivery-rls-cae'].include?(tag_name) )
+        white_list = [
+          'cosmos-development-management-cms',
+          'cosmos-development-management-workflow',
+          'cosmos-development-management-feeder',
+          'cosmos-development-management-studio',
+          'cosmos-development-management-caepreview',
+          'cosmos-development-delivery-backup',
+          'cosmos-development-delivery-mls',
+          'cosmos-development-delivery-rls-cae',
+          'cosmos-development-storage-management-solr',
+          'cosmos-development-storage-delivery-solr'
+        ]
+
+        if( !white_list.include?(tag_name) )
           logger.debug( "skip: '#{tag_name}'" )
           next
         end
@@ -200,7 +215,7 @@ module ExternalDiscovery
         result = self.nodeAdd(params)
 
         if( result == true )
-          sleep(8)
+          sleep(10)
         end
 
         sleep(2)
