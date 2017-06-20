@@ -113,13 +113,7 @@ class Icinga2Check_CM_SequenceNumbers < Icinga2Check
           mls = value.dig( 'MasterLiveServer', 'host' )
 
           if(!mls.nil?)
-#            @redis.set(cache_key, mls)
-
-            value = Redis::Value.new(cache_key, @redis)
-            value.value = mls
-            value.expire(320)
-
-#            @redis.expire(cache_key, 320)
+            @redis.set(cache_key,mls,320)
           else
             mls = rls
           end
@@ -129,7 +123,6 @@ class Icinga2Check_CM_SequenceNumbers < Icinga2Check
     end
 
     mls
-
   end
 
 end
