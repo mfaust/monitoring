@@ -166,16 +166,11 @@ class CMIcinga2 < Icinga2::Client
           payload = {}
         end
 
-#         logger.debug( payload )
-
-#         if( @icingaCluster == true && @icingaSatellite != nil )
-#           payload['attrs']['zone'] = @icingaSatellite
-#         end
 
         # TODO
         # full API support
         params = {
-          :name => ip,
+          :name => fqdn,
           :fqdn => fqdn,
           :display_name => display_name,
           :enable_notifications => @icingaNotifications,
@@ -247,11 +242,6 @@ class CMIcinga2 < Icinga2::Client
       end
 
       result[:request]    = data
-
-#       logger.debug( result )
-
-#         self.sendMessage( result )
-
     end
 
 

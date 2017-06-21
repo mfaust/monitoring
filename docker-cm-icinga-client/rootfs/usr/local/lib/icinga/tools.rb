@@ -18,7 +18,6 @@ class CMIcinga2 < Icinga2::Client
       dns      = @cache.get( hostname )
 
       if( dns == nil )
-
         logger.debug( 'create cached DNS data' )
         # create DNS Information
         dns      = Utils::Network.resolv( name )
@@ -41,7 +40,6 @@ class CMIcinga2 < Icinga2::Client
         ip    = dns.dig(:ip)
         short = dns.dig(:short)
         fqdn  = dns.dig(:long)
-
       end
       #
       # ------------------------------------------------
@@ -50,8 +48,7 @@ class CMIcinga2 < Icinga2::Client
       logger.debug( sprintf( ' host %s ', short ) )
       logger.debug( sprintf( ' fqdn %s ', fqdn ) )
 
-      return ip, short, fqdn
-
+      [ip, short, fqdn]
     end
 
 
@@ -63,9 +60,13 @@ class CMIcinga2 < Icinga2::Client
       host    = params.dig(:host)
       fqdn    = params.dig(:fqdn)
 
-      awsConfig  = @database.config( { :ip => ip, :short => host, :fqdn => fqdn, :key => 'aws' } )
+      aws_config         = @database.config( { :ip => ip, :short => host, :fqdn => fqdn, :key => 'aws' } )
+      vhost_http_config  = @database.config( { :ip => ip, :short => host, :fqdn => fqdn, :key => 'vhost_http' } )
+      vhost_https_config = @database.config( { :ip => ip, :short => host, :fqdn => fqdn, :key => 'vhost_https' } )
 
-      logger.debug( "awsConfig: #{awsConfig}" )
+      logger.debug( "aws_config        : #{aws_config}" )
+      logger.debug( "vhost_http_config : #{vhost_http_config}" )
+      logger.debug( "vhost_https_config: #{vhost_https_config}" )
 
       # in first, we need the discovered services ...
       #
@@ -73,10 +74,7 @@ class CMIcinga2 < Icinga2::Client
 
         result = @database.discoveryData( { :ip => ip, :short => host, :fqdn => fqdn } )
 
-#         logger.debug( result.class.to_s )
-
         if( result.is_a?( Hash ) && result.count != 0 )
-
           services = result
           break
         else
@@ -86,9 +84,7 @@ class CMIcinga2 < Icinga2::Client
       end
 
       if( services != nil )
-
         services.each do |s|
-
           if( s.last != nil )
             s.last.reject! { |k| k == 'template' }
             s.last.reject! { |k| k == 'application' }
@@ -101,22 +97,34 @@ class CMIcinga2 < Icinga2::Client
         payload = {}
       end
 
-      if( awsConfig )
+      if( aws_config )
+#        logger.debug(aws_config.class.to_s)
+        aws_config = aws_config.dig('aws')
+        aws_config = aws_config.gsub( '=>', ':' )
 
-        logger.debug(awsConfig.class.to_s)
-
-        awsConfig = awsConfig.dig('aws')
-        awsConfig = awsConfig.gsub( '=>', ':' )
-
-        payload['aws'] = self.parsedResponse( awsConfig )
+        payload['aws'] = self.parsedResponse( aws_config )
       end
 
-logger.debug( "payload: #{payload}" )
+      if( vhost_http_config )
+#        logger.debug(vhost_http_config.class.to_s)
+        vhost_http_config = vhost_http_config.dig('vhost_http')
+        vhost_http_config = vhost_http_config.gsub( '=>', ':' )
 
-      return payload
+        payload['http_vhost'] = self.parsedResponse( vhost_http_config )
+      end
 
+      if( vhost_https_config )
+#        logger.debug(vhost_https_config.class.to_s)
+        vhost_https_config = vhost_https_config.dig('vhost_https')
+        vhost_https_config = vhost_https_config.gsub( '=>', ':' )
+
+        payload['https_vhost'] = self.parsedResponse( vhost_https_config )
+      end
+
+# logger.debug( "payload: #{payload}" )
+
+      payload
     end
-
 
 
     def parsedResponse( r )
@@ -124,7 +132,6 @@ logger.debug( "payload: #{payload}" )
       return JSON.parse( r )
     rescue JSON::ParserError => e
       return r # do smth
-
     end
 
   end

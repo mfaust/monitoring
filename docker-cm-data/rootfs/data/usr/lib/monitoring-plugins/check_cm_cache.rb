@@ -22,8 +22,10 @@ class Icinga2Check_CM_Cache < Icinga2Check
 
   def check( host, application, type )
 
-    config   = readConfig( type )
+    logger.debug("check( #{host}, #{application}, #{type} )")
 
+    config   = readConfig(type)
+    logger.debug("config: #{config}")
     warning  = config.dig(:warning)  || 90
     critical = config.dig(:critical) || 95
 
@@ -31,7 +33,6 @@ class Icinga2Check_CM_Cache < Icinga2Check
     data = @mbean.bean( host, application, 'CapConnection' )
 
     dataValue = self.runningOrOutdated( data )
-
     dataValue = dataValue.values.first
 
     case type

@@ -51,6 +51,7 @@ module MBean
 
         if( s == nil )
           # no service found
+          logger.debug("no service '#{service}' found")
           return false
         end
 
@@ -58,53 +59,21 @@ module MBean
 
         if( mbeanExists == nil )
           # no mbean $mbean found
+          logger.debug("no mbean '#{mbean}' for service '#{service}' found")
           return false
         end
 
-        mbeanExists  = mbeanExists.dig(mbean)
-        mbeanStatus  = mbeanExists.dig('status') || 999
-
-        return mbeanExists
-
-        if( mbeanStatus.to_i != 200 )
-          #mbean $mbean found, but status != 200
-          return false
-        end
-
-        if( mbeanExists != nil && key == nil )
-
-          result = true
-        elsif( mbeanExists != nil && key != nil )
-
-          mbeanValue = mbeanExists.dig('value')
-
-          if( mbeanValue == nil )
-            # mbean value are nil
-            return false
-          end
-
-          if( mbeanValue.is_a?( Hash ) )
-            mbeanValue = mbeanValue.values.first
-          end
-
-          attribute = mbeanValue.dig(key)
-
-          if( attribute == nil || ( attribute.is_a?(String) && attribute.include?( 'ERROR' ) ) )
-
-            return false
-          end
-        end
+        result = mbeanExists.dig(mbean)
 
       rescue JSON::ParserError => e
 
         logger.error('wrong result (no json)')
         logger.error(e)
-
-        result = false
+#
+        return false
       end
 
-      return result
-
+      result
     end
 
 

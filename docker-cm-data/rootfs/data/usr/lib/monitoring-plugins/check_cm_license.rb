@@ -37,6 +37,7 @@ class Icinga2Check_CM_Licenses < Icinga2Check
   def check( host, application )
 
     config   = readConfig( 'license' )
+    logger.debug("config: #{config}")
     warning  = config.dig(:warning)  || 50
     critical = config.dig(:critical) || 20
 
@@ -69,7 +70,7 @@ class Icinga2Check_CM_Licenses < Icinga2Check
         exitCode = STATE_CRITICAL
       end
 
-      puts sprintf( '<b>%d days left</b><br>Coremedia License is valid until %s', validUntilDays, licenseDate )
+      puts sprintf( '<b>%d days left</b><br>Coremedia License is valid until %s | valid=%d warning=%d critical=%d', validUntilDays, licenseDate, validUntilDays,warning, critical
     else
       puts sprintf( 'UNKNOWN - No valid Coremedia License found' )
       exitCode = STATE_UNKNOWN

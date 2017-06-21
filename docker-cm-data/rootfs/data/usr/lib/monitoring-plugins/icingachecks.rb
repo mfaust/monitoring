@@ -12,7 +12,7 @@ require_relative '/usr/local/share/icinga2/logging'
 require_relative '/usr/local/share/icinga2/utils/network'
 require_relative '/usr/local/share/icinga2/storage'
 require_relative '/usr/local/share/icinga2/mbean'
-#require_relative '/usr/local/share/icinga2/cache'
+require_relative '/usr/local/share/icinga2/cache'
 require_relative '/usr/local/share/icinga2/monkey'
 
 # ---------------------------------------------------------------------------------------
@@ -35,37 +35,56 @@ class Icinga2Check
     logger.level = Logger::DEBUG
     @redis       = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
     @mbean       = MBean::Client.new( { :redis => @redis } )
-#     @cache       = Cache::Store.new()
+    @cache       = Cache::Store.new()
   end
 
 
   def readConfig( service )
 
-    file = '/etc/cm-icinga2.yaml'
+    logger.debug("readConfig( #{service} )")
 
     usePercent = nil
     warning    = nil
     critical   = nil
 
-    if( File.exist?( file ) )
+    # TODO
+    # use internal cache insteed file-access
+    cache_key = format('Icinga2Check::%s',service)
 
-      begin
+    data = @redis.get( cache_key )
 
-        config  = YAML.load_file( file )
+    logger.debug( "cached data: #{data}" )
 
-        service = config.dig(service)
+    if(data.nil?)
 
-        if( service != nil )
-          usePercent = service.dig('usePercent')
-          warning    = service.dig('warning')
-          critical   = service.dig('critical')
+      file = '/etc/cm-icinga2.yaml'
+
+      if( File.exist?(file) )
+
+        begin
+          config  = YAML.load_file(file)
+          data    = config.dig(service)
+
+          logger.debug( "file data: #{data}" )
+
+          if(data.is_a?(Hash))
+            @redis.set(cache_key, data, 640)
+          end
+
+        rescue YAML::ParserError => e
+
+          logger.error( 'wrong result (no yaml)')
+          logger.error( e )
         end
-      rescue YAML::ParserError => e
-
-        logger.error( 'wrong result (no yaml)')
-        logger.error( e )
       end
     end
+
+    if( data != nil )
+      usePercent = data.dig('usePercent')
+      warning    = data.dig('warning')
+      critical   = data.dig('critical')
+    end
+
 
     return {
       :usePercent => usePercent,
@@ -80,10 +99,10 @@ class Icinga2Check
 
     logger.debug( "hostname( #{hostname} )" )
 
-    logger.debug( "redis: #{@redis.get(format('dns::%s',hostname))}" )
-
     # look in our cache
-    cache_key = format('dns::%s',hostname) # Storage::RedisClient.cacheKey( { :host => hostname, :type => 'dns' } )
+    cache_key = format('dns::%s',hostname)
+
+#    logger.debug( "redis: #{@redis.get(cache_key)}" )
 
     data      = @redis.get( cache_key )
 
@@ -105,7 +124,7 @@ class Icinga2Check
 
   def runningOrOutdated( data )
 
-    if( data == false )
+    unless( data.is_a?(Hash) )
       puts 'CRITICAL - no data found - service not running!?'
       exit STATE_CRITICAL
     end
@@ -114,7 +133,7 @@ class Icinga2Check
     dataTimestamp = data.dig('timestamp')
     dataValue     = data.dig('value')     # ( data != nil && data['value'] ) ? data['value'] : nil
 
-    if( dataValue == nil )
+    if( dataValue.nil? )
       puts 'CRITICAL - missing monitoring data - service not running!?'
       exit STATE_CRITICAL
     end
@@ -141,7 +160,7 @@ class Icinga2Check
 
 #     logger.debug( "beanTimeout?( #{timestamp}, #{warning}, #{critical} )" )
 
-    config   = readConfig( 'timeout' )
+    config   = readConfig('timeout')
     warning  = config.dig(:warning)  || warning
     critical = config.dig(:critical) || critical
 
@@ -176,9 +195,6 @@ class Icinga2Check
 
     end
 
-    return result, difference
-
+    [result, difference]
   end
-
-
 end
