@@ -48,8 +48,8 @@ class Monitoring
 
     logger.level           = Logger::DEBUG
 
-    version              = '2.4.109'
-    date                 = '2017-06-16'
+    version              = '2.4.112'
+    date                 = '2017-06-22'
 
     logger.info( '-----------------------------------------------------------------' )
     logger.info( ' CoreMedia - Monitoring Service' )
