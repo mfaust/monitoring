@@ -49,7 +49,7 @@ class Icinga2Check
 
     # TODO
     # use internal cache insteed file-access
-    cache_key = format('Icinga2Check::%s',service)
+    cache_key = 'icinga2::config'
 
     data = @redis.get( cache_key )
 
@@ -63,12 +63,12 @@ class Icinga2Check
 
         begin
           config  = YAML.load_file(file)
-          data    = config.dig(service)
 
-          logger.debug( "file data: #{data}" )
+          # data    = config.dig(service)
+          # logger.debug( "file data: #{data}" )
 
-          if(data.is_a?(Hash))
-            @redis.set(cache_key, data, 640)
+          if(config.is_a?(Hash))
+            @redis.set(cache_key, config, 640)
           end
 
         rescue YAML::ParserError => e
@@ -79,7 +79,9 @@ class Icinga2Check
       end
     end
 
-    if( data != nil )
+    data    = data.dig(service)
+
+    unless(data.nil?)
       usePercent = data.dig('usePercent')
       warning    = data.dig('warning')
       critical   = data.dig('critical')

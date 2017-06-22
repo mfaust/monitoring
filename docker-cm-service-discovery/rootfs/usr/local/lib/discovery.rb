@@ -382,7 +382,7 @@ module ServiceDiscovery
 
           serviceData = @serviceConfig.dig( 'services', s )
 
-          if( serviceData != nil )
+          unless serviceData.nil?
 
             discoveredServices[s] ||= serviceData.filter( 'port' )
           end

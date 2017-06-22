@@ -25,7 +25,7 @@ module Storage
       @schema         = params.dig(:mysql, :schema)
       read_timeout    = params.dig(:mysql, :timeout, :read)    || 15
       write_timeout   = params.dig(:mysql, :timeout, :write)   || 15
-      connect_timeout = params.dig(:mysql, :timeout, :connect) || 15
+      connect_timeout = params.dig(:mysql, :timeout, :connect) || 25
 
       @client     = nil
 
@@ -42,18 +42,19 @@ module Storage
           :write_timeout   => write_timeout,
           :connect_timeout => connect_timeout,
           :encoding        => 'utf8',
-          :reconnect       => true,
-          :flags           => Mysql2::Client::MULTI_STATEMENTS
+          :reconnect       => true
         )
 
-        logger.info( sprintf( 'try to create the database connection (%d)', retries ) )
       rescue
-        if( retries < 10 )
 
-          sleep( 3 )
+        logger.info( sprintf( 'try to create the database connection (%d)', retries ) )
+
+        if( retries < 20 )
           retries += 1
+          sleep( 5 )
           retry
         end
+
       end
 
       # SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = 'DBName'

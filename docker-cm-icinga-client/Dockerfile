@@ -11,7 +11,7 @@ ENV \
   APK_DEL="build-base git ruby-dev ruby-rdoc " \
   GEMS="beaneater ipaddress icinga2 json mysql2 rufus-scheduler tzinfo-data"
 
-LABEL version="1706-02.2"
+LABEL version="1706-03.1"
 
 # ---------------------------------------------------------------------------------------
 
