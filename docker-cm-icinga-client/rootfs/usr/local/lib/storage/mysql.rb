@@ -45,9 +45,10 @@ module Storage
           :reconnect       => true
         )
 
-      rescue
+      rescue => e
 
         logger.info( sprintf( 'try to create the database connection (%d)', retries ) )
+        logger.error( e )
 
         if( retries < 20 )
           retries += 1
