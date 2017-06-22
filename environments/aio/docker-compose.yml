@@ -296,7 +296,7 @@ services:
   cm-rest-service:
     restart: always
     build: ../../docker-cm-rest-service
-    container_name: 02-cm-rest-service
+    container_name: cm-rest-service
     hostname: cm-rest-service
     extends:
       file: environments.yml
@@ -307,6 +307,7 @@ services:
       - database
     links:
       - redis
+      - database
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./logs:/var/log
