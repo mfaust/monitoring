@@ -38,7 +38,7 @@ waitForDatabase() {
 
     [ ${d} -eq 1 ] && break
 
-    echo " [i] Waiting for database host '${MYSQL_HOST}' to come up (#{RETRY})"
+    echo " [i] Waiting for database host '${MYSQL_HOST}' to come up (${RETRY})"
 
     sleep 2s
     RETRY=$(expr ${RETRY} - 1)
