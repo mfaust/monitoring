@@ -781,10 +781,10 @@ module ExternalClients
 
     def initialize( params = {} )
 
-      host      = params.dig(:host)
-      port      = params.dig(:port) || 8081
+      @host  = params.dig(:host)
+      port   = params.dig(:port) || 8081
 
-      @uri = URI.parse(format('http://%s:%d/server-status?auto', host, port))
+      @uri = URI.parse(format('http://%s:%d/server-status?auto', @host, port))
 
       # Sample Response with ExtendedStatus On
       # Total Accesses: 20643
@@ -846,44 +846,61 @@ module ExternalClients
 
       response = nil
       begin
+
+        retries ||= 0
+
         response = Net::HTTP.get(@uri)
 
       rescue => e
-#         report(
-#           :service     => 'httpd health',
-#           :state       => 'critical',
-#           :description => 'Httpd connection error: #{e.class} - #{e.message}',
-#           :tags        => ['httpd']
-#         )
-      else
-#         report(
-#           :service     => 'httpd health',
-#           :state       => 'ok',
-#           :description => 'Httpd connection status ok',
-#           :tags        => ['httpd']
-#         )
+
+        logger.debug(format('try to get data from %s (%d)', @url, retries))
+        logger.error(e)
+
+        if( retries < 10 )
+          retries += 1
+          sleep( 2 )
+          retry
+        end
       end
 
       response
-
     end
 
     def tick
 
+      a = Array.new
+
       unless (response = get_connection).nil?
 
-        response.each_line do |line|
+        # make an array
+        response = response.split("\n")
+
+        # blacklist
+        response.reject! { |t| t[/#{@host}/] }
+        response.reject! { |t| t[/^Server.*/] }
+        response.reject! { |t| t[/.*Time/] }
+        response.reject! { |t| t[/^ServerUptime/] }
+        response.reject! { |t| t[/^Load.*/] }
+        response.reject! { |t| t[/^CPU.*/] }
+        response.reject! { |t| t[/^TLSSessionCacheStatus/] }
+        response.reject! { |t| t[/^CacheType/] }
+
+        response.each do |line|
+
           metrics = Hash.new
 
           if line =~ /Scoreboard/
-            metrics = get_scoreboard_metrics(line.strip)
+            metrics = { 'scoreboard' => get_scoreboard_metrics(line.strip) }
           else
             key, value = line.strip.split(':')
-            metrics[key.gsub(/\s/, '')] = value
+            metrics[key.gsub(/\s/, '')] = value.strip.to_f
           end
-          report_metrics(metrics)
+
+          a << metrics
         end
       end
+
+      a = a.reduce( :merge )
 
     end
 

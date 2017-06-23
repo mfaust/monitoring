@@ -466,6 +466,8 @@ module DataCollector
             bulk.push( '' )
           when 'resourced'
             # resourced
+          when 'http_server_status'
+            bulk.push('')
           else
             # all others
           end

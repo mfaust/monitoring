@@ -27,7 +27,9 @@ module Storage
       @write_timeout   = params.dig(:mysql, :timeout, :write)   || 15
       @connect_timeout = params.dig(:mysql, :timeout, :connect) || 25
 
-      @client     = connect
+      logger.level = Logger::INFO
+
+      @client          = connect
 
       # SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = 'DBName'
       @client.query('SET storage_engine=InnoDB')

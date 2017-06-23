@@ -27,6 +27,7 @@ require_relative 'carbon-data/content-server'
 require_relative 'carbon-data/clients'
 require_relative 'carbon-data/feeder'
 require_relative 'carbon-data/solr'
+require_relative 'carbon-data/http'
 require_relative 'carbon-data/database/mongodb'
 require_relative 'carbon-data/database/mysql'
 require_relative 'carbon-data/database/postgres'
@@ -47,6 +48,7 @@ module CarbonData
     include CarbonData::Clients
     include CarbonData::Feeder
     include CarbonData::Solr
+    include CarbonData::Http::Apache
     include CarbonData::Database::MongoDB
     include CarbonData::Database::MySQL
     include CarbonData::Database::Postgres
@@ -292,6 +294,14 @@ module CarbonData
 
           if( result.is_a?( Hash ) )
             graphiteOutput.push( self.operatingSystemNodeExporter( result ) )
+          else
+            logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
+          end
+
+        when 'http_server_status'
+
+          if( result.is_a?( Hash ) )
+            graphiteOutput.push( self.http_server_status( result ) )
           else
             logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
           end
