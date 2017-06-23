@@ -10,16 +10,18 @@ module ServiceDiscovery
       host = params.dig(:fqdn)
       port = params.dig(:port)
 
-      fixedPorts = [80,443,3306,5432,9100,28017,55555]
+      fixedPorts = [80,443,8081,3306,5432,9100,28017,55555]
       services   = Array.new
 
       if( fixedPorts.include?( port ) )
 
         case port
         when 80
-          services.push('www_proxy')
+          services.push('http_proxy')
         when 443
-          services.push('www_proxy_ssl')
+          services.push('https_proxy')
+        when 8081
+          services.push('http_server_status')
         when 3306
           services.push('mysql')
         when 5432

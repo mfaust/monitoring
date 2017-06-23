@@ -320,18 +320,16 @@ module DataCollector
       port = data.dig(:port) || 55555
 
       if( port != nil )
-
         settings = {
           :host => host,
           :port => port
         }
       end
 
-
       result = Utils::Network.portOpen?( host, port )
 
       if( result == false )
-        logger.warn( sprintf( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
+        logger.warn( sprintf( 'The Port \'%s\' on Host \'%s\' is not open, skip ...', port, host ) )
 
         return JSON.parse( JSON.generate( { :status => 500 } ) )
       else
@@ -341,6 +339,39 @@ module DataCollector
 
         result   = JSON.generate( nodeData )
         data     = JSON.parse( result )
+
+        return data
+      end
+
+    end
+
+
+    def apache_mod_status( host, data = {} )
+
+      port = data.dig(:port) || 8081
+
+      if( port != nil )
+        settings = {
+          :host => host,
+          :port => port
+        }
+      end
+
+      result = Utils::Network.portOpen?( host, port )
+
+      if( result == false )
+        logger.warn( sprintf( 'The Port \'%s\' on Host \'%s\' is not open, skip ...', port, host ) )
+
+        return JSON.parse( JSON.generate( { :status => 500 } ) )
+      else
+
+        m = ExternalClients::ModStatus.new( settings )
+        data = m.tick
+
+        result   = JSON.generate( data )
+        data     = JSON.parse( result )
+
+        logger.debug( data )
 
         return data
       end
@@ -625,6 +656,9 @@ module DataCollector
             when 'resourced'
               #
               d = self.resourcedData( fqdn )
+            when 'http_server_status'
+              # apache mod_status
+              d = self.apache_mod_status( fqdn )
             else
               # all others
             end

@@ -36,10 +36,11 @@ module ServiceDiscovery
     def initialize( settings = {} )
 
       ports = [
-        80,
-        443,
+        80,       # http
+        443,      # https
         3306,     # mysql
         5432,     # postrgres
+        8081,     # Apache mod_status
         9100,     # node_exporter
         28017,    # mongodb
         38099,

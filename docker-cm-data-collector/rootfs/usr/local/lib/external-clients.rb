@@ -671,6 +671,7 @@ module ExternalClients
 
   end
 
+
   class Resourced
 
     include Logging
@@ -770,6 +771,121 @@ module ExternalClients
 
     end
 
+
+  end
+
+
+  class ModStatus
+
+    include Logging
+
+    def initialize( params = {} )
+
+      host      = params.dig(:host)
+      port      = params.dig(:port) || 8081
+
+      @uri = URI.parse(format('http://%s:%d/server-status?auto', host, port))
+
+      # Sample Response with ExtendedStatus On
+      # Total Accesses: 20643
+      # Total kBytes: 36831
+      # CPULoad: .0180314
+      # Uptime: 43868
+      # ReqPerSec: .470571
+      # BytesPerSec: 859.737
+      # BytesPerReq: 1827.01
+      # BusyWorkers: 6
+      # IdleWorkers: 94
+      # Scoreboard: ___K_____K____________W_
+
+      @scoreboard_map  = {
+        '_' => 'waiting',
+        'S' => 'starting',
+        'R' => 'reading',
+        'W' => 'sending',
+        'K' => 'keepalive',
+        'D' => 'dns',
+        'C' => 'closing',
+        'L' => 'logging',
+        'G' => 'graceful',
+        'I' => 'idle',
+        '.' => 'open'
+      }
+
+    end
+
+    def get_scoreboard_metrics(response)
+
+      results = Hash.new(0)
+
+      response.slice! 'Scoreboard: '
+      response.each_char do |char|
+        results[char] += 1
+      end
+
+      Hash[results.map { |k, v| [@scoreboard_map[k], v] }]
+    end
+
+
+    def report_metrics(metrics)
+#       metrics.each do |k, v|
+#         report(
+#           :service  => "httpd #{k}",
+#           :metric   => v.to_f,
+#           :state    => 'ok',
+#           :tags     => ['httpd']
+#         )
+#       end
+#
+      logger.debug( metrics )
+    end
+
+
+
+    def get_connection
+
+      response = nil
+      begin
+        response = Net::HTTP.get(@uri)
+
+      rescue => e
+#         report(
+#           :service     => 'httpd health',
+#           :state       => 'critical',
+#           :description => 'Httpd connection error: #{e.class} - #{e.message}',
+#           :tags        => ['httpd']
+#         )
+      else
+#         report(
+#           :service     => 'httpd health',
+#           :state       => 'ok',
+#           :description => 'Httpd connection status ok',
+#           :tags        => ['httpd']
+#         )
+      end
+
+      response
+
+    end
+
+    def tick
+
+      unless (response = get_connection).nil?
+
+        response.each_line do |line|
+          metrics = Hash.new
+
+          if line =~ /Scoreboard/
+            metrics = get_scoreboard_metrics(line.strip)
+          else
+            key, value = line.strip.split(':')
+            metrics[key.gsub(/\s/, '')] = value
+          end
+          report_metrics(metrics)
+        end
+      end
+
+    end
 
   end
 
