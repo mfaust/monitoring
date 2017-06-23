@@ -192,6 +192,7 @@ module DataCollector
 
           fallback = {
             coremedia: 'coremedia',
+            cm_replication: 'cm_replication',
             cm_caefeeder: 'cm_caefeeder',
             cm_mcaefeeder: 'cm_mcaefeeder',
             cm_management: 'cm_management',
@@ -208,7 +209,7 @@ module DataCollector
 
             m = ExternalClients::MySQL.new( settings )
 
-            if( m.client != nil )
+            unless( m.client.nil? )
 
               user = u.clone
               pass = p.clone
