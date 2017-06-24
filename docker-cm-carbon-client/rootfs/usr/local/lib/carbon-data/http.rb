@@ -11,6 +11,8 @@ module CarbonData
 
         unless(value.nil?)
 
+          service = 'HTTP_STATUS'
+
           total_accesses         = value.dig('TotalAccesses') || 0
           total_kbytes           = value.dig('TotalkBytes')   || 0
           uptime                 = value.dig('Uptime') || 0
@@ -23,17 +25,17 @@ module CarbonData
           conns_async_writing    = value.dig('ConnsAsyncWriting') || 0
           conns_async_keep_alive = value.dig('ConnsAsyncKeepAlive') || 0
           conns_async_closing    = value.dig('ConnsAsyncClosing') || 0
-          sb_waiting             = value.dig('waiting') || 0
-          sb_sending             = value.dig('sending') || 0
-          sb_open                = value.dig('open') || 0
-          sb_starting            = value.dig('starting') || 0
-          sb_reading             = value.dig('reading') || 0
-          sb_keepalive           = value.dig('keepalive') || 0
-          sb_dns                 = value.dig('dns') || 0
-          sb_closing             = value.dig('closing') || 0
-          sb_logging             = value.dig('logging') || 0
-          sb_graceful            = value.dig('graceful') || 0
-          sb_idle                = value.dig('idle') || 0
+          sb_waiting             = value.dig('scoreboard', 'waiting') || 0
+          sb_sending             = value.dig('scoreboard', 'sending') || 0
+          sb_open                = value.dig('scoreboard', 'open') || 0
+          sb_starting            = value.dig('scoreboard', 'starting') || 0
+          sb_reading             = value.dig('scoreboard', 'reading') || 0
+          sb_keepalive           = value.dig('scoreboard', 'keepalive') || 0
+          sb_dns                 = value.dig('scoreboard', 'dns') || 0
+          sb_closing             = value.dig('scoreboard', 'closing') || 0
+          sb_logging             = value.dig('scoreboard', 'logging') || 0
+          sb_graceful            = value.dig('scoreboard', 'graceful') || 0
+          sb_idle                = value.dig('scoreboard', 'idle') || 0
           cache_shared_memory    = value.dig('CacheSharedMemory') || 0
           cache_current_entries  = value.dig('CacheCurrentEntries') || 0
           cache_subcaches        = value.dig('CacheSubcaches') || 0
@@ -50,52 +52,52 @@ module CarbonData
           cache_remove_miss      = value.dig('CacheRemoveMissCount') || 0
 
           result << {
-            :key   => sprintf( '%s.%s.%s'      , @identifier, @Service, 'uptime' ),
+            :key   => sprintf( '%s.%s.%s'      , @identifier, service, 'uptime' ),
             :value => uptime
           } << {
-            :key   => sprintf( '%s.%s.%s.%s'   , @identifier, @Service, 'workers', 'busy' ),
+            :key   => sprintf( '%s.%s.%s.%s'   , @identifier, service, 'workers', 'busy' ),
             :value => busy_workers
           } << {
-            :key   => sprintf( '%s.%s.%s.%s'   , @identifier, @Service, 'workers', 'idle' ),
+            :key   => sprintf( '%s.%s.%s.%s'   , @identifier, service, 'workers', 'idle' ),
             :value => idle_workers
           } << {
-            :key   => sprintf( '%s.%s.%s.%s'   , @identifier, @Service, 'scoreboard', 'waiting' ),
+            :key   => sprintf( '%s.%s.%s.%s'   , @identifier, service, 'scoreboard', 'waiting' ),
             :value => sb_waiting
           } << {
-            :key   => sprintf( '%s.%s.%s.%s'   , @identifier, @Service, 'scoreboard', 'sending' ),
+            :key   => sprintf( '%s.%s.%s.%s'   , @identifier, service, 'scoreboard', 'sending' ),
             :value => sb_sending
           } << {
-            :key   => sprintf( '%s.%s.%s.%s'   , @identifier, @Service, 'scoreboard', 'open' ),
+            :key   => sprintf( '%s.%s.%s.%s'   , @identifier, service, 'scoreboard', 'open' ),
             :value => sb_open
           } << {
-            :key   => sprintf( '%s.%s.%s.%s'   , @identifier, @Service, 'scoreboard', 'starting' ),
+            :key   => sprintf( '%s.%s.%s.%s'   , @identifier, service, 'scoreboard', 'starting' ),
             :value => sb_starting
           } << {
-            :key   => sprintf( '%s.%s.%s.%s'   , @identifier, @Service, 'scoreboard', 'reading' ),
+            :key   => sprintf( '%s.%s.%s.%s'   , @identifier, service, 'scoreboard', 'reading' ),
             :value => sb_reading
           } << {
-            :key   => sprintf( '%s.%s.%s.%s'   , @identifier, @Service, 'scoreboard', 'keepalive' ),
+            :key   => sprintf( '%s.%s.%s.%s'   , @identifier, service, 'scoreboard', 'keepalive' ),
             :value => sb_keepalive
           } << {
-            :key   => sprintf( '%s.%s.%s.%s'   , @identifier, @Service, 'scoreboard', 'dns' ),
+            :key   => sprintf( '%s.%s.%s.%s'   , @identifier, service, 'scoreboard', 'dns' ),
             :value => sb_dns
           } << {
-            :key   => sprintf( '%s.%s.%s.%s'   , @identifier, @Service, 'scoreboard', 'closing' ),
+            :key   => sprintf( '%s.%s.%s.%s'   , @identifier, service, 'scoreboard', 'closing' ),
             :value => sb_closing
           } << {
-            :key   => sprintf( '%s.%s.%s.%s'   , @identifier, @Service, 'scoreboard', 'logging' ),
+            :key   => sprintf( '%s.%s.%s.%s'   , @identifier, service, 'scoreboard', 'logging' ),
             :value => sb_logging
           } << {
-            :key   => sprintf( '%s.%s.%s.%s'   , @identifier, @Service, 'scoreboard', 'graceful' ),
+            :key   => sprintf( '%s.%s.%s.%s'   , @identifier, service, 'scoreboard', 'graceful' ),
             :value => sb_graceful
           } << {
-            :key   => sprintf( '%s.%s.%s.%s'   , @identifier, @Service, 'scoreboard', 'idle' ),
+            :key   => sprintf( '%s.%s.%s.%s'   , @identifier, service, 'scoreboard', 'idle' ),
             :value => sb_idle
           } << {
-            :key   => sprintf( '%s.%s.%s.%s'   , @identifier, @Service, 'bytes', 'per_sec' ),
+            :key   => sprintf( '%s.%s.%s.%s'   , @identifier, service, 'bytes', 'per_sec' ),
             :value => bytes_per_sec
           } << {
-            :key   => sprintf( '%s.%s.%s.%s'   , @identifier, @Service, 'bytes', 'per_req' ),
+            :key   => sprintf( '%s.%s.%s.%s'   , @identifier, service, 'bytes', 'per_req' ),
             :value => bytes_per_req
           }
 

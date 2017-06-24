@@ -17,17 +17,17 @@ module ServiceDiscovery
 
         case port
         when 80
-          services.push('http_proxy')
+          services.push('http-proxy')
         when 443
-          services.push('https_proxy')
+          services.push('https-proxy')
         when 8081
-          services.push('http_server_status')
+          services.push('http-status')
         when 3306
           services.push('mysql')
         when 5432
           services.push('postgres')
         when 9100
-          services.push('node_exporter')
+          services.push('node-exporter')
         when 28017
           services.push('mongodb')
         when 55555

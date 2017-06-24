@@ -22,23 +22,23 @@ services:
     volumes:
       - /share:/share
 
-#  dnsdock:
-#    restart: always
-#    image: bodsch/docker-dnsdock:1705-04
-#    container_name: dnsdock
-#    hostname: dnsdock
-#    labels:
-#      com.dnsdock.alias: dnsdock
-#      com.dnsdock.ttl: '120'
-#    volumes:
-#      - /etc/localtime:/etc/localtime:ro
-#      - /var/run/docker.sock:/var/run/docker.sock
-#    # You can use also Environment vars like this:
-#    # command: "--nameserver='${DNS_1}:53' --nameserver='${DNS_2}:53' --http=:80"
-#    command: "--nameserver='10.1.2.14:53' --nameserver='10.1.2.63:53' --http=:80 --ttl=120"
-#    networks:
-#      mon:
-#        ipv4_address: 192.168.1.5
+  dnsdock:
+    restart: always
+    image: bodsch/docker-dnsdock:1705-04
+    container_name: dnsdock
+    hostname: dnsdock
+    labels:
+      com.dnsdock.alias: dnsdock
+      com.dnsdock.ttl: '120'
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    # You can use also Environment vars like this:
+    # command: "--nameserver='${DNS_1}:53' --nameserver='${DNS_2}:53' --http=:80"
+    command: "--nameserver='141.1.1.1:53' --nameserver='192.168.0.1:53' --http=:80 --ttl=120"
+    networks:
+      mon:
+        ipv4_address: 192.168.1.5
 
   beanstalkd:
     restart: always
@@ -70,7 +70,7 @@ services:
 
   jolokia:
     restart: always
-    image: bodsch/docker-jolokia:latest
+    image: bodsch/docker-jolokia:1706-04.1
     container_name: jolokia
     hostname: jolokia
     depends_on:
@@ -81,6 +81,8 @@ services:
     networks:
       mon:
         ipv4_address: 192.168.1.8
+    dns:
+      - 192.168.1.5
 
   memcached:
     restart: always
@@ -134,7 +136,7 @@ services:
       - /share/etc/nginx/modules.d/01-proxy-grafana.conf:/etc/nginx/modules.d/01-proxy-grafana.conf
       - /share/etc/nginx/modules.d/01-proxy-graphite.conf:/etc/nginx/modules.d/01-proxy-graphite.conf
       - /share/etc/nginx/modules.d/01-proxy-icingaweb2.conf:/etc/nginx/modules.d/01-proxy-icingaweb2.conf
-      - /share/etc/nginx/modules.d/01-proxy-dashing.conf:/etc/nginx/modules.d/01-proxy-dashing.conf
+      - /share/etc/nginx/modules.d/01-proxy-smashing-icinga2.conf:/etc/nginx/modules.d/01-proxy-smashing-icinga2.conf
       - /share/etc/nginx/modules.d/01-proxy-markdown-service.conf:/etc/nginx/modules.d/01-proxy-markdown-service.conf
     networks:
       mon:
@@ -235,6 +237,8 @@ services:
     networks:
       mon:
         ipv4_address: 192.168.1.15
+    dns:
+      - 192.168.1.5
 
   icingaweb2:
     restart: always
@@ -260,7 +264,7 @@ services:
 
   markdown-service:
     restart: always
-    image: bodsch/docker-markdown-service:latest
+    image: bodsch/docker-markdown-service:1706-04.1
     container_name: markdown-service
     hostname: markdown-service
     depends_on:
@@ -272,14 +276,14 @@ services:
       mon:
         ipv4_address: 192.168.1.17
 
-  dashing:
+  smashing-icinga2:
     restart: always
-    image: bodsch/docker-smashing-icinga2:latest
-    container_name: dashing
-    hostname: dashing
+    image: bodsch/docker-smashing-icinga2:1706-04.1
+    container_name: smashing-icinga2
+    hostname: smashing-icinga2
     extends:
       file: environments.yml
-      service: dashing
+      service: smashing-icinga2
     depends_on:
       - icinga2-master
     ports:
@@ -314,6 +318,8 @@ services:
     networks:
       mon:
         ipv4_address: 192.168.1.30
+    dns:
+      - 192.168.1.5
 
   # single service
   # use MQ to process data
@@ -343,6 +349,8 @@ services:
     networks:
       mon:
         ipv4_address: 192.168.1.31
+    dns:
+      - 192.168.1.5
 
   # single service
   # use MQ to process data
@@ -372,6 +380,8 @@ services:
     networks:
       mon:
         ipv4_address: 192.168.1.32
+    dns:
+      - 192.168.1.5
 
   # single service
   # use MQ to process data
@@ -411,8 +421,10 @@ services:
       - redis
       - database
     links:
+      - nginx
       - beanstalkd
       - redis
+      - database
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./logs:/var/log
@@ -464,3 +476,5 @@ services:
     networks:
       mon:
         ipv4_address: 192.168.1.36
+    dns:
+      - 192.168.1.5

@@ -45,14 +45,16 @@ module CarbonData
           service = 'CAE_PREV'
         when 'solr-master'
           service = 'SOLR_MASTER'
-    #    when 'solr-slave'
-    #      service = 'SOLR_SLAVE'
         when 'content-feeder'
           service = 'FEEDER_CONTENT'
         when 'caefeeder-live'
           service = 'FEEDER_LIVE'
         when 'caefeeder-preview'
           service = 'FEEDER_PREV'
+        when 'node-exporter'
+          service = 'NODE_EXPORTER'
+        when 'http-status'
+          service = 'HTTP_STATUS'
       end
 
       return service.tr('-', '_').upcase

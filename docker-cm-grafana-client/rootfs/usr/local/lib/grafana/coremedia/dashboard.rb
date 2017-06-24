@@ -159,8 +159,11 @@ module Grafana
         servicesTmp.delete( 'mysql' )
         servicesTmp.delete( 'postgres' )
         servicesTmp.delete( 'mongodb' )
-        servicesTmp.delete( 'node_exporter' )
+#        servicesTmp.delete( 'node-exporter' )
         servicesTmp.delete( 'demodata-generator' )
+        servicesTmp.delete( 'http-proxy' )
+        servicesTmp.delete( 'https-proxy' )
+        servicesTmp.delete( 'http-status' )
 
         serviceHash = Hash.new()
 
@@ -190,7 +193,7 @@ module Grafana
 #           logger.debug( sprintf( '  templateName %s', templateName ) )
 #           logger.debug( sprintf( '  cacheKey     %s', cacheKey ) )
 
-          if( ! ['mongodb', 'mysql', 'postgres', 'node_exporter'].include?( serviceName ) )
+          if( ! ['mongodb', 'mysql', 'postgres', 'node-exporter', 'http-status'].include?( serviceName ) )
             additionalTemplatePaths << self.templateForService( 'tomcat' )
           end
 
@@ -205,9 +208,7 @@ module Grafana
             }
 
             self.createServiceTemplate( options )
-
           end
-
         end
 
         # we want an Services Overview for this Host
@@ -232,13 +233,17 @@ module Grafana
           namedTemplate.push( 'cm-cae-cache-classes.json' )
 
           if( @mbean.beanAvailable?( host, 'cae-preview', 'CacheClassesECommerceAvailability' ) == true )
-            namedTemplate.push( 'cm-cae-cache-classes-ibm.json' )
+            namedTemplate.push( 'cm-cae-cache-classes-ecommerce.json' )
           end
         end
 
         # add Operation Datas for NodeExporter
-        if( services.include?('node_exporter' ) )
-          namedTemplate.push( 'cm-node_exporter.json' )
+        if( services.include?('node-exporter' ) )
+          namedTemplate.push( 'cm-node-exporter.json' )
+        end
+
+        if( services.include?('http-status' ) )
+          namedTemplate.push( 'cm-http-status.json' )
         end
 
         self.createNamedTemplate( namedTemplate )

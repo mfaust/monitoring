@@ -239,8 +239,6 @@ module CarbonData
       @Server        = fqdn
       graphiteOutput = Array.new()
 
-      logger.info( sprintf( 'Host: %s', fqdn ) )
-
       data    = @database.discoveryData( { :short => fqdn, :fqdn => fqdn } )
 
       # no discovery data found
@@ -259,7 +257,7 @@ module CarbonData
           next
         end
 
-        logger.info( sprintf( '  - %s (%s)', service, @Service ) )
+        logger.info( sprintf( 'Host: %s - \'%s\' (%s)', fqdn, service, @Service ) )
 
         cacheKey     = Storage::RedisClient.cacheKey( { :host => fqdn, :pre => 'result', :service => service } )
 
@@ -290,7 +288,7 @@ module CarbonData
             logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
           end
 
-        when 'node_exporter'
+        when 'node-exporter'
 
           if( result.is_a?( Hash ) )
             graphiteOutput.push( self.operatingSystemNodeExporter( result ) )
@@ -298,7 +296,7 @@ module CarbonData
             logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
           end
 
-        when 'http_server_status'
+        when 'http-status'
 
           if( result.is_a?( Hash ) )
             graphiteOutput.push( self.http_server_status( result ) )

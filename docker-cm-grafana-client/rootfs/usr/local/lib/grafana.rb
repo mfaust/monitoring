@@ -66,17 +66,17 @@ module Grafana
 
     # Returns a new instance of Client
     #
-    # @param [Hash, #read] params the configure the Client
-    # @option params [String] :host the Grafana Hostname (default: 'localhost')
-    # @option params [String] :port the Grafana Port (default: 80)
-    # @option params [String] :user the Grafana User for Login (default: 'admin')
-    # @option params [String] :password the Grafana Users Password for Login (default: '')
-    # @option params [Bool] :debug enabled debug Output
-    # @option params [Integer] :timeout Timeout for the RestClient
-    # @option params [Integer] :open_timeout
-    # @option params [String] :url_path advanced URL Path, when Grafana is located behind a Proxy Services, or the uri_path has changed
-    # @option params [Bool] :ssl enable SSL Connections
-    # @option params [Hash] :headers optional Header for an API Key Login
+    # @param [Hash, #read] settings the configure the Client
+    # @option settings [String] :host the Grafana Hostname (default: 'localhost')
+    # @option settings [String] :port the Grafana Port (default: 80)
+    # @option settings [String] :user the Grafana User for Login (default: 'admin')
+    # @option settings [String] :password the Grafana Users Password for Login (default: '')
+    # @option settings [Bool] :debug enabled debug Output
+    # @option settings [Integer] :timeout Timeout for the RestClient
+    # @option settings [Integer] :open_timeout
+    # @option settings [String] :url_path advanced URL Path, when Grafana is located behind a Proxy Services, or the uri_path has changed
+    # @option settings [Bool] :ssl enable SSL Connections
+    # @option settings [Hash] :headers optional Header for an API Key Login
     # @example to create an new Instance
     #    config = {
     #      :host     => grafanaHost,
@@ -181,19 +181,7 @@ module Grafana
 
       end
 
-      for y in 1..15
-
-        @loggedIn = self.login( { :user => @user, :password => @password } )
-
-        if( @loggedIn == true )
-          logger.info( 'login successful' )
-          break
-        else
-          logger.info( sprintf( 'Attempting to establish user session ... %d', y ) )
-          sleep(5)
-        end
-      end
-
+      @loggedIn = self.login( { :user => @user, :password => @password } )
     end
 
 
@@ -270,6 +258,8 @@ module Grafana
 
         begin
 
+          retries ||= 0
+
           resp = @apiInstance['/login'].post(
             request_data.to_json,
             { :content_type => 'application/json; charset=UTF-8' }
@@ -278,34 +268,37 @@ module Grafana
           if( resp.code.to_i == 200 )
 
             @sessionCookies = resp.cookies
-
             @headers = {
               :content_type => 'application/json; charset=UTF-8',
               :cookies      => @sessionCookies
             }
+
+            logger.info( 'successfully logged in to grafana' )
 
             loggedIn = true
           else
 
             logger.error( "Error running POST request on /login: #{resp.code.to_i}" )
             logger.error( "#{resp}" )
-            logger.error( "Request data: #{request_data.to_json}" )
-
             loggedIn = false
           end
 
         rescue => e
 
-          logger.error( "Error running POST request on /login: #{e}" )
-          logger.error( "Request data: #{request_data.to_json}" )
+          logger.debug(format('Attempting to establish user session ... %d', retries))
+          logger.error(e)
+
+          if( retries < 40 )
+            retries += 1
+            sleep( 5 )
+            retry
+          end
 
           loggedIn = false
         end
-
-        return loggedIn
-
       end
 
+      loggedIn
     end
 
   end

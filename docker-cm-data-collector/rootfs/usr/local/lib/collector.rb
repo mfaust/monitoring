@@ -458,7 +458,7 @@ module DataCollector
           when 'mongodb'
             # MongoDB
             bulk.push( '' )
-          when 'node_exporter'
+          when 'node-exporter'
             # Node Exporter (from Prometheus)
             bulk.push( '' )
           when 'postgres'
@@ -466,7 +466,7 @@ module DataCollector
             bulk.push( '' )
           when 'resourced'
             # resourced
-          when 'http_server_status'
+          when 'http-status'
             bulk.push('')
           else
             # all others
@@ -652,13 +652,13 @@ module DataCollector
             when 'postgres'
               # Postgres
               d = self.postgresData( fqdn )
-            when 'node_exporter'
+            when 'node-exporter'
               # node_exporter
               d = self.nodeExporterData( fqdn )
             when 'resourced'
               #
               d = self.resourcedData( fqdn )
-            when 'http_server_status'
+            when 'http-status'
               # apache mod_status
               d = self.apache_mod_status( fqdn )
             else

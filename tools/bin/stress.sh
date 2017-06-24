@@ -1,6 +1,7 @@
 #!/bin/bash
 
 HOST="master-17-tomcat.coremedia.vm"
+HOST="192.168.252.100.xip.io"
 
 rm -v *.urls
 

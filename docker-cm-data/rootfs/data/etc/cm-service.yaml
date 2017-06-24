@@ -2,24 +2,25 @@
 ---
 services:
 
-  http_proxy:
+  http-proxy:
     description: HTTP Proxy (Apache/nginx)
     port: 80
 
-  https_proxy:
+  https-proxy:
     description: HTTPS Proxy (Apache/nginx)
     port: 443
 
-  http_server_status:
-    description: HTTP Server Status (Apache/nginx)
+  http-status:
+    description: HTTP Server Status
     port: 8081
+
 
   mysql:
     description: MySQL
     port: 3306
 
-  node_exporter:
-    description: node_exporter from Prometheus
+  node-exporter:
+    description: node_exporter (Prometheus)
     port: 9100
 
   postgres:

@@ -641,7 +641,7 @@
         {
           "name": "Application",
           "query": "carbon-writer.$host.*",
-          "regex": "/^(?!MONGODB|MYSQL|NODE_EXPORTER).*$/",
+          "regex": "/^(?!MONGODB|MYSQL|NODE_EXPORTER|HTTP).*$/",
           "hide": 1,
           "sort": 0,
           "refresh": 1,
