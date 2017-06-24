@@ -24,6 +24,6 @@ getUrls ${HOST}
 
 # cat media.192.168.252.100.urls corporate.192.168.252.100.urls helios.192.168.252.100.urls > 192.168.252.100.urls
 
-siege -i --file=${HOST}.urls
+siege --benchmark --file=${HOST}.urls --time=10m
 
 # rm -fv *.urls
