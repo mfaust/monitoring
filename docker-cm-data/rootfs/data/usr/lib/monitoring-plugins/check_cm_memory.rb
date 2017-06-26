@@ -79,12 +79,19 @@ class Icinga2Check_CM_Memory < Icinga2Check
 
     case type
     when 'heap-mem'
-      puts sprintf( '%d%% %s Memory used<br>Max: %s<br>Commited: %s<br>Used: %s', percent, memoryType, max.to_filesize, committed.to_filesize, used.to_filesize )
+      puts format(
+        '%d%% %s Memory used<br>Max: %s<br>Committed: %s<br>Used: %s | max=%d committed=%d used=%d',
+        percent, memoryType, max.to_filesize, committed.to_filesize, used.to_filesize,
+        max, committed, used
+      )
     else
-      puts sprintf( '%d%% %s Memory used<br>Commited: %s<br>Used: %s', percent, memoryType, committed.to_filesize, used.to_filesize )
+      puts format(
+        '%d%% %s Memory used<br>Commited: %s<br>Used: %s | committed=%d used=%d',
+        percent, memoryType, committed.to_filesize, used.to_filesize,
+        committed, used
+      )
     end
     exit exitCode
-
   end
 
 end

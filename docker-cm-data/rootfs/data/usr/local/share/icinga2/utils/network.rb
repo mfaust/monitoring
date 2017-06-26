@@ -90,7 +90,7 @@ module Utils
           return self.resolv( ip )
 
         rescue => e
-          puts ( e )
+#           puts ( e )
           return { :ip    => nil, :short => nil, :long  => nil }
         end
       end
@@ -139,7 +139,7 @@ module Utils
         :long  => long
       }
 
-      puts( "result: #{result}" )
+#       puts( "result: #{result}" )
 
       return result
 

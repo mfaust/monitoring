@@ -64,7 +64,7 @@ module ExternalDiscovery
       end
 
       finish = Time.now
-      logger.info( sprintf( 'finished in %s seconds', finish - start ) )
+      logger.info( sprintf( 'finished in %s seconds', (finish - start).round(3) ) )
 
     end
 

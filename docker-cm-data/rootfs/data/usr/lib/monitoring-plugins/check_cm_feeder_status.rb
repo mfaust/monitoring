@@ -77,8 +77,8 @@ class Icinga2Check_CM_Feeder < Icinga2Check
       currentEntries        = engineValue.dig('ValuesCount') || 0  # Number of (valid) values. It is less or equal to 'keysCount'
       heartbeat             = engineValue.dig('HeartBeat')         # 1 minute == 60000 ms
 
-      sendSuccessTimeLatest = engineValue.dig('SendSuccessTimeLatest')  #  null | 2017-03-31T07:35:54Z
-      purgeTimeLatest       = engineValue.dig('PurgeTimeLatest')        # 2017-03-31T07:12:25Z | ERROR: RuntimeException thrown in RequiredModelMBean while trying to invoke operation getPurgeTimeLatest (class javax.management.MBeanException)
+#       sendSuccessTimeLatest = engineValue.dig('SendSuccessTimeLatest')  #  null | 2017-03-31T07:35:54Z
+#       purgeTimeLatest       = engineValue.dig('PurgeTimeLatest')        # 2017-03-31T07:12:25Z | ERROR: RuntimeException thrown in RequiredModelMBean while trying to invoke operation getPurgeTimeLatest (class javax.management.MBeanException)
 
       if( maxEntries == 0 && currentEntries == 0 )
 
@@ -109,11 +109,19 @@ class Icinga2Check_CM_Feeder < Icinga2Check
 
         if( maxEntries == currentEntries )
 
-          puts sprintf( 'all %d Elements feeded<br>Heartbeat %d ms', maxEntries, heartbeat )
+          puts format(
+            'all %d Elements feeded<br>Heartbeat %d ms | max=%s current=%d diff=%d heartbeat=%d',
+            maxEntries, heartbeat,
+            maxEntries, currentEntries, diffEntries, heartbeat
+          )
           exit exitCode
         else
 
-          puts sprintf( '%d Elements of %d feeded.<br>%d elements left<br>Heartbeat %d ms', currentEntries, maxEntries, diffEntries, heartbeat )
+          puts format(
+            '%d Elements of %d feeded.<br>%d elements left<br>Heartbeat %d ms | max=%s current=%d diff=%d heartbeat=%d',
+            currentEntries, maxEntries, diffEntries, heartbeat,
+            maxEntries, currentEntries, diffEntries, heartbeat
+          )
           exit exitCode
         end
 
@@ -157,7 +165,11 @@ class Icinga2Check_CM_Feeder < Icinga2Check
         exitCode = STATE_CRITICAL
       end
 
-      puts sprintf( 'Pending Documents: %d<br>Pending Events: %d', pendingDocuments, pendingEvents )
+      puts format(
+        'Pending Documents: %d<br>Pending Events: %d | pending_documents=%d pending_events=%d',
+        pendingDocuments, pendingEvents,
+        pendingDocuments, pendingEvents
+      )
 
     elsif( state == 'initializing' )
 

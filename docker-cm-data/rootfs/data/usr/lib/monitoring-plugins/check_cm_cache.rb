@@ -66,7 +66,7 @@ class Icinga2Check_CM_Cache < Icinga2Check
     end
 
     puts format(
-      '%d%% %s Cache used<br>Max: %s<br>Used %s| max=%d used=%d',
+      '%d%% %s Cache used<br>Max: %s<br>Used %s | max=%d used=%d',
       percent, type, cacheMax.to_filesize, cacheCurrentUsed.to_filesize, cacheMax, cacheCurrentUsed,
     )
 

@@ -398,39 +398,21 @@ module ExternalDiscovery
       @data   = Array.new()
       threads = Array.new()
 
-#      awsData        = @cache.get( 'aws-data' )
       awsData        = @dataConsumer.instances()
 
       monitoringData = @monitoringClient.monitoringData
 
-#       if( awsData == nil )
-#
-#         awsData = @dataConsumer.instances()
-#
-#         if( awsData.is_a?(Array) && awsData.count() != 0 )
-#           logger.debug( 'store data into cache' )
-#           @cache.set( 'aws-data' , expiresIn: 120 ) { Cache::Data.new( awsData ) }
-#         end
-#
-#         @jobs.del( { :status => 'running' } )
-#         return
-#
-#       else
-#
-#         logger.debug( 'found cached AWS data' )
-#       end
+#      start = Time.now
 
-      start = Time.now
+#      logger.debug( sprintf( 'AWS hold %d nodes'       , awsData.count ) )
+#      logger.debug( sprintf( 'Monitoring hold %d nodes (%s)', monitoringData.count, monitoringData.to_s ) )
 
-      logger.debug( sprintf( 'AWS hold %d nodes'       , awsData.count ) )
-      logger.debug( sprintf( 'Monitoring hold %d nodes (%s)', monitoringData.count, monitoringData.to_s ) )
-
-      logger.debug( 'look to insert new nodes, or delete removed ...' )
+#      logger.debug( 'look to insert new nodes, or delete removed ...' )
 
       self.compareVersions( { 'aws' => awsData, 'monitoring' => monitoringData } )
 
-      finish = Time.now
-      logger.info( sprintf( 'finished in %s seconds', finish - start ) )
+#      finish = Time.now
+#      logger.info( sprintf( 'finished in %s seconds', (finish - start).round(3) ) )
 
       @jobs.del( { :status => 'running' } )
 

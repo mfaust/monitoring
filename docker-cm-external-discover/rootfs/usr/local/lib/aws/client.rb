@@ -45,17 +45,12 @@ module Aws
           return result
         end
 
-        logger.debug( filter )
-
         begin
-
           instances = @awsClient.describe_instances( filters: filter )
 
           instances.reservations.each do |res|
 
             res.instances.each do |inst|
-
-#               logger.debug(inst)
 
               iid     = inst.dig(:instance_id)
               istate  = inst.dig(:state).name
@@ -123,10 +118,7 @@ module Aws
           raise e
         end
 
-#         logger.debug( JSON.pretty_generate( result ) )
-
-        return result
-
+        result
       end
 
     end
