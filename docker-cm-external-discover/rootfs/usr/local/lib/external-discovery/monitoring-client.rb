@@ -215,7 +215,6 @@ module ExternalDiscovery
 
         logger.error( e.inspect )
         logger.error( e.message )
-        logger.error( e.http_code )
 
         return {
           :status  => 500,
