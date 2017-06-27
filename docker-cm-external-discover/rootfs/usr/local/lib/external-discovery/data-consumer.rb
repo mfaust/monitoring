@@ -22,7 +22,7 @@ module ExternalDiscovery
       logger.info( '' )
 
       begin
-        @awsClient = Aws::Ec2::Client.new( { :aws => { :region => 'us-east-1' } } )
+        @awsClient = Aws::Ec2::Client.new( { :aws => { :region => @region } } )
         @awsData   = Hash.new()
 
         # run internal scheduler to remove old data

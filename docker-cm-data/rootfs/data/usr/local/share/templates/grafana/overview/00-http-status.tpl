@@ -73,7 +73,7 @@
             "maxDataPoints": 100,
             "interval": null,
             "cacheTimeout": null,
-            "format": "s",
+            "format": "none",
             "nullText": null,
             "mappingType": 1,
             "nullPointMode": "connected",
@@ -83,13 +83,7 @@
             "colorBackground": false,
             "colorValue": false,
             "decimals": 0,
-            "valueMaps": [
-              {
-                "value": "0",
-                "op": "=",
-                "text": "OFFLINE"
-              }
-            ]
+            "valueMaps": []
           },
           {
             "title": "workers idle",
@@ -111,7 +105,7 @@
             "maxDataPoints": 100,
             "interval": null,
             "cacheTimeout": null,
-            "format": "s",
+            "format": "none",
             "nullText": null,
             "mappingType": 1,
             "nullPointMode": "connected",
@@ -121,13 +115,7 @@
             "colorBackground": false,
             "colorValue": false,
             "decimals": 0,
-            "valueMaps": [
-              {
-                "value": "0",
-                "op": "=",
-                "text": "OFFLINE"
-              }
-            ]
+            "valueMaps": []
           }
         ],
         "title": "HTTP"
