@@ -61,7 +61,7 @@ module ExternalDiscovery
 
       @jobs             = JobQueue::Job.new()
       @cache            = Cache::Store.new()
-      @dataConsumer     = DataConsumer.new( { :filter => filter } )
+      @dataConsumer     = DataConsumer.new( { :aws => { :region =>  @awsRegion }, :filter => filter } )
       @monitoringClient = MonitoringClient.new( config )
 
     end
@@ -163,19 +163,19 @@ module ExternalDiscovery
         dns_fqdn        = d.dig('dns', 'fqdn')
 
         white_list = [
-          'cosmos-development-management-cms',
-          'cosmos-development-management-workflow',
-          'cosmos-development-management-feeder',
-          'cosmos-development-management-studio',
-          'cosmos-development-management-caepreview',
-          'cosmos-development-delivery-backup',
-          'cosmos-development-delivery-mls',
-          'cosmos-development-delivery-rls-cae',
-          'cosmos-development-storage-management-solr',
-          'cosmos-development-storage-delivery-solr'
+          'management-cms',
+          'management-workflow',
+          'management-feeder',
+          'management-studio',
+          'management-caepreview',
+          'delivery-backup',
+          'delivery-mls',
+          'delivery-rls-cae',
+          'storage-management-solr',
+          'storage-delivery-solr'
         ]
 
-        if( !white_list.include?(tag_name) )
+        if( !white_list.include?(tag_name.gsub(tag_customer,'').gsub(tag_environment,'').gsub('--','') ) )
           logger.debug( "skip: '#{tag_name}'" )
           next
         end

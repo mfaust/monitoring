@@ -775,7 +775,7 @@ module ExternalClients
   end
 
 
-  class ModStatus
+  class  ApacheModStatus
 
     include Logging
 
@@ -827,21 +827,6 @@ module ExternalClients
     end
 
 
-    def report_metrics(metrics)
-#       metrics.each do |k, v|
-#         report(
-#           :service  => "httpd #{k}",
-#           :metric   => v.to_f,
-#           :state    => 'ok',
-#           :tags     => ['httpd']
-#         )
-#       end
-#
-      logger.debug( metrics )
-    end
-
-
-
     def get_connection
 
       response = nil
@@ -865,6 +850,7 @@ module ExternalClients
 
       response
     end
+
 
     def tick
 
@@ -905,5 +891,60 @@ module ExternalClients
     end
 
   end
+
+
+  class HttpVhosts
+
+
+    def initialize( params = {} )
+
+      @host  = params.dig(:host)
+      port   = params.dig(:port) || 8081
+
+      @uri = URI.parse(format('http://%s:%d/vhosts.json', @host, port))
+    end
+
+
+    def get_connection
+
+      logger.debug(@uri)
+
+      response = nil
+      begin
+
+        retries ||= 0
+
+        response = Net::HTTP.get(@uri)
+
+      rescue => e
+
+        logger.debug(format('try to get data from %s (%d)', @url, retries))
+        logger.error(e)
+
+        if( retries < 10 )
+          retries += 1
+          sleep( 2 )
+          retry
+        end
+      end
+
+      response
+    end
+
+
+    def tick
+
+      response = get_connection
+#       logger.debug(response)
+
+#       unless respinse.nil?
+#
+#         response
+#       end
+    end
+
+
+  end
+
 
 end

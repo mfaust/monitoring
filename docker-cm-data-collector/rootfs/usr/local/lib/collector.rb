@@ -118,21 +118,6 @@ module DataCollector
     end
 
 
-    def timeParser( today, finalDate )
-
-      difference = TimeDifference.between( today, finalDate ).in_each_component
-
-      return {
-        :years   => difference[:years].round,
-        :months  => difference[:months].round,
-        :weeks   => difference[:weeks].round,
-        :days    => difference[:days].round,
-        :hours   => difference[:hours].round,
-        :minutes => difference[:minutes].round,
-      }
-    end
-
-
     def mongoDBData( host, data = {} )
 
       port = 28017
@@ -149,8 +134,7 @@ module DataCollector
 
         return m.get()
       end
-
-  end
+    end
 
 
     def mysqlData( host, data = {} )
@@ -285,6 +269,8 @@ module DataCollector
 
     def nodeExporterData( host, data = {} )
 
+      logger.debug("nodeExporterData( #{host}, #{data} )")
+
       port = data.dig(:port) || 9100
 
       if( port != nil )
@@ -348,6 +334,8 @@ module DataCollector
 
     def apache_mod_status( host, data = {} )
 
+      logger.debug("apache_mod_status( #{host}, #{data} )")
+
       port = data.dig(:port) || 8081
 
       if( port != nil )
@@ -365,16 +353,33 @@ module DataCollector
         return JSON.parse( JSON.generate( { :status => 500 } ) )
       else
 
-        m = ExternalClients::ModStatus.new( settings )
-        data = m.tick
+        result = Array.new
 
-        result   = JSON.generate( data )
-        data     = JSON.parse( result )
+        mod_status  = ExternalClients::ApacheModStatus.new( settings )
+        http_vhosts = ExternalClients::HttpVhosts.new( settings )
 
-        logger.debug( data )
+        mod_status_data  = mod_status.tick
+        http_vhosts_data = http_vhosts.tick
 
-        return data
+        mod_status_data  = JSON.generate( mod_status_data )
+        http_vhosts_data = JSON.generate( http_vhosts_data )
+
+        result = {
+          'mod_status' => mod_status_data,
+          'vhosts'     => http_vhosts_data
+        }
+
+        mod_status_data  = JSON.parse( mod_status_data )
+        http_vhosts_data = JSON.parse( http_vhosts_data )
+
+        logger.debug( mod_status_data )
+        logger.debug( http_vhosts_data )
+        logger.debug( result )
+
+        return mod_status_data
       end
+
+
 
     end
 
@@ -705,7 +710,7 @@ module DataCollector
       data    = params.dig(:data)
       mlsHost = fqdn
 
-      logger.info( '  search Master Live Server IOR for the Replication Live Server' )
+      logger.info( '  search Master Live Server for this Replication Live Server' )
 
       d = data.select {|d| d.dig('Replicator') }
 
