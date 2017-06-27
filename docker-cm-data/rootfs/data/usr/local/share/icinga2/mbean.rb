@@ -31,15 +31,15 @@ module MBean
       logger.debug( { :host => host, :pre => 'result', :service => service } )
       cacheKey = Storage::RedisClient.cacheKey( { :host => host, :pre => 'result', :service => service } )
 
-      for y in 1..10
+      for y in 1..50
 
-        result      = @redis.get( cacheKey )
+        result = @redis.get( cacheKey )
 
         if( result != nil )
           data = { service => result }
           break
         else
-          sleep( 3 )
+          sleep( 2 )
         end
       end
 

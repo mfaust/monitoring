@@ -350,7 +350,7 @@ module DataCollector
       if( result == false )
         logger.warn( sprintf( 'The Port \'%s\' on Host \'%s\' is not open, skip ...', port, host ) )
 
-        return JSON.parse( JSON.generate( { :status => 500 } ) )
+        JSON.parse( JSON.generate( { :status => 500 } ) )
       else
 
         result = Array.new
@@ -361,26 +361,16 @@ module DataCollector
         mod_status_data  = mod_status.tick
         http_vhosts_data = http_vhosts.tick
 
-        mod_status_data  = JSON.generate( mod_status_data )
-        http_vhosts_data = JSON.generate( http_vhosts_data )
+        if( http_vhosts_data.is_a?(String) )
+
+          http_vhosts_data = JSON.parse( http_vhosts_data )
+        end
 
         result = {
-          'mod_status' => mod_status_data,
-          'vhosts'     => http_vhosts_data
+          status: mod_status_data,
+          vhosts: http_vhosts_data.dig('vhosts')
         }
-
-        mod_status_data  = JSON.parse( mod_status_data )
-        http_vhosts_data = JSON.parse( http_vhosts_data )
-
-        logger.debug( mod_status_data )
-        logger.debug( http_vhosts_data )
-        logger.debug( result )
-
-        return mod_status_data
       end
-
-
-
     end
 
 
@@ -388,9 +378,7 @@ module DataCollector
     #
     def monitoredServer()
 
-      nodes = @database.nodes( { :status => [ Storage::MySQL::ONLINE ] } )
-
-      return nodes
+      @database.nodes( { :status => [ Storage::MySQL::ONLINE ] } )
     end
 
     # create a singulary json for every services to send them to the jolokia service

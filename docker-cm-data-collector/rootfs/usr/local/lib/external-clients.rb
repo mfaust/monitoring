@@ -895,6 +895,7 @@ module ExternalClients
 
   class HttpVhosts
 
+    include Logging
 
     def initialize( params = {} )
 
@@ -934,7 +935,10 @@ module ExternalClients
 
     def tick
 
-      response = get_connection
+      unless (response = get_connection).nil?
+
+        response
+      end
 #       logger.debug(response)
 
 #       unless respinse.nil?
