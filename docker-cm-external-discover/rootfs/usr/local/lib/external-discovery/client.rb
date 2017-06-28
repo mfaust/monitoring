@@ -27,8 +27,8 @@ module ExternalDiscovery
 
       @historic      = []
 
-      version        = '0.10.2'
-      date           = '2017-05-11'
+      version        = '0.11.1'
+      date           = '2017-06-28'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - External Discovery Service' )

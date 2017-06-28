@@ -62,8 +62,8 @@ module DataCollector
       mysqlUser           = settings.dig(:mysql, :user)
       mysqlPassword       = settings.dig(:mysql, :password)
 
-      version            = '1.9.2'
-      date               = '2017-06-07'
+      version            = '1.9.4'
+      date               = '2017-06-28'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - DataCollector' )

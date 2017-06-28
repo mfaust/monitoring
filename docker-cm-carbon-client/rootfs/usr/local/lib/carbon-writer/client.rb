@@ -21,8 +21,8 @@ module CarbonWriter
       @graphiteHost = settings.dig( :graphite, :host )
       @graphitePort = settings.dig( :graphite, :port )
 
-      version             = '1.4.0'
-      date                = '2017-06-04'
+      version             = '1.4.2'
+      date                = '2017-06-28'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - Carbon client' )
@@ -66,7 +66,7 @@ module CarbonWriter
       nodes = @carbonData.nodes()
 
       if( nodes == nil || nodes.is_a?( FalseClass ) )
-        logger.info( 'no online server found' )
+        logger.debug( 'no online server found' )
       else
 
         nodes.each do |n|
@@ -79,7 +79,7 @@ module CarbonWriter
 
           finish = Time.now
 
-          logger.info( sprintf( 'getting %s measurepoints in %s seconds', data.count, finish - start ) )
+          logger.info( sprintf( 'getting %s measurepoints in %s seconds', data.count, (finish - start).round(3) ) )
 
           data.each do |m|
             self.metric( m )

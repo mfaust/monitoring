@@ -26,22 +26,42 @@ module MBean
 
     def bean( host, service, mbean )
 
+      if( host.nil? || service.nil? || mbean.nil? )
+        logger.error( "no valid data:" )
+        logger.error( "  bean( #{host}, #{service}, #{mbean} )" )
+        return false
+      end
+
       data = Hash.new()
 
       logger.debug( { :host => host, :pre => 'result', :service => service } )
       cacheKey = Storage::RedisClient.cacheKey( { :host => host, :pre => 'result', :service => service } )
 
-      for y in 1..10
-
-        result      = @redis.get( cacheKey )
-
+      begin
+        result = @redis.get( cacheKey )
         if( result != nil )
           data = { service => result }
-          break
-        else
-          sleep( 3 )
         end
+
+      rescue => e
+
+        logger.debug( 'retry ...')
+        logger.error(e)
+        sleep( 2 )
+        retry
       end
+
+#      for y in 1..10
+#
+#        result      = @redis.get( cacheKey )
+#
+#        if( result != nil )
+#          data = { service => result }
+#          break
+#        else
+#          sleep( 3 )
+#        end
+#      end
 
       # ---------------------------------------------------------------------------------------
 
@@ -279,7 +299,7 @@ module MBean
       if( self.beanTimeout?( timestamp ) )
 
 #        logger.error( sprintf( '  status: %d: %s (Host: \'%s\' :: Service: \'%s\' - mbean: \'%s\')', status, timestamp, host, service, mbean ) )
-        logger.error( sprintf( '  status: %d: %s (Host: \'%s\' :: mbean: \'%s\')', status, timestamp, host, mbean ) )
+        logger.debug( sprintf( '  status: %d: %s (Host: \'%s\' :: mbean: \'%s\')', status, timestamp, host, mbean ) )
         return false
       end
     end
