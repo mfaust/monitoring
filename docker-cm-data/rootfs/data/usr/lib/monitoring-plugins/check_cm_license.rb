@@ -37,13 +37,12 @@ class Icinga2Check_CM_Licenses < Icinga2Check
   def check( host, application )
 
     config   = readConfig( 'license' )
-    logger.debug("config: #{config}")
     warning  = config.dig(:warning)  || 50
     critical = config.dig(:critical) || 20
 
     # get our bean
     data      = @mbean.bean( host, application, 'Server' )
-    dataValue = self.runningOrOutdated( data )
+    dataValue = self.runningOrOutdated( { host: host, data: data } )
 
     dataValue = dataValue.values.first
 

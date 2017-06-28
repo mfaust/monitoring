@@ -59,7 +59,8 @@ class Icinga2Check_CM_Feeder < Icinga2Check
     health      = @mbean.bean( host, feederServer, 'Health' )
     engine      = @mbean.bean( host, feederServer, 'ProactiveEngine' )
 
-    healthValue = self.runningOrOutdated( health )
+    healthValue = self.runningOrOutdated( { host: host, data: health } )
+#     healthValue = self.runningOrOutdated( health )
     healthValue = healthValue.values.first
 
     healthy     = ( healthValue != nil &&  healthValue['Healthy'] ) ? healthValue['Healthy'] : false
@@ -68,7 +69,8 @@ class Icinga2Check_CM_Feeder < Icinga2Check
 
       healthMessage  = 'HEALTHY'
 
-      engineValue = self.runningOrOutdated( engine )
+      engineValue = self.runningOrOutdated( { host: host, data: engine } )
+#       engineValue = self.runningOrOutdated( engine )
       engineValue = engineValue.values.first
 
 #       logger.debug( JSON.pretty_generate( engineValue ) )
@@ -142,7 +144,7 @@ class Icinga2Check_CM_Feeder < Icinga2Check
     critical = config.dig(:critical) || 10000
 
     data      = @mbean.bean( host, feederServer, 'Feeder' )
-    dataValue = self.runningOrOutdated( data )
+    dataValue = self.runningOrOutdated( { host: host, data: data } )
     dataValue = dataValue.values.first
     state     = dataValue.dig('State')
 

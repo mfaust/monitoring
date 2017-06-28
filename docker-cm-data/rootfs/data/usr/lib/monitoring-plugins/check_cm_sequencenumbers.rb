@@ -47,8 +47,9 @@ class Icinga2Check_CM_SequenceNumbers < Icinga2Check
       exit STATE_WARNING
     end
 
+    mlsDataValue = self.runningOrOutdated( { host: mls, data: mlsData } )
 
-    mlsDataValue = self.runningOrOutdated( mlsData )
+#    mlsDataValue = self.runningOrOutdated( mlsData )
 
     mlsDataValue      = mlsDataValue.values.first
     mlsSequenceNumber = mlsDataValue.dig('RepositorySequenceNumber' )
@@ -56,7 +57,8 @@ class Icinga2Check_CM_SequenceNumbers < Icinga2Check
 
     # get our bean
 
-    rlsDataValue = self.runningOrOutdated( rlsData )
+    rlsDataValue = self.runningOrOutdated( { host: rls, data: rlsData } )
+#    rlsDataValue = self.runningOrOutdated( rlsData )
 
     rlsDataValue        = rlsDataValue.values.first
     rlsSequenceNumber   = rlsDataValue.dig('LatestCompletedSequenceNumber' )

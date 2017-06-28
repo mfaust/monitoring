@@ -29,7 +29,7 @@ class Icinga2Check_CM_Memory < Icinga2Check
 
     # get our bean
     data      = @mbean.bean( host, application, 'Memory' )
-    dataValue = self.runningOrOutdated( data )
+    dataValue = self.runningOrOutdated( { host: host, data: data } )
 
 #     dataValue = dataValue.values.first
 

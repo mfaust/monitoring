@@ -24,7 +24,7 @@ class Icinga2Check_CM_Runlevel < Icinga2Check
 
     # get our bean
     data      = @mbean.bean( host, application, 'Server' )
-    dataValue = self.runningOrOutdated( data )
+    dataValue = self.runningOrOutdated( { host: host, data: data } )
 
     dataValue = dataValue.values.first
     runlevel  = dataValue.dig('RunLevel') || false

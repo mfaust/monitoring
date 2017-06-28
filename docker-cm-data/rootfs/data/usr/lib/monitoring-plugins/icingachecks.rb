@@ -32,7 +32,7 @@ class Icinga2Check
     redisHost    = ENV.fetch( 'REDIS_HOST', 'redis' )
     redisPort    = ENV.fetch( 'REDIS_PORT', 6379 )
 
-    logger.level = Logger::DEBUG
+    logger.level = Logger::INFO
     @redis       = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
     @mbean       = MBean::Client.new( { :redis => @redis } )
     @cache       = Cache::Store.new()
@@ -41,7 +41,7 @@ class Icinga2Check
 
   def readConfig( service )
 
-    logger.debug("readConfig( #{service} )")
+#     logger.debug("readConfig( #{service} )")
 
     usePercent = nil
     warning    = nil
@@ -53,7 +53,7 @@ class Icinga2Check
 
     data = @redis.get( cache_key )
 
-    logger.debug( "cached data: #{data}" )
+#     logger.debug( "cached data: #{data}" )
 
     if(data.nil?)
 
@@ -99,7 +99,7 @@ class Icinga2Check
 
   def hostname( hostname )
 
-    logger.debug( "hostname( #{hostname} )" )
+#     logger.debug( "hostname( #{hostname} )" )
 
     # look in our cache
     cache_key = format('dns::%s',hostname)
@@ -112,9 +112,9 @@ class Icinga2Check
 
       data = Utils::Network.resolv( hostname )
 
-      logger.debug( data )
+#       logger.debug( data )
 
-      @redis.set( cache_key, data, 120 )
+      @redis.set( cache_key, data, 320 )
     end
 
     hostname = data.dig('long')
@@ -124,7 +124,10 @@ class Icinga2Check
   end
 
 
-  def runningOrOutdated( data )
+  def runningOrOutdated( params = {} )
+
+    host = params.dig(:host)
+    data = params.dig(:data)
 
     unless( data.is_a?(Hash) )
       puts 'CRITICAL - no data found - service not running!?'
@@ -136,17 +139,27 @@ class Icinga2Check
     dataValue     = data.dig('value')     # ( data != nil && data['value'] ) ? data['value'] : nil
 
     if( dataValue.nil? )
-      puts 'CRITICAL - missing monitoring data - service not running!?'
+
+      output = 'CRITICAL - missing monitoring data - service not running!?'
+      logger.info( format( '%s: %s', host, output))
+      puts output
+
       exit STATE_CRITICAL
     end
 
     beanTimeout,difference = beanTimeout?( dataTimestamp )
 
     if( beanTimeout == STATE_CRITICAL )
-      puts sprintf( 'CRITICAL - last check creation is out of date (%d seconds)', difference )
+      output = format( 'CRITICAL - last check creation is out of date (%d seconds)', difference )
+      logger.info( format( '%s: %s', host, output))
+      puts output
+
       exit beanTimeout
     elsif( beanTimeout == STATE_WARNING )
-      puts sprintf( 'WARNING - last check creation is out of date (%d seconds)', difference )
+      output = format( 'WARNING - last check creation is out of date (%d seconds)', difference )
+      logger.info( format( '%s: %s', host, output))
+      puts output
+
       exit beanTimeout
     end
 

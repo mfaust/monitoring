@@ -32,7 +32,7 @@ class Icinga2Check_CM_Cache < Icinga2Check
     # get our bean
     data = @mbean.bean( host, application, 'CapConnection' )
 
-    dataValue = self.runningOrOutdated( data )
+    dataValue = self.runningOrOutdated( { host: host, data: data } )
     dataValue = dataValue.values.first
 
     case type
