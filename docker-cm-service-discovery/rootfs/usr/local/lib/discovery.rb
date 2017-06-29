@@ -204,11 +204,13 @@ module ServiceDiscovery
 
         else
           logger.warn( sprintf( 'missing entry \'%s\' in cm-service.yaml for merge with discovery data', d ) )
+          logger.warn( sprintf( '  remove \'%s\' from data', d ) )
+
+          data.reject! { |x| x == d }
         end
       end
 
       return data
-
     end
 
     # delete the directory with all files inside

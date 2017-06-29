@@ -10,16 +10,16 @@ class Icinga2Check_CM_SequenceNumbers < Icinga2Check
 
     super
 
-    mls         = settings.dig(:mls)
-    rls         = settings.dig(:rls)
+    rls       = settings.dig(:rls)
+    hostRls   = self.hostname( rls )
 
-    if( mls.nil? )
+    mls       = auto_detect_mls(rls)
 
-      mls = detect_mls(rls)
+    unless( mls.nil? )
+      hostMls = self.hostname( mls )
+    else
+      hostMls = nil
     end
-
-    hostMls     = self.hostname( mls )
-    hostRls     = self.hostname( rls )
 
     self.check( hostMls, hostRls )
 
@@ -33,6 +33,12 @@ class Icinga2Check_CM_SequenceNumbers < Icinga2Check
 
     warning  = config.dig(:warning)  || 300
     critical = config.dig(:critical) || 500
+
+    if( mls.nil? )
+
+      puts sprintf( 'please, give me an Master Live Server!' )
+      exit exitCode
+    end
 
     # get our bean
     rlsData      = @mbean.bean( rls, 'replication-live-server', 'Replicator' )
@@ -106,7 +112,10 @@ class Icinga2Check_CM_SequenceNumbers < Icinga2Check
 
 
 
-  def detect_mls( rls )
+  # TODO
+  # move this ASAP to icinga-client!
+  #
+  def auto_detect_mls( rls )
 
     cache_key = format('sequence-mls-%s',rls)
     mls       = @redis.get(cache_key)
@@ -118,18 +127,19 @@ class Icinga2Check_CM_SequenceNumbers < Icinga2Check
       if(bean.is_a?(Hash))
 
         value = bean.dig( 'value' )
-        if( !value.nil? )
-          value = value.values.first
-          mls = value.dig( 'MasterLiveServer', 'host' )
+        unless( value.nil? )
 
-          if(!mls.nil?)
-            @redis.set(cache_key,mls,320)
+          value = value.values.first
+          mls   = value.dig( 'MasterLiveServer', 'host' )
+
+          if( mls.nil? )
+            logger.error( 'no MasterLiveServer Data found' )
+            return nil
           else
-            mls = rls
+            @redis.set(cache_key,mls,320)
           end
         end
       end
-
     end
 
     mls

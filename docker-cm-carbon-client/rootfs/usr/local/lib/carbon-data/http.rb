@@ -13,6 +13,10 @@ module CarbonData
           value = value.dig('status')
         end
 
+        if( value.is_a?(Integer) && value == 500 )
+          result
+        end
+
         unless(value.nil?)
 
           total_accesses         = value.dig('TotalAccesses') || 0

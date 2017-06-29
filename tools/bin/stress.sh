@@ -2,6 +2,7 @@
 
 HOST="master-17-tomcat.coremedia.vm"
 HOST="192.168.252.100.xip.io"
+HOST="pandora-17-02.coremedia.vm"
 
 rm -v *.urls
 
@@ -24,6 +25,6 @@ getUrls ${HOST}
 
 # cat media.192.168.252.100.urls corporate.192.168.252.100.urls helios.192.168.252.100.urls > 192.168.252.100.urls
 
-siege --benchmark --file=${HOST}.urls --time=10m
+siege --benchmark --file=${HOST}.urls --time=20m
 
 # rm -fv *.urls

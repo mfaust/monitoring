@@ -59,7 +59,7 @@ module Jolokia
         :read_timeout => timeout
       ) do |http|
 
-        max_retries   = 3
+        max_retries   = 5
         times_retried = 0
 
         begin
@@ -75,7 +75,7 @@ module Jolokia
             logger.warn( "   retry #{times_retried}/#{max_retries}" )
             logger.debug( sprintf( ' -> request body: %s', request.body ) )
 
-            sleep( 5 )
+            sleep( 4 )
             retry
           else
             logger.error( 'Exiting request ...' )
