@@ -356,19 +356,25 @@ module DataCollector
         result = Array.new
 
         mod_status  = ExternalClients::ApacheModStatus.new( settings )
-        http_vhosts = ExternalClients::HttpVhosts.new( settings )
+#        http_vhosts = ExternalClients::HttpVhosts.new( settings )
 
         mod_status_data  = mod_status.tick
-        http_vhosts_data = http_vhosts.tick
 
-        if( http_vhosts_data.is_a?(String) )
+        # TODO
+        # make this part mor robust!
+        #  e.g. remote file are not existing ...
 
-          http_vhosts_data = JSON.parse( http_vhosts_data )
-        end
+#        http_vhosts_data = http_vhosts.tick
+
+
+
+#        if( http_vhosts_data.is_a?(String) )
+#          http_vhosts_data = JSON.parse( http_vhosts_data )
+#        end
 
         result = {
           status: mod_status_data,
-          vhosts: http_vhosts_data.dig('vhosts')
+          vhosts: '/'  # http_vhosts_data.dig('vhosts')
         }
       end
     end
@@ -667,13 +673,21 @@ module DataCollector
 
           end
 
+          begin
+
 #           logger.debug( 'store result in our redis' )
-          redisResult = @redis.set( cacheKey, result[v] )
+            redisResult = @redis.set( cacheKey, result[v] )
 
-          if( redisResult.is_a?( FalseClass ) || ( redisResult.is_a?( String ) && redisResult != 'OK' ) )
+            if( redisResult.is_a?( FalseClass ) || ( redisResult.is_a?( String ) && redisResult != 'OK' ) )
 
-            logger.error( sprintf( 'value for key % can not be write', cacheKey ) )
+              logger.error( sprintf( 'value for key %s can not be write', cacheKey ) )
+              logger.error( { :host => fqdn, :pre => 'result', :service => v } )
+            end
+          rescue => e
+
+            logger.error( sprintf( 'value for key %s can not be write', cacheKey ) )
             logger.error( { :host => fqdn, :pre => 'result', :service => v } )
+            logger.error( e )
           end
 
         end

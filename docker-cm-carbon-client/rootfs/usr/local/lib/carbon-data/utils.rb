@@ -62,9 +62,13 @@ module CarbonData
     end
 
 
-    def timeParser( today, finalDate )
+    def timeParser( today, final )
 
-      difference = TimeDifference.between( today, finalDate ).in_each_component
+      logger.debug( "timeParser( #{today}, #{final} )" )
+
+      difference = TimeDifference.between( today, final ).in_each_component
+
+      logger.debug(difference)
 
       return {
         :years   => difference[:years].round,

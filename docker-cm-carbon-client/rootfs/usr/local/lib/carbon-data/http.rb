@@ -13,8 +13,8 @@ module CarbonData
           value = value.dig('status')
         end
 
-        if( value.is_a?(Integer) && value == 500 )
-          result
+        if( value.is_a?(Integer) && value.to_i == 500 )
+          return result
         end
 
         unless(value.nil?)

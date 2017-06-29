@@ -830,6 +830,60 @@ module ExternalClients
     def get_connection
 
       response = nil
+      timeout   = 5
+      open_timeout  = 5
+      instance     = nil
+
+      begin
+
+        retries ||= 0
+
+        until( instance != nil )
+
+          instance = RestClient::Resource.new(
+            @uri,
+            :timeout      => timeout,
+            :open_timeout => open_timeout,
+            :verify_ssl   => false
+          )
+        end
+      rescue => e
+
+        logger.debug(format('try to create the httpd connection (%d)', retries))
+        logger.error(e)
+
+        if( retries < 10 )
+          retries += 1
+          sleep( 2 )
+          retry
+        end
+
+        logger.error( e )
+      end
+
+      logger.info( 'httpd connection established' )
+
+      begin
+
+        response = instance['/server-status?auto'].get
+
+        responseCode = response.code.to_i
+        responseBody = response.body
+
+        logger.debug( response )
+
+      rescue RestClient::ExceptionWithResponse => e
+
+        logger.error( "Error: #{@uri} , '#{e}'" )
+      end
+
+      response
+    end
+
+
+    def get_connection2
+
+      response = nil
       begin
 
         retries ||= 0
@@ -908,18 +962,27 @@ module ExternalClients
 
     def get_connection
 
-      logger.debug(@uri)
-
       response = nil
+      timeout   = 5
+      open_timeout  = 5
+      instance     = nil
+
       begin
 
         retries ||= 0
 
-        response = Net::HTTP.get(@uri)
+        until( instance != nil )
 
+          instance = RestClient::Resource.new(
+            @uri,
+            :timeout      => timeout,
+            :open_timeout => open_timeout,
+            :verify_ssl   => false
+          )
+        end
       rescue => e
 
-        logger.debug(format('try to get data from %s (%d)', @url, retries))
+        logger.debug(format('try to create the httpd connection (%d)', retries))
         logger.error(e)
 
         if( retries < 10 )
@@ -927,6 +990,26 @@ module ExternalClients
           sleep( 2 )
           retry
         end
+
+        logger.error( e )
+      end
+
+      logger.info( 'httpd connection established' )
+
+      begin
+
+        response = instance['/vhosts.json'].get
+
+        responseCode = response.code.to_i
+        responseBody = response.body
+
+#         logger.debug( response )
+
+      rescue RestClient::ExceptionWithResponse => e
+
+        logger.error( "Error: #{@uri} , '#{e}'" )
+
+        return nil
       end
 
       response
@@ -935,16 +1018,14 @@ module ExternalClients
 
     def tick
 
+      response = { 'vhost' => '' }
+
       unless (response = get_connection).nil?
 
         response
       end
-#       logger.debug(response)
 
-#       unless respinse.nil?
-#
-#         response
-#       end
+      response
     end
 
 

@@ -123,6 +123,7 @@ module CarbonData
       uncompletedCount      = 0
       completedCount        = 0
 
+
       def replicatorData()
 
         result                  = []
@@ -170,6 +171,7 @@ module CarbonData
           return completedSequenceNumber, result
         end
       end
+
 
       def mlsSequenceNumber( rlsSequenceNumber )
 
@@ -333,6 +335,8 @@ module CarbonData
           t      = Date.parse( Time.now().to_s )
           today  = Time.new( t.year, t.month, t.day )
 
+          logger.debug( today.strftime( '%Y-%m-%d %H:%M:%S' ) )
+
           if( licenseValidFrom != nil )
 
             result << {
@@ -345,7 +349,7 @@ module CarbonData
 
           if( licenseValidUntilSoft != nil )
 
-            x                   = self.timeParser( today, Time.at( licenseValidUntilSoft / 1000 ) )
+            x                   = timeParser( today, Time.at( licenseValidUntilSoft / 1000 ) )
             validUntilSoftMonth = x.dig(:months)
             validUntilSoftWeek  = x.dig(:weeks)
             validUntilSoftDays  = x.dig(:days)
@@ -368,7 +372,7 @@ module CarbonData
 
           if( licenseValidUntilHard != nil )
 
-            x                   = self.timeParser( today, Time.at( licenseValidUntilHard / 1000 ) )
+            x                   = timeParser( today, Time.at( licenseValidUntilHard / 1000 ) )
             validUntilHardMonth = x.dig(:months)
             validUntilHardWeek  = x.dig(:weeks)
             validUntilHardDays  = x.dig(:days)
