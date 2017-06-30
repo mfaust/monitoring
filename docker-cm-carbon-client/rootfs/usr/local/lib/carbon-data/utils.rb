@@ -61,8 +61,23 @@ module CarbonData
 
     end
 
+    def timeParser( start_time, start_time )
 
-    def timeParser( today, final )
+      seconds_diff = (start_time - start_time).to_i.abs
+
+      {
+        years: (seconds_diff / 31556952),
+        month: (seconds_diff / 2629746),
+        weeks: (seconds_diff / 2628288.0).round(0),
+        days: (seconds_diff / 86400),
+        hours: (seconds_diff / 3600),
+        minutes: (seconds_diff / 60),
+        seconds: seconds_diff,
+      }
+    end
+
+
+    def timeParserOBSOLETE( today, final )
 
       logger.debug( "timeParser( #{today}, #{final} )" )
 
