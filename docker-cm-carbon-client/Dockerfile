@@ -9,9 +9,9 @@ ENV \
   TERM=xterm \
   APK_ADD="build-base bind-tools imagemagick-dev mariadb-dev ruby-dev ruby-irb ruby-rdoc zlib zlib-dev" \
   APK_DEL="build-base imagemagick-dev ruby-dev ruby-rdoc zlib-dev" \
-  GEMS="beaneater bigdecimal filesize json mysql2 redis rest-client rufus-scheduler time_difference tzinfo-data"
+  GEMS="beaneater bigdecimal filesize json mysql2 redis rest-client rufus-scheduler tzinfo-data"
 
-LABEL version="1706-04.2"
+LABEL version="1707-27.1"
 
 # ---------------------------------------------------------------------------------------
 

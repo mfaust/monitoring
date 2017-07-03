@@ -6,7 +6,6 @@ require 'optparse'
 require 'json'
 require 'yaml'
 require 'logger'
-require 'time_difference'
 
 require_relative '/usr/local/share/icinga2/logging'
 require_relative '/usr/local/share/icinga2/utils/network'
@@ -189,7 +188,7 @@ class Icinga2Check
       t = Time.at( timestamp )
       t = t.add_seconds( quorum )
 
-      difference = TimeDifference.between( t, n ).in_each_component
+      difference = time_difference( t, n )
       difference = difference[:seconds].round
 
 #       logger.debug( sprintf( ' now       : %s', n.to_datetime.strftime("%d %m %Y %H:%M:%S") ) )
@@ -212,4 +211,21 @@ class Icinga2Check
 
     [result, difference]
   end
+
+
+    def time_difference( start_time, end_time )
+
+      seconds_diff = (start_time - end_time).to_i.abs
+
+      {
+        years: (seconds_diff / 31556952),
+        months: (seconds_diff / 2628288),
+        weeks: (seconds_diff / 604800),
+        days: (seconds_diff / 86400),
+        hours: (seconds_diff / 3600),
+        minutes: (seconds_diff / 60),
+        seconds: seconds_diff,
+      }
+    end
+
 end

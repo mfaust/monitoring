@@ -63,8 +63,6 @@ module CarbonData
 
     def timeParser( start_time, end_time )
 
-#      logger.debug( "timeParser( #{start_time}, #{end_time} )" )
-
       seconds_diff = (start_time - end_time).to_i.abs
 
       {
@@ -77,26 +75,6 @@ module CarbonData
         seconds: seconds_diff,
       }
     end
-
-
-    def timeParserOBSOLETE( today, final )
-
-      logger.debug( "timeParser( #{today}, #{final} )" )
-
-      difference = TimeDifference.between( today, final ).in_each_component
-
-      logger.debug(difference)
-
-      return {
-        :years   => difference[:years].round,
-        :months  => difference[:months].round,
-        :weeks   => difference[:weeks].round,
-        :days    => difference[:days].round,
-        :hours   => difference[:hours].round,
-        :minutes => difference[:minutes].round,
-      }
-    end
-
 
   end
 

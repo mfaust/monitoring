@@ -11,6 +11,7 @@ module MBean
 
     include Logging
 
+    
     def initialize( params = {} )
 
       redis = params.dig(:redis)
@@ -21,7 +22,6 @@ module MBean
 
       logger.level = Logger::INFO
     end
-
 
 
     def bean( host, service, mbean )
@@ -51,15 +51,15 @@ module MBean
         retry
       end
 
-#      for y in 1..50
+#      for y in 1..10
 #
-#        result = @redis.get( cacheKey )
+#        result      = @redis.get( cacheKey )
 #
 #        if( result != nil )
 #          data = { service => result }
 #          break
 #        else
-#          sleep( 2 )
+#          sleep( 3 )
 #        end
 #      end
 
@@ -91,11 +91,12 @@ module MBean
 
         logger.error('wrong result (no json)')
         logger.error(e)
-#
-        return false
+
+        result = false
       end
 
-      result
+      return result
+
     end
 
 
@@ -232,14 +233,14 @@ module MBean
         t = Time.at( timestamp )
         t = t.addMinutes( quorum ) + 10
 
-        difference = TimeDifference.between( t, n ).in_each_component
-        difference = difference[:minutes].ceil
+        difference = time_difference( t, n )
+        difference = difference[:minutes].round(0)
 
         if( difference > quorum + 1 )
 
-  #         logger.debug( sprintf( ' now       : %s', n.to_datetime.strftime("%d %m %Y %H:%M:%S") ) )
-  #         logger.debug( sprintf( ' timestamp : %s', t.to_datetime.strftime("%d %m %Y %H:%M:%S") ) )
-  #         logger.debug( sprintf( ' difference: %d', difference ) )
+          logger.debug( sprintf( ' now       : %s', n.to_datetime.strftime("%d %m %Y %H:%M:%S") ) )
+          logger.debug( sprintf( ' timestamp : %s', t.to_datetime.strftime("%d %m %Y %H:%M:%S") ) )
+          logger.debug( sprintf( ' difference: %d', difference ) )
 
           result = true
         end
@@ -252,31 +253,49 @@ module MBean
 
     def checkBeanConsistency( mbean, data = {} )
 
-    status    = data.dig('status')    # ? data['status']    : 505
-    timestamp = data.dig('timestamp') # ? data['timestamp'] : 0
-    host      = data.dig('host')
-    service   = data.dig('service')
-    value     = data.dig('value')
+      status    = data.dig('status')    # ? data['status']    : 505
+      timestamp = data.dig('timestamp') # ? data['timestamp'] : 0
+      host      = data.dig('host')
+      service   = data.dig('service')
+      value     = data.dig('value')
 
-    result = {
-      :mbean     => mbean,
-      :status    => status,
-      :timestamp => timestamp
-    }
+      result = {
+        :mbean     => mbean,
+        :status    => status,
+        :timestamp => timestamp
+      }
 
-    if( status.to_i == 200 )
-      return true
-    else
-      if( self.beanTimeout?( timestamp ) )
+      if( status.to_i == 200 )
+        return true
+      else
+        if( self.beanTimeout?( timestamp ) )
 
-        logger.error( sprintf( '  status: %d: %s (Host: \'%s\' :: Service: \'%s\' - mbean: \'%s\')', status, timestamp, host, service, mbean ) )
-        return false
+#          logger.error( sprintf( '  status: %d: %s (Host: \'%s\' :: Service: \'%s\' - mbean: \'%s\')', status, timestamp, host, service, mbean ) )
+          logger.debug( sprintf( '  status: %d: %s (Host: \'%s\' :: mbean: \'%s\')', status, timestamp, host, mbean ) )
+          return false
+        end
       end
+
+      return true
+
     end
 
-    return true
 
-  end
+    def time_difference( start_time, end_time )
+
+      seconds_diff = (start_time - end_time).to_i.abs
+
+      {
+        years: (seconds_diff / 31556952),
+        months: (seconds_diff / 2628288),
+        weeks: (seconds_diff / 604800),
+        days: (seconds_diff / 86400),
+        hours: (seconds_diff / 3600),
+        minutes: (seconds_diff / 60),
+        seconds: seconds_diff,
+      }
+    end
+
 
   end
 

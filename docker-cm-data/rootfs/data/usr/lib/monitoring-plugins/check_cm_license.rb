@@ -1,7 +1,5 @@
 #!/usr/bin/ruby
 
-require 'time_difference'
-
 require_relative '/usr/local/lib/icingachecks.rb'
 
 # ---------------------------------------------------------------------------------------
@@ -18,19 +16,6 @@ class Icinga2Check_CM_Licenses < Icinga2Check
 
     self.check( host, application )
 
-  end
-
-
-  def timeParser( today, finalDate )
-
-    difference = TimeDifference.between( today, finalDate ).in_each_component
-
-    return {
-      :years  => difference[:years].round,
-      :months => difference[:months].round,
-      :weeks  => difference[:weeks].round,
-      :days   => difference[:days].round
-    }
   end
 
 
@@ -53,7 +38,7 @@ class Icinga2Check_CM_Licenses < Icinga2Check
 
     if( validUntilHard != nil )
 
-      x               = self.timeParser( today, Time.at( validUntilHard / 1000 ) )
+      x               = time_difference( today, Time.at( validUntilHard / 1000 ) )
       validUntilDays  = x[:days]
 
       licenseDate     = Time.at( validUntilHard / 1000 ).strftime("%d.%m.%Y")

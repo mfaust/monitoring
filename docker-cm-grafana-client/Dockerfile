@@ -9,7 +9,7 @@ ENV \
   TERM=xterm \
   APK_ADD="build-base bind-tools drill imagemagick-dev mariadb-client mariadb-dev ruby-dev ruby-irb" \
   APK_DEL="build-base imagemagick-dev ruby-dev" \
-  GEMS="beaneater bigdecimal ipaddress json mysql2 redis resolve-hostname rest-client rufus-scheduler time_difference tzinfo-data"
+  GEMS="beaneater bigdecimal ipaddress json mysql2 redis resolve-hostname rest-client rufus-scheduler tzinfo-data"
 
 LABEL version="1706-02.1"
 

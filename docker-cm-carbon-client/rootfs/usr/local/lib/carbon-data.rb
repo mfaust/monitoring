@@ -9,7 +9,6 @@
 
 require 'time'
 require 'date'
-require 'time_difference'
 require 'json'
 require 'filesize'
 require 'fileutils'

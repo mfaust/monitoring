@@ -13,7 +13,6 @@ require 'timeout'
 require 'fileutils'
 require 'time'
 require 'date'
-require 'time_difference'
 require 'rest-client'
 
 require_relative 'logging'

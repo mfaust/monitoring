@@ -13,7 +13,6 @@ require 'timeout'
 require 'fileutils'
 require 'time'
 require 'date'
-require 'time_difference'
 require 'rufus-scheduler'
 
 require_relative 'logging'
