@@ -278,7 +278,7 @@ services:
 
   smashing-icinga2:
     restart: always
-    image: bodsch/docker-smashing-icinga2:1706-04.1
+    image: bodsch/docker-smashing-icinga2:1706-26
     container_name: smashing-icinga2
     hostname: smashing-icinga2
     extends:

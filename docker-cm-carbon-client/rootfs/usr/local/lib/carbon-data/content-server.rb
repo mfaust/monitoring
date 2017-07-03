@@ -175,7 +175,7 @@ module CarbonData
 
       def mlsSequenceNumber( rlsSequenceNumber )
 
-        logger.debug( "mlsSequenceNumber( #{rlsSequenceNumber} )" )
+#         logger.debug( "mlsSequenceNumber( #{rlsSequenceNumber} )" )
 
         result            = []
         mlsSequenceNumber = 0
@@ -188,9 +188,9 @@ module CarbonData
         if( replicatorData == false )
 
           logger.error( sprintf( 'No mbean \'Replicator\' for Service %s found!', @serviceName ) )
+          logger.debug( "#{@Server}, #{@serviceName}, 'Replicator'" )
 
-          return mlsSequenceNumber, result
-
+          [mlsSequenceNumber, result]
         else
 
           replicatorStatus = replicatorData.dig('status') || 505
@@ -200,9 +200,13 @@ module CarbonData
 
             replicatorValue   = replicatorValue.values.first
 
+            logger.debug( replicatorValue )
+
             masterLiveServer  = replicatorValue.dig('MasterLiveServer','host')
 
-#             logger.debug( replicatorValue.dig('MasterLiveServer') )
+            unless( masterLiveServer.nil? )
+              masterLiveServer = @Server
+            end
 
             # {:host=>"blueprint-box", :pre=>"result", :service=>"master-live-server"}
             repositoryData    = @mbean.bean( masterLiveServer, 'master-live-server', 'Server' )
@@ -210,9 +214,9 @@ module CarbonData
             if( repositoryData == false )
 
               logger.error( 'No mbean \'Server\' for Service \'master-live-server\' found!' )
+              logger.debug( "#{masterLiveServer}, 'master-live-server', 'Server'" )
 
-              return mlsSequenceNumber, result
-
+              [mlsSequenceNumber, result]
             else
 
               repositoryStatus = repositoryData.dig('status') || 505
@@ -235,7 +239,7 @@ module CarbonData
 
               end
 
-              return mlsSequenceNumber, result
+              [mlsSequenceNumber, result]
             end
           end
         end
@@ -334,8 +338,6 @@ module CarbonData
 
           t      = Date.parse( Time.now().to_s )
           today  = Time.new( t.year, t.month, t.day )
-
-          logger.debug( today.strftime( '%Y-%m-%d %H:%M:%S' ) )
 
           if( licenseValidFrom != nil )
 

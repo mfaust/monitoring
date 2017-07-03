@@ -187,7 +187,11 @@ module CarbonData
 
     def nodes()
 
-      return self.monitoredServer()
+      r = self.monitoredServer()
+
+      logger.debug("#{r}")
+
+      return r
     end
 
 
@@ -225,7 +229,7 @@ module CarbonData
 
     def run( fqdn = nil )
 
-#       logger.debug( "run( #{fqdn} )" )
+      logger.debug( "run( #{fqdn} )" )
 
       if( fqdn == nil )
         logger.error( 'no node given' )
@@ -320,7 +324,7 @@ module CarbonData
 
       end
 
-      return graphiteOutput
+      graphiteOutput
     end
 
   end

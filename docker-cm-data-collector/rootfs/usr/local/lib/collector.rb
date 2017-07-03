@@ -334,7 +334,7 @@ module DataCollector
 
     def apache_mod_status( host, data = {} )
 
-      logger.debug("apache_mod_status( #{host}, #{data} )")
+#       logger.debug("apache_mod_status( #{host}, #{data} )")
 
       port = data.dig(:port) || 8081
 
@@ -667,7 +667,7 @@ module DataCollector
             begin
               result[v] = d
             rescue => e
-              logger.error( "i can't store data into result for service #{v}" )
+              logger.error( "i can't create data for service #{v}" )
               logger.error( e )
             end
 
@@ -675,18 +675,21 @@ module DataCollector
 
           begin
 
-#           logger.debug( 'store result in our redis' )
+#             logger.debug( 'store result in our redis' )
+#             logger.debug( { :host => fqdn, :pre => 'result', :service => v } )
+
             redisResult = @redis.set( cacheKey, result[v] )
 
             if( redisResult.is_a?( FalseClass ) || ( redisResult.is_a?( String ) && redisResult != 'OK' ) )
-
               logger.error( sprintf( 'value for key %s can not be write', cacheKey ) )
               logger.error( { :host => fqdn, :pre => 'result', :service => v } )
             end
+
           rescue => e
 
-            logger.error( sprintf( 'value for key %s can not be write', cacheKey ) )
+            logger.error( sprintf( 'value for key \'%s\' can not be write', cacheKey ) )
             logger.error( { :host => fqdn, :pre => 'result', :service => v } )
+            logger.error( result[v] )
             logger.error( e )
           end
 
@@ -726,7 +729,7 @@ module DataCollector
         data
       end
 
-      if( value != nil )
+      unless( value.nil? )
 
         value  = value.values.first
 
@@ -736,7 +739,7 @@ module DataCollector
 
         mlsIOR = value.dig( 'MasterLiveServerIORUrl' )
 
-        if( mlsIOR != nil )
+        unless( mlsIOR.nil? )
 
           uri    = URI.parse( mlsIOR )
           scheme = uri.scheme
@@ -768,11 +771,14 @@ module DataCollector
             'port'   => port,
             'path'   => path
           }
+        else
+          logger.debug( 'no \'IOR URL\' found! :(' )
+          logger.debug( 'this RLS use an older version. we use the RLS Host as fallback' )
         end
 
       end
 
-      logger.info( sprintf( '  found \'%s\'', mlsHost ) )
+      logger.info( sprintf( '  use \'%s\'', mlsHost ) )
 #       logger.debug( JSON.pretty_generate(value.dig('MasterLiveServer')) )
       return data
 

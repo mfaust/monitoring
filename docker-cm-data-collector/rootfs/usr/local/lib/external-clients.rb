@@ -7,6 +7,21 @@ require 'pg'
 
 require_relative 'logging'
 
+
+# Lengthen timeout in Net::HTTP
+module Net
+    class HTTP
+        alias old_initialize initialize
+
+        def initialize(*args)
+            old_initialize(*args)
+            @read_timeout = 15
+        end
+    end
+end
+
+
+
 module ExternalClients
 
   class MySQL
@@ -827,7 +842,7 @@ module ExternalClients
     end
 
 
-    def get_connection
+    def get_connection2
 
       response = nil
       timeout   = 5
@@ -867,10 +882,10 @@ module ExternalClients
 
         response = instance['/server-status?auto'].get
 
-        responseCode = response.code.to_i
-        responseBody = response.body
+#        responseCode = response.code.to_i
+#        responseBody = response.body
 
-        logger.debug( response )
+#         logger.debug( response )
 
       rescue RestClient::ExceptionWithResponse => e
 
@@ -881,7 +896,7 @@ module ExternalClients
     end
 
 
-    def get_connection2
+    def get_connection
 
       response = nil
       begin
@@ -941,7 +956,6 @@ module ExternalClients
       end
 
       a = a.reduce( :merge )
-
     end
 
   end
@@ -1000,8 +1014,8 @@ module ExternalClients
 
         response = instance['/vhosts.json'].get
 
-        responseCode = response.code.to_i
-        responseBody = response.body
+#         responseCode = response.code.to_i
+#         responseBody = response.body
 
 #         logger.debug( response )
 

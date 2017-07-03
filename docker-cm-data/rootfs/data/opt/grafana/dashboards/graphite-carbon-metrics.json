@@ -183,12 +183,12 @@
       "repeatIteration": null,
       "repeatRowId": null,
       "showTitle": false,
-      "title": "Row1",
+      "title": "Graphite Carbon Metrics",
       "titleSize": "h6"
     },
     {
       "collapse": false,
-      "height": 330,
+      "height": 280,
       "panels": [
         {
           "aliasColors": {},
@@ -273,12 +273,12 @@
       "repeatIteration": null,
       "repeatRowId": null,
       "showTitle": false,
-      "title": "New row",
+      "title": "Carbon Cache",
       "titleSize": "h6"
     },
     {
       "collapse": false,
-      "height": 250,
+      "height": 220,
       "panels": [
         {
           "aliasColors": {},
@@ -289,7 +289,6 @@
           "editable": true,
           "error": false,
           "fill": 2,
-          "height": "180",
           "id": 5,
           "legend": {
             "alignAsTable": true,
@@ -364,12 +363,12 @@
       "repeatIteration": null,
       "repeatRowId": null,
       "showTitle": false,
-      "title": "Dashboard Row",
+      "title": "Carbon Persister",
       "titleSize": "h6"
     },
     {
       "collapse": false,
-      "height": 250,
+      "height": 200,
       "panels": [
         {
           "aliasColors": {},
@@ -380,7 +379,6 @@
           "editable": true,
           "error": false,
           "fill": 2,
-          "height": "150",
           "id": 6,
           "legend": {
             "alignAsTable": true,
@@ -455,12 +453,12 @@
       "repeatIteration": null,
       "repeatRowId": null,
       "showTitle": false,
-      "title": "Dashboard Row",
+      "title": "Carbon Pickle",
       "titleSize": "h6"
     },
     {
       "collapse": false,
-      "height": 250,
+      "height": 200,
       "panels": [
         {
           "aliasColors": {},
@@ -471,7 +469,6 @@
           "editable": true,
           "error": false,
           "fill": 2,
-          "height": "150",
           "id": 7,
           "legend": {
             "alignAsTable": true,
@@ -546,7 +543,7 @@
       "repeatIteration": null,
       "repeatRowId": null,
       "showTitle": false,
-      "title": "Dashboard Row",
+      "title": "Carbon TCP",
       "titleSize": "h6"
     }
   ]
