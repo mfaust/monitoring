@@ -204,12 +204,6 @@ module DataCollector
 
         unless( m.client.nil? )
 
-          logger.debug( "save settings:" )
-          logger.debug( "  user: #{user}" )
-          logger.debug( "  pass: #{pass}" )
-
-          # TODO
-          # set cached_data
           @cache.set( cache_key , expiresIn: 640 ) { Cache::Data.new( { 'user': user, 'pass': pass, 'port': port } ) }
 
           mysqlData = m.get()
@@ -333,7 +327,7 @@ module DataCollector
 
     def apache_mod_status( host, data = {} )
 
-#       logger.debug("apache_mod_status( #{host}, #{data} )")
+      logger.debug("apache_mod_status( #{host}, #{data} )")
 
       port = data.dig(:port) || 8081
 
@@ -355,25 +349,22 @@ module DataCollector
         result = Array.new
 
         mod_status  = ExternalClients::ApacheModStatus.new( settings )
-#        http_vhosts = ExternalClients::HttpVhosts.new( settings )
+        http_vhosts = ExternalClients::HttpVhosts.new( settings )
 
         mod_status_data  = mod_status.tick
 
         # TODO
         # make this part mor robust!
         #  e.g. remote file are not existing ...
+        http_vhosts_data = http_vhosts.tick
 
-#        http_vhosts_data = http_vhosts.tick
-
-
-
-#        if( http_vhosts_data.is_a?(String) )
-#          http_vhosts_data = JSON.parse( http_vhosts_data )
-#        end
+        if( http_vhosts_data.is_a?(String) )
+          http_vhosts_data = JSON.parse( http_vhosts_data )
+        end
 
         result = {
           status: mod_status_data,
-          vhosts: '/'  # http_vhosts_data.dig('vhosts')
+          vhosts: http_vhosts_data.dig('vhosts')
         }
       end
     end

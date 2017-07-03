@@ -8,19 +8,6 @@ require 'pg'
 require_relative 'logging'
 
 
-# Lengthen timeout in Net::HTTP
-module Net
-    class HTTP
-        alias old_initialize initialize
-
-        def initialize(*args)
-            old_initialize(*args)
-            @read_timeout = 15
-        end
-    end
-end
-
-
 
 module ExternalClients
 
@@ -790,16 +777,15 @@ module ExternalClients
   end
 
 
-  class  ApacheModStatus
+  class ApacheModStatus
 
     include Logging
 
     def initialize( params = {} )
 
       @host  = params.dig(:host)
-      port   = params.dig(:port) || 8081
+      @port  = params.dig(:port) || 8081
 
-      @uri = URI.parse(format('http://%s:%d/server-status?auto', @host, port))
 
       # Sample Response with ExtendedStatus On
       # Total Accesses: 20643
@@ -814,20 +800,21 @@ module ExternalClients
       # Scoreboard: ___K_____K____________W_
 
       @scoreboard_map  = {
-        '_' => 'waiting',
-        'S' => 'starting',
-        'R' => 'reading',
-        'W' => 'sending',
-        'K' => 'keepalive',
-        'D' => 'dns',
-        'C' => 'closing',
-        'L' => 'logging',
-        'G' => 'graceful',
-        'I' => 'idle',
-        '.' => 'open'
+        '_' => 'waiting'.to_sym,
+        'S' => 'starting'.to_sym,
+        'R' => 'reading'.to_sym,
+        'W' => 'sending'.to_sym,
+        'K' => 'keepalive'.to_sym,
+        'D' => 'dns'.to_sym,
+        'C' => 'closing'.to_sym,
+        'L' => 'logging'.to_sym,
+        'G' => 'graceful'.to_sym,
+        'I' => 'idle'.to_sym,
+        '.' => 'open'.to_sym
       }
 
     end
+
 
     def get_scoreboard_metrics(response)
 
@@ -842,82 +829,26 @@ module ExternalClients
     end
 
 
-    def get_connection2
+    def fetch( uri_str, limit = 10 )
 
-      response = nil
-      timeout   = 5
-      open_timeout  = 5
-      instance     = nil
+      # You should choose better exception.
+      raise ArgumentError, 'HTTP redirect too deep' if limit == 0
 
-      begin
+      p   = URI::Parser.new
+      url = p.parse( uri_str.to_s )
 
-        retries ||= 0
+      req      = Net::HTTP::Get.new( "#{url.path}?auto", { 'User-Agent' => 'CoreMedia Monitoring/1.0' })
+      response = Net::HTTP.start( url.host, url.port ) { |http| http.request(req) }
 
-        until( instance != nil )
-
-          instance = RestClient::Resource.new(
-            @uri,
-            :timeout      => timeout,
-            :open_timeout => open_timeout,
-            :verify_ssl   => false
-          )
-        end
-      rescue => e
-
-        logger.debug(format('try to create the httpd connection (%d)', retries))
-        logger.error(e)
-
-        if( retries < 10 )
-          retries += 1
-          sleep( 2 )
-          retry
-        end
-
-        logger.error( e )
+      case response
+        when Net::HTTPSuccess         then response
+        when Net::HTTPRedirection     then fetch( response['location'], limit - 1 )
+        when Net::HTTPNotFound        then response
+        when Net::HTTPForbidden       then response
+      else
+        response.error!
       end
 
-      logger.info( 'httpd connection established' )
-
-      begin
-
-        response = instance['/server-status?auto'].get
-
-#        responseCode = response.code.to_i
-#        responseBody = response.body
-
-#         logger.debug( response )
-
-      rescue RestClient::ExceptionWithResponse => e
-
-        logger.error( "Error: #{@uri} , '#{e}'" )
-      end
-
-      response
-    end
-
-
-    def get_connection
-
-      response = nil
-      begin
-
-        retries ||= 0
-
-        response = Net::HTTP.get(@uri)
-
-      rescue => e
-
-        logger.debug(format('try to get data from %s (%d)', @url, retries))
-        logger.error(e)
-
-        if( retries < 10 )
-          retries += 1
-          sleep( 2 )
-          retry
-        end
-      end
-
-      response
     end
 
 
@@ -925,10 +856,11 @@ module ExternalClients
 
       a = Array.new
 
-      unless (response = get_connection).nil?
+      response = fetch( format('http://%s:%d/server-status', @host, @port), 2 )
 
-        # make an array
-        response = response.split("\n")
+      if( response.code.to_i == 200 )
+
+        response = response.body.split("\n")
 
         # blacklist
         response.reject! { |t| t[/#{@host}/] }
@@ -945,19 +877,26 @@ module ExternalClients
           metrics = Hash.new
 
           if line =~ /Scoreboard/
-            metrics = { 'scoreboard' => get_scoreboard_metrics(line.strip) }
+            metrics = { scoreboard: get_scoreboard_metrics(line.strip) }
           else
             key, value = line.strip.split(':')
-            metrics[key.gsub(/\s/, '')] = value.strip.to_f
+
+            key   = key.gsub(/\s/, '').to_sym
+            value = value.strip
+
+            metrics[key] = format( "%f", value ).sub(/\.?0*$/, "" ).to_f
           end
 
           a << metrics
         end
+
+        a.reduce( :merge )
+
+      else
+        return {}
       end
 
-      a = a.reduce( :merge )
     end
-
   end
 
 
@@ -968,81 +907,41 @@ module ExternalClients
     def initialize( params = {} )
 
       @host  = params.dig(:host)
-      port   = params.dig(:port) || 8081
-
-      @uri = URI.parse(format('http://%s:%d/vhosts.json', @host, port))
+      @port  = params.dig(:port) || 8081
     end
 
 
-    def get_connection
+    def fetch( uri_str, limit = 10 )
 
-      response = nil
-      timeout   = 5
-      open_timeout  = 5
-      instance     = nil
+      # You should choose better exception.
+      raise ArgumentError, 'HTTP redirect too deep' if limit == 0
 
-      begin
+      url = URI.parse(uri_str)
+      req = Net::HTTP::Get.new(url.path, { 'User-Agent' => 'CoreMedia Monitoring/1.0' })
+      response = Net::HTTP.start(url.host, url.port) { |http| http.request(req) }
 
-        retries ||= 0
-
-        until( instance != nil )
-
-          instance = RestClient::Resource.new(
-            @uri,
-            :timeout      => timeout,
-            :open_timeout => open_timeout,
-            :verify_ssl   => false
-          )
-        end
-      rescue => e
-
-        logger.debug(format('try to create the httpd connection (%d)', retries))
-        logger.error(e)
-
-        if( retries < 10 )
-          retries += 1
-          sleep( 2 )
-          retry
-        end
-
-        logger.error( e )
+      case response
+        when Net::HTTPSuccess         then response
+        when Net::HTTPRedirection     then fetch(response['location'], limit - 1)
+        when Net::HTTPNotFound        then response
+      else
+        response.error!
       end
 
-      logger.info( 'httpd connection established' )
-
-      begin
-
-        response = instance['/vhosts.json'].get
-
-#         responseCode = response.code.to_i
-#         responseBody = response.body
-
-#         logger.debug( response )
-
-      rescue RestClient::ExceptionWithResponse => e
-
-        logger.error( "Error: #{@uri} , '#{e}'" )
-
-        return nil
-      end
-
-      response
     end
 
 
     def tick
 
-      response = { 'vhost' => '' }
+      response = fetch( format('http://%s:%d/vhosts.json', @host, @port), 2 )
 
-      unless (response = get_connection).nil?
-
-        response
+      if( response.code.to_i == 200 )
+        return response.body
+      else
+        return {}
       end
 
-      response
     end
-
-
   end
 
 
