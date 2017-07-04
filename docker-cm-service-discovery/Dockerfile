@@ -7,11 +7,11 @@ ENV \
   ALPINE_MIRROR="mirror1.hs-esslingen.de/pub/Mirrors" \
   ALPINE_VERSION="v3.6" \
   TERM=xterm \
-  APK_ADD="build-base bind-tools drill imagemagick-dev mariadb-client mariadb-dev ruby-dev ruby-io-console ruby-rdoc" \
+  APK_ADD="build-base bind-tools drill imagemagick-dev mariadb-client mariadb-dev nano ruby-dev ruby-io-console ruby-rdoc" \
   APK_DEL="build-base imagemagick-dev ruby-dev ruby-io-console zlib-dev" \
   GEMS="beaneater filesize mysql2 ipaddress redis resolve-hostname rufus-scheduler tzinfo-data"
 
-LABEL version="1706-04.2"
+LABEL version="1707-27.2"
 
 # ---------------------------------------------------------------------------------------
 

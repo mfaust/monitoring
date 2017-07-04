@@ -35,7 +35,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     # You can use also Environment vars like this:
     # command: "--nameserver='${DNS_1}:53' --nameserver='${DNS_2}:53' --http=:80"
-    command: "--nameserver='10.1.2.14:53' --nameserver='10.1.2.63:53' --http=:80 --ttl=120"
+    command: "--nameserver='10.1.2.14:53' --nameserver='10.1.2.63:53' --http=:80 --ttl=120 "
     networks:
       mon:
         ipv4_address: 192.168.1.5
@@ -278,7 +278,7 @@ services:
 
   smashing-icinga2:
     restart: always
-    image: bodsch/docker-smashing-icinga2:1706-26
+    image: bodsch/docker-smashing-icinga2:1706-27
     container_name: smashing-icinga2
     hostname: smashing-icinga2
     extends:
@@ -286,8 +286,6 @@ services:
       service: smashing-icinga2
     depends_on:
       - icinga2-master
-    ports:
-      - 3030:3030
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:
@@ -349,8 +347,8 @@ services:
     networks:
       mon:
         ipv4_address: 192.168.1.31
-    dns:
-      - 192.168.1.5
+    #dns:
+      #- 192.168.1.5
 
   # single service
   # use MQ to process data

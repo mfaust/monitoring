@@ -72,15 +72,15 @@ end
 # -----------------------------------------------------------------------------
 
 # Lengthen timeout in Net::HTTP
-module Net
-  class HTTP
-    alias old_initialize initialize
-
-    def initialize(*args)
-      old_initialize(*args)
-      @read_timeout = 15
-    end
-  end
-end
+# module Net
+#   class HTTP
+#     alias old_initialize initialize
+#
+#     def initialize(*args)
+#       old_initialize(*args)
+#       @read_timeout = 15
+#     end
+#   end
+# end
 
 # -----------------------------------------------------------------------------

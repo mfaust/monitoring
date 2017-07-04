@@ -334,4 +334,50 @@ module ServiceDiscovery
 
   end
 
+
+  class HttpVhosts
+
+    include Logging
+
+    def initialize( params = {} )
+
+      @host  = params.dig(:host)
+      @port  = params.dig(:port) || 8081
+    end
+
+
+    def fetch( uri_str, limit = 10 )
+
+      # You should choose better exception.
+      raise ArgumentError, 'HTTP redirect too deep' if limit == 0
+
+      url = URI.parse(uri_str)
+      req = Net::HTTP::Get.new( url.path, { 'User-Agent' => 'CoreMedia Monitoring/1.0' } )
+      response = Net::HTTP.start( url.host, url.port, { read_timeout: 5, open_timeout: 5 } ) { |http| http.request(req) }
+
+      case response
+        when Net::HTTPSuccess         then response
+        when Net::OpenTimeout         then response
+        when Net::HTTPRedirection     then fetch(response['location'], limit - 1)
+        when Net::HTTPNotFound        then response
+      else
+        response.error!
+      end
+
+    end
+
+
+    def tick
+
+      response = fetch( format('http://%s:%d/vhosts.json', @host, @port) )
+
+      if( response.code.to_i == 200 )
+        return response.body
+      else
+        return {}
+      end
+
+    end
+  end
+
 end

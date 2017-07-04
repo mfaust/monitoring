@@ -3,17 +3,18 @@
 services:
 
   http-proxy:
-    description: HTTP Proxy (Apache/nginx)
+    description: HTTP Proxy
     port: 80
+    vhosts:
+    - ''
 
   https-proxy:
-    description: HTTPS Proxy (Apache/nginx)
+    description: HTTPS Proxy
     port: 443
 
   http-status:
     description: HTTP Server Status
     port: 8081
-
 
   mysql:
     description: MySQL
@@ -92,7 +93,7 @@ services:
     - contentserver
 
   workflow-server:
-    description: Workflow Server
+    description: ContentServer WFS
     port: 49099
     cap_connection: true
     uapi_cache: true

@@ -60,6 +60,8 @@ class CMIcinga2 < Icinga2::Client
       host    = params.dig(:host)
       fqdn    = params.dig(:fqdn)
 
+      team_config        = @database.config( { :ip => ip, :short => host, :fqdn => fqdn, :key => 'team' } )
+      environment_config = @database.config( { :ip => ip, :short => host, :fqdn => fqdn, :key => 'environment' } )
       aws_config         = @database.config( { :ip => ip, :short => host, :fqdn => fqdn, :key => 'aws' } )
       vhost_http_config  = @database.config( { :ip => ip, :short => host, :fqdn => fqdn, :key => 'vhost_http' } )
       vhost_https_config = @database.config( { :ip => ip, :short => host, :fqdn => fqdn, :key => 'vhost_https' } )
@@ -84,14 +86,46 @@ class CMIcinga2 < Icinga2::Client
       end
 
       if( services != nil )
+
+#         logger.debug( JSON.pretty_generate( services ) )
+
         services.each do |s|
           if( s.last != nil )
             s.last.reject! { |k| k == 'template' }
             s.last.reject! { |k| k == 'application' }
+            s.last.reject! { |k| k == 'description' }
           end
         end
 
         payload = { 'coremedia': services }
+
+        if( services.include?('http-proxy') )
+          vhosts = services.dig('http-proxy','vhosts')
+
+          unless( vhosts.nil? )
+            payload['http_vhosts'] = vhosts
+          end
+
+          payload['http']        = true
+          services.reject! { |k| k == 'http-proxy' }
+        end
+
+        if( services.include?('https-proxy') )
+          vhosts = services.dig('https-proxy','vhosts')
+
+          unless( vhosts.nil? )
+            payload['https_vhosts'] = vhosts
+          end
+
+          payload['https']        = true
+          services.reject! { |k| k == 'https-proxy' }
+        end
+
+        if( services.include?('http-status') )
+          payload['http_status']        = true
+          services.reject! { |k| k == 'http-status' }
+        end
+
       else
 
         payload = {}
@@ -105,23 +139,14 @@ class CMIcinga2 < Icinga2::Client
         payload['aws'] = self.parsedResponse( aws_config )
       end
 
-      if( vhost_http_config )
-#        logger.debug(vhost_http_config.class.to_s)
-        vhost_http_config = vhost_http_config.dig('vhost_http')
-        vhost_http_config = vhost_http_config.gsub( '=>', ':' )
-
-        payload['http_vhost'] = self.parsedResponse( vhost_http_config )
+      if( team_config )
+        payload['team'] = self.parsedResponse( team_config )
       end
 
-      if( vhost_https_config )
-#        logger.debug(vhost_https_config.class.to_s)
-        vhost_https_config = vhost_https_config.dig('vhost_https')
-        vhost_https_config = vhost_https_config.gsub( '=>', ':' )
-
-        payload['https_vhost'] = self.parsedResponse( vhost_https_config )
+      if( environment_config )
+        payload['environment'] = self.parsedResponse( environment_config )
       end
 
-# logger.debug( "payload: #{payload}" )
 
       payload
     end

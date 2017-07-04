@@ -327,8 +327,6 @@ module DataCollector
 
     def apache_mod_status( host, data = {} )
 
-      logger.debug("apache_mod_status( #{host}, #{data} )")
-
       port = data.dig(:port) || 8081
 
       if( port != nil )
@@ -348,24 +346,13 @@ module DataCollector
 
         result = Array.new
 
-        mod_status  = ExternalClients::ApacheModStatus.new( settings )
-        http_vhosts = ExternalClients::HttpVhosts.new( settings )
-
-        mod_status_data  = mod_status.tick
-
-        # TODO
-        # make this part mor robust!
-        #  e.g. remote file are not existing ...
-        http_vhosts_data = http_vhosts.tick
-
-        if( http_vhosts_data.is_a?(String) )
-          http_vhosts_data = JSON.parse( http_vhosts_data )
-        end
+        mod_status      = ExternalClients::ApacheModStatus.new( settings )
+        mod_status_data = mod_status.tick
 
         result = {
           status: mod_status_data,
-          vhosts: http_vhosts_data.dig('vhosts')
         }
+
       end
     end
 

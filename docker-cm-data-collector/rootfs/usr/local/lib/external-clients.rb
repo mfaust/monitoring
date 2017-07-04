@@ -800,17 +800,17 @@ module ExternalClients
       # Scoreboard: ___K_____K____________W_
 
       @scoreboard_map  = {
-        '_' => 'waiting'.to_sym,
-        'S' => 'starting'.to_sym,
-        'R' => 'reading'.to_sym,
-        'W' => 'sending'.to_sym,
-        'K' => 'keepalive'.to_sym,
-        'D' => 'dns'.to_sym,
-        'C' => 'closing'.to_sym,
-        'L' => 'logging'.to_sym,
-        'G' => 'graceful'.to_sym,
-        'I' => 'idle'.to_sym,
-        '.' => 'open'.to_sym
+        '_' => 'waiting',
+        'S' => 'starting',
+        'R' => 'reading',
+        'W' => 'sending',
+        'K' => 'keepalive',
+        'D' => 'dns',
+        'C' => 'closing',
+        'L' => 'logging',
+        'G' => 'graceful',
+        'I' => 'idle',
+        '.' => 'open'
       }
 
     end
@@ -881,7 +881,7 @@ module ExternalClients
           else
             key, value = line.strip.split(':')
 
-            key   = key.gsub(/\s/, '').to_sym
+            key   = key.gsub(/\s/, '')
             value = value.strip
 
             metrics[key] = format( "%f", value ).sub(/\.?0*$/, "" ).to_f

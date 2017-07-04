@@ -176,6 +176,19 @@ module ServiceDiscovery
     #
     def createHostConfig( data )
 
+      if( !data.is_a?(Hash) )
+        return nil
+      end
+
+      ip    = data.dig(:ip)
+      short = data.dig(:short)
+      fqdn  = data.dig(:fqdn)
+      data  = data.dig(:data)
+
+      if( data.nil? )
+        return nil
+      end
+
       data.each do |d,v|
 
         # merge data between discovered Services and our base configuration,
@@ -183,14 +196,30 @@ module ServiceDiscovery
         #
         serviceData = @serviceConfig.dig( 'services', d )
 
-        if( serviceData != nil )
+        unless( serviceData.nil? )
 
-  #         logger.debug( @serviceConfig['services'][d] )
+#           logger.debug( serviceData )
 
           data[d].merge!( serviceData ) { |key, port| port }
 
           port       = data.dig( d, 'port' )
           port_http  = data.dig( d, 'port_http' )
+
+          # when we provide a vhost.json
+          #
+          unless( serviceData.dig( 'vhosts' ).nil? )
+
+            http_vhosts = ServiceDiscovery::HttpVhosts.new( { host: fqdn, port: port } )
+            http_vhosts_data = http_vhosts.tick
+
+            if( http_vhosts_data.is_a?(String) )
+              http_vhosts_data = JSON.parse( http_vhosts_data )
+            end
+
+            http_vhosts_data = http_vhosts_data.dig('vhosts')
+
+            data[d]['vhosts'] = http_vhosts_data
+          end
 
           if( port != nil && port_http != nil )
             # ATTENTION
@@ -209,6 +238,8 @@ module ServiceDiscovery
           data.reject! { |x| x == d }
         end
       end
+
+#       logger.debug( data )
 
       return data
     end
@@ -364,16 +395,13 @@ module ServiceDiscovery
 
           logger.debug( "discovered services: #{names}" )
 
-          if( names != nil )
+          unless( names.nil? )
 
             names.each do |name|
               discoveredServices.merge!( { name => { 'port' => p } } )
             end
-
           end
-
         end
-
       end
 
       # TODO
@@ -385,7 +413,7 @@ module ServiceDiscovery
 
           serviceData = @serviceConfig.dig( 'services', s )
 
-          unless serviceData.nil?
+          unless( serviceData.nil? )
 
             discoveredServices[s] ||= serviceData.filter( 'port' )
           end
@@ -396,7 +424,7 @@ module ServiceDiscovery
 
       # merge discovered services with cm-services.yaml
       #
-      discoveredServices = self.createHostConfig( discoveredServices )
+      discoveredServices = self.createHostConfig( { :ip => ip, :short => short, :fqdn => fqdn, :data => discoveredServices } )
 
       result    = @database.createDiscovery( { :ip => ip, :short => short, :fqdn => fqdn, :data => discoveredServices } )
 
