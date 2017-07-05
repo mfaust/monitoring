@@ -66,6 +66,8 @@ class CMIcinga2 < Icinga2::Client
       vhost_http_config  = @database.config( { :ip => ip, :short => host, :fqdn => fqdn, :key => 'vhost_http' } )
       vhost_https_config = @database.config( { :ip => ip, :short => host, :fqdn => fqdn, :key => 'vhost_https' } )
 
+      logger.debug( "team_config       : #{team_config}" )
+      logger.debug( "environment_config: #{environment_config}" )
       logger.debug( "aws_config        : #{aws_config}" )
       logger.debug( "vhost_http_config : #{vhost_http_config}" )
       logger.debug( "vhost_https_config: #{vhost_https_config}" )
@@ -85,6 +87,8 @@ class CMIcinga2 < Icinga2::Client
         end
       end
 
+      payload = {}
+
       if( services != nil )
 
 #         logger.debug( JSON.pretty_generate( services ) )
@@ -97,7 +101,10 @@ class CMIcinga2 < Icinga2::Client
           end
         end
 
-        payload = { 'coremedia': services }
+#         logger.debug(services)
+#         logger.debug(services.class.to_s)
+#
+#         payload = { 'coremedia': services }
 
         if( services.include?('http-proxy') )
           vhosts = services.dig('http-proxy','vhosts')
@@ -126,9 +133,9 @@ class CMIcinga2 < Icinga2::Client
           services.reject! { |k| k == 'http-status' }
         end
 
-      else
-
-        payload = {}
+        services.each do |k,v|
+          payload[k] = v
+        end
       end
 
       if( aws_config )
