@@ -163,7 +163,15 @@ class Monitoring
 
         if( discoveryData != nil )
 
+#           logger.debug( discoveryData.class.to_s )
+
           discoveryData.each do |a,d|
+
+#             logger.debug(a)
+#             logger.debug( d.class.to_s )
+            if(d.is_a?(String))
+              d = JSON.generate(d)
+            end
 
             d.reject! { |k| k == 'application' }
             d.reject! { |k| k == 'template' }

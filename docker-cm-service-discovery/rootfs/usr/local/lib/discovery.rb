@@ -198,8 +198,6 @@ module ServiceDiscovery
 
         unless( serviceData.nil? )
 
-#           logger.debug( serviceData )
-
           data[d].merge!( serviceData ) { |key, port| port }
 
           port       = data.dig( d, 'port' )
@@ -214,11 +212,11 @@ module ServiceDiscovery
 
             if( http_vhosts_data.is_a?(String) )
               http_vhosts_data = JSON.parse( http_vhosts_data )
+
+              http_vhosts_data = http_vhosts_data.dig('vhosts')
+
+              data[d]['vhosts'] = http_vhosts_data
             end
-
-            http_vhosts_data = http_vhosts_data.dig('vhosts')
-
-            data[d]['vhosts'] = http_vhosts_data
           end
 
           if( port != nil && port_http != nil )
@@ -239,7 +237,7 @@ module ServiceDiscovery
         end
       end
 
-#       logger.debug( data )
+      logger.debug( data )
 
       return data
     end

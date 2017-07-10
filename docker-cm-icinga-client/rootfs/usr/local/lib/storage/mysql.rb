@@ -755,6 +755,7 @@ module Storage
             )',
           service, ip, name, fqdn
         )
+
       elsif( service == nil )
 
         statement = sprintf(

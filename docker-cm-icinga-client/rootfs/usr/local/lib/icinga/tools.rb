@@ -74,7 +74,7 @@ class CMIcinga2 < Icinga2::Client
 
       # in first, we need the discovered services ...
       #
-      for y in 1..30
+      for y in 1..15
 
         result = @database.discoveryData( { :ip => ip, :short => host, :fqdn => fqdn } )
 
@@ -91,8 +91,6 @@ class CMIcinga2 < Icinga2::Client
 
       if( services != nil )
 
-#         logger.debug( JSON.pretty_generate( services ) )
-
         services.each do |s|
           if( s.last != nil )
             s.last.reject! { |k| k == 'template' }
@@ -101,35 +99,30 @@ class CMIcinga2 < Icinga2::Client
           end
         end
 
-#         logger.debug(services)
-#         logger.debug(services.class.to_s)
-#
-#         payload = { 'coremedia': services }
-
         if( services.include?('http-proxy') )
           vhosts = services.dig('http-proxy','vhosts')
 
-          unless( vhosts.nil? )
+          if( vhosts.is_a?(Hash) )
             payload['http_vhosts'] = vhosts
           end
 
-          payload['http']        = true
+          payload['http'] = true
           services.reject! { |k| k == 'http-proxy' }
         end
 
         if( services.include?('https-proxy') )
           vhosts = services.dig('https-proxy','vhosts')
 
-          unless( vhosts.nil? )
+          if( vhosts.is_a?(Hash) )
             payload['https_vhosts'] = vhosts
           end
 
-          payload['https']        = true
+          payload['https'] = true
           services.reject! { |k| k == 'https-proxy' }
         end
 
         if( services.include?('http-status') )
-          payload['http_status']        = true
+          payload['http_status'] = true
           services.reject! { |k| k == 'http-status' }
         end
 
@@ -154,8 +147,10 @@ class CMIcinga2 < Icinga2::Client
         payload['environment'] = self.parsedResponse( environment_config )
       end
 
-
-      payload
+      # rename all keys
+      # replace '-' with '_'
+      #
+      payload.inject({ }) { |x, (k,v)| x[k.gsub('-', '_')] = v; x }
     end
 
 
