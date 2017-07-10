@@ -24,7 +24,7 @@ services:
 
   dnsdock:
     restart: always
-    image: bodsch/docker-dnsdock:1705-04
+    image: bodsch/docker-dnsdock:1707-27.1
     container_name: dnsdock
     hostname: dnsdock
     labels:
@@ -42,7 +42,7 @@ services:
 
   beanstalkd:
     restart: always
-    image: bodsch/docker-beanstalkd:1705-04
+    image: bodsch/docker-beanstalkd:1707-27.1
     container_name: beanstalkd
     hostname: beanstalkd
     volumes:
@@ -53,7 +53,7 @@ services:
 
   database:
     restart: always
-    image: bodsch/docker-mysql:1705-04
+    image: bodsch/docker-mysql:1707-27.1
     container_name: database
     hostname: database
     ports:
@@ -70,7 +70,7 @@ services:
 
   jolokia:
     restart: always
-    image: bodsch/docker-jolokia:1706-04.1
+    image: bodsch/docker-jolokia:1707-27.1
     container_name: jolokia
     hostname: jolokia
     depends_on:
@@ -86,7 +86,7 @@ services:
 
   memcached:
     restart: always
-    image: bodsch/docker-memcached:1705-04
+    image: bodsch/docker-memcached:1707-27.1
     container_name: memcached
     hostname: memcached
     volumes:
@@ -98,7 +98,7 @@ services:
 
   redis:
     restart: always
-    image: bodsch/docker-redis:1705-04
+    image: bodsch/docker-redis:1707-27.1
     container_name: redis
     hostname: redis
     volumes:
@@ -110,7 +110,7 @@ services:
 
   nginx:
     restart: always
-    image: bodsch/docker-nginx:1705-04
+    image: bodsch/docker-nginx:1707-27.1
     container_name: nginx
     hostname: nginx
     ports:
@@ -144,7 +144,7 @@ services:
 
   carbon:
     restart: always
-    image: bodsch/docker-go-carbon:1705-04
+    image: bodsch/docker-go-carbon:1707-27.1
     container_name: carbon
     hostname: carbon
     depends_on:
@@ -161,7 +161,7 @@ services:
 
   graphite:
     restart: always
-    image: bodsch/docker-graphite:1705-04
+    image: bodsch/docker-graphite:1707-27.1
     container_name: graphite
     hostname: graphite
     extends:
@@ -178,7 +178,7 @@ services:
 
   grafana:
     restart: always
-    image: bodsch/docker-grafana:1705-04
+    image: bodsch/docker-grafana:1707-27.4
     container_name: grafana
     hostname: grafana
     extends:
@@ -202,7 +202,7 @@ services:
 
   icinga2-master:
     restart: always
-    image: bodsch/docker-icinga2:1706-03
+    image: bodsch/docker-icinga2:1707-27.2
     container_name: icinga2-master
     hostname: icinga2-master
     extends:
@@ -242,7 +242,7 @@ services:
 
   icingaweb2:
     restart: always
-    image: bodsch/docker-icingaweb2:1705-04
+    image: bodsch/docker-icingaweb2:1707-27.1
     container_name: icingaweb2
     hostname: icingaweb2
     extends:
@@ -264,7 +264,7 @@ services:
 
   markdown-service:
     restart: always
-    image: bodsch/docker-markdown-service:1706-04.1
+    image: bodsch/docker-markdown-service:1707-27.1
     container_name: markdown-service
     hostname: markdown-service
     depends_on:
@@ -278,7 +278,7 @@ services:
 
   smashing-icinga2:
     restart: always
-    image: bodsch/docker-smashing-icinga2:1706-27
+    image: bodsch/docker-smashing-icinga2:1707-27.1
     container_name: smashing-icinga2
     hostname: smashing-icinga2
     extends:
