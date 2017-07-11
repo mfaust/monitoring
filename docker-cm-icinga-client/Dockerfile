@@ -23,9 +23,8 @@ RUN \
   apk --no-cache update && \
   apk --no-cache upgrade && \
   apk --no-cache add ${APK_ADD} && \
-  gem install --quiet --no-rdoc --no-ri ${GEMS} && \
+  gem install --no-rdoc --no-ri ${GEMS} && \
   apk --purge del ${APK_DEL} && \
-  mkdir /var/cache/monitoring && \
   rm -rf \
     /opt/* \
     /tmp/* \

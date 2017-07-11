@@ -11,7 +11,7 @@ ENV \
   APK_DEL="build-base imagemagick-dev ruby-dev ruby-io-console zlib-dev" \
   GEMS="beaneater ipaddress mysql2 resolve-hostname redis rufus-scheduler sinatra thin tzinfo-data"
 
-LABEL version="1706-02.3"
+LABEL version="1707-28.1"
 
 # ---------------------------------------------------------------------------------------
 
@@ -20,20 +20,11 @@ WORKDIR /
 RUN \
   echo "http://${ALPINE_MIRROR}/alpine/${ALPINE_VERSION}/main"       > /etc/apk/repositories && \
   echo "http://${ALPINE_MIRROR}/alpine/${ALPINE_VERSION}/community" >> /etc/apk/repositories && \
-  apk --quiet --no-cache update && \
-  apk --quiet --no-cache upgrade && \
-  for apk in ${APK_ADD} ; \
-  do \
-    apk --quiet --no-cache add ${apk} ; \
-  done && \
-  for gem in ${GEMS} ; \
-  do \
-     gem install --quiet --no-rdoc --no-ri ${gem} ; \
-  done && \
-  for apk in ${APK_DEL} ; \
-  do \
-    apk del --quiet --purge ${apk} ; \
-  done && \
+  apk --no-cache update && \
+  apk --no-cache upgrade && \
+  apk --no-cache add ${APK_ADD} && \
+  gem install --no-rdoc --no-ri ${GEMS} && \
+  apk --purge del ${APK_DEL} && \
   rm -rf \
     /tmp/* \
     /var/cache/apk/*

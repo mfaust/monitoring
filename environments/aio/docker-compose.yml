@@ -202,7 +202,7 @@ services:
 
   icinga2-master:
     restart: always
-    image: bodsch/docker-icinga2:1707-27.2
+    image: bodsch/docker-icinga2:1707-28.1
     container_name: icinga2-master
     hostname: icinga2-master
     extends:
