@@ -200,9 +200,11 @@ module CarbonData
 
             replicatorValue   = replicatorValue.values.first
 
-            logger.debug( replicatorValue )
+            logger.debug( "replicatorValue : #{replicatorValue}" )
 
             masterLiveServer  = replicatorValue.dig('MasterLiveServer','host')
+
+            logger.debug( "masterLiveServer: #{masterLiveServer}" )
 
             unless( masterLiveServer.nil? )
               masterLiveServer = @Server

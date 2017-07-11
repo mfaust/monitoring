@@ -756,7 +756,7 @@ module DataCollector
       end
 
       logger.info( sprintf( '  use \'%s\'', mlsHost ) )
-#       logger.debug( JSON.pretty_generate(value.dig('MasterLiveServer')) )
+      logger.debug( JSON.pretty_generate(value.dig('MasterLiveServer')) )
       return data
 
     end

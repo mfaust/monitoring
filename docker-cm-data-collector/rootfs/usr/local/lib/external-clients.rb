@@ -598,6 +598,7 @@ module ExternalClients
       data.reject! { |t| t[/sysfs/] }
       data.reject! { |t| t[/proc/] }
       data.reject! { |t| t[/none/] }
+      data.reject! { |t| t[/\/rootfs\/var\/run/] }
       data.flatten!
 
       existingDevices = Array.new()

@@ -253,6 +253,8 @@ module CarbonData
 
       data.each do |service, d|
 
+        logger.info( sprintf( 'Host: %s - \'%s\'', fqdn, @identifier ) )
+
         @serviceName = service
         @Service     = self.normalizeService( service )
 
@@ -260,7 +262,7 @@ module CarbonData
           next
         end
 
-        logger.info( sprintf( 'Host: %s - \'%s\' (%s)', fqdn, service, @Service ) )
+        logger.info( sprintf( '  - \'%s\' (%s)', service, @Service ) )
 
         cacheKey     = Storage::RedisClient.cacheKey( { :host => fqdn, :pre => 'result', :service => service } )
 
