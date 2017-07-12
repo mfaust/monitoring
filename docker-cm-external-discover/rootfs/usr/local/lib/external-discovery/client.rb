@@ -264,6 +264,7 @@ module ExternalDiscovery
       d = {
         :force      => false,
         :tags       => useableTags,
+        :overview   = false,
         :config     => {
           :display_name        => display_name,
           :graphite_identifier => graphite_identifier,
