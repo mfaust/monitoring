@@ -241,9 +241,15 @@ module ServiceDiscovery
                       logger.warn( services )
                     end
 
-                  # Solr 6 Support
+                  # Solr - Standalone Support
                   #
-                  elsif( classPath.include?( 'solr-6' ) )
+                  elsif( classPath.include?( 'solr-6' ) || classPath.include?('solr/server') )
+
+                    services.push( 'solr' )
+
+                  # Solr - Standalone Support
+                  #
+                  elsif( classPath.include?('solr/server') )
 
                     services.push( 'solr' )
 
