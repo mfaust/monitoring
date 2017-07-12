@@ -288,8 +288,8 @@ module ExternalDiscovery
 
       if( result.is_a?(Hash) )
 
-        discoveryStatus  = result.dig( :status )   || result.dig( 'status' )
-        discoveryMessage = result.dig( :message )  || result.dig( 'message' )
+        discoveryStatus  = result.dig(:status) #   || result.dig( 'status' )
+        discoveryMessage = result.dig(:message)#   || result.dig( 'message' )
 
         if( discoveryStatus == 400 )
           # error
