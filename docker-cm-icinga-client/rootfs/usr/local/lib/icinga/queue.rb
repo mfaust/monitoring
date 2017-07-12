@@ -55,6 +55,8 @@ class CMIcinga2 < Icinga2::Client
       node        = data.dig( :body, 'node' )
       payload     = data.dig( :body, 'payload' )
       @identifier = nil
+      dns         = nil
+      tags        = nil
 
       if( command == nil || node == nil || payload == nil )
 
@@ -87,10 +89,13 @@ class CMIcinga2 < Icinga2::Client
         payload  = JSON.parse( payload )
       end
 
+      logger.debug( 'payload:' )
       logger.debug( JSON.pretty_generate( payload ) )
+      logger.debug( '----------------------------------' )
 
       if( payload.is_a?( String ) == false )
         dns      = payload.dig('dns')
+        tags     = payload.dig('tags')
       end
 
       logger.info( sprintf( '  %s node %s', command , node ) )
@@ -104,9 +109,7 @@ class CMIcinga2 < Icinga2::Client
       end
 
       if( @jobs.jobs( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } ) == true )
-
         logger.warn( 'we are working on this job' )
-
         return {
           :status  => 409, # 409 Conflict
           :message => 'we are working on this job'
@@ -116,27 +119,6 @@ class CMIcinga2 < Icinga2::Client
       @jobs.add( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
 
       @cache.set( format( 'dns-%s', node ) , expiresIn: 320 ) { Cache::Data.new( { 'ip': ip, 'short': short, 'long': fqdn } ) }
-
-#       logger.debug( payload )
-#       logger.debug( payload.class.to_s )
-#
-#       if( payload.is_a?( String ) == true && payload.to_s != '' )
-#         payload  = JSON.parse( payload )
-#       end
-#
-#       logger.debug( payload )
-#       logger.debug( payload.class.to_s )
-#
-#       config     = payload.dig('config')
-#
-#       if( config != nil )
-#
-#         if( config.is_a?( String ) == true && config.to_s != '' )
-#           config  = JSON.parse( config )
-#         end
-#
-#         @identifier = config.dig('graphite_identifier')
-#       end
 
       # add Node
       #
@@ -149,8 +131,8 @@ class CMIcinga2 < Icinga2::Client
         services     = self.nodeInformation( { :ip => ip, :host => short, :fqdn => fqdn } )
         display_name = @database.config( { :ip => ip, :short => short, :fqdn => fqdn, :key => 'display_name' } )
 
-        logger.debug( display_name )
-        logger.debug( display_name.class.to_s )
+#         logger.debug( display_name )
+#         logger.debug( display_name.class.to_s )
 
         if( display_name.nil? )
           display_name = fqdn
@@ -164,6 +146,12 @@ class CMIcinga2 < Icinga2::Client
           payload = services
         else
           payload = {}
+        end
+
+        unless( tags.nil? )
+          tags.each do |t,v|
+            payload[t] = v
+          end
         end
 
 

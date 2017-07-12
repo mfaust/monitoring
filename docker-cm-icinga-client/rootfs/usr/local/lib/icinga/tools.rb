@@ -66,11 +66,14 @@ class CMIcinga2 < Icinga2::Client
       vhost_http_config  = @database.config( { :ip => ip, :short => host, :fqdn => fqdn, :key => 'vhost_http' } )
       vhost_https_config = @database.config( { :ip => ip, :short => host, :fqdn => fqdn, :key => 'vhost_https' } )
 
+      full_config = @database.config( { :ip => ip, :short => host, :fqdn => fqdn )
+
       logger.debug( "team_config       : #{team_config}" )
       logger.debug( "environment_config: #{environment_config}" )
       logger.debug( "aws_config        : #{aws_config}" )
       logger.debug( "vhost_http_config : #{vhost_http_config}" )
       logger.debug( "vhost_https_config: #{vhost_https_config}" )
+      logger.debug( "full_config       : #{full_config}" )
 
       # in first, we need the discovered services ...
       #
@@ -135,8 +138,12 @@ class CMIcinga2 < Icinga2::Client
 #        logger.debug(aws_config.class.to_s)
         aws_config = aws_config.dig('aws')
         aws_config = aws_config.gsub( '=>', ':' )
+        aws_config = self.parsedResponse( aws_config )
 
-        payload['aws'] = self.parsedResponse( aws_config )
+        aws_config.each do |k,v|
+          payload["aws_#{k}"] = v
+        end
+
       end
 
       if( team_config )

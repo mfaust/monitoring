@@ -178,7 +178,7 @@ services:
 
   grafana:
     restart: always
-    image: bodsch/docker-grafana:1707-27.4
+    image: bodsch/docker-grafana:1707-28.1
     container_name: grafana
     hostname: grafana
     extends:

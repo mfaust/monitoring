@@ -280,7 +280,7 @@ module ExternalDiscovery
         }
       }
 
-#       logger.debug( JSON.pretty_generate( d ) )
+      logger.debug( JSON.pretty_generate( d ) )
 
       result = @monitoringClient.add( ip, JSON.generate(d) )
 
