@@ -28,7 +28,23 @@ fi
 
 waitForDatabase() {
 
-  RETRY=15
+  RETRY=50
+
+  # wait for database
+  #
+  until [ ${RETRY} -le 0 ]
+  do
+    d=$(dig -t a ${MYSQL_HOST} +short | wc -w)
+
+    [ ${d} -eq 1 ] && break
+
+    echo " [i] Waiting for database host '${MYSQL_HOST}' to come up (${RETRY})"
+
+    sleep 2s
+    RETRY=$(expr ${RETRY} - 1)
+  done
+
+  RETRY=50
 
   # wait for database
   #
@@ -38,9 +54,9 @@ waitForDatabase() {
 
     [ $? -eq 0 ] && break
 
-    echo " [i] Waiting for database to come up"
+    echo " [i] Waiting for database to come up (#{RETRY})"
 
-    sleep 5s
+    sleep 2s
     RETRY=$(expr ${RETRY} - 1)
   done
 
@@ -50,7 +66,7 @@ waitForDatabase() {
     exit 1
   fi
 
-  RETRY=10
+  RETRY=50
 
   # must start initdb and do other jobs well
   #
@@ -60,8 +76,8 @@ waitForDatabase() {
 
     [ $? -eq 0 ] && break
 
-    echo " [i] wait for the database for her initdb and all other jobs"
-    sleep 5s
+    echo " [i] wait for the database for her initdb and all other jobs (#{RETRY})"
+    sleep 2s
     RETRY=$(expr ${RETRY} - 1)
   done
 

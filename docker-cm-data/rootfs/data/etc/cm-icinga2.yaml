@@ -1,4 +1,8 @@
 ---
+timeout:
+  warning: 40
+  critical: 60
+
 caefeeder:
   usePercent: false
   warning: 2500

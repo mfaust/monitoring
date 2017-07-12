@@ -45,35 +45,36 @@ module CarbonData
           service = 'CAE_PREV'
         when 'solr-master'
           service = 'SOLR_MASTER'
-    #    when 'solr-slave'
-    #      service = 'SOLR_SLAVE'
         when 'content-feeder'
           service = 'FEEDER_CONTENT'
         when 'caefeeder-live'
           service = 'FEEDER_LIVE'
         when 'caefeeder-preview'
           service = 'FEEDER_PREV'
+        when 'node-exporter'
+          service = 'NODE_EXPORTER'
+        when 'http-status'
+          service = 'HTTP_STATUS'
       end
 
       return service.tr('-', '_').upcase
 
     end
 
+    def timeParser( start_time, end_time )
 
-    def timeParser( today, finalDate )
+      seconds_diff = (start_time - end_time).to_i.abs
 
-      difference = TimeDifference.between( today, finalDate ).in_each_component
-
-      return {
-        :years   => difference[:years].round,
-        :months  => difference[:months].round,
-        :weeks   => difference[:weeks].round,
-        :days    => difference[:days].round,
-        :hours   => difference[:hours].round,
-        :minutes => difference[:minutes].round,
+      {
+        years: (seconds_diff / 31556952),
+        months: (seconds_diff / 2628288),
+        weeks: (seconds_diff / 604800),
+        days: (seconds_diff / 86400),
+        hours: (seconds_diff / 3600),
+        minutes: (seconds_diff / 60),
+        seconds: seconds_diff,
       }
     end
-
 
   end
 

@@ -159,6 +159,9 @@ module ExternalDiscovery
 
       url = sprintf( '%s/host/%s', @apiUrl, path )
 
+      max_retries   = 3
+      times_retried = 0
+
       restClient = RestClient::Resource.new(
         URI.encode( url ),
         :timeout      => 25,
@@ -181,10 +184,21 @@ module ExternalDiscovery
         logger.error( e.message )
         logger.error( e.http_code )
 
-        return {
-          :status  => e.http_code,
-          :message => e.message
-        }
+        if( times_retried < max_retries )
+
+          times_retried += 1
+          logger.warn( sprintf( 'Cannot execute request to %s, cause: %s', url, e ) )
+          logger.warn( "   retry #{times_retried}/#{max_retries}" )
+#           logger.debug( sprintf( ' -> request body: %s', request.body ) )
+
+          sleep( 4 )
+          retry
+        else
+          return {
+            :status  => 408, # 408 Request Timeout
+            :message => e.message
+          }
+        end
 
       rescue RestClient::ExceptionWithResponse => e
 
@@ -201,7 +215,6 @@ module ExternalDiscovery
 
         logger.error( e.inspect )
         logger.error( e.message )
-        logger.error( e.http_code )
 
         return {
           :status  => 500,
@@ -252,7 +265,7 @@ module ExternalDiscovery
       end
 
       finish = Time.now
-      logger.info( sprintf( 'finished in %s seconds', finish - start ) )
+      logger.info( sprintf( 'finished in %s seconds', (finish - start).round(3) ) )
 
     end
 

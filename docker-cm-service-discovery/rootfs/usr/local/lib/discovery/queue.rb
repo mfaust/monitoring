@@ -81,8 +81,37 @@ module ServiceDiscovery
 
       end
 
-      logger.debug( sprintf( '  command: %s', command ) )
-      logger.info( sprintf( '  node %s', node ) )
+      if( payload.is_a?( String ) == true && payload.to_s != '' )
+        payload  = JSON.parse( payload )
+      end
+
+      if( payload.is_a?( String ) == false )
+        dns      = payload.dig('dns')
+      end
+
+      logger.info( sprintf( '  %s node %s', command , node ) )
+
+      if !dns.nil?
+        ip    = dns.dig('ip')
+        short = dns.dig('short')
+        fqdn  = dns.dig('fqdn')
+      else
+        ip, short, fqdn = self.nsLookup( node )
+      end
+
+      if( @jobs.jobs( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } ) == true )
+
+        logger.warn( 'we are working on this job' )
+
+        return {
+          :status  => 409, # 409 Conflict
+          :message => 'we are working on this job'
+        }
+      end
+
+      @jobs.add( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
+
+      @cache.set( format( 'dns-%s', node ) , expiresIn: 320 ) { Cache::Data.new( { 'ip': ip, 'short': short, 'long': fqdn } ) }
 
       # add Node
       #
@@ -103,6 +132,8 @@ module ServiceDiscovery
 
         logger.debug( result )
 
+        @jobs.del( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
+
         return result
 
       # remove Node
@@ -119,6 +150,8 @@ module ServiceDiscovery
         if( result != nil && result.to_s != node.to_s )
 
           logger.info( 'node not in monitoring. skipping delete' )
+
+          @jobs.del( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
 
           return {
             :status  => 200,
@@ -140,6 +173,8 @@ module ServiceDiscovery
           logger.error( e )
 
         end
+
+        @jobs.del( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
 
         return {
           :status => 200
@@ -169,6 +204,8 @@ module ServiceDiscovery
 
           logger.info( 'node not in monitoring. skipping info' )
 
+          @jobs.del( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
+
           return {
             :status  => 200,
             :message => sprintf( 'node not in monitoring. skipping info ...' )
@@ -196,6 +233,8 @@ module ServiceDiscovery
 
         self.sendMessage( { :cmd => 'info', :node => node, :queue => 'mq-discover-info', :payload => result, :ttr => 1, :delay => 0 } )
 
+        @jobs.del( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
+
         return {
           :status  => 200,
           :message => 'information succesful send'
@@ -207,20 +246,20 @@ module ServiceDiscovery
 
         logger.error( sprintf( 'wrong command detected: %s', command ) )
 
-        result = {
+        @jobs.del( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
+
+        return {
           :status  => 500,
           :message => sprintf( 'wrong command detected: %s', command )
         }
 
       end
-
-      if( result.is_a?( String ) )
-
-        result = JSON.parse( result )
-      end
-
-      result[:request]    = data
-
+#
+#       if( result.is_a?( String ) )
+#         result = JSON.parse( result )
+#       end
+#
+#       result[:request]    = data
 #      logger.debug( result )
 
     end

@@ -81,8 +81,8 @@
     "list": [
       {
         "current": {
-          "value": "${VAR_PREFIX}",
-          "text": "${VAR_PREFIX}"
+          "value": "grafana",
+          "text": "grafana"
         },
         "datasource": null,
         "hide": 2,
@@ -92,11 +92,11 @@
         "name": "prefix",
         "options": [
           {
-            "value": "${VAR_PREFIX}",
-            "text": "${VAR_PREFIX}"
+            "value": "grafana",
+            "text": "grafana"
           }
         ],
-        "query": "${VAR_PREFIX}",
+        "query": "grafana",
         "refresh": 0,
         "type": "constant"
       },

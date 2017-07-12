@@ -4,13 +4,6 @@
 #
 #
 
-# require 'rest-client'
-# require 'openssl'
-#
-# require 'json'
-# require 'net/http'
-# require 'uri'
-
 require 'icinga2'
 
 require_relative 'logging'
@@ -62,8 +55,8 @@ class CMIcinga2 < Icinga2::Client
 
       super( settings )
 
-      version              = '1.6.3'
-      date                 = '2017-06-06'
+      version              = '1.6.5'
+      date                 = '2017-06-28'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - Icinga2 Client' )

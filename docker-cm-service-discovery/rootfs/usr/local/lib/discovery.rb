@@ -36,8 +36,11 @@ module ServiceDiscovery
     def initialize( settings = {} )
 
       ports = [
+        80,       # http
+        443,      # https
         3306,     # mysql
         5432,     # postrgres
+        8081,     # Apache mod_status
         9100,     # node_exporter
         28017,    # mongodb
         38099,
@@ -102,8 +105,8 @@ module ServiceDiscovery
 
       @scanPorts         = ports
 
-      version             = '1.7.1'
-      date                = '2017-06-06'
+      version             = '1.7.6'
+      date                = '2017-06-28'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - Service Discovery' )
@@ -173,6 +176,19 @@ module ServiceDiscovery
     #
     def createHostConfig( data )
 
+      if( !data.is_a?(Hash) )
+        return nil
+      end
+
+      ip    = data.dig(:ip)
+      short = data.dig(:short)
+      fqdn  = data.dig(:fqdn)
+      data  = data.dig(:data)
+
+      if( data.nil? )
+        return nil
+      end
+
       data.each do |d,v|
 
         # merge data between discovered Services and our base configuration,
@@ -180,14 +196,28 @@ module ServiceDiscovery
         #
         serviceData = @serviceConfig.dig( 'services', d )
 
-        if( serviceData != nil )
-
-  #         logger.debug( @serviceConfig['services'][d] )
+        unless( serviceData.nil? )
 
           data[d].merge!( serviceData ) { |key, port| port }
 
           port       = data.dig( d, 'port' )
           port_http  = data.dig( d, 'port_http' )
+
+          # when we provide a vhost.json
+          #
+          unless( serviceData.dig( 'vhosts' ).nil? )
+
+            http_vhosts = ServiceDiscovery::HttpVhosts.new( { host: fqdn, port: port } )
+            http_vhosts_data = http_vhosts.tick
+
+            if( http_vhosts_data.is_a?(String) )
+              http_vhosts_data = JSON.parse( http_vhosts_data )
+
+              http_vhosts_data = http_vhosts_data.dig('vhosts')
+
+              data[d]['vhosts'] = http_vhosts_data
+            end
+          end
 
           if( port != nil && port_http != nil )
             # ATTENTION
@@ -201,11 +231,15 @@ module ServiceDiscovery
 
         else
           logger.warn( sprintf( 'missing entry \'%s\' in cm-service.yaml for merge with discovery data', d ) )
+          logger.warn( sprintf( '  remove \'%s\' from data', d ) )
+
+          data.reject! { |x| x == d }
         end
       end
 
-      return data
+      logger.debug( data )
 
+      return data
     end
 
     # delete the directory with all files inside
@@ -221,12 +255,26 @@ module ServiceDiscovery
       status  = 400
       message = 'Host not in Monitoring'
 
-      result  = @database.removeDNS( { :ip => ip, :short => short, :fqdn => fqdn } )
+      # DELETE ONLY WHEN THES STATUS ARE DELETED!
+      #
+      params = params = { :ip => ip, :short => short, :fqdn => fqdn, :status => [ Storage::MySQL::DELETE ] }
+      nodes = @database.nodes( params )
 
-      if( result != nil )
+      logger.debug( nodes )
+
+      if( nodes.is_a?( Array ) && nodes.count != 0 )
+
+        result  = @database.removeDNS( { :ip => ip, :short => short, :fqdn => fqdn } )
+
+        if( result != nil )
+          status  = 200
+          message = 'Host successful removed'
+        end
+
+      else
 
         status  = 200
-        message = 'Host successful removed'
+        message = 'no deleted hosts found'
       end
 
       return {
@@ -255,18 +303,6 @@ module ServiceDiscovery
       # get a DNS record
       #
       ip, short, fqdn = self.nsLookup( host )
-
-      # add hostname to an blocking cache
-      #
-      if( @jobs.jobs( { :ip => ip, :short => short, :fqdn => fqdn } ) == true )
-
-        logger.warn( 'we are working on this job' )
-
-        return {
-          :status  => 409, # 409 Conflict
-          :message => 'we are working on this job'
-        }
-      end
 
       # if the destination host available (simple check with ping)
       #
@@ -316,10 +352,6 @@ module ServiceDiscovery
 
       # -----------------------------------------------------------------------------------
 
-      # block this job..
-      #
-      @jobs.add( { :ip => ip, :short => short, :fqdn => fqdn } )
-
       # get customized configurations of ports and services
       #
       logger.debug( 'ask for custom configurations' )
@@ -361,16 +393,13 @@ module ServiceDiscovery
 
           logger.debug( "discovered services: #{names}" )
 
-          if( names != nil )
+          unless( names.nil? )
 
             names.each do |name|
               discoveredServices.merge!( { name => { 'port' => p } } )
             end
-
           end
-
         end
-
       end
 
       # TODO
@@ -382,7 +411,7 @@ module ServiceDiscovery
 
           serviceData = @serviceConfig.dig( 'services', s )
 
-          if( serviceData != nil )
+          unless( serviceData.nil? )
 
             discoveredServices[s] ||= serviceData.filter( 'port' )
           end
@@ -393,7 +422,7 @@ module ServiceDiscovery
 
       # merge discovered services with cm-services.yaml
       #
-      discoveredServices = self.createHostConfig( discoveredServices )
+      discoveredServices = self.createHostConfig( { :ip => ip, :short => short, :fqdn => fqdn, :data => discoveredServices } )
 
       result    = @database.createDiscovery( { :ip => ip, :short => short, :fqdn => fqdn, :data => discoveredServices } )
 
@@ -401,9 +430,7 @@ module ServiceDiscovery
       result    = @database.setStatus( { :ip => ip, :short => short, :fqdn => fqdn, :status => Storage::MySQL::ONLINE } )
 
       finish = Time.now
-      logger.info( sprintf( 'finished in %s seconds', finish - start ) )
-
-      @jobs.del( { :ip => ip, :short => short, :fqdn => fqdn } )
+      logger.info( sprintf( 'finished in %s seconds', (finish - start).round(2) ) )
 
       return {
         :status   => 200,

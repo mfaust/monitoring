@@ -22,7 +22,7 @@ module ExternalDiscovery
       logger.info( '' )
 
       begin
-        @awsClient = Aws::Ec2::Client.new( { :aws => { :region => 'us-east-1' } } )
+        @awsClient = Aws::Ec2::Client.new( { :aws => { :region => @region } } )
         @awsData   = Hash.new()
 
         # run internal scheduler to remove old data
@@ -64,7 +64,7 @@ module ExternalDiscovery
       end
 
       finish = Time.now
-      logger.info( sprintf( 'finished in %s seconds', finish - start ) )
+      logger.info( sprintf( 'finished in %s seconds', (finish - start).round(3) ) )
 
     end
 

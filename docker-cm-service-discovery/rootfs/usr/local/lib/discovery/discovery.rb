@@ -7,21 +7,27 @@ module ServiceDiscovery
     #
     def discoverApplication( params = {} )
 
-      host = params.dig( :fqdn )
-      port = params.dig( :port )
+      host = params.dig(:fqdn)
+      port = params.dig(:port)
 
-      fixedPorts = [3306,5432,9100,28017,55555]
+      fixedPorts = [80,443,8081,3306,5432,9100,28017,55555]
       services   = Array.new
 
       if( fixedPorts.include?( port ) )
 
         case port
+        when 80
+          services.push('http-proxy')
+        when 443
+          services.push('https-proxy')
+        when 8081
+          services.push('http-status')
         when 3306
           services.push('mysql')
         when 5432
           services.push('postgres')
         when 9100
-          services.push('node_exporter')
+          services.push('node-exporter')
         when 28017
           services.push('mongodb')
         when 55555
@@ -235,9 +241,15 @@ module ServiceDiscovery
                       logger.warn( services )
                     end
 
-                  # Solr 6 Support
+                  # Solr - Standalone Support
                   #
-                  elsif( classPath.include?( 'solr-6' ) )
+                  elsif( classPath.include?( 'solr-6' ) || classPath.include?('solr/server') )
+
+                    services.push( 'solr' )
+
+                  # Solr - Standalone Support
+                  #
+                  elsif( classPath.include?('solr/server') )
 
                     services.push( 'solr' )
 
@@ -326,6 +338,52 @@ module ServiceDiscovery
       return services
     end
 
+  end
+
+
+  class HttpVhosts
+
+    include Logging
+
+    def initialize( params = {} )
+
+      @host  = params.dig(:host)
+      @port  = params.dig(:port) || 8081
+    end
+
+
+    def fetch( uri_str, limit = 10 )
+
+      # You should choose better exception.
+      raise ArgumentError, 'HTTP redirect too deep' if limit == 0
+
+      url = URI.parse(uri_str)
+      req = Net::HTTP::Get.new( url.path, { 'User-Agent' => 'CoreMedia Monitoring/1.0' } )
+      response = Net::HTTP.start( url.host, url.port, { read_timeout: 5, open_timeout: 5 } ) { |http| http.request(req) }
+
+      case response
+        when Net::HTTPSuccess         then response
+        when Net::OpenTimeout         then response
+        when Net::HTTPRedirection     then fetch(response['location'], limit - 1)
+        when Net::HTTPNotFound        then response
+      else
+        response.error!
+      end
+
+    end
+
+
+    def tick
+
+      response = fetch( format('http://%s:%d/vhosts.json', @host, @port) )
+
+      if( response.code.to_i == 200 )
+        return response.body
+      else
+        return {}
+      end
+
+    end
   end
 
 end

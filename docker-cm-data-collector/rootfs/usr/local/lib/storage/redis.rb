@@ -104,7 +104,12 @@ module Storage
     end
 
 
-    def set( key, value )
+    def set( key, value, expire = nil )
+
+      if(!expire.nil?)
+
+        return @redis.setex( key, expire, value )
+      end
 
       return @redis.set( key, value )
     end
@@ -480,16 +485,16 @@ module Storage
         return false
       end
 
+      dnsIp        = params.dig(:ip)
       dnsShortname = params.dig(:short)
-      fqdn         = params.dig(:fqdn)
       data         = params.dig(:data)
 
       cachekey = sprintf(
         '%s-measurements',
-        Storage::RedisClient.cacheKey( { :short => dnsShortname, :fqdn => fqdn } )
+        Storage::RedisClient.cacheKey( { :short => dnsShortname } )
       )
 
-      toStore = { fqdn: fqdn, short: dnsShortname, data: data, created: DateTime.now() }.to_json
+      toStore = { short: dnsShortname, data: data, created: DateTime.now() }.to_json
 
       @redis.set( cachekey, toStore )
 
@@ -502,13 +507,13 @@ module Storage
         return false
       end
 
+      dnsIp        = params.dig(:ip)
       dnsShortname = params.dig(:short)
-      fqdn         = params.dig(:fqdn)
       application  = params.dig(:application)
 
       cachekey = sprintf(
         '%s-measurements',
-        Storage::RedisClient.cacheKey( { :short => dnsShortname, :fqdn => fqdn } )
+        Storage::RedisClient.cacheKey( { :short => dnsShortname } )
       )
 
       result = @redis.get( cachekey )

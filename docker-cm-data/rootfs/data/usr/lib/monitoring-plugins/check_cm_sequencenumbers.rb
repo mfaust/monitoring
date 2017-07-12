@@ -10,11 +10,16 @@ class Icinga2Check_CM_SequenceNumbers < Icinga2Check
 
     super
 
-    mls         = settings.dig(:mls)
-    rls         = settings.dig(:rls)
+    rls       = settings.dig(:rls)
+    hostRls   = self.hostname( rls )
 
-    hostMls     = self.hostname( mls )
-    hostRls     = self.hostname( rls )
+    mls       = auto_detect_mls(rls)
+
+    unless( mls.nil? )
+      hostMls = self.hostname( mls )
+    else
+      hostMls = nil
+    end
 
     self.check( hostMls, hostRls )
 
@@ -29,17 +34,37 @@ class Icinga2Check_CM_SequenceNumbers < Icinga2Check
     warning  = config.dig(:warning)  || 300
     critical = config.dig(:critical) || 500
 
+    if( mls.nil? )
+
+      puts sprintf( 'please, give me an Master Live Server!' )
+      exit exitCode
+    end
+
     # get our bean
+    rlsData      = @mbean.bean( rls, 'replication-live-server', 'Replicator' )
     mlsData      = @mbean.bean( mls, 'master-live-server', 'Server' )
-    mlsDataValue = self.runningOrOutdated( mlsData )
+
+    logger.debug( "rls data: #{rlsData.class.to_s}" )
+    logger.debug( "mls data: #{mlsData.class.to_s}" )
+
+    if ( rlsData == nil || rlsData == false ) && ( mlsData == nil || mlsData == false )
+
+      puts sprintf( 'RLS or MLS has no data' )
+      exit STATE_WARNING
+    end
+
+    mlsDataValue = self.runningOrOutdated( { host: mls, data: mlsData } )
+
+#    mlsDataValue = self.runningOrOutdated( mlsData )
 
     mlsDataValue      = mlsDataValue.values.first
     mlsSequenceNumber = mlsDataValue.dig('RepositorySequenceNumber' )
     mlsRunLevel       = mlsDataValue.dig('RunLevel').downcase
 
     # get our bean
-    rlsData      = @mbean.bean( rls, 'replication-live-server', 'Replicator' )
-    rlsDataValue = self.runningOrOutdated( rlsData )
+
+    rlsDataValue = self.runningOrOutdated( { host: rls, data: rlsData } )
+#    rlsDataValue = self.runningOrOutdated( rlsData )
 
     rlsDataValue        = rlsDataValue.values.first
     rlsSequenceNumber   = rlsDataValue.dig('LatestCompletedSequenceNumber' )
@@ -59,7 +84,11 @@ class Icinga2Check_CM_SequenceNumbers < Icinga2Check
       status   = 'OK'
       exitCode = STATE_OK
 
-      puts sprintf( 'RLS and MLS in sync<br>MLS Sequence Number: %s<br>RLS Sequence Number: %s', mlsSequenceNumber.to_i, rlsSequenceNumber.to_i )
+      puts format(
+        'RLS and MLS in sync<br>MLS Sequence Number: %s<br>RLS Sequence Number: %s | diff=%d mls_seq_nr=%d rls_seq_nr=%d',
+        mlsSequenceNumber.to_i, rlsSequenceNumber.to_i,
+        diff, mlsSequenceNumber.to_i, rlsSequenceNumber.to_i
+      )
 
       exit exitCode
 
@@ -71,10 +100,49 @@ class Icinga2Check_CM_SequenceNumbers < Icinga2Check
       exitCode = STATE_CRITICAL
     end
 
-    puts sprintf( 'RLS are %s Events <b>behind</b> the MLS<br>MLS Sequence Number: %s<br>RLS Sequence Number: %s', diff, mlsSequenceNumber.to_i, rlsSequenceNumber.to_i )
+    puts format(
+      'RLS are %s Events <b>behind</b> the MLS<br>MLS Sequence Number: %s<br>RLS Sequence Number: %s | diff=%d mls_seq_nr=%d rls_seq_nr=%d',
+      diff, mlsSequenceNumber.to_i, rlsSequenceNumber.to_i,
+      diff, mlsSequenceNumber.to_i, rlsSequenceNumber.to_i
+    )
 
     exit exitCode
 
+  end
+
+
+
+  # TODO
+  # move this ASAP to icinga-client!
+  #
+  def auto_detect_mls( rls )
+
+    cache_key = format('sequence-mls-%s',rls)
+    mls       = @redis.get(cache_key)
+
+    if(mls.nil?)
+
+      bean = @mbean.bean( rls, 'replication-live-server', 'Replicator' )
+
+      if(bean.is_a?(Hash))
+
+        value = bean.dig( 'value' )
+        unless( value.nil? )
+
+          value = value.values.first
+          mls   = value.dig( 'MasterLiveServer', 'host' )
+
+          if( mls.nil? )
+            logger.error( 'no MasterLiveServer Data found' )
+            return nil
+          else
+            @redis.set(cache_key,mls,320)
+          end
+        end
+      end
+    end
+
+    mls
   end
 
 end
@@ -87,7 +155,6 @@ OptionParser.new do |opts|
 
   opts.banner = "Usage: check_cm_sequencenumbers.rb [options]"
 
-  opts.on( '-m', '--mls NAME'       , 'Host with running Master-Live-Server')                   { |v| options[:mls]  = v }
   opts.on( '-r', '--rls NAME'       , 'Host with running Replication-Live-Server')              { |v| options[:rls]  = v }
 
 end.parse!

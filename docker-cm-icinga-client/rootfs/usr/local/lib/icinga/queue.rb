@@ -55,6 +55,8 @@ class CMIcinga2 < Icinga2::Client
       node        = data.dig( :body, 'node' )
       payload     = data.dig( :body, 'payload' )
       @identifier = nil
+      dns         = nil
+      tags        = nil
 
       if( command == nil || node == nil || payload == nil )
 
@@ -83,44 +85,40 @@ class CMIcinga2 < Icinga2::Client
 
       end
 
-      logger.debug( sprintf( '  command: %s', command ) )
-      logger.info( sprintf( '  node %s', node ) )
+      if( payload.is_a?( String ) == true && payload.to_s != '' )
+        payload  = JSON.parse( payload )
+      end
 
-      ip, short, fqdn = self.nsLookup( node )
+      logger.debug( 'payload:' )
+      logger.debug( JSON.pretty_generate( payload ) )
+      logger.debug( '----------------------------------' )
+
+      if( payload.is_a?( String ) == false )
+        dns      = payload.dig('dns')
+        tags     = payload.dig('tags')
+      end
+
+      logger.info( sprintf( '  %s node %s', command , node ) )
+
+      if !dns.nil?
+        ip    = dns.dig('ip')
+        short = dns.dig('short')
+        fqdn  = dns.dig('fqdn')
+      else
+        ip, short, fqdn = self.nsLookup( node )
+      end
 
       if( @jobs.jobs( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } ) == true )
-
         logger.warn( 'we are working on this job' )
-
         return {
           :status  => 409, # 409 Conflict
           :message => 'we are working on this job'
         }
       end
 
-#       logger.debug( payload )
-#       logger.debug( payload.class.to_s )
-#
-#       if( payload.is_a?( String ) == true && payload.to_s != '' )
-#         payload  = JSON.parse( payload )
-#       end
-#
-#       logger.debug( payload )
-#       logger.debug( payload.class.to_s )
-#
-#       config     = payload.dig('config')
-#
-#       if( config != nil )
-#
-#         if( config.is_a?( String ) == true && config.to_s != '' )
-#           config  = JSON.parse( config )
-#         end
-#
-#         @identifier = config.dig('graphite-identifier')
-#       end
-
       @jobs.add( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
 
+      @cache.set( format( 'dns-%s', node ) , expiresIn: 320 ) { Cache::Data.new( { 'ip': ip, 'short': short, 'long': fqdn } ) }
 
       # add Node
       #
@@ -130,7 +128,17 @@ class CMIcinga2 < Icinga2::Client
 #        logger.debug( payload )
 #        payload = JSON.parse( payload )
 
-        services   = self.nodeInformation( { :ip => ip, :host => short, :fqdn => fqdn } )
+        services     = self.nodeInformation( { :ip => ip, :host => short, :fqdn => fqdn } )
+        display_name = @database.config( { :ip => ip, :short => short, :fqdn => fqdn, :key => 'display_name' } )
+
+#         logger.debug( display_name )
+#         logger.debug( display_name.class.to_s )
+
+        if( display_name.nil? )
+          display_name = fqdn
+        else
+          display_name = display_name.dig('display_name') || fqdn
+        end
 
         # TODO: add groups
         #
@@ -140,22 +148,39 @@ class CMIcinga2 < Icinga2::Client
           payload = {}
         end
 
-        logger.debug( payload )
+        unless( tags.nil? )
+          tags.each do |t,v|
+            payload[t] = v
+          end
+        end
 
-#         if( @icingaCluster == true && @icingaSatellite != nil )
-#           payload['attrs']['zone'] = @icingaSatellite
-#         end
 
         # TODO
         # full API support
-        result = self.addHost( { :name => node, :fqdn => fqdn, :enable_notifications => @icingaNotifications, :vars => payload } )
+        params = {
+          :host => fqdn,
+          :fqdn => fqdn,
+          :display_name => display_name,
+          :enable_notifications => @icingaNotifications,
+          :vars => payload
+        }
+
+        logger.debug(params)
+
+        result = self.add_host(params)
+
+        status = result.dig(:status)
+
+        if( status != 200 )
+          logger.error( result )
+        end
 
         logger.info( result )
 
         @jobs.del( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
 
         return {
-          :status => 200
+          :status => status
         }
 
       # remove Node
@@ -164,7 +189,7 @@ class CMIcinga2 < Icinga2::Client
 
         logger.info( sprintf( 'remove checks for node %s', node ) )
 
-        result = self.deleteHost( { :name => node } )
+        result = self.delete_host( { :host => fqdn, :fqdn => fqdn } )
 
         logger.info( result )
 
@@ -180,7 +205,7 @@ class CMIcinga2 < Icinga2::Client
 
         logger.info( sprintf( 'give information for node %s', node ) )
 
-        result = self.listHost( { :name => node } )
+        result = self.hosts( { :host => fqdn } )
 
         logger.info( result )
 
@@ -211,11 +236,6 @@ class CMIcinga2 < Icinga2::Client
       end
 
       result[:request]    = data
-
-#       logger.debug( result )
-
-#         self.sendMessage( result )
-
     end
 
 

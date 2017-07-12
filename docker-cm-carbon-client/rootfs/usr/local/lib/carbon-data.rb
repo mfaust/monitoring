@@ -9,7 +9,6 @@
 
 require 'time'
 require 'date'
-require 'time_difference'
 require 'json'
 require 'filesize'
 require 'fileutils'
@@ -27,6 +26,7 @@ require_relative 'carbon-data/content-server'
 require_relative 'carbon-data/clients'
 require_relative 'carbon-data/feeder'
 require_relative 'carbon-data/solr'
+require_relative 'carbon-data/http'
 require_relative 'carbon-data/database/mongodb'
 require_relative 'carbon-data/database/mysql'
 require_relative 'carbon-data/database/postgres'
@@ -47,6 +47,7 @@ module CarbonData
     include CarbonData::Clients
     include CarbonData::Feeder
     include CarbonData::Solr
+    include CarbonData::Http::Apache
     include CarbonData::Database::MongoDB
     include CarbonData::Database::MySQL
     include CarbonData::Database::Postgres
@@ -185,7 +186,11 @@ module CarbonData
 
     def nodes()
 
-      return self.monitoredServer()
+      r = self.monitoredServer()
+
+      logger.debug("#{r}")
+
+      return r
     end
 
 
@@ -198,11 +203,11 @@ module CarbonData
 
       if( data == nil )
 
-        identifier  = @database.config( { :short => host, :fqdn => host, :key => 'graphite-identifier' } )
+        identifier  = @database.config( { :short => host, :fqdn => host, :key => 'graphite_identifier' } )
 
         if( identifier != false && identifier != nil )
 
-          identifier = identifier.dig( 'graphite-identifier' )
+          identifier = identifier.dig( 'graphite_identifier' )
 
           if( identifier != nil )
             result     = identifier
@@ -223,7 +228,7 @@ module CarbonData
 
     def run( fqdn = nil )
 
-#       logger.debug( "run( #{fqdn} )" )
+      logger.debug( "run( #{fqdn} )" )
 
       if( fqdn == nil )
         logger.error( 'no node given' )
@@ -234,9 +239,8 @@ module CarbonData
       data    = nil
 
       @identifier    = self.storagePath( fqdn )
+      @Server        = fqdn
       graphiteOutput = Array.new()
-
-      logger.info( sprintf( 'Host: %s', fqdn ) )
 
       data    = @database.discoveryData( { :short => fqdn, :fqdn => fqdn } )
 
@@ -249,6 +253,8 @@ module CarbonData
 
       data.each do |service, d|
 
+        logger.info( sprintf( 'Host: %s - \'%s\'', fqdn, @identifier ) )
+
         @serviceName = service
         @Service     = self.normalizeService( service )
 
@@ -256,7 +262,7 @@ module CarbonData
           next
         end
 
-        logger.info( sprintf( '  - %s (%s)', service, @Service ) )
+        logger.info( sprintf( '  - \'%s\' (%s)', service, @Service ) )
 
         cacheKey     = Storage::RedisClient.cacheKey( { :host => fqdn, :pre => 'result', :service => service } )
 
@@ -287,10 +293,18 @@ module CarbonData
             logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
           end
 
-        when 'node_exporter'
+        when 'node-exporter'
 
           if( result.is_a?( Hash ) )
             graphiteOutput.push( self.operatingSystemNodeExporter( result ) )
+          else
+            logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
+          end
+
+        when 'http-status'
+
+          if( result.is_a?( Hash ) )
+            graphiteOutput.push( self.http_server_status( result ) )
           else
             logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
           end
@@ -311,7 +325,7 @@ module CarbonData
 
       end
 
-      return graphiteOutput
+      graphiteOutput
     end
 
   end

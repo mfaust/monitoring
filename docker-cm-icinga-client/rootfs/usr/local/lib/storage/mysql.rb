@@ -19,48 +19,58 @@ module Storage
 
     def initialize( params = {} )
 
-      host            = params.dig(:mysql, :host)
-      user            = params.dig(:mysql, :user)
-      pass            = params.dig(:mysql, :password)
-      @schema         = params.dig(:mysql, :schema)
-      read_timeout    = params.dig(:mysql, :timeout, :read)    || 15
-      write_timeout   = params.dig(:mysql, :timeout, :write)   || 15
-      connect_timeout = params.dig(:mysql, :timeout, :connect) || 15
+      @host            = params.dig(:mysql, :host)
+      @user            = params.dig(:mysql, :user)
+      @pass            = params.dig(:mysql, :password)
+      @schema          = params.dig(:mysql, :schema)
+      @read_timeout    = params.dig(:mysql, :timeout, :read)    || 15
+      @write_timeout   = params.dig(:mysql, :timeout, :write)   || 15
+      @connect_timeout = params.dig(:mysql, :timeout, :connect) || 25
 
-      @client     = nil
+      logger.level = Logger::INFO
 
-      begin
-
-        retries ||= 0
-
-        @client = Mysql2::Client.new(
-          :host            => host,
-          :username        => user,
-          :password        => pass,
-          :database        => @schema,
-          :read_timeout    => read_timeout,
-          :write_timeout   => write_timeout,
-          :connect_timeout => connect_timeout,
-          :encoding        => 'utf8',
-          :reconnect       => true
-        )
-
-        logger.info( sprintf( 'try to create the database connection (%d)', retries ) )
-      rescue
-        if( retries < 10 )
-
-          sleep( 3 )
-          retries += 1
-          retry
-        end
-      end
+      @client          = connect
 
       # SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = 'DBName'
       @client.query('SET storage_engine=InnoDB')
       @client.query("CREATE DATABASE if not exists #{@schema}")
 
       self.prepare()
+    end
 
+
+    def connect()
+
+      begin
+
+        retries ||= 0
+
+        client = Mysql2::Client.new(
+          :host            => @host,
+          :username        => @user,
+          :password        => @pass,
+          :database        => @schema,
+          :read_timeout    => @read_timeout,
+          :write_timeout   => @write_timeout,
+          :connect_timeout => @connect_timeout,
+          :encoding        => 'utf8',
+          :reconnect       => true
+        )
+
+      rescue => e
+
+        logger.debug(format('try to create the database connection (%d)', retries))
+        logger.error(e)
+
+        if( retries < 20 )
+          retries += 1
+          sleep( 5 )
+          retry
+        end
+      end
+
+      logger.info( 'database connection established' )
+      client
     end
 
 
@@ -745,6 +755,7 @@ module Storage
             )',
           service, ip, name, fqdn
         )
+
       elsif( service == nil )
 
         statement = sprintf(

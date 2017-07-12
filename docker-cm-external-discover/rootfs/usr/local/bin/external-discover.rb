@@ -18,8 +18,12 @@ apiHost          = ENV.fetch('MONITORING_HOST', nil)
 apiPort          = ENV.fetch('MONITORING_PORT', 80)
 apiVersion       = ENV.fetch('MONITORING_API_VERSION', 2)
 awsRegion        = ENV.fetch('AWS_REGION', 'us-east-1')
+awsEnvironment   = ENV.fetch('AWS_ENVIRONMENT', 'development')
+serviceEnabled   = ENV.fetch('SERVICE_ENABLED', true)
 interval         = ENV.fetch('INTERVAL'         , 40 )
 delay            = ENV.fetch('RUN_DELAY'        , 10 )
+
+serviceEnabled   = serviceEnabled.to_s.eql?('true') ? true : false
 
 if( apiHost == nil || apiPort == nil || awsRegion == nil )
   puts '=> missing configuration!'
@@ -36,6 +40,7 @@ config = {
   },
   :aws        => {
     :region  => awsRegion,
+    :environment => awsEnvironment,
     :filter  => []
   }
 }
@@ -58,7 +63,9 @@ scheduler = Rufus::Scheduler.new
 
 scheduler.every( interval.to_i, :first_in => delay.to_i ) do
 
-  e.run()
+  if( serviceEnabled == true )
+    e.run()
+  end
 
 end
 

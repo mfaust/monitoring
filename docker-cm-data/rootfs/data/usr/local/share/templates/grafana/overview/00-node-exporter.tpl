@@ -4,7 +4,7 @@
         "height": "100px",
         "panels": [
           {
-            "content": "<h3>Operating System</h3>",
+            "content": "<h3><center><bold><a href=\"/grafana/dashboard/db/%SHORTHOST%-operating-system\">Operating System</a></bold></center></h3>",
             "id": 100,
             "links": [],
             "mode": "html",

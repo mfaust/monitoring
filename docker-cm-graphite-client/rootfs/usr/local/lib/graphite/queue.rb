@@ -34,7 +34,7 @@ module Graphite
 
         status = result.dig(:status).to_i
 
-        if( status == 200 || status == 500 )
+        if( status == 200 || status == 409 || status == 500 || status == 503 )
 
           @mqConsumer.deleteJob( @mqQueue, jobId )
         else
@@ -48,8 +48,9 @@ module Graphite
 
     def processQueue( data = {} )
 
-
       logger.info( sprintf( 'process Message ID %d from Queue \'%s\'', data.dig(:id), data.dig(:tube) ) )
+
+      logger.debug( data )
 
       command    = data.dig(:body, 'cmd')
       node       = data.dig(:body, 'node')
@@ -85,6 +86,7 @@ module Graphite
 
       end
 
+
       if( payload.is_a?( String ) == true && payload.to_s != '' )
         payload  = JSON.parse( payload )
       end
@@ -93,12 +95,20 @@ module Graphite
 
       timestamp  = payload.dig('timestamp')
       config     = payload.dig('config')
-      fqdn       = payload.dig('fqdn') || node
+#      fqdn       = payload.dig('fqdn') || node
+      dns        = payload.dig('dns')
+
+      if !dns.nil?
+        ip    = dns.dig('ip')
+        short = dns.dig('short')
+        fqdn  = dns.dig('fqdn')
+      else
+        ip, short, fqdn = self.nsLookup( node )
+      end
 
       @identifier = fqdn
 
-
-      if( timestamp != nil )
+      if !timestamp.nil?
 
         if( timestamp.is_a?( Time ) )
 
@@ -110,17 +120,14 @@ module Graphite
         @timestamp = timestamp.to_i
       end
 
-      if( config != nil )
+      if !config.nil?
 
-        if( config.is_a?( String ) == true && config.to_s != '' )
-
+        if( config.is_a?(String) && config.to_s != '' )
           config  = JSON.parse( config )
         end
 
-        @identifier = config.dig('graphite-identifier')
+        @identifier = config.dig('graphite_identifier')
       end
-
-      logger.debug( JSON.pretty_generate( payload ) )
 
 
       logger.info( sprintf( 'add annotation \'%s\' for node \'%s\'', command, fqdn ) )

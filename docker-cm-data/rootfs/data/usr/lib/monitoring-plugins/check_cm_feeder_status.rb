@@ -57,8 +57,10 @@ class Icinga2Check_CM_Feeder < Icinga2Check
 
     # get our bean
     health      = @mbean.bean( host, feederServer, 'Health' )
+    engine      = @mbean.bean( host, feederServer, 'ProactiveEngine' )
 
-    healthValue = self.runningOrOutdated( health )
+    healthValue = self.runningOrOutdated( { host: host, data: health } )
+#     healthValue = self.runningOrOutdated( health )
     healthValue = healthValue.values.first
 
     healthy     = ( healthValue != nil &&  healthValue['Healthy'] ) ? healthValue['Healthy'] : false
@@ -67,19 +69,18 @@ class Icinga2Check_CM_Feeder < Icinga2Check
 
       healthMessage  = 'HEALTHY'
 
-      engine      = @mbean.bean( host, feederServer, 'ProactiveEngine' )
-
-      engineValue = self.runningOrOutdated( engine )
+      engineValue = self.runningOrOutdated( { host: host, data: engine } )
+#       engineValue = self.runningOrOutdated( engine )
       engineValue = engineValue.values.first
 
-      logger.debug( JSON.pretty_generate( engineValue ) )
+#       logger.debug( JSON.pretty_generate( engineValue ) )
 
       maxEntries            = engineValue.dig('KeysCount')   || 0  # Number of (active) keys
       currentEntries        = engineValue.dig('ValuesCount') || 0  # Number of (valid) values. It is less or equal to 'keysCount'
       heartbeat             = engineValue.dig('HeartBeat')         # 1 minute == 60000 ms
 
-      sendSuccessTimeLatest = engineValue.dig('SendSuccessTimeLatest')  #  null | 2017-03-31T07:35:54Z
-      purgeTimeLatest       = engineValue.dig('PurgeTimeLatest')        # 2017-03-31T07:12:25Z | ERROR: RuntimeException thrown in RequiredModelMBean while trying to invoke operation getPurgeTimeLatest (class javax.management.MBeanException)
+#       sendSuccessTimeLatest = engineValue.dig('SendSuccessTimeLatest')  #  null | 2017-03-31T07:35:54Z
+#       purgeTimeLatest       = engineValue.dig('PurgeTimeLatest')        # 2017-03-31T07:12:25Z | ERROR: RuntimeException thrown in RequiredModelMBean while trying to invoke operation getPurgeTimeLatest (class javax.management.MBeanException)
 
       if( maxEntries == 0 && currentEntries == 0 )
 
@@ -110,11 +111,19 @@ class Icinga2Check_CM_Feeder < Icinga2Check
 
         if( maxEntries == currentEntries )
 
-          puts sprintf( 'all %d Elements feeded<br>Heartbeat %d ms', maxEntries, heartbeat )
+          puts format(
+            'all %d Elements feeded<br>Heartbeat %d ms | max=%s current=%d diff=%d heartbeat=%d',
+            maxEntries, heartbeat,
+            maxEntries, currentEntries, diffEntries, heartbeat
+          )
           exit exitCode
         else
 
-          puts sprintf( '%d Elements of %d feeded.<br>%d elements left<br>Heartbeat %d ms', currentEntries, maxEntries, diffEntries, heartbeat )
+          puts format(
+            '%d Elements of %d feeded.<br>%d elements left<br>Heartbeat %d ms | max=%s current=%d diff=%d heartbeat=%d',
+            currentEntries, maxEntries, diffEntries, heartbeat,
+            maxEntries, currentEntries, diffEntries, heartbeat
+          )
           exit exitCode
         end
 
@@ -135,7 +144,7 @@ class Icinga2Check_CM_Feeder < Icinga2Check
     critical = config.dig(:critical) || 10000
 
     data      = @mbean.bean( host, feederServer, 'Feeder' )
-    dataValue = self.runningOrOutdated( data )
+    dataValue = self.runningOrOutdated( { host: host, data: data } )
     dataValue = dataValue.values.first
     state     = dataValue.dig('State')
 
@@ -158,7 +167,11 @@ class Icinga2Check_CM_Feeder < Icinga2Check
         exitCode = STATE_CRITICAL
       end
 
-      puts sprintf( 'Pending Documents: %d<br>Pending Events: %d', pendingDocuments, pendingEvents )
+      puts format(
+        'Pending Documents: %d<br>Pending Events: %d | pending_documents=%d pending_events=%d',
+        pendingDocuments, pendingEvents,
+        pendingDocuments, pendingEvents
+      )
 
     elsif( state == 'initializing' )
 

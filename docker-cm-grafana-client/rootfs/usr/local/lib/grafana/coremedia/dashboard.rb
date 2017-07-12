@@ -64,24 +64,27 @@ module Grafana
 
         # read the configuration for an customized display name
         #
-        display     = @database.config( { :ip => ip, :short => short, :fqdn => fqdn, :key => 'display-name' } )
-        identifier  = @database.config( { :ip => ip, :short => short, :fqdn => fqdn, :key => 'graphite-identifier' } )
+        display     = @database.config( { :ip => ip, :short => short, :fqdn => fqdn, :key => 'display_name' } )
+        identifier  = @database.config( { :ip => ip, :short => short, :fqdn => fqdn, :key => 'graphite_identifier' } )
 
-        if( display != nil && display.dig( 'display-name' ) != nil )
+        if( display != nil && display.dig( 'display_name' ) != nil )
 
-          @grafanaHostname = display.dig( 'display-name' ).to_s
-          logger.info( "use custom display-name from config: '#{@grafanaHostname}'" )
+          @grafanaHostname = display.dig( 'display_name' ).to_s
+          logger.info( "use custom display_name from config: '#{@grafanaHostname}'" )
         end
 
 
-        if( identifier != nil && identifier.dig( 'graphite-identifier' ) != nil )
+        if( identifier != nil && identifier.dig( 'graphite_identifier' ) != nil )
 
-          @storageIdentifier = identifier.dig( 'graphite-identifier' ).to_s
+          @storageIdentifier = identifier.dig( 'graphite_identifier' ).to_s
           logger.info( "use custom storage identifier from config: '#{@storageIdentifier}'" )
         end
 
         @grafanaHostname  = self.createSlug( @grafanaHostname ).gsub( '.', '-' )
 
+        logger.debug( format('ip   : %s', ip))
+        logger.debug( format('short: %s', short))
+        logger.debug( format('fqdn : %s', fqdn))
         logger.debug( "short hostname    : #{@shortHostname}" )
         logger.debug( "grafana hostname  : #{@grafanaHostname}" )
         logger.debug( "storage Identifier: #{@storageIdentifier}" )
@@ -122,7 +125,6 @@ module Grafana
 
         ip, short, fqdn = self.prepare( host )
 
-
         begin
 
           for y in 1..15
@@ -157,8 +159,11 @@ module Grafana
         servicesTmp.delete( 'mysql' )
         servicesTmp.delete( 'postgres' )
         servicesTmp.delete( 'mongodb' )
-        servicesTmp.delete( 'node_exporter' )
+#        servicesTmp.delete( 'node-exporter' )
         servicesTmp.delete( 'demodata-generator' )
+        servicesTmp.delete( 'http-proxy' )
+        servicesTmp.delete( 'https-proxy' )
+        servicesTmp.delete( 'http-status' )
 
         serviceHash = Hash.new()
 
@@ -188,7 +193,7 @@ module Grafana
 #           logger.debug( sprintf( '  templateName %s', templateName ) )
 #           logger.debug( sprintf( '  cacheKey     %s', cacheKey ) )
 
-          if( ! ['mongodb', 'mysql', 'postgres', 'node_exporter'].include?( serviceName ) )
+          if( ! ['mongodb', 'mysql', 'postgres', 'node-exporter', 'http-status'].include?( serviceName ) )
             additionalTemplatePaths << self.templateForService( 'tomcat' )
           end
 
@@ -203,9 +208,7 @@ module Grafana
             }
 
             self.createServiceTemplate( options )
-
           end
-
         end
 
         # we want an Services Overview for this Host
@@ -230,13 +233,17 @@ module Grafana
           namedTemplate.push( 'cm-cae-cache-classes.json' )
 
           if( @mbean.beanAvailable?( host, 'cae-preview', 'CacheClassesECommerceAvailability' ) == true )
-            namedTemplate.push( 'cm-cae-cache-classes-ibm.json' )
+            namedTemplate.push( 'cm-cae-cache-classes-ecommerce.json' )
           end
         end
 
         # add Operation Datas for NodeExporter
-        if( services.include?('node_exporter' ) )
-          namedTemplate.push( 'cm-node_exporter.json' )
+        if( services.include?('node-exporter' ) )
+          namedTemplate.push( 'cm-node-exporter.json' )
+        end
+
+        if( services.include?('http-status' ) )
+          namedTemplate.push( 'cm-http-status.json' )
         end
 
         self.createNamedTemplate( namedTemplate )
@@ -592,7 +599,7 @@ module Grafana
         #   {"id"=>40, "title"=>"blueprint-box - Cache Classes (Livecontext)", "uri"=>"db/blueprint-box-cache-classes-livecontext", "type"=>"dash-db", "tags"=>["blueprint-box"], "isStarred"=>false},
         # ...
         # ]
-        logger.debug( data )
+#         logger.debug( data )
 
         if( data.count == 0 )
 
@@ -635,7 +642,7 @@ module Grafana
           }
         end
 
-        self.prepare( host )
+        ip, short, fqdn = self.prepare( host )
 
         logger.info( sprintf( 'remove dashboards for host %s (%s)', host, @grafanaHostname ) )
 
@@ -653,11 +660,9 @@ module Grafana
 
         elsif( status.to_i == 200 )
 
-          logger.debug( dashboards )
-
+#           logger.debug( dashboards )
           dashboards = dashboards.dig(:dashboards)
-
-          logger.debug( dashboards )
+#           logger.debug( dashboards )
 
           if( dashboards == nil )
 
@@ -791,11 +796,11 @@ module Grafana
 
                 if( @shortHostname != realShort )
 
-                  identifier  = @database.config( { :ip => realIP, :short => realShort, :fqdn => realFqdn, :key => 'graphite-identifier' } )
+                  identifier  = @database.config( { :ip => realIP, :short => realShort, :fqdn => realFqdn, :key => 'graphite_identifier' } )
 
-                  if( identifier.dig( 'graphite-identifier' ) != nil )
+                  if( identifier.dig( 'graphite_identifier' ) != nil )
 
-                    mlsIdentifier = identifier.dig( 'graphite-identifier' ).to_s
+                    mlsIdentifier = identifier.dig( 'graphite_identifier' ).to_s
 
                     logger.info( "  use custom storage identifier from config: '#{mlsIdentifier}'" )
                   end

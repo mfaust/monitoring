@@ -13,7 +13,6 @@ require 'timeout'
 require 'fileutils'
 require 'time'
 require 'date'
-require 'time_difference'
 require 'rufus-scheduler'
 
 require_relative 'logging'
@@ -62,8 +61,8 @@ module DataCollector
       mysqlUser           = settings.dig(:mysql, :user)
       mysqlPassword       = settings.dig(:mysql, :password)
 
-      version            = '1.9.2'
-      date               = '2017-06-07'
+      version            = '1.9.4'
+      date               = '2017-06-28'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - DataCollector' )
@@ -99,29 +98,14 @@ module DataCollector
       @mq        = MessageQueue::Consumer.new( @MQSettings )
       @prepare   = Prepare.new( prepareSettings )
       @jobs      = JobQueue::Job.new()
-      @database   = nil
-
-      if( mysqlHost != nil )
-
-        begin
-
-          until( @database != nil )
-
-            @database   = Storage::MySQL.new( {
-              :mysql => {
-                :host     => mysqlHost,
-                :user     => mysqlUser,
-                :password => mysqlPassword,
-                :schema   => mysqlSchema
-              }
-            } )
-
-          end
-        rescue => e
-
-          logger.error( e )
-        end
-      end
+      @database  = Storage::MySQL.new( {
+        :mysql => {
+          :host     => mysqlHost,
+          :user     => mysqlUser,
+          :password => mysqlPassword,
+          :schema   => mysqlSchema
+        }
+      } )
 
       # run internal scheduler to remove old data
       scheduler = Rufus::Scheduler.new
@@ -130,21 +114,6 @@ module DataCollector
         clean()
       end
 
-    end
-
-
-    def timeParser( today, finalDate )
-
-      difference = TimeDifference.between( today, finalDate ).in_each_component
-
-      return {
-        :years   => difference[:years].round,
-        :months  => difference[:months].round,
-        :weeks   => difference[:weeks].round,
-        :days    => difference[:days].round,
-        :hours   => difference[:hours].round,
-        :minutes => difference[:minutes].round,
-      }
     end
 
 
@@ -164,19 +133,25 @@ module DataCollector
 
         return m.get()
       end
-
-  end
+    end
 
 
     def mysqlData( host, data = {} )
 
-#      data = {}
-      user = data.dig('user') || 'cm_management'
-      pass = data.dig('pass') || 'cm_management'
+      user = data.dig('user') || 'monitoring'
+      pass = data.dig('pass') || 'monitoring'
       port = data.dig('port') || 3306
+      cache_key = format('mysql-%s', host)
 
-      if( port != nil )
+      cached_data = @cache.get( cache_key )
 
+      unless( cached_data.nil? )
+        user = cached_data.dig(:user)
+        pass = cached_data.dig(:pass)
+        port = cached_data.dig(:port)
+      end
+
+      unless( port.nil? )
         # TODO
         # we need an low-level-priv User for Monitoring!
         settings = {
@@ -189,14 +164,47 @@ module DataCollector
       result = Utils::Network.portOpen?( host, port )
 
       if( result == false )
-        logger.warn( sprintf( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
+        logger.warn( sprintf( 'The Port \'%s\' on Host \'%s\' is not open, skip ...', port, host ) )
 
         return JSON.parse( JSON.generate( { :status => 500 } ) )
       else
 
-        m = ExternalClients::MySQL.new( { :host => host, :username => user, :password => pass } )
+        m = ExternalClients::MySQL.new( settings )
 
-        if( m != nil || m != false )
+        if( m.client == nil )
+
+          fallback = {
+            coremedia: 'coremedia',
+            cm_replication: 'cm_replication',
+            cm_caefeeder: 'cm_caefeeder',
+            cm_mcaefeeder: 'cm_mcaefeeder',
+            cm_management: 'cm_management',
+            cm_master: 'cm_master'
+          }
+
+          fallback.each do |u,p|
+
+            settings = {
+              :host     => host,
+              :username => u,
+              :password => p
+            }
+
+            m = ExternalClients::MySQL.new( settings )
+
+            unless( m.client.nil? )
+
+              user = u.clone
+              pass = p.clone
+              break
+            end
+          end
+
+        end
+
+        unless( m.client.nil? )
+
+          @cache.set( cache_key , expiresIn: 640 ) { Cache::Data.new( { 'user': user, 'pass': pass, 'port': port } ) }
 
           mysqlData = m.get()
 
@@ -254,6 +262,8 @@ module DataCollector
 
     def nodeExporterData( host, data = {} )
 
+      logger.debug("nodeExporterData( #{host}, #{data} )")
+
       port = data.dig(:port) || 9100
 
       if( port != nil )
@@ -289,18 +299,16 @@ module DataCollector
       port = data.dig(:port) || 55555
 
       if( port != nil )
-
         settings = {
           :host => host,
           :port => port
         }
       end
 
-
       result = Utils::Network.portOpen?( host, port )
 
       if( result == false )
-        logger.warn( sprintf( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
+        logger.warn( sprintf( 'The Port \'%s\' on Host \'%s\' is not open, skip ...', port, host ) )
 
         return JSON.parse( JSON.generate( { :status => 500 } ) )
       else
@@ -317,13 +325,43 @@ module DataCollector
     end
 
 
+    def apache_mod_status( host, data = {} )
+
+      port = data.dig(:port) || 8081
+
+      if( port != nil )
+        settings = {
+          :host => host,
+          :port => port
+        }
+      end
+
+      result = Utils::Network.portOpen?( host, port )
+
+      if( result == false )
+        logger.warn( sprintf( 'The Port \'%s\' on Host \'%s\' is not open, skip ...', port, host ) )
+
+        JSON.parse( JSON.generate( { :status => 500 } ) )
+      else
+
+        result = Array.new
+
+        mod_status      = ExternalClients::ApacheModStatus.new( settings )
+        mod_status_data = mod_status.tick
+
+        result = {
+          status: mod_status_data,
+        }
+
+      end
+    end
+
+
     # return all known and active (online) server for monitoring
     #
     def monitoredServer()
 
-      nodes = @database.nodes( { :status => [ Storage::MySQL::ONLINE ] } )
-
-      return nodes
+      @database.nodes( { :status => [ Storage::MySQL::ONLINE ] } )
     end
 
     # create a singulary json for every services to send them to the jolokia service
@@ -396,7 +434,7 @@ module DataCollector
           when 'mongodb'
             # MongoDB
             bulk.push( '' )
-          when 'node_exporter'
+          when 'node-exporter'
             # Node Exporter (from Prometheus)
             bulk.push( '' )
           when 'postgres'
@@ -404,6 +442,8 @@ module DataCollector
             bulk.push( '' )
           when 'resourced'
             # resourced
+          when 'http-status'
+            bulk.push('')
           else
             # all others
           end
@@ -588,12 +628,15 @@ module DataCollector
             when 'postgres'
               # Postgres
               d = self.postgresData( fqdn )
-            when 'node_exporter'
+            when 'node-exporter'
               # node_exporter
               d = self.nodeExporterData( fqdn )
             when 'resourced'
               #
               d = self.resourcedData( fqdn )
+            when 'http-status'
+              # apache mod_status
+              d = self.apache_mod_status( fqdn )
             else
               # all others
             end
@@ -601,19 +644,30 @@ module DataCollector
             begin
               result[v] = d
             rescue => e
-              logger.error( "i can't store data into result for service #{v}" )
+              logger.error( "i can't create data for service #{v}" )
               logger.error( e )
             end
 
           end
 
-#           logger.debug( 'store result in our redis' )
-          redisResult = @redis.set( cacheKey, result[v] )
+          begin
 
-          if( redisResult.is_a?( FalseClass ) || ( redisResult.is_a?( String ) && redisResult != 'OK' ) )
+#             logger.debug( 'store result in our redis' )
+#             logger.debug( { :host => fqdn, :pre => 'result', :service => v } )
 
-            logger.error( sprintf( 'value for key % can not be write', cacheKey ) )
+            redisResult = @redis.set( cacheKey, result[v] )
+
+            if( redisResult.is_a?( FalseClass ) || ( redisResult.is_a?( String ) && redisResult != 'OK' ) )
+              logger.error( sprintf( 'value for key %s can not be write', cacheKey ) )
+              logger.error( { :host => fqdn, :pre => 'result', :service => v } )
+            end
+
+          rescue => e
+
+            logger.error( sprintf( 'value for key \'%s\' can not be write', cacheKey ) )
             logger.error( { :host => fqdn, :pre => 'result', :service => v } )
+            logger.error( result[v] )
+            logger.error( e )
           end
 
         end
@@ -638,18 +692,31 @@ module DataCollector
       data    = params.dig(:data)
       mlsHost = fqdn
 
-      logger.info( '  search Master Live Server IOR for the Replication Live Server' )
+      logger.info( '  search Master Live Server for this Replication Live Server' )
 
       d = data.select {|d| d.dig('Replicator') }
 
+      if(!d.is_a?(Array))
+        data
+      end
+
       value = d.first.dig( 'Replicator','value' )
 
-      if( value != nil )
+      if(!value.is_a?(Hash))
+        data
+      end
+
+      unless( value.nil? )
 
         value  = value.values.first
+
+        if(!value.is_a?(Hash))
+          data
+        end
+
         mlsIOR = value.dig( 'MasterLiveServerIORUrl' )
 
-        if( mlsIOR != nil )
+        unless( mlsIOR.nil? )
 
           uri    = URI.parse( mlsIOR )
           scheme = uri.scheme
@@ -657,13 +724,23 @@ module DataCollector
           port   = uri.port
           path   = uri.path
 
-          ip, short, fqdn = self.nsLookup( host )
+          logger.debug( format('search dns entry for \'%s\'', host) )
 
-          dns = @database.dnsData( { :ip => ip, :short => short, :fqdn => fqdn } )
+          ip, short, fqdn = self.nsLookup(host,60)
 
-          realIP    = dns.dig('ip')   || ip
-          realShort = dns.dig('name') || short
-          mlsHost   = dns.dig('fqdn') || fqdn
+          if( !ip.nil? && !short.nil? && !fqdn.nil? )
+
+            logger.debug( "found: #{ip} , #{short} , #{fqdn}" )
+
+            realIP    = ip
+            realShort = short
+            mlsHost   = fqdn
+
+          else
+            realIP    = ''
+            realShort = ''
+            mlsHost   = host
+          end
 
           value['MasterLiveServer'] = {
             'scheme' => scheme,
@@ -671,12 +748,15 @@ module DataCollector
             'port'   => port,
             'path'   => path
           }
+        else
+          logger.debug( 'no \'IOR URL\' found! :(' )
+          logger.debug( 'this RLS use an older version. we use the RLS Host as fallback' )
         end
 
       end
 
-      logger.info( sprintf( '  found \'%s\'', mlsHost ) )
-#       logger.debug( JSON.pretty_generate( data ) )
+      logger.info( sprintf( '  use \'%s\'', mlsHost ) )
+      logger.debug( JSON.pretty_generate(value.dig('MasterLiveServer')) )
       return data
 
     end
@@ -928,7 +1008,7 @@ module DataCollector
         self.createBulkCheck( { :hostname => short, :fqdn => fqdn } )
 
         finish = Time.now
-        logger.info( sprintf( 'collect data in %s seconds', finish - start ) )
+        logger.info( sprintf( 'collect data in %s seconds', (finish - start).round(2) ) )
 
         @jobs.del( { :short => short, :fqdn => fqdn } )
 

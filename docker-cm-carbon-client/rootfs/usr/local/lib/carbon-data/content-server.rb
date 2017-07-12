@@ -123,12 +123,13 @@ module CarbonData
       uncompletedCount      = 0
       completedCount        = 0
 
+
       def replicatorData()
 
         result                  = []
         completedSequenceNumber = 0
 
-        replicatorData = @mbean.bean( @identifier, @serviceName, 'Replicator' )
+        replicatorData = @mbean.bean( @Server, @serviceName, 'Replicator' )
 
         if( replicatorData == false )
 
@@ -171,9 +172,10 @@ module CarbonData
         end
       end
 
+
       def mlsSequenceNumber( rlsSequenceNumber )
 
-        logger.debug( "mlsSequenceNumber( #{rlsSequenceNumber} )" )
+#         logger.debug( "mlsSequenceNumber( #{rlsSequenceNumber} )" )
 
         result            = []
         mlsSequenceNumber = 0
@@ -181,14 +183,14 @@ module CarbonData
 #         logger.debug( @identifier )
 #         logger.debug( @serviceName )
 
-        replicatorData = @mbean.bean( @identifier, @serviceName, 'Replicator' )
+        replicatorData = @mbean.bean( @Server, @serviceName, 'Replicator' )
 
         if( replicatorData == false )
 
           logger.error( sprintf( 'No mbean \'Replicator\' for Service %s found!', @serviceName ) )
+          logger.debug( "#{@Server}, #{@serviceName}, 'Replicator'" )
 
-          return mlsSequenceNumber, result
-
+          [mlsSequenceNumber, result]
         else
 
           replicatorStatus = replicatorData.dig('status') || 505
@@ -198,9 +200,15 @@ module CarbonData
 
             replicatorValue   = replicatorValue.values.first
 
+            logger.debug( "replicatorValue : #{replicatorValue}" )
+
             masterLiveServer  = replicatorValue.dig('MasterLiveServer','host')
 
-#             logger.debug( replicatorValue.dig('MasterLiveServer') )
+            logger.debug( "masterLiveServer: #{masterLiveServer}" )
+
+            unless( masterLiveServer.nil? )
+              masterLiveServer = @Server
+            end
 
             # {:host=>"blueprint-box", :pre=>"result", :service=>"master-live-server"}
             repositoryData    = @mbean.bean( masterLiveServer, 'master-live-server', 'Server' )
@@ -208,9 +216,9 @@ module CarbonData
             if( repositoryData == false )
 
               logger.error( 'No mbean \'Server\' for Service \'master-live-server\' found!' )
+              logger.debug( "#{masterLiveServer}, 'master-live-server', 'Server'" )
 
-              return mlsSequenceNumber, result
-
+              [mlsSequenceNumber, result]
             else
 
               repositoryStatus = repositoryData.dig('status') || 505
@@ -233,7 +241,7 @@ module CarbonData
 
               end
 
-              return mlsSequenceNumber, result
+              [mlsSequenceNumber, result]
             end
           end
         end
@@ -345,7 +353,7 @@ module CarbonData
 
           if( licenseValidUntilSoft != nil )
 
-            x                   = self.timeParser( today, Time.at( licenseValidUntilSoft / 1000 ) )
+            x                   = timeParser( today, Time.at( licenseValidUntilSoft / 1000 ) )
             validUntilSoftMonth = x.dig(:months)
             validUntilSoftWeek  = x.dig(:weeks)
             validUntilSoftDays  = x.dig(:days)
@@ -368,7 +376,7 @@ module CarbonData
 
           if( licenseValidUntilHard != nil )
 
-            x                   = self.timeParser( today, Time.at( licenseValidUntilHard / 1000 ) )
+            x                   = timeParser( today, Time.at( licenseValidUntilHard / 1000 ) )
             validUntilHardMonth = x.dig(:months)
             validUntilHardWeek  = x.dig(:weeks)
             validUntilHardDays  = x.dig(:days)

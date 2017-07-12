@@ -6,12 +6,12 @@ require 'optparse'
 require 'json'
 require 'yaml'
 require 'logger'
-require 'time_difference'
 
 require_relative '/usr/local/share/icinga2/logging'
 require_relative '/usr/local/share/icinga2/utils/network'
 require_relative '/usr/local/share/icinga2/storage'
 require_relative '/usr/local/share/icinga2/mbean'
+require_relative '/usr/local/share/icinga2/cache'
 require_relative '/usr/local/share/icinga2/monkey'
 
 # ---------------------------------------------------------------------------------------
@@ -31,39 +31,61 @@ class Icinga2Check
     redisHost    = ENV.fetch( 'REDIS_HOST', 'redis' )
     redisPort    = ENV.fetch( 'REDIS_PORT', 6379 )
 
-    logger.level = Logger::DEBUG
+    logger.level = Logger::INFO
     @redis       = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
     @mbean       = MBean::Client.new( { :redis => @redis } )
+    @cache       = Cache::Store.new()
   end
 
 
   def readConfig( service )
 
-    file = '/etc/cm-icinga2.yaml'
+#     logger.debug("readConfig( #{service} )")
 
     usePercent = nil
     warning    = nil
     critical   = nil
 
-    if( File.exist?( file ) )
+    # TODO
+    # use internal cache insteed file-access
+    cache_key = 'icinga2::config'
 
-      begin
+    data = @redis.get( cache_key )
 
-        config  = YAML.load_file( file )
+#     logger.debug( "cached data: #{data}" )
 
-        service = config.dig(service)
+    if(data.nil?)
 
-        if( service != nil )
-          usePercent = service.dig('usePercent')
-          warning    = service.dig('warning')
-          critical   = service.dig('critical')
+      file = '/etc/cm-icinga2.yaml'
+
+      if( File.exist?(file) )
+
+        begin
+          config  = YAML.load_file(file)
+
+          # data    = config.dig(service)
+          # logger.debug( "file data: #{data}" )
+
+          if(config.is_a?(Hash))
+            @redis.set(cache_key, config, 640)
+          end
+
+        rescue YAML::ParserError => e
+
+          logger.error( 'wrong result (no yaml)')
+          logger.error( e )
         end
-      rescue YAML::ParserError => e
-
-        logger.error( 'wrong result (no yaml)')
-        logger.error( e )
       end
     end
+
+    data    = data.dig(service)
+
+    unless(data.nil?)
+      usePercent = data.dig('usePercent')
+      warning    = data.dig('warning')
+      critical   = data.dig('critical')
+    end
+
 
     return {
       :usePercent => usePercent,
@@ -76,15 +98,14 @@ class Icinga2Check
 
   def hostname( hostname )
 
-    logger.debug( "hostname( #{hostname} )" )
+#     logger.debug( "hostname( #{hostname} )" )
 
-    # look in the memcache
-    memcacheKey = Storage::RedisClient.cacheKey( { :host => hostname, :type => 'dns' } )
+    # look in our cache
+    cache_key = format('dns::%s',hostname)
 
-#     logger.debug( { :host => hostname, :type => 'dns' } )
-#     logger.debug( memcacheKey )
+#    logger.debug( "redis: #{@redis.get(cache_key)}" )
 
-    data      = @redis.get( memcacheKey )
+    data      = @redis.get( cache_key )
 
     if( data == nil )
 
@@ -92,7 +113,7 @@ class Icinga2Check
 
 #       logger.debug( data )
 
-      @redis.set( memcacheKey, data )
+      @redis.set( cache_key, data, 320 )
     end
 
     hostname = data.dig('long')
@@ -102,10 +123,13 @@ class Icinga2Check
   end
 
 
-  def runningOrOutdated( data )
+  def runningOrOutdated( params = {} )
 
-    if( data == false )
-      puts 'CRITICAL - Service not running!?'
+    host = params.dig(:host)
+    data = params.dig(:data)
+
+    unless( data.is_a?(Hash) )
+      puts 'CRITICAL - no data found - service not running!?'
       exit STATE_CRITICAL
     end
 
@@ -113,18 +137,28 @@ class Icinga2Check
     dataTimestamp = data.dig('timestamp')
     dataValue     = data.dig('value')     # ( data != nil && data['value'] ) ? data['value'] : nil
 
-    if( dataValue == nil )
-      puts 'CRITICAL - Service not running!?'
+    if( dataValue.nil? )
+
+      output = 'CRITICAL - missing monitoring data - service not running!?'
+      logger.info( format( '%s: %s', host, output))
+      puts output
+
       exit STATE_CRITICAL
     end
 
     beanTimeout,difference = beanTimeout?( dataTimestamp )
 
     if( beanTimeout == STATE_CRITICAL )
-      puts sprintf( 'CRITICAL - last check creation is out of date (%d seconds)', difference )
+      output = format( 'CRITICAL - last check creation is out of date (%d seconds)', difference )
+      logger.info( format( '%s: %s', host, output))
+      puts output
+
       exit beanTimeout
     elsif( beanTimeout == STATE_WARNING )
-      puts sprintf( 'WARNING - last check creation is out of date (%d seconds)', difference )
+      output = format( 'WARNING - last check creation is out of date (%d seconds)', difference )
+      logger.info( format( '%s: %s', host, output))
+      puts output
+
       exit beanTimeout
     end
 
@@ -138,6 +172,12 @@ class Icinga2Check
   #  critical at 60000 ms == 60 seconds
   def beanTimeout?( timestamp, warning = 30, critical = 60 )
 
+#     logger.debug( "beanTimeout?( #{timestamp}, #{warning}, #{critical} )" )
+
+    config   = readConfig('timeout')
+    warning  = config.dig(:warning)  || warning
+    critical = config.dig(:critical) || critical
+
     result = false
     quorum = 5 # add 5 seconds
 
@@ -148,12 +188,14 @@ class Icinga2Check
       t = Time.at( timestamp )
       t = t.add_seconds( quorum )
 
-      difference = TimeDifference.between( t, n ).in_each_component
+      difference = time_difference( t, n )
       difference = difference[:seconds].round
 
 #       logger.debug( sprintf( ' now       : %s', n.to_datetime.strftime("%d %m %Y %H:%M:%S") ) )
 #       logger.debug( sprintf( ' timestamp : %s', t.to_datetime.strftime("%d %m %Y %H:%M:%S") ) )
 #       logger.debug( sprintf( ' difference: %d', difference ) )
+#       logger.debug( sprintf( '   warning : %d', warning ) )
+#       logger.debug( sprintf( '   critical: %d', critical ) )
 
       if( difference > critical )
         logger.error( sprintf( '  %d > %d', difference, critical ) )
@@ -167,9 +209,23 @@ class Icinga2Check
 
     end
 
-    return result, difference
-
+    [result, difference]
   end
 
+
+    def time_difference( start_time, end_time )
+
+      seconds_diff = (start_time - end_time).to_i.abs
+
+      {
+        years: (seconds_diff / 31556952),
+        months: (seconds_diff / 2628288),
+        weeks: (seconds_diff / 604800),
+        days: (seconds_diff / 86400),
+        hours: (seconds_diff / 3600),
+        minutes: (seconds_diff / 60),
+        seconds: seconds_diff,
+      }
+    end
 
 end

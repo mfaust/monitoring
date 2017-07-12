@@ -110,7 +110,12 @@ module Storage
     end
 
 
-    def set( key, value )
+    def set( key, value, expire = nil )
+
+      if(!expire.nil?)
+
+        return @redis.setex( key, expire, value )
+      end
 
       return @redis.set( key, value )
     end
@@ -304,7 +309,7 @@ module Storage
 
       dnsIp        = params.dig(:ip)
       dnsShortname = params.dig(:short)
-      key    = params.dig(:key)
+      key          = params.dig(:key)
 
       cachekey = sprintf(
         '%s-config',

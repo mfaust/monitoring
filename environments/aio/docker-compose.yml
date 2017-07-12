@@ -19,15 +19,12 @@ services:
   data:
     build: ../../docker-cm-data
     container_name: 01-data
-    depends_on:
-      - dnsdock
     volumes:
       - /share:/share
 
-
   dnsdock:
     restart: always
-    image: bodsch/docker-dnsdock:1705-04
+    image: bodsch/docker-dnsdock:1707-27.1
     container_name: dnsdock
     hostname: dnsdock
     labels:
@@ -38,19 +35,16 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     # You can use also Environment vars like this:
     # command: "--nameserver='${DNS_1}:53' --nameserver='${DNS_2}:53' --http=:80"
-    command: "--nameserver='10.1.2.14:53' --nameserver='10.1.2.63:53' --http=:80 --ttl=120"
+    command: "--nameserver='10.1.2.14:53' --nameserver='10.1.2.63:53' --http=:80 --ttl=120 "
     networks:
       mon:
         ipv4_address: 192.168.1.5
 
   beanstalkd:
     restart: always
-    image: bodsch/docker-beanstalkd:1705-04
+    image: bodsch/docker-beanstalkd:1707-27.1
     container_name: beanstalkd
     hostname: beanstalkd
-    labels:
-      com.dnsdock.alias: beanstalkd
-      com.dnsdock.ttl: '120'
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:
@@ -59,13 +53,9 @@ services:
 
   database:
     restart: always
-    image: bodsch/docker-mysql:1705-04
+    image: bodsch/docker-mysql:1707-27.1
     container_name: database
     hostname: database
-    labels:
-      com.dnsdock.alias: database
-      com.dnsdock.ttl: '120'
-    dns: 192.168.1.5
     ports:
       - 3306:3306
     extends:
@@ -80,13 +70,9 @@ services:
 
   jolokia:
     restart: always
-    image: bodsch/docker-jolokia:latest
+    image: bodsch/docker-jolokia:1707-27.1
     container_name: jolokia
     hostname: jolokia
-    labels:
-      com.dnsdock.alias: jolokia
-      com.dnsdock.ttl: '120'
-    dns: 192.168.1.5
     depends_on:
       - data
     volumes:
@@ -95,15 +81,14 @@ services:
     networks:
       mon:
         ipv4_address: 192.168.1.8
+    dns:
+      - 192.168.1.5
 
   memcached:
     restart: always
-    image: bodsch/docker-memcached:1705-04
+    image: bodsch/docker-memcached:1707-27.1
     container_name: memcached
     hostname: memcached
-    labels:
-      com.dnsdock.alias: memcached
-      com.dnsdock.ttl: '120'
     volumes:
       - /etc/localtime:/etc/localtime:ro
     command: "-l 0.0.0.0 -m 8 -u memcached"
@@ -113,13 +98,9 @@ services:
 
   redis:
     restart: always
-    image: bodsch/docker-redis:1705-04
+    image: bodsch/docker-redis:1707-27.1
     container_name: redis
     hostname: redis
-    labels:
-      com.dnsdock.image: "redis"
-      com.dnsdock.alias: "redis"
-      com.dnsdock.ttl: '120'
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - redis:/var/lib/redis
@@ -129,13 +110,9 @@ services:
 
   nginx:
     restart: always
-    image: bodsch/docker-nginx:1705-04
+    image: bodsch/docker-nginx:1707-27.1
     container_name: nginx
     hostname: nginx
-    labels:
-      com.dnsdock.alias: nginx-proxy
-      com.dnsdock.ttl: '120'
-    dns: 192.168.1.5
     ports:
       - 80:80
     depends_on:
@@ -159,7 +136,7 @@ services:
       - /share/etc/nginx/modules.d/01-proxy-grafana.conf:/etc/nginx/modules.d/01-proxy-grafana.conf
       - /share/etc/nginx/modules.d/01-proxy-graphite.conf:/etc/nginx/modules.d/01-proxy-graphite.conf
       - /share/etc/nginx/modules.d/01-proxy-icingaweb2.conf:/etc/nginx/modules.d/01-proxy-icingaweb2.conf
-      - /share/etc/nginx/modules.d/01-proxy-dashing.conf:/etc/nginx/modules.d/01-proxy-dashing.conf
+      - /share/etc/nginx/modules.d/01-proxy-smashing-icinga2.conf:/etc/nginx/modules.d/01-proxy-smashing-icinga2.conf
       - /share/etc/nginx/modules.d/01-proxy-markdown-service.conf:/etc/nginx/modules.d/01-proxy-markdown-service.conf
     networks:
       mon:
@@ -167,13 +144,9 @@ services:
 
   carbon:
     restart: always
-    image: bodsch/docker-go-carbon:1705-04
+    image: bodsch/docker-go-carbon:1707-27.1
     container_name: carbon
     hostname: carbon
-    labels:
-      com.dnsdock.alias: carbon
-      com.dnsdock.ttl: '120'
-    dns: 192.168.1.5
     depends_on:
       - data
     ports:
@@ -188,13 +161,9 @@ services:
 
   graphite:
     restart: always
-    image: bodsch/docker-graphite:1705-04
+    image: bodsch/docker-graphite:1707-27.1
     container_name: graphite
     hostname: graphite
-    labels:
-      com.dnsdock.alias: graphite
-      com.dnsdock.ttl: '120'
-    dns: 192.168.1.5
     extends:
       file: environments.yml
       service: graphite
@@ -209,13 +178,9 @@ services:
 
   grafana:
     restart: always
-    image: bodsch/docker-grafana:1705-04
+    image: bodsch/docker-grafana:1707-28.1
     container_name: grafana
     hostname: grafana
-    labels:
-      com.dnsdock.alias: grafana
-      com.dnsdock.ttl: '120'
-    dns: 192.168.1.5
     extends:
       file: environments.yml
       service: grafana
@@ -237,13 +202,9 @@ services:
 
   icinga2-master:
     restart: always
-    image: bodsch/docker-icinga2:1705-04
+    image: bodsch/docker-icinga2:1707-28.1
     container_name: icinga2-master
     hostname: icinga2-master
-    labels:
-      com.dnsdock.alias: icinga2-master
-      com.dnsdock.ttl: '120'
-    dns: 192.168.1.5
     extends:
       file: environments.yml
       service: icinga2-master
@@ -276,16 +237,14 @@ services:
     networks:
       mon:
         ipv4_address: 192.168.1.15
+    dns:
+      - 192.168.1.5
 
   icingaweb2:
     restart: always
-    image: bodsch/docker-icingaweb2:1705-04
+    image: bodsch/docker-icingaweb2:1707-27.1
     container_name: icingaweb2
     hostname: icingaweb2
-    labels:
-      com.dnsdock.alias: icingaweb2
-      com.dnsdock.ttl: '120'
-    dns: 192.168.1.5
     extends:
       file: environments.yml
       service: icingaweb2
@@ -305,12 +264,9 @@ services:
 
   markdown-service:
     restart: always
-    image: bodsch/docker-markdown-service:latest
+    image: bodsch/docker-markdown-service:1707-27.1
     container_name: markdown-service
     hostname: markdown-service
-    labels:
-      com.dnsdock.alias: markdown-service
-      com.dnsdock.ttl: '120'
     depends_on:
       - data
     volumes:
@@ -320,21 +276,16 @@ services:
       mon:
         ipv4_address: 192.168.1.17
 
-  dashing:
+  smashing-icinga2:
     restart: always
-    image: bodsch/docker-smashing-icinga2:latest
-    container_name: dashing
-    hostname: dashing
-    labels:
-      com.dnsdock.alias: dashing
-      com.dnsdock.ttl: '120'
+    image: bodsch/docker-smashing-icinga2:1707-27.1
+    container_name: smashing-icinga2
+    hostname: smashing-icinga2
     extends:
       file: environments.yml
-      service: dashing
+      service: smashing-icinga2
     depends_on:
       - icinga2-master
-    ports:
-      - 3030:3030
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:
@@ -349,10 +300,6 @@ services:
     build: ../../docker-cm-rest-service
     container_name: cm-rest-service
     hostname: cm-rest-service
-    labels:
-      com.dnsdock.alias: cm-rest-service
-      com.dnsdock.ttl: '120'
-    dns: 192.168.1.5
     extends:
       file: environments.yml
       service: cm-rest-service
@@ -362,12 +309,15 @@ services:
       - database
     links:
       - redis
+      - database
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./logs:/var/log
     networks:
       mon:
         ipv4_address: 192.168.1.30
+    dns:
+      - 192.168.1.5
 
   # single service
   # use MQ to process data
@@ -376,10 +326,6 @@ services:
     build: ../../docker-cm-service-discovery
     container_name: cm-service-discover
     hostname: cm-service-discover
-    labels:
-      com.dnsdock.alias: cm-service-discovery
-      com.dnsdock.ttl: '120'
-    dns: 192.168.1.5
     extends:
       file: environments.yml
       service: cm-service-discovery
@@ -401,6 +347,8 @@ services:
     networks:
       mon:
         ipv4_address: 192.168.1.31
+    #dns:
+      #- 192.168.1.5
 
   # single service
   # use MQ to process data
@@ -409,10 +357,6 @@ services:
     build: ../../docker-cm-data-collector
     container_name: cm-data-collector
     hostname: cm-data-collector
-    labels:
-      com.dnsdock.alias: cm-data-collector
-      com.dnsdock.ttl: '120'
-    dns: 192.168.1.5
     extends:
       file: environments.yml
       service: cm-data-collector
@@ -434,6 +378,8 @@ services:
     networks:
       mon:
         ipv4_address: 192.168.1.32
+    dns:
+      - 192.168.1.5
 
   # single service
   # use MQ to process data
@@ -442,10 +388,6 @@ services:
     build: ../../docker-cm-carbon-client
     container_name: cm-carbon-client
     hostname: cm-carbon-client
-    labels:
-      com.dnsdock.alias: cm-carbon-client
-      com.dnsdock.ttl: '120'
-    dns: 192.168.1.5
     extends:
       file: environments.yml
       service: cm-carbon-client
@@ -468,10 +410,6 @@ services:
     build: ../../docker-cm-grafana-client
     container_name: cm-grafana-client
     hostname: cm-grafana-client
-    labels:
-      com.dnsdock.alias: cm-grafana-client
-      com.dnsdock.ttl: '120'
-    dns: 192.168.1.5
     extends:
       file: environments.yml
       service: cm-grafana-client
@@ -481,8 +419,10 @@ services:
       - redis
       - database
     links:
+      - nginx
       - beanstalkd
       - redis
+      - database
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./logs:/var/log
@@ -498,10 +438,6 @@ services:
     build: ../../docker-cm-graphite-client
     container_name: cm-graphite-client
     hostname: cm-graphite-client
-    labels:
-      com.dnsdock.alias: cm-graphite-client
-      com.dnsdock.ttl: '120'
-    dns: 192.168.1.5
     extends:
       file: environments.yml
       service: cm-graphite-client
@@ -524,10 +460,6 @@ services:
     build: ../../docker-cm-icinga-client
     container_name: cm-icinga-client
     hostname: cm-icinga-client
-    labels:
-      com.dnsdock.alias: cm-icinga-client
-      com.dnsdock.ttl: '120'
-    dns: 192.168.1.5
     extends:
       file: environments.yml
       service: cm-icinga-client
@@ -542,3 +474,5 @@ services:
     networks:
       mon:
         ipv4_address: 192.168.1.36
+    dns:
+      - 192.168.1.5

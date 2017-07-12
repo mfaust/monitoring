@@ -1,7 +1,5 @@
 #!/usr/bin/ruby
 
-require 'time_difference'
-
 require_relative '/usr/local/lib/icingachecks.rb'
 
 # ---------------------------------------------------------------------------------------
@@ -21,19 +19,6 @@ class Icinga2Check_CM_Licenses < Icinga2Check
   end
 
 
-  def timeParser( today, finalDate )
-
-    difference = TimeDifference.between( today, finalDate ).in_each_component
-
-    return {
-      :years  => difference[:years].round,
-      :months => difference[:months].round,
-      :weeks  => difference[:weeks].round,
-      :days   => difference[:days].round
-    }
-  end
-
-
   def check( host, application )
 
     config   = readConfig( 'license' )
@@ -42,7 +27,7 @@ class Icinga2Check_CM_Licenses < Icinga2Check
 
     # get our bean
     data      = @mbean.bean( host, application, 'Server' )
-    dataValue = self.runningOrOutdated( data )
+    dataValue = self.runningOrOutdated( { host: host, data: data } )
 
     dataValue = dataValue.values.first
 
@@ -53,7 +38,7 @@ class Icinga2Check_CM_Licenses < Icinga2Check
 
     if( validUntilHard != nil )
 
-      x               = self.timeParser( today, Time.at( validUntilHard / 1000 ) )
+      x               = time_difference( today, Time.at( validUntilHard / 1000 ) )
       validUntilDays  = x[:days]
 
       licenseDate     = Time.at( validUntilHard / 1000 ).strftime("%d.%m.%Y")
@@ -69,7 +54,7 @@ class Icinga2Check_CM_Licenses < Icinga2Check
         exitCode = STATE_CRITICAL
       end
 
-      puts sprintf( '<b>%d days left</b><br>Coremedia License is valid until %s', validUntilDays, licenseDate )
+      puts sprintf( '<b>%d days left</b><br>Coremedia License is valid until %s | valid=%d warning=%d critical=%d', validUntilDays, licenseDate, validUntilDays,warning, critical )
     else
       puts sprintf( 'UNKNOWN - No valid Coremedia License found' )
       exitCode = STATE_UNKNOWN
