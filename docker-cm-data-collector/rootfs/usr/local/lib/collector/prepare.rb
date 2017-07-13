@@ -44,7 +44,7 @@ module DataCollector
     # creates mergedHostData.json for every Node
     def buildMergedData( params = {} )
 
-#       logger.debug( "buildMergedData( #{params} )" )
+#      logger.debug( "buildMergedData( #{params} )" )
 
       short = params.dig(:hostname)
       fqdn  = params.dig(:fqdn)
@@ -52,7 +52,7 @@ module DataCollector
 
       if( short == nil )
         logger.error( 'no hostname found' )
-        return {}
+        return
       end
 
       # check our cache for prepared data
@@ -112,8 +112,7 @@ module DataCollector
       finish = Time.now
       logger.info( sprintf( 'build prepared data in %s seconds', (finish - start).round(2) ) )
 
-      return true
-
+      return
     end
 
 

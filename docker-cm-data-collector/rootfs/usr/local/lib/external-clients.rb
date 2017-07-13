@@ -883,7 +883,7 @@ module ExternalClients
             key, value = line.strip.split(':')
 
             key   = key.gsub(/\s/, '')
-            value = value.strip
+            value = value.strip.gsub('%','')
 
             metrics[key] = format( "%f", value ).sub(/\.?0*$/, "" ).to_f
           end

@@ -473,14 +473,6 @@ module DataCollector
               attributes = attribute.split(',')
             end
 
-#             if( e['attribute'] )
-#               e['attribute'].split(',').each do |t|
-#                 attributes.push( t.to_s )
-#               end
-#
-#               target['attribute'] = attributes
-#             end
-
             bulk.push( target )
           end
         end
@@ -498,15 +490,18 @@ module DataCollector
       result[:services] = *services
       result[:checks]   = *checks
 
-#       logger.debug( JSON.pretty_generate( result ) )
+      logger.debug( JSON.pretty_generate( result ) )
         # send json to jolokia
-      self.collectMeasurements( result )
+      begin
+        self.collectMeasurements( result )
+      rescue => e
+        logger.error(format('collect measurements failed, cause: %s', e ))
+      end
 
       checks.clear()
       result.clear()
 
       return
-
     end
 
 
@@ -577,7 +572,7 @@ module DataCollector
 
         c.each do |v,i|
 
-          logger.info( sprintf( 'service \'%s\' has %d checks', v, i.count ) )
+          logger.info( sprintf( 'service \'%s\' has %s checks', v, i.count ) )
 
           result[v] ||= []
 
@@ -980,6 +975,7 @@ module DataCollector
         if( @jobs.jobs( { :short => short, :fqdn => fqdn } ) == true )
 
           logger.warn( 'we are working on this job' )
+          logger.debug( { :short => short, :fqdn => fqdn } )
 
           next
         end
@@ -990,14 +986,11 @@ module DataCollector
 
         logger.info( sprintf( 'found \'%s\' for monitoring', fqdn ) )
 
-        if( @database != nil )
-
-          # TODO
-          # discussion
-          # we need this in realtime, or can we cache this for ... 1 minute or more?
-          #
-          discoveryData    = @database.discoveryData( { :ip => ip, :short => short, :fqdn => fqdn } )
-        end
+        # TODO
+        # discussion
+        # we need this in realtime, or can we cache this for ... 1 minute or more?
+        #
+        discoveryData    = @database.discoveryData( { :ip => ip, :short => short, :fqdn => fqdn } )
 
         # build prepared datas
         #
