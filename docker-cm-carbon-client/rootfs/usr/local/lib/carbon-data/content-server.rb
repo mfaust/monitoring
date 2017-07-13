@@ -206,7 +206,7 @@ module CarbonData
 
             logger.debug( "masterLiveServer: #{masterLiveServer}" )
 
-            unless( masterLiveServer.nil? )
+            if( masterLiveServer.nil? )
               masterLiveServer = @Server
             end
 
