@@ -71,7 +71,49 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByNode(carbon-writer.$host.HTTP_STATUS.scoreboard.*, 6)"
+                "target": "aliasByMetric(carbon-writer.$host.HTTP_STATUS.scoreboard.closing)"
+              },
+              {
+                "refId": "B",
+                "target": "aliasByMetric(carbon-writer.$host.HTTP_STATUS.scoreboard.dns)"
+              },
+              {
+                "hide": true,
+                "refId": "C",
+                "target": "aliasByMetric(carbon-writer.$host.HTTP_STATUS.scoreboard.graceful)"
+              },
+              {
+                "refId": "D",
+                "target": "aliasByMetric(carbon-writer.$host.HTTP_STATUS.scoreboard.idle)"
+              },
+              {
+                "refId": "E",
+                "target": "aliasByMetric(carbon-writer.$host.HTTP_STATUS.scoreboard.keepalive)"
+              },
+              {
+                "hide": true,
+                "refId": "F",
+                "target": "aliasByMetric(carbon-writer.$host.HTTP_STATUS.scoreboard.logging)"
+              },
+              {
+                "refId": "G",
+                "target": "aliasByMetric(carbon-writer.$host.HTTP_STATUS.scoreboard.open)"
+              },
+              {
+                "refId": "H",
+                "target": "aliasByMetric(carbon-writer.$host.HTTP_STATUS.scoreboard.reading)"
+              },
+              {
+                "refId": "I",
+                "target": "aliasByMetric(carbon-writer.$host.HTTP_STATUS.scoreboard.sending)"
+              },
+              {
+                "refId": "J",
+                "target": "aliasByMetric(carbon-writer.$host.HTTP_STATUS.scoreboard.starting)"
+              },
+              {
+                "refId": "K",
+                "target": "aliasByMetric(carbon-writer.$host.HTTP_STATUS.scoreboard.waiting)"
               }
             ],
             "thresholds": [],
@@ -257,7 +299,11 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByNode(carbon-writer.$host.HTTP_STATUS.workers.*, 6)"
+                "target": "aliasByMetric(carbon-writer.$host.HTTP_STATUS.workers.busy)"
+              },
+              {
+                "refId": "B",
+                "target": "aliasByMetric(carbon-writer.$host.HTTP_STATUS.workers.idle)"
               }
             ],
             "thresholds": [],
