@@ -11,7 +11,7 @@ ENV \
   APK_DEL="build-base imagemagick-dev ruby-dev" \
   GEMS="beaneater bigdecimal ipaddress json mysql2 redis resolve-hostname rest-client rufus-scheduler tzinfo-data"
 
-LABEL version="1706-02.1"
+LABEL version="1707-28.2"
 
 # ---------------------------------------------------------------------------------------
 
