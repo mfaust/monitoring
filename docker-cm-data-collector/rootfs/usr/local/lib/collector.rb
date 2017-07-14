@@ -745,7 +745,7 @@ module DataCollector
           }
         else
           logger.debug( 'no \'IOR URL\' found! :(' )
-          logger.debug( 'this RLS use an older version. we use the RLS Host as fallback' )
+          logger.info( 'this RLS use an older version. we use the RLS Host as fallback' )
         end
 
       end
