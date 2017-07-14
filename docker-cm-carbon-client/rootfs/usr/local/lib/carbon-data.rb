@@ -244,6 +244,8 @@ module CarbonData
 
       data    = @database.discoveryData( { :short => fqdn, :fqdn => fqdn } )
 
+      logger.info( sprintf( 'Host: %s - \'%s\'', fqdn, @identifier ) )
+
       # no discovery data found
       #
       if( data == nil )
@@ -252,8 +254,6 @@ module CarbonData
       end
 
       data.each do |service, d|
-
-        logger.info( sprintf( 'Host: %s - \'%s\'', fqdn, @identifier ) )
 
         @serviceName = service
         @Service     = self.normalizeService( service )
