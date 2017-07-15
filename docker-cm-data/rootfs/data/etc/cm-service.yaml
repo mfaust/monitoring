@@ -43,6 +43,7 @@ services:
   solr:
     description: Solr
     port: 40099
+    port_http: 40080
     cores:
     - live
     - preview
@@ -53,6 +54,7 @@ services:
   solr-master:
     description: Solr Master
     port: 40099
+    port_http: 40080
     cores:
     - live
     - preview
@@ -63,6 +65,7 @@ services:
   solr-slave:
     description: Solr Slave
     port: 40099
+    port_http: 40080
     cores:
     - live
     - preview

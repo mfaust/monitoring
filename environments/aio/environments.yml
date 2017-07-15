@@ -41,6 +41,7 @@ services:
       MYSQL_ROOT_PASS: database.pass
       IDO_PASSWORD: ido.pass
       IDO_DATABASE_NAME: icinga2core
+      CARBON_HOST: carbon
       ICINGA_CLUSTER: 'false'
       ICINGA_MASTER: icinga2-master
       ICINGA_API_USERS: root:icinga,icingaweb:icingaweb,dashing:dashing,cert:foo-bar
