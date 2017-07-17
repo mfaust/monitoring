@@ -46,6 +46,9 @@ services:
       ICINGA_MASTER: icinga2-master
       ICINGA_API_USERS: root:icinga,icingaweb:icingaweb,dashing:dashing,cert:foo-bar
       REDIS_HOST: redis
+      AWS_REGION: eu-west-1
+      AWS_SNS_ACCOUNT_ID: 240945249030
+      AWS_SNS_TOPIC: app-monitoring
 
   icingaweb2:
     environment:

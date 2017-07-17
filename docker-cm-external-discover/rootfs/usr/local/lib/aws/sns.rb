@@ -16,31 +16,32 @@ module Aws
       def initialize( settings = {} )
 
         @region  = settings.dig(:aws, :region) || 'us-east-1'
+        @sns     = Aws::SNS::Client.new(region: @region)
 
-        begin
-
-          Aws.config.update( { region: @region } )
-
-          @awsClient = Aws::EC2::Client.new()
-        rescue => e
-
-          raise e
-        end
+#        begin
+#
+#          Aws.config.update( { region: @region } )
+#
+#          @awsClient = Aws::EC2::Client.new()
+#        rescue => e
+#
+#          raise e
+#        end
 
       end
 
 
-      def createSubscription( params = {} )
+      def create_subscription( params = {} )
 
-        region    = params.dig(:region)  || @region
-        accountId = params.dig(:account_id)
-        topic     = params.dig(:topic)
-        protocol  = params.dig(:protocol)
-        endpoint  = params.dig(:endpoint)
+        region     = params.dig(:region)  || @region
+        account_id = params.dig(:account_id)
+        topic      = params.dig(:topic)
+        protocol   = params.dig(:protocol)
+        endpoint   = params.dig(:endpoint)
 
         sns       = Aws::SNS::Resource.new( region: region )
 
-        topic     = sns.topic( sprintf( 'arn:aws:sns:%s:%s:%s', region, accountId, topic ) ) #  'arn:aws:sns:us-west-2:123456789:MyGroovyTopic')
+        topic     = sns.topic( sprintf( 'arn:aws:sns:%s:%s:%s', region, account_id, topic ) ) #  'arn:aws:sns:us-west-2:123456789:MyGroovyTopic')
 
         sub = topic.subscribe({
           protocol: protocol,
@@ -53,35 +54,51 @@ module Aws
       end
 
 
-      def sendMessage( params = {} )
+      def send_message( params = {} )
 
         # aws sns publish --topic-arn "arn:aws:sns:us-east-1:450225884721:app-monitoring" --message file://message.txt
 
-        region    = params.dig(:region)  || @region
-        accountId = params.dig(:account_id)
-        topic     = params.dig(:topic)
-        message   = params.dig(:message)
+        region     = params.dig(:region)  || @region
+        account_id = params.dig(:account_id)
+        topic      = params.dig(:topic)
+        subject    = params.dig(:subject)
+        message    = params.dig(:message)
 
-        sns       = Aws::SNS::Resource.new( region: region )
+        begin
 
-        topic     = sns.topic( sprintf( 'arn:aws:sns:%s:%s:%s', region, accountId, topic ) ) #  'arn:aws:sns:us-west-2:123456789:MyGroovyTopic')
+          resp       = @sns.publish({
+            target_arn: sprintf( 'arn:aws:sns:%s:%s:%s', region, account_id, topic ),
+            message: message,
+            subject: subject
+          })
 
-        topic.publish({
-          message: message
-        })
+#           logger.debug( resp.class.to_s )
+#           logger.debug( resp )
+#           logger.debug( resp.data.message_id )
+#           logger.debug( resp.error)
+#           logger.debug( resp.successful? )
 
+          logger.debug( format('successful send with id: %s', resp.data.message_id ) )
+
+        rescue => e
+
+          raise(e)
+
+        end
       end
 
 
-      def showTopics()
+      def show_topics()
 
-        region    = params.dig(:region)  || @region
+#        @sns.show_topic( )
 
-        sns       = Aws::SNS::Resource.new( region: region )
-
-        sns.topics.each do |topic|
-          logger.debug( topic.arn )
-        end
+#         region    = params.dig(:region)  || @region
+#
+#         sns       = Aws::SNS::Resource.new( region: region )
+#
+#         sns.topics.each do |topic|
+#           logger.debug( topic.arn )
+#         end
       end
 
 

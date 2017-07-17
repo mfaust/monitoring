@@ -26,9 +26,9 @@ config = {
 
 s = Aws::Sns::Client.new( config )
 
-s.createSubscription( { :protocol => 'email', :endpoint => 'bodo.schulz@coremedia.com' } )
-s.showTopics()
-s.sendMessage( { :topic => 'app-monitoring' :account_id => '450225884721', :message => 'test-message' } )
+s.create_subscription( { :protocol => 'email', :endpoint => 'bodo.schulz@coremedia.com' } )
+#s.show_topics()
+s.send_message( { :topic => 'app-monitoring' :account_id => '450225884721', :message => 'test-message' } )
 
 
 
