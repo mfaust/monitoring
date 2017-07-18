@@ -40,9 +40,15 @@ waitForDatabase() {
 
     echo " [i] Waiting for database host '${MYSQL_HOST}' to come up (${RETRY})"
 
-    sleep 2s
+    sleep 3s
     RETRY=$(expr ${RETRY} - 1)
   done
+
+  if [ $RETRY -le 0 ]
+  then
+    echo " [E] could not find a database on ${MYSQL_HOST}:${MYSQL_PORT}"
+    exit 1
+  fi
 
   RETRY=50
 
@@ -56,13 +62,13 @@ waitForDatabase() {
 
     echo " [i] Waiting for database to come up (#{RETRY})"
 
-    sleep 2s
+    sleep 3s
     RETRY=$(expr ${RETRY} - 1)
   done
 
   if [ $RETRY -le 0 ]
   then
-    echo " [E] Could not connect to Database on ${MYSQL_HOST}:${MYSQL_PORT}"
+    echo " [E] could not connect to database on ${MYSQL_HOST}:${MYSQL_PORT}"
     exit 1
   fi
 
@@ -80,6 +86,12 @@ waitForDatabase() {
     sleep 2s
     RETRY=$(expr ${RETRY} - 1)
   done
+
+  if [ $RETRY -le 0 ]
+  then
+    echo " [E] timeout for initdb on ${MYSQL_HOST}:${MYSQL_PORT}"
+    exit 1
+  fi
 
 }
 
