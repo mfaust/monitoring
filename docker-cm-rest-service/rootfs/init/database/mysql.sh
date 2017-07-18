@@ -30,7 +30,7 @@ waitForDatabase() {
 
   RETRY=50
 
-  # wait for database
+  # wait for database #1
   #
   until [ ${RETRY} -le 0 ]
   do
@@ -46,7 +46,7 @@ waitForDatabase() {
 
   RETRY=50
 
-  # wait for database
+  # wait for database #2
   #
   until [ ${RETRY} -le 0 ]
   do
@@ -86,6 +86,27 @@ waitForDatabase() {
 
 configureDatabase() {
 
+  # create user - when they NOT exists
+  query="select host, user, password from mysql.user where user = '${DATABASE_NAME}';"
+  status=$(mysql ${MYSQL_OPTS} --batch --execute="${query}" | wc -w)
+
+  if [ ${status} -eq 0 ]
+  then
+    echo " [i] create database '${DATABASE_NAME}' with user and grants for 'discovery'"
+    (
+      echo "create user '${DATABASE_NAME}'@'%' IDENTIFIED BY '${DBA_PASSWORD}';"
+      echo "--- CREATE DATABASE IF NOT EXISTS ${DATABASE_NAME};"
+      echo "GRANT SELECT, INSERT, UPDATE, DELETE, DROP, CREATE VIEW, CREATE, INDEX, EXECUTE ON ${DATABASE_NAME}.* TO 'discovery'@'%' IDENTIFIED BY '${DBA_PASSWORD}';"
+      echo "FLUSH PRIVILEGES;"
+    ) | mysql ${MYSQL_OPTS}
+
+    if [ $? -eq 1 ]
+    then
+      echo " [E] can't create Database '${DATABASE_NAME}'"
+      exit 1
+    fi
+  fi
+
   # check if database already created ...
   #
   query="SELECT TABLE_SCHEMA FROM information_schema.tables WHERE table_schema = \"${DATABASE_NAME}\" limit 1;"
@@ -100,9 +121,8 @@ configureDatabase() {
     echo " [i] Initializing database."
 
     (
-      echo "--- create user '${DATABASE_NAME}'@'%' IDENTIFIED BY '${DBA_PASSWORD}';"
       echo "CREATE DATABASE IF NOT EXISTS ${DATABASE_NAME};"
-      echo "GRANT SELECT, INSERT, UPDATE, DELETE, DROP, CREATE VIEW, CREATE, INDEX, EXECUTE ON ${DATABASE_NAME}.* TO 'discovery'@'%' IDENTIFIED BY '${DBA_PASSWORD}';"
+      echo "--- GRANT SELECT, INSERT, UPDATE, DELETE, DROP, CREATE VIEW, CREATE, INDEX, EXECUTE ON ${DATABASE_NAME}.* TO 'discovery'@'%' IDENTIFIED BY '${DBA_PASSWORD}';"
       echo "FLUSH PRIVILEGES;"
     ) | mysql ${MYSQL_OPTS}
 
@@ -120,15 +140,6 @@ configureDatabase() {
       fi
     fi
 
-#     # create the ido schema
-#     #
-#     mysql ${MYSQL_OPTS} --force ${DATABASE_NAME}  < /init/database/mysql.sql
-#
-#     if [ $? -gt 0 ]
-#     then
-#       echo " [E] can't insert the Database Schema"
-#       exit 1
-#     fi
   fi
 
 }
