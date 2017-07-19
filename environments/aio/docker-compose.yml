@@ -222,8 +222,8 @@ services:
       - /share/etc/cm-icinga2.yaml:/etc/cm-icinga2.yaml
       - /share/etc/icinga2/objects.d:/etc/icinga2/objects.d
       - /share/usr/local/share/icinga2:/usr/local/share/icinga2
-      - /share/etc/icinga2/conf.d/coremedia_notifications.conf:/etc/icinga2/conf.d/coremedia_notifications.conf,
-      - /share/etc/icinga2/scripts/aws-notifications.rb:/etc/icinga2/scripts/aws-notifications.rb,
+      - /share/etc/icinga2/conf.d/coremedia_notifications.conf:/etc/icinga2/conf.d/coremedia_notifications.conf
+      - /share/etc/icinga2/scripts/aws-notifications.rb:/etc/icinga2/scripts/aws-notifications.rb
       - /share/usr/lib/monitoring-plugins/icingachecks.rb:/usr/local/lib/icingachecks.rb
       - /share/usr/lib/monitoring-plugins/check_cm_feeder_status.rb:/usr/lib/monitoring-plugins/check_cm_feeder_status
       - /share/usr/lib/monitoring-plugins/check_cm_cache.rb:/usr/lib/monitoring-plugins/check_cm_cache
