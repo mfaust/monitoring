@@ -1,5 +1,5 @@
 
-FROM bodsch/docker-icinga2:1707-28.1
+FROM bodsch/docker-icinga2:1707-29.2
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
@@ -7,11 +7,11 @@ ENV \
   ALPINE_MIRROR="mirror1.hs-esslingen.de/pub/Mirrors" \
   ALPINE_VERSION="v3.6" \
   TERM=xterm \
-  APK_ADD="build-base bind-tools drill py2-pip ruby ruby-dev nano" \
-  APK_DEL="build-base ruby-dev" \
-  GEMS="aws-sdk bigdecimal io-console ipaddress json openssl redis sinatra sinatra-basic-auth thin time_difference"
+  APK_ADD="py2-pip ruby-dev nano" \
+  APK_DEL="ruby-dev" \
+  GEMS="aws-sdk"
 
-LABEL version="1707-28.1"
+LABEL version="1707-29.2"
 
 # ---------------------------------------------------------------------------------------
 
