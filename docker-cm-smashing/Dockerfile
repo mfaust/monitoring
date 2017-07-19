@@ -39,7 +39,6 @@ RUN \
   rm -f /opt/${DASHBOARD}/jobs/twitter* && \
   rm -f /opt/${DASHBOARD}/dashboards/* && \
   cd ${DASHBOARD} && \
-  bundle config local.icinga2 /build && \
   sed -i "/gem 'twitter'/d" Gemfile && \
   echo "gem 'icinga2', '~> 0.7'" >> Gemfile && \
   bundle update && \

@@ -69,6 +69,11 @@ END
     -e 's|%PROXY_PATH%|'${PROXY_PATH}'|g' \
     ${CONFIG_FILE}
 
+  sed -i \
+    -e 's|%DASHBOARD%|'${DASHBOARD}'|g' \
+    /etc/supervisor.d/dashing.ini
+
+
   echo -e "\n"
   echo " ==================================================================="
   echo " Dashing AUTH_TOKEN set to '${AUTH_TOKEN}'"
