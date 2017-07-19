@@ -1,17 +1,25 @@
 
 html {
-  font-size: 100%;
-  -webkit-text-size-adjust: 100%;
-  -ms-text-size-adjust: 100%;
+  font-size: 110%;
+  -webkit-text-size-adjust: 110%;
+  -ms-text-size-adjust: 110%;
+  font-family: 'Roboto', 'Open Sans', "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 body {
   margin: 0;
-  background-color: #222;
-  font-size: 20px;
+  min-height: 550px;
+  background: #165aa8 url(../images/background_login.svg) no-repeat center center fixed;
+  background-size: cover;
+  background-blend-mode: overlay;
   color: #fff;
-  font-family: 'Open Sans', "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
+
+.content {
+  text-align: center;
+  margin-top: 40px;
+}
+
 
 b, strong {
   font-weight: bold;
@@ -29,6 +37,7 @@ a:visited {
 a:hover{
   text-decoration: none;
 }
+
 
 img {
   border: 0;
@@ -73,18 +82,90 @@ h3 {
   padding-top: 5px;
 }
 
-#footer div.footer {
-    color: #777;
-    font-size: 0.85em;
-    line-height: 1.5;
-    padding: 4px 10px 4px 4px;
-    text-align: right;
+.footer{
+  position: absolute;
+  width: 100%;
+  bottom: 16px;
+  padding: 0 16px;
+  z-index: 0;
+  display: block;
+  color: #000000;
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: whitesmoke;
 }
 
-#footer div.footer div.on-off {
-    cursor: pointer;
-    float: right;
-    margin-left: 20px;
-    margin-right: 10px;
-    margin-top: 3px;
+.footer p {
+  text-align: right;
+  padding-right: 30px;
+}
+
+ul {
+  list-style-type: none;
+}
+
+ul li {
+  display: inline-block;
+  margin: 1em;
+  width: 200px;
+  height: 100px;
+}
+
+ul li p {
+  display: inline-block;
+  max-width: 100px;
+  height: 28px;
+  line-height: 28px;
+  padding: 0 1em;
+  background-color: #fff;
+  border: 1px solid #aaa;
+  border-radius: 3px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  color: #333;
+  font-size: 13px;
+  text-decoration: none;
+  -webkit-transition: .2s;
+  transition: .2s;
+}
+
+.button {
+  background-repeat: no-repeat;
+  height: 100%;
+}
+
+.button_icinga {
+  background-image: url('../images/icinga_logo4.png');
+  background-size: 100%;
+}
+.button_grafana {
+  background-image: url('../images/grafana_logo_200.png');
+  background-size: 100%;
+}
+.button_opguide {
+  background-image: url('../images/opguide_logo_200.png');
+  background-size: 100%;
+}
+.button_dashboard {
+  background-image: url('../images/dashboard_logo_200.png');
+  background-size: 100%;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 200px;
+  background-color: #165aa8;
+  color: #fff;
+  text-align: center;
+  border-radius: 4px;
+  border: 1px solid black;
+  padding: 5px 0;
+  /* Position the tooltip */
+  position: absolute;
+  z-index: 1;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
 }
