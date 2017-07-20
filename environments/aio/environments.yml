@@ -49,6 +49,7 @@ services:
       AWS_REGION: eu-west-1
       AWS_SNS_ACCOUNT_ID: 240945249030
       AWS_SNS_TOPIC: app-monitoring
+      ICINGAWEB_URL: http://localhost/icinga
 
   icingaweb2:
     environment:

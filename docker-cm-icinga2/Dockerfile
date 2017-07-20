@@ -30,4 +30,3 @@ RUN \
   rm -rf \
     /tmp/* \
     /var/cache/apk/*
-

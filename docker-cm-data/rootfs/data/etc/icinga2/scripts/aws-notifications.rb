@@ -1,11 +1,15 @@
 #!/usr/bin/env ruby
+#
+#
+#
 
 require 'logger'
+require 'erb'
 
 @aws_region         = ENV.fetch('AWS_REGION'        , 'us-east-1')
 @aws_sns_account_id = ENV.fetch('AWS_SNS_ACCOUNT_ID', nil)
 @aws_sns_topic      = ENV.fetch('AWS_SNS_TOPIC'     , nil)
-@icingaweb_url      = ENV.fetch('ICINGAWEB_URL'     , 'https://icinga2/icingaweb2')
+@icingaweb_url      = ENV.fetch('ICINGAWEB_URL'     , 'http://localhost/icinga')
 
 # -----------------------------------------------------------------------------
 
@@ -14,7 +18,7 @@ file            = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT 
 file.sync       = true
 @logger         = Logger.new( file, 'weekly', 1024000 )
 
-@logger.level           = Logger::DEBUG
+@logger.level           = Logger::INFO
 @logger.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
 @logger.formatter       = proc do |severity, datetime, progname, msg|
   "[#{datetime.strftime( @logger.datetime_format )}] #{severity.ljust(5)} : #{msg}\n"
@@ -24,23 +28,23 @@ end
 
 def environments
 
-  ENV["HOSTNAME"] = "icinga2-master"
-  ENV["HOSTADDRESS"] = "blueprint-box"
-  ENV["HOSTDISPLAYNAME"] = "blueprint-box"
-  ENV["HOSTNAME"] = "blueprint-box"
-  ENV["LASTCHECK"] = "1500293636"
-  ENV["LASTSTATE"] = "CRITICAL"
-  ENV["LASTSTATETYPE"] = "HARD"
-  ENV["NOTIFICATIONAUTHORNAME"] = "icinga"
-  ENV["NOTIFICATIONCOMMENT"] = "force"
-  ENV["NOTIFICATIONTYPE"] = "CUSTOM"
-  ENV["SERVICEDISPLAYNAME"] = "CoreMedia - CAEFeeder - live"
-  ENV["SERVICEDURATION"] = "2903.200815"
-  ENV["SERVICENAME"] = "CAEFeeder-caefeeder_live"
-  ENV["SERVICEOUTPUT"] = "CRITICAL - no data found - service not running!?"
-  ENV["SERVICEPERFDATA"] = ""
-  ENV["SERVICESTATE"] = "CRITICAL"
-  ENV["SERVICESTATETYPE"] = "HARD"
+  ENV["HOST_NAME"] = "icinga2-master"
+  ENV["HOST_ADDRESS"] = "blueprint-box"
+  ENV["HOST_DISPLAYNAME"] = "blueprint-box"
+  ENV["HOST_NAME"] = "blueprint-box"
+  ENV["LAST_CHECK"] = "1500293636"
+  ENV["LAST_STATE"] = "CRITICAL"
+  ENV["LAST_STATETYPE"] = "HARD"
+  ENV["NOTIFICATION_AUTHORNAME"] = "icinga"
+  ENV["NOTIFICATION_COMMENT"] = "force"
+  ENV["NOTIFICATION_TYPE"] = "CUSTOM"
+  ENV["SERVICE_DISPLAYNAME"] = "CoreMedia - CAEFeeder - live"
+  ENV["SERVICE_DURATION"] = "2903.200815"
+  ENV["SERVICE_NAME"] = "CAEFeeder-caefeeder_live"
+  ENV["SERVICE_OUTPUT"] = "CRITICAL - no data found - service not running!?"
+  ENV["SERVICE_PERFDATA"] = ""
+  ENV["SERVICE_STATE"] = "CRITICAL"
+  ENV["SERVICE_STATETYPE"] = "HARD"
 
 end
 
@@ -50,24 +54,7 @@ def sns
 end
 
 
-def create_message
-
-#   @logger.debug ENV.to_a
-
-  notification_type = ENV.fetch('NOTIFICATIONTYPE',nil)
-
-  host_name = ENV.fetch('HOSTNAME',nil)
-  host_address = ENV.fetch('HOSTADDRESS',nil)
-  host_display_name = ENV.fetch('HOSTDISPLAYNAME',nil)
-
-  service_name = ENV.fetch('SERVICENAME',nil)
-
-  last_check = ENV.fetch('LASTCHECK',nil)
-  last_state = ENV.fetch('LASTSTATE',nil)
-  last_state_type = ENV.fetch('LASTSTATETYPE',nil)
-
-  comment = nil
-  author = nil
+def subject( notification_type, state, host_name, service_display_name = nil )
 
   subject = format(
     '%s - %s',
@@ -75,119 +62,108 @@ def create_message
     host_name
   )
 
-  if( notification_type == 'ACKNOWLEDGEMENT' )
-
-    author  = ENV.fetch('NOTIFICATIONAUTHORNAME',nil)
-    comment = ENV.fetch('NOTIFICATIONCOMMENT',nil)
+  # service
+  unless( service_display_name.nil? )
+    subject = format(
+      '%s / %s',
+      subject,
+      service_display_name
+    )
   end
+
+  # host
+
+  # finalize
+  subject = format(
+    '%s : %s',
+    state, subject
+  )
+end
+
+
+def create_message
+
+  env = {}
+  begin
+    # transform ENV to an hash
+    env = Hash[*ENV.to_a.flatten!]
+  rescue => e
+    @logger.error(e)
+  end
+
+  notification_type    = env.dig('NOTIFICATION_TYPE')
+  notification_author  = env.dig('NOTIFICATION_AUTHORNAME')
+  notification_comment = env.dig('NOTIFICATION_COMMENT')
+  last_check           = env.dig('LAST_CHECK')
+  last_state           = env.dig('LAST_STATE')
+  last_state_type      = env.dig('LAST_STATETYPE')
+
+  host_name            = env.dig('HOST_NAME')
+  host_address         = env.dig('HOST_ADDRESS')
+  host_display_name    = env.dig('HOST_DISPLAYNAME')
+  host_state_type      = env.dig('HOST_STATETYPE')
+  host_output          = env.dig('HOST_OUTPUT')
+  host_perfdata        = env.dig('HOST_PERFDATA')
+  host_customer        = env.dig('HOST_CUSTOMER')
+  host_environment     = env.dig('HOST_ENVIORNMENT')
+  host_team            = env.dig('HOST_TEAM')
+  host_tier            = env.dig('HOST_TIER')
+
+  service_name         = env.dig('SERVICE_NAME')
+  service_display_name = env.dig('SERVICE_DISPLAYNAME')
+  service_state_type   = env.dig('SERVICE_STATETYPE')
+  service_output       = env.dig('SERVICE_OUTPUT')
+  service_perfdata     = env.dig('SERVICE_PERFDATA')
 
   if( service_name )
 
-    state                 = ENV.fetch('SERVICESTATE',nil)
-    service_display_name  = ENV.fetch('SERVICEDISPLAYNAME',nil)
-    service_state_type    = ENV.fetch('SERVICESTATETYPE',nil)
-    duration      = ENV.fetch('SERVICEDURATION',nil)
-    service_perf_data     = ENV.fetch('SERVICEPERFDATA',nil)
-    service_output        = ENV.fetch('SERVICEOUTPUT',nil)
+    state                 = env.dig('SERVICE_STATE')
+    duration              = env.dig('SERVICE_DURATION')
 
-    details_url = format(
+    link_details = format(
       '%s/monitoring/service/show?host=%s&service=%s',
       @icingaweb_url,
       host_name,
       service_name
     )
 
-    ack_url = format(
+    link_ack = format(
       '%s/monitoring/service/acknowledge-problem?host=%s&service=%s',
       @icingaweb_url,
       host_name,
       service_name
     )
-
-    subject = format(
-      '%s / %s',
-      subject,
-      service_display_name
-    )
-
   else
 
-    state           = ENV.fetch('HOSTSTATE',nil)
-    host_state_type = ENV.fetch('HOSTSTATETYPE',nil)
-    host_output     = ENV.fetch('HOSTOUTPUT',nil)
-    duration   = ENV.fetch('HOSTDURATION',nil)
-    host_perfdata   = ENV.fetch('HOSTPERFDATA',nil)
+    state           = env.dig('HOST_STATE')
+    duration        = env.dig('HOST_DURATION')
 
-    details_url = format(
+    link_details = format(
       '%s/monitoring/host/show?host=%s',
       @icingaweb_url,
       host_name
     )
 
-    ack_url = format(
+    link_ack = format(
       '%s/monitoring/host/acknowledge-problem?host=%s',
       @icingaweb_url,
       host_name
     )
-
   end
 
-  failed_since = Time.at(duration.to_f).strftime('%H:%M:%S')
-
-  last_check_datetime = Time.at(last_check.to_f)
-  last_check = last_check_datetime.strftime('%F %H:%M:%S %Z')
-
+  failed_since          = Time.at(duration.to_f).strftime('%H:%M:%S')
+  last_check_datetime   = Time.at(last_check.to_f)
+  last_check            = last_check_datetime.strftime('%F %H:%M:%S %Z')
   problem_time_datetime = Time.now().to_i - Time.at( duration.to_i ).to_i
-  problem_time = Time.at(problem_time_datetime).strftime('%F %H:%M:%S %Z')
+  problem_time          = Time.at(problem_time_datetime).strftime('%F %H:%M:%S %Z')
 
-  subject = format(
-    '%s : %s',
-    state, subject
+  template = File.read( '/etc/icinga2/scripts/notification.erb')
+  renderer = ERB.new( template, nil, '-' )
+  # render the template
+  body     = renderer.result(binding)
+  subject  = subject( notification_type, state, host_name, service_display_name )
 
-  )
-
-  body_text = format(
-    '***** Icinga2 %s Notification ******
-
-  Host:              %s (%s)
-  Last Check:        %s
-  Duration:          %s hours (since %s)
-  ',
-    notification_type.capitalize,
-    host_name,
-    host_address,
-    last_check,
-    failed_since,
-    problem_time
-  )
-
-    if( notification_type == 'ACKNOWLEDGEMENT' )
-      body_text += format(
-        '
-  Comment:           %s
-  Author:            %s',
-    comment,
-    author
-  )
-
-    end
-
-    body_text += format('
-  Show Details:      %s',
-    details_url=details_url
-    )
-
-    if( ['RECOVERY', 'DOWNTIME', 'FLAPPINGSTART', 'FLAPPINGEND'].include?(notification_type) )
-      body_text += format('
-  Acknowledge:       %s
-    ',
-    ack_url=ack_url,
-    )
-    end
-
-  [subject,body_text]
-
-#  @logger.debug body_text
+  [subject,body]
 
 end
 
@@ -199,8 +175,8 @@ def publish( params = {} )
 
   topic_arn = sprintf( 'arn:aws:sns:%s:%s:%s', @aws_region, @aws_sns_account_id, @aws_sns_topic )
 
-  @logger.debug( subject )
-  @logger.debug( message )
+  @logger.info( subject )
+  @logger.info( message )
   @logger.debug(topic_arn)
 
   resp = sns.publish(
