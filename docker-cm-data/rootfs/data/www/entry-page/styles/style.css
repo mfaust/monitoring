@@ -15,6 +15,11 @@ body {
   color: #fff;
 }
 
+.head img {
+  float:left;
+  width:150px
+}
+
 .content {
   text-align: center;
   margin-top: 40px;
@@ -60,7 +65,7 @@ h1, h2, h3, h4, h5, p {
 }
 
 h1 {
-  padding-top: 12px;
+  padding-top: 1.3em;
   text-align: center;
   font-size: 40px;
   font-weight: 400;
@@ -96,8 +101,9 @@ h3 {
 }
 
 .footer p {
-  text-align: right;
-  padding-right: 30px;
+  position: fixed;
+  right: 15px;
+  bottom: 10px;
 }
 
 ul {

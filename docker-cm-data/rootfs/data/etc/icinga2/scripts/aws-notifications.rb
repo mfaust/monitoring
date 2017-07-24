@@ -27,40 +27,32 @@ end
 
 # -----------------------------------------------------------------------------
 
-def environments
-
-  ENV["HOST_NAME"] = "icinga2-master"
-  ENV["HOST_ADDRESS"] = "blueprint-box"
-  ENV["HOST_DISPLAYNAME"] = "blueprint-box"
-  ENV["HOST_NAME"] = "blueprint-box"
-  ENV["LAST_CHECK"] = "1500293636"
-  ENV["LAST_STATE"] = "CRITICAL"
-  ENV["LAST_STATETYPE"] = "HARD"
-  ENV["NOTIFICATION_AUTHORNAME"] = "icinga"
-  ENV["NOTIFICATION_COMMENT"] = "force"
-  ENV["NOTIFICATION_TYPE"] = "CUSTOM"
-  ENV["SERVICE_DISPLAYNAME"] = "CoreMedia - CAEFeeder - live"
-  ENV["SERVICE_DURATION"] = "2903.200815"
-  ENV["SERVICE_NAME"] = "CAEFeeder-caefeeder_live"
-  ENV["SERVICE_OUTPUT"] = "CRITICAL - no data found - service not running!?"
-  ENV["SERVICE_PERFDATA"] = ""
-  ENV["SERVICE_STATE"] = "CRITICAL"
-  ENV["SERVICE_STATETYPE"] = "HARD"
-
-end
-
-
 def sns
   @sns = Aws::SNS::Client.new( region: @aws_region )
 end
 
+# Returns a subject for a Notification
+#
+# @param [String, #read] notification_type the type of a notification
+# @param [String, #read] state the state of a notification (OK, WARNING, CRITICAL)
+# @param [String, #read] host_name the host name
+# @param [String, #read] service_display_name (optional) view a display name
+#
+# @return [String, #read] 'CRITICAL : CUSTOM - ip-172-33-41-54.ec2.internal / License - master_live_server'
+#
+def subject( params = {} )
 
-def subject( notification_type, state, host_name, service_display_name = nil )
+  notification_type = params.dig(:notification_type)
+  customer = params.dig(:customer)
+  environment = params.dig(:environment)
+  state = params.dig(:state)
+  service_display_name = params.dig(:service_display_name)
 
   subject = format(
-    '%s - %s',
+    '%s - %s - %s ',
     notification_type,
-    host_name
+    customer,
+    environment
   )
 
   # service
@@ -76,8 +68,8 @@ def subject( notification_type, state, host_name, service_display_name = nil )
 
   # finalize
   subject = format(
-    '%s : %s',
-    state, subject
+    '%s : (%s)',
+    subject, state
   )
 end
 
@@ -115,6 +107,10 @@ def create_message
   service_state_type   = env.dig('SERVICE_STATETYPE')
   service_output       = env.dig('SERVICE_OUTPUT')
   service_perfdata     = env.dig('SERVICE_PERFDATA')
+
+  aws_name             = env.dig('AWS_NAME')
+  aws_region           = env.dig('AWS_REGION')
+  aws_instance_id      = env.dig('AWS_INSTANCE_ID')
 
   if( service_name )
 
@@ -162,7 +158,14 @@ def create_message
   renderer = ERB.new( template, nil, '-' )
   # render the template
   body     = renderer.result(binding)
-  subject  = subject( notification_type, state, host_name, service_display_name )
+  subject  = subject(
+    notification_type: notification_type,
+    state: state,
+    host_name: host_name,
+    service_display_name: service_display_name,
+    customer: host_customer,
+    environment: host_environment
+  )
 
   [subject,body]
 
@@ -194,7 +197,6 @@ def publish( params = {} )
 
 end
 
-# environments
 
 subject, body = create_message
 
