@@ -59,7 +59,7 @@ module Jolokia
         :read_timeout => timeout
       ) do |http|
 
-        max_retries   = 3
+        max_retries   = 2
         times_retried = 0
 
         begin

@@ -490,7 +490,7 @@ module DataCollector
       result[:services] = *services
       result[:checks]   = *checks
 
-      logger.debug( JSON.pretty_generate( result ) )
+#      logger.debug( JSON.pretty_generate( result ) )
         # send json to jolokia
       begin
         self.collectMeasurements( result )
@@ -980,6 +980,8 @@ module DataCollector
           next
         end
 
+        logger.debug( 'block this job:' )
+        logger.debug( { :short => short, :fqdn => fqdn } )
         @jobs.add( { :short => short, :fqdn => fqdn } )
 
         start = Time.now
@@ -990,19 +992,33 @@ module DataCollector
         # discussion
         # we need this in realtime, or can we cache this for ... 1 minute or more?
         #
-        discoveryData    = @database.discoveryData( { :ip => ip, :short => short, :fqdn => fqdn } )
+        begin
+          discoveryData    = @database.discoveryData( { :ip => ip, :short => short, :fqdn => fqdn } )
+        rescue => e
+          logger.error(e)
+        end
 
         # build prepared datas
         #
-        @prepare.buildMergedData( { :hostname => short, :fqdn => fqdn, :data => discoveryData } )
+        begin
+          @prepare.buildMergedData( { :hostname => short, :fqdn => fqdn, :data => discoveryData } )
+        rescue => e
+          logger.error(e)
+        end
 
         # run checks
         #
-        self.createBulkCheck( { :hostname => short, :fqdn => fqdn } )
+        begin
+          self.createBulkCheck( { :hostname => short, :fqdn => fqdn } )
+        rescue => e
+          logger.error(e)
+        end
 
         finish = Time.now
         logger.info( sprintf( 'collect data in %s seconds', (finish - start).round(2) ) )
 
+        logger.debug( 'give job free:' )
+        logger.debug( { :short => short, :fqdn => fqdn } )
         @jobs.del( { :short => short, :fqdn => fqdn } )
 
       end
