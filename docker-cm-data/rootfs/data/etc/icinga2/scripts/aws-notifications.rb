@@ -3,6 +3,7 @@
 #
 #
 
+require 'aws-sdk'
 require 'logger'
 require 'erb'
 
@@ -179,13 +180,17 @@ def publish( params = {} )
   @logger.info( message )
   @logger.debug(topic_arn)
 
-  resp = sns.publish(
-    topic_arn: topic_arn,
-    subject: subject,
-    message: message
-  )
+  begin
+    resp = sns.publish(
+      topic_arn: topic_arn,
+      subject: subject,
+      message: message
+    )
 
-  @logger.debug(resp)
+    @logger.debug(resp)
+  rescue => e
+    @logger.error(e)
+  end
 
 end
 
