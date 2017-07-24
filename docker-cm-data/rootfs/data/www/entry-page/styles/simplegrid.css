@@ -11,9 +11,9 @@
 	box-sizing: border-box;
 }
 
-body {
+/*body {
 	margin: 0;
-}
+}*/
 
 [class*='col-'] {
 	float: left;

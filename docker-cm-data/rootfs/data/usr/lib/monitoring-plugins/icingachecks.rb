@@ -78,12 +78,14 @@ class Icinga2Check
       end
     end
 
-    data    = data.dig(service)
-
     unless(data.nil?)
-      usePercent = data.dig('usePercent')
-      warning    = data.dig('warning')
-      critical   = data.dig('critical')
+      data    = data.dig(service)
+
+      unless(data.nil?)
+        usePercent = data.dig('usePercent')
+        warning    = data.dig('warning')
+        critical   = data.dig('critical')
+      end
     end
 
 

@@ -35,7 +35,7 @@ services:
       MEMCACHE_HOST: memcached
       REDIS_HOST: redis
 
-  icinga2-master:
+  cm-icinga2-master:
     environment:
       MYSQL_HOST: database
       MYSQL_ROOT_PASS: database.pass
@@ -46,6 +46,10 @@ services:
       ICINGA_MASTER: icinga2-master
       ICINGA_API_USERS: root:icinga,icingaweb:icingaweb,dashing:dashing,cert:foo-bar
       REDIS_HOST: redis
+      AWS_REGION: eu-west-1
+      AWS_SNS_ACCOUNT_ID: 240945249030
+      AWS_SNS_TOPIC: app-monitoring
+      ICINGAWEB_URL: http://localhost/icinga
 
   icingaweb2:
     environment:
@@ -57,7 +61,7 @@ services:
       ICINGA2_CMD_API_USER: icingaweb
       ICINGA2_CMD_API_PASS: icingaweb
 
-  smashing-icinga2:
+  cm-smashing:
     environment:
       ICINGA_HOST: icinga2-master
       ICINGA_API_USER: dashing

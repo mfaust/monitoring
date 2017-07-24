@@ -30,7 +30,7 @@ waitForDatabase() {
 
   RETRY=50
 
-  # wait for database
+  # wait for database #1
   #
   until [ ${RETRY} -le 0 ]
   do
@@ -40,13 +40,19 @@ waitForDatabase() {
 
     echo " [i] Waiting for database host '${MYSQL_HOST}' to come up (${RETRY})"
 
-    sleep 2s
+    sleep 3s
     RETRY=$(expr ${RETRY} - 1)
   done
 
+  if [ $RETRY -le 0 ]
+  then
+    echo " [E] could not find a database on ${MYSQL_HOST}:${MYSQL_PORT}"
+    exit 1
+  fi
+
   RETRY=50
 
-  # wait for database
+  # wait for database #2
   #
   until [ ${RETRY} -le 0 ]
   do
@@ -56,13 +62,13 @@ waitForDatabase() {
 
     echo " [i] Waiting for database to come up (#{RETRY})"
 
-    sleep 2s
+    sleep 3s
     RETRY=$(expr ${RETRY} - 1)
   done
 
   if [ $RETRY -le 0 ]
   then
-    echo " [E] Could not connect to Database on ${MYSQL_HOST}:${MYSQL_PORT}"
+    echo " [E] could not connect to database on ${MYSQL_HOST}:${MYSQL_PORT}"
     exit 1
   fi
 
@@ -81,10 +87,37 @@ waitForDatabase() {
     RETRY=$(expr ${RETRY} - 1)
   done
 
+  if [ $RETRY -le 0 ]
+  then
+    echo " [E] timeout for initdb on ${MYSQL_HOST}:${MYSQL_PORT}"
+    exit 1
+  fi
+
 }
 
 
 configureDatabase() {
+
+  # create user - when they NOT exists
+  query="select host, user, password from mysql.user where user = '${DATABASE_NAME}';"
+  status=$(mysql ${MYSQL_OPTS} --batch --execute="${query}" | wc -w)
+
+  if [ ${status} -eq 0 ]
+  then
+    echo " [i] create database '${DATABASE_NAME}' with user and grants for 'discovery'"
+    (
+      echo "create user '${DATABASE_NAME}'@'%' IDENTIFIED BY '${DBA_PASSWORD}';"
+      echo "--- CREATE DATABASE IF NOT EXISTS ${DATABASE_NAME};"
+      echo "GRANT SELECT, INSERT, UPDATE, DELETE, DROP, CREATE VIEW, CREATE, INDEX, EXECUTE ON ${DATABASE_NAME}.* TO 'discovery'@'%' IDENTIFIED BY '${DBA_PASSWORD}';"
+      echo "FLUSH PRIVILEGES;"
+    ) | mysql ${MYSQL_OPTS}
+
+    if [ $? -eq 1 ]
+    then
+      echo " [E] can't create Database '${DATABASE_NAME}'"
+      exit 1
+    fi
+  fi
 
   # check if database already created ...
   #
@@ -100,9 +133,8 @@ configureDatabase() {
     echo " [i] Initializing database."
 
     (
-      echo "--- create user '${DATABASE_NAME}'@'%' IDENTIFIED BY '${DBA_PASSWORD}';"
       echo "CREATE DATABASE IF NOT EXISTS ${DATABASE_NAME};"
-      echo "GRANT SELECT, INSERT, UPDATE, DELETE, DROP, CREATE VIEW, CREATE, INDEX, EXECUTE ON ${DATABASE_NAME}.* TO 'discovery'@'%' IDENTIFIED BY '${DBA_PASSWORD}';"
+      echo "--- GRANT SELECT, INSERT, UPDATE, DELETE, DROP, CREATE VIEW, CREATE, INDEX, EXECUTE ON ${DATABASE_NAME}.* TO 'discovery'@'%' IDENTIFIED BY '${DBA_PASSWORD}';"
       echo "FLUSH PRIVILEGES;"
     ) | mysql ${MYSQL_OPTS}
 
@@ -120,15 +152,6 @@ configureDatabase() {
       fi
     fi
 
-#     # create the ido schema
-#     #
-#     mysql ${MYSQL_OPTS} --force ${DATABASE_NAME}  < /init/database/mysql.sql
-#
-#     if [ $? -gt 0 ]
-#     then
-#       echo " [E] can't insert the Database Schema"
-#       exit 1
-#     fi
   fi
 
 }
