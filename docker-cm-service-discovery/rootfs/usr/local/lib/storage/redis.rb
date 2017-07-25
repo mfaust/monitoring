@@ -76,6 +76,32 @@ module Storage
     end
 
 
+    def monitoring
+
+      data = @redis.info
+
+      data.reject! { |k,v| k =~ /.*_human$/ }
+      data.each do |key,value|
+
+        case key
+          when /^used_.*/, /maxmemory.*/
+            data[key] = value.to_f
+
+          when /.*_per_second$/
+            data[key] = value.to_f
+
+          when /^db[0-9]+$/
+            m = {}
+            value.split(',').map { |e| e.split '=' }.each do |k,v|
+              m[k] = v.to_i
+            end
+            data[key] = m
+
+        end
+      end
+    end
+
+
     def get( key )
 
       data =  @redis.get( key )

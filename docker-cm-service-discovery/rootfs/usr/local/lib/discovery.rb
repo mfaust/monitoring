@@ -39,7 +39,8 @@ module ServiceDiscovery
         80,       # http
         443,      # https
         3306,     # mysql
-        5432,     # postrgres
+        5432,     # postgres
+        6379,     # redis
         8081,     # Apache mod_status
         9100,     # node_exporter
         28017,    # mongodb
@@ -105,8 +106,8 @@ module ServiceDiscovery
 
       @scanPorts         = ports
 
-      version             = '1.7.6'
-      date                = '2017-06-28'
+      version             = '1.8.0'
+      date                = '2017-07-25'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - Service Discovery' )

@@ -101,6 +101,8 @@ services:
     image: bodsch/docker-redis:1707-27.1
     container_name: redis
     hostname: redis
+    ports:
+      - 6379:6379
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - redis:/var/lib/redis
