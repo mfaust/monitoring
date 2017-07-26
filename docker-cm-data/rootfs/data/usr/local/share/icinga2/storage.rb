@@ -84,9 +84,14 @@ module Storage
 
     def get( key )
 
-      data =  @redis.get( key )
+      begin
+        data =  @redis.get( key )
+      rescue => e
+        logger.error(e)
+        data = nil
+      end
 
-      if( data == nil )
+      if( data.nil? )
         return nil
       elsif( data == 'true' )
         return true
@@ -112,12 +117,22 @@ module Storage
 
     def set( key, value, expire = nil )
 
-      if(!expire.nil?)
+      unless(expire.nil?)
 
-        return @redis.setex( key, expire, value )
+        begin
+          @redis.setex( key, expire, value )
+        rescue => e
+          logger.error(e)
+          data = nil
+        end
       end
 
-      return @redis.set( key, value )
+      begin
+        @redis.set( key, value )
+      rescue => e
+        logger.error(e)
+        data = nil
+      end
     end
 
 
