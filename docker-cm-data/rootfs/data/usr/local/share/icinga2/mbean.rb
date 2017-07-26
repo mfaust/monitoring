@@ -11,7 +11,7 @@ module MBean
 
     include Logging
 
-    
+
     def initialize( params = {} )
 
       redis = params.dig(:redis)

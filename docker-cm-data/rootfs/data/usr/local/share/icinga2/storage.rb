@@ -84,11 +84,12 @@ module Storage
 
     def get( key )
 
+      data = nil
+
       begin
         data =  @redis.get( key )
       rescue => e
         logger.error(e)
-        data = nil
       end
 
       if( data.nil? )
@@ -102,16 +103,29 @@ module Storage
       else
 
         begin
-          data = eval( data )
+          # darf nur mit einem String durchgeführt werden, der sinnvoll in ein hash umgewandelt werden kann
+          # singuläre strings werfen hier einen fehler!
+          #
+          if(data.include?('{'))
+            data = eval( data )
+          end
         rescue => e
           logger.error( e )
+          logger.error(e.backtrace.join("\n"))
+          logger.debug(data)
         end
 
 #         data = JSON.parse( data, :quirks_mode => true )
       end
 
-      return data.deep_string_keys
+      begin
+        data = data.deep_string_keys
+      rescue => e
+        logger.error( e )
+        logger.error(e.backtrace.join("\n"))
+      end
 
+      data
     end
 
 
