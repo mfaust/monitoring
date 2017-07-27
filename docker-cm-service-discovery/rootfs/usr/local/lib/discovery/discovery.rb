@@ -10,7 +10,7 @@ module ServiceDiscovery
       host = params.dig(:fqdn)
       port = params.dig(:port)
 
-      fixedPorts = [80,443,8081,3306,5432,9100,28017,55555]
+      fixedPorts = [80,443,8081,3306,5432,6379,9100,28017,55555]
       services   = Array.new
 
       if( fixedPorts.include?( port ) )
@@ -26,6 +26,8 @@ module ServiceDiscovery
           services.push('mysql')
         when 5432
           services.push('postgres')
+        when 6379
+          services.push('redis')
         when 9100
           services.push('node-exporter')
         when 28017

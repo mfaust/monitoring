@@ -105,20 +105,19 @@ class Icinga2Check
     # look in our cache
     cache_key = format('dns::%s',hostname)
 
-#    logger.debug( "redis: #{@redis.get(cache_key)}" )
+#     data      = @redis.get( cache_key )
+# #    logger.debug( "cache_key: #{cache_key}" )
+# #    logger.debug( "data     : #{data}" )
+#
+#     if(data.nil?)
+#       data = Utils::Network.resolv( hostname )
+# #       logger.debug( data )
+#       @redis.set( cache_key, data, 320 )
+#     end
 
-    data      = @redis.get( cache_key )
+    data = Utils::Network.resolv( hostname )
 
-    if( data == nil )
-
-      data = Utils::Network.resolv( hostname )
-
-#       logger.debug( data )
-
-      @redis.set( cache_key, data, 320 )
-    end
-
-    hostname = data.dig('long')
+    hostname = data.dig(:long)
 
     return hostname
 

@@ -70,7 +70,7 @@ services:
 
   jolokia:
     restart: always
-    image: bodsch/docker-jolokia:1707-27.1
+    image: bodsch/docker-jolokia:1707-30.1
     container_name: jolokia
     hostname: jolokia
     depends_on:
@@ -101,6 +101,8 @@ services:
     image: bodsch/docker-redis:1707-27.1
     container_name: redis
     hostname: redis
+    ports:
+      - 6379:6379
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - redis:/var/lib/redis

@@ -11,7 +11,7 @@ module MBean
 
     include Logging
 
-    
+
     def initialize( params = {} )
 
       redis = params.dig(:redis)
@@ -71,7 +71,7 @@ module MBean
 
         s   = data.dig(service)
 
-        if( s == nil )
+        if( s.is_a?(String) && s.size <= 2 )
           # no service found
           logger.debug("no service '#{service}' found")
           return false

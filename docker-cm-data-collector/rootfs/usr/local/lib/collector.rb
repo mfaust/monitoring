@@ -61,8 +61,8 @@ module DataCollector
       mysqlUser           = settings.dig(:mysql, :user)
       mysqlPassword       = settings.dig(:mysql, :password)
 
-      version            = '1.9.4'
-      date               = '2017-06-28'
+      version            = '1.10.0'
+      date               = '2017-07-25'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - DataCollector' )
@@ -254,11 +254,38 @@ module DataCollector
         data = pgsql.run()
 
 #         logger.debug( data )
-
       end
 
     end
 
+
+    def redisData( host, data = {} )
+
+      logger.debug("redisData( #{host}, #{data} )")
+
+      port = data.dig(:port) || 6379
+
+      unless( port.nil? )
+
+        settings = {
+          :host => host,
+          :port => port
+        }
+      end
+
+      result = Utils::Network.portOpen?( host, port )
+
+      if( result == false )
+        logger.warn( sprintf( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
+
+        return JSON.parse( JSON.generate( { :status => 500 } ) )
+      else
+
+        logger.debug( 'read redis data ...' )
+
+        @redis.monitoring
+      end
+    end
 
     def nodeExporterData( host, data = {} )
 
@@ -440,6 +467,9 @@ module DataCollector
           when 'postgres'
             # Postgres
             bulk.push( '' )
+          when 'redis'
+            # redis
+            bulk.push('')
           when 'resourced'
             # resourced
           when 'http-status'
@@ -623,6 +653,9 @@ module DataCollector
             when 'postgres'
               # Postgres
               d = self.postgresData( fqdn )
+            when 'redis'
+              # redis
+              d = self.redisData( fqdn )
             when 'node-exporter'
               # node_exporter
               d = self.nodeExporterData( fqdn )
