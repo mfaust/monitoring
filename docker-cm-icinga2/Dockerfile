@@ -7,13 +7,13 @@ ENV \
   TERM=xterm \
   APK_ADD="py2-pip ruby-dev nano" \
   APK_DEL="ruby-dev" \
-  GEMS="aws-sdk ipaddress"
+  GEMS="aws-sdk ipaddress redis"
 
 LABEL version="1707-30.2"
 
 # ---------------------------------------------------------------------------------------
 
-WORKDIR /
+COPY rootfs/ /
 
 RUN \
   apk --no-cache update && \
