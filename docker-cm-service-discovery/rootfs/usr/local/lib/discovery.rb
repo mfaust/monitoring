@@ -208,6 +208,7 @@ module ServiceDiscovery
           #
           unless( serviceData.dig( 'vhosts' ).nil? )
 
+            begin
             http_vhosts = ServiceDiscovery::HttpVhosts.new( { host: fqdn, port: port } )
             http_vhosts_data = http_vhosts.tick
 
@@ -217,6 +218,10 @@ module ServiceDiscovery
               http_vhosts_data = http_vhosts_data.dig('vhosts')
 
               data[d]['vhosts'] = http_vhosts_data
+            end
+            rescue => e
+              logger.error( 'can\'t get vhost data' )
+              logger.error(e)
             end
           end
 

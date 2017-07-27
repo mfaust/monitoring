@@ -7,9 +7,9 @@ ENV \
   TERM=xterm \
   APK_ADD="py2-pip ruby-dev nano" \
   APK_DEL="ruby-dev" \
-  GEMS="aws-sdk"
+  GEMS="aws-sdk ipaddress"
 
-LABEL version="1707-30.1"
+LABEL version="1707-30.2"
 
 # ---------------------------------------------------------------------------------------
 
