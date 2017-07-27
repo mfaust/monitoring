@@ -1,25 +1,21 @@
 
-FROM bodsch/docker-icinga2:1707-29.2
+FROM bodsch/docker-icinga2:1707-30.1
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
-  ALPINE_MIRROR="mirror1.hs-esslingen.de/pub/Mirrors" \
-  ALPINE_VERSION="v3.6" \
   TERM=xterm \
   APK_ADD="py2-pip ruby-dev nano" \
   APK_DEL="ruby-dev" \
   GEMS="aws-sdk"
 
-LABEL version="1707-29.2"
+LABEL version="1707-30.1"
 
 # ---------------------------------------------------------------------------------------
 
 WORKDIR /
 
 RUN \
-  echo "http://${ALPINE_MIRROR}/alpine/${ALPINE_VERSION}/main"       > /etc/apk/repositories && \
-  echo "http://${ALPINE_MIRROR}/alpine/${ALPINE_VERSION}/community" >> /etc/apk/repositories && \
   apk --no-cache update && \
   apk --no-cache upgrade && \
   apk --no-cache add ${APK_ADD} && \
