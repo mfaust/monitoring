@@ -315,3 +315,8 @@ jolokia:
     webdav:
       description: Webdav
       metrics: []
+
+    cloud-manager-backend:
+      description: Cloud Manager Backend (AWS specific)
+      metrics: []
+

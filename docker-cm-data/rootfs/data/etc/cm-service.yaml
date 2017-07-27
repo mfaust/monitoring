@@ -261,3 +261,9 @@ services:
     - caches
     - caches-ecommerce
     - caches-ecommerce-fragment
+
+  cloud-manager-backend:
+    description: Cloud Manager Backend (AWS specific)
+    port: 44099
+    cap_connection: true
+
