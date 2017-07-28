@@ -1,5 +1,5 @@
 
-FROM bodsch/docker-icinga2:1707-30.1
+FROM bodsch/docker-icinga2:1707-30.2
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
@@ -9,7 +9,7 @@ ENV \
   APK_DEL="ruby-dev" \
   GEMS="aws-sdk ipaddress redis"
 
-LABEL version="1707-30.2"
+LABEL version="1707-30.3"
 
 # ---------------------------------------------------------------------------------------
 

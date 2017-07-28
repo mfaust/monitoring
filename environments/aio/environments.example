@@ -106,6 +106,7 @@ services:
       # ICINGA2_PORT: 5665
       ICINGA2_CMD_API_USER: icingaweb
       ICINGA2_CMD_API_PASS: icingaweb
+      ICINGAWEB2_USERS: coremedia:coremedia,icinga:icinga
 
   cm-rest-service:
     environment:
