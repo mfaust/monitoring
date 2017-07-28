@@ -33,7 +33,7 @@ services:
       # (see above in this configuration part!)
       CARBON_HOST: carbon
       MEMCACHE_HOST: memcached
-      REDIS_HOST: redis
+      GRAFANA_USERS: coremedia:coremedia:
 
   cm-icinga2-master:
     environment:
@@ -69,7 +69,14 @@ services:
       ICINGA_API_PASSWORD: dashing
       ICINGAWEB_URL: /icinga
       PROXY_PATH: /dashing
-
+      ICINGA_CERT_SERVICE: 'true'
+      ICINGA_CERT_SERVICE_BA_USER: admin
+      ICINGA_CERT_SERVICE_BA_PASSWORD: admin
+      ICINGA_CERT_SERVICE_API_USER: root
+      ICINGA_CERT_SERVICE_API_PASSWORD: icinga
+      ICINGA_CERT_SERVICE_SERVER: icinga2-master
+      ICINGA_CERT_SERVICE_PORT: 4567
+      ICINGA_CERT_SERVICE_PATH: /
 
   cm-rest-service:
     environment:

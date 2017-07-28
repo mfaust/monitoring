@@ -46,9 +46,8 @@ services:
       # CARBON_PORT: 2003
       MEMCACHE_HOST: memcached
       # MEMCACHE_PORT: 11211
-      REDIS_HOST: redis
-      # REDIS_PORT: 6379
       # DATABASE_GRAFANA_PASS: grafana
+      GRAFANA_USERS: foo:barbarbar:,bar:barbar:bar@foo.tld
 
   icinga2-master:
     environment:
