@@ -16,7 +16,10 @@ module Grafana
       end
 
       session = self.ping_session()
-      msg     = session.dig('message')
+
+      unless( session.is_a?(TrueClass) )
+        msg     = session.dig('message')
+      end
 
       if( msg != nil && msg != 'Logged in' )
 
