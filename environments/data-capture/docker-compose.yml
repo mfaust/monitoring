@@ -10,8 +10,14 @@ volumes:
   persistent:
   redis:
 
-services:
+networks:
+  mon:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.2.0/24
 
+services:
   data:
     build: ../../docker-cm-data
     container_name: 01-data
@@ -22,81 +28,78 @@ services:
 
   dnsdock:
     restart: always
-    image: bodsch/docker-dnsdock:1704-01
+    image: bodsch/docker-dnsdock:1707-27.1
     container_name: dnsdock
     hostname: dnsdock
-    ports:
-      - 172.17.0.1:53:53/udp
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock
     # You can use also Environment vars like this:
     # command: "--nameserver='${DNS_1}:53' --nameserver='${DNS_2}:53' --http=:80"
     command: " --nameserver='10.1.2.14:53' --nameserver='10.1.2.63:53' --http=:80 --verbose"
-
+    networks:
+      mon:
+        ipv4_address: 192.168.2.5
 
   beanstalkd:
     restart: always
-    image: bodsch/docker-beanstalkd:1704-01
+    image: bodsch/docker-beanstalkd:1707-27.1
     container_name: beanstalkd
     hostname: beanstalkd
-    labels:
-      com.dnsdock.alias: beanstalkd
-      com.dnsdock.ttl: '120'
     volumes:
       - /etc/localtime:/etc/localtime:ro
-
+    networks:
+      mon:
+        ipv4_address: 192.168.2.6
 
   jolokia:
     restart: always
-    image: bodsch/docker-jolokia:latest
+    image: bodsch/docker-jolokia:1707-30.1
     container_name: jolokia
     hostname: jolokia
-    labels:
-      com.dnsdock.alias: jolokia
-      com.dnsdock.ttl: '120'
-    depends_on:
-      - data
     volumes:
       - /etc/localtime:/etc/localtime:ro
+    networks:
+      mon:
+        ipv4_address: 192.168.2.7
+    dns:
+      - 192.168.2.5
 
   database:
     restart: always
-    image: bodsch/docker-mysql:1704-01
+    image: bodsch/docker-mysql:1707-30.1
     container_name: database
     hostname: database
-    labels:
-      com.dnsdock.alias: database
-      com.dnsdock.ttl: '120'
     extends:
       file: environments.yml
       service: database
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - database:/srv
+    networks:
+      mon:
+        ipv4_address: 192.168.2.8
 
   redis:
     restart: always
-    image: bodsch/docker-redis:1704-01
+    image: bodsch/docker-redis:1707-27.1
     container_name: redis
     hostname: redis
-    labels:
-      com.dnsdock.alias: redis
-      com.dnsdock.ttl: '120'
     ports:
       - 6379:6379
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - redis:/var/lib/redis
+    networks:
+      mon:
+        ipv4_address: 192.168.2.9
+
 
   nginx:
     restart: always
-    image: bodsch/docker-nginx:1704-01
+    image: bodsch/docker-nginx:1707-27.1
     container_name: nginx
     hostname: nginx
-    labels:
-      com.dnsdock.alias: nginx-proxy
-      com.dnsdock.ttl: '120'
     ports:
       - 80:80
     depends_on:
@@ -109,33 +112,29 @@ services:
       - /share/etc/nginx/nginx.conf:/etc/nginx/nginx.conf
       - /share/etc/nginx/modules.d/00-restrictions.conf:/etc/nginx/modules.d/00-restrictions.conf
       - /share/etc/nginx/modules.d/01-proxy-rest-service.conf:/etc/nginx/modules.d/01-proxy-rest-service.conf:ro
-
+    networks:
+      mon:
+        ipv4_address: 192.168.2.20
 
   carbon-relay:
     restart: always
     image: bodsch/docker-carbon-relay-ng:1704-01
     container_name: carbon-relay
     hostname: carbon-relay
-    labels:
-      com.dnsdock.alias: carbon-relay
-      com.dnsdock.ttl: '120'
-    dns: 172.17.0.1
     extends:
       file: environments.yml
       service: carbon-relay
     volumes:
       - /etc/localtime:/etc/localtime:ro
-
+    networks:
+      mon:
+        ipv4_address: 192.168.2.21
 
   icinga2-satellite:
     restart: always
-    image: bodsch/docker-icinga2:1704-03
+    build: ../../docker-cm-icinga2
     container_name: icinga2-satellite
     hostname: icinga2-satellite
-    labels:
-      com.dnsdock.alias: icinga2-satellite
-      com.dnsdock.ttl: '120'
-    dns: 172.17.0.1
     extends:
       file: environments.yml
       service: icinga2-satellite
@@ -162,9 +161,11 @@ services:
       - /share/usr/lib/monitoring-plugins/check_cm_runlevel.rb:/usr/lib/monitoring-plugins/check_cm_runlevel
       - /share/usr/lib/monitoring-plugins/check_cm_sequencenumbers.rb:/usr/lib/monitoring-plugins/check_cm_seqencenumbers
       - /share/usr/lib/monitoring-plugins/check_ssl_cert:/usr/lib/monitoring-plugins/check_ssl_cert
-      - persistent:/srv
-      - persistent:/var/lib/icinga2
-
+      - icinga:/srv
+      - icinga:/var/lib/icinga2
+    networks:
+      mon:
+        ipv4_address: 192.168.2.22
 
   #
   # CoreMedia Glue and Logic
@@ -174,9 +175,6 @@ services:
     build: ../../docker-cm-service-discovery
     container_name: cm-service-discover
     hostname: cm-service-discover
-    labels:
-      com.dnsdock.alias: cm-service-discovery
-      com.dnsdock.ttl: '120'
     extends:
       file: environments.yml
       service: cm-service-discovery
@@ -193,16 +191,15 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - /share/etc/cm-service.yaml:/etc/cm-service.yaml
       - /share/etc/cm-application.yaml:/etc/cm-application.yaml
-
+    networks:
+      mon:
+        ipv4_address: 192.168.2.30
 
   cm-data-collector:
     restart: always
     build: ../../docker-cm-data-collector
     container_name: cm-data-collector
     hostname: cm-data-collector
-    labels:
-      com.dnsdock.alias: cm-data-collector
-      com.dnsdock.ttl: '120'
     extends:
       file: environments.yml
       service: cm-data-collector
@@ -219,17 +216,15 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - /share/etc/cm-service.yaml:/etc/cm-service.yaml
       - /share/etc/cm-application.yaml:/etc/cm-application.yaml
-
+    networks:
+      mon:
+        ipv4_address: 192.168.2.31
 
   cm-carbon-client:
     restart: always
     build: ../../docker-cm-carbon-client
     container_name: cm-carbon-client
     hostname: cm-carbon-client
-    labels:
-      com.dnsdock.alias: cm-carbon-client
-      com.dnsdock.ttl: '120'
-    dns: 172.17.0.1
     extends:
       file: environments.yml
       service: cm-carbon-client
@@ -242,17 +237,15 @@ services:
       - redis
     volumes:
       - /etc/localtime:/etc/localtime:ro
-
+    networks:
+      mon:
+        ipv4_address: 192.168.2.32
 
   cm-grafana-client:
     restart: always
     build: ../../docker-cm-grafana-client
     container_name: cm-grafana-client
     hostname: cm-grafana-client
-    labels:
-      com.dnsdock.alias: cm-grafana-client
-      com.dnsdock.ttl: '120'
-    dns: 172.17.0.1
     extends:
       file: environments.yml
       service: cm-grafana-client
@@ -266,17 +259,15 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /share/usr/local/share/templates:/usr/local/share/templates
-
+    networks:
+      mon:
+        ipv4_address: 192.168.2.33
 
   cm-graphite-client:
     restart: always
     build: ../../docker-cm-graphite-client
     container_name: cm-graphite-client
     hostname: cm-graphite-client
-    labels:
-      com.dnsdock.alias: cm-graphite-client
-      com.dnsdock.ttl: '120'
-    dns: 172.17.0.1
     extends:
       file: environments.yml
       service: cm-graphite-client
@@ -287,17 +278,15 @@ services:
       - beanstalkd
     volumes:
       - /etc/localtime:/etc/localtime:ro
-
+    networks:
+      mon:
+        ipv4_address: 192.168.2.34
 
   cm-icinga-client:
     restart: always
     build: ../../docker-cm-icinga-client
     container_name: cm-icinga-client
     hostname: cm-icinga-client
-    labels:
-      com.dnsdock.alias: cm-icinga-client
-      com.dnsdock.ttl: '120'
-    dns: 172.17.0.1
     extends:
       file: environments.yml
       service: cm-icinga-client
@@ -308,17 +297,15 @@ services:
       - beanstalkd
     volumes:
       - /etc/localtime:/etc/localtime:ro
-
+    networks:
+      mon:
+        ipv4_address: 192.168.2.35
 
   cm-rest-service:
     restart: always
     build: ../../docker-cm-rest-service
     container_name: cm-rest-service
     hostname: cm-rest-service
-    labels:
-      com.dnsdock.alias: cm-rest-service
-      com.dnsdock.ttl: '120'
-    dns: 172.17.0.1
     extends:
       file: environments.yml
       service: cm-rest-service
@@ -329,5 +316,8 @@ services:
       - redis
     volumes:
       - /etc/localtime:/etc/localtime:ro
+    networks:
+      mon:
+        ipv4_address: 192.168.2.36
 
 # EOF

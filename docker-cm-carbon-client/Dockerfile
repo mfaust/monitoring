@@ -4,14 +4,14 @@ FROM alpine:3.6
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
+  VERSION="1707-31.1" \
+  BUILD_DATE="2017-07-31" \
   ALPINE_MIRROR="mirror1.hs-esslingen.de/pub/Mirrors" \
   ALPINE_VERSION="v3.6" \
   TERM=xterm \
   APK_ADD="build-base bind-tools imagemagick-dev mariadb-dev ruby-dev ruby-irb ruby-rdoc zlib zlib-dev" \
   APK_DEL="build-base imagemagick-dev ruby-dev ruby-rdoc zlib-dev" \
   GEMS="beaneater bigdecimal filesize json mysql2 redis rest-client rufus-scheduler tzinfo-data"
-
-LABEL version="1707-28.2"
 
 # ---------------------------------------------------------------------------------------
 

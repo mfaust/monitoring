@@ -11,6 +11,7 @@ services:
 
   database:
     environment:
+      MYSQL_SYSTEM_USER: root
       MYSQL_ROOT_PASS: database.pass
 
   graphite:
@@ -26,30 +27,67 @@ services:
       GRAPHITE_HOST: graphite
       CARBON_HOST: carbon
       MEMCACHE_HOST: memcached
+      GRAFANA_USERS: 'coremedia:coremedia::admin'
 
-  icinga2-master:
+  cm-icinga2-master:
     environment:
       MYSQL_HOST: database
       MYSQL_ROOT_PASS: database.pass
       IDO_PASSWORD: ido.pass
       IDO_DATABASE_NAME: icinga2core
       CARBON_HOST: carbon
-      ICINGA_API_USERS: root:icinga,icingaweb:icingaweb,cert-service:47pswW14rzeV9MNFGruI
       ICINGA_CLUSTER: 'true'
-      ICINGA_MASTER: icinga2-master
+      ICINGA_MASTER: cm-icinga2-master
       ICINGA_CERT_SERVICE: 'false'
       ICINGA_CERT_SERVICE_BA_USER: admin
       ICINGA_CERT_SERVICE_BA_PASSWORD: admin
       ICINGA_CERT_SERVICE_API_USER: cert-service
       ICINGA_CERT_SERVICE_API_PASSWORD: 47pswW14rzeV9MNFGruI
       ICINGA_CERT_SERVICE_PATH: /cert-service/
+      ICINGA_API_USERS: root:icinga,icingaweb:icingaweb,dashing:dashing,cert:foo-bar
+      REDIS_HOST: redis
+
+  #icinga2-master:
+    #environment:
+      #MYSQL_HOST: database
+      #MYSQL_ROOT_PASS: database.pass
+      #IDO_PASSWORD: ido.pass
+      #IDO_DATABASE_NAME: icinga2core
+      #CARBON_HOST: carbon
+      #ICINGA_API_USERS: root:icinga,icingaweb:icingaweb,cert-service:47pswW14rzeV9MNFGruI
+      #ICINGA_CLUSTER: 'true'
+      #ICINGA_MASTER: icinga2-master
+      #ICINGA_CERT_SERVICE: 'false'
+      #ICINGA_CERT_SERVICE_BA_USER: admin
+      #ICINGA_CERT_SERVICE_BA_PASSWORD: admin
+      #ICINGA_CERT_SERVICE_API_USER: cert-service
+      #ICINGA_CERT_SERVICE_API_PASSWORD: 47pswW14rzeV9MNFGruI
+      #ICINGA_CERT_SERVICE_PATH: /cert-service/
 
   icingaweb2:
     environment:
       MYSQL_HOST: database
       MYSQL_ROOT_PASS: database.pass
-      ICINGA2_HOST: icinga2-master
-      ICINGA2_CMD_API_USER: icingaweb
-      ICINGA2_CMD_API_PASS: icingaweb
       IDO_PASSWORD: ido.pass
       IDO_DATABASE_NAME: icinga2core
+      ICINGA2_HOST: cm-icinga2-master
+      ICINGA2_CMD_API_USER: icingaweb
+      ICINGA2_CMD_API_PASS: icingaweb
+      ICINGAWEB2_USERS: coremedia:coremedia,icinga:icinga
+
+
+  cm-smashing:
+    environment:
+      ICINGA_HOST: cm-icinga2-master
+      ICINGA_API_USER: dashing
+      ICINGA_API_PASSWORD: dashing
+      ICINGAWEB_URL: /icinga
+      PROXY_PATH: /dashing
+      ICINGA_CERT_SERVICE: 'true'
+      ICINGA_CERT_SERVICE_BA_USER: admin
+      ICINGA_CERT_SERVICE_BA_PASSWORD: admin
+      ICINGA_CERT_SERVICE_API_USER: root
+      ICINGA_CERT_SERVICE_API_PASSWORD: icinga
+      ICINGA_CERT_SERVICE_SERVER: cm-icinga2-master
+      ICINGA_CERT_SERVICE_PORT: 4567
+      ICINGA_CERT_SERVICE_PATH: /

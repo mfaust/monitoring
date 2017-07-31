@@ -33,7 +33,7 @@ services:
       # (see above in this configuration part!)
       CARBON_HOST: carbon
       MEMCACHE_HOST: memcached
-      GRAFANA_USERS: 'coremedia:coremedia:'
+      GRAFANA_USERS: 'coremedia:coremedia::admin'
 
   cm-icinga2-master:
     environment:

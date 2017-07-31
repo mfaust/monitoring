@@ -8,67 +8,53 @@ volumes:
   carbon:
   icinga:
 
+networks:
+  mon:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.1.0/24
+
 services:
 
   data:
     build: ../../docker-cm-data
     container_name: 01-data
-    depends_on:
-      - dnsdock
     volumes:
       - /share:/share
 
-  dnsdock:
-    restart: always
-    image: bodsch/docker-dnsdock:1704-01
-    container_name: dnsdock
-    hostname: dnsdock
-    labels:
-      com.dnsdock.alias: dnsdock
-      com.dnsdock.ttl: '120'
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /run/docker.sock:/var/run/docker.sock
-    command: "--nameserver='141.1.1.1:53' --http=:80"
-
-
   database:
     restart: always
-    image: bodsch/docker-mysql:1704-01
+    image: bodsch/docker-mysql:1707-30.1
     container_name: database
     hostname: database
-    labels:
-      com.dnsdock.alias: database
-      com.dnsdock.ttl: '120'
     extends:
       file: environments.yml
       service: database
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - database:/srv
-
+    networks:
+      mon:
+        ipv4_address: 192.168.1.5
 
   memcached:
     restart: always
-    image: bodsch/docker-memcached:1704-01
+    image: bodsch/docker-memcached:1707-27.1
     container_name: memcached
     hostname: memcached
-    labels:
-      com.dnsdock.alias: memcached
-      com.dnsdock.ttl: '120'
     volumes:
       - /etc/localtime:/etc/localtime:ro
     command: "-l 0.0.0.0 -m 8 -u memcached"
-
+    networks:
+      mon:
+        ipv4_address: 192.168.1.6
 
   nginx:
     restart: always
-    image: bodsch/docker-nginx:1704-01
+    image: bodsch/docker-nginx:1707-27.1
     container_name: nginx
     hostname: nginx
-    labels:
-      com.dnsdock.alias: nginx-proxy
-      com.dnsdock.ttl: '120'
     ports:
       - 80:80
     depends_on:
@@ -88,52 +74,48 @@ services:
       - /share/etc/nginx/modules.d/01-proxy-icingaweb2.conf:/etc/nginx/modules.d/01-proxy-icingaweb2.conf
       - /share/etc/nginx/modules.d/01-proxy-icinga-cert-service.conf:/etc/nginx/modules.d/01-proxy-icingaweb-cert-service.conf
       - /share/etc/nginx/modules.d/01-proxy-markdown-service.conf:/etc/nginx/modules.d/01-proxy-markdown-service.conf
-
+      - /share/etc/nginx/modules.d/01-proxy-smashing-icinga2.conf:/etc/nginx/modules.d/01-proxy-smashing-icinga2.conf
+    networks:
+      mon:
+        ipv4_address: 192.168.1.10
 
   carbon:
     restart: always
-    image: bodsch/docker-go-carbon:1704-01
+    image: bodsch/docker-go-carbon:1707-27.1
     container_name: carbon
     hostname: carbon
-    labels:
-      com.dnsdock.alias: carbon
-      com.dnsdock.ttl: '120'
     ports:
       - 2003:2003
       - 2003:2003/udp
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - carbon:/srv
-
+    networks:
+      mon:
+        ipv4_address: 192.168.1.20
 
   graphite:
     restart: always
-    image: bodsch/docker-graphite:1704-02
+    image: bodsch/docker-graphite:1707-27.1
     container_name: graphite
     hostname: graphite
-    labels:
-      com.dnsdock.alias: graphite
-      com.dnsdock.ttl: '120'
     extends:
       file: environments.yml
       service: graphite
     depends_on:
-      - memcached
-    links:
-      - memcached
+      - data
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - carbon:/srv
-
+    networks:
+      mon:
+        ipv4_address: 192.168.1.21
 
   grafana:
     restart: always
-    image: bodsch/docker-grafana:1704-01
+    image: bodsch/docker-grafana:1707-31.1
     container_name: grafana
     hostname: grafana
-    labels:
-      com.dnsdock.alias: grafana
-      com.dnsdock.ttl: '120'
     extends:
       file: environments.yml
       service: grafana
@@ -148,26 +130,25 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - /share/opt/grafana/dashboards:/opt/grafana/dashboards
       - carbon:/srv
+    networks:
+      mon:
+        ipv4_address: 192.168.1.22
 
-
-  icinga2-master:
+  cm-icinga2-master:
     restart: always
-    image: bodsch/docker-icinga2:1704-03
-    container_name: icinga2-master
-    hostname: icinga2-master
-    labels:
-      com.dnsdock.alias: icinga2-master
-      com.dnsdock.ttl: '120'
+    build: ../../docker-cm-icinga2
+    container_name: cm-icinga2-master
+    hostname: cm-icinga2-master
     extends:
       file: environments.yml
-      service: icinga2-master
+      service: cm-icinga2-master
     depends_on:
       - data
       - database
-      - memcached
+      - redis
     links:
       - database
-      - memcached
+      - redis
     ports:
       - 5665:5665
       - 6666:6666
@@ -188,41 +169,59 @@ services:
       - /share/usr/lib/monitoring-plugins/check_ssl_cert:/usr/lib/monitoring-plugins/check_ssl_cert
       - icinga:/srv
       - icinga:/var/lib/icinga2
-
+    networks:
+      mon:
+        ipv4_address: 192.168.1.23
 
   icingaweb2:
     restart: always
-    image: bodsch/docker-icingaweb2:1704-02
+    image: bodsch/docker-icingaweb2:1707-30.1
     container_name: icingaweb2
     hostname: icingaweb2
-    labels:
-      com.dnsdock.alias: icingaweb2
-      com.dnsdock.ttl: '120'
     extends:
       file: environments.yml
       service: icingaweb2
     depends_on:
       - database
-      - icinga2-master
+      - cm-icinga2-master
     links:
       - database
-      - icinga2-master:icinga2
+      - cm-icinga2-master:icinga2
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - icinga:/srv
-
+    networks:
+      mon:
+        ipv4_address: 192.168.1.24
 
   markdown-service:
     restart: always
-    image: bodsch/docker-markdown-service:latest
+    image: bodsch/docker-markdown-service:1707-27.1
     container_name: markdown-service
     hostname: markdown-service
-    labels:
-      com.dnsdock.alias: markdown-service
-      com.dnsdock.ttl: '120'
     depends_on:
       - data
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /share/www/markdown-service:/var/www:ro
+    networks:
+      mon:
+        ipv4_address: 192.168.1.25
+
+
+  cm-smashing:
+    restart: always
+    build: ../../docker-cm-smashing
+    container_name: cm-smashing
+    hostname: cm-smashing
+    extends:
+      file: environments.yml
+      service: cm-smashing
+    depends_on:
+      - cm-icinga2-master
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      mon:
+        ipv4_address: 192.168.1.26
 

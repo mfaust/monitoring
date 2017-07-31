@@ -4,23 +4,11 @@ FROM bodsch/docker-smashing:1707-27.1
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
-  BUILD_DATE="2017-07-29" \
+  VERSION="1707-31.1" \
+  BUILD_DATE="2017-07-31" \
   DASHBOARD="coremedia"
 
 EXPOSE 3030
-
-LABEL \
-  version="1707-30.2" \
-  org.label-schema.build-date=${BUILD_DATE} \
-  org.label-schema.name="Smashing Icinga2 Docker Image" \
-  org.label-schema.description="Inofficial Smashing Icinga2 Docker Image" \
-  org.label-schema.url="https://github.com/Smashing/smashing" \
-  org.label-schema.vcs-url="https://github.com/bodsch/docker-smashing-icinga2" \
-  org.label-schema.vendor="Bodo Schulz" \
-  org.label-schema.version=${ICINGA_VERSION} \
-  org.label-schema.schema-version="1.0" \
-  com.microscaling.docker.dockerfile="/Dockerfile" \
-  com.microscaling.license="GNU General Public License v3.0"
 
 # ---------------------------------------------------------------------------------------
 
