@@ -60,7 +60,6 @@ class Icinga2Check_CM_Feeder < Icinga2Check
     engine      = @mbean.bean( host, feederServer, 'ProactiveEngine' )
 
     healthValue = self.runningOrOutdated( { host: host, data: health } )
-#     healthValue = self.runningOrOutdated( health )
     healthValue = healthValue.values.first
 
     healthy     = ( healthValue != nil &&  healthValue['Healthy'] ) ? healthValue['Healthy'] : false
@@ -70,7 +69,6 @@ class Icinga2Check_CM_Feeder < Icinga2Check
       healthMessage  = 'HEALTHY'
 
       engineValue = self.runningOrOutdated( { host: host, data: engine } )
-#       engineValue = self.runningOrOutdated( engine )
       engineValue = engineValue.values.first
 
 #       logger.debug( JSON.pretty_generate( engineValue ) )
@@ -79,18 +77,21 @@ class Icinga2Check_CM_Feeder < Icinga2Check
       currentEntries        = engineValue.dig('ValuesCount') || 0  # Number of (valid) values. It is less or equal to 'keysCount'
       heartbeat             = engineValue.dig('HeartBeat')         # 1 minute == 60000 ms
 
-#       sendSuccessTimeLatest = engineValue.dig('SendSuccessTimeLatest')  #  null | 2017-03-31T07:35:54Z
-#       purgeTimeLatest       = engineValue.dig('PurgeTimeLatest')        # 2017-03-31T07:12:25Z | ERROR: RuntimeException thrown in RequiredModelMBean while trying to invoke operation getPurgeTimeLatest (class javax.management.MBeanException)
-
       if( maxEntries == 0 && currentEntries == 0 )
 
         status       = 'UNKNOWN'
-        stateMessage = sprintf( '%d Elements for Feeder available. This feeder is maybe restarting?', maxEntries )
-        exitCode     = STATE_UNKNOWN
+        puts format(
+          '%d Elements for Feeder available. This feeder is maybe restarting?',
+          maxEntries
+        )
+        exit STATE_UNKNOWN
       else
 
         if( heartbeat >= 60000 )
-          puts sprintf( 'Feeder Heartbeat is more then 1 minute old<br>Heartbeat %d ms', heartbeat )
+          puts format(
+            'Feeder Heartbeat is more then 1 minute old<br>Heartbeat %d ms',
+            heartbeat
+          )
           exit STATE_CRITICAL
         end
 
