@@ -182,7 +182,7 @@ und die CoreMedia Container werden anschließend gebaut. Beim ersten Start kann 
 
 Nach dem erfolgreichem Start steht das Webinterface der Toolbox unter `http://localhost` zur Verfügung:
 
-![index](documentation/assets/first-steps_0.png)
+![index](documentation/assets/monitoring_1.png)
 
 ### Hinzufügen eine CoreMedia Node
 
