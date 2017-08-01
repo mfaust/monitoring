@@ -1,23 +1,31 @@
-docker-smashing-icinga2
-==============
 
-Docker Container based on [docker-smashing](https://github.com/bodsch/docker-smashing) with Icinga2 Integration
+CoreMedia smashing
+========================
 
-This Container use the [icinga2 gem](https://rubygems.org/gems/icinga2) and implements the
-dashboard from the official [Icinga2 Dashing](https://github.com/Icinga/dashing-icinga2)
+# short Description
+
+A small and powerful dashboard system.
+
+Bases on [bodsch/docker-smashing](https://hub.docker.com/r/bodsch/docker-smashing/)
 
 
-# Status
+# Environment Variables
 
-[![Docker Pulls](https://img.shields.io/docker/pulls/bodsch/docker-smashing-icinga2.svg)][hub]
-[![Image Size](https://images.microbadger.com/badges/image/bodsch/docker-smashing-icinga2.svg)][microbadger]
-[![Build Status](https://travis-ci.org/bodsch/docker-smashing-icinga2.svg)][travis]
-
-[hub]: https://hub.docker.com/r/bodsch/docker-smashing-icinga2/
-[microbadger]: https://microbadger.com/images/bodsch/docker-smashing-icinga2
-[travis]: https://travis-ci.org/bodsch/docker-smashing-icinga2
-
-# Build
-
-Your can use the included Makefile.
-
+| Environmental Variable             | Default Value        | Description                                                     |
+| :--------------------------------- | :-------------       | :-----------                                                    |
+| `ICINGA_HOST`                      | `icinga2`            | icinga2 Host                                                    |
+| `ICINGA_API_PORT`                  | `5665`               | icinga2 API Port                                                |
+| `ICINGA_API_USER`                  | `admin`              | icinga2 API User                                                |
+| `ICINGA_API_PASSWORD`              | ``                   | icinga2 API Password                                            |
+| `ICINGA_CLUSTER`                   | `false`              | icinga2 Cluster Mode                                            |
+| `ICINGA_CLUSTER_SATELLITE`         | ``                   | icinga2 Cluster Satellite                                       |
+|                                    |                      |                                                                 |
+| `ICINGA_CERT_SERVICE`              | `false`              | enable the Icinga2 Certificate Service                          |
+| `ICINGA_CERT_SERVICE_BA_USER`      | `admin`              | The Basic Auth User for the certicate Service                   |
+| `ICINGA_CERT_SERVICE_BA_PASSWORD`  | `admin`              | The Basic Auth Password for the certicate Service               |
+| `ICINGA_CERT_SERVICE_API_USER`     | -                    | The Certificate Service needs also an API Users                 |
+| `ICINGA_CERT_SERVICE_API_PASSWORD` | -                    |                                                                 |
+| `ICINGA_CERT_SERVICE_SERVER`       | `localhost`          | Certificate Service Host                                        |
+| `ICINGA_CERT_SERVICE_PORT`         | `80`                 | Certificate Service Port                                        |
+| `ICINGA_CERT_SERVICE_PATH`         | `/`                  | Certificate Service Path (needful, when they run begind a Proxy |
+| `ICINGAWEB_URL`                    | `http://localhost/icingaweb2` | (not yet used)                                         |

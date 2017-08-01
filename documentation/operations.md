@@ -1,10 +1,6 @@
 Operating
 =========
 
-:
- - Heap Memory :
- - Blob Cache :
-
 
 ## Heap Memory
 

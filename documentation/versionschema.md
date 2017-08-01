@@ -4,7 +4,7 @@
 
 All Containers have a Version LABEL with the following (or upcoming) Schema:
 
-`YY.MM.Number`
+`YYMM-WEEK.Number`
 
 E.g. from a `Dockerfile`
 
@@ -12,12 +12,12 @@ E.g. from a `Dockerfile`
 
     MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
-    LABEL version="17.04.03"
+    LABEL version="1707-31.3"
 
 ### LTS
 
-In an TLS Version, was the `Number` replased with `LTS`:
-`17.05.LTS`
+In an TLS Version, after the `YYMM` Notations follow the `LTS`:
+`1707.LTS`
 
 LTS Version will be recreated every 3 Month.
 

@@ -13,7 +13,7 @@ require_relative '../lib/grafana'
 
 # -----------------------------------------------------------------------------
 
-grafanaHost         = ENV.fetch('GRAFANA_HOST'           , 'localhost')
+grafanaHost         = ENV.fetch('GRAFANA_HOST'           , 'grafana')
 grafanaPort         = ENV.fetch('GRAFANA_PORT'           , 80)
 grafanaUrlPath      = ENV.fetch('GRAFANA_URL_PATH'       , '/grafana')
 grafanaApiUser      = ENV.fetch('GRAFANA_API_USER'       , 'admin')

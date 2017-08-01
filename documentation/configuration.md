@@ -106,10 +106,9 @@ Dabei gibt es einige zusätzliche Servicesdefinitionen:
 * `tomcat`
 * `contentserver`
 * `caches`
-* `caches-ibm`
 
 Während der Service `tomcat` mit allen Services (ausser `mysql`, `postgres`, `mongodb`) explizit zusammen geführt wird, werden die Services
-`contentserver`, `solr`, `caches` und `caches-ibm` nur mit denjenigen zusammengeführt, die diese in der `cm-service.yaml` unter `application` angegeben haben.
+`contentserver`, `solr`, und `caches` nur mit denjenigen zusammengeführt, die diese in der `cm-service.yaml` unter `application` angegeben haben.
 
 
 
