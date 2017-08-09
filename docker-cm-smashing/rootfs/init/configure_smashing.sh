@@ -73,5 +73,19 @@ then
     /etc/supervisor.d/dashing.ini
 fi
 
+cp /usr/lib/ruby/gems/current/gems/smashing/templates/project/assets/stylesheets/font-awesome.css ${DASHING_PATH}/assets/stylesheets/
+
+
+for f in font-awesome.css font-awesome.min.css
+do
+  if [ -f ${DASHING_PATH}/assets/stylesheets/${f} ]
+  then
+    sed \
+      -i \
+      -e "s|'../fonts/|'|g" \
+      ${DASHING_PATH}/assets/stylesheets/${f}
+  fi
+done
+
 # EOF
 
