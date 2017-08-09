@@ -1,11 +1,11 @@
 
-FROM bodsch/docker-icinga2:1707-30.4
+FROM bodsch/docker-icinga2:1707-32.1
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
-  VERSION="1707-31.1" \
-  BUILD_DATE="2017-07-31" \
+  VERSION="1707-32.1" \
+  BUILD_DATE="2017-08-09" \
   TERM=xterm \
   APK_ADD="py2-pip ruby-dev nano" \
   APK_DEL="ruby-dev" \
