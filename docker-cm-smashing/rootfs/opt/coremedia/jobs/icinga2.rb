@@ -81,8 +81,7 @@ SCHEDULER.every '15s', :first_in => 10 do |job|
   send_event('icinga-host-meter', {
     value: host_problems,
     max:   max_host_objects,
-    moreinfo: "Total hosts: #{max_host_objects}",
-    color: 'blue'
+    moreinfo: "Total hosts: #{max_host_objects}"
   })
 
   send_event('icinga-service-meter', {
@@ -126,13 +125,13 @@ SCHEDULER.every '15s', :first_in => 10 do |job|
     'red'
   end
 
-  service_warning_color = if( icinga.services_warning.to_i == 0 )
+  service_warning_color = if( icinga.services_handled_warning_problems.to_i == 0 )
     'blue'
   else
     'yellow'
   end
 
-  service_unknown_color = if( icinga.services_unknown.to_i == 0 )
+  service_unknown_color = if( icinga.services_handled_unknown_problems.to_i == 0 )
     'blue'
   else
     'purple'
@@ -158,7 +157,7 @@ SCHEDULER.every '15s', :first_in => 10 do |job|
 #  puts format('Service Warning: %d', icinga.services_warning)
   send_event('icinga-service-problems-warning', {
     title: 'Services warning',
-    value: icinga.services_warning.to_s,
+    value: icinga.services_handled_warning_problems.to_s,
     moreinfo: "All Problems: " + icinga.services_warning.to_s,
     color: service_warning_color
   })
@@ -166,7 +165,7 @@ SCHEDULER.every '15s', :first_in => 10 do |job|
 #  puts format('Service Unknown: %d', icinga.services_unknown )
   send_event('icinga-service-problems-unknown', {
     title: 'Services unknown',
-    value: icinga.services_unknown.to_s,
+    value: icinga.services_handled_unknown_problems.to_s,
     moreinfo: "All Problems: " + icinga.services_unknown.to_s,
     color: service_unknown_color
   })
