@@ -24,7 +24,7 @@ services:
 
   dnsdock:
     restart: always
-    image: bodsch/docker-dnsdock:1707-27.1
+    image: bodsch/docker-dnsdock:1708-35.1
     container_name: dnsdock
     hostname: dnsdock
     labels:
@@ -35,14 +35,14 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     # You can use also Environment vars like this:
     # command: "--nameserver='${DNS_1}:53' --nameserver='${DNS_2}:53' --http=:80"
-    command: "--nameserver='10.1.2.14:53' --nameserver='10.1.2.63:53' --http=:80 --ttl=120 "
+    command: " --nameserver='10.1.2.63:53' --nameserver='10.1.2.14:53' --http=:80 --alias --ttl=120 --verbose"
     networks:
       mon:
         ipv4_address: 192.168.1.5
 
   beanstalkd:
     restart: always
-    image: bodsch/docker-beanstalkd:1707-27.1
+    image: bodsch/docker-beanstalkd:1708-35.1
     container_name: beanstalkd
     hostname: beanstalkd
     volumes:
@@ -53,7 +53,7 @@ services:
 
   database:
     restart: always
-    image: bodsch/docker-mysql:1707-30.1
+    image: bodsch/docker-mysql:1708-35.1
     container_name: database
     hostname: database
     ports:
@@ -70,7 +70,7 @@ services:
 
   jolokia:
     restart: always
-    image: bodsch/docker-jolokia:1707-30.1
+    image: bodsch/docker-jolokia:1708-35.1
     container_name: jolokia
     hostname: jolokia
     depends_on:
@@ -86,7 +86,7 @@ services:
 
   memcached:
     restart: always
-    image: bodsch/docker-memcached:1707-27.1
+    image: bodsch/docker-memcached:1708-35.1
     container_name: memcached
     hostname: memcached
     volumes:
@@ -98,7 +98,7 @@ services:
 
   redis:
     restart: always
-    image: bodsch/docker-redis:1707-27.1
+    image: bodsch/docker-redis:1708-35.1
     container_name: redis
     hostname: redis
     ports:
@@ -112,7 +112,7 @@ services:
 
   nginx:
     restart: always
-    image: bodsch/docker-nginx:1707-27.1
+    image: bodsch/docker-nginx:1708-35.1
     container_name: nginx
     hostname: nginx
     ports:
@@ -146,7 +146,7 @@ services:
 
   carbon:
     restart: always
-    image: bodsch/docker-go-carbon:1707-27.1
+    image: bodsch/docker-go-carbon:1708-35.1
     container_name: carbon
     hostname: carbon
     depends_on:
@@ -163,7 +163,7 @@ services:
 
   graphite:
     restart: always
-    image: bodsch/docker-graphite:1707-27.1
+    image: bodsch/docker-graphite:1708-35.1
     container_name: graphite
     hostname: graphite
     extends:
@@ -180,7 +180,7 @@ services:
 
   grafana:
     restart: always
-    image: bodsch/docker-grafana:1707-31.1
+    image: bodsch/docker-grafana:1708-35.1
     container_name: grafana
     hostname: grafana
     extends:
@@ -246,7 +246,7 @@ services:
 
   icingaweb2:
     restart: always
-    image: bodsch/docker-icingaweb2:1707-30.1
+    image: bodsch/docker-icingaweb2:1708-35.1
     container_name: icingaweb2
     hostname: icingaweb2
     extends:
@@ -268,7 +268,7 @@ services:
 
   markdown-service:
     restart: always
-    image: bodsch/docker-markdown-service:1707-27.1
+    image: bodsch/docker-markdown-service:1708-35.1
     container_name: markdown-service
     hostname: markdown-service
     depends_on:
@@ -304,6 +304,9 @@ services:
     build: ../../docker-cm-rest-service
     container_name: cm-rest-service
     hostname: cm-rest-service
+#    labels:
+#      com.dnsdock.alias: rest-service
+#      com.dnsdock.ttl: '120'
     extends:
       file: environments.yml
       service: cm-rest-service
@@ -320,8 +323,8 @@ services:
     networks:
       mon:
         ipv4_address: 192.168.1.30
-    dns:
-      - 192.168.1.5
+#    dns:
+#      - 192.168.1.5
 
   # single service
   # use MQ to process data
