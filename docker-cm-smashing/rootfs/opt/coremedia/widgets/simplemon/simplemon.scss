@@ -63,11 +63,9 @@ $moreinfo-color:    rgba(255, 255, 255, 0.7);
 // ----------------------------------------------------------------------------
 .widget-simplemon {
 
-/*   background-color: $background-color; */
-
   .title {
     color: $title-color;
-    font-size: 25px;
+    font-size: 1.3em;
     text-align: center;
     margin-top: -3em;
   }
@@ -75,12 +73,8 @@ $moreinfo-color:    rgba(255, 255, 255, 0.7);
   .value {
     color: $value-color;
   }
-
-  .updated-at {
-    color: darken($background-color, 25%);
-  }
-
 }
+
 .widget-simplemon.color-green {
     background-color: $background-color-green;
     .value { color: $value-color-green; }
@@ -121,3 +115,9 @@ $moreinfo-color:    rgba(255, 255, 255, 0.7);
     background-color: $background-color-grey;
     .value { color: $value-color-grey; }
 }
+
+.widget-simplemon.color-blue {
+  border: 1px solid #83c5f6;
+}
+
+

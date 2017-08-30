@@ -109,6 +109,8 @@ services:
       TZ: 'Europe/Berlin'
       GRAFANA_HOST: nginx
       RUN_DELAY: 40
+      GRAFANA_API_USER: coremedia
+      GRAFANA_API_PASSWORD: coremedia
 
   cm-graphite-client:
     environment:

@@ -1,16 +1,19 @@
 
-FROM bodsch/docker-smashing:1707-27.1
+FROM bodsch/docker-dashing:1708-35.1
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
-  VERSION="1707-31.1" \
-  BUILD_DATE="2017-07-31" \
-  DASHBOARD="coremedia"
+  VERSION="1708-35.1" \
+  BUILD_DATE="2017-08-29" \
+  DASHBOARD="coremedia" \
+  ICINGA2_GEM_VERSION="0.8"
 
 EXPOSE 3030
 
 # ---------------------------------------------------------------------------------------
+
+COPY build /build
 
 RUN \
   apk --no-cache update && \
@@ -29,7 +32,15 @@ RUN \
   rm -f /opt/${DASHBOARD}/dashboards/* && \
   cd ${DASHBOARD} && \
   sed -i "/gem 'twitter'/d" Gemfile && \
-  echo "gem 'icinga2', '~> 0.7'" >> Gemfile && \
+  #
+  cd /opt/${DASHBOARD} && \
+  count=$(ls -1 /build/*.gem 2> /dev/null | tail -n1) && \
+  if [ ! -z ${count} ] ; then \
+    gem install --no-rdoc --no-ri ${count} ; \
+  else \
+    echo "gem 'icinga2', '~> ${ICINGA2_GEM_VERSION}'" >> Gemfile ; \
+  fi && \
+  #
   bundle update && \
   apk del --purge \
     build-base \
