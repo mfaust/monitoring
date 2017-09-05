@@ -199,7 +199,7 @@ module Grafana
 
         until( instance != nil )
 
-          logger.info( sprintf( 'try to connect our grafana endpoint (%d)', retries ) )
+          logger.info( sprintf( 'try to connect our grafana endpoint ... %d', retries ) )
 
           instance = RestClient::Resource.new(
             @url,
@@ -259,6 +259,8 @@ module Grafana
 
           retries ||= 0
 
+          logger.debug(format('Attempting to establish user session ... %d', retries))
+
           resp = @apiInstance['/login'].post(
             request_data.to_json,
             { :content_type => 'application/json; charset=UTF-8' }
@@ -284,7 +286,6 @@ module Grafana
 
         rescue => e
 
-          logger.debug(format('Attempting to establish user session ... %d', retries))
           logger.error(e)
 
           if( retries < 40 )
