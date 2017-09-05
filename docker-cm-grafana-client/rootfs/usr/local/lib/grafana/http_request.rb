@@ -74,6 +74,7 @@ module Grafana
         200 => 'created',
         400 => 'Errors (invalid json, missing or invalid fields, etc)',
         401 => 'Unauthorized',
+        403 => 'Forbidden',
         412 => 'Precondition failed'
       }
 
