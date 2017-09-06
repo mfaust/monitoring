@@ -138,7 +138,7 @@ services:
       - /share/etc/nginx/modules.d/01-proxy-grafana.conf:/etc/nginx/modules.d/01-proxy-grafana.conf
       - /share/etc/nginx/modules.d/01-proxy-graphite.conf:/etc/nginx/modules.d/01-proxy-graphite.conf
       - /share/etc/nginx/modules.d/01-proxy-icingaweb2.conf:/etc/nginx/modules.d/01-proxy-icingaweb2.conf
-      - /share/etc/nginx/modules.d/01-proxy-smashing-icinga2.conf:/etc/nginx/modules.d/01-proxy-smashing-icinga2.conf
+      - /share/etc/nginx/modules.d/01-proxy-dashing-icinga2.conf:/etc/nginx/modules.d/01-proxy-dashing-icinga2.conf
       - /share/etc/nginx/modules.d/01-proxy-markdown-service.conf:/etc/nginx/modules.d/01-proxy-markdown-service.conf
     networks:
       mon:
@@ -280,14 +280,14 @@ services:
       mon:
         ipv4_address: 192.168.1.17
 
-  cm-smashing:
+  cm-dashing:
     restart: always
-    build: ../../docker-cm-smashing
-    container_name: cm-smashing
-    hostname: cm-smashing
+    build: ../../docker-cm-dashing
+    container_name: cm-dashing
+    hostname: cm-dashing
     extends:
       file: environments.yml
-      service: cm-smashing
+      service: cm-dashing
     depends_on:
       - cm-icinga2-master
     volumes:

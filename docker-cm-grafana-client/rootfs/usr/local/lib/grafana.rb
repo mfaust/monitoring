@@ -267,7 +267,7 @@ module Grafana
             { :content_type => 'application/json; charset=UTF-8' }
           )
 
-          logger.debug("#{resp}")
+#           logger.debug("#{resp}")
 
           if( resp.code.to_i == 200 )
 
@@ -302,7 +302,7 @@ module Grafana
         end
       end
 
-      logger.debug("#{@headers}")
+#       logger.debug("#{@headers}")
 
       loggedIn
     end

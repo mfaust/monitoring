@@ -58,7 +58,7 @@ services:
       ICINGA2_CMD_API_PASS: icingaweb
       ICINGAWEB2_USERS: coremedia:coremedia,icinga:icinga
 
-  cm-smashing:
+  cm-dashing:
     environment:
       ICINGA_HOST: cm-icinga2-master
       ICINGA_API_USER: dashing

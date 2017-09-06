@@ -68,8 +68,8 @@ module Grafana
     # @return [Mixed, #read]  return false at Error, or an JSON on success
     def issueRequest( methodType = 'GET', endpoint = '/', data = {} )
 
-      logger.debug( "issueRequest( #{methodType}, #{endpoint}, data )" )
-      logger.debug( "#{@headers}" )
+#       logger.debug( "issueRequest( #{methodType}, #{endpoint}, data )" )
+#       logger.debug( "#{@headers}" )
 
       resultCodes = {
         200 => 'created',
