@@ -215,11 +215,12 @@ module Grafana
         end
       rescue => e
 
+        retries += 1
         logger.error( e )
+        retry
       end
 
       return instance
-
     end
 
 
@@ -259,12 +260,15 @@ module Grafana
 
           retries ||= 0
 
-          logger.debug(format('Attempting to establish user session ... %d', retries))
+          logger.info(format('Attempting to establish user session ... %d', retries))
+          logger.debug("#{request_data}")
 
           resp = @apiInstance['/login'].post(
             request_data.to_json,
             { :content_type => 'application/json; charset=UTF-8' }
           )
+
+          logger.debug("#{resp}")
 
           if( resp.code.to_i == 200 )
 
@@ -297,6 +301,8 @@ module Grafana
           loggedIn = false
         end
       end
+
+      logger.debug("#{@headers}")
 
       loggedIn
     end

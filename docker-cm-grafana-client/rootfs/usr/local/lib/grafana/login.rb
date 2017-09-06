@@ -7,12 +7,13 @@ module Grafana
 
       endpoint = "/api/login/ping"
 
-      @logger.info( "Pinging current session (GET #{endpoint})" )
+      logger.info( "Pinging current session (GET #{endpoint})" )
 
       result = self.getRequest( endpoint )
 
-      return result
+      logger.debug( result )
 
+      return result
     end
   end
 
