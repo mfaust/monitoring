@@ -32,7 +32,7 @@ icinga = Icinga2::Client.new( config )
 
 
 
-SCHEDULER.every '20s', :first_in => 0 do |job|
+SCHEDULER.every '30s', :first_in => 0 do |job|
 
   begin
 
@@ -67,7 +67,7 @@ SCHEDULER.every '20s', :first_in => 0 do |job|
     ]
 
     # severity list
-    problem_services, service_problems_severity = icinga.list_services_with_problems(10).values
+    problem_services, service_problems_severity = icinga.list_services_with_problems(5).values
     work_queue_stats = icinga.work_queue_statistics
 
     severity_stats = []

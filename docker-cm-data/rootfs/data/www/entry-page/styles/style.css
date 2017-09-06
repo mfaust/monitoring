@@ -170,6 +170,8 @@ ul li p {
   /* Position the tooltip */
   position: absolute;
   z-index: 1;
+  margin: -25px 0 0 60px;
+
 }
 
 .tooltip:hover .tooltiptext {

@@ -1,12 +1,6 @@
 ---
 version: '2.0'
 
-volumes:
-  database:
-  redis:
-  carbon:
-  icinga:
-
 networks:
   mon:
     driver: bridge
@@ -63,7 +57,7 @@ services:
       service: database
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - database:/srv
+      - /var/tmp/docker-volumes/database:/srv
     networks:
       mon:
         ipv4_address: 192.168.1.7
@@ -77,7 +71,6 @@ services:
       - data
     volumes:
       - /etc/localtime:/etc/localtime:ro
-#      - /share/etc/resolv.conf:/etc/resolv.conf:ro
     networks:
       mon:
         ipv4_address: 192.168.1.8
@@ -105,7 +98,7 @@ services:
       - 6379:6379
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - redis:/var/lib/redis
+      - /var/tmp/docker-volumes/redis:/var/lib/redis
     networks:
       mon:
         ipv4_address: 192.168.1.10
@@ -156,7 +149,7 @@ services:
       - 2003:2003/udp
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - carbon:/srv
+      - /var/tmp/docker-volumes/carbon:/srv
     networks:
       mon:
         ipv4_address: 192.168.1.12
@@ -173,7 +166,7 @@ services:
       - data
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - carbon:/srv
+      - /var/tmp/docker-volumes/carbon:/srv
     networks:
       mon:
         ipv4_address: 192.168.1.13
@@ -196,7 +189,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /share/opt/grafana/dashboards:/opt/grafana/dashboards
-      - carbon:/srv
+      - /var/tmp/docker-volumes/carbon:/srv
     networks:
       mon:
         ipv4_address: 192.168.1.14
@@ -236,8 +229,8 @@ services:
       - /share/usr/lib/monitoring-plugins/check_cm_runlevel.rb:/usr/lib/monitoring-plugins/check_cm_runlevel
       - /share/usr/lib/monitoring-plugins/check_cm_sequencenumbers.rb:/usr/lib/monitoring-plugins/check_cm_seqencenumbers
       - /share/usr/lib/monitoring-plugins/check_ssl_cert:/usr/lib/monitoring-plugins/check_ssl_cert
-      - icinga:/srv
-      - icinga:/var/lib/icinga2
+      - /var/tmp/docker-volumes/icinga:/srv
+      - /var/tmp/docker-volumes/icinga:/var/lib/icinga2
     networks:
       mon:
         ipv4_address: 192.168.1.15
@@ -261,7 +254,7 @@ services:
       - cm-icinga2-master:icinga2
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - icinga:/srv
+      - /var/tmp/docker-volumes/icinga:/srv
     networks:
       mon:
         ipv4_address: 192.168.1.16
@@ -304,9 +297,6 @@ services:
     build: ../../docker-cm-rest-service
     container_name: cm-rest-service
     hostname: cm-rest-service
-#    labels:
-#      com.dnsdock.alias: rest-service
-#      com.dnsdock.ttl: '120'
     extends:
       file: environments.yml
       service: cm-rest-service
@@ -323,8 +313,6 @@ services:
     networks:
       mon:
         ipv4_address: 192.168.1.30
-#    dns:
-#      - 192.168.1.5
 
   # single service
   # use MQ to process data
