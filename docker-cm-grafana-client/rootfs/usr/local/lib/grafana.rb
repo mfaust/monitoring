@@ -139,8 +139,8 @@ module Grafana
       @loggedIn    = false
       @headers     = nil
 
-      version            = '1.9.1'
-      date               = '2017-06-06'
+      version            = '1.9.2'
+      date               = '2017-09-17'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - Grafana Client' )
@@ -261,7 +261,6 @@ module Grafana
           retries ||= 0
 
           logger.info(format('Attempting to establish user session ... %d', retries))
-          logger.debug("#{request_data}")
 
           resp = @apiInstance['/login'].post(
             request_data.to_json,
@@ -279,6 +278,7 @@ module Grafana
             }
 
             logger.info( 'successfully logged in to grafana' )
+            logger.debug("#{request_data}")
 
             loggedIn = true
           else

@@ -69,7 +69,7 @@ module Grafana
     def issueRequest( methodType = 'GET', endpoint = '/', data = {} )
 
       logger.debug( "issueRequest( #{methodType}, #{endpoint}, data )" )
-      logger.debug( "{@headers}" )
+      logger.debug( "#{@headers}" )
 
       resultCodes = {
         200 => 'created',
@@ -134,6 +134,7 @@ module Grafana
       rescue RestClient::ExceptionWithResponse => e
 
         logger.error( "Error: #{__method__} #{methodType.upcase} on #{endpoint} error: '#{e}'" )
+        return false
       end
 
     end

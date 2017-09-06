@@ -382,7 +382,10 @@ module Grafana
 
         response = self.postRequest( '/api/dashboards/db' , json )
 
-        logger.debug( "#{response}" )
+        if( response == false )
+          logger.error( 'template can\'t be add' )
+          logger.debug( "#{response}" )
+        end
       end
 
 
@@ -523,7 +526,10 @@ module Grafana
 
         response = self.postRequest( '/api/dashboards/db' , json )
 
-        logger.debug( "#{response}" )
+        if( response == false )
+          logger.error( 'template can\'t be add' )
+          logger.debug( "#{response}" )
+        end
       end
 
 
@@ -557,7 +563,10 @@ module Grafana
 
               response = self.postRequest( '/api/dashboards/db' , json )
 
-              logger.debug( "#{response}" )
+              if( response == false )
+                logger.error( 'template can\'t be add' )
+                logger.debug( "#{response}" )
+              end
             end
           end
         end
@@ -845,8 +854,10 @@ module Grafana
 
         response = self.postRequest( '/api/dashboards/db' , json )
 
-#         logger.debug( "#{response}" )
-
+        if( response == false )
+          logger.error( 'template can\'t be add' )
+          logger.debug( "#{response}" )
+        end
       end
 
 
