@@ -13,6 +13,7 @@ require_relative 'job-queue'
 require_relative 'message-queue'
 require_relative 'storage'
 
+require_relative 'icinga/version'
 require_relative 'icinga/tools'
 require_relative 'icinga/queue'
 
@@ -22,6 +23,8 @@ class CMIcinga2 < Icinga2::Client
 
   include CMIcinga2::Tools
   include CMIcinga2::Queue
+  include CMIcinga2::Version
+  include CMIcinga2::Data
 
   def initialize( settings = {} )
 
@@ -55,8 +58,8 @@ class CMIcinga2 < Icinga2::Client
 
       super( settings )
 
-      version              = '1.6.5'
-      date                 = '2017-06-28'
+      version              = CMIcinga::Version::VERSION
+      date                 = CMIcinga::Date::DATE
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - Icinga2 Client' )

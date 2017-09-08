@@ -9,7 +9,7 @@ class CMIcinga2 < Icinga2::Client
 
       # DNS
       #
-      hostname = sprintf( 'dns-%s', name )
+      hostname = format( 'dns-%s', name )
 
       ip       = nil
       short    = nil
@@ -17,7 +17,7 @@ class CMIcinga2 < Icinga2::Client
 
       dns      = @cache.get( hostname )
 
-      if( dns == nil )
+      if( dns.nil? )
         logger.debug( 'create cached DNS data' )
         # create DNS Information
         dns      = Utils::Network.resolv( name )
@@ -28,7 +28,7 @@ class CMIcinga2 < Icinga2::Client
 
         if( ip != nil && short != nil && fqdn != nil )
 
-          @cache.set( hostname , expiresIn: expire ) { Cache::Data.new( { 'ip': ip, 'short': short, 'long': fqdn } ) }
+          @cache.set( hostname , expiresIn: expire ) { Cache::Data.new( { ip: ip, short: short, long: fqdn } ) }
         else
           logger.error( 'no DNS data found!' )
           logger.error( " => #{dns}" )
@@ -44,9 +44,9 @@ class CMIcinga2 < Icinga2::Client
       #
       # ------------------------------------------------
 
-      logger.debug( sprintf( ' ip   %s ', ip ) )
-      logger.debug( sprintf( ' host %s ', short ) )
-      logger.debug( sprintf( ' fqdn %s ', fqdn ) )
+      logger.debug( format( ' ip   %s ', ip ) )
+      logger.debug( format( ' host %s ', short ) )
+      logger.debug( format( ' fqdn %s ', fqdn ) )
 
       [ip, short, fqdn]
     end
@@ -60,13 +60,13 @@ class CMIcinga2 < Icinga2::Client
       host    = params.dig(:host)
       fqdn    = params.dig(:fqdn)
 
-      team_config        = @database.config( { :ip => ip, :short => host, :fqdn => fqdn, :key => 'team' } )
-      environment_config = @database.config( { :ip => ip, :short => host, :fqdn => fqdn, :key => 'environment' } )
-      aws_config         = @database.config( { :ip => ip, :short => host, :fqdn => fqdn, :key => 'aws' } )
-      vhost_http_config  = @database.config( { :ip => ip, :short => host, :fqdn => fqdn, :key => 'vhost_http' } )
-      vhost_https_config = @database.config( { :ip => ip, :short => host, :fqdn => fqdn, :key => 'vhost_https' } )
+      team_config        = @database.config( ip: ip, short: host, fqdn: fqdn, key: 'team' )
+      environment_config = @database.config( ip: ip, short: host, fqdn: fqdn, key: 'environment' )
+      aws_config         = @database.config( ip: ip, short: host, fqdn: fqdn, key: 'aws' )
+      vhost_http_config  = @database.config( ip: ip, short: host, fqdn: fqdn, key: 'vhost_http' )
+      vhost_https_config = @database.config( ip: ip, short: host, fqdn: fqdn, key: 'vhost_https' )
 
-      full_config = @database.config( { :ip => ip, :short => host, :fqdn => fqdn } )
+      full_config = @database.config( ip: ip, short: host, fqdn: fqdn )
 
       logger.debug( "team_config       : #{team_config}" )
       logger.debug( "environment_config: #{environment_config}" )
@@ -79,27 +79,31 @@ class CMIcinga2 < Icinga2::Client
       #
       for y in 1..15
 
-        result = @database.discoveryData( { :ip => ip, :short => host, :fqdn => fqdn } )
+        result = @database.discoveryData( ip: ip, short: host, fqdn: fqdn )
 
         if( result.is_a?( Hash ) && result.count != 0 )
           services = result
           break
         else
-          logger.debug( sprintf( 'waiting for data for node %s ... %d', fqdn, y ) )
+          logger.debug( format( 'waiting for data for node %s ... %d', fqdn, y ) )
           sleep( 5 )
         end
       end
 
       payload = {}
 
-      if( services != nil )
+      unless( services.nil?  )
 
         services.each do |s|
-          if( s.last != nil )
+#          if( s.last.nil? )
+            next if( s.last.nil? )
+#          end
+
+#          unless( s.last.nil? )
             s.last.reject! { |k| k == 'template' }
             s.last.reject! { |k| k == 'application' }
             s.last.reject! { |k| k == 'description' }
-          end
+#          end
         end
 
         if( services.include?('http-proxy') )
@@ -138,7 +142,7 @@ class CMIcinga2 < Icinga2::Client
 #        logger.debug(aws_config.class.to_s)
         aws_config = aws_config.dig('aws')
         aws_config = aws_config.gsub( '=>', ':' )
-        aws_config = self.parsedResponse( aws_config )
+        aws_config = parsed_response( aws_config )
 
         aws_config.each do |k,v|
           payload["aws_#{k}"] = v
@@ -147,11 +151,11 @@ class CMIcinga2 < Icinga2::Client
       end
 
       if( team_config )
-        payload['team'] = self.parsedResponse( team_config )
+        payload['team'] = parsed_response( team_config )
       end
 
       if( environment_config )
-        payload['environment'] = self.parsedResponse( environment_config )
+        payload['environment'] = parsed_response( environment_config )
       end
 
       # rename all keys
@@ -161,10 +165,11 @@ class CMIcinga2 < Icinga2::Client
     end
 
 
-    def parsedResponse( r )
+    def parsed_response( r )
 
       return JSON.parse( r )
     rescue JSON::ParserError => e
+      logger.error(e)
       return r # do smth
     end
 
