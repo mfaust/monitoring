@@ -8,7 +8,6 @@ ENV \
   BUILD_DATE="2017-09-14" \
   TERM=xterm \
   APK_ADD="nano git g++ make go " \
-  APK_DEL="nano git g++ make go" \
   GOPATH=/build \
   GOROOT=/usr/lib/go
 
@@ -22,17 +21,12 @@ COPY rootfs/ /
 RUN \
   apk --no-cache update && \
   apk --no-cache upgrade && \
-  apk --no-cache add ${APK_ADD}
-
-RUN \
+  apk --no-cache add ${APK_ADD} && \
   cd ${GOPATH}/src && \
   go get github.com/gorilla/mux && \
   go build -ldflags="-s -w" -o service-discovery && \
-  mv service-discovery /usr/bin
-
-
-RUN \
-  apk --purge del ${APK_DEL} && \
+  mv service-discovery /usr/bin && \
+  apk --purge del ${APK_ADD} && \
   rm -rfv \
     /tmp/* \
     /var/cache/apk/* \
