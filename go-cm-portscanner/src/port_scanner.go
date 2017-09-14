@@ -6,9 +6,7 @@ import (
   "os"
 )
 
-func scan_port(host string) []int {
-
-//   ps := portscanner.NewPortScanner( host, 30000 )
+func scan_port(host string, ports_optional []int) []int {
 
   array := []int{ 80, 443, 3306, 5432, 6379, 8081, 9100, 28017, 38099,
         40099,
@@ -43,6 +41,10 @@ func scan_port(host string) []int {
         48099,
         49099,
         55555 }
+
+  if len(ports_optional) != 0 {
+    array = ports_optional
+  }
 
   var open_ports []int
 
