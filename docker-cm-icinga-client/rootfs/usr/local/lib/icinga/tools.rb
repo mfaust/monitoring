@@ -52,9 +52,9 @@ class CMIcinga2 < Icinga2::Client
     end
 
 
-    def nodeInformation( params = {} )
+    def node_information(params = {} )
 
-      logger.debug( "nodeInformation( #{params} )" )
+      logger.debug( "node_information( #{params} )" )
 
       ip      = params.dig(:ip)
       host    = params.dig(:host)
