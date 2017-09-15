@@ -20,6 +20,7 @@ jolokiaPort        = ENV.fetch('JOLOKIA_PORT'           , 8080 )
 jolokiaPath        = ENV.fetch('JOLOKIA_PATH'           , '/jolokia' )
 jolokiaAuthUser    = ENV.fetch('JOLOKIA_AUTH_USER'      , nil )
 jolokiaAuthPass    = ENV.fetch('JOLOKIA_AUTH_PASS'      , nil )
+discoveryHost      = ENV.fetch('DISCOVERY_HOST'         , 'jolokia' )
 mqHost             = ENV.fetch('MQ_HOST'                , 'beanstalkd' )
 mqPort             = ENV.fetch('MQ_PORT'                , 11300 )
 mqQueue            = ENV.fetch('MQ_QUEUE'               , 'mq-discover' )
@@ -41,6 +42,9 @@ config = {
       :user => jolokiaAuthUser,
       :pass => jolokiaAuthPass
     }
+  },
+  :discovery   => {
+    :host => discoveryHost
   },
   :mq          => {
     :host  => mqHost,

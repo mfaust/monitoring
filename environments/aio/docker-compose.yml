@@ -64,7 +64,7 @@ services:
 
   jolokia:
     restart: always
-    image: bodsch/docker-jolokia:1708-35.1
+    build: ../../docker-cm-jolokia
     container_name: jolokia
     hostname: jolokia
     depends_on:
@@ -173,7 +173,7 @@ services:
 
   grafana:
     restart: always
-    image: bodsch/docker-grafana:1707-31.1
+    image: bodsch/docker-grafana:1709-37.1
     container_name: grafana
     hostname: grafana
     extends:

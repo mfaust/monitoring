@@ -14,6 +14,7 @@ require_relative 'logging'
 require_relative 'utils/network'
 require_relative 'cache'
 require_relative 'jolokia'
+require_relative 'port_discovery'
 require_relative 'job-queue'
 require_relative 'message-queue'
 require_relative 'storage'
@@ -84,6 +85,11 @@ module ServiceDiscovery
       jolokiaPath         = settings.dig(:jolokia, :path)           || '/jolokia'
       jolokiaAuthUser     = settings.dig(:jolokia, :auth, :user)
       jolokiaAuthPass     = settings.dig(:jolokia, :auth, :pass)
+
+      @discoveryHost       = settings.dig(:discovery, :host)
+      @discoveryPort       = settings.dig(:discovery, :port)        || 8088
+      @discoveryPath       = settings.dig(:discovery, :path)        # default: /scan
+
       mqHost              = settings.dig(:mq, :host)                || 'localhost'
       mqPort              = settings.dig(:mq, :port)                || 11300
       @mqQueue            = settings.dig(:mq, :queue)               || 'mq-discover'
@@ -106,8 +112,8 @@ module ServiceDiscovery
 
       @scanPorts         = ports
 
-      version             = '1.8.0'
-      date                = '2017-07-25'
+      version             = '1.9.1'
+      date                = '2017-09-15'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - Service Discovery' )
@@ -208,20 +214,21 @@ module ServiceDiscovery
           #
           unless( serviceData.dig( 'vhosts' ).nil? )
 
+            logger.info('try to get vhost data')
+
             begin
-            http_vhosts = ServiceDiscovery::HttpVhosts.new( { host: fqdn, port: port } )
-            http_vhosts_data = http_vhosts.tick
+              http_vhosts = ServiceDiscovery::HttpVhosts.new( { host: fqdn, port: port } )
+              http_vhosts_data = http_vhosts.tick
 
-            if( http_vhosts_data.is_a?(String) )
-              http_vhosts_data = JSON.parse( http_vhosts_data )
+              if( http_vhosts_data.is_a?(String) )
+                http_vhosts_data = JSON.parse( http_vhosts_data )
 
-              http_vhosts_data = http_vhosts_data.dig('vhosts')
+                http_vhosts_data = http_vhosts_data.dig('vhosts')
 
-              data[d]['vhosts'] = http_vhosts_data
-            end
+                data[d]['vhosts'] = http_vhosts_data
+              end
             rescue => e
-              logger.error( 'can\'t get vhost data' )
-              logger.error(e)
+              logger.error( format( '  can\'t get vhost data, error: %s', e ) )
             end
           end
 
@@ -383,30 +390,88 @@ module ServiceDiscovery
 
       discoveredServices = Hash.new()
 
-      open = false
 
-      # check open ports and ask for application behind open ports
-      #
-      ports.each do |p|
+      # TODO
+      # check if @discoveryHost and @discoveryPort setStatus
+      # then use the new
+      # otherwise use the old code
 
-        open = Utils::Network.portOpen?( fqdn, p )
+      use_old_discovery = false
 
-        logger.debug( sprintf( 'Host: %s | Port: %s   %s', host, p, open ? 'open' : 'closed' ) )
+      unless( @discoveryHost.nil? )
 
-        if( open == true )
+        # use new port discover service
+        #
+        start = Time.now
+        open_ports = []
 
-          names = self.discoverApplication( { :fqdn => fqdn, :port => p } )
+        pd = PortDiscovery::Client.new( host: @discoveryHost, port: @discoveryPort )
 
-          logger.debug( "discovered services: #{names}" )
+        if( pd.isAvailable?() == true )
 
-          unless( names.nil? )
+          open_ports = pd.post( host: host, ports: ports )
 
-            names.each do |name|
-              discoveredServices.merge!( { name => { 'port' => p } } )
+          open_ports.each do |p|
+
+            names = self.discoverApplication( { :fqdn => fqdn, :port => p } )
+
+            logger.debug( "discovered services: #{names}" )
+
+            unless( names.nil? )
+
+              names.each do |name|
+                discoveredServices.merge!( { name => { 'port' => p } } )
+              end
+            end
+          end
+        else
+
+          use_old_discovery = true
+        end
+
+        finish = Time.now
+        logger.info( sprintf( 'runtime for application discovery: %s seconds', (finish - start).round(2) ) )
+        #
+        # ---------------------------------------------------------------------------------------------------
+      else
+        use_old_discovery = true
+      end
+
+      if( use_old_discovery == true )
+
+        open = false
+        start = Time.now
+
+        # check open ports and ask for application behind open ports
+        #
+        ports.each do |p|
+
+          open = Utils::Network.portOpen?( fqdn, p )
+
+          logger.debug( sprintf( 'Host: %s | Port: %s   %s', host, p, open ? 'open' : 'closed' ) )
+
+          if( open == true )
+
+            names = self.discoverApplication( { :fqdn => fqdn, :port => p } )
+
+            logger.debug( "discovered services: #{names}" )
+
+            unless( names.nil? )
+
+              names.each do |name|
+                discoveredServices.merge!( { name => { 'port' => p } } )
+              end
             end
           end
         end
+
+        finish = Time.now
+        logger.info( sprintf( 'runtime for application discovery: %s seconds', (finish - start).round(2) ) )
       end
+
+      found_services = discoveredServices.keys
+
+      logger.info( format( 'found %d services: %s', found_services.count, found_services.to_s ) )
 
       # TODO
       # merge discovered services with additional services
@@ -418,13 +483,14 @@ module ServiceDiscovery
           serviceData = @serviceConfig.dig( 'services', s )
 
           unless( serviceData.nil? )
-
             discoveredServices[s] ||= serviceData.filter( 'port' )
           end
         end
 
-      end
+        found_services = discoveredServices.keys
 
+        logger.info( format( '%d usable services: %s', found_services.count, found_services.to_s ) )
+      end
 
       # merge discovered services with cm-services.yaml
       #
@@ -436,7 +502,7 @@ module ServiceDiscovery
       result    = @database.setStatus( { :ip => ip, :short => short, :fqdn => fqdn, :status => Storage::MySQL::ONLINE } )
 
       finish = Time.now
-      logger.info( sprintf( 'finished in %s seconds', (finish - start).round(2) ) )
+      logger.info( sprintf( 'overall runtime: %s seconds', (finish - start).round(2) ) )
 
       return {
         :status   => 200,
