@@ -10,11 +10,11 @@ class CMIcinga2 < Icinga2::Client
     def queue()
 
 #       logger.debug( "CMIcinga2::Queue.queue()" )
-      data = @mqConsumer.getJobFromTube( @mqQueue )
+      data = @mq_consumer.getJobFromTube(@mq_queue )
 
       if( data.count() != 0 )
 
-        stats = @mqConsumer.tubeStatistics( @mqQueue )
+        stats = @mq_consumer.tubeStatistics(@mq_queue )
         logger.debug( {
           :total   => stats.dig(:total),
           :ready   => stats.dig(:ready),
@@ -25,29 +25,29 @@ class CMIcinga2 < Icinga2::Client
         if( stats.dig(:ready).to_i > 10 )
           logger.warn( 'more then 10 jobs in queue ... just wait' )
 
-          @mqConsumer.cleanQueue( @mqQueue )
+          @mq_consumer.cleanQueue(@mq_queue)
           return
         end
 
-        jobId  = data.dig( :id )
+        job_id  = data.dig(:id )
 
-        result = self.processQueue( data )
+        result = self.process_queue(data )
 
         status = result.dig(:status).to_i
 
         if( status == 200 || status == 409 || status == 500 || status == 503 )
 
-          @mqConsumer.deleteJob( @mqQueue, jobId )
+          @mq_consumer.deleteJob(@mq_queue, job_id )
         else
 
-          @mqConsumer.buryJob( @mqQueue, jobId )
+          @mq_consumer.buryJob(@mq_queue, job_id )
         end
       end
 
     end
 
 
-    def processQueue( data = {} )
+    def process_queue(data = {} )
 
       logger.info( sprintf( 'process Message ID %d from Queue \'%s\'', data.dig(:id), data.dig(:tube) ) )
 
@@ -128,11 +128,13 @@ class CMIcinga2 < Icinga2::Client
 #        logger.debug( payload )
 #        payload = JSON.parse( payload )
 
-        services     = self.nodeInformation( { :ip => ip, :host => short, :fqdn => fqdn } )
+        services     = self.node_information({:ip => ip, :host => short, :fqdn => fqdn } )
         display_name = @database.config( { :ip => ip, :short => short, :fqdn => fqdn, :key => 'display_name' } )
 
 #         logger.debug( display_name )
 #         logger.debug( display_name.class.to_s )
+
+        logger.debug(services)
 
         if( display_name.nil? )
           display_name = fqdn
@@ -161,11 +163,11 @@ class CMIcinga2 < Icinga2::Client
           :host => fqdn,
           :fqdn => fqdn,
           :display_name => display_name,
-          :enable_notifications => @icingaNotifications,
+          :enable_notifications => @icinga_notifications,
           :vars => payload
         }
 
-        logger.debug(params)
+        logger.debug(JOSN.pretty_generate(params))
 
         result = self.add_host(params)
 
@@ -230,16 +232,14 @@ class CMIcinga2 < Icinga2::Client
 
       end
 
-      if( result.is_a?( String ) )
+      result = JSON.parse(result) if( result.is_a?(String ) )
 
-        result = JSON.parse( result )
-      end
 
       result[:request]    = data
     end
 
 
-    def sendMessage( params = {} )
+    def send_message(params = {} )
 
       command = params.dig(:cmd)
       node    = params.dig(:node)
@@ -257,7 +257,7 @@ class CMIcinga2 < Icinga2::Client
         payload: data       # require
       }.to_json
 
-      result = @mqProducer.addJob( queue, job, prio, ttr, delay )
+      result = @mq_producer.addJob(queue, job, prio, ttr, delay )
 
       logger.debug( job )
       logger.debug( result )
