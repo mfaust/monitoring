@@ -167,7 +167,7 @@ class CMIcinga2 < Icinga2::Client
           :vars => payload
         }
 
-        logger.debug(JOSN.pretty_generate(params))
+        logger.debug(JSON.pretty_generate(params))
 
         result = self.add_host(params)
 

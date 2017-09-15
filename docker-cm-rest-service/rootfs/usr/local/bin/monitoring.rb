@@ -610,25 +610,30 @@ class Monitoring
     if( payload.is_a?(String) && payload.size == 0 )
       payload = { 'dns' => hostData }
     end
+
     payload = JSON.generate(payload)
 
+    delay = 0
+
     if( force == true )
+
+      delay = 45
 
       logger.info( 'force mode ...' )
 
       if( enabledGrafana == true )
         logger.info( 'remove grafana dashborads' )
-        self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-grafana', :payload => payload, :prio => 1 } )
+        self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-grafana', :payload => payload, :prio => 1, :ttr => 1, :delay => 0 } )
       end
 
       if( enabledIcinga == true )
         logger.info( 'remove icinga checks and notifications' )
-        self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-icinga', :payload => payload, :prio => 1 } )
+        self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-icinga', :payload => payload, :prio => 1, :ttr => 1, :delay => 0 } )
       end
 
       if( enableDiscovery == true )
         logger.info( 'remove node from discovery service' )
-        self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-discover', :payload => payload, :prio => 1 } )
+        self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-discover', :payload => payload, :prio => 1, :ttr => 1, :delay => 0 } )
       end
 
       sleep(2)
@@ -639,9 +644,11 @@ class Monitoring
       logger.info( 'done' )
 
       sleep(2)
+
+
     end
 
-
+    logger.debug(format('add %d seconds delay',delay))
     # create a valid DNS entry
     #
     status = @database.createDNS( { :ip => ip, :short => short, :fqdn => fqdn } )
@@ -657,19 +664,19 @@ class Monitoring
     if( enableDiscovery == true )
 
       logger.info( 'add node to discovery service' )
-      self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-discover', :payload => payload, :prio => 1, :delay => 2 } )
+      self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-discover', :payload => payload, :prio => 1, :delay => 2 + delay.to_i } )
     end
 
     if( enabledGrafana == true )
 
       logger.info( 'create grafana dashborads' )
-      self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-grafana', :payload => payload, :prio => 10, :ttr => 15, :delay => 10 } )
+      self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-grafana', :payload => payload, :prio => 10, :ttr => 15, :delay => 10 + delay.to_i } )
     end
 
     if( enabledIcinga == true  )
 
       logger.info( 'create icinga checks and notifications' )
-      self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-icinga', :payload => payload, :prio => 10, :ttr => 15, :delay => 10 } )
+      self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-icinga', :payload => payload, :prio => 10, :ttr => 15, :delay => 10 + delay.to_i } )
     end
 
     # add annotation at last
