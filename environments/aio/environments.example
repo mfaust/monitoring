@@ -135,6 +135,9 @@ services:
       # JOLOKIA_PATH: /jolokia
       # JOLOKIA_AUTH_USER:
       # JOLOKIA_AUTH_PASS:
+      # DISCOVERY_HOST: jolokia
+      # DISCOVERY_PORT: 8088
+      # DISCOVERY_PATH: /scan
       REDIS_HOST: redis
       # REDIS_PORT: 6379
       MQ_HOST: beanstalkd
