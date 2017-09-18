@@ -311,7 +311,7 @@ module CarbonData
 
         else
 
-          if( result != nil )
+          if( result != nil && result.is_a?( Array ) )
 
             result.each do |r|
               key    = r.keys.first
@@ -320,6 +320,9 @@ module CarbonData
               graphiteOutput.push( self.createGraphiteOutput( key, values ) )
 
             end
+          else
+            logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
+            logger.error( result.class.to_s )
           end
         end
 
