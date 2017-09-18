@@ -61,8 +61,8 @@ module DataCollector
       mysqlUser           = settings.dig(:mysql, :user)
       mysqlPassword       = settings.dig(:mysql, :password)
 
-      version            = '1.10.0'
-      date               = '2017-07-25'
+      version            = '1.11.0'
+      date               = '2017-09-18'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - DataCollector' )
@@ -625,8 +625,14 @@ module DataCollector
 
                   data = self.reorganizeData( jolokiaMessage )
 
+                  # get configured Content Server (RLS or MLS)
+                  if( v == 'cae-live' || v == 'cae-preview' )
+                    data = self.parse_content_server_url( fqdn: fqdn, service: v, data: data )
+                  end
+
+                  # get configured Master Live Server
                   if( v == 'replication-live-server' )
-                    data = self.parseMLSIor( { :fqdn => fqdn, :data => data } )
+                    data = self.parse_mls_ior( { :fqdn => fqdn, :data => data } )
                   end
 
                   result[v] = data
@@ -712,7 +718,7 @@ module DataCollector
     #   "path": "/coremedia/ior"
     # }
     #
-    def parseMLSIor( params = {} )
+    def parse_mls_ior( params = {} )
 
       mlsIOR = nil
 
@@ -788,6 +794,90 @@ module DataCollector
       return data
 
     end
+
+    # a CAE give us his Content Server as URL:
+    #  - "Url": "http://tomcat-centos7:42080/coremedia/ior"
+    #  - "Url": "http://tomcat-centos7:40180/coremedia/ior"
+
+    def parse_content_server_url( params )
+
+      content_server_ior = nil
+
+      fqdn    = params.dig(:fqdn)
+      service = params.dig(:service)
+      data    = params.dig(:data)
+      content_server = fqdn
+
+      logger.info( format( '  search Content Server for this CAE (%s)', service ) )
+
+      d = data.select {|d| d.dig('CapConnection') }
+
+      if(!d.is_a?(Array))
+        data
+      end
+
+      value = d.first.dig( 'CapConnection','value' )
+
+      if(!value.is_a?(Hash))
+        data
+      end
+
+      unless( value.nil? )
+
+        value  = value.values.first
+
+        if(!value.is_a?(Hash))
+          data
+        end
+
+        content_server_ior = value.dig( 'Url' )
+
+        unless( content_server_ior.nil? )
+
+          uri    = URI.parse( content_server_ior )
+          scheme = uri.scheme
+          host   = uri.host
+          port   = uri.port
+          path   = uri.path
+
+          logger.debug( format('search dns entry for \'%s\'', host) )
+
+          ip, short, fqdn = self.nsLookup(host,60)
+
+          if( !ip.nil? && !short.nil? && !fqdn.nil? )
+
+            logger.debug( "found: #{ip} , #{short} , #{fqdn}" )
+
+            realIP    = ip
+            realShort = short
+            content_server = fqdn
+
+          else
+            realIP    = ''
+            realShort = ''
+            content_server = host
+          end
+
+          value['ContentServer'] = {
+            'scheme' => scheme,
+            'host'   => content_server,
+            'port'   => port,
+            'path'   => path
+          }
+        else
+          logger.debug( 'no \'IOR URL\' found! :(' )
+          logger.info( 'this CAE use an older version. we use the CAE Host as fallback' )
+        end
+
+      end
+
+      logger.info( sprintf( '  use \'%s\'', content_server ) )
+      logger.debug( JSON.pretty_generate(value.dig('ContentServer')) )
+      return data
+
+    end
+
+
 
 
     # reorganize data to later simple find

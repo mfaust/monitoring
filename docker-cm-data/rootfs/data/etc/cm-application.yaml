@@ -285,7 +285,7 @@ jolokia:
       metrics:
       - name: CapConnection
         mbean: com.coremedia:type=CapConnection,application=*
-        attribute: BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open
+        attribute: BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open,Url
       - mbean: com.coremedia:type=DataViewFactory,application=*
         attribute: ActiveTimeOfComputedDataViews,NumberOfCachedDataViews,NumberOfComputedDataViews,NumberOfDataViewLookups,NumberOfEvictedDataViews,NumberOfInvalidatedDataViews,TotalTimeOfComputedDataViews
       # currently disabled
