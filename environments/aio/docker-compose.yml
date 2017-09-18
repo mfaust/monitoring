@@ -139,7 +139,8 @@ services:
 
   carbon:
     restart: always
-    image: bodsch/docker-go-carbon:1708-35.1
+    #image: bodsch/docker-go-carbon:1708-35.1
+    image: bodsch/docker-go-carbon:1709.2
     container_name: carbon
     hostname: carbon
     depends_on:
@@ -149,6 +150,7 @@ services:
       - 2003:2003/udp
     volumes:
       - /etc/localtime:/etc/localtime:ro
+      - /var/log/:/var/tmp/docker-log
       - /var/tmp/docker-volumes/carbon:/srv
     networks:
       mon:
