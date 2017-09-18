@@ -92,18 +92,89 @@ class CMIcinga2 < Icinga2::Client
 
       payload = {}
 
+      logger.debug( JSON.pretty_generate(services) )
+
       unless( services.nil?  )
 
-        services.each do |s|
-#          if( s.last.nil? )
-            next if( s.last.nil? )
-#          end
+        # check, for RLS and CAE(live|preview)
+        unless( services.dig('replication-live-server').nil? )
 
-#          unless( s.last.nil? )
-            s.last.reject! { |k| k == 'template' }
-            s.last.reject! { |k| k == 'application' }
-            s.last.reject! { |k| k == 'description' }
-#          end
+          # get data from redis
+          cache_key = Storage::RedisClient.cacheKey( { :host => fqdn, :pre => 'result', :service => 'replication-live-server' } )
+
+          _redis = @redis.get( cache_key )
+          _redis = JSON.parse(_redis) if _redis.is_a?(String)
+
+          replicator = _redis.select { |k,_v| k.dig('Replicator') }
+          replicator = replicator.first
+          replicator_value = replicator.dig('Replicator','value')
+
+#          logger.debug( replicator_value )
+
+          unless( replicator_value.nil? )
+
+            master_live_server = replicator_value.values.first.dig('MasterLiveServer','host')
+#            logger.debug( "result: #{master_live_server}" )
+
+            unless( master_live_server.nil? )
+              services['replication-live-server']['master_live_server'] = master_live_server
+            end
+          end
+        end
+
+        unless( services.dig('cae-live').nil? )
+
+          # get data from redis
+          cache_key = Storage::RedisClient.cacheKey( { :host => fqdn, :pre => 'result', :service => 'cae-live' } )
+
+          _redis = @redis.get( cache_key )
+          _redis = JSON.parse(_redis) if _redis.is_a?(String)
+
+          replicator = _redis.select { |k,_v| k.dig('CapConnection') }
+          replicator = replicator.first
+          replicator_value = replicator.dig('CapConnection','value')
+
+#          logger.debug( replicator_value )
+
+          unless( replicator_value.nil? )
+
+            content_server = replicator_value.values.first.dig('ContentServer','host')
+#            logger.debug( "result: #{content_server}" )
+
+            unless( content_server.nil? )
+              services['cae-live']['content_server'] = content_server
+            end
+          end
+        end
+
+        unless( services.dig('cae-preview').nil? )
+
+          # get data from redis
+          cache_key = Storage::RedisClient.cacheKey( { :host => fqdn, :pre => 'result', :service => 'cae-preview' } )
+
+          _redis = @redis.get( cache_key )
+          _redis = JSON.parse(_redis) if _redis.is_a?(String)
+
+          replicator = _redis.select { |k,_v| k.dig('CapConnection') }
+          replicator = replicator.first
+          replicator_value = replicator.dig('CapConnection','value')
+
+          unless( replicator_value.nil? )
+
+            content_server = replicator_value.values.first.dig('ContentServer','host')
+
+            unless( content_server.nil? )
+              services['cae-preview']['content_server'] = content_server
+            end
+          end
+        end
+
+        services.each do |s|
+          next if( s.last.nil? )
+
+          s.last.reject! { |k| k == 'template' }
+          s.last.reject! { |k| k == 'application' }
+          s.last.reject! { |k| k == 'description' }
         end
 
         if( services.include?('http-proxy') )

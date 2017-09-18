@@ -42,6 +42,9 @@ class CMIcinga2 < Icinga2::Client
       mq_port                = settings.dig(:mq, :port)                || 11300
       @mq_queue              = settings.dig(:mq, :queue)               || 'mq-icinga'
 
+      redis_host           = settings.dig(:redis, :host)
+      redis_port           = settings.dig(:redis, :port)  || 6379
+
       mysql_host             = settings.dig(:mysql, :host)
       mysql_schema           = settings.dig(:mysql, :schema)
       mysql_user             = settings.dig(:mysql, :user)
@@ -72,6 +75,7 @@ class CMIcinga2 < Icinga2::Client
       end
       logger.info( format('    notifications enabled: %s', @icinga_notifications ? 'true' : 'false' ) )
       logger.info( '  used Services:' )
+      logger.info( "    - redis        : #{redis_host}:#{redis_port}" )
       logger.info( "    - mysql        : #{mysql_host}@#{mysql_schema}" )
       logger.info( "    - message Queue: #{mq_host}:#{mq_port}/#{@mq_queue}" )
       logger.info( '-----------------------------------------------------------------' )
@@ -84,8 +88,9 @@ class CMIcinga2 < Icinga2::Client
       logger.debug( format(' api pass : %s', @icinga_api_pass ) )
       logger.debug( format(' node name: %s', @node_name ) )
 
-      @cache      = Cache::Store.new()
-      @jobs       = JobQueue::Job.new()
+      @cache       = Cache::Store.new()
+      @jobs        = JobQueue::Job.new()
+      @redis       = Storage::RedisClient.new( { :redis => { :host => redis_host } } )
       @mq_consumer = MessageQueue::Consumer.new(mq_settings )
       @mq_producer = MessageQueue::Producer.new(mq_settings )
 

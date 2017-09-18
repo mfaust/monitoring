@@ -4,14 +4,14 @@ FROM alpine:3.6
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
-  VERSION="1707-31.1" \
-  BUILD_DATE="2017-07-31" \
+  VERSION="1709.1" \
+  BUILD_DATE="2017-09-18" \
   ALPINE_MIRROR="mirror1.hs-esslingen.de/pub/Mirrors" \
   ALPINE_VERSION="v3.6" \
   TERM=xterm \
   APK_ADD="build-base bind-tools drill git mariadb-dev libressl-dev ruby-dev ruby-irb ruby-rdoc" \
   APK_DEL="build-base git ruby-dev ruby-rdoc " \
-  GEMS="beaneater ipaddress icinga2 json mysql2 rufus-scheduler tzinfo-data"
+  GEMS="beaneater ipaddress icinga2 json mysql2 redis rufus-scheduler tzinfo-data"
 
 # ---------------------------------------------------------------------------------------
 
