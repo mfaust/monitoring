@@ -109,8 +109,8 @@ services:
       TZ: 'Europe/Berlin'
       GRAFANA_HOST: nginx
       RUN_DELAY: 40
-      GRAFANA_API_USER: coremedia
-      GRAFANA_API_PASSWORD: coremedia
+      GRAFANA_API_USER: admin
+      GRAFANA_API_PASSWORD: grafana-admin
 
   cm-graphite-client:
     environment:
@@ -126,5 +126,3 @@ services:
       ICINGA_API_USER: root
       ICINGA_API_PASSWORD: icinga
       ENABLE_NOTIFICATIONS: 'true'
-      RUN_DELAY: 45
-
