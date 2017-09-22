@@ -25,7 +25,7 @@ services:
 
   database:
     restart: always
-    image: bodsch/docker-mysql:1707-30.1
+    image: bodsch/docker-mysql:1708-35.1
     container_name: database
     hostname: database
     extends:
@@ -40,7 +40,7 @@ services:
 
   memcached:
     restart: always
-    image: bodsch/docker-memcached:1707-27.1
+    image: bodsch/docker-memcached:1708-35.1
     container_name: memcached
     hostname: memcached
     volumes:
@@ -52,7 +52,7 @@ services:
 
   nginx:
     restart: always
-    image: bodsch/docker-nginx:1707-27.1
+    image: bodsch/docker-nginx:1708-35.1
     container_name: nginx
     hostname: nginx
     ports:
@@ -81,9 +81,11 @@ services:
 
   carbon:
     restart: always
-    image: bodsch/docker-go-carbon:1707-27.1
+    image: bodsch/docker-go-carbon:1709.2
     container_name: carbon
     hostname: carbon
+    depends_on:
+      - data
     ports:
       - 2003:2003
       - 2003:2003/udp
@@ -96,7 +98,7 @@ services:
 
   graphite:
     restart: always
-    image: bodsch/docker-graphite:1707-27.1
+    image: bodsch/docker-graphite:1708-35.1
     container_name: graphite
     hostname: graphite
     extends:
@@ -113,7 +115,7 @@ services:
 
   grafana:
     restart: always
-    image: bodsch/docker-grafana:1707-31.1
+    image: bodsch/docker-grafana:stable-4.5.0-r1
     container_name: grafana
     hostname: grafana
     extends:
@@ -145,10 +147,8 @@ services:
     depends_on:
       - data
       - database
-      - redis
     links:
       - database
-      - redis
     ports:
       - 5665:5665
       - 6666:6666
@@ -157,7 +157,9 @@ services:
       - /share/etc/cm-icinga2.yaml:/etc/cm-icinga2.yaml
       - /share/etc/icinga2/objects.d:/etc/icinga2/objects.d
       - /share/usr/local/share/icinga2:/usr/local/share/icinga2
-      - /share/usr/lib/monitoring-plugins/tools:/usr/local/share/icinga2
+      - /share/etc/icinga2/conf.d/coremedia_notifications.conf:/etc/icinga2/conf.d/coremedia_notifications.conf
+      - /share/etc/icinga2/scripts/aws-notifications.rb:/etc/icinga2/scripts/aws-notifications.rb
+      - /share/etc/icinga2/scripts/notification.erb:/etc/icinga2/scripts/notification.erb
       - /share/usr/lib/monitoring-plugins/icingachecks.rb:/usr/local/lib/icingachecks.rb
       - /share/usr/lib/monitoring-plugins/check_cm_feeder_status.rb:/usr/lib/monitoring-plugins/check_cm_feeder_status
       - /share/usr/lib/monitoring-plugins/check_cm_cache.rb:/usr/lib/monitoring-plugins/check_cm_cache
@@ -175,13 +177,14 @@ services:
 
   icingaweb2:
     restart: always
-    image: bodsch/docker-icingaweb2:1707-30.1
+    image: bodsch/docker-icingaweb2:1708-35.1
     container_name: icingaweb2
     hostname: icingaweb2
     extends:
       file: environments.yml
       service: icingaweb2
     depends_on:
+      - data
       - database
       - cm-icinga2-master
     links:
@@ -196,7 +199,7 @@ services:
 
   markdown-service:
     restart: always
-    image: bodsch/docker-markdown-service:1707-27.1
+    image: bodsch/docker-markdown-service:1708-35.1
     container_name: markdown-service
     hostname: markdown-service
     depends_on:
@@ -209,14 +212,14 @@ services:
         ipv4_address: 192.168.1.25
 
 
-  cm-smashing:
+  cm-dashing:
     restart: always
-    build: ../../docker-cm-smashing
-    container_name: cm-smashing
-    hostname: cm-smashing
+    build: ../../docker-cm-dashing
+    container_name: cm-dashing
+    hostname: cm-dashing
     extends:
       file: environments.yml
-      service: cm-smashing
+      service: cm-dashing
     depends_on:
       - cm-icinga2-master
     volumes:
