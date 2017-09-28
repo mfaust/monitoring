@@ -1,13 +1,15 @@
 .gradle
-build/
 out/
 *.iml
 .idea
 .vagrant
 *~
+.yardoc
+.yardopts
 
+environments/aio/logs
+environments/aio/data/
 
 docker-compose-monitoring/data/
-environments/aio/data/
 environments/customer/data/
 environments/aws/data/
