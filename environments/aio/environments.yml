@@ -33,7 +33,6 @@ services:
       # (see above in this configuration part!)
       CARBON_HOST: carbon
       MEMCACHE_HOST: memcached
-      GRAFANA_USERS: 'coremedia:coremedia::admin'
 
   cm-icinga2-master:
     environment:
@@ -110,7 +109,7 @@ services:
       GRAFANA_HOST: nginx
       RUN_DELAY: 40
       GRAFANA_API_USER: admin
-      GRAFANA_API_PASSWORD: grafana-admin
+      GRAFANA_API_PASSWORD: admin
 
   cm-graphite-client:
     environment:
