@@ -176,6 +176,8 @@ services:
   grafana:
     restart: always
     image: bodsch/docker-grafana:stable-4.5.2-r1
+#    image: bodsch/docker-grafana:1707-31.1
+#    image: bodsch/docker-grafana:1710-dev
     container_name: grafana
     hostname: grafana
     extends:
@@ -382,25 +384,25 @@ services:
 
   # single service
   # use MQ to process data
-  cm-carbon-client:
-    restart: always
-    build: ../../docker-cm-carbon-client
-    container_name: cm-carbon-client
-    hostname: cm-carbon-client
-    extends:
-      file: environments.yml
-      service: cm-carbon-client
-    depends_on:
-      - data
-      - redis
-    links:
-      - redis
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ./logs:/var/log
-    networks:
-      mon:
-        ipv4_address: 192.168.1.33
+#  cm-carbon-client:
+#    restart: always
+#    build: ../../docker-cm-carbon-client
+#    container_name: cm-carbon-client
+#    hostname: cm-carbon-client
+#    extends:
+#      file: environments.yml
+#      service: cm-carbon-client
+#    depends_on:
+#      - data
+#      - redis
+#    links:
+#      - redis
+#    volumes:
+#      - /etc/localtime:/etc/localtime:ro
+#      - ./logs:/var/log
+#    networks:
+#      mon:
+#        ipv4_address: 192.168.1.33
 
   # single service
   # use MQ to process data
@@ -432,46 +434,46 @@ services:
 
   # single service
   # use MQ to process data
-  cm-graphite-client:
-    restart: always
-    build: ../../docker-cm-graphite-client
-    container_name: cm-graphite-client
-    hostname: cm-graphite-client
-    extends:
-      file: environments.yml
-      service: cm-graphite-client
-    depends_on:
-      - data
-      - beanstalkd
-    links:
-      - beanstalkd
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ./logs:/var/log
-    networks:
-      mon:
-        ipv4_address: 192.168.1.35
-
-  # single service
-  # use MQ to process data
-  cm-icinga-client:
-    restart: always
-    build: ../../docker-cm-icinga-client
-    container_name: cm-icinga-client
-    hostname: cm-icinga-client
-    extends:
-      file: environments.yml
-      service: cm-icinga-client
-    depends_on:
-      - data
-      - beanstalkd
-    links:
-      - beanstalkd
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ./logs:/var/log
-    networks:
-      mon:
-        ipv4_address: 192.168.1.36
-    dns:
-      - 192.168.1.5
+#  cm-graphite-client:
+#    restart: always
+#    build: ../../docker-cm-graphite-client
+#    container_name: cm-graphite-client
+#    hostname: cm-graphite-client
+#    extends:
+#      file: environments.yml
+#      service: cm-graphite-client
+#    depends_on:
+#      - data
+#      - beanstalkd
+#    links:
+#      - beanstalkd
+#    volumes:
+#      - /etc/localtime:/etc/localtime:ro
+#      - ./logs:/var/log
+#    networks:
+#      mon:
+#        ipv4_address: 192.168.1.35
+#
+#  # single service
+#  # use MQ to process data
+#  cm-icinga-client:
+#    restart: always
+#    build: ../../docker-cm-icinga-client
+#    container_name: cm-icinga-client
+#    hostname: cm-icinga-client
+#    extends:
+#      file: environments.yml
+#      service: cm-icinga-client
+#    depends_on:
+#      - data
+#      - beanstalkd
+#    links:
+#      - beanstalkd
+#    volumes:
+#      - /etc/localtime:/etc/localtime:ro
+#      - ./logs:/var/log
+#    networks:
+#      mon:
+#        ipv4_address: 192.168.1.36
+#    dns:
+#      - 192.168.1.5

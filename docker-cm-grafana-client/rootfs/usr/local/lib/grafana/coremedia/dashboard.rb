@@ -620,6 +620,8 @@ module Grafana
 
         # get all elements from tyoe 'uri'
         # and remove the path and the tag-name'
+        logger.debug(data)
+        logger.debug(data.class.to_s)
         data = data.collect { |item| item['uri'] }
 
         # db/blueprint-box-cache-classes-cm => cache-classes-cm

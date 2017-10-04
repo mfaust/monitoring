@@ -100,9 +100,9 @@ module Grafana
       @password           = settings.dig(:grafana, :password)      || ''
       urlPath             = settings.dig(:grafana, :url_path)      || ''
       ssl                 = settings.dig(:grafana, :ssl)           || false
-      timeout             = settings.dig(:grafana, :timeout)       || 5
-      open_timeout        = settings.dig(:grafana, :open_timeout)  || 5
-      headers             = settings.dig(:grafana, :headers)       || {}
+      @timeout            = settings.dig(:grafana, :timeout)       || 5
+      @open_timeout       = settings.dig(:grafana, :open_timeout)  || 5
+      @http_headers       = settings.dig(:grafana, :headers)       || {}
 
       @templateDirectory  = settings.dig(:templateDirectory)       || '/usr/local/share/templates/grafana'
 
@@ -124,23 +124,18 @@ module Grafana
         :beanstalkQueue => @mqQueue
       }
 
-      if( timeout.to_i <= 0 )
-        timeout = 5
-      end
-
-      if( open_timeout.to_i <= 0 )
-        open_timeout = 5
-      end
+      @timeout      = 5 if( @timeout.to_i <= 0 )
+      @open_timeout = 5 if( @open_timeout.to_i <= 0 )
 
       proto        = ( ssl == true ? 'https' : 'http' )
       @url  = sprintf( '%s://%s:%s%s', proto, host, port, urlPath )
 
-      @apiInstance = nil
+      @api_instance = nil
       @loggedIn    = false
-      @headers     = nil
+#       @http_headers     = nil
 
-      version            = '1.9.2'
-      date               = '2017-09-17'
+      version            = '1.10.1'
+      date               = '2017-10-04'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - Grafana Client' )
@@ -170,141 +165,7 @@ module Grafana
         }
       })
 
-      until( @apiInstance != nil )
-
-        @apiInstance = self.createApiInstance({
-          :timeout      => timeout,
-          :open_timeout => open_timeout,
-          :headers      => headers
-        })
-
-      end
-
-      @loggedIn = self.login( { :user => @user, :password => @password } )
-    end
-
-
-    # create an REST-API Instance
-    #
-    def createApiInstance( params = {} )
-
-      timeout      = params.dig(:timeout)
-      open_timeout = params.dig(:open_timeout)
-      headers      = params.dig(:headers)
-      instance     = nil
-
-      begin
-
-        retries ||= 0
-
-        until( instance != nil )
-
-          logger.info( sprintf( 'try to connect our grafana endpoint ... %d', retries ) )
-
-          instance = RestClient::Resource.new(
-            @url,
-            :timeout      => timeout,
-            :open_timeout => open_timeout,
-            :headers      => headers,
-            :verify_ssl   => false
-          )
-
-          sleep(5)
-
-          retries += 1
-        end
-      rescue => e
-
-        retries += 1
-        logger.error( e )
-        retry
-      end
-
-      return instance
-    end
-
-
-
-    # Login into Grafana
-    #
-    # @param [Hash, #read] params the params to create a valid login
-    # @option params [String] :user The Username
-    # @option params [String] :password The Password
-    # @example For an successful Login
-    #    login( { :user => 'admin', :password => 'admin' } )
-    # @return [bool, #read]
-    def login( params = {} )
-
-      user     = params.dig(:user)      || @user
-      password = params.dig(:password)  || @password
-      headers  = params.dig(:headers)
-
-      loggedIn = false
-
-      if( headers != nil && headers.has_key?(:authorization) )
-
-        # API key Auth
-        @headers = {
-          :content_type  => 'application/json; charset=UTF-8',
-          :Authorization => headers.dig( :authorization )
-        }
-
-      else
-
-        request_data = {
-          'User'     => user,
-          'Password' => password
-        }
-
-        begin
-
-          retries ||= 0
-
-          logger.info(format('Attempting to establish user session ... %d', retries))
-
-          resp = @apiInstance['/login'].post(
-            request_data.to_json,
-            { :content_type => 'application/json; charset=UTF-8' }
-          )
-
-#           logger.debug("#{resp}")
-
-          if( resp.code.to_i == 200 )
-
-            @sessionCookies = resp.cookies
-            @headers = {
-              :content_type => 'application/json; charset=UTF-8',
-              :cookies      => @sessionCookies
-            }
-
-            logger.info( 'successfully logged in to grafana' )
-            logger.debug("#{request_data}")
-
-            loggedIn = true
-          else
-
-            logger.error( "Error running POST request on /login: #{resp.code.to_i}" )
-            logger.error( "#{resp}" )
-            loggedIn = false
-          end
-
-        rescue => e
-
-          logger.error(e)
-
-          if( retries < 40 )
-            retries += 1
-            sleep( 5 )
-            retry
-          end
-
-          loggedIn = false
-        end
-      end
-
-#       logger.debug("#{@headers}")
-
-      loggedIn
+      @loggedIn = login( { :user => @user, :password => @password } )
     end
 
   end
