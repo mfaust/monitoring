@@ -19,7 +19,9 @@ require_relative 'icinga/queue'
 
 # -------------------------------------------------------------------------------------------------------------------
 
-class CMIcinga2 < Icinga2::Client
+class CMIcinga2
+
+  include Icinga2
 
   include CMIcinga2::Tools
   include CMIcinga2::Queue
