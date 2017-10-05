@@ -82,7 +82,7 @@ Das hinzufügen wird über einen `POST` Request ermöglicht. Hierbei kann über 
 
 Aktuell funktionieren folgende Paramaeter:
 
-| Parameter   | Typ     | default | Beschreibung |
+| Parameter    | Typ     | default | Beschreibung |
 | :---------   | :-----: | :-----: | :----------- |
 | `force`      | bool    | false   | wenn `true` gesetzt ist, werden alle vorher gefundenen Informationen über die Node gelöscht **ACHTUNG** dazu zählt auch eine ggf. vorher durchgefürte _Custom Configuration_ |
 | `discovery`  | bool    | true    | schaltet die automatische ServiceDiscovery der CoreMedia Applicationen ab |
@@ -92,6 +92,21 @@ Aktuell funktionieren folgende Paramaeter:
 | `annotation` | bool    | true    | setzt eine Annotation für das erzeugen einer Node |
 | `overview`   | bool    | false   | ermöglicht das Anlegen eines Overview Templates in Grafana |
 | `config`     | Hash    | {}      | Ein Hash für das direkte schreiben einer Konfiguration |
+
+Unterterhalb von `config` stehen weitere Parameter zur Verfügung:
+
+| Parameter    | Typ     | default | Beschreibung |
+| :---------   | :-----: | :-----: | :----------- |
+| `graphite-identifier` | String | `${HOSTNAME}` | Ändert den Identifier für die Kombination `graphite` / `grafana` |
+|                       |        |               | dadurch ist es möglich in einer sehr dynamischen Umgebung (z.B. Amazon Web Services) einen einheitlichen Identifier für das Graphensystem zu nutzen |
+| `ports`               | Array  | []            | **ersetzt** den intern genutzten Portbereich |
+|                       |        |               | hierdurch kann man gezielt individuelle Ports durch das Monitoring nutzen. |
+| `display-name`        | String | `${HOSTNAME}` | ändert den Anzeige Namen im Grafana. |
+|                       |        |               | dadurch kann man individuelle Namen nutzen |
+| `services`            | Array  | []            | **ergänzt** die Services, die durch die Service Discovery gefunden werden. |
+|                       |        |               | dadurch ist es möglich den Server **vor** den Starten der Services in das Monitoring zu integrieren |
+|                       |        |               | bzw. einen Service mit langer Startzeit oder größeren Abhängigkeiten vorzugeben |
+
 
 **Beispiel eines Parametersatzes**
 
