@@ -18,7 +18,7 @@ services:
 
   dnsdock:
     restart: always
-    image: bodsch/docker-dnsdock:1708-35.1
+    image: bodsch/docker-dnsdock:1710.1
     container_name: dnsdock
     hostname: dnsdock
     labels:
@@ -36,7 +36,7 @@ services:
 
   beanstalkd:
     restart: always
-    image: bodsch/docker-beanstalkd:1708-35.1
+    image: bodsch/docker-beanstalkd:1710.1
     container_name: beanstalkd
     hostname: beanstalkd
     volumes:
@@ -47,7 +47,7 @@ services:
 
   database:
     restart: always
-    image: bodsch/docker-mysql:1708-35.1
+    image: bodsch/docker-mysql:1710.1
     container_name: database
     hostname: database
     ports:
@@ -79,7 +79,7 @@ services:
 
   memcached:
     restart: always
-    image: bodsch/docker-memcached:1708-35.1
+    image: bodsch/docker-memcached:1710.1
     container_name: memcached
     hostname: memcached
     volumes:
@@ -91,7 +91,7 @@ services:
 
   redis:
     restart: always
-    image: bodsch/docker-redis:1708-35.1
+    image: bodsch/docker-redis:1710.1
     container_name: redis
     hostname: redis
     ports:
@@ -105,7 +105,7 @@ services:
 
   nginx:
     restart: always
-    image: bodsch/docker-nginx:1708-35.1
+    image: bodsch/docker-nginx:1710.1
     container_name: nginx
     hostname: nginx
     ports:
@@ -139,8 +139,7 @@ services:
 
   carbon:
     restart: always
-    #image: bodsch/docker-go-carbon:1708-35.1
-    image: bodsch/docker-go-carbon:1709.2
+    image: bodsch/docker-go-carbon:1709.3
     container_name: carbon
     hostname: carbon
     depends_on:
@@ -158,7 +157,7 @@ services:
 
   graphite:
     restart: always
-    image: bodsch/docker-graphite:1708-35.1
+    image: bodsch/docker-graphite:1710.1
     container_name: graphite
     hostname: graphite
     extends:
@@ -175,9 +174,7 @@ services:
 
   grafana:
     restart: always
-    image: bodsch/docker-grafana:stable-4.5.2-r1
-#    image: bodsch/docker-grafana:1707-31.1
-#    image: bodsch/docker-grafana:1710-dev
+    image: bodsch/docker-grafana:stable-4.5.2-r2
     container_name: grafana
     hostname: grafana
     extends:
@@ -243,7 +240,7 @@ services:
 
   icingaweb2:
     restart: always
-    image: bodsch/docker-icingaweb2:1708-35.1
+    image: bodsch/docker-icingaweb2:1709.2
     container_name: icingaweb2
     hostname: icingaweb2
     extends:

@@ -1,13 +1,13 @@
 
-FROM bodsch/docker-dashing:1708-35.1
+FROM bodsch/docker-dashing:1710.1
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
-  VERSION="1708-35.1" \
-  BUILD_DATE="2017-08-29" \
+  VERSION="1710.1" \
+  BUILD_DATE="2017-10-05" \
   DASHBOARD="coremedia" \
-  ICINGA2_GEM_VERSION="0.8"
+  ICINGA2_GEM_VERSION="0.9"
 
 EXPOSE 3030
 
