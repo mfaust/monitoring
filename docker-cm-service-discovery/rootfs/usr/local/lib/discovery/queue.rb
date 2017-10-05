@@ -58,40 +58,21 @@ module ServiceDiscovery
 
         status = 500
 
-        if( command == nil )
-          e = 'missing command'
-          logger.error( e )
-          logger.error( data )
-          return { :status  => status, :message => e }
-        end
-
-        if( node == nil )
-          e = 'missing node'
-          logger.error( e )
-          logger.error( data )
-          return { :status  => status, :message => e }
-        end
-
-        if( payload == nil )
-          e = 'missing payload'
-          logger.error( e )
-          logger.error( data )
-          return { :status  => status, :message => e }
-        end
-
+        return { :status  => status, :message => 'missing command' } if( command == nil )
+        return { :status  => status, :message => 'missing node' } if( node == nil )
+        return { :status  => status, :message => 'missing payload' } if( payload == nil )
       end
 
-      if( payload.is_a?( String ) == true && payload.to_s != '' )
-        payload  = JSON.parse( payload )
-      end
+      payload  = JSON.parse( payload ) if( payload.is_a?( String ) == true && payload.to_s != '' )
 
       if( payload.is_a?( String ) == false )
         dns      = payload.dig('dns')
+        tags     = payload.dig('tags')
       end
 
-      logger.info( sprintf( '  %s node %s', command , node ) )
+#       logger.info( sprintf( '  %s node %s', command , node ) )
 
-      if !dns.nil?
+      unless( dns.nil? )
         ip    = dns.dig('ip')
         short = dns.dig('short')
         fqdn  = dns.dig('fqdn')
@@ -100,9 +81,7 @@ module ServiceDiscovery
       end
 
       if( @jobs.jobs( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } ) == true )
-
         logger.warn( 'we are working on this job' )
-
         return {
           :status  => 409, # 409 Conflict
           :message => 'we are working on this job'
@@ -130,7 +109,7 @@ module ServiceDiscovery
           :message => message
         }
 
-        logger.debug( result )
+#         logger.debug( result )
 
         @jobs.del( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
 
@@ -144,7 +123,7 @@ module ServiceDiscovery
         #
         result = @database.nodes( { :short => node, :status => Storage::MySQL::DELETE } )
 
-        logger.debug( "database: '#{result}' | node: '#{node}'" )
+#         logger.debug( "database: '#{result}' | node: '#{node}'" )
 #         logger.debug( @database.nodes() )
 
         if( result != nil && result.to_s != node.to_s )
@@ -157,7 +136,6 @@ module ServiceDiscovery
             :status  => 200,
             :message => sprintf( 'node not in monitoring. skipping delete ...' )
           }
-
         end
 
         begin
@@ -171,7 +149,6 @@ module ServiceDiscovery
         rescue => e
 
           logger.error( e )
-
         end
 
         @jobs.del( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
@@ -198,7 +175,7 @@ module ServiceDiscovery
         result = @redis.nodes( { :short => node } )
 
         logger.debug( "redis: '#{result}' | node: '#{node}'" )
-        logger.debug( @redis.nodes() )
+#         logger.debug( @redis.nodes() )
 
         if( result.to_s != node.to_s )
 
