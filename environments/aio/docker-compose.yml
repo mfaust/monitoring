@@ -176,6 +176,8 @@ services:
   grafana:
     restart: always
     image: bodsch/docker-grafana:stable-4.5.2-r1
+#    image: bodsch/docker-grafana:1707-31.1
+#    image: bodsch/docker-grafana:1710-dev
     container_name: grafana
     hostname: grafana
     extends:
