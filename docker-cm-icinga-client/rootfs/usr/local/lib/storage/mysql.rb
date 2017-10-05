@@ -528,25 +528,23 @@ module Storage
 
       dns = self.dnsData( params )
 
-      if( dns != nil )
+      unless( dns.nil? )
 
         ip   = dns.dig('ip')
-        more = nil
+#         more = nil
+#         logger.debug( ip )
 
-        logger.debug( ip )
-
-        if( key != nil )
-          more = sprintf( 'and `key` = \'%s\'', key )
-        end
+        more = sprintf( 'and `key` = \'%s\'', key ) unless( key.nil? )
 
         statement = sprintf(
           'delete
             from config
           where
-            %s and
-            ( ip = \'%s\' or name = \'%s\' or fqdn = \'%s\' )',
-          more, ip, name, fqdn
+            dns_ip = \'%s\'
+            %s',
+          ip, more
         )
+
         logger.debug( statement )
 
         begin
@@ -560,7 +558,6 @@ module Storage
       end
 
       return nil
-
     end
 
 
@@ -755,7 +752,6 @@ module Storage
             )',
           service, ip, name, fqdn
         )
-
       elsif( service == nil )
 
         statement = sprintf(
