@@ -46,10 +46,10 @@ class Monitoring
     @enabledGrafana   = true
     @enabledIcinga    = true
 
-    logger.level           = Logger::DEBUG
+    logger.level           = Logger::INFO
 
-    version              = '2.4.112'
-    date                 = '2017-06-22'
+    version              = '2.4.115'
+    date                 = '2017-10-05'
 
     logger.info( '-----------------------------------------------------------------' )
     logger.info( ' CoreMedia - Monitoring Service' )
@@ -256,7 +256,7 @@ class Monitoring
     #
     cache_key = sprintf( 'dns::%s', name )
 
-    logger.debug("cache_key: #{cache_key}")
+#     logger.debug("cache_key: #{cache_key}")
 
     ip       = nil
     short    = nil
@@ -291,7 +291,7 @@ class Monitoring
 
     end
 
-    logger.debug( "redis: #{@redis.get(format('dns::%s',fqdn))}" )
+#     logger.debug( "redis: #{@redis.get(format('dns::%s',fqdn))}" )
 
     #
     # ------------------------------------------------
@@ -552,9 +552,9 @@ class Monitoring
     fqdn            = hostData.dig(:fqdn)
 
     force           = false
-    enableDiscovery = @enabledDiscovery
-    enabledGrafana  = @enabledGrafana
-    enabledIcinga   = @enabledIcinga
+    enableDiscovery = true # @enabledDiscovery
+    enabledGrafana  = true # @enabledGrafana
+    enabledIcinga   = true # @enabledIcinga
     annotation      = true
     grafanaOverview = true
     services        = []
@@ -570,9 +570,9 @@ class Monitoring
       result[host.to_s]['request'] = hash
 
       force           = hash.keys.include?('force')        ? hash['force']        : false
-      enableDiscovery = hash.keys.include?('discovery')    ? hash['discovery']    : @enabledDiscovery
-      enabledGrafana  = hash.keys.include?('grafana')      ? hash['grafana']      : @enabledGrafana
-      enabledIcinga   = hash.keys.include?('icinga')       ? hash['icinga']       : @enabledIcinga
+#       enableDiscovery = hash.keys.include?('discovery')    ? hash['discovery']    : @enabledDiscovery
+#       enabledGrafana  = hash.keys.include?('grafana')      ? hash['grafana']      : @enabledGrafana
+#       enabledIcinga   = hash.keys.include?('icinga')       ? hash['icinga']       : @enabledIcinga
       annotation      = hash.keys.include?('annotation')   ? hash['annotation']   : true
       grafanaOverview = hash.keys.include?('overview')     ? hash['overview']     : true
       services        = hash.keys.include?('services')     ? hash['services']     : []
@@ -580,15 +580,15 @@ class Monitoring
       config          = hash.keys.include?('config')       ? hash['config']       : {}
     end
 
-#    logger.debug( sprintf( 'force      : %s', force            ? 'true' : 'false' ) )
-#    logger.debug( sprintf( 'discovery  : %s', enableDiscovery  ? 'true' : 'false' ) )
-#    logger.debug( sprintf( 'grafana    : %s', enabledGrafana   ? 'true' : 'false' ) )
-#    logger.debug( sprintf( 'icinga     : %s', enabledIcinga    ? 'true' : 'false' ) )
-#    logger.debug( sprintf( 'annotation : %s', annotation       ? 'true' : 'false' ) )
-#    logger.debug( sprintf( 'overview   : %s', grafanaOverview  ? 'true' : 'false' ) )
-#    logger.debug( sprintf( 'services   : %s', services ) )
-#    logger.debug( sprintf( 'tags       : %s', tags ) )
-#    logger.debug( sprintf( 'config     : %s', config ) )
+    # logger.debug( sprintf( 'force      : %s', force            ? 'true' : 'false' ) )
+    # logger.debug( sprintf( 'discovery  : %s', enableDiscovery  ? 'true' : 'false' ) )
+    # logger.debug( sprintf( 'grafana    : %s', enabledGrafana   ? 'true' : 'false' ) )
+    # logger.debug( sprintf( 'icinga     : %s', enabledIcinga    ? 'true' : 'false' ) )
+    # logger.debug( sprintf( 'annotation : %s', annotation       ? 'true' : 'false' ) )
+    # logger.debug( sprintf( 'overview   : %s', grafanaOverview  ? 'true' : 'false' ) )
+    # logger.debug( sprintf( 'services   : %s', services ) )
+    # logger.debug( sprintf( 'tags       : %s', tags ) )
+    # logger.debug( sprintf( 'config     : %s', config ) )
 
 
     if( force == false && alreadyInMonitoring == true )
@@ -621,34 +621,36 @@ class Monitoring
 
       logger.info( 'force mode ...' )
 
-      if( enabledGrafana == true )
-        logger.info( 'remove grafana dashborads' )
-        self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-grafana', :payload => payload, :prio => 1, :ttr => 1, :delay => 0 } )
-      end
+      logger.info( 'create message for remove node from discovery service' )
+      self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-discover', :payload => payload, :prio => 1, :ttr => 1, :delay => 0 } )
 
-      if( enabledIcinga == true )
-        logger.info( 'remove icinga checks and notifications' )
-        self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-icinga', :payload => payload, :prio => 1, :ttr => 1, :delay => 0 } )
-      end
+      logger.info( 'create message for remove grafana dashboards' )
+      self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-grafana', :payload => payload, :prio => 1, :ttr => 1, :delay => 0 } )
 
-      if( enableDiscovery == true )
-        logger.info( 'remove node from discovery service' )
-        self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-discover', :payload => payload, :prio => 1, :ttr => 1, :delay => 0 } )
-      end
+      logger.info( 'create message for remove icinga checks and notifications' )
+      self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-icinga', :payload => payload, :prio => 1, :ttr => 1, :delay => 0 } )
 
-      sleep(2)
+      sleep(3)
 
-#       logger.debug( 'remove configuration' )
-      status = @database.removeConfig( { :ip => ip, :short => short, :fqdn => fqdn } )
+      logger.debug( 'set node status to OFFLINE' )
+      status = @database.setStatus( { :ip => ip, :short => short, :fqdn => fqdn, :status => Storage::MySQL::OFFLINE } )
+      logger.debug(status)
+
+      logger.debug( 'remove configuration' )
+      status  = @database.removeConfig( { :ip => ip, :short => short, :fqdn => fqdn } )
+      logger.debug(status)
+
+      logger.debug( 'remove dns' )
+      status  = @database.removeDNS( { :ip => ip, :short => short, :fqdn => fqdn } )
+      logger.debug(status)
 
       logger.info( 'done' )
 
-      sleep(2)
-
-
+      sleep(4)
     end
 
     logger.debug(format('add %d seconds delay',delay))
+
     # create a valid DNS entry
     #
     status = @database.createDNS( { :ip => ip, :short => short, :fqdn => fqdn } )
@@ -657,35 +659,16 @@ class Monitoring
     #
     if( config.is_a?( Hash ) )
 
-#       logger.debug( "write configuration: #{config}" )
+      logger.debug( "write configuration: #{config}" )
       status = @database.createConfig( { :ip => ip, :short => short, :fqdn => fqdn, :data => config } )
     end
 
-    if( enableDiscovery == true )
 
-      logger.info( 'add node to discovery service' )
-      self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-discover', :payload => payload, :prio => 1, :delay => 2 + delay.to_i } )
-    end
+    logger.info( 'add node to discovery service' )
+    self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-discover', :payload => payload, :prio => 1, :delay => 2 + delay.to_i } )
 
-    if( enabledGrafana == true )
-
-      logger.info( 'create grafana dashborads' )
-      self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-grafana', :payload => payload, :prio => 10, :ttr => 15, :delay => 10 + delay.to_i } )
-    end
-
-    if( enabledIcinga == true  )
-
-      logger.info( 'create icinga checks and notifications' )
-      self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-icinga', :payload => payload, :prio => 10, :ttr => 15, :delay => 10 + delay.to_i } )
-    end
-
-    # add annotation at last
-    #
-    if( annotation == true )
-
-      logger.info( 'annotation for create' )
-      self.addAnnotation( host, { 'command' => 'create', 'argument' => 'node', 'config' => config } )
-    end
+    logger.info( 'annotation for create' )
+    self.addAnnotation( host, { 'command' => 'create', 'argument' => 'node', 'config' => config } )
 
     result['status']    = 200
     result['message']   = 'the message queue is informed ...'
@@ -801,9 +784,9 @@ class Monitoring
     result    = Hash.new()
     hash      = Hash.new()
 
-    enableDiscovery = @enabledDiscovery
-    enabledGrafana  = @enabledGrafana
-    enabledIcinga   = @enabledIcinga
+    enableDiscovery = true # @enabledDiscovery
+    enabledGrafana  = true # @enabledGrafana
+    enabledIcinga   = true # @enabledIcinga
     annotation      = true
 
     result[host.to_s] ||= {}
@@ -864,24 +847,24 @@ class Monitoring
 #    logger.debug( sprintf( 'icinga     : %s', enabledIcinga    ? 'true' : 'false' ) )
 #    logger.debug( sprintf( 'annotation : %s', annotation       ? 'true' : 'false' ) )
 
-    if( annotation == true )
+#     if( annotation == true )
       logger.info( 'annotation for remove' )
       self.addAnnotation( host, { 'command' => 'remove', 'argument' => 'node', 'config' => config } )
-    end
+#     end
 
-    if( enabledIcinga == true )
+#     if( enabledIcinga == true )
       logger.info( 'remove icinga checks and notifications' )
       self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-icinga', :payload => payload, :prio => 0 } )
-    end
-    if( enabledGrafana == true )
+#     end
+#     if( enabledGrafana == true )
       logger.info( 'remove grafana dashboards' )
       self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-grafana', :payload => payload, :prio => 0 } )
-    end
+#     end
 
-    if( enableDiscovery == true )
+#     if( enableDiscovery == true )
       logger.info( 'remove node from discovery service' )
       self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-discover', :payload => payload, :prio => 0, :delay => 5 } )
-    end
+#     end
 
     @database.removeDNS( { :short => host } )
 

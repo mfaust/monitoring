@@ -54,7 +54,7 @@ class CMIcinga2 < Icinga2::Client
       command     = data.dig( :body, 'cmd' )
       node        = data.dig( :body, 'node' )
       payload     = data.dig( :body, 'payload' )
-      @identifier = nil
+#       @identifier = nil
       dns         = nil
       tags        = nil
 
@@ -62,36 +62,16 @@ class CMIcinga2 < Icinga2::Client
 
         status = 500
 
-        if( command == nil )
-          e = 'missing command'
-          logger.error( e )
-          logger.error( data )
-          return { :status  => status, :message => e }
-        end
-
-        if( node == nil )
-          e = 'missing node'
-          logger.error( e )
-          logger.error( data )
-          return { :status  => status, :message => e }
-        end
-
-        if( payload == nil )
-          e = 'missing payload'
-          logger.error( e )
-          logger.error( data )
-          return { :status  => status, :message => e }
-        end
-
+        return { :status  => status, :message => 'missing command' } if( command == nil )
+        return { :status  => status, :message => 'missing node' } if( node == nil )
+        return { :status  => status, :message => 'missing payload' } if( payload == nil )
       end
 
-      if( payload.is_a?( String ) == true && payload.to_s != '' )
-        payload  = JSON.parse( payload )
-      end
+      payload  = JSON.parse( payload ) if( payload.is_a?( String ) == true && payload.to_s != '' )
 
-      logger.debug( 'payload:' )
-      logger.debug( JSON.pretty_generate( payload ) )
-      logger.debug( '----------------------------------' )
+#       logger.debug( 'payload:' )
+#       logger.debug( JSON.pretty_generate( payload ) )
+#       logger.debug( '----------------------------------' )
 
       if( payload.is_a?( String ) == false )
         dns      = payload.dig('dns')
@@ -100,7 +80,7 @@ class CMIcinga2 < Icinga2::Client
 
       logger.info( sprintf( '  %s node %s', command , node ) )
 
-      if !dns.nil?
+      unless( dns.nil? )
         ip    = dns.dig('ip')
         short = dns.dig('short')
         fqdn  = dns.dig('fqdn')
@@ -124,7 +104,7 @@ class CMIcinga2 < Icinga2::Client
       #
       if( command == 'add' )
 
-        logger.info( sprintf( 'add node %s', node ) )
+#         logger.info( sprintf( 'add node %s', node ) )
 #        logger.debug( payload )
 #        payload = JSON.parse( payload )
 
@@ -134,7 +114,7 @@ class CMIcinga2 < Icinga2::Client
 #         logger.debug( display_name )
 #         logger.debug( display_name.class.to_s )
 
-        logger.debug(services)
+#         logger.debug(services)
 
         if( display_name.nil? )
           display_name = fqdn
@@ -167,17 +147,14 @@ class CMIcinga2 < Icinga2::Client
           :vars => payload
         }
 
-        logger.debug(JSON.pretty_generate(params))
+#        logger.debug(JSON.pretty_generate(params))
 
         result = self.add_host(params)
+        status = result.dig(:status) || 500
 
-        status = result.dig(:status)
+        logger.error( result ) if( status != 200 )
 
-        if( status != 200 )
-          logger.error( result )
-        end
-
-        logger.info( result )
+#        logger.info( result )
 
         @jobs.del( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
 
@@ -189,11 +166,11 @@ class CMIcinga2 < Icinga2::Client
       #
       elsif( command == 'remove' )
 
-        logger.info( sprintf( 'remove checks for node %s', node ) )
+#         logger.info( sprintf( 'remove checks for node %s', node ) )
 
         result = self.delete_host( { :host => fqdn, :fqdn => fqdn } )
 
-        logger.info( result )
+#         logger.info( result )
 
         @jobs.del( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
 
@@ -205,11 +182,11 @@ class CMIcinga2 < Icinga2::Client
       #
       elsif( command == 'info' )
 
-        logger.info( sprintf( 'give information for node %s', node ) )
+#         logger.info( sprintf( 'give information for node %s', node ) )
 
         result = self.hosts( { :host => fqdn } )
 
-        logger.info( result )
+#         logger.info( result )
 
         @jobs.del( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
 
@@ -233,7 +210,6 @@ class CMIcinga2 < Icinga2::Client
       end
 
       result = JSON.parse(result) if( result.is_a?(String ) )
-
 
       result[:request]    = data
     end

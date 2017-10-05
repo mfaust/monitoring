@@ -112,8 +112,8 @@ module ServiceDiscovery
 
       @scanPorts         = ports
 
-      version             = '1.9.1'
-      date                = '2017-09-15'
+      version             = '1.10.0'
+      date                = '2017-10-05'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - Service Discovery' )
@@ -270,7 +270,7 @@ module ServiceDiscovery
 
       # DELETE ONLY WHEN THES STATUS ARE DELETED!
       #
-      params = params = { :ip => ip, :short => short, :fqdn => fqdn, :status => [ Storage::MySQL::DELETE ] }
+      params = { :ip => ip, :short => short, :fqdn => fqdn, :status => [ Storage::MySQL::DELETE ] }
       nodes = @database.nodes( params )
 
       logger.debug( nodes )
@@ -504,12 +504,23 @@ module ServiceDiscovery
       finish = Time.now
       logger.info( sprintf( 'overall runtime: %s seconds', (finish - start).round(2) ) )
 
-      return {
+      status = {
         :status   => 200,
         :message  => 'Host successful created',
         :services => services
       }
 
+      # inform other services ...
+      delay = 10
+
+      logger.info( 'create message for grafana dashborads' )
+      sendMessage( { :cmd => 'add', :node => host, :queue => 'mq-grafana', :payload => options, :prio => 10, :ttr => 15, :delay => 10 + delay.to_i } )
+
+      logger.info( 'create message for icinga checks and notifications' )
+      sendMessage( { :cmd => 'add', :node => host, :queue => 'mq-icinga', :payload => options, :prio => 10, :ttr => 15, :delay => 10 + delay.to_i } )
+
+
+      return status
     end
 
 

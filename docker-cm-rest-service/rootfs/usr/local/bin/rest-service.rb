@@ -128,48 +128,48 @@ module Sinatra
     # curl -X POST http://localhost/api/v2/config/foo \
     #  --data '{ "ports": [200,300] }'
     #
-    post '/v2/config/:host' do
-
-      host            = params[:host]
-
-      payload         =  @request_paylod
-      @request_paylod = nil
-
-      result = m.writeHostConfiguration( host, paylod )
-
-      status result[:status]
-
-      result
-
-    end
-
-    #
-    # curl http://localhost/api/v2/config/foo
-    #
-    get '/v2/config/:host' do
-
-      host   = params[:host]
-      result = m.getHostConfiguration( host )
-
-      status result[:status]
-
-      result
-
-    end
-
-    #
-    # curl -X DELETE http://localhost/api/v2/config/foo
-    #
-    delete '/v2/config/:host' do
-
-      host   = params[:host]
-      result = m.removeHostConfiguration( host )
-
-      status result[:status]
-
-      result
-
-    end
+#     post '/v2/config/:host' do
+#
+#       host            = params[:host]
+#
+#       payload         =  @request_paylod
+#       @request_paylod = nil
+#
+#       result = m.writeHostConfiguration( host, paylod )
+#
+#       status result[:status]
+#
+#       result
+#
+#     end
+#
+#     #
+#     # curl http://localhost/api/v2/config/foo
+#     #
+#     get '/v2/config/:host' do
+#
+#       host   = params[:host]
+#       result = m.getHostConfiguration( host )
+#
+#       status result[:status]
+#
+#       result
+#
+#     end
+#
+#     #
+#     # curl -X DELETE http://localhost/api/v2/config/foo
+#     #
+#     delete '/v2/config/:host' do
+#
+#       host   = params[:host]
+#       result = m.removeHostConfiguration( host )
+#
+#       status result[:status]
+#
+#       result
+#
+#     end
 
     # -----------------------------------------------------------------------------
     # HOST

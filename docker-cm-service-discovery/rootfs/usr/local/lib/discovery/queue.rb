@@ -142,10 +142,10 @@ module ServiceDiscovery
 
         # check first for existing node!
         #
-        result = @database.nodes( { :short => node } )
+        result = @database.nodes( { :short => node, :status => Storage::MySQL::DELETE } )
 
         logger.debug( "database: '#{result}' | node: '#{node}'" )
-        logger.debug( @database.nodes() )
+#         logger.debug( @database.nodes() )
 
         if( result != nil && result.to_s != node.to_s )
 
