@@ -409,7 +409,7 @@ module ServiceDiscovery
 
         if( pd.isAvailable?() == true )
 
-          open_ports = pd.post( host: host, ports: ports )
+          open_ports = pd.post( host: fqdn, ports: ports )
 
           open_ports.each do |p|
 

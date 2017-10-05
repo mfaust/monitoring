@@ -154,7 +154,7 @@ class CMIcinga2 < Icinga2::Client
 
         logger.error( result ) if( status != 200 )
 
-#        logger.info( result )
+        logger.info( result )
 
         @jobs.del( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
 
