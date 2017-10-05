@@ -131,11 +131,10 @@ module Grafana
       @url  = sprintf( '%s://%s:%s%s', proto, host, port, urlPath )
 
       @api_instance = nil
-      @loggedIn    = false
-#       @http_headers     = nil
+      @loggedIn     = false
 
-      version            = '1.10.1'
-      date               = '2017-10-04'
+      version       = '1.10.1'
+      date          = '2017-10-05'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - Grafana Client' )
