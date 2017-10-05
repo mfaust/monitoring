@@ -60,20 +60,19 @@ class CMIcinga2 < Icinga2::Client
       host    = params.dig(:host)
       fqdn    = params.dig(:fqdn)
 
+#       full_config        = @database.config( ip: ip, short: host, fqdn: fqdn )
       team_config        = @database.config( ip: ip, short: host, fqdn: fqdn, key: 'team' )
       environment_config = @database.config( ip: ip, short: host, fqdn: fqdn, key: 'environment' )
       aws_config         = @database.config( ip: ip, short: host, fqdn: fqdn, key: 'aws' )
       vhost_http_config  = @database.config( ip: ip, short: host, fqdn: fqdn, key: 'vhost_http' )
       vhost_https_config = @database.config( ip: ip, short: host, fqdn: fqdn, key: 'vhost_https' )
 
-      full_config = @database.config( ip: ip, short: host, fqdn: fqdn )
-
       logger.debug( "team_config       : #{team_config}" )
       logger.debug( "environment_config: #{environment_config}" )
       logger.debug( "aws_config        : #{aws_config}" )
       logger.debug( "vhost_http_config : #{vhost_http_config}" )
       logger.debug( "vhost_https_config: #{vhost_https_config}" )
-      logger.debug( "full_config       : #{full_config}" )
+#       logger.debug( "full_config       : #{full_config}" )
 
       # in first, we need the discovered services ...
       #
@@ -92,7 +91,7 @@ class CMIcinga2 < Icinga2::Client
 
       payload = {}
 
-      logger.debug( JSON.pretty_generate(services) )
+#       logger.debug( JSON.pretty_generate(services) )
 
       unless( services.nil?  )
 
@@ -180,9 +179,7 @@ class CMIcinga2 < Icinga2::Client
         if( services.include?('http-proxy') )
           vhosts = services.dig('http-proxy','vhosts')
 
-          if( vhosts.is_a?(Hash) )
-            payload['http_vhosts'] = vhosts
-          end
+          payload['http_vhosts'] = vhosts  if( vhosts.is_a?(Hash) )
 
           payload['http'] = true
           services.reject! { |k| k == 'http-proxy' }
@@ -191,10 +188,7 @@ class CMIcinga2 < Icinga2::Client
         if( services.include?('https-proxy') )
           vhosts = services.dig('https-proxy','vhosts')
 
-          if( vhosts.is_a?(Hash) )
-            payload['https_vhosts'] = vhosts
-          end
-
+          payload['https_vhosts'] = vhosts if( vhosts.is_a?(Hash) )
           payload['https'] = true
           services.reject! { |k| k == 'https-proxy' }
         end
@@ -221,13 +215,8 @@ class CMIcinga2 < Icinga2::Client
 
       end
 
-      if( team_config )
-        payload['team'] = parsed_response( team_config )
-      end
-
-      if( environment_config )
-        payload['environment'] = parsed_response( environment_config )
-      end
+      payload['team']        = parsed_response( team_config )        if( team_config )
+      payload['environment'] = parsed_response( environment_config ) if( environment_config )
 
       # rename all keys
       # replace '-' with '_'
