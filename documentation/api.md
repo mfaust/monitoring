@@ -11,67 +11,13 @@ This API helps also to create Annotations and give back Informations about all k
 
 ## Examples
 
-## helps
+## Help
 
 ```
     curl \
       http://localhost/api/v2/help
 ```
 
-## Custom configuration
-
-### add
-```
-    HOSTNAME=monitoring-16-01.coremedia.vm
-
-    curl \
-      --silent \
-      --request POST \
-      --data '{ "ports": [3306,9100,28017] }' \
-      http://localhost/api/v2/config/${HOSTNAME} | \
-      json_reformat
-
-    {
-       "status": 200,
-       "message": "config successful written"
-    }
-```
-
-
-### list
-```
-    HOSTNAME=monitoring-16-01.coremedia.vm
-
-    curl \
-      --silent \
-      http://localhost/api/v2/config/${HOSTNAME} | \
-      json_reformat
-
-    {
-      "status" : 200,
-      "message" : {
-        "ports" : [
-           3306,
-           9100,
-           28017
-        ]
-      }
-    }
-```
-
-### remove
-```
-    curl \
-      --silent \
-      --request DELETE \
-      http://localhost/api/v2/config/${HOSTNAME} | \
-      json_reformat
-
-    {
-      "status": 200,
-      "message": "configuration succesfull removed"
-    }
-```
 ---
 
 ## Nodes
@@ -84,43 +30,33 @@ Aktuell funktionieren folgende Paramaeter:
 
 | Parameter    | Typ     | default | Beschreibung |
 | :---------   | :-----: | :-----: | :----------- |
-| `force`      | bool    | false   | wenn `true` gesetzt ist, werden alle vorher gefundenen Informationen über die Node gelöscht **ACHTUNG** dazu zählt auch eine ggf. vorher durchgefürte _Custom Configuration_ |
-| `discovery`  | bool    | true    | schaltet die automatische ServiceDiscovery der CoreMedia Applicationen ab |
-| `icinga`     | bool    | false   | deaktiviert den Icinga Support |
-| `grafana`    | bool    | false   | deaktiviert den Grafana Support. Dadrurch werden keine Dashboards hinzugefügt |
+| `force`      | bool    | false   | wenn `true` gesetzt ist, werden alle vorher gefundenen Informationen über die Node gelöscht |
 | `tags`       | Array   | []      | Eine Liste von Tags, die an die Node in Grafana gehängt werden |
-| `annotation` | bool    | true    | setzt eine Annotation für das erzeugen einer Node |
-| `overview`   | bool    | false   | ermöglicht das Anlegen eines Overview Templates in Grafana |
 | `config`     | Hash    | {}      | Ein Hash für das direkte schreiben einer Konfiguration |
 
 Unterterhalb von `config` stehen weitere Parameter zur Verfügung:
-
-| Parameter    | Typ     | default | Beschreibung |
-| :---------   | :-----: | :-----: | :----------- |
-| `graphite-identifier` | String | `${HOSTNAME}` | Ändert den Identifier für die Kombination `graphite` / `grafana` |
-|                       |        |               | dadurch ist es möglich in einer sehr dynamischen Umgebung (z.B. Amazon Web Services) einen einheitlichen Identifier für das Graphensystem zu nutzen |
-| `ports`               | Array  | []            | **ersetzt** den intern genutzten Portbereich |
-|                       |        |               | hierdurch kann man gezielt individuelle Ports durch das Monitoring nutzen. |
-| `display-name`        | String | `${HOSTNAME}` | ändert den Anzeige Namen im Grafana. |
-|                       |        |               | dadurch kann man individuelle Namen nutzen |
-| `services`            | Array  | []            | **ergänzt** die Services, die durch die Service Discovery gefunden werden. |
-|                       |        |               | dadurch ist es möglich den Server **vor** den Starten der Services in das Monitoring zu integrieren |
-|                       |        |               | bzw. einen Service mit langer Startzeit oder größeren Abhängigkeiten vorzugeben |
+                                                                                                                                                                                                        | Beispiel                                              |
+| Parameter             | Typ     | default       | Beschreibung                                                                                                                                        | :-------                                              |
+| :---------            | :-----: | :-----        | :-----------                                                                                                                                        | `"graphite-identifier": "development-system"`         |
+| `graphite-identifier` | String  | `${HOSTNAME}` | Ändert den Identifier für die Kombination `graphite` / `grafana`                                                                                    |                                                       |
+|                       |         |               | dadurch ist es möglich in einer sehr dynamischen Umgebung (z.B. Amazon Web Services) einen einheitlichen Identifier für das Graphensystem zu nutzen | `"ports": [50199,51099]`                              |
+| `ports`               | Array   | []            | **ersetzt** den intern genutzten Portbereich                                                                                                        |                                                       |
+|                       |         |               | hierdurch kann man gezielt individuelle Ports durch das Monitoring nutzen.                                                                          | `"display-name": "foo.bar.com"`                       |
+| `display-name`        | String  | `${HOSTNAME}` | ändert den Anzeige Namen im Grafana.                                                                                                                |                                                       |
+|                       |         |               | dadurch kann man individuelle Namen nutzen                                                                                                          | `"services": ["cae-live","content-managment-server"]` |
+| `services`            | Array   | []            | **ergänzt** die Services, die durch die Service Discovery gefunden werden.                                                                          | |
+|                       |         |               | dadurch ist es möglich den Server **vor** den Starten der Services in das Monitoring zu integrieren                                                 | |
+|                       |         |               | bzw. einen Service mit langer Startzeit oder größeren Abhängigkeiten vorzugeben                                                                     | |
 
 
 **Beispiel eines Parametersatzes**
 
     {
       "force": true,
-      "discovery": false,
-      "icinga": false,
-      "grafana": false,
       "tags": [
         "development",
         "git-0000000"
       ],
-      "annotation": true,
-      "overview": true,
       "config": {
         "graphite-identifier": "development-system",
         "ports": [50199,51099],
@@ -128,20 +64,6 @@ Unterterhalb von `config` stehen weitere Parameter zur Verfügung:
         "services": ["cae-live","content-managment-server"]
       }
     }
-
-#### Configuration
-
-Zur Zeit können folgende Parameter bei `config` benutzt werden:
-
-| Parameter             | Beschreibung                                                                                     | Beispiel                                              |
-| :---------            | :-----------                                                                                     | :-------                                              |
-| `graphite-identifier` | bestimmt den Speicherpfad für die TSDB                                                           | `"graphite-identifier": "development-system"`         |
-|                       | wird bei Cloud-Services benötigt                                                                 |                                                       |
-| `ports`               | überschreibt die feste default Portliste der CoreMedia Applikationen mit einem eigen Portbereich | `"ports": [50199,51099]`                              |
-|                       | dadurch ist es möglich auf ggf. geänderte Portbereiche Rücksicht nehmen zu können                |                                                       |
-| `display-name`        | ändert den Anzeigenamen in _Grafana_                                                             | `"display-name": "foo.bar.com"`                       |
-| `services`            | **ergänzt** die durch die Service-Discovery gefundenen Services                                  | `"services": ["cae-live","content-managment-server"]` |
-|                       | dadurch ist es möglich, eine definierte Liste von Services festzulegen, die existieren müssen    |                                                       |
 
 
 #### kompletter Aufruf
@@ -180,11 +102,8 @@ Auch hier ist es möglich das löschen über `--data` Parameter feingranular zu 
 
 Aktuell funktionieren folgende Paramaeter:
 
-| Parameter   | Typ     | default | Beschreibung |
+| Parameter    | Typ     | default | Beschreibung |
 | :---------   | :-----: | :-----: | :----------- |
-| `force`      | bool    | false   | wenn `true` gesetzt ist, werden alle vorher gefundenen Informationen über die Node gelöscht **ACHTUNG** dazu zählt auch eine ggf. vorher durchgefürte _Custom Configuration_ |
-| `icinga`     | bool    | true    | deaktiviert den Icinga Support |
-| `grafana`    | bool    | true    | deaktiviert den Grafana Support. Hierbei bleiben die Dashboards erhalten! |
 | `annotation` | bool    | true    | setzt eine Annotation für das entfernen einer Node |
 
 
@@ -204,7 +123,6 @@ Aktuell funktionieren folgende Paramaeter:
     curl \
       --silent \
       --request DELETE \
-      --data '{ "grafana": false }' \
       http://localhost/api/v2/host/${HOSTNAME} | \
       json_reformat
 ```
@@ -313,7 +231,3 @@ Zu jedem dieser Annotationen ist es möglich, über `--data` json formatierte Pa
 ```
 
 Für diese Annotation Typen wurden in den von CoreMedia mitgelieferten Templates entsprechende Anzeigemöglichkeiten geschaffen.
-
-
-
-
