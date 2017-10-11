@@ -34,19 +34,23 @@ Aktuell funktionieren folgende Paramaeter:
 | `tags`       | Array   | []      | Eine Liste von Tags, die an die Node in Grafana gehängt werden |
 | `config`     | Hash    | {}      | Ein Hash für das direkte schreiben einer Konfiguration |
 
-Unterterhalb von `config` stehen weitere Parameter zur Verfügung:
-                                                                                                                                                                                                        | Beispiel                                              |
-| Parameter             | Typ     | default       | Beschreibung                                                                                                                                        | :-------                                              |
-| :---------            | :-----: | :-----        | :-----------                                                                                                                                        | `"graphite-identifier": "development-system"`         |
-| `graphite-identifier` | String  | `${HOSTNAME}` | Ändert den Identifier für die Kombination `graphite` / `grafana`                                                                                    |                                                       |
-|                       |         |               | dadurch ist es möglich in einer sehr dynamischen Umgebung (z.B. Amazon Web Services) einen einheitlichen Identifier für das Graphensystem zu nutzen | `"ports": [50199,51099]`                              |
-| `ports`               | Array   | []            | **ersetzt** den intern genutzten Portbereich                                                                                                        |                                                       |
-|                       |         |               | hierdurch kann man gezielt individuelle Ports durch das Monitoring nutzen.                                                                          | `"display-name": "foo.bar.com"`                       |
-| `display-name`        | String  | `${HOSTNAME}` | ändert den Anzeige Namen im Grafana.                                                                                                                |                                                       |
-|                       |         |               | dadurch kann man individuelle Namen nutzen                                                                                                          | `"services": ["cae-live","content-managment-server"]` |
-| `services`            | Array   | []            | **ergänzt** die Services, die durch die Service Discovery gefunden werden.                                                                          | |
-|                       |         |               | dadurch ist es möglich den Server **vor** den Starten der Services in das Monitoring zu integrieren                                                 | |
-|                       |         |               | bzw. einen Service mit langer Startzeit oder größeren Abhängigkeiten vorzugeben                                                                     | |
+Unterhalb von `config` stehen weitere Parameter zur Verfügung:
+
+| Parameter             | Typ     | default       | Beschreibung | Beispiel |
+| :---------            | :-----: | :-----        | :----------- | :------- |
+| `graphite-identifier` | String  | `${HOSTNAME}` | Ändert den Identifier für die Kombination `graphite` / `grafana`                                                    | `"graphite-identifier": "development-system"` |
+|                       |         |               | dadurch ist es möglich in einer sehr dynamischen Umgebung (z.B. Amazon Web Services) einen einheitlichen Identifier | |
+|                       |         |               | für das Graphensystem zu nutzen                                                                                     | |
+|                       |         |               |                                                                                                                     | |
+| `ports`               | Array   | []            | **ersetzt** den intern genutzten Portbereich                                                                        | `"ports": [50199,51099]` |
+|                       |         |               | hierdurch kann man gezielt individuelle Ports durch das Monitoring nutzen.                                          | |
+|                       |         |               |                                                                                                                     | |
+| `display-name`        | String  | `${HOSTNAME}` | ändert den Anzeige Namen im Grafana.                                                                                | `"display-name": "foo.bar.com"` |
+|                       |         |               | dadurch kann man individuelle Namen nutzen                                                                          | |
+|                       |         |               |                                                                                                                     | |
+| `services`            | Array   | []            | **ergänzt** die Services, die durch die Service Discovery gefunden werden.                                          | `"services": ["cae-live","content-managment-server"]` |
+|                       |         |               | dadurch ist es möglich den Server **vor** den Starten der Services in das Monitoring zu integrieren                 | |
+|                       |         |               | bzw. einen Service mit langer Startzeit oder größeren Abhängigkeiten vorzugeben                                     | |
 
 
 **Beispiel eines Parametersatzes**
