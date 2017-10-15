@@ -9,7 +9,7 @@
 
 require 'rufus-scheduler'
 
-require_relative '../lib/grafana'
+require_relative '../lib/cm_grafana'
 
 # -----------------------------------------------------------------------------
 
@@ -30,6 +30,8 @@ mysqlUser           = ENV.fetch('DISCOVERY_DATABASE_USER', 'discovery')
 mysqlPassword       = ENV.fetch('DISCOVERY_DATABASE_PASS', 'discovery')
 interval            = ENV.fetch('INTERVAL'               , 40 )
 delay               = ENV.fetch('RUN_DELAY'              , 30 )
+
+config_file         = ENV.fetch('CONFIG_FILE'            , nil )
 
 config = {
   :grafana => {
@@ -71,30 +73,33 @@ Signal.trap('QUIT') { stop = true }
 
 # -----------------------------------------------------------------------------
 
-g = Grafana::Client.new( config )
+g = CMGrafana.new( config )
 
-scheduler = Rufus::Scheduler.new
-
-scheduler.every( interval, :first_in => delay ) do
-
-   g.queue()
-
-end
+g.configure_server()
 
 
-scheduler.every( 5 ) do
-
-  if( stop == true )
-
-    p 'shutdown scheduler ...'
-
-    scheduler.shutdown(:kill)
-  end
-
-end
-
-
-scheduler.join
+# scheduler = Rufus::Scheduler.new
+#
+# scheduler.every( interval, :first_in => delay ) do
+#
+#    g.queue()
+#
+# end
+#
+#
+# scheduler.every( 5 ) do
+#
+#   if( stop == true )
+#
+#     p 'shutdown scheduler ...'
+#
+#     scheduler.shutdown(:kill)
+#   end
+#
+# end
+#
+#
+# scheduler.join
 
 # -----------------------------------------------------------------------------
 

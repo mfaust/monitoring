@@ -1,5 +1,5 @@
 
-class CMGrafana
+module Grafana
 
   module Queue
 

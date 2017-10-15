@@ -1,7 +1,8 @@
 
-class CMGrafana
+module Grafana
 
   module Coremedia
+
 
     module Dashboard
 
