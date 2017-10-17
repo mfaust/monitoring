@@ -1,5 +1,5 @@
 
-class CMGrafana
+class CMGrafana < Grafana::Client
 
   module Queue
 
@@ -9,7 +9,7 @@ class CMGrafana
     #
     def queue()
 
-      if( @loggedIn == false )
+      if( @logged_in == false )
 
         logger.debug( 'client are not logged in, skip' )
         return
@@ -27,11 +27,11 @@ class CMGrafana
         return
       end
 
-      data    = @mqConsumer.getJobFromTube( @mqQueue )
+      data    = @mq_consumer.getJobFromTube( @mq_queue )
 
       if( data.count() != 0 )
 
-        stats = @mqConsumer.tubeStatistics( @mqQueue )
+        stats = @mq_consumer.tubeStatistics( @mq_queue )
         logger.debug( {
           :total   => stats.dig(:total),
           :ready   => stats.dig(:ready),
@@ -42,7 +42,7 @@ class CMGrafana
         if( stats.dig(:ready).to_i > 10 )
           logger.warn( 'more then 10 jobs in queue ... just wait' )
 
-          @mqConsumer.cleanQueue( @mqQueue )
+          @mq_consumer.cleanQueue( @mq_queue )
           return
         end
 
@@ -54,10 +54,10 @@ class CMGrafana
 
         if( status == 200 || status == 409 || status == 500 || status == 503 )
 
-          @mqConsumer.deleteJob( @mqQueue, jobId )
+          @mq_consumer.deleteJob( @mq_queue, jobId )
         else
 
-          @mqConsumer.buryJob( @mqQueue, jobId )
+          @mq_consumer.buryJob( @mq_queue, jobId )
         end
       end
 
@@ -244,7 +244,7 @@ class CMGrafana
         payload: data       # require
       }.to_json
 
-      result = @mqProducer.addJob( queue, job, prio, ttr, delay )
+      result = @mq_Producer.addJob( queue, job, prio, ttr, delay )
 
       logger.debug( job )
       logger.debug( result )

@@ -139,7 +139,7 @@ services:
 
   carbon:
     restart: always
-    image: bodsch/docker-go-carbon:1709.3
+    image: bodsch/docker-go-carbon:1710.1
     container_name: carbon
     hostname: carbon
     depends_on:
@@ -174,7 +174,7 @@ services:
 
   grafana:
     restart: always
-    image: bodsch/docker-grafana:stable-4.5.2-r2
+    image: bodsch/docker-grafana:4.6.0-beta1
     container_name: grafana
     hostname: grafana
     extends:
@@ -425,6 +425,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ./logs:/var/log
       - /share/usr/local/share/templates:/usr/local/share/templates
+      - /share/etc/grafana/grafana_config.yml:/etc/grafana_config.yml
     networks:
       mon:
         ipv4_address: 192.168.1.34

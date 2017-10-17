@@ -5,51 +5,6 @@ class CMGrafana
 
     module Dashboard
 
-      # cae-live-1 -> cae-live
-      def removePostfix( service )
-
-        if( service =~ /\d/ )
-          lastPart = service.split( '-' ).last
-          service  = service.chomp( "-#{lastPart}" )
-        end
-
-        return service
-
-      end
-
-
-      def normalizeService( service )
-
-        # normalize service names for grafana
-        case service
-          when 'content-management-server'
-            service = 'CMS'
-          when 'master-live-server'
-            service = 'MLS'
-          when 'replication-live-server'
-            service = 'RLS'
-          when 'workflow-server'
-            service = 'WFS'
-          when /^cae-live/
-            service = 'CAE_LIVE'
-          when /^cae-preview/
-            service = 'CAE_PREV'
-          when 'solr-master'
-            service = 'SOLR_MASTER'
-      #    when 'solr-slave'
-      #      service = 'SOLR_SLAVE'
-          when 'content-feeder'
-            service = 'FEEDER_CONTENT'
-          when 'caefeeder-live'
-            service = 'FEEDER_LIVE'
-          when 'caefeeder-preview'
-            service = 'FEEDER_PREV'
-        end
-
-        return service.tr('-', '_').upcase
-
-      end
-
 
       def prepare( host )
 
@@ -79,7 +34,7 @@ class CMGrafana
           logger.info( "use custom storage identifier from config: '#{@storageIdentifier}'" )
         end
 
-        @grafanaHostname  = self.createSlug( @grafanaHostname ).gsub( '.', '-' )
+        @grafanaHostname  = self.slug( @grafanaHostname ).gsub( '.', '-' )
 
         logger.debug( format('ip   : %s', ip))
         logger.debug( format('short: %s', short))
@@ -275,7 +230,7 @@ class CMGrafana
           self.createLicenseTemplate( { :host => host, :services => services } )
         end
 
-        dashboards = self.listDashboards( { :host => @grafanaHostname } )
+        dashboards = self.listDashboards( { :host => short } ) #@grafanaHostname } )
         dashboards = dashboards.dig(:dashboards)
 
         # TODO
@@ -403,9 +358,9 @@ class CMGrafana
 #         logger.debug( " services      : #{services}" )
 #         logger.debug( " use           : #{intersect}" )
 
-        licenseHead    = sprintf( '%s/licenses/licenses-head.json' , @templateDirectory )
-        licenseUntil   = sprintf( '%s/licenses/licenses-until.json', @templateDirectory )
-        licensePart    = sprintf( '%s/licenses/licenses-part.json' , @templateDirectory )
+        licenseHead    = sprintf( '%s/licenses/licenses-head.json' , @template_directory )
+        licenseUntil   = sprintf( '%s/licenses/licenses-until.json', @template_directory )
+        licensePart    = sprintf( '%s/licenses/licenses-part.json' , @template_directory )
 
         intersect.each do |service|
 
@@ -541,7 +496,7 @@ class CMGrafana
 
           templates.each do |template|
 
-            filename = sprintf( '%s/%s', @templateDirectory, template )
+            filename = sprintf( '%s/%s', @template_directory, template )
 
             if( File.exist?( filename ) )
 
@@ -590,9 +545,16 @@ class CMGrafana
       # @return [Hash, #read]
       def listDashboards( params = {} )
 
+        logger.debug("listDashboards( #{params} )")
+
         tags            = params.dig(:tags)
 
-        data = self.searchDashboards( { :tags => tags } )
+        data = self.search_dashboards( { :tags => tags } )
+
+#         logger.debug( data )
+
+        status = data.dig('status')
+        data   = data.dig('message')
 
         if( data == nil || data == false )
 
@@ -621,11 +583,13 @@ class CMGrafana
         # and remove the path and the tag-name'
         logger.debug(data)
         logger.debug(data.class.to_s)
+
         data = data.collect { |item| item['uri'] }
 
         # db/blueprint-box-cache-classes-cm => cache-classes-cm
         data.each do |d|
-          d.gsub!( sprintf( 'db/%s-', tags ), '' )
+          # d.gsub!( sprintf( 'db/%s-', tags ), '' )
+          d.gsub!( 'db/', '' )
         end
 
         return {
@@ -656,7 +620,7 @@ class CMGrafana
 
         logger.info( sprintf( 'remove dashboards for host %s (%s)', host, @grafanaHostname ) )
 
-        dashboards = self.listDashboards( { :tags => host } )
+        dashboards = self.listDashboards( { :tags => short } )
 
         status = dashboards.dig(:status)
 
@@ -696,7 +660,12 @@ class CMGrafana
 
             logger.debug( sprintf( 'found %d dashboards for delete', count ) )
 
+            # ensure, that we are logged in
+            login( { :user => @user, :password => @password, :max_retries => 10 } )
+
             dashboards.each do |d|
+
+              logger.debug( format( ' -> %s', d ) )
 
               # TODO
               #if( (i.include?"group") && ( !host.include?"group") )
@@ -707,12 +676,14 @@ class CMGrafana
               # add 'db' and hostname to the request
               #
 
-              request = sprintf( '/api/dashboards/db/%s-%s', host, d )
+#               request = sprintf( '/api/dashboards/db/%s-%s', host, d )
 #              request = sprintf( '/api/dashboards/%s', d )
 
-              logger.debug( sprintf( '  - %s (%s)', d, request ) )
+#               dashboard_name = format('%s-%s', @grafanaHostname, d)
 
-              response = self.deleteRequest( request )
+              logger.debug( sprintf( '  - %s :: %s', host, d ) )
+
+              response = delete_dashboard( d )
             end
 
             logger.info( sprintf( '%d dashboards deleted', count ) )
@@ -742,8 +713,8 @@ class CMGrafana
         template      = nil
         templateArray = Array.new()
 
-        templateArray << sprintf( '%s/%s.json', @templateDirectory, serviceName )
-        templateArray << sprintf( '%s/services/%s.json', @templateDirectory, serviceName )
+        templateArray << sprintf( '%s/%s.json', @template_directory, serviceName )
+        templateArray << sprintf( '%s/services/%s.json', @template_directory, serviceName )
 
         templateArray.each do |tpl|
 
@@ -879,7 +850,7 @@ class CMGrafana
           \.tpl                   #
         /x
 
-        Dir.chdir( sprintf( '%s/overview', @templateDirectory )  )
+        Dir.chdir( sprintf( '%s/overview', @template_directory )  )
 
         dirs = Dir.glob( "**.tpl" ).sort
 
@@ -900,7 +871,7 @@ class CMGrafana
         intersect.each do |service|
 
 #           service  = removePostfix( service )
-          template = Dir.glob( sprintf( '%s/overview/**%s.tpl', @templateDirectory, service ) ).first
+          template = Dir.glob( sprintf( '%s/overview/**%s.tpl', @template_directory, service ) ).first
 
           if( File.exist?( template ) )
 
@@ -959,30 +930,33 @@ class CMGrafana
         template.gsub!( re, map )
 
         if( @additionalTags.count() > 0 )
-          template = self.addTags( { :template => template, :additionalTags => @additionalTags } )
+          template = self.expand_tags( { :template => template, :additionalTags => @additionalTags } )
         end
 
         # now we must recreate *all* panel IDs for an propper import
         template = JSON.parse( template )
 
-        rows = template.dig( 'dashboard', 'rows' )
+        template = regenerate_template_ids( template )
 
-        if( rows != nil )
-
-          counter   = 1
-          idCounter = 10
-
-          rows.each_with_index do |r, counter|
-
-            panel = r.dig('panels')
-            panel.each do |p|
-              p['id']   = idCounter
-              idCounter += 1 # idCounter +=1 ??
-            end
-          end
-        end
-
-        return JSON.generate( template )
+        # use gem function
+#         rows = template.dig( 'dashboard', 'rows' )
+#
+#         if( rows != nil )
+#
+#           counter   = 1
+#           idCounter = 10
+#
+#           rows.each_with_index do |r, counter|
+#
+#             panel = r.dig('panels')
+#             panel.each do |p|
+#               p['id']   = idCounter
+#               idCounter += 1 # idCounter +=1 ??
+#             end
+#           end
+#         end
+#
+#         return JSON.generate( template )
 
       end
 
@@ -1049,48 +1023,49 @@ class CMGrafana
     end
 
 
-    module Tags
-
-      # expand the Template Tags
-      #
-      #
-      #
-      def addTags( params = {} )
-
-        template        = params.dig(:template)
-        additionalTags  = params.dig(:additionalTags) || []
-
-        # add tags
-        if( template.is_a?( String ) )
-          template = JSON.parse( template )
-        end
-
-        if( additionalTags.is_a?( Hash ) )
-
-          additionalTags = additionalTags.values
-        end
-
-        currentTags = template.dig( 'dashboard', 'tags' )
-
-        if( currentTags != nil && additionalTags.count() > 0 )
-
-          currentTags << additionalTags
-
-          currentTags.flatten!
-          currentTags.sort!
-
-          template['dashboard']['tags'] = currentTags
-        end
-
-        if( template.is_a?( Hash ) )
-          template = JSON.generate( template )
-        end
-
-        return template
-
-      end
-
-    end
+    # use gem function
+#     module Tags
+#
+#       # expand the Template Tags
+#       #
+#       #
+#       #
+#       def addTags( params = {} )
+#
+#         template        = params.dig(:template)
+#         additionalTags  = params.dig(:additionalTags) || []
+#
+#         # add tags
+#         if( template.is_a?( String ) )
+#           template = JSON.parse( template )
+#         end
+#
+#         if( additionalTags.is_a?( Hash ) )
+#
+#           additionalTags = additionalTags.values
+#         end
+#
+#         currentTags = template.dig( 'dashboard', 'tags' )
+#
+#         if( currentTags != nil && additionalTags.count() > 0 )
+#
+#           currentTags << additionalTags
+#
+#           currentTags.flatten!
+#           currentTags.sort!
+#
+#           template['dashboard']['tags'] = currentTags
+#         end
+#
+#         if( template.is_a?( Hash ) )
+#           template = JSON.generate( template )
+#         end
+#
+#         return template
+#
+#       end
+#
+#     end
 
 
   end
