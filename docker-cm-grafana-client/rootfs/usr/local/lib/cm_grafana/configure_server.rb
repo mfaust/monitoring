@@ -307,7 +307,7 @@ class CMGrafana < Grafana::Client
 
             if( port.nil? )
 
-              port = 2003 if( type == 'graphite' )
+              port = 8080 if( type == 'graphite' )
               port = 8080 if( type == 'influxdb' )
             end
 
