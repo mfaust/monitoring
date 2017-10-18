@@ -35,30 +35,30 @@ services:
       MEMCACHE_HOST: memcached
       # GRAFANA_USERS: 'coremedia:coremedia::admin'
       # ADMIN_PASSWORD: grafana_admin
-      USERS: '[
-        {
-          "username": "coremedia",
-          "password": "coremedia",
-          "email": "",
-          "role": "Admin"
-        }
-      ]'
-      DATASOURCES: '{
-        "graphite": [
-          {
-            "name": "graphite",
-            "host": "graphite",
-            "port": 2003,
-            "database": "graphite",
-            "default": true
-          }, {
-            "name": "events",
-            "host": "graphite",
-            "port": 2003,
-            "database": "graphite"
-          }
-        ]
-      }'
+#      USERS: '[
+#        {
+#          "username": "coremedia",
+#          "password": "coremedia",
+#          "email": "",
+#          "role": "Admin"
+#        }
+#      ]'
+#      DATASOURCES: '{
+#        "graphite": [
+#          {
+#            "name": "graphite",
+#            "host": "graphite",
+#            "port": 2003,
+#            "database": "graphite",
+#            "default": true
+#          }, {
+#            "name": "events",
+#            "host": "graphite",
+#            "port": 2003,
+#            "database": "graphite"
+#          }
+#        ]
+#      }'
 
   cm-icinga2-master:
     environment:
