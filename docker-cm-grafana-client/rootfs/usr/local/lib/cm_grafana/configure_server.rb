@@ -29,7 +29,6 @@ class CMGrafana < Grafana::Client
           logger.error( "#{$!}" )
 
           raise( 'no valid yaml File' )
-          exit 1
         end
       else
         logger.error( sprintf( 'Config File %s not found!', config_file ) )
@@ -209,13 +208,12 @@ class CMGrafana < Grafana::Client
 
                 organisations.each do |o|
 
+                  role   = 'Viewer'
                   org    = o.keys.first
                   values = o.values.first
                   # values = values.first if( values.is_a?(Array) )
 
-                  if( values.nil? )
-                    role = 'Viewer'
-                  else
+                  unless( values.nil? )
                     role = o.values.first unless( o.values.nil? )
                     role = role.dig('role') unless( role.nil? )
                   end
@@ -246,7 +244,7 @@ class CMGrafana < Grafana::Client
 
           end
 
-          if( grafana_admin == true )
+          if(grafana_admin)
 
             logger.info( '  - set as grafana admin' )
             result << update_user_permissions( name: user_name, permissions: { grafana_admin: true } )
@@ -275,7 +273,7 @@ class CMGrafana < Grafana::Client
 
         datasources.each do |k,ds|
 
-          defaults = ds.select { |x| x['default'] == true }
+          defaults = ds.select { |x| x['default']}
 
           if( defaults.count > 1 )
             logger.error( format( 'only one default datasource for type %s allowed', k ) )

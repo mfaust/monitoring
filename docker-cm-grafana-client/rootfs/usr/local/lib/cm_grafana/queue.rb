@@ -7,29 +7,26 @@ class CMGrafana < Grafana::Client
     #
     #
     #
-    def queue()
+    def queue
 
-      if( @logged_in == false )
-
-        logger.debug( 'client are not logged in, skip' )
-        return
-      end
-
-      session = self.ping_session()
-
-      unless( session.is_a?(TrueClass) )
-        msg     = session.dig('message')
-      end
-
-      if( msg != nil && msg != 'Logged in' )
+      if(!@logged_in)
 
         logger.debug( 'client are not logged in, skip' )
         return
       end
+
+#       msg     = nil
+#       session = self.ping_session
+#       msg     = session.dig('message') unless( session.is_a?(TrueClass) )
+#
+#       if( msg != nil && msg != 'Logged in' )
+#         logger.debug( 'client are not logged in, skip' )
+#         return
+#       end
 
       data    = @mq_consumer.getJobFromTube( @mq_queue )
 
-      if( data.count() != 0 )
+      if( data.count != 0 )
 
         stats = @mq_consumer.tubeStatistics( @mq_queue )
         logger.debug( {
@@ -46,25 +43,25 @@ class CMGrafana < Grafana::Client
           return
         end
 
-        jobId  = data.dig( :id )
+        job_id  = data.dig( :id )
 
-        result = self.processQueue( data )
+        result = self.process_queue(data )
 
         status = result.dig(:status).to_i
 
         if( status == 200 || status == 409 || status == 500 || status == 503 )
 
-          @mq_consumer.deleteJob( @mq_queue, jobId )
+          @mq_consumer.deleteJob( @mq_queue, job_id )
         else
 
-          @mq_consumer.buryJob( @mq_queue, jobId )
+          @mq_consumer.buryJob( @mq_queue, job_id )
         end
       end
 
     end
 
 
-    def processQueue( data = {} )
+    def process_queue(data = {} )
 
       logger.debug( sprintf( 'process Message ID %d from Queue \'%s\'', data.dig(:id), data.dig(:tube) ) )
 
@@ -73,6 +70,7 @@ class CMGrafana < Grafana::Client
       payload  = data.dig( :body, 'payload' )
       tags     = []
       overview = true
+      dns = nil
 
       logger.debug( payload )
 
@@ -107,7 +105,7 @@ class CMGrafana < Grafana::Client
         payload  = JSON.parse( payload )
       end
 
-      if( payload.is_a?( String ) == false )
+      if(!payload.is_a?(String))
 
         tags     = payload.dig('tags')
         overview = payload.dig('overview') || true
@@ -116,12 +114,12 @@ class CMGrafana < Grafana::Client
 
       logger.info( sprintf( '  %s node %s', command , node ) )
 
-      if !dns.nil?
-        ip    = dns.dig('ip')
-        short = dns.dig('short')
-        fqdn  = dns.dig('fqdn')
+      if( dns.nil? )
+        ip, short, fqdn = self.nsLookup(node)
       else
-        ip, short, fqdn = self.nsLookup( node )
+        ip = dns.dig('ip')
+        short = dns.dig('short')
+        fqdn = dns.dig('fqdn')
       end
 
       # no DNS data?
@@ -132,7 +130,7 @@ class CMGrafana < Grafana::Client
 
         # ask grafana
         #
-        result = self.listDashboards( { :host => node } )
+        result = self.list_dashboards({:host => node } )
 
         logger.debug( result )
 
@@ -142,7 +140,7 @@ class CMGrafana < Grafana::Client
         }
       end
 
-      if( @jobs.jobs( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } ) == true )
+      if(@jobs.jobs({:command => command, :ip => ip, :short => short, :fqdn => fqdn}))
 
         logger.warn( 'we are working on this job' )
 
@@ -163,13 +161,13 @@ class CMGrafana < Grafana::Client
         # TODO
         # check payload!
         # e.g. for 'force' ...
-        result = self.createDashboardForHost( { :host => node, :tags => tags, :overview => overview } )
+        result = self.create_dashboard_for_host({:host => node, :tags => tags, :overview => overview } )
 
-        logger.info( result )
+        logger.debug( result )
 
         @jobs.del( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
 
-        return {
+        {
           :status  => 200,
           :message => result
         }
@@ -179,9 +177,9 @@ class CMGrafana < Grafana::Client
       elsif( command == 'remove' )
 
 #         logger.info( sprintf( 'remove dashboards for node %s', node ) )
-        result = self.deleteDashboards( { :ip => ip, :host => node, :fqdn => fqdn } )
+        result = self.delete_dashboards({:ip => ip, :host => node, :fqdn => fqdn } )
 
-        logger.info( result )
+        logger.debug( result )
 
         @jobs.del( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
 
@@ -195,9 +193,9 @@ class CMGrafana < Grafana::Client
       elsif( command == 'info' )
 
 #         logger.info( sprintf( 'give dashboards for %s back', node ) )
-        result = self.listDashboards( { :host => node } )
+        result = self.list_dashboards({:host => node } )
 
-        self.sendMessage( { :cmd => 'info', :host => node, :queue => 'mq-grafana-info', :payload => result, :ttr => 1, :delay => 0 } )
+        self.send_message({:cmd => 'info', :host => node, :queue => 'mq-grafana-info', :payload => result, :ttr => 1, :delay => 0 } )
 
         @jobs.del( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
 
@@ -213,7 +211,7 @@ class CMGrafana < Grafana::Client
 
         @jobs.del( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
 
-        return {
+        {
           :status  => 500,
           :message => sprintf( 'wrong command detected: %s', command )
         }
@@ -226,7 +224,7 @@ class CMGrafana < Grafana::Client
     end
 
 
-    def sendMessage( params = {} )
+    def send_message(params = {} )
 
       command = params.dig(:cmd)
       node    = params.dig(:node)
@@ -237,11 +235,11 @@ class CMGrafana < Grafana::Client
       delay   = params.dig(:delay) || 2
 
       job = {
-        cmd:  command,      # require
-        node: node,         # require
-        timestamp: Time.now().strftime( '%Y-%m-%d %H:%M:%S' ), # optional
-        from: 'grafana',    # optional
-        payload: data       # require
+          cmd:  command, # require
+          node: node, # require
+          timestamp: Time.now.strftime('%Y-%m-%d %H:%M:%S' ), # optional
+          from: 'grafana', # optional
+          payload: data # require
       }.to_json
 
       result = @mq_Producer.addJob( queue, job, prio, ttr, delay )

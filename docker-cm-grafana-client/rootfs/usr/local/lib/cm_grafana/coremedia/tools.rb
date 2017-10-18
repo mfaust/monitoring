@@ -13,13 +13,9 @@ class CMGrafana
         #
         hostname = sprintf( 'dns-%s', name )
 
-        ip       = nil
-        short    = nil
-        fqdn     = nil
-
         dns      = @cache.get( hostname )
 
-        if( dns == nil )
+        if( dns.nil? )
 
           logger.debug( 'create cached DNS data' )
           # create DNS Information
@@ -57,49 +53,49 @@ class CMGrafana
       end
 
 
-
       # cae-live-1 -> cae-live
-      def removePostfix( service )
+      def remove_postfix( service )
 
         if( service =~ /\d/ )
-          lastPart = service.split( '-' ).last
-          service  = service.chomp( "-#{lastPart}" )
+          last = service.split( '-' ).last
+          service  = service.chomp( "-#{last}" )
         end
 
-        return service
-
+        service
       end
 
 
-      def normalizeService( service )
+      def normalize_service( service )
 
         # normalize service names for grafana
-        case service
+        service = case service
           when 'content-management-server'
-            service = 'CMS'
+            'CMS'
           when 'master-live-server'
-            service = 'MLS'
+            'MLS'
           when 'replication-live-server'
-            service = 'RLS'
+            'RLS'
           when 'workflow-server'
-            service = 'WFS'
+            'WFS'
           when /^cae-live/
-            service = 'CAE_LIVE'
+            'CAE_LIVE'
           when /^cae-preview/
-            service = 'CAE_PREV'
+            'CAE_PREV'
           when 'solr-master'
-            service = 'SOLR_MASTER'
+            'SOLR_MASTER'
       #    when 'solr-slave'
-      #      service = 'SOLR_SLAVE'
+      #      'SOLR_SLAVE'
           when 'content-feeder'
-            service = 'FEEDER_CONTENT'
+            'FEEDER_CONTENT'
           when 'caefeeder-live'
-            service = 'FEEDER_LIVE'
+            'FEEDER_LIVE'
           when 'caefeeder-preview'
-            service = 'FEEDER_PREV'
+            'FEEDER_PREV'
+          else
+            service
         end
 
-        return service.tr('-', '_').upcase
+        service.tr('-', '_').upcase
 
       end
 

@@ -34,23 +34,30 @@ class CMGrafana
 
   def initialize( settings = {} )
 
-    # logger.debug( "CMGrafana.initialize( #{settings} )" )
-
-    host                = settings.dig(:grafana, :host)          || 'localhost'
-    port                = settings.dig(:grafana, :port)          || 80
-    @user               = settings.dig(:grafana, :user)          || 'admin'
-    @password           = settings.dig(:grafana, :password)
-    url_path            = settings.dig(:grafana, :url_path)
-    ssl                 = settings.dig(:grafana, :ssl)           || false
-    @timeout            = settings.dig(:grafana, :timeout)       || 5
-    @open_timeout       = settings.dig(:grafana, :open_timeout)  || 5
-    @http_headers       = settings.dig(:grafana, :headers)       || {}
-    server_config_file  = settings.dig(:grafana, :server_config_file)
+    host                 = settings.dig(:grafana, :host)          || 'localhost'
+    port                 = settings.dig(:grafana, :port)          || 80
+    @user                = settings.dig(:grafana, :user)          || 'admin'
+    @password            = settings.dig(:grafana, :password)
+    url_path             = settings.dig(:grafana, :url_path)
+    ssl                  = settings.dig(:grafana, :ssl)           || false
+    @timeout             = settings.dig(:grafana, :timeout)       || 5
+    @open_timeout        = settings.dig(:grafana, :open_timeout)  || 5
+    @http_headers        = settings.dig(:grafana, :headers)       || {}
+    server_config_file   = settings.dig(:grafana, :server_config_file)
     @template_directory  = settings.dig(:templateDirectory)       || '/usr/local/share/templates/grafana'
 
     mq_host              = settings.dig(:mq, :host)               || 'localhost'
     mq_port              = settings.dig(:mq, :port)               || 11300
     @mq_queue            = settings.dig(:mq, :queue)              || 'mq-grafana'
+
+    redis_host           = settings.dig(:redis, :host)
+    redis_port           = settings.dig(:redis, :port)            || 6379
+
+    mysql_host           = settings.dig(:mysql, :host)
+    mysql_schema         = settings.dig(:mysql, :schema)
+    mysql_user           = settings.dig(:mysql, :user)
+    mysql_password       = settings.dig(:mysql, :password)
+
 
     @mq_settings = {
       :beanstalkHost  => mq_host,
@@ -58,17 +65,18 @@ class CMGrafana
       :beanstalkQueue => @mq_queue
     }
 
-    redisHost           = settings.dig(:redis, :host)
-    redisPort           = settings.dig(:redis, :port)            || 6379
-
-    mysqlHost           = settings.dig(:mysql, :host)
-    mysqlSchema         = settings.dig(:mysql, :schema)
-    mysqlUser           = settings.dig(:mysql, :user)
-    mysqlPassword       = settings.dig(:mysql, :password)
+    mysql_settings = {
+      :mysql => {
+        :host     => mysql_host,
+        :user     => mysql_user,
+        :password => mysql_password,
+        :schema   => mysql_schema
+      }
+    }
 
     super( settings )
 
-    @debug = false
+    @debug  = false
     @logger = logger
 
     version       = CMGrafana::Version::VERSION
@@ -80,8 +88,8 @@ class CMGrafana
     logger.info( '  Copyright 2016-2017 Coremedia' )
     logger.info( '  used Services:' )
     logger.info( "    - grafana      : #{@url}" )
-    logger.info( "    - redis        : #{redisHost}:#{redisPort}" )
-    logger.info( "    - mysql        : #{mysqlHost}@#{mysqlSchema}" )
+    logger.info( "    - redis        : #{redis_host}:#{redis_port}" )
+    logger.info( "    - mysql        : #{mysql_host}@#{mysql_schema}" )
     logger.info( "    - message queue: #{mq_host}:#{mq_port}/#{@mq_queue}" )
     logger.info( '-----------------------------------------------------------------' )
 
@@ -90,8 +98,6 @@ class CMGrafana
 
       @logged_in = login( { :user => @user, :password => @password } )
     rescue => e
-
-#      logger.error( e )
 
       if( server_config_file.nil? )
 
@@ -127,21 +133,13 @@ class CMGrafana
 
     cfg = configure_server( config_file: server_config_file ) unless( server_config_file.nil? )
 
-      @redis       = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
-      @mbean       = MBean::Client.new( { :redis => @redis } )
-      @cache       = Cache::Store.new()
-      @jobs        = JobQueue::Job.new()
-      @mq_consumer  = MessageQueue::Consumer.new( @mq_settings )
-      @mq_producer  = MessageQueue::Producer.new( @mq_settings )
-
-      @database    = Storage::MySQL.new({
-        :mysql => {
-          :host     => mysqlHost,
-          :user     => mysqlUser,
-          :password => mysqlPassword,
-          :schema   => mysqlSchema
-        }
-      })
+    @redis        = Storage::RedisClient.new( { :redis => { :host => redis_host } } )
+    @mbean        = MBean::Client.new( { :redis => @redis } )
+    @cache        = Cache::Store.new()
+    @jobs         = JobQueue::Job.new()
+    @mq_consumer  = MessageQueue::Consumer.new( @mq_settings )
+    @mq_producer  = MessageQueue::Producer.new( @mq_settings )
+    @database     = Storage::MySQL.new( mysql_settings )
 
   end
 

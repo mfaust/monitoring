@@ -12,9 +12,9 @@ class CMGrafana
         #
         ip, short, fqdn = self.nsLookup( host )
 
-        @shortHostname     = short  # (%HOST%)
-        @grafanaHostname   = fqdn   # name for the grafana title (%SHORTNAME%)
-        @storageIdentifier = fqdn   # identifier for an storage path (%STORAGE_IDENTIFIER%) (useful for cloud stack on aws with changing hostnames)
+        @short_hostname     = short  # (%HOST%)
+        @grafana_hostname   = fqdn   # name for the grafana title (%SHORTNAME%)
+        @storage_identifier = fqdn   # identifier for an storage path (%STORAGE_IDENTIFIER%) (useful for cloud stack on aws with changing hostnames)
 
         # read the configuration for an customized display name
         #
@@ -23,25 +23,25 @@ class CMGrafana
 
         if( display != nil && display.dig( 'display_name' ) != nil )
 
-          @grafanaHostname = display.dig( 'display_name' ).to_s
-          logger.info( "use custom display_name from config: '#{@grafanaHostname}'" )
+          @grafana_hostname = display.dig( 'display_name' ).to_s
+          logger.info( "use custom display_name from config: '#{@grafana_hostname}'" )
         end
 
 
         if( identifier != nil && identifier.dig( 'graphite_identifier' ) != nil )
 
-          @storageIdentifier = identifier.dig( 'graphite_identifier' ).to_s
-          logger.info( "use custom storage identifier from config: '#{@storageIdentifier}'" )
+          @storage_identifier = identifier.dig( 'graphite_identifier' ).to_s
+          logger.info( "use custom storage identifier from config: '#{@storage_identifier}'" )
         end
 
-        @grafanaHostname  = self.slug( @grafanaHostname ).gsub( '.', '-' )
+        @grafana_hostname  = slug( @grafana_hostname ).gsub( '.', '-' )
 
         logger.debug( format('ip   : %s', ip))
         logger.debug( format('short: %s', short))
         logger.debug( format('fqdn : %s', fqdn))
-        logger.debug( "short hostname    : #{@shortHostname}" )
-        logger.debug( "grafana hostname  : #{@grafanaHostname}" )
-        logger.debug( "storage Identifier: #{@storageIdentifier}" )
+        logger.debug( "short hostname    : #{@short_hostname}" )
+        logger.debug( "grafana hostname  : #{@grafana_hostname}" )
+        logger.debug( "storage Identifier: #{@storage_identifier}" )
 
         return ip, short, fqdn
 
@@ -57,11 +57,11 @@ class CMGrafana
       # @option params [Bool] :overview create an Overview Dashboard
       #
       #
-      def createDashboardForHost( params = {} )
+      def create_dashboard_for_host(params = {} )
 
         host            = params.dig(:host)
-        @additionalTags = params.dig(:tags)     || []
-        createOverview  = params.dig(:overview) || false
+        @additional_tags = params.dig(:tags)     || []
+        create_overview  = params.dig(:overview) || false
 
         if( host == nil )
 
@@ -79,25 +79,26 @@ class CMGrafana
 
         ip, short, fqdn = self.prepare( host )
 
+        discovery = nil
         begin
 
-          for y in 1..15
+          (1..15).each { |y|
 
-            discovery    = @database.discoveryData( { :ip => ip, :short => short, :fqdn => fqdn } )
+            discovery = @database.discoveryData({:ip => ip, :short => short, :fqdn => fqdn})
 
-            if( discovery != nil )
-              break
+            if (discovery.nil?)
+              logger.debug(sprintf('wait for discovery data for node \'%s\' ... %d', fqdn, y))
+              sleep(4)
             else
-              logger.debug( sprintf( 'wait for discovery data for node \'%s\' ... %d', fqdn, y ) )
-              sleep( 4 )
+              break
             end
-          end
+          }
 
         rescue => e
           logger.error( e )
         end
 
-        if( discovery == nil )
+        if( discovery.nil? )
 
           return {
             :status    => 400,
@@ -109,128 +110,116 @@ class CMGrafana
         logger.debug( "Found services: #{services}" )
 
         # fist, we must remove strange services
-        servicesTmp = *services
-        servicesTmp.delete( 'mysql' )
-        servicesTmp.delete( 'postgres' )
-        servicesTmp.delete( 'mongodb' )
-#        servicesTmp.delete( 'node-exporter' )
-        servicesTmp.delete( 'demodata-generator' )
-        servicesTmp.delete( 'http-proxy' )
-        servicesTmp.delete( 'https-proxy' )
-        servicesTmp.delete( 'http-status' )
+        tmp_services = *services
+        tmp_services.delete( 'mysql' )
+        tmp_services.delete( 'postgres' )
+        tmp_services.delete( 'mongodb' )
+#        tmp_services.delete( 'node-exporter' )
+        tmp_services.delete( 'demodata-generator' )
+        tmp_services.delete( 'http-proxy' )
+        tmp_services.delete( 'https-proxy' )
+        tmp_services.delete( 'http-status' )
 
-        serviceHash = Hash.new()
+        # ensure, that we are logged in
+        login( { :user => @user, :password => @password, :max_retries => 10 } )
 
-        discovery.each do |service,serviceData|
+        discovery.each do |service,service_data|
 
-          additionalTemplatePaths = Array.new()
+          additional_template_paths = Array.new
 
-          if( serviceData != nil )
-            description    = serviceData.dig( 'description' )
-            template       = serviceData.dig( 'template' )
+          if( service_data != nil )
+            description    = service_data.dig( 'description' )
+            template       = service_data.dig( 'template' )
           else
             description    = nil
             template       = nil
           end
 
           # cae-live-1 -> cae-live
-          serviceName     = self.removePostfix( service )
-          normalizedName  = self.normalizeService( service )
+          service_name     = self.remove_postfix( service )
+          normalized_name  = self.normalize_service( service )
 
-          templateName    = template != nil ? template : serviceName
-          serviceTemplate = self.templateForService( templateName )
-#           serviceTemplate = self.templateForService( serviceName )
+          template_name    = template != nil ? template : service_name
+          service_template = self.template_for_service( template_name )
+#           service_template = self.template_for_service( service_name )
 
-#           logger.debug( sprintf( '  serviceName  %s', serviceName ) )
+#           logger.debug( sprintf( '  service_name  %s', service_name ) )
 #           logger.debug( sprintf( '  description  %s', description ) )
 #           logger.debug( sprintf( '  template     %s', template ) )
-#           logger.debug( sprintf( '  templateName %s', templateName ) )
+#           logger.debug( sprintf( '  template_name %s', template_name ) )
 #           logger.debug( sprintf( '  cacheKey     %s', cacheKey ) )
 
-          if( ! ['mongodb', 'mysql', 'postgres', 'node-exporter', 'http-status'].include?( serviceName ) )
-            additionalTemplatePaths << self.templateForService( 'tomcat' )
+          if( ! %w(mongodb mysql postgres node-exporter http-status).include?(service_name ) )
+            additional_template_paths << self.template_for_service( 'tomcat' )
           end
 
-          if( ! serviceTemplate.to_s.empty? )
+          if( ! service_template.to_s.empty? )
 
             options = {
               :description             => description,
-              :serviceName             => serviceName,
-              :normalizedName          => normalizedName,
-              :serviceTemplate         => serviceTemplate,
-              :additionalTemplatePaths => additionalTemplatePaths
+              :service_name             => service_name,
+              :normalized_name          => normalized_name,
+              :service_template         => service_template,
+              :additional_template_paths => additional_template_paths
             }
 
-            self.createServiceTemplate( options )
+            self.create_service_template( options )
           end
         end
 
         # we want an Services Overview for this Host
-        if( createOverview == true )
-          self.createOverview( services ) # add description
-        end
+        self.create_overview( services ) if(create_overview) # add description
 
 
         # named Templates are a subset of specialized Templates
         # like Memory-Pools, Tomcat or simple Grafana-Templates
-        namedTemplate = Array.new()
+        named_template_array = Array.new
 
         # MemoryPools for many Services
-        namedTemplate.push( 'cm-memory-pool.json' )
+        named_template_array.push( 'cm-memory-pool.json' )
 
         # unique Tomcat Dashboard
-        namedTemplate.push( 'cm-tomcat.json' )
+        named_template_array.push( 'cm-tomcat.json' )
 
         # CAE Caches
-        if( servicesTmp.include?( 'cae-preview' ) || servicesTmp.include?( 'cae-live' ) )
+        if( tmp_services.include?( 'cae-preview' ) || tmp_services.include?( 'cae-live' ) )
 
-          namedTemplate.push( 'cm-cae-cache-classes.json' )
-
-          if( @mbean.beanAvailable?( host, 'cae-preview', 'CacheClassesECommerceAvailability' ) == true )
-            namedTemplate.push( 'cm-cae-cache-classes-ecommerce.json' )
-          end
+          named_template_array.push( 'cm-cae-cache-classes.json' )
+          named_template_array.push( 'cm-cae-cache-classes-ecommerce.json' ) if(@mbean.beanAvailable?(host, 'cae-preview', 'CacheClassesECommerceAvailability'))
         end
 
         # add Operation Datas for NodeExporter
-        if( services.include?('node-exporter' ) )
-          namedTemplate.push( 'cm-node-exporter.json' )
-        end
+        named_template_array.push( 'cm-node-exporter.json' ) if( services.include?('node-exporter' ) )
+        named_template_array.push( 'cm-http-status.json' ) if( services.include?('http-status' ) )
 
-        if( services.include?('http-status' ) )
-          namedTemplate.push( 'cm-http-status.json' )
-        end
-
-        self.createNamedTemplate( namedTemplate )
-
-        measurements = nil
+        self.create_named_template( named_template_array )
 
         begin
 
-          for y in 1..30
+          (1..30).each { |y|
 
-            result = @redis.measurements( { :short => short, :fqdn => fqdn } )
+            result = @redis.measurements({:short => short, :fqdn => fqdn})
 
-            if( result != nil )
-              measurements = result
-              break
+            if( result.nil? )
+              logger.debug(sprintf('wait for measurements data for node \'%s\' ... %d', short, y))
+              sleep(4)
             else
-              logger.debug( sprintf( 'wait for measurements data for node \'%s\' ... %d', short, y ) )
-              sleep( 4 )
+              break
             end
-          end
+          }
 
         rescue => e
           logger.error( e )
         end
 
         # - at last - the LicenseInformation
-        if( servicesTmp.include?( 'content-management-server' ) ||
-            servicesTmp.include?( 'master-live-server' ) ||
-            servicesTmp.include?( 'replication-live-server' ) )
-          self.createLicenseTemplate( { :host => host, :services => services } )
+        if( tmp_services.include?( 'content-management-server' ) ||
+            tmp_services.include?( 'master-live-server' ) ||
+            tmp_services.include?( 'replication-live-server' ) )
+          self.create_license_template({:host => host, :services => services } )
         end
 
-        dashboards = self.listDashboards( { :host => short } ) #@grafanaHostname } )
+        dashboards = self.list_dashboards({:host => short } ) #@grafana_hostname } )
         dashboards = dashboards.dig(:dashboards)
 
         # TODO
@@ -243,7 +232,7 @@ class CMGrafana
           }
         end
 
-        count      = dashboards.count()
+        count      = dashboards.count
 
         if( count.to_i != 0 )
           status  = 200
@@ -254,9 +243,9 @@ class CMGrafana
         end
 
         finish = Time.now
-        logger.info( sprintf( 'finished in %s seconds', finish - start ) )
+        logger.info( sprintf( 'finished in %s seconds', (finish - start).round(3) ) )
 
-        return {
+        {
           :status      => status,
           :name        => host,
           :message     => message
@@ -265,11 +254,11 @@ class CMGrafana
       end
 
 
-      def createOverview( services = [] )
+      def create_overview( services = [] )
 
         logger.info( 'Create Overview Template' )
 
-        rows = self.overviewTemplateRows( services )
+        rows = self.overview_template_rows(services )
         rows = rows.join(',')
 
         template = %(
@@ -327,52 +316,51 @@ class CMGrafana
           }
         )
 
-        json = self.normalizeTemplate( {
+        json = self.normalize_template({
           :template          => template,
-          :grafanaHostname   => @grafanaHostname,
-          :storageIdentifier => @storageIdentifier,
-          :shortHostname     => @shortHostname
+          :grafana_hostname   => @grafana_hostname,
+          :storage_identifier => @storage_identifier,
+          :short_hostname     => @short_hostname
         } )
 
-        response = self.postRequest( '/api/dashboards/db' , json )
+        json = JSON.parse( json ) if( json.is_a?(String) )
+        title = json.dig('dashboard','title')
 
-        if( response == false )
+        response = create_dashboard( title: title, dashboard: json )
+
+        if( response.dig('status').to_i != 200 )
           logger.error( 'template can\'t be add' )
           logger.debug( "#{response}" )
         end
       end
 
 
-      def createLicenseTemplate( params = {} )
+      def create_license_template(params = {} )
 
         logger.info( 'create License Templates' )
 
         host            = params.dig(:host)
         services        = params.dig(:services) || []
 
-        rows            = Array.new()
-        contentServers  = ['content-management-server', 'master-live-server', 'replication-live-server']
-        intersect       = contentServers & services
+        rows            = Array.new
+        content_servers  = %w(content-management-server master-live-server replication-live-server)
+        intersect       = content_servers & services
 
-#         logger.debug( " contentServers: #{contentServers}" )
-#         logger.debug( " services      : #{services}" )
-#         logger.debug( " use           : #{intersect}" )
-
-        licenseHead    = sprintf( '%s/licenses/licenses-head.json' , @template_directory )
-        licenseUntil   = sprintf( '%s/licenses/licenses-until.json', @template_directory )
-        licensePart    = sprintf( '%s/licenses/licenses-part.json' , @template_directory )
+        license_head    = sprintf( '%s/licenses/licenses-head.json' , @template_directory )
+        license_until   = sprintf( '%s/licenses/licenses-until.json', @template_directory )
+        license_part    = sprintf( '%s/licenses/licenses-part.json' , @template_directory )
 
         intersect.each do |service|
 
-          if( @mbean.beanAvailable?( host, service, 'Server', 'LicenseValidUntilHard' ) == true )
+          if(@mbean.beanAvailable?(host, service, 'Server', 'LicenseValidUntilHard'))
 
             logger.info( sprintf( '  - found License Information for Service %s', service ) )
 
-            if( File.exist?( licenseUntil ) )
+            if( File.exist?( license_until ) )
 
-              tpl = File.read( licenseUntil )
+              tpl = File.read( license_until )
 
-              tpl.gsub!( '%SERVICE%', normalizeService( service ) )
+              tpl.gsub!( '%SERVICE%', normalize_service( service ) )
 
               rows << tpl
             end
@@ -380,27 +368,23 @@ class CMGrafana
           end
         end
 
-        if( File.exist?( licenseHead ) )
-          rows << File.read( licenseHead )
-        end
+        rows << File.read( license_head )  if( File.exist?( license_head ) )
 
         intersect.each do |service|
 
-          if( @mbean.beanAvailable?( host, service, 'Server', 'ServiceInfos' ) == true )
+          if(@mbean.beanAvailable?(host, service, 'Server', 'ServiceInfos'))
 
             logger.info( sprintf( '  - found Service Information for Service %s', service ) )
 
-            if( File.exist?( licensePart ) )
+            if( File.exist?( license_part ) )
 
-              tpl = File.read( licensePart )
+              tpl = File.read( license_part )
 
-              tpl.gsub!( '%SERVICE%', normalizeService( service ) )
+              tpl.gsub!( '%SERVICE%', normalize_service( service ) )
 
               if( service == 'replication-live-server' )
-
                 tpl.gsub!( 'Server.ServiceInfo.publisher' , 'Server.ServiceInfo.webserver' )
                 tpl.gsub!( 'Publisher', 'Webserver' )
-
               end
 
               rows << tpl
@@ -471,28 +455,32 @@ class CMGrafana
           }
         )
 
-        json = self.normalizeTemplate( {
+        json = self.normalize_template({
           :template          => template,
-          :grafanaHostname   => @grafanaHostname,
-          :storageIdentifier => @storageIdentifier,
-          :shortHostname     => @shortHostname
+          :grafana_hostname   => @grafana_hostname,
+          :storage_identifier => @storage_identifier,
+          :short_hostname     => @short_hostname
         } )
 
-        response = self.postRequest( '/api/dashboards/db' , json )
+        json = JSON.parse( json ) if( json.is_a?(String) )
+        title = json.dig('dashboard','title')
 
-        if( response == false )
+        response = create_dashboard( title: title, dashboard: json )
+
+        if( response.dig('status').to_i != 200 )
           logger.error( 'template can\'t be add' )
           logger.debug( "#{response}" )
         end
+
       end
 
 
       # use array to add more than on template
-      def createNamedTemplate( templates = [] )
+      def create_named_template( templates = [] )
 
         logger.info( 'add named template' )
 
-        if( templates.count() != 0 )
+        if( templates.count != 0 )
 
           templates.each do |template|
 
@@ -502,22 +490,24 @@ class CMGrafana
 
               logger.info( sprintf( '  - %s', File.basename( filename ).strip ) )
 
-#             file = File.read( filename )
-#             file = self.addAnnotations( file )
-#             file = JSON.generate( file )
+              # TODO
+              # switch to gem
+              template_json = self.add_annotations(File.read(filename ) )
 
-              templateJson = self.addAnnotations( File.read( filename ) )
-
-              json = self.normalizeTemplate( {
-                :template          => templateJson,
-                :grafanaHostname   => @grafanaHostname,
-                :storageIdentifier => @storageIdentifier,
-                :shortHostname     => @shortHostname
+              json = self.normalize_template({
+                :template          => template_json,
+                :grafana_hostname   => @grafana_hostname,
+                :storage_identifier => @storage_identifier,
+                :short_hostname     => @short_hostname
               } )
 
-              response = self.postRequest( '/api/dashboards/db' , json )
+              json = JSON.parse( json ) if( json.is_a?(String) )
+              title = json.dig('dashboard','title')
+              logger.debug( title )
 
-              if( response == false )
+              response = create_dashboard( title: title, dashboard: json )
+
+              if( response.dig('status').to_i != 200 )
                 logger.error( 'template can\'t be add' )
                 logger.debug( "#{response}" )
               end
@@ -543,18 +533,17 @@ class CMGrafana
       #    or, in combination
       #    searchDashboards( { :tags => [ 'dev' ], :starred => true, :query => 'Dashboard for Tomcats' } )
       # @return [Hash, #read]
-      def listDashboards( params = {} )
+      def list_dashboards(params = {} )
 
-        logger.debug("listDashboards( #{params} )")
+        logger.debug("list_dashboards( #{params} )")
 
         tags            = params.dig(:tags)
 
+        # ensure, that we are logged in
+        login( { :user => @user, :password => @password, :max_retries => 10 } )
+
         data = self.search_dashboards( { :tags => tags } )
-
-#         logger.debug( data )
-
-        status = data.dig('status')
-        data   = data.dig('message')
+        data = data.dig('message') unless( data.nil? )
 
         if( data == nil || data == false )
 
@@ -564,13 +553,6 @@ class CMGrafana
           }
         end
 
-        # [
-        #   {"id"=>39, "title"=>"blueprint-box - Cache Classes (CM)", "uri"=>"db/blueprint-box-cache-classes-cm", "type"=>"dash-db", "tags"=>["blueprint-box"], "isStarred"=>false},
-        #   {"id"=>40, "title"=>"blueprint-box - Cache Classes (Livecontext)", "uri"=>"db/blueprint-box-cache-classes-livecontext", "type"=>"dash-db", "tags"=>["blueprint-box"], "isStarred"=>false},
-        # ...
-        # ]
-#         logger.debug( data )
-
         if( data.count == 0 )
 
           return {
@@ -579,20 +561,17 @@ class CMGrafana
           }
         end
 
-        # get all elements from tyoe 'uri'
+        # get all elements from type 'uri'
         # and remove the path and the tag-name'
-        logger.debug(data)
-        logger.debug(data.class.to_s)
-
         data = data.collect { |item| item['uri'] }
 
-        # db/blueprint-box-cache-classes-cm => cache-classes-cm
+        # db/blueprint-box-cache-classes-cm => blueprint-box-cache-classes-cm
         data.each do |d|
           # d.gsub!( sprintf( 'db/%s-', tags ), '' )
           d.gsub!( 'db/', '' )
         end
 
-        return {
+        {
           :status     => 200,
           :count      => data.count,
           :dashboards => data
@@ -600,13 +579,13 @@ class CMGrafana
       end
 
 
-      def deleteDashboards( params = {} )
+      def delete_dashboards(params = {} )
 
         host = params.dig(:host)
         fqdn = params.dig(:fqdn)
         tags = params.dig(:tags) || []
 
-        if( host == nil )
+        if( host.nil? )
 
           logger.error( 'missing hostname to delete Dashboards' )
 
@@ -618,15 +597,15 @@ class CMGrafana
 
         ip, short, fqdn = self.prepare( host )
 
-        logger.info( sprintf( 'remove dashboards for host %s (%s)', host, @grafanaHostname ) )
+#         logger.info( sprintf( 'remove dashboards for host %s (%s)', host, @grafana_hostname ) )
 
-        dashboards = self.listDashboards( { :tags => short } )
+        dashboards = self.list_dashboards({:tags => short } )
 
         status = dashboards.dig(:status)
 
         if( status.to_i == 204 )
 
-          return {
+          {
             :status     => 204,
             :name       => host,
             :message    => 'no Dashboards found'
@@ -634,11 +613,9 @@ class CMGrafana
 
         elsif( status.to_i == 200 )
 
-#           logger.debug( dashboards )
           dashboards = dashboards.dig(:dashboards)
-#           logger.debug( dashboards )
 
-          if( dashboards == nil )
+          if( dashboards.nil? )
 
             return {
               :status      => 500,
@@ -647,7 +624,7 @@ class CMGrafana
 
           end
 
-          count      = dashboards.count()
+          count      = dashboards.count
 
           if( count.to_i == 0 )
 
@@ -658,14 +635,13 @@ class CMGrafana
             }
           else
 
-            logger.debug( sprintf( 'found %d dashboards for delete', count ) )
+            logger.info( sprintf( 'remove %d dashboards for host %s (%s)', count, host, @grafana_hostname ) )
+#             logger.debug( sprintf( 'found %d dashboards for delete', count ) )
 
             # ensure, that we are logged in
             login( { :user => @user, :password => @password, :max_retries => 10 } )
 
             dashboards.each do |d|
-
-              logger.debug( format( ' -> %s', d ) )
 
               # TODO
               #if( (i.include?"group") && ( !host.include?"group") )
@@ -673,17 +649,14 @@ class CMGrafana
               #  next
               #end
 
-              # add 'db' and hostname to the request
-              #
-
-#               request = sprintf( '/api/dashboards/db/%s-%s', host, d )
-#              request = sprintf( '/api/dashboards/%s', d )
-
-#               dashboard_name = format('%s-%s', @grafanaHostname, d)
-
               logger.debug( sprintf( '  - %s :: %s', host, d ) )
 
               response = delete_dashboard( d )
+
+              status = response.dig('status')
+
+              count -= 1 if( status == 200 )
+
             end
 
             logger.info( sprintf( '%d dashboards deleted', count ) )
@@ -704,19 +677,19 @@ class CMGrafana
 
     module Templates
 
-      def templateForService( serviceName )
+      def template_for_service( service_name )
 
         # TODO
         # look for '%s/%s.json'  and  '%s/services/%s.json'
         # first match wins
 
         template      = nil
-        templateArray = Array.new()
+        template_array = Array.new
 
-        templateArray << sprintf( '%s/%s.json', @template_directory, serviceName )
-        templateArray << sprintf( '%s/services/%s.json', @template_directory, serviceName )
+        template_array << sprintf( '%s/%s.json', @template_directory, service_name )
+        template_array << sprintf( '%s/services/%s.json', @template_directory, service_name )
 
-        templateArray.each do |tpl|
+        template_array.each do |tpl|
 
           if( File.exist?( tpl ) )
 
@@ -728,33 +701,33 @@ class CMGrafana
 
         if( template == nil )
 
-          logger.error( sprintf( 'no template for service %s found', serviceName ) )
+          logger.error( sprintf( 'no template for service %s found', service_name ) )
         end
 
-        return template
+        template
 
       end
 
 
-      def createServiceTemplate( params = {} )
+      def create_service_template( params = {} )
 
         description             = params.dig(:description)
-        serviceName             = params.dig(:serviceName)
-        normalizedName          = params.dig(:normalizedName)
-        serviceTemplate         = params.dig(:serviceTemplate)
-        additionalTemplatePaths = params.dig(:additionalTemplatePaths) || []
-        mlsIdentifier           = @storageIdentifier
+        service_name             = params.dig(:service_name)
+        normalized_name          = params.dig(:normalized_name)
+        service_template         = params.dig(:service_template)
+        additional_template_paths = params.dig(:additional_template_paths) || []
+        mls_identifier           = @storage_identifier
 
-        logger.info( sprintf( 'Creating dashboard for \'%s\'', serviceName ) )
+        logger.info( sprintf( 'Creating dashboard for \'%s\'', service_name ) )
 
-        if( serviceName == 'replication-live-server' )
+        if( service_name == 'replication-live-server' )
 
           logger.info( '  search Master Live Server IOR for the Replication Live Server' )
 
           # 'Server'
-          ip, short, fqdn = self.nsLookup( @shortHostname )
+          ip, short, fqdn = self.nsLookup( @short_hostname )
 
-          bean = @mbean.bean( fqdn, serviceName, 'Replicator' )
+          bean = @mbean.bean( fqdn, service_name, 'Replicator' )
 
           if( bean != nil && bean != false )
 
@@ -771,19 +744,19 @@ class CMGrafana
 
                 dns = @database.dnsData( { :ip => ip, :short => short, :fqdn => fqdn } )
 
-                realIP    = dns.dig('ip')
-                realShort = dns.dig('name')
-                realFqdn  = dns.dig('fqdn')
+                real_ip    = dns.dig('ip')
+                real_short = dns.dig('name')
+                real_fqdn  = dns.dig('fqdn')
 
-                if( @shortHostname != realShort )
+                if( @short_hostname != real_short )
 
-                  identifier  = @database.config( { :ip => realIP, :short => realShort, :fqdn => realFqdn, :key => 'graphite_identifier' } )
+                  identifier  = @database.config( { :ip => real_ip, :short => real_short, :fqdn => real_fqdn, :key => 'graphite_identifier' } )
 
                   if( identifier.dig( 'graphite_identifier' ) != nil )
 
-                    mlsIdentifier = identifier.dig( 'graphite_identifier' ).to_s
+                    mls_identifier = identifier.dig( 'graphite_identifier' ).to_s
 
-                    logger.info( "  use custom storage identifier from config: '#{mlsIdentifier}'" )
+                    logger.info( "  use custom storage identifier from config: '#{mls_identifier}'" )
                   end
                 else
                   logger.info( '  the Master Live Server runs on the same host as the Replication Live Server' )
@@ -793,54 +766,59 @@ class CMGrafana
           end
         end
 
-        templateFile = File.read( serviceTemplate )
-        templateJson = JSON.parse( templateFile )
+        template_file = File.read( service_template )
+        template_json = JSON.parse( template_file )
 
-        rows         = templateJson.dig( 'dashboard', 'rows' )
+        rows         = template_json.dig( 'dashboard', 'rows' )
 
         if( rows != nil )
 
-          additionalTemplatePaths.each do |additionalTemplate|
+          additional_template_paths.each do |additionalTemplate|
 
-            additionalTemplateFile = File.read( additionalTemplate )
-            additionalTemplateJson = JSON.parse( additionalTemplateFile )
+            additional_template_file = File.read( additionalTemplate )
+            additional_template_json = JSON.parse( additional_template_file )
 
-            if( additionalTemplateJson['dashboard']['rows'] )
-              templateJson['dashboard']['rows'] = additionalTemplateJson['dashboard']['rows'].concat(rows)
+            if( additional_template_json['dashboard']['rows'] )
+              template_json['dashboard']['rows'] = additional_template_json['dashboard']['rows'].concat(rows)
             end
           end
         end
 
-        templateJson = self.addAnnotations( templateJson )
+        # TODO
+        # switch to gem
+        template_json = self.add_annotations(template_json )
 
-        json = self.normalizeTemplate( {
-          :template          => templateJson,
-          :serviceName       => serviceName,
+        json = self.normalize_template({
+          :template          => template_json,
+          :service_name       => service_name,
           :description       => description,
-          :normalizedName    => normalizedName,
-          :grafanaHostname   => @grafanaHostname,
-          :storageIdentifier => @storageIdentifier,
-          :shortHostname     => @shortHostname,
-          :mlsIdentifier     => mlsIdentifier
+          :normalized_name    => normalized_name,
+          :grafana_hostname   => @grafana_hostname,
+          :storage_identifier => @storage_identifier,
+          :short_hostname     => @short_hostname,
+          :mls_identifier     => mls_identifier
         } )
 
-        response = self.postRequest( '/api/dashboards/db' , json )
+        json = JSON.parse( json ) if( json.is_a?(String) )
+        title = json.dig('dashboard','title')
+        response = create_dashboard( title: title, dashboard: json )
 
-        if( response == false )
+        if( response.dig('status').to_i != 200 )
           logger.error( 'template can\'t be add' )
           logger.debug( "#{response}" )
         end
+
       end
 
 
-      def overviewTemplateRows( services = [] )
+      def overview_template_rows(services = [] )
 
-        rows = Array.new()
-        dir  = Array.new()
-        srv  = Array.new()
+        rows = Array.new
+        dir  = Array.new
+        srv  = Array.new
 
         services.each do |s|
-          srv << self.removePostfix( s )
+          srv << self.remove_postfix( s )
         end
 
         regex = /
@@ -852,7 +830,7 @@ class CMGrafana
 
         Dir.chdir( sprintf( '%s/overview', @template_directory )  )
 
-        dirs = Dir.glob( "**.tpl" ).sort
+        dirs = Dir.glob( '**.tpl' ).sort
 
 #        dirs.sort!
 
@@ -870,7 +848,7 @@ class CMGrafana
 
         intersect.each do |service|
 
-#           service  = removePostfix( service )
+#           service  = remove_postfix( service )
           template = Dir.glob( sprintf( '%s/overview/**%s.tpl', @template_directory, service ) ).first
 
           if( File.exist?( template ) )
@@ -884,23 +862,21 @@ class CMGrafana
 #         logger.debug( " services : #{srv}" )
 #         logger.debug( " use      : #{intersect}" )
 
-        return rows
+        rows
 
       end
 
 
-      def normalizeTemplate( params = {} )
-
-#        logger.debug( "normalizeTemplate( #{params} )" )
+      def normalize_template(params = {} )
 
         template          = params.dig(:template)
-        serviceName       = params.dig(:serviceName)
+        service_name       = params.dig(:service_name)
         description       = params.dig(:description)
-        normalizedName    = params.dig(:normalizedName)
-        grafanaHostname   = params.dig(:grafanaHostname)
-        storageIdentifier = params.dig(:storageIdentifier)
-        shortHostname     = params.dig(:shortHostname)
-        mlsIdentifier     = params.dig(:mlsIdentifier)
+        normalized_name    = params.dig(:normalized_name)
+        grafana_hostname   = params.dig(:grafana_hostname)
+        storage_identifier = params.dig(:storage_identifier)
+        short_hostname     = params.dig(:short_hostname)
+        mls_identifier     = params.dig(:mls_identifier)
 
         if( template == nil )
           return false
@@ -910,54 +886,26 @@ class CMGrafana
           template = JSON.generate( template )
         end
 
-#         if( serviceName )
-#           template.gsub!( '%SERVICE%'  , serviceName )
-#         end
-
         # replace Template Vars
         map = {
           '%DESCRIPTION%'            => description,
-          '%SERVICE%'                => normalizedName,
-          '%HOST%'                   => shortHostname,
-          '%SHORTHOST%'              => grafanaHostname,
-          '%STORAGE_IDENTIFIER%'     => storageIdentifier,
-          '%MLS_STORAGE_IDENTIFIER%' => mlsIdentifier,
-          '%TAG%'                    => shortHostname
+          '%SERVICE%'                => normalized_name,
+          '%HOST%'                   => short_hostname,
+          '%SHORTHOST%'              => grafana_hostname,
+          '%STORAGE_IDENTIFIER%'     => storage_identifier,
+          '%MLS_STORAGE_IDENTIFIER%' => mls_identifier,
+          '%TAG%'                    => short_hostname
         }
 
         re = Regexp.new( map.keys.map { |x| Regexp.escape(x) }.join( '|' ) )
 
         template.gsub!( re, map )
-
-        if( @additionalTags.count() > 0 )
-          template = self.expand_tags( { :template => template, :additionalTags => @additionalTags } )
-        end
+        template = self.expand_tags( { :template => template, :additionalTags => @additional_tags } ) if( @additional_tags.count > 0 )
 
         # now we must recreate *all* panel IDs for an propper import
         template = JSON.parse( template )
 
-        template = regenerate_template_ids( template )
-
-        # use gem function
-#         rows = template.dig( 'dashboard', 'rows' )
-#
-#         if( rows != nil )
-#
-#           counter   = 1
-#           idCounter = 10
-#
-#           rows.each_with_index do |r, counter|
-#
-#             panel = r.dig('panels')
-#             panel.each do |p|
-#               p['id']   = idCounter
-#               idCounter += 1 # idCounter +=1 ??
-#             end
-#           end
-#         end
-#
-#         return JSON.generate( template )
-
+        regenerate_template_ids( template )
       end
 
     end
@@ -968,7 +916,7 @@ class CMGrafana
       # add standard annotations to all Templates
       #
       #
-      def addAnnotations( templateJson )
+      def add_annotations(template_json )
 
         # add or overwrite annotations
         annotations = '
@@ -1006,67 +954,21 @@ class CMGrafana
           }
         '
 
-        if( templateJson.is_a?( String ) )
-          templateJson = JSON.parse( templateJson )
+        if( template_json.is_a?( String ) )
+          template_json = JSON.parse( template_json )
         end
 
-        annotation = templateJson.dig( 'dashboard', 'annotations' )
+        annotation = template_json.dig( 'dashboard', 'annotations' )
 
         if( annotation != nil )
-          templateJson['dashboard']['annotations'] = JSON.parse( annotations )
+          template_json['dashboard']['annotations'] = JSON.parse( annotations )
         end
 
-        return templateJson
+        template_json
 
       end
 
     end
-
-
-    # use gem function
-#     module Tags
-#
-#       # expand the Template Tags
-#       #
-#       #
-#       #
-#       def addTags( params = {} )
-#
-#         template        = params.dig(:template)
-#         additionalTags  = params.dig(:additionalTags) || []
-#
-#         # add tags
-#         if( template.is_a?( String ) )
-#           template = JSON.parse( template )
-#         end
-#
-#         if( additionalTags.is_a?( Hash ) )
-#
-#           additionalTags = additionalTags.values
-#         end
-#
-#         currentTags = template.dig( 'dashboard', 'tags' )
-#
-#         if( currentTags != nil && additionalTags.count() > 0 )
-#
-#           currentTags << additionalTags
-#
-#           currentTags.flatten!
-#           currentTags.sort!
-#
-#           template['dashboard']['tags'] = currentTags
-#         end
-#
-#         if( template.is_a?( Hash ) )
-#           template = JSON.generate( template )
-#         end
-#
-#         return template
-#
-#       end
-#
-#     end
-
 
   end
 end

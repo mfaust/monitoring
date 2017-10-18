@@ -76,7 +76,6 @@ Signal.trap('QUIT') { stop = true }
 
 g = CMGrafana.new( config )
 
-
 scheduler = Rufus::Scheduler.new
 
 scheduler.every( interval, :first_in => delay ) do
