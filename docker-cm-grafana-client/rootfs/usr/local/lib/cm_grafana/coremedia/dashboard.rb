@@ -86,7 +86,10 @@ class CMGrafana
 
             discovery = @database.discoveryData({:ip => ip, :short => short, :fqdn => fqdn})
 
-            if (discovery.nil?)
+            logger.debug(discovery)
+            logger.debug(discovery.class.to_s)
+
+            if( discovery.nil? )
               logger.debug(sprintf('wait for discovery data for node \'%s\' ... %d', fqdn, y))
               sleep(4)
             else
@@ -216,7 +219,10 @@ class CMGrafana
         if( tmp_services.include?( 'content-management-server' ) ||
             tmp_services.include?( 'master-live-server' ) ||
             tmp_services.include?( 'replication-live-server' ) )
-          self.create_license_template({:host => host, :services => services } )
+
+          # TODO
+          # check ASAP if FQDN needed!
+          self.create_license_template( host: fqdn, services: services )
         end
 
         dashboards = self.list_dashboards({:host => short } ) #@grafana_hostname } )
@@ -352,7 +358,14 @@ class CMGrafana
 
         intersect.each do |service|
 
-          if(@mbean.beanAvailable?(host, service, 'Server', 'LicenseValidUntilHard'))
+          logger.debug( format( 'Search License Information for Service %s', service ) )
+
+          bean_available = @mbean.beanAvailable?(host, service, 'Server', 'LicenseValidUntilHard')
+
+#           logger.debug( "#{bean_available}" )
+#           logger.debug('---------')
+
+          if( bean_available )
 
             logger.info( sprintf( '  - found License Information for Service %s', service ) )
 
@@ -372,7 +385,14 @@ class CMGrafana
 
         intersect.each do |service|
 
-          if(@mbean.beanAvailable?(host, service, 'Server', 'ServiceInfos'))
+          logger.debug( format( 'Search Service Information for Service %s', service ) )
+
+          bean_available = @mbean.beanAvailable?(host, service, 'Server', 'ServiceInfos')
+
+#           logger.debug( "#{bean_available}" )
+#           logger.debug('---------')
+
+          if( bean_available )
 
             logger.info( sprintf( '  - found Service Information for Service %s', service ) )
 
@@ -635,6 +655,8 @@ class CMGrafana
             }
           else
 
+            delete_count = 0
+
             logger.info( sprintf( 'remove %d dashboards for host %s (%s)', count, host, @grafana_hostname ) )
 #             logger.debug( sprintf( 'found %d dashboards for delete', count ) )
 
@@ -653,18 +675,20 @@ class CMGrafana
 
               response = delete_dashboard( d )
 
+              logger.debug( response )
+
               status = response.dig('status')
 
-              count -= 1 if( status == 200 )
+              delete_count += 1 if( status == 200 )
 
             end
 
-            logger.info( sprintf( '%d dashboards deleted', count ) )
+            logger.info( sprintf( '%d dashboards deleted', delete_count ) )
 
             return {
               :status      => 200,
               :name        => host,
-              :message     => sprintf( '%d dashboards deleted', count )
+              :message     => sprintf( '%d dashboards deleted', delete_count )
             }
 
           end
