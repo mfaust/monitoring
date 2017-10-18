@@ -5,16 +5,14 @@ MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
   VERSION="1710" \
-  BUILD_DATE="2017-10-15" \
+  BUILD_DATE="2017-10-18" \
   ALPINE_MIRROR="mirror1.hs-esslingen.de/pub/Mirrors" \
   ALPINE_VERSION="v3.6" \
   TERM=xterm \
-  GRAFANA_GEM_VERSION="0.5" \
+  GRAFANA_GEM_VERSION="0.6" \
   APK_ADD="build-base bind-tools drill imagemagick-dev mariadb-client mariadb-dev ruby-dev ruby-irb" \
   APK_DEL="build-base imagemagick-dev ruby-dev" \
   GEMS="io-console bundler"
-
-#  beaneater bigdecimal ipaddress json mysql2 redis resolve-hostname rest-client rufus-scheduler tzinfo-data"
 
 # ---------------------------------------------------------------------------------------
 
@@ -27,28 +25,19 @@ RUN \
   echo "http://${ALPINE_MIRROR}/alpine/${ALPINE_VERSION}/community" >> /etc/apk/repositories && \
   apk --quiet --no-cache update && \
   apk --quiet --no-cache upgrade && \
-  apk --quiet --no-cache add ${APK_ADD}
-
-RUN \
+  apk --quiet --no-cache add ${APK_ADD} && \
   #
-  gem install --quiet --no-rdoc --no-ri ${GEMS}
-
-RUN \
+  gem install --quiet --no-rdoc --no-ri ${GEMS} && \
   #
   count=$(ls -1 /build/*.gem 2> /dev/null | tail -n1) && \
   if [ ! -z ${count} ] ; then \
     gem install --no-rdoc --no-ri ${count} ; \
   else \
     echo "gem 'grafana', '~> ${GRAFANA_GEM_VERSION}'" >> /build/Gemfile ; \
-  fi
+  fi && \
   #
-
-RUN \
-   #
   cd /build && \
-  bundle install
-
-RUN \
+  bundle install && \
   #
   for apk in ${APK_DEL} ; \
   do \

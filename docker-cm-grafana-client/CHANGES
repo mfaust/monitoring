@@ -61,4 +61,4 @@ admin_user:
   email: moebius-team@coremedia.com
 ```
 
-configuartion takes place at the start of the grafana client.
+configuration takes place at the start of the grafana client.
