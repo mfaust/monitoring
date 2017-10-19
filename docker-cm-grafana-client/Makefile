@@ -4,6 +4,8 @@ IMAGE_NAME := docker-${TYPE}
 build:
 	docker build \
 		--rm \
+		--no-cache \
+		--force-rm \
 		--tag=$(IMAGE_NAME) .
 	@echo Image tag: ${IMAGE_NAME}
 
