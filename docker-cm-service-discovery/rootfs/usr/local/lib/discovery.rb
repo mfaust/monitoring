@@ -273,21 +273,24 @@ module ServiceDiscovery
       params = { :ip => ip, :short => short, :fqdn => fqdn, :status => [ Storage::MySQL::DELETE ] }
       nodes = @database.nodes( params )
 
-      logger.debug( nodes )
+      logger.debug( "nodes: #{nodes}" )
+      logger.debug( "nodes: #{nodes.class.to_s}" )
 
       if( nodes.is_a?( Array ) && nodes.count != 0 )
 
         result  = @database.removeDNS( { :ip => ip, :short => short, :fqdn => fqdn } )
 
-        if( result != nil )
-          status  = 200
-          message = 'Host successful removed'
+        unless( result.nil? )
+          return {
+            :status  => 200,
+            :message => 'Host successful removed'
+          }
         end
 
       else
 
         status  = 200
-        message = 'no deleted hosts found'
+        message = 'no hosts in database found'
       end
 
       return {
@@ -320,6 +323,9 @@ module ServiceDiscovery
       # if the destination host available (simple check with ping)
       #
       if( Utils::Network.isRunning?( fqdn ) == false )
+
+        # delete dns entry
+        result  = @database.removeDNS( { :ip => ip, :short => short, :fqdn => fqdn } )
 
         return {
           :status  => 503, # 503 Service Unavailable

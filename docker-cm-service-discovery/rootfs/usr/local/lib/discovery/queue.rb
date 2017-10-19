@@ -109,7 +109,7 @@ module ServiceDiscovery
           :message => message
         }
 
-#         logger.debug( result )
+        logger.debug( result )
 
         @jobs.del( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
 
@@ -145,6 +145,8 @@ module ServiceDiscovery
           self.sendMessage( { :cmd => command, :node => node, :queue => 'mq-collector', :payload => { :host => node, :pre => 'prepare' }, :ttr => 1, :delay => 0 } )
 
           result = self.deleteHost( node )
+
+          logger.debug( result )
 
         rescue => e
 
