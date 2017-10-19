@@ -14,8 +14,7 @@ require 'yaml'
 # require 'fileutils'
 require 'resolve/hostname'
 
-require_relative 'monitoring'
-require_relative '../lib/logging'
+require_relative '../lib/monitoring'
 
 module Sinatra
 
@@ -83,7 +82,7 @@ module Sinatra
       }
     }
 
-    m = Monitoring.new( config )
+    m = Monitoring::Client.new( config )
 
     # -----------------------------------------------------------------------------
 
@@ -255,7 +254,7 @@ module Sinatra
     post '/v2/annotation/:host' do
 
       host   = params[:host]
-      result = m.addAnnotation( host, @request_paylod )
+      result = m.annotation( host, @request_paylod )
 
 #       status = result[:status]
 
