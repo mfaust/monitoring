@@ -23,7 +23,7 @@ datasources:
   graphite:
   - name: graphite
     host: graphite
-    port: 2003
+    port: 8080
     database: carbon
     default: true
     data:
@@ -31,7 +31,7 @@ datasources:
 
   - name: events
     host: graphite
-    port: 2003
+    port: 8080
     database: carbon
     data:
       graphiteVersion: '1.1'

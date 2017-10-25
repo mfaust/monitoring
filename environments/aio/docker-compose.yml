@@ -105,11 +105,12 @@ services:
 
   nginx:
     restart: always
-    image: bodsch/docker-nginx:1710.1
+    image: bodsch/docker-nginx:1710.2
     container_name: nginx
     hostname: nginx
     ports:
       - 80:80
+      - 443:443
     depends_on:
       - data
       - grafana
@@ -124,6 +125,8 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /share/www/entry-page:/var/www/entry-page
+      - ./secure:/etc/nginx/secure/
+      - /share/etc/nginx/external/https.conf:/etc/nginx/external/https.conf
       - /share/etc/nginx/sites-enabled/01-default.conf:/etc/nginx/sites-enabled/01-default.conf
       - /share/etc/nginx/nginx.conf:/etc/nginx/nginx.conf
       - /share/etc/nginx/modules.d/00-restrictions.conf:/etc/nginx/modules.d/00-restrictions.conf
@@ -174,7 +177,7 @@ services:
 
   grafana:
     restart: always
-    image: bodsch/docker-grafana:4.6.0-beta1
+    image: bodsch/docker-grafana:4.6.0-beta3
     container_name: grafana
     hostname: grafana
     extends:
