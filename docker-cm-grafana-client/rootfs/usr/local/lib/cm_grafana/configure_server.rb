@@ -346,6 +346,25 @@ class CMGrafana < Grafana::Client
               logger.info( format( 'datasource %s :: %s exists', type, name ) )
               # logger.debug( 'check updates ...' )
 
+              config = {
+                'name' => name,
+                'database' => database,
+                'type' => type,
+                'access' => 'proxy',
+                'url' => format('http://%s:%d', host, port),
+                'jsonData' => data.deep_symbolize_keys,
+                'default' => default
+              }
+
+              config['basic_auth_user'] = ba_user unless(ba_user.nil?)
+              config['basic_auth_password'] = ba_password unless(ba_password.nil?)
+
+              config = config.deep_symbolize_keys
+
+              result = update_datasource( datasource: name, data: config )
+
+              logger.debug( result )
+
             end
 
           end

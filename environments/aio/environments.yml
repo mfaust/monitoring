@@ -33,6 +33,16 @@ services:
       # (see above in this configuration part!)
       CARBON_HOST: carbon
       MEMCACHE_HOST: memcached
+      LDAP: '{
+        "server": "${LDAP_SERVER}",
+        "port": "${LDAP_PORT}",
+        "bind_dn": "${LDAP_BIND_DN}",
+        "bind_password": "${LDAP_BIND_PASSWORD}",
+        "base_dn": "${LDAP_BASE_DN}",
+        "group_dn": "${LDAP_GROUP_DN}",
+        "search_filter": "${LDAP_SEARCH_FILTER}"
+      }'
+
       # GRAFANA_USERS: 'coremedia:coremedia::admin'
       # ADMIN_PASSWORD: grafana_admin
 #      USERS: '[
@@ -82,6 +92,18 @@ services:
       ICINGA2_CMD_API_USER: icingaweb
       ICINGA2_CMD_API_PASS: icingaweb
       ICINGAWEB2_USERS: coremedia:coremedia,icinga:icinga
+      LDAP: '{
+        "active_directory": "true",
+        "server": "${LDAP_SERVER}",
+        "port": "${LDAP_PORT}",
+        "bind_dn": "${LDAP_BIND_DN}",
+        "bind_password": "${LDAP_BIND_PASSWORD}",
+        "base_dn": "${LDAP_BASE_DN}",
+        "filter": "${LDAP_FILTER}",
+        "role": {
+          "groups": "${LDAP_GROUP_NAMES}",
+          "permissions": "${GROUP_PERMISSIONS}"
+        }'
 
   cm-dashing:
     environment:
