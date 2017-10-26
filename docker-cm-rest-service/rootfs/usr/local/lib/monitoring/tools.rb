@@ -54,7 +54,7 @@ module Monitoring
   #
   #       status = @database.createDNS( { :ip => ip, :short => short, :fqdn => fqdn } )
   #
-  #       @cache.set( hostname , expiresIn: expire ) { Cache::Data.new( { 'ip': ip, 'short': short, 'long': fqdn } ) }
+  #       @cache.set( hostname , expires_in: expire ) { Cache::Data.new( { 'ip': ip, 'short': short, 'long': fqdn } ) }
   #     end
 
   #     logger.debug( sprintf( '  ip   %s ', ip ) )
