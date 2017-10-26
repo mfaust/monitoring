@@ -13,27 +13,27 @@ require_relative '../lib/graphite'
 
 # -----------------------------------------------------------------------------
 
-graphiteHost      = ENV.fetch('GRAPHITE_HOST'          , 'localhost' )
-graphitePort      = ENV.fetch('GRAPHITE_PORT'          , 2003 )
-graphiteHttpPort  = ENV.fetch('GRAPHITE_HTTP_PORT'     , 8081 )
-graphitePath      = ENV.fetch('GRAPHITE_PATH'          , nil )
-mqHost            = ENV.fetch('MQ_HOST'                , 'beanstalkd' )
-mqPort            = ENV.fetch('MQ_PORT'                , 11300 )
-mqQueue           = ENV.fetch('MQ_QUEUE'               , 'mq-graphite' )
-interval          = ENV.fetch('INTERVAL'               , 30 )
-delay             = ENV.fetch('RUN_DELAY'              , 1 )
+graphite_host      = ENV.fetch('GRAPHITE_HOST', nil )
+graphite_port      = ENV.fetch('GRAPHITE_PORT', nil )
+graphite_http_port = ENV.fetch('GRAPHITE_HTTP_PORT', nil )
+graphite_path      = ENV.fetch('GRAPHITE_PATH', nil )
+mq_host            = ENV.fetch('MQ_HOST', nil )
+mq_port            = ENV.fetch('MQ_PORT', nil )
+mq_queue           = ENV.fetch('MQ_QUEUE', nil )
+interval           = ENV.fetch('INTERVAL', 30 )
+delay              = ENV.fetch('RUN_DELAY', 10 )
 
 config = {
   :graphite => {
-    :host      => graphiteHost,
-    :port      => graphitePort,
-    :http_port => graphiteHttpPort,
-    :path      => graphitePath
+    :host      => graphite_host,
+    :port      => graphite_port,
+    :http_port => graphite_http_port,
+    :path      => graphite_path
   },
   :mq       => {
-    :host  => mqHost,
-    :port  => mqPort,
-    :queue => mqQueue
+    :host  => mq_host,
+    :port  => mq_port,
+    :queue => mq_queue
   }
 }
 
@@ -55,14 +55,14 @@ scheduler = Rufus::Scheduler.new
 
 scheduler.every( interval, :first_in => delay ) do
 
-  g.queue()
+  g.queue
 
 end
 
 
 scheduler.every( 5 ) do
 
-  if( stop == true )
+  if stop
 
     p 'shutdown scheduler ...'
 

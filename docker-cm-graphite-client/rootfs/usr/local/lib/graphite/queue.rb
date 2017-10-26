@@ -7,13 +7,13 @@ module Graphite
     #
     #
     #
-    def queue()
+    def queue
 
-      data = @mqConsumer.getJobFromTube( @mqQueue )
+      data = @mq_consumer.getJobFromTube(@mq_queue )
 
-      if( data.count() != 0 )
+      if( data.count != 0 )
 
-        stats = @mqConsumer.tubeStatistics( @mqQueue )
+        stats = @mq_consumer.tubeStatistics(@mq_queue )
         logger.debug( {
           :total   => stats.dig(:total),
           :ready   => stats.dig(:ready),
@@ -24,29 +24,29 @@ module Graphite
         if( stats.dig(:ready).to_i > 10 )
           logger.warn( 'more then 10 jobs in queue ... just wait' )
 
-          @mqConsumer.cleanQueue( @mqQueue )
+          @mq_consumer.cleanQueue(@mq_queue )
           return
         end
 
-        jobId  = data.dig( :id )
+        job_id  = data.dig(:id )
 
-        result = self.processQueue( data )
+        result = self.process_queue(data )
 
         status = result.dig(:status).to_i
 
         if( status == 200 || status == 409 || status == 500 || status == 503 )
 
-          @mqConsumer.deleteJob( @mqQueue, jobId )
+          @mq_consumer.deleteJob(@mq_queue, job_id )
         else
 
-          @mqConsumer.buryJob( @mqQueue, jobId )
+          @mq_consumer.buryJob(@mq_queue, job_id )
         end
       end
 
     end
 
 
-    def processQueue( data = {} )
+    def process_queue(data = {} )
 
       logger.info( sprintf( 'process Message ID %d from Queue \'%s\'', data.dig(:id), data.dig(:tube) ) )
 
@@ -95,35 +95,32 @@ module Graphite
 
       timestamp  = payload.dig('timestamp')
       config     = payload.dig('config')
-#      fqdn       = payload.dig('fqdn') || node
       dns        = payload.dig('dns')
 
-      if !dns.nil?
-        ip    = dns.dig('ip')
-        short = dns.dig('short')
-        fqdn  = dns.dig('fqdn')
+      if( dns.nil? )
+        _ip, _short, fqdn = self.nsLookup( node )
       else
-        ip, short, fqdn = self.nsLookup( node )
+        fqdn  = dns.dig('fqdn')
       end
 
       @identifier = fqdn
 
-      if !timestamp.nil?
+      unless timestamp.nil?
 
-        if( timestamp.is_a?( Time ) )
+        if (timestamp.is_a?(Time))
 
-          @timestamp = Time.parse( timestamp )
+          @timestamp = Time.parse(timestamp)
 
-          logger.debug( @timestamp )
+          logger.debug(@timestamp)
         end
 
         @timestamp = timestamp.to_i
       end
 
-      if !config.nil?
+      unless config.nil?
 
-        if( config.is_a?(String) && config.to_s != '' )
-          config  = JSON.parse( config )
+        if (config.is_a?(String) && config.to_s != '')
+          config = JSON.parse(config)
         end
 
         @identifier = config.dig('graphite_identifier')
@@ -135,7 +132,7 @@ module Graphite
       case command
       when 'create', 'remove'
 
-        result = self.nodeAnnotation( fqdn, command )
+        result = self.node_annotation(fqdn, command )
 
         logger.info( result )
 
@@ -156,7 +153,7 @@ module Graphite
           }
         end
 
-        result = self.loadtestAnnotation( fqdn, argument )
+        result = self.loadtest_annotation(fqdn, argument )
 
         logger.info( result )
 
@@ -169,7 +166,7 @@ module Graphite
         message = payload.dig( 'message' )
         tags    = payload.dig( 'tags' ) || []
 
-        result = self.deploymentAnnotation( fqdn, message, tags )
+        result = self.deployment_annotation(fqdn, message, tags )
 
         logger.info( result )
 
@@ -183,7 +180,7 @@ module Graphite
         message     = payload.dig( 'message' )
         tags        = payload.dig( 'tags' ) || []
 
-        result = self.generalAnnotation( fqdn, description, message, tags )
+        result = self.general_annotation(fqdn, description, message, tags )
 
         logger.info( result )
 
@@ -204,7 +201,7 @@ module Graphite
     end
 
 
-    def sendMessage( data = {} )
+    def send_message(data = {} )
 
       logger.debug( JSON.pretty_generate( data ) )
 
@@ -214,7 +211,7 @@ module Graphite
         payload: data
       }.to_json
 
-      result = @mqProducer.addJob( queue, job, 1, ttr, delay )
+      result = @mq_producer.addJob(queue, job, 1, ttr, delay )
 
       logger.debug( job )
       logger.debug( result )
