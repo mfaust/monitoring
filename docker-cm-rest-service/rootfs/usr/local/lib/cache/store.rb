@@ -68,7 +68,7 @@ module Cache
       @data[key.to_s] = if data.is_a?( Cache::Data )
                           data
                         else
-                          Cache::Data.new( data, expiresIn: expiresIn )
+                          Cache::Data.new(data, expires_in: expiresIn )
                         end
       get( key )
     end
@@ -115,7 +115,7 @@ module Cache
     # Returns the value.
     def get_or_set( key, value = nil, expiresIn: nil )
       return get( key ) if set?( key )
-      set( key, block_given? ? yield : value, expiresIn: expiresIn )
+      set(key, block_given? ? yield : value, expires_in: expiresIn )
     end
 
     # Public: Removes the key-value pair from the cache

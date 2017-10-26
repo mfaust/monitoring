@@ -20,7 +20,7 @@ module Monitoring
 
       if( host != nil )
 
-        ip, short, fqdn = self.nsLookup( host )
+        ip, short, fqdn = self.ns_lookup(host )
 
         if( ip == nil && short == nil && fqdn == nil )
 
@@ -43,7 +43,7 @@ module Monitoring
 
           if( ip == nil && short == nil && fqdn == nil )
 
-            ip, short, fqdn = self.nsLookup( n )
+            ip, short, fqdn = self.ns_lookup(n )
 
             if( ip == nil && short == nil && fqdn == nil )
 
@@ -121,7 +121,7 @@ module Monitoring
 
               for y in 1..4
 
-                r      = @mqConsumer.getJobFromTube('mq-grafana-info')
+                r      = @mq_consumer.getJobFromTube('mq-grafana-info')
 
 #                 logger.debug( r.dig( :body, 'payload' ) )
 
@@ -137,7 +137,7 @@ module Monitoring
 
               for y in 1..4
 
-                r      = @mqConsumer.getJobFromTube('mq-icinga-info')
+                r      = @mq_consumer.getJobFromTube('mq-icinga-info')
 
 #                 logger.debug( r.dig( :body, 'payload' ) )
 

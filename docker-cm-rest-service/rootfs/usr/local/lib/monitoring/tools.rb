@@ -2,7 +2,7 @@ module Monitoring
 
   module Tools
 
-    def nsLookup( name, expire = 120 )
+    def ns_lookup(name, expire = 120 )
 
       # DNS
       #
@@ -28,7 +28,7 @@ module Monitoring
         if( ip != nil && short != nil && fqdn != nil )
 
           @redis.set(format('dns::%s',fqdn), { 'ip': ip, 'short': short, 'long': fqdn }.to_json, 320 )
-          @cache.set(cache_key , expiresIn: expire ) { Cache::Data.new( { 'ip': ip, 'short': short, 'long': fqdn } ) }
+          @cache.set(cache_key , expires_in: expire ) { Cache::Data.new({'ip' : ip, 'short' : short, 'long' : fqdn } ) }
         else
           logger.error( 'no DNS data found!' )
           logger.error( " => #{dns}" )
@@ -70,7 +70,7 @@ module Monitoring
 
       logger.debug( "nodeExists?( #{host} )" )
 
-      ip, short, fqdn = self.nsLookup( host )
+      ip, short, fqdn = self.ns_lookup(host )
 
       d = self.nodeInformations( { :host => fqdn } )
 
@@ -104,7 +104,7 @@ module Monitoring
     #
     def checkAvailablility?( host )
 
-      ip, short, fqdn = self.nsLookup( host )
+      ip, short, fqdn = self.ns_lookup(host )
 
       if( ip == nil && short == nil && fqdn == nil )
         return false
