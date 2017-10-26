@@ -39,7 +39,7 @@ module Graphite
 
       @graphite_uri        = format('http://%s:%s%s', graphite_host, graphite_http_port, graphite_path )
 
-      @mq_settings = {
+      mq_settings = {
         :beanstalkHost  => mq_host,
         :beanstalkPort  => mq_port,
         :beanstalkQueue => @mq_queue
@@ -58,8 +58,8 @@ module Graphite
       logger.info( '-----------------------------------------------------------------' )
       logger.info( '' )
 
-      @mq_consumer  = MessageQueue::Consumer.new(@mq_settings )
-      @mq_producer  = MessageQueue::Producer.new(@mq_settings )
+      @mq_consumer  = MessageQueue::Consumer.new(mq_settings )
+      @mq_producer  = MessageQueue::Producer.new(mq_settings )
 
       begin
 

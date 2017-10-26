@@ -98,7 +98,7 @@ module Graphite
       dns        = payload.dig('dns')
 
       if( dns.nil? )
-        _ip, _short, fqdn = self.nsLookup( node )
+        _ip, _short, fqdn = self.ns_lookup(node )
       else
         fqdn  = dns.dig('fqdn')
       end
