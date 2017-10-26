@@ -1,0 +1,9 @@
+---
+icingaweb_url: http://localhost/icinga
+
+aws:
+  region: us-east-1
+  sns_account_id:
+  sns_topic:
+
+email:
