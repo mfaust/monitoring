@@ -41,7 +41,7 @@ module Cache
     #         Not used if a block is given.
     # block - A block of code that returns the value to set (optional).
     #         Can be set a Cache::Data in the block.
-    # expiresIn - Time, in seconds, to expire the cache (optional).
+    # expires_in - Time, in seconds, to expire the cache (optional).
     #              If not set, the cache never expires.
     #
     # Examples
@@ -49,7 +49,7 @@ module Cache
     #   cache.set("name", "Derrick")
     #   => "Derrick"
     #
-    #   cache.set("name", "Derrick", expiresIn: 60)
+    #   cache.set("name", "Derrick", expires_in: 60)
     #   => "Derrick"
     #
     #   cache.set("name") { "Joe" }
@@ -95,7 +95,7 @@ module Cache
     #         Not used if a block is given.
     # block - A block of code that returns the value to set (optional).
     #         Can be set a Cache::Data in the block.
-    # expiresIn - Time, in seconds, to expire the cache (optional).
+    # expires_in - Time, in seconds, to expire the cache (optional).
     #              If not set, the cache never expires.
     #
     # Examples
