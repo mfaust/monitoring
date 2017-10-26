@@ -41,7 +41,7 @@ module Cache
     #         Not used if a block is given.
     # block - A block of code that returns the value to set (optional).
     #         Can be set a Cache::Data in the block.
-    # expiresIn - Time, in seconds, to expire the cache (optional).
+    # expires_in - Time, in seconds, to expire the cache (optional).
     #              If not set, the cache never expires.
     #
     # Examples
@@ -49,7 +49,7 @@ module Cache
     #   cache.set("name", "Derrick")
     #   => "Derrick"
     #
-    #   cache.set("name", "Derrick", expiresIn: 60)
+    #   cache.set("name", "Derrick", expires_in: 60)
     #   => "Derrick"
     #
     #   cache.set("name") { "Joe" }
@@ -68,7 +68,7 @@ module Cache
       @data[key.to_s] = if data.is_a?( Cache::Data )
                           data
                         else
-                          Cache::Data.new( data, expiresIn: expiresIn )
+                          Cache::Data.new(data, expires_in: expiresIn )
                         end
       get( key )
     end
@@ -95,7 +95,7 @@ module Cache
     #         Not used if a block is given.
     # block - A block of code that returns the value to set (optional).
     #         Can be set a Cache::Data in the block.
-    # expiresIn - Time, in seconds, to expire the cache (optional).
+    # expires_in - Time, in seconds, to expire the cache (optional).
     #              If not set, the cache never expires.
     #
     # Examples
@@ -115,7 +115,7 @@ module Cache
     # Returns the value.
     def get_or_set( key, value = nil, expiresIn: nil )
       return get( key ) if set?( key )
-      set( key, block_given? ? yield : value, expiresIn: expiresIn )
+      set(key, block_given? ? yield : value, expires_in: expiresIn )
     end
 
     # Public: Removes the key-value pair from the cache

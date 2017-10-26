@@ -329,7 +329,7 @@ module ExternalDiscovery
 
       ip          = params.dig(:ip)
 
-      ip, short, fqdn = nsLookup( ip )
+      ip, short, fqdn = ns_lookup(ip )
 
       logger.info( sprintf( 'remove host %s (%s) from monitoring', fqdn, ip ) )
 
