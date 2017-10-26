@@ -9,11 +9,11 @@ module Cache
 
     def initialize( value, expiresIn: nil )
       @value = value
-      @expiresIn = expiresIn.nil? ? nil : Time.now + expiresIn
+      @expires_in = expiresIn.nil? ? nil : Time.now + expiresIn
     end
 
     def expired?
-      !@expiresIn.nil? && Time.now > @expiresIn
+      !@expires_in.nil? && Time.now > @expires_in
     end
 
     def ==(other)
