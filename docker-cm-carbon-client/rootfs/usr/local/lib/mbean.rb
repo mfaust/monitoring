@@ -53,7 +53,7 @@ module MBean
 
 #      for y in 1..10
 #
-#        result      = @redis.get( cacheKey )
+#        result      = @redis.get( cache_key )
 #
 #        if( result != nil )
 #          data = { service => result }

@@ -213,7 +213,7 @@ module CarbonData
             result     = identifier
           end
 
-          @cache.set( key, expiresIn: 320 ) { Cache::Data.new( result ) }
+          @cache.set(key, expires_in: 320 ) { Cache::Data.new(result ) }
         end
 
       else
