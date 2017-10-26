@@ -85,7 +85,7 @@ class CMIcinga2 < Icinga2::Client
         short = dns.dig('short')
         fqdn  = dns.dig('fqdn')
       else
-        ip, short, fqdn = self.nsLookup( node )
+        ip, short, fqdn = self.ns_lookup(node )
       end
 
       if( @jobs.jobs( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } ) == true )
@@ -98,7 +98,7 @@ class CMIcinga2 < Icinga2::Client
 
       @jobs.add( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
 
-      @cache.set( format( 'dns-%s', node ) , expiresIn: 320 ) { Cache::Data.new( { 'ip': ip, 'short': short, 'long': fqdn } ) }
+      @cache.set(format( 'dns-%s', node ) , expires_in: 320 ) { Cache::Data.new({ ip: ip, short: short, long: fqdn } ) }
 
       # add Node
       #

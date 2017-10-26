@@ -7,13 +7,13 @@ module Cache
     attr_reader :value
     attr_reader :expiresIn
 
-    def initialize( value, expiresIn: nil )
+    def initialize(value, expires_in: nil )
       @value = value
-      @expiresIn = expiresIn.nil? ? nil : Time.now + expiresIn
+      @expires_in = expires_in.nil? ? nil : Time.now + expires_in
     end
 
     def expired?
-      !@expiresIn.nil? && Time.now > @expiresIn
+      !@expires_in.nil? && Time.now > @expires_in
     end
 
     def ==(other)
