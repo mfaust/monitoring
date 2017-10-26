@@ -115,7 +115,7 @@ class CMGrafana < Grafana::Client
       logger.info( sprintf( '  %s node %s', command , node ) )
 
       if( dns.nil? )
-        ip, short, fqdn = self.nsLookup(node)
+        ip, short, fqdn = self.ns_lookup(node)
       else
         ip = dns.dig('ip')
         short = dns.dig('short')
@@ -152,7 +152,7 @@ class CMGrafana < Grafana::Client
 
       @jobs.add( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
 
-      @cache.set( format( 'dns-%s', node ) , expiresIn: 320 ) { Cache::Data.new( { 'ip': ip, 'short': short, 'long': fqdn } ) }
+      @cache.set(format( 'dns-%s', node ) , expires_in: 320 ) { Cache::Data.new({'ip' : ip, 'short' : short, 'long' : fqdn } ) }
 
       # add Node
       #

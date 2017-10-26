@@ -59,7 +59,7 @@ class CMGrafana
     mysql_password       = settings.dig(:mysql, :password)
 
 
-    @mq_settings = {
+    mq_settings = {
       :beanstalkHost  => mq_host,
       :beanstalkPort  => mq_port,
       :beanstalkQueue => @mq_queue
@@ -137,8 +137,8 @@ class CMGrafana
     @mbean        = MBean::Client.new( { :redis => @redis } )
     @cache        = Cache::Store.new()
     @jobs         = JobQueue::Job.new()
-    @mq_consumer  = MessageQueue::Consumer.new( @mq_settings )
-    @mq_producer  = MessageQueue::Producer.new( @mq_settings )
+    @mq_consumer  = MessageQueue::Consumer.new(mq_settings )
+    @mq_producer  = MessageQueue::Producer.new(mq_settings )
     @database     = Storage::MySQL.new( mysql_settings )
 
   end

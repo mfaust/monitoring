@@ -10,7 +10,7 @@ class CMGrafana
 
         # get a DNS record
         #
-        ip, short, fqdn = self.nsLookup( host )
+        ip, short, fqdn = self.ns_lookup(host )
 
         @short_hostname     = short  # (%HOST%)
         @grafana_hostname   = fqdn   # name for the grafana title (%SHORTNAME%)
@@ -150,7 +150,7 @@ class CMGrafana
 #           logger.debug( sprintf( '  description  %s', description ) )
 #           logger.debug( sprintf( '  template     %s', template ) )
 #           logger.debug( sprintf( '  template_name %s', template_name ) )
-#           logger.debug( sprintf( '  cacheKey     %s', cacheKey ) )
+#           logger.debug( sprintf( '  cache_key     %s', cache_key ) )
 
           if( ! %w(mongodb mysql postgres node-exporter http-status).include?(service_name ) )
             additional_template_paths << self.template_for_service( 'tomcat' )
@@ -749,7 +749,7 @@ class CMGrafana
           logger.info( '  search Master Live Server IOR for the Replication Live Server' )
 
           # 'Server'
-          ip, short, fqdn = self.nsLookup( @short_hostname )
+          ip, short, fqdn = self.ns_lookup(@short_hostname )
 
           bean = @mbean.bean( fqdn, service_name, 'Replicator' )
 
@@ -764,7 +764,7 @@ class CMGrafana
 
               if( mls != nil )
 
-                ip, short, fqdn = self.nsLookup( mls )
+                ip, short, fqdn = self.ns_lookup(mls )
 
                 dns = @database.dnsData( { :ip => ip, :short => short, :fqdn => fqdn } )
 
