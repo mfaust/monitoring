@@ -27,7 +27,7 @@ module Cache
     # Returns the value set for the key; if nothing is
     #   set, returns nil.
     def get( key )
-      checkKey!( key )
+      check_key!(key )
       expires!( key )
       @data[key.to_s]&.value
     end
@@ -59,16 +59,16 @@ module Cache
     #   => "Joe"
     #
     # Returns the value given.
-    def set( key, value = nil, expiresIn: nil )
+    def set(key, value = nil, expires_in: nil )
 
-      checkKey!( key )
+      check_key!(key )
 
       data = block_given? ? yield : value
 
       @data[key.to_s] = if data.is_a?( Cache::Data )
                           data
                         else
-                          Cache::Data.new( data, expiresIn: expiresIn )
+                          Cache::Data.new(data, expires_in: expires_in )
                         end
       get( key )
     end
@@ -80,7 +80,7 @@ module Cache
     #
     # Returns a Boolean.
     def set?( key )
-      checkKey!( key )
+      check_key!(key )
       expires!( key )
       @data.keys.include?( key.to_s )
     end
@@ -113,9 +113,9 @@ module Cache
     #   => "Engineer"
     #
     # Returns the value.
-    def get_or_set( key, value = nil, expiresIn: nil )
+    def get_or_set(key, value = nil, expires_in: nil )
       return get( key ) if set?( key )
-      set( key, block_given? ? yield : value, expiresIn: expiresIn )
+      set(key, block_given? ? yield : value, expires_in: expires_in )
     end
 
     # Public: Removes the key-value pair from the cache
@@ -125,7 +125,7 @@ module Cache
     #
     # Returns the value.
     def unset( key )
-      checkKey!( key )
+      check_key!(key )
       @data.delete( key.to_s )
     end
 
@@ -153,7 +153,7 @@ module Cache
     # Returns nothing.
     def load( data )
       data.each do |key, value|
-        checkKey!( key )
+        check_key!(key )
         set( key, value )
       end
     end
@@ -164,7 +164,7 @@ module Cache
     # or a Symbol.
     #
     # key - A key provided by the user.
-    def checkKey!( key )
+    def check_key!(key )
       return if key.is_a?( String ) || key.is_a?( Symbol )
       raise TypeError, 'key must be a String or Symbol'
     end

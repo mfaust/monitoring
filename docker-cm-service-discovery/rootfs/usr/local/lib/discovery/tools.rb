@@ -1,21 +1,17 @@
 
 module ServiceDiscovery
 
+  # noinspection ALL
   module Tools
 
-    def nsLookup( name, expire = 120 )
+    def ns_lookup(name, expire = 120 )
 
       # DNS
       #
       hostname = sprintf( 'dns-%s', name )
-
-      ip       = nil
-      short    = nil
-      fqdn     = nil
-
       dns      = @cache.get( hostname )
 
-      if( dns == nil )
+      if( dns.nil? )
 
         logger.debug( 'create cached DNS data' )
         # create DNS Information
@@ -25,9 +21,9 @@ module ServiceDiscovery
         short = dns.dig(:short)
         fqdn  = dns.dig(:long)
 
-        if( ip != nil && short != nil && fqdn != nil )
+        if( !ip.nil? && !short.nil? && !fqdn.nil? )
 
-          @cache.set( hostname , expiresIn: expire ) { Cache::Data.new( { 'ip': ip, 'short': short, 'long': fqdn } ) }
+          @cache.set(hostname , expires_in: expire ) { Cache::Data.new({'ip' => ip, 'short' => short, 'long' => fqdn } ) }
         else
           logger.error( 'no DNS data found!' )
           logger.error( " => #{dns}" )
