@@ -3,7 +3,7 @@ module DataCollector
 
   module Tools
 
-    def nsLookup( name, expire = 120 )
+    def ns_lookup(name, expire = 120 )
 
       # DNS
       #
@@ -27,7 +27,7 @@ module DataCollector
 
         if( ip != nil && short != nil && fqdn != nil )
 
-          @cache.set( hostname , expiresIn: expire ) { Cache::Data.new( { 'ip': ip, 'short': short, 'long': fqdn } ) }
+          @cache.set(hostname , expires_in: expire ) { Cache::Data.new({'ip' : ip, 'short' : short, 'long' : fqdn } ) }
         else
           logger.error( 'no DNS data found!' )
           logger.error( " => #{dns}" )

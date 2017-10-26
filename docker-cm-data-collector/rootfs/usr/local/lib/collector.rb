@@ -48,7 +48,7 @@ module DataCollector
       jolokiaAuthPass     = settings.dig(:jolokia, :auth, :pass)
       mqHost              = settings.dig(:mq, :host)                || 'localhost'
       mqPort              = settings.dig(:mq, :port)                || 11300
-      @mqQueue            = settings.dig(:mq, :queue)               || 'mq-collector'
+      @mq_queue            = settings.dig(:mq, :queue)               || 'mq-collector'
 
       redisHost           = settings.dig(:redis, :host)
       redisPort           = settings.dig(:redis, :port)  || 6379
@@ -72,7 +72,7 @@ module DataCollector
       logger.info( "    - jolokia      : #{jolokiaHost}:#{jolokiaPort}" )
       logger.info( "    - redis        : #{redisHost}:#{redisPort}" )
       logger.info( "    - mysql        : #{mysqlHost}@#{mysqlSchema}" )
-      logger.info( "    - message queue: #{mqHost}:#{mqPort}/#{@mqQueue}" )
+      logger.info( "    - message queue: #{mqHost}:#{mqPort}/#{@mq_queue}" )
       logger.info( '-----------------------------------------------------------------' )
 
       if( applicationConfig == nil || serviceConfig == nil )
@@ -82,7 +82,7 @@ module DataCollector
         fail msg
       end
 
-      @MQSettings = {
+      mq_settings = {
         :beanstalkHost => mqHost,
         :beanstalkPort => mqPort
       }
@@ -95,7 +95,7 @@ module DataCollector
       @cache     = Cache::Store.new()
       @redis     = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
       @jolokia   = Jolokia::Client.new( { :host => jolokiaHost, :port => jolokiaPort, :path => jolokiaPath, :auth => { :user => jolokiaAuthUser, :pass => jolokiaAuthPass } } )
-      @mq        = MessageQueue::Consumer.new( @MQSettings )
+      @mq        = MessageQueue::Consumer.new(mq_settings )
       @prepare   = Prepare.new( prepareSettings )
       @jobs      = JobQueue::Job.new()
       @database  = Storage::MySQL.new( {
@@ -204,7 +204,7 @@ module DataCollector
 
         unless( m.client.nil? )
 
-          @cache.set( cache_key , expiresIn: 640 ) { Cache::Data.new( { 'user': user, 'pass': pass, 'port': port } ) }
+          @cache.set(cache_key , expires_in: 640 ) { Cache::Data.new({'user' : user, 'pass' : pass, 'port' : port } ) }
 
           mysqlData = m.get()
 
@@ -760,7 +760,7 @@ module DataCollector
 
           logger.debug( format('search dns entry for \'%s\'', host) )
 
-          ip, short, fqdn = self.nsLookup(host,60)
+          ip, short, fqdn = self.ns_lookup(host, 60)
 
           if( !ip.nil? && !short.nil? && !fqdn.nil? )
 
@@ -842,7 +842,7 @@ module DataCollector
 
           logger.debug( format('search dns entry for \'%s\'', host) )
 
-          ip, short, fqdn = self.nsLookup(host,60)
+          ip, short, fqdn = self.ns_lookup(host, 60)
 
           if( !ip.nil? && !short.nil? && !fqdn.nil? )
 
@@ -1054,7 +1054,7 @@ module DataCollector
 
     def clean()
 
-      data = @mq.getJobFromTube( @mqQueue, true )
+      data = @mq.getJobFromTube(@mq_queue, true )
 
       if( data.count() != 0 )
 
@@ -1089,7 +1089,7 @@ module DataCollector
 
         # get dns data!
         #
-        ip, short, fqdn = self.nsLookup( h )
+        ip, short, fqdn = self.ns_lookup(h )
 
         discoveryData = nil
 

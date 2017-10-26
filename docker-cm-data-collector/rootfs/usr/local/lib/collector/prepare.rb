@@ -107,7 +107,7 @@ module DataCollector
 
       @redis.createMeasurements( { :short => short, :fqdn => fqdn, :data => dataForRedis } )
 
-      @cache.set( fqdn, 'prepared', expiresIn: 320 )
+      @cache.set(fqdn, 'prepared', expires_in: 320 )
 
       finish = Time.now
       logger.info( sprintf( 'build prepared data in %s seconds', (finish - start).round(2) ) )
