@@ -1,5 +1,5 @@
 
-require_relative 'cache'
+require_relative 'mini_cache'
 
 module JobQueue
 
@@ -7,7 +7,7 @@ module JobQueue
 
     def initialize( settings = {} )
 
-      @jobs  = Cache::Store.new()
+      @jobs  = MiniCache::Store.new()
     end
 
     def cache_key(params = {} )
@@ -21,7 +21,7 @@ module JobQueue
       checksum = self.cache_key(params)
 
       if( self.jobs( params ) == false )
-        @jobs.set( checksum ) { Cache::Data.new( 'true' ) }
+        @jobs.set( checksum ) { MiniCache::Data.new( 'true' ) }
       end
 
     end

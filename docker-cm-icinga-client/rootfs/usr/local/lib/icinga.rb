@@ -8,7 +8,7 @@ require 'icinga2'
 
 require_relative 'logging'
 require_relative 'utils/network'
-require_relative 'cache'
+require_relative 'mini_cache'
 require_relative 'job-queue'
 require_relative 'message-queue'
 require_relative 'storage'
@@ -44,8 +44,8 @@ class CMIcinga2
       mq_port                = settings.dig(:mq, :port)                || 11300
       @mq_queue              = settings.dig(:mq, :queue)               || 'mq-icinga'
 
-      redis_host           = settings.dig(:redis, :host)
-      redis_port           = settings.dig(:redis, :port)  || 6379
+      redis_host             = settings.dig(:redis, :host)
+      redis_port             = settings.dig(:redis, :port)  || 6379
 
       mysql_host             = settings.dig(:mysql, :host)
       mysql_schema           = settings.dig(:mysql, :schema)
@@ -55,11 +55,9 @@ class CMIcinga2
       @icinga_api_url_base   = format('https://%s:%d', @icinga_host, @icinga_api_port )
       @node_name             = Socket.gethostbyname(Socket.gethostname ).first
 
-      mq_settings = {
-        :beanstalkHost  => mq_host,
-        :beanstalkPort  => mq_port,
-        :beanstalkQueue => @mq_queue
-      }
+      mq_settings    = { beanstalkHost: mq_host, beanstalkPort: mq_port, beanstalkQueue: @mq_queue }
+      mysql_settings = { mysql: { host: mysql_host, user: mysql_user, password: mysql_password, schema: mysql_schema } }
+      redis_settings = { redis: { host: redis_host } }
 
       super( settings )
 
@@ -67,7 +65,7 @@ class CMIcinga2
       date                 = CMIcinga2::Date::DATE
 
       logger.info( '-----------------------------------------------------------------' )
-      logger.info( ' CoreMedia - Icinga2 Client' )
+      logger.info( " CoreMedia - Icinga2 Client - gem Version #{Icinga2::VERSION}" )
       logger.info( "  Version #{version} (#{date})" )
       logger.info( '  Copyright 2017 CoreMedia' )
       logger.info( "  Backendsystem #{@icinga_api_url_base}" )
@@ -90,24 +88,14 @@ class CMIcinga2
       logger.debug( format(' api pass : %s', @icinga_api_pass ) )
       logger.debug( format(' node name: %s', @node_name ) )
 
-      @cache       = Cache::Store.new()
-      @jobs        = JobQueue::Job.new()
-      @redis       = Storage::RedisClient.new( { :redis => { :host => redis_host } } )
-      @mq_consumer = MessageQueue::Consumer.new(mq_settings )
-      @mq_producer = MessageQueue::Producer.new(mq_settings )
-
-      @database   = Storage::MySQL.new( {
-        :mysql => {
-          :host     => mysql_host,
-          :user     => mysql_user,
-          :password => mysql_password,
-          :schema   => mysql_schema
-        }
-      } )
+      @cache       = MiniCache::Store.new
+      @jobs        = JobQueue::Job.new
+      @redis       = Storage::RedisClient.new( redis_settings )
+      @mq_consumer = MessageQueue::Consumer.new( mq_settings )
+      @mq_producer = MessageQueue::Producer.new( mq_settings )
+      @database    = Storage::MySQL.new( mysql_settings )
 
   end
-
 end
-
 
 # EOF
