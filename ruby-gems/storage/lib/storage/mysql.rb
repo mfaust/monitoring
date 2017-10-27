@@ -35,7 +35,7 @@ module Storage
       @client.query('SET storage_engine=InnoDB')
       @client.query("CREATE DATABASE if not exists #{@schema}")
 
-      self.prepare()
+      self.prepare
     end
 
 
@@ -49,7 +49,7 @@ module Storage
     end
 
 
-    def connect()
+    def connect
 
       begin
 
@@ -67,7 +67,7 @@ module Storage
           :reconnect       => true
         )
 
-      rescue => e
+      rescue
 
 #         logger.debug(format('try to create the database connection (%d)', retries))
 #         logger.error(e)
@@ -84,7 +84,7 @@ module Storage
     end
 
 
-    def prepare()
+    def prepare
 
       @client.query( "USE #{@schema}" )
 
@@ -102,8 +102,7 @@ module Storage
         )"
       )
 
-      @client.query(
-        "CREATE TABLE IF NOT EXISTS config (
+      @client.query('CREATE TABLE IF NOT EXISTS config (
           `key`      varchar(128) not null,
           `value`    varchar(255) not null,
           dns_ip     varchar(16),
@@ -112,11 +111,10 @@ module Storage
           unique( `key`, `value`, dns_ip ),
           FOREIGN KEY (`dns_ip`) REFERENCES dns(`ip`)
           ON DELETE CASCADE
-        )"
+        )'
       )
 
-      @client.query(
-        "CREATE TABLE IF NOT EXISTS discovery (
+      @client.query('CREATE TABLE IF NOT EXISTS discovery (
           service    varchar(128) not null,
           port       int(4)       not null,
           data       text         not null,
@@ -126,7 +124,7 @@ module Storage
           unique( service, port, dns_ip ),
           FOREIGN KEY (`dns_ip`) REFERENCES dns(`ip`)
           ON DELETE CASCADE
-        )"
+        )'
       )
 
 #       @client.query(
@@ -145,29 +143,24 @@ module Storage
     end
 
 
-    def toJson( data )
+    def to_json( data )
 
-      h = Hash.new()
+      hash = Hash.new
 
       data.each do |k|
-
         # "Variable_name"=>"Innodb_buffer_pool_pages_free", "Value"=>"1"
-        h[k['Variable_name']] =  k['Value']
+        hash[k['Variable_name']] =  k['Value']
       end
-
-      return h
-
+      hash
     end
 
     # -- dns ------------------------------------
     #
-    def createDNS( params = {} )
+    def create_dns( params = {} )
 
-      if( ! @client )
-        return false
-      end
+      return false unless( @client )
 
-#       logger.debug( " createDNS( #{params} )")
+#       logger.debug( " create_dns( #{params} )")
 
       ip    = params.dig(:ip)
       name  = params.dig(:short)
@@ -182,7 +175,7 @@ module Storage
       if( result.to_a.first.dig('count').to_i == 0 )
 
         statement = sprintf('insert into dns ( ip, name, fqdn, status ) values ( \'%s\', \'%s\', \'%s\', \'prepare\' )', ip, name, fqdn )
-        result    = @client.query( statement, :as => :hash )
+        @client.query( statement, :as => :hash )
 
 #         logger.debug( statement )
 #         logger.debug( result.to_a )
@@ -190,11 +183,9 @@ module Storage
     end
 
 
-    def removeDNS( params = {} )
+    def remove_dns( params = {} )
 
-      if( ! @client )
-        return false
-      end
+      return false unless( @client )
 
 #       logger.debug( " removeDNS( #{params} )")
       ip    = params.dig(:ip)
@@ -209,11 +200,9 @@ module Storage
     end
 
 
-    def dnsData( params = {}  )
+    def dns_data( params = {}  )
 
-      if( ! @client )
-        return false
-      end
+      return false unless( @client )
 
 #       logger.debug( " dnsData( #{params} )")
 
@@ -234,7 +223,7 @@ module Storage
         end
       end
 
-      return nil
+      nil
 
     end
     #
@@ -247,9 +236,7 @@ module Storage
     #
     def nodes( params = {} )
 
-      if( ! @client )
-        return false
-      end
+      return false unless( @client )
 
       result = Array.new
       ip     = params.dig(:ip)
@@ -355,16 +342,14 @@ module Storage
         return result
       end
 
-      return nil
+      nil
 
     end
 
 
-    def setStatus( params = {} )
+    def set_status( params = {} )
 
-      if( ! @client )
-        return false
-      end
+      return false unless( @client )
 
       ip     = params.dig(:ip)
       name   = params.dig(:short)
@@ -375,7 +360,7 @@ module Storage
 
       if( ip == nil )
 
-        dns = self.dnsData( params )
+        dns = self.dns_data( params )
 
         if( dns != nil )
           ip   = dns.dig('ip')
@@ -385,7 +370,7 @@ module Storage
         end
       end
 
-      if( status != nil )
+      unless( status.nil? )
 
         status = case status
           when Storage::MySQL::ONLINE
@@ -412,16 +397,14 @@ module Storage
         return true
       end
 
-      return nil
+      nil
 
     end
 
 
     def status( params = {} )
 
-      if( ! @client )
-        return false
-      end
+      return false unless( @client )
 
       ip    = params.dig(:ip)
       name  = params.dig(:short)
@@ -442,17 +425,15 @@ module Storage
         end
       end
 
-      return nil
+      nil
     end
 
 
     # -- configurations -------------------------
     #
-    def createConfig( params = {} )
+    def create_config( params = {} )
 
-      if( ! @client )
-        return false
-      end
+      return false unless( @client )
 
       ip     = params.dig(:ip)
       name   = params.dig(:short)
@@ -467,19 +448,19 @@ module Storage
 
         data.each do |k,v|
 
-          self.writeConfig( { :ip => ip, :short => name, :fqdn => fqdn, :key => k, :value => v } )
+          self.write_config( { ip: ip, short: name, fqdn: fqdn, key: k, value: v } )
         end
       else
 
-        self.writeConfig( params )
+        self.write_config( params )
       end
 
-      return nil
+      nil
 
     end
 
     # PRIVATE
-    def writeConfig( params = {} )
+    def write_config( params = {} )
 
       ip     = params.dig(:ip)
       name   = params.dig(:short)
@@ -495,7 +476,7 @@ module Storage
 
       if( ip == nil )
 
-        dns = self.dnsData( params )
+        dns = self.dns_data( params )
 
         if( dns != nil )
           ip   = dns.dig('ip')
@@ -518,16 +499,14 @@ module Storage
         logger.error( e )
       end
 
-      return nil
+      nil
 
     end
 
 
-    def removeConfig( params = {} )
+    def remove_config( params = {} )
 
-      if( ! @client )
-        return false
-      end
+      return false unless( @client )
 
       ip    = params.dig(:ip)
       name  = params.dig(:short)
@@ -536,10 +515,11 @@ module Storage
 
 #       logger.debug( " removeConfig( #{params} )")
 
-      dns = self.dnsData( params )
+      dns = self.dns_data( params )
 
       unless( dns.nil? )
 
+        more = nil
         ip   = dns.dig('ip')
 #         more = nil
 #         logger.debug( ip )
@@ -567,15 +547,13 @@ module Storage
 
       end
 
-      return nil
+      nil
     end
 
 
     def config( params = {} )
 
-      if( ! @client )
-        return false
-      end
+      return false unless( @client )
 
       ip     = params.dig(:ip)
       name   = params.dig(:short)
@@ -613,7 +591,7 @@ module Storage
       end
 
       array   = Array.new
-      result  = Hash.new()
+      result  = Hash.new
 
       r.each do |row|
 
@@ -621,11 +599,11 @@ module Storage
         key   = row.dig('key')
         value = row.dig('value')
 
-        result[key.to_s] ||= self.parsedResponse( value )
+        result[key.to_s] ||= self.parsed_response(value )
 
       end
 
-      return result
+      result
 
     end
     #
@@ -633,11 +611,9 @@ module Storage
 
     # -- discovery ------------------------------
     #
-    def createDiscovery( params = {}, append = false )
+    def create_discovery( params = {}, append = false )
 
-      if( ! @client )
-        return false
-      end
+      return false unless( @client )
 
       ip      = params.dig(:ip)
       name    = params.dig(:short)
@@ -649,7 +625,7 @@ module Storage
 #       logger.debug( " createDiscovery( #{params}, #{append} )")
       if( ip == nil )
 
-        dns = self.dnsData( { :ip => ip, :short => name, fqdn => fqdn } )
+        dns = self.dns_data( { ip: ip, short: name, fqdn => fqdn } )
 
         if( dns != nil )
           ip   = dns.dig('ip')
@@ -667,22 +643,22 @@ module Storage
 
           port = v.dig('port')
 
-          self.writeDiscovery( { :ip => ip, :short => name, :fqdn => fqdn, :port => port, :service => k, :data => v } )
+          self.write_discovery( { ip: ip, short: name, fqdn: fqdn, port: port, service: k, data: v } )
         end
       else
 
         params['ip']   = ip
         params['fqdn'] = fqdn
 
-        self.writeDiscovery( params )
+        self.write_discovery( params )
       end
 
-      return nil
+      nil
 
     end
 
     # PRIVATE
-    def writeDiscovery( params = {} )
+    def write_discovery( params = {} )
 
       ip      = params.dig(:ip)
       name    = params.dig(:short)
@@ -705,22 +681,20 @@ module Storage
 #         logger.error( e )
       end
 
-      return nil
+      nil
 
     end
 
 
-    def discoveryData( params = {} )
+    def discovery_data( params = {} )
 
-      if( ! @client )
-        return false
-      end
+      return false unless( @client )
 
       ip        = params.dig(:ip)
       name      = params.dig(:short)
       fqdn      = params.dig(:fqdn)
       service   = params.dig(:service)
-      result    = Hash.new()
+      result    = Hash.new
       statement = nil
 
 #       logger.debug( " discoveryData( #{params} )")
@@ -729,7 +703,7 @@ module Storage
       #
       if( ip == nil )
 
-        dns = self.dnsData( params )
+        dns = self.dns_data( params )
 
         if( dns != nil )
           ip   = dns.dig('ip')
@@ -777,7 +751,7 @@ module Storage
           ip, name, fqdn
         )
 
-        r = Array.new()
+        r = Array.new
 #         logger.debug( statement )
         res     = @client.query( statement, :as => :hash )
 
@@ -789,7 +763,7 @@ module Storage
             name     = row.dig('name').to_s
             fqdn     = row.dig('fqdn').to_s
             service  = row.dig('service').to_s
-            dnsIp    = row.dig('dns_ip').to_i
+            dns_ip    = row.dig('dns_ip').to_i
             data     = row.dig('data')
 
             if( data == nil )
@@ -797,7 +771,7 @@ module Storage
             end
 
             data = data.gsub( '=>', ':' )
-            data = self.parsedResponse( data )
+            data = self.parsed_response(data )
 
             result[service.to_s] = data
           end
@@ -813,7 +787,7 @@ module Storage
 
       end
 
-      return nil
+      nil
 
     end
     #
@@ -822,36 +796,25 @@ module Storage
 
     # -- measurements ---------------------------
     #
-    def createMeasurements( params = {} )
+    def create_measurements( params = {} )
 
-      if( ! @client )
-        return false
-      end
+      return false unless( @client )
 
       ip        = params.dig(:ip)
       name      = params.dig(:short)
       fqdn      = params.dig(:fqdn)
       data      = params.dig(:data)
-      result    = Hash.new()
+      result    = Hash.new
 
 #       logger.debug( " createMeasurements( #{params} )")
 
 
-
-
-
-
-
-
-
-
-
-      return nil
+      nil
     end
 
 
     # PRIVATE
-    def writeMeasurements( params = {} )
+    def write_measurements( params = {} )
 
       ip      = params.dig(:ip)
       name    = params.dig(:short)
@@ -874,22 +837,20 @@ module Storage
 #         logger.error( e )
       end
 
-      return nil
+      nil
 
     end
 
 
     def measurements( params = {} )
 
-      if( ! @client )
-        return false
-      end
+      return false unless( @client )
 
       ip        = params.dig(:ip)
       name      = params.dig(:short)
       fqdn      = params.dig(:fqdn)
       service   = params.dig(:service)
-      result    = Hash.new()
+      result    = Hash.new
 
 #       logger.debug( " measurements( #{params} )")
 
@@ -918,7 +879,7 @@ module Storage
           ip, name, fqdn
         )
 
-        r = Array.new()
+        r = Array.new
 #         logger.debug( statement )
 
         res     = @client.query( statement, :as => :hash )
@@ -931,7 +892,7 @@ module Storage
             name     = row.dig('name').to_s
             fqdn     = row.dig('fqdn').to_s
             service  = row.dig('service').to_s
-            dnsIp    = row.dig('dns_ip').to_i
+            dns_ip    = row.dig('dns_ip').to_i
             data     = row.dig('data')
 
             if( data == nil )
@@ -939,7 +900,7 @@ module Storage
             end
 
             data = data.gsub( '=>', ':' )
-            data = self.parsedResponse( data )
+            data = self.parsed_response(data )
 
             result[service.to_s] = data
           end
@@ -956,7 +917,7 @@ module Storage
       end
 
 
-      return nil
+      nil
     end
     #
     # -- measurements ---------------------------
@@ -964,7 +925,7 @@ module Storage
 
 
 
-    def parsedResponse( r )
+    def parsed_response(r )
 
       return JSON.parse( r )
     rescue JSON::ParserError => e
@@ -998,7 +959,7 @@ module Storage
 #       logger.debug( result.inspect )
 #       logger.debug( result.size )
 
-      return result
+      result
 
     end
 

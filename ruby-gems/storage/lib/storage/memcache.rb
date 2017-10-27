@@ -19,24 +19,21 @@ module Storage
       namespace = params[:namespace] ? params[:namespace] : 'monitoring'
       expire    = params[:expire]    ? params[:expire]    : 10
 
-      memcacheOptions = {
-        :compress   => true,
-        :namespace  => namespace.to_s
-      }
+      memcache_options = { :compress => true, :namespace => namespace.to_s }
 
-      if( expire.to_i != 0 )
-        memcacheOptions[:expires_in] = ( 60 * expire.to_i )  # :expires_in - default TTL in seconds (defaults to 0 or forever)
-      end
+      # :expires_in - default TTL in seconds (defaults to 0 or forever)
+      memcache_options[:expires_in] = ( 60 * expire.to_i ) if( expire.to_i != 0 )
+      memcache_host = format( '%s:%s', host, port )
 
       @mc = nil
 
       begin
-        until( @mc != nil )
-          @mc = Dalli::Client.new( sprintf( '%s:%s', host, port ), memcacheOptions )
+        if( @mc.nil? )
+          @mc = Dalli::Client.new( memcache_host , memcache_options )
           sleep( 3 )
         end
       rescue => e
-        logger.error( e )
+        puts e
       end
     end
 
@@ -51,35 +48,27 @@ module Storage
     end
 
 
-    def self.cacheKey( params = {} )
+    def self.cache_key( params = {} )
 
       params   = Hash[params.sort]
-      checksum = Digest::MD5.hexdigest( params.to_s )
-
-      return checksum
-
+      Digest::MD5.hexdigest( params.to_s )
     end
 
     def get( key )
 
       result = {}
-
-      if( @mc )
-
-        result = @mc.get( key )
-      end
-
-      return result
+      result = @mc.get( key ) if( @mc )
+      result
     end
 
     def set( key, value )
 
-      return @mc.set( key, value )
+      @mc.set( key, value )
     end
 
     def self.delete( key )
 
-      return @mc.delete( key )
+      @mc.delete( key )
     end
 
   end
