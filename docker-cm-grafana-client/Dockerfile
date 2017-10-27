@@ -39,13 +39,11 @@ RUN \
   cd /build && \
   bundle install && \
   #
-  for apk in ${APK_DEL} ; \
-  do \
-    apk del --quiet --purge ${apk} ; \
-  done && \
-  mkdir /var/cache/monitoring && \
+  apk --quiet --purge del ${APK_DEL} && \
   rm -rf \
     /tmp/* \
+    /root/.bundle \
+    /root/.gem \
     /var/cache/apk/*
 
 COPY rootfs/ /

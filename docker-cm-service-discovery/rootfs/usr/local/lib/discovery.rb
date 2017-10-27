@@ -83,12 +83,12 @@ module ServiceDiscovery
       jolokia_host         = settings.dig(:jolokia, :host)           || 'localhost'
       jolokia_port         = settings.dig(:jolokia, :port)           ||  8080
       jolokia_path         = settings.dig(:jolokia, :path)           || '/jolokia'
-      jolokia_auth_user     = settings.dig(:jolokia, :auth, :user)
-      jolokia_auth_pass     = settings.dig(:jolokia, :auth, :pass)
+      jolokia_auth_user    = settings.dig(:jolokia, :auth, :user)
+      jolokia_auth_pass    = settings.dig(:jolokia, :auth, :pass)
 
-      @discovery_host       = settings.dig(:discovery, :host)
-      @discovery_port       = settings.dig(:discovery, :port)        || 8088
-      @discovery_path       = settings.dig(:discovery, :path)        # default: /scan
+      @discovery_host      = settings.dig(:discovery, :host)
+      @discovery_port      = settings.dig(:discovery, :port)        || 8088
+      @discovery_path      = settings.dig(:discovery, :path)        # default: /scan
 
       mq_host              = settings.dig(:mq, :host)                || 'localhost'
       mq_port              = settings.dig(:mq, :port)                || 11300
@@ -104,9 +104,9 @@ module ServiceDiscovery
 
       @service_config      = settings.dig(:configFiles, :service)
 
-      mq_settings = { beanstalkHost: mq_host, beanstalkPort: mq_port, beanstalkQueue: @mq_queue }
-      jolokia_settings =  { host: jolokia_host, port: jolokia_port, path: jolokia_path, auth: {user: jolokia_auth_user, pass: jolokia_auth_pass} }
-      mysql_settings = { mysql: { host: mysql_host, user: mysql_user, password: mysql_password, schema: mysql_schema } }
+      mq_settings      = { beanstalkHost: mq_host, beanstalkPort: mq_port, beanstalkQueue: @mq_queue }
+      jolokia_settings = { host: jolokia_host, port: jolokia_port, path: jolokia_path, auth: {user: jolokia_auth_user, pass: jolokia_auth_pass} }
+      mysql_settings   = { mysql: { host: mysql_host, user: mysql_user, password: mysql_password, schema: mysql_schema } }
 
       @scan_ports         = ports
 

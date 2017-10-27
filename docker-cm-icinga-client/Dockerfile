@@ -27,11 +27,11 @@ RUN \
   apk --quiet --no-cache upgrade && \
   apk --quiet --no-cache add ${APK_ADD} && \
   #
-  gem install --quiet --no-rdoc --no-ri --quiet ${GEMS} && \
+  gem install --quiet --no-rdoc --no-ri ${GEMS} && \
   #
   count=$(ls -1 /build/*.gem 2> /dev/null | tail -n1) && \
   if [ ! -z ${count} ] ; then \
-    gem install --no-rdoc --no-ri --quiet ${count} ; \
+    gem install --quiet --no-rdoc --no-ri ${count} ; \
   else \
     echo "gem 'icinga2', '~> ${ICINGA2_GEM_VERSION}'" >> /build/Gemfile ; \
   fi && \
