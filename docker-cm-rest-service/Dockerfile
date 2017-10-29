@@ -9,7 +9,7 @@ ENV \
   ALPINE_MIRROR="mirror1.hs-esslingen.de/pub/Mirrors" \
   ALPINE_VERSION="v3.6" \
   TERM=xterm \
-  APK_ADD="build-base bind-tools curl drill imagemagick-dev mariadb-client mariadb-dev ruby-dev ruby-irb ruby-io-console ruby-rdoc zlib zlib-dev" \
+  APK_ADD="build-base bind-tools curl drill ipcalc jq imagemagick-dev mariadb-client mariadb-dev ruby-dev ruby-irb ruby-io-console ruby-rdoc zlib zlib-dev" \
   APK_DEL="build-base imagemagick-dev ruby-dev ruby-io-console zlib-dev" \
   GEMS="beaneater ipaddress mini_cache mysql2 resolve-hostname redis rufus-scheduler sinatra thin tzinfo-data"
 

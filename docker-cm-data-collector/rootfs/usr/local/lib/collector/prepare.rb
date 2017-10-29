@@ -1,5 +1,5 @@
 
-require_relative '../cache'
+require 'mini_cache'
 
 module DataCollector
 

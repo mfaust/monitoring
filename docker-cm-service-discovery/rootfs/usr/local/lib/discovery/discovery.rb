@@ -5,7 +5,7 @@ module ServiceDiscovery
 
     # discorery application
     #
-    def discover_application(params = {} )
+    def discover_application( params = {} )
 
       host = params.dig(:fqdn)
       port = params.dig(:port)
@@ -13,7 +13,7 @@ module ServiceDiscovery
       fixed_ports = [80, 443, 8081, 3306, 5432, 6379, 9100, 28017, 55555]
       services   = Array.new
 
-      if( fixed_ports.include?(port ) )
+      if( fixed_ports.include?( port ) )
 
         case port
         when 80
@@ -70,7 +70,7 @@ module ServiceDiscovery
           config: {'ignoreErrors' => true, 'ifModifiedSince' => true, 'canonicalNaming' => true}
         }
 
-        response       = @jolokia.post( {payload: array} )
+        response        = @jolokia.post( payload: array )
         response_status = response.dig(:status).to_i
         response_body   = response.dig(:message)
 
@@ -84,18 +84,35 @@ module ServiceDiscovery
             response_body.delete!("\t" )
             response_body.delete!("\n" )
 
+#             logger.debug( response_body )
+
+            if( response_body.include?('ConnectException') )
+
+              parts = response_body.match( '^(.*)ConnectException :(?<error>.+[a-zA-Z0-9-]);(.*)' )
+              hostname = host
+              hostname = parts['error'].to_s.strip if( parts )
+
+              response_body = sprintf('jolokia error: %s. Possibly a DNS or configuration problem', hostname )
+            end
+
             if( response_body.include?('UnknownHostException' ) )
-              response_body = sprintf('Unknown Host: %s', host )
+
+              parts = response_body.match( '^(.*)Unknown host:(?<hostname>.+[a-zA-Z0-9-]);(.*)' )
+              hostname = host
+              hostname = parts['hostname'].to_s.strip if( parts )
+
+              response_body = sprintf('Unknown Host: jolokia becomes %s as FQDN! Possibly a DNS or configuration problem', hostname )
             end
           else
 
             response_body = 'bad status'
           end
 
-          logger.error( {
-                            status: response_status,
-            message: response_body
-          } )
+          logger.error(
+            status: response_status,
+            message: response_body,
+            target_url: target_url
+          )
 
           return nil
 
