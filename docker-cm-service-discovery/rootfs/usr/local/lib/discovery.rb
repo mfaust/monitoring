@@ -9,10 +9,10 @@
 require 'json'
 require 'yaml'
 require 'fileutils'
+require 'mini_cache'
 
 require_relative 'logging'
 require_relative 'utils/network'
-require_relative 'cache'
 require_relative 'jolokia'
 require_relative 'port_discovery'
 require_relative 'job-queue'
@@ -124,9 +124,9 @@ module ServiceDiscovery
       logger.info( '-----------------------------------------------------------------' )
       logger.info( '' )
 
-      @cache      = Cache::Store.new
-      @jobs       = JobQueue::Job.new
-      @jolokia    = Jolokia::Client.new( jolokia_settings )
+      @cache       = MiniCache::Store.new
+      @jobs        = JobQueue::Job.new
+      @jolokia     = Jolokia::Client.new( jolokia_settings )
       @mq_consumer = MessageQueue::Consumer.new(mq_settings )
       @mq_producer = MessageQueue::Producer.new(mq_settings )
 

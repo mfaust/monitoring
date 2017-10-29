@@ -1,3 +1,4 @@
+
 module Monitoring
 
   module Tools
@@ -27,8 +28,8 @@ module Monitoring
 
         if( ip != nil && short != nil && fqdn != nil )
 
-          @redis.set(format('dns::%s',fqdn), { 'ip': ip, 'short': short, 'long': fqdn }.to_json, 320 )
-          @cache.set(cache_key , expires_in: expire ) { Cache::Data.new({'ip' : ip, 'short' : short, 'long' : fqdn } ) }
+          @redis.set(format('dns::%s',fqdn), { ip: ip, short: short, long: fqdn }.to_json, 320 )
+          @cache.set(cache_key , expires_in: expire ) { MiniCache::Data.new( { ip: ip, short: short, long: fqdn } ) }
         else
           logger.error( 'no DNS data found!' )
           logger.error( " => #{dns}" )
@@ -54,7 +55,7 @@ module Monitoring
   #
   #       status = @database.createDNS( { :ip => ip, :short => short, :fqdn => fqdn } )
   #
-  #       @cache.set( hostname , expires_in: expire ) { Cache::Data.new( { 'ip': ip, 'short': short, 'long': fqdn } ) }
+  #       @cache.set( hostname , expires_in: expire ) { MiniCache::Data.new( { 'ip': ip, 'short': short, 'long': fqdn } ) }
   #     end
 
   #     logger.debug( sprintf( '  ip   %s ', ip ) )

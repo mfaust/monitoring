@@ -1,35 +1,29 @@
 
-require_relative 'mini_cache'
+require 'mini_cache'
 
 module JobQueue
 
   class Job
 
     def initialize( settings = {} )
-
       @jobs  = MiniCache::Store.new()
     end
 
-    def cache_key(params = {} )
-
-      params   = Hash[params.sort]
-      Digest::MD5.hexdigest( params.to_s )
+    def cacheKey( params = {} )
+      Digest::MD5.hexdigest( Hash[params.sort].to_s )
     end
 
     def add( params = {} )
 
-      checksum = self.cache_key(params)
+      checksum = self.cacheKey(params)
 
-      if( self.jobs( params ) == false )
-        @jobs.set( checksum ) { MiniCache::Data.new( 'true' ) }
-      end
-
+      @jobs.set( checksum ) { MiniCache::Data.new( 'true' ) } if( self.jobs( params ) == false )
     end
 
 
     def del( params = {} )
 
-      checksum = self.cache_key(params)
+      checksum = self.cacheKey(params)
 
       @jobs.unset( checksum )
     end
@@ -37,16 +31,14 @@ module JobQueue
 
     def jobs( params = {} )
 
-      checksum = self.cache_key(params)
+      checksum = self.cacheKey(params)
       current  = @jobs.get( checksum )
 
-      result = false
-      result = true if( current.nil? )
+      # no entry found
+      return false if( current.nil? )
 
-      result
+      return true
     end
-
   end
-
 end
 

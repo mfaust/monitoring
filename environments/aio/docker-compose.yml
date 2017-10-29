@@ -177,7 +177,7 @@ services:
 
   grafana:
     restart: always
-    image: bodsch/docker-grafana:4.6.0-beta3
+    image: bodsch/docker-grafana:4.6.0
     container_name: grafana
     hostname: grafana
     extends:
@@ -243,7 +243,7 @@ services:
 
   icingaweb2:
     restart: always
-    image: bodsch/docker-icingaweb2:1709.2
+    image: bodsch/docker-icingaweb2:2.4.2
     container_name: icingaweb2
     hostname: icingaweb2
     extends:

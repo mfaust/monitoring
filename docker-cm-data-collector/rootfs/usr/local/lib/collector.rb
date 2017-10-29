@@ -13,10 +13,10 @@ require 'timeout'
 require 'fileutils'
 require 'time'
 require 'date'
+require 'mini_cache'
 require 'rufus-scheduler'
 
 require_relative 'logging'
-require_relative 'cache'
 require_relative 'utils/network'
 require_relative 'monkey'
 require_relative 'jolokia'
@@ -48,7 +48,7 @@ module DataCollector
       jolokiaAuthPass     = settings.dig(:jolokia, :auth, :pass)
       mqHost              = settings.dig(:mq, :host)                || 'localhost'
       mqPort              = settings.dig(:mq, :port)                || 11300
-      @mq_queue            = settings.dig(:mq, :queue)               || 'mq-collector'
+      @mq_queue           = settings.dig(:mq, :queue)               || 'mq-collector'
 
       redisHost           = settings.dig(:redis, :host)
       redisPort           = settings.dig(:redis, :port)  || 6379
@@ -92,7 +92,7 @@ module DataCollector
         :redis       => { :host => redisHost, :port => redisPort }
       }
 
-      @cache     = Cache::Store.new()
+      @cache     = MiniCache::Store.new()
       @redis     = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
       @jolokia   = Jolokia::Client.new( { :host => jolokiaHost, :port => jolokiaPort, :path => jolokiaPath, :auth => { :user => jolokiaAuthUser, :pass => jolokiaAuthPass } } )
       @mq        = MessageQueue::Consumer.new(mq_settings )
@@ -204,7 +204,7 @@ module DataCollector
 
         unless( m.client.nil? )
 
-          @cache.set(cache_key , expires_in: 640 ) { Cache::Data.new({'user' : user, 'pass' : pass, 'port' : port } ) }
+          @cache.set( cache_key , expires_in: 640 ) { MiniCache::Data.new( user: user, pass: pass, port: port ) }
 
           mysqlData = m.get()
 
@@ -428,7 +428,7 @@ module DataCollector
           @cache.unset( host )
           return
         else
-          @cache.set( key ) { Cache::Data.new( data ) }
+          @cache.set( key ) { MiniCache::Data.new( data ) }
         end
 
       end

@@ -30,10 +30,10 @@ module Graphite
     def initialize( settings = {} )
 
       graphite_host        = settings.dig(:graphite, :host)       || 'localhost'
-      # graphite_port        = settings.dig(:graphite, :port)       || 2003
+      graphite_port        = settings.dig(:graphite, :port)       || 2003
       graphite_http_port   = settings.dig(:graphite, :http_port)  || 8081
       graphite_path        = settings.dig(:graphite, :path)
-      mq_host              = settings.dig(:mq, :host)             || 'localhost'
+      mq_host              = settings.dig(:mq, :host)             || 'beanstalkd'
       mq_port              = settings.dig(:mq, :port)             || 11300
       @mq_queue            = settings.dig(:mq, :queue)            || 'mq-graphite'
 

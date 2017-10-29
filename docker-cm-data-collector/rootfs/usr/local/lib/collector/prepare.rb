@@ -14,7 +14,7 @@ module DataCollector
 
       @cfg           = Config.new( settings )
       @redis         = Storage::RedisClient.new( { :redis => { :host => @redisHost } } )
-      @cache         = Cache::Store.new()
+      @cache         = MiniCache::Store.new()
 
     end
 

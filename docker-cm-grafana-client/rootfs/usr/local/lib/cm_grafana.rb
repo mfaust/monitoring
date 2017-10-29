@@ -5,10 +5,10 @@
 #
 
 require 'grafana'
+require 'mini_cache'
 
 require_relative 'logging'
 require_relative 'monkey'
-require_relative 'cache'
 require_relative 'job-queue'
 require_relative 'message-queue'
 require_relative 'storage'
@@ -135,7 +135,7 @@ class CMGrafana
 
     @redis        = Storage::RedisClient.new( { :redis => { :host => redis_host } } )
     @mbean        = MBean::Client.new( { :redis => @redis } )
-    @cache        = Cache::Store.new()
+    @cache        = MiniCache::Store.new()
     @jobs         = JobQueue::Job.new()
     @mq_consumer  = MessageQueue::Consumer.new(mq_settings )
     @mq_producer  = MessageQueue::Producer.new(mq_settings )

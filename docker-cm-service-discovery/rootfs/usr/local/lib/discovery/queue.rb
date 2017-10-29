@@ -77,7 +77,7 @@ module ServiceDiscovery
         fqdn = dns.dig('fqdn')
       end
 
-      if(@jobs.jobs({command: command, ip: ip, short: short, fqdn: fqdn}))
+      if(@jobs.jobs( command: command, ip: ip, short: short, fqdn: fqdn ))
         logger.warn( 'we are working on this job' )
         return {
             status: 409, # 409 Conflict
@@ -87,7 +87,7 @@ module ServiceDiscovery
 
       @jobs.add( {command: command, ip: ip, short: short, fqdn: fqdn} )
 
-      @cache.set(format( 'dns-%s', node ) , expires_in: 320 ) { Cache::Data.new({'ip' => ip, 'short' => short, 'long' => fqdn } ) }
+      @cache.set(format( 'dns-%s', node ) , expires_in: 320 ) { MiniCache::Data.new( ip: ip, short: short, long: fqdn ) }
 
       # add Node
       #
@@ -108,7 +108,7 @@ module ServiceDiscovery
 
         logger.debug( result )
 
-        @jobs.del( {command: command, ip: ip, short: short, fqdn: fqdn} )
+        @jobs.del( command: command, ip: ip, short: short, fqdn: fqdn )
 
         result
 
@@ -118,7 +118,7 @@ module ServiceDiscovery
 
         # check first for existing node!
         #
-        result = @database.nodes( {short: node, status: Storage::MySQL::DELETE} )
+        result = @database.nodes( short: node, status: Storage::MySQL::DELETE )
 
 #         logger.debug( "database: '#{result}' | node: '#{node}'" )
 #         logger.debug( @database.nodes() )
@@ -139,7 +139,7 @@ module ServiceDiscovery
 
           # remove node also from data-collector!
           #
-          self.send_message({cmd: command, node: node, queue: 'mq-collector', payload: {host: node, pre: 'prepare'}, ttr: 1, delay: 0} )
+          self.send_message( cmd: command, node: node, queue: 'mq-collector', payload: { host: node, pre: 'prepare' }, ttr: 1, delay: 0 )
 
           result = self.delete_host(node )
 
@@ -150,7 +150,7 @@ module ServiceDiscovery
           logger.error( e )
         end
 
-        @jobs.del( {command: command, ip: ip, short: short, fqdn: fqdn} )
+        @jobs.del( command: command, ip: ip, short: short, fqdn: fqdn )
 
         return {
             status: 200
@@ -180,7 +180,7 @@ module ServiceDiscovery
 
           logger.info( 'node not in monitoring. skipping info' )
 
-          @jobs.del( {command: command, ip: ip, short: short, fqdn: fqdn} )
+          @jobs.del( command: command, ip: ip, short: short, fqdn: fqdn )
 
           return {
               status: 200,

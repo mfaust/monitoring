@@ -11,7 +11,7 @@ ENV \
   TERM=xterm \
   APK_ADD="build-base bind-tools drill ruby ruby-dev nano" \
   APK_DEL="build-base ruby-dev" \
-  GEMS="aws-sdk ipaddress json rest-client rufus-scheduler tzinfo-data"
+  GEMS="aws-sdk ipaddress json mini_cache rest-client rufus-scheduler tzinfo-data"
 
 # ---------------------------------------------------------------------------------------
 

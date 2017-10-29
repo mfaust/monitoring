@@ -11,7 +11,7 @@ ENV \
   TERM=xterm \
   APK_ADD="build-base bind-tools drill imagemagick-dev mariadb-client mariadb-dev nano ruby-dev ruby-io-console ruby-rdoc" \
   APK_DEL="build-base imagemagick-dev ruby-dev ruby-io-console zlib-dev" \
-  GEMS="beaneater filesize mysql2 ipaddress redis rest-client resolve-hostname rufus-scheduler tzinfo-data"
+  GEMS="beaneater filesize mini_cache mysql2 ipaddress redis rest-client resolve-hostname rufus-scheduler tzinfo-data"
 
 # ---------------------------------------------------------------------------------------
 

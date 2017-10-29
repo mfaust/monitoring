@@ -5,10 +5,10 @@
 #
 
 require 'icinga2'
+require 'mini_cache'
 
 require_relative 'logging'
 require_relative 'utils/network'
-require_relative 'mini_cache'
 require_relative 'job-queue'
 require_relative 'message-queue'
 require_relative 'storage'

@@ -12,9 +12,10 @@ require 'date'
 require 'json'
 require 'filesize'
 require 'fileutils'
+require 'mini_cache'
 
 require_relative 'logging'
-require_relative 'cache'
+
 require_relative 'storage'
 require_relative 'mbean'
 
@@ -78,7 +79,7 @@ module CarbonData
       logger.info( '-----------------------------------------------------------------' )
       logger.info( '' )
 
-      @cache  = Cache::Store.new()
+      @cache  = MiniCache::Store.new()
       @redis  = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
       @mbean  = MBean::Client.new( { :redis => @redis } )
       @database   = nil
@@ -213,7 +214,7 @@ module CarbonData
             result     = identifier
           end
 
-          @cache.set(key, expires_in: 320 ) { Cache::Data.new(result ) }
+          @cache.set(key, expires_in: 320 ) { MiniCache::Data.new( result ) }
         end
 
       else

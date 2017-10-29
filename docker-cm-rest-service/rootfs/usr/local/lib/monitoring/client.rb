@@ -65,11 +65,11 @@ module Monitoring
       logger.info( '-----------------------------------------------------------------' )
       logger.info( '' )
 
-      @cache      = Cache::Store.new()
-      @redis      = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
+      @cache       = MiniCache::Store.new()
+      @redis       = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
       @mq_consumer = MessageQueue::Consumer.new( mq_settings )
       @mq_producer = MessageQueue::Producer.new( mq_settings )
-      @database   = Storage::MySQL.new( mysql_settings )
+      @database    = Storage::MySQL.new( mysql_settings )
 
     end
 

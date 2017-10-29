@@ -152,7 +152,7 @@ class CMGrafana < Grafana::Client
 
       @jobs.add( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
 
-      @cache.set(format( 'dns-%s', node ) , expires_in: 320 ) { Cache::Data.new({'ip' : ip, 'short' : short, 'long' : fqdn } ) }
+      @cache.set(format( 'dns-%s', node ) , expires_in: 320 ) { MiniCache::Data.new( ip: ip, short: short, long: fqdn ) }
 
       # add Node
       #

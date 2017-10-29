@@ -27,8 +27,8 @@ module ExternalDiscovery
 
       @historic      = []
 
-      version        = '0.11.1'
-      date           = '2017-06-28'
+      version        = '0.11.2'
+      date           = '2017-10-29'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - External Discovery Service' )
@@ -60,7 +60,7 @@ module ExternalDiscovery
       ]
 
       @jobs             = JobQueue::Job.new()
-      @cache            = Cache::Store.new()
+      @cache            = MiniCache::Store.new()
       @dataConsumer     = DataConsumer.new( { :aws => { :region =>  @awsRegion }, :filter => filter } )
       @monitoringClient = MonitoringClient.new( config )
 
