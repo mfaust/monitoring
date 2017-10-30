@@ -43,32 +43,6 @@ services:
         "search_filter": "${LDAP_SEARCH_FILTER}"
       }'
 
-      # GRAFANA_USERS: 'coremedia:coremedia::admin'
-      # ADMIN_PASSWORD: grafana_admin
-#      USERS: '[
-#        {
-#          "username": "coremedia",
-#          "password": "coremedia",
-#          "email": "",
-#          "role": "Admin"
-#        }
-#      ]'
-#      DATASOURCES: '{
-#        "graphite": [
-#          {
-#            "name": "graphite",
-#            "host": "graphite",
-#            "port": 2003,
-#            "database": "graphite",
-#            "default": true
-#          }, {
-#            "name": "events",
-#            "host": "graphite",
-#            "port": 2003,
-#            "database": "graphite"
-#          }
-#        ]
-#      }'
 
   cm-icinga2-master:
     environment:
@@ -135,11 +109,10 @@ services:
       #   "ip": "192.168.252.100",
       #   "aliases": [ "tomcat-centos7" ]
       # }]'
-      ADDITIONAL_DNS: 'blueprint-box:192.168.252.100,tomcat-centos7:192.168.252.100'
       ADDITIONAL_DNS: '[{
         "name": "blueprint-box",
         "ip": "192.168.252.100",
-        "aliases": [ "tomcat-centos7", "tomcat-centos7-vagrant.vagrantup.com" ]
+        "aliases": [ "tomcat-centos7" ]
       }]'
 
   cm-service-discovery:
