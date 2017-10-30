@@ -27,22 +27,7 @@ RUN \
   apk --no-cache update && \
   apk --no-cache upgrade && \
   apk --no-cache add ${APK_ADD} && \
-  [ -d /opt ] || mkdir /opt &&\
-  cd /opt && \
-  git clone https://github.com/kr/beanstalkd.git && \
-  cd beanstalkd && \
-  #
-  # build stable packages
-  if [ "${BUILD_TYPE}" == "stable" ] ; then \
-    echo "switch to stable Tag v${BEANSTALKD_VERSION}" && \
-    git checkout tags/v${BEANSTALKD_VERSION} 2> /dev/null ; \
-  fi && \
-  #
-  sed -i 's,sys/fcntl.h,fcntl.h,' sd-daemon.c && \
-  make && \
-  mv beanstalkd /usr/bin/ && \
-  mkdir /var/cache/beanstalkd && \
-  /usr/bin/beanstalkd -v && \
+
   #
   gem install --no-rdoc --no-ri ${GEMS}
 
