@@ -7,19 +7,19 @@ ENV \
   ALPINE_MIRROR="mirror1.hs-esslingen.de/pub/Mirrors" \
   ALPINE_VERSION="v3.6" \
   TERM=xterm \
-  BUILD_DATE="2017-10-26" \
-  BUILD_TYPE="stable" \
-  BEANSTALKD_VERSION="1.10" \
+  BUILD_DATE="2017-10-30" \
   APK_ADD="build-base git ruby ruby-dev nano" \
   APK_DEL="build-base git ruby-dev" \
-  GEMS="aws-sdk beaneater ipaddress json rufus-scheduler tzinfo-data"
+  GEMS="io-console bundler"
 
-EXPOSE 11300
+EXPOSE 8080
 
 LABEL \
   version="1710"
 
 # ---------------------------------------------------------------------------------------
+
+COPY build /build
 
 RUN \
   echo "http://${ALPINE_MIRROR}/alpine/${ALPINE_VERSION}/main"       > /etc/apk/repositories && \
@@ -27,15 +27,29 @@ RUN \
   apk --no-cache update && \
   apk --no-cache upgrade && \
   apk --no-cache add ${APK_ADD} && \
+  #
+  gem install --quiet --no-rdoc --no-ri ${GEMS} && \
+  #
+#   count=$(ls -1 /build/*.gem 2> /dev/null | tail -n1) && \
+#   if [ ! -z ${count} ] ; then \
+#     gem install --quiet --no-rdoc --no-ri ${count} ; \
+#   else \
+#     echo "gem 'icinga2', '~> ${ICINGA2_GEM_VERSION}'" >> /build/Gemfile ; \
+#   fi && \
+  #
+  cd /build && \
+  bundle install --quiet
+
+
 
   #
-  gem install --no-rdoc --no-ri ${GEMS}
-
-#  apk del --purge ${APK_ADD} && \
+#  apk --quiet --purge del ${APK_DEL} && \
 #  rm -rf \
 #    /opt/* \
 #    /tmp/* \
-#    /var/cache/apk/
+#    /root/.bundle \
+#    /root/.gem \
+#    /var/cache/apk/*
 
 COPY rootfs/ /
 
@@ -44,4 +58,3 @@ ENTRYPOINT [ "/init/run.sh" ]
 CMD ["/bin/sh"]
 
 # EOF
-

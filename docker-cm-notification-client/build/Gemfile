@@ -1,0 +1,14 @@
+source ENV['GEM_SOURCE'] || "https://rubygems.org"
+
+gem 'ipaddress', '~> 0.8'
+gem 'json', '~> 2.1'
+gem 'rest-client', '~> 2.0'
+gem 'rufus-scheduler', '~> 3.4'
+gem 'tzinfo-data', '~> 1.2017'
+gem 'mini_cache', '~> 1.1'
+gem 'sinatra', '~> 2.0'
+gem 'sinatra-basic-auth', '~> 0'
+gem 'sequel', '~> 0'
+
+# GEMS="beaneater ipaddress mini_cache mysql2 resolve-hostname redis rufus-scheduler sinatra thin tzinfo-data"
+# GEMS="aws-sdk beaneater ipaddress json rufus-scheduler tzinfo-data"
