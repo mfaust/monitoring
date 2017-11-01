@@ -58,7 +58,6 @@ class CMGrafana
     mysql_user           = settings.dig(:mysql, :user)
     mysql_password       = settings.dig(:mysql, :password)
 
-
     mq_settings = {
       :beanstalkHost  => mq_host,
       :beanstalkPort  => mq_port,
@@ -92,7 +91,6 @@ class CMGrafana
     logger.info( "    - mysql        : #{mysql_host}@#{mysql_schema}" )
     logger.info( "    - message queue: #{mq_host}:#{mq_port}/#{@mq_queue}" )
     logger.info( '-----------------------------------------------------------------' )
-
 
     begin
 
@@ -131,7 +129,7 @@ class CMGrafana
 
     end
 
-    cfg = configure_server( config_file: server_config_file ) unless( server_config_file.nil? )
+    # cfg = configure_server( config_file: server_config_file ) unless( server_config_file.nil? )
 
     @redis        = Storage::RedisClient.new( { :redis => { :host => redis_host } } )
     @mbean        = MBean::Client.new( { :redis => @redis } )

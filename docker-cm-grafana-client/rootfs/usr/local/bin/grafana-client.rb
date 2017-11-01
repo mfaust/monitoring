@@ -76,12 +76,22 @@ Signal.trap('QUIT') { stop = true }
 
 g = CMGrafana.new( config )
 
+cfg_scheduler = Rufus::Scheduler.singleton
+
+cfg_scheduler.every( '60m', :first_in => delay.to_i ) do
+
+  g.configure_server( config_file: server_config_file ) unless( server_config_file.nil? )
+  cfg_scheduler.shutdown(:kill)
+end
+
+
+
+
 scheduler = Rufus::Scheduler.new
 
-scheduler.every( interval, :first_in => delay ) do
+scheduler.every( interval, :first_in => delay.to_i + 5 ) do
 
   g.queue()
-
 end
 
 
