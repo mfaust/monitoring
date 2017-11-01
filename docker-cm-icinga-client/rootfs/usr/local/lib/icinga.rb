@@ -99,7 +99,7 @@ class CMIcinga2
       @mq_producer = MessageQueue::Producer.new( mq_settings )
       @database    = Storage::MySQL.new( mysql_settings )
 
-      cfg = configure_server( config_file: server_config_file ) unless( server_config_file.nil? )
+#      cfg = configure_server( config_file: server_config_file ) unless( server_config_file.nil? )
 
   end
 end

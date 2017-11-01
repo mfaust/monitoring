@@ -12,7 +12,7 @@ ENV \
   APK_ADD="build-base bind-tools drill git mariadb-dev libressl-dev ruby-dev ruby-irb ruby-rdoc" \
   APK_DEL="build-base git ruby-dev ruby-rdoc " \
   GEMS="io-console bundler" \
-  ICINGA2_GEM_VERSION="1.1"
+  ICINGA2_GEM_VERSION="1.0"
 
 # ---------------------------------------------------------------------------------------
 

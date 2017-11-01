@@ -47,21 +47,41 @@ class CMIcinga2 < Icinga2::Client
 
       result = []
 
+      icinga2_available = false
+      retries ||= 1
+
+      while( icinga2_available == false || retries >= 20 )
+
+        logger.debug(format('try to create the icinga2 connection (%d)', retries))
+
+        icinga2_available = available?
+        retries += 1
+        sleep( 5 )
+      end
+
+      raise( format( 'can\'t create a valid connection to the icinga master \'%s\'', @icinga_host ) ) if( icinga2_available == false )
+
       unless( config.nil? )
 
         logger.info( format( 'configure server \'%s\'', @icinga_host ) )
 
-        groups       = config.select { |x| x == 'groups' }.values
-        users        = config.select { |x| x == 'users' }.values
+        groups          = config.select { |x| x == 'groups' }.values
+        users           = config.select { |x| x == 'users' }.values
+        service_groups  = config.select { |x| x == 'service_groups' }.values
+        host_groups     = config.select { |x| x == 'host_groups' }.values
 
         raise ArgumentError.new(format( 'groups must be an Array, given an %s', groups.class.to_s ) ) unless( groups.is_a?(Array) )
         raise ArgumentError.new(format( 'users must be an Array, given an %s', users.class.to_s ) ) unless( users.is_a?(Array) )
+        raise ArgumentError.new(format( 'service_groups must be an Array, given an %s', service_groups.class.to_s ) ) unless( service_groups.is_a?(Array) )
+        raise ArgumentError.new(format( 'host_groups must be an Array, given an %s', host_groups.class.to_s ) ) unless( host_groups.is_a?(Array) )
 
         result << icinga_groups( groups )
         result << icinga_users( users )
-      end
+#         result << icinga_service_groups( service_groups )
+#         result << icinga_host_groups( host_groups )
 
-      logger.debug( JSON.pretty_generate( result ) )
+      end
+#       logger.debug( JSON.pretty_generate( result ) )
 
       result
     end
@@ -80,13 +100,13 @@ class CMIcinga2 < Icinga2::Client
             v = JSON.parse(v) if( v.is_a?(String) )
 
             group_name = k
-            group_description = v.dig('description') || group_name
+            display_name = v.dig('display_name') || group_name
 
             unless( exists_usergroup?( group_name ) )
 
-              logger.info( format('create group: %s (%s)', group_name, group_description ) )
+              logger.info( format('create group: %s (%s)', group_name, display_name ) )
               # create group
-              result << add_usergroup( user_group: group_name, display_name: group_description )
+              result << add_usergroup( user_group: group_name, display_name: display_name )
             end
 
           end
@@ -96,13 +116,12 @@ class CMIcinga2 < Icinga2::Client
       end
     end
 
+
     def icinga_users( params )
 
       if( params.count >= 1 )
 
         result = []
-
-        logger.debug( JSON.pretty_generate( params ) )
 
         params.each do |p|
 
@@ -158,6 +177,89 @@ class CMIcinga2 < Icinga2::Client
 
         result
       end
+    end
+
+
+    def icinga_service_groups( params )
+
+      if( params.count >= 1 )
+
+        result = []
+        params.each do |p|
+
+          p.each do |k,v|
+
+            v = JSON.parse(v) if( v.is_a?(String) )
+
+            group_name = k
+            display_name = v.dig('display_name') || group_name
+            notes = v.dig('notes')
+            assign  = v.dig('assign')
+            ignore  = v.dig('ignore')
+
+            unless( exists_servicegroup?( group_name ) )
+
+              logger.info( format('create service group: %s (%s)', group_name, display_name ) )
+
+              options = {
+                service_group: group_name,
+                display_name: display_name
+              }
+
+              options['notes'] ||= notes unless( notes.nil? )
+
+              logger.debug( options )
+
+              result << add_servicegroup( options )
+            end
+
+          end
+        end
+
+        result
+      end
+    end
+
+    def icinga_host_groups( params )
+
+      if( params.count >= 1 )
+
+        result = []
+        params.each do |p|
+
+          p.each do |k,v|
+
+            v = JSON.parse(v) if( v.is_a?(String) )
+
+            group_name = k
+            display_name = v.dig('display_name') || group_name
+            notes = v.dig('notes')
+            assign  = v.dig('assign')
+
+            unless( exists_hostgroup?( group_name ) )
+
+              logger.info( format('create host group: %s (%s)', group_name, display_name ) )
+
+              options = {
+                host_group: group_name,
+                display_name: display_name
+              }
+
+              options['notes'] ||= notes unless( notes.nil? )
+
+              logger.debug( options )
+
+#               result << add_servicegroup( service_group: group_name, display_name: display_name )
+            end
+
+          end
+        end
+
+        result
+      end
+
+
+
     end
 
   end
