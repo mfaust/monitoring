@@ -44,7 +44,7 @@ module ServiceDiscovery
         # hash for the NEW Port-Schema
         # since cm160x every application runs in his own container with unique port schema
         #
-        target_url = sprintf('service:jmx:rmi:///jndi/rmi://%s:%s/jmxrmi', host, port )
+        target_url = format('service:jmx:rmi:///jndi/rmi://%s:%s/jmxrmi', host, port )
 
         array << {
           type: 'read',
@@ -92,7 +92,7 @@ module ServiceDiscovery
               hostname = host
               hostname = parts['error'].to_s.strip if( parts )
 
-              response_body = sprintf('jolokia error: %s. Possibly a DNS or configuration problem', hostname )
+              response_body = format('jolokia error: \'%s\'. Possibly a DNS or configuration problem', hostname )
             end
 
             if( response_body.include?('UnknownHostException' ) )
@@ -101,7 +101,7 @@ module ServiceDiscovery
               hostname = host
               hostname = parts['hostname'].to_s.strip if( parts )
 
-              response_body = sprintf('Unknown Host: jolokia becomes %s as FQDN! Possibly a DNS or configuration problem', hostname )
+              response_body = format('jolokia error: jolokia becomes \'%s\' as FQDN! Possibly a DNS or configuration problem', hostname )
             end
           else
 
@@ -190,7 +190,7 @@ module ServiceDiscovery
                           next
                         end
 
-                        logger.debug( sprintf(' - ‎recognized application: %s', app_name ) )
+                        logger.debug( format(' - recognized application: %s', app_name ) )
                         services.push(app_name )
                       end
                     end
@@ -223,7 +223,7 @@ module ServiceDiscovery
                           services.delete('caefeeder')
                           services.push( service )
 
-                          logger.debug( sprintf( '  => %s', service ) )
+                          logger.debug( format( '  => %s', service ) )
                         else
 
                           logger.error( 'unknown error' )
@@ -231,7 +231,7 @@ module ServiceDiscovery
                           logger.error( parts )
                         end
                       else
-                        logger.error( sprintf( 'response status %d', engine['status'].to_i ) )
+                        logger.error( format( 'response status %d', engine['status'].to_i ) )
                       end
 
                     # blueprint = cae-preview or delivery?editor
@@ -252,7 +252,7 @@ module ServiceDiscovery
                           services.push( 'delivery' )
                         end
                       else
-                        logger.error( sprintf( 'response status %d', engine['status'].to_i ) )
+                        logger.error( format( 'response status %d', engine['status'].to_i ) )
                         logger.error( engine )
                       end
                     else
