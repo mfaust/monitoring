@@ -1,0 +1,22 @@
+---
+
+# this creates only contact-groups and users!
+# login-user must be create otherwhise
+groups:
+  coremedia:
+    description: CoreMedia
+  1st-level:
+    description: 1st Level
+  2nd-level:
+    description: 2nd Level
+  operating:
+    description: Operating
+
+users:
+  bodsch:
+    display_name: Bodo Schulz
+    email: bodo.schulz@coremedia.com
+    pager: ''
+    groups:
+      - coremedia
+    enable_notifications: true

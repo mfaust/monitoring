@@ -1,18 +1,24 @@
+
 CURRENT_DIRECTORY := $(shell pwd)
 
-help:
-	@echo "Docker Compose Help"
-	@echo "-----------------------"
-	@echo ""
-	@echo "start th complete stack:"
-	@echo "    make begin"
-	@echo ""
-	@echo "Really, really start over:"
-	@echo "    make clean"
-	@echo ""
-	@echo "See contents of Makefile for more targets."
+.PHONY: build up start stop status restart clean down pull build tail
 
-begin: pull start
+# help:
+# 	@echo "Docker Compose Help"
+# 	@echo "-----------------------"
+# 	@echo ""
+# 	@echo "start th complete stack:"
+# 	@echo "    make start"
+# 	@echo ""
+# 	@echo "Really, really start over:"
+# 	@echo "    make clean"
+# 	@echo ""
+# 	@echo "See contents of Makefile for more targets."
+
+default: build
+
+up:
+	@docker-compose up --build
 
 start:
 	@docker-compose up --build -d
@@ -29,6 +35,9 @@ restart: stop start
 clean: stop
 	@docker-compose rm --force
 
+kill:
+	@docker-compose kill
+
 down:
 	@docker-compose down
 
@@ -40,5 +49,3 @@ build:
 
 tail:
 	@docker-compose logs -f
-
-.PHONY: start stop status restart clean build down tail
