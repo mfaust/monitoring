@@ -293,7 +293,7 @@ module ServiceDiscovery
       if(!@jolokia.jolokiaIsAvailable?())
 
         return {
-            status: 500,
+          status: 500,
           message: 'jolokia service is not available!'
         }
       end
@@ -302,18 +302,18 @@ module ServiceDiscovery
 
       # get a DNS record
       #
-      ip, short, fqdn = self.ns_lookup(host )
+      ip, short, fqdn = self.ns_lookup( host )
 
       # if the destination host available (simple check with ping)
       #
-      if(!Utils::Network.isRunning?(fqdn))
+      unless( Utils::Network.isRunning?( fqdn ) )
 
         # delete dns entry
-        result  = @database.removeDNS( {ip: ip, short: short, fqdn: fqdn} )
+        result  = @database.removeDNS( ip: ip, short: short, fqdn: fqdn )
 
         return {
-            status: 503, # 503 Service Unavailable
-            message: sprintf('Host %s are unavailable', host)
+          status: 503, # 503 Service Unavailable
+          message: sprintf('Host %s are unavailable', host)
         }
       end
 

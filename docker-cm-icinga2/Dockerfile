@@ -9,7 +9,7 @@ ENV \
   TERM=xterm \
   APK_ADD="py2-pip ruby-dev nano" \
   APK_DEL="ruby-dev" \
-  GEMS="aws-sdk ipaddress redis"
+  GEMS="aws-sdk ipaddress mini_cache redis"
 
 # ---------------------------------------------------------------------------------------
 

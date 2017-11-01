@@ -16,6 +16,46 @@ services:
     volumes:
       - /share:/share
 
+#  fluentd:
+#    image: fluent/fluentd:v0.14-onbuild
+#    volumes:
+#      - ./fluentd/conf:/fluentd/etc
+#    links:
+#      - "elasticsearch"
+#    ports:
+#      - "24224:24224"
+#      - "24224:24224/udp"
+#
+#  mongo:
+#    image: mongo
+#    volumes:
+#      - /data/db
+#
+#  elasticsearch:
+#    image: elasticsearch
+#    expose:
+#      - 9200
+#    ports:
+#      - "9200:9200"
+#
+#  graylog2:
+#    container_name: graylog2
+#    image: graylog2/allinone
+#    ports:
+#      - 9000:9000
+#      - 12201:12201
+#    volumes:
+#      - ./graylog2/data:/var/opt/greylog/data
+#      - ./graylog2/log:/var/log/graylog`
+#
+#  fluentd-gelf:
+#    container_name: fluentd-gelf
+#    build: .
+#    links:
+#      - graylog2
+#    ports:
+#      - 24224:24224
+
   dnsdock:
     restart: always
     image: bodsch/docker-dnsdock:1710.1
@@ -24,12 +64,17 @@ services:
     labels:
       com.dnsdock.alias: dnsdock
       com.dnsdock.ttl: '120'
+#    logging:
+#      driver: "fluentd"
+#      options:
+#        fluentd-address: localhost:24224
+#        tag: dnsdock
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock
     # You can use also Environment vars like this:
     # command: "--nameserver='${DNS_1}:53' --nameserver='${DNS_2}:53' --http=:80"
-    command: " --nameserver='10.1.2.63:53' --nameserver='10.1.2.14:53' --http=:80 --alias --ttl=120 --verbose"
+    command: " --nameserver='10.1.2.63:53' --nameserver='10.1.2.14:53' --http=:80 --alias --ttl=120"
     networks:
       mon:
         ipv4_address: 192.168.1.5
