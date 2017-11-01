@@ -3,12 +3,12 @@ class CMIcinga2 < Icinga2::Client
 
   module Version
 
-    VERSION = '1.7.0'
+    VERSION = '1.8.0'
   end
 
   module Date
 
-    DATE = '2017-10-27'
+    DATE = '2017-11-01'
   end
 
 end

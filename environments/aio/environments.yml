@@ -154,3 +154,4 @@ services:
       ICINGA_API_USER: root
       ICINGA_API_PASSWORD: icinga
       ENABLE_NOTIFICATIONS: 'true'
+      RUN_DELAY: 50

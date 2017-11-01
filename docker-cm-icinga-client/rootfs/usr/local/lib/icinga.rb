@@ -16,6 +16,7 @@ require_relative 'storage'
 require_relative 'icinga/version'
 require_relative 'icinga/tools'
 require_relative 'icinga/queue'
+require_relative 'icinga/configure_server'
 
 # -------------------------------------------------------------------------------------------------------------------
 
@@ -23,9 +24,10 @@ class CMIcinga2
 
   include Icinga2
 
+  include CMIcinga2::Version
   include CMIcinga2::Tools
   include CMIcinga2::Queue
-  include CMIcinga2::Version
+  include CMIcinga2::ServerConfiguration
 #   include CMIcinga2::Data
 
   def initialize( settings = {} )
@@ -39,6 +41,8 @@ class CMIcinga2
       @icinga_cluster        = settings.dig(:icinga, :cluster)         || false
       @icinga_satellite      = settings.dig(:icinga, :satellite)
       @icinga_notifications  = settings.dig(:icinga, :notifications)   || false
+
+      server_config_file     = settings.dig(:icinga, :server_config_file)
 
       mq_host                = settings.dig(:mq, :host)                || 'localhost'
       mq_port                = settings.dig(:mq, :port)                || 11300
@@ -94,6 +98,8 @@ class CMIcinga2
       @mq_consumer = MessageQueue::Consumer.new( mq_settings )
       @mq_producer = MessageQueue::Producer.new( mq_settings )
       @database    = Storage::MySQL.new( mysql_settings )
+
+      cfg = configure_server( config_file: server_config_file ) unless( server_config_file.nil? )
 
   end
 end
