@@ -51,6 +51,6 @@ service_groups:
 
 host_groups:
   coremedia:
-    display_name: Coremedia
+    display_name: CoreMedia
     notes: all Hosts with CoreMedia Services
     assign: host.vars.coremedia

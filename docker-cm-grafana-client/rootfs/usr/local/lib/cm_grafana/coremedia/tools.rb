@@ -3,7 +3,7 @@ require_relative '../../utils/network'
 
 class CMGrafana
 
-  module Coremedia
+  module CoreMedia
 
     module Tools
 

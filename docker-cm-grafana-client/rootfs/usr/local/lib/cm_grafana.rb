@@ -27,10 +27,10 @@ class CMGrafana
   include CMGrafana::Version
   include CMGrafana::ServerConfiguration
   include CMGrafana::Queue
-  include CMGrafana::Coremedia::Tools
-  include CMGrafana::Coremedia::Dashboard
-  include CMGrafana::Coremedia::Templates
-  include CMGrafana::Coremedia::Annotations
+  include CMGrafana::CoreMedia::Tools
+  include CMGrafana::CoreMedia::Dashboard
+  include CMGrafana::CoreMedia::Templates
+  include CMGrafana::CoreMedia::Annotations
 
   def initialize( settings = {} )
 
@@ -84,7 +84,7 @@ class CMGrafana
     logger.info( '-----------------------------------------------------------------' )
     logger.info( " CoreMedia - Grafana Client - gem Version #{Grafana::VERSION}" )
     logger.info( "  Version #{version} (#{date})" )
-    logger.info( '  Copyright 2016-2017 Coremedia' )
+    logger.info( '  Copyright 2016-2017 CoreMedia' )
     logger.info( '  used Services:' )
     logger.info( "    - grafana      : #{@url}" )
     logger.info( "    - redis        : #{redis_host}:#{redis_port}" )

@@ -163,7 +163,7 @@ module ExternalClients
   end
 
 
-  class  PostgresStatus
+  class PostgresStatus
 
     include Logging
 
@@ -363,6 +363,9 @@ module ExternalClients
           elsif( responseCode == 200 )
 
             body = response.body
+
+#             logger.debug( body )
+
             # remove all comments
             body        = body.each_line.reject{ |x| x.strip =~ /(^.*)#/ }.join
 
@@ -385,7 +388,6 @@ module ExternalClients
   #      logger.error( e )
   #      logger.error( e.backtrace )
         raise( e )
-
       end
 
     end
@@ -393,17 +395,15 @@ module ExternalClients
 
     def collect_uptime( data )
 
-      result  = Hash.new()
-
+      result    = Hash.new()
       parts    = data.last.split( ' ' )
-
       bootTime = sprintf( "%f", parts[1].to_s ).sub(/\.?0*$/, "" )
       uptime   = Time.at( Time.now() - Time.at( bootTime.to_i ) ).to_i
 
       result[parts[0]] = bootTime
       result['uptime'] = uptime
 
-      return result
+      result
     end
 
 
@@ -430,7 +430,7 @@ module ExternalClients
         end
       end
 
-      return result
+      result
     end
 
 
@@ -438,8 +438,6 @@ module ExternalClients
 
       result = Hash.new()
       regex = /(?<load>(.*)) (?<mes>(.*))/x
-
-      logger.debug( data )
 
       data.each do |c|
 
@@ -454,9 +452,7 @@ module ExternalClients
         end
       end
 
-      logger.debug( result )
-
-      return result
+      result
     end
 
 
@@ -477,7 +473,7 @@ module ExternalClients
         end
       end
 
-      return result
+      result
     end
 
 
@@ -486,22 +482,21 @@ module ExternalClients
       result = Hash.new()
       r      = Array.new
 
-      existingDevices = Array.new()
+      existing_devices = Array.new()
 
       regex = /(.*)receive_bytes{device="(?<device>(.*))"}(.*)/
 
       d = data.select { |name| name.match( regex ) }
 
       d.each do |devices|
-
         if( parts = devices.match( regex ) )
-          existingDevices += parts.captures
+          existing_devices += parts.captures
         end
       end
 
       regex = /(.*)_(?<direction>(.*))_(?<type>(.*)){device="(?<device>(.*))"}(?<mes>(.*))/x
 
-      existingDevices.each do |d|
+      existing_devices.each do |d|
 
         selected = data.select { |name| name.match( /(.*)device="#{d}(.*)/ ) }
 
@@ -510,7 +505,6 @@ module ExternalClients
         selected.each do |s|
 
           if( parts = s.match( regex ) )
-
             direction, type, device, mes = parts.captures
 
             hash[ d.to_s ] ||= {}
@@ -524,10 +518,7 @@ module ExternalClients
 
       end
 
-      result = r.reduce( :merge )
-
-      return result
-
+      r.reduce( :merge )
     end
 
 
@@ -536,26 +527,23 @@ module ExternalClients
       result = Hash.new()
       r      = Array.new
 
-      existingDevices = Array.new()
+      existing_devices = Array.new()
 
       regex = /(.*){device="(?<device>(.*))"}(.*)/
 
       d = data.select { |name| name.match( regex ) }
 
       d.each do |devices|
-
         if( parts = devices.match( regex ) )
-          existingDevices += parts.captures
+          existing_devices += parts.captures
         end
       end
 
-      existingDevices.uniq!
-
-      logger.debug( existingDevices )
+      existing_devices.uniq!
 
       regex = /(.*)_(?<type>(.*))_(?<direction>(.*)){device="(?<device>(.*))"}(?<mes>(.*))/x
 
-      existingDevices.each do |d|
+      existing_devices.each do |d|
 
         selected = data.select     { |name| name.match( /(.*)device="#{d}(.*)/ ) }
         selected = selected.select { |name| name =~ /bytes_read|bytes_written|io_now/ }
@@ -577,15 +565,9 @@ module ExternalClients
         end
 
         r.push( hash )
-
       end
 
-      result = r.reduce( :merge )
-
-      logger.debug( result )
-
-      return result
-
+      r.reduce( :merge )
     end
 
 
@@ -604,29 +586,37 @@ module ExternalClients
       data.reject! { |t| t[/devpts/] }
       data.reject! { |t| t[/devtmpfs/] }
       data.reject! { |t| t[/sysfs/] }
+      data.reject! { |t| t[/sys\//] }
       data.reject! { |t| t[/proc/] }
       data.reject! { |t| t[/none/] }
+      data.reject! { |t| t[/configfs/] }
+      data.reject! { |t| t[/debugfs/] }
+      data.reject! { |t| t[/hugetlbfs/] }
+      data.reject! { |t| t[/mqueue/] }
+      data.reject! { |t| t[/pstore/] }
+      data.reject! { |t| t[/securityfs/] }
+      data.reject! { |t| t[/selinuxfs/] }
       data.reject! { |t| t[/\/rootfs\/var\/run/] }
+      data.reject! { |t| t[/\/var\/lib\/docker/] }
       data.flatten!
 
-      existingDevices = Array.new()
+      existing_devices = Array.new()
 
       regex = /(.*){device="(?<device>(.*))"}(.*)/
 
       d = data.select { |name| name.match( regex ) }
 
       d.each do |devices|
-
         if( parts = devices.match( regex ) )
-          existingDevices += parts.captures
+          existing_devices += parts.captures
         end
       end
 
-      existingDevices.uniq!
+      existing_devices.uniq!
 
       regex = /(.*)_(?<type>(.*)){device="(?<device>(.*))",fstype="(?<fstype>(.*))",mountpoint="(?<mountpoint>(.*))"}(?<mes>(.*))/x
 
-      existingDevices.each do |d|
+      existing_devices.each do |d|
 
         selected = data.select     { |name| name.match( /(.*)device="#{d}(.*)/ ) }
 
@@ -651,10 +641,7 @@ module ExternalClients
 
       end
 
-      result = r.reduce( :merge )
-
-      return result
-
+      r.reduce( :merge )
     end
 
 

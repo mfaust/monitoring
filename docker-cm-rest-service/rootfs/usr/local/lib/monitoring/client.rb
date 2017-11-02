@@ -58,7 +58,7 @@ module Monitoring
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - Monitoring Service' )
       logger.info( "  Version #{version} (#{date})" )
-      logger.info( '  Copyright 2016-2017 Coremedia' )
+      logger.info( '  Copyright 2016-2017 CoreMedia' )
       logger.info( '  used Services:' )
       logger.info( "    - mysql        : #{mysqlHost}@#{mysqlSchema}" )
       logger.info( "    - message queue: #{mqHost}:#{mqPort}/#{mqQueue}" )

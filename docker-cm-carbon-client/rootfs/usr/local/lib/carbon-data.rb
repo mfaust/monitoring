@@ -70,7 +70,7 @@ module CarbonData
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - CarbonData' )
       logger.info( "  Version #{version} (#{date})" )
-      logger.info( '  Copyright 2016-2017 Coremedia' )
+      logger.info( '  Copyright 2016-2017 CoreMedia' )
       logger.info( '  used Services:' )
       logger.info( "    - redis        : #{redisHost}:#{redisPort}" )
       if( mysqlHost != nil )

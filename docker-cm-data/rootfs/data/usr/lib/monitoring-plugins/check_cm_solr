@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# maintainer         Coremedia
+# maintainer         CoreMedia
 # maintainer_email   bodo.schulz@coremedia.com
 # license            Copyright (C) 2016, CoreMedia AG proprietary License, all rights reserved.
 # description        icinga Check for Solr Status
@@ -43,7 +43,7 @@ version() {
   help_format_title="%-9s %s\n"
 
   echo ""
-  printf  "$help_format_title" "NRPE-Check to Check Coremedia Solr Status"
+  printf  "$help_format_title" "NRPE-Check to Check CoreMedia Solr Status"
   echo ""
   printf  "$help_format_title" " Version $VERSION ($VDATE)"
   echo ""

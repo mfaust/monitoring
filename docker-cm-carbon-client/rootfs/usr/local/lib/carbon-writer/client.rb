@@ -27,7 +27,7 @@ module CarbonWriter
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - Carbon client' )
       logger.info( "  Version #{version} (#{date})" )
-      logger.info( '  Copyright 2017 Coremedia' )
+      logger.info( '  Copyright 2017 CoreMedia' )
       logger.info( '  used Services:' )
       logger.info( "    - carbon       : #{@graphiteHost}:#{@graphitePort}" )
       logger.info( '-----------------------------------------------------------------' )

@@ -40,7 +40,7 @@ module Jolokia
       sleep_retries = params.dig(:sleep_retries) || 5
       times_retried = 0
 
-      raise ArgumentError.new( format( 'wrong type. payload must be an Hash, given %s', payload.class.to_s ) ) unless( payload.is_a?(Hash) )
+      raise ArgumentError.new( format( 'wrong type. payload must be an Array, given %s', payload.class.to_s ) ) unless( payload.is_a?(Array) )
       raise ArgumentError.new( format( 'wrong type. timeout must be an Integer, given %s', timeout.class.to_s ) ) unless( timeout.is_a?(Integer) )
       raise ArgumentError.new( format( 'wrong type. max_retries must be an Integer, given %s', max_retries.class.to_s ) ) unless( max_retries.is_a?(Integer) )
       raise ArgumentError.new( format( 'wrong type. sleep_retries must be an Integer, given %s', sleep_retries.class.to_s ) ) unless( sleep_retries.is_a?(Integer) )
@@ -98,10 +98,8 @@ module Jolokia
 
       body = JSON.parse( response.body )
 
-      body = body.first if( body.is_a?(Array) )
-
-      request_status = body.dig('status') || 500
-      request_error  = body.dig('error')
+      request_status = body.first.dig('status') || 500
+      request_error  = body.first.dig('error')
 
       # stacktrace found! :(
       if( request_status != 200 )
@@ -112,19 +110,10 @@ module Jolokia
     end
 
 
-    def available?( params )
-
-      raise ArgumentError.new( format( 'wrong type. params must be an Hash, given %s', params.class.to_s ) ) unless( params.is_a?(Hash) )
-      raise ArgumentError.new('missing params') if( params.size.zero? )
-
-      host = params.dig(:host) || @Host
-      port = params.dig(:port) || @Port
-
-      raise ArgumentError.new( format( 'wrong type. host must be an String, given %s', host.class.to_s ) ) unless( host.is_a?(String) )
-      raise ArgumentError.new( format( 'wrong type. port must be an Integer, given %s', port.class.to_s ) ) unless( port.is_a?(Integer) )
+    def available?
 
       # if our jolokia proxy available?
-      false if( ! Utils::Network.portOpen?( host, port ) )
+      false if( ! Utils::Network.portOpen?( @Host, @Port ) )
 
       true
     end

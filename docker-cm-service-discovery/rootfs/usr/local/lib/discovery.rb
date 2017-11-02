@@ -117,7 +117,7 @@ module ServiceDiscovery
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - Service Discovery' )
       logger.info( "  Version #{version} (#{date})" )
-      logger.info( '  Copyright 2016-2017 Coremedia' )
+      logger.info( '  Copyright 2016-2017 CoreMedia' )
       logger.info( '  used Services:' )
       logger.info( "    - jolokia      : #{jolokia_host}:#{jolokia_port}" )
       logger.info( "    - mysql        : #{mysql_host}@#{mysql_schema}" )
@@ -291,12 +291,9 @@ module ServiceDiscovery
 
       logger.info( sprintf( 'Adding host \'%s\'', host ) )
 
-      if(!@jolokia.available?())
-
-        return {
-          status: 500,
-          message: 'jolokia service is not available!'
-        }
+      if( @jolokia.available? == false )
+        logger.error( 'jolokia service is not available!' )
+        { status: 500, message: 'jolokia service is not available!' }
       end
 
       start = Time.now

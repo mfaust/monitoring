@@ -1,5 +1,4 @@
 
-
 module DataCollector
 
   class Config

@@ -33,7 +33,7 @@ module ExternalDiscovery
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - External Discovery Service' )
       logger.info( "  Version #{version} (#{date})" )
-      logger.info( '  Copyright 2016-2017 Coremedia' )
+      logger.info( '  Copyright 2016-2017 CoreMedia' )
       logger.info( "  Monitoring System #{apiUrl}" )
       logger.info( '-----------------------------------------------------------------' )
       logger.info( '' )

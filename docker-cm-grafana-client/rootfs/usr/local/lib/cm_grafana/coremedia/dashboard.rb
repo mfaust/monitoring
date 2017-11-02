@@ -1,7 +1,7 @@
 
 class CMGrafana
 
-  module Coremedia
+  module CoreMedia
 
     module Dashboard
 
@@ -47,7 +47,7 @@ class CMGrafana
 
       end
 
-      # creates an Grafana Dashboard for Coremedia Services
+      # creates an Grafana Dashboard for CoreMedia Services
       # the Dashboard will be create from pre defined Templates
       # PUBLIC
       #
