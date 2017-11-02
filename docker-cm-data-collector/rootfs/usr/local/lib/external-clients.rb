@@ -333,15 +333,15 @@ module ExternalClients
 
     include Logging
 
-    def initialize( params = {} )
+    def initialize( params )
 
-      @host      = params[:host]          ? params[:host]          : nil
-      @port      = params[:port]          ? params[:port]          : 9100
+      @host      = params.dig(:host)
+      @port      = params.dig(:port) ||  9100
 
     end
 
 
-    def callService()
+    def call_service()
 
       uri = URI( sprintf( 'http://%s:%s/metrics', @host, @port ) )
 
@@ -391,7 +391,7 @@ module ExternalClients
     end
 
 
-    def collectUptime( data )
+    def collect_uptime( data )
 
       result  = Hash.new()
 
@@ -407,7 +407,7 @@ module ExternalClients
     end
 
 
-    def collectCpu( data )
+    def collect_cpu( data )
 
       result  = Hash.new()
       tmpCore = nil
@@ -434,10 +434,12 @@ module ExternalClients
     end
 
 
-    def collectLoad( data )
+    def collect_load( data )
 
       result = Hash.new()
       regex = /(?<load>(.*)) (?<mes>(.*))/x
+
+      logger.debug( data )
 
       data.each do |c|
 
@@ -452,11 +454,13 @@ module ExternalClients
         end
       end
 
+      logger.debug( result )
+
       return result
     end
 
 
-    def collectMemory( data )
+    def collect_memory( data )
 
       result = Hash.new()
       data   = data.select { |name| name =~ /^node_memory_Swap|node_memory_Mem/ }
@@ -477,7 +481,7 @@ module ExternalClients
     end
 
 
-    def collectNetwork( data )
+    def collect_network( data )
 
       result = Hash.new()
       r      = Array.new
@@ -527,7 +531,7 @@ module ExternalClients
     end
 
 
-    def collectDisk( data )
+    def collect_disk( data )
 
       result = Hash.new()
       r      = Array.new
@@ -546,6 +550,8 @@ module ExternalClients
       end
 
       existingDevices.uniq!
+
+      logger.debug( existingDevices )
 
       regex = /(.*)_(?<type>(.*))_(?<direction>(.*)){device="(?<device>(.*))"}(?<mes>(.*))/x
 
@@ -576,12 +582,14 @@ module ExternalClients
 
       result = r.reduce( :merge )
 
+      logger.debug( result )
+
       return result
 
     end
 
 
-    def collectFilesystem( data )
+    def collect_filesystem( data )
 
       result = Hash.new()
       r      = Array.new
@@ -650,20 +658,20 @@ module ExternalClients
     end
 
 
-    def get()
+    def get
 
       begin
 
-        self.callService( )
+        self.call_service
 
         return {
-          :uptime     => self.collectUptime( @boot ),
-          :cpu        => self.collectCpu( @cpu ),
-          :load       => self.collectLoad( @load ),
-          :memory     => self.collectMemory( @memory ),
-          :network    => self.collectNetwork( @network ),
-          :disk       => self.collectDisk( @disk ),
-          :filesystem => self.collectFilesystem( @filesystem )
+          :uptime     => self.collect_uptime( @boot ),
+          :cpu        => self.collect_cpu( @cpu ),
+          :load       => self.collect_load( @load ),
+          :memory     => self.collect_memory( @memory ),
+          :network    => self.collect_network( @network ),
+          :disk       => self.collect_disk( @disk ),
+          :filesystem => self.collect_filesystem( @filesystem )
         }
       rescue Exception => e
         logger.error( "An error occurred for query: #{e}" )
@@ -730,7 +738,7 @@ module ExternalClients
 
 
 
-    def collectLoad( data )
+    def collect_load( data )
 
       result = Hash.new()
       regex = /(?<load>(.*)) (?<mes>(.*))/x
@@ -761,10 +769,10 @@ module ExternalClients
 
       begin
 
-        self.callService( )
+        self.call_service( )
 
         return {
-          :load       => self.collectLoad( 'load-avg' )
+          :load       => self.collect_load( 'load-avg' )
         }
 
       rescue Exception => e

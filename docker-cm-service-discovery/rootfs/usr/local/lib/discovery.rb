@@ -43,7 +43,8 @@ module ServiceDiscovery
         5432,     # postgres
         6379,     # redis
         8081,     # Apache mod_status
-        9100,     # node_exporter
+        9100,     # node_exporter (standard port)
+        19100,    # node_exporter (CoreMedia internal)
         28017,    # mongodb
         38099,
         40099,

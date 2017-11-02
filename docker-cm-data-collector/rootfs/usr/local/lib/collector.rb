@@ -293,7 +293,7 @@ module DataCollector
 
       port = data.dig(:port) || 9100
 
-      if( port != nil )
+      unless( port.nil? )
 
         settings = {
           :host => host,
