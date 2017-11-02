@@ -50,6 +50,11 @@ example data to send to jolokia. A bulk-request for 3 different mbeans.
 ]
 ```
 
+Since Version 1707, we integrate a seperate and read-only bean to help us the secure application detection.
+this bean is defined in the pom.xml and set the application name to build time.
+
+
+
 # results
 
 ## 7.0
@@ -220,7 +225,7 @@ The found application names are finally normalized.
 In the first block (```"mbean": "java.lang:type=Runtime"```) we look at the ```"ClassPath"``` Variable.
 Contains the result **NOT** ```cm7-tomcat-installation``` we have an new portstyle and can extract the Application Name from ```ClassPath```.
 
-Multiple Aplications in one Tomcat will be ignored.
+Multiple Applications in one Tomcat will be ignored.
 
 
 
