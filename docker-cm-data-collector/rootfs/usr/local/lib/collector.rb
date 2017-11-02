@@ -578,7 +578,7 @@ module DataCollector
 
 #       logger.debug( "collectMeasurements( #{params} )" )
 
-      if( @jolokia.jolokiaIsAvailable?() == false )
+      if( @jolokia.available?() == false )
 
         logger.error( 'jolokia service is not available!' )
 
@@ -606,7 +606,7 @@ module DataCollector
 
           result[v] ||= []
 
-          cacheKey = Storage::RedisClient.cacheKey( { :host => fqdn, :pre => 'result', :service => v } )
+          cacheKey = Storage::RedisClient.cacheKey( host: fqdn, pre: 'result', service: v )
 
           if( i.count > 1 )
 
@@ -614,7 +614,7 @@ module DataCollector
 
             if( self.checkHostAndService( targetUrl ) == true )
 
-              response       = @jolokia.post( { :payload => i, :timeout => 15 } )
+              response       = @jolokia.post( payload: i, timeout: 15, sleep_retries: 3 )
 
               jolokiaStatus  = response.dig(:status)
               jolokiaMessage = response.dig(:message)
@@ -632,7 +632,7 @@ module DataCollector
 
                   # get configured Master Live Server
                   if( v == 'replication-live-server' )
-                    data = self.parse_mls_ior( { :fqdn => fqdn, :data => data } )
+                    data = self.parse_mls_ior( fqdn: fqdn, data: data )
                   end
 
                   result[v] = data
@@ -687,19 +687,19 @@ module DataCollector
           begin
 
 #             logger.debug( 'store result in our redis' )
-#             logger.debug( { :host => fqdn, :pre => 'result', :service => v } )
+#             logger.debug( host: fqdn, pre: 'result', service: v ) )
 
             redisResult = @redis.set( cacheKey, result[v] )
 
             if( redisResult.is_a?( FalseClass ) || ( redisResult.is_a?( String ) && redisResult != 'OK' ) )
               logger.error( sprintf( 'value for key %s can not be write', cacheKey ) )
-              logger.error( { :host => fqdn, :pre => 'result', :service => v } )
+              logger.error( host: fqdn, pre: 'result', service: v )
             end
 
           rescue => e
 
             logger.error( sprintf( 'value for key \'%s\' can not be write', cacheKey ) )
-            logger.error( { :host => fqdn, :pre => 'result', :service => v } )
+            logger.error( host: fqdn, pre: 'result', service: v )
             logger.error( result[v] )
             logger.error( e )
           end

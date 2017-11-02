@@ -290,7 +290,7 @@ module ServiceDiscovery
 
       logger.info( sprintf( 'Adding host \'%s\'', host ) )
 
-      if(!@jolokia.jolokiaIsAvailable?())
+      if(!@jolokia.available?())
 
         return {
           status: 500,

@@ -17,31 +17,38 @@ module Jolokia
 
     include Logging
 
-    def initialize( params = {} )
+    def initialize( settings )
 
-#       logger.debug( JSON.pretty_generate( params ) )
+      raise ArgumentError.new( format( 'wrong type. settings must be an Hash, given %s', settings.class.to_s ) ) unless( settings.is_a?(Hash) )
 
-      @Host     = params.dig(:host) || 'localhost'
-      @Port     = params.dig(:port) || 8080
-      @Path     = params.dig(:path) || '/jolokia'
-      @authUser = params.dig(:auth, :user)
-      @authPass = params.dig(:auth, :pass)
-
+      @Host     = settings.dig(:host) || 'localhost'
+      @Port     = settings.dig(:port) || 8080
+      @Path     = settings.dig(:path) || '/jolokia'
+      @auth_user = settings.dig(:auth, :user)
+      @auth_password = settings.dig(:auth, :pass)
     end
 
 
-    def post( params = {} )
+    def post( params )
 
-#       logger.debug( 'Jolokia.post()' )
-#       logger.debug( params )
+      raise ArgumentError.new( format( 'wrong type. params must be an Hash, given %s', params.class.to_s ) ) unless( params.is_a?(Hash) )
+      raise ArgumentError.new('missing params') if( params.size.zero? )
 
-      payload = params.dig(:payload) || {}
-      timeout = params.dig(:timeout) || 10
+      payload       = params.dig(:payload)
+      timeout       = params.dig(:timeout) || 10
+      max_retries   = params.dig(:max_retries) || 5
+      sleep_retries = params.dig(:sleep_retries) || 5
+      times_retried = 0
+
+      raise ArgumentError.new( format( 'wrong type. payload must be an Hash, given %s', payload.class.to_s ) ) unless( payload.is_a?(Hash) )
+      raise ArgumentError.new( format( 'wrong type. timeout must be an Integer, given %s', timeout.class.to_s ) ) unless( timeout.is_a?(Integer) )
+      raise ArgumentError.new( format( 'wrong type. max_retries must be an Integer, given %s', max_retries.class.to_s ) ) unless( max_retries.is_a?(Integer) )
+      raise ArgumentError.new( format( 'wrong type. sleep_retries must be an Integer, given %s', sleep_retries.class.to_s ) ) unless( sleep_retries.is_a?(Integer) )
 
       # HINT or QUESTION
       # check payload if is an valid json?
 
-      uri          = URI.parse( sprintf( 'http://%s:%s%s', @Host, @Port, @Path ) )
+      uri          = URI.parse( format( 'http://%s:%s%s', @Host, @Port, @Path ) )
       http         = Net::HTTP.new( uri.host, uri.port )
 
       request = Net::HTTP::Post.new(
@@ -59,11 +66,7 @@ module Jolokia
         :read_timeout => timeout
       ) do |http|
 
-        max_retries   = 2
-        times_retried = 0
-
         begin
-
           http.request( request )
 
         rescue Net::ReadTimeout => e
@@ -71,78 +74,59 @@ module Jolokia
           if( times_retried < max_retries )
 
             times_retried += 1
-            logger.warn( sprintf( 'cannot execute request to %s://%s:%s%s, cause: %s', uri.scheme, uri.hostname, uri.port, uri.request_uri, e ) )
-            logger.warn( "   retry #{times_retried}/#{max_retries}" )
-#             logger.debug( sprintf( ' -> request body: %s', request.body ) )
+            logger.warn( format( 'Cannot execute request to %s://%s:%s%s, cause: %s', uri.scheme, uri.hostname, uri.port, uri.request_uri, e ) )
+            logger.warn( format( '   retry %s/%s', times_retried, max_retries ) )
+            logger.debug( format( ' -> request body: %s', request.body ) )
 
-            sleep( 2 )
+            sleep( sleep_retries )
             retry
           else
-            logger.error( 'exiting request ...' )
-            error = sprintf( 'cannot execute request to %s://%s:%s%s, cause: %s', uri.scheme, uri.hostname, uri.port, uri.request_uri, e )
-#            error = sprintf( '%s for request %s://%s:%s%s, cause: %s, request: %s', error, uri.scheme, uri.hostname, uri.port, uri.request_uri, e, request.body )
-#             logger.error( error )
+            error = format( '%s for request %s://%s:%s%s, cause: %s, request: %s', error, uri.scheme, uri.hostname, uri.port, uri.request_uri, e, request.body )
+            logger.error( 'Exiting request ...' )
+            logger.error( error )
 
-            return {
-              :status  => 500,
-              :message => error
-            }
+            { status: 500, message: error }
           end
-
-#        rescue Timeout::Error, Errno::EINVAL, Errno::ECONNRESET, EOFError, Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError => e
         rescue Errno::EINVAL, Errno::ECONNRESET, EOFError, Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError => e
 
-          error = sprintf( '%s for request %s://%s:%s%s, cause: %s, request: %s', error, uri.scheme, uri.hostname, uri.port, uri.request_uri, e, request.body )
-
+          error = format( '%s for request %s://%s:%s%s, cause: %s, request: %s', error, uri.scheme, uri.hostname, uri.port, uri.request_uri, e, request.body )
           logger.error( error )
 
-          return {
-            :status  => 500,
-            :message => error
-          }
+          { status: 500, message: error }
         end
       end
 
       body = JSON.parse( response.body )
 
-#       logger.debug( 'done' )
-#       logger.debug( body.first )
+      body = body.first if( body.is_a?(Array) )
 
-      requestStatus = body.first['status'] ? body.first['status'] : 500
-      requestError  = body.first['error']  ? body.first['error']  : nil
+      request_status = body.dig('status') || 500
+      request_error  = body.dig('error')
 
-#       logger.debug( requestStatus )
-#       logger.debug( requestError )
-
-      if( requestStatus != 200 )
-
-        # stacktrace found! :(
-        return {
-          :status   => requestStatus,
-          :message  => requestError
-        }
+      # stacktrace found! :(
+      if( request_status != 200 )
+        { status: request_status, message: request_error }
       end
 
-      return {
-        :status  => 200,
-        :message => body
-      }
-
+      { status: 200, message: body }
     end
 
 
-    def jolokiaIsAvailable?( params = {} )
+    def available?( params )
 
-      host = params.dig(:host) ||  @Host
-      port = params.dig(:port) ||  @Port
+      raise ArgumentError.new( format( 'wrong type. params must be an Hash, given %s', params.class.to_s ) ) unless( params.is_a?(Hash) )
+      raise ArgumentError.new('missing params') if( params.size.zero? )
+
+      host = params.dig(:host) || @Host
+      port = params.dig(:port) || @Port
+
+      raise ArgumentError.new( format( 'wrong type. host must be an String, given %s', host.class.to_s ) ) unless( host.is_a?(String) )
+      raise ArgumentError.new( format( 'wrong type. port must be an Integer, given %s', port.class.to_s ) ) unless( port.is_a?(Integer) )
 
       # if our jolokia proxy available?
-      if( ! Utils::Network.portOpen?( host, port ) )
-        logger.error( 'jolokia service is not available!' )
-        return false
-      end
+      false if( ! Utils::Network.portOpen?( host, port ) )
 
-      return true
+      true
     end
 
   end
