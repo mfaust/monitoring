@@ -1,9 +1,31 @@
 #!/usr/bin/env ruby
 
+require 'net/http'
 require 'open3'
 require 'json'
 
 o = []
+
+def get_response_with_redirect(url)
+
+  uri = URI.parse(url)
+
+  http = Net::HTTP.new(uri.host,uri.port)
+  resp, data = http.get(uri.path,nil)
+
+  #1."Location" response redirect...
+  if( resp.response['Location'] != nil )
+    # puts 'Direct to: ' + resp.response['Location']
+    redirectUrl = resp.response['Location']
+  end
+
+  return '/' if( redirectUrl.nil? )
+
+  response = URI.parse( redirectUrl )
+
+  redirectUrl.gsub( format( '%s://%s', response.scheme, response.host ) ,'')
+end
+
 
 Open3.popen3('/usr/sbin/apache2ctl', '-S')  { |stdin, stdout, stderr, wait_thr|
 
@@ -18,6 +40,8 @@ Open3.popen3('/usr/sbin/apache2ctl', '-S')  { |stdin, stdout, stderr, wait_thr|
       vhost = parts['vhost'].to_s.strip if( parts )
       path  = parts['path'].to_s.strip if( parts )
 
+      next if( vhost.nil? )
+
       o << {
         vhost => { url: '/' }
       }
@@ -28,5 +52,14 @@ Open3.popen3('/usr/sbin/apache2ctl', '-S')  { |stdin, stdout, stderr, wait_thr|
 }
 
 r = o.reduce( {} , :merge )
+
+r.each do |k,v|
+
+  next if( k.nil? )
+
+  url = format( 'http://%s%s', k, v[:url] )
+
+  v[:url] = get_response_with_redirect( url )
+end
 
 puts JSON.pretty_generate(r)
