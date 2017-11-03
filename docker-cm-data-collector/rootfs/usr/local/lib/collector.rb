@@ -687,7 +687,7 @@ module DataCollector
 
             logger.error( sprintf( 'value for key \'%s\' can not be write', cacheKey ) )
             logger.error( host: fqdn, pre: 'result', service: v )
-            logger.error( result[v] )
+            # logger.error( result[v] )
             logger.error( e )
           end
 
