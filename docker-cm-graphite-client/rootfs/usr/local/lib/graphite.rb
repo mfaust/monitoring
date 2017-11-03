@@ -10,7 +10,7 @@ require 'uri'
 require 'time'
 
 require_relative 'logging'
-require_relative 'message-queue'
+require_relative 'message_queue'
 require_relative 'graphite/tools'
 require_relative 'graphite/annotations'
 require_relative 'graphite/queue'
@@ -58,8 +58,8 @@ module Graphite
       logger.info( '-----------------------------------------------------------------' )
       logger.info( '' )
 
-      @mq_consumer  = MessageQueue::Consumer.new(mq_settings )
-      @mq_producer  = MessageQueue::Producer.new(mq_settings )
+      @mq_consumer  = MessageQueue::Consumer.new( mq_settings )
+      @mq_producer  = MessageQueue::Producer.new( mq_settings )
 
       begin
 

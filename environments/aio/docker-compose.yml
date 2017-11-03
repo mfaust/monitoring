@@ -8,13 +8,6 @@ networks:
       config:
         - subnet: 192.168.1.0/24
 
-volumes:
-  elastic:
-    driver: local
-  mongodata:
-    driver: local
-
-
 services:
 
   data:
@@ -22,61 +15,6 @@ services:
     container_name: 01-data
     volumes:
       - /share:/share
-
-  fluentd:
-    image: fluent/fluentd:v0.14-onbuild
-    volumes:
-      - ./fluentd/conf:/fluentd/etc
-    links:
-      - "elasticsearch"
-    ports:
-      - "24224:24224"
-      - "24224:24224/udp"
-
-  mongodb:
-    image: mongo:3
-    container_name: mongodb
-    restart: always
-    ports:
-      - 27017:27017
-    volumes:
-      - mongodata:/data/db
-
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:5.6.0
-    container_name: elasticsearch
-    environment:
-      - cluster.name=docker-cluster
-      - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    mem_limit: 2g
-    volumes:
-      - elastic:/usr/share/elasticsearch/data
-    ports:
-      - 9200:9200
-
-
-#  graylog2:
-#    container_name: graylog2
-#    image: graylog2/allinone
-#    ports:
-#      - 9000:9000
-#      - 12201:12201
-#    volumes:
-#      - ./graylog2/data:/var/opt/greylog/data
-#      - ./graylog2/log:/var/log/graylog`
-#
-#  fluentd-gelf:
-#    container_name: fluentd-gelf
-#    build: .
-#    links:
-#      - graylog2
-#    ports:
-#      - 24224:24224
 
   dnsdock:
     restart: always
@@ -86,11 +24,6 @@ services:
     labels:
       com.dnsdock.alias: dnsdock
       com.dnsdock.ttl: '120'
-#    logging:
-#      driver: "fluentd"
-#      options:
-#        fluentd-address: localhost:24224
-#        tag: dnsdock
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock

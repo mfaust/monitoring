@@ -11,7 +11,7 @@ ENV \
   TERM=xterm \
   APK_ADD="build-base ruby ruby-dev " \
   APK_DEL="build-base ruby-dev" \
-  GEMS="beaneater json rest-client rufus-scheduler tzinfo-data"
+  GEMS="beaneater json rest-client rufus-scheduler semantic_logger tzinfo-data"
 
 # ---------------------------------------------------------------------------------------
 

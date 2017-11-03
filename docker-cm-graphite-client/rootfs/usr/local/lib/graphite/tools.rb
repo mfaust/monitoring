@@ -5,14 +5,10 @@ module Graphite
 
     def node_tag(host )
 
-      if( @identifier != nil )
-        @identifier
-      else
-        host
-      end
+      @identifier if( @identifier != nil )
+
+      host
     end
-
   end
-
 end
 
