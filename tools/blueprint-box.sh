@@ -20,9 +20,14 @@ yum -y install docker-ce
 
 service docker start
 
+systemctl enable docker
+
 docker pull quay.io/prometheus/node-exporter
 
-docker run -d -p 9100:9100 \
+docker run \
+  --restart=always \
+  -d \
+  -p 9100:9100 \
   -v "/proc:/host/proc:ro" \
   -v "/sys:/host/sys:ro" \
   -v "/:/rootfs:ro,rslave" \
@@ -31,3 +36,4 @@ docker run -d -p 9100:9100 \
     --path.procfs /host/proc \
     --path.sysfs /host/sys \
     --collector.filesystem.ignored-mount-points "^/(sys|proc|dev|host|etc)($|/)"
+
