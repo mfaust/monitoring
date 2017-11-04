@@ -48,49 +48,60 @@ module Graphite
 
       endpoint = sprintf( '%s/events/', uri.request_uri )
 
-      logger.debug( data )
-      logger.debug( endpoint )
+      logger.debug( "data    : #{data}" )
+      logger.debug( "endpoint: #{endpoint}" )
 
       begin
+        response     = @api_instance[ '/events/' ].post( data.to_json, { 'Content-Type' => 'application/json' } )
 
-        response     = @api_instance['/events/' ].post(data.to_json, {'Content-Type' => 'application/json' } )
-
-        response_code = response.code.to_i
-        response_body = response.body
+        response_code    = response.code.to_i
+        response_body    = response.body
+        response_headers = response.headers
 
         if( ( response_code >= 200 && response_code <= 299 ) || ( response_code >= 400 && response_code <= 499 ) )
 
-          return {
-            :status     => 200,
-            :message    => 'annotation successful',
-            :annotation => data
-          }
+          { status: 200, message: 'annotation successful', annotation: data }
         else
 
           logger.error( "#{__method__}  on #{endpoint} failed: HTTP #{response_code} - #{response_body}" )
-
-          JSON.parse(response_body )
+          JSON.parse( response_body )
         end
 
       rescue Errno::ECONNREFUSED
 
         logger.error( 'connection to graphite service refused' )
 
-        return {
-          :status   => 500,
-          :message  => 'connection to graphite service refused'
-        }
+        { status: 500, message: 'connection to graphite service refused' }
+
+      rescue RestClient::ExceptionWithResponse => e
+
+        logger.error( "Error: #{__method__} #{method_type.upcase} on #{endpoint} error: '#{e}'" )
+        logger.error( data )
+        logger.error( "code  : #{response_code}" )
+        logger.error( "body  : #{response_body}" )
+        logger.error( JSON.pretty_generate( response_headers ) )
+        logger.debug( e.inspect )
+
+        return false
 
       rescue => e
 
         logger.error( "Error: #{__method__}  on #{endpoint} error: '#{e}'" )
+        logger.error( data )
+        logger.error( "code  : #{response_code}" )
+        logger.error( "body  : #{response_body}" )
+        logger.error( JSON.pretty_generate( response_headers ) )
+        logger.debug( e.inspect )
+
+        # logger.error(e)
 
         if( e.response )
           result           = JSON.parse( e.response )
         else
           result  = e.inspect
         end
-          result['status'] = e.to_s.split( ' ' ).first
+
+        result['status'] = e.to_s.split( ' ' ).first
 
         return result
       end
