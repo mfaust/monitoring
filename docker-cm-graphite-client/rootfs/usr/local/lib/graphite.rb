@@ -11,6 +11,7 @@ require 'time'
 
 require_relative 'logging'
 require_relative 'message_queue'
+require_relative 'graphite/version'
 require_relative 'graphite/tools'
 require_relative 'graphite/annotations'
 require_relative 'graphite/queue'
@@ -45,8 +46,8 @@ module Graphite
         :beanstalkQueue => @mq_queue
       }
 
-      version              = '1.5.0'
-      date                 = '2017-10-26'
+      version              = Graphite::VERSION
+      date                 = Graphite::DATE
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - Graphite Client' )
