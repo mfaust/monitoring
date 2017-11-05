@@ -50,8 +50,6 @@ module Monitoring
       @enabledGrafana   = true
       @enabledIcinga    = true
 
-      logger.level         = Logger::INFO
-
       version              = Monitoring::VERSION
       date                 = Monitoring::DATE
 

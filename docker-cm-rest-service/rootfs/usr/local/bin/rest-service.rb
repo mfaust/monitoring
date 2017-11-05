@@ -254,7 +254,7 @@ module Sinatra
     post '/v2/annotation/:host' do
 
       host   = params[:host]
-      result = m.annotation( host, @request_paylod )
+      result = m.annotation( host: host, payload: @request_paylod )
 
 #       status = result[:status]
 

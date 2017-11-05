@@ -3,7 +3,7 @@ module Monitoring
 
   module Tools
 
-    def ns_lookup(name, expire = 120 )
+    def ns_lookup( name, expire = 120 )
 
       # DNS
       #
