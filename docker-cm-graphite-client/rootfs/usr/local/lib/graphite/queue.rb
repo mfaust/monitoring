@@ -97,6 +97,8 @@ module Graphite
         fqdn  = dns.dig('fqdn')
       end
 
+      return { status: 500, message: 'missing hostname for annotation' } if( fqdn.nil? )
+
       @identifier = fqdn
 
       unless timestamp.nil?
