@@ -56,11 +56,15 @@ module Graphite
       logger.debug( "endpoint: #{endpoint}" )
 
       begin
-        response     = @api_instance[ '/events/' ].post( data.to_json, { 'Content-Type' => 'application/json' } )
+        response         = @api_instance[ '/events/' ].post( data.to_json, { 'Content-Type' => 'application/json' } )
 
         response_code    = response.code.to_i
         response_body    = response.body
         response_headers = response.headers
+
+        logger.debug( response_code )
+        logger.debug( response_body )
+        logger.debug( response_headers )
 
         if( ( response_code >= 200 && response_code <= 299 ) || ( response_code >= 400 && response_code <= 499 ) )
 
@@ -86,7 +90,7 @@ module Graphite
         logger.error( JSON.pretty_generate( response_headers ) )
         logger.debug( e.inspect )
 
-        return false
+        return { status: response_code, message: response_body, annotation: data }
 
       rescue => e
 
