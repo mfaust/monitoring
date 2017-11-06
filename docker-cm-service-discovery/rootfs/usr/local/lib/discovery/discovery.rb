@@ -18,6 +18,7 @@ module ServiceDiscovery
         case port
         when 80
           services.push('http-proxy')
+          services.push('http-status')
         when 443
           services.push('https-proxy')
         when 8081

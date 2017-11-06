@@ -27,7 +27,7 @@ def get_response_with_redirect(url)
 end
 
 
-Open3.popen3('/usr/sbin/apache2ctl', '-S')  { |stdin, stdout, stderr, wait_thr|
+Open3.popen3('/usr/sbin/apachectl', '-S')  { |stdin, stdout, stderr, wait_thr|
 
   pid = wait_thr.pid # pid of the started process.
 
@@ -41,6 +41,7 @@ Open3.popen3('/usr/sbin/apache2ctl', '-S')  { |stdin, stdout, stderr, wait_thr|
       path  = parts['path'].to_s.strip if( parts )
 
       next if( vhost.nil? )
+      next if( vhost =~ /^candy.*/ )
 
       o << {
         vhost => { url: '/' }
@@ -59,7 +60,10 @@ r.each do |k,v|
 
   url = format( 'http://%s%s', k, v[:url] )
 
+
   v[:url] = get_response_with_redirect( url )
 end
+
+r = { 'vhosts' => r }
 
 puts JSON.pretty_generate(r)

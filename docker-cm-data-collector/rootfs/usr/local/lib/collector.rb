@@ -99,7 +99,8 @@ module DataCollector
       @redis     = Storage::RedisClient.new( { :redis => { :host => redis_host } } )
       @jolokia   = Jolokia::Client.new( { :host => jolokia_host, :port => jolokia_port, :path => jolokia_path, :auth => { :user => jolokia_auth_user, :pass => jolokia_auth_pass } } )
       @mq        = MessageQueue::Consumer.new(mq_settings )
-      @prepare   = Prepare.new( prepareSettings )
+      @cfg       = Config.new( application: application_config, service: service_config )
+      @prepare   = Prepare.new( redis: @redis, config: @cfg ) # prepareSettings )
       @jobs      = JobQueue::Job.new()
       @database  = Storage::MySQL.new( mysql_settings )
 
@@ -343,32 +344,24 @@ module DataCollector
 
     def apache_mod_status( host, data = {} )
 
-      port = data.dig(:port) || 8081
+      logger.debug( "apache_mod_status( #{host}, #{data} )" )
 
-      if( port != nil )
-        settings = {
-          :host => host,
-          :port => port
-        }
-      end
+      port = data.dig(:port) || 8081
 
       result = Utils::Network.portOpen?( host, port )
 
       if( result == false )
         logger.warn( sprintf( 'The Port \'%s\' on Host \'%s\' is not open, skip ...', port, host ) )
 
-        JSON.parse( JSON.generate( { :status => 500 } ) )
+        JSON.parse( JSON.generate( status: 500 ) )
       else
 
-        result = Array.new
+#        result = []
 
-        mod_status      = ExternalClients::ApacheModStatus.new( settings )
+        mod_status      = ExternalClients::ApacheModStatus.new( host: host, port: port )
         mod_status_data = mod_status.tick
 
-        result = {
-          status: mod_status_data,
-        }
-
+        return { status: mod_status_data }
       end
     end
 
@@ -562,7 +555,7 @@ module DataCollector
 
       if( @jolokia.available? == false )
         logger.error( 'jolokia service is not available!' )
-        { status: 500, message: 'jolokia service is not available!' }
+        return { status: 500, message: 'jolokia service is not available!' }
       end
 
       hostname  = params.dig(:hostname)
@@ -657,7 +650,20 @@ module DataCollector
               d = self.resourced_data( fqdn )
             when 'http-status'
               # apache mod_status
-              d = self.apache_mod_status( fqdn )
+
+              # TODO
+              # need better coding
+              port = 80
+              begin
+                service_config = @cfg.service_config.clone
+                port = service_config.dig( 'http-status', 'port' ) || 80
+                logger.debug( port )
+              rescue => e
+                logger.error(e)
+                logger.error( e.backtrace.join("\n") )
+              end
+
+              d = self.apache_mod_status( fqdn, { port: port } )
             else
               # all others
             end
@@ -667,6 +673,7 @@ module DataCollector
             rescue => e
               logger.error( "i can't create data for service #{v}" )
               logger.error( e )
+              logger.error( e.backtrace.join("\n") )
             end
 
           end

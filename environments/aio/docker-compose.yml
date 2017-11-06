@@ -8,6 +8,16 @@ networks:
       config:
         - subnet: 192.168.1.0/24
 
+volumes:
+  database:
+    driver: local
+  redis:
+    driver: local
+  carbon:
+    driver: local
+  icinga:
+    driver: local
+
 services:
 
   data:
@@ -57,7 +67,7 @@ services:
       service: database
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /var/tmp/docker-volumes/database:/srv
+      - database:/srv
     networks:
       mon:
         ipv4_address: 192.168.1.7
@@ -101,7 +111,7 @@ services:
       - 6379:6379
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /var/tmp/docker-volumes/redis:/var/lib/redis
+      - redis:/var/lib/redis
     networks:
       mon:
         ipv4_address: 192.168.1.10
@@ -155,7 +165,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /var/log/:/var/tmp/docker-log
-      - /var/tmp/docker-volumes/carbon:/srv
+      - carbon:/srv
     networks:
       mon:
         ipv4_address: 192.168.1.12
@@ -172,14 +182,14 @@ services:
       - data
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /var/tmp/docker-volumes/carbon:/srv
+      - carbon:/srv
     networks:
       mon:
         ipv4_address: 192.168.1.13
 
   grafana:
     restart: always
-    image: bodsch/docker-grafana:4.6.0
+    image: bodsch/docker-grafana:1711.1
     container_name: grafana
     hostname: grafana
     extends:
@@ -195,7 +205,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /share/opt/grafana/dashboards:/opt/grafana/dashboards
-      - /var/tmp/docker-volumes/carbon:/srv
+      # - /var/tmp/docker-volumes/carbon:/srv
     networks:
       mon:
         ipv4_address: 192.168.1.14
@@ -235,8 +245,8 @@ services:
       - /share/usr/lib/monitoring-plugins/check_cm_runlevel.rb:/usr/lib/monitoring-plugins/check_cm_runlevel
       - /share/usr/lib/monitoring-plugins/check_cm_sequencenumbers.rb:/usr/lib/monitoring-plugins/check_cm_seqencenumbers
       - /share/usr/lib/monitoring-plugins/check_ssl_cert:/usr/lib/monitoring-plugins/check_ssl_cert
-      - /var/tmp/docker-volumes/icinga:/srv
-      - /var/tmp/docker-volumes/icinga:/var/lib/icinga2
+      - icinga:/srv
+      - icinga:/var/lib/icinga2
     networks:
       mon:
         ipv4_address: 192.168.1.15
@@ -260,14 +270,14 @@ services:
       - cm-icinga2-master:icinga2
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /var/tmp/docker-volumes/icinga:/srv
+      # - /var/tmp/docker-volumes/icinga:/srv
     networks:
       mon:
         ipv4_address: 192.168.1.16
 
   markdown-service:
     restart: always
-    image: bodsch/docker-markdown-service:1708-35.1
+    image: bodsch/docker-markdown-service:1.0.0
     container_name: markdown-service
     hostname: markdown-service
     depends_on:

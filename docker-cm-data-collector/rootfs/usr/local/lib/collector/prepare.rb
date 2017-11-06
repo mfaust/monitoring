@@ -9,11 +9,16 @@ module DataCollector
 
     def initialize( settings = {} )
 
-      @redisHost     = settings.dig(:redis, :host)
-      @redisPort     = settings.dig(:redis, :port) || 6379
+      #@redisHost     = settings.dig(:redis, :host)
+      #@redisPort     = settings.dig(:redis, :port) || 6379
+      redis          = settings.dig(:redis)
+      config         = settings.dig(:config)
 
-      @cfg           = Config.new( settings )
-      @redis         = Storage::RedisClient.new( { :redis => { :host => @redisHost } } )
+      @cfg           = config.clone unless( config.nil? )
+      # @cfg           = Config.new( settings )
+
+       # Storage::RedisClient.new( { :redis => { :host => @redisHost } } )
+      @redis         = redis.clone  unless( redis.nil? )
       @cache         = MiniCache::Store.new()
 
     end

@@ -58,9 +58,9 @@ class CMIcinga2 < Icinga2::Client
 
         status = 500
 
-        { status: status, message: 'missing command' } if( command.nil? )
-        { status: status, message: 'missing node' } if( node.nil? )
-        { status: status, message: 'missing payload' } if( payload.nil? )
+        return { status: status, message: 'missing command' } if( command.nil? )
+        return { status: status, message: 'missing node' } if( node.nil? )
+        return { status: status, message: 'missing payload' } if( payload.nil? )
       end
 
       payload  = JSON.parse( payload ) if( payload.is_a?( String ) == true && payload.to_s != '' )
@@ -134,12 +134,12 @@ class CMIcinga2 < Icinga2::Client
         result = self.add_host(params)
         status = result.dig('code') || 500
 
-        logger.info( result )
+        logger.debug( result )
         logger.error( result ) if( status != 200 )
 
         @jobs.del( command: command, ip: ip, short: short, fqdn: fqdn )
 
-        { status: status }
+        return { status: status }
 
       # remove Node
       #
@@ -149,11 +149,11 @@ class CMIcinga2 < Icinga2::Client
 
         result = self.delete_host( host: fqdn, fqdn: fqdn )
 
-#         logger.info( result )
+        logger.debug( result )
 
         @jobs.del( command: command, ip: ip, short: short, fqdn: fqdn )
 
-        { status: 200 }
+        return { status: 200 }
 
       # information about Node
       #
@@ -163,11 +163,11 @@ class CMIcinga2 < Icinga2::Client
 
         result = self.hosts( host: fqdn )
 
-#         logger.info( result )
+        logger.debug( result )
 
         @jobs.del( command: command, ip: ip, short: short, fqdn: fqdn )
 
-        { status: 200 }
+        return { status: 200 }
 
       # all others
       #
@@ -177,7 +177,7 @@ class CMIcinga2 < Icinga2::Client
 
         @jobs.del( command: command, ip: ip, short: short, fqdn: fqdn )
 
-        { status: 500, message: format( 'wrong command detected: %s', command ) }
+        return { status: 500, message: format( 'wrong command detected: %s', command ) }
 
       end
 

@@ -4,8 +4,8 @@ FROM alpine:3.6
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
-  VERSION="1710.1" \
-  BUILD_DATE="2017-10-26" \
+  VERSION="1711.1" \
+  BUILD_DATE="2017-11-06" \
   ALPINE_MIRROR="mirror1.hs-esslingen.de/pub/Mirrors" \
   ALPINE_VERSION="v3.6" \
   TERM=xterm \

@@ -152,7 +152,7 @@ class CMGrafana
 #           logger.debug( sprintf( '  template_name %s', template_name ) )
 #           logger.debug( sprintf( '  cache_key     %s', cache_key ) )
 
-          if( ! %w(mongodb mysql postgres node-exporter http-status).include?(service_name ) )
+          if( ! %w(mongodb mysql postgres node-exporter http-status).include?( service_name ) )
             additional_template_paths << self.template_for_service( 'tomcat' )
           end
 

@@ -1,11 +1,11 @@
 
-FROM bodsch/docker-jolokia:1710.1
+FROM bodsch/docker-jolokia:1.3.7
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
-  VERSION="1710" \
-  BUILD_DATE="2017-10-05" \
+  VERSION="1711" \
+  BUILD_DATE="2017-11-06" \
   TERM=xterm \
   APK_ADD="nano git g++ make go " \
   GOPATH=/build \

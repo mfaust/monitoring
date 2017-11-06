@@ -199,19 +199,22 @@ class CMIcinga2 < Icinga2::Client
       fqdn    = params.dig(:fqdn)
       service = params.dig(:service)
       mbean   = params.dig(:mbean)
+      content_server = nil
 
       # get data from redis
       cache_key = Storage::RedisClient.cacheKey( host: fqdn, pre: 'result', service: service )
 
       _redis = @redis.get( cache_key )
+      logger.debug( _redis.class.to_s )
       _redis = JSON.parse(_redis) if _redis.is_a?(String)
 
-      _bean  = _redis.select { |k,_v| k.dig( mbean ) }
-      _bean  = _bean.first if( _bean.is_a?(Array) )
+      unless( _redis.nil? )
+        _bean  = _redis.select { |k,_v| k.dig( mbean ) }
+        _bean  = _bean.first if( _bean.is_a?(Array) )
 
-      content_server = nil
-      content_server = _bean.dig(mbean,'value') unless( _bean.nil? )
-      content_server.values.first unless( _bean.nil? )
+        content_server = _bean.dig(mbean,'value') unless( _bean.nil? )
+        content_server.values.first unless( _bean.nil? )
+      end
     end
 
 

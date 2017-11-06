@@ -112,7 +112,7 @@ services:
       ADDITIONAL_DNS: '[{
         "name": "blueprint-box",
         "ip": "192.168.252.100",
-        "aliases": [ "tomcat-centos7" ]
+        "aliases": [ "tomcat-centos7", "overview.blueprint-box", "preview.blueprint-box", "sitemanager.blueprint-box", "studio.blueprint-box", "corporate.blueprint-box" ]
       }]'
 
   cm-service-discovery:
