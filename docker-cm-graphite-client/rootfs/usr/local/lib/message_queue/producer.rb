@@ -7,15 +7,14 @@ module MessageQueue
 
     def initialize( params = {} )
 
-      beanstalkHost       = params.dig(:beanstalkHost) || 'beanstalkd'
-      beanstalkPort       = params.dig(:beanstalkPort) || 11300
+      beanstalk_host       = params.dig(:beanstalk_host) || 'beanstalkd'
+      beanstalk_port       = params.dig(:beanstalk_port) || 11300
 
       begin
-        @b = Beaneater.new( sprintf( '%s:%s', beanstalkHost, beanstalkPort ) )
+        @b = Beaneater.new( format( '%s:%s', beanstalk_host, beanstalk_port ) )
       rescue => e
         logger.error( e )
         @b = nil
-#        raise sprintf( 'ERROR: %s' , e )
       end
 
 #       logger.info( '-----------------------------------------------------------------' )
@@ -40,20 +39,17 @@ module MessageQueue
     # @param [Integer, #read] delay is an integer number of seconds to wait before putting the job in
     #        the ready queue. The job will be in the "delayed" state during this time.
     # @example send a Job to Beanaeter
-    #    addJob()
+    #    add_job()
     # @return [Hash,#read]
     #
-    def addJob( tube, job = {}, prio = 65536, ttr = 10, delay = 2 )
+    def add_job( tube, job, prio = 65536, ttr = 10, delay = 2 )
 
       if( @b )
-
         # check if job already in the queue
         #
-        if( self.jobExists?( tube.to_s, job ) == true )
-          return
-        end
+        return { status: 200, message: 'job exists' } if( job_exists?( tube.to_s, job ) == true )
 
-        response = @b.tubes[ tube.to_s ].put( job , :prio => prio, :ttr => ttr, :delay => delay )
+        response = @b.tubes[tube.to_s].put( job, { prio: prio, ttr: ttr, delay: delay } )
 
         logger.debug( response )
       end
@@ -62,13 +58,11 @@ module MessageQueue
 
 
 
-    def jobExists?( tube, job )
+    def job_exists?( tube, job )
 
-      if( job.is_a?( String ) )
-        job = JSON.parse(job)
-      end
+      job = JSON.parse(job) if( job.is_a?( String ) )
 
-      j_checksum = self.checksum(job)
+      j_checksum = checksum(job)
 
       if( @b )
 
@@ -79,20 +73,14 @@ module MessageQueue
           j = t.reserve
 
           b = JSON.parse( j.body )
+          b = JSON.parse( b ) if( b.is_a?( String ) )
 
-          if( b.is_a?( String ) )
-            b = JSON.parse( b )
-          end
+          b_checksum = checksum(b)
 
-          b_checksum = self.checksum(b)
+          logger.warn( "  job '#{job}' already in queue .." ) if( j_checksum == b_checksum )
 
-          if( j_checksum == b_checksum )
-            logger.warn( "  job '#{job}' already in queue .." )
-            return true
-          else
-            return false
-          end
-
+          return true if( j_checksum == b_checksum )
+          return false
         end
       end
     end
@@ -103,8 +91,7 @@ module MessageQueue
       p.reject! { |k| k == 'timestamp' }
       p.reject! { |k| k == 'payload' }
 
-      p = Hash[p.sort]
-      return Digest::MD5.hexdigest(p.to_s)
+      Digest::MD5.hexdigest(Hash[p.sort].to_s)
     end
 
   end

@@ -7,28 +7,28 @@ module MessageQueue
 
     def initialize( params = {} )
 
-      beanstalkHost         = params.dig(:beanstalkHost)         || 'beanstalkd'
-      beanstalkPort         = params.dig(:beanstalkPort)         ||  11300
-      beanstalkQueue        = params.dig(:beanstalkQueue)
-      releaseBuriedInterval = params.dig(:releaseBuriedInterval) || 40
+      beanstalk_host         = params.dig(:beanstalk_host)         || 'beanstalkd'
+      beanstalk_port         = params.dig(:beanstalk_port)         ||  11300
+      beanstalk_queue        = params.dig(:beanstalk_queue)
+      release_buried_interval = params.dig(:release_buried_interval) || 40
 
       begin
-        @b = Beaneater.new( sprintf( '%s:%s', beanstalkHost, beanstalkPort ) )
+        @b = Beaneater.new( format( '%s:%s', beanstalk_host, beanstalk_port ) )
 
-        if( beanstalkQueue != nil )
+        if( beanstalk_queue != nil )
 
           scheduler = Rufus::Scheduler.new
 
-          scheduler.every( releaseBuriedInterval ) do
-            releaseBuriedJobs( beanstalkQueue )
+          scheduler.every( release_buried_interval ) do
+            release_buried_jobs( beanstalk_queue )
           end
         else
-          logger.info( 'no Queue defined. Skip releaseBuriedJobs() Part' )
+          logger.info( 'no Queue defined. Skip release_buried_jobs() Part' )
         end
 
       rescue => e
         logger.error( e )
-        raise sprintf( 'ERROR: %s' , e )
+        raise format( 'ERROR: %s' , e )
       end
 
 #       logger.info( '-----------------------------------------------------------------' )
@@ -38,27 +38,27 @@ module MessageQueue
     end
 
 
-    def tubeStatistics( tube )
+    def tube_statistics( tube )
 
       queue       = nil
-      jobsTotal   = 0
-      jobsReady   = 0
-      jobsDelayed = 0
-      jobsBuried  = 0
-      tubeStats   = nil
+      jobs_total   = 0
+      jobs_ready   = 0
+      jobs_delayed = 0
+      jobs_buried  = 0
+      tube_stats   = nil
 
       if( @b )
 
         begin
-          tubeStats = @b.tubes[tube].stats
+          tube_stats = @b.tubes[tube].stats
 
-          if( tubeStats )
+          if( tube_stats )
 
-            queue       = tubeStats[ :name ]
-            jobsTotal   = tubeStats[ :total_jobs ]
-            jobsReady   = tubeStats[ :current_jobs_ready ]
-            jobsDelayed = tubeStats[ :current_jobs_delayed ]
-            jobsBuried  = tubeStats[ :current_jobs_buried ]
+            queue        = tube_stats.dig(:name)
+            jobs_total   = tube_stats.dig(:total_jobs)
+            jobs_ready   = tube_stats.dig(:current_jobs_ready)
+            jobs_delayed = tube_stats.dig(:current_jobs_delayed)
+            jobs_buried  = tube_stats.dig(:current_jobs_buried)
           end
         rescue Beaneater::NotFoundError
 
@@ -66,18 +66,18 @@ module MessageQueue
       end
 
       return {
-        :queue   => queue,
-        :total   => jobsTotal.to_i,
-        :ready   => jobsReady.to_i,
-        :delayed => jobsDelayed.to_i,
-        :buried  => jobsBuried.to_i,
-        :raw     => tubeStats
+        queue: queue,
+        total: jobs_total.to_i,
+        ready: jobs_ready.to_i,
+        delayed: jobs_delayed.to_i,
+        buried: jobs_buried.to_i,
+        raw: tube_stats
       }
 
     end
 
 
-    def cleanQueue( tube )
+    def clean_queue( tube )
 
       b = Array.new()
 
@@ -138,7 +138,7 @@ module MessageQueue
 
           if j.id == r.dig('id' )
 
-            self.deleteJob( tube, j.id )
+            delete_job( tube, j.id )
 
 #            logger.debug( "remove job id: #{j.id}" )
 #            logger.debug( r )
@@ -153,17 +153,15 @@ module MessageQueue
 
 
 
-    def getJobFromTube( tube, delete = false )
+    def get_job_from_tube( tube, delete = false )
 
       result = {}
 
       if( @b )
 
-        stats = self.tubeStatistics( tube )
+        stats = tube_statistics( tube )
 
-        if( stats.dig( :ready ) == 0 )
-          return result
-        end
+        return result if( stats.dig( :ready ) == 0 )
 
         tube = @b.tubes.watch!( tube.to_s )
 
@@ -174,19 +172,17 @@ module MessageQueue
             # processing job
 
             result = {
-              :id    => job.id,
-              :tube  => job.stats.tube,
-              :state => job.stats.state,
-              :ttr   => job.stats.ttr,
-              :prio  => job.stats.pri,
-              :age   => job.stats.age,
-              :delay => job.stats.delay,
-              :body  => JSON.parse( job.body )
+              id: job.id,
+              tube: job.stats.tube,
+              state: job.stats.state,
+              ttr: job.stats.ttr,
+              prio: job.stats.pri,
+              age: job.stats.age,
+              delay: job.stats.delay,
+              body: JSON.parse( job.body )
             }
 
-            if( delete == true )
-              job.delete
-            end
+            job.delete if( delete == true )
 
           rescue Exception => e
             job.bury
@@ -197,11 +193,11 @@ module MessageQueue
         end
       end
 
-      return result
+      result
     end
 
 
-    def releaseBuriedJobs( tube )
+    def release_buried_jobs( tube )
 
       if( @b )
 
@@ -210,40 +206,33 @@ module MessageQueue
         buried = tube.peek( :buried )
 
         if( buried )
-          logger.info( sprintf( 'found job: %d, kick them back into the \'ready\' queue', buried.id ) )
-
+          logger.info( format( 'found job: %d, kick them back into the \'ready\' queue', buried.id ) )
           tube.kick(1)
         end
       end
     end
 
 
-    def deleteJob( tube, id )
+    def delete_job( tube, id )
 
-      logger.debug( sprintf( "deleteJob( #{tube}, #{id} )" ) )
+      logger.debug( format( "delete_job( #{tube}, #{id} )" ) )
 
       if( @b )
-
         job = @b.jobs.find( id )
 
-        if( job != nil )
-          response = job.delete
-        end
+        job.delete if( job != nil )
       end
     end
 
 
-    def buryJob( tube, id )
+    def bury_job( tube, id )
 
-      logger.debug( sprintf( "buryJob( #{tube}, #{id} )" ) )
+      logger.debug( format( "bury_job( #{tube}, #{id} )" ) )
 
       if( @b )
-
         job = @b.jobs.find( id )
 
-        if( job != nil )
-          response = job.bury
-        end
+        job.bury if( job != nil )
       end
     end
 
