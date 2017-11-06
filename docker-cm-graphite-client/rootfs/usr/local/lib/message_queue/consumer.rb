@@ -54,11 +54,11 @@ module MessageQueue
 
           if( tube_stats )
 
-            queue        = tube_stats.dig(:name)
-            jobs_total   = tube_stats.dig(:total_jobs)
-            jobs_ready   = tube_stats.dig(:current_jobs_ready)
-            jobs_delayed = tube_stats.dig(:current_jobs_delayed)
-            jobs_buried  = tube_stats.dig(:current_jobs_buried)
+            queue        = tube_stats[:name]
+            jobs_total   = tube_stats[:total_jobs]
+            jobs_ready   = tube_stats[:current_jobs_ready]
+            jobs_delayed = tube_stats[:current_jobs_delayed]
+            jobs_buried  = tube_stats[:current_jobs_buried]
           end
         rescue Beaneater::NotFoundError
 

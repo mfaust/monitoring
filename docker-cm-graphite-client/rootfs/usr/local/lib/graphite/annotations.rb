@@ -28,7 +28,7 @@ module Graphite
 
       raise ArgumentError.new(format('wrong type. what must be an String, given %s', what.class.to_s ) ) unless( what.is_a?(String) )
       raise ArgumentError.new(format('wrong type. tags must be an Array, given %s', tags.class.to_s ) ) unless( tags.is_a?(Array) )
-      raise ArgumentError.new(format('wrong type. data must be an Hash, given %s', data.class.to_s ) ) unless( data.is_a?(Hash) )
+      raise ArgumentError.new(format('wrong type. data must be an String, given %s', data.class.to_s ) ) unless( data.is_a?(String) )
 
       if( @timestamp.nil? )
         str  = Time.now
@@ -111,7 +111,7 @@ module Graphite
 
     def node_annotation( host, type )
 
-      raise ArgumentError.new(format('wrong type. host must be an String, given %s', what.class.to_s ) ) unless( what.is_a?(String) )
+      raise ArgumentError.new(format('wrong type. host must be an String, given %s', host.class.to_s ) ) unless( host.is_a?(String) )
       raise ArgumentError.new(format('wrong type. type must be an String, given %s', type.class.to_s ) ) unless( type.is_a?(String) )
 
       tag      = []
@@ -142,7 +142,7 @@ module Graphite
 
     def loadtest_annotation( host, type )
 
-      raise ArgumentError.new(format('wrong type. host must be an String, given %s', what.class.to_s ) ) unless( what.is_a?(String) )
+      raise ArgumentError.new(format('wrong type. host must be an String, given %s', host.class.to_s ) ) unless( host.is_a?(String) )
       raise ArgumentError.new(format('wrong type. type must be an String, given %s', type.class.to_s ) ) unless( type.is_a?(String) )
       raise ArgumentError.new(format('wrong type. type must be \'start\' or \'stop\', given %s', type ) ) unless( %w[start stop].include?(type.downcase) )
 
@@ -170,7 +170,7 @@ module Graphite
 
     def deployment_annotation( host, descr, tags = [] )
 
-      raise ArgumentError.new(format('wrong type. host must be an String, given %s', what.class.to_s ) ) unless( what.is_a?(String) )
+      raise ArgumentError.new(format('wrong type. host must be an String, given %s', host.class.to_s ) ) unless( host.is_a?(String) )
       raise ArgumentError.new(format('wrong type. descr must be an String, given %s', descr.class.to_s ) ) unless( descr.is_a?(String) )
       raise ArgumentError.new(format('wrong type. tags must be an Array, given %s', tags.class.to_s ) ) unless( tags.is_a?(Array) )
 
@@ -197,7 +197,7 @@ module Graphite
 
     def general_annotation( host, descr, message, custom_tags = [] )
 
-      raise ArgumentError.new(format('wrong type. host must be an String, given %s', what.class.to_s ) ) unless( what.is_a?(String) )
+      raise ArgumentError.new(format('wrong type. host must be an String, given %s', host.class.to_s ) ) unless( host.is_a?(String) )
       raise ArgumentError.new(format('wrong type. descr must be an String, given %s', descr.class.to_s ) ) unless( descr.is_a?(String) )
       raise ArgumentError.new(format('wrong type. message must be an String, given %s', message.class.to_s ) ) unless( message.is_a?(String) )
       raise ArgumentError.new(format('wrong type. custom_tags must be an Array, given %s', custom_tags.class.to_s ) ) unless( custom_tags.is_a?(Array) )
