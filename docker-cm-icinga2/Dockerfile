@@ -1,15 +1,15 @@
 
-FROM bodsch/docker-icinga2:1709.1
+FROM bodsch/docker-icinga2:2.7.1-r2
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
-  VERSION="1710.1" \
-  BUILD_DATE="2017-10-05" \
+  VERSION="1711" \
+  BUILD_DATE="2017-11-05" \
   TERM=xterm \
   APK_ADD="py2-pip ruby-dev nano" \
   APK_DEL="ruby-dev" \
-  GEMS="aws-sdk ipaddress redis"
+  GEMS="aws-sdk ipaddress mini_cache redis"
 
 # ---------------------------------------------------------------------------------------
 

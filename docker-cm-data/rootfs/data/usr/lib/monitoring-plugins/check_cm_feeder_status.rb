@@ -40,7 +40,7 @@ class Icinga2Check_CM_Feeder < Icinga2Check
     when 'content'
       feederServer = 'content-feeder'
     else
-      puts sprintf( 'Coremedia Feeder - unknown feeder type %s', feeder )
+      puts sprintf( 'CoreMedia Feeder - unknown feeder type %s', feeder )
       exit STATE_CRITICAL
     end
 

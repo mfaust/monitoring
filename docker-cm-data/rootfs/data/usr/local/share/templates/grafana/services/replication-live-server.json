@@ -466,7 +466,7 @@
                 "label": null,
                 "logBase": 1,
                 "max": null,
-                "min": "-5",
+                "min": "0",
                 "show": true
               },
               {

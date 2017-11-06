@@ -14,7 +14,7 @@ services:
 
   http-status:
     description: HTTP Server Status
-    port: 8081
+    port: 80
 
   mysql:
     description: MySQL
@@ -31,6 +31,10 @@ services:
   node-exporter:
     description: node_exporter (Prometheus)
     port: 9100
+
+  node_exporter:
+    description: node_exporter (CoreMedia internal)
+    port: 19100
 
   mongodb:
     description: MongoDB

@@ -250,7 +250,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "carbon-writer.$host.NODE_EXPORTER.filesystem.*.used_percent"
+                "target": "carbon-writer.$host.NODE_EXPORTER.filesystem.rootfs.used_percent"
               }
             ],
             "thresholds": "80,90",

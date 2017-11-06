@@ -9,7 +9,7 @@
 
 require 'rufus-scheduler'
 
-require_relative '../lib/grafana'
+require_relative '../lib/cm_grafana'
 
 # -----------------------------------------------------------------------------
 
@@ -31,6 +31,8 @@ mysqlPassword       = ENV.fetch('DISCOVERY_DATABASE_PASS', 'discovery')
 interval            = ENV.fetch('INTERVAL'               , 40 )
 delay               = ENV.fetch('RUN_DELAY'              , 30 )
 
+server_config_file  = ENV.fetch('SERVER_CONFIG_FILE'     , '/etc/grafana/server_config.yml' )
+
 config = {
   :grafana => {
     :host              => grafanaHost,
@@ -41,6 +43,7 @@ config = {
     :ssl               => false,
     :url_path          => grafanaUrlPath,
     :templateDirectory => grafanaTemplatePath,
+    :server_config_file => server_config_file
   },
   :mq          => {
     :host  => mqHost,
@@ -71,14 +74,24 @@ Signal.trap('QUIT') { stop = true }
 
 # -----------------------------------------------------------------------------
 
-g = Grafana::Client.new( config )
+g = CMGrafana.new( config )
+
+cfg_scheduler = Rufus::Scheduler.singleton
+
+cfg_scheduler.every( '60m', :first_in => delay.to_i ) do
+
+  g.configure_server( config_file: server_config_file ) unless( server_config_file.nil? )
+  cfg_scheduler.shutdown(:kill)
+end
+
+
+
 
 scheduler = Rufus::Scheduler.new
 
-scheduler.every( interval, :first_in => delay ) do
+scheduler.every( interval, :first_in => delay.to_i + 5 ) do
 
-   g.queue()
-
+  g.queue()
 end
 
 

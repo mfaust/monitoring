@@ -1,5 +1,5 @@
 
-require_relative '../cache'
+require 'mini_cache'
 
 module DataCollector
 
@@ -9,12 +9,17 @@ module DataCollector
 
     def initialize( settings = {} )
 
-      @redisHost     = settings.dig(:redis, :host)
-      @redisPort     = settings.dig(:redis, :port) || 6379
+      #@redisHost     = settings.dig(:redis, :host)
+      #@redisPort     = settings.dig(:redis, :port) || 6379
+      redis          = settings.dig(:redis)
+      config         = settings.dig(:config)
 
-      @cfg           = Config.new( settings )
-      @redis         = Storage::RedisClient.new( { :redis => { :host => @redisHost } } )
-      @cache         = Cache::Store.new()
+      @cfg           = config.clone unless( config.nil? )
+      # @cfg           = Config.new( settings )
+
+       # Storage::RedisClient.new( { :redis => { :host => @redisHost } } )
+      @redis         = redis.clone  unless( redis.nil? )
+      @cache         = MiniCache::Store.new()
 
     end
 
@@ -107,7 +112,7 @@ module DataCollector
 
       @redis.createMeasurements( { :short => short, :fqdn => fqdn, :data => dataForRedis } )
 
-      @cache.set( fqdn, 'prepared', expiresIn: 320 )
+      @cache.set(fqdn, 'prepared', expires_in: 320 )
 
       finish = Time.now
       logger.info( sprintf( 'build prepared data in %s seconds', (finish - start).round(2) ) )

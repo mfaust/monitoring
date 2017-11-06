@@ -14,8 +14,7 @@ require 'yaml'
 # require 'fileutils'
 require 'resolve/hostname'
 
-require_relative 'monitoring'
-require_relative '../lib/logging'
+require_relative '../lib/monitoring'
 
 module Sinatra
 
@@ -33,7 +32,7 @@ module Sinatra
       @restServiceBind  = ENV.fetch('REST_SERVICE_BIND'      , '0.0.0.0' )
       @mqHost           = ENV.fetch('MQ_HOST'                , 'beanstalkd' )
       @mqPort           = ENV.fetch('MQ_PORT'                , 11300 )
-      @mqQueue          = ENV.fetch('MQ_QUEUE'               , 'mq-rest-service' )
+      @mq_queue          = ENV.fetch('MQ_QUEUE'               , 'mq-rest-service' )
       @redisHost        = ENV.fetch('REDIS_HOST'             , 'redis' )
       @redisPort        = ENV.fetch('REDIS_PORT'             , 6379 )
 
@@ -69,7 +68,7 @@ module Sinatra
       :mq       => {
         :host      => @mqHost,
         :port      => @mqPort,
-        :queue     => @mqQueue
+        :queue     => @mq_queue
       },
       :redis    => {
         :host      => @redisHost,
@@ -83,7 +82,7 @@ module Sinatra
       }
     }
 
-    m = Monitoring.new( config )
+    m = Monitoring::Client.new( config )
 
     # -----------------------------------------------------------------------------
 
@@ -255,7 +254,7 @@ module Sinatra
     post '/v2/annotation/:host' do
 
       host   = params[:host]
-      result = m.addAnnotation( host, @request_paylod )
+      result = m.annotation( host: host, payload: @request_paylod )
 
 #       status = result[:status]
 

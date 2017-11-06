@@ -1,6 +1,8 @@
 TYPE := cm-icinga-client
 IMAGE_NAME := docker-${TYPE}
 
+.PHONY: build clean shell run exec
+
 build:
 	docker build \
 		--rm \
@@ -16,9 +18,6 @@ run:
 		--detach \
 		--interactive \
 		--tty \
-		--label com.dnsdock.image=${TYPE} \
-		--label com.dnsdock.alias=${TYPE} \
-		--label com.dnsdock.ttl=30 \
 		--volume /etc/localtime:/etc/localtime:ro \
 		--hostname=${IMAGE_NAME} \
 		--name=${IMAGE_NAME} \
@@ -30,9 +29,6 @@ shell:
 		--rm \
 		--interactive \
 		--tty \
-		--label com.dnsdock.image=${TYPE} \
-		--label com.dnsdock.alias=${TYPE} \
-		--label com.dnsdock.ttl=30 \
 		--volume /etc/localtime:/etc/localtime:ro \
 		--hostname=${IMAGE_NAME} \
 		--name=${IMAGE_NAME} \

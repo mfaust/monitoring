@@ -8,6 +8,16 @@ networks:
       config:
         - subnet: 192.168.1.0/24
 
+volumes:
+  database:
+    driver: local
+  redis:
+    driver: local
+  carbon:
+    driver: local
+  icinga:
+    driver: local
+
 services:
 
   data:
@@ -57,7 +67,7 @@ services:
       service: database
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /var/tmp/docker-volumes/database:/srv
+      - database:/srv
     networks:
       mon:
         ipv4_address: 192.168.1.7
@@ -67,6 +77,9 @@ services:
     build: ../../docker-cm-jolokia
     container_name: jolokia
     hostname: jolokia
+    ports:
+      - 8080:8080
+      - 8088:8088
     depends_on:
       - data
     volumes:
@@ -98,14 +111,14 @@ services:
       - 6379:6379
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /var/tmp/docker-volumes/redis:/var/lib/redis
+      - redis:/var/lib/redis
     networks:
       mon:
         ipv4_address: 192.168.1.10
 
   nginx:
     restart: always
-    image: bodsch/docker-nginx:1710.1
+    image: bodsch/docker-nginx:1710.2
     container_name: nginx
     hostname: nginx
     ports:
@@ -124,6 +137,8 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /share/www/entry-page:/var/www/entry-page
+      - ./secure:/etc/nginx/secure/
+      - /share/etc/nginx/external/https.conf:/etc/nginx/external/https.conf
       - /share/etc/nginx/sites-enabled/01-default.conf:/etc/nginx/sites-enabled/01-default.conf
       - /share/etc/nginx/nginx.conf:/etc/nginx/nginx.conf
       - /share/etc/nginx/modules.d/00-restrictions.conf:/etc/nginx/modules.d/00-restrictions.conf
@@ -139,7 +154,7 @@ services:
 
   carbon:
     restart: always
-    image: bodsch/docker-go-carbon:1709.3
+    image: bodsch/docker-go-carbon:1710.1
     container_name: carbon
     hostname: carbon
     depends_on:
@@ -150,7 +165,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /var/log/:/var/tmp/docker-log
-      - /var/tmp/docker-volumes/carbon:/srv
+      - carbon:/srv
     networks:
       mon:
         ipv4_address: 192.168.1.12
@@ -167,14 +182,14 @@ services:
       - data
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /var/tmp/docker-volumes/carbon:/srv
+      - carbon:/srv
     networks:
       mon:
         ipv4_address: 192.168.1.13
 
   grafana:
     restart: always
-    image: bodsch/docker-grafana:stable-4.5.2-r2
+    image: bodsch/docker-grafana:1711.1
     container_name: grafana
     hostname: grafana
     extends:
@@ -190,7 +205,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /share/opt/grafana/dashboards:/opt/grafana/dashboards
-      - /var/tmp/docker-volumes/carbon:/srv
+      # - /var/tmp/docker-volumes/carbon:/srv
     networks:
       mon:
         ipv4_address: 192.168.1.14
@@ -230,8 +245,8 @@ services:
       - /share/usr/lib/monitoring-plugins/check_cm_runlevel.rb:/usr/lib/monitoring-plugins/check_cm_runlevel
       - /share/usr/lib/monitoring-plugins/check_cm_sequencenumbers.rb:/usr/lib/monitoring-plugins/check_cm_seqencenumbers
       - /share/usr/lib/monitoring-plugins/check_ssl_cert:/usr/lib/monitoring-plugins/check_ssl_cert
-      - /var/tmp/docker-volumes/icinga:/srv
-      - /var/tmp/docker-volumes/icinga:/var/lib/icinga2
+      - icinga:/srv
+      - icinga:/var/lib/icinga2
     networks:
       mon:
         ipv4_address: 192.168.1.15
@@ -240,7 +255,7 @@ services:
 
   icingaweb2:
     restart: always
-    image: bodsch/docker-icingaweb2:1709.2
+    image: bodsch/docker-icingaweb2:2.4.2
     container_name: icingaweb2
     hostname: icingaweb2
     extends:
@@ -255,14 +270,14 @@ services:
       - cm-icinga2-master:icinga2
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /var/tmp/docker-volumes/icinga:/srv
+      # - /var/tmp/docker-volumes/icinga:/srv
     networks:
       mon:
         ipv4_address: 192.168.1.16
 
   markdown-service:
     restart: always
-    image: bodsch/docker-markdown-service:1708-35.1
+    image: bodsch/docker-markdown-service:1.0.0
     container_name: markdown-service
     hostname: markdown-service
     depends_on:
@@ -425,6 +440,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ./logs:/var/log
       - /share/usr/local/share/templates:/usr/local/share/templates
+      - /share/etc/grafana/grafana_config.yml:/etc/grafana_config.yml
     networks:
       mon:
         ipv4_address: 192.168.1.34
@@ -469,6 +485,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./logs:/var/log
+      - /share/etc/icinga_server_config.yml:/etc/icinga_server_config.yml
     networks:
       mon:
         ipv4_address: 192.168.1.36

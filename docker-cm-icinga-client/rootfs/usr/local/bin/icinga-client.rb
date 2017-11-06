@@ -30,7 +30,9 @@ mysqlSchema         = ENV.fetch('DISCOVERY_DATABASE_NAME' , 'discovery')
 mysqlUser           = ENV.fetch('DISCOVERY_DATABASE_USER' , 'discovery')
 mysqlPassword       = ENV.fetch('DISCOVERY_DATABASE_PASS' , 'discovery')
 interval            = ENV.fetch('INTERVAL'                , 20 )
-delay               = ENV.fetch('RUN_DELAY'               , 10 )
+delay               = ENV.fetch('RUN_DELAY'               , 25 )
+
+server_config_file  = ENV.fetch('SERVER_CONFIG_FILE'     , '/etc/icinga_server_config.yml' )
 
 # convert string to bool
 icingaCluster       = icingaCluster.to_s.eql?('true') ? true : false
@@ -46,7 +48,8 @@ config = {
       :port     => icingaApiPort,
       :user     => icingaApiUser,
       :password => icingaApiPass
-    }
+    },
+    :server_config_file => server_config_file
   },
   :mq          => {
     :host  => mqHost,
@@ -79,14 +82,20 @@ Signal.trap('QUIT') { stop = true }
 
 i = CMIcinga2.new( config )
 
-# i = Icinga2::Client.new( config )
+cfg_scheduler = Rufus::Scheduler.singleton
+
+cfg_scheduler.every( '60m', :first_in => delay.to_i ) do
+
+  i.configure_server( config_file: server_config_file ) unless( server_config_file.nil? )
+  cfg_scheduler.shutdown(:kill)
+end
+
 
 scheduler = Rufus::Scheduler.new
 
-scheduler.every( interval, :first_in => delay ) do
+scheduler.every( interval, :first_in => delay.to_i + 5 ) do
 
   i.queue()
-
 end
 
 

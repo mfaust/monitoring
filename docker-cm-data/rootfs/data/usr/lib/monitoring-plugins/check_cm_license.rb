@@ -54,9 +54,9 @@ class Icinga2Check_CM_Licenses < Icinga2Check
         exitCode = STATE_CRITICAL
       end
 
-      puts sprintf( '<b>%d days left</b><br>Coremedia License is valid until %s | valid=%d warning=%d critical=%d', validUntilDays, licenseDate, validUntilDays,warning, critical )
+      puts sprintf( '<b>%d days left</b><br>CoreMedia License is valid until %s | valid=%d warning=%d critical=%d', validUntilDays, licenseDate, validUntilDays,warning, critical )
     else
-      puts sprintf( 'UNKNOWN - No valid Coremedia License found' )
+      puts sprintf( 'UNKNOWN - No valid CoreMedia License found' )
       exitCode = STATE_UNKNOWN
     end
 
