@@ -113,6 +113,10 @@ services:
         "name": "blueprint-box",
         "ip": "192.168.252.100",
         "aliases": [ "tomcat-centos7", "overview.blueprint-box", "preview.blueprint-box", "sitemanager.blueprint-box", "studio.blueprint-box", "corporate.blueprint-box" ]
+      },{
+        "name": "osmc",
+        "ip": "192.168.122.60",
+        "aliases": [ "osmc.local", "overview.osmc.local", "preview.osmc.local", "sitemanager.osmc.local", "studio.osmc.local", "corporate.osmc.local" ]
       }]'
 
   cm-service-discovery:

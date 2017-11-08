@@ -33,7 +33,7 @@ add_dns() {
 
   local name=${1}
   local ip=${2}
-  local aliases=${3}
+  local aliases="${3}"
 
   ip="$(check_ip ${ip})"
 
@@ -43,11 +43,13 @@ add_dns() {
     return
   fi
 
+  [ -z "${aliases}" ] || aliases=$(echo "${aliases}" | sed -e 's| ||g' -e 's|,|","|g')
+
   if [ "${name}" == "blueprint-box" ]
   then
     aliases="\"aliases\":[\"${aliases}\", \"${ip}.xip.io\", \"${name}\", \"${name}.docker\"]"
   else
-    aliases="\"aliases\":[\"${aliases}\"]"
+    aliases="\"aliases\":[\"${name}\",\"${aliases}\"]"
   fi
 
   echo "add host '${name}' with ip '${ip}' and aliases '${aliases}' to dns"

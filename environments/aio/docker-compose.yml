@@ -39,7 +39,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     # You can use also Environment vars like this:
     # command: "--nameserver='${DNS_1}:53' --nameserver='${DNS_2}:53' --http=:80"
-    command: " --nameserver='10.1.2.63:53' --nameserver='10.1.2.14:53' --http=:80 --alias --ttl=120"
+    command: " --nameserver='10.1.2.63:53' --nameserver='10.1.2.14:53' --http=:80 --alias --ttl=20 --verbose"
     networks:
       mon:
         ipv4_address: 192.168.1.5
@@ -189,7 +189,7 @@ services:
 
   grafana:
     restart: always
-    image: bodsch/docker-grafana:1711.1
+    image: bodsch/docker-grafana:4.6.2-r2
     container_name: grafana
     hostname: grafana
     extends:
