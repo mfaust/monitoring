@@ -159,6 +159,8 @@ module Utils
 
     def self.portOpen? ( host, port, seconds = 1 )
 
+      puts "portOpen?( #{host}, #{port}, #{seconds} )"
+
       # => checks if a port is open or not on a remote host
       Timeout::timeout( seconds ) do
 

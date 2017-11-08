@@ -7,6 +7,8 @@ class CMIcinga2 < Icinga2::Client
 
     def ns_lookup(name, expire = 120 )
 
+      logger.debug( "ns_lookup( #{name}, #{expire} )" )
+
       # DNS
       #
       hostname = format( 'dns-%s', name )
@@ -18,7 +20,26 @@ class CMIcinga2 < Icinga2::Client
       dns      = @cache.get( hostname )
 
       if( dns.nil? )
-        logger.debug( 'create cached DNS data' )
+
+        logger.debug( 'no cached DNS data' )
+
+        dns = @database.dnsData( short: name, fqdn: name )
+
+        unless( dns.nil? )
+
+          logger.debug( 'use database entries' )
+
+          ip    = dns.dig('ip')
+          short = dns.dig('name')
+          fqdn  = dns.dig('fqdn')
+
+          @cache.set( hostname , expires_in: expire ) { MiniCache::Data.new( ip: ip, short: short, long: fqdn ) }
+
+          return ip, short, fqdn
+        end
+
+        logger.debug( format( 'resolve dns name %s', name ) )
+
         # create DNS Information
         dns      = Utils::Network.resolv( name )
 
@@ -213,7 +234,7 @@ class CMIcinga2 < Icinga2::Client
         _bean  = _bean.first if( _bean.is_a?(Array) )
 
         content_server = _bean.dig(mbean,'value') unless( _bean.nil? )
-        content_server.values.first unless( _bean.nil? )
+        content_server.values.first unless( content_server.nil? )
       end
     end
 

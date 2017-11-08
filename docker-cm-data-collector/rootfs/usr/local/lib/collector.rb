@@ -375,12 +375,13 @@ module DataCollector
 
     # create a singulary json for every services to send them to the jolokia service
     #
-    def create_bulkcheck( params = {} )
+    def create_bulkcheck( params )
 
-      host = params.dig(:hostname)
+      logger.debug( "create_bulkcheck( #{params} )" )
+
+      ip   = params.dig(:ip)
+      host = params.dig(:short)
       fqdn = params.dig(:fqdn)
-
-#       logger.debug( "create_bulkcheck( #{params} )" )
 
       if( host.nil? )
         logger.warn( 'no host name for bulk checks' )
@@ -490,6 +491,7 @@ module DataCollector
 
       checks.flatten!
 
+      result[:ip]       = ip
       result[:hostname] = host
       result[:fqdn]     = fqdn
       result[:services] = *services
@@ -558,6 +560,7 @@ module DataCollector
         return { status: 500, message: 'jolokia service is not available!' }
       end
 
+      ip        = params.dig(:ip)
       hostname  = params.dig(:hostname)
       fqdn      = params.dig(:fqdn)
       checks    = params.dig(:checks)
@@ -605,7 +608,7 @@ module DataCollector
                   data = self.reorganize_data( jolokia_message )
 
                   # get configured Content Server (RLS or MLS)
-                  if( v == 'cae-live' || v == 'cae-preview' )
+                  if( v =~ /^cae-(\blive|preview).*/ )
                     data = self.parse_content_server_url( fqdn: fqdn, service: v, data: data )
                   end
 
@@ -632,22 +635,22 @@ module DataCollector
             case v
             when 'mysql'
               # MySQL
-              d = self.mysql_data( fqdn )
+              d = self.mysql_data( ip )
             when 'mongodb'
               # MongoDB
-              d = self.mongodb_data( fqdn )
+              d = self.mongodb_data( ip )
             when 'postgres'
               # Postgres
-              d = self.postgres_data( fqdn )
+              d = self.postgres_data( ip )
             when 'redis'
               # redis
-              d = self.redis_data( fqdn )
+              d = self.redis_data( ip )
             when 'node-exporter'
               # node_exporter
-              d = self.node_exporter_data( fqdn )
+              d = self.node_exporter_data( ip )
             when 'resourced'
               #
-              d = self.resourced_data( fqdn )
+              d = self.resourced_data( ip )
             when 'http-status'
               # apache mod_status
 
@@ -663,7 +666,7 @@ module DataCollector
                 logger.error( e.backtrace.join("\n") )
               end
 
-              d = self.apache_mod_status( fqdn, { port: port } )
+              d = self.apache_mod_status( ip, { port: port } )
             else
               # all others
             end
@@ -722,27 +725,57 @@ module DataCollector
 
       logger.info( '  search Master Live Server for this Replication Live Server' )
 
-      d = data.select {|d| d.dig('Replicator') }
+      d = data.select { |d| d.dig('Replicator') }
 
-      if(!d.is_a?(Array))
-        data
+      return data unless( d.is_a?(Array) )
+
+#       unless( d.is_a?(Array) )
+#         data
+#       end
+
+      value = d.first # hash
+      replicator = value.dig('Replicator')
+
+#       logger.debug( value.class.to_s )
+#       logger.debug(value)
+
+      status = replicator.dig('status')
+#       logger.debug(status)
+
+      if( status.to_i != 200 )
+        logger.error( 'Contentserver are not available!' )
+        return data
       end
 
-      value = d.first.dig( 'Replicator','value' )
+      value = replicator.dig('value')
 
-      if(!value.is_a?(Hash))
-        data
-      end
+      return data unless( value.is_a?(Hash) )
+
+#       logger.debug( value.class.to_s )
+
+#       if( !value.is_a?(Hash) )
+#         data
+#       end
+#
+#       logger.debug( value )
 
       unless( value.nil? )
 
+#         logger.debug( value.class.to_s )
+
         value  = value.values.first
 
-        if(!value.is_a?(Hash))
-          data
-        end
+        return data unless( value.is_a?(Hash) )
+#
+#         logger.debug( value.class.to_s )
+#
+#         if( !value.is_a?(Hash))
+#           data
+#         end
 
         mlsIOR = value.dig( 'MasterLiveServerIORUrl' )
+
+#         logger.debug( mlsIOR )
 
         unless( mlsIOR.nil? )
 
@@ -776,6 +809,9 @@ module DataCollector
             'port'   => port,
             'path'   => path
           }
+
+          logger.debug( JSON.pretty_generate(value.dig('MasterLiveServer')) )
+
         else
           logger.debug( 'no \'IOR URL\' found! :(' )
           logger.info( 'this RLS use an older version. we use the RLS Host as fallback' )
@@ -784,7 +820,7 @@ module DataCollector
       end
 
       logger.info( sprintf( '  use \'%s\'', mlsHost ) )
-      logger.debug( JSON.pretty_generate(value.dig('MasterLiveServer')) )
+
       return data
 
     end
@@ -806,23 +842,33 @@ module DataCollector
 
       d = data.select {|d| d.dig('CapConnection') }
 
-      if(!d.is_a?(Array))
-        data
+      return data unless( d.is_a?(Array) )
+
+      value = d.first # hash
+      cap_connection = value.dig('CapConnection')
+
+#       logger.debug( value.class.to_s )
+#       logger.debug(value)
+
+      status = cap_connection.dig('status')
+#       logger.debug(status)
+
+      if( status.to_i != 200 )
+        logger.error( 'Contentserver are not available!' )
+        return data
       end
 
-      value = d.first.dig( 'CapConnection','value' )
+      value = cap_connection.dig('value')
 
-      if(!value.is_a?(Hash))
-        data
-      end
+      return data unless( value.is_a?(Hash) )
+
+#       logger.debug( value ) #
 
       unless( value.nil? )
 
         value  = value.values.first
 
-        if(!value.is_a?(Hash))
-          data
-        end
+        return data unless( value.is_a?(Hash) )
 
         content_server_ior = value.dig( 'Url' )
 
@@ -858,17 +904,16 @@ module DataCollector
             'port'   => port,
             'path'   => path
           }
+
+          logger.debug( JSON.pretty_generate(value.dig('ContentServer')) )
         else
           logger.debug( 'no \'IOR URL\' found! :(' )
           logger.info( 'this CAE use an older version. we use the CAE Host as fallback' )
         end
-
       end
 
       logger.info( sprintf( '  use \'%s\'', content_server ) )
-      logger.debug( JSON.pretty_generate(value.dig('ContentServer')) )
       return data
-
     end
 
 
@@ -1081,7 +1126,7 @@ module DataCollector
 
         # get dns data!
         #
-        ip, short, fqdn = self.ns_lookup(h )
+        ip, short, fqdn = self.ns_lookup( h )
 
         discovery_data = nil
 
@@ -1124,7 +1169,7 @@ module DataCollector
         # run checks
         #
         begin
-          self.create_bulkcheck( hostname: short, fqdn: fqdn )
+          self.create_bulkcheck( ip: ip, short: short, fqdn: fqdn )
         rescue => e
           logger.error(e)
         end

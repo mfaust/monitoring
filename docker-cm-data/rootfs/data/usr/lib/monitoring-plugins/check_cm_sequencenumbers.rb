@@ -11,15 +11,17 @@ class Icinga2Check_CM_SequenceNumbers < Icinga2Check
     super
 
     rls       = settings.dig(:rls)
+    mls       = settings.dig(:mls)
+
     hostRls   = self.hostname( rls )
+    hostMls   = self.hostname( mls )
 
-    mls       = auto_detect_mls(rls)
-
-    unless( mls.nil? )
-      hostMls = self.hostname( mls )
-    else
-      hostMls = nil
-    end
+#     unless( mls.nil? )
+#       hostMls = self.hostname( mls )
+#     else
+#       mls     = auto_detect_mls(rls)
+#       hostMls = nil if( mls.nil? )
+#     end
 
     self.check( hostMls, hostRls )
 
@@ -112,38 +114,38 @@ class Icinga2Check_CM_SequenceNumbers < Icinga2Check
 
 
 
-  # TODO
-  # move this ASAP to icinga-client!
-  #
-  def auto_detect_mls( rls )
-
-    cache_key = format('sequence-mls-%s',rls)
-    mls       = @redis.get(cache_key)
-
-    if(mls.nil?)
-
-      bean = @mbean.bean( rls, 'replication-live-server', 'Replicator' )
-
-      if(bean.is_a?(Hash))
-
-        value = bean.dig( 'value' )
-        unless( value.nil? )
-
-          value = value.values.first
-          mls   = value.dig( 'MasterLiveServer', 'host' )
-
-          if( mls.nil? )
-            logger.error( 'no MasterLiveServer Data found' )
-            return nil
-          else
-            @redis.set(cache_key,mls,320)
-          end
-        end
-      end
-    end
-
-    mls
-  end
+#   # TODO
+#   # move this ASAP to icinga-client!
+#   #
+#   def auto_detect_mls( rls )
+#
+#     cache_key = format('sequence-mls-%s',rls)
+#     mls       = @redis.get(cache_key)
+#
+#     if(mls.nil?)
+#
+#       bean = @mbean.bean( rls, 'replication-live-server', 'Replicator' )
+#
+#       if(bean.is_a?(Hash))
+#
+#         value = bean.dig( 'value' )
+#         unless( value.nil? )
+#
+#           value = value.values.first
+#           mls   = value.dig( 'MasterLiveServer', 'host' )
+#
+#           if( mls.nil? )
+#             logger.error( 'no MasterLiveServer Data found' )
+#             return nil
+#           else
+#             @redis.set(cache_key,mls,320)
+#           end
+#         end
+#       end
+#     end
+#
+#     mls
+#   end
 
 end
 
@@ -156,6 +158,7 @@ OptionParser.new do |opts|
   opts.banner = "Usage: check_cm_sequencenumbers.rb [options]"
 
   opts.on( '-r', '--rls NAME'       , 'Host with running Replication-Live-Server')              { |v| options[:rls]  = v }
+  opts.on( '-m', '--mls NAME'       , 'Host with running Master-Live-Server')                   { |v| options[:mls]  = v }
 
 end.parse!
 
