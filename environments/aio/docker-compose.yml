@@ -57,7 +57,7 @@ services:
 
   database:
     restart: always
-    image: bodsch/docker-mysql:1710.1
+    image: bodsch/docker-mysql:1711.1
     container_name: database
     hostname: database
     ports:
@@ -172,7 +172,7 @@ services:
 
   graphite:
     restart: always
-    image: bodsch/docker-graphite:1710.1
+    image: bodsch/docker-graphite:1.1.0-r1
     container_name: graphite
     hostname: graphite
     extends:

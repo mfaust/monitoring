@@ -14,7 +14,7 @@ services:
 
   http-status:
     description: HTTP Server Status
-    port: 80
+    port: 8081
 
   mysql:
     description: MySQL

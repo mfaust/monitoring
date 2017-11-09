@@ -656,10 +656,10 @@ module DataCollector
 
               # TODO
               # need better coding
-              port = 80
+              port = 8081
               begin
                 service_config = @cfg.service_config.clone
-                port = service_config.dig( 'http-status', 'port' ) || 80
+                port = service_config.dig( 'http-status', 'port' ) || 8081
                 logger.debug( port )
               rescue => e
                 logger.error(e)
