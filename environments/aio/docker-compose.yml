@@ -491,3 +491,40 @@ services:
         ipv4_address: 192.168.1.36
     dns:
       - 192.168.1.5
+
+
+  # testing area ..
+  #
+  fluentd:
+    image: bodsch/docker-fluentd
+    container_name: fluentd
+    hostname: fluentd
+    links:
+      - graylog2
+    ports:
+      - 24224:24224
+      - 24224:24224/udp
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+
+  graylog2:
+    container_name: graylog2
+    image: graylog2/allinone
+    ports:
+      # Graylog web interface and REST API
+      - 9000:9000
+      # Syslog TCP
+      - 514:514
+      # Syslog UDP
+      - 514:514/udp
+      # GELF TCP
+      - 12201:12201
+      # GELF UDP
+      - 12201:12201/udp
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./graylog2/data:/var/opt/greylog/data
+      - ./graylog2/log:/var/log/graylog`
+
+
+

@@ -142,7 +142,7 @@ services:
       # GRAFANA_API_USER: admin
       # GRAFANA_API_PASSWORD: admin
       SERVER_CONFIG_FILE: /etc/grafana_config.yml
-      RUN_DELAY: 50
+      RUN_DELAY: 30
 
   cm-graphite-client:
     environment:
@@ -158,4 +158,4 @@ services:
       ICINGA_API_USER: root
       ICINGA_API_PASSWORD: icinga
       ENABLE_NOTIFICATIONS: 'true'
-      RUN_DELAY: 50
+      RUN_DELAY: 30
