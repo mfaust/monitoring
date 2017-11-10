@@ -17,6 +17,15 @@ volumes:
     driver: local
   icinga:
     driver: local
+  graylog_log:
+    driver: local
+  mongo_data:
+    driver: local
+  es_data:
+    driver: local
+  graylog_journal:
+    driver: local
+
 
 services:
 
@@ -39,7 +48,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     # You can use also Environment vars like this:
     # command: "--nameserver='${DNS_1}:53' --nameserver='${DNS_2}:53' --http=:80"
-    command: " --nameserver='10.1.2.63:53' --nameserver='10.1.2.14:53' --http=:80 --alias --ttl=20 --verbose"
+    command: " --nameserver='10.1.2.63:53' --nameserver='10.1.2.14:53' --http=:80 --alias --ttl=20"
     networks:
       mon:
         ipv4_address: 192.168.1.5
@@ -215,9 +224,6 @@ services:
     build: ../../docker-cm-icinga2
     container_name: cm-icinga2-master
     hostname: cm-icinga2-master
-    extends:
-      file: environments.yml
-      service: cm-icinga2-master
     depends_on:
       - data
       - database
@@ -225,6 +231,24 @@ services:
     links:
       - database
       - redis
+      - fluentd
+    logging:
+      driver: fluentd
+      options:
+        tag: docker.{{.Name}}
+        labels: icinga2-master
+        env: SERVICE_NAME
+    environment:
+      SERVICE_NAME: icinga2-master
+      MYSQL_HOST: database
+      MYSQL_ROOT_PASS: database.pass
+      IDO_PASSWORD: ido.pass
+      IDO_DATABASE_NAME: icinga2core
+      CARBON_HOST: carbon
+      ICINGA_CLUSTER: 'false'
+      ICINGA_MASTER: cm-icinga2-master
+      ICINGA_API_USERS: root:icinga,icingaweb:icingaweb,dashing:dashing,cert:foo-bar
+      REDIS_HOST: redis
     ports:
       - 5665:5665
       - 6666:6666
@@ -495,36 +519,42 @@ services:
 
   # testing area ..
   #
+  # MongoDB: https://hub.docker.com/_/mongo/
+  mongo:
+    image: mongo:3
+    volumes:
+      - mongo_data:/data/db
+
   fluentd:
     image: bodsch/docker-fluentd
     container_name: fluentd
     hostname: fluentd
     links:
-      - graylog2
+      - graylog
     ports:
       - 24224:24224
       - 24224:24224/udp
     volumes:
       - /etc/localtime:/etc/localtime:ro
 
-  graylog2:
-    container_name: graylog2
-    image: graylog2/allinone
-    ports:
-      # Graylog web interface and REST API
-      - 9000:9000
-      # Syslog TCP
-      - 514:514
-      # Syslog UDP
-      - 514:514/udp
-      # GELF TCP
-      - 12201:12201
-      # GELF UDP
-      - 12201:12201/udp
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ./graylog2/data:/var/opt/greylog/data
-      - ./graylog2/log:/var/log/graylog`
+#  graylog:
+#    container_name: graylog2
+#    image: graylog2/allinone
+#    ports:
+#      # Graylog web interface and REST API
+#      - 9000:9000
+#      # Syslog TCP
+#      - 514:514
+#      # Syslog UDP
+#      - 514:514/udp
+#      # GELF TCP
+#      - 12201:12201
+#      # GELF UDP
+#      - 12201:12201/udp
+#    volumes:
+#      - /etc/localtime:/etc/localtime:ro
+#      - graylog_data:/var/opt/greylog/data
+#      - graylog_log:/var/log/graylog`
 
 
 
