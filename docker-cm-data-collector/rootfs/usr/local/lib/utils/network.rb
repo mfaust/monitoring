@@ -166,19 +166,20 @@ module Utils
 
         begin
           TCPSocket.new( host, port ).close
+          puts "true"
           return true
 
         rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH, SocketError => e
-
+          puts "false"
           return false
-
         end
 
       end
 
       rescue Timeout::Error => e
-
+        puts "false"
         return false
+
     end
 
 

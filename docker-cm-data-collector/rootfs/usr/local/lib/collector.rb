@@ -635,22 +635,22 @@ module DataCollector
             case v
             when 'mysql'
               # MySQL
-              d = self.mysql_data( ip )
+              d = self.mysql_data( fqdn )
             when 'mongodb'
               # MongoDB
-              d = self.mongodb_data( ip )
+              d = self.mongodb_data( fqdn )
             when 'postgres'
               # Postgres
-              d = self.postgres_data( ip )
+              d = self.postgres_data( fqdn )
             when 'redis'
               # redis
-              d = self.redis_data( ip )
+              d = self.redis_data( fqdn )
             when 'node-exporter'
               # node_exporter
-              d = self.node_exporter_data( ip )
+              d = self.node_exporter_data( fqdn )
             when 'resourced'
               #
-              d = self.resourced_data( ip )
+              d = self.resourced_data( fqdn )
             when 'http-status'
               # apache mod_status
 
@@ -666,7 +666,7 @@ module DataCollector
                 logger.error( e.backtrace.join("\n") )
               end
 
-              d = self.apache_mod_status( ip, { port: port } )
+              d = self.apache_mod_status( fqdn, { port: port } )
             else
               # all others
             end
