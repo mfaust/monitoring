@@ -67,6 +67,21 @@ module DataCollector
 
     end
 
+
+    def config_data( service, value, default )
+
+      begin
+        service_config = @cfg.service_config.clone
+        default = service_config.dig( service, value ) || default
+      rescue => e
+        logger.error(e)
+        logger.error( e.backtrace.join("\n") )
+      end
+
+      default
+    end
+
+
   end
 
 end

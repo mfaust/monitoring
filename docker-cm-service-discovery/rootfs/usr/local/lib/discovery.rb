@@ -21,6 +21,7 @@ require_relative 'storage'
 require_relative 'discovery/tools'
 require_relative 'discovery/queue'
 require_relative 'discovery/discovery'
+require_relative 'discovery/refresh'
 
 # -------------------------------------------------------------------------------------------------------------------
 
@@ -33,6 +34,7 @@ module ServiceDiscovery
     include ServiceDiscovery::Tools
     include ServiceDiscovery::Queue
     include ServiceDiscovery::Discovery
+    include ServiceDiscovery::Refresh
 
     def initialize( settings = {} )
 
@@ -111,8 +113,8 @@ module ServiceDiscovery
 
       @scan_ports         = ports
 
-      version             = '1.11.0'
-      date                = '2017-11-06'
+      version             = '1.11.5'
+      date                = '2017-11-10'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - Service Discovery' )
@@ -131,9 +133,16 @@ module ServiceDiscovery
       @mq_consumer = MessageQueue::Consumer.new(mq_settings )
       @mq_producer = MessageQueue::Producer.new(mq_settings )
 
-      @database   = Storage::MySQL.new(mysql_settings )
+      @database    = Storage::MySQL.new(mysql_settings )
 
       self.read_configurations
+
+      # run internal scheduler to remove old data
+      scheduler = Rufus::Scheduler.new
+
+      scheduler.every( 1200, :first_in => 60 ) do
+        refresh_host_data
+      end
     end
 
     # read Service Configuration
@@ -287,7 +296,7 @@ module ServiceDiscovery
 
     # add Host and discovery applications
     #
-    def add_host(host, options = {} )
+    def add_host( host, options = {} )
 
       logger.info( sprintf( 'Adding host \'%s\'', host ) )
 
@@ -325,15 +334,12 @@ module ServiceDiscovery
 
         # look for online status ...
         #
-        status = @database.status( {ip: ip, short: short, fqdn: fqdn} )
+        status = @database.status( ip: ip, short: short, fqdn: fqdn )
 
         if( status == nil )
 
           logger.warn( 'host not found' )
-          return {
-              status: 404,
-            message: 'Host not found'
-          }
+          return { status: 404, message: 'Host not found' }
         end
 
         status = status.dig(:status)
@@ -341,14 +347,11 @@ module ServiceDiscovery
         if( status != nil || status != Storage::MySQL::OFFLINE )
 
           logger.debug( 'set host status to ONLINE' )
-          status = @database.setStatus( {ip: ip, short: short, fqdn: fqdn, status: Storage::MySQL::ONLINE} )
+          status = @database.setStatus( ip: ip, short: short, fqdn: fqdn, status: Storage::MySQL::ONLINE )
         end
 
-        return {
-            status: 409, # 409 Conflict
-            message: 'Host already created'
-        }
-
+        # 409 Conflict
+        return { status: 409,  message: 'Host already created' }
       end
 
       # -----------------------------------------------------------------------------------
@@ -357,8 +360,8 @@ module ServiceDiscovery
       #
       logger.debug( 'ask for custom configurations' )
 
-      ports    = @database.config( {ip: ip, short: short, fqdn: fqdn, key: 'ports'} )
-      services = @database.config( {ip: ip, short: short, fqdn: fqdn, key: 'services'} )
+      ports    = @database.config( ip: ip, short: short, fqdn: fqdn, key: 'ports' )
+      services = @database.config( ip: ip, short: short, fqdn: fqdn, key: 'services' )
 
       ports    = (ports != nil)    ? ports.dig( 'ports' )       : ports
       services = (services != nil) ? services.dig( 'services' ) : services
@@ -383,52 +386,11 @@ module ServiceDiscovery
       # check if @discoveryHost and @discoveryPort setStatus
       # then use the new
       # otherwise use the old code
+      start = Time.now
 
-      use_old_discovery = false
-
-      if (@discovery_host.nil?)
-        use_old_discovery = true
-      else
-
-        # use new port discover service
-        #
-        start = Time.now
-        open_ports = []
-
-        pd = PortDiscovery::Client.new(host: @discovery_host, port: @discovery_port)
-
-        if (pd.isAvailable?())
-
-          open_ports = pd.post(host: fqdn, ports: ports)
-
-          open_ports.each do |p|
-
-            names = self.discover_application({fqdn: fqdn, port: p})
-
-            logger.debug("discovered services: #{names}")
-
-            unless (names.nil?)
-
-              names.each do |name|
-                discovered_services.merge!({name => {'port' => p}})
-              end
-            end
-          end
-        else
-
-          use_old_discovery = true
-        end
-
-        finish = Time.now
-        logger.info(sprintf('runtime for application discovery: %s seconds', (finish - start).round(2)))
-        #
-        # ---------------------------------------------------------------------------------------------------
-      end
-
-      if(use_old_discovery)
+      if( @discovery_host.nil? )
 
         open = false
-        start = Time.now
 
         # check open ports and ask for application behind open ports
         #
@@ -453,9 +415,37 @@ module ServiceDiscovery
           end
         end
 
-        finish = Time.now
-        logger.info( sprintf( 'runtime for application discovery: %s seconds', (finish - start).round(2) ) )
+      else
+        # our new port discover service
+        #
+        open_ports = []
+
+        pd = PortDiscovery::Client.new( host: @discovery_host, port: @discovery_port )
+
+        if( pd.isAvailable?() )
+
+          open_ports = pd.post( host: fqdn, ports: ports )
+
+          open_ports.each do |p|
+
+            names = self.discover_application( fqdn: fqdn, port: p )
+
+            logger.debug("discovered services: #{names}")
+
+            unless( names.nil? )
+
+              names.each do |name|
+                discovered_services.merge!( { name => {'port' => p} })
+              end
+            end
+          end
+        end
       end
+
+      finish = Time.now
+      logger.info( sprintf( 'runtime for application discovery: %s seconds', (finish - start).round(2) ) )
+
+      # ---------------------------------------------------------------------------------------------------
 
       found_services = discovered_services.keys
 
@@ -482,9 +472,9 @@ module ServiceDiscovery
 
       # merge discovered services with cm-services.yaml
       #
-      discovered_services = self.create_host_config({ip: ip, short: short, fqdn: fqdn, data: discovered_services} )
+      discovered_services = self.create_host_config( ip: ip, short: short, fqdn: fqdn, data: discovered_services )
 
-      result    = @database.createDiscovery( {ip: ip, short: short, fqdn: fqdn, data: discovered_services} )
+      result    = @database.createDiscovery( ip: ip, short: short, fqdn: fqdn, data: discovered_services )
 
       logger.debug( 'set host status to ONLINE' )
       result    = @database.setStatus( {ip: ip, short: short, fqdn: fqdn, status: Storage::MySQL::ONLINE} )
@@ -492,10 +482,7 @@ module ServiceDiscovery
       finish = Time.now
       logger.info( sprintf( 'overall runtime: %s seconds', (finish - start).round(2) ) )
 
-      status = {
-          status: 200,
-        message: 'Host successful created',
-        services: services
+      status = { status: 200, message: 'Host successful created', services: services
       }
 
       # inform other services ...
@@ -511,38 +498,6 @@ module ServiceDiscovery
       status
     end
 
-
-    def refresh_host(host )
-
-      status  = 200
-      message = 'initialize message'
-
-      host_info = Utils::Network.resolv(host )
-      ip       = host_info.dig(:ip)
-
-      if( ip == nil )
-
-        return {
-            status: 400,
-          message: 'Host not available'
-        }
-
-      end
-
-      # second, if the that we want monitored, available
-      #
-      if(!Utils::Network.isRunning?(ip))
-
-        status  = 400
-        message = 'Host not available'
-      end
-
-      {
-          status: status,
-        message: message
-      }
-
-    end
 
 
     def list_hosts(host = nil )

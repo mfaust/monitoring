@@ -157,27 +157,43 @@ module Utils
     end
 
 
+    def self.port_open? ( host, port, seconds = 1 )
+
+      puts "port_open?( #{host}, #{port}, #{seconds} )"
+
+      # => checks if a port is open or not on a remote host
+      Timeout::timeout( seconds ) do
+        begin
+          TCPSocket.new( host, port ).close
+          return true
+        rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH, SocketError => e
+          return false
+        end
+      end
+
+      rescue Timeout::Error => e
+        return false
+    end
+
+
     def self.portOpen? ( host, port, seconds = 1 )
 
-      puts "portOpen?( #{host}, #{port}, #{seconds} )"
+      # puts "portOpen?( #{host}, #{port}, #{seconds} )"
 
       # => checks if a port is open or not on a remote host
       Timeout::timeout( seconds ) do
 
         begin
           TCPSocket.new( host, port ).close
-          puts "true"
           return true
 
         rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH, SocketError => e
-          puts "false"
           return false
         end
 
       end
 
       rescue Timeout::Error => e
-        puts "false"
         return false
 
     end

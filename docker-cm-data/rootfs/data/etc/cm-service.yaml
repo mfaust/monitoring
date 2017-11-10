@@ -19,6 +19,8 @@ services:
   mysql:
     description: MySQL
     port: 3306
+    monitoring_user: monitoring
+    monitoring_password: monitoring
 
   postgres:
     description: PostgreSQL

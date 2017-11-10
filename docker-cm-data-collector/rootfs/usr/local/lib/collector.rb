@@ -114,32 +114,42 @@ module DataCollector
     end
 
 
-    def mongodb_data( host, data = {} )
+    def mongodb_data( params )
 
-      port = 28017
+      logger.debug( "mongodb_data( #{params} )" )
+
+      host = params.dig(:host)
+      port = params.dig(:port) || 28017
+
+      return { status: 500, message: 'no host name for mongodb_data data' } if( host.nil? )
 
       result = Utils::Network.portOpen?( host, port )
 
       if( result == false )
         logger.warn( sprintf( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
 
-        return JSON.parse( JSON.generate( { :status => 500 } ) )
+        return JSON.parse( JSON.generate( status: 500 ) )
       else
 
-        m = ExternalClients::MongoDb.new( { :host => host, :port => port } )
+        m = ExternalClients::MongoDb.new( host: host, port: port )
 
         return m.get()
       end
     end
 
 
-    def mysql_data( host, data = {} )
+    def mysql_data( params )
 
-      user = data.dig('user') || 'monitoring'
-      pass = data.dig('pass') || 'monitoring'
-      port = data.dig('port') || 3306
-      cache_key = format('mysql-%s', host)
+      logger.debug( "mysql_data( #{params} )" )
 
+      host = params.dig(:host)
+      port = params.dig(:port) || 3306
+      user = params.dig(:username) || 'monitoring'
+      pass = params.dig(:password) || 'monitoring'
+
+      return { status: 500, message: 'no host name for mysql_data data' } if( host.nil? )
+
+      cache_key   = format('mysql-%s', host)
       cached_data = @cache.get( cache_key )
 
       unless( cached_data.nil? )
@@ -186,7 +196,6 @@ module DataCollector
             m = ExternalClients::MySQL.new( settings )
 
             unless( m.client.nil? )
-
               user = u.clone
               pass = p.clone
               break
@@ -196,7 +205,6 @@ module DataCollector
         end
 
         unless( m.client.nil? )
-
           @cache.set( cache_key , expires_in: 640 ) { MiniCache::Data.new( user: user, pass: pass, port: port ) }
 
           mysql_data = m.get()
@@ -210,15 +218,20 @@ module DataCollector
     end
 
 
-    def postgres_data( host, data = {} )
+    def postgres_data( params )
 
       # WiP and nore sure
       # return
 
-      user = data.dig('user')     || 'cm_management'
-      pass = data.dig('pass')     || 'cm_management'
-      port = data.dig('port')     || 5432
-      dbname = data.dig('dbname') || 'coremedia'
+      logger.debug( "postgres_data( #{params} )" )
+
+      host = params.dig(:host)
+      port = params.dig(:port) || 5432
+      user = params.dig(:username) || 'cm_management'
+      pass = params.dig(:password) || 'cm_management'
+      dbname = params.dig(:database) || 'coremedia'
+
+      return { status: 500, message: 'no host name for mysql_data data' } if( host.nil? )
 
       if( port != nil )
 
@@ -236,7 +249,7 @@ module DataCollector
       if( result == false )
         logger.warn( sprintf( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
 
-        return JSON.parse( JSON.generate( { :status => 500 } ) )
+        return JSON.parse( JSON.generate( status: 500 ) )
       else
 
         pgsql = ExternalClients::PostgresStatus.new( settings )
@@ -248,11 +261,14 @@ module DataCollector
     end
 
 
-    def redis_data( host, data = {} )
+    def redis_data( params )
 
-      logger.debug("redis_data( #{host}, #{data} )")
+      logger.debug( "redis_data( #{params} )" )
 
-      port = data.dig(:port) || 6379
+      host = params.dig(:host)
+      port = params.dig(:port) || 6379
+
+      return { status: 500, message: 'no host name for redis_data data' } if( host.nil? )
 
       unless( port.nil? )
 
@@ -267,7 +283,7 @@ module DataCollector
       if( result == false )
         logger.warn( sprintf( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
 
-        return JSON.parse( JSON.generate( { :status => 500 } ) )
+        return JSON.parse( JSON.generate( status: 500 ) )
       else
 
         logger.debug( 'read redis data ...' )
@@ -277,29 +293,24 @@ module DataCollector
     end
 
 
-    def node_exporter_data( host, data = {} )
+    def node_exporter_data( params )
 
-      logger.debug("node_exporter_data( #{host}, #{data} )")
+      logger.debug("node_exporter_data( #{params} )")
 
-      port = data.dig(:port) || 9100
+      host = params.dig(:host)
+      port = params.dig(:port) || 9100
 
-      unless( port.nil? )
-
-        settings = {
-          :host => host,
-          :port => port
-        }
-      end
+      return { status: 500, message: 'no host name for node_exporter data' } if( host.nil? )
 
       result = Utils::Network.portOpen?( host, port )
 
       if( result == false )
-        logger.warn( sprintf( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
+        logger.warn( sprintf( 'The Port %s for node_exporter on Host %s is not open, skip sending data', port, host ) )
 
-        return JSON.parse( JSON.generate( { :status => 500 } ) )
+        return JSON.parse( JSON.generate( status: 500 ) )
       else
 
-        m = ExternalClients::NodeExporter.new( settings )
+        m = ExternalClients::NodeExporter.new( host: host, port: port )
         nodeData = m.get()
 
         result   = JSON.generate( nodeData )
@@ -311,9 +322,14 @@ module DataCollector
     end
 
 
-    def resourced_data( host, data = {} )
+    def resourced_data( params )
 
-      port = data.dig(:port) || 55555
+      logger.debug("resourced_data( #{params} )")
+
+      host = params.dig(:host)
+      port = params.dig(:port) || 55555
+
+      return { status: 500, message: 'no host name for resourced_data data' } if( host.nil? )
 
       if( port != nil )
         settings = {
@@ -327,7 +343,7 @@ module DataCollector
       if( result == false )
         logger.warn( sprintf( 'The Port \'%s\' on Host \'%s\' is not open, skip ...', port, host ) )
 
-        return JSON.parse( JSON.generate( { :status => 500 } ) )
+        return JSON.parse( JSON.generate( status: 500 ) )
       else
 
         m = ExternalClients::Resouced.new( settings )
@@ -342,11 +358,14 @@ module DataCollector
     end
 
 
-    def apache_mod_status( host, data = {} )
+    def apache_mod_status( params )
 
-      logger.debug( "apache_mod_status( #{host}, #{data} )" )
+      logger.debug( "apache_mod_status( #{params} )" )
 
-      port = data.dig(:port) || 8081
+      host = params.dig(:host)
+      port = params.dig(:port) || 8081
+
+      return { status: 500, message: 'no host name for apache_mod_status data' } if( host.nil? )
 
       result = Utils::Network.portOpen?( host, port )
 
@@ -355,8 +374,6 @@ module DataCollector
 
         JSON.parse( JSON.generate( status: 500 ) )
       else
-
-#        result = []
 
         mod_status      = ExternalClients::ApacheModStatus.new( host: host, port: port )
         mod_status_data = mod_status.tick
@@ -503,6 +520,7 @@ module DataCollector
         self.collect_measurements( result )
       rescue => e
         logger.error(format('collect measurements failed, cause: %s', e ))
+        logger.error( e.backtrace.join("\n") )
       end
 
       checks.clear()
@@ -635,38 +653,40 @@ module DataCollector
             case v
             when 'mysql'
               # MySQL
-              d = self.mysql_data( fqdn )
+
+              port = config_data( v, 'port', 3306 )
+              username = config_data( v, 'monitoring_user', 'monitoring' )
+              password = config_data( v, 'monitoring_password', 'monitoring' )
+
+              d = self.mysql_data( host: fqdn, port: port, username: username, password: password )
             when 'mongodb'
               # MongoDB
-              d = self.mongodb_data( fqdn )
+              port = config_data( v, 'port', 28017 )
+              d = self.mongodb_data( host: fqdn, port: port )
             when 'postgres'
               # Postgres
-              d = self.postgres_data( fqdn )
+              port = config_data( v, 'port', 5432 )
+              username = config_data( v, 'monitoring_user', 'cm_management' )
+              password = config_data( v, 'monitoring_password', 'cm_management' )
+              database = config_data( v, 'monitoring_database', 'coremedia' )
+
+              d = self.postgres_data( host: fqdn, port: port )
             when 'redis'
               # redis
-              d = self.redis_data( fqdn )
+              port = config_data( v, 'port', 6379 )
+              d = self.redis_data( host: fqdn, port: port )
             when 'node-exporter'
               # node_exporter
-              d = self.node_exporter_data( fqdn )
+              port = config_data( v, 'port', 9100 )
+              d = self.node_exporter_data( host: fqdn )
             when 'resourced'
               #
-              d = self.resourced_data( fqdn )
+              port = config_data( v, 'port', 55555 )
+              d = self.resourced_data( host: fqdn, port: port )
             when 'http-status'
               # apache mod_status
-
-              # TODO
-              # need better coding
-              port = 8081
-              begin
-                service_config = @cfg.service_config.clone
-                port = service_config.dig( 'http-status', 'port' ) || 8081
-                logger.debug( port )
-              rescue => e
-                logger.error(e)
-                logger.error( e.backtrace.join("\n") )
-              end
-
-              d = self.apache_mod_status( fqdn, { port: port } )
+              port = config_data( v, 'port', 8081 )
+              d = self.apache_mod_status( host: fqdn, port: port )
             else
               # all others
             end
@@ -743,7 +763,7 @@ module DataCollector
 #       logger.debug(status)
 
       if( status.to_i != 200 )
-        logger.error( 'Contentserver are not available!' )
+        logger.error( format( '  [%s] - Contentserver are not available!', status ) )
         return data
       end
 
@@ -825,6 +845,7 @@ module DataCollector
 
     end
 
+
     # a CAE give us his Content Server as URL:
     #  - "Url": "http://tomcat-centos7:42080/coremedia/ior"
     #  - "Url": "http://tomcat-centos7:40180/coremedia/ior"
@@ -854,7 +875,7 @@ module DataCollector
 #       logger.debug(status)
 
       if( status.to_i != 200 )
-        logger.error( 'Contentserver are not available!' )
+        logger.error( format( '  [%s] - Contentserver are not available!', status ) )
         return data
       end
 
