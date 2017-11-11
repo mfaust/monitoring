@@ -54,15 +54,21 @@ module ServiceDiscovery
 
           # step 1
           # update our database
-          logger.debug( 'update the database' )
           result    = @database.createDiscovery( ip: ip, short: short, fqdn: fqdn, data: data )
-          logger.debug( result )
+
+          options = { dns: { ip: ip, short: short, fqdn: fqdn } }
+          host    = fqdn
+          delay = 10
 
           # step 2
           # create a job for update icinga
+          logger.info( 'create message for grafana to create or update dashboards' )
+          send_message( cmd: 'update', node: host, queue: 'mq-grafana', payload: options, prio: 10, ttr: 15, delay: 10 + delay.to_i )
 
           # step 3
           # create a job for update grafana
+          logger.info( 'create message for icinga to update host and apply checks and notifications' )
+          send_message( cmd: 'update', node: host, queue: 'mq-icinga', payload: options, prio: 10, ttr: 15, delay: 10 + delay.to_i )
 
         elsif( known_services_count > actually_services_count )
           logger.info( 'less services (will be ignored)' )
@@ -85,7 +91,8 @@ module ServiceDiscovery
       services = discovery_data.keys.sort
 
       services_count   = services.count
-      logger.info( format( 'known about %d services: %s', services_count, services.to_s ) )
+      logger.info( format( 'i known %d services', services_count ) )
+      logger.debug( services.to_s )
 
       { count: services_count, services: services }
     end
@@ -123,7 +130,8 @@ module ServiceDiscovery
       services = discovered_services.keys.sort
       services_count = services.count
 
-      logger.info( format( 'actual found %d services: %s', services_count, services.to_s ) )
+      logger.info( format( 'currently there are %s services', services_count ) )
+      logger.debug( services.to_s )
 
       { count: services_count, services: services, discovery_data: discovered_services }
     end

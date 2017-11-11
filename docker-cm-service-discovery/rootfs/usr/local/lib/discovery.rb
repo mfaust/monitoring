@@ -395,13 +395,14 @@ module ServiceDiscovery
       status = { status: 200, message: 'Host successful created', services: services }
 
       # inform other services ...
-      delay = 10
+      logger.debug( "host: #{host}" )
+      logger.debug( "options: #{options}" )
 
-      logger.info( 'create message for grafana dashborads' )
-      send_message({cmd: 'add', node: host, queue: 'mq-grafana', payload: options, prio: 10, ttr: 15, delay: 10 + delay.to_i} )
+      logger.info( 'create message for grafana to create dashboards' )
+      send_message( cmd: 'add', node: host, queue: 'mq-grafana', payload: options, prio: 10, ttr: 15, delay: 20 )
 
-      logger.info( 'create message for icinga checks and notifications' )
-      send_message({cmd: 'add', node: host, queue: 'mq-icinga', payload: options, prio: 10, ttr: 15, delay: 10 + delay.to_i} )
+      logger.info( 'create message for icinga to insert host and apply checks and notifications' )
+      send_message( cmd: 'add', node: host, queue: 'mq-icinga', payload: options, prio: 10, ttr: 15, delay: 20 )
 
       status
     end

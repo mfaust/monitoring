@@ -456,7 +456,7 @@ services:
     hostname: cm-data-collector
     environment:
       TZ: 'Europe/Berlin'
-      INTERVAL: 20
+      INTERVAL: 45
     depends_on:
       - data
       - jolokia
