@@ -63,14 +63,9 @@ class CMGrafana
         @additional_tags = params.dig(:tags)     || []
         create_overview  = params.dig(:overview) || false
 
-        if( host == nil )
-
+        if( host.nil? )
           logger.error( 'missing hostname to create Dashboards' )
-
-          return {
-            :status      => 500,
-            :message     => 'missing hostname to create Dashboards'
-          }
+          return { status: 500, message: 'missing hostname to create Dashboards' }
         end
 
         start = Time.now
@@ -79,35 +74,9 @@ class CMGrafana
 
         ip, short, fqdn = self.prepare( host )
 
-        discovery = nil
-        begin
+        discovery = discovery_data( ip: ip, short: short, fqdn: fqdn )
 
-          (1..15).each { |y|
-
-            discovery = @database.discoveryData({:ip => ip, :short => short, :fqdn => fqdn})
-
-            logger.debug(discovery)
-            logger.debug(discovery.class.to_s)
-
-            if( discovery.nil? )
-              logger.debug(sprintf('wait for discovery data for node \'%s\' ... %d', fqdn, y))
-              sleep(4)
-            else
-              break
-            end
-          }
-
-        rescue => e
-          logger.error( e )
-        end
-
-        if( discovery.nil? )
-
-          return {
-            :status    => 400,
-            :message   => 'no discovery data found'
-          }
-        end
+        return { status: 400, message: 'no discovery data found' } if( discovery.nil? )
 
         services       = discovery.keys
         logger.debug( "Found services: #{services}" )
@@ -124,7 +93,10 @@ class CMGrafana
         tmp_services.delete( 'http-status' )
 
         # ensure, that we are logged in
-        login( { :user => @user, :password => @password, :max_retries => 10 } )
+        login( user: @user, password: @password, max_retries: 10 )
+
+        # we want an Services Overview for this Host
+        create_overview( services ) if(create_overview) # add description
 
         discovery.each do |service,service_data|
 
@@ -159,20 +131,16 @@ class CMGrafana
           if( ! service_template.to_s.empty? )
 
             options = {
-              :description             => description,
-              :service_name             => service_name,
-              :normalized_name          => normalized_name,
-              :service_template         => service_template,
-              :additional_template_paths => additional_template_paths
+              description: description,
+              service_name: service_name,
+              normalized_name: normalized_name,
+              service_template: service_template,
+              additional_template_paths: additional_template_paths
             }
 
             self.create_service_template( options )
           end
         end
-
-        # we want an Services Overview for this Host
-        self.create_overview( services ) if(create_overview) # add description
-
 
         # named Templates are a subset of specialized Templates
         # like Memory-Pools, Tomcat or simple Grafana-Templates
@@ -198,10 +166,9 @@ class CMGrafana
         self.create_named_template( named_template_array )
 
         begin
-
           (1..30).each { |y|
 
-            result = @redis.measurements({:short => short, :fqdn => fqdn})
+            result = @redis.measurements( short: short, fqdn: fqdn )
 
             if( result.nil? )
               logger.debug(sprintf('wait for measurements data for node \'%s\' ... %d', short, y))
@@ -222,21 +189,15 @@ class CMGrafana
 
           # TODO
           # check ASAP if FQDN needed!
-          self.create_license_template( host: fqdn, services: services )
+          create_license_template( host: fqdn, services: services )
         end
 
-        dashboards = self.list_dashboards({:host => short } ) #@grafana_hostname } )
+        dashboards = self.list_dashboards( host: short ) #@grafana_hostname } )
         dashboards = dashboards.dig(:dashboards)
 
         # TODO
         # clearer!
-        if( dashboards == nil )
-
-          return {
-            :status      => 404,
-            :message     => 'no dashboards added'
-          }
-        end
+        return { status: 404, message: 'no dashboards added' } if( dashboards.nil? )
 
         count      = dashboards.count
 
@@ -249,14 +210,9 @@ class CMGrafana
         end
 
         finish = Time.now
-        logger.info( sprintf( 'finished in %s seconds', (finish - start).round(3) ) )
+        logger.info( sprintf( 'finished in %s seconds', (finish - start).round(2) ) )
 
-        {
-          :status      => status,
-          :name        => host,
-          :message     => message
-        }
-
+        { status: status, name: host, message: message  }
       end
 
 
@@ -333,11 +289,10 @@ class CMGrafana
         title = json.dig('dashboard','title')
 
         response = create_dashboard( title: title, dashboard: json )
+        response_status  = response.dig('status').to_i
+        response_message = response.dig('message')
 
-        if( response.dig('status').to_i != 200 )
-          logger.error( 'template can\'t be add' )
-          logger.debug( "#{response}" )
-        end
+        logger.warn( format('template can\'t be add: [%s] %s', response_status, response_message ) ) if( response_status != 200 )
       end
 
 
@@ -486,12 +441,10 @@ class CMGrafana
         title = json.dig('dashboard','title')
 
         response = create_dashboard( title: title, dashboard: json )
+        response_status  = response.dig('status').to_i
+        response_message = response.dig('message')
 
-        if( response.dig('status').to_i != 200 )
-          logger.error( 'template can\'t be add' )
-          logger.debug( "#{response}" )
-        end
-
+        logger.warn( format('template can\'t be add: [%s] %s', response_status, response_message ) ) if( response_status != 200 )
       end
 
 
@@ -526,11 +479,10 @@ class CMGrafana
               logger.debug( title )
 
               response = create_dashboard( title: title, dashboard: json )
+              response_status  = response.dig('status').to_i
+              response_message = response.dig('message')
 
-              if( response.dig('status').to_i != 200 )
-                logger.error( 'template can\'t be add' )
-                logger.debug( "#{response}" )
-              end
+              logger.warn( format('template can\'t be add: [%s] %s', response_status, response_message ) ) if( response_status != 200 )
             end
           end
         end
@@ -553,33 +505,19 @@ class CMGrafana
       #    or, in combination
       #    searchDashboards( { :tags => [ 'dev' ], :starred => true, :query => 'Dashboard for Tomcats' } )
       # @return [Hash, #read]
-      def list_dashboards(params = {} )
+      def list_dashboards( params )
 
         logger.debug("list_dashboards( #{params} )")
 
         tags            = params.dig(:tags)
 
         # ensure, that we are logged in
-        login( { :user => @user, :password => @password, :max_retries => 10 } )
+        login( user: @user, password: @password, max_retries: 10 )
 
-        data = self.search_dashboards( { :tags => tags } )
+        data = self.search_dashboards( tags: tags )
         data = data.dig('message') unless( data.nil? )
 
-        if( data == nil || data == false )
-
-          return {
-            :status     => 204,
-            :message    => 'no Dashboards found'
-          }
-        end
-
-        if( data.count == 0 )
-
-          return {
-            :status     => 204,
-            :message    => 'no Dashboards found'
-          }
-        end
+        return { status: 204, message: 'no Dashboards found' } if( data.nil? || data == false || data.count == 0 )
 
         # get all elements from type 'uri'
         # and remove the path and the tag-name'
@@ -591,110 +529,111 @@ class CMGrafana
           d.gsub!( 'db/', '' )
         end
 
-        {
-          :status     => 200,
-          :count      => data.count,
-          :dashboards => data
-        }
+        { status: 200, count: data.count, dashboards: data }
       end
 
 
-      def delete_dashboards(params = {} )
+      def delete_dashboards( params )
 
         host = params.dig(:host)
         fqdn = params.dig(:fqdn)
         tags = params.dig(:tags) || []
 
         if( host.nil? )
-
           logger.error( 'missing hostname to delete Dashboards' )
-
-          return {
-            :status      => 500,
-            :message     => 'missing hostname to delete Dashboards'
-          }
+          return { status: 500, message: 'missing hostname to delete Dashboards' }
         end
 
         ip, short, fqdn = self.prepare( host )
 
-#         logger.info( sprintf( 'remove dashboards for host %s (%s)', host, @grafana_hostname ) )
-
-        dashboards = self.list_dashboards({:tags => short } )
+        dashboards = self.list_dashboards( tags: short )
 
         status = dashboards.dig(:status)
 
-        if( status.to_i == 204 )
+        return { status: 204, name: host, message: 'no Dashboards found' } if( status.to_i == 204 )
 
-          {
-            :status     => 204,
-            :name       => host,
-            :message    => 'no Dashboards found'
-          }
-
-        elsif( status.to_i == 200 )
+        if( status.to_i == 200 )
 
           dashboards = dashboards.dig(:dashboards)
 
-          if( dashboards.nil? )
-
-            return {
-              :status      => 500,
-              :message     => 'no dashboards found'
-            }
-
-          end
+          return { status: 500, message: 'no dashboards found' } if( dashboards.nil? )
 
           count      = dashboards.count
 
-          if( count.to_i == 0 )
+          return { status: 204, name: host, message: 'no Dashboards found' } if( count.to_i == 0 )
 
-            return {
-              :status      => 204,
-              :name        => host,
-              :message     => 'no Dashboards found'
-            }
-          else
+          delete_count = 0
 
-            delete_count = 0
+          logger.info( sprintf( 'remove %d dashboards for host %s (%s)', count, host, @grafana_hostname ) )
+#           logger.debug( sprintf( 'found %d dashboards for delete', count ) )
 
-            logger.info( sprintf( 'remove %d dashboards for host %s (%s)', count, host, @grafana_hostname ) )
-#             logger.debug( sprintf( 'found %d dashboards for delete', count ) )
+          # ensure, that we are logged in
+          login( user: @user, password: @password, max_retries: 10 )
 
-            # ensure, that we are logged in
-            login( { :user => @user, :password => @password, :max_retries => 10 } )
+          dashboards.each do |d|
 
-            dashboards.each do |d|
+            # TODO
+            #if( (i.include?"group") && ( !host.include?"group") )
+            #  # Don't delete group templates except if deletion is forced
+            #  next
+            #end
 
-              # TODO
-              #if( (i.include?"group") && ( !host.include?"group") )
-              #  # Don't delete group templates except if deletion is forced
-              #  next
-              #end
+            logger.debug( sprintf( '  - %s :: %s', host, d ) )
 
-              logger.debug( sprintf( '  - %s :: %s', host, d ) )
+            response = delete_dashboard( d )
 
-              response = delete_dashboard( d )
+            logger.debug( response )
 
-              logger.debug( response )
+            status = response.dig('status')
 
-              status = response.dig('status')
-
-              delete_count += 1 if( status == 200 )
-
-            end
-
-            logger.info( sprintf( '%d dashboards deleted', delete_count ) )
-
-            return {
-              :status      => 200,
-              :name        => host,
-              :message     => sprintf( '%d dashboards deleted', delete_count )
-            }
+            delete_count += 1 if( status == 200 )
 
           end
+
+          logger.info( sprintf( '%d dashboards deleted', delete_count ) )
+
+          return { status: 200, name: host, message: sprintf( '%d dashboards deleted', delete_count ) }
         end
 
       end
+
+
+      def update_dashboards( params )
+
+        host             = params.dig(:host)
+        @additional_tags = params.dig(:tags)     || []
+        create_overview  = params.dig(:overview) || false
+
+        ip, short, fqdn  = prepare( host )
+
+        overview_dashboard = list_dashboards( tags: [ short, 'overview' ] )
+        licenses_dashboard = list_dashboards( tags: [ short, 'licenses' ] )
+
+        overview_dashboard = overview_dashboard.dig(:dashboards)
+        licenses_dashboard = licenses_dashboard.dig(:dashboards)
+
+        params[:overview] = true if(overview_dashboard)
+
+        logger.debug( "overview_dashboard: #{overview_dashboard}" )
+
+        logger.debug( 'first, delete combined dashboards: overview and licenses' )
+        overview_dashboard.each do |d|
+          logger.debug( sprintf( '  - %s :: %s', host, d ) )
+          response = delete_dashboard( d )
+          # logger.debug( response )
+          status = response.dig('status')
+        end
+
+        licenses_dashboard.each do |d|
+          logger.debug( sprintf( '  - %s :: %s', host, d ) )
+          response = delete_dashboard( d )
+          # logger.debug( response )
+          status = response.dig('status')
+        end
+
+        create_dashboard_for_host( params )
+      end
+
 
     end
 
@@ -723,17 +662,13 @@ class CMGrafana
           end
         end
 
-        if( template == nil )
-
-          logger.error( sprintf( 'no template for service %s found', service_name ) )
-        end
+        logger.warn( sprintf( 'no template for service %s found', service_name ) ) if( template.nil? )
 
         template
-
       end
 
 
-      def create_service_template( params = {} )
+      def create_service_template( params )
 
         description             = params.dig(:description)
         service_name             = params.dig(:service_name)
@@ -825,12 +760,15 @@ class CMGrafana
 
         json = JSON.parse( json ) if( json.is_a?(String) )
         title = json.dig('dashboard','title')
-        response = create_dashboard( title: title, dashboard: json )
 
-        if( response.dig('status').to_i != 200 )
-          logger.error( 'template can\'t be add' )
-          logger.debug( "#{response}" )
-        end
+        # TODO
+        # check, if dashboard exists
+        # check, if we can overwrite the dashboard
+        response = create_dashboard( title: title, dashboard: json )
+        response_status  = response.dig('status').to_i
+        response_message = response.dig('message')
+
+        logger.warn( format('template can\'t be add: [%s] %s', response_status, response_message ) ) if( response_status != 200 )
 
       end
 
@@ -902,7 +840,7 @@ class CMGrafana
         short_hostname     = params.dig(:short_hostname)
         mls_identifier     = params.dig(:mls_identifier)
 
-        if( template == nil )
+        if( template.nil? )
           return false
         end
 

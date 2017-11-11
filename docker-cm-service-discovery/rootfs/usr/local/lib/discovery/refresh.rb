@@ -58,17 +58,16 @@ module ServiceDiscovery
 
           options = { dns: { ip: ip, short: short, fqdn: fqdn } }
           host    = fqdn
-          delay = 10
 
           # step 2
           # create a job for update icinga
           logger.info( 'create message for grafana to create or update dashboards' )
-          send_message( cmd: 'update', node: host, queue: 'mq-grafana', payload: options, prio: 10, ttr: 15, delay: 10 + delay.to_i )
+          send_message( cmd: 'update', node: host, queue: 'mq-grafana', payload: options, prio: 10, ttr: 15, delay: 25 )
 
           # step 3
           # create a job for update grafana
           logger.info( 'create message for icinga to update host and apply checks and notifications' )
-          send_message( cmd: 'update', node: host, queue: 'mq-icinga', payload: options, prio: 10, ttr: 15, delay: 10 + delay.to_i )
+          send_message( cmd: 'update', node: host, queue: 'mq-icinga', payload: options, prio: 10, ttr: 15, delay: 25 )
 
         elsif( known_services_count > actually_services_count )
           logger.info( 'less services (will be ignored)' )

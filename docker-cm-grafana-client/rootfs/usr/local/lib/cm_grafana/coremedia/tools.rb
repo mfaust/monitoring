@@ -120,6 +120,38 @@ class CMGrafana
       end
 
 
+      def discovery_data( params )
+
+        ip    = params.dig(:ip)
+        short = params.dig(:short)
+        fqdn  = params.dig(:fqdn)
+
+        discovery = nil
+
+        begin
+          (1..15).each { |y|
+
+            discovery = @database.discoveryData( ip: ip, short: short, fqdn: fqdn )
+
+            logger.debug(discovery)
+            logger.debug(discovery.class.to_s)
+
+            if( discovery.nil? )
+              logger.debug(sprintf('wait for discovery data for node \'%s\' ... %d', fqdn, y))
+              sleep(4)
+            else
+              break
+            end
+          }
+
+        rescue => e
+          logger.error( e )
+        end
+
+        discovery
+      end
+
+
     end
 
   end
