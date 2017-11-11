@@ -37,8 +37,6 @@ module DataCollector
   class Collector
 
     include Logging
-
-#     include DataCollector::Version
     include DataCollector::Tools
 
     def initialize( settings = {} )
@@ -107,7 +105,7 @@ module DataCollector
       # run internal scheduler to remove old data
       scheduler = Rufus::Scheduler.new
 
-      scheduler.every( 10, :first_in => 10 ) do
+      scheduler.every( '10s', :first_in => 10 ) do
         clean()
       end
 
@@ -400,10 +398,7 @@ module DataCollector
       host = params.dig(:short)
       fqdn = params.dig(:fqdn)
 
-      if( host.nil? )
-        logger.warn( 'no host name for bulk checks' )
-        return
-      end
+      return { status: 404, message: 'no host name for bulk checks' } if( host.nil? )
 
       checks   = Array.new()
       array    = Array.new()
@@ -749,18 +744,10 @@ module DataCollector
 
       return data unless( d.is_a?(Array) )
 
-#       unless( d.is_a?(Array) )
-#         data
-#       end
-
       value = d.first # hash
       replicator = value.dig('Replicator')
 
-#       logger.debug( value.class.to_s )
-#       logger.debug(value)
-
       status = replicator.dig('status')
-#       logger.debug(status)
 
       if( status.to_i != 200 )
         logger.error( format( '  [%s] - Contentserver are not available!', status ) )
@@ -771,78 +758,53 @@ module DataCollector
 
       return data unless( value.is_a?(Hash) )
 
-#       logger.debug( value.class.to_s )
-
-#       if( !value.is_a?(Hash) )
-#         data
-#       end
-#
-#       logger.debug( value )
-
       unless( value.nil? )
-
-#         logger.debug( value.class.to_s )
 
         value  = value.values.first
 
         return data unless( value.is_a?(Hash) )
-#
-#         logger.debug( value.class.to_s )
-#
-#         if( !value.is_a?(Hash))
-#           data
-#         end
 
         mlsIOR = value.dig( 'MasterLiveServerIORUrl' )
 
-#         logger.debug( mlsIOR )
+        return data if( mlsIOR.nil? )
 
-        unless( mlsIOR.nil? )
+        uri    = URI.parse( mlsIOR )
+        scheme = uri.scheme
+        host   = uri.host
+        port   = uri.port
+        path   = uri.path
 
-          uri    = URI.parse( mlsIOR )
-          scheme = uri.scheme
-          host   = uri.host
-          port   = uri.port
-          path   = uri.path
+        logger.debug( format('search dns entry for \'%s\'', host) )
 
-          logger.debug( format('search dns entry for \'%s\'', host) )
+        ip, short, fqdn = self.ns_lookup(host, 60)
 
-          ip, short, fqdn = self.ns_lookup(host, 60)
+        if( !ip.nil? && !short.nil? && !fqdn.nil? )
 
-          if( !ip.nil? && !short.nil? && !fqdn.nil? )
+          logger.debug( "found: #{ip} , #{short} , #{fqdn}" )
 
-            logger.debug( "found: #{ip} , #{short} , #{fqdn}" )
-
-            realIP    = ip
-            realShort = short
-            mlsHost   = fqdn
-
-          else
-            realIP    = ''
-            realShort = ''
-            mlsHost   = host
-          end
-
-          value['MasterLiveServer'] = {
-            'scheme' => scheme,
-            'host'   => mlsHost,
-            'port'   => port,
-            'path'   => path
-          }
-
-          logger.debug( JSON.pretty_generate(value.dig('MasterLiveServer')) )
-
+          realIP    = ip
+          realShort = short
+          mlsHost   = fqdn
         else
-          logger.debug( 'no \'IOR URL\' found! :(' )
-          logger.info( 'this RLS use an older version. we use the RLS Host as fallback' )
+          realIP    = ''
+          realShort = ''
+          mlsHost   = host
         end
+
+        value['MasterLiveServer'] = {
+          'scheme' => scheme,
+          'host'   => mlsHost,
+          'port'   => port,
+          'path'   => path
+        }
+
+        # logger.debug( JSON.pretty_generate(value.dig('MasterLiveServer')) )
 
       end
 
       logger.info( sprintf( '  use \'%s\'', mlsHost ) )
 
-      return data
-
+      data
     end
 
 
@@ -893,8 +855,12 @@ module DataCollector
 
         content_server_ior = value.dig( 'Url' )
 
-        unless( content_server_ior.nil? )
+        if( content_server_ior.nil? )
+          logger.debug( 'no \'IOR URL\' found! :(' )
+          logger.info( 'this CAE use an older version. we use the CAE Host as fallback' )
 
+          return data
+        else
           uri    = URI.parse( content_server_ior )
           scheme = uri.scheme
           host   = uri.host
@@ -925,16 +891,12 @@ module DataCollector
             'port'   => port,
             'path'   => path
           }
-
-          logger.debug( JSON.pretty_generate(value.dig('ContentServer')) )
-        else
-          logger.debug( 'no \'IOR URL\' found! :(' )
-          logger.info( 'this CAE use an older version. we use the CAE Host as fallback' )
+          # logger.debug( JSON.pretty_generate(value.dig('ContentServer')) )
         end
       end
 
       logger.info( sprintf( '  use \'%s\'', content_server ) )
-      return data
+      data
     end
 
 
@@ -1112,25 +1074,29 @@ module DataCollector
 
     def clean()
 
-      data = @mq.getJobFromTube(@mq_queue, true )
+      data = @mq.getJobFromTube( @mq_queue, true )
 
       if( data.count() != 0 )
 
-        logger.debug( data )
-
+        logger.debug( "clean: #{data}" )
         payload = data.dig( :body, 'payload' )
+        hostname = payload.dig('host') unless( payload.nil? )
 
-        logger.debug( payload )
+        unless( hostname.nil? )
 
-        @cache.unset( payload.dig('host') )
+          logger.debug('unset cached data')
+          keys  = format( '%s-validate', hostname )
+
+          [hostname, keys].each do |x|
+            logger.debug( "  #{x}" )
+            @cache.unset( x )
+          end
+        end
       end
     end
 
 
-
     def run()
-
-#      logger.debug( 'get the online server for monitoring to collect their data' )
 
       monitoredServer = self.monitoredServer()
 
@@ -1175,6 +1141,13 @@ module DataCollector
         #
         begin
           discovery_data    = @database.discoveryData( ip: ip, short: short, fqdn: fqdn )
+
+          discovery_keys   = discovery_data.keys.sort
+          discovery_count  = discovery_keys.count
+          key = discovery_keys.clone
+          key = discovery_keys.to_s if( discovery_keys.is_a?(Array) )
+
+          discovery_checksum = Digest::MD5.hexdigest( key )
         rescue => e
           logger.error(e)
         end
@@ -1182,7 +1155,27 @@ module DataCollector
         # build prepared datas
         #
         begin
-          @prepare.buildMergedData( hostname: short, fqdn: fqdn, data: discovery_data )
+
+          prepared_count, prepared_checksum, prepared_keys = @prepare.valid_data(fqdn).values
+
+          logger.debug( "current : #{discovery_count} services / checksum: #{discovery_checksum}" )
+          logger.debug( "cached  : #{prepared_count} services / checksum: #{prepared_checksum}" )
+
+          options = { hostname: short, fqdn: fqdn, data: discovery_data }
+
+          if( prepared_count != 0 && discovery_count > prepared_count )
+
+            logger.info('new service detected ...')
+            logger.debug( "current : #{discovery_keys}" )
+            logger.debug( "cached  : #{prepared_keys}" )
+
+            options[:force] = true
+            key       = Storage::RedisClient.cacheKey( host: fqdn, pre: 'collector' )
+            data      = @cache.unset( key )
+          end
+
+          result = @prepare.build_merged_data( options )
+          logger.debug( result )
         rescue => e
           logger.error(e)
         end

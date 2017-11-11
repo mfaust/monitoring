@@ -381,8 +381,6 @@ services:
     hostname: cm-rest-service
     environment:
       TZ: 'Europe/Berlin'
-      REST_SERVICE_PORT: 45678
-      REST_SERVICE_BIND: '0.0.0.0'
       MYSQL_HOST: database
       MYSQL_ROOT_PASS: database.pass
       # when we need an DNS entry for external services, we can use ADDITIONAL_DNS
@@ -426,6 +424,7 @@ services:
     hostname: cm-service-discover
     environment:
       TZ: 'Europe/Berlin'
+      REFRESH_ENABLED: 'true'
       INTERVAL: 20
     depends_on:
       - data
