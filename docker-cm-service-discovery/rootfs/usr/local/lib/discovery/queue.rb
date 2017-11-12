@@ -46,7 +46,7 @@ module ServiceDiscovery
     end
 
 
-    def process_queue(data = {} )
+    def process_queue( data = {} )
 
       logger.info( sprintf( 'process Message ID %d from Queue \'%s\'', data.dig(:id), data.dig(:tube) ) )
 
@@ -241,7 +241,7 @@ module ServiceDiscovery
     end
 
 
-    def send_message(params = {} )
+    def send_message( params = {} )
 
       command = params.dig(:cmd)
       node    = params.dig(:node)

@@ -37,8 +37,6 @@ module DataCollector
   class Collector
 
     include Logging
-
-#     include DataCollector::Version
     include DataCollector::Tools
 
     def initialize( settings = {} )
@@ -107,7 +105,7 @@ module DataCollector
       # run internal scheduler to remove old data
       scheduler = Rufus::Scheduler.new
 
-      scheduler.every( 10, :first_in => 10 ) do
+      scheduler.every( '10s', :first_in => 10 ) do
         clean()
       end
 
@@ -126,7 +124,7 @@ module DataCollector
       result = Utils::Network.portOpen?( host, port )
 
       if( result == false )
-        logger.warn( sprintf( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
+        logger.warn( format( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
 
         return JSON.parse( JSON.generate( status: 500 ) )
       else
@@ -171,7 +169,7 @@ module DataCollector
       result = Utils::Network.portOpen?( host, port )
 
       if( result == false )
-        logger.warn( sprintf( 'The Port \'%s\' on Host \'%s\' is not open, skip ...', port, host ) )
+        logger.warn( format( 'The Port \'%s\' on Host \'%s\' is not open, skip ...', port, host ) )
 
         return JSON.parse( JSON.generate( status: 500 ) )
       else
@@ -247,7 +245,7 @@ module DataCollector
       result = Utils::Network.portOpen?( host, port )
 
       if( result == false )
-        logger.warn( sprintf( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
+        logger.warn( format( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
 
         return JSON.parse( JSON.generate( status: 500 ) )
       else
@@ -281,7 +279,7 @@ module DataCollector
       result = Utils::Network.portOpen?( host, port )
 
       if( result == false )
-        logger.warn( sprintf( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
+        logger.warn( format( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
 
         return JSON.parse( JSON.generate( status: 500 ) )
       else
@@ -305,7 +303,7 @@ module DataCollector
       result = Utils::Network.portOpen?( host, port )
 
       if( result == false )
-        logger.warn( sprintf( 'The Port %s for node_exporter on Host %s is not open, skip sending data', port, host ) )
+        logger.warn( format( 'The Port %s for node_exporter on Host %s is not open, skip sending data', port, host ) )
 
         return JSON.parse( JSON.generate( status: 500 ) )
       else
@@ -341,7 +339,7 @@ module DataCollector
       result = Utils::Network.portOpen?( host, port )
 
       if( result == false )
-        logger.warn( sprintf( 'The Port \'%s\' on Host \'%s\' is not open, skip ...', port, host ) )
+        logger.warn( format( 'The Port \'%s\' on Host \'%s\' is not open, skip ...', port, host ) )
 
         return JSON.parse( JSON.generate( status: 500 ) )
       else
@@ -370,7 +368,7 @@ module DataCollector
       result = Utils::Network.portOpen?( host, port )
 
       if( result == false )
-        logger.warn( sprintf( 'The Port \'%s\' on Host \'%s\' is not open, skip ...', port, host ) )
+        logger.warn( format( 'The Port \'%s\' on Host \'%s\' is not open, skip ...', port, host ) )
 
         JSON.parse( JSON.generate( status: 500 ) )
       else
@@ -400,10 +398,7 @@ module DataCollector
       host = params.dig(:short)
       fqdn = params.dig(:fqdn)
 
-      if( host.nil? )
-        logger.warn( 'no host name for bulk checks' )
-        return
-      end
+      return { status: 404, message: 'no host name for bulk checks' } if( host.nil? )
 
       checks   = Array.new()
       array    = Array.new()
@@ -413,7 +408,7 @@ module DataCollector
         timestamp: Time.now().to_i
       }
 
-#       logger.debug( sprintf( 'create bulk checks for \'%s\'', host ) )
+#       logger.debug( format( 'create bulk checks for \'%s\'', host ) )
 
       # to improve performance, read initial collector Data from Database and store them into Redis
       #
@@ -421,7 +416,6 @@ module DataCollector
       data      = @cache.get( key )
 
       if( data.nil? )
-
         data = @redis.measurements( short: host, fqdn: fqdn )
 
         if( data.nil? || data == false )
@@ -430,18 +424,14 @@ module DataCollector
         else
           @cache.set( key ) { MiniCache::Data.new( data ) }
         end
-
       end
 
-      if( data.nil? )
-        logger.error( 'no services found. skip ...' )
-        return
-      end
+      return { status: 204, message: 'no services found. skip ...' } if( data.nil? )
 
       services      = data.keys
       servicesCount = services.count
 
-      logger.info( sprintf( '%d services found', servicesCount ) )
+      logger.info( format( '  with %d services', servicesCount ) )
 
       data.each do |s,d|
 
@@ -451,7 +441,7 @@ module DataCollector
 
         # only to see which service
         #
-#         logger.debug( sprintf( '    %s with port %d', s, port ) )
+#         logger.debug( format( '    %s with port %d', s, port ) )
 
         if( metrics != nil && metrics.count == 0 )
           case s
@@ -492,7 +482,7 @@ module DataCollector
             target = {
               'type'   => 'read',
               'mbean'  => mbean.to_s,
-              'target' => { 'url' => sprintf( "service:jmx:rmi:///jndi/rmi://%s:%s/jmxrmi", fqdn, port ) },
+              'target' => { 'url' => format( "service:jmx:rmi:///jndi/rmi://%s:%s/jmxrmi", fqdn, port ) },
               'config' => { 'ignoreErrors' => true, 'ifModifiedSince' => true, 'canonicalNaming' => true }
             }
 
@@ -551,12 +541,12 @@ module DataCollector
       destHost  = parts['host'].to_s.strip
       destPort  = parts['port'].to_s.strip
 
-#       logger.debug( sprintf( 'check Port %s on Host %s for sending data', destPort, destHost ) )
+#       logger.debug( format( 'check Port %s on Host %s for sending data', destPort, destHost ) )
 
       result = Utils::Network.portOpen?( destHost, destPort )
 
       if( result == false )
-        logger.warn( sprintf( 'The Port %s on Host %s is not open, skip sending data', destPort, destHost ) )
+        logger.warn( format( 'The Port %s on Host %s is not open, skip sending data', destPort, destHost ) )
       end
 
       return result
@@ -599,7 +589,7 @@ module DataCollector
 
         c.each do |v,i|
 
-          logger.info( sprintf( 'service \'%s\' has %s checks', v, i.count ) )
+          logger.info( format( 'service \'%s\' with %s check%s', v, i.count, ( 's' if( i.count > 1 ) ) ) )
 
           result[v] ||= []
 
@@ -709,13 +699,13 @@ module DataCollector
             redis_result = @redis.set( cacheKey, result[v] )
 
             if( redis_result.is_a?( FalseClass ) || ( redis_result.is_a?( String ) && redis_result != 'OK' ) )
-              logger.error( sprintf( 'value for key %s can not be write', cacheKey ) )
+              logger.error( format( 'value for key %s can not be write', cacheKey ) )
               logger.error( host: fqdn, pre: 'result', service: v )
             end
 
           rescue => e
 
-            logger.error( sprintf( 'value for key \'%s\' can not be write', cacheKey ) )
+            logger.error( format( 'value for key \'%s\' can not be write', cacheKey ) )
             logger.error( host: fqdn, pre: 'result', service: v )
             # logger.error( result[v] )
             logger.error( e )
@@ -749,18 +739,10 @@ module DataCollector
 
       return data unless( d.is_a?(Array) )
 
-#       unless( d.is_a?(Array) )
-#         data
-#       end
-
       value = d.first # hash
       replicator = value.dig('Replicator')
 
-#       logger.debug( value.class.to_s )
-#       logger.debug(value)
-
       status = replicator.dig('status')
-#       logger.debug(status)
 
       if( status.to_i != 200 )
         logger.error( format( '  [%s] - Contentserver are not available!', status ) )
@@ -771,78 +753,53 @@ module DataCollector
 
       return data unless( value.is_a?(Hash) )
 
-#       logger.debug( value.class.to_s )
-
-#       if( !value.is_a?(Hash) )
-#         data
-#       end
-#
-#       logger.debug( value )
-
       unless( value.nil? )
-
-#         logger.debug( value.class.to_s )
 
         value  = value.values.first
 
         return data unless( value.is_a?(Hash) )
-#
-#         logger.debug( value.class.to_s )
-#
-#         if( !value.is_a?(Hash))
-#           data
-#         end
 
         mlsIOR = value.dig( 'MasterLiveServerIORUrl' )
 
-#         logger.debug( mlsIOR )
+        return data if( mlsIOR.nil? )
 
-        unless( mlsIOR.nil? )
+        uri    = URI.parse( mlsIOR )
+        scheme = uri.scheme
+        host   = uri.host
+        port   = uri.port
+        path   = uri.path
 
-          uri    = URI.parse( mlsIOR )
-          scheme = uri.scheme
-          host   = uri.host
-          port   = uri.port
-          path   = uri.path
+        logger.debug( format('search dns entry for \'%s\'', host) )
 
-          logger.debug( format('search dns entry for \'%s\'', host) )
+        ip, short, fqdn = self.ns_lookup(host, 60)
 
-          ip, short, fqdn = self.ns_lookup(host, 60)
+        if( !ip.nil? && !short.nil? && !fqdn.nil? )
 
-          if( !ip.nil? && !short.nil? && !fqdn.nil? )
+          logger.debug( "found: #{ip} , #{short} , #{fqdn}" )
 
-            logger.debug( "found: #{ip} , #{short} , #{fqdn}" )
-
-            realIP    = ip
-            realShort = short
-            mlsHost   = fqdn
-
-          else
-            realIP    = ''
-            realShort = ''
-            mlsHost   = host
-          end
-
-          value['MasterLiveServer'] = {
-            'scheme' => scheme,
-            'host'   => mlsHost,
-            'port'   => port,
-            'path'   => path
-          }
-
-          logger.debug( JSON.pretty_generate(value.dig('MasterLiveServer')) )
-
+          realIP    = ip
+          realShort = short
+          mlsHost   = fqdn
         else
-          logger.debug( 'no \'IOR URL\' found! :(' )
-          logger.info( 'this RLS use an older version. we use the RLS Host as fallback' )
+          realIP    = ''
+          realShort = ''
+          mlsHost   = host
         end
+
+        value['MasterLiveServer'] = {
+          'scheme' => scheme,
+          'host'   => mlsHost,
+          'port'   => port,
+          'path'   => path
+        }
+
+        # logger.debug( JSON.pretty_generate(value.dig('MasterLiveServer')) )
 
       end
 
-      logger.info( sprintf( '  use \'%s\'', mlsHost ) )
+      logger.info( format( '  use \'%s\'', mlsHost ) )
 
-      return data
-
+      data
     end
 
 
@@ -893,8 +850,12 @@ module DataCollector
 
         content_server_ior = value.dig( 'Url' )
 
-        unless( content_server_ior.nil? )
+        if( content_server_ior.nil? )
+          logger.debug( 'no \'IOR URL\' found! :(' )
+          logger.info( 'this CAE use an older version. we use the CAE Host as fallback' )
 
+          return data
+        else
           uri    = URI.parse( content_server_ior )
           scheme = uri.scheme
           host   = uri.host
@@ -925,16 +886,12 @@ module DataCollector
             'port'   => port,
             'path'   => path
           }
-
-          logger.debug( JSON.pretty_generate(value.dig('ContentServer')) )
-        else
-          logger.debug( 'no \'IOR URL\' found! :(' )
-          logger.info( 'this CAE use an older version. we use the CAE Host as fallback' )
+          # logger.debug( JSON.pretty_generate(value.dig('ContentServer')) )
         end
       end
 
-      logger.info( sprintf( '  use \'%s\'', content_server ) )
-      return data
+      logger.info( format( '  use \'%s\'', content_server ) )
+      data
     end
 
 
@@ -999,7 +956,7 @@ module DataCollector
 
           cacheClass     = cacheClass.split('.').last
           cacheClass[0]  = cacheClass[0].to_s.capitalize
-          mbean_type     = sprintf( format, cacheClass )
+          mbean_type     = format( format, cacheClass )
 
 
         elsif( mbean.include?( 'module=' ) )
@@ -1020,7 +977,7 @@ module DataCollector
           mbeanModule     = parts['module'].to_s.strip.tr( '. ', '' )
           mbeanPool       = parts['pool'].to_s.strip.tr( '. ', '' )
           mbeanType       = parts['type'].to_s.strip.tr( '. ', '' )
-          mbean_type      = sprintf( '%s%s', mbeanType, mbeanPool )
+          mbean_type      = format( '%s%s', mbeanType, mbeanPool )
 
         elsif( mbean.include?( 'bean=' ) )
 
@@ -1038,7 +995,7 @@ module DataCollector
           parts           = mbean.match( regex )
           mbeanBean       = parts['bean'].to_s.strip.tr( '. ', '' )
           mbeanType       = parts['type'].to_s.strip.tr( '. ', '' )
-          mbean_type      = sprintf( '%s%s', mbeanType, mbeanBean )
+          mbean_type      = format( '%s%s', mbeanType, mbeanBean )
 
         elsif( mbean.include?( 'name=' ) )
           regex = /
@@ -1055,7 +1012,7 @@ module DataCollector
           parts           = mbean.match( regex )
           mbeanName       = parts['name'].to_s.strip.tr( '. ', '' )
           mbeanType       = parts['type'].to_s.strip.tr( '. ', '' )
-          mbean_type      = sprintf( '%s%s', mbeanType, mbeanName )
+          mbean_type      = format( '%s%s', mbeanType, mbeanName )
 
         elsif( mbean.include?( 'solr') )
 
@@ -1074,7 +1031,7 @@ module DataCollector
           mbeanCore[0]    = mbeanCore[0].to_s.capitalize
           mbeanType       = parts['type'].to_s.tr( '. /', '' )
           mbeanType[0]    = mbeanType[0].to_s.capitalize
-          mbean_type      = sprintf( 'Solr%s%s', mbeanCore, mbeanType )
+          mbean_type      = format( 'Solr%s%s', mbeanCore, mbeanType )
 
         else
           regex = /
@@ -1087,7 +1044,7 @@ module DataCollector
 
           parts           = mbean.match( regex )
           mbeanType       = parts['type'].to_s.strip.tr( '. ', '' )
-          mbean_type      = sprintf( '%s', mbeanType )
+          mbean_type      = format( '%s', mbeanType )
         end
 
         result.push(
@@ -1112,36 +1069,34 @@ module DataCollector
 
     def clean()
 
-      data = @mq.getJobFromTube(@mq_queue, true )
+      data = @mq.getJobFromTube( @mq_queue, true )
 
       if( data.count() != 0 )
 
-        logger.debug( data )
-
+        logger.debug( "clean: #{data}" )
         payload = data.dig( :body, 'payload' )
+        hostname = payload.dig('host') unless( payload.nil? )
 
-        logger.debug( payload )
+        unless( hostname.nil? )
 
-        @cache.unset( payload.dig('host') )
+          logger.debug('unset cached data')
+          keys  = format( '%s-validate', hostname )
+
+          [hostname, keys].each do |x|
+            logger.debug( "  #{x}" )
+            @cache.unset( x )
+          end
+        end
       end
     end
 
 
-
     def run()
-
-#      logger.debug( 'get the online server for monitoring to collect their data' )
 
       monitoredServer = self.monitoredServer()
 
-#       logger.debug( monitoredServer )
+      return { status: 204, message: 'no online server found' } if( monitoredServer.nil? || monitoredServer.is_a?( FalseClass ) || monitoredServer.count == 0 )
 
-      if( monitoredServer.nil? || monitoredServer.is_a?( FalseClass ) || monitoredServer.count == 0 )
-
-        logger.info( 'no online server found' )
-
-        return
-      end
 
       monitoredServer.each do |h|
 
@@ -1167,7 +1122,7 @@ module DataCollector
 
         start = Time.now
 
-        logger.info( sprintf( 'found \'%s\' for monitoring', fqdn ) )
+        logger.info( format( 'found \'%s\' for monitoring', fqdn ) )
 
         # TODO
         # discussion
@@ -1175,6 +1130,13 @@ module DataCollector
         #
         begin
           discovery_data    = @database.discoveryData( ip: ip, short: short, fqdn: fqdn )
+
+          discovery_keys   = discovery_data.keys.sort
+          discovery_count  = discovery_keys.count
+          key = discovery_keys.clone
+          key = discovery_keys.to_s if( discovery_keys.is_a?(Array) )
+
+          discovery_checksum = Digest::MD5.hexdigest( key )
         rescue => e
           logger.error(e)
         end
@@ -1182,7 +1144,26 @@ module DataCollector
         # build prepared datas
         #
         begin
-          @prepare.buildMergedData( hostname: short, fqdn: fqdn, data: discovery_data )
+          prepared_count, prepared_checksum, prepared_keys = @prepare.valid_data(fqdn).values
+
+          logger.debug( "current : #{discovery_count} services / checksum: #{discovery_checksum}" )
+          logger.debug( "cached  : #{prepared_count} services / checksum: #{prepared_checksum}" )
+
+          options = { hostname: short, fqdn: fqdn, data: discovery_data }
+
+          if( prepared_count != 0 && discovery_count > prepared_count )
+
+            logger.info('new service detected ...')
+            logger.debug( "current : #{discovery_keys}" )
+            logger.debug( "cached  : #{prepared_keys}" )
+
+            options[:force] = true
+            key       = Storage::RedisClient.cacheKey( host: fqdn, pre: 'collector' )
+            data      = @cache.unset( key )
+          end
+
+          result = @prepare.build_merged_data( options )
+          logger.debug( result )
         rescue => e
           logger.error(e)
         end
@@ -1196,7 +1177,7 @@ module DataCollector
         end
 
         finish = Time.now
-        logger.info( sprintf( 'collect data in %s seconds', (finish - start).round(2) ) )
+        logger.info( format( 'collect data in %s seconds', (finish - start).round(2) ) )
 
         logger.debug( 'give job free:' )
         logger.debug( short: short, fqdn: fqdn )

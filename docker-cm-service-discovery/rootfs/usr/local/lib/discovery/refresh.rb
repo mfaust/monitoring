@@ -6,21 +6,9 @@ module ServiceDiscovery
 
     def refresh_host_data
 
-      logger.debug( "refresh_host_data" )
-
-      status  = 200
-      message = 'initialize message'
-
       monitoredServer = @database.nodes( status: [ Storage::MySQL::ONLINE ] )
 
-#       logger.debug( monitoredServer )
-
-      if( monitoredServer.nil? || monitoredServer.is_a?( FalseClass ) || monitoredServer.count == 0 )
-
-        logger.info( 'no online server found' )
-
-        return
-      end
+      return { status: 204,  message: 'no online server found' } if( monitoredServer.nil? || monitoredServer.is_a?( FalseClass ) || monitoredServer.count == 0 )
 
       monitoredServer.each do |h|
 
@@ -30,156 +18,122 @@ module ServiceDiscovery
 
         # if the destination host available (simple check with ping)
         #
-        unless( Utils::Network.isRunning?( fqdn ) )
+        # 503 Service Unavailable
+        return { status: 503,  message: sprintf( 'Host %s are unavailable', fqdn ) } unless( Utils::Network.isRunning?( fqdn ) )
 
-          # delete dns entry
-          # result  = @database.removeDNS( ip: ip, short: short, fqdn: fqdn )
-
-          # 503 Service Unavailable
-          return { status: 503,  message: sprintf( 'Host %s are unavailable', fqdn ) }
-        end
-
-        # check discovered datas from the past
-        #
-        discovery_data    = @database.discoveryData( ip: ip, short: short, fqdn: fqdn )
-
-#         logger.debug( discovery_data )
-
-        current_services = discovery_data.keys.sort
-
-        logger.info( format( 'current %d services: %s', current_services.count, current_services.to_s ) )
-
-#         logger.debug( "#{discovery_data.keys}" )
-
-        # get customized configurations of ports and services
-        #
-        logger.debug( 'ask for custom configurations' )
-
-        ports    = @database.config( ip: ip, short: short, fqdn: fqdn, key: 'ports' )
-        services = @database.config( ip: ip, short: short, fqdn: fqdn, key: 'services' )
-
-        ports    = (ports != nil)    ? ports.dig( 'ports' )       : ports
-        services = (services != nil) ? services.dig( 'services' ) : services
-
-        # our default known ports
-        ports = @scan_ports if( ports.nil? )
-
-        # our default known ports
-        services = [] if( services.nil? )
-
-        logger.debug( "use ports          : #{ports}" )
-        logger.debug( "additional services: #{services}" )
-
-        discovered_services = Hash.new
-
+        known_services_count, known_services_array       = known_services( ip: ip, short: short, fqdn: fqdn ).values
+        actually_services_count, actually_services_array, data = actually_services( ip: ip, short: short, fqdn: fqdn ).values
 
         # TODO
-        # check if @discoveryHost and @discoveryPort setStatus
-        # then use the new
-        # otherwise use the old code
-        start = Time.now
-
-        if( @discovery_host.nil? )
-
-          open = false
-
-          # check open ports and ask for application behind open ports
-          #
-          ports.each do |p|
-
-            open = Utils::Network.portOpen?( fqdn, p )
-
-            logger.debug( sprintf( 'Host: %s | Port: %s   %s', host, p, open ? 'open' : 'closed' ) )
-
-            if( open == true )
-
-              names = self.discover_application({fqdn: fqdn, port: p} )
-
-              logger.debug( "discovered services: #{names}" )
-
-              unless( names.nil? )
-
-                names.each do |name|
-                  discovered_services.merge!({name => {'port' => p } } )
-                end
-              end
-            end
-          end
-
-        else
-          # our new port discover service
-          #
-          open_ports = []
-
-          pd = PortDiscovery::Client.new( host: @discovery_host, port: @discovery_port )
-
-          if( pd.isAvailable?() )
-
-            open_ports = pd.post( host: fqdn, ports: ports )
-
-            open_ports.each do |p|
-
-              names = self.discover_application( fqdn: fqdn, port: p )
-
-              logger.debug("discovered services: #{names}")
-
-              unless( names.nil? )
-
-                names.each do |name|
-                  discovered_services.merge!( { name => {'port' => p} })
-                end
-              end
-            end
-          end
-        end
-
-        finish = Time.now
-        logger.info( sprintf( 'runtime for application discovery: %s seconds', (finish - start).round(2) ) )
-
-        # ---------------------------------------------------------------------------------------------------
-
-        # TODO
-        # merge discovered services with additional services
+        # compare both arrays
+        # identicalEntries      = known_services_array & actually_services_array
+        # removedEntries        = actually_services_array - known_services_array
+        # newEntries            = known_services_array - identicalEntries
         #
-        if( services.is_a?( Array ) && services.count >= 1 )
+        # known_dataCount       = known_services_array.count
+        # actually_dataCount    = actually_services_array.count
+        # identicalEntriesCount = identicalEntries.count
+        # removedEntriesCount   = removedEntries.count
+        # newEntriesCount       = newEntries.count
 
-          services.each do |s|
+        # logger.debug( '------------------------------------------------------------' )
+        # logger.info( sprintf( 'known entries %d', known_dataCount ) )
+        # logger.info( sprintf( 'actually entries %d', actually_dataCount ) )
+        # logger.debug( '------------------------------------------------------------' )
+        # logger.info( sprintf( 'identical entries %d', identicalEntriesCount ) )
+        # #logger.debug(  "  #{identicalEntries}" )
+        # logger.info( sprintf( 'new entries %d', newEntriesCount ) )
+        # #logger.debug(  "  #{newEntries}" )
+        # logger.info( sprintf( 'removed entries %d', removedEntriesCount ) )
+        # #logger.debug(  "  #{removedEntries}" )
+        # logger.debug( '------------------------------------------------------------' )
 
-            service_data = @service_config.dig('services', s )
+        if( known_services_count < actually_services_count )
 
-            unless( service_data.nil? )
-              discovered_services[s] ||= service_data.filter('port' )
-            end
-          end
+          logger.info( 'new service detected' )
 
-          found_services = discovered_services.keys
+          # step 1
+          # update our database
+          result    = @database.createDiscovery( ip: ip, short: short, fqdn: fqdn, data: data )
 
-          logger.info( format( '%d usable services: %s', found_services.count, found_services.to_s ) )
-        end
+          options = { dns: { ip: ip, short: short, fqdn: fqdn } }
+          host    = fqdn
 
-        # merge discovered services with cm-services.yaml
-        #
-        discovered_services = self.create_host_config( ip: ip, short: short, fqdn: fqdn, data: discovered_services )
+          # step 2
+          # create a job for update icinga
+          logger.info( 'create message for grafana to create or update dashboards' )
+          send_message( cmd: 'update', node: host, queue: 'mq-grafana', payload: options, prio: 10, ttr: 15, delay: 25 )
 
-        found_services = discovered_services.keys.sort
+          # step 3
+          # create a job for update grafana
+          logger.info( 'create message for icinga to update host and apply checks and notifications' )
+          send_message( cmd: 'update', node: host, queue: 'mq-icinga', payload: options, prio: 10, ttr: 15, delay: 25 )
 
-        logger.info( format( 'actual found %d services: %s', found_services.count, found_services.to_s ) )
-
-        if( current_services.count > found_services.count )
-          logger.info( 'new service!' )
-        elsif( current_services.count < found_services.count )
-          logger.info( 'less services (can be ignored)' )
+        elsif( known_services_count > actually_services_count )
+          logger.info( 'less services (will be ignored)' )
         else
           logger.info( 'equal services' )
         end
 
       end
-
-
-
-
     end
 
+    def known_services( params )
+
+      ip    = params.dig(:ip)
+      short = params.dig(:short)
+      fqdn  = params.dig(:fqdn)
+
+      # check discovered datas from the past
+      #
+      discovery_data   = @database.discoveryData( ip: ip, short: short, fqdn: fqdn )
+      services = discovery_data.keys.sort
+
+      services_count   = services.count
+      logger.info( format( 'i known %d services', services_count ) )
+      logger.debug( services.to_s )
+
+      { count: services_count, services: services }
+    end
+
+
+    def actually_services( params )
+
+      ip    = params.dig(:ip)
+      short = params.dig(:short)
+      fqdn  = params.dig(:fqdn)
+
+      # get customized configurations of ports and services
+      #
+      logger.debug( 'ask for custom configurations' )
+
+      ports    = @database.config( ip: ip, short: short, fqdn: fqdn, key: 'ports' )
+      services = @database.config( ip: ip, short: short, fqdn: fqdn, key: 'services' )
+
+      ports    = (ports != nil)    ? ports.dig( 'ports' )       : ports
+      services = (services != nil) ? services.dig( 'services' ) : services
+
+      # our default known ports
+      ports = @scan_ports if( ports.nil? )
+
+      # our default known ports
+      services = [] if( services.nil? )
+
+      logger.debug( "use ports          : #{ports}" )
+      logger.debug( "additional services: #{services}" )
+
+      discovered_services = discover( ip: ip, short: short, fqdn: fqdn, ports: ports )
+      discovered_services = merge_services( discovered_services, services )
+      discovered_services = create_host_config( ip: ip, short: short, fqdn: fqdn, data: discovered_services )
+
+      services = discovered_services.keys.sort
+      services_count = services.count
+
+      logger.info( format( 'currently there are %s services', services_count ) )
+      logger.debug( services.to_s )
+
+      { count: services_count, services: services, discovery_data: discovered_services }
+    end
 
   end
 end

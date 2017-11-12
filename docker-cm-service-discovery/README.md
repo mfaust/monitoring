@@ -25,5 +25,16 @@ A service discovery for CoreMedia Applications.
 | `DISCOVERY_DATABASE_NAME`          | `discovery`          | database schema name for the discovery service                  |
 | `DISCOVERY_DATABASE_USER`          | `discovery`          | database user for the discovery service                         |
 | `DISCOVERY_DATABASE_PASS`          | `discovery`          | database password for the discovery service                     |
-| `INTERVAL`                         | `20`                 | run interval for the scheduler                                  |
-| `RUN_DELAY`                        | `10`                 | delay for the first run                                         |
+| `INTERVAL`                         | `20s`                | run interval for the scheduler (minimum are `20s`)              |
+| `RUN_DELAY`                        | `10s`                | delay for the first run                                         |
+| `REFRESH_ENABLED`                  | `false`              | enable / disable a peridic scan of new services for **ONLINE** Hosts |
+| `REFRESH_INTERVAL`                 | `5m`                 | run refresh scan every `5m` (minimum are (`5m`)                 |
+
+For all Scheduler Variables, you can use simple integer values like `10`, this will be interpreted as `second`.
+Other Values are also possible:
+  - `1h` for 1 hour
+  - `1w` for 1 week
+
+Kombinations are also possible:
+  - `5m10s` for 5 minutes and 10 seconds
+  - `1h10s` for 1 hour and 20 minutes
