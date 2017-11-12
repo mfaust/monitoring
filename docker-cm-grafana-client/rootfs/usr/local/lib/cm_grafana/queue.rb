@@ -142,16 +142,7 @@ class CMGrafana < Grafana::Client
 
       job_option = { command: command, ip: ip, short: short, fqdn: fqdn }
 
-
-      if( @jobs.jobs( job_option ) )
-
-        logger.warn( 'we are working on this job' )
-
-        return {
-          :status  => 409, # 409 Conflict
-          :message => 'we are working on this job'
-        }
-      end
+      return { status: 409, message: 'we are working on this job' } if( @jobs.jobs( job_option ) == true )
 
       @jobs.add( job_option )
 

@@ -73,7 +73,7 @@ class CMIcinga2 < Icinga2::Client
     end
 
 
-    def node_information(params = {} )
+    def node_information( params )
 
       logger.debug( "node_information( #{params} )" )
 
@@ -202,7 +202,6 @@ class CMIcinga2 < Icinga2::Client
         aws_config.each do |k,v|
           payload["aws_#{k}"] = v
         end
-
       end
 
       payload['team']        = parsed_response( team_config )        if( team_config )
@@ -225,15 +224,14 @@ class CMIcinga2 < Icinga2::Client
       # get data from redis
       cache_key = Storage::RedisClient.cacheKey( host: fqdn, pre: 'result', service: service )
 
-      _redis = @redis.get( cache_key )
-      logger.debug( _redis.class.to_s )
-      _redis = JSON.parse(_redis) if _redis.is_a?(String)
+      redis_data = @redis.get( cache_key )
+      redis_data = JSON.parse(redis_data) if redis_data.is_a?(String)
 
-      unless( _redis.nil? )
-        _bean  = _redis.select { |k,_v| k.dig( mbean ) }
-        _bean  = _bean.first if( _bean.is_a?(Array) )
+      unless( redis_data.nil? )
+        bean_data  = redis_data.select { |k,_v| k.dig( mbean ) }
+        bean_data  = bean_data.first if( bean_data.is_a?(Array) )
 
-        content_server = _bean.dig(mbean,'value') unless( _bean.nil? )
+        content_server = bean_data.dig(mbean,'value') unless( bean_data.nil? )
         content_server.values.first unless( content_server.nil? )
       end
     end

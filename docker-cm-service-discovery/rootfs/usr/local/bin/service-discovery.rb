@@ -31,7 +31,7 @@ mysql_schema          = ENV.fetch('DISCOVERY_DATABASE_NAME', 'discovery')
 mysql_user            = ENV.fetch('DISCOVERY_DATABASE_USER', 'discovery')
 mysql_password        = ENV.fetch('DISCOVERY_DATABASE_PASS', 'discovery')
 refresh_enabled       = ENV.fetch('REFRESH_ENABLED'        , false)
-refresh_interval      = ENV.fetch('REFRESH_INTERVAL'       , '90s') # 5m == 300
+refresh_interval      = ENV.fetch('REFRESH_INTERVAL'       , '5m')
 interval              = ENV.fetch('INTERVAL'               , '20s' )
 delay                 = ENV.fetch('RUN_DELAY'              , '10s' )
 
@@ -48,7 +48,7 @@ end
 
 interval         = validate_scheduler_values( interval, 20.0 )
 delay            = validate_scheduler_values( delay, 0.0 )
-refresh_interval = validate_scheduler_values( refresh_interval, 120.0 ) # 5m == 300
+refresh_interval = validate_scheduler_values( refresh_interval, 300.0 ) # 5m == 300
 
 # -----------------------------------------------------------------------------
 
