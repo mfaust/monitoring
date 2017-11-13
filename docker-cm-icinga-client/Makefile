@@ -32,6 +32,8 @@ shell:
 		--volume /etc/localtime:/etc/localtime:ro \
 		--hostname=${IMAGE_NAME} \
 		--name=${IMAGE_NAME} \
+		--env ICINGA_CERT_SERVICE='{ "ba": { "user":"admin", "password":"admin" },"api": { "port": "5665", "user":"root", "password":"icinga" },"server": "cm-icinga2-master","port": 4567,"path": "/"}' \
+		--entrypoint '' \
 		$(IMAGE_NAME) \
 		/bin/sh
 

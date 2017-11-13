@@ -8,7 +8,7 @@ The icinga2 client use the message queue service and creates only Nodes on a ici
 
 This service runs every `INTERVAL` seconds.
 
-It use the [icinga-gem](https://rubygems.org/gems/icinga2) for AÜI Calls.
+It use the [icinga-gem](https://rubygems.org/gems/icinga2) for API Calls.
 
 
 
@@ -30,5 +30,14 @@ It use the [icinga-gem](https://rubygems.org/gems/icinga2) for AÜI Calls.
 | `DISCOVERY_DATABASE_NAME`          | `discovery`          | database schema name for the discovery service                  |
 | `DISCOVERY_DATABASE_USER`          | `discovery`          | database user for the discovery service                         |
 | `DISCOVERY_DATABASE_PASS`          | `discovery`          | database password for the discovery service                     |
-| `INTERVAL`                         | `20`                 | run interval for the scheduler                                  |
-| `RUN_DELAY`                        | `10`                 | delay for the first run                                         |
+| `INTERVAL`                         | `20s`                | run interval for the scheduler (minimum are `20s`)              |
+| `RUN_DELAY`                        | `10s`                | delay for the first run                                         |
+
+For all Scheduler Variables, you can use simple integer values like `10`, this will be interpreted as `second`.
+Other Values are also possible:
+  - `1h` for 1 hour
+  - `1w` for 1 week
+
+Kombinations are also possible:
+  - `5m10s` for 5 minutes and 10 seconds
+  - `1h10s` for 1 hour and 20 minutes
