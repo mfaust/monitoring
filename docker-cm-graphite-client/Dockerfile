@@ -9,26 +9,34 @@ ENV \
   ALPINE_MIRROR="mirror1.hs-esslingen.de/pub/Mirrors" \
   ALPINE_VERSION="v3.6" \
   TERM=xterm \
-  APK_ADD="build-base ruby ruby-dev " \
-  APK_DEL="build-base ruby-dev" \
   GEMS="beaneater json rest-client rufus-scheduler semantic_logger tzinfo-data"
 
 # ---------------------------------------------------------------------------------------
-
-WORKDIR /
 
 RUN \
   echo "http://${ALPINE_MIRROR}/alpine/${ALPINE_VERSION}/main"       > /etc/apk/repositories && \
   echo "http://${ALPINE_MIRROR}/alpine/${ALPINE_VERSION}/community" >> /etc/apk/repositories && \
   apk --no-cache update && \
   apk --no-cache upgrade && \
-  apk --no-cache add ${APK_ADD} && \
+  apk add --quiet --no-cache --virtual .build-deps \
+    build-base ruby-dev && \
+  apk --quiet --no-cache add \
+    ruby &&\
+  echo 'gem: --no-document' >> /etc/gemrc && \
   gem install --no-rdoc --no-ri ${GEMS} && \
-  apk --purge del ${APK_DEL} && \
+  apk del --quiet .build-deps && \
   rm -rf \
     /tmp/* \
     /var/cache/apk/*
 
 COPY rootfs/ /
+
+WORKDIR /
+
+HEALTHCHECK \
+  --interval=5s \
+  --timeout=2s \
+  --retries=12 \
+  CMD ps ax | grep -c graphite-client.rb || exit 1
 
 CMD [ "/usr/local/bin/graphite-client.rb" ]

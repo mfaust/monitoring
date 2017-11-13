@@ -5,7 +5,7 @@ MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
   VERSION="1711" \
-  BUILD_DATE="2017-11-09" \
+  BUILD_DATE="2017-11-13" \
   TERM=xterm \
   APK_ADD="py2-pip ruby-dev nano" \
   APK_DEL="ruby-dev" \
@@ -26,3 +26,9 @@ RUN \
   rm -rf \
     /tmp/* \
     /var/cache/apk/*
+
+HEALTHCHECK \
+  --interval=5s \
+  --timeout=2s \
+  --retries=12 \
+  CMD curl --silent --fail localhost:4567/v2/health-check || exit 1

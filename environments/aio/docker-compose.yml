@@ -36,6 +36,17 @@ services:
     volumes:
       - /share:/share
 
+  certificate:
+    image: bodsch/omgwtfssl
+    container_name: 01-certificate
+    environment:
+      SILENT: 'true'
+      SSL_SUBJECT: localhost
+    volumes:
+      - ./certs:/certs
+    depends_on:
+      - data
+
 #  dnsdock:
 #    restart: always
 #    image: bodsch/docker-dnsdock:1710.1
@@ -128,13 +139,15 @@ services:
 
   nginx:
     restart: always
-    image: bodsch/docker-nginx:1710.2
+    image: bodsch/docker-nginx:1711.1
     container_name: nginx
     hostname: nginx
     ports:
       - 80:80
+      - 443:443
     depends_on:
       - data
+      - certificate
       - grafana
       - icingaweb2
       - cm-rest-service
@@ -145,9 +158,9 @@ services:
       - cm-rest-service
       - markdown-service
     volumes:
+      - ./certs:/etc/nginx/secure/
       - /etc/localtime:/etc/localtime:ro
       - /share/www/entry-page:/var/www/entry-page
-      - ./secure:/etc/nginx/secure/
       - /share/etc/nginx/external/https.conf:/etc/nginx/external/https.conf
       - /share/etc/nginx/sites-enabled/01-default.conf:/etc/nginx/sites-enabled/01-default.conf
       - /share/etc/nginx/nginx.conf:/etc/nginx/nginx.conf
@@ -355,14 +368,13 @@ services:
       ICINGA_API_PASSWORD: dashing
       ICINGAWEB_URL: /icinga
       PROXY_PATH: /dashing
-      ICINGA_CERT_SERVICE: 'true'
-      ICINGA_CERT_SERVICE_BA_USER: admin
-      ICINGA_CERT_SERVICE_BA_PASSWORD: admin
-      ICINGA_CERT_SERVICE_API_USER: root
-      ICINGA_CERT_SERVICE_API_PASSWORD: icinga
-      ICINGA_CERT_SERVICE_SERVER: cm-icinga2-master
-      ICINGA_CERT_SERVICE_PORT: 4567
-      ICINGA_CERT_SERVICE_PATH: /
+      ICINGA_CERT_SERVICE: '{
+        "ba": { "user":"admin", "password":"admin" },
+        "api": { "user":"root", "password":"icinga" },
+        "server": "cm-icinga2-master",
+        "port": 4567,
+        "path": "/"
+      }'
     depends_on:
       - cm-icinga2-master
     volumes:
@@ -567,6 +579,13 @@ services:
     hostname: cm-icinga-client
     environment:
       TZ: 'Europe/Berlin'
+      ICINGA_CERT_SERVICE: '{
+        "ba": { "user":"admin", "password":"admin" },
+        "api": { "user":"root", "password":"icinga" },
+        "server": "cm-icinga2-master",
+        "port": 4567,
+        "path": "/"
+      }'
       ICINGA_HOST: cm-icinga2-master
       ICINGA_API_USER: root
       ICINGA_API_PASSWORD: icinga
