@@ -99,7 +99,7 @@ module ServiceDiscovery
 
         result = { status: status, message: message }
 
-        logger.debug( result )
+        logger.error( result ) if( result.dig(:status).to_i != 200 )
 
         @jobs.del( job_option )
 
