@@ -3,13 +3,16 @@ FROM bodsch/docker-jolokia:1.3.7
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
+ARG HOSTS
+
 ENV \
   VERSION="1711" \
   BUILD_DATE="2017-11-06" \
   TERM=xterm \
   APK_ADD="curl nano git g++ make go " \
   GOPATH=/build \
-  GOROOT=/usr/lib/go
+  GOROOT=/usr/lib/go \
+  HOSTS=${HOSTS:-}
 
 EXPOSE 8080 8088
 
@@ -35,7 +38,8 @@ RUN \
     /root/.n* \
     /root/.cache \
     /root/.config \
-    /usr/local/*
+    /usr/local/* && \
+  [ ! -n "${HOSTS}" ] && echo "${HOSTS}" >> /etc/hosts
 
 COPY rootfs/ /
 

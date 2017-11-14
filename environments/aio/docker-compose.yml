@@ -73,6 +73,8 @@ services:
       - /etc/localtime:/etc/localtime:ro
     networks:
       - mon
+    extra_hosts:
+      osmc.local: 191.168.122.60
 
   memcached:
     restart: always
@@ -255,6 +257,8 @@ services:
       - icinga:/var/lib/icinga2
     networks:
       - mon
+    extra_hosts:
+      osmc.local: 191.168.122.60
 
   icingaweb2:
     restart: always
@@ -356,6 +360,8 @@ services:
       - ./logs:/var/log
     networks:
       - mon
+    extra_hosts:
+      osmc.local: 191.168.122.60
 
   # single service
   # use MQ to process data
@@ -385,6 +391,8 @@ services:
       - /share/etc/cm-application.yaml:/etc/cm-application.yaml
     networks:
       - mon
+    extra_hosts:
+      osmc.local: 191.168.122.60
 
   # single service
   # use MQ to process data
@@ -413,6 +421,8 @@ services:
       - /share/etc/cm-application.yaml:/etc/cm-application.yaml
     networks:
       - mon
+    extra_hosts:
+      osmc.local: 191.168.122.60
 
   # single service
   # use MQ to process data
@@ -521,3 +531,4 @@ services:
       - /share/etc/icinga_server_config.yml:/etc/icinga_server_config.yml
     networks:
       - mon
+

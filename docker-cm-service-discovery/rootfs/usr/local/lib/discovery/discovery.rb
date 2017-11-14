@@ -406,19 +406,25 @@ module ServiceDiscovery
 
           open_ports = pd.post( host: fqdn, ports: ports )
 
-          open_ports.each do |p|
+          if( open_ports.nil? )
+            logger.error( format( 'can\'t detect open ports for %s', fqdn ) )
+          else
 
-            names = discover_application( fqdn: fqdn, port: p )
+            open_ports.each do |p|
 
-            # logger.debug("discovered services: #{names}")
+              names = discover_application( fqdn: fqdn, port: p )
 
-            unless( names.nil? )
+              # logger.debug("discovered services: #{names}")
 
-              names.each do |name|
-                discovered_services.merge!( { name => { 'port' => p } } )
+              unless( names.nil? )
+
+                names.each do |name|
+                  discovered_services.merge!( { name => { 'port' => p } } )
+                end
               end
             end
           end
+
         end
       end
 

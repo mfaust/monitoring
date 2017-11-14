@@ -103,7 +103,7 @@ module ServiceDiscovery
 
         @jobs.del( job_option )
 
-        result
+        return result
       end
 
       # remove Node
