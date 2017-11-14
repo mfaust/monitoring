@@ -3,10 +3,6 @@ version: '2.0'
 
 networks:
   mon:
-#    driver: bridge
-#    ipam:
-#      config:
-#        - subnet: 192.168.1.0/24
 
 volumes:
   database:
@@ -16,16 +12,6 @@ volumes:
   carbon:
     driver: local
   icinga:
-    driver: local
-  mongo_data:
-    driver: local
-  es_data:
-    driver: local
-  graylog_log:
-    driver: local
-  graylog_data:
-    driver: local
-  graylog_journal:
     driver: local
 
 services:
@@ -47,24 +33,6 @@ services:
     depends_on:
       - data
 
-#  dnsdock:
-#    restart: always
-#    image: bodsch/docker-dnsdock:1710.1
-#    container_name: dnsdock
-#    hostname: dnsdock
-#    labels:
-#      com.dnsdock.alias: dnsdock
-#      com.dnsdock.ttl: '120'
-#    volumes:
-#      - /etc/localtime:/etc/localtime:ro
-#      - /var/run/docker.sock:/var/run/docker.sock
-#    # You can use also Environment vars like this:
-#    # command: "--nameserver='${DNS_1}:53' --nameserver='${DNS_2}:53' --http=:80"
-#    command: "--nameserver='172.17.0.1' --nameserver='10.1.2.63:53' --nameserver='10.1.2.14:53' --http=:80 --alias --ttl=20 --verbose"
-#    networks:
-#      - mon
-#        ipv4_address: 192.168.1.5
-
   beanstalkd:
     restart: always
     image: bodsch/docker-beanstalkd:1710.1
@@ -74,7 +42,6 @@ services:
       - /etc/localtime:/etc/localtime:ro
     networks:
       - mon
-#        ipv4_address: 192.168.1.6
 
   database:
     restart: always
@@ -91,7 +58,6 @@ services:
       - database:/srv
     networks:
       - mon
-#        ipv4_address: 192.168.1.7
 
   jolokia:
     restart: always
@@ -107,9 +73,6 @@ services:
       - /etc/localtime:/etc/localtime:ro
     networks:
       - mon
-#        ipv4_address: 192.168.1.8
-#    dns:
-#      - 192.168.1.5
 
   memcached:
     restart: always
@@ -121,7 +84,6 @@ services:
     command: "-l 0.0.0.0 -m 8 -u memcached"
     networks:
       - mon
-#        ipv4_address: 192.168.1.9
 
   redis:
     restart: always
@@ -135,7 +97,6 @@ services:
       - redis:/var/lib/redis
     networks:
       - mon
-#        ipv4_address: 192.168.1.10
 
   nginx:
     restart: always
@@ -173,7 +134,6 @@ services:
       - /share/etc/nginx/modules.d/01-proxy-markdown-service.conf:/etc/nginx/modules.d/01-proxy-markdown-service.conf
     networks:
       - mon
-#        ipv4_address: 192.168.1.11
 
   carbon:
     restart: always
@@ -191,7 +151,6 @@ services:
       - carbon:/srv
     networks:
       - mon
-#        ipv4_address: 192.168.1.12
 
   graphite:
     restart: always
@@ -209,7 +168,6 @@ services:
       - carbon:/srv
     networks:
       - mon
-#        ipv4_address: 192.168.1.13
 
   grafana:
     restart: always
@@ -247,10 +205,8 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /share/opt/grafana/dashboards:/opt/grafana/dashboards
-      # - /var/tmp/docker-volumes/carbon:/srv
     networks:
       - mon
-#        ipv4_address: 192.168.1.14
 
   cm-icinga2-master:
     restart: always
@@ -299,9 +255,6 @@ services:
       - icinga:/var/lib/icinga2
     networks:
       - mon
-#        ipv4_address: 192.168.1.15
-#    dns:
-#      - 192.168.1.5
 
   icingaweb2:
     restart: always
@@ -338,10 +291,8 @@ services:
       - cm-icinga2-master:icinga2
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      # - /var/tmp/docker-volumes/icinga:/srv
     networks:
       - mon
-#        ipv4_address: 192.168.1.16
 
   markdown-service:
     restart: always
@@ -355,7 +306,6 @@ services:
       - /share/www/markdown-service:/var/www
     networks:
       - mon
-#        ipv4_address: 192.168.1.17
 
   cm-dashing:
     restart: always
@@ -381,11 +331,10 @@ services:
       - /etc/localtime:/etc/localtime:ro
     networks:
       - mon
-#        ipv4_address: 192.168.1.18
 
 
   # CoreMedia Glue and Logic
-
+  #
   cm-rest-service:
     restart: always
     build: ../../docker-cm-rest-service
@@ -395,22 +344,6 @@ services:
       TZ: 'Europe/Berlin'
       MYSQL_HOST: database
       MYSQL_ROOT_PASS: database.pass
-      # when we need an DNS entry for external services, we can use ADDITIONAL_DNS
-      # its an json style with following syntax:
-      # ADDITIONAL_DNS: '[{
-      #   "name": "blueprint-box",
-      #   "ip": "192.168.252.100",
-      #   "aliases": [ "tomcat-centos7" ]
-      # }]'
-      #ADDITIONAL_DNS: '[{
-      #  "name": "blueprint-box",
-      #  "ip": "192.168.252.100",
-      #  "aliases": [ "tomcat-centos7", "overview.blueprint-box", "preview.blueprint-box", "sitemanager.blueprint-box", "studio.blueprint-box", "corporate.blueprint-box" ]
-      #},{
-      #  "name": "osmc",
-      #  "ip": "192.168.122.60",
-      #  "aliases": [ "osmc.local", "overview.osmc.local", "preview.osmc.local", "sitemanager.osmc.local", "studio.osmc.local", "corporate.osmc.local" ]
-      #}]'
     depends_on:
       - data
       - redis
@@ -423,9 +356,6 @@ services:
       - ./logs:/var/log
     networks:
       - mon
-#        ipv4_address: 192.168.1.30
-#    dns:
-#      - 192.168.1.5
 
   # single service
   # use MQ to process data
@@ -455,9 +385,6 @@ services:
       - /share/etc/cm-application.yaml:/etc/cm-application.yaml
     networks:
       - mon
-#        ipv4_address: 192.168.1.31
-#    dns:
-#      - 192.168.1.5
 
   # single service
   # use MQ to process data
@@ -486,9 +413,6 @@ services:
       - /share/etc/cm-application.yaml:/etc/cm-application.yaml
     networks:
       - mon
-#        ipv4_address: 192.168.1.32
-#    dns:
-#      - 192.168.1.5
 
   # single service
   # use MQ to process data
@@ -511,7 +435,6 @@ services:
       - ./logs:/var/log
     networks:
       - mon
-#        ipv4_address: 192.168.1.33
 
   # single service
   # use MQ to process data
@@ -523,8 +446,6 @@ services:
     environment:
       TZ: 'Europe/Berlin'
       GRAFANA_HOST: nginx
-      # GRAFANA_API_USER: admin
-      # GRAFANA_API_PASSWORD: admin
       SERVER_CONFIG_FILE: /etc/grafana_config.yml
       RUN_DELAY: 30
     depends_on:
@@ -544,7 +465,6 @@ services:
       - /share/etc/grafana/grafana_config.yml:/etc/grafana_config.yml
     networks:
       - mon
-#        ipv4_address: 192.168.1.34
 
   # single service
   # use MQ to process data
@@ -568,7 +488,6 @@ services:
       - ./logs:/var/log
     networks:
       - mon
-#        ipv4_address: 192.168.1.35
 
   # single service
   # use MQ to process data
@@ -602,110 +521,3 @@ services:
       - /share/etc/icinga_server_config.yml:/etc/icinga_server_config.yml
     networks:
       - mon
-#        ipv4_address: 192.168.1.36
-#    dns:
-#      - 192.168.1.5
-
-
-#  # testing area ..
-#  #
-#  # disable huge pages first:
-#  # https://docs.mongodb.com/manual/tutorial/transparent-huge-pages/
-#  mongo:
-#    image: mongo:3
-#    volumes:
-#      - mongo_data:/data/db
-#    networks:
-#      - mon
-#        ipv4_address: 192.168.1.100
-#
-#  # to use Elasticsearch properly, be ensure your max_map_count ist set to 262144!
-#  # sysctl -w vm.max_map_count=262144 or
-#  # echo "vm.max_map_count=262144" >> /etc/sysctl.d/999-user.conf && sysctl --system
-#  #
-#  # THIS IS IMPORTAND!
-#  # TRUST ME
-#  #
-#  elasticsearch:
-#    restart: always
-#    image: docker.elastic.co/elasticsearch/elasticsearch:5.6.0
-#    container_name: elasticsearch
-#    hostname: elasticsearch
-#    logging:
-#      driver: "json-file"
-#    environment:
-#      - xpack.security.enabled=false
-#      - discovery.type=single-node
-#      - bootstrap.memory_lock=true
-#      - http.host=0.0.0.0
-#    ulimits:
-#      memlock:
-#        soft: -1
-#        hard: -1
-#    mem_limit: 1g
-##    ports:
-##      - 9200:9200
-#    volumes:
-#      - /etc/localtime:/etc/localtime:ro
-#      - es_data:/usr/share/elasticsearch/data
-#    networks:
-#      - mon
-#        ipv4_address: 192.168.1.101
-#
-#  fluentd:
-#    image: bodsch/docker-fluentd
-#    container_name: fluentd
-#    hostname: fluentd
-#    links:
-#      - graylog
-#    ports:
-#      - 24224:24224
-#      - 24224:24224/udp
-#    volumes:
-#      - /etc/localtime:/etc/localtime:ro
-#      - ./fluentd/conf/fluent.conf:/etc/fluentd.conf
-#    networks:
-#      - mon
-#        ipv4_address: 192.168.1.102
-#
-#  graylog:
-#    restart: always
-#    image: graylog2/server:latest
-#    container_name: graylog
-#    hostname: graylog
-#    environment:
-#      # CHANGE ME!
-#      - GRAYLOG_PASSWORD_SECRET=somepasswordpepper
-#      # Password: admin
-#      - GRAYLOG_ROOT_PASSWORD_SHA2=8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918
-#      - GRAYLOG_WEB_ENDPOINT_URI=http://192.168.1.105:9000/api
-#      - GRAYLOG_ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-#    depends_on:
-#      - mongo
-#      - elasticsearch
-#    links:
-#      - mongo
-#      - elasticsearch
-#    ports:
-#      # Graylog web interface and REST API
-#      - 9000:9000
-#      # Syslog TCP
-#      - 514:514
-#      # Syslog UDP
-#      - 514:514/udp
-#      # GELF TCP
-#      - 12201:12201
-#      # GELF UDP
-#      - 12201:12201/udp
-#    volumes:
-#      - /etc/localtime:/etc/localtime:ro
-#      - graylog_journal:/usr/share/graylog/data/journal
-#      - /share/usr/share/graylog/data/config/graylog.conf:/usr/share/graylog/data/config/graylog.conf
-#      - /share/usr/share/graylog/data/config/log4j2.xml:/usr/share/graylog/data/config/log4j2.xml
-#      - /share/usr/share/graylog/data/config/node-id:/usr/share/graylog/data/config/node-id
-#      - /share/usr/share/graylog/data/contentpacks/content_pack_appliance.json:/usr/share/graylog/data/contentpacks/content_pack_appliance.json
-#      - graylog_data:/opt/graylog
-#    networks:
-#      - mon
-#        ipv4_address: 192.168.1.105
-#
