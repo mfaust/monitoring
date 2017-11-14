@@ -83,7 +83,7 @@ module Monitoring
 
           # get discovery data
           #
-          discoveryData = @database.discoveryData( { :ip => ip, :short => short, :fqdn => fqdn } )
+          discoveryData = @database.discovery_data( { :ip => ip, :short => short, :fqdn => fqdn } )
 
           if( discoveryData != nil )
 

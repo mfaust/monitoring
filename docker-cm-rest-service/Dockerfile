@@ -4,27 +4,37 @@ FROM alpine:3.6
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
-  VERSION="1707-31.1" \
-  BUILD_DATE="2017-07-31" \
-  ALPINE_MIRROR="mirror1.hs-esslingen.de/pub/Mirrors" \
-  ALPINE_VERSION="v3.6" \
-  TERM=xterm \
-  APK_ADD="build-base bind-tools curl drill ipcalc jq imagemagick-dev mariadb-client mariadb-dev ruby-dev ruby-irb ruby-io-console ruby-rdoc zlib zlib-dev" \
-  APK_DEL="build-base imagemagick-dev ruby-dev ruby-io-console zlib-dev" \
-  GEMS="beaneater ipaddress mini_cache mysql2 resolve-hostname redis rufus-scheduler sinatra thin tzinfo-data"
+  VERSION="1711" \
+  BUILD_DATE="2017-11-14" \
+  TERM=xterm
 
 # ---------------------------------------------------------------------------------------
 
 RUN \
-  echo "http://${ALPINE_MIRROR}/alpine/${ALPINE_VERSION}/main"       > /etc/apk/repositories && \
-  echo "http://${ALPINE_MIRROR}/alpine/${ALPINE_VERSION}/community" >> /etc/apk/repositories && \
   apk --no-cache update && \
-  apk --no-cache upgrade && \
-  apk --no-cache add ${APK_ADD} && \
-  gem install --no-rdoc --no-ri ${GEMS} && \
-  apk --purge del ${APK_DEL} && \
+  apk --no-cache upgrade
+
+COPY build /build
+
+RUN \
+  apk add --quiet --no-cache --virtual .build-deps \
+    build-base imagemagick-dev mariadb-dev ruby-dev ruby-io-console zlib-dev && \
+  apk --no-cache add \
+    bind-tools curl drill ipcalc jq mariadb-client mariadb-client-libs ruby-irb ruby-io-console ruby-rdoc zlib && \
+  gem install --quiet --no-rdoc --no-ri \
+    bundler \
+    io-console && \
+  cd /build && \
+  bundle install && \
+  count=$(ls -1 /build/*.gem 2> /dev/null) && \
+  if [ ! -z ${count} ] ; then \
+    gem install --no-rdoc --no-ri ${count} ; \
+  fi && \
+  apk del --quiet .build-deps && \
   rm -rf \
     /tmp/* \
+    /root/.bundle \
+    /root/.gem \
     /var/cache/apk/*
 
 COPY rootfs/ /

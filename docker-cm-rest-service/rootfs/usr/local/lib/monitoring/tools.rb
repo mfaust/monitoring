@@ -23,7 +23,7 @@ module Monitoring
 
         logger.debug( 'no cached DNS data' )
 
-        dns = @database.dnsData( short: name, fqdn: name )
+        dns = @database.dns_data( short: name, fqdn: name )
 
         unless( dns.nil? )
 

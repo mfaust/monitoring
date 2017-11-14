@@ -1,11 +1,11 @@
 TYPE := cm-rest-service
 IMAGE_NAME := docker-${TYPE}
 
+.PHONY: build push shell run start stop rm release
 
 build:
 	docker build \
 		--rm \
-		--quiet \
 		--tag=$(IMAGE_NAME) .
 	@echo Image tag: ${IMAGE_NAME}
 
