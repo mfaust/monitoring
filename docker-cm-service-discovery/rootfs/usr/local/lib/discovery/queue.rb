@@ -48,7 +48,7 @@ module ServiceDiscovery
 
     def process_queue( data = {} )
 
-      logger.info( sprintf( 'process Message ID %d from Queue \'%s\'', data.dig(:id), data.dig(:tube) ) )
+      logger.info( format( 'process Message ID %d from Queue \'%s\'', data.dig(:id), data.dig(:tube) ) )
 
       command = data.dig( :body, 'cmd' )
       node    = data.dig( :body, 'node' )
@@ -67,7 +67,7 @@ module ServiceDiscovery
 
       dns      = payload.dig('dns') unless( payload.is_a?(String))
 
-#       logger.info( sprintf( '  %s node %s', command , node ) )
+#       logger.info( format( '  %s node %s', command , node ) )
 
       if (dns.nil?)
         ip, short, fqdn = self.ns_lookup(node)
@@ -77,15 +77,11 @@ module ServiceDiscovery
         fqdn = dns.dig('fqdn')
       end
 
-      if(@jobs.jobs( command: command, ip: ip, short: short, fqdn: fqdn ))
-        logger.warn( 'we are working on this job' )
-        return {
-            status: 409, # 409 Conflict
-            message: 'we are working on this job'
-        }
-      end
+      job_option = { command: command, ip: ip, short: short, fqdn: fqdn }
 
-      @jobs.add( {command: command, ip: ip, short: short, fqdn: fqdn} )
+      return { status: 409, message: 'we are working on this job' } if( @jobs.jobs( job_option ) == true )
+
+      @jobs.add( job_option )
 
       @cache.set(format( 'dns-%s', node ) , expires_in: 320 ) { MiniCache::Data.new( ip: ip, short: short, long: fqdn ) }
 
@@ -96,43 +92,35 @@ module ServiceDiscovery
         # TODO
         # check payload!
         # e.g. for 'force' ...
-        result  = self.add_host(node, payload )
+        result  = self.add_host( node, payload )
 
         status  = result.dig(:status)
         message = result.dig(:message)
 
-        result = {
-          status: status,
-          message: message
-        }
+        result = { status: status, message: message }
 
         logger.debug( result )
 
-        @jobs.del( command: command, ip: ip, short: short, fqdn: fqdn )
+        @jobs.del( job_option )
 
         result
+      end
 
       # remove Node
       #
-      elsif( command == 'remove' )
+      if( command == 'remove' )
 
         # check first for existing node!
         #
         result = @database.nodes( short: node, status: Storage::MySQL::DELETE )
 
-#         logger.debug( "database: '#{result}' | node: '#{node}'" )
-#         logger.debug( @database.nodes() )
-
         if( result != nil && result.to_s != node.to_s )
 
           logger.info( 'node not in monitoring. skipping delete' )
 
-          @jobs.del( {command: command, ip: ip, short: short, fqdn: fqdn} )
+          @jobs.del( job_option )
 
-          return {
-            status: 200,
-            message: sprintf('node not in monitoring. skipping delete ...')
-          }
+          return { status: 200, message: format('node not in monitoring. skipping delete ...') }
         end
 
         begin
@@ -150,94 +138,48 @@ module ServiceDiscovery
           logger.error( e )
         end
 
-        @jobs.del( command: command, ip: ip, short: short, fqdn: fqdn )
+        @jobs.del( job_option )
 
-        return {
-            status: 200
-        }
-
-      # refresh Node
-      #
-      elsif( command == 'refresh' )
-
-        result = self.refresh_host(node )
-
-          return {
-              status: 200,
-              message: result
-          }
+        return { status: 200 }
+      end
 
       # information about Node
       #
-      elsif( command == 'info' )
+      if( command == 'info' )
 
-        result = @redis.nodes( {short: node} )
+        result = @redis.nodes( short: node )
 
         logger.debug( "redis: '#{result}' | node: '#{node}'" )
-#         logger.debug( @redis.nodes() )
 
         if( result.to_s != node.to_s )
 
           logger.info( 'node not in monitoring. skipping info' )
 
-          @jobs.del( command: command, ip: ip, short: short, fqdn: fqdn )
+          @jobs.del( job_option )
 
-          return {
-              status: 200,
-              message: sprintf('node not in monitoring. skipping info ...')
-          }
-
+          return { status: 200, message: format('node not in monitoring. skipping info ...') }
         end
 
-#         self.sendMessage( { :cmd => 'info', :queue => 'mq-discover-info', :payload => {}, :ttr => 1, :delay => 0 } )
-#
-#         return {
-#           :status  => 200
-#         }
-
         result = self.list_hosts(node )
+        logger.debug( result )
 
         status  = result.dig(:status)
         message = result.dig(:message)
 
-        r = {
-            status: status,
-            message: message
-        }
+        self.send_message( cmd: 'info', node: node, queue: 'mq-discover-info', payload: result, ttr: 1, delay: 0 )
 
-        logger.debug( r )
+        @jobs.del( job_option )
 
-        self.send_message({cmd: 'info', node: node, queue: 'mq-discover-info', payload: result, ttr: 1, delay: 0} )
-
-        @jobs.del( {command: command, ip: ip, short: short, fqdn: fqdn} )
-
-        return {
-            status: 200,
-            message: 'information succesful send'
-        }
+        return { status: 200, message: 'information succesful send' }
+      end
 
       # all others
       #
-      else
+      logger.error( format( 'wrong command detected: %s', command ) )
 
-        logger.error( sprintf( 'wrong command detected: %s', command ) )
+      @jobs.del( job_option )
 
-        @jobs.del( {command: command, ip: ip, short: short, fqdn: fqdn} )
-
-        {
-            status: 500,
-            message: sprintf('wrong command detected: %s', command)
-        }
-
-      end
-#
-#       if( result.is_a?( String ) )
-#         result = JSON.parse( result )
-#       end
-#
-#       result[:request]    = data
-#      logger.debug( result )
-
+      return { status: 500, message: format('wrong command detected: %s', command) }
     end
 
 

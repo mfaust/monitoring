@@ -306,7 +306,7 @@ module ServiceDiscovery
 
       if( @jolokia.available? == false )
         logger.error( 'jolokia service is not available!' )
-        { status: 500, message: 'jolokia service is not available!' }
+        return { status: 500, message: 'jolokia service is not available!' }
       end
 
       start = Time.now
@@ -321,11 +321,8 @@ module ServiceDiscovery
 
         # delete dns entry
         result  = @database.removeDNS( ip: ip, short: short, fqdn: fqdn )
-
-        return {
-          status: 503, # 503 Service Unavailable
-          message: format('Host %s are unavailable', host)
-        }
+        # 503 Service Unavailable
+        return { status: 503,  message: format('Host %s are unavailable', host) }
       end
 
       # check discovered datas from the past

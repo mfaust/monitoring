@@ -28,7 +28,7 @@ RUN \
     io-console bundler && \
   cd /build && \
   bundle install --quiet && \
-  apk --purge del ${APK_DEL} && \
+  apk del --quiet .build-deps && \
   rm -rf \
     /tmp/* \
     /var/cache/apk/*
