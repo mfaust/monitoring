@@ -11,7 +11,6 @@ require 'sinatra/base'
 require 'logger'
 require 'json'
 require 'yaml'
-# require 'fileutils'
 require 'resolve/hostname'
 
 require_relative '../lib/monitoring'
