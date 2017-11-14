@@ -7,7 +7,7 @@ ENV \
   VERSION="1711" \
   BUILD_DATE="2017-11-06" \
   TERM=xterm \
-  APK_ADD="nano git g++ make go " \
+  APK_ADD="curl nano git g++ make go " \
   GOPATH=/build \
   GOROOT=/usr/lib/go
 
@@ -16,7 +16,6 @@ EXPOSE 8080 8088
 # ---------------------------------------------------------------------------------------
 
 COPY build/ /build
-COPY rootfs/ /
 
 RUN \
   apk --no-cache update && \
@@ -37,3 +36,13 @@ RUN \
     /root/.cache \
     /root/.config \
     /usr/local/*
+
+COPY rootfs/ /
+
+WORKDIR /
+
+HEALTHCHECK \
+  --interval=5s \
+  --timeout=2s \
+  --retries=12 \
+  CMD curl --silent --fail http://localhost:8080/jolokia || exit 1

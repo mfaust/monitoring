@@ -22,7 +22,7 @@ module Monitoring
 #       hostInfo = Utils::Network.resolv( host )
 #       host     = hostInfo.dig(:short)
 #
-#       @redis.createConfig( { :short => host , :data => hash } )
+#       @redis.create_config( { :short => host , :data => hash } )
 #
 #       status  = 200
 #       message = 'config successful written'
@@ -77,7 +77,7 @@ module Monitoring
 #       hostInfo = Utils::Network.resolv( host )
 #       host     = hostInfo.dig(:short)
 #
-#       data     = @redis.removeConfig( { :short => host } )
+#       data     = @redis.remove_config( { :short => host } )
 #
 #       if( data != false )
 #         status = 200

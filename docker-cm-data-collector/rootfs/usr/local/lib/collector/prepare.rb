@@ -47,26 +47,24 @@ module DataCollector
 
     # merge Data between Property Files and discovered Services
     # creates mergedHostData.json for every Node
-    def buildMergedData( params = {} )
+    def build_merged_data( params )
 
-#      logger.debug( "buildMergedData( #{params} )" )
+#      logger.debug( "build_merged_data( #{params} )" )
 
       short = params.dig(:hostname)
       fqdn  = params.dig(:fqdn)
       data  = params.dig(:data)
+      force = params.dig(:force) || false
 
-      if( short == nil )
-        logger.error( 'no hostname found' )
-        return
-      end
+      return { status: 404, message: 'no hostname given' } if( fqdn.nil? )
+      return { status: 404, message: 'no discovery data given' } if( data.nil? || data == false || data.count() == 0 )
 
       # check our cache for prepared data
       #
       prepared   = @cache.get( fqdn )
 
-      if( prepared != nil )
-        logger.debug( 'prepared data already created' )
-        return
+      if( force == false )
+        return { status: 200, message: 'prepared data already created' } unless( prepared.nil? )
       end
       #
       # ----------------------------------
@@ -76,19 +74,14 @@ module DataCollector
       #
       tomcatApplication = @cfg.jolokiaApplications.clone
 
-#       if( data == nil )
+#       if( data.nil? )
 #
 #         # Redis based
 #         logger.debug( 'use redis' )
 #         data = @redis.discoveryData( { :short => short } )
 #       end
 
-      if( data == nil || data == false || data.count() == 0 )
-        logger.error( 'no discovery data found' )
-        return false
-      end
-
-      dataForRedis = Array.new()
+      redis_data = Array.new()
 
       data.each do |service,payload|
 
@@ -97,33 +90,43 @@ module DataCollector
           next
         end
 
-        result      = self.mergeData( service.to_s, tomcatApplication, payload )
+        result      = self.merge_data( service.to_s, tomcatApplication, payload )
 
 #         logger.debug( JSON.pretty_generate( result ) )
 
-        dataForRedis << { service.to_s => result }
+        redis_data << { service.to_s => result }
       end
 
-      dataForRedis = dataForRedis.deep_string_keys
+      redis_data = redis_data.deep_string_keys
 
       # http://stackoverflow.com/questions/11856407/rails-mapping-array-of-hashes-onto-single-hash
       # mapping array of hashes onto single hash
-      dataForRedis = dataForRedis.reduce( {} , :merge )
+      redis_data = redis_data.reduce( {} , :merge )
+      redis_data_keys          = redis_data.keys.sort
+      redis_data_keys_count    = redis_data_keys.count
 
-      @redis.createMeasurements( { :short => short, :fqdn => fqdn, :data => dataForRedis } )
+      key = redis_data_keys.clone
+      key = redis_data_keys.to_s if( redis_data_keys.is_a?(Array) )
 
-      @cache.set(fqdn, 'prepared', expires_in: 320 )
+      redis_data_keys_checksum = Digest::MD5.hexdigest( key )
+
+      validate_data = { prepared: true, fqdn: fqdn, count: redis_data_keys_count, keys: redis_data_keys, checksum: redis_data_keys_checksum }
+
+      @redis.createMeasurements( short: short, fqdn: fqdn, data: redis_data )
+
+      @cache.set( fqdn, 'prepared', expires_in: 320 )
+      @cache.set( format( '%s-validate', fqdn ) , expires_in: 320 ) { MiniCache::Data.new( validate_data ) }
 
       finish = Time.now
       logger.info( sprintf( 'build prepared data in %s seconds', (finish - start).round(2) ) )
 
-      return
+      return { status: 200 }
     end
 
 
-    def mergeData( service, tomcatApplication, data = {} )
+    def merge_data( service, tomcatApplication, data = {} )
 
-      logger.debug( "mergeData( #{service} )" )
+      logger.debug( "merge_data( #{service} )" )
 
       metricsTomcat     = tomcatApplication.dig('tomcat')      # standard metrics for Tomcat
 
@@ -136,13 +139,13 @@ module DataCollector
 
       dataSource = nil
 
-      if( data == nil || data.count() == 0 )
+      if( data.nil? || data.count() == 0 )
         logger.debug( 'no data to merge' )
 
         return {}
       end
 
-      if( data.dig(:data) == nil )
+      if( data.dig(:data).nil? )
 
         application = data.dig('application')
         solr_cores  = data.dig('cores')
@@ -245,6 +248,26 @@ module DataCollector
       end
 
     end
+
+
+    def valid_data( fqdn )
+
+      data    = @cache.get( format( '%s-validate', fqdn ) ) || nil
+      count = 0
+      checksum = ''
+      keys = ''
+
+#       logger.debug( "valid_data: #{data} (#{data.class.to_s})" )
+
+      unless( data.nil? )
+        count    = data.dig(:count)
+        checksum = data.dig(:checksum)
+        keys     = data.dig(:keys)
+      end
+
+      { count: count, checksum: checksum, keys: keys }
+    end
+
 
   end
 

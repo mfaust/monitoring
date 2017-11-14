@@ -63,7 +63,7 @@ class CMGrafana < Grafana::Client
 
     def process_queue(data = {} )
 
-      logger.debug( sprintf( 'process Message ID %d from Queue \'%s\'', data.dig(:id), data.dig(:tube) ) )
+      logger.debug( format( 'process Message ID %d from Queue \'%s\'', data.dig(:id), data.dig(:tube) ) )
 
       command  = data.dig( :body, 'cmd' )
       node     = data.dig( :body, 'node' )
@@ -112,7 +112,7 @@ class CMGrafana < Grafana::Client
         dns      = payload.dig('dns')
       end
 
-      logger.info( sprintf( '  %s node %s', command , node ) )
+      logger.info( format( '%s node %s', command , node ) )
 
       if( dns.nil? )
         ip, short, fqdn = self.ns_lookup(node)
@@ -140,17 +140,11 @@ class CMGrafana < Grafana::Client
         }
       end
 
-      if(@jobs.jobs({:command => command, :ip => ip, :short => short, :fqdn => fqdn}))
+      job_option = { command: command, ip: ip, short: short, fqdn: fqdn }
 
-        logger.warn( 'we are working on this job' )
+      return { status: 409, message: 'we are working on this job' } if( @jobs.jobs( job_option ) == true )
 
-        return {
-          :status  => 409, # 409 Conflict
-          :message => 'we are working on this job'
-        }
-      end
-
-      @jobs.add( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
+      @jobs.add( job_option )
 
       @cache.set(format( 'dns-%s', node ) , expires_in: 320 ) { MiniCache::Data.new( ip: ip, short: short, long: fqdn ) }
 
@@ -161,61 +155,63 @@ class CMGrafana < Grafana::Client
         # TODO
         # check payload!
         # e.g. for 'force' ...
-        result = self.create_dashboard_for_host({:host => node, :tags => tags, :overview => overview } )
+        result = self.create_dashboard_for_host( host: node, tags: tags, overview: overview )
 
         logger.debug( result )
 
-        @jobs.del( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
+        @jobs.del( job_option )
 
-        {
-          :status  => 200,
-          :message => result
-        }
+        return { status: 200, message: result }
+      end
 
       # remove Node
       #
-      elsif( command == 'remove' )
+      if( command == 'remove' )
 
-#         logger.info( sprintf( 'remove dashboards for node %s', node ) )
-        result = self.delete_dashboards({:ip => ip, :host => node, :fqdn => fqdn } )
+#         logger.info( format( 'remove dashboards for node %s', node ) )
+        result = self.delete_dashboards( ip: ip, host: node, fqdn: fqdn )
 
         logger.debug( result )
 
-        @jobs.del( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
+        @jobs.del( job_option )
 
-        return {
-          :status  => 200,
-          :message => result
-        }
+        return { status: 200, message: result }
+      end
 
       # information about Node
       #
-      elsif( command == 'info' )
+      if( command == 'info' )
 
-#         logger.info( sprintf( 'give dashboards for %s back', node ) )
-        result = self.list_dashboards({:host => node } )
+#         logger.info( format( 'give dashboards for %s back', node ) )
+        result = self.list_dashboards( host: node )
 
-        self.send_message({:cmd => 'info', :host => node, :queue => 'mq-grafana-info', :payload => result, :ttr => 1, :delay => 0 } )
+        self.send_message( cmd: 'info', host: node, queue: 'mq-grafana-info', payload: result, ttr: 1, delay: 0 )
 
-        @jobs.del( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
+        @jobs.del( job_option )
 
-        return {
-          :status  => 200,
-          :message => result
-        }
+        return { status: 200, message: result }
+      end
+
+      #
+      #
+      if( command == 'update' )
+
+        result = update_dashboards( host: node )
+
+        logger.debug( result )
+
+        @jobs.del( job_option )
+
+        return { status: 200, message: result }
+      end
 
       # all others
       #
-      else
-        logger.error( sprintf( 'wrong command detected: %s', command ) )
+      logger.error( format( 'wrong command detected: %s', command ) )
 
-        @jobs.del( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
+      @jobs.del( job_option )
 
-        {
-          :status  => 500,
-          :message => sprintf( 'wrong command detected: %s', command )
-        }
-      end
+      return { status: 500, message: format( 'wrong command detected: %s', command ) }
 
 #      result[:request]    = data
 #      logger.info( result )

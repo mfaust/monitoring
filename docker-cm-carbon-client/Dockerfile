@@ -29,4 +29,12 @@ RUN \
 
 COPY rootfs/ /
 
+WORKDIR /
+
+HEALTHCHECK \
+  --interval=5s \
+  --timeout=2s \
+  --retries=12 \
+  CMD ps ax | grep -c carbon-data.rb || exit 1
+
 CMD [ "/usr/local/bin/carbon-data.rb" ]

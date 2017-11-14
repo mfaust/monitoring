@@ -9,6 +9,8 @@ class CMGrafana
 
       def ns_lookup(name, expire = 120 )
 
+        logger.debug( "ns_lookup( #{name}, #{expire} )" )
+
         # DNS
         #
         hostname = sprintf( 'dns-%s', name )
@@ -17,7 +19,25 @@ class CMGrafana
 
         if( dns.nil? )
 
-          logger.debug( 'create cached DNS data' )
+          logger.debug( 'no cached DNS data' )
+
+          dns = @database.dnsData( short: name, fqdn: name )
+
+          unless( dns.nil? )
+
+            logger.debug( 'use database entries' )
+
+            ip    = dns.dig('ip')
+            short = dns.dig('name')
+            fqdn  = dns.dig('fqdn')
+
+            @cache.set( hostname , expires_in: expire ) { MiniCache::Data.new( ip: ip, short: short, long: fqdn ) }
+
+            return ip, short, fqdn
+          end
+
+          logger.debug( format( 'resolve dns name %s', name ) )
+
           # create DNS Information
           dns      = Utils::Network.resolv( name )
 
@@ -97,6 +117,38 @@ class CMGrafana
 
         service.tr('-', '_').upcase
 
+      end
+
+
+      def discovery_data( params )
+
+        ip    = params.dig(:ip)
+        short = params.dig(:short)
+        fqdn  = params.dig(:fqdn)
+
+        discovery = nil
+
+        begin
+          (1..15).each { |y|
+
+            discovery = @database.discoveryData( ip: ip, short: short, fqdn: fqdn )
+
+            logger.debug(discovery)
+            logger.debug(discovery.class.to_s)
+
+            if( discovery.nil? )
+              logger.debug(sprintf('wait for discovery data for node \'%s\' ... %d', fqdn, y))
+              sleep(4)
+            else
+              break
+            end
+          }
+
+        rescue => e
+          logger.error( e )
+        end
+
+        discovery
       end
 
 

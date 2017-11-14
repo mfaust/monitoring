@@ -18,8 +18,6 @@ ENV \
 
 COPY build /build
 
-WORKDIR /
-
 RUN \
   echo "http://${ALPINE_MIRROR}/alpine/${ALPINE_VERSION}/main"       > /etc/apk/repositories && \
   echo "http://${ALPINE_MIRROR}/alpine/${ALPINE_VERSION}/community" >> /etc/apk/repositories && \
@@ -47,5 +45,13 @@ RUN \
     /var/cache/apk/*
 
 COPY rootfs/ /
+
+WORKDIR /
+
+HEALTHCHECK \
+  --interval=5s \
+  --timeout=2s \
+  --retries=12 \
+  CMD ps ax | grep -c grafana-client.rb || exit 1
 
 CMD [ "/usr/local/bin/grafana-client.rb" ]

@@ -5,9 +5,11 @@ module Monitoring
 
     def ns_lookup( name, expire = 120 )
 
+      logger.debug( "ns_lookup( #{name}, #{expire} )" )
+
       # DNS
       #
-      cache_key = sprintf( 'dns::%s', name )
+      cache_key = format( 'dns::%s', name )
 
   #     logger.debug("cache_key: #{cache_key}")
 
@@ -17,7 +19,26 @@ module Monitoring
 
       dns      = @cache.get( cache_key )
 
-      if( dns == nil )
+      if( dns.nil? )
+
+        logger.debug( 'no cached DNS data' )
+
+        dns = @database.dns_data( short: name, fqdn: name )
+
+        unless( dns.nil? )
+
+          logger.debug( 'use database entries' )
+
+          ip    = dns.dig('ip')
+          short = dns.dig('name')
+          fqdn  = dns.dig('fqdn')
+
+          @cache.set( cache_key , expires_in: expire ) { MiniCache::Data.new( ip: ip, short: short, long: fqdn ) }
+
+          return ip, short, fqdn
+        end
+
+        logger.debug( format( 'resolve dns name %s', name ) )
 
         # create DNS Information
         dns      = Utils::Network.resolv( name )
@@ -33,8 +54,6 @@ module Monitoring
         else
           logger.error( 'no DNS data found!' )
           logger.error( " => #{dns}" )
-
-          return nil, nil, nil
         end
       else
 
@@ -44,26 +63,7 @@ module Monitoring
 
       end
 
-  #     logger.debug( "redis: #{@redis.get(format('dns::%s',fqdn))}" )
-
-      #
-      # ------------------------------------------------
-
-  #     dns    = @database.dnsData( { :ip => ip, :short => short, :fqdn => fqdn } )
-  #
-  #     if( dns == nil )
-  #
-  #       status = @database.createDNS( { :ip => ip, :short => short, :fqdn => fqdn } )
-  #
-  #       @cache.set( hostname , expires_in: expire ) { MiniCache::Data.new( { 'ip': ip, 'short': short, 'long': fqdn } ) }
-  #     end
-
-  #     logger.debug( sprintf( '  ip   %s ', ip ) )
-  #     logger.debug( sprintf( '  host %s ', short ) )
-  #     logger.debug( sprintf( '  fqdn %s ', fqdn ) )
-
       return ip, short, fqdn
-
     end
 
 

@@ -69,29 +69,26 @@ class CMIcinga2 < Icinga2::Client
 #       logger.debug( JSON.pretty_generate( payload ) )
 #       logger.debug( '----------------------------------' )
 
-      if( payload.is_a?( String ) == false )
+      unless( payload.is_a?( String ) )
         dns      = payload.dig('dns')
         tags     = payload.dig('tags')
       end
 
       logger.info( format( '  %s node %s', command , node ) )
 
-      unless( dns.nil? )
-        ip    = dns.dig('ip')
-        short = dns.dig('short')
-        fqdn  = dns.dig('fqdn')
+      if( dns.nil? )
+        ip, short, fqdn = self.ns_lookup(node)
       else
-        ip, short, fqdn = self.ns_lookup(node )
+        ip = dns.dig('ip')
+        short = dns.dig('short')
+        fqdn = dns.dig('fqdn')
       end
 
-      if( @jobs.jobs( command: command, ip: ip, short: short, fqdn: fqdn ) == true )
-        logger.warn( 'we are working on this job' )
+      job_option = { command: command, ip: ip, short: short, fqdn: fqdn }
 
-        # 409 Conflict
-        { status: 409, message: 'we are working on this job' }
-      end
+      return { status: 409, message: 'we are working on this job' } if( @jobs.jobs( job_option ) == true )
 
-      @jobs.add( command: command, ip: ip, short: short, fqdn: fqdn )
+      @jobs.add( job_option )
 
       @cache.set(format( 'dns-%s', node ) , expires_in: 320 ) { MiniCache::Data.new( ip: ip, short: short, long: fqdn ) }
 
@@ -137,13 +134,14 @@ class CMIcinga2 < Icinga2::Client
         logger.debug( result )
         logger.error( result ) if( status != 200 )
 
-        @jobs.del( command: command, ip: ip, short: short, fqdn: fqdn )
+        @jobs.del( job_option )
 
         return { status: status }
+      end
 
       # remove Node
       #
-      elsif( command == 'remove' )
+      if( command == 'remove' )
 
 #         logger.info( format( 'remove checks for node %s', node ) )
 
@@ -151,13 +149,14 @@ class CMIcinga2 < Icinga2::Client
 
         logger.debug( result )
 
-        @jobs.del( command: command, ip: ip, short: short, fqdn: fqdn )
+        @jobs.del( job_option )
 
         return { status: 200 }
+      end
 
       # information about Node
       #
-      elsif( command == 'info' )
+      if( command == 'info' )
 
 #         logger.info( format( 'give information for node %s', node ) )
 
@@ -165,25 +164,64 @@ class CMIcinga2 < Icinga2::Client
 
         logger.debug( result )
 
-        @jobs.del( command: command, ip: ip, short: short, fqdn: fqdn )
+        @jobs.del( job_option )
 
         return { status: 200 }
+      end
+
+      #
+      #
+      if( command == 'update' )
+
+        services     = self.node_information( ip: ip, host: short, fqdn: fqdn )
+        display_name = @database.config( ip: ip, short: short, fqdn: fqdn, key: 'display_name' )
+
+        if( display_name.nil? )
+          display_name = fqdn
+        else
+          display_name = display_name.dig('display_name') || fqdn
+        end
+
+        # TODO: add groups
+        #
+        payload = {}
+        payload = services unless( services.empty? )
+
+        unless( tags.nil? )
+          tags.each do |t,v|
+            payload[t] = v
+          end
+        end
+
+        # TODO
+        # full API support
+        params = {
+          host: fqdn,
+          fqdn: fqdn,
+          display_name: display_name,
+          enable_notifications: @icinga_notifications,
+          vars: payload,
+          merge_vars: true
+        }
+
+        result = self.modify_host(params)
+        status = result.dig('code') || 500
+
+        logger.debug( result )
+        logger.error( result ) if( status != 200 )
+
+        @jobs.del( job_option )
+
+        return { status: status }
+      end
 
       # all others
       #
-      else
+      logger.error( format( 'wrong command detected: %s', command ) )
 
-        logger.error( format( 'wrong command detected: %s', command ) )
+      @jobs.del( job_option )
 
-        @jobs.del( command: command, ip: ip, short: short, fqdn: fqdn )
-
-        return { status: 500, message: format( 'wrong command detected: %s', command ) }
-
-      end
-
-      result = JSON.parse(result) if( result.is_a?(String ) )
-
-      result[:request]    = data
+      return { status: 500, message: format( 'wrong command detected: %s', command ) }
     end
 
 

@@ -7,6 +7,8 @@ class CMIcinga2 < Icinga2::Client
 
     def ns_lookup(name, expire = 120 )
 
+      logger.debug( "ns_lookup( #{name}, #{expire} )" )
+
       # DNS
       #
       hostname = format( 'dns-%s', name )
@@ -18,7 +20,26 @@ class CMIcinga2 < Icinga2::Client
       dns      = @cache.get( hostname )
 
       if( dns.nil? )
-        logger.debug( 'create cached DNS data' )
+
+        logger.debug( 'no cached DNS data' )
+
+        dns = @database.dnsData( short: name, fqdn: name )
+
+        unless( dns.nil? )
+
+          logger.debug( 'use database entries' )
+
+          ip    = dns.dig('ip')
+          short = dns.dig('name')
+          fqdn  = dns.dig('fqdn')
+
+          @cache.set( hostname , expires_in: expire ) { MiniCache::Data.new( ip: ip, short: short, long: fqdn ) }
+
+          return ip, short, fqdn
+        end
+
+        logger.debug( format( 'resolve dns name %s', name ) )
+
         # create DNS Information
         dns      = Utils::Network.resolv( name )
 
@@ -52,7 +73,7 @@ class CMIcinga2 < Icinga2::Client
     end
 
 
-    def node_information(params = {} )
+    def node_information( params )
 
       logger.debug( "node_information( #{params} )" )
 
@@ -181,7 +202,6 @@ class CMIcinga2 < Icinga2::Client
         aws_config.each do |k,v|
           payload["aws_#{k}"] = v
         end
-
       end
 
       payload['team']        = parsed_response( team_config )        if( team_config )
@@ -204,16 +224,15 @@ class CMIcinga2 < Icinga2::Client
       # get data from redis
       cache_key = Storage::RedisClient.cacheKey( host: fqdn, pre: 'result', service: service )
 
-      _redis = @redis.get( cache_key )
-      logger.debug( _redis.class.to_s )
-      _redis = JSON.parse(_redis) if _redis.is_a?(String)
+      redis_data = @redis.get( cache_key )
+      redis_data = JSON.parse(redis_data) if redis_data.is_a?(String)
 
-      unless( _redis.nil? )
-        _bean  = _redis.select { |k,_v| k.dig( mbean ) }
-        _bean  = _bean.first if( _bean.is_a?(Array) )
+      unless( redis_data.nil? )
+        bean_data  = redis_data.select { |k,_v| k.dig( mbean ) }
+        bean_data  = bean_data.first if( bean_data.is_a?(Array) )
 
-        content_server = _bean.dig(mbean,'value') unless( _bean.nil? )
-        content_server.values.first unless( _bean.nil? )
+        content_server = bean_data.dig(mbean,'value') unless( bean_data.nil? )
+        content_server.values.first unless( content_server.nil? )
       end
     end
 

@@ -11,7 +11,6 @@ require 'sinatra/base'
 require 'logger'
 require 'json'
 require 'yaml'
-# require 'fileutils'
 require 'resolve/hostname'
 
 require_relative '../lib/monitoring'
@@ -106,18 +105,24 @@ module Sinatra
     # -----------------------------------------------------------------------------
     # HELP
 
+    get '/health' do
+      status 200
+    end
+
+
+    # -----------------------------------------------------------------------------
+    # HELP
+
     # prints out a little help about our ReST-API
     get '/v2/help' do
 
       send_file File.join( settings.public_folder, 'help' )
-
     end
 
     # currently not supported
     get '/' do
-
-      send_file File.join( settings.public_folder, 'help' )
-
+      redirect '/v2/help'
+      # send_file File.join( settings.public_folder, 'help' )
     end
 
     # -----------------------------------------------------------------------------

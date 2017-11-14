@@ -3,7 +3,7 @@ module ServiceDiscovery
 
   module Discovery
 
-    # discorery application
+    # discover application
     #
     def discover_application( params = {} )
 
@@ -18,7 +18,6 @@ module ServiceDiscovery
         case port
         when 80
           services.push('http-proxy')
-          services.push('http-status')
         when 443
           services.push('https-proxy')
         when 8081
@@ -80,12 +79,13 @@ module ServiceDiscovery
 #           logger.error( response )
 #           logger.error( responseStatus )
 
-          if( response_body != nil )
+          if( response_body.nil? )
+
+            response_body = 'bad status'
+          else
 
             response_body.delete!("\t" )
             response_body.delete!("\n" )
-
-#             logger.debug( response_body )
 
             if( response_body.include?('ConnectException') )
 
@@ -104,9 +104,6 @@ module ServiceDiscovery
 
               response_body = format('jolokia error: jolokia becomes \'%s\' as FQDN! Possibly a DNS or configuration problem', hostname )
             end
-          else
-
-            response_body = 'bad status'
           end
 
           logger.error(
@@ -116,9 +113,7 @@ module ServiceDiscovery
           )
 
           return nil
-
         else
-
           body = response.dig(:message)
 
           unless( body.nil? )
@@ -140,11 +135,8 @@ module ServiceDiscovery
               value = value.dig('ServiceType')
 
               if( value != 'to be defined' )
-
-                logger.debug( "Application are '#{value}'" )
-
+                # logger.debug( "Application are '#{value}'" )
                 services.push( value )
-
                 # clear othe results
                 #
                 runtime = nil
@@ -357,6 +349,105 @@ module ServiceDiscovery
       end
 
       services
+    end
+
+    # get open ports and call 'discover_application'
+    #
+    def discover( params )
+
+      ip    = params.dig(:ip)
+      short = params.dig(:short)
+      fqdn  = params.dig(:fqdn)
+      ports = params.dig(:ports)
+
+      discovered_services = Hash.new
+
+      # TODO
+      # check if @discoveryHost and @discoveryPort setStatus
+      # then use the new
+      # otherwise use the old code
+      start = Time.now
+
+      if( @discovery_host.nil? )
+
+        open = false
+
+        # check open ports and ask for application behind open ports
+        #
+        ports.each do |p|
+
+          open = Utils::Network.portOpen?( fqdn, p )
+
+          logger.debug( sprintf( 'Host: %s | Port: %s   %s', host, p, open ? 'open' : 'closed' ) )
+
+          if( open == true )
+
+            names = discover_application( fqdn: fqdn, port: p )
+
+            # logger.debug( "discovered services: #{names}" )
+
+            unless( names.nil? )
+
+              names.each do |name|
+                discovered_services.merge!( { name => { 'port' => p } } )
+              end
+            end
+          end
+        end
+
+      else
+        # our new port discover service
+        #
+        open_ports = []
+
+        pd = PortDiscovery::Client.new( host: @discovery_host, port: @discovery_port )
+
+        if( pd.isAvailable?() )
+
+          open_ports = pd.post( host: fqdn, ports: ports )
+
+          open_ports.each do |p|
+
+            names = discover_application( fqdn: fqdn, port: p )
+
+            # logger.debug("discovered services: #{names}")
+
+            unless( names.nil? )
+
+              names.each do |name|
+                discovered_services.merge!( { name => { 'port' => p } } )
+              end
+            end
+          end
+        end
+      end
+
+      finish = Time.now
+      logger.info( sprintf( 'runtime for application discovery: %s seconds', (finish - start).round(2) ) )
+
+      # ---------------------------------------------------------------------------------------------------
+
+      discovered_services
+
+    end
+
+    # merge discovered services with additional services
+    #
+    def merge_services( discovered_services, additional_services )
+
+      if( additional_services.is_a?( Array ) && additional_services.count >= 1 )
+
+        additional_services.each do |s|
+          service_data = @service_config.dig( 'services', s )
+          discovered_services[s] ||= service_data.filter('port' ) unless( service_data.nil? )
+        end
+
+        found_services = discovered_services.keys
+
+        logger.info( format( '%d usable services: %s', found_services.count, found_services.to_s ) )
+      end
+
+      discovered_services
     end
 
   end
