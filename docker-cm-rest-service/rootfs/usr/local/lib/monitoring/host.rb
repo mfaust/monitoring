@@ -152,15 +152,15 @@ module Monitoring
         sleep(3)
 
         logger.debug( 'set node status to OFFLINE' )
-        status = @database.setStatus( { :ip => ip, :short => short, :fqdn => fqdn, :status => Storage::MySQL::OFFLINE } )
+        status = @database.set_status( { :ip => ip, :short => short, :fqdn => fqdn, :status => Storage::MySQL::OFFLINE } )
         logger.debug(status)
 
         logger.debug( 'remove configuration' )
-        status  = @database.removeConfig( { :ip => ip, :short => short, :fqdn => fqdn } )
+        status  = @database.remove_config( { :ip => ip, :short => short, :fqdn => fqdn } )
         logger.debug(status)
 
         logger.debug( 'remove dns' )
-        status  = @database.removeDNS( { :ip => ip, :short => short, :fqdn => fqdn } )
+        status  = @database.remove_dns( { :ip => ip, :short => short, :fqdn => fqdn } )
         logger.debug(status)
 
         logger.info( 'done' )
@@ -172,14 +172,14 @@ module Monitoring
 
       # create a valid DNS entry
       #
-      status = @database.createDNS( { :ip => ip, :short => short, :fqdn => fqdn } )
+      status = @database.create_dns( { :ip => ip, :short => short, :fqdn => fqdn } )
 
       # now, we can write an own configiguration per node when we add them, hurray
       #
       if( config.is_a?( Hash ) )
 
         logger.debug( "write configuration: #{config}" )
-        status = @database.createConfig( { :ip => ip, :short => short, :fqdn => fqdn, :data => config } )
+        status = @database.create_config( { :ip => ip, :short => short, :fqdn => fqdn, :data => config } )
       end
 
 
@@ -353,7 +353,7 @@ module Monitoring
       config = @database.config( { :ip => ip, :short => host, :fqdn => fqdn } )
 
   #     logger.debug( 'set node status to DELETE' )
-      status = @database.setStatus( { :ip => ip, :short => host, :fqdn => fqdn, :status => Storage::MySQL::DELETE } )
+      status = @database.set_status( { :ip => ip, :short => host, :fqdn => fqdn, :status => Storage::MySQL::DELETE } )
 
       # insert the DNS data into the payload
       #
@@ -390,7 +390,7 @@ module Monitoring
       logger.info( 'remove node from discovery service' )
       self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-discover', :payload => payload, :prio => 0, :delay => 5 } )
 
-      @database.removeDNS( { :short => host } )
+      @database.remove_dns( { :short => host } )
 
       result['status']    = 200
       result['message']   = 'the message queue is informed ...'
