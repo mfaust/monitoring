@@ -56,7 +56,7 @@ module ServiceDiscovery
 
         if( known_services_count < actually_services_count )
 
-          logger.info( format( '%d new service detected', known_services_count.to_i - actually_services_count.to_i )
+          logger.info( format( '%d new service detected', known_services_count.to_i - actually_services_count.to_i ) )
 
           # step 1
           # update our database
