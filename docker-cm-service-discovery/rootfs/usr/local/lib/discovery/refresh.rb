@@ -36,6 +36,12 @@ module ServiceDiscovery
         # removedEntriesCount   = removedEntries.count
         # newEntriesCount       = newEntries.count
 
+        # logger.info( format( 'currently there are %s services', services_count ) )
+        # logger.debug( services.to_s )
+        #
+        # logger.info( format( 'i known %d services', services_count ) )
+        # logger.debug( services.to_s )
+
         # logger.debug( '------------------------------------------------------------' )
         # logger.info( sprintf( 'known entries %d', known_dataCount ) )
         # logger.info( sprintf( 'actually entries %d', actually_dataCount ) )
@@ -50,7 +56,7 @@ module ServiceDiscovery
 
         if( known_services_count < actually_services_count )
 
-          logger.info( 'new service detected' )
+          logger.info( format( '%d new service detected', known_services_count.to_i - actually_services_count.to_i )
 
           # step 1
           # update our database
@@ -78,6 +84,7 @@ module ServiceDiscovery
       end
     end
 
+
     def known_services( params )
 
       ip    = params.dig(:ip)
@@ -90,8 +97,6 @@ module ServiceDiscovery
       services = discovery_data.keys.sort
 
       services_count   = services.count
-      logger.info( format( 'i known %d services', services_count ) )
-      logger.debug( services.to_s )
 
       { count: services_count, services: services }
     end
@@ -128,9 +133,6 @@ module ServiceDiscovery
 
       services = discovered_services.keys.sort
       services_count = services.count
-
-      logger.info( format( 'currently there are %s services', services_count ) )
-      logger.debug( services.to_s )
 
       { count: services_count, services: services, discovery_data: discovered_services }
     end
