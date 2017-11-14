@@ -253,6 +253,9 @@ reset_hard() {
   service caefeeder-live restart
   service caefeeder-preview restart
 
+  /opt/coremedia/content-management-server-tools/bin/cm bulkpublish -a -u admin -p admin
+  /opt/coremedia/content-management-server-tools/bin/cm bulkpublish -b -u admin -p admin
+
   tail -F /var/log/coremedia/*/*log
 }
 
