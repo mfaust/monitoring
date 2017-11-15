@@ -18,8 +18,8 @@ class CMGrafana
 
         # read the configuration for an customized display name
         #
-        display     = @database.config( { :ip => ip, :short => short, :fqdn => fqdn, :key => 'display_name' } )
-        identifier  = @database.config( { :ip => ip, :short => short, :fqdn => fqdn, :key => 'graphite_identifier' } )
+        display     = @database.config( ip: ip, short: short, fqdn: fqdn, key: 'display_name' )
+        identifier  = @database.config( ip: ip, short: short, fqdn: fqdn, key: 'graphite_identifier' )
 
         if( display != nil && display.dig( 'display_name' ) != nil )
 
@@ -44,7 +44,6 @@ class CMGrafana
         logger.debug( "storage Identifier: #{@storage_identifier}" )
 
         return ip, short, fqdn
-
       end
 
       # creates an Grafana Dashboard for CoreMedia Services
@@ -831,9 +830,9 @@ class CMGrafana
 
       def normalize_template(params = {} )
 
-        template          = params.dig(:template)
+        template           = params.dig(:template)
         service_name       = params.dig(:service_name)
-        description       = params.dig(:description)
+        description        = params.dig(:description)
         normalized_name    = params.dig(:normalized_name)
         grafana_hostname   = params.dig(:grafana_hostname)
         storage_identifier = params.dig(:storage_identifier)
@@ -855,6 +854,7 @@ class CMGrafana
           '%HOST%'                   => short_hostname,
           '%SHORTHOST%'              => grafana_hostname,
           '%STORAGE_IDENTIFIER%'     => storage_identifier,
+          '%ICINGA_IDENTIFIER%'      => storage_identifier.gsub('.','_'),
           '%MLS_STORAGE_IDENTIFIER%' => mls_identifier,
           '%TAG%'                    => short_hostname
         }
@@ -862,7 +862,7 @@ class CMGrafana
         re = Regexp.new( map.keys.map { |x| Regexp.escape(x) }.join( '|' ) )
 
         template.gsub!( re, map )
-        template = self.expand_tags( { :template => template, :additionalTags => @additional_tags } ) if( @additional_tags.count > 0 )
+        template = self.expand_tags( template: template, additionalTags: @additional_tags ) if( @additional_tags.count > 0 )
 
         # now we must recreate *all* panel IDs for an propper import
         template = JSON.parse( template )
