@@ -12,13 +12,13 @@ ENV \
 
 # ---------------------------------------------------------------------------------------
 
+RUN \
+  apk --quiet --no-cache update && \
+  apk --quiet --no-cache upgrade
+
 COPY build /build
 
 RUN \
-  echo "http://${ALPINE_MIRROR}/alpine/${ALPINE_VERSION}/main"       > /etc/apk/repositories && \
-  echo "http://${ALPINE_MIRROR}/alpine/${ALPINE_VERSION}/community" >> /etc/apk/repositories && \
-  apk --no-cache update && \
-  apk --no-cache upgrade && \
   apk add --quiet --no-cache --virtual .build-deps \
     build-base imagemagick-dev ruby-dev ruby-io-console zlib-dev && \
   apk --quiet --no-cache add \
@@ -28,9 +28,15 @@ RUN \
     io-console bundler && \
   cd /build && \
   bundle install --quiet && \
+  for g in $(ls -1 build/*.gem 2> /dev/null) ; do echo $g; gem install --quiet --no-rdoc --no-ri ${g} ; done && \
+  gem uninstall --quiet \
+    io-console bundler && \
   apk del --quiet .build-deps && \
   rm -rf \
     /tmp/* \
+    /build \
+    /root/.bundle \
+    /root/.gem \
     /var/cache/apk/*
 
 COPY rootfs/ /

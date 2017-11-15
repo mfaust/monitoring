@@ -4,8 +4,8 @@ FROM busybox:latest
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
-  VERSION="1707-31.1" \
-  BUILD_DATE="2017-07-31"
+  VERSION="1711" \
+  BUILD_DATE="2017-11-15"
 
 # ---------------------------------------------------------------------------------------
 

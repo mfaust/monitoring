@@ -11,28 +11,28 @@ ENV \
 # ---------------------------------------------------------------------------------------
 
 RUN \
-  apk --no-cache update && \
-  apk --no-cache upgrade
+  apk --quiet --no-cache update && \
+  apk --quiet --no-cache upgrade
 
 COPY build /build
 
 RUN \
   apk add --quiet --no-cache --virtual .build-deps \
     build-base imagemagick-dev mariadb-dev ruby-dev ruby-io-console zlib-dev && \
-  apk --no-cache add \
+  apk add --quiet --no-cache \
     bind-tools curl drill ipcalc jq mariadb-client mariadb-client-libs ruby-irb ruby-io-console ruby-rdoc zlib && \
+  echo 'gem: --no-document' >> /etc/gemrc && \
   gem install --quiet --no-rdoc --no-ri \
-    bundler \
-    io-console && \
+    io-console bundler && \
   cd /build && \
-  bundle install && \
-  count=$(ls -1 /build/*.gem 2> /dev/null) && \
-  if [ ! -z ${count} ] ; then \
-    gem install --no-rdoc --no-ri ${count} ; \
-  fi && \
+  bundle install --quiet && \
+  for g in $(ls -1 build/*.gem 2> /dev/null) ; do echo $g; gem install --no-rdoc --no-ri ${g} ; done && \
+  gem uninstall --quiet \
+    io-console bundler && \
   apk del --quiet .build-deps && \
   rm -rf \
     /tmp/* \
+    /build  \
     /root/.bundle \
     /root/.gem \
     /var/cache/apk/*

@@ -1,5 +1,11 @@
-TYPE := cm-collectd
+
+TYPE := cm-carbon-client
 IMAGE_NAME := docker-${TYPE}
+
+.PHONY: build clean run  shell exec stop package-info history
+
+default: build
+
 
 build:
 	docker build \
@@ -12,15 +18,6 @@ run:
 		--detach \
 		--interactive \
 		--tty \
-		--env MEMCACHE_HOST=localhost \
-		--env MEMCACHE_PORT=11211 \
-		--label com.dnsdock.image=cm-collectd \
-		--label com.dnsdock.alias=cm-collectd \
-		--label com.dnsdock.ttl=30 \
-		--volume /etc/localtime:/etc/localtime:ro \
-		--network=customer_mon \
-		--ip=172.25.0.100 \
-		--hostname=${IMAGE_NAME} \
 		--name=${IMAGE_NAME} \
 		$(IMAGE_NAME)
 
@@ -29,17 +26,6 @@ shell:
 		--rm \
 		--interactive \
 		--tty \
-		--env GRAPHITE_HOST=carbon-relay \
-		--env MEMCACHE_HOST=memcached \
-		--env MEMCACHE_PORT=11211 \
-		--label com.dnsdock.image=cm-collectd \
-		--label com.dnsdock.alias=cm-collectd \
-		--label com.dnsdock.ttl=30 \
-		--volume /etc/localtime:/etc/localtime:ro \
-		--volume ~/src/cm-xlabs/monitoring/environments/customer/share/resolv.conf:/etc/resolv.conf:ro \
-		--volume ~/src/cm-xlabs/monitoring/environments/customer/data/monitoring:/var/cache/monitoring \
-		--network=customer_mon \
-		--ip=172.25.0.100 \
 		--hostname=${IMAGE_NAME} \
 		--name=${IMAGE_NAME} \
 		$(IMAGE_NAME)

@@ -5,51 +5,46 @@ MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
   VERSION="1711" \
-  BUILD_DATE="2017-11-09" \
+  BUILD_DATE="2017-11-15" \
   DASHBOARD="coremedia" \
+  ICINGA2_GEM_TYPE="local" \
   ICINGA2_GEM_VERSION="1.0"
 
 EXPOSE 3030
 
 # ---------------------------------------------------------------------------------------
 
+RUN \
+  apk --quiet --no-cache update && \
+  apk --quiet --no-cache upgrade
+
 COPY build /build
 
 RUN \
-  apk --no-cache update && \
-  apk --no-cache upgrade && \
-  apk --no-cache add \
-    build-base \
-    git \
-    jq \
-    openssl-dev \
-    ruby-dev \
-    openssl-dev \
-    supervisor && \
+  apk add --quiet --no-cache --virtual .build-deps \
+    build-base git openssl-dev  ruby-dev && \
+  apk add --quiet --no-cache \
+    bind-tools drill jq ruby-irb supervisor && \
+  gem install --quiet --no-rdoc --no-ri \
+    io-console bundler && \
+  for g in $(ls -1 build/*.gem 2> /dev/null) ; do echo $g; gem install --quiet --no-rdoc --no-ri ${g} ; done && \
   cd /opt && \
   smashing new ${DASHBOARD} && \
   rm -f /opt/${DASHBOARD}/jobs/twitter* && \
   rm -f /opt/${DASHBOARD}/dashboards/* && \
   cd ${DASHBOARD} && \
   sed -i "/gem 'twitter'/d" Gemfile && \
-  #
-  cd /opt/${DASHBOARD} && \
-  count=$(ls -1 /build/*.gem 2> /dev/null | tail -n1) && \
-  if [ ! -z ${count} ] ; then \
-    gem install --no-rdoc --no-ri ${count} ; \
-  else \
+  echo "gem 'puma', '~> 3.10'" >> Gemfile && \
+  if [ "${ICINGA2_GEM_TYPE}" == "stable" ] ; then \
     echo "gem 'icinga2', '~> ${ICINGA2_GEM_VERSION}'" >> Gemfile ; \
   fi && \
-  #
-  bundle update && \
-  apk del --purge \
-    build-base \
-    git \
-    ruby-dev \
-    openssl-dev && \
+  bundle update --quiet && \
+  apk del --quiet .build-deps && \
   rm -rf \
     /tmp/* \
     /build \
+    /root/.bundle \
+    /root/.gem \
     /var/cache/apk/* \
     /usr/lib/ruby/gems/current/cache/*
 
