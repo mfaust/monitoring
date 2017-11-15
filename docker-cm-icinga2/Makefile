@@ -1,5 +1,5 @@
 
-TYPE := cm-icinga-client
+TYPE := cm-icinga2
 IMAGE_NAME := docker-${TYPE}
 
 .PHONY: build clean run  shell exec stop package-info history
@@ -24,8 +24,7 @@ run:
 		--volume /etc/localtime:/etc/localtime:ro \
 		--hostname=${IMAGE_NAME} \
 		--name=${IMAGE_NAME} \
-		$(IMAGE_NAME) \
-		icinga-client.rb
+		$(IMAGE_NAME)
 
 shell:
 	docker run \
@@ -35,8 +34,6 @@ shell:
 		--volume /etc/localtime:/etc/localtime:ro \
 		--hostname=${IMAGE_NAME} \
 		--name=${IMAGE_NAME} \
-		--env ICINGA_CERT_SERVICE='{ "ba": { "user":"admin", "password":"admin" },"api": { "port": "5665", "user":"root", "password":"icinga" },"server": "cm-icinga2-master","port": 4567,"path": "/"}' \
-		--entrypoint '' \
 		$(IMAGE_NAME) \
 		/bin/sh
 
@@ -62,5 +59,6 @@ package-info:
 		apk -v info | sort
 
 history:
-	docker \
-		history ${IMAGE_NAME}
+	docker history \
+		${IMAGE_NAME}
+

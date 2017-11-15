@@ -1,5 +1,10 @@
+
 TYPE := cm-graphite-client
 IMAGE_NAME := docker-${TYPE}
+
+.PHONY: build clean run  shell exec stop package-info history
+
+default: build
 
 build:
 	docker build \

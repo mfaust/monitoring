@@ -6,20 +6,19 @@ MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 ENV \
   VERSION="1711" \
   BUILD_DATE="2017-11-13" \
-  ALPINE_MIRROR="mirror1.hs-esslingen.de/pub/Mirrors" \
-  ALPINE_VERSION="v3.6" \
   TERM=xterm \
+  ICINGA2_GEM_TYPE="local" \
   ICINGA2_GEM_VERSION="1.0"
 
 # ---------------------------------------------------------------------------------------
 
+RUN \
+  apk --quiet --no-cache update && \
+  apk --quiet --no-cache upgrade
+
 COPY build /build
 
 RUN \
-  echo "http://${ALPINE_MIRROR}/alpine/${ALPINE_VERSION}/main"       > /etc/apk/repositories && \
-  echo "http://${ALPINE_MIRROR}/alpine/${ALPINE_VERSION}/community" >> /etc/apk/repositories && \
-  apk update --quiet --no-cache && \
-  apk upgrade --quiet --no-cache && \
   apk add --quiet --no-cache --virtual .build-deps \
     build-base git ruby-dev ruby-rdoc && \
   apk --quiet --no-cache add \
@@ -27,14 +26,14 @@ RUN \
   echo 'gem: --no-document' >> /etc/gemrc && \
   gem install --quiet --no-rdoc --no-ri \
     io-console bundler && \
-  count=$(ls -1 /build/*.gem 2> /dev/null | tail -n1) && \
-  if [ ! -z ${count} ] ; then \
-    gem install --quiet --no-rdoc --no-ri ${count} ; \
-  else \
-    echo "gem 'icinga2', '~> ${ICINGA2_GEM_VERSION}'" >> /build/Gemfile ; \
-  fi && \
   cd /build && \
   bundle install --quiet && \
+  for g in $(ls -1 build/*.gem 2> /dev/null) ; do echo $g; gem install --quiet --no-rdoc --no-ri ${g} ; done && \
+  if [ "${ICINGA2_GEM_TYPE}" == "stable" ] ; then \
+    echo "gem 'icinga2', '~> ${ICINGA2_GEM_VERSION}'" >> Gemfile ; \
+  fi && \
+  gem uninstall --quiet \
+    io-console bundler && \
   apk del --quiet .build-deps && \
   rm -rf \
     /opt/* \
