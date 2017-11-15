@@ -22,13 +22,13 @@ RUN \
   apk add --quiet --no-cache --virtual .build-deps \
     build-base git ruby-dev ruby-rdoc && \
   apk --quiet --no-cache add \
-    bind-tools curl drill mariadb-dev jq libressl-dev ruby-irb &&\
+    bind-tools curl drill mariadb-dev mariadb-client-libs jq libressl-dev ruby-irb &&\
   echo 'gem: --no-document' >> /etc/gemrc && \
   gem install --quiet --no-rdoc --no-ri \
     io-console bundler && \
   cd /build && \
   bundle install --quiet && \
-  for g in $(ls -1 build/*.gem 2> /dev/null) ; do echo $g; gem install --quiet --no-rdoc --no-ri ${g} ; done && \
+  for g in $(ls -1 /build/*.gem 2> /dev/null) ; do echo $g; gem install --quiet --no-rdoc --no-ri ${g} ; done && \
   if [ "${ICINGA2_GEM_TYPE}" == "stable" ] ; then \
     echo "gem 'icinga2', '~> ${ICINGA2_GEM_VERSION}'" >> Gemfile ; \
   fi && \
