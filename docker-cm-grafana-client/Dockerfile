@@ -20,12 +20,12 @@ RUN \
   apk add --quiet --no-cache --virtual .build-deps \
     build-base imagemagick-dev ruby-dev mariadb-dev && \
   apk add --quiet --no-cache \
-    bind-tools drill mariadb-client ruby-irb && \
+    bind-tools drill mariadb-client mariadb-client-libs ruby-irb && \
   gem install --quiet --no-rdoc --no-ri \
     io-console bundler && \
   cd /build && \
   bundle install --quiet && \
-  for g in $(ls -1 build/*.gem 2> /dev/null) ; do echo $g; gem install --quiet --no-rdoc --no-ri ${g} ; done && \
+  for g in $(ls -1 /build/*.gem 2> /dev/null) ; do echo $g; gem install --quiet --no-rdoc --no-ri ${g} ; done && \
   gem uninstall --quiet \
     io-console bundler && \
   apk del --quiet .build-deps && \

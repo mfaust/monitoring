@@ -27,7 +27,7 @@ RUN \
     bind-tools drill jq ruby-irb supervisor && \
   gem install --quiet --no-rdoc --no-ri \
     io-console bundler && \
-  for g in $(ls -1 build/*.gem 2> /dev/null) ; do echo $g; gem install --quiet --no-rdoc --no-ri ${g} ; done && \
+  for g in $(ls -1 /build/*.gem 2> /dev/null) ; do echo $g; gem install --quiet --no-rdoc --no-ri ${g} ; done && \
   cd /opt && \
   smashing new ${DASHBOARD} && \
   rm -f /opt/${DASHBOARD}/jobs/twitter* && \

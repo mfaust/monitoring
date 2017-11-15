@@ -25,7 +25,7 @@ RUN \
     io-console bundler && \
   cd /build && \
   bundle install --quiet && \
-  for g in $(ls -1 build/*.gem 2> /dev/null) ; do echo $g; gem install --quiet --no-rdoc --no-ri ${g} ; done && \
+  for g in $(ls -1 /build/*.gem 2> /dev/null) ; do echo $g; gem install --quiet --no-rdoc --no-ri ${g} ; done && \
   gem uninstall --quiet \
     io-console bundler && \
   apk del --quiet .build-deps && \
