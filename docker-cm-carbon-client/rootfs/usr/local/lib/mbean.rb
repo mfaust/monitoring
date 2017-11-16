@@ -166,17 +166,18 @@ module MBean
       logger.debug( { :host => host, :pre => 'result', :service => service } )
       cacheKey = Storage::RedisClient.cacheKey( { :host => host, :pre => 'result', :service => service } )
 
-      for y in 1..10
+      (1..15).each { |x|
 
-        result = @redis.get( cacheKey )
+        redis_data = @redis.get( cacheKey )
 
-        if( result != nil )
-          data = { service => result }
-          break
+        if( redis_data.nil? )
+          logger.debug(sprintf('wait for discovery data for node \'%s\' ... %d', host, x))
+          sleep(3)
         else
-          sleep( 3 )
+          data = { service => redis_data }
+          break
         end
-      end
+      }
 
       # ---------------------------------------------------------------------------------------
 

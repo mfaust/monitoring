@@ -4,7 +4,7 @@
         "height": "100px",
         "panels": [
           {
-            "content": "<h3><center><bold><a href=\"/grafana/dashboard/db/%HOST%-mongodb\">MongoDB</a></bold></center></h3>",
+            "content": "<h3><center><bold><a href=\"/grafana/dashboard/db/%SHORTHOST%-mongodb\">MongoDB</a></bold></center></h3>",
             "editable": true,
             "error": false,
             "id": 1,
