@@ -1,5 +1,6 @@
 
 require 'yaml'
+require 'erb'
 
 class CMGrafana < Grafana::Client
 
@@ -8,6 +9,9 @@ class CMGrafana < Grafana::Client
     public
 
     def read_config_file( params )
+
+      raise ArgumentError.new(format('only Hash are allowed (%s given)', params.class.to_s )) unless( params.is_a?(Hash) )
+      raise ArgumentError.new('missing settings') if( params.size.zero? )
 
       logger.debug( "read_config_file( #{params} )" )
 
@@ -20,14 +24,11 @@ class CMGrafana < Grafana::Client
       if( !config_file.nil? && File.file?(config_file) )
 
         begin
-
-          config = YAML.load_file( config_file )
-
-        rescue Exception
-
-          logger.error( 'wrong result (no yaml)')
-          logger.error( "#{$!}" )
-
+          template = ERB.new File.new(config_file).read
+          config = YAML.load template.result(binding)
+        rescue Exception => e
+          puts( 'wrong result (no yaml)')
+          puts(e)
           raise( 'no valid yaml File' )
         end
       else

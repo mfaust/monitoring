@@ -45,7 +45,7 @@ services:
 
   database:
     restart: always
-    image: bodsch/docker-mysql:1711.1
+    image: bodsch/docker-mysql:1711.2
     container_name: database
     hostname: database
     ports:
