@@ -105,9 +105,9 @@ reset_hard() {
   sleep 10s
 
 
-#  /opt/coremedia/content-management-server-tools/bin/cm publishall -a -cq "NOT BELOW PATH '/Home'" -t 1 http://${HOSTNAME}:40180/coremedia/ior admin admin http://${HOSTNAME}:40280/coremedia/ior admin admin
-#  /opt/coremedia/content-management-server-tools/bin/cm serverimport -r -u admin -p admin --no-validate-xml -t 4 /var/tmp/coremedia/test-data/content
-#  sleep 4s
+  /opt/coremedia/content-management-server-tools/bin/cm publishall -a -cq "NOT BELOW PATH '/Home'" -t 1 http://${HOSTNAME}:40180/coremedia/ior admin admin http://${HOSTNAME}:40280/coremedia/ior admin admin
+  /opt/coremedia/content-management-server-tools/bin/cm serverimport -r -u admin -p admin --no-validate-xml -t 4 /var/tmp/coremedia/test-data/content
+  sleep 4s
 
   /opt/coremedia/content-management-server-tools/bin/cm runlevel -u admin -p admin
   /opt/coremedia/master-live-server-tools/bin/cm runlevel -u admin -p admin
