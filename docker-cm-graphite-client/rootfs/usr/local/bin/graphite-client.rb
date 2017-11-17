@@ -13,10 +13,10 @@ require_relative '../lib/graphite'
 
 # -----------------------------------------------------------------------------
 
-graphite_host      = ENV.fetch('GRAPHITE_HOST', nil )
-graphite_port      = ENV.fetch('GRAPHITE_PORT', nil )
+graphite_host      = ENV.fetch('GRAPHITE_HOST', 'nginx' )
+graphite_port      = ENV.fetch('GRAPHITE_PORT', 80 )
 graphite_http_port = ENV.fetch('GRAPHITE_HTTP_PORT', nil )
-graphite_path      = ENV.fetch('GRAPHITE_PATH', nil )
+graphite_path      = ENV.fetch('GRAPHITE_PATH', '/graphite' )
 mq_host            = ENV.fetch('MQ_HOST', nil )
 mq_port            = ENV.fetch('MQ_PORT', nil )
 mq_queue           = ENV.fetch('MQ_QUEUE', nil )

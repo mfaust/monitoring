@@ -6,7 +6,8 @@ MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 ENV \
   VERSION="1711" \
   BUILD_DATE="2017-11-13" \
-  TERM=xterm
+  TERM=xterm \
+  TZ='Europe/Berlin'
 
 # ---------------------------------------------------------------------------------------
 

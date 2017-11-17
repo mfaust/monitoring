@@ -318,10 +318,6 @@ services:
     hostname: cm-dashing
     environment:
       ICINGA_HOST: cm-icinga2-master
-      ICINGA_API_USER: dashing
-      ICINGA_API_PASSWORD: dashing
-      ICINGAWEB_URL: /icinga
-      PROXY_PATH: /dashing
       ICINGA_CERT_SERVICE: '{
         "ba": { "user":"admin", "password":"admin" },
         "api": { "user":"root", "password":"icinga" },
@@ -345,8 +341,6 @@ services:
     container_name: cm-rest-service
     hostname: cm-rest-service
     environment:
-      TZ: 'Europe/Berlin'
-      MYSQL_HOST: database
       MYSQL_ROOT_PASS: database.pass
     depends_on:
       - data
@@ -371,9 +365,7 @@ services:
     container_name: cm-service-discover
     hostname: cm-service-discover
     environment:
-      TZ: 'Europe/Berlin'
       REFRESH_ENABLED: 'true'
-      INTERVAL: 20
     depends_on:
       - data
       - jolokia
@@ -401,9 +393,6 @@ services:
     build: ../../docker-cm-data-collector
     container_name: cm-data-collector
     hostname: cm-data-collector
-    environment:
-      TZ: 'Europe/Berlin'
-      INTERVAL: 45
     depends_on:
       - data
       - jolokia
@@ -432,7 +421,6 @@ services:
     container_name: cm-carbon-client
     hostname: cm-carbon-client
     environment:
-      TZ: 'Europe/Berlin'
       # USE ONLY WITH AND EXTERNAL CARBON-WRITER!
       GRAPHITE_HOST: carbon
     depends_on:
@@ -453,11 +441,6 @@ services:
     build: ../../docker-cm-grafana-client
     container_name: cm-grafana-client
     hostname: cm-grafana-client
-    environment:
-      TZ: 'Europe/Berlin'
-      GRAFANA_HOST: nginx
-      SERVER_CONFIG_FILE: /etc/grafana_config.yml
-      RUN_DELAY: 30
     depends_on:
       - data
       - beanstalkd
@@ -483,11 +466,6 @@ services:
     build: ../../docker-cm-graphite-client
     container_name: cm-graphite-client
     hostname: cm-graphite-client
-    environment:
-      TZ: 'Europe/Berlin'
-      GRAPHITE_HOST: nginx
-      GRAPHITE_HTTP_PORT: 80
-      GRAPHITE_PATH: /graphite
     depends_on:
       - data
       - beanstalkd
@@ -507,7 +485,6 @@ services:
     container_name: cm-icinga-client
     hostname: cm-icinga-client
     environment:
-      TZ: 'Europe/Berlin'
       ICINGA_CERT_SERVICE: '{
         "ba": { "user":"admin", "password":"admin" },
         "api": { "user":"root", "password":"icinga" },
@@ -516,10 +493,7 @@ services:
         "path": "/"
       }'
       ICINGA_HOST: cm-icinga2-master
-      ICINGA_API_USER: root
-      ICINGA_API_PASSWORD: icinga
-      ENABLE_NOTIFICATIONS: 'true'
-      RUN_DELAY: 30
+      # ENABLE_NOTIFICATIONS: 'true'
     depends_on:
       - data
       - beanstalkd

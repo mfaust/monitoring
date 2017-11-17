@@ -31,7 +31,7 @@ mysqlPassword       = ENV.fetch('DISCOVERY_DATABASE_PASS', 'discovery')
 interval            = ENV.fetch('INTERVAL'               , 40 )
 delay               = ENV.fetch('RUN_DELAY'              , 30 )
 
-server_config_file  = ENV.fetch('SERVER_CONFIG_FILE'     , '/etc/grafana/server_config.yml' )
+server_config_file  = ENV.fetch('SERVER_CONFIG_FILE'     , '/etc/grafana_config.yml' )
 
 config = {
   :grafana => {

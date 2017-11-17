@@ -8,7 +8,9 @@ ENV \
   BUILD_DATE="2017-11-15" \
   DASHBOARD="coremedia" \
   ICINGA2_GEM_TYPE="local" \
-  ICINGA2_GEM_VERSION="1.0"
+  ICINGA2_GEM_VERSION="1.0" \
+  term=xterm \
+  TZ='Europe/Berlin'
 
 EXPOSE 3030
 

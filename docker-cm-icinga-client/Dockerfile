@@ -7,6 +7,7 @@ ENV \
   VERSION="1711" \
   BUILD_DATE="2017-11-13" \
   TERM=xterm \
+  TZ='Europe/Berlin' \
   ICINGA2_GEM_TYPE="local" \
   ICINGA2_GEM_VERSION="1.0"
 

@@ -9,6 +9,7 @@ ENV \
   VERSION="1711" \
   BUILD_DATE="2017-11-06" \
   TERM=xterm \
+  TZ='Europe/Berlin' \
   GOPATH=/build \
   GOROOT=/usr/lib/go \
   HOSTS=${HOSTS:-}
