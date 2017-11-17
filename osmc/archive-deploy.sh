@@ -2,9 +2,28 @@
 
 # set -e
 
-
-
 HOSTNAME="osmc.local"
+
+disable_ipv6() {
+
+  sed -i '/^GRUB_CMDLINE_LINUX/d' /etc/default/grub
+  echo 'GRUB_CMDLINE_LINUX="rd.lvm.lv=centos_osmc/root rd.lvm.lv=centos_osmc/swap rhgb ipv6.disable=1"' >> /etc/default/grub
+
+  grub2-mkconfig -o /boot/grub2/grub.cfg
+
+  systemctl stop ip6tables
+  systemctl disable ip6tables
+
+  sed -i '/^IPV6/d' /etc/sysconfig/network-scripts/ifcfg-*
+
+  echo "net.ipv6.conf.default.disable_ipv6 = 1" > /etc/sysctl.d/99-no-ipv6.conf
+  echo "net.ipv6.conf.all.disable_ipv6 = 1" > /etc/sysctl.d/99-no-ipv6.conf
+
+  echo "alias net-pf-10 off" > /etc/modprobe.d/disableip6.conf
+  echo "alias ipv6 off" >> /etc/modprobe.d/disableip6.conf
+  echo "options ipv6 disable=1" >> /etc/modprobe.d/disableip6.conf
+}
+
 
 prepare() {
 
@@ -102,8 +121,11 @@ wait_for_ior() {
     sleep 5s
 
     curl --fail http://${HOSTNAME}:${port}/coremedia/ior 2> /dev/null
+    ecode="${?}"
 
-    [ $? -eq 0 ] && break
+    echo "${ecode}"
+
+    [ $ecode -eq 0 ] && break
 
     sleep 10s
     RETRY=$(expr ${RETRY} - 1)
@@ -130,7 +152,7 @@ deploy() {
       --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie" \
       "http://download.oracle.com/otn-pub/java/jdk/8u152-b16/aa0333dd3019491ca4f6ddbe78cdb6d0/jdk-8u152-linux-x64.rpm"
 
-    yum localinstall *.rpm
+    yum -y localinstall *.rpm
   fi
 
   rm -f *.rpm
@@ -143,13 +165,24 @@ deploy() {
   fi
 
   [ -d /var/tmp/deploy ] || mkdir /var/tmp/deploy
+  [ -d /var/tmp/coremedia ] || mkdir /var/tmp/coremedia
+
+
+  mkdir -p /var/tmp/coremedia/test-data/content/
+
+  [ -f /tmp/cms9-blueprint-workspace-content-blobs.zip ] && cp /tmp/cms9-blueprint-workspace-content-blobs.zip /var/tmp/coremedia/
+
+  cd /var/tmp/coremedia/
+  [ -f cms9-blueprint-workspace-content-blobs.zip ] && unzip -o cms9-blueprint-workspace-content-blobs.zip
+  mv workspace/modules/extensions/corporate/test-data/content/__blob  /var/tmp/coremedia/test-data/content/
+  cp -u workspace/modules/extensions/am/test-data/content/__blob/*    /var/tmp/coremedia/test-data/content/__blob/
+
 
   cd /var/tmp/deploy
 
   rm -rf *
 
   [ -f /tmp/deployment-archive.zip ] && cp -a /tmp/deployment-archive.zip /var/tmp/deploy/
-  [ -f /tmp/cms9-blueprint-workspace-content-blobs.zip ] && cp -a /tmp/cms9-blueprint-workspace-content-blobs.zip /var/tmp/coremedia/
 
   [ -f /tmp/cms.zip ] && cp -a /tmp/cms.zip /var/tmp/deploy/
   [ -f /tmp/mls.zip ] && cp -a /tmp/mls.zip /var/tmp/deploy/
@@ -159,16 +192,13 @@ deploy() {
 
   # jetzt gehts loooooo ... hos
   [ -f deployment-archive.zip ] && unzip -o deployment-archive.zip
-  [ -f cms9-blueprint-workspace-content-blobs.zip ] && unzip -o cms9-blueprint-workspace-content-blobs.zip
 
   [ -f /tmp/cms-1710.json ]  && cp -a /tmp/cms-1710.json  /var/tmp/deploy/chef-repo/nodes/
+  [ -f /tmp/cms-1710-deploy.json ]  && cp -a /tmp/cms-1710.json  /var/tmp/deploy/chef-repo/nodes/
   [ -f /tmp/osmc-deploy.sh ] && cp -a /tmp/osmc-deploy.sh /var/tmp/deploy/osmc-deploy.sh
+  [ -f /tmp/osmc-content-deploy.sh ] && cp -a /tmp/osmc-deploy.sh /var/tmp/deploy/osmc-content-deploy.sh
 
-  mv ./workspace/modules/extensions/corporate/test-data/content/__blob  test-data/content/
-  cp -u ./workspace/modules/extensions/am/test-data/content/__blob/*  test-data/content/__blob/
-
-
-  chmod +x /var/tmp/deploy/osmc-deploy.sh
+  chmod +x /var/tmp/deploy/*.sh
 
   /var/tmp/deploy/osmc-deploy.sh
 
@@ -189,23 +219,25 @@ deploy() {
   wait_for_ior 40180
   wait_for_ior 40280
 
-  sleep 10s
+  sleep 1m
 
-  /opt/coremedia/content-management-server-tools/bin/cm publishall -a -cq "NOT BELOW PATH '/Home'" -t 1 http://${HOSTNAME}:40180/coremedia/ior admin admin http://${HOSTNAME}:40280/coremedia/ior admin admin
-  /opt/coremedia/content-management-server-tools/bin/cm serverimport -r -u admin -p admin --no-validate-xml -t 4 /var/tmp/coremedia/test-data/content
+  /var/tmp/deploy/osmc-content-deploy.sh
 
-  /opt/coremedia/content-management-server-tools/bin/cm runlevel -u admin -p admin
-  /opt/coremedia/master-live-server-tools/bin/cm runlevel -u admin -p admin
-  /opt/coremedia/replication-live-server-tools/bin/cm runlevel -u admin -p admin
-  /opt/coremedia/replication-live-server-tools/bin/cm runlevel -u admin -p admin -r online -g 2
-  /opt/coremedia/caefeeder-preview-tools/bin/cm resetcaefeeder reset
-  /opt/coremedia/caefeeder-live-tools/bin/cm resetcaefeeder reset
-
-  service caefeeder-live restart
-  service caefeeder-preview restart
-
-  /opt/coremedia/content-management-server-tools/bin/cm bulkpublish -a -u admin -p admin
-  /opt/coremedia/content-management-server-tools/bin/cm bulkpublish -b -u admin -p admin
+#   /opt/coremedia/content-management-server-tools/bin/cm publishall -a -cq "NOT BELOW PATH '/Home'" -t 1 http://${HOSTNAME}:40180/coremedia/ior admin admin http://${HOSTNAME}:40280/coremedia/ior admin admin
+#   /opt/coremedia/content-management-server-tools/bin/cm serverimport -r -u admin -p admin --no-validate-xml -t 4 /var/tmp/coremedia/test-data/content
+#
+#   /opt/coremedia/content-management-server-tools/bin/cm runlevel -u admin -p admin
+#   /opt/coremedia/master-live-server-tools/bin/cm runlevel -u admin -p admin
+#   /opt/coremedia/replication-live-server-tools/bin/cm runlevel -u admin -p admin
+#   /opt/coremedia/replication-live-server-tools/bin/cm runlevel -u admin -p admin -r online -g 2
+#   /opt/coremedia/caefeeder-preview-tools/bin/cm resetcaefeeder reset
+#   /opt/coremedia/caefeeder-live-tools/bin/cm resetcaefeeder reset
+#
+#   service caefeeder-live restart
+#   service caefeeder-preview restart
+#
+#   /opt/coremedia/content-management-server-tools/bin/cm bulkpublish -a -u admin -p admin
+#   /opt/coremedia/content-management-server-tools/bin/cm bulkpublish -b -u admin -p admin
 
 
 
