@@ -4,9 +4,9 @@ CoreMedia carbon client
 
 # short Description
 
-Reads data from `redis`, manipulate and normalized these data and pushe them to the `carbon` Service.
+Reads data from `redis`, normalized data. calculate some values and build compared data between services (Sequencenumbers between MLS and RLS) and push the result to the `carbon` Service.
 
-this service runs every `INTERVAL` seconds and has no requirements to an message-queue.
+This service runs every `INTERVAL` seconds and has no requirements to an message-queue.
 
 
 # Environment Variables

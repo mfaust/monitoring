@@ -55,14 +55,7 @@ module Monitoring
 
       hostData = self.checkAvailablility?( host )
 
-      if( hostData == false )
-
-        return JSON.pretty_generate({
-          :status  => 400,
-          :message => 'Host are not available (DNS Problem)'
-        })
-
-      end
+      return JSON.pretty_generate( status: 400, message: 'Host are not available (DNS Problem)' ) if( hostData == false )
 
       logger.debug( JSON.pretty_generate( hostData ) )
 
@@ -112,11 +105,7 @@ module Monitoring
 
       if( force == false && alreadyInMonitoring == true )
         logger.warn( "node '#{host}' is already in monitoring" )
-
-        return JSON.pretty_generate( {
-          'status'  => 200,
-          'message' => "node '#{host}' is already in monitoring"
-        })
+        return JSON.pretty_generate( status: 200, message: "node '#{host}' is already in monitoring" )
       end
 
       # insert the DNS data into the payload
@@ -126,9 +115,8 @@ module Monitoring
         payload['dns'] = hostData
       end
 
-      if( payload.is_a?(String) && payload.size == 0 )
-        payload = { 'dns' => hostData }
-      end
+      payload = { 'dns' => hostData } if( payload.is_a?(String) && payload.size == 0 )
+      payload['timestamp'] = Time.now.to_i
 
       payload = JSON.generate(payload)
 
@@ -141,26 +129,26 @@ module Monitoring
         logger.info( 'force mode ...' )
 
         logger.info( 'create message for remove node from discovery service' )
-        self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-discover', :payload => payload, :prio => 1, :ttr => 1, :delay => 0 } )
+        self.messageQueue( cmd: 'remove', node: host, queue: 'mq-discover', payload: payload, prio: 1, ttr: 1, delay: 0 )
 
         logger.info( 'create message for remove grafana dashboards' )
-        self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-grafana', :payload => payload, :prio => 1, :ttr => 1, :delay => 0 } )
+        self.messageQueue( cmd: 'remove', node: host, queue: 'mq-grafana', payload: payload, prio: 1, ttr: 1, delay: 0 )
 
         logger.info( 'create message for remove icinga checks and notifications' )
-        self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-icinga', :payload => payload, :prio => 1, :ttr => 1, :delay => 0 } )
+        self.messageQueue( cmd: 'remove', node: host, queue: 'mq-icinga', payload: payload, prio: 1, ttr: 1, delay: 0 )
 
         sleep(3)
 
         logger.debug( 'set node status to OFFLINE' )
-        status = @database.set_status( { :ip => ip, :short => short, :fqdn => fqdn, :status => Storage::MySQL::OFFLINE } )
+        status = @database.set_status( ip: ip, short: short, fqdn: fqdn, status: Storage::MySQL::OFFLINE )
         logger.debug(status)
 
         logger.debug( 'remove configuration' )
-        status  = @database.remove_config( { :ip => ip, :short => short, :fqdn => fqdn } )
+        status  = @database.remove_config( ip: ip, short: short, fqdn: fqdn )
         logger.debug(status)
 
         logger.debug( 'remove dns' )
-        status  = @database.remove_dns( { :ip => ip, :short => short, :fqdn => fqdn } )
+        status  = @database.remove_dns( ip: ip, short: short, fqdn: fqdn )
         logger.debug(status)
 
         logger.info( 'done' )
@@ -172,34 +160,26 @@ module Monitoring
 
       # create a valid DNS entry
       #
-      status = @database.create_dns( { :ip => ip, :short => short, :fqdn => fqdn } )
+      status = @database.create_dns( ip: ip, short: short, fqdn: fqdn )
 
       # now, we can write an own configiguration per node when we add them, hurray
       #
       if( config.is_a?( Hash ) )
-
         logger.debug( "write configuration: #{config}" )
-        status = @database.create_config( { :ip => ip, :short => short, :fqdn => fqdn, :data => config } )
+        status = @database.create_config( ip: ip, short: short, fqdn: fqdn, data: config )
       end
 
-
       logger.info( 'add node to discovery service' )
-      self.messageQueue( { :cmd => 'add', :node => host, :queue => 'mq-discover', :payload => payload, :prio => 1, :delay => 2 + delay.to_i } )
+      self.messageQueue( cmd: 'add', node: host, queue: 'mq-discover', payload: payload, prio: 1, delay: 2 + delay.to_i )
 
-      logger.info( 'annotation for create' )
-  #     @annotations.annotation( host, { 'command' => 'create', 'argument' => 'node', 'config' => config } )
-      annotation(
-        host: host,
-        dns: { ip: ip, short: host, fqdn: fqdn },
-        payload: { command: 'create', argument: 'node', config: config }
-      )
-  #    self.addAnnotation( host, { 'command' => 'create', 'argument' => 'node', 'config' => config } )
+#       logger.info( 'annotation for create' )
+#       annotation(
+#         host: host,
+#         dns: { ip: ip, short: host, fqdn: fqdn },
+#         payload: { command: 'create', argument: 'node', config: config }
+#       )
 
-      result['status']    = 200
-      result['message']   = 'the message queue is informed ...'
-
-      return JSON.pretty_generate( result )
-
+      return JSON.pretty_generate( status: 200, message: 'the message queue is informed ...' )
     end
 
     #  - http://localhost/api/v2/host
@@ -214,18 +194,9 @@ module Monitoring
       short   = request.keys.include?('short')
 
       logger.debug( data )
-
       result  = Hash.new()
 
-      if( data == nil || data.count == 0 )
-
-        return JSON.pretty_generate({
-          :status  => 204,
-          :message => 'no hosts in monitoring found'
-        })
-      end
-
-
+      return JSON.pretty_generate( status: 204, message: 'no hosts in monitoring found') if( data == nil || data.count == 0 )
 
       if( host.to_s != '' )
 
@@ -234,7 +205,6 @@ module Monitoring
         if ( h != nil )
 
           if( short == true )
-
             result[:host] = host
           else
             result[host.to_s] ||= {}
@@ -242,30 +212,23 @@ module Monitoring
           end
           status = 200
         else
-
           status = 204
         end
 
       else
-
         if( data != nil )
-
           if( short == true )
-
             result[:hosts] = data.keys
           else
             result = data
           end
-
           status = 200
         end
-
       end
 
       result[:status] = status
 
       return JSON.pretty_generate( result )
-
     end
 
 
@@ -361,7 +324,8 @@ module Monitoring
       payload = Hash.new
       payload = {
         'dns'   => hostData,
-        'force' => true
+        'force' => true,
+        'timestamp' => Time.now.to_i
       }
 
       payload = JSON.generate(payload)
@@ -382,13 +346,13 @@ module Monitoring
   #    self.addAnnotation( host, { 'command' => 'remove', 'argument' => 'node', 'config' => config } )
 
       logger.info( 'remove icinga checks and notifications' )
-      self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-icinga', :payload => payload, :prio => 0 } )
+      self.messageQueue( cmd: 'remove', node: host, queue: 'mq-icinga', payload: payload, prio: 0 )
 
       logger.info( 'remove grafana dashboards' )
-      self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-grafana', :payload => payload, :prio => 0 } )
+      self.messageQueue( cmd: 'remove', node: host, queue: 'mq-grafana', payload: payload, prio: 0 )
 
       logger.info( 'remove node from discovery service' )
-      self.messageQueue( { :cmd => 'remove', :node => host, :queue => 'mq-discover', :payload => payload, :prio => 0, :delay => 5 } )
+      self.messageQueue( cmd: 'remove', node: host, queue: 'mq-discover', payload: payload, prio: 0, delay: 5 )
 
       @database.remove_dns( { :short => host } )
 

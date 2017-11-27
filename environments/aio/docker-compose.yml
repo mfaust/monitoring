@@ -75,6 +75,7 @@ services:
       - mon
     extra_hosts:
       osmc.local: 192.168.122.60
+      blueprint-box: 192.168.252.100
 
   memcached:
     restart: always
@@ -259,6 +260,7 @@ services:
       - mon
     extra_hosts:
       osmc.local: 192.168.122.60
+      blueprint-box: 192.168.252.100
 
   icingaweb2:
     restart: always
@@ -356,6 +358,7 @@ services:
       - mon
     extra_hosts:
       osmc.local: 192.168.122.60
+      blueprint-box: 192.168.252.100
 
   # single service
   # use MQ to process data
@@ -385,6 +388,7 @@ services:
       - mon
     extra_hosts:
       osmc.local: 192.168.122.60
+      blueprint-box: 192.168.252.100
 
   # single service
   # use MQ to process data
@@ -412,6 +416,7 @@ services:
       - mon
     extra_hosts:
       osmc.local: 192.168.122.60
+      blueprint-box: 192.168.252.100
 
   # single service
   # use MQ to process data
@@ -505,4 +510,6 @@ services:
       - /share/etc/icinga_server_config.yml:/etc/icinga_server_config.yml
     networks:
       - mon
-
+    extra_hosts:
+      osmc.local: 192.168.122.60
+      blueprint-box: 192.168.252.100

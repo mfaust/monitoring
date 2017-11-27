@@ -5,7 +5,7 @@ module Monitoring
 
   module Annotations
 
-    def annotation( params ) #host, payload )
+    def annotation( params )
 
       logger.debug( "annotation( #{params} )" )
 
@@ -18,16 +18,12 @@ module Monitoring
       host    = params.dig(:host)
       payload = params.dig(:payload)
 
-      #logger.debug( payload.class.to_s )
-
       payload = JSON.parse(payload) if( payload.is_a?(String) )
       payload = payload.deep_symbolize_keys
 
       logger.debug( "payload: #{payload}" )
 
-      if( dns.nil? )
-        ip, short, fqdn = ns_lookup( host )
-      end
+      ip, short, fqdn = ns_lookup( host ) if( dns.nil? )
 
       logger.debug( "ip  : #{ip}" )
       logger.debug( "fqdn: #{fqdn}" )
@@ -38,9 +34,7 @@ module Monitoring
       result  = Hash.new
       hash    = Hash.new
 
-      if( host.size == 0 && payload.size == 0 )
-        return JSON.pretty_generate( status: 404, message: 'missing arguments for annotations' )
-      end
+      return JSON.pretty_generate( status: 404, message: 'missing arguments for annotations' ) if( host.size == 0 && payload.size == 0 )
 
       payload         = JSON.parse( payload ) if( payload.is_a?( String ) )
 
@@ -52,6 +46,7 @@ module Monitoring
       description  = payload.dig(:description)
       tags         = payload.dig(:tags)  || []
       config       = payload.dig(:config)
+      timestamp    = payload.dig(:timestamp) || Time.now.to_i
 
       if( command == 'create' || command == 'remove' )
   #     example:
@@ -68,24 +63,25 @@ module Monitoring
         tags        = []
 
         params = {
-          :cmd     => command,
-          :node    => host,
-          :queue   => 'mq-graphite',
-          :payload => {
-            :timestamp => Time.now().to_i,
-            :config    => config,
-            :fqdn      => fqdn,
-            :node      => host,
-            :dns       => {:ip => ip, :short => short, :fqdn => fqdn }
+          cmd: command,
+          node: host,
+          queue: 'mq-graphite',
+          payload: {
+            timestamp: timestamp,
+            config: config,
+            fqdn: fqdn,
+            node: host,
+            dns: { ip: ip, short: short, fqdn: fqdn }
           },
-          :prio => 0
+          prio: 0
         }
 
         logger.debug(params)
 
         self.messageQueue(params)
+      end
 
-      elsif( command == 'loadtest' && ( argument == 'start' || argument == 'stop' ) )
+      if( command == 'loadtest' && ( argument == 'start' || argument == 'stop' ) )
 
   #     example:
   #     {
@@ -107,7 +103,7 @@ module Monitoring
           :node    => host,
           :queue   => 'mq-graphite',
           :payload => {
-            :timestamp => Time.now().to_i,
+            :timestamp => timestamp,
             :config    => config,
             :fqdn      => fqdn,
             :argument  => argument,
@@ -115,8 +111,9 @@ module Monitoring
           },
           :prio => 0
         })
+      end
 
-      elsif( command == 'deployment' )
+      if( command == 'deployment' )
 
   #     example:
   #     {
@@ -133,7 +130,7 @@ module Monitoring
           :node => host,
           :queue => 'mq-graphite',
           :payload => {
-            :timestamp => Time.now().to_i,
+            :timestamp => timestamp,
             :config    => config,
             :fqdn      => fqdn,
             :message   => message,
@@ -142,8 +139,9 @@ module Monitoring
           },
           :prio => 0
         })
+      end
 
-      else
+
   #     example:
   #     {
   #       "command": "",
@@ -159,7 +157,7 @@ module Monitoring
           :node => host,
           :queue => 'mq-graphite',
           :payload => {
-            :timestamp => Time.now().to_i,
+            :timestamp => timestamp,
             :config    => config,
             :fqdn      => fqdn,
             :message   => message,
@@ -170,16 +168,10 @@ module Monitoring
           :prio => 0
         })
 
-      end
-
       status    = 200
       message   = 'annotation succesfull created'
 
-      return JSON.pretty_generate( {
-        :status  => status,
-        :message => message
-      } )
-
+      return JSON.pretty_generate( status: status, message: message )
     end
 
   end
