@@ -58,24 +58,12 @@ class CMGrafana
     mysql_user           = settings.dig(:mysql, :user)
     mysql_password       = settings.dig(:mysql, :password)
 
-    mq_settings = {
-      :beanstalkHost  => mq_host,
-      :beanstalkPort  => mq_port,
-      :beanstalkQueue => @mq_queue
-    }
-
-    mysql_settings = {
-      :mysql => {
-        :host     => mysql_host,
-        :user     => mysql_user,
-        :password => mysql_password,
-        :schema   => mysql_schema
-      }
-    }
+    mq_settings    = { beanstalkHost: mq_host, beanstalkPort: mq_port, beanstalkQueue: @mq_queue }
+    mysql_settings = { mysql: { host: mysql_host, user: mysql_user, password: mysql_password, schema: mysql_schema } }
 
     super( settings )
 
-    @debug  = false
+    @debug  = true
     @logger = logger
 
     version       = CMGrafana::Version::VERSION
@@ -94,7 +82,7 @@ class CMGrafana
 
     begin
 
-      @logged_in = login( { :user => @user, :password => @password } )
+      @logged_in = login( user: @user, password: @password )
     rescue => e
 
       if( server_config_file.nil? )
@@ -123,20 +111,18 @@ class CMGrafana
 
           @user      = admin_login_name
           @password  = admin_password
-          @logged_in = login( { :user => @user, :password => @password, :max_retries => 10 } )
+          @logged_in = login( user: @user, password: @password, max_retries: 10, sleep_between_retries: 8 )
         end
       end
 
     end
 
-    # cfg = configure_server( config_file: server_config_file ) unless( server_config_file.nil? )
-
-    @redis        = Storage::RedisClient.new( { :redis => { :host => redis_host } } )
-    @mbean        = MBean::Client.new( { :redis => @redis } )
+    @redis        = Storage::RedisClient.new( redis: { host: redis_host } )
+    @mbean        = MBean::Client.new( redis: @redis )
     @cache        = MiniCache::Store.new()
     @jobs         = JobQueue::Job.new()
-    @mq_consumer  = MessageQueue::Consumer.new(mq_settings )
-    @mq_producer  = MessageQueue::Producer.new(mq_settings )
+    @mq_consumer  = MessageQueue::Consumer.new( mq_settings )
+    @mq_producer  = MessageQueue::Producer.new( mq_settings )
     @database     = Storage::MySQL.new( mysql_settings )
 
   end

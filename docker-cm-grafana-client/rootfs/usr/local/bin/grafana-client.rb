@@ -28,10 +28,27 @@ mysqlHost           = ENV.fetch('MYSQL_HOST'             , 'database')
 mysqlSchema         = ENV.fetch('DISCOVERY_DATABASE_NAME', 'discovery')
 mysqlUser           = ENV.fetch('DISCOVERY_DATABASE_USER', 'discovery')
 mysqlPassword       = ENV.fetch('DISCOVERY_DATABASE_PASS', 'discovery')
-interval            = ENV.fetch('INTERVAL'               , 40 )
-delay               = ENV.fetch('RUN_DELAY'              , 30 )
+interval            = ENV.fetch('INTERVAL'               , '40s' )
+delay               = ENV.fetch('RUN_DELAY'              , '30s' )
 
 server_config_file  = ENV.fetch('SERVER_CONFIG_FILE'     , '/etc/grafana_config.yml' )
+
+# -----------------------------------------------------------------------------
+# validate durations for the Scheduler
+
+def validate_scheduler_values( duration, default )
+  raise ArgumentError.new(format('wrong type. \'duration\' must be an String, given %s', duration.class.to_s )) unless( duration.is_a?(String) )
+  raise ArgumentError.new(format('wrong type. \'default\' must be an Float, given %s', default.class.to_s )) unless( default.is_a?(Float) )
+  i = Rufus::Scheduler.parse( duration.to_s )
+  i = default.to_f if( i < default.to_f )
+  Rufus::Scheduler.to_duration( i )
+end
+
+interval         = validate_scheduler_values( interval, 40.0 )
+delay_config     = validate_scheduler_values( delay, 30.0 )
+delay            = validate_scheduler_values( delay, 40.0 )
+
+# -----------------------------------------------------------------------------
 
 config = {
   :grafana => {
@@ -78,22 +95,18 @@ g = CMGrafana.new( config )
 
 cfg_scheduler = Rufus::Scheduler.singleton
 
-cfg_scheduler.every( '60m', :first_in => delay.to_i ) do
+cfg_scheduler.every( '60m', :first_in => delay_config ) do
 
   g.configure_server( config_file: server_config_file ) unless( server_config_file.nil? )
   cfg_scheduler.shutdown(:kill)
 end
 
-
-
-
 scheduler = Rufus::Scheduler.new
 
-scheduler.every( interval, :first_in => delay.to_i + 5 ) do
+scheduler.every( interval, :first_in => delay, :overlap => false ) do
 
   g.queue()
 end
-
 
 scheduler.every( 5 ) do
 

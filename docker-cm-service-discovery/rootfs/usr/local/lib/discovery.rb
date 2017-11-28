@@ -22,7 +22,6 @@ require_relative 'discovery/version'
 require_relative 'discovery/tools'
 require_relative 'discovery/queue'
 require_relative 'discovery/discovery'
-require_relative 'discovery/annotations'
 require_relative 'discovery/refresh'
 
 # -------------------------------------------------------------------------------------------------------------------
@@ -35,7 +34,6 @@ module ServiceDiscovery
     include ServiceDiscovery::Tools
     include ServiceDiscovery::Queue
     include ServiceDiscovery::Discovery
-    include ServiceDiscovery::Annotations
     include ServiceDiscovery::Refresh
 
     def initialize( settings = {} )
@@ -398,7 +396,8 @@ module ServiceDiscovery
       logger.debug( "options: #{options}" )
 
       logger.info( 'create message for an create annotation' )
-      annotation( host: host, dns: { ip: ip, short: host, fqdn: fqdn }, payload: { command: 'create', argument: 'node', config: options } )
+      # annotation( host: host, dns: { ip: ip, short: host, fqdn: fqdn }, payload: { command: 'create', argument: 'node', config: options } )
+      send_message( cmd: 'create', node: host, queue: 'mq-graphite', payload: options, prio: 1, ttr: 5, delay: 0 )
 
       logger.info( 'create message for grafana to create dashboards' )
       send_message( cmd: 'add', node: host, queue: 'mq-grafana', payload: options, prio: 10, ttr: 15, delay: 20 )

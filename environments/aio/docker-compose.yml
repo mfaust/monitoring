@@ -35,7 +35,7 @@ services:
 
   beanstalkd:
     restart: always
-    image: bodsch/docker-beanstalkd:1710.1
+    image: bodsch/docker-beanstalkd:1.10
     container_name: beanstalkd
     hostname: beanstalkd
     volumes:
@@ -45,7 +45,7 @@ services:
 
   database:
     restart: always
-    image: bodsch/docker-mysql:1711.2
+    image: bodsch/docker-mysql:1711.4
     container_name: database
     hostname: database
     ports:
@@ -79,7 +79,7 @@ services:
 
   memcached:
     restart: always
-    image: bodsch/docker-memcached:1710.1
+    image: bodsch/docker-memcached:1711.1
     container_name: memcached
     hostname: memcached
     volumes:
@@ -90,7 +90,7 @@ services:
 
   redis:
     restart: always
-    image: bodsch/docker-redis:1710.1
+    image: bodsch/docker-redis:1711.1
     container_name: redis
     hostname: redis
     ports:
@@ -140,7 +140,7 @@ services:
 
   carbon:
     restart: always
-    image: bodsch/docker-go-carbon:1710.1
+    image: bodsch/docker-go-carbon:1711.1
     container_name: carbon
     hostname: carbon
     depends_on:
@@ -157,7 +157,7 @@ services:
 
   graphite:
     restart: always
-    image: bodsch/docker-graphite:1.1.0-r1
+    image: bodsch/docker-graphite:1.1.0-r2
     container_name: graphite
     hostname: graphite
     environment:
@@ -174,7 +174,7 @@ services:
 
   grafana:
     restart: always
-    image: bodsch/docker-grafana:4.6.2-r2
+    image: bodsch/docker-grafana:4.6.2-r3
     container_name: grafana
     hostname: grafana
     environment:
@@ -264,7 +264,7 @@ services:
 
   icingaweb2:
     restart: always
-    image: bodsch/docker-icingaweb2:2.4.2
+    image: bodsch/docker-icingaweb2:2.5.0
     container_name: icingaweb2
     hostname: icingaweb2
     environment:
@@ -302,7 +302,7 @@ services:
 
   markdown-service:
     restart: always
-    image: bodsch/docker-markdown-service:1.0.0
+    image: bodsch/docker-markdown-service:1.1.0
     container_name: markdown-service
     hostname: markdown-service
     depends_on:
@@ -446,6 +446,8 @@ services:
     build: ../../docker-cm-grafana-client
     container_name: cm-grafana-client
     hostname: cm-grafana-client
+    environment:
+      GRAFANA_HOST: nginx
     depends_on:
       - data
       - beanstalkd
@@ -460,7 +462,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ./logs:/var/log
       - /share/usr/local/share/templates:/usr/local/share/templates
-      - /share/etc/grafana/grafana_config.yml:/etc/grafana_config.yml
+      - /share/etc/grafana_config.yml:/etc/grafana_config.yml
     networks:
       - mon
 

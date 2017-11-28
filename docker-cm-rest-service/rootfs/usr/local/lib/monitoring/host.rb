@@ -110,13 +110,13 @@ module Monitoring
 
       # insert the DNS data into the payload
       #
-      if( payload.is_a?(String) && payload.size != 0 )
-        payload = JSON.parse(payload)
-        payload['dns'] = hostData
-      end
+#       if( payload.is_a?(String) && payload.size != 0 )
+#         payload = JSON.parse(payload)
+#         payload[:dns] = hostData
+#       end
 
-      payload = { 'dns' => hostData } if( payload.is_a?(String) && payload.size == 0 )
-      payload['timestamp'] = Time.now.to_i
+      payload = { dns: hostData } if( payload.is_a?(String) && payload.size == 0 )
+      payload[:timestamp] = Time.now.to_i
 
       payload = JSON.generate(payload)
 
@@ -313,19 +313,19 @@ module Monitoring
 
       # read the customized configuration
       #
-      config = @database.config( { :ip => ip, :short => host, :fqdn => fqdn } )
+      config = @database.config( ip: ip, short: host, fqdn: fqdn )
 
   #     logger.debug( 'set node status to DELETE' )
-      status = @database.set_status( { :ip => ip, :short => host, :fqdn => fqdn, :status => Storage::MySQL::DELETE } )
+      status = @database.set_status( ip: ip, short: host, fqdn: fqdn, status: Storage::MySQL::DELETE )
 
       # insert the DNS data into the payload
       #
 
       payload = Hash.new
       payload = {
-        'dns'   => hostData,
-        'force' => true,
-        'timestamp' => Time.now.to_i
+        dns: hostData,
+        force: true,
+        timestamp: Time.now.to_i
       }
 
       payload = JSON.generate(payload)
@@ -360,7 +360,6 @@ module Monitoring
       result['message']   = 'the message queue is informed ...'
 
       return JSON.pretty_generate( result )
-
     end
 
 

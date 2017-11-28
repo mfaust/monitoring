@@ -78,7 +78,7 @@ module Monitoring
 
         logger.debug(params)
 
-        self.messageQueue(params)
+        return self.messageQueue(params)
       end
 
       if( command == 'loadtest' && ( argument == 'start' || argument == 'stop' ) )
@@ -98,7 +98,7 @@ module Monitoring
         description = nil
         tags        = []
 
-        self.messageQueue({
+        return self.messageQueue({
           :cmd     => 'loadtest',
           :node    => host,
           :queue   => 'mq-graphite',
@@ -125,7 +125,8 @@ module Monitoring
   #       ]
   #     }
         description = nil
-        self.messageQueue({
+
+        return self.messageQueue({
           :cmd => 'deployment',
           :node => host,
           :queue => 'mq-graphite',
@@ -152,7 +153,7 @@ module Monitoring
   #         "git-0000000"
   #       ]
   #     }
-        self.messageQueue({
+        return self.messageQueue({
           :cmd => 'general',
           :node => host,
           :queue => 'mq-graphite',
