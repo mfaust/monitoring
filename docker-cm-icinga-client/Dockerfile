@@ -1,11 +1,11 @@
 
-FROM alpine:3.6
+FROM alpine:3.7
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
-  VERSION="1711" \
-  BUILD_DATE="2017-11-13" \
+  VERSION="1712" \
+  BUILD_DATE="2017-12-04" \
   TERM=xterm \
   TZ='Europe/Berlin' \
   ICINGA2_GEM_TYPE="local" \
@@ -27,7 +27,7 @@ RUN \
   apk add --quiet --no-cache --virtual .build-deps \
     build-base git ruby-dev ruby-rdoc && \
   apk --quiet --no-cache add \
-    bind-tools curl drill mariadb-dev mariadb-client-libs jq libressl-dev ruby-irb &&\
+    bind-tools curl drill mariadb-dev mariadb-client-libs jq libressl-dev ruby-irb yajl-tools &&\
   echo 'gem: --no-document' >> /etc/gemrc && \
   gem install --quiet --no-rdoc --no-ri \
     io-console bundler && \

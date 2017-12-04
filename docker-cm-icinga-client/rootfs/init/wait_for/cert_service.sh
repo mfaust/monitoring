@@ -5,7 +5,7 @@ wait_for_icinga_cert_service() {
 
   # the CERT-Service API use an Basic-Auth as first Authentication *AND*
   # use an own API Userr
-  if [ ${ICINGA_CERT_SERVICE} == true ]
+  if [ "${USE_CERT_SERVICE}" == "true" ]
   then
 
     echo " [i] waiting for our cert-service on '${ICINGA_CERT_SERVICE_SERVER}' to come up"
