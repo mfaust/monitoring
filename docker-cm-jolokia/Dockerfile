@@ -6,8 +6,8 @@ MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 ARG HOSTS
 
 ENV \
-  VERSION="1711" \
-  BUILD_DATE="2017-11-06" \
+  VERSION="1712" \
+  BUILD_DATE="2017-12-04" \
   TERM=xterm \
   TZ='Europe/Berlin' \
   GOPATH=/build \

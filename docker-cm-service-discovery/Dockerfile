@@ -1,11 +1,11 @@
 
-FROM alpine:3.6
+FROM alpine:3.7
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
-  VERSION="1711" \
-  BUILD_DATE="2017-11-14" \
+  VERSION="1712" \
+  BUILD_DATE="2017-12-04" \
   TERM=xterm \
   TZ='Europe/Berlin'
 
