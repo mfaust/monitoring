@@ -11,23 +11,16 @@ cd ~/cm-monitoring-toolbox/monitoring/docker-cm-data/rootfs/data/etc/
 
  - `cm-application.yaml`
  
- - `cm-icinga2.yaml`
- 
  - `cm-monitoring.yaml`
  
  - `cm-service.yaml`
 
-
-
-
+ - `grafana_config.yaml`
+ 
+ - `cm-icinga2.yaml`
 
 
 ## Dateien
-
-### *`cm-monitoring.yaml`*
-
-Basiskonfiguration des Monitoringstacks.
-
 
 ### *`cm-service.yaml`*
 
@@ -49,21 +42,20 @@ Alle Services werden als Liste ausgeführt und haben folgenden Aufbau:
     template: cae
 ```
 
-Hier ist folgendes zu beachten:
-
 | Paramerter       | Beschreibung |
 | :---------       | :----------- |
 | `cae-live-1`     | Servicename, der durch das Service Discovery ermittelt wird. Der Servicename wird ausserdem benutzt um ein Grafana Dashboard anzulegen. |
-| `port`           | der RMI Port, unter denen die JMX-Anfragen gestellt werden. **ACHTUNG** Der Port wird durch das Service Discovery gesetzt! |
-| `port_http`      | sollte der Server eine *IOR* oder einen *HTTP* Port anbieten, wird dieser hier angegeben. **ACHTUNG** Der Port wird durch das Service Discovery gesetzt! |
+| `description`    | Einfache Beschreibung des Services |
+| `port`           | der RMI Port, unter denen die JMX-Anfragen gestellt werden.<br>**ACHTUNG** Der Port wird durch das Service Discovery gesetzt! |
+| `port_http`      | sollte der Server eine *IOR* oder einen *HTTP* Port anbieten, wird dieser hier angegeben.<br>**ACHTUNG** Der Port wird durch das Service Discovery gesetzt! |
 | `cap-connection` | wird auf `true` gesetzt, wenn dieser Service eine *Cap-Connection* besitzt |
 | `uapi_cache`     | wird auf `true` gesetzt, wenn dieser Service ein *UAPI Cache* besitzt |
 | `blob_cache`     | wird auf `true` gesetzt, wenn dieser Service ein *Blob Cache* besitzt |
 | `ior`            | wird auf `true` gesetzt, wenn dieser Service eine *IOR* besitzt |
 | `runlevel`       | wird auf `true` gesetzt, wenn dieser Service ein *Runlevel* besitzt (alle Contentserver) |
 | `license`        | wird auf `true` gesetzt, wenn dieser Service eine *Lizenz* benötigt (alle Contentserver) |
-| `application`    | Eine Liste mit Application mbeans. Diese Liste wird nach dem Service Discovery mit Daten aus `cm-application.yaml` zusammengeführt. |
-| `template`       | Sollte eine Applikation gefunden werden, die vom standard CoreMedia Namensschema abweicht, kann ich ein alternatives Template angegeben werden. |
+| `application`    | Eine Liste mit *application beans*.<br>Diese Liste wird nach dem Service Discovery mit Daten aus `cm-application.yaml` zusammengeführt. |
+| `template`       | Sollte eine Applikation gefunden werden, die vom Standard CoreMedia Namensschema abweicht, kann hier ein alternatives Template angegeben werden. |
 
 Die Paramerter `port_http`, `cap-connection`, `uapi_cache`, `blob_cache`, `ior`, `runlevel` und `license` werden zusätzlich für **Icinga** Checks benötigt.
 
@@ -97,8 +89,8 @@ Die Solr-Cores können beliebig erweitert werden. Im Beispiel wurden nur die Sta
 
 ### *`cm-application.yaml`*
 
-Beinhaltet alle bekannten mbeans und deren Attribute für die CoreMedia Services.
-Diese werden mit den erkannten Services zusammengeführt und für das weitere Monitoring benutzt.
+Beinhaltet aktuell alle bekannten und sinnvollen JMX beans sowie deren Attribute für die CoreMedia Services.
+Diese werden mit denen duch die Service Discovery erkannten Services zusammengeführt und für das weitere Monitoring benutzt.
 
 Der Aufbau ist einfach gehalten und entspricht folgenden Schema:
 
@@ -113,17 +105,68 @@ Der Aufbau ist einfach gehalten und entspricht folgenden Schema:
         attribute: TotalStartedThreadCount,ThreadCount,DaemonThreadCount,PeakThreadCount
 ```
 
-Dabei gibt es einige zusätzliche Servicesdefinitionen:
-
-* `tomcat`
-* `contentserver`
-* `caches`
-
-Während der Service `tomcat` mit allen Services (ausser `mysql`, `postgres`, `mongodb`) explizit zusammen geführt wird, werden die Services
-`contentserver`, `solr`, und `caches` nur mit denjenigen zusammengeführt, die diese in der `cm-service.yaml` unter `application` angegeben haben.
-
-
+| Paramerter       | Beschreibung |
+| :---------       | :----------- |
+| `tomcat`         | Der Service Name |
+| `description`    | Eine kurze Beschreibung des Service Names |
+| `metrics`        | |
+| `description`    | Eine kurze Beschreibung des folgenen mbeans |
+| `mbean`          | der komplette mbean Name |
+| `attribute`      | Eine Liste mit mbean Attributen. Wenn `attribute` nicht angegeben wird, werden alle Attribute ausgelesen  |
 
 
+Es können wir eigene Gruppierungen von mbeans Vorgenommen werden. Diese können dann in der `cm-service.yml` unter `application` angegeben werden.
+ 
+
+Während der Service `tomcat` mit allen (Java) Services explizit zusammen geführt wird, werden nur die konfigurierten Services,
+welche unter `application` in der `cm-service.yml` angegeben wurden zusammen geführt.
+
+Beispiel:
+```bash
+  studio:
+    description: Studio
+    port: 41099
+    cap_connection: true
+    uapi_cache: true
+    blob_cache: true
+    heap_cache: true
+    application:
+    - caches-studio
+    - caches-ecommerce
+```
+
+Eine spezielle Besonderheit gibt es bei den `solr` Services.
+```bash
+    solr:
+      description: Solr Standard Checks for Core %CORE%
+      metrics:
+      - mbean: solr/%CORE%:type=/replication,id=org.apache.solr.handler.ReplicationHandler
+        attribute: errors,isMaster,isSlave,requests,medianRequestTime,indexVersion,indexSize,generation
+```
+
+Die Variable `%CORE%` wird mir den Cores aus `cm-service.yml` erweitert.
 
 
+### *`cm-icinga2.yaml`*
+
+Hier können Schwellwerte für eine Alarmierung hinterlegt werden
+
+```bash
+blob-cache:
+  usePercent: true
+  warning: 95
+  critical: 98
+```
+
+
+### *`grafana_config.yml`*
+
+Über diese Konfigurationsdatei wird Grafana über dessen API konfiguriert.
+Das betrift das anlegen von lokalen Benutzern bzw. von Datasources. Ebenso kann hier über der Organisation 
+oder die Zugangsdaten des Admin-Users geändert werden.
+Desweiteren kann man darüber statische Dashboards importieren lassen.
+
+
+### *`icinga_server_config.yml`*
+
+Über diese Konfiguration kann z.Z. ausschließlich `contact-groups` und `contact-users` angelegt werden.

@@ -134,8 +134,7 @@ Im Verzeichniss `environments` befinden sich 3 verschieden Monitoringumgebungen:
 
 Um den Startvorgang zu beschleunigen, werden pre-compiled OpenSource Container von [Docker Hub](https://hub.docker.com/r/bodsch/) benutzt.
 
-
-
+---
 
 ### Links
 

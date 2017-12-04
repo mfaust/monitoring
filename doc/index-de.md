@@ -51,14 +51,14 @@ Wenn im default vhost eine `vhosts.json` Datein vorhanden ist, dann werden alle 
 
 1. [Installation](./de/installation.md)
 
-2. [Configuration](./de/konfiguration.md)
+2. [Konfiguration](./de/konfiguration.md)
 
-3. [API](./api.md)
+3. [API](./de/api.md)
 
-4. [JMX](./jmx.md)
+4. [JMX](./de/jmx.md)
 
-5. [Operation](./operations.md)
+5. [Bereitschaft](./de/operations.md)
 
-6. [Service Discovery](./service-discovery.md)
+6. [Service Discovery](./de/service-discovery.md)
 
-7. [Screenshots](./screenshots.md)
+7. [Screenshots](./de/screenshots.md)
