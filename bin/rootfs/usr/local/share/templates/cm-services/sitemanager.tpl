@@ -1,3 +1,0 @@
-# SITE-MANAGER
-SITE_MANAGER=%PORT%
-JMX_%PORT%="${standardJMX} "
