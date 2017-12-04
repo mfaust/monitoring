@@ -18,69 +18,76 @@ Je nach Distribution muß dazu eine bereits bestehende Docker Installation entfe
 
 **Debian**
 
-    apt-get remove \
-      docker \
-      docker-engine
+```bash
+apt-get remove \
+  docker \
+  docker-engine
 
-    apt-get install \
-      apt-transport-https \
-      ca-certificates \
-      curl \
-      python-software-properties
+apt-get install \
+  apt-transport-https \
+  ca-certificates \
+  curl \
+  python-software-properties
 
-    curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
+curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
 
-    add-apt-repository \
-      "deb [arch=amd64] https://download.docker.com/linux/debian \
-      $(lsb_release -cs) \
-      stable"
+add-apt-repository \
+  "deb [arch=amd64] https://download.docker.com/linux/debian \
+  $(lsb_release -cs) \
+  stable"
 
-    apt-get update
+apt-get update
 
-    apt-get install docker-ce
+apt-get install docker-ce
+```
 
 **CentOS**
 
-    yum remove \
-      docker \
-      docker-common \
-      container-selinux \
-      docker-selinux \
-      docker-engine
+```bash
+yum remove \
+  docker \
+  docker-common \
+  container-selinux \
+  docker-selinux \
+  docker-engine
 
-    yum install -y \
-      yum-utils
+yum install -y \
+  yum-utils
 
-    yum-config-manager \
-      --add-repo \
-      https://download.docker.com/linux/centos/docker-ce.repo
+yum-config-manager \
+  --add-repo \
+  https://download.docker.com/linux/centos/docker-ce.repo
 
-    yum makecache \
-      fast
+yum makecache \
+  fast
 
-    yum install \
-      docker-ce
-
+yum install \
+  docker-ce
+```
 
 ### Docker-Compose
 
 Neben dem eigentlichen `docker` benötigen wir noch das `docker-compose` binary.
 Dieses bietet eine einfach Möglichkeit, viele Container und deren Abhängigkeiten einfach zu orchestrieren.
 
-    COMPOSE_VERSION="1.16.1"
-    URL="https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)"
+```bash
+COMPOSE_VERSION="1.16.1"
+URL="https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)"
 
-    curl -L ${URL} > /usr/bin/docker-compose_${COMPOSE_VERSION}
+curl -L ${URL} > /usr/bin/docker-compose_${COMPOSE_VERSION}
 
-    ln -s /usr/bin/docker-compose_${COMPOSE_VERSION} /usr/bin/docker-compose
+ln -s /usr/bin/docker-compose_${COMPOSE_VERSION} /usr/bin/docker-compose
+```
 
 ### Post-Installation (optional)
 
 Wenn ein spezieller User `docker` benutzen soll, benötigen wir noch eine entsprechende Gruppe und fügen diesen User dier Gruppe hinzu:
 
-    groupadd docker
+```bash
+groupadd docker
 
-    usermod -aG docker $USER
+usermod -aG docker $USER
+```
 
 Damit wäre die Basisvoraussetzung erfüllt.
 
@@ -89,36 +96,40 @@ Damit wäre die Basisvoraussetzung erfüllt.
 
 Als nächstes muß die CoreMedia Monitoring-Toolbox installiert werden.
 
-    cd ~
-    mkdir cm-monitoring-toolbox
-    cd cm-monitoring-toolbox
+```bash
+cd ~
+mkdir cm-monitoring-toolbox
+cd cm-monitoring-toolbox
 
-    git clone https://github.com/cm-xlabs/monitoring.git
+git clone https://github.com/cm-xlabs/monitoring.git
+```
 
 Nach dem erfolgreichen clonen sollte ungefähr diese Verzeichnissstruktur vorhanden sein:
 
-      monitoring
-        ├── bin
-        ├── docker-cm-carbon-client
-        ├── docker-cm-data
-        ├── docker-cm-data-collector
-        ├── docker-cm-external-discover
-        ├── docker-cm-grafana-client
-        ├── docker-cm-graphite-client
-        ├── docker-cm-icinga-client
-        ├── docker-cm-rest-service
-        ├── docker-cm-service-discovery
-        ├── documentation
-        ├── environments
-        │    ├── aio
-        │    │    ├── docker-compose.yml
-        │    │    └── environments.yml
-        │    ├── data-capture
-        │    └── data-visualization
-        │
-        ├── incubator
-        ├── praese
-        └── tools
+```bash
+monitoring
+  ├── bin
+  ├── docker-cm-carbon-client
+  ├── docker-cm-data
+  ├── docker-cm-data-collector
+  ├── docker-cm-external-discover
+  ├── docker-cm-grafana-client
+  ├── docker-cm-graphite-client
+  ├── docker-cm-icinga-client
+  ├── docker-cm-rest-service
+  ├── docker-cm-service-discovery
+  ├── documentation
+  ├── environments
+  │    ├── aio
+  │    │    ├── docker-compose.yml
+  │    │    └── environments.yml
+  │    ├── data-capture
+  │    └── data-visualization
+  │
+  ├── incubator
+  ├── praese
+  └── tools
+```
 
 Alle Verzeichnisse, die mit `docker-cm` beginnen, beinhalten die komplette CoreMedia Logik bezüglich des Monitorings, oder sind spezielle Clients für OpenSource Komponenten.
 Im Verzeichniss `environments` befinden sich 3 verschieden Monitoringumgebungen:
@@ -133,17 +144,19 @@ Wir versuchen die Toolbox ständig weiter zu entwickeln und nehmen Wünsche und 
 Daher kan es vorkommen, dass der *master* Branch ein einem instabilen Zustand ist.
 Um einen stabilen Zweig Entwicklungstand zu ermöglichen werden diese mit einem *Tag* versehen
 
-    $ git tag
-    1707-30
-    1708-31
-    1710
-    cosmos-1708-31
-
+```bash
+$ git tag
+1707-30
+1708-31
+1710
+cosmos-1708-31
+```
 Um einen dieser stabilen Tags nutzen zu können, muß man diesen im git auschecken
 
-    $ git checkout tags/1710
-    Note: checking out 'tags/1710'.
-
+```bash
+$ git checkout tags/1710
+Note: checking out 'tags/1710'.
+```
 Damit wäre die Installation aller Komponenten abgeschlossen.
 
 

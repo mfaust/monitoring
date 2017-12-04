@@ -11,7 +11,7 @@ In der Regel ist die Blueprint Box folgendermaßen erreichbar:
 
 Vorab sollten wir die DNS Auflösung prüfen:
 
-```
+```bash
 $ nslookup 192.168.252.100
 100.252.168.192.in-addr.arpa    name = blueprint-box.
 
@@ -25,7 +25,7 @@ $ dig -t any blueprint-box +short
 Sollten die hier gezeigten Auflösungen nicht funktionieren, muß ein lokaler DNS konfiguriert werden.
 Unter Linux empfiehlt sich `dnsmasq` und eine erweiterung der `/etc/hosts`:
 
-```
+```bash
 $ cat /etc/hosts
 
 192.168.252.100         blueprint-box
