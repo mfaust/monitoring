@@ -18,7 +18,11 @@ EXPOSE 3030
 
 RUN \
   apk --quiet --no-cache update && \
-  apk --quiet --no-cache upgrade
+  apk --quiet --no-cache upgrade && \
+  apk add --quiet --no-cache --virtual .build-deps tzdata && \
+  cp /usr/share/zoneinfo/$TZ /etc/localtime && \
+  echo $TZ > /etc/timezone && \
+  apk del --quiet .build-deps
 
 COPY build /build
 
