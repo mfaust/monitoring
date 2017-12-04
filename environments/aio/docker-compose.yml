@@ -264,7 +264,7 @@ services:
 
   icingaweb2:
     restart: always
-    image: bodsch/docker-icingaweb2:2.5.0
+    image: bodsch/docker-icingaweb2:2.5.0-r1
     container_name: icingaweb2
     hostname: icingaweb2
     environment:
@@ -275,6 +275,7 @@ services:
       ICINGA2_HOST: cm-icinga2-master
       ICINGA2_CMD_API_USER: icingaweb
       ICINGA2_CMD_API_PASS: icingaweb
+      GRAPHITE_HOST: graphite
       ICINGAWEB2_USERS: coremedia:coremedia,icinga:icinga
       LDAP: '{
         "active_directory": "true",
