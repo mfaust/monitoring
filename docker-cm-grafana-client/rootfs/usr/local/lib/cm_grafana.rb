@@ -5,6 +5,7 @@
 #
 
 require 'grafana'
+require 'grafana/tags'
 require 'mini_cache'
 
 require_relative 'logging'
@@ -24,6 +25,7 @@ class CMGrafana
 
   include Logging
   include Grafana
+  include Grafana::Tags
   include CMGrafana::Version
   include CMGrafana::ServerConfiguration
   include CMGrafana::Queue
