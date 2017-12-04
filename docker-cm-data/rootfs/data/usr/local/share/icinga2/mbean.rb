@@ -53,7 +53,7 @@ module MBean
 
 #      for y in 1..10
 #
-#        result      = @redis.get( cacheKey )
+#        result      = @redis.get( cache_key )
 #
 #        if( result != nil )
 #          data = { service => result }
@@ -71,9 +71,17 @@ module MBean
 
         s   = data.dig(service)
 
-        if( s == nil || s.nil? )
+        logger.debug(s)
+        logger.debug(s.class.to_s)
+
+        if( s.nil? )
           # no service found
           logger.debug("no service '#{service}' found")
+          return false
+        end
+
+        if( s.count == 0 )
+          logger.debug( "empty data for '#{service}'")
           return false
         end
 
@@ -166,17 +174,18 @@ module MBean
       logger.debug( { :host => host, :pre => 'result', :service => service } )
       cacheKey = Storage::RedisClient.cacheKey( { :host => host, :pre => 'result', :service => service } )
 
-      for y in 1..10
+      (1..15).each { |x|
 
-        result = @redis.get( cacheKey )
+        redis_data = @redis.get( cacheKey )
 
-        if( result != nil )
-          data = { service => result }
-          break
+        if( redis_data.nil? )
+          logger.debug(sprintf('wait for discovery data for node \'%s\' ... %d', host, x))
+          sleep(3)
         else
-          sleep( 3 )
+          data = { service => redis_data }
+          break
         end
-      end
+      }
 
       # ---------------------------------------------------------------------------------------
 

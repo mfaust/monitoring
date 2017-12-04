@@ -1,11 +1,13 @@
 
-require_relative '../cache'
+require 'mini_cache'
 
 class CMIcinga2 < Icinga2::Client
 
   module Tools
 
-    def nsLookup( name, expire = 120 )
+    def ns_lookup(name, expire = 120 )
+
+      logger.debug( "ns_lookup( #{name}, #{expire} )" )
 
       # DNS
       #
@@ -18,7 +20,26 @@ class CMIcinga2 < Icinga2::Client
       dns      = @cache.get( hostname )
 
       if( dns.nil? )
-        logger.debug( 'create cached DNS data' )
+
+        logger.debug( 'no cached DNS data' )
+
+        dns = @database.dnsData( short: name, fqdn: name )
+
+        unless( dns.nil? )
+
+          logger.debug( 'use database entries' )
+
+          ip    = dns.dig('ip')
+          short = dns.dig('name')
+          fqdn  = dns.dig('fqdn')
+
+          @cache.set( hostname , expires_in: expire ) { MiniCache::Data.new( ip: ip, short: short, long: fqdn ) }
+
+          return ip, short, fqdn
+        end
+
+        logger.debug( format( 'resolve dns name %s', name ) )
+
         # create DNS Information
         dns      = Utils::Network.resolv( name )
 
@@ -28,7 +49,7 @@ class CMIcinga2 < Icinga2::Client
 
         if( ip != nil && short != nil && fqdn != nil )
 
-          @cache.set( hostname , expiresIn: expire ) { Cache::Data.new( { ip: ip, short: short, long: fqdn } ) }
+          @cache.set(hostname , expires_in: expire ) { MiniCache::Data.new({ ip: ip, short: short, long: fqdn } ) }
         else
           logger.error( 'no DNS data found!' )
           logger.error( " => #{dns}" )
@@ -52,7 +73,7 @@ class CMIcinga2 < Icinga2::Client
     end
 
 
-    def node_information(params = {} )
+    def node_information( params )
 
       logger.debug( "node_information( #{params} )" )
 
@@ -60,24 +81,25 @@ class CMIcinga2 < Icinga2::Client
       host    = params.dig(:host)
       fqdn    = params.dig(:fqdn)
 
+#       full_config        = @database.config( ip: ip, short: host, fqdn: fqdn )
       team_config        = @database.config( ip: ip, short: host, fqdn: fqdn, key: 'team' )
       environment_config = @database.config( ip: ip, short: host, fqdn: fqdn, key: 'environment' )
       aws_config         = @database.config( ip: ip, short: host, fqdn: fqdn, key: 'aws' )
       vhost_http_config  = @database.config( ip: ip, short: host, fqdn: fqdn, key: 'vhost_http' )
       vhost_https_config = @database.config( ip: ip, short: host, fqdn: fqdn, key: 'vhost_https' )
 
-      full_config = @database.config( ip: ip, short: host, fqdn: fqdn )
-
       logger.debug( "team_config       : #{team_config}" )
       logger.debug( "environment_config: #{environment_config}" )
       logger.debug( "aws_config        : #{aws_config}" )
       logger.debug( "vhost_http_config : #{vhost_http_config}" )
       logger.debug( "vhost_https_config: #{vhost_https_config}" )
-      logger.debug( "full_config       : #{full_config}" )
+      logger.debug('---------------------------------------------------------------------')
 
       # in first, we need the discovered services ...
       #
-      for y in 1..15
+      for y in 1..30
+
+        logger.debug( format( 'get data for \'%s\' ...', fqdn ) )
 
         result = @database.discoveryData( ip: ip, short: host, fqdn: fqdn )
 
@@ -85,87 +107,54 @@ class CMIcinga2 < Icinga2::Client
           services = result
           break
         else
-          logger.debug( format( 'waiting for data for node %s ... %d', fqdn, y ) )
+          logger.debug( format( 'waiting for data for \'%s\' ... %d', fqdn, y ) )
           sleep( 5 )
         end
       end
 
       payload = {}
 
-      logger.debug( JSON.pretty_generate(services) )
+#       logger.debug( JSON.pretty_generate(services) )
 
       unless( services.nil?  )
 
         # check, for RLS and CAE(live|preview)
         unless( services.dig('replication-live-server').nil? )
 
-          # get data from redis
-          cache_key = Storage::RedisClient.cacheKey( { :host => fqdn, :pre => 'result', :service => 'replication-live-server' } )
-
-          _redis = @redis.get( cache_key )
-          _redis = JSON.parse(_redis) if _redis.is_a?(String)
-
-          replicator = _redis.select { |k,_v| k.dig('Replicator') }
-          replicator = replicator.first
-          replicator_value = replicator.dig('Replicator','value')
-
-#          logger.debug( replicator_value )
+          replicator_value = content_server( fqdn: fqdn, mbean: 'Replicator', service: 'replication-live-server' )
 
           unless( replicator_value.nil? )
 
-            master_live_server = replicator_value.values.first.dig('MasterLiveServer','host')
-#            logger.debug( "result: #{master_live_server}" )
+            master_live_server = replicator_value.dig('MasterLiveServer','host')
+            logger.debug( "content server for replication-live-server: #{master_live_server}" )
 
-            unless( master_live_server.nil? )
-              services['replication-live-server']['master_live_server'] = master_live_server
-            end
+            services['replication-live-server']['master_live_server'] = master_live_server unless( master_live_server.nil? )
           end
         end
 
         unless( services.dig('cae-live').nil? )
 
-          # get data from redis
-          cache_key = Storage::RedisClient.cacheKey( { :host => fqdn, :pre => 'result', :service => 'cae-live' } )
+          cap_connection_value = content_server( fqdn: fqdn, mbean: 'CapConnection', service: 'cae-live' )
 
-          _redis = @redis.get( cache_key )
-          _redis = JSON.parse(_redis) if _redis.is_a?(String)
+          unless( cap_connection_value.nil? )
 
-          replicator = _redis.select { |k,_v| k.dig('CapConnection') }
-          replicator = replicator.first
-          replicator_value = replicator.dig('CapConnection','value')
+            content_server = cap_connection_value.dig('ContentServer','host')
+            logger.debug( "content server for cae-live: #{content_server}" )
 
-#          logger.debug( replicator_value )
-
-          unless( replicator_value.nil? )
-
-            content_server = replicator_value.values.first.dig('ContentServer','host')
-#            logger.debug( "result: #{content_server}" )
-
-            unless( content_server.nil? )
-              services['cae-live']['content_server'] = content_server
-            end
+            services['cae-live']['content_server'] = content_server unless( content_server.nil? )
           end
         end
 
         unless( services.dig('cae-preview').nil? )
 
-          # get data from redis
-          cache_key = Storage::RedisClient.cacheKey( { :host => fqdn, :pre => 'result', :service => 'cae-preview' } )
+          cap_connection_value = content_server( fqdn: fqdn, mbean: 'CapConnection', service: 'cae-preview' )
 
-          _redis = @redis.get( cache_key )
-          _redis = JSON.parse(_redis) if _redis.is_a?(String)
+          unless( cap_connection_value.nil? )
 
-          replicator = _redis.select { |k,_v| k.dig('CapConnection') }
-          replicator = replicator.first
-          replicator_value = replicator.dig('CapConnection','value')
+            content_server = cap_connection_value.dig('ContentServer','host')
+            logger.debug( "content server for cae-preview: #{content_server}" )
 
-          unless( replicator_value.nil? )
-
-            content_server = replicator_value.values.first.dig('ContentServer','host')
-
-            unless( content_server.nil? )
-              services['cae-preview']['content_server'] = content_server
-            end
+            services['cae-preview']['content_server'] = content_server unless( content_server.nil? )
           end
         end
 
@@ -180,9 +169,7 @@ class CMIcinga2 < Icinga2::Client
         if( services.include?('http-proxy') )
           vhosts = services.dig('http-proxy','vhosts')
 
-          if( vhosts.is_a?(Hash) )
-            payload['http_vhosts'] = vhosts
-          end
+          payload['http_vhosts'] = vhosts  if( vhosts.is_a?(Hash) )
 
           payload['http'] = true
           services.reject! { |k| k == 'http-proxy' }
@@ -191,10 +178,7 @@ class CMIcinga2 < Icinga2::Client
         if( services.include?('https-proxy') )
           vhosts = services.dig('https-proxy','vhosts')
 
-          if( vhosts.is_a?(Hash) )
-            payload['https_vhosts'] = vhosts
-          end
-
+          payload['https_vhosts'] = vhosts if( vhosts.is_a?(Hash) )
           payload['https'] = true
           services.reject! { |k| k == 'https-proxy' }
         end
@@ -218,21 +202,38 @@ class CMIcinga2 < Icinga2::Client
         aws_config.each do |k,v|
           payload["aws_#{k}"] = v
         end
-
       end
 
-      if( team_config )
-        payload['team'] = parsed_response( team_config )
-      end
-
-      if( environment_config )
-        payload['environment'] = parsed_response( environment_config )
-      end
+      payload['team']        = parsed_response( team_config )        if( team_config )
+      payload['environment'] = parsed_response( environment_config ) if( environment_config )
 
       # rename all keys
       # replace '-' with '_'
       #
       payload.inject({ }) { |x, (k,v)| x[k.gsub('-', '_')] = v; x }
+    end
+
+
+    def content_server( params )
+
+      fqdn    = params.dig(:fqdn)
+      service = params.dig(:service)
+      mbean   = params.dig(:mbean)
+      content_server = nil
+
+      # get data from redis
+      cache_key = Storage::RedisClient.cacheKey( host: fqdn, pre: 'result', service: service )
+
+      redis_data = @redis.get( cache_key )
+      redis_data = JSON.parse(redis_data) if redis_data.is_a?(String)
+
+      unless( redis_data.nil? )
+        bean_data  = redis_data.select { |k,_v| k.dig( mbean ) }
+        bean_data  = bean_data.first if( bean_data.is_a?(Array) )
+
+        content_server = bean_data.dig(mbean,'value') unless( bean_data.nil? )
+        content_server.values.first unless( content_server.nil? )
+      end
     end
 
 
@@ -247,3 +248,4 @@ class CMIcinga2 < Icinga2::Client
   end
 
 end
+

@@ -11,11 +11,9 @@ require 'sinatra/base'
 require 'logger'
 require 'json'
 require 'yaml'
-# require 'fileutils'
 require 'resolve/hostname'
 
-require_relative 'monitoring'
-require_relative '../lib/logging'
+require_relative '../lib/monitoring'
 
 module Sinatra
 
@@ -33,7 +31,7 @@ module Sinatra
       @restServiceBind  = ENV.fetch('REST_SERVICE_BIND'      , '0.0.0.0' )
       @mqHost           = ENV.fetch('MQ_HOST'                , 'beanstalkd' )
       @mqPort           = ENV.fetch('MQ_PORT'                , 11300 )
-      @mqQueue          = ENV.fetch('MQ_QUEUE'               , 'mq-rest-service' )
+      @mq_queue         = ENV.fetch('MQ_QUEUE'               , 'mq-rest-service' )
       @redisHost        = ENV.fetch('REDIS_HOST'             , 'redis' )
       @redisPort        = ENV.fetch('REDIS_PORT'             , 6379 )
 
@@ -69,7 +67,7 @@ module Sinatra
       :mq       => {
         :host      => @mqHost,
         :port      => @mqPort,
-        :queue     => @mqQueue
+        :queue     => @mq_queue
       },
       :redis    => {
         :host      => @redisHost,
@@ -83,7 +81,7 @@ module Sinatra
       }
     }
 
-    m = Monitoring.new( config )
+    m = Monitoring::Client.new( config )
 
     # -----------------------------------------------------------------------------
 
@@ -107,18 +105,24 @@ module Sinatra
     # -----------------------------------------------------------------------------
     # HELP
 
+    get '/health' do
+      status 200
+    end
+
+
+    # -----------------------------------------------------------------------------
+    # HELP
+
     # prints out a little help about our ReST-API
     get '/v2/help' do
 
       send_file File.join( settings.public_folder, 'help' )
-
     end
 
     # currently not supported
     get '/' do
-
-      send_file File.join( settings.public_folder, 'help' )
-
+      redirect '/v2/help'
+      # send_file File.join( settings.public_folder, 'help' )
     end
 
     # -----------------------------------------------------------------------------
@@ -128,48 +132,48 @@ module Sinatra
     # curl -X POST http://localhost/api/v2/config/foo \
     #  --data '{ "ports": [200,300] }'
     #
-    post '/v2/config/:host' do
-
-      host            = params[:host]
-
-      payload         =  @request_paylod
-      @request_paylod = nil
-
-      result = m.writeHostConfiguration( host, paylod )
-
-      status result[:status]
-
-      result
-
-    end
-
-    #
-    # curl http://localhost/api/v2/config/foo
-    #
-    get '/v2/config/:host' do
-
-      host   = params[:host]
-      result = m.getHostConfiguration( host )
-
-      status result[:status]
-
-      result
-
-    end
-
-    #
-    # curl -X DELETE http://localhost/api/v2/config/foo
-    #
-    delete '/v2/config/:host' do
-
-      host   = params[:host]
-      result = m.removeHostConfiguration( host )
-
-      status result[:status]
-
-      result
-
-    end
+#     post '/v2/config/:host' do
+#
+#       host            = params[:host]
+#
+#       payload         =  @request_paylod
+#       @request_paylod = nil
+#
+#       result = m.writeHostConfiguration( host, paylod )
+#
+#       status result[:status]
+#
+#       result
+#
+#     end
+#
+#     #
+#     # curl http://localhost/api/v2/config/foo
+#     #
+#     get '/v2/config/:host' do
+#
+#       host   = params[:host]
+#       result = m.getHostConfiguration( host )
+#
+#       status result[:status]
+#
+#       result
+#
+#     end
+#
+#     #
+#     # curl -X DELETE http://localhost/api/v2/config/foo
+#     #
+#     delete '/v2/config/:host' do
+#
+#       host   = params[:host]
+#       result = m.removeHostConfiguration( host )
+#
+#       status result[:status]
+#
+#       result
+#
+#     end
 
     # -----------------------------------------------------------------------------
     # HOST
@@ -255,7 +259,7 @@ module Sinatra
     post '/v2/annotation/:host' do
 
       host   = params[:host]
-      result = m.addAnnotation( host, @request_paylod )
+      result = m.annotation( host: host, payload: @request_paylod )
 
 #       status = result[:status]
 

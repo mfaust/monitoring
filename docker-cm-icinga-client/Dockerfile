@@ -4,32 +4,60 @@ FROM alpine:3.6
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
-  VERSION="1709.1" \
-  BUILD_DATE="2017-09-18" \
-  ALPINE_MIRROR="mirror1.hs-esslingen.de/pub/Mirrors" \
-  ALPINE_VERSION="v3.6" \
+  VERSION="1711" \
+  BUILD_DATE="2017-11-13" \
   TERM=xterm \
-  APK_ADD="build-base bind-tools drill git mariadb-dev libressl-dev ruby-dev ruby-irb ruby-rdoc" \
-  APK_DEL="build-base git ruby-dev ruby-rdoc " \
-  GEMS="beaneater ipaddress icinga2 json mysql2 redis rufus-scheduler tzinfo-data"
+  TZ='Europe/Berlin' \
+  ICINGA2_GEM_TYPE="local" \
+  ICINGA2_GEM_VERSION="1.0"
 
 # ---------------------------------------------------------------------------------------
 
-WORKDIR /
+RUN \
+  apk --quiet --no-cache update && \
+  apk --quiet --no-cache upgrade && \
+  apk add --quiet --no-cache --virtual .build-deps tzdata && \
+  cp /usr/share/zoneinfo/$TZ /etc/localtime && \
+  echo $TZ > /etc/timezone && \
+  apk del --quiet .build-deps
+
+COPY build /build
 
 RUN \
-  echo "http://${ALPINE_MIRROR}/alpine/${ALPINE_VERSION}/main"       > /etc/apk/repositories && \
-  echo "http://${ALPINE_MIRROR}/alpine/${ALPINE_VERSION}/community" >> /etc/apk/repositories && \
-  apk --no-cache update && \
-  apk --no-cache upgrade && \
-  apk --no-cache add ${APK_ADD} && \
-  gem install --no-rdoc --no-ri ${GEMS} && \
-  apk --purge del ${APK_DEL} && \
+  apk add --quiet --no-cache --virtual .build-deps \
+    build-base git ruby-dev ruby-rdoc && \
+  apk --quiet --no-cache add \
+    bind-tools curl drill mariadb-dev mariadb-client-libs jq libressl-dev ruby-irb &&\
+  echo 'gem: --no-document' >> /etc/gemrc && \
+  gem install --quiet --no-rdoc --no-ri \
+    io-console bundler && \
+  cd /build && \
+  bundle install --quiet && \
+  for g in $(ls -1 /build/*.gem 2> /dev/null) ; do echo $g; gem install --quiet --no-rdoc --no-ri ${g} ; done && \
+  if [ "${ICINGA2_GEM_TYPE}" == "stable" ] ; then \
+    echo "gem 'icinga2', '~> ${ICINGA2_GEM_VERSION}'" >> Gemfile ; \
+  fi && \
+  gem uninstall --quiet \
+    io-console bundler && \
+  apk del --quiet .build-deps && \
   rm -rf \
     /opt/* \
     /tmp/* \
+    /build \
+    /root/.bundle \
+    /root/.gem \
     /var/cache/apk/*
 
 COPY rootfs/ /
+
+WORKDIR /
+
+HEALTHCHECK \
+  --interval=5s \
+  --timeout=2s \
+  --retries=12 \
+  CMD ps ax | grep -c icinga-client.rb || exit 1
+
+ENTRYPOINT [ "/init/run.sh" ]
 
 CMD [ "/usr/local/bin/icinga-client.rb" ]

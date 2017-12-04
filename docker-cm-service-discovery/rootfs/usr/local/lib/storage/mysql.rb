@@ -27,7 +27,7 @@ module Storage
       @write_timeout   = params.dig(:mysql, :timeout, :write)   || 15
       @connect_timeout = params.dig(:mysql, :timeout, :connect) || 25
 
-      logger.level = Logger::INFO
+      logger.level = Logger::UNKNOWN
 
       @client          = connect
 
@@ -528,25 +528,23 @@ module Storage
 
       dns = self.dnsData( params )
 
-      if( dns != nil )
+      unless( dns.nil? )
 
         ip   = dns.dig('ip')
-        more = nil
+#         more = nil
+#         logger.debug( ip )
 
-        logger.debug( ip )
-
-        if( key != nil )
-          more = sprintf( 'and `key` = \'%s\'', key )
-        end
+        more = sprintf( 'and `key` = \'%s\'', key ) unless( key.nil? )
 
         statement = sprintf(
           'delete
             from config
           where
-            %s and
-            ( ip = \'%s\' or name = \'%s\' or fqdn = \'%s\' )',
-          more, ip, name, fqdn
+            dns_ip = \'%s\'
+            %s',
+          ip, more
         )
+
         logger.debug( statement )
 
         begin
@@ -560,7 +558,6 @@ module Storage
       end
 
       return nil
-
     end
 
 
@@ -656,12 +653,18 @@ module Storage
 
       if( service == nil && data.is_a?( Hash ) )
 
+        result    = exec( 'SET foreign_key_checks = 0' )
+        logger.debug( "#{result} (#{result.class.to_s})")
+
         data.each do |k,v|
-
           port = v.dig('port')
+          result = self.writeDiscovery( { :ip => ip, :short => name, :fqdn => fqdn, :port => port, :service => k, :data => v } )
 
-          self.writeDiscovery( { :ip => ip, :short => name, :fqdn => fqdn, :port => port, :service => k, :data => v } )
+          logger.debug( "#{result} (#{result.class.to_s})")
         end
+
+        result    = exec( 'SET foreign_key_checks = 1' )
+        logger.debug( "#{result} (#{result.class.to_s})")
       else
 
         params['ip']   = ip
@@ -690,15 +693,15 @@ module Storage
       )
 
       begin
-        result    = @client.query( statement, :as => :hash )
-
+        #result    = @client.query( statement, :as => :hash )
+        result    = exec( statement )
         return true
       rescue => e
         logger.error( e )
+        logger.debug( statement )
       end
 
       return nil
-
     end
 
 
@@ -965,19 +968,13 @@ module Storage
     def exec( statement )
 
       logger.debug( "exec( #{statement} )" )
-
       result = nil
-
       begin
         retries ||= 1
-
         result = @client.query( statement, :as => :hash )
-
         logger.debug( sprintf( ' %d try to execute statement', retries ) )
       rescue
-
         if( retries < 5 )
-
           sleep( 2 )
           retries += 1
           retry

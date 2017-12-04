@@ -27,13 +27,13 @@ module ExternalDiscovery
 
       @historic      = []
 
-      version        = '0.11.1'
-      date           = '2017-06-28'
+      version        = '0.11.2'
+      date           = '2017-10-29'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - External Discovery Service' )
       logger.info( "  Version #{version} (#{date})" )
-      logger.info( '  Copyright 2016-2017 Coremedia' )
+      logger.info( '  Copyright 2016-2017 CoreMedia' )
       logger.info( "  Monitoring System #{apiUrl}" )
       logger.info( '-----------------------------------------------------------------' )
       logger.info( '' )
@@ -60,7 +60,7 @@ module ExternalDiscovery
       ]
 
       @jobs             = JobQueue::Job.new()
-      @cache            = Cache::Store.new()
+      @cache            = MiniCache::Store.new()
       @dataConsumer     = DataConsumer.new( { :aws => { :region =>  @awsRegion }, :filter => filter } )
       @monitoringClient = MonitoringClient.new( config )
 
@@ -329,7 +329,7 @@ module ExternalDiscovery
 
       ip          = params.dig(:ip)
 
-      ip, short, fqdn = nsLookup( ip )
+      ip, short, fqdn = ns_lookup(ip )
 
       logger.info( sprintf( 'remove host %s (%s) from monitoring', fqdn, ip ) )
 

@@ -1,0 +1,143 @@
+---
+# project_name: monitoring
+
+version: '2.0'
+
+networks:
+  integrate:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.220.0/24
+
+services:
+
+  data:
+    build: ../../docker-cm-data
+    container_name: 01-data
+    volumes:
+      - /share:/share
+
+  memcached:
+    restart: always
+    image: bodsch/docker-memcached:1710.1
+    container_name: memcached
+    hostname: memcached
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    command: "-l 0.0.0.0 -m 8 -u memcached"
+    networks:
+      integrate:
+        ipv4_address: 192.168.220.6
+
+  beanstalkd:
+    restart: always
+    image: bodsch/docker-beanstalkd:1710.1
+    container_name: beanstalkd
+    hostname: beanstalkd
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      integrate:
+        ipv4_address: 192.168.220.7
+
+  nginx:
+    restart: always
+    image: bodsch/docker-nginx:1710.1
+    container_name: nginx
+    hostname: nginx
+    ports:
+      - 80:80
+    depends_on:
+      - data
+      - grafana
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /share/www/entry-page:/var/www/entry-page
+      - /share/etc/nginx/sites-enabled/01-default.conf:/etc/nginx/sites-enabled/01-default.conf
+      - /share/etc/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - /share/etc/nginx/modules.d/00-restrictions.conf:/etc/nginx/modules.d/00-restrictions.conf
+      - /share/etc/nginx/modules.d/01-proxy-grafana.conf:/etc/nginx/modules.d/01-proxy-grafana.conf
+    networks:
+      integrate:
+        ipv4_address: 192.168.220.10
+
+  carbon:
+    restart: always
+    image: bodsch/docker-go-carbon:1710.1
+    container_name: carbon
+    hostname: carbon
+    depends_on:
+      - data
+    ports:
+      - 2003:2003
+      - 2003:2003/udp
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/tmp/docker-volumes/carbon:/srv
+    networks:
+      integrate:
+        ipv4_address: 192.168.220.20
+
+  graphite:
+    restart: always
+    image: bodsch/docker-graphite:1710.1
+    container_name: graphite
+    hostname: graphite
+    extends:
+      file: environments.yml
+      service: graphite
+    depends_on:
+      - data
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/tmp/docker-volumes/carbon:/srv
+    networks:
+      integrate:
+        ipv4_address: 192.168.220.21
+
+  grafana:
+    restart: always
+    image: bodsch/docker-grafana:4.6.0-beta1
+    container_name: grafana
+    hostname: grafana
+    extends:
+      file: environments.yml
+      service: grafana
+    depends_on:
+      - data
+      - memcached
+      - carbon
+    links:
+      - memcached
+      - carbon
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /share/opt/grafana/dashboards:/opt/grafana/dashboards
+    networks:
+      integrate:
+        ipv4_address: 192.168.220.22
+
+
+
+  # single service
+  # use MQ to process data
+  cm-grafana-client:
+    restart: always
+    build: ../../docker-cm-grafana-client
+    container_name: cm-grafana-client
+    hostname: cm-grafana-client
+    extends:
+      file: environments.yml
+      service: cm-grafana-client
+    depends_on:
+      - data
+    links:
+      - nginx
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./logs:/var/log
+      - /share/usr/local/share/templates:/usr/local/share/templates
+    networks:
+      integrate:
+        ipv4_address: 192.168.220.34

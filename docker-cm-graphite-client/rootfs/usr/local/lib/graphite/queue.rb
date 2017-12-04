@@ -7,50 +7,47 @@ module Graphite
     #
     #
     #
-    def queue()
+    def queue
 
-      data = @mqConsumer.getJobFromTube( @mqQueue )
+      data = @mq_consumer.get_job_from_tube( @mq_queue )
 
-      if( data.count() != 0 )
+      if( data.count != 0 )
 
-        stats = @mqConsumer.tubeStatistics( @mqQueue )
-        logger.debug( {
-          :total   => stats.dig(:total),
-          :ready   => stats.dig(:ready),
-          :delayed => stats.dig(:delayed),
-          :buried  => stats.dig(:buried)
-        } )
+        stats = @mq_consumer.tube_statistics( @mq_queue )
+
+        logger.debug(
+          total: stats.dig(:total),
+          ready: stats.dig(:ready),
+          delayed: stats.dig(:delayed),
+          buried: stats.dig(:buried)
+        )
 
         if( stats.dig(:ready).to_i > 10 )
           logger.warn( 'more then 10 jobs in queue ... just wait' )
 
-          @mqConsumer.cleanQueue( @mqQueue )
+          @mq_consumer.clean_queue( @mq_queue )
           return
         end
 
-        jobId  = data.dig( :id )
-
-        result = self.processQueue( data )
-
+        job_id  = data.dig(:id )
+        result = process_queue( data )
         status = result.dig(:status).to_i
 
         if( status == 200 || status == 409 || status == 500 || status == 503 )
-
-          @mqConsumer.deleteJob( @mqQueue, jobId )
+          @mq_consumer.delete_job( @mq_queue, job_id )
         else
-
-          @mqConsumer.buryJob( @mqQueue, jobId )
+          @mq_consumer.bury_job( @mq_queue, job_id )
         end
       end
-
     end
 
 
-    def processQueue( data = {} )
+    def process_queue( data )
 
-      logger.info( sprintf( 'process Message ID %d from Queue \'%s\'', data.dig(:id), data.dig(:tube) ) )
+      raise ArgumentError.new(format('wrong type. data must be an Hash, given %s', data.class.to_s ) ) unless( data.is_a?(Hash) )
 
-      logger.debug( data )
+      logger.info( format( 'process Message ID %d from Queue \'%s\'', data.dig(:id), data.dig(:tube) ) )
+      logger.debug( JSON.pretty_generate data )
 
       command    = data.dig(:body, 'cmd')
       node       = data.dig(:body, 'node')
@@ -59,123 +56,111 @@ module Graphite
 
       #
       #
-      if( command == nil || node == nil || payload == nil )
+      if( command.nil? || node.nil? || payload.nil? )
 
         status = 500
 
-        if( command == nil )
+        if( command.nil? )
           e = 'missing command'
           logger.error( e )
           logger.error( data )
-          return { :status  => status, :message => e }
+          return { status: status, message: e }
         end
 
-        if( node == nil )
+        if( node.nil? )
           e = 'missing node'
           logger.error( e )
           logger.error( data )
-          return { :status  => status, :message => e }
+          return { status: status, message: e }
         end
 
-        if( payload == nil )
+        if( payload.nil? )
           e = 'missing payload'
           logger.error( e )
           logger.error( data )
-          return { :status  => status, :message => e }
+          return { status: status, message: e }
         end
 
       end
 
-
-      if( payload.is_a?( String ) == true && payload.to_s != '' )
-        payload  = JSON.parse( payload )
-      end
+      payload  = JSON.parse( payload ) if( payload.is_a?( String ) == true && payload.to_s != '' )
 
       logger.debug( JSON.pretty_generate( payload ) )
 
       timestamp  = payload.dig('timestamp')
       config     = payload.dig('config')
-#      fqdn       = payload.dig('fqdn') || node
       dns        = payload.dig('dns')
 
-      if !dns.nil?
-        ip    = dns.dig('ip')
-        short = dns.dig('short')
-        fqdn  = dns.dig('fqdn')
+      if( dns.nil? )
+        _ip, _short, fqdn = self.ns_lookup(node )
       else
-        ip, short, fqdn = self.nsLookup( node )
+        fqdn  = dns.dig('fqdn')
       end
+
+      return { status: 500, message: 'missing hostname for annotation' } if( fqdn.nil? )
 
       @identifier = fqdn
 
-      if !timestamp.nil?
+      unless timestamp.nil?
 
-        if( timestamp.is_a?( Time ) )
+        if (timestamp.is_a?(Time))
 
-          @timestamp = Time.parse( timestamp )
+          @timestamp = Time.parse(timestamp)
 
-          logger.debug( @timestamp )
+          logger.debug(@timestamp)
         end
 
         @timestamp = timestamp.to_i
       end
 
-      if !config.nil?
+      unless config.nil?
 
-        if( config.is_a?(String) && config.to_s != '' )
-          config  = JSON.parse( config )
+        if (config.is_a?(String) && config.to_s != '')
+          config = JSON.parse(config)
         end
 
         @identifier = config.dig('graphite_identifier')
       end
 
 
-      logger.info( sprintf( 'add annotation \'%s\' for node \'%s\'', command, fqdn ) )
+      logger.info( format( 'add annotation \'%s\' for node \'%s\'', command, fqdn ) )
 
       case command
       when 'create', 'remove'
 
-        result = self.nodeAnnotation( fqdn, command )
+        result = self.node_annotation( fqdn, command )
 
         logger.info( result )
 
-        return {
-          :status => 200
-        }
+        return { status: 200 }
 
       when 'loadtest'
 
         argument = payload.dig( 'argument' )
 
-        if( argument != 'start' && argument != 'stop' )
-          logger.error( sprintf( 'wrong argument for LOADTEST \'%s\'', argument ) )
+        if( %w[start stop].include?(argument.downcase) == false )
 
-          return {
-            :status  => 500,
-            :message => sprintf( 'wrong argument for LOADTEST \'%s\'', argument )
-          }
+          logger.error( format( 'wrong argument for LOADTEST \'%s\'', argument ) )
+
+          return { status: 500, message: format( 'wrong argument for LOADTEST \'%s\'', argument ) }
         end
 
-        result = self.loadtestAnnotation( fqdn, argument )
+        result = self.loadtest_annotation( fqdn, argument )
 
         logger.info( result )
 
-        return {
-          :status => 200
-        }
+        return { status: 200 }
 
       when 'deployment'
 
         message = payload.dig( 'message' )
         tags    = payload.dig( 'tags' ) || []
 
-        result = self.deploymentAnnotation( fqdn, message, tags )
+        result = self.deployment_annotation( fqdn, message, tags )
 
         logger.info( result )
 
-        return {
-          :status => 200
-        }
+        return { status: 200 }
 
       when 'general'
 
@@ -183,30 +168,24 @@ module Graphite
         message     = payload.dig( 'message' )
         tags        = payload.dig( 'tags' ) || []
 
-        result = self.generalAnnotation( fqdn, description, message, tags )
+        result = self.general_annotation( fqdn, description, message, tags )
 
         logger.info( result )
 
-        return {
-          :status => 200
-        }
+        return { status: 200 }
 
       else
-        logger.error( sprintf( 'wrong command detected: %s', command ) )
+        logger.error( format( 'wrong command detected: %s', command ) )
 
-        return {
-          :status  => 500,
-          :message => sprintf( 'wrong command detected: %s', command )
-        }
-
+        return { status: 500, message: format( 'wrong command detected: %s', command ) }
       end
 
     end
 
 
-    def sendMessage( data = {} )
+    def send_message( data )
 
-      logger.debug( JSON.pretty_generate( data ) )
+      raise ArgumentError.new(format('wrong type. data must be an Hash, given %s', data.class.to_s ) ) unless( data.is_a?(Hash) )
 
       job = {
         cmd:  'information',
@@ -214,11 +193,11 @@ module Graphite
         payload: data
       }.to_json
 
-      result = @mqProducer.addJob( queue, job, 1, ttr, delay )
+      logger.debug( JSON.pretty_generate( job ) )
 
-      logger.debug( job )
+      result = @mq_producer.add_job( queue, job, 1, ttr, delay )
+
       logger.debug( result )
-
     end
 
 

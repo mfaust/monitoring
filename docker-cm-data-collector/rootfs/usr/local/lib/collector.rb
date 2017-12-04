@@ -13,10 +13,10 @@ require 'timeout'
 require 'fileutils'
 require 'time'
 require 'date'
+require 'mini_cache'
 require 'rufus-scheduler'
 
 require_relative 'logging'
-require_relative 'cache'
 require_relative 'utils/network'
 require_relative 'monkey'
 require_relative 'jolokia'
@@ -25,6 +25,7 @@ require_relative 'message-queue'
 require_relative 'storage'
 require_relative 'external-clients'
 
+require_relative 'collector/version'
 require_relative 'collector/tools'
 require_relative 'collector/config'
 require_relative 'collector/prepare'
@@ -36,113 +37,117 @@ module DataCollector
   class Collector
 
     include Logging
-
     include DataCollector::Tools
 
     def initialize( settings = {} )
 
-      jolokiaHost         = settings.dig(:jolokia, :host)           || 'localhost'
-      jolokiaPort         = settings.dig(:jolokia, :port)           ||  8080
-      jolokiaPath         = settings.dig(:jolokia, :path)           || '/jolokia'
-      jolokiaAuthUser     = settings.dig(:jolokia, :auth, :user)
-      jolokiaAuthPass     = settings.dig(:jolokia, :auth, :pass)
-      mqHost              = settings.dig(:mq, :host)                || 'localhost'
-      mqPort              = settings.dig(:mq, :port)                || 11300
-      @mqQueue            = settings.dig(:mq, :queue)               || 'mq-collector'
+      jolokia_host        = settings.dig(:jolokia, :host)           || 'localhost'
+      jolokia_port        = settings.dig(:jolokia, :port)           ||  8080
+      jolokia_path        = settings.dig(:jolokia, :path)           || '/jolokia'
+      jolokia_auth_user   = settings.dig(:jolokia, :auth, :user)
+      jolokia_auth_pass   = settings.dig(:jolokia, :auth, :pass)
+      mq_host             = settings.dig(:mq, :host)                || 'localhost'
+      mq_port             = settings.dig(:mq, :port)                || 11300
+      @mq_queue           = settings.dig(:mq, :queue)               || 'mq-collector'
 
-      redisHost           = settings.dig(:redis, :host)
-      redisPort           = settings.dig(:redis, :port)  || 6379
+      redis_host          = settings.dig(:redis, :host)
+      redis_port          = settings.dig(:redis, :port)  || 6379
 
-      applicationConfig   = settings.dig(:configFiles, :application)
-      serviceConfig       = settings.dig(:configFiles, :service)
+      application_config  = settings.dig(:configFiles, :application)
+      service_config      = settings.dig(:configFiles, :service)
 
-      mysqlHost           = settings.dig(:mysql, :host)
-      mysqlSchema         = settings.dig(:mysql, :schema)
-      mysqlUser           = settings.dig(:mysql, :user)
-      mysqlPassword       = settings.dig(:mysql, :password)
+      mysql_host          = settings.dig(:mysql, :host)
+      mysql_schema        = settings.dig(:mysql, :schema)
+      mysql_user          = settings.dig(:mysql, :user)
+      mysql_password      = settings.dig(:mysql, :password)
 
-      version            = '1.11.0'
-      date               = '2017-09-18'
+      version             = DataCollector::VERSION
+      date                = DataCollector::DATE
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - DataCollector' )
       logger.info( "  Version #{version} (#{date})" )
-      logger.info( '  Copyright 2016-2017 Coremedia' )
+      logger.info( '  Copyright 2016-2017 CoreMedia' )
       logger.info( '  used Services:' )
-      logger.info( "    - jolokia      : #{jolokiaHost}:#{jolokiaPort}" )
-      logger.info( "    - redis        : #{redisHost}:#{redisPort}" )
-      logger.info( "    - mysql        : #{mysqlHost}@#{mysqlSchema}" )
-      logger.info( "    - message queue: #{mqHost}:#{mqPort}/#{@mqQueue}" )
+      logger.info( "    - jolokia      : #{jolokia_host}:#{jolokia_port}" )
+      logger.info( "    - redis        : #{redis_host}:#{redis_port}" )
+      logger.info( "    - mysql        : #{mysql_host}@#{mysql_schema}" )
+      logger.info( "    - message queue: #{mq_host}:#{mq_port}/#{@mq_queue}" )
       logger.info( '-----------------------------------------------------------------' )
 
-      if( applicationConfig == nil || serviceConfig == nil )
+      if( application_config.nil? || service_config.nil? )
         msg = 'no Configuration File given'
         logger.error( msg )
-
         fail msg
       end
 
-      @MQSettings = {
-        :beanstalkHost => mqHost,
-        :beanstalkPort => mqPort
+      mq_settings = {
+        :beanstalkHost => mq_host,
+        :beanstalkPort => mq_port
       }
 
       prepareSettings = {
-        :configFiles => { :application => applicationConfig, :service => serviceConfig },
-        :redis       => { :host => redisHost, :port => redisPort }
+        :configFiles => { :application => application_config, :service => service_config },
+        :redis       => { :host => redis_host, :port => redis_port }
       }
 
-      @cache     = Cache::Store.new()
-      @redis     = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
-      @jolokia   = Jolokia::Client.new( { :host => jolokiaHost, :port => jolokiaPort, :path => jolokiaPath, :auth => { :user => jolokiaAuthUser, :pass => jolokiaAuthPass } } )
-      @mq        = MessageQueue::Consumer.new( @MQSettings )
-      @prepare   = Prepare.new( prepareSettings )
+      mysql_settings = { mysql: { host: mysql_host, user: mysql_user, password: mysql_password, schema: mysql_schema } }
+
+      @cache     = MiniCache::Store.new()
+      @redis     = Storage::RedisClient.new( { :redis => { :host => redis_host } } )
+      @jolokia   = Jolokia::Client.new( { :host => jolokia_host, :port => jolokia_port, :path => jolokia_path, :auth => { :user => jolokia_auth_user, :pass => jolokia_auth_pass } } )
+      @mq        = MessageQueue::Consumer.new(mq_settings )
+      @cfg       = Config.new( application: application_config, service: service_config )
+      @prepare   = Prepare.new( redis: @redis, config: @cfg ) # prepareSettings )
       @jobs      = JobQueue::Job.new()
-      @database  = Storage::MySQL.new( {
-        :mysql => {
-          :host     => mysqlHost,
-          :user     => mysqlUser,
-          :password => mysqlPassword,
-          :schema   => mysqlSchema
-        }
-      } )
+      @database  = Storage::MySQL.new( mysql_settings )
 
       # run internal scheduler to remove old data
       scheduler = Rufus::Scheduler.new
 
-      scheduler.every( 10, :first_in => 10 ) do
+      scheduler.every( '10s', :first_in => 10 ) do
         clean()
       end
 
     end
 
 
-    def mongoDBData( host, data = {} )
+    def mongodb_data( params )
 
-      port = 28017
+      logger.debug( "mongodb_data( #{params} )" )
+
+      host = params.dig(:host)
+      port = params.dig(:port) || 28017
+
+      return { status: 500, message: 'no host name for mongodb_data data' } if( host.nil? )
 
       result = Utils::Network.portOpen?( host, port )
 
       if( result == false )
-        logger.warn( sprintf( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
+        logger.warn( format( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
 
-        return JSON.parse( JSON.generate( { :status => 500 } ) )
+        return JSON.parse( JSON.generate( status: 500 ) )
       else
 
-        m = ExternalClients::MongoDb.new( { :host => host, :port => port } )
+        m = ExternalClients::MongoDb.new( host: host, port: port )
 
         return m.get()
       end
     end
 
 
-    def mysqlData( host, data = {} )
+    def mysql_data( params )
 
-      user = data.dig('user') || 'monitoring'
-      pass = data.dig('pass') || 'monitoring'
-      port = data.dig('port') || 3306
-      cache_key = format('mysql-%s', host)
+      logger.debug( "mysql_data( #{params} )" )
 
+      host = params.dig(:host)
+      port = params.dig(:port) || 3306
+      user = params.dig(:username) || 'monitoring'
+      pass = params.dig(:password) || 'monitoring'
+
+      return { status: 500, message: 'no host name for mysql_data data' } if( host.nil? )
+
+      cache_key   = format('mysql-%s', host)
       cached_data = @cache.get( cache_key )
 
       unless( cached_data.nil? )
@@ -164,14 +169,14 @@ module DataCollector
       result = Utils::Network.portOpen?( host, port )
 
       if( result == false )
-        logger.warn( sprintf( 'The Port \'%s\' on Host \'%s\' is not open, skip ...', port, host ) )
+        logger.warn( format( 'The Port \'%s\' on Host \'%s\' is not open, skip ...', port, host ) )
 
-        return JSON.parse( JSON.generate( { :status => 500 } ) )
+        return JSON.parse( JSON.generate( status: 500 ) )
       else
 
         m = ExternalClients::MySQL.new( settings )
 
-        if( m.client == nil )
+        if( m.client.nil? )
 
           fallback = {
             coremedia: 'coremedia',
@@ -184,16 +189,11 @@ module DataCollector
 
           fallback.each do |u,p|
 
-            settings = {
-              :host     => host,
-              :username => u,
-              :password => p
-            }
+            settings = { host: host, username: u, password: p }
 
             m = ExternalClients::MySQL.new( settings )
 
             unless( m.client.nil? )
-
               user = u.clone
               pass = p.clone
               break
@@ -203,33 +203,33 @@ module DataCollector
         end
 
         unless( m.client.nil? )
+          @cache.set( cache_key , expires_in: 640 ) { MiniCache::Data.new( user: user, pass: pass, port: port ) }
 
-          @cache.set( cache_key , expiresIn: 640 ) { Cache::Data.new( { 'user': user, 'pass': pass, 'port': port } ) }
+          mysql_data = m.get()
+          mysql_data = JSON.generate( status: 500 ) if( mysql_data == false || mysql_data.nil? )
 
-          mysqlData = m.get()
-
-          if( mysqlData == false || mysqlData == nil )
-            mysqlData   = JSON.generate( { :status => 500 } )
-          end
-
-          data          = JSON.parse( mysqlData )
+          data       = JSON.parse( mysql_data )
         end
       end
 
-      return data
-
+      data
     end
 
 
-    def postgresData( host, data = {} )
+    def postgres_data( params )
 
       # WiP and nore sure
       # return
 
-      user = data.dig('user')     || 'cm_management'
-      pass = data.dig('pass')     || 'cm_management'
-      port = data.dig('port')     || 5432
-      dbname = data.dig('dbname') || 'coremedia'
+      logger.debug( "postgres_data( #{params} )" )
+
+      host = params.dig(:host)
+      port = params.dig(:port) || 5432
+      user = params.dig(:username) || 'cm_management'
+      pass = params.dig(:password) || 'cm_management'
+      dbname = params.dig(:database) || 'coremedia'
+
+      return { status: 500, message: 'no host name for mysql_data data' } if( host.nil? )
 
       if( port != nil )
 
@@ -245,9 +245,9 @@ module DataCollector
       result = Utils::Network.portOpen?( host, port )
 
       if( result == false )
-        logger.warn( sprintf( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
+        logger.warn( format( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
 
-        return JSON.parse( JSON.generate( { :status => 500 } ) )
+        return JSON.parse( JSON.generate( status: 500 ) )
       else
 
         pgsql = ExternalClients::PostgresStatus.new( settings )
@@ -259,11 +259,14 @@ module DataCollector
     end
 
 
-    def redisData( host, data = {} )
+    def redis_data( params )
 
-      logger.debug("redisData( #{host}, #{data} )")
+      logger.debug( "redis_data( #{params} )" )
 
-      port = data.dig(:port) || 6379
+      host = params.dig(:host)
+      port = params.dig(:port) || 6379
+
+      return { status: 500, message: 'no host name for redis_data data' } if( host.nil? )
 
       unless( port.nil? )
 
@@ -276,9 +279,9 @@ module DataCollector
       result = Utils::Network.portOpen?( host, port )
 
       if( result == false )
-        logger.warn( sprintf( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
+        logger.warn( format( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
 
-        return JSON.parse( JSON.generate( { :status => 500 } ) )
+        return JSON.parse( JSON.generate( status: 500 ) )
       else
 
         logger.debug( 'read redis data ...' )
@@ -287,29 +290,25 @@ module DataCollector
       end
     end
 
-    def nodeExporterData( host, data = {} )
 
-      logger.debug("nodeExporterData( #{host}, #{data} )")
+    def node_exporter_data( params )
 
-      port = data.dig(:port) || 9100
+      logger.debug("node_exporter_data( #{params} )")
 
-      if( port != nil )
+      host = params.dig(:host)
+      port = params.dig(:port) || 9100
 
-        settings = {
-          :host => host,
-          :port => port
-        }
-      end
+      return { status: 500, message: 'no host name for node_exporter data' } if( host.nil? )
 
       result = Utils::Network.portOpen?( host, port )
 
       if( result == false )
-        logger.warn( sprintf( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
+        logger.warn( format( 'The Port %s for node_exporter on Host %s is not open, skip sending data', port, host ) )
 
-        return JSON.parse( JSON.generate( { :status => 500 } ) )
+        return JSON.parse( JSON.generate( status: 500 ) )
       else
 
-        m = ExternalClients::NodeExporter.new( settings )
+        m = ExternalClients::NodeExporter.new( host: host, port: port )
         nodeData = m.get()
 
         result   = JSON.generate( nodeData )
@@ -321,9 +320,14 @@ module DataCollector
     end
 
 
-    def resourcedData( host, data = {} )
+    def resourced_data( params )
 
-      port = data.dig(:port) || 55555
+      logger.debug("resourced_data( #{params} )")
+
+      host = params.dig(:host)
+      port = params.dig(:port) || 55555
+
+      return { status: 500, message: 'no host name for resourced_data data' } if( host.nil? )
 
       if( port != nil )
         settings = {
@@ -335,9 +339,9 @@ module DataCollector
       result = Utils::Network.portOpen?( host, port )
 
       if( result == false )
-        logger.warn( sprintf( 'The Port \'%s\' on Host \'%s\' is not open, skip ...', port, host ) )
+        logger.warn( format( 'The Port \'%s\' on Host \'%s\' is not open, skip ...', port, host ) )
 
-        return JSON.parse( JSON.generate( { :status => 500 } ) )
+        return JSON.parse( JSON.generate( status: 500 ) )
       else
 
         m = ExternalClients::Resouced.new( settings )
@@ -352,34 +356,27 @@ module DataCollector
     end
 
 
-    def apache_mod_status( host, data = {} )
+    def apache_mod_status( params )
 
-      port = data.dig(:port) || 8081
+      logger.debug( "apache_mod_status( #{params} )" )
 
-      if( port != nil )
-        settings = {
-          :host => host,
-          :port => port
-        }
-      end
+      host = params.dig(:host)
+      port = params.dig(:port) || 8081
+
+      return { status: 500, message: 'no host name for apache_mod_status data' } if( host.nil? )
 
       result = Utils::Network.portOpen?( host, port )
 
       if( result == false )
-        logger.warn( sprintf( 'The Port \'%s\' on Host \'%s\' is not open, skip ...', port, host ) )
+        logger.warn( format( 'The Port \'%s\' on Host \'%s\' is not open, skip ...', port, host ) )
 
-        JSON.parse( JSON.generate( { :status => 500 } ) )
+        JSON.parse( JSON.generate( status: 500 ) )
       else
 
-        result = Array.new
-
-        mod_status      = ExternalClients::ApacheModStatus.new( settings )
+        mod_status      = ExternalClients::ApacheModStatus.new( host: host, port: port )
         mod_status_data = mod_status.tick
 
-        result = {
-          status: mod_status_data,
-        }
-
+        return { status: mod_status_data }
       end
     end
 
@@ -388,60 +385,53 @@ module DataCollector
     #
     def monitoredServer()
 
-      @database.nodes( { :status => [ Storage::MySQL::ONLINE ] } )
+      @database.nodes( status: [ Storage::MySQL::ONLINE ] )
     end
 
     # create a singulary json for every services to send them to the jolokia service
     #
-    def createBulkCheck( params = {} )
+    def create_bulkcheck( params )
 
-      host = params.dig(:hostname)
+      logger.debug( "create_bulkcheck( #{params} )" )
+
+      ip   = params.dig(:ip)
+      host = params.dig(:short)
       fqdn = params.dig(:fqdn)
 
-#       logger.debug( "createBulkCheck( #{params} )" )
-
-      if( host == nil )
-        logger.warn( 'no host name for bulk checks' )
-        return
-      end
+      return { status: 404, message: 'no host name for bulk checks' } if( host.nil? )
 
       checks   = Array.new()
       array    = Array.new()
       services = nil
 
       result = {
-        :timestamp   => Time.now().to_i
+        timestamp: Time.now().to_i
       }
 
-#       logger.debug( sprintf( 'create bulk checks for \'%s\'', host ) )
+#       logger.debug( format( 'create bulk checks for \'%s\'', host ) )
 
       # to improve performance, read initial collector Data from Database and store them into Redis
       #
-      key       = Storage::RedisClient.cacheKey( { :host => fqdn, :pre => 'collector' } )
+      key       = Storage::RedisClient.cacheKey( host: fqdn, pre: 'collector' )
       data      = @cache.get( key )
 
-      if( data == nil )
+      if( data.nil? )
+        data = @redis.measurements( short: host, fqdn: fqdn )
 
-        data = @redis.measurements( { :short => host, :fqdn => fqdn } )
-
-        if( data == nil || data == false )
+        if( data.nil? || data == false )
           @cache.unset( host )
           return
         else
-          @cache.set( key ) { Cache::Data.new( data ) }
+          @cache.set( key ) { MiniCache::Data.new( data ) }
         end
-
       end
 
-      if( data == nil )
-        logger.error( 'no services found. skip ...' )
-        return
-      end
+      return { status: 204, message: 'no services found. skip ...' } if( data.nil? )
 
       services      = data.keys
       servicesCount = services.count
 
-      logger.info( sprintf( '%d services found', servicesCount ) )
+      logger.info( format( '  with %d services', servicesCount ) )
 
       data.each do |s,d|
 
@@ -451,7 +441,7 @@ module DataCollector
 
         # only to see which service
         #
-#         logger.debug( sprintf( '    %s with port %d', s, port ) )
+#         logger.debug( format( '    %s with port %d', s, port ) )
 
         if( metrics != nil && metrics.count == 0 )
           case s
@@ -484,7 +474,7 @@ module DataCollector
             mbean     = e.dig('mbean')
             attribute = e.dig('attribute')
 
-            if( mbean == nil )
+            if( mbean.nil? )
               logger.error( '\'mbean\' are nil!' )
               next
             end
@@ -492,29 +482,23 @@ module DataCollector
             target = {
               'type'   => 'read',
               'mbean'  => mbean.to_s,
-              'target' => { 'url' => sprintf( "service:jmx:rmi:///jndi/rmi://%s:%s/jmxrmi", fqdn, port ) },
+              'target' => { 'url' => format( "service:jmx:rmi:///jndi/rmi://%s:%s/jmxrmi", fqdn, port ) },
               'config' => { 'ignoreErrors' => true, 'ifModifiedSince' => true, 'canonicalNaming' => true }
             }
 
             attributes = []
-
-            if( attribute != nil )
-
-              attributes = attribute.split(',')
-            end
+            attributes = attribute.split(',') unless( attribute.nil? )
 
             bulk.push( target )
           end
         end
 
-        if( bulk.count != 0 )
-          checks.push( { s => bulk.flatten } )
-        end
-
+        checks.push( { s => bulk.flatten } ) if( bulk.count != 0 )
       end
 
       checks.flatten!
 
+      result[:ip]       = ip
       result[:hostname] = host
       result[:fqdn]     = fqdn
       result[:services] = *services
@@ -523,9 +507,10 @@ module DataCollector
 #      logger.debug( JSON.pretty_generate( result ) )
         # send json to jolokia
       begin
-        self.collectMeasurements( result )
+        self.collect_measurements( result )
       rescue => e
         logger.error(format('collect measurements failed, cause: %s', e ))
+        logger.error( e.backtrace.join("\n") )
       end
 
       checks.clear()
@@ -539,7 +524,7 @@ module DataCollector
     #  - rmi uri are : "service:jmx:rmi:///jndi/rmi://moebius-16-tomcat:2222/jmxrmi"
     #    host: moebius-16-tomcat
     #    port: 2222
-    def checkHostAndService( targetUrl )
+    def check_host_and_service( targetUrl )
 
       result = false
 
@@ -556,12 +541,12 @@ module DataCollector
       destHost  = parts['host'].to_s.strip
       destPort  = parts['port'].to_s.strip
 
-#       logger.debug( sprintf( 'check Port %s on Host %s for sending data', destPort, destHost ) )
+#       logger.debug( format( 'check Port %s on Host %s for sending data', destPort, destHost ) )
 
       result = Utils::Network.portOpen?( destHost, destPort )
 
       if( result == false )
-        logger.warn( sprintf( 'The Port %s on Host %s is not open, skip sending data', destPort, destHost ) )
+        logger.warn( format( 'The Port %s on Host %s is not open, skip sending data', destPort, destHost ) )
       end
 
       return result
@@ -574,75 +559,81 @@ module DataCollector
     #  - or get data from external services
     # and save the result in an memory storage
     #
-    def collectMeasurements( params = {} )
+    def collect_measurements( params )
 
-#       logger.debug( "collectMeasurements( #{params} )" )
+#       logger.debug( "collect_measurements( #{params} )" )
 
-      if( @jolokia.jolokiaIsAvailable?() == false )
-
+      if( @jolokia.available? == false )
         logger.error( 'jolokia service is not available!' )
-
-        return {
-          :status  => 500,
-          :message => 'jolokia service is not available!'
-        }
+        return { status: 500, message: 'jolokia service is not available!' }
       end
 
+      ip        = params.dig(:ip)
       hostname  = params.dig(:hostname)
       fqdn      = params.dig(:fqdn)
       checks    = params.dig(:checks)
 
       result    = {
-        :hostname  => hostname,
-        :fqdn      => fqdn,
-        :timestamp => Time.now().to_i
+        hostname:  hostname,
+        fqdn: fqdn,
+        timestamp: Time.now().to_i
       }
+
+#       logger.debug( result )
+#       logger.debug( checks )
+#       logger.debug( checks.count )
+#
+#       logger.debug('------------------------------------------')
 
       checks.each do |c|
 
         c.each do |v,i|
 
-          logger.info( sprintf( 'service \'%s\' has %s checks', v, i.count ) )
+          logger.info( format( 'service \'%s\' with %s check%s', v, i.count, ( 's' if( i.count > 1 ) ) ) )
 
           result[v] ||= []
 
-          cacheKey = Storage::RedisClient.cacheKey( { :host => fqdn, :pre => 'result', :service => v } )
+          cacheKey = Storage::RedisClient.cacheKey( host: fqdn, pre: 'result', service: v )
 
           if( i.count > 1 )
 
             targetUrl = i.first.dig( 'target', 'url' )
 
-            if( self.checkHostAndService( targetUrl ) == true )
+            if( self.check_host_and_service( targetUrl ) == true )
 
-              response       = @jolokia.post( { :payload => i, :timeout => 15 } )
+              response       = @jolokia.post( payload: i, timeout: 15, sleep_retries: 3 )
 
-              jolokiaStatus  = response.dig(:status)
-              jolokiaMessage = response.dig(:message)
+              jolokia_status  = response.dig(:status)
+              jolokia_message = response.dig(:message)
 
-              if( jolokiaStatus != nil && jolokiaStatus.to_i == 200 )
+#               logger.debug( "jolokia_status : #{jolokia_status}" )
+#               logger.debug( "jolokia_message: #{jolokia_message}" )
+
+              if( jolokia_status != nil && jolokia_status.to_i == 200 )
 
                 begin
 
-                  data = self.reorganizeData( jolokiaMessage )
+                  data = self.reorganize_data( jolokia_message )
 
                   # get configured Content Server (RLS or MLS)
-                  if( v == 'cae-live' || v == 'cae-preview' )
+                  if( v =~ /^cae-(\blive|preview).*/ )
                     data = self.parse_content_server_url( fqdn: fqdn, service: v, data: data )
                   end
 
                   # get configured Master Live Server
                   if( v == 'replication-live-server' )
-                    data = self.parse_mls_ior( { :fqdn => fqdn, :data => data } )
+                    data = self.parse_mls_ior( fqdn: fqdn, data: data )
                   end
 
                   result[v] = data
                 rescue => e
                   logger.error( "i can't store data into result for service #{v}" )
                   logger.error( e )
+                  logger.debug( e.backtrace.join("\n") )
                 end
               else
-                logger.error( "jolokia status : #{jolokiaStatus}" )
-                logger.error( "jolokia message: #{jolokiaMessage}" )
+                logger.error( "jolokia status : #{jolokia_status}" )
+                logger.error( "jolokia message: #{jolokia_message}" )
               end
             end
 
@@ -652,25 +643,40 @@ module DataCollector
             case v
             when 'mysql'
               # MySQL
-              d = self.mysqlData( fqdn )
+
+              port = config_data( v, 'port', 3306 )
+              username = config_data( v, 'monitoring_user', 'monitoring' )
+              password = config_data( v, 'monitoring_password', 'monitoring' )
+
+              d = self.mysql_data( host: fqdn, port: port, username: username, password: password )
             when 'mongodb'
               # MongoDB
-              d = self.mongoDBData( fqdn )
+              port = config_data( v, 'port', 28017 )
+              d = self.mongodb_data( host: fqdn, port: port )
             when 'postgres'
               # Postgres
-              d = self.postgresData( fqdn )
+              port = config_data( v, 'port', 5432 )
+              username = config_data( v, 'monitoring_user', 'cm_management' )
+              password = config_data( v, 'monitoring_password', 'cm_management' )
+              database = config_data( v, 'monitoring_database', 'coremedia' )
+
+              d = self.postgres_data( host: fqdn, port: port )
             when 'redis'
               # redis
-              d = self.redisData( fqdn )
+              port = config_data( v, 'port', 6379 )
+              d = self.redis_data( host: fqdn, port: port )
             when 'node-exporter'
               # node_exporter
-              d = self.nodeExporterData( fqdn )
+              port = config_data( v, 'port', 9100 )
+              d = self.node_exporter_data( host: fqdn )
             when 'resourced'
               #
-              d = self.resourcedData( fqdn )
+              port = config_data( v, 'port', 55555 )
+              d = self.resourced_data( host: fqdn, port: port )
             when 'http-status'
               # apache mod_status
-              d = self.apache_mod_status( fqdn )
+              port = config_data( v, 'port', 8081 )
+              d = self.apache_mod_status( host: fqdn, port: port )
             else
               # all others
             end
@@ -680,6 +686,7 @@ module DataCollector
             rescue => e
               logger.error( "i can't create data for service #{v}" )
               logger.error( e )
+              logger.error( e.backtrace.join("\n") )
             end
 
           end
@@ -687,20 +694,20 @@ module DataCollector
           begin
 
 #             logger.debug( 'store result in our redis' )
-#             logger.debug( { :host => fqdn, :pre => 'result', :service => v } )
+#             logger.debug( host: fqdn, pre: 'result', service: v ) )
 
-            redisResult = @redis.set( cacheKey, result[v] )
+            redis_result = @redis.set( cacheKey, result[v] )
 
-            if( redisResult.is_a?( FalseClass ) || ( redisResult.is_a?( String ) && redisResult != 'OK' ) )
-              logger.error( sprintf( 'value for key %s can not be write', cacheKey ) )
-              logger.error( { :host => fqdn, :pre => 'result', :service => v } )
+            if( redis_result.is_a?( FalseClass ) || ( redis_result.is_a?( String ) && redis_result != 'OK' ) )
+              logger.error( format( 'value for key %s can not be write', cacheKey ) )
+              logger.error( host: fqdn, pre: 'result', service: v )
             end
 
           rescue => e
 
-            logger.error( sprintf( 'value for key \'%s\' can not be write', cacheKey ) )
-            logger.error( { :host => fqdn, :pre => 'result', :service => v } )
-            logger.error( result[v] )
+            logger.error( format( 'value for key \'%s\' can not be write', cacheKey ) )
+            logger.error( host: fqdn, pre: 'result', service: v )
+            # logger.error( result[v] )
             logger.error( e )
           end
 
@@ -728,72 +735,73 @@ module DataCollector
 
       logger.info( '  search Master Live Server for this Replication Live Server' )
 
-      d = data.select {|d| d.dig('Replicator') }
+      d = data.select { |d| d.dig('Replicator') }
 
-      if(!d.is_a?(Array))
-        data
+      return data unless( d.is_a?(Array) )
+
+      value = d.first # hash
+      replicator = value.dig('Replicator')
+
+      status = replicator.dig('status')
+
+      if( status.to_i != 200 )
+        logger.error( format( '  [%s] - Contentserver are not available!', status ) )
+        return data
       end
 
-      value = d.first.dig( 'Replicator','value' )
+      value = replicator.dig('value')
 
-      if(!value.is_a?(Hash))
-        data
-      end
+      return data unless( value.is_a?(Hash) )
 
       unless( value.nil? )
 
         value  = value.values.first
 
-        if(!value.is_a?(Hash))
-          data
-        end
+        return data unless( value.is_a?(Hash) )
 
         mlsIOR = value.dig( 'MasterLiveServerIORUrl' )
 
-        unless( mlsIOR.nil? )
+        return data if( mlsIOR.nil? )
 
-          uri    = URI.parse( mlsIOR )
-          scheme = uri.scheme
-          host   = uri.host
-          port   = uri.port
-          path   = uri.path
+        uri    = URI.parse( mlsIOR )
+        scheme = uri.scheme
+        host   = uri.host
+        port   = uri.port
+        path   = uri.path
 
-          logger.debug( format('search dns entry for \'%s\'', host) )
+        logger.debug( format('search dns entry for \'%s\'', host) )
 
-          ip, short, fqdn = self.nsLookup(host,60)
+        ip, short, fqdn = self.ns_lookup(host, 60)
 
-          if( !ip.nil? && !short.nil? && !fqdn.nil? )
+        if( !ip.nil? && !short.nil? && !fqdn.nil? )
 
-            logger.debug( "found: #{ip} , #{short} , #{fqdn}" )
+          logger.debug( "found: #{ip} , #{short} , #{fqdn}" )
 
-            realIP    = ip
-            realShort = short
-            mlsHost   = fqdn
-
-          else
-            realIP    = ''
-            realShort = ''
-            mlsHost   = host
-          end
-
-          value['MasterLiveServer'] = {
-            'scheme' => scheme,
-            'host'   => mlsHost,
-            'port'   => port,
-            'path'   => path
-          }
+          realIP    = ip
+          realShort = short
+          mlsHost   = fqdn
         else
-          logger.debug( 'no \'IOR URL\' found! :(' )
-          logger.info( 'this RLS use an older version. we use the RLS Host as fallback' )
+          realIP    = ''
+          realShort = ''
+          mlsHost   = host
         end
+
+        value['MasterLiveServer'] = {
+          'scheme' => scheme,
+          'host'   => mlsHost,
+          'port'   => port,
+          'path'   => path
+        }
+
+        # logger.debug( JSON.pretty_generate(value.dig('MasterLiveServer')) )
 
       end
 
-      logger.info( sprintf( '  use \'%s\'', mlsHost ) )
-      logger.debug( JSON.pretty_generate(value.dig('MasterLiveServer')) )
-      return data
+      logger.info( format( '  use \'%s\'', mlsHost ) )
 
+      data
     end
+
 
     # a CAE give us his Content Server as URL:
     #  - "Url": "http://tomcat-centos7:42080/coremedia/ior"
@@ -812,28 +820,42 @@ module DataCollector
 
       d = data.select {|d| d.dig('CapConnection') }
 
-      if(!d.is_a?(Array))
-        data
+      return data unless( d.is_a?(Array) )
+
+      value = d.first # hash
+      cap_connection = value.dig('CapConnection')
+
+#       logger.debug( value.class.to_s )
+#       logger.debug(value)
+
+      status = cap_connection.dig('status')
+#       logger.debug(status)
+
+      if( status.to_i != 200 )
+        logger.error( format( '  [%s] - Contentserver are not available!', status ) )
+        return data
       end
 
-      value = d.first.dig( 'CapConnection','value' )
+      value = cap_connection.dig('value')
 
-      if(!value.is_a?(Hash))
-        data
-      end
+      return data unless( value.is_a?(Hash) )
+
+#       logger.debug( value ) #
 
       unless( value.nil? )
 
         value  = value.values.first
 
-        if(!value.is_a?(Hash))
-          data
-        end
+        return data unless( value.is_a?(Hash) )
 
         content_server_ior = value.dig( 'Url' )
 
-        unless( content_server_ior.nil? )
+        if( content_server_ior.nil? )
+          logger.debug( 'no \'IOR URL\' found! :(' )
+          logger.info( 'this CAE use an older version. we use the CAE Host as fallback' )
 
+          return data
+        else
           uri    = URI.parse( content_server_ior )
           scheme = uri.scheme
           host   = uri.host
@@ -842,7 +864,7 @@ module DataCollector
 
           logger.debug( format('search dns entry for \'%s\'', host) )
 
-          ip, short, fqdn = self.nsLookup(host,60)
+          ip, short, fqdn = self.ns_lookup(host, 60)
 
           if( !ip.nil? && !short.nil? && !fqdn.nil? )
 
@@ -864,51 +886,41 @@ module DataCollector
             'port'   => port,
             'path'   => path
           }
-        else
-          logger.debug( 'no \'IOR URL\' found! :(' )
-          logger.info( 'this CAE use an older version. we use the CAE Host as fallback' )
+          # logger.debug( JSON.pretty_generate(value.dig('ContentServer')) )
         end
-
       end
 
-      logger.info( sprintf( '  use \'%s\'', content_server ) )
-      logger.debug( JSON.pretty_generate(value.dig('ContentServer')) )
-      return data
-
+      logger.info( format( '  use \'%s\'', content_server ) )
+      data
     end
-
-
 
 
     # reorganize data to later simple find
     #
-    def reorganizeData( data )
+    def reorganize_data( data )
 
-      if( data == nil )
+      if( data.nil? )
         logger.error( "      no data for reorganize" )
         logger.error( "      skip" )
-
-        return {
-          :status  => 500,
-          :message => 'no data for reorganize'
-        }
+        { status: 500, message: 'no data for reorganize' }
       end
 
       result  = Array.new()
 
       data.each do |c|
 
-        mbean      = c.dig('request', 'mbean')
         request    = c.dig('request')
+
+        if( request.nil? )
+          logger.error( 'wrong data format ... skip reorganizing' )
+          next
+        end
+
+        mbean      = request.dig('mbean')
         value      = c.dig('value')
         timestamp  = c.dig('timestamp')
         status     = c.dig('status')
 
-        if( request == nil )
-
-          logger.error( 'wrong data format ... skip reorganizing' )
-          next
-        end
 
         # "service:jmx:rmi:///jndi/rmi://moebius-16-tomcat:2222/jmxrmi"
         regex = /
@@ -944,7 +956,7 @@ module DataCollector
 
           cacheClass     = cacheClass.split('.').last
           cacheClass[0]  = cacheClass[0].to_s.capitalize
-          mbean_type     = sprintf( format, cacheClass )
+          mbean_type     = format( format, cacheClass )
 
 
         elsif( mbean.include?( 'module=' ) )
@@ -965,7 +977,7 @@ module DataCollector
           mbeanModule     = parts['module'].to_s.strip.tr( '. ', '' )
           mbeanPool       = parts['pool'].to_s.strip.tr( '. ', '' )
           mbeanType       = parts['type'].to_s.strip.tr( '. ', '' )
-          mbean_type      = sprintf( '%s%s', mbeanType, mbeanPool )
+          mbean_type      = format( '%s%s', mbeanType, mbeanPool )
 
         elsif( mbean.include?( 'bean=' ) )
 
@@ -983,7 +995,7 @@ module DataCollector
           parts           = mbean.match( regex )
           mbeanBean       = parts['bean'].to_s.strip.tr( '. ', '' )
           mbeanType       = parts['type'].to_s.strip.tr( '. ', '' )
-          mbean_type      = sprintf( '%s%s', mbeanType, mbeanBean )
+          mbean_type      = format( '%s%s', mbeanType, mbeanBean )
 
         elsif( mbean.include?( 'name=' ) )
           regex = /
@@ -1000,7 +1012,7 @@ module DataCollector
           parts           = mbean.match( regex )
           mbeanName       = parts['name'].to_s.strip.tr( '. ', '' )
           mbeanType       = parts['type'].to_s.strip.tr( '. ', '' )
-          mbean_type      = sprintf( '%s%s', mbeanType, mbeanName )
+          mbean_type      = format( '%s%s', mbeanType, mbeanName )
 
         elsif( mbean.include?( 'solr') )
 
@@ -1019,7 +1031,7 @@ module DataCollector
           mbeanCore[0]    = mbeanCore[0].to_s.capitalize
           mbeanType       = parts['type'].to_s.tr( '. /', '' )
           mbeanType[0]    = mbeanType[0].to_s.capitalize
-          mbean_type      = sprintf( 'Solr%s%s', mbeanCore, mbeanType )
+          mbean_type      = format( 'Solr%s%s', mbeanCore, mbeanType )
 
         else
           regex = /
@@ -1032,10 +1044,11 @@ module DataCollector
 
           parts           = mbean.match( regex )
           mbeanType       = parts['type'].to_s.strip.tr( '. ', '' )
-          mbean_type      = sprintf( '%s', mbeanType )
+          mbean_type      = format( '%s', mbeanType )
         end
 
         result.push(
+
           mbean_type.to_s => {
             'status'    => status,
             'timestamp' => timestamp,
@@ -1048,75 +1061,82 @@ module DataCollector
 
       end
 
-      return result
+      { status: 204, message: 'no data' } if( result.count == 0 )
+
+      result
     end
 
 
     def clean()
 
-      data = @mq.getJobFromTube( @mqQueue, true )
+      data = @mq.getJobFromTube( @mq_queue, true )
 
       if( data.count() != 0 )
 
-        logger.debug( data )
-
+        logger.debug( "clean: #{data}" )
         payload = data.dig( :body, 'payload' )
+        hostname = payload.dig('host') unless( payload.nil? )
 
-        logger.debug( payload )
+        unless( hostname.nil? )
 
-        @cache.unset( payload.dig('host') )
+          logger.debug('unset cached data')
+          keys  = format( '%s-validate', hostname )
+
+          [hostname, keys].each do |x|
+            logger.debug( "  #{x}" )
+            @cache.unset( x )
+          end
+        end
       end
     end
 
 
-
     def run()
-
-#      logger.debug( 'get the online server for monitoring to collect their data' )
 
       monitoredServer = self.monitoredServer()
 
-#       logger.debug( monitoredServer )
+      return { status: 204, message: 'no online server found' } if( monitoredServer.nil? || monitoredServer.is_a?( FalseClass ) || monitoredServer.count == 0 )
 
-      if( monitoredServer == nil || monitoredServer.is_a?( FalseClass ) || monitoredServer.count == 0 )
-
-        logger.info( 'no online server found' )
-
-        return
-      end
 
       monitoredServer.each do |h|
 
         # get dns data!
         #
-        ip, short, fqdn = self.nsLookup( h )
+        ip, short, fqdn = self.ns_lookup( h )
 
-        discoveryData = nil
+        discovery_data = nil
 
         # add hostname to an blocking cache
         #
-        if( @jobs.jobs( { :short => short, :fqdn => fqdn } ) == true )
+        if( @jobs.jobs( short: short, fqdn: fqdn ) == true )
 
           logger.warn( 'we are working on this job' )
-          logger.debug( { :short => short, :fqdn => fqdn } )
+          logger.debug( short: short, fqdn: fqdn )
 
           next
         end
 
         logger.debug( 'block this job:' )
-        logger.debug( { :short => short, :fqdn => fqdn } )
-        @jobs.add( { :short => short, :fqdn => fqdn } )
+        logger.debug( short: short, fqdn: fqdn )
+        @jobs.add( short: short, fqdn: fqdn )
 
         start = Time.now
 
-        logger.info( sprintf( 'found \'%s\' for monitoring', fqdn ) )
+        logger.info( format( 'found \'%s\' for monitoring', fqdn ) )
 
         # TODO
         # discussion
         # we need this in realtime, or can we cache this for ... 1 minute or more?
         #
         begin
-          discoveryData    = @database.discoveryData( { :ip => ip, :short => short, :fqdn => fqdn } )
+          discovery_data    = @database.discoveryData( ip: ip, short: short, fqdn: fqdn )
+
+          discovery_keys   = discovery_data.keys.sort
+          discovery_count  = discovery_keys.count
+          key = discovery_keys.clone
+          key = discovery_keys.to_s if( discovery_keys.is_a?(Array) )
+
+          discovery_checksum = Digest::MD5.hexdigest( key )
         rescue => e
           logger.error(e)
         end
@@ -1124,7 +1144,26 @@ module DataCollector
         # build prepared datas
         #
         begin
-          @prepare.buildMergedData( { :hostname => short, :fqdn => fqdn, :data => discoveryData } )
+          prepared_count, prepared_checksum, prepared_keys = @prepare.valid_data(fqdn).values
+
+          logger.debug( "current : #{discovery_count} services / checksum: #{discovery_checksum}" )
+          logger.debug( "cached  : #{prepared_count} services / checksum: #{prepared_checksum}" )
+
+          options = { hostname: short, fqdn: fqdn, data: discovery_data }
+
+          if( prepared_count != 0 && discovery_count > prepared_count )
+
+            logger.info('new service detected ...')
+            logger.debug( "current : #{discovery_keys}" )
+            logger.debug( "cached  : #{prepared_keys}" )
+
+            options[:force] = true
+            key       = Storage::RedisClient.cacheKey( host: fqdn, pre: 'collector' )
+            data      = @cache.unset( key )
+          end
+
+          result = @prepare.build_merged_data( options )
+          logger.debug( result )
         rescue => e
           logger.error(e)
         end
@@ -1132,17 +1171,17 @@ module DataCollector
         # run checks
         #
         begin
-          self.createBulkCheck( { :hostname => short, :fqdn => fqdn } )
+          self.create_bulkcheck( ip: ip, short: short, fqdn: fqdn )
         rescue => e
           logger.error(e)
         end
 
         finish = Time.now
-        logger.info( sprintf( 'collect data in %s seconds', (finish - start).round(2) ) )
+        logger.info( format( 'collect data in %s seconds', (finish - start).round(2) ) )
 
         logger.debug( 'give job free:' )
-        logger.debug( { :short => short, :fqdn => fqdn } )
-        @jobs.del( { :short => short, :fqdn => fqdn } )
+        logger.debug( short: short, fqdn: fqdn )
+        @jobs.del( short: short, fqdn: fqdn )
 
       end
 

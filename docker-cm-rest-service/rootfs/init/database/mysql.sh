@@ -2,7 +2,7 @@
 # set -e
 # set -x
 
-MYSQL_HOST=${MYSQL_HOST:-""}
+MYSQL_HOST=${MYSQL_HOST:-"database"}
 MYSQL_PORT=${MYSQL_PORT:-"3306"}
 
 MYSQL_ROOT_USER=${MYSQL_ROOT_USER:-"root"}

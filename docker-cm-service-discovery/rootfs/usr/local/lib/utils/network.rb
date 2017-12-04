@@ -193,7 +193,7 @@ module Utils
 #       puts "pinging IP #{ip} ... "
 
       # first, ping check
-      if( system( sprintf( 'ping -c1 -w1 %s > /dev/null', ip.to_s ) ) == true )
+      if( system( sprintf( 'ping -c1 -w5 %s >  /dev/null', ip.to_s ) ) == true )
         return true
       else
         return false

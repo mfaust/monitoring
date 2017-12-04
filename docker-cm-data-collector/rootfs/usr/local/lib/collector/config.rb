@@ -1,5 +1,4 @@
 
-
 module DataCollector
 
   class Config
@@ -8,39 +7,43 @@ module DataCollector
 
     attr_accessor :config
     attr_accessor :jolokiaApplications
+    attr_accessor :service_config
 
     def initialize( settings = {} )
 
-      applicationConfig  = settings.dig( :configFiles, :application )
-      serviceConfig      = settings.dig( :configFiles, :service )
+      application_config  = settings.dig( :application )
+      service_config      = settings.dig( :service )
 
-      @config             = nil
-      jolokiaApplications = nil
+      @config              = nil
+      @jolokiaApplications = nil
+      @service_config      = nil
 
-      appConfigFile  = File.expand_path( applicationConfig )
+      application_config_file  = File.expand_path( application_config )
+      service_config_file      = File.expand_path( service_config )
 
+      logger.debug( format( 'read config file: %s', service_config_file ) )
       begin
-
-        if( File.exist?( appConfigFile ) )
-
-          @config      = YAML.load_file( appConfigFile )
-
-          @jolokiaApplications = @config.dig( 'jolokia', 'applications' )
-
+        if( File.exist?( service_config_file ) )
+          @service_config = YAML.load_file( service_config_file )
         else
-          logger.error( sprintf( 'Application Config File %s not found!', appConfigFile ) )
-
-          raise( sprintf( 'Application Config File %s not found!', appConfigFile ) )
-
+          logger.error( sprintf( 'service config file %s not found!', service_config_file ) )
         end
       rescue => e
-
+        logger.error(e)
       end
 
+      logger.debug( format( 'read config file: %s', application_config_file ) )
+      begin
+        if( File.exist?( application_config_file ) )
+          @config      = YAML.load_file( application_config_file )
+          @jolokiaApplications = @config.dig( 'jolokia', 'applications' )
+        else
+          logger.error( sprintf( 'Application Config File %s not found!', application_config_file ) )
+          raise( sprintf( 'Application Config File %s not found!', application_config_file ) )
+        end
+      rescue => e
+        logger.error(e)
+      end
     end
-
   end
-
 end
-
-

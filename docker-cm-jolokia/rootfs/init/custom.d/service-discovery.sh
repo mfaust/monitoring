@@ -1,7 +1,6 @@
 #!/bin/sh
 
 set -e
-set -x
 
 if [ -e /usr/bin/service-discovery ]
 then

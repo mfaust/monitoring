@@ -1,11 +1,14 @@
+
 TYPE := cm-rest-service
 IMAGE_NAME := docker-${TYPE}
 
+.PHONY: build clean run  shell exec stop package-info history
+
+default: build
 
 build:
 	docker build \
 		--rm \
-		--quiet \
 		--tag=$(IMAGE_NAME) .
 	@echo Image tag: ${IMAGE_NAME}
 
@@ -27,9 +30,6 @@ shell:
 		--rm \
 		--interactive \
 		--tty \
-		--env MYSQL_HOST=172.17.0.1 \
-		--env MYSQL_ROOT_USER=root \
-		--env MYSQL_ROOT_PASS=m3B.yCZB \
 		--hostname=${IMAGE_NAME} \
 		--name=${IMAGE_NAME} \
 		$(IMAGE_NAME) \

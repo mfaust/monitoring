@@ -1,5 +1,10 @@
+
 TYPE := cm-icinga-client
 IMAGE_NAME := docker-${TYPE}
+
+.PHONY: build clean run  shell exec stop package-info history
+
+default: build
 
 build:
 	docker build \
@@ -16,9 +21,6 @@ run:
 		--detach \
 		--interactive \
 		--tty \
-		--label com.dnsdock.image=${TYPE} \
-		--label com.dnsdock.alias=${TYPE} \
-		--label com.dnsdock.ttl=30 \
 		--volume /etc/localtime:/etc/localtime:ro \
 		--hostname=${IMAGE_NAME} \
 		--name=${IMAGE_NAME} \
@@ -30,12 +32,11 @@ shell:
 		--rm \
 		--interactive \
 		--tty \
-		--label com.dnsdock.image=${TYPE} \
-		--label com.dnsdock.alias=${TYPE} \
-		--label com.dnsdock.ttl=30 \
 		--volume /etc/localtime:/etc/localtime:ro \
 		--hostname=${IMAGE_NAME} \
 		--name=${IMAGE_NAME} \
+		--env ICINGA_CERT_SERVICE='{ "ba": { "user":"admin", "password":"admin" },"api": { "port": "5665", "user":"root", "password":"icinga" },"server": "cm-icinga2-master","port": 4567,"path": "/"}' \
+		--entrypoint '' \
 		$(IMAGE_NAME) \
 		/bin/sh
 

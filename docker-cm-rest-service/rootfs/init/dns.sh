@@ -6,33 +6,13 @@ set -e
 
 # -------------------------------------------------------------------------------------------------
 
-isIp() {
-
-  TEST=$(echo "${IP}." | grep -E "([0-9]{1,3}\.){4}")
-
-  if [ "$TEST" ]
-  then
-    echo "$IP" | awk -F. '{
-      if ( (($1>=0) && ($1<=255)) &&
-           (($2>=0) && ($2<=255)) &&
-           (($3>=0) && ($3<=255)) &&
-           (($4>=0) && ($4<=255)) ) {
-        print 0
-#         print($0 " is a valid IP address.");
-      } else {
-        print 1
-#        print($0 ": IP address out of range!");
-      }
-    }'
-  else
-    echo 1
-#    echo "${IP} is not a valid IP address!"
-  fi
+is_ip() {
+  echo $(ipcalc ${1} | head -n1 | grep -c 'INVALID ADDRESS')
 }
 
-checkIP() {
+check_ip() {
 
-  if [ $(isIp ${1}) -eq 1 ]
+  if [ $(is_ip ${1}) -eq 1 ]
   then
     name=$(host -t A ${1} | grep "has address" | cut -d ' ' -f 4)
 
@@ -49,63 +29,63 @@ checkIP() {
 }
 
 
-addDNS() {
+add_dns() {
 
-  hosts=
+  local name=${1}
+  local ip=${2}
+  local aliases="${3}"
 
-  if [ -n "${ADDITIONAL_DNS}" ]
+  ip="$(check_ip ${ip})"
+
+  if [ -z ${ip} ]
+  then
+    echo " [E] - the ip can't resolve! :("
+    return
+  fi
+
+  [ -z "${aliases}" ] || aliases=$(echo "${aliases}" | sed -e 's| ||g' -e 's|,|","|g')
+
+  if [ "${name}" == "blueprint-box" ]
+  then
+    aliases="\"aliases\":[\"${aliases}\", \"${ip}.xip.io\", \"${name}\", \"${name}.docker\"]"
+  else
+    aliases="\"aliases\":[\"${name}\",\"${aliases}\"]"
+  fi
+
+  echo "add host '${name}' with ip '${ip}' and aliases '${aliases}' to dns"
+
+  curl \
+    http://dnsdock/services/${name} \
+    --silent \
+    --request PUT \
+    --data-ascii "{\"name\":\"${name}\",\"image\":\"${name}\",\"ips\":[\"${ip}\"],\"ttl\":0,${aliases}}"
+}
+
+
+read_additional_dns() {
+
+  if [ ! -z "${ADDITIONAL_DNS}" ]
   then
 
-    while ! nc -z dnsdock 80
+    echo "${ADDITIONAL_DNS}" | jq --compact-output --raw-output ".[]" | while IFS='' read x
     do
-      echo -n " ."
-      sleep 5s
+
+      if [[ ${x} == null ]]
+      then
+        continue
+      fi
+
+      name=$(echo "${x}" | jq --raw-output .name)
+      ip=$(echo "${x}" | jq --raw-output .ip)
+      aliases=$(echo "${x}" | jq --raw-output '.aliases | join(", ")')
+
+      [ ${name} == null ] && continue
+      [ "${aliases}" == null ] && aliases=
+
+      add_dns "${name}" "${ip}" "${aliases}"
     done
-    echo " "
 
-    sleep 2s
-
-    hosts=$(echo ${ADDITIONAL_DNS} | sed -e 's/,/ /g' -e 's/\s+/\n/g' | uniq)
-
-    if [ ! -z "${hosts}" ]
-    then
-      for h in ${hosts}
-      do
-        echo "${h}"
-
-        host=$(echo "${h}" | cut -d: -f1)
-        ip=$(echo "${h}" | cut -d: -f2)
-        aliases=
-
-        [ -n "${host}" ]
-        [ -n "${ip}" ]
-
-        ip="$(checkIP ${ip})"
-
-        if [ -z ${ip} ]
-        then
-          echo " [E] - the ip can't resolve! :("
-          continue
-        fi
-
-        if [ "${host}" == "blueprint-box" ]
-        then
-          aliases="\"aliases\":[\"${host}\", \"${ip}.xip.io\"]"
-        else
-          aliases="\"aliases\":[\"${host}\"]"
-        fi
-
-        echo "add host '${host}' with ip '${ip}' to dns"
-
-        curl \
-          http://dnsdock/services/${host} \
-          --silent \
-          --request PUT \
-          --data-ascii "{\"name\":\"${host}.docker\",\"image\":\"${host}\",\"ips\":[\"${ip}\"],\"ttl\":0,${aliases}}"
-
-      done
-    fi
   fi
 }
 
-addDNS
+read_additional_dns

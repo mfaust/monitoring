@@ -1,5 +1,10 @@
+
 TYPE := cm-graphite-client
 IMAGE_NAME := docker-${TYPE}
+
+.PHONY: build clean run  shell exec stop package-info history
+
+default: build
 
 build:
 	docker build \
@@ -16,9 +21,6 @@ run:
 		--detach \
 		--interactive \
 		--tty \
-		--label com.dnsdock.image=${TYPE} \
-		--label com.dnsdock.alias=${TYPE} \
-		--label com.dnsdock.ttl=30 \
 		--volume /etc/localtime:/etc/localtime:ro \
 		--hostname=${IMAGE_NAME} \
 		--name=${IMAGE_NAME} \
@@ -29,9 +31,6 @@ shell:
 		--rm \
 		--interactive \
 		--tty \
-		--label com.dnsdock.image=${TYPE} \
-		--label com.dnsdock.alias=${TYPE} \
-		--label com.dnsdock.ttl=30 \
 		--volume /etc/localtime:/etc/localtime:ro \
 		--hostname=${IMAGE_NAME} \
 		--name=${IMAGE_NAME} \
