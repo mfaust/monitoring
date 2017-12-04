@@ -862,6 +862,7 @@ class CMGrafana
         re = Regexp.new( map.keys.map { |x| Regexp.escape(x) }.join( '|' ) )
 
         template.gsub!( re, map )
+        template = JSON.parse( template ) if( template.is_a?( String ) )
         template = self.expand_tags( dashboard: template, additional_tags: @additional_tags ) if( @additional_tags.count > 0 )
 
         # now we must recreate *all* panel IDs for an propper import
