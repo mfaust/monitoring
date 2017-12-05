@@ -77,11 +77,19 @@ module Aws
               tags = tags.reduce( :merge )
               tags = Hash[tags.sort]
 
-              if( tags.key?('cm_apps') )
-                tags['services'] = tags.delete('cm_apps')
-              end
+              # rename some tags
+              tags['services'] = tags.delete('cm-apps') if( tags.key?('cm-apps') )
+              tags['customer'] = tags.delete('customer-name-short') if( tags.key?('customer-name-short') )
+              tags['environment'] = tags.delete('customer-environment-domain') if( tags.key?('customer-environment-domain') )
+              tags['environment-short'] = tags.delete('customer-environment-name-short') if( tags.key?('customer-environment-name-short') )
 
-              useableTags = tags.filter( 'customer', 'environment', 'tier', 'name', 'services' )
+              useableTags = tags.filter( 'customer', 'environment', 'environment-short', 'tier', 'name', 'services' )
+
+#               if( tags.key?('cm-apps') )
+#                 tags['services'] = tags.delete('cm-apps')
+#               end
+#
+#               useableTags = tags.filter( 'customer', 'environment', 'tier', 'name', 'services' )
 
               if( useableTags.key?('services') )
                 useableTags['services'] = useableTags['services'].split(' ')

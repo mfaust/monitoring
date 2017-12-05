@@ -27,8 +27,8 @@ module ExternalDiscovery
 
       @historic      = []
 
-      version        = '0.11.2'
       date           = '2017-10-29'
+      version        = '1.0.0'
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - External Discovery Service' )
@@ -53,10 +53,10 @@ module ExternalDiscovery
       }
 
       filter = [
-        { name: 'instance-state-name', values: ['running'] },
-        { name: 'tag-key'            , values: ['monitoring-enabled'] },
-        { name: 'tag:monitoring-enabled', values: ['true'] },
-        { name: 'tag:environment'    , values: [@awsEnvironment] }
+        { name: 'instance-state-name'            , values: ['running'] },
+        { name: 'tag-key'                        , values: ['monitoring-enabled'] },
+        { name: 'tag:monitoring-enabled'         , values: ['1'] },
+        { name: 'tag:customer-environment-domain', values: [@awsEnvironment] }
       ]
 
       @jobs             = JobQueue::Job.new()
@@ -157,6 +157,7 @@ module ExternalDiscovery
         tag_tier        = d.dig('tags', 'tier')
         tag_customer    = d.dig('tags', 'customer')
         tag_environment = d.dig('tags', 'environment')
+        tag_environment_short = d.dig('tags', 'environment-short')
         tag_cm_apps     = d.dig('tags', 'cm_apps')
         dns_ip          = d.dig('dns', 'ip')
         dns_short       = d.dig('dns', 'short')
@@ -164,19 +165,39 @@ module ExternalDiscovery
 
         white_list = [
           'management-cms',
-          'management-workflow',
+          'management-wfs',
           'management-feeder',
           'management-studio',
           'management-caepreview',
           'delivery-backup',
           'delivery-mls',
-          'delivery-rls-cae',
+          'delivery-rls1',
+          'delivery-rls2',
+          'delivery-rls3',
+          'delivery-rls4',
+          'delivery-rls5',
+          'delivery-cae1',
+          'delivery-cae2',
+          'delivery-cae3',
+          'delivery-cae4',
+          'delivery-cae5',
+          'delivery-cae6',
+          'delivery-cae7',
+          'delivery-cae8',
+          'delivery-cae9',
+          'storage-solr',
           'storage-management-solr',
           'storage-delivery-solr'
         ]
 
-        if( !white_list.include?(tag_name.gsub(tag_customer,'').gsub(tag_environment,'').gsub('--','') ) )
+        check_name = tag_name.gsub(tag_customer,'').gsub(tag_environment,'').gsub(tag_environment_short,'').gsub('-','')
+        check_name = format('%s-%s', tag_tier, check_name)
+
+        logger.debug( "check against whitelist: #{check_name}" )
+
+        unless( white_list.include?( check_name ) )
           logger.debug( "skip: '#{tag_name}'" )
+          logger.debug( "tags: '#{aws_tags}'" )
           next
         end
 
@@ -251,7 +272,8 @@ module ExternalDiscovery
 
       # our positive list for Tags
       #
-      useableTags = tags.filter( 'customer', 'environment', 'tier' )
+      useableTags = tags.filter( 'environment-short', 'tier' )
+      useableTags = useableTags.values
 
       logger.debug( "useable tags : #{useableTags}" )
 
@@ -268,7 +290,7 @@ module ExternalDiscovery
         :config     => {
           :display_name        => display_name,
           :graphite_identifier => graphite_identifier,
-          :tags                => useableTags,
+          :tags                => useableTags, ## ???
           :customer            => customer,
           :environment         => environment,
           :tier                => tier,
