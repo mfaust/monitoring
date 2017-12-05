@@ -272,7 +272,8 @@ module ExternalDiscovery
 
       # our positive list for Tags
       #
-      useableTags = tags.filter( 'customer', 'environment', 'tier' )
+      useableTags = tags.filter( 'environment-short', 'tier' )
+      useableTags = useableTags.values
 
       logger.debug( "useable tags : #{useableTags}" )
 
@@ -289,7 +290,7 @@ module ExternalDiscovery
         :config     => {
           :display_name        => display_name,
           :graphite_identifier => graphite_identifier,
-          :tags                => useableTags,
+          :tags                => useableTags, ## ???
           :customer            => customer,
           :environment         => environment,
           :tier                => tier,
