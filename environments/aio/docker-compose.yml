@@ -224,6 +224,7 @@ services:
       - database
       - redis
     environment:
+      DEBUG: 1
       SERVICE_NAME: icinga2-master
       MYSQL_HOST: database
       MYSQL_ROOT_PASS: database.pass

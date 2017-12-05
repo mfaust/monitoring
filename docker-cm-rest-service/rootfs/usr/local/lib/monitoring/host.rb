@@ -28,7 +28,7 @@ module Monitoring
 
     def addHost( host, payload )
 
-  #     logger.debug( sprintf( 'addHost( \'%s\', \'%s\' )', host, payload ) )
+  #     logger.debug( format( 'addHost( \'%s\', \'%s\' )', host, payload ) )
 
       status    = 500
       message   = 'initialize error'
@@ -47,7 +47,7 @@ module Monitoring
 
       # --------------------------------------------------------------------
 
-      logger.info( sprintf( 'add node \'%s\' to monitoring', host ) )
+      logger.info( format( 'add node \'%s\' to monitoring', host ) )
 
       alreadyInMonitoring = self.nodeExists?( host )
 
@@ -82,9 +82,6 @@ module Monitoring
         result[host.to_s]['request'] = hash
 
         force           = hash.keys.include?('force')        ? hash['force']        : false
-  #       enableDiscovery = hash.keys.include?('discovery')    ? hash['discovery']    : @enabledDiscovery
-  #       enabledGrafana  = hash.keys.include?('grafana')      ? hash['grafana']      : @enabledGrafana
-  #       enabledIcinga   = hash.keys.include?('icinga')       ? hash['icinga']       : @enabledIcinga
         annotation      = hash.keys.include?('annotation')   ? hash['annotation']   : true
         grafanaOverview = hash.keys.include?('overview')     ? hash['overview']     : true
         services        = hash.keys.include?('services')     ? hash['services']     : []
@@ -92,28 +89,28 @@ module Monitoring
         config          = hash.keys.include?('config')       ? hash['config']       : {}
       end
 
-      # logger.debug( sprintf( 'force      : %s', force            ? 'true' : 'false' ) )
-      # logger.debug( sprintf( 'discovery  : %s', enableDiscovery  ? 'true' : 'false' ) )
-      # logger.debug( sprintf( 'grafana    : %s', enabledGrafana   ? 'true' : 'false' ) )
-      # logger.debug( sprintf( 'icinga     : %s', enabledIcinga    ? 'true' : 'false' ) )
-      # logger.debug( sprintf( 'annotation : %s', annotation       ? 'true' : 'false' ) )
-      # logger.debug( sprintf( 'overview   : %s', grafanaOverview  ? 'true' : 'false' ) )
-      # logger.debug( sprintf( 'services   : %s', services ) )
-      # logger.debug( sprintf( 'tags       : %s', tags ) )
-      # logger.debug( sprintf( 'config     : %s', config ) )
+      logger.debug( format( 'force      : %s (%s)', force           ? 'true' : 'false', force.class.to_s))
+      logger.debug( format( 'discovery  : %s (%s)', enableDiscovery ? 'true' : 'false', enableDiscovery.class.to_s))
+      logger.debug( format( 'grafana    : %s (%s)', enabledGrafana  ? 'true' : 'false', enabledGrafana.class.to_s))
+      logger.debug( format( 'icinga     : %s (%s)', enabledIcinga   ? 'true' : 'false', enabledIcinga.class.to_s))
+      logger.debug( format( 'annotation : %s (%s)', annotation      ? 'true' : 'false', annotation.class.to_s))
+      logger.debug( format( 'overview   : %s (%s)', grafanaOverview ? 'true' : 'false', grafanaOverview.class.to_s))
+      logger.debug( format( 'services   : %s (%s)', services , services.class.to_s) )
+      logger.debug( format( 'tags       : %s (%s)', tags , tags.class.to_s) )
+      logger.debug( format( 'config     : %s (%s)', config , config.class.to_s) )
+
+      # TODO
+      # ASAP
+      # sanity-checks
+
+      return { status: 404, message: format('wrong type. \'tags\' must be an Array, given \'%s\'', tags.class.to_s) } unless( tags.is_a?(Array) )
+      return { status: 404, message: format('wrong type. \'config\' must be an Hash, given \'%s\'', tags.class.to_s) } unless( tags.is_a?(Hash) )
 
 
       if( force == false && alreadyInMonitoring == true )
         logger.warn( "node '#{host}' is already in monitoring" )
         return JSON.pretty_generate( status: 200, message: "node '#{host}' is already in monitoring" )
       end
-
-      # insert the DNS data into the payload
-      #
-#       if( payload.is_a?(String) && payload.size != 0 )
-#         payload = JSON.parse(payload)
-#         payload[:dns] = hostData
-#       end
 
       payload = { dns: hostData } if( payload.is_a?(String) && payload.size == 0 )
       payload[:timestamp] = Time.now.to_i
@@ -172,12 +169,6 @@ module Monitoring
       logger.info( 'add node to discovery service' )
       self.messageQueue( cmd: 'add', node: host, queue: 'mq-discover', payload: payload, prio: 1, delay: 2 + delay.to_i )
 
-#       logger.info( 'annotation for create' )
-#       annotation(
-#         host: host,
-#         dns: { ip: ip, short: host, fqdn: fqdn },
-#         payload: { command: 'create', argument: 'node', config: config }
-#       )
 
       return JSON.pretty_generate( status: 200, message: 'the message queue is informed ...' )
     end
@@ -255,7 +246,7 @@ module Monitoring
 
       # --------------------------------------------------------------------
 
-      logger.info( sprintf( 'remove node \'%s\' from monitoring', host ) )
+      logger.info( format( 'remove node \'%s\' from monitoring', host ) )
 
       alreadyInMonitoring = self.nodeExists?( host )
       hostData            = self.checkAvailablility?( host )
@@ -330,11 +321,11 @@ module Monitoring
 
       payload = JSON.generate(payload)
 
-  #    logger.debug( sprintf( 'force      : %s', force            ? 'true' : 'false' ) )
-  #    logger.debug( sprintf( 'discovery  : %s', enableDiscovery  ? 'true' : 'false' ) )
-  #    logger.debug( sprintf( 'grafana    : %s', enabledGrafana   ? 'true' : 'false' ) )
-  #    logger.debug( sprintf( 'icinga     : %s', enabledIcinga    ? 'true' : 'false' ) )
-  #    logger.debug( sprintf( 'annotation : %s', annotation       ? 'true' : 'false' ) )
+  #    logger.debug( format( 'force      : %s', force            ? 'true' : 'false' ) )
+  #    logger.debug( format( 'discovery  : %s', enableDiscovery  ? 'true' : 'false' ) )
+  #    logger.debug( format( 'grafana    : %s', enabledGrafana   ? 'true' : 'false' ) )
+  #    logger.debug( format( 'icinga     : %s', enabledIcinga    ? 'true' : 'false' ) )
+  #    logger.debug( format( 'annotation : %s', annotation       ? 'true' : 'false' ) )
 
       logger.info( 'annotation for remove' )
       annotation(

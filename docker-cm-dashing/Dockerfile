@@ -30,7 +30,7 @@ RUN \
   apk add --quiet --no-cache --virtual .build-deps \
     build-base git openssl-dev  ruby-dev && \
   apk add --quiet --no-cache \
-    bind-tools drill jq ruby-irb supervisor && \
+    bind-tools drill jq ruby-irb supervisor yajl-tools && \
   gem install --quiet --no-rdoc --no-ri \
     io-console bundler && \
   for g in $(ls -1 /build/*.gem 2> /dev/null) ; do echo $g; gem install --quiet --no-rdoc --no-ri ${g} ; done && \

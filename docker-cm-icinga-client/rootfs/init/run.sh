@@ -1,7 +1,5 @@
 #!/bin/sh
 
-set -x
-
 export WORK_DIR=/srv
 
 # -------------------------------------------------------------------------------------------------
@@ -11,19 +9,19 @@ extract_vars() {
   if [ ! -z "${ICINGA_CERT_SERVICE}" ]
   then
 
-    echo "${ICINGA_CERT_SERVICE}" | json_verify -q 2> /dev/null
-
-    if [ $? -gt 0 ]
-    then
-      echo " [E] the ICINGA_CERT_SERVICE Environment ist not an json"
-      exit 1
-    fi
-
-    if ( [ "${ICINGA_CERT_SERVICE}" == "true" ] || [ "${ICINGA_CERT_SERVICE}" == "true" ] )
-    then
-      echo " [E] the ICINGA_CERT_SERVICE Environment must be an json, not true or false!"
-      exit 1
-    fi
+#     echo "${ICINGA_CERT_SERVICE}" | json_verify -q 2> /dev/null
+#
+#     if [ $? -gt 0 ]
+#     then
+#       echo " [E] the ICINGA_CERT_SERVICE Environment ist not an json"
+#       exit 1
+#     fi
+#
+#     if ( [ "${ICINGA_CERT_SERVICE}" == "true" ] || [ "${ICINGA_CERT_SERVICE}" == "true" ] )
+#     then
+#       echo " [E] the ICINGA_CERT_SERVICE Environment must be an json, not true or false!"
+#       exit 1
+#     fi
 
     ICINGA_CERT_SERVICE_SERVER=$(echo "${ICINGA_CERT_SERVICE}" | jq --raw-output .server)
     ICINGA_CERT_SERVICE_PORT=$(echo "${ICINGA_CERT_SERVICE}" | jq --raw-output .port)

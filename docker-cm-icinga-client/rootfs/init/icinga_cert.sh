@@ -1,6 +1,6 @@
 
 ICINGA_API_PORT=${ICINGA_API_PORT:-5665}
-USE_CERT_SERVICE=${USE_CERT_SERVICE:-'false'}# must be an json!
+USE_CERT_SERVICE=${USE_CERT_SERVICE:-'false'}
 
 ICINGA_CERT_SERVICE_SERVER=
 ICINGA_CERT_SERVICE_PORT=
@@ -26,6 +26,8 @@ get_certificate() {
     echo ""
     echo " [i] we ask our cert-service for a certificate .."
 
+    set -x
+
     # generate a certificate request
     #
     code=$(curl \
@@ -33,10 +35,12 @@ get_certificate() {
       --silent \
       --request GET \
       --header "X-API-USER: ${ICINGA_CERT_SERVICE_API_USER}" \
-      --header "X-API-KEY: ${ICINGA_CERT_SERVICE_API_PASSWORD}" \
+      --header "X-API-PASSWORD: ${ICINGA_CERT_SERVICE_API_PASSWORD}" \
       --write-out "%{http_code}\n" \
       --output /tmp/request_${HOSTNAME}.json \
       http://${ICINGA_CERT_SERVICE_SERVER}:${ICINGA_CERT_SERVICE_PORT}${ICINGA_CERT_SERVICE_PATH}v2/request/${HOSTNAME})
+
+    set +x
 
     if ( [ $? -eq 0 ] && [ ${code} -eq 200 ] )
     then
@@ -58,7 +62,7 @@ get_certificate() {
         --silent \
         --request GET \
         --header "X-API-USER: ${ICINGA_CERT_SERVICE_API_USER}" \
-        --header "X-API-KEY: ${ICINGA_CERT_SERVICE_API_PASSWORD}" \
+        --header "X-API-PASSWORD: ${ICINGA_CERT_SERVICE_API_PASSWORD}" \
         --header "X-CHECKSUM: ${checksum}" \
         --write-out "%{http_code}\n" \
         --request GET \
@@ -101,12 +105,17 @@ get_certificate() {
       fi
     else
 
-      error=$(cat /tmp/request_${HOSTNAME}.json)
+      if [ -f /tmp/request_${HOSTNAME}.json ]
+      then
+        error=$(cat /tmp/request_${HOSTNAME}.json)
 
-      echo " [E] ${code} - the cert-service tell us a problem: '${error}'"
-      echo " [E] exit ..."
+        echo " [E] ${code} - the cert-service tell us a problem: '${error}'"
+        echo " [E] exit ..."
 
-      rm -f /tmp/request_${HOSTNAME}.json
+        rm -f /tmp/request_${HOSTNAME}.json
+      else
+        echo " [E] ${code} - the cert-service has an unknown problem."
+      fi
       exit 1
     fi
 
@@ -132,7 +141,7 @@ validate_local_ca() {
       --silent \
       --request GET \
       --header "X-API-USER: ${ICINGA_CERT_SERVICE_API_USER}" \
-      --header "X-API-KEY: ${ICINGA_CERT_SERVICE_API_PASSWORD}" \
+      --header "X-API-PASSWORD: ${ICINGA_CERT_SERVICE_API_PASSWORD}" \
       --write-out "%{http_code}\n" \
       --output /tmp/validate_ca_${HOSTNAME}.json \
       http://${ICINGA_CERT_SERVICE_SERVER}:${ICINGA_CERT_SERVICE_PORT}${ICINGA_CERT_SERVICE_PATH}v2/validate/${checksum})
