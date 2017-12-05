@@ -13,8 +13,8 @@ The AWS Part create an filter to get all relevant instances for the monitoring:
       filter = [
         { name: 'instance-state-name', values: ['running'] },
         { name: 'tag-key'            , values: ['monitoring-enabled'] },
-        { name: 'tag:monitoring-enabled', values: ['true'] },
-        { name: 'tag:environment'    , values: [AWS_ENVIRONMENT] }
+        { name: 'tag:monitoring-enabled'         , values: ['1'] },
+        { name: 'tag:customer-environment-domain', values: [AWS_ENVIRONMENT] }
       ]
 
 New instances will automatic added at the CoreMedia Monitoring.
