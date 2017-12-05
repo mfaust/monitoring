@@ -698,26 +698,32 @@ class CMGrafana
 
               if( mls != nil )
 
-                ip, short, fqdn = self.ns_lookup(mls )
+                ip, short, fqdn = self.ns_lookup(mls)
 
-                dns = @database.dnsData( { :ip => ip, :short => short, :fqdn => fqdn } )
+                dns = @database.dnsData( ip: ip, short: short, fqdn: fqdn )
 
-                real_ip    = dns.dig('ip')
-                real_short = dns.dig('name')
-                real_fqdn  = dns.dig('fqdn')
-
-                if( @short_hostname != real_short )
-
-                  identifier  = @database.config( { :ip => real_ip, :short => real_short, :fqdn => real_fqdn, :key => 'graphite_identifier' } )
-
-                  if( identifier.dig( 'graphite_identifier' ) != nil )
-
-                    mls_identifier = identifier.dig( 'graphite_identifier' ).to_s
-
-                    logger.info( "  use custom storage identifier from config: '#{mls_identifier}'" )
-                  end
+                if( dns.nil? )
+                  logger.warn(format('no DNS Entry for the Master Live Server \'%s\' found!', mls))
                 else
-                  logger.info( '  the Master Live Server runs on the same host as the Replication Live Server' )
+
+                  real_ip    = dns.dig('ip')
+                  real_short = dns.dig('name')
+                  real_fqdn  = dns.dig('fqdn')
+
+                  if( @short_hostname != real_short )
+
+                    identifier  = @database.config( ip: real_ip, short: real_short, fqdn: real_fqdn, key: 'graphite_identifier' )
+
+                    if( identifier.dig( 'graphite_identifier' ) != nil )
+
+                      mls_identifier = identifier.dig( 'graphite_identifier' ).to_s
+
+                      logger.info( "  use custom storage identifier from config: '#{mls_identifier}'" )
+                    end
+                  else
+                    logger.info( '  the Master Live Server runs on the same host as the Replication Live Server' )
+                  end
+
                 end
               end
             end
