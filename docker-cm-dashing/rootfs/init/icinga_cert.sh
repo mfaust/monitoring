@@ -16,7 +16,7 @@ get_certificate() {
 
   validate_local_ca
 
-  if [ -f ${WORK_DIR}/pki/${HOSTNAME}.key ]
+  if [ -f ${WORK_DIR}/pki/${HOSTNAME}/${HOSTNAME}.key ]
   then
     return
   fi
@@ -26,7 +26,6 @@ get_certificate() {
     echo ""
     echo " [i] we ask our cert-service for a certificate .."
 
-    set -x
     # generate a certificate request
     #
     code=$(curl \
@@ -38,8 +37,6 @@ get_certificate() {
       --write-out "%{http_code}\n" \
       --output /tmp/request_${HOSTNAME}.json \
       http://${ICINGA_CERT_SERVICE_SERVER}:${ICINGA_CERT_SERVICE_PORT}${ICINGA_CERT_SERVICE_PATH}v2/request/${HOSTNAME})
-
-    set +x
 
     if ( [ $? -eq 0 ] && [ ${code} -eq 200 ] )
     then
@@ -53,6 +50,8 @@ get_certificate() {
 #      rm -f /tmp/request_${HOSTNAME}.json
 
       mkdir -p ${WORK_DIR}/pki/${HOSTNAME}
+
+      cp -a /tmp/request_${HOSTNAME}.json ${WORK_DIR}/pki/${HOSTNAME}/
 
       # get our created cert
       #
@@ -96,7 +95,7 @@ get_certificate() {
       else
         echo " [E] can't download out certificate!"
 
-        rm -rf ${WORK_DIR}/pki 2> /dev/null
+        rm -rf ${WORK_DIR}/pki/${HOSTNAME} 2> /dev/null
 
         unset ICINGA_API_PKI_PATH
 
