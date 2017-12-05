@@ -46,19 +46,6 @@
     }
   },
   "run_list": [
-    "role[mysql]",
-    "role[mongodb]",
-    "role[solr]",
-    "role[cms-9-config]",
-    "role[management]",
-    "role[publication]",
-    "role[replication]",
-    "role[preview]",
-    "role[preview-proxy]",
-    "role[studio]",
-    "role[studio-proxy]",
-    "role[delivery]",
-    "role[cms-9-delivery-proxy]",
-    "recipe[blueprint-cms-9::overview]"
+    "recipe[blueprint-dev-tooling::content]"
   ]
 }
