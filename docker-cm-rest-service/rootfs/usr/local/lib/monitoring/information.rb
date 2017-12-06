@@ -4,13 +4,13 @@ module Monitoring
 
     # get informations for one or all nodes back
     #
-    def nodeInformations( params = {} )
+    def host_informations( params = {} )
 
-#       logger.debug( "nodeInformations( #{params} )" )
+      logger.debug( "host_informations( #{params} )" )
 
       host            = params.dig(:host)
       status          = params.dig(:status) || [ Storage::MySQL::ONLINE, Storage::MySQL::PREPARE ]
-      fullInformation = params.dig(:full)   || false
+      full_information = params.dig(:full)  || false
 
       ip              = nil
       short           = nil
@@ -20,17 +20,14 @@ module Monitoring
 
       if( host != nil )
 
-        ip, short, fqdn = self.ns_lookup(host )
+        ip, short, fqdn = ns_lookup(host)
 
-        if( ip == nil && short == nil && fqdn == nil )
+        return nil if( ip.nil? && short.nil? && fqdn.nil? )
 
-          return nil
-        end
-
-        params = { :ip => ip, :short => short, :fqdn => fqdn, :status => status }
+        params = { ip: ip, short: short, fqdn: fqdn, status: status }
       else
 
-        params = { :status => status }
+        params = { status: status }
       end
 
       # get nodes with ONLINE or PREPARE state
@@ -41,19 +38,12 @@ module Monitoring
 
         nodes.each do |n|
 
-          if( ip == nil && short == nil && fqdn == nil )
+          if( ip.nil? && short.nil? && fqdn.nil? )
 
-            ip, short, fqdn = self.ns_lookup(n )
+            ip, short, fqdn = ns_lookup(n)
 
-            if( ip == nil && short == nil && fqdn == nil )
-
-              result = {
-                :status  => 400,
-                :message => sprintf( 'Host \'%s\' are not available (DNS Problem)', n )
-              }
-
-              logger.warn( result )
-
+            if( ip.nil? && short.nil? && fqdn.nil? )
+              logger.warn( { status: 400, message: format( 'Host \'%s\' are not available (DNS Problem)', n ) } )
               next
             end
 
@@ -63,104 +53,94 @@ module Monitoring
 
           # DNS data
           #
-          result[n.to_s][:dns] ||= { 'ip' => ip, 'short' => short, 'fqdn' => fqdn }
+          result[n.to_s][:dns] ||= { ip: ip, short: short, fqdn: fqdn }
 
-          status  = @database.status( { :ip => ip, :short => short, :fqdn => fqdn } )
-          # {"ip"=>"192.168.252.100", "name"=>"blueprint-box", "fqdn"=>"blueprint-box", "status"=>"online", "creation"=>2017-06-07 11:07:57 +0000}
+          status  = @database.status( ip: ip, short: short, fqdn: fqdn )
 
           created = status.dig('creation')
           message = status.dig('status')
 
           # STATUS data
           #
-          result[n.to_s][:status] ||= { 'created' => created, 'status' => message }
+          result[n.to_s][:status] ||= { created: created, status: message }
 
-          hostConfiguration = @database.config( { :ip => ip, :short => short, :fqdn => fqdn } )
+          host_configuration = @database.config( ip: ip, short: short, fqdn: fqdn )
 
-          if( hostConfiguration != nil )
-            result[n.to_s][:custom_config] = hostConfiguration
-          end
+          result[n.to_s][:custom_config] = host_configuration if( host_configuration != nil )
 
           # get discovery data
           #
-          discoveryData = @database.discovery_data( { :ip => ip, :short => short, :fqdn => fqdn } )
+          discovery_data = @database.discovery_data( ip: ip, short: short, fqdn: fqdn )
 
-          if( discoveryData != nil )
+          unless( discovery_data.nil? )
 
-#             logger.debug( discoveryData.class.to_s )
+            discovery_data.each do |a,d|
 
-            discoveryData.each do |a,d|
-
-#               logger.debug(a)
-#               logger.debug( d.class.to_s )
-              if(d.is_a?(String))
-                d = JSON.generate(d)
-              end
+              d = JSON.generate(d) if(d.is_a?(String))
 
               d.reject! { |k| k == 'application' }
               d.reject! { |k| k == 'template' }
             end
 
-            result[n.to_s][:services] ||= discoveryData
-
+            result[n.to_s][:services] ||= discovery_data
           end
 
           # realy needed?
           #
-            if( fullInformation != nil && fullInformation == true )
+          if( full_information != nil && full_information == true )
 
-              # get data from external services
-              #
-              self.messageQueue( { :cmd => 'info', :node => n, :queue => 'mq-grafana' , :prio => 1, :payload => {}, :ttr => 1, :delay => 0 } )
-              self.messageQueue( { :cmd => 'info', :node => n, :queue => 'mq-icinga'  , :prio => 1, :payload => {}, :ttr => 1, :delay => 0 } )
+            # get data from external services
+            #
+            message_queue( cmd: 'info', node: n, queue: 'mq-grafana' , prio: 1, payload: {}, ttr: 1, delay: 0 )
+            message_queue( cmd: 'info', node: n, queue: 'mq-icinga'  , prio: 1, payload: {}, ttr: 1, delay: 0 )
 
-              sleep( 1 )
+            sleep( 1 )
 
-              grafanaStatus   = Hash.new()
-              icingaStatus    = Hash.new()
+            status_grafana   = {}
+            status_icinga    = {}
 
-              for y in 1..4
+            for y in 1..4
 
-                r      = @mq_consumer.getJobFromTube('mq-grafana-info')
+              r      = @mq_consumer.get_job_from_queue('mq-grafana-info')
 
-#                 logger.debug( r.dig( :body, 'payload' ) )
+#               logger.debug( r.dig( :body, 'payload' ) )
 
-                if( r.is_a?( Hash ) && r.count != 0 && r.dig( :body, 'payload' ) != nil )
+              if( r.is_a?( Hash ) && r.count != 0 && r.dig( :body, 'payload' ) != nil )
 
-                  grafanaStatus = r
-                  break
-                else
-#                   logger.debug( sprintf( 'Waiting for data %s ... %d', 'mq-grafana-info', y ) )
-                  sleep( 2 )
-                end
-              end
-
-              for y in 1..4
-
-                r      = @mq_consumer.getJobFromTube('mq-icinga-info')
-
-#                 logger.debug( r.dig( :body, 'payload' ) )
-
-                if( r.is_a?( Hash ) && r.count != 0 && r.dig( :body, 'payload' ) != nil )
-
-                  icingaStatus = r
-                  break
-                else
-#                   logger.debug( sprintf( 'Waiting for data %s ... %d', 'mq-icinga-info', y ) )
-                  sleep( 2 )
-                end
-              end
-
-              if( grafanaStatus )
-                grafanaStatus = grafanaStatus.dig( :body, 'payload' ) || {}
-                result[n.to_s][:grafana] ||= grafanaStatus
-              end
-
-              if( icingaStatus )
-                icingaStatus = icingaStatus.dig( :body, 'payload' ) || {}
-                result[n.to_s][:icinga] ||= icingaStatus
+                status_grafana = r
+                break
+              else
+#                 logger.debug( format( 'Waiting for data %s ... %d', 'mq-grafana-info', y ) )
+                sleep( 2 )
               end
             end
+
+            for y in 1..4
+
+              r      = @mq_consumer.get_job_from_queue('mq-icinga-info')
+
+#               logger.debug( r.dig( :body, 'payload' ) )
+
+              if( r.is_a?( Hash ) && r.count != 0 && r.dig( :body, 'payload' ) != nil )
+
+                status_icinga = r
+                break
+              else
+#                 logger.debug( format( 'Waiting for data %s ... %d', 'mq-icinga-info', y ) )
+                sleep( 2 )
+              end
+            end
+
+            if( status_grafana )
+              status_grafana = status_grafana.dig( :body, 'payload' ) || {}
+              result[n.to_s][:grafana] ||= status_grafana
+            end
+
+            if( status_icinga )
+              status_icinga = status_icinga.dig( :body, 'payload' ) || {}
+              result[n.to_s][:icinga] ||= status_icinga
+            end
+          end
 
 
           ip    = nil
@@ -169,9 +149,7 @@ module Monitoring
         end
       end
 
-      return result
-
+      result
     end
-
   end
 end

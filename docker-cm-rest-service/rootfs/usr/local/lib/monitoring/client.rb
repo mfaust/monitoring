@@ -16,39 +16,24 @@ module Monitoring
     include Monitoring::Information
     include Monitoring::Host
 
-    def initialize( settings = {} )
+    def initialize( settings )
 
-      raise ArgumentError.new('only Hash are allowed') unless( settings.is_a?(Hash) )
+      raise ArgumentError.new(format('wrong type. \'settings\' must be an Hash, given \'%s\'', settings.class.to_s)) unless( settings.is_a?(Hash) )
       raise ArgumentError.new('missing settings') if( settings.size.zero? )
 
-      mqHost              = settings.dig(:mq, :host)      || 'localhost'
-      mqPort              = settings.dig(:mq, :port)      || 11300
-      mqQueue             = settings.dig(:mq, :queue)     || 'mq-rest-service'
-      redisHost           = settings.dig(:redis, :host)
-      redisPort           = settings.dig(:redis, :port)
-      mysqlHost           = settings.dig(:mysql, :host)
-      mysqlSchema         = settings.dig(:mysql, :schema)
-      mysqlUser           = settings.dig(:mysql, :user)
-      mysqlPassword       = settings.dig(:mysql, :password)
+      mq_host        = settings.dig(:mq, :host)
+      mq_port        = settings.dig(:mq, :port)
+      mq_queue       = settings.dig(:mq, :queue)     || 'mq-rest-service'
+      redis_host     = settings.dig(:redis, :host)
+      redis_port     = settings.dig(:redis, :port)
+      mysql_host     = settings.dig(:mysql, :host)
+      mysql_schema   = settings.dig(:mysql, :schema)
+      mysql_user     = settings.dig(:mysql, :user)
+      mysql_password = settings.dig(:mysql, :password)
 
-      mq_settings = {
-        :beanstalkHost  => mqHost,
-        :beanstalkPort  => mqPort,
-        :beanstalkQueue => mqQueue
-      }
-
-      mysql_settings = {
-        :mysql => {
-          :host     => mysqlHost,
-          :user     => mysqlUser,
-          :password => mysqlPassword,
-          :schema   => mysqlSchema
-        }
-      }
-
-      @enabledDiscovery = true
-      @enabledGrafana   = true
-      @enabledIcinga    = true
+      mq_settings    = { beanstalk: { host: mq_host, port: mq_port, queue: mq_queue } }
+      mysql_settings = { mysql: { host: mysql_host, user: mysql_user, password: mysql_password, schema: mysql_schema } }
+      redis_settings = { redis: { host: redis_host } }
 
       version              = Monitoring::VERSION
       date                 = Monitoring::DATE
@@ -58,13 +43,14 @@ module Monitoring
       logger.info( "  Version #{version} (#{date})" )
       logger.info( '  Copyright 2016-2017 CoreMedia' )
       logger.info( '  used Services:' )
-      logger.info( "    - mysql        : #{mysqlHost}@#{mysqlSchema}" )
-      logger.info( "    - message queue: #{mqHost}:#{mqPort}/#{mqQueue}" )
+      logger.info( "    - mysql        : #{mysql_host}@#{mysql_schema}" )
+      logger.info( "    - redis        : #{redis_host}:#{redis_port}" )
+      logger.info( "    - message queue: #{mq_host}:#{mq_port}/#{mq_queue}" )
       logger.info( '-----------------------------------------------------------------' )
       logger.info( '' )
 
       @cache       = MiniCache::Store.new()
-      @redis       = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
+      @redis       = Storage::RedisClient.new( redis_settings )
       @mq_consumer = MessageQueue::Consumer.new( mq_settings )
       @mq_producer = MessageQueue::Producer.new( mq_settings )
       @database    = Storage::MySQL.new( mysql_settings )

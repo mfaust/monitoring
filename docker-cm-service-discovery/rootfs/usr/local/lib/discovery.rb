@@ -255,7 +255,7 @@ module ServiceDiscovery
 
     # delete the directory with all files inside
     #
-    def delete_host(host )
+    def delete_host( host )
 
       logger.info( format( 'delete Host \'%s\'',  host ) )
 
@@ -395,6 +395,10 @@ module ServiceDiscovery
       logger.debug( "host: #{host}" )
       logger.debug( "options: #{options}" )
 
+      logger.info( 'create message for an create annotation' )
+      # annotation( host: host, dns: { ip: ip, short: host, fqdn: fqdn }, payload: { command: 'create', argument: 'node', config: options } )
+      send_message( cmd: 'create', node: host, queue: 'mq-graphite', payload: options, prio: 1, ttr: 5, delay: 0 )
+
       logger.info( 'create message for grafana to create dashboards' )
       send_message( cmd: 'add', node: host, queue: 'mq-grafana', payload: options, prio: 10, ttr: 15, delay: 20 )
 
@@ -405,8 +409,9 @@ module ServiceDiscovery
     end
 
 
-
-    def list_hosts(host = nil )
+    # TODO test!
+    # ASAP
+    def list_hosts( host = nil )
 
       logger.debug( "list_hosts( #{host} )" )
 
@@ -420,24 +425,16 @@ module ServiceDiscovery
         #
         # TODO
         # what is with offline or other hosts?
-        @database.nodes
-
+        return @database.nodes
       else
 
         # get a DNS record
         #
-        ip, short, fqdn = self.ns_lookup(host )
+        ip, short, fqdn = self.ns_lookup( host )
 
-        discovery_data   = @database.discoveryData({ip: ip, short: short, fqdn: fqdn} )
+        discovery_data   = @database.discoveryData( ip: ip, short: short, fqdn: fqdn )
 
-        if( discovery_data == nil )
-
-          return {
-              status: 204,
-            message: 'no node data found'
-          }
-
-        end
+        return { status: 204, message: 'no node data found' } if( discovery_data == nil )
 
         discovery_data.each do |s|
 
@@ -450,7 +447,6 @@ module ServiceDiscovery
 
           services[s.first.to_sym] ||= {}
           services[s.first.to_sym] = data
-
         end
 
         status = nil
@@ -459,7 +455,7 @@ module ServiceDiscovery
         #
         (1..15).each {|y|
 
-          result = @database.status({:ip => ip, :short => short, :fqdn => fqdn})
+          result = @database.status( ip: ip, short: short, fqdn: fqdn )
 
           if (result != nil)
             status = result
@@ -480,7 +476,7 @@ module ServiceDiscovery
           created      = Time.parse( created ).strftime( '%Y-%m-%d %H:%M:%S' )
         end
 
-        if( ! status.ia_a?( String ) )
+        unless( status.ia_a?( String ) )
 
           # parse the online state
           #
@@ -503,12 +499,7 @@ module ServiceDiscovery
 
         end
 
-        {
-            status: 200,
-          mode: status,
-          services: services,
-          created: created
-        }
+        { status: 200, mode: status, services: services, created: created }
       end
 
     end

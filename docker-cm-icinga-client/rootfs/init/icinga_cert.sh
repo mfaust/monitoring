@@ -1,6 +1,6 @@
 
 ICINGA_API_PORT=${ICINGA_API_PORT:-5665}
-ICINGA_CERT_SERVICE=${ICINGA_CERT_SERVICE:-false}
+USE_CERT_SERVICE=${USE_CERT_SERVICE:-'false'}
 
 ICINGA_CERT_SERVICE_SERVER=
 ICINGA_CERT_SERVICE_PORT=
@@ -8,6 +8,57 @@ ICINGA_CERT_SERVICE_BA_USER=
 ICINGA_CERT_SERVICE_BA_PASSWORD=
 ICINGA_CERT_SERVICE_API_USER=
 ICINGA_CERT_SERVICE_API_PASSWORD=
+
+
+extract_vars() {
+
+  if [ ! -z "${ICINGA_CERT_SERVICE}" ]
+  then
+
+#     echo "${ICINGA_CERT_SERVICE}" | json_verify -q 2> /dev/null
+#
+#     if [ $? -gt 0 ]
+#     then
+#       echo " [E] the ICINGA_CERT_SERVICE Environment ist not an json"
+#       exit 1
+#     fi
+#
+#     if ( [ "${ICINGA_CERT_SERVICE}" == "true" ] || [ "${ICINGA_CERT_SERVICE}" == "true" ] )
+#     then
+#       echo " [E] the ICINGA_CERT_SERVICE Environment must be an json, not true or false!"
+#       exit 1
+#     fi
+
+    ICINGA_CERT_SERVICE_SERVER=$(echo "${ICINGA_CERT_SERVICE}" | jq --raw-output .server)
+    ICINGA_CERT_SERVICE_PORT=$(echo "${ICINGA_CERT_SERVICE}" | jq --raw-output .port)
+    ICINGA_CERT_SERVICE_PATH=$(echo "${ICINGA_CERT_SERVICE}" | jq --raw-output .path)
+    ICINGA_CERT_SERVICE_API_USER=$(echo "${ICINGA_CERT_SERVICE}" | jq --raw-output .api.user)
+    ICINGA_CERT_SERVICE_API_PASSWORD=$(echo "${ICINGA_CERT_SERVICE}" | jq --raw-output .api.password)
+    ICINGA_CERT_SERVICE_BA_USER=$(echo "${ICINGA_CERT_SERVICE}" | jq --raw-output .ba.user)
+    ICINGA_CERT_SERVICE_BA_PASSWORD=$(echo "${ICINGA_CERT_SERVICE}" | jq --raw-output .ba.password)
+
+    [ "${ICINGA_CERT_SERVICE_SERVER}" == null ] && ICINGA_CERT_SERVICE_SERVER=
+    [ "${ICINGA_CERT_SERVICE_PORT}" == null ] && ICINGA_CERT_SERVICE_PORT=4567
+    [ "${ICINGA_CERT_SERVICE_PATH}" == null ] && ICINGA_CERT_SERVICE_PATH="/"
+    [ "${ICINGA_CERT_SERVICE_API_USER}" == null ] && ICINGA_CERT_SERVICE_API_USER=
+    [ "${ICINGA_CERT_SERVICE_API_PASSWORD}" == null ] && ICINGA_CERT_SERVICE_API_PASSWORD=
+    [ "${ICINGA_CERT_SERVICE_BA_USER}" == null ] && ICINGA_CERT_SERVICE_BA_USER=
+    [ "${ICINGA_CERT_SERVICE_BA_PASSWORD}" == null ] && ICINGA_CERT_SERVICE_BA_PASSWORD=
+
+    if (
+      [ ! -z ${ICINGA_CERT_SERVICE_SERVER} ] &&
+      [ ! -z ${ICINGA_CERT_SERVICE_PORT} ] &&
+      [ ! -z ${ICINGA_CERT_SERVICE_BA_USER} ] &&
+      [ ! -z ${ICINGA_CERT_SERVICE_BA_PASSWORD} ] &&
+      [ ! -z ${ICINGA_CERT_SERVICE_API_USER} ] &&
+      [ ! -z ${ICINGA_CERT_SERVICE_API_PASSWORD} ]
+    )
+    then
+      USE_CERT_SERVICE="true"
+    fi
+  fi
+}
+
 
 # get a new icinga certificate from our icinga-master
 #
@@ -21,7 +72,7 @@ get_certificate() {
     return
   fi
 
-  if [ ${ICINGA_CERT_SERVICE} ]
+  if [ "${USE_CERT_SERVICE}" == "true" ]
   then
     echo ""
     echo " [i] we ask our cert-service for a certificate .."
@@ -33,7 +84,7 @@ get_certificate() {
       --silent \
       --request GET \
       --header "X-API-USER: ${ICINGA_CERT_SERVICE_API_USER}" \
-      --header "X-API-KEY: ${ICINGA_CERT_SERVICE_API_PASSWORD}" \
+      --header "X-API-PASSWORD: ${ICINGA_CERT_SERVICE_API_PASSWORD}" \
       --write-out "%{http_code}\n" \
       --output /tmp/request_${HOSTNAME}.json \
       http://${ICINGA_CERT_SERVICE_SERVER}:${ICINGA_CERT_SERVICE_PORT}${ICINGA_CERT_SERVICE_PATH}v2/request/${HOSTNAME})
@@ -58,7 +109,7 @@ get_certificate() {
         --silent \
         --request GET \
         --header "X-API-USER: ${ICINGA_CERT_SERVICE_API_USER}" \
-        --header "X-API-KEY: ${ICINGA_CERT_SERVICE_API_PASSWORD}" \
+        --header "X-API-PASSWORD: ${ICINGA_CERT_SERVICE_API_PASSWORD}" \
         --header "X-CHECKSUM: ${checksum}" \
         --write-out "%{http_code}\n" \
         --request GET \
@@ -101,12 +152,17 @@ get_certificate() {
       fi
     else
 
-      error=$(cat /tmp/request_${HOSTNAME}.json)
+      if [ -f /tmp/request_${HOSTNAME}.json ]
+      then
+        error=$(cat /tmp/request_${HOSTNAME}.json)
 
-      echo " [E] ${code} - the cert-service tell us a problem: '${error}'"
-      echo " [E] exit ..."
+        echo " [E] ${code} - the cert-service tell us a problem: '${error}'"
+        echo " [E] exit ..."
 
-      rm -f /tmp/request_${HOSTNAME}.json
+        rm -f /tmp/request_${HOSTNAME}.json
+      else
+        echo " [E] ${code} - the cert-service has an unknown problem."
+      fi
       exit 1
     fi
 
@@ -132,7 +188,7 @@ validate_local_ca() {
       --silent \
       --request GET \
       --header "X-API-USER: ${ICINGA_CERT_SERVICE_API_USER}" \
-      --header "X-API-KEY: ${ICINGA_CERT_SERVICE_API_PASSWORD}" \
+      --header "X-API-PASSWORD: ${ICINGA_CERT_SERVICE_API_PASSWORD}" \
       --write-out "%{http_code}\n" \
       --output /tmp/validate_ca_${HOSTNAME}.json \
       http://${ICINGA_CERT_SERVICE_SERVER}:${ICINGA_CERT_SERVICE_PORT}${ICINGA_CERT_SERVICE_PATH}v2/validate/${checksum})
@@ -156,45 +212,9 @@ validate_local_ca() {
   fi
 }
 
-
-extract_vars() {
-
-  if [ ! -z "${ICINGA_CERT_SERVICE}" ]
-  then
-    ICINGA_CERT_SERVICE_SERVER=$(echo "${ICINGA_CERT_SERVICE}" | jq --raw-output .server)
-    ICINGA_CERT_SERVICE_PORT=$(echo "${ICINGA_CERT_SERVICE}" | jq --raw-output .port)
-    ICINGA_CERT_SERVICE_PATH=$(echo "${ICINGA_CERT_SERVICE}" | jq --raw-output .path)
-    ICINGA_CERT_SERVICE_API_USER=$(echo "${ICINGA_CERT_SERVICE}" | jq --raw-output .api.user)
-    ICINGA_CERT_SERVICE_API_PASSWORD=$(echo "${ICINGA_CERT_SERVICE}" | jq --raw-output .api.password)
-    ICINGA_CERT_SERVICE_BA_USER=$(echo "${ICINGA_CERT_SERVICE}" | jq --raw-output .ba.user)
-    ICINGA_CERT_SERVICE_BA_PASSWORD=$(echo "${ICINGA_CERT_SERVICE}" | jq --raw-output .ba.password)
-
-    [ "${ICINGA_CERT_SERVICE_SERVER}" == null ] && ICINGA_CERT_SERVICE_SERVER=
-    [ "${ICINGA_CERT_SERVICE_PORT}" == null ] && ICINGA_CERT_SERVICE_PORT=4567
-    [ "${ICINGA_CERT_SERVICE_PATH}" == null ] && ICINGA_CERT_SERVICE_PATH="/"
-    [ "${ICINGA_CERT_SERVICE_API_USER}" == null ] && ICINGA_CERT_SERVICE_API_USER=
-    [ "${ICINGA_CERT_SERVICE_API_PASSWORD}" == null ] && ICINGA_CERT_SERVICE_API_PASSWORD=
-    [ "${ICINGA_CERT_SERVICE_BA_USER}" == null ] && ICINGA_CERT_SERVICE_BA_USER=
-    [ "${ICINGA_CERT_SERVICE_BA_PASSWORD}" == null ] && ICINGA_CERT_SERVICE_BA_PASSWORD=
-
-    if (
-      [ ! -z ${ICINGA_CERT_SERVICE_SERVER} ] &&
-      [ ! -z ${ICINGA_CERT_SERVICE_PORT} ] &&
-      [ ! -z ${ICINGA_CERT_SERVICE_BA_USER} ] &&
-      [ ! -z ${ICINGA_CERT_SERVICE_BA_PASSWORD} ] &&
-      [ ! -z ${ICINGA_CERT_SERVICE_API_USER} ] &&
-      [ ! -z ${ICINGA_CERT_SERVICE_API_PASSWORD} ]
-    )
-    then
-      ICINGA_CERT_SERVICE=true
-    fi
-  fi
-}
-
 extract_vars
 . /init/wait_for/cert_service.sh
 get_certificate
-
 
 if [ -d ${WORK_DIR}/pki/${HOSTNAME} ]
 then

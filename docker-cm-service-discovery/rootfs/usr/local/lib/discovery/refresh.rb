@@ -19,7 +19,9 @@ module ServiceDiscovery
         # if the destination host available (simple check with ping)
         #
         # 503 Service Unavailable
-        return { status: 503,  message: sprintf( 'Host %s are unavailable', fqdn ) } unless( Utils::Network.isRunning?( fqdn ) )
+        return { status: 503,  message: format( 'Host %s are unavailable', fqdn ) } unless( Utils::Network.isRunning?( fqdn ) )
+
+        logger.info(format('refresh services for host \'%s\'', fqdn))
 
         known_services_count, known_services_array       = known_services( ip: ip, short: short, fqdn: fqdn ).values
         actually_services_count, actually_services_array, data = actually_services( ip: ip, short: short, fqdn: fqdn ).values
@@ -43,14 +45,14 @@ module ServiceDiscovery
         # logger.debug( services.to_s )
 
         # logger.debug( '------------------------------------------------------------' )
-        # logger.info( sprintf( 'known entries %d', known_dataCount ) )
-        # logger.info( sprintf( 'actually entries %d', actually_dataCount ) )
+        # logger.info( format( 'known entries %d', known_dataCount ) )
+        # logger.info( format( 'actually entries %d', actually_dataCount ) )
         # logger.debug( '------------------------------------------------------------' )
-        # logger.info( sprintf( 'identical entries %d', identicalEntriesCount ) )
+        # logger.info( format( 'identical entries %d', identicalEntriesCount ) )
         # #logger.debug(  "  #{identicalEntries}" )
-        # logger.info( sprintf( 'new entries %d', newEntriesCount ) )
+        # logger.info( format( 'new entries %d', newEntriesCount ) )
         # #logger.debug(  "  #{newEntries}" )
-        # logger.info( sprintf( 'removed entries %d', removedEntriesCount ) )
+        # logger.info( format( 'removed entries %d', removedEntriesCount ) )
         # #logger.debug(  "  #{removedEntries}" )
         # logger.debug( '------------------------------------------------------------' )
 
@@ -78,7 +80,8 @@ module ServiceDiscovery
         elsif( known_services_count > actually_services_count )
           logger.info( 'less services (will be ignored)' )
         else
-          logger.info( 'equal services' )
+          # reduce logging
+          logger.debug( 'equal services' )
         end
 
       end

@@ -47,7 +47,7 @@ module Graphite
       raise ArgumentError.new(format('wrong type. data must be an Hash, given %s', data.class.to_s ) ) unless( data.is_a?(Hash) )
 
       logger.info( format( 'process Message ID %d from Queue \'%s\'', data.dig(:id), data.dig(:tube) ) )
-      logger.debug( data )
+      logger.debug( JSON.pretty_generate data )
 
       command    = data.dig(:body, 'cmd')
       node       = data.dig(:body, 'node')
@@ -173,6 +173,7 @@ module Graphite
         logger.info( result )
 
         return { status: 200 }
+
       else
         logger.error( format( 'wrong command detected: %s', command ) )
 

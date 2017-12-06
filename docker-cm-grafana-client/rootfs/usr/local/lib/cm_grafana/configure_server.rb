@@ -19,19 +19,20 @@ class CMGrafana < Grafana::Client
       config_file = File.expand_path( config_file )
       config = nil
 
-      result = []
+#       result = []
 
       if( !config_file.nil? && File.file?(config_file) )
 
         begin
           template = ERB.new File.new(config_file).read
-          config = YAML.load template.result(binding)
+          config   = YAML.load( template.result(binding) )
         rescue Exception => e
           puts( 'wrong result (no yaml)')
           puts(e)
           raise( 'no valid yaml File' )
         end
       else
+        puts sprintf( 'Config File %s not found!', config_file )
         logger.error( sprintf( 'Config File %s not found!', config_file ) )
       end
 

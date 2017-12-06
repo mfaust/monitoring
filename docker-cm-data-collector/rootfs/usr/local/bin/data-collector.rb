@@ -31,7 +31,7 @@ mysqlHost         = ENV.fetch('MYSQL_HOST'             , 'database')
 mysqlSchema       = ENV.fetch('DISCOVERY_DATABASE_NAME', 'discovery')
 mysqlUser         = ENV.fetch('DISCOVERY_DATABASE_USER', 'discovery')
 mysqlPassword     = ENV.fetch('DISCOVERY_DATABASE_PASS', 'discovery')
-interval          = ENV.fetch('INTERVAL'               , 30 )
+interval          = ENV.fetch('INTERVAL'               , 45 )
 
 config = {
   :jolokia     => {

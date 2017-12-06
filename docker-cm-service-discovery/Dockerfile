@@ -1,20 +1,23 @@
 
-FROM alpine:3.6
+FROM alpine:3.7
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
-  VERSION="1711" \
-  BUILD_DATE="2017-11-14" \
-  ALPINE_MIRROR="mirror1.hs-esslingen.de/pub/Mirrors" \
-  ALPINE_VERSION="v3.6" \
-  TERM=xterm
+  VERSION="1712" \
+  BUILD_DATE="2017-12-04" \
+  TERM=xterm \
+  TZ='Europe/Berlin'
 
 # ---------------------------------------------------------------------------------------
 
 RUN \
   apk --quiet --no-cache update && \
-  apk --quiet --no-cache upgrade
+  apk --quiet --no-cache upgrade && \
+  apk add --quiet --no-cache --virtual .build-deps tzdata && \
+  cp /usr/share/zoneinfo/$TZ /etc/localtime && \
+  echo $TZ > /etc/timezone && \
+  apk del --quiet .build-deps
 
 COPY build /build
 

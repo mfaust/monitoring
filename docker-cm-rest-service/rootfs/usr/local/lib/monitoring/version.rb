@@ -1,5 +1,5 @@
 
 module Monitoring
-  VERSION = '1.7.0'
-  DATE    = '2017-11-05'
+  VERSION = '2.0.0'
+  DATE    = '2017-12-06'
 end

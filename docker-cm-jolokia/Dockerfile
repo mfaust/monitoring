@@ -6,9 +6,10 @@ MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 ARG HOSTS
 
 ENV \
-  VERSION="1711" \
-  BUILD_DATE="2017-11-06" \
+  VERSION="1712" \
+  BUILD_DATE="2017-12-04" \
   TERM=xterm \
+  TZ='Europe/Berlin' \
   GOPATH=/build \
   GOROOT=/usr/lib/go \
   HOSTS=${HOSTS:-}
@@ -19,7 +20,11 @@ EXPOSE 8080 8088
 
 RUN \
   apk --quiet --no-cache update && \
-  apk --quiet --no-cache upgrade
+  apk --quiet --no-cache upgrade && \
+  apk add --quiet --no-cache --virtual .build-deps tzdata && \
+  cp /usr/share/zoneinfo/$TZ /etc/localtime && \
+  echo $TZ > /etc/timezone && \
+  apk del --quiet .build-deps
 
 COPY build/ /build
 

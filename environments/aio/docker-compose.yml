@@ -35,7 +35,7 @@ services:
 
   beanstalkd:
     restart: always
-    image: bodsch/docker-beanstalkd:1710.1
+    image: bodsch/docker-beanstalkd:1.10
     container_name: beanstalkd
     hostname: beanstalkd
     volumes:
@@ -45,7 +45,7 @@ services:
 
   database:
     restart: always
-    image: bodsch/docker-mysql:1711.2
+    image: bodsch/docker-mysql:1711.4
     container_name: database
     hostname: database
     ports:
@@ -75,10 +75,11 @@ services:
       - mon
     extra_hosts:
       osmc.local: 192.168.122.60
+      blueprint-box: 192.168.252.100
 
   memcached:
     restart: always
-    image: bodsch/docker-memcached:1710.1
+    image: bodsch/docker-memcached:1711.1
     container_name: memcached
     hostname: memcached
     volumes:
@@ -89,7 +90,7 @@ services:
 
   redis:
     restart: always
-    image: bodsch/docker-redis:1710.1
+    image: bodsch/docker-redis:1711.1
     container_name: redis
     hostname: redis
     ports:
@@ -139,7 +140,7 @@ services:
 
   carbon:
     restart: always
-    image: bodsch/docker-go-carbon:1710.1
+    image: bodsch/docker-go-carbon:1712.1
     container_name: carbon
     hostname: carbon
     depends_on:
@@ -156,7 +157,7 @@ services:
 
   graphite:
     restart: always
-    image: bodsch/docker-graphite:1.1.0-r1
+    image: bodsch/docker-graphite:1.1.0-r2
     container_name: graphite
     hostname: graphite
     environment:
@@ -173,7 +174,7 @@ services:
 
   grafana:
     restart: always
-    image: bodsch/docker-grafana:4.6.2-r2
+    image: bodsch/docker-grafana:4.6.2-r3
     container_name: grafana
     hostname: grafana
     environment:
@@ -259,10 +260,11 @@ services:
       - mon
     extra_hosts:
       osmc.local: 192.168.122.60
+      blueprint-box: 192.168.252.100
 
   icingaweb2:
     restart: always
-    image: bodsch/docker-icingaweb2:2.4.2
+    image: bodsch/docker-icingaweb2:2.5.0-r1
     container_name: icingaweb2
     hostname: icingaweb2
     environment:
@@ -273,6 +275,7 @@ services:
       ICINGA2_HOST: cm-icinga2-master
       ICINGA2_CMD_API_USER: icingaweb
       ICINGA2_CMD_API_PASS: icingaweb
+      GRAPHITE_HOST: graphite
       ICINGAWEB2_USERS: coremedia:coremedia,icinga:icinga
       LDAP: '{
         "active_directory": "true",
@@ -300,7 +303,7 @@ services:
 
   markdown-service:
     restart: always
-    image: bodsch/docker-markdown-service:1.0.0
+    image: bodsch/docker-markdown-service:1.1.0
     container_name: markdown-service
     hostname: markdown-service
     depends_on:
@@ -318,10 +321,6 @@ services:
     hostname: cm-dashing
     environment:
       ICINGA_HOST: cm-icinga2-master
-      ICINGA_API_USER: dashing
-      ICINGA_API_PASSWORD: dashing
-      ICINGAWEB_URL: /icinga
-      PROXY_PATH: /dashing
       ICINGA_CERT_SERVICE: '{
         "ba": { "user":"admin", "password":"admin" },
         "api": { "user":"root", "password":"icinga" },
@@ -345,8 +344,6 @@ services:
     container_name: cm-rest-service
     hostname: cm-rest-service
     environment:
-      TZ: 'Europe/Berlin'
-      MYSQL_HOST: database
       MYSQL_ROOT_PASS: database.pass
     depends_on:
       - data
@@ -362,6 +359,7 @@ services:
       - mon
     extra_hosts:
       osmc.local: 192.168.122.60
+      blueprint-box: 192.168.252.100
 
   # single service
   # use MQ to process data
@@ -371,9 +369,7 @@ services:
     container_name: cm-service-discover
     hostname: cm-service-discover
     environment:
-      TZ: 'Europe/Berlin'
       REFRESH_ENABLED: 'true'
-      INTERVAL: 20
     depends_on:
       - data
       - jolokia
@@ -393,6 +389,7 @@ services:
       - mon
     extra_hosts:
       osmc.local: 192.168.122.60
+      blueprint-box: 192.168.252.100
 
   # single service
   # use MQ to process data
@@ -401,9 +398,6 @@ services:
     build: ../../docker-cm-data-collector
     container_name: cm-data-collector
     hostname: cm-data-collector
-    environment:
-      TZ: 'Europe/Berlin'
-      INTERVAL: 45
     depends_on:
       - data
       - jolokia
@@ -423,6 +417,7 @@ services:
       - mon
     extra_hosts:
       osmc.local: 192.168.122.60
+      blueprint-box: 192.168.252.100
 
   # single service
   # use MQ to process data
@@ -432,7 +427,6 @@ services:
     container_name: cm-carbon-client
     hostname: cm-carbon-client
     environment:
-      TZ: 'Europe/Berlin'
       # USE ONLY WITH AND EXTERNAL CARBON-WRITER!
       GRAPHITE_HOST: carbon
     depends_on:
@@ -454,10 +448,7 @@ services:
     container_name: cm-grafana-client
     hostname: cm-grafana-client
     environment:
-      TZ: 'Europe/Berlin'
       GRAFANA_HOST: nginx
-      SERVER_CONFIG_FILE: /etc/grafana_config.yml
-      RUN_DELAY: 30
     depends_on:
       - data
       - beanstalkd
@@ -472,7 +463,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ./logs:/var/log
       - /share/usr/local/share/templates:/usr/local/share/templates
-      - /share/etc/grafana/grafana_config.yml:/etc/grafana_config.yml
+      - /share/etc/grafana_config.yml:/etc/grafana_config.yml
     networks:
       - mon
 
@@ -483,11 +474,6 @@ services:
     build: ../../docker-cm-graphite-client
     container_name: cm-graphite-client
     hostname: cm-graphite-client
-    environment:
-      TZ: 'Europe/Berlin'
-      GRAPHITE_HOST: nginx
-      GRAPHITE_HTTP_PORT: 80
-      GRAPHITE_PATH: /graphite
     depends_on:
       - data
       - beanstalkd
@@ -507,7 +493,6 @@ services:
     container_name: cm-icinga-client
     hostname: cm-icinga-client
     environment:
-      TZ: 'Europe/Berlin'
       ICINGA_CERT_SERVICE: '{
         "ba": { "user":"admin", "password":"admin" },
         "api": { "user":"root", "password":"icinga" },
@@ -516,10 +501,7 @@ services:
         "path": "/"
       }'
       ICINGA_HOST: cm-icinga2-master
-      ICINGA_API_USER: root
-      ICINGA_API_PASSWORD: icinga
-      ENABLE_NOTIFICATIONS: 'true'
-      RUN_DELAY: 30
+      # ENABLE_NOTIFICATIONS: 'true'
     depends_on:
       - data
       - beanstalkd
@@ -531,4 +513,6 @@ services:
       - /share/etc/icinga_server_config.yml:/etc/icinga_server_config.yml
     networks:
       - mon
-
+    extra_hosts:
+      osmc.local: 192.168.122.60
+      blueprint-box: 192.168.252.100
