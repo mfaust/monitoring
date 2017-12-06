@@ -6,7 +6,7 @@ CoreMedia Monitoring REST
 
 The monitoring REST API is the user entry point.
 
-For more Information, please read the [API Doku](https://github.com/cm-xlabs/monitoring/blob/doc/de/api.md)
+For more Information, please read the [API Doku](https://github.com/cm-xlabs/monitoring/blob/doc/de/api.md)!
 
 
 # Environment Variables
