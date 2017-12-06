@@ -378,7 +378,7 @@ module ServiceDiscovery
 
           open = Utils::Network.portOpen?( fqdn, p )
 
-          logger.debug( sprintf( 'Host: %s | Port: %s   %s', host, p, open ? 'open' : 'closed' ) )
+          logger.debug( sprintf( 'Host: %s | Port: %s   %s', fqdn, p, open ? 'open' : 'closed' ) )
 
           if( open == true )
 
@@ -445,7 +445,10 @@ module ServiceDiscovery
 
         additional_services.each do |s|
           service_data = @service_config.dig( 'services', s )
-          discovered_services[s] ||= service_data.filter('port' ) unless( service_data.nil? )
+          unless( service_data.nil? )
+            discovered_services[s] ||= service_data.filter('port')
+            next
+          end
         end
 
         found_services = discovered_services.keys

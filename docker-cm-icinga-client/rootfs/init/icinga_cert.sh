@@ -77,8 +77,6 @@ get_certificate() {
     echo ""
     echo " [i] we ask our cert-service for a certificate .."
 
-    set -x
-
     # generate a certificate request
     #
     code=$(curl \
@@ -90,8 +88,6 @@ get_certificate() {
       --write-out "%{http_code}\n" \
       --output /tmp/request_${HOSTNAME}.json \
       http://${ICINGA_CERT_SERVICE_SERVER}:${ICINGA_CERT_SERVICE_PORT}${ICINGA_CERT_SERVICE_PATH}v2/request/${HOSTNAME})
-
-    set +x
 
     if ( [ $? -eq 0 ] && [ ${code} -eq 200 ] )
     then

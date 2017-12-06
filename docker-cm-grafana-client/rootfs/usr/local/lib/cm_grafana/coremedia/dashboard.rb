@@ -872,7 +872,7 @@ class CMGrafana
         template = expand_tags( dashboard: template, additional_tags: @additional_tags ) if( @additional_tags.count > 0 )
 
         # now we must recreate *all* panel IDs for an propper import
-        template = JSON.parse( template )
+        template = JSON.parse( template ) if( template.is_a?( String ) )
 
         regenerate_template_ids( template )
       end

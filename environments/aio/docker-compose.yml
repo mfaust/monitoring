@@ -140,7 +140,7 @@ services:
 
   carbon:
     restart: always
-    image: bodsch/docker-go-carbon:1711.1
+    image: bodsch/docker-go-carbon:1712.1
     container_name: carbon
     hostname: carbon
     depends_on:
