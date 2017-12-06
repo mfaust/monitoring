@@ -11,12 +11,6 @@ module Monitoring
       #
       cache_key = format( 'dns::%s', name )
 
-  #     logger.debug("cache_key: #{cache_key}")
-
-      ip       = nil
-      short    = nil
-      fqdn     = nil
-
       dns      = @cache.get( cache_key )
 
       if( dns.nil? )
@@ -45,84 +39,59 @@ module Monitoring
 
         ip    = dns.dig(:ip)
         short = dns.dig(:short)
-        fqdn  = dns.dig(:long)
+        fqdn  = dns.dig(:fqdn)
 
-        if( ip != nil && short != nil && fqdn != nil )
-
-          @redis.set(format('dns::%s',fqdn), { ip: ip, short: short, long: fqdn }.to_json, 320 )
-          @cache.set(cache_key , expires_in: expire ) { MiniCache::Data.new( { ip: ip, short: short, long: fqdn } ) }
-        else
+        if( ip.nil? && short.nil? && fqdn.nil? )
           logger.error( 'no DNS data found!' )
           logger.error( " => #{dns}" )
+
+          ip       = nil
+          short    = nil
+          fqdn     = nil
+        else
+          @redis.set(format('dns::%s',fqdn), { ip: ip, short: short, long: fqdn }.to_json, 320 )
+          @cache.set(cache_key , expires_in: expire ) { MiniCache::Data.new( { ip: ip, short: short, long: fqdn } ) }
         end
       else
-
         ip    = dns.dig(:ip)
         short = dns.dig(:short)
-        fqdn  = dns.dig(:long)
-
+        fqdn  = dns.dig(:fqdn)
       end
 
       return ip, short, fqdn
     end
 
 
-    def nodeExists?( host )
+    def host_exists?( host )
 
-      logger.debug( "nodeExists?( #{host} )" )
+      logger.debug( "host_exists?( #{host} )" )
 
-      ip, short, fqdn = self.ns_lookup(host )
+      ip, short, fqdn = ns_lookup(host)
 
-      d = self.nodeInformations( { :host => fqdn } )
+      d = host_informations( host: fqdn )
 
-      if( d == nil )
-        return false
-      end
+      return false if( d.nil? )
 
-      if( d.keys.first == fqdn )
-        return true
-      else
-        return false
-      end
+      return true if( d.keys.first == fqdn )
 
-  #     cache   = @cache.get( 'information' )
-  #
-  #     if( cache == nil )
-  #       return false
-  #     end
-  #
-  #     h = cache.dig( node.to_s )
-  #
-  #     if ( h == nil )
-  #       return false
-  #     else
-  #       return true
-  #     end
-
+      return false
     end
 
     # check availability and create an DNS entry into our redis
     #
-    def checkAvailablility?( host )
+    def host_avail?( host )
 
-      ip, short, fqdn = self.ns_lookup(host )
+      ip, short, fqdn = ns_lookup(host )
 
-      if( ip == nil && short == nil && fqdn == nil )
-        return false
-      end
+      return false if( ip == nil && short == nil && fqdn == nil )
 
-      return {
-        :ip    => ip,
-        :short => short,
-        :fqdn  => fqdn
-      }
-
+      { ip: ip, short: short, fqdn: fqdn }
     end
 
 
-    def messageQueue( params = {} )
+    def message_queue( params = {} )
 
-      logger.debug( "messageQueue( #{params} )" )
+      logger.debug( "message_queue( #{params} )" )
 
       command = params.dig(:cmd)
       node    = params.dig(:node)
@@ -140,7 +109,7 @@ module Monitoring
         payload: data
       }.to_json
 
-      @mq_producer.addJob( queue, job, prio, ttr, delay )
+      @mq_producer.add_job( queue, job, prio, ttr, delay )
 
     end
 

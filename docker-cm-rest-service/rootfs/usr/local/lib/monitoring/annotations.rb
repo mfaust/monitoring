@@ -49,14 +49,14 @@ module Monitoring
       timestamp    = payload.dig(:timestamp) || Time.now.to_i
 
       if( command == 'create' || command == 'remove' )
-  #     example:
-  #     {
-  #       "command": "create"
-  #     }
-  #
-  #     {
-  #       "command": "destroy"
-  #     }
+#     example:
+#     {
+#       "command": "create"
+#     }
+#
+#     {
+#       "command": "destroy"
+#     }
 
         message     = nil
         description = nil
@@ -78,101 +78,110 @@ module Monitoring
 
         logger.debug(params)
 
-        return self.messageQueue(params)
+        return message_queue(params)
       end
 
       if( command == 'loadtest' && ( argument == 'start' || argument == 'stop' ) )
 
-  #     example:
-  #     {
-  #       "command": "loadtest",
-  #       "argument": "start"
-  #     }
-  #
-  #     {
-  #       "command": "loadtest",
-  #       "argument": "stop"
-  #     }
+#     example:
+#     {
+#       "command": "loadtest",
+#       "argument": "start"
+#     }
+#
+#     {
+#       "command": "loadtest",
+#       "argument": "stop"
+#     }
 
         message     = nil
         description = nil
         tags        = []
 
-        return self.messageQueue({
-          :cmd     => 'loadtest',
-          :node    => host,
-          :queue   => 'mq-graphite',
-          :payload => {
-            :timestamp => timestamp,
-            :config    => config,
-            :fqdn      => fqdn,
-            :argument  => argument,
-            :dns       => {:ip => ip, :short => short, :fqdn => fqdn }
+        params = {
+          cmd: command,
+          node: host,
+          queue: 'mq-graphite',
+          payload: {
+            timestamp: timestamp,
+            config: config,
+            fqdn: fqdn,
+            argument: argument,
+            dns: { ip: ip, short: short, fqdn: fqdn }
           },
-          :prio => 0
-        })
+          prio: 0
+        }
+
+        logger.debug(params)
+
+        return message_queue(params)
       end
 
       if( command == 'deployment' )
 
-  #     example:
-  #     {
-  #       "command": "deployment",
-  #       "message": "version 7.1.50",
-  #       "tags": [
-  #         "development",
-  #         "git-0000000"
-  #       ]
-  #     }
+#     example:
+#     {
+#       "command": "deployment",
+#       "message": "version 7.1.50",
+#       "tags": [
+#         "development",
+#         "git-0000000"
+#       ]
+#     }
         description = nil
 
-        return self.messageQueue({
-          :cmd => 'deployment',
-          :node => host,
-          :queue => 'mq-graphite',
-          :payload => {
-            :timestamp => timestamp,
-            :config    => config,
-            :fqdn      => fqdn,
-            :message   => message,
-            :tags      => tags,
-            :dns       => {:ip => ip, :short => short, :fqdn => fqdn }
+        params = {
+          cmd: command,
+          node: host,
+          queue: 'mq-graphite',
+          payload: {
+            timestamp: timestamp,
+            config: config,
+            fqdn: fqdn,
+            message: message,
+            tags: tags,
+            dns: { ip: ip, short: short, fqdn: fqdn }
           },
-          :prio => 0
-        })
+          prio: 0
+        }
+
+        logger.debug(params)
+
+        return message_queue(params)
       end
 
 
-  #     example:
-  #     {
-  #       "command": "",
-  #       "message": "date: 2016-12-24, last-cristmas",
-  #       "description": "never so ho-ho-ho",
-  #       "tags": [
-  #         "development",
-  #         "git-0000000"
-  #       ]
-  #     }
-        return self.messageQueue({
-          :cmd => 'general',
-          :node => host,
-          :queue => 'mq-graphite',
-          :payload => {
-            :timestamp => timestamp,
-            :config    => config,
-            :fqdn      => fqdn,
-            :message   => message,
-            :tags      => tags,
-            :description => description,
-            :dns       => {:ip => ip, :short => short, :fqdn => fqdn }
-          },
-          :prio => 0
-        })
+#     example:
+#     {
+#       "command": "",
+#       "message": "date: 2016-12-24, last-cristmas",
+#       "description": "never say ho-ho-ho",
+#       "tags": [
+#         "development",
+#         "git-0000000"
+#       ]
+#     }
 
-      status    = 200
-      message   = 'annotation succesfull created'
+      params = {
+        cmd: 'general',
+        node: host,
+        queue: 'mq-graphite',
+        payload: {
+          timestamp: timestamp,
+          config: config,
+          fqdn: fqdn,
+          message: message,
+          tags: tags,
+          description: description,
+          dns: { ip: ip, short: short, fqdn: fqdn }
+        },
+        prio: 0
+      }
 
-      return JSON.pretty_generate( status: status, message: message )
+      logger.debug(params)
+
+      return message_queue(params)
+
     end
 
   end

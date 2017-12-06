@@ -17,18 +17,17 @@ require_relative 'logging'
 
 module MessageQueue
 
-
   class Producer
 
     include Logging
 
     def initialize( params = {} )
 
-      beanstalkHost       = params.dig(:beanstalkHost) || 'beanstalkd'
-      beanstalkPort       = params.dig(:beanstalkPort) || 11300
+      beanstalk_host       = params.dig(:beanstalk, :host) || 'beanstalkd'
+      beanstalk_port       = params.dig(:beanstalk, :port) || 11300
 
       begin
-        @b = Beaneater.new( sprintf( '%s:%s', beanstalkHost, beanstalkPort ) )
+        @b = Beaneater.new( sprintf( '%s:%s', beanstalk_host, beanstalk_port ) )
       rescue => e
         logger.error( e )
         @b = nil
@@ -57,21 +56,18 @@ module MessageQueue
     # @param [Integer, #read] delay is an integer number of seconds to wait before putting the job in
     #        the ready queue. The job will be in the "delayed" state during this time.
     # @example send a Job to Beanaeter
-    #    addJob()
+    #    add_job()
     # @return [Hash,#read]
     #
-    def addJob( tube, job = {}, prio = 65536, ttr = 10, delay = 2 )
+    def add_job( tube, job = {}, prio = 65536, ttr = 10, delay = 2 )
 
       if( @b )
 
         # check if job already in the queue
         #
-        if( self.jobExists?( tube.to_s, job ) == true )
-          return
-        end
+        return if( job_exists?( tube.to_s, job ) == true )
 
         response = @b.tubes[ tube.to_s ].put( job , :prio => prio, :ttr => ttr, :delay => delay )
-
         logger.debug( response )
       end
 
@@ -79,16 +75,13 @@ module MessageQueue
 
 
 
-    def jobExists?( tube, job )
+    def job_exists?( tube, job )
 
-      if( job.is_a?( String ) )
-        job = JSON.parse(job)
-      end
+      job = JSON.parse(job) if( job.is_a?( String ) )
 
-      j_checksum = self.checksum(job)
+      j_checksum = checksum(job)
 
       if( @b )
-
         t = @b.tubes[ tube.to_s ]
 
         while t.peek(:ready)
@@ -96,12 +89,9 @@ module MessageQueue
           j = t.reserve
 
           b = JSON.parse( j.body )
+          b = JSON.parse( b ) if( b.is_a?( String ) )
 
-          if( b.is_a?( String ) )
-            b = JSON.parse( b )
-          end
-
-          b_checksum = self.checksum(b)
+          b_checksum = checksum(b)
 
           if( j_checksum == b_checksum )
             logger.warn( "  job '#{job}' already in queue .." )
@@ -121,7 +111,7 @@ module MessageQueue
       p.reject! { |k| k == 'payload' }
 
       p = Hash[p.sort]
-      return Digest::MD5.hexdigest(p.to_s)
+      Digest::MD5.hexdigest(p.to_s)
     end
 
   end
@@ -133,23 +123,21 @@ module MessageQueue
 
     def initialize( params = {} )
 
-      beanstalkHost         = params.dig(:beanstalkHost)         || 'beanstalkd'
-      beanstalkPort         = params.dig(:beanstalkPort)         ||  11300
-      beanstalkQueue        = params.dig(:beanstalkQueue)
-      releaseBuriedInterval = params.dig(:releaseBuriedInterval) || 40
+      beanstalk_host         = params.dig(:beanstalk, :host)         || 'beanstalkd'
+      beanstalk_port         = params.dig(:beanstalk, :port)         ||  11300
+      beanstalk_queue        = params.dig(:beanstalk, :queue)
+      release_buried_interval = params.dig(:beanstalk, :release_buried_interval) || 40
 
       begin
-        @b = Beaneater.new( sprintf( '%s:%s', beanstalkHost, beanstalkPort ) )
+        @b = Beaneater.new( sprintf( '%s:%s', beanstalk_host, beanstalk_port ) )
 
-        if( beanstalkQueue != nil )
-
+        if( beanstalk_queue != nil )
           scheduler = Rufus::Scheduler.new
-
-          scheduler.every( releaseBuriedInterval ) do
-            releaseBuriedJobs( beanstalkQueue )
+          scheduler.every( release_buried_interval ) do
+            release_buried_jobs( beanstalk_queue )
           end
         else
-          logger.info( 'no Queue defined. Skip releaseBuriedJobs() Part' )
+          logger.info( 'no Queue defined. Skip release_buried_jobs() Part' )
         end
 
       rescue => e
@@ -164,7 +152,7 @@ module MessageQueue
     end
 
 
-    def tubeStatistics( tube )
+    def statistics( tube )
 
       queue       = nil
       jobsTotal   = 0
@@ -191,19 +179,18 @@ module MessageQueue
         end
       end
 
-      return {
-        :queue   => queue,
-        :total   => jobsTotal.to_i,
-        :ready   => jobsReady.to_i,
-        :delayed => jobsDelayed.to_i,
-        :buried  => jobsBuried.to_i,
-        :raw     => tubeStats
+      {
+        queue: queue,
+        total: jobsTotal.to_i,
+        ready: jobsReady.to_i,
+        delayed: jobsDelayed.to_i,
+        buried: jobsBuried.to_i,
+        raw: tubeStats
       }
-
     end
 
 
-    def cleanQueue( tube )
+    def clean_queue( tube )
 
       b = Array.new()
 
@@ -221,6 +208,8 @@ module MessageQueue
       end
 
       jobs.map do |j|
+
+        logger.debug( JSON.pretty_generate(j))
 
 #         logger.debug( JSON.pretty_generate( {
 #                   'id'    => j.id,
@@ -259,37 +248,22 @@ module MessageQueue
       removedEntries        = b - c
 
       jobs.map do |j|
-
         removedEntries.each do |r|
-
-          if j.id == r.dig('id' )
-
-            self.deleteJob( tube, j.id )
-
-#            logger.debug( "remove job id: #{j.id}" )
-#            logger.debug( r )
-#            j.delete
-          end
-
+          delete_job( tube, j.id ) if j.id == r.dig('id' )
         end
-
       end
-
     end
 
 
 
-    def getJobFromTube( tube, delete = false )
+    def get_job_from_queue( tube, delete = false )
 
       result = {}
 
       if( @b )
+        stats = statistics( tube )
 
-        stats = self.tubeStatistics( tube )
-
-        if( stats.dig( :ready ) == 0 )
-          return result
-        end
+        return result if( stats.dig( :ready ) == 0 )
 
         tube = @b.tubes.watch!( tube.to_s )
 
@@ -300,19 +274,17 @@ module MessageQueue
             # processing job
 
             result = {
-              :id    => job.id,
-              :tube  => job.stats.tube,
-              :state => job.stats.state,
-              :ttr   => job.stats.ttr,
-              :prio  => job.stats.pri,
-              :age   => job.stats.age,
-              :delay => job.stats.delay,
-              :body  => JSON.parse( job.body )
+              id: job.id,
+              tube: job.stats.tube,
+              state: job.stats.state,
+              ttr: job.stats.ttr,
+              prio: job.stats.pri,
+              age: job.stats.age,
+              delay: job.stats.delay,
+              body: JSON.parse( job.body )
             }
 
-            if( delete == true )
-              job.delete
-            end
+            job.delete if( delete == true )
 
           rescue Exception => e
             job.bury
@@ -323,14 +295,13 @@ module MessageQueue
         end
       end
 
-      return result
+      result
     end
 
 
-    def releaseBuriedJobs( tube )
+    def release_buried_jobs( tube )
 
       if( @b )
-
         tube = @b.tubes.find( tube.to_s )
 
         buried = tube.peek( :buried )
@@ -344,32 +315,24 @@ module MessageQueue
     end
 
 
-    def deleteJob( tube, id )
+    def delete_job( tube, id )
 
-      logger.debug( sprintf( "deleteJob( #{tube}, #{id} )" ) )
+      logger.debug( sprintf( "delete_job( #{tube}, #{id} )" ) )
 
       if( @b )
-
         job = @b.jobs.find( id )
-
-        if( job != nil )
-          response = job.delete
-        end
+        response = job.delete if( job != nil )
       end
     end
 
 
-    def buryJob( tube, id )
+    def bury_job( tube, id )
 
-      logger.debug( sprintf( "buryJob( #{tube}, #{id} )" ) )
+      logger.debug( sprintf( "bury_job( #{tube}, #{id} )" ) )
 
       if( @b )
-
         job = @b.jobs.find( id )
-
-        if( job != nil )
-          response = job.bury
-        end
+        response = job.bury if( job != nil )
       end
     end
 
@@ -381,7 +344,7 @@ end
 # TESTS
 
 # settings = {
-#   :beanstalkHost => 'localhost'
+#   :beanstalk_host => 'localhost'
 # }
 #
 # p = MessageQueue::Producer.new( settings )
@@ -394,15 +357,15 @@ end
 #     payload: sprintf( "foo-bar-%s.com", i )
 #   }.to_json
 #
-#   p.addJob( 'test-tube', job )
+#   p.add_job( 'test-tube', job )
 # end
 #
 # c = MessageQueue::Consumer.new( settings )
 #
-# puts JSON.pretty_generate( c.tubeStatistics( 'test-tube' ) )
+# puts JSON.pretty_generate( c.statistics( 'test-tube' ) )
 #
 # loop do
-#   j = c.getJobFromTube( 'test-tube' )
+#   j = c.get_job_from_queue( 'test-tube' )
 #
 #   if( j.count == 0 )
 #     break

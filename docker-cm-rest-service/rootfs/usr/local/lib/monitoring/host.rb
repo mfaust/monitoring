@@ -7,9 +7,6 @@ module Monitoring
   #      example:
   #      {
   #        "force": true,
-  #        "discovery": false,
-  #        "icinga": false,
-  #        "grafana": false,
   #        "tags": [
   #          "development",
   #          "git-0000000"
@@ -26,53 +23,18 @@ module Monitoring
   #        }
   #      }
 
-    def addHost( host, payload )
+    def add_host( host, payload )
 
-  #     logger.debug( format( 'addHost( \'%s\', \'%s\' )', host, payload ) )
+      return JSON.pretty_generate( status: 400, message: 'no hostname given' ) if( host.to_s == '' )
 
-      status    = 500
-      message   = 'initialize error'
-
-      result    = Hash.new()
-      hash      = Hash.new()
-
-      if( host.to_s == '' )
-
-        return JSON.pretty_generate( {
-          :status  => 400,
-          :message => 'no hostname given'
-        } )
-
-      end
-
-      # --------------------------------------------------------------------
-
-      logger.info( format( 'add node \'%s\' to monitoring', host ) )
-
-      alreadyInMonitoring = self.nodeExists?( host )
-
-  #     logger.debug( alreadyInMonitoring ? 'true' : 'false' )
-
-      hostData = self.checkAvailablility?( host )
-
-      return JSON.pretty_generate( status: 400, message: 'Host are not available (DNS Problem)' ) if( hostData == false )
-
-      logger.debug( JSON.pretty_generate( hostData ) )
-
-      ip              = hostData.dig(:ip)
-      short           = hostData.dig(:short)
-      fqdn            = hostData.dig(:fqdn)
-
+      hash            = {}
       force           = false
-      enableDiscovery = true # @enabledDiscovery
-      enabledGrafana  = true # @enabledGrafana
-      enabledIcinga   = true # @enabledIcinga
-      annotation      = true
-      grafanaOverview = true
+      grafana_overview = true
       services        = []
       tags            = []
       config          = {}
 
+      result          = {}
       result[host.to_s] ||= {}
 
       if( payload.to_s != '' )
@@ -81,39 +43,67 @@ module Monitoring
 
         result[host.to_s]['request'] = hash
 
-        force           = hash.keys.include?('force')        ? hash['force']        : false
-        annotation      = hash.keys.include?('annotation')   ? hash['annotation']   : true
-        grafanaOverview = hash.keys.include?('overview')     ? hash['overview']     : true
-        services        = hash.keys.include?('services')     ? hash['services']     : []
-        tags            = hash.keys.include?('tags')         ? hash['tags']         : []
-        config          = hash.keys.include?('config')       ? hash['config']       : {}
+        force            = hash.keys.include?('force')        ? hash['force']        : false
+        annotation       = hash.keys.include?('annotation')   ? hash['annotation']   : true
+        grafana_overview = hash.keys.include?('overview')     ? hash['overview']     : true
+        services         = hash.keys.include?('services')     ? hash['services']     : []
+        tags             = hash.keys.include?('tags')         ? hash['tags']         : []
+        config           = hash.keys.include?('config')       ? hash['config']       : {}
       end
 
+      sanity_force = ( !force.nil? && force.is_a?(Boolean) )
+      sanity_tags  = ( !tags.nil? && tags.is_a?(Array) )
+      sanity_config = ( !config.nil? && config.is_a?(Hash) )
+
       logger.debug( format( 'force      : %s (%s)', force           ? 'true' : 'false', force.class.to_s))
-      logger.debug( format( 'discovery  : %s (%s)', enableDiscovery ? 'true' : 'false', enableDiscovery.class.to_s))
-      logger.debug( format( 'grafana    : %s (%s)', enabledGrafana  ? 'true' : 'false', enabledGrafana.class.to_s))
-      logger.debug( format( 'icinga     : %s (%s)', enabledIcinga   ? 'true' : 'false', enabledIcinga.class.to_s))
-      logger.debug( format( 'annotation : %s (%s)', annotation      ? 'true' : 'false', annotation.class.to_s))
-      logger.debug( format( 'overview   : %s (%s)', grafanaOverview ? 'true' : 'false', grafanaOverview.class.to_s))
+      logger.debug( format( 'overview   : %s (%s)', grafana_overview ? 'true' : 'false', grafana_overview.class.to_s))
       logger.debug( format( 'services   : %s (%s)', services , services.class.to_s) )
       logger.debug( format( 'tags       : %s (%s)', tags , tags.class.to_s) )
       logger.debug( format( 'config     : %s (%s)', config , config.class.to_s) )
 
-      # TODO
-      # ASAP
-      # sanity-checks
+      logger.debug( format( 'sanity_force  : %s (%s)', sanity_force ? 'true' : 'false', sanity_force.class.to_s))
+      logger.debug( format( 'sanity_tags   : %s (%s)', sanity_tags  ? 'true' : 'false', sanity_tags.class.to_s))
+      logger.debug( format( 'sanity_config : %s (%s)', sanity_config   ? 'true' : 'false', sanity_config.class.to_s))
 
-      return { status: 404, message: format('wrong type. \'tags\' must be an Array, given \'%s\'', tags.class.to_s) } unless( tags.is_a?(Array) )
-      return { status: 404, message: format('wrong type. \'config\' must be an Hash, given \'%s\'', tags.class.to_s) } unless( tags.is_a?(Hash) )
+      if( sanity_force == false || sanity_tags == false || sanity_config == false )
 
+        message = []
+        message << format('wrong type. \'force\' must be an Boolean, given \'%s\'', force.class.to_s) unless sanity_force
+        message << format('wrong type. \'tags\' must be an Array, given \'%s\'', tags.class.to_s) unless sanity_tags
+        message << format('wrong type. \'config\' must be an Hash, given \'%s\'', config.class.to_s) unless sanity_config
 
-      if( force == false && alreadyInMonitoring == true )
-        logger.warn( "node '#{host}' is already in monitoring" )
-        return JSON.pretty_generate( status: 200, message: "node '#{host}' is already in monitoring" )
+        return JSON.pretty_generate( status: 400, message: message )
       end
 
-      payload = { dns: hostData } if( payload.is_a?(String) && payload.size == 0 )
+      # --------------------------------------------------------------------
+
+      in_monitoring = host_exists?( host )
+      host_data     = host_avail?( host )
+
+      return JSON.pretty_generate( status: 400, message: 'Host are not available (DNS Problem)' ) if( host_data == false )
+
+      logger.debug( JSON.pretty_generate( host_data ) )
+
+      ip              = host_data.dig(:ip)
+      short           = host_data.dig(:short)
+      fqdn            = host_data.dig(:fqdn)
+
+      return JSON.pretty_generate( status: 200, message: "node '#{host}' is already in monitoring" ) if( force == false && in_monitoring == true )
+
+      # --------------------------------------------------------------------
+
+      logger.info( format( 'add host \'%s\' to monitoring', host ) )
+
+      if( payload.is_a?(String) && payload.size == 0 )
+        payload = {}
+      else
+        payload = JSON.parse( payload )
+      end
+#        if( payload.is_a?( String ) )
+#      payload = {} if( payload.is_a?(String) && payload.size == 0 )
+
       payload[:timestamp] = Time.now.to_i
+      payload[:dns] = host_data
 
       payload = JSON.generate(payload)
 
@@ -126,13 +116,13 @@ module Monitoring
         logger.info( 'force mode ...' )
 
         logger.info( 'create message for remove node from discovery service' )
-        self.messageQueue( cmd: 'remove', node: host, queue: 'mq-discover', payload: payload, prio: 1, ttr: 1, delay: 0 )
+        message_queue( cmd: 'remove', node: host, queue: 'mq-discover', payload: payload, prio: 1, ttr: 1, delay: 0 )
 
         logger.info( 'create message for remove grafana dashboards' )
-        self.messageQueue( cmd: 'remove', node: host, queue: 'mq-grafana', payload: payload, prio: 1, ttr: 1, delay: 0 )
+        message_queue( cmd: 'remove', node: host, queue: 'mq-grafana', payload: payload, prio: 1, ttr: 1, delay: 0 )
 
         logger.info( 'create message for remove icinga checks and notifications' )
-        self.messageQueue( cmd: 'remove', node: host, queue: 'mq-icinga', payload: payload, prio: 1, ttr: 1, delay: 0 )
+        message_queue( cmd: 'remove', node: host, queue: 'mq-icinga', payload: payload, prio: 1, ttr: 1, delay: 0 )
 
         sleep(3)
 
@@ -153,7 +143,7 @@ module Monitoring
         sleep(4)
       end
 
-      logger.debug(format('add %d seconds delay',delay))
+      logger.debug(format('add %d seconds delay', delay)) if( delay > 0 )
 
       # create a valid DNS entry
       #
@@ -166,9 +156,10 @@ module Monitoring
         status = @database.create_config( ip: ip, short: short, fqdn: fqdn, data: config )
       end
 
-      logger.info( 'add node to discovery service' )
-      self.messageQueue( cmd: 'add', node: host, queue: 'mq-discover', payload: payload, prio: 1, delay: 2 + delay.to_i )
+      logger.debug( 'create message for discovery service' )
+      message_queue( cmd: 'add', node: host, queue: 'mq-discover', payload: payload, prio: 1, delay: 2 + delay.to_i )
 
+      logger.info('sucessfull')
 
       return JSON.pretty_generate( status: 200, message: 'the message queue is informed ...' )
     end
@@ -177,17 +168,20 @@ module Monitoring
     #  - http://localhost/api/v2/host?short
     #  - http://localhost/api/v2/host/blueprint-box
     #
-    def listHost( host = nil, payload = nil )
+    def list_host( host = nil, payload = nil )
 
-      data = self.nodeInformations()
+      logger.debug( "list_host( #{host}, #{payload} )" )
 
       request = payload.dig('rack.request.query_hash')
       short   = request.keys.include?('short')
+      data    = host_informations()
 
       logger.debug( data )
-      result  = Hash.new()
+      logger.debug( data.class.to_s )
 
-      return JSON.pretty_generate( status: 204, message: 'no hosts in monitoring found') if( data == nil || data.count == 0 )
+      result  = {}
+
+      return JSON.pretty_generate( status: 204 ) if( data.nil? || data.count == 0 )
 
       if( host.to_s != '' )
 
@@ -226,46 +220,24 @@ module Monitoring
   #     example:
   #     {
   #       "force": true,
-  #       "icinga": false,
   #       "grafana": false,
-  #       "annotation": true
   #     }
-    def removeHost( host, payload )
+    def delete_host( host, payload )
 
-      status    = 500
-      message   = 'initialize error'
-
-      if( host.to_s == '' )
-
-        return JSON.pretty_generate( {
-          :status  => 400,
-          :message => 'no hostname given'
-        } )
-
-      end
+      return JSON.pretty_generate( status: 400, message: 'no hostname given' ) if( host.to_s == '' )
 
       # --------------------------------------------------------------------
 
-      logger.info( format( 'remove node \'%s\' from monitoring', host ) )
+      logger.info( format( 'remove host \'%s\' from monitoring', host ) )
 
-      alreadyInMonitoring = self.nodeExists?( host )
-      hostData            = self.checkAvailablility?( host )
+      in_monitoring = host_exists?( host )
+      host_data     = host_avail?( host )
 
-      if( hostData == false )
-        logger.warn( "DNS PROBLEMS" )
-
-        return JSON.pretty_generate( {
-          'status'  => 404,
-          'message' => "we have problems with our dns to resolve '#{host}' :("
-        })
-      end
+      return JSON.pretty_generate( status: 404, message: format('we have problems with our dns to resolve \'%s\'', host ) ) if( host_data == false )
 
       result    = Hash.new()
       hash      = Hash.new()
 
-      enableDiscovery = true # @enabledDiscovery
-      enabledGrafana  = true # @enabledGrafana
-      enabledIcinga   = true # @enabledIcinga
       annotation      = true
 
       result[host.to_s] ||= {}
@@ -278,43 +250,30 @@ module Monitoring
 
         force           = hash.keys.include?('force')      ? hash['force']      : false
         enabledGrafana  = hash.keys.include?('grafana')    ? hash['grafana']    : @enabledGrafana
-        enabledIcinga   = hash.keys.include?('icinga')     ? hash['icinga']     : @enabledIcinga
-        annotation      = hash.keys.include?('annotation') ? hash['annotation'] : true
       end
 
-      if( alreadyInMonitoring == false && force == false )
-        logger.warn( "node '#{host}' is not in monitoring" )
+      return JSON.pretty_generate( status: 200, message: format( 'host \'%s\' is not in monitoring', host ) ) if( in_monitoring == false && force == false )
 
-        return JSON.pretty_generate( {
-          'status'  => 200,
-          'message' => "node '#{host}' is not in monitoring"
-        })
-      end
+      annotation = false if( in_monitoring == false && force == true )
 
-      if( alreadyInMonitoring == false && force == true )
-        logger.warn( "node '#{host}' is not in monitoring" )
-        logger.warn( "but force delete" )
+#       logger.warn( "force delete" )
+#       logger.warn( "but node '#{host}' is not in monitoring" )
 
-        annotation = false
-      end
-
-      ip    = hostData.dig(:ip)
-      short = hostData.dig(:short)
-      fqdn  = hostData.dig(:fqdn)
+      ip    = host_data.dig(:ip)
+      short = host_data.dig(:short)
+      fqdn  = host_data.dig(:fqdn)
 
       # read the customized configuration
       #
       config = @database.config( ip: ip, short: host, fqdn: fqdn )
 
-  #     logger.debug( 'set node status to DELETE' )
       status = @database.set_status( ip: ip, short: host, fqdn: fqdn, status: Storage::MySQL::DELETE )
 
       # insert the DNS data into the payload
       #
-
       payload = Hash.new
       payload = {
-        dns: hostData,
+        dns: host_data,
         force: true,
         timestamp: Time.now.to_i
       }
@@ -327,33 +286,28 @@ module Monitoring
   #    logger.debug( format( 'icinga     : %s', enabledIcinga    ? 'true' : 'false' ) )
   #    logger.debug( format( 'annotation : %s', annotation       ? 'true' : 'false' ) )
 
-      logger.info( 'annotation for remove' )
+      logger.debug( 'annotation for remove' )
       annotation(
         host: host,
         dns: { ip: ip, short: host, fqdn: fqdn },
         payload: { command: 'remove', argument: 'node', config: config }
       )
 
-  #    self.addAnnotation( host, { 'command' => 'remove', 'argument' => 'node', 'config' => config } )
+      logger.debug( 'remove icinga checks and notifications' )
+      message_queue( cmd: 'remove', node: host, queue: 'mq-icinga', payload: payload, prio: 1 )
 
-      logger.info( 'remove icinga checks and notifications' )
-      self.messageQueue( cmd: 'remove', node: host, queue: 'mq-icinga', payload: payload, prio: 0 )
+      logger.debug( 'remove grafana dashboards' )
+      message_queue( cmd: 'remove', node: host, queue: 'mq-grafana', payload: payload, prio: 1 )
 
-      logger.info( 'remove grafana dashboards' )
-      self.messageQueue( cmd: 'remove', node: host, queue: 'mq-grafana', payload: payload, prio: 0 )
+      logger.debug( 'remove node from discovery service' )
+      message_queue( cmd: 'remove', node: host, queue: 'mq-discover', payload: payload, prio: 1, delay: 5 )
 
-      logger.info( 'remove node from discovery service' )
-      self.messageQueue( cmd: 'remove', node: host, queue: 'mq-discover', payload: payload, prio: 0, delay: 5 )
+      @database.remove_dns( short: host )
 
-      @database.remove_dns( { :short => host } )
+      logger.info('sucessfull')
 
-      result['status']    = 200
-      result['message']   = 'the message queue is informed ...'
-
-      return JSON.pretty_generate( result )
+      return JSON.pretty_generate( status: 200, message: 'the message queue is informed ...' )
     end
-
-
 
   end
 end

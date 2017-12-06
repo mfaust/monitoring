@@ -5,7 +5,7 @@ MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
   VERSION="1712" \
-  BUILD_DATE="2017-12-04" \
+  BUILD_DATE="2017-12-06" \
   TERM=xterm \
   TZ='Europe/Berlin'
 
@@ -50,6 +50,6 @@ HEALTHCHECK \
   --interval=5s \
   --timeout=2s \
   --retries=12 \
-  CMD curl --silent --fail http://localhost:4567/health || exit 1
+  CMD curl --silent --fail http://localhost:8080/health || exit 1
 
 CMD [ "/init/run.sh" ]
