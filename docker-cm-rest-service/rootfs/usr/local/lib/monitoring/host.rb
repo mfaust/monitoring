@@ -80,15 +80,16 @@ module Monitoring
       in_monitoring = host_exists?( host )
       host_data     = host_avail?( host )
 
-      return JSON.pretty_generate( status: 400, message: 'Host are not available (DNS Problem)' ) if( host_data == false )
+      logger.debug( "in_monitoring:  #{in_monitoring}" )
+      logger.debug( "host_data    :  #{JSON.pretty_generate( host_data )}" )
 
-      logger.debug( JSON.pretty_generate( host_data ) )
+      return JSON.pretty_generate( status: 400, message: 'Host are not available (DNS Problem)' ) if( host_data == false )
 
       ip              = host_data.dig(:ip)
       short           = host_data.dig(:short)
       fqdn            = host_data.dig(:fqdn)
 
-      return JSON.pretty_generate( status: 200, message: "node '#{host}' is already in monitoring" ) if( force == false && in_monitoring == true )
+      return JSON.pretty_generate( status: 200, message: "Host '#{host}' is already in monitoring" ) if( force == false && in_monitoring == true )
 
       # --------------------------------------------------------------------
 

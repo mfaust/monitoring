@@ -12,22 +12,20 @@ module Monitoring
       status          = params.dig(:status) || [ Storage::MySQL::ONLINE, Storage::MySQL::PREPARE ]
       full_information = params.dig(:full)  || false
 
-      ip              = nil
-      short           = nil
-      fqdn            = nil
+      ip      = nil
+      short   = nil
+      fqdn    = nil
 
-      result  = Hash.new()
+      result  = {}
 
-      if( host != nil )
-
+      if( host.nil? )
+        params = { status: status }
+      else
         ip, short, fqdn = ns_lookup(host)
 
         return nil if( ip.nil? && short.nil? && fqdn.nil? )
 
         params = { ip: ip, short: short, fqdn: fqdn, status: status }
-      else
-
-        params = { status: status }
       end
 
       # get nodes with ONLINE or PREPARE state

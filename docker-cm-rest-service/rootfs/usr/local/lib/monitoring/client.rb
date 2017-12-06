@@ -49,7 +49,6 @@ module Monitoring
       logger.info( '-----------------------------------------------------------------' )
       logger.info( '' )
 
-      @cache       = MiniCache::Store.new()
       @redis       = Storage::RedisClient.new( redis_settings )
       @mq_consumer = MessageQueue::Consumer.new( mq_settings )
       @mq_producer = MessageQueue::Producer.new( mq_settings )

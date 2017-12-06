@@ -11,7 +11,10 @@ module Monitoring
       #
       cache_key = format( 'dns::%s', name )
 
-      dns      = @cache.get( cache_key )
+      dns = @redis.get(cache_key)
+      dns = dns.deep_symbolize_keys unless(dns.nil?)
+
+      logger.debug( "dns cache: #{dns} (#{dns.class.to_s})" )
 
       if( dns.nil? )
 
@@ -23,11 +26,15 @@ module Monitoring
 
           logger.debug( 'use database entries' )
 
-          ip    = dns.dig('ip')
-          short = dns.dig('name')
-          fqdn  = dns.dig('fqdn')
+          dns = dns.deep_symbolize_keys unless(dns.nil?)
 
-          @cache.set( cache_key , expires_in: expire ) { MiniCache::Data.new( ip: ip, short: short, long: fqdn ) }
+          logger.debug( "dba cache: #{dns} (#{dns.class.to_s})" )
+
+          ip    = dns.dig(:ip)
+          short = dns.dig(:name)
+          fqdn  = dns.dig(:fqdn)
+
+          @redis.set(cache_key, { ip: ip, short: short, fqdn: fqdn }.to_json, expire )
 
           return ip, short, fqdn
         end
@@ -49,8 +56,7 @@ module Monitoring
           short    = nil
           fqdn     = nil
         else
-          @redis.set(format('dns::%s',fqdn), { ip: ip, short: short, long: fqdn }.to_json, 320 )
-          @cache.set(cache_key , expires_in: expire ) { MiniCache::Data.new( { ip: ip, short: short, long: fqdn } ) }
+          @redis.set(cache_key, { ip: ip, short: short, fqdn: fqdn }.to_json, expire )
         end
       else
         ip    = dns.dig(:ip)
@@ -66,24 +72,26 @@ module Monitoring
 
       logger.debug( "host_exists?( #{host} )" )
 
-      ip, short, fqdn = ns_lookup(host)
+      params = { short: host, fqdn: host, status: [ Storage::MySQL::ONLINE, Storage::MySQL::PREPARE ] }
 
-      d = host_informations( host: fqdn )
+      nodes = @database.nodes( params )
 
-      return false if( d.nil? )
+      return false if( nodes.nil? )
 
-      return true if( d.keys.first == fqdn )
-
-      return false
+      true
     end
 
     # check availability and create an DNS entry into our redis
     #
     def host_avail?( host )
 
-      ip, short, fqdn = ns_lookup(host )
+      logger.debug( "host_avail?( #{host} )" )
 
-      return false if( ip == nil && short == nil && fqdn == nil )
+      ip, short, fqdn = ns_lookup(host)
+
+      logger.debug( { ip: ip, short: short, fqdn: fqdn } )
+
+      return false if( ip.nil? && short.nil? && fqdn.nil? )
 
       { ip: ip, short: short, fqdn: fqdn }
     end

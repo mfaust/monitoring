@@ -9,6 +9,8 @@ module Utils
 
     def self.resolv( host )
 
+#       puts("self.resolv( #{host} )")
+
       line  = nil
       fqdn  = nil
       short = nil
@@ -32,14 +34,16 @@ module Utils
 
         cmd = format( 'dig -x %s +short', host )
         Open3.popen3( cmd ) do |stdin, stdout, stderr, wait_thr|
-          returnValue = wait_thr.value
-          stdOut      = stdout.gets
-          stdErr      = stderr.gets
+          return_value = wait_thr.value
+          std_out      = stdout.gets
+          std_err      = stderr.gets
 
           # got the hostname for the IP-Address
-          host = stdOut if( returnValue == 0 && !stdOut.to_s.empty? )
+          host = std_out if( return_value == 0 && !std_out.to_s.empty? )
         end
       end
+
+#       puts(" #1 host  #{host} ")
 
       # use host to resolve hostname
       #  host -t A $hostname
@@ -47,14 +51,14 @@ module Utils
 
       Open3.popen3( cmd ) do |stdin, stdout, stderr, wait_thr|
 
-        returnValue = wait_thr.value
-        stdOut      = stdout.gets
-        stdErr      = stderr.gets
+        return_value = wait_thr.value
+        std_out      = stdout.gets
+        std_err      = stderr.gets
 
-        line = stdOut if( returnValue == 0 && !stdOut.to_s.empty? )
+        line = std_out if( return_value == 0 && !std_out.to_s.empty? )
       end
 
-#       puts line
+#       puts(" #1 line  #{line} ")
 
       # the host command above was disfunctional
       # we try the ruby resolv class
