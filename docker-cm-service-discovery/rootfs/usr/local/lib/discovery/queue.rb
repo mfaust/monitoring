@@ -63,7 +63,10 @@ module ServiceDiscovery
         return {status: status, message: 'missing payload'} if( payload == nil )
       end
 
-      payload  = JSON.parse( payload ) if( payload.is_a?( String ) == true && payload.to_s != '' )
+      payload  = JSON.parse( payload ) if( payload.is_a?( String ) && payload.to_s != '' )
+
+      logger.debug( JSON.pretty_generate payload )
+
 
       dns      = payload.dig('dns') unless( payload.is_a?(String))
 
