@@ -10,106 +10,106 @@ class Icinga2Check_CM_SequenceNumbers < Icinga2Check
 
     super
 
+    logger.level = Logger::DEBUG
+
     rls       = settings.dig(:rls)
     mls       = settings.dig(:mls)
 
-    hostRls   = self.hostname( rls )
-    hostMls   = self.hostname( mls )
+    host_rls   = hostname( rls )
+    host_mls   = hostname( mls )
 
 #     unless( mls.nil? )
-#       hostMls = self.hostname( mls )
+#       host_mls = hostname( mls )
 #     else
 #       mls     = auto_detect_mls(rls)
-#       hostMls = nil if( mls.nil? )
+#       host_mls = nil if( mls.nil? )
 #     end
 
-    self.check( hostMls, hostRls )
+    check( host_mls, host_rls )
 
   end
 
 
   def check( mls, rls )
 
-    exitCode = STATE_UNKNOWN
-    config   = readConfig( 'sequence-number' )
+    exit_code = STATE_UNKNOWN
 
+    if( mls.nil? )
+      puts format( 'please, give me an Master Live Server!' )
+      exit exit_code
+    end
+
+    config   = read_config( 'sequence-number' )
     warning  = config.dig(:warning)  || 300
     critical = config.dig(:critical) || 500
 
-    if( mls.nil? )
-
-      puts sprintf( 'please, give me an Master Live Server!' )
-      exit exitCode
-    end
-
     # get our bean
-    rlsData      = @mbean.bean( rls, 'replication-live-server', 'Replicator' )
-    mlsData      = @mbean.bean( mls, 'master-live-server', 'Server' )
+    rls_data      = @mbean.bean( rls, 'replication-live-server', 'Replicator' )
+    mls_data      = @mbean.bean( mls, 'master-live-server', 'Server' )
 
-    logger.debug( "rls data: #{rlsData.class.to_s}" )
-    logger.debug( "mls data: #{mlsData.class.to_s}" )
+    logger.debug( "rls data: #{rls_data.class.to_s}" )
+    logger.debug( "mls data: #{mls_data.class.to_s}" )
 
-    if ( rlsData == nil || rlsData == false ) && ( mlsData == nil || mlsData == false )
+    if ( rls_data == nil || rls_data == false ) && ( mls_data == nil || mls_data == false )
 
-      puts sprintf( 'RLS or MLS has no data' )
+      puts format( 'RLS or MLS has no data' )
       exit STATE_WARNING
     end
 
-    mlsDataValue = self.runningOrOutdated( { host: mls, data: mlsData } )
+    mls_data_value = running_or_outdated( { host: mls, data: mls_data } )
 
-#    mlsDataValue = self.runningOrOutdated( mlsData )
+#    mls_data_value = running_or_outdated( mls_data )
 
-    mlsDataValue      = mlsDataValue.values.first
-    mlsSequenceNumber = mlsDataValue.dig('RepositorySequenceNumber' )
-    mlsRunLevel       = mlsDataValue.dig('RunLevel').downcase
+    mls_data_value      = mls_data_value.values.first
+    mls_sequence_number = mls_data_value.dig('RepositorySequenceNumber' )
+    mls_runLevel       = mls_data_value.dig('RunLevel').downcase
 
     # get our bean
 
-    rlsDataValue = self.runningOrOutdated( { host: rls, data: rlsData } )
-#    rlsDataValue = self.runningOrOutdated( rlsData )
+    rls_data_value = running_or_outdated( { host: rls, data: rls_data } )
+#    rls_data_value = running_or_outdated( rls_data )
 
-    rlsDataValue        = rlsDataValue.values.first
-    rlsSequenceNumber   = rlsDataValue.dig('LatestCompletedSequenceNumber' )
-    rlsControllerState  = rlsDataValue.dig('ControllerState').downcase
+    rls_data_value        = rls_data_value.values.first
+    rls_sequence_number   = rls_data_value.dig('LatestCompletedSequenceNumber' )
+    rls_controller_state  = rls_data_value.dig('ControllerState').downcase
 
 
-    if( mlsRunLevel != 'online' || rlsControllerState != 'running' )
+    if( mls_runLevel != 'online' || rls_controller_state != 'running' )
 
-      puts sprintf( 'MLS or RLS are not running' )
+      puts format( 'MLS or RLS are not running' )
 
       exit STATE_WARNING
     end
 
-    diff = mlsSequenceNumber.to_i - rlsSequenceNumber.to_i
+    diff = mls_sequence_number.to_i - rls_sequence_number.to_i
 
     if( diff == warning || diff <= warning )
       status   = 'OK'
-      exitCode = STATE_OK
+      exit_code = STATE_OK
 
       puts format(
         'RLS and MLS in sync<br>MLS Sequence Number: %s<br>RLS Sequence Number: %s | diff=%d mls_seq_nr=%d rls_seq_nr=%d',
-        mlsSequenceNumber.to_i, rlsSequenceNumber.to_i,
-        diff, mlsSequenceNumber.to_i, rlsSequenceNumber.to_i
+        mls_sequence_number.to_i, rls_sequence_number.to_i,
+        diff, mls_sequence_number.to_i, rls_sequence_number.to_i
       )
 
-      exit exitCode
+      exit exit_code
 
     elsif( diff >= warning && diff <= critical )
       status   = 'WARNING'
-      exitCode = STATE_WARNING
+      exit_code = STATE_WARNING
     else
       status   = 'CRITICAL'
-      exitCode = STATE_CRITICAL
+      exit_code = STATE_CRITICAL
     end
 
     puts format(
       'RLS are %s Events <b>behind</b> the MLS<br>MLS Sequence Number: %s<br>RLS Sequence Number: %s | diff=%d mls_seq_nr=%d rls_seq_nr=%d',
-      diff, mlsSequenceNumber.to_i, rlsSequenceNumber.to_i,
-      diff, mlsSequenceNumber.to_i, rlsSequenceNumber.to_i
+      diff, mls_sequence_number.to_i, rls_sequence_number.to_i,
+      diff, mls_sequence_number.to_i, rls_sequence_number.to_i
     )
 
-    exit exitCode
-
+    exit exit_code
   end
 
 

@@ -12,56 +12,56 @@ class Icinga2Check_CM_Licenses < Icinga2Check
     host         = settings.dig(:host)
     application  = settings.dig(:application)
 
-    host         = self.hostname( host )
+    host         = hostname( host )
 
-    self.check( host, application )
-
+    check( host, application )
   end
 
 
   def check( host, application )
 
-    config   = readConfig( 'license' )
+    config   = read_config( 'license' )
     warning  = config.dig(:warning)  || 50
     critical = config.dig(:critical) || 20
 
     # get our bean
     data      = @mbean.bean( host, application, 'Server' )
-    dataValue = self.runningOrOutdated( { host: host, data: data } )
+    data_value = running_or_outdated( { host: host, data: data } )
 
-    dataValue = dataValue.values.first
+    data_value = data_value.values.first
 
     t               = Date.parse( Time.now().to_s )
     today           = Time.new( t.year, t.month, t.day )
 
-    validUntilHard  = dataValue.dig('LicenseValidUntilHard')
+    valid_until_hard  = data_value.dig('LicenseValidUntilHard')
 
-    if( validUntilHard != nil )
+    if( valid_until_hard != nil )
 
-      x               = time_difference( today, Time.at( validUntilHard / 1000 ) )
-      validUntilDays  = x[:days]
+      x                = time_difference( today, Time.at( valid_until_hard / 1000 ) )
+      valid_until_days = x[:days]
+      license_date     = Time.at( valid_until_hard / 1000 ).strftime('%d.%m.%Y')
 
-      licenseDate     = Time.at( validUntilHard / 1000 ).strftime("%d.%m.%Y")
-
-      if( validUntilDays >= warning || validUntilDays == warning )
+      if( valid_until_days >= warning || valid_until_days == warning )
         status   = 'OK'
-        exitCode = STATE_OK
-      elsif( validUntilDays >= critical && validUntilDays <= warning )
+        exit_code = STATE_OK
+      elsif( valid_until_days >= critical && valid_until_days <= warning )
         status   = 'WARNING'
-        exitCode = STATE_WARNING
+        exit_code = STATE_WARNING
       else
         status   = 'CRITICAL'
-        exitCode = STATE_CRITICAL
+        exit_code = STATE_CRITICAL
       end
 
-      puts sprintf( '<b>%d days left</b><br>CoreMedia License is valid until %s | valid=%d warning=%d critical=%d', validUntilDays, licenseDate, validUntilDays,warning, critical )
+      puts format(
+        '<b>%d days left</b><br>CoreMedia License is valid until %s | valid=%d warning=%d critical=%d',
+        valid_until_days, license_date, valid_until_days,warning, critical
+      )
     else
-      puts sprintf( 'UNKNOWN - No valid CoreMedia License found' )
-      exitCode = STATE_UNKNOWN
+      puts format( 'UNKNOWN - No valid CoreMedia License found' )
+      exit_code = STATE_UNKNOWN
     end
 
-    exit exitCode
-
+    exit exit_code
   end
 
 end

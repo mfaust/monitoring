@@ -15,17 +15,17 @@ class Icinga2Check_CM_Feeder < Icinga2Check
     host   = settings.dig(:host)
     feeder = settings.dig(:feeder)
 
-    host         = self.hostname( host )
+    host         = hostname( host )
 
-    feederServer = self.validate( feeder )
+    feeder_server = validate( feeder )
 
     case feeder
     when 'live'
-      self.feederStatus( host, feederServer )
+      cae_feeder_status( host, feeder_server )
     when 'preview'
-      self.feederStatus( host, feederServer )
+      cae_feeder_status( host, feeder_server )
     when 'content'
-      self.contentFeederStatus( host, feederServer )
+      content_feeder_status( host, feeder_server )
     end
   end
 
@@ -34,55 +34,54 @@ class Icinga2Check_CM_Feeder < Icinga2Check
 
     case feeder
     when 'live'
-      feederServer = 'caefeeder-live'
+      feeder_server = 'caefeeder-live'
     when 'preview'
-      feederServer = 'caefeeder-preview'
+      feeder_server = 'caefeeder-preview'
     when 'content'
-      feederServer = 'content-feeder'
+      feeder_server = 'content-feeder'
     else
-      puts sprintf( 'CoreMedia Feeder - unknown feeder type %s', feeder )
+      puts format( 'CoreMedia Feeder - unknown feeder type %s', feeder )
       exit STATE_CRITICAL
     end
 
-    return feederServer
-
+    feeder_server
   end
 
 
-  def feederStatus( host, feederServer )
+  def cae_feeder_status( host, feeder_server )
 
-    config   = readConfig( 'caefeeder' )
+    config   = read_config( 'caefeeder' )
     warning  = config.dig(:warning)  || 2500
     critical = config.dig(:critical) || 10000
 
     # get our bean
-    health      = @mbean.bean( host, feederServer, 'Health' )
-    engine      = @mbean.bean( host, feederServer, 'ProactiveEngine' )
+    health      = @mbean.bean( host, feeder_server, 'Health' )
+    engine      = @mbean.bean( host, feeder_server, 'ProactiveEngine' )
 
-    healthValue = self.runningOrOutdated( { host: host, data: health } )
-    healthValue = healthValue.values.first
+    health_value = running_or_outdated( host: host, data: health )
+    health_value = health_value.values.first
 
-    healthy     = ( healthValue != nil &&  healthValue['Healthy'] ) ? healthValue['Healthy'] : false
+    healthy     = ( health_value != nil &&  health_value['Healthy'] ) ? health_value['Healthy'] : false
 
     if( healthy == true )
 
-      healthMessage  = 'HEALTHY'
+      health_message  = 'HEALTHY'
 
-      engineValue = self.runningOrOutdated( { host: host, data: engine } )
-      engineValue = engineValue.values.first
+      engine_value = running_or_outdated( host: host, data: engine )
+      engine_value = engine_value.values.first
 
-#       logger.debug( JSON.pretty_generate( engineValue ) )
+#       logger.debug( JSON.pretty_generate( engine_value ) )
 
-      maxEntries            = engineValue.dig('KeysCount')   || 0  # Number of (active) keys
-      currentEntries        = engineValue.dig('ValuesCount') || 0  # Number of (valid) values. It is less or equal to 'keysCount'
-      heartbeat             = engineValue.dig('HeartBeat')         # 1 minute == 60000 ms
+      max_entries            = engine_value.dig('KeysCount')   || 0  # Number of (active) keys
+      current_entries        = engine_value.dig('ValuesCount') || 0  # Number of (valid) values. It is less or equal to 'keysCount'
+      heartbeat              = engine_value.dig('HeartBeat')         # 1 minute == 60000 ms
 
-      if( maxEntries == 0 && currentEntries == 0 )
+      if( max_entries == 0 && current_entries == 0 )
 
         status       = 'UNKNOWN'
         puts format(
           '%d Elements for Feeder available. This feeder is maybe restarting?',
-          maxEntries
+          max_entries
         )
         exit STATE_UNKNOWN
       else
@@ -95,101 +94,100 @@ class Icinga2Check_CM_Feeder < Icinga2Check
           exit STATE_CRITICAL
         end
 
-        diffEntries    = ( maxEntries - currentEntries ).to_i
+        diff_entries    = ( max_entries - current_entries ).to_i
 
-        if( diffEntries > critical )
+        if( diff_entries > critical )
           status   = 'CRITICAL'
-          exitCode = STATE_CRITICAL
-        elsif( diffEntries > warning || diffEntries == warning )
+          exit_code = STATE_CRITICAL
+        elsif( diff_entries > warning || diff_entries == warning )
 
           status   = 'WARNING'
-          exitCode = STATE_WARNING
+          exit_code = STATE_WARNING
         else
 
           status   = 'OK'
-          exitCode = STATE_OK
+          exit_code = STATE_OK
         end
 
-        if( maxEntries == currentEntries )
+        if( max_entries == current_entries )
 
           puts format(
             'all %d Elements feeded<br>Heartbeat %d ms | max=%s current=%d diff=%d heartbeat=%d',
-            maxEntries, heartbeat,
-            maxEntries, currentEntries, diffEntries, heartbeat
+            max_entries, heartbeat,
+            max_entries, current_entries, diff_entries, heartbeat
           )
-          exit exitCode
+          exit exit_code
         else
 
           puts format(
             '%d Elements of %d feeded.<br>%d elements left<br>Heartbeat %d ms | max=%s current=%d diff=%d heartbeat=%d',
-            currentEntries, maxEntries, diffEntries, heartbeat,
-            maxEntries, currentEntries, diffEntries, heartbeat
+            current_entries, max_entries, diff_entries, heartbeat,
+            max_entries, current_entries, diff_entries, heartbeat
           )
-          exit exitCode
+          exit exit_code
         end
 
       end
 
     else
-      puts sprintf( 'CRITICAL - NOT HEALTHY' )
+      puts format( 'CRITICAL - NOT HEALTHY' )
       exit STATE_CRITICAL
     end
 
   end
 
 
-  def contentFeederStatus( host, feederServer )
+  def content_feeder_status( host, feeder_server )
 
-    config   = readConfig( 'contentfeeder' )
+    config   = read_config( 'contentfeeder' )
     warning  = config.dig(:warning)  || 2500
     critical = config.dig(:critical) || 10000
 
-    data      = @mbean.bean( host, feederServer, 'Feeder' )
-    dataValue = self.runningOrOutdated( { host: host, data: data } )
-    dataValue = dataValue.values.first
-    state     = dataValue.dig('State')
+    data       = @mbean.bean( host, feeder_server, 'Feeder' )
+    data_value = running_or_outdated( host: host, data: data )
+    data_value = data_value.values.first
+    state      = data_value.dig('State')
 
-    if( state == 'running' )
+    if( state.downcase == 'running' )
 
-      pendingDocuments = dataValue.dig('CurrentPendingDocuments')
-      pendingEvents    = dataValue.dig('PendingEvents')
+      pending_documents = data_value.dig('CurrentPendingDocuments')
+      pending_events    = data_value.dig('PendingEvents')
 
-      if( pendingDocuments == 0 && pendingDocuments <= warning )
+      if( pending_documents == 0 && pending_documents <= warning )
 
         status   = 'OK'
-        exitCode = STATE_OK
-      elsif( pendingDocuments >= warning && pendingDocuments <= critical )
+        exit_code = STATE_OK
+      elsif( pending_documents >= warning && pending_documents <= critical )
 
         status   = 'WARNING'
-        exitCode = STATE_WARNING
+        exit_code = STATE_WARNING
       else
 
         status   = 'CRITICAL'
-        exitCode = STATE_CRITICAL
+        exit_code = STATE_CRITICAL
       end
 
       puts format(
         'Pending Documents: %d<br>Pending Events: %d | pending_documents=%d pending_events=%d',
-        pendingDocuments, pendingEvents,
-        pendingDocuments, pendingEvents
+        pending_documents, pending_events,
+        pending_documents, pending_events
       )
 
-    elsif( state == 'initializing' )
+    elsif( state.downcase == 'initializing' )
 
       status   = 'WARNING'
-      exitCode = STATE_WARNING
+      exit_code = STATE_WARNING
 
-      puts sprintf( 'Feeder are in <b>%s</b> state', state )
+      puts format( 'Feeder are in <b>%s</b> state', state )
     else
 
       status   = 'CRITICAL'
-      exitCode = STATE_CRITICAL
+      exit_code = STATE_CRITICAL
 
       puts 'Feeder are in unknown state'
     end
 
-    exit exitCode
-
+    exit exit_code
   end
 
 end

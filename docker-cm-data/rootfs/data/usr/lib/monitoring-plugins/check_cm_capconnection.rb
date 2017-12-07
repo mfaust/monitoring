@@ -14,10 +14,9 @@ class Icinga2Check_CM_CapConnection < Icinga2Check
     application  = settings.dig(:application)
     memory       = settings.dig(:memory)
 
-    host         = self.hostname( host )
+    host         = hostname( host )
 
-    self.check( host, application, memory )
-
+    check( host, application, memory )
   end
 
 
@@ -26,23 +25,22 @@ class Icinga2Check_CM_CapConnection < Icinga2Check
     # get our bean
     data = @mbean.bean( host, application, 'CapConnection' )
 
-    dataValue = self.runningOrOutdated( { host: host, data: data } )
+    data_value = running_or_outdated( host: host, data: data )
 
-    dataValue = dataValue.values.first
+    data_value = data_value.values.first
 
-    state = dataValue.dig('Open') || false
+    state = data_value.dig('Open') || false
 
     if( state == true )
       status   = 'OK'
-      exitCode = STATE_OK
+      exit_code = STATE_OK
     else
       status   = 'CRITICAL'
-      exitCode = STATE_CRITICAL
+      exit_code = STATE_CRITICAL
     end
 
-    puts sprintf( 'Cap Connection <b>%s</b>', state ? 'open' : 'not exists' )
-    exit exitCode
-
+    puts format( 'Cap Connection <b>%s</b>', state ? 'open' : 'not exists' )
+    exit exit_code
   end
 
 end

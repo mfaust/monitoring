@@ -13,40 +13,39 @@ class Icinga2Check_CM_Runlevel < Icinga2Check
     host         = settings.dig(:host)
     application  = settings.dig(:application)
 
-    host         = self.hostname( host )
+    host         = hostname( host )
 
-    self.check( host, application )
-
+    check( host, application )
   end
 
 
   def check( host, application )
 
     # get our bean
-    data      = @mbean.bean( host, application, 'Server' )
-    dataValue = self.runningOrOutdated( { host: host, data: data } )
+    data       = @mbean.bean( host, application, 'Server' )
+    data_value = running_or_outdated( { host: host, data: data } )
 
-    dataValue = dataValue.values.first
-    runlevel  = dataValue.dig('RunLevel') || false
+    data_value = data_value.values.first
+    runlevel   = data_value.dig('RunLevel') || false
 
     # in maintenance mode the Server mbean is not available
     case runlevel.downcase
     when 'offline'
-      status   = 'CRITICAL'
-      exitCode = STATE_CRITICAL
+      status    = 'CRITICAL'
+      exit_code = STATE_CRITICAL
     when 'online'
-      status   = 'OK'
-      exitCode = STATE_OK
+      status    = 'OK'
+      exit_code = STATE_OK
     when 'administration'
-      status   = 'WARNING'
-      exitCode = STATE_WARNING
+      status    = 'WARNING'
+      exit_code = STATE_WARNING
     else
-      status   = 'CRITICAL'
-      exitCode = STATE_CRITICAL
+      status    = 'CRITICAL'
+      exit_code = STATE_CRITICAL
     end
 
-    puts sprintf( 'RunLevel in <b>%s</b> Mode', runlevel )
-    exit exitCode
+    puts format( 'RunLevel in <b>%s</b> Mode', runlevel )
+    exit exit_code
 
   end
 
