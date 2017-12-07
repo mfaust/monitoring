@@ -92,7 +92,21 @@ class CMGrafana
         tmp_services.delete( 'http-status' )
 
         # ensure, that we are logged in
-        login( user: @user, password: @password, max_retries: 10 )
+        begin
+          login_retried ||= 0
+          login_max_retried ||= 4
+          login_sleep_between_retries = 4
+          login( user: @user, password: @password, max_retried: login_max_retried )
+        rescue
+          if( login_retried < login_max_retried )
+            login_retried += 1
+            logger.debug( format( 'cannot login, socket error (retry %d / %d)', login_retried, login_max_retried ) )
+            sleep( login_sleep_between_retries )
+            retry
+          else
+            raise format( 'Maximum retries (%d) against \'%s/login\' reached. Giving up ...', login_max_retried, @url )
+          end
+        end
 
         # we want an Services Overview for this Host
         create_overview( services ) if(create_overview) # add description
