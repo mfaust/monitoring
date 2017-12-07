@@ -98,7 +98,7 @@ module DataCollector
       @jolokia   = Jolokia::Client.new( { :host => jolokia_host, :port => jolokia_port, :path => jolokia_path, :auth => { :user => jolokia_auth_user, :pass => jolokia_auth_pass } } )
       @mq        = MessageQueue::Consumer.new(mq_settings )
       @cfg       = Config.new( application: application_config, service: service_config )
-      @prepare   = Prepare.new( redis: @redis, config: @cfg ) # prepareSettings )
+      @prepare   = Prepare.new( redis: @redis, config: @cfg )
       @jobs      = JobQueue::Job.new()
       @database  = Storage::MySQL.new( mysql_settings )
 
@@ -383,7 +383,7 @@ module DataCollector
 
     # return all known and active (online) server for monitoring
     #
-    def monitoredServer()
+    def monitored_server()
 
       @database.nodes( status: [ Storage::MySQL::ONLINE ] )
     end
@@ -400,8 +400,8 @@ module DataCollector
 
       return { status: 404, message: 'no host name for bulk checks' } if( host.nil? )
 
-      checks   = Array.new()
-      array    = Array.new()
+      checks   = []
+      array    = []
       services = nil
 
       result = {
@@ -437,7 +437,7 @@ module DataCollector
 
         port    = d.dig( 'port' )    || -1
         metrics = d.dig( 'metrics' ) || []
-        bulk    = Array.new()
+        bulk    = []
 
         # only to see which service
         #
@@ -507,7 +507,7 @@ module DataCollector
 #      logger.debug( JSON.pretty_generate( result ) )
         # send json to jolokia
       begin
-        self.collect_measurements( result )
+        collect_measurements( result )
       rescue => e
         logger.error(format('collect measurements failed, cause: %s', e ))
         logger.error( e.backtrace.join("\n") )
@@ -524,7 +524,7 @@ module DataCollector
     #  - rmi uri are : "service:jmx:rmi:///jndi/rmi://moebius-16-tomcat:2222/jmxrmi"
     #    host: moebius-16-tomcat
     #    port: 2222
-    def check_host_and_service( targetUrl )
+    def check_host_and_service( target_url )
 
       result = false
 
@@ -537,17 +537,15 @@ module DataCollector
       /x
 
       # prepare
-      parts     = targetUrl.match( regex )
-      destHost  = parts['host'].to_s.strip
-      destPort  = parts['port'].to_s.strip
+      parts     = target_url.match( regex )
+      dest_host  = parts['host'].to_s.strip
+      dest_port  = parts['port'].to_s.strip
 
-#       logger.debug( format( 'check Port %s on Host %s for sending data', destPort, destHost ) )
+#       logger.debug( format( 'check Port %s on Host %s for sending data', dest_port, dest_host ) )
 
-      result = Utils::Network.portOpen?( destHost, destPort )
+      result = Utils::Network.portOpen?( dest_host, dest_port )
 
-      if( result == false )
-        logger.warn( format( 'The Port %s on Host %s is not open, skip sending data', destPort, destHost ) )
-      end
+      logger.warn( format( 'The Port %s on Host %s is not open, skip sending data', dest_port, dest_host ) ) if( result == false )
 
       return result
 
@@ -562,11 +560,8 @@ module DataCollector
     def collect_measurements( params )
 
 #       logger.debug( "collect_measurements( #{params} )" )
-
-      if( @jolokia.available? == false )
-        logger.error( 'jolokia service is not available!' )
-        return { status: 500, message: 'jolokia service is not available!' }
-      end
+      # logger.error( 'jolokia service is not available!' )
+      return { status: 500, message: 'jolokia service is not available!' } if( @jolokia.available? == false )
 
       ip        = params.dig(:ip)
       hostname  = params.dig(:hostname)
@@ -597,9 +592,9 @@ module DataCollector
 
           if( i.count > 1 )
 
-            targetUrl = i.first.dig( 'target', 'url' )
+            target_url = i.first.dig( 'target', 'url' )
 
-            if( self.check_host_and_service( targetUrl ) == true )
+            if( check_host_and_service( target_url ) == true )
 
               response       = @jolokia.post( payload: i, timeout: 15, sleep_retries: 3 )
 
@@ -613,16 +608,16 @@ module DataCollector
 
                 begin
 
-                  data = self.reorganize_data( jolokia_message )
+                  data = reorganize_data( jolokia_message )
 
                   # get configured Content Server (RLS or MLS)
                   if( v =~ /^cae-(\blive|preview).*/ )
-                    data = self.parse_content_server_url( fqdn: fqdn, service: v, data: data )
+                    data = parse_content_server_url( fqdn: fqdn, service: v, data: data )
                   end
 
                   # get configured Master Live Server
                   if( v == 'replication-live-server' )
-                    data = self.parse_mls_ior( fqdn: fqdn, data: data )
+                    data = parse_mls_ior( fqdn: fqdn, data: data )
                   end
 
                   result[v] = data
@@ -644,39 +639,39 @@ module DataCollector
             when 'mysql'
               # MySQL
 
-              port = config_data( v, 'port', 3306 )
-              username = config_data( v, 'monitoring_user', 'monitoring' )
-              password = config_data( v, 'monitoring_password', 'monitoring' )
+              port = config_data( host: hostname, service: v, value: 'port', default: 3306 )
+              username = config_data( host: hostname, service: v, value: 'monitoring_user', default: 'monitoring' )
+              password = config_data( host: hostname, service: v, value: 'monitoring_password', default: 'monitoring' )
 
-              d = self.mysql_data( host: fqdn, port: port, username: username, password: password )
+              d = mysql_data( host: fqdn, port: port, username: username, password: password )
             when 'mongodb'
               # MongoDB
-              port = config_data( v, 'port', 28017 )
-              d = self.mongodb_data( host: fqdn, port: port )
+              port = config_data( host: hostname, service: v, value: 'port', default: 28017 )
+              d = mongodb_data( host: fqdn, port: port )
             when 'postgres'
               # Postgres
-              port = config_data( v, 'port', 5432 )
-              username = config_data( v, 'monitoring_user', 'cm_management' )
-              password = config_data( v, 'monitoring_password', 'cm_management' )
-              database = config_data( v, 'monitoring_database', 'coremedia' )
+              port = config_data( host: hostname, service: v, value: 'port', default: 5432 )
+              username = config_data( host: hostname, service: v, value: 'monitoring_user', default: 'cm_management' )
+              password = config_data( host: hostname, service: v, value: 'monitoring_password', default: 'cm_management' )
+              database = config_data( host: hostname, service: v, value: 'monitoring_database', default: 'coremedia' )
 
-              d = self.postgres_data( host: fqdn, port: port )
+              d = postgres_data( host: fqdn, port: port )
             when 'redis'
               # redis
-              port = config_data( v, 'port', 6379 )
-              d = self.redis_data( host: fqdn, port: port )
+              port = config_data( host: hostname, service: v, value: 'port', default: 6379 )
+              d = redis_data( host: fqdn, port: port )
             when 'node-exporter'
               # node_exporter
-              port = config_data( v, 'port', 9100 )
-              d = self.node_exporter_data( host: fqdn )
+              port = config_data( host: hostname, service: v, value: 'port', default: 9100 )
+              d = node_exporter_data( host: fqdn, port: port )
             when 'resourced'
               #
-              port = config_data( v, 'port', 55555 )
-              d = self.resourced_data( host: fqdn, port: port )
+              port = config_data( host: hostname, service: v, value: 'port', default: 55555 )
+              d = resourced_data( host: fqdn, port: port )
             when 'http-status'
               # apache mod_status
-              port = config_data( v, 'port', 8081 )
-              d = self.apache_mod_status( host: fqdn, port: port )
+              port = config_data( host: hostname, service: v, value: 'port', default: 8081 )
+              d = apache_mod_status( host: fqdn, port: port )
             else
               # all others
             end
@@ -731,7 +726,7 @@ module DataCollector
 
       fqdn    = params.dig(:fqdn)
       data    = params.dig(:data)
-      mlsHost = fqdn
+      mls_host = fqdn
 
       logger.info( '  search Master Live Server for this Replication Live Server' )
 
@@ -771,7 +766,7 @@ module DataCollector
 
         logger.debug( format('search dns entry for \'%s\'', host) )
 
-        ip, short, fqdn = self.ns_lookup(host, 60)
+        ip, short, fqdn = ns_lookup(host, 60)
 
         if( !ip.nil? && !short.nil? && !fqdn.nil? )
 
@@ -779,16 +774,16 @@ module DataCollector
 
           realIP    = ip
           realShort = short
-          mlsHost   = fqdn
+          mls_host   = fqdn
         else
           realIP    = ''
           realShort = ''
-          mlsHost   = host
+          mls_host   = host
         end
 
         value['MasterLiveServer'] = {
           'scheme' => scheme,
-          'host'   => mlsHost,
+          'host'   => mls_host,
           'port'   => port,
           'path'   => path
         }
@@ -797,7 +792,7 @@ module DataCollector
 
       end
 
-      logger.info( format( '  use \'%s\'', mlsHost ) )
+      logger.info( format( '  use \'%s\'', mls_host ) )
 
       data
     end
@@ -864,7 +859,7 @@ module DataCollector
 
           logger.debug( format('search dns entry for \'%s\'', host) )
 
-          ip, short, fqdn = self.ns_lookup(host, 60)
+          ip, short, fqdn = ns_lookup(host, 60)
 
           if( !ip.nil? && !short.nil? && !fqdn.nil? )
 
@@ -899,13 +894,12 @@ module DataCollector
     #
     def reorganize_data( data )
 
-      if( data.nil? )
-        logger.error( "      no data for reorganize" )
-        logger.error( "      skip" )
-        { status: 500, message: 'no data for reorganize' }
-      end
 
-      result  = Array.new()
+      #  logger.error( "      no data for reorganize" )
+      #  logger.error( "      skip" )
+      { status: 500, message: 'no data for reorganize' } if( data.nil? )
+
+      result  = []
 
       data.each do |c|
 
@@ -946,17 +940,14 @@ module DataCollector
             "(?<type>.+[a-zA-Z])"
             /x
           parts           = mbean.match( regex )
-          cacheClass      = parts['type'].to_s
+          cache_class      = parts['type'].to_s
 
-          if( cacheClass.include?( 'ecommerce.' ) )
-            format   = 'CacheClassesECommerce%s'
-          else
-            format   = 'CacheClasses%s'
-          end
+          format   = 'CacheClasses%s'
+          format   = 'CacheClassesECommerce%s' if( cache_class.include?( 'ecommerce.' ) )
 
-          cacheClass     = cacheClass.split('.').last
-          cacheClass[0]  = cacheClass[0].to_s.capitalize
-          mbean_type     = format( format, cacheClass )
+          cache_class     = cache_class.split('.').last
+          cache_class[0]  = cache_class[0].to_s.capitalize
+          mbean_type     = format( format, cache_class )
 
 
         elsif( mbean.include?( 'module=' ) )
@@ -974,10 +965,10 @@ module DataCollector
           /x
 
           parts           = mbean.match( regex )
-          mbeanModule     = parts['module'].to_s.strip.tr( '. ', '' )
-          mbeanPool       = parts['pool'].to_s.strip.tr( '. ', '' )
-          mbeanType       = parts['type'].to_s.strip.tr( '. ', '' )
-          mbean_type      = format( '%s%s', mbeanType, mbeanPool )
+          mbean_module    = parts['module'].to_s.strip.tr( '. ', '' )
+          mbean_pool      = parts['pool'].to_s.strip.tr( '. ', '' )
+          mbean_type      = parts['type'].to_s.strip.tr( '. ', '' )
+          mbean_type      = format( '%s%s', mbean_type, mbean_pool )
 
         elsif( mbean.include?( 'bean=' ) )
 
@@ -993,9 +984,9 @@ module DataCollector
           /x
 
           parts           = mbean.match( regex )
-          mbeanBean       = parts['bean'].to_s.strip.tr( '. ', '' )
-          mbeanType       = parts['type'].to_s.strip.tr( '. ', '' )
-          mbean_type      = format( '%s%s', mbeanType, mbeanBean )
+          mbean_bean      = parts['bean'].to_s.strip.tr( '. ', '' )
+          mbean_type      = parts['type'].to_s.strip.tr( '. ', '' )
+          mbean_type      = format( '%s%s', mbean_type, mbean_bean )
 
         elsif( mbean.include?( 'name=' ) )
           regex = /
@@ -1010,9 +1001,9 @@ module DataCollector
           /x
 
           parts           = mbean.match( regex )
-          mbeanName       = parts['name'].to_s.strip.tr( '. ', '' )
-          mbeanType       = parts['type'].to_s.strip.tr( '. ', '' )
-          mbean_type      = format( '%s%s', mbeanType, mbeanName )
+          mbean_name      = parts['name'].to_s.strip.tr( '. ', '' )
+          mbean_type      = parts['type'].to_s.strip.tr( '. ', '' )
+          mbean_type      = format( '%s%s', mbean_type, mbean_name )
 
         elsif( mbean.include?( 'solr') )
 
@@ -1027,11 +1018,11 @@ module DataCollector
           /x
 
           parts           = mbean.match( regex )
-          mbeanCore       = parts['core'].to_s.strip.tr( '. ', '' )
-          mbeanCore[0]    = mbeanCore[0].to_s.capitalize
-          mbeanType       = parts['type'].to_s.tr( '. /', '' )
-          mbeanType[0]    = mbeanType[0].to_s.capitalize
-          mbean_type      = format( 'Solr%s%s', mbeanCore, mbeanType )
+          mbean_core      = parts['core'].to_s.strip.tr( '. ', '' )
+          mbean_core[0]   = mbean_core[0].to_s.capitalize
+          mbean_type      = parts['type'].to_s.tr( '. /', '' )
+          mbean_type[0]   = mbean_type[0].to_s.capitalize
+          mbean_type      = format( 'Solr%s%s', mbean_core, mbean_type )
 
         else
           regex = /
@@ -1043,8 +1034,8 @@ module DataCollector
           /x
 
           parts           = mbean.match( regex )
-          mbeanType       = parts['type'].to_s.strip.tr( '. ', '' )
-          mbean_type      = format( '%s', mbeanType )
+          mbean_type      = parts['type'].to_s.strip.tr( '. ', '' )
+          mbean_type      = format( '%s', mbean_type )
         end
 
         result.push(
@@ -1093,16 +1084,16 @@ module DataCollector
 
     def run()
 
-      monitoredServer = self.monitoredServer()
+      monitored_server = monitored_server()
 
-      return { status: 204, message: 'no online server found' } if( monitoredServer.nil? || monitoredServer.is_a?( FalseClass ) || monitoredServer.count == 0 )
+      return { status: 204, message: 'no online server found' } if( monitored_server.nil? || monitored_server.is_a?( FalseClass ) || monitored_server.count == 0 )
 
 
-      monitoredServer.each do |h|
+      monitored_server.each do |h|
 
         # get dns data!
         #
-        ip, short, fqdn = self.ns_lookup( h )
+        ip, short, fqdn = ns_lookup( h )
 
         discovery_data = nil
 
@@ -1122,7 +1113,7 @@ module DataCollector
 
         start = Time.now
 
-        logger.info( format( 'found \'%s\' for monitoring', fqdn ) )
+        logger.info( format( 'found host \'%s\' for monitoring', fqdn ) )
 
         # TODO
         # discussion
@@ -1171,7 +1162,7 @@ module DataCollector
         # run checks
         #
         begin
-          self.create_bulkcheck( ip: ip, short: short, fqdn: fqdn )
+          create_bulkcheck( ip: ip, short: short, fqdn: fqdn )
         rescue => e
           logger.error(e)
         end

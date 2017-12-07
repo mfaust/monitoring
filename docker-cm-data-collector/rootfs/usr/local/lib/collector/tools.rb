@@ -68,11 +68,25 @@ module DataCollector
     end
 
 
-    def config_data( service, value, default )
+    def config_data( params )
+
+      logger.debug("config_data( #{params} )")
+
+
+      host = params.dig(:host)
+      service = params.dig(:service)
+      value = params.dig(:value)
+      default = params.dig(:default)
 
       begin
-        service_config = @cfg.service_config.clone
-        default = service_config.dig( service, value ) || default
+        d = @redis.measurements( short: host, application: service )
+
+        logger.debug( d )
+        logger.debug( d.class.to_s )
+
+        data = d.dig( service, value ) unless( d.nil? )
+        default = data unless( data.nil? )
+
       rescue => e
         logger.error(e)
         logger.error( e.backtrace.join("\n") )

@@ -7,26 +7,20 @@ module DataCollector
 
     include Logging
 
-    def initialize( settings = {} )
+    def initialize( settings )
 
-      #@redisHost     = settings.dig(:redis, :host)
-      #@redisPort     = settings.dig(:redis, :port) || 6379
       redis          = settings.dig(:redis)
       config         = settings.dig(:config)
 
       @cfg           = config.clone unless( config.nil? )
-      # @cfg           = Config.new( settings )
-
-       # Storage::RedisClient.new( { :redis => { :host => @redisHost } } )
       @redis         = redis.clone  unless( redis.nil? )
       @cache         = MiniCache::Store.new()
-
     end
 
 
-    def mergeSolrCores( metrics, cores = [] )
+    def merge_solr_cores( metrics, cores = [] )
 
-      work = Array.new()
+      work = []
 
       cores.each do |core|
 
@@ -41,8 +35,6 @@ module DataCollector
       end
 
       work.flatten!
-
-      return work
     end
 
     # merge Data between Property Files and discovered Services
@@ -72,16 +64,9 @@ module DataCollector
       start = Time.now
 
       #
-      tomcatApplication = @cfg.jolokiaApplications.clone
+      applications = @cfg.jolokiaApplications.clone
 
-#       if( data.nil? )
-#
-#         # Redis based
-#         logger.debug( 'use redis' )
-#         data = @redis.discoveryData( { :short => short } )
-#       end
-
-      redis_data = Array.new()
+      redis_data = []
 
       data.each do |service,payload|
 
@@ -90,9 +75,7 @@ module DataCollector
           next
         end
 
-        result      = self.merge_data( service.to_s, tomcatApplication, payload )
-
-#         logger.debug( JSON.pretty_generate( result ) )
+        result      = self.merge_data( service.to_s, applications, payload )
 
         redis_data << { service.to_s => result }
       end
@@ -112,6 +95,8 @@ module DataCollector
 
       validate_data = { prepared: true, fqdn: fqdn, count: redis_data_keys_count, keys: redis_data_keys, checksum: redis_data_keys_checksum }
 
+      # this part is needed by
+      #   DataCollector::Tools.config_data()
       @redis.createMeasurements( short: short, fqdn: fqdn, data: redis_data )
 
       @cache.set( fqdn, 'prepared', expires_in: 320 )
@@ -124,26 +109,25 @@ module DataCollector
     end
 
 
-    def merge_data( service, tomcatApplication, data = {} )
+    def merge_data( service, applications, data = {} )
 
       logger.debug( "merge_data( #{service} )" )
 
-      metricsTomcat     = tomcatApplication.dig('tomcat')      # standard metrics for Tomcat
+      metrics_tomcat     = applications.dig('tomcat')      # standard metrics for Tomcat
 
-      configuredApplication = tomcatApplication.keys
+      return {} if( metrics_tomcat.nil? )
 
-#       logger.debug( '----------------------------------------------------------------------')
-#       logger.debug( "look for service: '#{service}'" )
-#       logger.debug( "configured Applications: #{configuredApplication}" )
+      configured_application = applications.keys
+
+      logger.debug( '----------------------------------------------------------------------')
+      logger.debug( "look for service: '#{service}'" )
+      logger.debug( "configured Applications: #{configured_application}" )
 #       logger.debug( data )
 
-      dataSource = nil
+      data_source = nil
 
-      if( data.nil? || data.count() == 0 )
-        logger.debug( 'no data to merge' )
-
-        return {}
-      end
+      # logger.debug( 'no data to merge' )
+      return {} if( data.nil? || data.count() == 0 )
 
       if( data.dig(:data).nil? )
 
@@ -151,77 +135,75 @@ module DataCollector
         solr_cores  = data.dig('cores')
         metrics     = data.dig('metrics')
 
-        dataSource  = 'redis'
+        data_source  = 'redis'
       else
 
         application = data.dig(:data, 'application')
         solr_cores  = data.dig(:data, 'cores')
         metrics     = data.dig(:data, 'metrics')
 
-        dataSource  = 'sqlite'
+        data_source  = 'sqlite'
       end
 
-# logger.debug( "data source: '#{dataSource}'" )
-# logger.debug( "application: '#{application}'" )
+      logger.debug( "data source: '#{data_source}'" )
+      logger.debug( "application: '#{application}'" )
 # logger.debug( "solr_cores : '#{solr_cores}'" )
 # logger.debug( "metrics    : '#{metrics}'" )
-#       logger.debug( '----------------------------------------------------------------------')
+      logger.debug( '----------------------------------------------------------------------')
 
-      if( dataSource == 'redis' )
-
+      if( data_source == 'redis' )
         data['metrics'] ||= []
       else
-
         data[:data]            ||= {}
         data[:data]['metrics'] ||= []
       end
 
 #       logger.debug( data )
 
-      if( configuredApplication.include?( service ) )
+      if( configured_application.include?( service ) )
 
         logger.debug( "found #{service} in tomcat application" )
 
-        if( dataSource == 'redis' )
-          data['metrics'].push( metricsTomcat.dig('metrics') )
-          data['metrics'].push( tomcatApplication.dig( service, 'metrics' ) )
+        if( data_source == 'redis' )
+          data['metrics'].push( metrics_tomcat.dig('metrics') )
+          data['metrics'].push( applications.dig( service, 'metrics' ) )
         else
-          data[:data]['metrics'].push( metricsTomcat.dig('metrics') )
-          data[:data]['metrics'].push( tomcatApplication.dig( service, 'metrics' ) )
+          data[:data]['metrics'].push( metrics_tomcat.dig('metrics') )
+          data[:data]['metrics'].push( applications.dig( service, 'metrics' ) )
         end
       end
 
 
       if( application != nil )
 
-        if( dataSource == 'redis' )
-          data['metrics'].push( metricsTomcat.dig( 'metrics' ) )
+        if( data_source == 'redis' )
+          data['metrics'].push( metrics_tomcat.dig( 'metrics' ) )
         else
-          data[:data]['metrics'].push( metricsTomcat.dig( 'metrics' ) )
+          data[:data]['metrics'].push( metrics_tomcat.dig( 'metrics' ) )
         end
 
         application.each do |a|
 
-          if( tomcatApplication.dig( a ) != nil )
+          if( applications.dig( a ) != nil )
 
             logger.debug( "  add application metrics for #{a}" )
 
-            applicationMetrics = tomcatApplication.dig( a, 'metrics' )
+            applicationMetrics = applications.dig( a, 'metrics' )
 
             if( solr_cores != nil )
 
-              if( dataSource == 'redis' )
-                data['metrics'].push( self.mergeSolrCores( applicationMetrics , solr_cores ) )
+              if( data_source == 'redis' )
+                data['metrics'].push( self.merge_solr_cores( applicationMetrics , solr_cores ) )
               else
-                data[:data]['metrics'].push( self.mergeSolrCores( applicationMetrics , solr_cores ) )
+                data[:data]['metrics'].push( self.merge_solr_cores( applicationMetrics , solr_cores ) )
               end
             end
 
             # remove unneeded Templates
-            tomcatApplication[a]['metrics'].delete_if {|key| key['mbean'].match( '%CORE%' ) }
+            applications[a]['metrics'].delete_if {|key| key['mbean'].match( '%CORE%' ) }
 
-#            data[:data]['metrics'].push( metricsTomcat['metrics'] )
-            if( dataSource == 'redis' )
+#            data[:data]['metrics'].push( metrics_tomcat['metrics'] )
+            if( data_source == 'redis' )
               data['metrics'].push( applicationMetrics )
             else
 
@@ -233,7 +215,7 @@ module DataCollector
       end
 
 
-      if( dataSource == 'redis' )
+      if( data_source == 'redis' )
 
         data['metrics'].compact!   # remove 'nil' from array
         data['metrics'].flatten!   # clean up and reduce depth
@@ -252,12 +234,15 @@ module DataCollector
 
     def valid_data( fqdn )
 
-      data    = @cache.get( format( '%s-validate', fqdn ) ) || nil
+      data  = @cache.get( format( '%s-validate', fqdn ) ) || nil
+
+      { count: 0, checksum: '', keys: '' } if( data.nil? )
+
+#       logger.debug( "valid_data: #{data} (#{data.class.to_s})" )
+
       count = 0
       checksum = ''
       keys = ''
-
-#       logger.debug( "valid_data: #{data} (#{data.class.to_s})" )
 
       unless( data.nil? )
         count    = data.dig(:count)
