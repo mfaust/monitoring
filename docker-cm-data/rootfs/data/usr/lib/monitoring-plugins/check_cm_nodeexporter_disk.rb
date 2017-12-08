@@ -19,10 +19,12 @@ class Icinga2Check_CM_Disk < Icinga2Check
 
     host       = settings.dig(:host)
     partition  = settings.dig(:partition)
-    warning    = settings.dig(:warning)
-    critical   = settings.dig(:critical)
+    warning    = settings.dig(:warning).to_i
+    critical   = settings.dig(:critical).to_i
 
-    logger.level = Logger::DEBUG
+#     logger.level = Logger::DEBUG
+
+#     logger.debug( "initialize( #{settings} )" )
 
     # get us only the fqdn
     host       = hostname( host ) || host
@@ -32,6 +34,8 @@ class Icinga2Check_CM_Disk < Icinga2Check
 
 
   def check( host, partition, warning, critical )
+
+#     logger.debug( "check( #{host}, #{partition}, #{warning}, #{critical} )" )
 
 #    d = @redis.measurements( short: host, application: 'node-exporter' )
 
