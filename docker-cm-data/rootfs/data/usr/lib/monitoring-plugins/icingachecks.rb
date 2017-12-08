@@ -91,7 +91,21 @@ class Icinga2Check
 
 
   def hostname( hostname )
-    Utils::Network.resolv( hostname ).dig(:long)
+
+    cache_key = format( 'dns::%s', hostname )
+
+    dns = @redis.get(cache_key)
+#     dns = dns.deep_symbolize_keys unless(dns.nil?)
+
+    logger.debug( "dns cache: #{dns} (#{dns.class.to_s})" )
+
+    # return dns.dig(:fqdn) unless(dns.nil?)
+
+    long = Utils::Network.resolv( hostname ).dig(:long)
+
+    logger.debug( "resolver: #{long}" )
+
+    long
   end
 
 
@@ -185,6 +199,11 @@ class Icinga2Check
       minutes: (seconds_diff / 60),
       seconds: seconds_diff,
     }
+  end
+
+
+  def bytes_to_megabytes (bytes)
+    (bytes.to_f / 1024 / 1024 / 1024 * 100).round / 100.0
   end
 
 end

@@ -81,22 +81,19 @@ module DataCollector
         fail msg
       end
 
-      mq_settings = {
-        :beanstalkHost => mq_host,
-        :beanstalkPort => mq_port
-      }
-
+      mq_settings = { beanstalkHost: mq_host, beanstalkPort: mq_port }
       prepareSettings = {
-        :configFiles => { :application => application_config, :service => service_config },
-        :redis       => { :host => redis_host, :port => redis_port }
+        configFiles: { application: application_config, service: service_config },
+        redis: { host: redis_host, port: redis_port }
       }
-
       mysql_settings = { mysql: { host: mysql_host, user: mysql_user, password: mysql_password, schema: mysql_schema } }
+      redis_settings = { redis: { host: redis_host } }
+      jolokia_settings = { host: jolokia_host, port: jolokia_port, path: jolokia_path, auth: { user: jolokia_auth_user, pass: jolokia_auth_pass } }
 
       @cache     = MiniCache::Store.new()
-      @redis     = Storage::RedisClient.new( { :redis => { :host => redis_host } } )
-      @jolokia   = Jolokia::Client.new( { :host => jolokia_host, :port => jolokia_port, :path => jolokia_path, :auth => { :user => jolokia_auth_user, :pass => jolokia_auth_pass } } )
-      @mq        = MessageQueue::Consumer.new(mq_settings )
+      @redis     = Storage::RedisClient.new( redis_settings )
+      @jolokia   = Jolokia::Client.new( jolokia_settings )
+      @mq        = MessageQueue::Consumer.new( mq_settings )
       @cfg       = Config.new( application: application_config, service: service_config )
       @prepare   = Prepare.new( redis: @redis, config: @cfg )
       @jobs      = JobQueue::Job.new()
@@ -121,18 +118,12 @@ module DataCollector
 
       return { status: 500, message: 'no host name for mongodb_data data' } if( host.nil? )
 
-      result = Utils::Network.portOpen?( host, port )
-
-      if( result == false )
+      if( Utils::Network.portOpen?( host, port ) == false )
         logger.warn( format( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
-
         return JSON.parse( JSON.generate( status: 500 ) )
-      else
-
-        m = ExternalClients::MongoDb.new( host: host, port: port )
-
-        return m.get()
       end
+
+      ExternalClients::MongoDb.new( host: host, port: port ).get()
     end
 
 
@@ -156,60 +147,51 @@ module DataCollector
         port = cached_data.dig(:port)
       end
 
-      unless( port.nil? )
-        # TODO
-        # we need an low-level-priv User for Monitoring!
-        settings = {
-          :host     => host,
-          :username => user,
-          :password => pass
-        }
+      # TODO
+      # we need an low-level-priv User for Monitoring!
+      settings = { host: host, username: user, password: pass } unless( port.nil? )
+
+      if( Utils::Network.portOpen?( host, port ) == false )
+        logger.warn( format( 'The Port \'%s\' on Host \'%s\' is not open, skip ...', port, host ) )
+        return JSON.parse( JSON.generate( status: 500 ) )
       end
 
-      result = Utils::Network.portOpen?( host, port )
 
-      if( result == false )
-        logger.warn( format( 'The Port \'%s\' on Host \'%s\' is not open, skip ...', port, host ) )
+      m = ExternalClients::MySQL.new( settings )
 
-        return JSON.parse( JSON.generate( status: 500 ) )
-      else
+      if( m.client.nil? )
 
-        m = ExternalClients::MySQL.new( settings )
+        fallback = {
+          coremedia: 'coremedia',
+          cm_replication: 'cm_replication',
+          cm_caefeeder: 'cm_caefeeder',
+          cm_mcaefeeder: 'cm_mcaefeeder',
+          cm_management: 'cm_management',
+          cm_master: 'cm_master'
+        }
 
-        if( m.client.nil? )
+        fallback.each do |u,p|
 
-          fallback = {
-            coremedia: 'coremedia',
-            cm_replication: 'cm_replication',
-            cm_caefeeder: 'cm_caefeeder',
-            cm_mcaefeeder: 'cm_mcaefeeder',
-            cm_management: 'cm_management',
-            cm_master: 'cm_master'
-          }
+          settings = { host: host, username: u, password: p }
 
-          fallback.each do |u,p|
+          m = ExternalClients::MySQL.new( settings )
 
-            settings = { host: host, username: u, password: p }
-
-            m = ExternalClients::MySQL.new( settings )
-
-            unless( m.client.nil? )
-              user = u.clone
-              pass = p.clone
-              break
-            end
+          unless( m.client.nil? )
+            user = u.clone
+            pass = p.clone
+            break
           end
-
         end
 
-        unless( m.client.nil? )
-          @cache.set( cache_key , expires_in: 640 ) { MiniCache::Data.new( user: user, pass: pass, port: port ) }
+      end
 
-          mysql_data = m.get()
-          mysql_data = JSON.generate( status: 500 ) if( mysql_data == false || mysql_data.nil? )
+      unless( m.client.nil? )
+        @cache.set( cache_key , expires_in: 640 ) { MiniCache::Data.new( user: user, pass: pass, port: port ) }
 
-          data       = JSON.parse( mysql_data )
-        end
+        mysql_data = m.get()
+        mysql_data = JSON.generate( status: 500 ) if( mysql_data == false || mysql_data.nil? )
+
+        data       = JSON.parse( mysql_data )
       end
 
       data
@@ -231,7 +213,7 @@ module DataCollector
 
       return { status: 500, message: 'no host name for mysql_data data' } if( host.nil? )
 
-      if( port != nil )
+      unless( port.nil? )
 
         settings = {
           'postgresHost'   => host,
@@ -246,16 +228,11 @@ module DataCollector
 
       if( result == false )
         logger.warn( format( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
-
         return JSON.parse( JSON.generate( status: 500 ) )
       else
-
         pgsql = ExternalClients::PostgresStatus.new( settings )
         data = pgsql.run()
-
-#         logger.debug( data )
       end
-
     end
 
 
@@ -268,26 +245,14 @@ module DataCollector
 
       return { status: 500, message: 'no host name for redis_data data' } if( host.nil? )
 
-      unless( port.nil? )
-
-        settings = {
-          :host => host,
-          :port => port
-        }
-      end
-
-      result = Utils::Network.portOpen?( host, port )
-
-      if( result == false )
+      if( Utils::Network.portOpen?( host, port ) == false )
         logger.warn( format( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
-
         return JSON.parse( JSON.generate( status: 500 ) )
-      else
-
-        logger.debug( 'read redis data ...' )
-
-        @redis.monitoring
       end
+
+      settings = { host: host, port: port } unless( port.nil? )
+      logger.debug( 'read redis data ...' )
+      @redis.monitoring
     end
 
 
@@ -300,23 +265,13 @@ module DataCollector
 
       return { status: 500, message: 'no host name for node_exporter data' } if( host.nil? )
 
-      result = Utils::Network.portOpen?( host, port )
-
-      if( result == false )
+      if( Utils::Network.portOpen?( host, port ) == false )
         logger.warn( format( 'The Port %s for node_exporter on Host %s is not open, skip sending data', port, host ) )
-
         return JSON.parse( JSON.generate( status: 500 ) )
-      else
-
-        m = ExternalClients::NodeExporter.new( host: host, port: port )
-        nodeData = m.get()
-
-        result   = JSON.generate( nodeData )
-        data     = JSON.parse( result )
-
-        return data
       end
 
+      result   = JSON.generate( ExternalClients::NodeExporter.new( host: host, port: port ).get() )
+      JSON.parse( result )
     end
 
 
@@ -329,30 +284,18 @@ module DataCollector
 
       return { status: 500, message: 'no host name for resourced_data data' } if( host.nil? )
 
-      if( port != nil )
-        settings = {
-          :host => host,
-          :port => port
-        }
-      end
-
-      result = Utils::Network.portOpen?( host, port )
-
-      if( result == false )
+      if( Utils::Network.portOpen?( host, port ) == false )
         logger.warn( format( 'The Port \'%s\' on Host \'%s\' is not open, skip ...', port, host ) )
-
         return JSON.parse( JSON.generate( status: 500 ) )
-      else
-
-        m = ExternalClients::Resouced.new( settings )
-        nodeData = m.get()
-
-        result   = JSON.generate( nodeData )
-        data     = JSON.parse( result )
-
-        return data
       end
 
+      settings = { host: host, port: port } unless( port.nil? )
+
+      m = ExternalClients::Resouced.new( settings )
+      nodeData = m.get()
+
+      result   = JSON.generate( nodeData )
+      JSON.parse( result )
     end
 
 
@@ -404,10 +347,6 @@ module DataCollector
       array    = []
       services = nil
 
-      result = {
-        timestamp: Time.now().to_i
-      }
-
 #       logger.debug( format( 'create bulk checks for \'%s\'', host ) )
 
       # to improve performance, read initial collector Data from Database and store them into Redis
@@ -441,7 +380,7 @@ module DataCollector
 
         # only to see which service
         #
-#         logger.debug( format( '    %s with port %d', s, port ) )
+        # logger.debug( format( '    %s with port %d', s, port ) )
 
         if( metrics != nil && metrics.count == 0 )
           case s
@@ -498,6 +437,19 @@ module DataCollector
 
       checks.flatten!
 
+      logger.debug( "services: #{services} (#{services.class.to_s})" )
+
+      #result = {
+      #  timestamp: Time.now().to_i,
+      #  ip: ip,
+      #  hostname: host,
+      #  fqdn: fqdn,
+      #  services: services,
+      #  checks: checks
+      #}
+
+      result = {}
+      result[:timestamp] = Time.now().to_i
       result[:ip]       = ip
       result[:hostname] = host
       result[:fqdn]     = fqdn
@@ -538,8 +490,8 @@ module DataCollector
 
       # prepare
       parts     = target_url.match( regex )
-      dest_host  = parts['host'].to_s.strip
-      dest_port  = parts['port'].to_s.strip
+      dest_host = parts['host'].to_s.strip
+      dest_port = parts['port'].to_s.strip
 
 #       logger.debug( format( 'check Port %s on Host %s for sending data', dest_port, dest_host ) )
 
@@ -601,24 +553,15 @@ module DataCollector
               jolokia_status  = response.dig(:status)
               jolokia_message = response.dig(:message)
 
-#               logger.debug( "jolokia_status : #{jolokia_status}" )
-#               logger.debug( "jolokia_message: #{jolokia_message}" )
-
               if( jolokia_status != nil && jolokia_status.to_i == 200 )
-
                 begin
-
                   data = reorganize_data( jolokia_message )
 
                   # get configured Content Server (RLS or MLS)
-                  if( v =~ /^cae-(\blive|preview).*/ )
-                    data = parse_content_server_url( fqdn: fqdn, service: v, data: data )
-                  end
+                  data = parse_content_server_url( fqdn: fqdn, service: v, data: data ) if( v =~ /^cae-(\blive|preview).*/ )
 
                   # get configured Master Live Server
-                  if( v == 'replication-live-server' )
-                    data = parse_mls_ior( fqdn: fqdn, data: data )
-                  end
+                  data = parse_mls_ior( fqdn: fqdn, data: data ) if( v == 'replication-live-server' )
 
                   result[v] = data
                 rescue => e
@@ -687,9 +630,6 @@ module DataCollector
           end
 
           begin
-
-#             logger.debug( 'store result in our redis' )
-#             logger.debug( host: fqdn, pre: 'result', service: v ) )
 
             redis_result = @redis.set( cacheKey, result[v] )
 
@@ -772,12 +712,12 @@ module DataCollector
 
           logger.debug( "found: #{ip} , #{short} , #{fqdn}" )
 
-          realIP    = ip
-          realShort = short
+          real_ip    = ip
+          real_short = short
           mls_host   = fqdn
         else
-          realIP    = ''
-          realShort = ''
+          real_ip    = ''
+          real_short = ''
           mls_host   = host
         end
 
@@ -865,13 +805,13 @@ module DataCollector
 
             logger.debug( "found: #{ip} , #{short} , #{fqdn}" )
 
-            realIP    = ip
-            realShort = short
+            real_ip    = ip
+            real_short = short
             content_server = fqdn
 
           else
-            realIP    = ''
-            realShort = ''
+            real_ip    = ''
+            real_short = ''
             content_server = host
           end
 

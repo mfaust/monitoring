@@ -31,13 +31,13 @@ module ExternalClients
 
       begin
         @client = Mysql2::Client.new(
-          :host            => @mysqlHost,
-          :username        => @mysqlUser,
-          :password        => @mysqlPass,
-          :encoding        => 'utf8',
-          :reconnect       => true,
-          :read_timeout    => 5,
-          :connect_timeout => 5
+          host: @mysqlHost,
+          username: @mysqlUser,
+          password: @mysqlPass,
+          encoding: 'utf8',
+          reconnect: true,
+          read_timeout: 5,
+          connect_timeout: 5
         )
       rescue => e
         logger.error( "An error occurred for connection: #{e}" )
@@ -113,7 +113,6 @@ module ExternalClients
       h = Hash.new()
 
       data.each do |k|
-
         # "Variable_name"=>"Innodb_buffer_pool_pages_free", "Value"=>"1"
         h[k['Variable_name']] =  k['Value']
       end
@@ -534,9 +533,8 @@ module ExternalClients
       d = data.select { |name| name.match( regex ) }
 
       d.each do |devices|
-        if( parts = devices.match( regex ) )
-          existing_devices += parts.captures
-        end
+        parts = devices.match( regex )
+        existing_devices += parts.captures if( parts )
       end
 
       existing_devices.uniq!
@@ -577,6 +575,7 @@ module ExternalClients
       r      = Array.new
 
       # blacklist | mount | egrep -v "(cgroup|none|sysfs|devtmpfs|tmpfs|devpts|proc)"
+      data.reject! { |t| t[/etc/] }
       data.reject! { |t| t[/iso9660/] }
       data.reject! { |t| t[/tmpfs/] }
       data.reject! { |t| t[/rpc_pipefs/] }
@@ -607,9 +606,9 @@ module ExternalClients
       d = data.select { |name| name.match( regex ) }
 
       d.each do |devices|
-        if( parts = devices.match( regex ) )
-          existing_devices += parts.captures
-        end
+        parts = devices.match( regex )
+        existing_devices += parts.captures if( parts )
+        # existing_devices += parts.captures if( parts = devices.match( regex ) )
       end
 
       existing_devices.uniq!
@@ -629,6 +628,10 @@ module ExternalClients
             type, device, fstype, mountpoint, mes = parts.captures
 
             device.gsub!( '/dev/', '' )
+
+            # AWS / Xen special
+            device = 'rootfs' if( device =~ /xvda/ )
+            mountpoint = '/' if( device == 'rootfs' )
 
             hash[ device.to_s ] ||= {}
             hash[ device.to_s ][ type.to_s ] ||= {}
@@ -678,7 +681,6 @@ module ExternalClients
 
       @host      = params[:host]          ? params[:host]          : nil
       @port      = params[:port]          ? params[:port]          : 55555
-
     end
 
 
@@ -854,43 +856,39 @@ module ExternalClients
 
       response = fetch( format('http://%s:%d/server-status', @host, @port), 2 )
 
-      if( response.code.to_i == 200 )
+      return {} if( response.code.to_i != 200 )
 
-        response = response.body.split("\n")
+      response = response.body.split("\n")
 
-        # blacklist
-        response.reject! { |t| t[/#{@host}/] }
-        response.reject! { |t| t[/^Server.*/] }
-        response.reject! { |t| t[/.*Time/] }
-        response.reject! { |t| t[/^ServerUptime/] }
-        response.reject! { |t| t[/^Load.*/] }
-        response.reject! { |t| t[/^CPU.*/] }
-        response.reject! { |t| t[/^TLSSessionCacheStatus/] }
-        response.reject! { |t| t[/^CacheType/] }
+      # blacklist
+      response.reject! { |t| t[/#{@host}/] }
+      response.reject! { |t| t[/^Server.*/] }
+      response.reject! { |t| t[/.*Time/] }
+      response.reject! { |t| t[/^ServerUptime/] }
+      response.reject! { |t| t[/^Load.*/] }
+      response.reject! { |t| t[/^CPU.*/] }
+      response.reject! { |t| t[/^TLSSessionCacheStatus/] }
+      response.reject! { |t| t[/^CacheType/] }
 
-        response.each do |line|
+      response.each do |line|
 
-          metrics = Hash.new
+        metrics = Hash.new
 
-          if line =~ /Scoreboard/
-            metrics = { scoreboard: get_scoreboard_metrics(line.strip) }
-          else
-            key, value = line.strip.split(':')
+        if line =~ /Scoreboard/
+          metrics = { scoreboard: get_scoreboard_metrics(line.strip) }
+        else
+          key, value = line.strip.split(':')
 
-            key   = key.gsub(/\s/, '')
-            value = value.strip.gsub('%','')
+          key   = key.gsub(/\s/, '')
+          value = value.strip.gsub('%','')
 
-            metrics[key] = format( "%f", value ).sub(/\.?0*$/, "" ).to_f
-          end
-
-          a << metrics
+          metrics[key] = format( "%f", value ).sub(/\.?0*$/, "" ).to_f
         end
 
-        a.reduce( :merge )
-
-      else
-        return {}
+        a << metrics
       end
+
+      a.reduce( :merge )
 
     end
   end
@@ -901,7 +899,6 @@ module ExternalClients
     include Logging
 
     def initialize( params = {} )
-
       @host  = params.dig(:host)
       @port  = params.dig(:port) || 8081
     end
@@ -931,12 +928,9 @@ module ExternalClients
 
       response = fetch( format('http://%s:%d/vhosts.json', @host, @port), 2 )
 
-      if( response.code.to_i == 200 )
-        return response.body
-      else
-        return {}
-      end
+      return {} if( response.code.to_i != 200 )
 
+      response.body
     end
   end
 
