@@ -447,7 +447,11 @@ module ExternalClients
           c.gsub!('node_load1' , 'shortterm' )
 
           parts = c.split( ' ' )
-          result[parts[0]] = parts[1]
+
+          key   = parts[0]
+          value = parts[1]
+
+          result[key] = value
         end
       end
 
