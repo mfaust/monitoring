@@ -254,6 +254,8 @@ services:
       - /share/usr/lib/monitoring-plugins/check_cm_runlevel.rb:/usr/lib/monitoring-plugins/check_cm_runlevel
       - /share/usr/lib/monitoring-plugins/check_cm_sequencenumbers.rb:/usr/lib/monitoring-plugins/check_cm_seqencenumbers
       - /share/usr/lib/monitoring-plugins/check_cm_nodeexporter_disk.rb:/usr/lib/monitoring-plugins/check_cm_nodeexporter_disk
+      - /share/usr/lib/monitoring-plugins/check_cm_nodeexporter_memory.rb:/usr/lib/monitoring-plugins/check_cm_nodeexporter_memory
+      - /share/usr/lib/monitoring-plugins/check_cm_nodeexporter_load.rb:/usr/lib/monitoring-plugins/check_cm_nodeexporter_load
       - /share/usr/lib/monitoring-plugins/check_ssl_cert:/usr/lib/monitoring-plugins/check_ssl_cert
       - icinga:/srv
       - icinga:/var/lib/icinga2
