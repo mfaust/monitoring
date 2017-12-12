@@ -22,10 +22,6 @@ class Icinga2Check_CM_Disk < Icinga2Check
     warning    = settings.dig(:warning).to_i
     critical   = settings.dig(:critical).to_i
 
-#     logger.level = Logger::DEBUG
-
-#     logger.debug( "initialize( #{settings} )" )
-
     # get us only the fqdn
     host       = hostname( host ) || host
 
@@ -34,10 +30,6 @@ class Icinga2Check_CM_Disk < Icinga2Check
 
 
   def check( host, partition, warning, critical )
-
-#     logger.debug( "check( #{host}, #{partition}, #{warning}, #{critical} )" )
-
-#    d = @redis.measurements( short: host, application: 'node-exporter' )
 
     cacheKey     = Storage::RedisClient.cacheKey( host: host, pre: 'result', service: 'node-exporter' )
 
@@ -80,8 +72,6 @@ class Icinga2Check_CM_Disk < Icinga2Check
 
       exit exit_code
     end
-
-    # {"rootfs"=>{"avail"=>"10698674176", "mountpoint"=>"/", "error"=>"0", "files"=>"11270144", "free"=>"10698674176", "readonly"=>"0", "size"=>"23069986816"}}
   end
 
 end

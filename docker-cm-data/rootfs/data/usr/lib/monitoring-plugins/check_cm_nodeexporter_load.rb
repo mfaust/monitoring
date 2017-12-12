@@ -39,13 +39,6 @@ class Icinga2Check_CM_Load < Icinga2Check
     cpu  = result.dig('cpu') unless( result.nil? )
     load = result.dig('load') unless( result.nil? )
 
-    # "cpu"=>{
-    #    "cpu0"=>{"guest"=>"0", "guest_nice"=>"0", "idle"=>"7167.66", "iowait"=>"2.79", "irq"=>"0", "nice"=>"0", "softirq"=>"103.74", "steal"=>"23.16", "system"=>"202.15", "user"=>"480.69"},
-    #    "cpu1"=>{"guest"=>"0", "guest_nice"=>"0", "idle"=>"7537.06", "iowait"=>"3.6", "irq"=>"0", "nice"=>"0.02", "softirq"=>"2.68", "steal"=>"24.24", "system"=>"42.17", "user"=>"416.54"}, "cpu2"=>{"guest"=>"0", "guest_nice"=>"0", "idle"=>"7527.17", "iowait"=>"4.05", "irq"=>"0", "nice"=>"0", "softirq"=>"2.05", "steal"=>"24.66", "system"=>"37.25", "user"=>"425.06"}
-    # }
-    # "load"=>{"shortterm"=>"0.16", "longterm"=>"0.23", "midterm"=>"0.24"}
-
-
     if( load.nil? || (load.is_a?(Hash) && load.count == 0 ) )
       puts '<b>No load value found</b>'
       exit STATE_UNKNOWN
