@@ -10,10 +10,10 @@ organisation:
     country: ''
 
 users:
-  - username: coremedia
+  - user_name: coremedia
     password: coremedia
     login_name: CoreMedia
-    email: moebius-team@coremedia.com
+    email: bschulz@coremedia.com
     grafana_admin: true
     organisations:
       - CoreMedia:
@@ -40,6 +40,7 @@ dashboards:
   import_from_directory: /tmp/dashboards
 
 admin_user:
-  username: Moebius
+  user_name: Moebius
+  email: moebius-team@coremedia.com
   login_name: cm-admin
   password: cm-admin

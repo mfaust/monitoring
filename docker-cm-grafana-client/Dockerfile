@@ -7,7 +7,9 @@ ENV \
   VERSION="1712" \
   BUILD_DATE="2017-12-04" \
   TERM=xterm \
-  TZ='Europe/Berlin'
+  TZ='Europe/Berlin' \
+  GRAFANA_GEM_TYPE="stable" \
+  GRAFANA_GEM_VERSION="0.9"
 
 # ---------------------------------------------------------------------------------------
 
@@ -29,8 +31,14 @@ RUN \
   gem install --quiet --no-rdoc --no-ri \
     io-console bundler && \
   cd /build && \
-  bundle install --quiet && \
   for g in $(ls -1 /build/*.gem 2> /dev/null) ; do echo $g; gem install --quiet --no-rdoc --no-ri ${g} ; done && \
+  if [ "${GRAFANA_GEM_TYPE}" == "stable" ] ; then \
+    if [ $(gem list | grep -c grafana) -eq 1 ] ; then \
+      gem uninstall --quiet grafana ; \
+    fi ; \
+    echo "gem 'grafana', '~> ${GRAFANA_GEM_VERSION}'" >> Gemfile ; \
+  fi && \
+  bundle install --quiet && \
   gem uninstall --quiet \
     io-console bundler && \
   apk del --quiet .build-deps && \

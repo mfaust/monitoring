@@ -28,8 +28,8 @@ mysqlHost           = ENV.fetch('MYSQL_HOST'             , 'database')
 mysqlSchema         = ENV.fetch('DISCOVERY_DATABASE_NAME', 'discovery')
 mysqlUser           = ENV.fetch('DISCOVERY_DATABASE_USER', 'discovery')
 mysqlPassword       = ENV.fetch('DISCOVERY_DATABASE_PASS', 'discovery')
-interval            = ENV.fetch('INTERVAL'               , '40s' )
-delay               = ENV.fetch('RUN_DELAY'              , '30s' )
+interval            = ENV.fetch('INTERVAL'               , '20s' )
+delay               = ENV.fetch('RUN_DELAY'              , '35s' )
 
 server_config_file  = ENV.fetch('SERVER_CONFIG_FILE'     , '/etc/grafana_config.yml' )
 
@@ -44,9 +44,9 @@ def validate_scheduler_values( duration, default )
   Rufus::Scheduler.to_duration( i )
 end
 
-interval         = validate_scheduler_values( interval, 40.0 )
+interval         = validate_scheduler_values( interval, 20.0 )
 delay_config     = validate_scheduler_values( delay, 30.0 )
-delay            = validate_scheduler_values( delay, 40.0 )
+delay            = validate_scheduler_values( delay, 35.0 )
 
 # -----------------------------------------------------------------------------
 

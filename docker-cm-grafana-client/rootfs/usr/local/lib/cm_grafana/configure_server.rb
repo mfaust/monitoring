@@ -39,6 +39,7 @@ class CMGrafana < Grafana::Client
       config
     end
 
+
     def configure_server( params )
 
       logger.debug( "configure_server( #{params} )" )
@@ -99,7 +100,7 @@ class CMGrafana < Grafana::Client
 
         logger.info( format( 'set organisation to \'%s\'', @org_name ) )
 
-        org_by_name = organization_by_name( @org_name )
+        org_by_name = organization( @org_name )
 
         status = org_by_name.dig('status') || 500
 
@@ -145,7 +146,7 @@ class CMGrafana < Grafana::Client
 
         users.each do |u|
 
-          user_name     = u.dig('username')
+          user_name     = u.dig('user_name')
           login_name    = u.dig('login_name')
           email         = u.dig('email')
           password      = u.dig('password')
@@ -153,7 +154,6 @@ class CMGrafana < Grafana::Client
 
           login_name    = user_name if( login_name.nil? )
           email         = format( '%s@domain.tld', user_name ) if( email.nil? || email.empty? )
-          # grafana_admin = false if( grafana_admin.nil? )
 
           logger.debug( format('user: %s', user_name ) )
 
@@ -164,13 +164,13 @@ class CMGrafana < Grafana::Client
             next
           end
 
-          usr_created = user_by_name( user_name )
+          usr_created = user( user_name )
 
           status = usr_created.dig('status') || 500
 
           if( status == 500 )
 
-              logger.error( 'internal server error' )
+            logger.error( 'internal server error' )
 
           elsif( status == 404 )
 
@@ -180,9 +180,9 @@ class CMGrafana < Grafana::Client
             organisations = u.dig('organisations')
 
             config = {
-              name: user_name,
+              user_name: user_name,
               email: email,
-              login: login_name,
+              login_name: login_name,
               password: password
             }
 
@@ -200,7 +200,7 @@ class CMGrafana < Grafana::Client
               ## Add User in Organisation
               add_user_to_organization(
                 organization: @org_name,
-                loginOrEmail: user_name,
+                login_or_email: user_name,
                 role: 'Viewer'
               )
 
@@ -225,7 +225,7 @@ class CMGrafana < Grafana::Client
                   ## Add User in Organisation
                   add_user_to_organization(
                     organization: org,
-                    loginOrEmail: user_name,
+                    login_or_email: user_name,
                     role: role
                   )
                 end
@@ -236,8 +236,8 @@ class CMGrafana < Grafana::Client
           elsif( status == 200 )
 
             # user exists
-            logger.info( 'user exists' )
-            logger.debug( 'check updates ...' )
+            logger.info( format( 'user \'%s\' exists', user_name ) )
+            logger.debug( 'check for updates ...' )
 
             #role = u.dig('role')
             #usr_created_role.dig('isGrafanaAdmin')
@@ -247,9 +247,8 @@ class CMGrafana < Grafana::Client
           end
 
           if(grafana_admin)
-
             logger.info( '  - set as grafana admin' )
-            result << update_user_permissions( name: user_name, permissions: { grafana_admin: true } )
+            result << update_user_permissions( user_name: user_name, permissions: { grafana_admin: true } )
           end
 
         end
@@ -306,14 +305,13 @@ class CMGrafana < Grafana::Client
             next if( name.nil? )
 
             if( port.nil? )
-
               port = 8080 if( type == 'graphite' )
               port = 8080 if( type == 'influxdb' )
             end
 
             logger.debug( format('datasource: %s :: %s', type, name ) )
 
-            data_src = data_source( name )
+            data_src = datasource( name )
             status = data_src.dig('status') || 500
 
             if( status == 500 )
@@ -329,14 +327,13 @@ class CMGrafana < Grafana::Client
                 'name' => name,
                 'database' => database,
                 'type' => type,
-                'access' => 'proxy',
                 'url' => format('http://%s:%d', host, port),
-                'jsonData' => data.deep_symbolize_keys,
+                'json_data' => data.deep_symbolize_keys,
                 'default' => default
               }
 
-              config['basic_auth_user'] = ba_user unless(ba_user.nil?)
-              config['basic_auth_password'] = ba_password unless(ba_password.nil?)
+              config['basic_user'] = ba_user unless(ba_user.nil?)
+              config['basic_password'] = ba_password unless(ba_password.nil?)
 
               config = config.deep_symbolize_keys
 
@@ -352,18 +349,17 @@ class CMGrafana < Grafana::Client
                 'name' => name,
                 'database' => database,
                 'type' => type,
-                'access' => 'proxy',
                 'url' => format('http://%s:%d', host, port),
-                'jsonData' => data.deep_symbolize_keys,
+                'json_data' => data.deep_symbolize_keys,
                 'default' => default
               }
 
-              config['basic_auth_user'] = ba_user unless(ba_user.nil?)
-              config['basic_auth_password'] = ba_password unless(ba_password.nil?)
+              config['basic_user'] = ba_user unless(ba_user.nil?)
+              config['basic_password'] = ba_password unless(ba_password.nil?)
 
               config = config.deep_symbolize_keys
 
-              result = update_datasource( datasource: name, data: config )
+              result = update_datasource( config )
 
               logger.debug( result )
 
@@ -400,7 +396,7 @@ class CMGrafana < Grafana::Client
 
         params = params.first if( params.is_a?(Array) )
 
-        admin_username   = params.dig('username')
+        admin_username   = params.dig('user_name')
         admin_password   = params.dig('password')
         admin_login_name = params.dig('login_name')
         admin_email      = params.dig('email')
@@ -419,36 +415,31 @@ class CMGrafana < Grafana::Client
           end
         end
 
-        adm_user = user_by_name(@user)
+        adm_user = user(@user)
 
         # admin: adm_user.dig('isGrafanaAdmin')
         left = {
           email: adm_user.dig('email'),
-          name: adm_user.dig('name'),
-          login: adm_user.dig('login'),
+          user_name: adm_user.dig('name'),
+          login_name: adm_user.dig('login'),
           theme: adm_user.dig('theme')
         }
 
         right = {
           email: admin_email,
-          name: admin_username,
-          login: admin_login_name,
+          user_name: admin_username,
+          login_name: admin_login_name,
           theme: admin_theme
         }
 
         if( left.sort != right.sort )
 
           logger.info( 'update admin user' )
-          logger.debug( left.sort )
-          logger.debug( right.sort )
+#          logger.debug( left.sort )
+#          logger.debug( right.sort )
 
-          user_data = {}
-
-          user_data[:user_name]  = @user
-          user_data['name']  = admin_username unless( admin_username.nil? )
-          user_data['login'] = admin_login_name unless( admin_login_name.nil? )
-          user_data['email'] = admin_email unless( admin_email.nil? )
-          user_data['theme'] = admin_theme unless( admin_theme.nil? )
+          user_data = left.merge(right)
+#          logger.debug( user_data.sort )
 
           result << update_user( user_data )
         end

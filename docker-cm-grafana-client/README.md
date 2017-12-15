@@ -28,6 +28,16 @@ This service runs every `INTERVAL` seconds.
 | `DISCOVERY_DATABASE_NAME`   | `discovery`          | database schema name for the discovery service                  |
 | `DISCOVERY_DATABASE_USER`   | `discovery`          | database user for the discovery service                         |
 | `DISCOVERY_DATABASE_PASS`   | `discovery`          | database password for the discovery service                     |
-| `INTERVAL`                  | `40`                 | run interval for the scheduler                                  |
-| `RUN_DELAY`                 | `30`                 | delay for the first run                                         |
+| `INTERVAL`                  | `20s`                | run interval for the scheduler (minimum are `20s`)              |
+| `RUN_DELAY`                 | `30s`                | delay for the first run                                         |
 | `SERVER_CONFIG_FILE`        | `/etc/grafana/server_config.yml` | configure file for grafana |
+
+For all Scheduler Variables, you can use simple integer values like `10`, this will be interpreted as `second`.
+Other Values are also possible:
+  - `1h` for 1 hour
+  - `1w` for 1 week
+
+Kombinations are also possible:
+  - `5m10s` for 5 minutes and 10 seconds
+  - `1h10s` for 1 hour and 20 minutes
+

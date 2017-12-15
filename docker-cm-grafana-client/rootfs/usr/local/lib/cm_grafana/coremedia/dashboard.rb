@@ -22,14 +22,11 @@ class CMGrafana
         identifier  = @database.config( ip: ip, short: short, fqdn: fqdn, key: 'graphite_identifier' )
 
         if( display != nil && display.dig( 'display_name' ) != nil )
-
           @grafana_hostname = display.dig( 'display_name' ).to_s
           logger.info( "use custom display_name from config: '#{@grafana_hostname}'" )
         end
 
-
         if( identifier != nil && identifier.dig( 'graphite_identifier' ) != nil )
-
           @storage_identifier = identifier.dig( 'graphite_identifier' ).to_s
           logger.info( "use custom storage identifier from config: '#{@storage_identifier}'" )
         end
@@ -96,7 +93,7 @@ class CMGrafana
           login_retried ||= 0
           login_max_retried ||= 4
           login_sleep_between_retries = 4
-          login( user: @user, password: @password, max_retried: login_max_retried )
+          login( username: @user, password: @password, max_retried: login_max_retried )
         rescue
           if( login_retried < login_max_retried )
             login_retried += 1
@@ -525,7 +522,7 @@ class CMGrafana
         tags            = params.dig(:tags)
 
         # ensure, that we are logged in
-        login( user: @user, password: @password, max_retries: 10 )
+        login( username: @user, password: @password, max_retries: 10 )
 
         data = self.search_dashboards( tags: tags )
         data = data.dig('message') unless( data.nil? )
@@ -581,7 +578,7 @@ class CMGrafana
 #           logger.debug( sprintf( 'found %d dashboards for delete', count ) )
 
           # ensure, that we are logged in
-          login( user: @user, password: @password, max_retries: 10 )
+          login( username: @user, password: @password, max_retries: 10 )
 
           dashboards.each do |d|
 
@@ -906,32 +903,60 @@ class CMGrafana
           {
             "list": [
               {
-                "name": "created",
-                "enable": false,
+                "datasource": "-- Grafana --",
+                "enable": true,
+                "hide": false,
                 "iconColor": "rgb(93, 227, 12)",
-                "datasource": "events",
-                "tags": "%STORAGE_IDENTIFIER% created&set=intersection"
+                "limit": 10,
+                "name": "created",
+                "showIn": 0,
+                "tags": [
+                  "%TAG%",
+                  "created"
+                ],
+                "type": "tags"
               },
               {
-                "name": "destoyed",
-                "enable": false,
+                "datasource": "-- Grafana --",
+                "enable": true,
+                "hide": false,
                 "iconColor": "rgb(227, 57, 12)",
-                "datasource": "events",
-                "tags": "%STORAGE_IDENTIFIER% destroyed&set=intersection"
+                "limit": 10,
+                "name": "destoyed",
+                "showIn": 0,
+                "tags": [
+                  "%TAG%",
+                  "destoyed"
+                ],
+                "type": "tags"
               },
               {
-                "name": "Load Tests",
-                "enable": false,
+                "datasource": "-- Grafana --",
+                "enable": true,
+                "hide": false,
                 "iconColor": "rgb(26, 196, 220)",
-                "datasource": "events",
-                "tags": "%STORAGE_IDENTIFIER% loadtest&set=intersection"
+                "limit": 10,
+                "name": "Load Tests",
+                "showIn": 0,
+                "tags": [
+                  "%TAG%",
+                  "loadtest"
+                ],
+                "type": "tags"
               },
               {
-                "name": "Deployments",
-                "enable": false,
+                "datasource": "-- Grafana --",
+                "enable": true,
+                "hide": false,
                 "iconColor": "rgb(176, 40, 253)",
-                "datasource": "events",
-                "tags": "%STORAGE_IDENTIFIER% deployment&set=intersection"
+                "limit": 10,
+                "name": "Deployments",
+                "showIn": 0,
+                "tags": [
+                  "%TAG%",
+                  "deployment"
+                ],
+                "type": "tags"
               }
             ]
           }
