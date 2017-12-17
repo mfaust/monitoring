@@ -397,7 +397,7 @@ module Storage
 
       return result.dig('data') if (application.nil?)
 
-      { application.to_s: result.dig('data', application) }
+      { application => result.dig('data', application) }
     end
     #
     # -- measurements ---------------------------
