@@ -1,5 +1,10 @@
+
 TYPE := cm-external-discover
 IMAGE_NAME := docker-${TYPE}
+
+.PHONY: build clean run  shell exec stop package-info history
+
+default: build
 
 build:
 	docker \
@@ -16,13 +21,6 @@ run:
 		--detach \
 		--interactive \
 		--tty \
-		--env DISCOVERY_HOST=172.31.21.237 \
-		--env DISCOVERY_PORT=8080 \
-		--env DISCOVERY_PATH=/api/aws \
-		--env DISCOVERY_POLL_INTERVAL=10 \
-		--env MONITORING_HOST=localhost \
-		--env MONITORING_PORT=80 \
-		--env MONITORING_API_VERSION=2 \
 		--hostname=${IMAGE_NAME} \
 		--name=${IMAGE_NAME} \
 		$(IMAGE_NAME) \
@@ -33,13 +31,6 @@ shell:
 		--rm \
 		--interactive \
 		--tty \
-		--env DISCOVERY_HOST=172.31.21.237 \
-		--env DISCOVERY_PORT=8080 \
-		--env DISCOVERY_PATH=/api/aws \
-		--env DISCOVERY_POLL_INTERVAL=10 \
-		--env MONITORING_HOST=localhost \
-		--env MONITORING_PORT=80 \
-		--env MONITORING_API_VERSION=2 \
 		--hostname=${IMAGE_NAME} \
 		--name=${IMAGE_NAME} \
 		$(IMAGE_NAME) \

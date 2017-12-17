@@ -1,5 +1,10 @@
+
 TYPE := cm-data-collector
 IMAGE_NAME := docker-${TYPE}
+
+.PHONY: build clean run  shell exec stop package-info history
+
+default: build
 
 build:
 	docker \
@@ -16,11 +21,6 @@ run:
 		--detach \
 		--interactive \
 		--tty \
-		--env MEMCACHE_HOST=localhost \
-		--env MEMCACHE_PORT=11211 \
-		--env JOLOKIA_HOST=jolokia \
-		--env MQ_HOST=beanstalkd \
-		--env POLL_INTERVAL=10 \
 		--hostname=${IMAGE_NAME} \
 		--name=${IMAGE_NAME} \
 		$(IMAGE_NAME) \
@@ -31,11 +31,6 @@ shell:
 		--rm \
 		--interactive \
 		--tty \
-		--env MEMCACHE_HOST=localhost \
-		--env MEMCACHE_PORT=11211 \
-		--env JOLOKIA_HOST=jolokia \
-		--env MQ_HOST=beanstalkd \
-		--env POLL_INTERVAL=10 \
 		--volume /etc/localtime:/etc/localtime:ro \
 		--hostname=${IMAGE_NAME} \
 		--name=${IMAGE_NAME} \

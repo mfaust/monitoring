@@ -6,12 +6,13 @@ require 'optparse'
 require 'json'
 require 'yaml'
 require 'logger'
+require 'mini_cache'
 
 require_relative '/usr/local/share/icinga2/logging'
 require_relative '/usr/local/share/icinga2/utils/network'
 require_relative '/usr/local/share/icinga2/storage'
 require_relative '/usr/local/share/icinga2/mbean'
-require_relative '/usr/local/share/icinga2/cache'
+# require_relative '/usr/local/share/icinga2/cache'
 require_relative '/usr/local/share/icinga2/monkey'
 
 # ---------------------------------------------------------------------------------------
@@ -28,21 +29,21 @@ class Icinga2Check
 
   def initialize( settings = {} )
 
-    redisHost    = ENV.fetch( 'REDIS_HOST', 'redis' )
-    redisPort    = ENV.fetch( 'REDIS_PORT', 6379 )
+    redis_host    = ENV.fetch( 'REDIS_HOST', 'redis' )
+    redis_port    = ENV.fetch( 'REDIS_PORT', 6379 )
 
     logger.level = Logger::INFO
-    @redis       = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
-    @mbean       = MBean::Client.new( { :redis => @redis } )
-    @cache       = Cache::Store.new()
+    @redis       = Storage::RedisClient.new( { redis: { host: redis_host } } )
+    @mbean       = MBean::Client.new( { redis: @redis } )
+    @cache       = MiniCache::Store.new()
   end
 
 
-  def readConfig( service )
+  def read_config( service )
 
-#     logger.debug("readConfig( #{service} )")
+#     logger.debug("read_config( #{service} )")
 
-    usePercent = nil
+    use_percent = nil
     warning    = nil
     critical   = nil
 
@@ -62,16 +63,9 @@ class Icinga2Check
 
         begin
           config  = YAML.load_file(file)
-
-          # data    = config.dig(service)
-          # logger.debug( "file data: #{data}" )
-
-          if(config.is_a?(Hash))
-            @redis.set(cache_key, config, 640)
-          end
+          @redis.set(cache_key, config, 640) if(config.is_a?(Hash))
 
         rescue YAML::ParserError => e
-
           logger.error( 'wrong result (no yaml)')
           logger.error( e )
         end
@@ -82,49 +76,40 @@ class Icinga2Check
       data    = data.dig(service)
 
       unless(data.nil?)
-        usePercent = data.dig('usePercent')
-        warning    = data.dig('warning')
-        critical   = data.dig('critical')
+        use_percent = data.dig('use_percent') || false
+        warning    = data.dig('warning') || 80
+        critical   = data.dig('critical') || 90
       end
     end
 
-
-    return {
-      :usePercent => usePercent,
-      :warning    => warning,
-      :critical   => critical
+    {
+      use_percent: use_percent,
+      warning: warning,
+      critical: critical
     }
-
   end
 
 
   def hostname( hostname )
 
-#     logger.debug( "hostname( #{hostname} )" )
+    cache_key = format( 'dns::%s', hostname )
 
-    # look in our cache
-    cache_key = format('dns::%s',hostname)
+    dns = @redis.get(cache_key)
+#     dns = dns.deep_symbolize_keys unless(dns.nil?)
 
-#     data      = @redis.get( cache_key )
-# #    logger.debug( "cache_key: #{cache_key}" )
-# #    logger.debug( "data     : #{data}" )
-#
-#     if(data.nil?)
-#       data = Utils::Network.resolv( hostname )
-# #       logger.debug( data )
-#       @redis.set( cache_key, data, 320 )
-#     end
+    logger.debug( "dns cache: #{dns} (#{dns.class.to_s})" )
 
-    data = Utils::Network.resolv( hostname )
+    # return dns.dig(:fqdn) unless(dns.nil?)
 
-    hostname = data.dig(:long)
+    long = Utils::Network.resolv( hostname ).dig(:long)
 
-    return hostname
+    logger.debug( "resolver: #{long}" )
 
+    long
   end
 
 
-  def runningOrOutdated( params = {} )
+  def running_or_outdated( params )
 
     host = params.dig(:host)
     data = params.dig(:data)
@@ -134,12 +119,11 @@ class Icinga2Check
       exit STATE_CRITICAL
     end
 
-    dataStatus    = data.dig('status')    || 500
-    dataTimestamp = data.dig('timestamp')
-    dataValue     = data.dig('value')     # ( data != nil && data['value'] ) ? data['value'] : nil
+    status    = data.dig('status')    || 500
+    timestamp = data.dig('timestamp')
+    value     = data.dig('value')
 
-    if( dataValue.nil? )
-
+    if( value.nil? )
       output = 'CRITICAL - missing monitoring data - service not running!?'
       logger.info( format( '%s: %s', host, output))
       puts output
@@ -147,86 +131,79 @@ class Icinga2Check
       exit STATE_CRITICAL
     end
 
-    beanTimeout,difference = beanTimeout?( dataTimestamp )
+    state, difference = bean_timeout?( timestamp, 44 )
 
-    if( beanTimeout == STATE_CRITICAL )
+    if( state == STATE_CRITICAL )
       output = format( 'CRITICAL - last check creation is out of date (%d seconds)', difference )
       logger.info( format( '%s: %s', host, output))
       puts output
 
-      exit beanTimeout
-    elsif( beanTimeout == STATE_WARNING )
+      exit state
+    elsif( state == STATE_WARNING )
       output = format( 'WARNING - last check creation is out of date (%d seconds)', difference )
       logger.info( format( '%s: %s', host, output))
       puts output
 
-      exit beanTimeout
+      exit state
     end
 
-    return dataValue
-
+    value
   end
 
 
   # check timeout of last bean creation
   #  warning  at 30000 ms == 30 seconds
   #  critical at 60000 ms == 60 seconds
-  def beanTimeout?( timestamp, warning = 30, critical = 60 )
+  def bean_timeout?( timestamp, warning = 30, critical = 60 )
 
-#     logger.debug( "beanTimeout?( #{timestamp}, #{warning}, #{critical} )" )
-
-    config   = readConfig('timeout')
+    config   = read_config('timeout')
     warning  = config.dig(:warning)  || warning
     critical = config.dig(:critical) || critical
 
     result = false
     quorum = 5 # add 5 seconds
 
-    if( timestamp == nil || timestamp.to_s == 'null' )
-      result = true
+    return true if( timestamp == nil || timestamp.to_s == 'null' )
+
+    n = Time.now()
+    t = Time.at( timestamp )
+    t = t.add_seconds( quorum )
+
+    difference = time_difference( t, n )
+    difference = difference[:seconds].round
+
+    if( difference > critical )
+      logger.error( format( '  %d > %d', difference, critical ) )
+      result = STATE_CRITICAL
+    elsif( difference > warning || difference == warning )
+      logger.warn( format( '  %d >= %d', difference, warning ) )
+      result = STATE_WARNING
     else
-      n = Time.now()
-      t = Time.at( timestamp )
-      t = t.add_seconds( quorum )
-
-      difference = time_difference( t, n )
-      difference = difference[:seconds].round
-
-#       logger.debug( sprintf( ' now       : %s', n.to_datetime.strftime("%d %m %Y %H:%M:%S") ) )
-#       logger.debug( sprintf( ' timestamp : %s', t.to_datetime.strftime("%d %m %Y %H:%M:%S") ) )
-#       logger.debug( sprintf( ' difference: %d', difference ) )
-#       logger.debug( sprintf( '   warning : %d', warning ) )
-#       logger.debug( sprintf( '   critical: %d', critical ) )
-
-      if( difference > critical )
-        logger.error( sprintf( '  %d > %d', difference, critical ) )
-        result = STATE_CRITICAL
-      elsif( difference > warning || difference == warning )
-        logger.warn( sprintf( '  %d >= %d', difference, warning ) )
-        result = STATE_WARNING
-      else
-        result = STATE_OK
-      end
-
+      result = STATE_OK
     end
 
     [result, difference]
   end
 
 
-    def time_difference( start_time, end_time )
+  def time_difference( start_time, end_time )
 
-      seconds_diff = (start_time - end_time).to_i.abs
+    seconds_diff = (start_time - end_time).to_i.abs
 
-      {
-        years: (seconds_diff / 31556952),
-        months: (seconds_diff / 2628288),
-        weeks: (seconds_diff / 604800),
-        days: (seconds_diff / 86400),
-        hours: (seconds_diff / 3600),
-        minutes: (seconds_diff / 60),
-        seconds: seconds_diff,
-      }
-    end
+    {
+      years: (seconds_diff / 31556952),
+      months: (seconds_diff / 2628288),
+      weeks: (seconds_diff / 604800),
+      days: (seconds_diff / 86400),
+      hours: (seconds_diff / 3600),
+      minutes: (seconds_diff / 60),
+      seconds: seconds_diff,
+    }
+  end
+
+
+  def bytes_to_megabytes (bytes)
+    (bytes.to_f / 1024 / 1024 / 1024 * 100).round / 100.0
+  end
 
 end

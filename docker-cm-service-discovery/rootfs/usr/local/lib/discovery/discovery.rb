@@ -3,17 +3,17 @@ module ServiceDiscovery
 
   module Discovery
 
-    # discorery application
+    # discover application
     #
-    def discoverApplication( params = {} )
+    def discover_application( params = {} )
 
       host = params.dig(:fqdn)
       port = params.dig(:port)
 
-      fixedPorts = [80,443,8081,3306,5432,6379,9100,28017,55555]
+      fixed_ports = [80, 443, 8081, 3306, 5432, 6379, 9100, 19100, 28017, 55555]
       services   = Array.new
 
-      if( fixedPorts.include?( port ) )
+      if( fixed_ports.include?( port ) )
 
         case port
         when 80
@@ -28,81 +28,95 @@ module ServiceDiscovery
           services.push('postgres')
         when 6379
           services.push('redis')
-        when 9100
+        when 9100, 19100
           services.push('node-exporter')
         when 28017
           services.push('mongodb')
         when 55555
           services.push('resourced')
+        else
+          # type code here
         end
       else
 
-        h     = Hash.new()
-        array = Array.new()
+        array = []
 
         # hash for the NEW Port-Schema
         # since cm160x every application runs in his own container with unique port schema
         #
-        targetUrl = sprintf( "service:jmx:rmi:///jndi/rmi://%s:%s/jmxrmi", host, port )
+        target_url = format('service:jmx:rmi:///jndi/rmi://%s:%s/jmxrmi', host, port )
 
         array << {
-          :type      => "read",
-          :mbean     => "java.lang:type=Runtime",
-          :attribute => [ "ClassPath" ],
-          :target    => { :url => targetUrl },
-          :config    => { "ignoreErrors" => true, "ifModifiedSince" => true, "canonicalNaming" => true }
+          type: 'read',
+          mbean: 'java.lang:type=Runtime',
+          attribute: ['ClassPath'],
+          target: {url: target_url},
+          config: {'ignoreErrors' => true, 'ifModifiedSince' => true, 'canonicalNaming' => true}
         } << {
-          :type      => "read",
-          :mbean     => "Catalina:type=Manager,context=*,host=*",
-          :target    => { :url => targetUrl },
-          :config    => { "ignoreErrors" => true, "ifModifiedSince" => true, "canonicalNaming" => true }
+          type: 'read',
+          mbean: 'Catalina:type=Manager,context=*,host=*',
+          target: {url: target_url},
+          config: {'ignoreErrors' => true, 'ifModifiedSince' => true, 'canonicalNaming' => true}
         } << {
-          :type      => "read",
-          :mbean     => "Catalina:type=Engine",
-          :attribute => [ 'baseDir', 'jvmRoute' ],
-          :target    => { :url => targetUrl },
-          :config    => { "ignoreErrors" => true, "ifModifiedSince" => true, "canonicalNaming" => true }
+          type: 'read',
+          mbean: 'Catalina:type=Engine',
+          attribute: %w(baseDir jvmRoute),
+          target: {url: target_url},
+          config: {'ignoreErrors' => true, 'ifModifiedSince' => true, 'canonicalNaming' => true}
         } << {
-          :type      => "read",
-          :mbean     => "com.coremedia:type=serviceInfo,application=*",
-          :target    => { :url => targetUrl },
-          :config    => { "ignoreErrors" => true, "ifModifiedSince" => true, "canonicalNaming" => true }
+          type: 'read',
+          mbean: 'com.coremedia:type=serviceInfo,application=*',
+          target: {url: target_url},
+          config: {'ignoreErrors' => true, 'ifModifiedSince' => true, 'canonicalNaming' => true}
         }
 
-        response       = @jolokia.post( { :payload => array } )
-        responseStatus = response.dig(:status).to_i
-        responseBody   = response.dig(:message)
+        response        = @jolokia.post( payload: array )
+        response_status = response.dig(:status).to_i
+        response_body   = response.dig(:message)
 
-        if( responseStatus != 200 )
+        if( response_status != 200 )
 
 #           logger.error( response )
 #           logger.error( responseStatus )
 
-          if( responseBody != nil )
+          if( response_body.nil? )
 
-            responseBody.delete!( "\t" )
-            responseBody.delete!( "\n" )
-
-            if( responseBody.include?( 'UnknownHostException' ) )
-              responseBody = sprintf( 'Unknown Host: %s', host )
-            end
+            response_body = 'bad status'
           else
 
-            responseBody = 'bad status'
+            response_body.delete!("\t" )
+            response_body.delete!("\n" )
+
+            if( response_body.include?('ConnectException') )
+
+              parts = response_body.match( '^(.*)ConnectException :(?<error>.+[a-zA-Z0-9-]);(.*)' )
+              hostname = host
+              hostname = parts['error'].to_s.strip if( parts )
+
+              response_body = format('jolokia error: \'%s\'. Possibly a DNS or configuration problem', hostname )
+            end
+
+            if( response_body.include?('UnknownHostException' ) )
+
+              parts = response_body.match( '^(.*)Unknown host:(?<hostname>.+[a-zA-Z0-9-]);(.*)' )
+              hostname = host
+              hostname = parts['hostname'].to_s.strip if( parts )
+
+              response_body = format('jolokia error: jolokia becomes \'%s\' as FQDN! Possibly a DNS or configuration problem', hostname )
+            end
           end
 
-          logger.error( {
-            :status  => responseStatus,
-            :message => responseBody
-          } )
+          logger.error(
+            status: response_status,
+            message: response_body,
+            target_url: target_url
+          )
 
           return nil
-
         else
-
           body = response.dig(:message)
 
-          if( body != nil )
+          unless( body.nil? )
 
             runtime     = body[0]  # #1  == Runtime
             manager     = body[1]  # #2  == Manager
@@ -121,11 +135,8 @@ module ServiceDiscovery
               value = value.dig('ServiceType')
 
               if( value != 'to be defined' )
-
-                logger.debug( "Application are '#{value}'" )
-
+                # logger.debug( "Application are '#{value}'" )
                 services.push( value )
-
                 # clear othe results
                 #
                 runtime = nil
@@ -135,7 +146,7 @@ module ServiceDiscovery
 
             end
 
-            if( runtime != nil )
+            unless( runtime.nil? )
 
               status = runtime.dig('status') || 500
               value  = runtime.dig('value')
@@ -144,7 +155,7 @@ module ServiceDiscovery
 
                 if( value != nil )
 
-                  classPath  = value.dig('ClassPath')
+                  class_path  = value.dig('ClassPath')
 
                   # CoreMedia 7.x == classPath 'cm7-tomcat-installation'
                   # Solr 6.5      == classPath 'solr-6'
@@ -152,28 +163,28 @@ module ServiceDiscovery
                   # others        == CoreMedia > 9
                   #
                   # CoreMedia 7.x Installation
-                  if( classPath.include?( 'cm7-tomcat-installation' ) )
+                  if( class_path.include?('cm7-tomcat-installation' ) )
 
                     logger.debug( 'found pre cm160x Portstyle (‎possibly cm7.x)' )
                     value = manager.dig('value')
 
                     regex = /context=(.*?),/
 
-                    value.each do |context,v|
+                    value.each do |context, _|
 
                       part = context.match( regex )
 
                       if( part != nil && part.length > 1 )
 
-                        appName = part[1].gsub!( '/', '' )
+                        app_name = part[1].gsub!('/', '' )
 
-                        if( appName == 'manager' )
+                        if( app_name == 'manager' )
                           # skip 'manager'
                           next
                         end
 
-                        logger.debug( sprintf( ' - ‎recognized application: %s', appName ) )
-                        services.push( appName )
+                        logger.debug( format(' - recognized application: %s', app_name ) )
+                        services.push(app_name )
                       end
                     end
 
@@ -186,7 +197,7 @@ module ServiceDiscovery
 
                       if( engine.dig('status').to_i == 200 )
 
-                        baseDir = value.dig('baseDir')
+                        base_dir = value.dig('baseDir')
 
                         regex = /
                           ^                           # Starting at the front of the string
@@ -197,15 +208,15 @@ module ServiceDiscovery
                           $
                         /x
 
-                        parts = baseDir.match( regex )
+                        parts = base_dir.match(regex )
 
                         if( parts )
                           service = parts['service'].to_s.strip.tr('. ', '')
-                          services.delete( "coremedia" )
-                          services.delete( "caefeeder" )
+                          services.delete('coremedia')
+                          services.delete('caefeeder')
                           services.push( service )
 
-                          logger.debug( sprintf( '  => %s', service ) )
+                          logger.debug( format( '  => %s', service ) )
                         else
 
                           logger.error( 'unknown error' )
@@ -213,7 +224,7 @@ module ServiceDiscovery
                           logger.error( parts )
                         end
                       else
-                        logger.error( sprintf( 'response status %d', engine['status'].to_i ) )
+                        logger.error( format( 'response status %d', engine['status'].to_i ) )
                       end
 
                     # blueprint = cae-preview or delivery?editor
@@ -224,9 +235,9 @@ module ServiceDiscovery
 
                       if( engine.dig('status').to_i == 200 )
 
-                        jvmRoute = value.dig('jvmRoute')
+                        jvm_route = value.dig('jvmRoute')
 
-                        if( ( jvmRoute != nil ) && ( jvmRoute.include?( 'studio' ) ) )
+                        if( ( jvm_route != nil ) && ( jvm_route.include?('studio' ) ) )
                           services.delete( 'blueprint' )
                           services.push( 'cae-preview' )
                         else
@@ -234,7 +245,7 @@ module ServiceDiscovery
                           services.push( 'delivery' )
                         end
                       else
-                        logger.error( sprintf( 'response status %d', engine['status'].to_i ) )
+                        logger.error( format( 'response status %d', engine['status'].to_i ) )
                         logger.error( engine )
                       end
                     else
@@ -245,33 +256,33 @@ module ServiceDiscovery
 
                   # Solr - Standalone Support
                   #
-                  elsif( classPath.include?( 'solr-6' ) || classPath.include?('solr/server') )
+                  elsif( class_path.include?('solr-6' ) || class_path.include?('solr/server') )
 
                     services.push( 'solr' )
 
                   # Solr - Standalone Support
                   #
-                  elsif( classPath.include?('solr/server') )
+                  elsif( class_path.include?('solr/server') )
 
                     services.push( 'solr' )
 
                   # CoreMedia on Cloud / SpringBoot
                   #
-                  elsif( classPath.include?( '.war' ) )
+                  elsif( class_path.include?('.war' ) )
 
                     regex = /
                       ^
                       \/(?<service>.+[a-zA-Z0-9-])\.war$
                     /x
 
-                    parts = classPath.match( regex )
+                    parts = class_path.match(regex )
 
                     if( parts )
                       service = parts['service'].to_s.strip
                       services.push( service )
                     else
                       logger.error( 'parse error for ClassPath' )
-                      logger.error( " => classPath: #{classPath}" )
+                      logger.error( " => classPath: #{class_path}" )
                       logger.error( parts )
                     end
 
@@ -289,14 +300,14 @@ module ServiceDiscovery
                       $
                     /x
 
-                    parts = classPath.match( regex )
+                    parts = class_path.match(regex )
 
                     if( parts )
                       service = parts['service'].to_s.strip.tr('. ', '')
                       services.push( service )
                     else
                       logger.error( 'parse error for ClassPath' )
-                      logger.error( " => classPath: #{classPath}" )
+                      logger.error( " => classPath: #{class_path}" )
                       logger.error( parts )
                     end
                   end
@@ -337,7 +348,115 @@ module ServiceDiscovery
 
       end
 
-      return services
+      services
+    end
+
+    # get open ports and call 'discover_application'
+    #
+    def discover( params )
+
+      ip    = params.dig(:ip)
+      short = params.dig(:short)
+      fqdn  = params.dig(:fqdn)
+      ports = params.dig(:ports)
+
+      discovered_services = Hash.new
+
+      # TODO
+      # check if @discoveryHost and @discoveryPort setStatus
+      # then use the new
+      # otherwise use the old code
+      start = Time.now
+
+      if( @discovery_host.nil? )
+
+        open = false
+
+        # check open ports and ask for application behind open ports
+        #
+        ports.each do |p|
+
+          open = Utils::Network.portOpen?( fqdn, p )
+
+          logger.debug( sprintf( 'Host: %s | Port: %s   %s', fqdn, p, open ? 'open' : 'closed' ) )
+
+          if( open == true )
+
+            names = discover_application( fqdn: fqdn, port: p )
+
+            # logger.debug( "discovered services: #{names}" )
+
+            unless( names.nil? )
+
+              names.each do |name|
+                discovered_services.merge!( { name => { 'port' => p } } )
+              end
+            end
+          end
+        end
+
+      else
+        # our new port discover service
+        #
+        open_ports = []
+
+        pd = PortDiscovery::Client.new( host: @discovery_host, port: @discovery_port )
+
+        if( pd.isAvailable?() )
+
+          open_ports = pd.post( host: fqdn, ports: ports )
+
+          if( open_ports.nil? )
+            logger.error( format( 'can\'t detect open ports for %s', fqdn ) )
+          else
+
+            open_ports.each do |p|
+
+              names = discover_application( fqdn: fqdn, port: p )
+
+              # logger.debug("discovered services: #{names}")
+
+              unless( names.nil? )
+
+                names.each do |name|
+                  discovered_services.merge!( { name => { 'port' => p } } )
+                end
+              end
+            end
+          end
+
+        end
+      end
+
+      finish = Time.now
+      logger.info( sprintf( 'runtime for application discovery: %s seconds', (finish - start).round(2) ) )
+
+      # ---------------------------------------------------------------------------------------------------
+
+      discovered_services
+
+    end
+
+    # merge discovered services with additional services
+    #
+    def merge_services( discovered_services, additional_services )
+
+      if( additional_services.is_a?( Array ) && additional_services.count >= 1 )
+
+        additional_services.each do |s|
+          service_data = @service_config.dig( 'services', s )
+          unless( service_data.nil? )
+            discovered_services[s] ||= service_data.filter('port')
+            next
+          end
+        end
+
+        found_services = discovered_services.keys
+
+        logger.info( format( '%d usable services: %s', found_services.count, found_services.to_s ) )
+      end
+
+      discovered_services
     end
 
   end
@@ -380,9 +499,9 @@ module ServiceDiscovery
       response = fetch( format('http://%s:%d/vhosts.json', @host, @port) )
 
       if( response.code.to_i == 200 )
-        return response.body
+        response.body
       else
-        return {}
+        {}
       end
 
     end

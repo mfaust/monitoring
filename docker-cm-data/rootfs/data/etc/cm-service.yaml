@@ -19,6 +19,8 @@ services:
   mysql:
     description: MySQL
     port: 3306
+    monitoring_user: monitoring
+    monitoring_password: monitoring
 
   postgres:
     description: PostgreSQL
@@ -31,6 +33,10 @@ services:
   node-exporter:
     description: node_exporter (Prometheus)
     port: 9100
+
+  node-exporter:
+    description: node_exporter (CoreMedia internal)
+    port: 19100
 
   mongodb:
     description: MongoDB

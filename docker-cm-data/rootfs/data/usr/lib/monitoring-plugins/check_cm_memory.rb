@@ -14,45 +14,37 @@ class Icinga2Check_CM_Memory < Icinga2Check
     application  = settings.dig(:application)
     memory       = settings.dig(:memory)
 
-    host         = self.hostname( host )
+    host         = hostname( host )
 
-    self.check( host, application, memory )
-
+    check( host, application, memory )
   end
 
 
   def check( host, application, type )
 
-    config   = readConfig( type )
+    config   = read_config( type )
     warning  = config.dig(:warning)  || 90
     critical = config.dig(:critical) || 95
 
     # get our bean
-    data      = @mbean.bean( host, application, 'Memory' )
-    dataValue = self.runningOrOutdated( { host: host, data: data } )
+    data       = @mbean.bean( host, application, 'Memory' )
+    data_value = running_or_outdated( { host: host, data: data } )
 
-#     dataValue = dataValue.values.first
+#     data_value = data_value.values.first
 
     case type
     when 'heap-mem'
-
-      memoryType = 'Heap'
-      memory     = dataValue.dig('HeapMemoryUsage')
-
-      warning  = 95
-      critical = 98
-
+      memory_type = 'Heap'
+      memory      = data_value.dig('HeapMemoryUsage')
+      warning     = 95
+      critical    = 98
     when 'perm-mem'
-
-      memoryType = 'Perm'
-      memory     = dataValue.dig('NonHeapMemoryUsage')
-
-      warning  = 99
-      critical = 100
-
+      memory_type = 'Perm'
+      memory      = data_value.dig('NonHeapMemoryUsage')
+      warning     = 99
+      critical    = 100
     else
-
-      puts sprintf( 'UNKNOWN - Memory not available' )
+      puts format( 'UNKNOWN - Memory not available' )
       exit STATE_UNKNOWN
     end
 
@@ -67,31 +59,31 @@ class Icinga2Check_CM_Memory < Icinga2Check
     end
 
     if( percent == warning || percent <= warning )
-      status   = 'OK'
-      exitCode = STATE_OK
+      status    = 'OK'
+      exit_code = STATE_OK
     elsif( percent >= warning && percent <= critical )
-      status   = 'WARNING'
-      exitCode = STATE_WARNING
+      status    = 'WARNING'
+      exit_code = STATE_WARNING
     else
-      status   = 'CRITICAL'
-      exitCode = STATE_CRITICAL
+      status    = 'CRITICAL'
+      exit_code = STATE_CRITICAL
     end
 
     case type
     when 'heap-mem'
       puts format(
         '%d%% %s Memory used<br>Max: %s<br>Committed: %s<br>Used: %s | max=%d committed=%d used=%d',
-        percent, memoryType, max.to_filesize, committed.to_filesize, used.to_filesize,
+        percent, memory_type, max.to_filesize, committed.to_filesize, used.to_filesize,
         max, committed, used
       )
     else
       puts format(
         '%d%% %s Memory used<br>Commited: %s<br>Used: %s | committed=%d used=%d',
-        percent, memoryType, committed.to_filesize, used.to_filesize,
+        percent, memory_type, committed.to_filesize, used.to_filesize,
         committed, used
       )
     end
-    exit exitCode
+    exit exit_code
   end
 
 end

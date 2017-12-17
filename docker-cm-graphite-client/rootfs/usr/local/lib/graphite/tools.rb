@@ -3,16 +3,12 @@ module Graphite
 
   module Tools
 
-    def nodeTag( host )
+    def node_tag(host )
 
-      if( @identifier != nil )
-        return @identifier
-      else
-        return host
-      end
+      @identifier if( @identifier != nil )
+
+      host
     end
-
   end
-
 end
 

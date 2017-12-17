@@ -1,6 +1,6 @@
 
-ICINGAWEB_URL=${ICINGAWEB_URL:-"http://localhost/icingaweb2"}
-PROXY_PATH=${PROXY_PATH:-""}
+ICINGAWEB_URL=${ICINGAWEB_URL:-"/icinga"}
+PROXY_PATH=${PROXY_PATH:-"/dashing"}
 
 DASHBOARD=${DASHBOARD:-icinga2}
 

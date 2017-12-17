@@ -1,0 +1,51 @@
+{
+  "blueprint": {
+    "hostname": "osmc.local",
+    "loopback_hostname": "osmc.local",
+    "maven_repository_url": "file:///var/tmp/deploy/maven-repo",
+    "tomcat": {
+      "java_home": "/usr/java/default",
+      "caefeeder-live": {
+        "heap": "1024m"
+      },
+      "caefeeder-preview": {
+        "heap": "1024m"
+      }
+    },
+    "mysql": {
+      "package_version": "5.7.20-1.el7"
+    },
+    "tools": {
+      "java_home": "/usr/java/default",
+      "jvm_args": {
+        "heap": "-Xmx768m"
+      }
+    },
+    "webapps":{
+      "content-management-server": {
+        "application.properties": {
+          "cap.server.license": "/var/tmp/deploy/cms.zip"
+        }
+      },
+      "master-live-server": {
+        "application.properties": {
+          "cap.server.license": "/var/tmp/deploy/mls.zip"
+        }
+      },
+      "replication-live-server": {
+        "application.properties": {
+          "cap.server.license": "/var/tmp/deploy/rls.zip"
+        }
+      }
+    },
+    "dev": {
+      "content": {
+        "content_zip": "file:///var/tmp/deploy/content-users.zip",
+        "serverimport_extra_args" : ["-t 4"]
+      }
+    }
+  },
+  "run_list": [
+    "recipe[blueprint-dev-tooling::content]"
+  ]
+}

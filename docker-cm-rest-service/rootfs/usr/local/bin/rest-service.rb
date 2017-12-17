@@ -11,11 +11,9 @@ require 'sinatra/base'
 require 'logger'
 require 'json'
 require 'yaml'
-# require 'fileutils'
 require 'resolve/hostname'
 
-require_relative 'monitoring'
-require_relative '../lib/logging'
+require_relative '../lib/monitoring'
 
 module Sinatra
 
@@ -27,63 +25,63 @@ module Sinatra
 
       set :environment, :production
 
-      @logDirectory     = '/var/log'
+      @log_directory     = '/var/log'
 
-      @restServicePort  = ENV.fetch('REST_SERVICE_PORT'      , 4567 )
-      @restServiceBind  = ENV.fetch('REST_SERVICE_BIND'      , '0.0.0.0' )
-      @mqHost           = ENV.fetch('MQ_HOST'                , 'beanstalkd' )
-      @mqPort           = ENV.fetch('MQ_PORT'                , 11300 )
-      @mqQueue          = ENV.fetch('MQ_QUEUE'               , 'mq-rest-service' )
-      @redisHost        = ENV.fetch('REDIS_HOST'             , 'redis' )
-      @redisPort        = ENV.fetch('REDIS_PORT'             , 6379 )
+      @rest_service_port = ENV.fetch('REST_SERVICE_PORT'      , 8080 )
+      @rest_service_bind = ENV.fetch('REST_SERVICE_BIND'      , '0.0.0.0' )
+      @mq_host           = ENV.fetch('MQ_HOST'                , 'beanstalkd' )
+      @mq_port           = ENV.fetch('MQ_PORT'                , 11300 )
+      @mq_queue          = ENV.fetch('MQ_QUEUE'               , 'mq-rest-service' )
+      @redis_host        = ENV.fetch('REDIS_HOST'             , 'redis' )
+      @redis_port        = ENV.fetch('REDIS_PORT'             , 6379 )
 
-      @mysqlHost        = ENV.fetch('MYSQL_HOST'             , 'database')
-      @mysqlSchema      = ENV.fetch('DISCOVERY_DATABASE_NAME', 'discovery')
-      @mysqlUser        = ENV.fetch('DISCOVERY_DATABASE_USER', 'discovery')
-      @mysqlPassword    = ENV.fetch('DISCOVERY_DATABASE_PASS', 'discovery')
+      @mysql_host        = ENV.fetch('MYSQL_HOST'             , 'database')
+      @mysql_schema      = ENV.fetch('DISCOVERY_DATABASE_NAME', 'discovery')
+      @mysql_user        = ENV.fetch('DISCOVERY_DATABASE_USER', 'discovery')
+      @mysql_password    = ENV.fetch('DISCOVERY_DATABASE_PASS', 'discovery')
 
 
-      FileUtils.chmod( 1775, @logDirectory )
-      FileUtils.chown( 'nobody', 'nobody', @logDirectory )
-
-      file      = File.new( sprintf( '%s/rest-service.log', @logDirectory ), File::WRONLY | File::APPEND | File::CREAT )
-      file.sync = true
-
-      use Rack::CommonLogger, file
+      #FileUtils.chmod( 1775, @log_directory )
+      #FileUtils.chown( 'nobody', 'nobody', @log_directory )
+      #
+      #file      = File.new( sprintf( '%s/rest-service.log', @log_directory ), File::WRONLY | File::APPEND | File::CREAT )
+      #file.sync = true
+      #
+      #use Rack::CommonLogger, file
 
     end
 
-    set :logging, true
+    set :logging, false
     set :app_file, caller_files.first || $0
     set :run, Proc.new { $0 == app_file }
     set :dump_errors, true
     set :show_exceptions, true
     set :public_folder, '/var/www/monitoring'
 
-    set :bind, @restServiceBind
-    set :port, @restServicePort.to_i
+    set :bind, @rest_service_bind
+    set :port, @rest_service_port.to_i
 
     # -----------------------------------------------------------------------------
 
     config = {
       :mq       => {
-        :host      => @mqHost,
-        :port      => @mqPort,
-        :queue     => @mqQueue
+        :host      => @mq_host,
+        :port      => @mq_port,
+        :queue     => @mq_queue
       },
       :redis    => {
-        :host      => @redisHost,
-        :port      => @redisPort
+        :host      => @redis_host,
+        :port      => @redis_port
       },
       :mysql    => {
-        :host      => @mysqlHost,
-        :schema    => @mysqlSchema,
-        :user      => @mysqlUser,
-        :password  => @mysqlPassword
+        :host      => @mysql_host,
+        :schema    => @mysql_schema,
+        :user      => @mysql_user,
+        :password  => @mysql_password
       }
     }
 
-    m = Monitoring.new( config )
+    m = Monitoring::Client.new( config )
 
     # -----------------------------------------------------------------------------
 
@@ -107,18 +105,24 @@ module Sinatra
     # -----------------------------------------------------------------------------
     # HELP
 
+    get '/health' do
+      status 200
+    end
+
+
+    # -----------------------------------------------------------------------------
+    # HELP
+
     # prints out a little help about our ReST-API
     get '/v2/help' do
 
       send_file File.join( settings.public_folder, 'help' )
-
     end
 
     # currently not supported
     get '/' do
-
-      send_file File.join( settings.public_folder, 'help' )
-
+      redirect '/v2/help'
+      # send_file File.join( settings.public_folder, 'help' )
     end
 
     # -----------------------------------------------------------------------------
@@ -184,60 +188,61 @@ module Sinatra
       payload         = @request_paylod
       @request_paylod = nil
 
-      logger.debug( sprintf( 'POST \'/v2/host/:host\' - \'%s\', \'%s\'', host, payload ) )
+      #logger.debug( sprintf( 'POST \'/v2/host/:host\' - \'%s\', \'%s\'', host, payload ) )
 
-      result = m.addHost( host, payload )
+      result = m.add_host( host, payload )
 
-      r = JSON.parse( result )
+      r = JSON.parse( result ) if( result.is_a?( String ) )
 
-      status = r['status']
-      body   = r['message']
+      result_status = r.dig('status').to_i
 
-      halt status, {'Content-Type' => 'text/json'}, result
+      status result_status
 
-#      status result['status']
-#      result
-
+      JSON.pretty_generate(r) + "\n"
     end
 
     # get information about all hosts
     get '/v2/host' do
 
-      result = m.listHost( nil, request.env )
+      result = m.list_host( nil, request.env )
 
-      r = JSON.parse( result )
+      r = JSON.parse( result ) if( result.is_a?( String ) )
 
-      status = r['status']
-      body   = r['message']
+      result_status = r.dig('status').to_i
 
-      halt status, {'Content-Type' => 'text/json'}, result
+      status result_status
 
-#      status result['status']
-#      result
-
+      JSON.pretty_generate(r) + "\n"
     end
 
     # get information about given 'host'
     get '/v2/host/:host' do
 
       host   = params[:host]
-      result = m.listHost( host, request.env )
+      result = m.list_host( host, request.env )
 
-      r = JSON.parse( result )
+      r = JSON.parse( result ) if( result.is_a?( String ) )
 
-      status = r['status']
-      body   = r['message']
+      result_status = r.dig('status').to_i
 
-      halt status, {'Content-Type' => 'text/json'}, result
+      status result_status
 
+      JSON.pretty_generate(r) + "\n"
     end
 
     # remove named host from monitoring
     delete '/v2/host/:host' do
 
       host   = params[:host]
-      result = m.removeHost( host, @request_paylod )
+      result = m.delete_host( host, @request_paylod )
 
+      r = JSON.parse( result ) if( result.is_a?( String ) )
+
+      result_status = r.dig('status').to_i
+
+      status result_status
+
+      JSON.pretty_generate(r) + "\n"
 #       r = JSON.parse( result )
 #
 #       logger.debug( r )
@@ -255,7 +260,7 @@ module Sinatra
     post '/v2/annotation/:host' do
 
       host   = params[:host]
-      result = m.addAnnotation( host, @request_paylod )
+      result = m.annotation( host: host, payload: @request_paylod )
 
 #       status = result[:status]
 

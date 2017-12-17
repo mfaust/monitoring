@@ -67,6 +67,15 @@ class Hash
       self.select { |key| args.include?( key ) }
     end
   end
+
+  # a << 0.3 <<0.1 << 1.0 << 0.4 << 2.0 << 2.2 << 1.8 << 1.6 << 1.6
+  # a.average(5)
+  #
+  def average(size)
+    reject!{ |v| v.nil? }
+    pop(size)
+    inject { |sum, x| sum + x }.round(2) / size
+  end
 end
 
 # -----------------------------------------------------------------------------

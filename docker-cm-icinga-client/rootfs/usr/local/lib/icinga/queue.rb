@@ -16,10 +16,10 @@ class CMIcinga2 < Icinga2::Client
 
         stats = @mq_consumer.tubeStatistics(@mq_queue )
         logger.debug( {
-          :total   => stats.dig(:total),
-          :ready   => stats.dig(:ready),
-          :delayed => stats.dig(:delayed),
-          :buried  => stats.dig(:buried)
+          total: stats.dig(:total),
+          ready: stats.dig(:ready),
+          delayed: stats.dig(:delayed),
+          buried: stats.dig(:buried)
         } )
 
         if( stats.dig(:ready).to_i > 10 )
@@ -29,17 +29,13 @@ class CMIcinga2 < Icinga2::Client
           return
         end
 
-        job_id  = data.dig(:id )
-
+        job_id = data.dig(:id )
         result = self.process_queue(data )
-
         status = result.dig(:status).to_i
 
         if( status == 200 || status == 409 || status == 500 || status == 503 )
-
           @mq_consumer.deleteJob(@mq_queue, job_id )
         else
-
           @mq_consumer.buryJob(@mq_queue, job_id )
         end
       end
@@ -47,9 +43,9 @@ class CMIcinga2 < Icinga2::Client
     end
 
 
-    def process_queue(data = {} )
+    def process_queue( data = {} )
 
-      logger.info( sprintf( 'process Message ID %d from Queue \'%s\'', data.dig(:id), data.dig(:tube) ) )
+      logger.info( format( 'process Message ID %d from Queue \'%s\'', data.dig(:id), data.dig(:tube) ) )
 
       command     = data.dig( :body, 'cmd' )
       node        = data.dig( :body, 'node' )
@@ -58,13 +54,13 @@ class CMIcinga2 < Icinga2::Client
       dns         = nil
       tags        = nil
 
-      if( command == nil || node == nil || payload == nil )
+      if( command.nil? || node.nil? || payload.nil? )
 
         status = 500
 
-        return { :status  => status, :message => 'missing command' } if( command == nil )
-        return { :status  => status, :message => 'missing node' } if( node == nil )
-        return { :status  => status, :message => 'missing payload' } if( payload == nil )
+        return { status: status, message: 'missing command' } if( command.nil? )
+        return { status: status, message: 'missing node' } if( node.nil? )
+        return { status: status, message: 'missing payload' } if( payload.nil? )
       end
 
       payload  = JSON.parse( payload ) if( payload.is_a?( String ) == true && payload.to_s != '' )
@@ -73,48 +69,35 @@ class CMIcinga2 < Icinga2::Client
 #       logger.debug( JSON.pretty_generate( payload ) )
 #       logger.debug( '----------------------------------' )
 
-      if( payload.is_a?( String ) == false )
+      unless( payload.is_a?( String ) )
         dns      = payload.dig('dns')
         tags     = payload.dig('tags')
       end
 
-      logger.info( sprintf( '  %s node %s', command , node ) )
+      logger.info( format( '  %s node %s', command , node ) )
 
-      unless( dns.nil? )
-        ip    = dns.dig('ip')
-        short = dns.dig('short')
-        fqdn  = dns.dig('fqdn')
+      if( dns.nil? )
+        ip, short, fqdn = self.ns_lookup(node)
       else
-        ip, short, fqdn = self.nsLookup( node )
+        ip = dns.dig('ip')
+        short = dns.dig('short')
+        fqdn = dns.dig('fqdn')
       end
 
-      if( @jobs.jobs( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } ) == true )
-        logger.warn( 'we are working on this job' )
-        return {
-          :status  => 409, # 409 Conflict
-          :message => 'we are working on this job'
-        }
-      end
+      job_option = { command: command, ip: ip, short: short, fqdn: fqdn }
 
-      @jobs.add( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
+      return { status: 409, message: 'we are working on this job' } if( @jobs.jobs( job_option ) == true )
 
-      @cache.set( format( 'dns-%s', node ) , expiresIn: 320 ) { Cache::Data.new( { 'ip': ip, 'short': short, 'long': fqdn } ) }
+      @jobs.add( job_option )
+
+      @cache.set(format( 'dns-%s', node ) , expires_in: 320 ) { MiniCache::Data.new( ip: ip, short: short, long: fqdn ) }
 
       # add Node
       #
       if( command == 'add' )
 
-#         logger.info( sprintf( 'add node %s', node ) )
-#        logger.debug( payload )
-#        payload = JSON.parse( payload )
-
-        services     = self.node_information({:ip => ip, :host => short, :fqdn => fqdn } )
-        display_name = @database.config( { :ip => ip, :short => short, :fqdn => fqdn, :key => 'display_name' } )
-
-#         logger.debug( display_name )
-#         logger.debug( display_name.class.to_s )
-
-#         logger.debug(services)
+        services     = self.node_information( ip: ip, host: short, fqdn: fqdn )
+        display_name = @database.config( ip: ip, short: short, fqdn: fqdn, key: 'display_name' )
 
         if( display_name.nil? )
           display_name = fqdn
@@ -124,11 +107,8 @@ class CMIcinga2 < Icinga2::Client
 
         # TODO: add groups
         #
-        if( ! services.empty? )
-          payload = services
-        else
-          payload = {}
-        end
+        payload = {}
+        payload = services unless( services.empty? )
 
         unless( tags.nil? )
           tags.each do |t,v|
@@ -136,82 +116,112 @@ class CMIcinga2 < Icinga2::Client
           end
         end
 
-
         # TODO
         # full API support
         params = {
-          :host => fqdn,
-          :fqdn => fqdn,
-          :display_name => display_name,
-          :enable_notifications => @icinga_notifications,
-          :vars => payload
+          host: fqdn,
+          fqdn: fqdn,
+          display_name: display_name,
+          enable_notifications: @icinga_notifications,
+          vars: payload
         }
 
 #        logger.debug(JSON.pretty_generate(params))
 
         result = self.add_host(params)
-        status = result.dig(:status) || 500
+        status = result.dig('code') || 500
 
+        logger.debug( result )
         logger.error( result ) if( status != 200 )
 
-        logger.info( result )
+        @jobs.del( job_option )
 
-        @jobs.del( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
-
-        return {
-          :status => status
-        }
+        return { status: status }
+      end
 
       # remove Node
       #
-      elsif( command == 'remove' )
+      if( command == 'remove' )
 
-#         logger.info( sprintf( 'remove checks for node %s', node ) )
+#         logger.info( format( 'remove checks for node %s', node ) )
 
-        result = self.delete_host( { :host => fqdn, :fqdn => fqdn } )
+        result = self.delete_host( host: fqdn, fqdn: fqdn )
 
-#         logger.info( result )
+        logger.debug( result )
 
-        @jobs.del( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
+        @jobs.del( job_option )
 
-        return {
-          :status => 200
-        }
+        return { status: 200 }
+      end
 
       # information about Node
       #
-      elsif( command == 'info' )
+      if( command == 'info' )
 
-#         logger.info( sprintf( 'give information for node %s', node ) )
+#         logger.info( format( 'give information for node %s', node ) )
 
-        result = self.hosts( { :host => fqdn } )
+        result = self.hosts( host: fqdn )
 
-#         logger.info( result )
+        logger.debug( result )
 
-        @jobs.del( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
+        @jobs.del( job_option )
 
-        return {
-          :status => 200
+        return { status: 200 }
+      end
+
+      #
+      #
+      if( command == 'update' )
+
+        services     = self.node_information( ip: ip, host: short, fqdn: fqdn )
+        display_name = @database.config( ip: ip, short: short, fqdn: fqdn, key: 'display_name' )
+
+        if( display_name.nil? )
+          display_name = fqdn
+        else
+          display_name = display_name.dig('display_name') || fqdn
+        end
+
+        # TODO: add groups
+        #
+        payload = {}
+        payload = services unless( services.empty? )
+
+        unless( tags.nil? )
+          tags.each do |t,v|
+            payload[t] = v
+          end
+        end
+
+        # TODO
+        # full API support
+        params = {
+          host: fqdn,
+          fqdn: fqdn,
+          display_name: display_name,
+          enable_notifications: @icinga_notifications,
+          vars: payload,
+          merge_vars: true
         }
+
+        result = self.modify_host(params)
+        status = result.dig('code') || 500
+
+        logger.debug( result )
+        logger.error( result ) if( status != 200 )
+
+        @jobs.del( job_option )
+
+        return { status: status }
+      end
 
       # all others
       #
-      else
+      logger.error( format( 'wrong command detected: %s', command ) )
 
-        logger.error( sprintf( 'wrong command detected: %s', command ) )
+      @jobs.del( job_option )
 
-        @jobs.del( { :command => command, :ip => ip, :short => short, :fqdn => fqdn } )
-
-        return {
-          :status  => 500,
-          :message => sprintf( 'wrong command detected: %s', command )
-        }
-
-      end
-
-      result = JSON.parse(result) if( result.is_a?(String ) )
-
-      result[:request]    = data
+      return { status: 500, message: format( 'wrong command detected: %s', command ) }
     end
 
 
@@ -233,7 +243,7 @@ class CMIcinga2 < Icinga2::Client
         payload: data       # require
       }.to_json
 
-      result = @mq_producer.addJob(queue, job, prio, ttr, delay )
+      result = @mq_producer.addJob( queue, job, prio, ttr, delay )
 
       logger.debug( job )
       logger.debug( result )

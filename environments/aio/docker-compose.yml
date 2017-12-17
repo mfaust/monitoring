@@ -1,12 +1,18 @@
 ---
-version: '2.0'
+version: '3.3'
 
 networks:
   mon:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 192.168.1.0/24
+
+volumes:
+  database:
+    driver: local
+  redis:
+    driver: local
+  carbon:
+    driver: local
+  icinga:
+    driver: local
 
 services:
 
@@ -16,102 +22,96 @@ services:
     volumes:
       - /share:/share
 
-  dnsdock:
-    restart: always
-    image: bodsch/docker-dnsdock:1710.1
-    container_name: dnsdock
-    hostname: dnsdock
-    labels:
-      com.dnsdock.alias: dnsdock
-      com.dnsdock.ttl: '120'
+  certificate:
+    image: bodsch/omgwtfssl
+    container_name: 01-certificate
+    environment:
+      SILENT: 'true'
+      SSL_SUBJECT: localhost
     volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /var/run/docker.sock:/var/run/docker.sock
-    # You can use also Environment vars like this:
-    # command: "--nameserver='${DNS_1}:53' --nameserver='${DNS_2}:53' --http=:80"
-    command: " --nameserver='10.1.2.63:53' --nameserver='10.1.2.14:53' --http=:80 --alias --ttl=120"
-    networks:
-      mon:
-        ipv4_address: 192.168.1.5
+      - ./certs:/certs
+    depends_on:
+      - data
 
   beanstalkd:
     restart: always
-    image: bodsch/docker-beanstalkd:1710.1
+    image: bodsch/docker-beanstalkd:1.10
     container_name: beanstalkd
     hostname: beanstalkd
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:
-      mon:
-        ipv4_address: 192.168.1.6
+      - mon
 
   database:
     restart: always
-    image: bodsch/docker-mysql:1710.1
+    image: bodsch/docker-mysql:1711.4
     container_name: database
     hostname: database
     ports:
       - 3306:3306
-    extends:
-      file: environments.yml
-      service: database
+    environment:
+      MYSQL_SYSTEM_USER: root
+      MYSQL_ROOT_PASS: database.pass
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /var/tmp/docker-volumes/database:/srv
+      - database:/srv
     networks:
-      mon:
-        ipv4_address: 192.168.1.7
+      - mon
 
   jolokia:
     restart: always
     build: ../../docker-cm-jolokia
     container_name: jolokia
     hostname: jolokia
+    ports:
+      - 8080:8080
+      - 8088:8088
     depends_on:
       - data
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:
-      mon:
-        ipv4_address: 192.168.1.8
-    dns:
-      - 192.168.1.5
+      - mon
+    extra_hosts:
+      osmc.local: 192.168.122.60
+      blueprint-box: 192.168.252.100
 
   memcached:
     restart: always
-    image: bodsch/docker-memcached:1710.1
+    image: bodsch/docker-memcached:1711.1
     container_name: memcached
     hostname: memcached
     volumes:
       - /etc/localtime:/etc/localtime:ro
     command: "-l 0.0.0.0 -m 8 -u memcached"
     networks:
-      mon:
-        ipv4_address: 192.168.1.9
+      - mon
 
   redis:
     restart: always
-    image: bodsch/docker-redis:1710.1
+    image: bodsch/docker-redis:1711.1
     container_name: redis
     hostname: redis
     ports:
       - 6379:6379
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /var/tmp/docker-volumes/redis:/var/lib/redis
+      - redis:/var/lib/redis
     networks:
-      mon:
-        ipv4_address: 192.168.1.10
+      - mon
 
   nginx:
     restart: always
-    image: bodsch/docker-nginx:1710.1
+    image: bodsch/docker-nginx:1711.1
     container_name: nginx
     hostname: nginx
     ports:
       - 80:80
+      - 443:443
     depends_on:
       - data
+      - certificate
       - grafana
       - icingaweb2
       - cm-rest-service
@@ -122,8 +122,10 @@ services:
       - cm-rest-service
       - markdown-service
     volumes:
+      - ./certs:/etc/nginx/secure/
       - /etc/localtime:/etc/localtime:ro
       - /share/www/entry-page:/var/www/entry-page
+      - /share/etc/nginx/external/https.conf:/etc/nginx/external/https.conf
       - /share/etc/nginx/sites-enabled/01-default.conf:/etc/nginx/sites-enabled/01-default.conf
       - /share/etc/nginx/nginx.conf:/etc/nginx/nginx.conf
       - /share/etc/nginx/modules.d/00-restrictions.conf:/etc/nginx/modules.d/00-restrictions.conf
@@ -134,12 +136,11 @@ services:
       - /share/etc/nginx/modules.d/01-proxy-dashing-icinga2.conf:/etc/nginx/modules.d/01-proxy-dashing-icinga2.conf
       - /share/etc/nginx/modules.d/01-proxy-markdown-service.conf:/etc/nginx/modules.d/01-proxy-markdown-service.conf
     networks:
-      mon:
-        ipv4_address: 192.168.1.11
+      - mon
 
   carbon:
     restart: always
-    image: bodsch/docker-go-carbon:1709.3
+    image: bodsch/docker-go-carbon:1712.1
     container_name: carbon
     hostname: carbon
     depends_on:
@@ -150,36 +151,53 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /var/log/:/var/tmp/docker-log
-      - /var/tmp/docker-volumes/carbon:/srv
+      - carbon:/srv
     networks:
-      mon:
-        ipv4_address: 192.168.1.12
+      - mon
 
   graphite:
     restart: always
-    image: bodsch/docker-graphite:1710.1
+    image: bodsch/docker-graphite:1.1.0-r2
     container_name: graphite
     hostname: graphite
-    extends:
-      file: environments.yml
-      service: graphite
+    environment:
+      # THIS TURN OFF THE INTERNAL CARBON!
+      # USE THIS ONLY WITH AN OTHER CARBON-WRITER (e.g. bodsch/docker-go-carbon)
+      USE_EXTERNAL_CARBON: 'true'
     depends_on:
       - data
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /var/tmp/docker-volumes/carbon:/srv
+      - carbon:/srv
     networks:
-      mon:
-        ipv4_address: 192.168.1.13
+      - mon
 
   grafana:
     restart: always
-    image: bodsch/docker-grafana:stable-4.5.2-r2
+    image: bodsch/docker-grafana:4.6.3-r1
     container_name: grafana
     hostname: grafana
-    extends:
-      file: environments.yml
-      service: grafana
+    environment:
+      URL_PATH: /grafana/
+      ORGANISATION: CoreMedia
+      DATABASE_TYPE: mysql
+      MYSQL_HOST: database
+      MYSQL_ROOT_PASS: database.pass
+      GRAPHITE_HOST: graphite
+      # WE USE AN SEPERATE CARBON SERVICE
+      # IF NOT, THEN SET THEN TO $GRAPHITE_HOST
+      # (see above in this configuration part!)
+      CARBON_HOST: carbon
+      MEMCACHE_HOST: memcached
+      LDAP: '{
+        "server": "${LDAP_SERVER}",
+        "port": "${LDAP_PORT}",
+        "bind_dn": "${LDAP_BIND_DN}",
+        "bind_password": "${LDAP_BIND_PASSWORD}",
+        "base_dn": "${LDAP_BASE_DN}",
+        "group_dn": "${LDAP_GROUP_DN}",
+        "search_filter": "${LDAP_SEARCH_FILTER}"
+      }'
     depends_on:
       - data
       - database
@@ -189,20 +207,15 @@ services:
       - memcached
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /share/opt/grafana/dashboards:/opt/grafana/dashboards
-      - /var/tmp/docker-volumes/carbon:/srv
+      # - /share/opt/grafana/dashboards:/opt/grafana/dashboards
     networks:
-      mon:
-        ipv4_address: 192.168.1.14
+      - mon
 
   cm-icinga2-master:
     restart: always
     build: ../../docker-cm-icinga2
     container_name: cm-icinga2-master
     hostname: cm-icinga2-master
-    extends:
-      file: environments.yml
-      service: cm-icinga2-master
     depends_on:
       - data
       - database
@@ -210,6 +223,17 @@ services:
     links:
       - database
       - redis
+    environment:
+      SERVICE_NAME: icinga2-master
+      MYSQL_HOST: database
+      MYSQL_ROOT_PASS: database.pass
+      IDO_PASSWORD: ido.pass
+      IDO_DATABASE_NAME: icinga2core
+      CARBON_HOST: carbon
+      ICINGA_CLUSTER: 'false'
+      ICINGA_MASTER: cm-icinga2-master
+      ICINGA_API_USERS: root:icinga,icingaweb:icingaweb,dashing:dashing,cert:foo-bar
+      REDIS_HOST: redis
     ports:
       - 5665:5665
       - 6666:6666
@@ -229,23 +253,45 @@ services:
       - /share/usr/lib/monitoring-plugins/check_cm_capconnection.rb:/usr/lib/monitoring-plugins/check_cm_capconnection
       - /share/usr/lib/monitoring-plugins/check_cm_runlevel.rb:/usr/lib/monitoring-plugins/check_cm_runlevel
       - /share/usr/lib/monitoring-plugins/check_cm_sequencenumbers.rb:/usr/lib/monitoring-plugins/check_cm_seqencenumbers
+      - /share/usr/lib/monitoring-plugins/check_cm_nodeexporter_disk.rb:/usr/lib/monitoring-plugins/check_cm_nodeexporter_disk
+      - /share/usr/lib/monitoring-plugins/check_cm_nodeexporter_memory.rb:/usr/lib/monitoring-plugins/check_cm_nodeexporter_memory
+      - /share/usr/lib/monitoring-plugins/check_cm_nodeexporter_load.rb:/usr/lib/monitoring-plugins/check_cm_nodeexporter_load
       - /share/usr/lib/monitoring-plugins/check_ssl_cert:/usr/lib/monitoring-plugins/check_ssl_cert
-      - /var/tmp/docker-volumes/icinga:/srv
-      - /var/tmp/docker-volumes/icinga:/var/lib/icinga2
+      - icinga:/srv
+      - icinga:/var/lib/icinga2
     networks:
-      mon:
-        ipv4_address: 192.168.1.15
-    dns:
-      - 192.168.1.5
+      - mon
+    extra_hosts:
+      osmc.local: 192.168.122.60
+      blueprint-box: 192.168.252.100
 
   icingaweb2:
     restart: always
-    image: bodsch/docker-icingaweb2:1709.2
+    image: bodsch/docker-icingaweb2:2.5.0-r2
     container_name: icingaweb2
     hostname: icingaweb2
-    extends:
-      file: environments.yml
-      service: icingaweb2
+    environment:
+      MYSQL_HOST: database
+      MYSQL_ROOT_PASS: database.pass
+      IDO_PASSWORD: ido.pass
+      IDO_DATABASE_NAME: icinga2core
+      ICINGA2_HOST: cm-icinga2-master
+      ICINGA2_CMD_API_USER: icingaweb
+      ICINGA2_CMD_API_PASS: icingaweb
+      GRAPHITE_HOST: graphite
+      ICINGAWEB2_USERS: coremedia:coremedia,icinga:icinga
+      LDAP: '{
+        "active_directory": "true",
+        "server": "${LDAP_SERVER}",
+        "port": "${LDAP_PORT}",
+        "bind_dn": "${LDAP_BIND_DN}",
+        "bind_password": "${LDAP_BIND_PASSWORD}",
+        "base_dn": "${LDAP_BASE_DN}",
+        "filter": "${LDAP_FILTER}",
+        "role": {
+          "groups": "${LDAP_GROUP_NAMES}",
+          "permissions": "${GROUP_PERMISSIONS}"
+        }'
     depends_on:
       - data
       - database
@@ -255,14 +301,12 @@ services:
       - cm-icinga2-master:icinga2
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /var/tmp/docker-volumes/icinga:/srv
     networks:
-      mon:
-        ipv4_address: 192.168.1.16
+      - mon
 
   markdown-service:
     restart: always
-    image: bodsch/docker-markdown-service:1708-35.1
+    image: bodsch/docker-markdown-service:1.1.0
     container_name: markdown-service
     hostname: markdown-service
     depends_on:
@@ -271,36 +315,39 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - /share/www/markdown-service:/var/www
     networks:
-      mon:
-        ipv4_address: 192.168.1.17
+      - mon
 
   cm-dashing:
     restart: always
     build: ../../docker-cm-dashing
     container_name: cm-dashing
     hostname: cm-dashing
-    extends:
-      file: environments.yml
-      service: cm-dashing
+    environment:
+      ICINGA_HOST: cm-icinga2-master
+      ICINGA_CERT_SERVICE: '{
+        "ba": { "user":"admin", "password":"admin" },
+        "api": { "user":"root", "password":"icinga" },
+        "server": "cm-icinga2-master",
+        "port": 4567,
+        "path": "/"
+      }'
     depends_on:
       - cm-icinga2-master
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:
-      mon:
-        ipv4_address: 192.168.1.18
+      - mon
 
 
   # CoreMedia Glue and Logic
-
+  #
   cm-rest-service:
     restart: always
     build: ../../docker-cm-rest-service
     container_name: cm-rest-service
     hostname: cm-rest-service
-    extends:
-      file: environments.yml
-      service: cm-rest-service
+    environment:
+      MYSQL_ROOT_PASS: database.pass
     depends_on:
       - data
       - redis
@@ -312,10 +359,10 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ./logs:/var/log
     networks:
-      mon:
-        ipv4_address: 192.168.1.30
-    dns:
-      - 192.168.1.5
+      - mon
+    extra_hosts:
+      osmc.local: 192.168.122.60
+      blueprint-box: 192.168.252.100
 
   # single service
   # use MQ to process data
@@ -324,9 +371,8 @@ services:
     build: ../../docker-cm-service-discovery
     container_name: cm-service-discover
     hostname: cm-service-discover
-    extends:
-      file: environments.yml
-      service: cm-service-discovery
+    environment:
+      REFRESH_ENABLED: 'true'
     depends_on:
       - data
       - jolokia
@@ -343,10 +389,10 @@ services:
       - /share/etc/cm-service.yaml:/etc/cm-service.yaml
       - /share/etc/cm-application.yaml:/etc/cm-application.yaml
     networks:
-      mon:
-        ipv4_address: 192.168.1.31
-    dns:
-      - 192.168.1.5
+      - mon
+    extra_hosts:
+      osmc.local: 192.168.122.60
+      blueprint-box: 192.168.252.100
 
   # single service
   # use MQ to process data
@@ -355,9 +401,6 @@ services:
     build: ../../docker-cm-data-collector
     container_name: cm-data-collector
     hostname: cm-data-collector
-    extends:
-      file: environments.yml
-      service: cm-data-collector
     depends_on:
       - data
       - jolokia
@@ -374,10 +417,10 @@ services:
       - /share/etc/cm-service.yaml:/etc/cm-service.yaml
       - /share/etc/cm-application.yaml:/etc/cm-application.yaml
     networks:
-      mon:
-        ipv4_address: 192.168.1.32
-    dns:
-      - 192.168.1.5
+      - mon
+    extra_hosts:
+      osmc.local: 192.168.122.60
+      blueprint-box: 192.168.252.100
 
   # single service
   # use MQ to process data
@@ -386,9 +429,9 @@ services:
     build: ../../docker-cm-carbon-client
     container_name: cm-carbon-client
     hostname: cm-carbon-client
-    extends:
-      file: environments.yml
-      service: cm-carbon-client
+    environment:
+      # USE ONLY WITH AND EXTERNAL CARBON-WRITER!
+      GRAPHITE_HOST: carbon
     depends_on:
       - data
       - redis
@@ -398,8 +441,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ./logs:/var/log
     networks:
-      mon:
-        ipv4_address: 192.168.1.33
+      - mon
 
   # single service
   # use MQ to process data
@@ -408,9 +450,8 @@ services:
     build: ../../docker-cm-grafana-client
     container_name: cm-grafana-client
     hostname: cm-grafana-client
-    extends:
-      file: environments.yml
-      service: cm-grafana-client
+    environment:
+      GRAFANA_HOST: nginx
     depends_on:
       - data
       - beanstalkd
@@ -425,31 +466,9 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ./logs:/var/log
       - /share/usr/local/share/templates:/usr/local/share/templates
+      - /share/etc/grafana_config.yml:/etc/grafana_config.yml
     networks:
-      mon:
-        ipv4_address: 192.168.1.34
-
-  # single service
-  # use MQ to process data
-  cm-graphite-client:
-    restart: always
-    build: ../../docker-cm-graphite-client
-    container_name: cm-graphite-client
-    hostname: cm-graphite-client
-    extends:
-      file: environments.yml
-      service: cm-graphite-client
-    depends_on:
-      - data
-      - beanstalkd
-    links:
-      - beanstalkd
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ./logs:/var/log
-    networks:
-      mon:
-        ipv4_address: 192.168.1.35
+      - mon
 
   # single service
   # use MQ to process data
@@ -458,9 +477,16 @@ services:
     build: ../../docker-cm-icinga-client
     container_name: cm-icinga-client
     hostname: cm-icinga-client
-    extends:
-      file: environments.yml
-      service: cm-icinga-client
+    environment:
+      ICINGA_CERT_SERVICE: '{
+        "ba": { "user":"admin", "password":"admin" },
+        "api": { "user":"root", "password":"icinga" },
+        "server": "cm-icinga2-master",
+        "port": 4567,
+        "path": "/"
+      }'
+      ICINGA_HOST: cm-icinga2-master
+      # ENABLE_NOTIFICATIONS: 'true'
     depends_on:
       - data
       - beanstalkd
@@ -469,8 +495,9 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./logs:/var/log
+      - /share/etc/icinga_server_config.yml:/etc/icinga_server_config.yml
     networks:
-      mon:
-        ipv4_address: 192.168.1.36
-    dns:
-      - 192.168.1.5
+      - mon
+    extra_hosts:
+      osmc.local: 192.168.122.60
+      blueprint-box: 192.168.252.100

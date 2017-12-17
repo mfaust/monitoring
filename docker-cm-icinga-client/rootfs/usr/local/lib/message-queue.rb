@@ -338,6 +338,20 @@ module MessageQueue
         if( buried )
           logger.info( sprintf( 'found job: %d, kick them back into the \'ready\' queue', buried.id ) )
 
+          job = @b.jobs.find( buried.id )
+
+          logger.debug( JSON.pretty_generate( {
+                    'id'    => job.id,
+                    'tube'  => job.stats.tube,
+                    'state' => job.stats.state,
+                    'ttr'   => job.stats.ttr,
+                    'prio'  => job.stats.pri,
+                    'age'   => job.stats.age,
+                    'delay' => job.stats.delay,
+                    'body'  => JSON.parse( job.body )
+                  } )
+          )
+
           tube.kick(1)
         end
       end

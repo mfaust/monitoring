@@ -1,5 +1,10 @@
+
 TYPE := cm-service-discover
 IMAGE_NAME := docker-${TYPE}
+
+.PHONY: build clean run  shell exec stop package-info history
+
+default: build
 
 build:
 	docker build \
@@ -17,11 +22,6 @@ run:
 		--detach \
 		--interactive \
 		--tty \
-		--env JOLOKIA_HOST=jolokia \
-		--env MQ_HOST=beanstalkd \
-		--label com.dnsdock.image=cm-service-discover \
-		--label com.dnsdock.alias=cm-service-discover \
-		--label com.dnsdock.ttl=30 \
 		--volume /etc/localtime:/etc/localtime:ro \
 		--hostname=${IMAGE_NAME} \
 		--name=${IMAGE_NAME} \
@@ -32,11 +32,6 @@ shell:
 		--rm \
 		--interactive \
 		--tty \
-		--env JOLOKIA_HOST=jolokia \
-		--env MQ_HOST=beanstalkd \
-		--label com.dnsdock.image=cm-service-discover \
-		--label com.dnsdock.alias=cm-service-discover \
-		--label com.dnsdock.ttl=30 \
 		--volume /etc/localtime:/etc/localtime:ro \
 		--hostname=${IMAGE_NAME} \
 		--name=${IMAGE_NAME} \

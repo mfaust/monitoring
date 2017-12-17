@@ -9,89 +9,70 @@ module Utils
 
     def self.resolv( host )
 
-      # puts( "resolv( #{host} )" )
+#       puts("self.resolv( #{host} )")
 
       line  = nil
-      long  = nil
+      fqdn  = nil
       short = nil
       ip    = nil
+
+      is_ip       = false
+      is_hostname = true
+      fqdn        = host
 
       # here comes an IP
       #
       if( IPAddress.valid?( host ) )
-
-        isIP       = true
-        isHostname = false
-
-        ip         = host
-      else
-
-        isIP       = false
-        isHostname = true
-
-        long       = host
+        is_ip       = true
+        is_hostname = false
+        ip          = host
       end
 
+      # use dig for an reverse lookup ip => hostname
+      #  dig -x $hostname +short
+      if( is_ip == true )
 
-      if( isIP == true )
-
-        # use dig to make an reverse lookup
-        #
-        cmd = sprintf( 'dig -x %s +short', host )
-
+        cmd = format( 'dig -x %s +short', host )
         Open3.popen3( cmd ) do |stdin, stdout, stderr, wait_thr|
+          return_value = wait_thr.value
+          std_out      = stdout.gets
+          std_err      = stderr.gets
 
-          returnValue = wait_thr.value
-          stdOut      = stdout.gets
-          stdErr      = stderr.gets
-
-          if( returnValue == 0 && !stdOut.to_s.empty? )
-
-            # got the hostname for the IP-Address
-            #
-            host = stdOut
-          else
-
-          end
+          # got the hostname for the IP-Address
+          host = std_out if( return_value == 0 && !std_out.to_s.empty? )
         end
-
       end
 
-      line  = nil
+#       puts(" #1 host  #{host} ")
 
-      # we have an hostname
-      #
-      cmd   = sprintf( 'host -t A %s', host )
+      # use host to resolve hostname
+      #  host -t A $hostname
+      cmd   = format( 'host -t A %s', host )
 
       Open3.popen3( cmd ) do |stdin, stdout, stderr, wait_thr|
 
-        returnValue = wait_thr.value
-        stdOut      = stdout.gets
-        stdErr      = stderr.gets
+        return_value = wait_thr.value
+        std_out      = stdout.gets
+        std_err      = stderr.gets
 
-        if( returnValue == 0 && !stdOut.to_s.empty? )
-
-          line = stdOut
-        else
-
-        end
+        line = std_out if( return_value == 0 && !std_out.to_s.empty? )
       end
 
-#       puts line
+#       puts(" #1 line  #{line} ")
 
       # the host command above was disfunctional
       # we try the ruby resolv class
       if( line == nil )
 
         begin
-
           ip   =  Resolv.getaddress( host )
-
+          # BAD HACK
+          # recursive call without a break :(
+          #
           return self.resolv( ip )
-
         rescue => e
           puts ( e )
-          return { :ip    => nil, :short => nil, :long  => nil }
+          return { ip: nil, short: nil, fqdn: nil }
         end
       end
 
@@ -102,48 +83,46 @@ module Utils
 
         parts = line.split( ' ' )
 
-        if(line.include?('has no A record') == true )
-          # panikmodus => ON
-          return { :ip => nil, :short => nil, :long => nil }
-        end
+        # no A record found
+        # panikmodus => ON
+        return { ip: nil, short: nil, fqdn: nil } if(line.include?('has no A record') == true )
 
         # / # host -t A 172.31.41.133
         # Host 133.41.31.172.in-addr.arpa. not found: 3(NXDOMAIN)
-        if( line.include?('not found') == true )
-          # panikmodus => ON
-          return { :ip => nil, :short => nil, :long => nil }
-        end
+        # panikmodus => ON
+        return { ip: nil, short: nil, fqdn: nil } if(line.include?('not found') == true )
 
+        # mls.development.cosmos.internal is an alias for ip-172-31-41-204.ec2.internal.
         #
-        #
-        if( line.include?('is an alias for') == true ) # mls.development.cosmos.internal is an alias for ip-172-31-41-204.ec2.internal.
+        if( line.include?('is an alias for') == true )
 
           fqdn  = parts.last.strip
 
+          # BAD HACK
+          # recursive call without a break :(
+          #
           r     = self.resolv( fqdn )
 
           ip    = r.dig(:ip)
           short = r.dig(:short)
-          long  = r.dig(:long)
+          fqdn  = r.dig(:fqdn)
         else
-          long  = parts.first.strip
+          fqdn  = parts.first.strip
           ip    = parts.last.strip
-          short = long.split('.').first
+          short = fqdn.split('.').first
         end
 
       end
 
       result = {
-        :ip    => ip != nil ? ip : host,
-        :short => short,
-        :long  => long
+        ip: ip.nil? ? host : ip,
+        short: short,
+        fqdn: fqdn
       }
-
-      puts( "result: #{result}" )
-
-      return result
-
+#       puts( "result: #{result}" )
+      result
     end
+
 
     def self.ip( host )
 
@@ -153,11 +132,11 @@ module Utils
         ip = host
       end
 
-      return ip
+      ip
     end
 
 
-    def self.portOpen? ( host, port, seconds = 1 )
+    def self.port_open? ( host, port, seconds = 1 )
 
       # => checks if a port is open or not on a remote host
       Timeout::timeout( seconds ) do
@@ -169,7 +148,6 @@ module Utils
         rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH, SocketError => e
 
           return false
-
         end
 
       end
@@ -180,25 +158,18 @@ module Utils
     end
 
 
-
-    def self.isIp?( data )
-
-      return IPAddress.valid?( data ) # "192.128.0.12"  end
+    def self.is_ip?( data )
+      IPAddress.valid?( data ) # "192.128.0.12"  end
     end
+
 
     # check if Node exists (simple ping)
     # result @bool
-    def self.isRunning? ( ip )
+    def self.is_running?( ip )
 
-#       puts "pinging IP #{ip} ... "
+      return true if( system( format( 'ping -c1 -w1 %s > /dev/null', ip.to_s ) ) == true )
 
-      # first, ping check
-      if( system( sprintf( 'ping -c1 -w1 %s > /dev/null', ip.to_s ) ) == true )
-        return true
-      else
-        return false
-      end
-
+      return false
     end
 
   end

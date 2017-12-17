@@ -1,35 +1,35 @@
 ---
 timeout:
-  warning: 40
+  warning: 45
   critical: 60
 
 caefeeder:
-  usePercent: false
+  use_percent: false
   warning: 2500
   critical: 10000
 
 contentfeeder:
-  usePercent: false
+  use_percent: false
   warning: 2500
   critical: 10000
 
 blob-cache:
-  usePercent: true
+  use_percent: true
   warning: 95
   critical: 98
 
 uapi-cache:
-  usePercent: true
+  use_percent: true
   warning: 98
   critical: 99
 
 heap-memory:
-  usePercent: true
+  use_percent: true
   warning: 95
   critical: 98
 
 perm-memory:
-  usePercent: true
+  use_percent: true
   warning: 99
   critical: 100
 

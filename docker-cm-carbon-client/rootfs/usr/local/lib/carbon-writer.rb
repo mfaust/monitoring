@@ -1,6 +1,6 @@
 #!/usr/bin/ruby
 #
-#  (c) 2017 Coremedia (Bodo Schulz)
+#  (c) 2017 CoreMedia (Bodo Schulz)
 #
 # 1.2.0
 

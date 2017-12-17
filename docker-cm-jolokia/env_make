@@ -7,3 +7,5 @@ VOLUMES = \
 
 #ENV = \
 #  --env key=value
+
+# HOSTS="8.8.8.8 example.com" .

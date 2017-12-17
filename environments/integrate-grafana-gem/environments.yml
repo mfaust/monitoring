@@ -1,0 +1,61 @@
+---
+# environment variables for all services that need this
+# all commented out vars are set into the containers with the correct value
+# they are only examples and documentation
+
+# FOR ALL ENVIRONMENT VARS LOOK INTO environments.example
+
+version: '2.0'
+
+services:
+
+  database:
+    environment:
+      MYSQL_SYSTEM_USER: root
+      MYSQL_ROOT_PASS: database.pass
+
+  graphite:
+    environment:
+      USE_EXTERNAL_CARBON: 'true'
+
+  grafana:
+    environment:
+      ORGANISATION: CoreMedia
+      GRAPHITE_HOST: graphite
+      CARBON_HOST: carbon
+      MEMCACHE_HOST: memcached
+
+
+
+  cm-grafana-client:
+    environment:
+      TZ: 'Europe/Berlin'
+      GRAFANA_HOST: nginx
+      RUN_DELAY: 40
+      GRAFANA_API_USER: admin
+      GRAFANA_API_PASSWORD: admin
+      GRAFANA_ADMIN_PASSWORD: grafana_admin
+      DATASOURCES: '{
+        "graphite": [
+          {
+            "name": "graphite",
+            "host": "graphite",
+            "port": 2003,
+            "database": "graphite",
+            "default": true
+          }, {
+            "name": "events",
+            "host": "graphite",
+            "port": 2003,
+            "database": "graphite"
+          }
+        ]
+      }'
+      USERS: '[
+        {
+          "username": "coremedia",
+          "password": "coremedia",
+          "email": "",
+          "role": "Admin"
+        }
+      ]'
