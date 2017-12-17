@@ -7,7 +7,7 @@ Gem::Specification.new do |spec|
 
   spec.name          = 'storage'
   spec.version       = Storage::VERSION
-  spec.date          = '2017-10-27'
+  spec.date          = '2017-12-17'
   spec.authors       = ['Bodo Schulz']
   spec.email         = ['bodo.schulz@coremedia.com']
   spec.summary       = 'Storage ist a small wrapper Module over a set of Database Engines'
