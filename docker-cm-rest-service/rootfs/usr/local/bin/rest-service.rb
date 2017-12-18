@@ -188,8 +188,6 @@ module Sinatra
       payload         = @request_paylod
       @request_paylod = nil
 
-      #logger.debug( sprintf( 'POST \'/v2/host/:host\' - \'%s\', \'%s\'', host, payload ) )
-
       result = m.add_host( host, payload )
 
       r = JSON.parse( result ) if( result.is_a?( String ) )
@@ -243,15 +241,6 @@ module Sinatra
       status result_status
 
       JSON.pretty_generate(r) + "\n"
-#       r = JSON.parse( result )
-#
-#       logger.debug( r )
-#
-#       status = r['status']
-#       body   = r['message']
-#
-#       halt status, {'Content-Type' => 'text/json'}, result
-
     end
 
     # -----------------------------------------------------------------------------
