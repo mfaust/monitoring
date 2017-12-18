@@ -70,8 +70,6 @@ module Monitoring
           prio: 0
         }
 
-#         logger.debug( JSON.pretty_generate params )
-
         # send to grafana
         return message_queue(params)
       end

@@ -117,8 +117,14 @@ module Monitoring
         payload: data
       }.to_json
 
-      @mq_producer.add_job( queue, job, prio, ttr, delay )
+      result = @mq_producer.add_job( queue, job, prio, ttr, delay )
+      result = JSON.parse( result ) if( result.is_a?( String ) )
 
+      status = result.dig(:status)
+      id = result.dig(:id)
+
+      return { status: 200, message: 'annotation succesfull send.' }   if(status == 'INSERTED')
+      return { status: 404, message: 'can\'t send annotation.' } unless(status == 'INSERTED')
     end
 
   end

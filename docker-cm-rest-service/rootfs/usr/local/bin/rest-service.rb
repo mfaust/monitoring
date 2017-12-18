@@ -261,11 +261,12 @@ module Sinatra
 
       host   = params[:host]
       result = m.annotation( host: host, payload: @request_paylod )
+      result = JSON.parse( result ) if( result.is_a?( String ) )
 
-#       status = result[:status]
+      result_status = result.dig(:status).to_i
+      status result_status
 
-      result
-
+      JSON.pretty_generate(result) + "\n"
     end
 
     # -----------------------------------------------------------------------------
