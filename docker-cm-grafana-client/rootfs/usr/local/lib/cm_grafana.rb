@@ -65,7 +65,7 @@ class CMGrafana
 
     super( settings )
 
-    @debug  = true
+    @debug  = false
     @logger = logger
 
     version       = CMGrafana::Version::VERSION
@@ -84,7 +84,7 @@ class CMGrafana
 
     begin
 
-      @logged_in = login( user: @user, password: @password )
+      @logged_in = login( username: @user, password: @password )
     rescue => e
 
       if( server_config_file.nil? )
@@ -113,7 +113,7 @@ class CMGrafana
 
           @user      = admin_login_name
           @password  = admin_password
-          @logged_in = login( user: @user, password: @password, max_retries: 10, sleep_between_retries: 8 )
+          @logged_in = login( username: @user, password: @password, max_retries: 10, sleep_between_retries: 8 )
         end
       end
 

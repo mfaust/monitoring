@@ -261,14 +261,11 @@ module ServiceDiscovery
 
       # get a DNS record
       #
-      ip, short, fqdn = self.ns_lookup(host )
-
-      status  = 400
-      message = 'Host not in Monitoring'
+      ip, short, fqdn = self.ns_lookup( host )
 
       # DELETE ONLY WHEN THES STATUS ARE DELETED!
       #
-      params = {ip: ip, short: short, fqdn: fqdn, status: [Storage::MySQL::DELETE]}
+      params = { ip: ip, short: short, fqdn: fqdn, status: [Storage::MySQL::DELETE] }
       nodes = @database.nodes( params )
 
       logger.debug( "nodes: #{nodes}" )
@@ -276,26 +273,12 @@ module ServiceDiscovery
 
       if( nodes.is_a?( Array ) && nodes.count != 0 )
 
-        result  = @database.removeDNS( {ip: ip, short: short, fqdn: fqdn} )
+        result  = @database.removeDNS( ip: ip, short: short, fqdn: fqdn )
 
-        unless( result.nil? )
-          return {
-              status: 200,
-            message: 'Host successful removed'
-          }
-        end
-
-      else
-
-        status  = 200
-        message = 'no hosts in database found'
+        return { status: 200, message: 'Host successful removed' } unless( result.nil? )
       end
 
-      {
-          status: status,
-        message: message
-      }
-
+      { status: 200, message: 'no hosts in database found' }
     end
 
     # add Host and discovery applications
@@ -327,7 +310,7 @@ module ServiceDiscovery
 
       # check discovered datas from the past
       #
-      discovery_data    = @database.discoveryData({ip: ip, short: short, fqdn: fqdn} )
+      discovery_data    = @database.discoveryData( ip: ip, short: short, fqdn: fqdn )
 
       unless( discovery_data.nil? )
 
@@ -395,11 +378,7 @@ module ServiceDiscovery
       logger.debug( "host: #{host}" )
       logger.debug( "options: #{options}" )
 
-      logger.info( 'create message for an create annotation' )
-      # annotation( host: host, dns: { ip: ip, short: host, fqdn: fqdn }, payload: { command: 'create', argument: 'node', config: options } )
-      send_message( cmd: 'create', node: host, queue: 'mq-graphite', payload: options, prio: 1, ttr: 5, delay: 0 )
-
-      logger.info( 'create message for grafana to create dashboards' )
+      logger.info( 'create message for grafana to create dashboards and annotations' )
       send_message( cmd: 'add', node: host, queue: 'mq-grafana', payload: options, prio: 10, ttr: 15, delay: 20 )
 
       logger.info( 'create message for icinga to insert host and apply checks and notifications' )

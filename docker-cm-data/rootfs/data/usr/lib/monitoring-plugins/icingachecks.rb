@@ -109,7 +109,7 @@ class Icinga2Check
   end
 
 
-  def running_or_outdated( params = {} )
+  def running_or_outdated( params )
 
     host = params.dig(:host)
     data = params.dig(:data)
@@ -121,7 +121,7 @@ class Icinga2Check
 
     status    = data.dig('status')    || 500
     timestamp = data.dig('timestamp')
-    value     = data.dig('value')     # ( data != nil && data['value'] ) ? data['value'] : nil
+    value     = data.dig('value')
 
     if( value.nil? )
       output = 'CRITICAL - missing monitoring data - service not running!?'
@@ -131,7 +131,7 @@ class Icinga2Check
       exit STATE_CRITICAL
     end
 
-    state, difference = bean_timeout?( timestamp )
+    state, difference = bean_timeout?( timestamp, 44 )
 
     if( state == STATE_CRITICAL )
       output = format( 'CRITICAL - last check creation is out of date (%d seconds)', difference )

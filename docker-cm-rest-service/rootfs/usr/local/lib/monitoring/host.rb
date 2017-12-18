@@ -27,14 +27,15 @@ module Monitoring
 
       return JSON.pretty_generate( status: 400, message: 'no hostname given' ) if( host.to_s == '' )
 
-      hash            = {}
-      force           = false
+      hash             = {}
+      force            = false
+      annotation       = true
       grafana_overview = true
-      services        = []
-      tags            = []
-      config          = {}
+      services         = []
+      tags             = []
+      config           = {}
 
-      result          = {}
+      result           = {}
       result[host.to_s] ||= {}
 
       if( payload.to_s != '' )
@@ -100,19 +101,19 @@ module Monitoring
       else
         payload = JSON.parse( payload )
       end
-#        if( payload.is_a?( String ) )
-#      payload = {} if( payload.is_a?(String) && payload.size == 0 )
 
       payload[:timestamp] = Time.now.to_i
-      payload[:dns] = host_data
+      payload[:dns] =  host_data
+      payload[:annotation] = annotation
 
-      payload = JSON.generate(payload)
+#       logger.debug( JSON.pretty_generate( payload ) )
 
       delay = 0
 
       if( force == true )
 
         delay = 45
+        payload[:annotation] = false
 
         logger.info( 'force mode ...' )
 
@@ -140,8 +141,6 @@ module Monitoring
         logger.debug(status)
 
         logger.info( 'done' )
-
-        sleep(4)
       end
 
       logger.debug(format('add %d seconds delay', delay)) if( delay > 0 )
@@ -149,6 +148,8 @@ module Monitoring
       # create a valid DNS entry
       #
       status = @database.create_dns( ip: ip, short: short, fqdn: fqdn )
+
+#       logger.debug( JSON.pretty_generate( payload ) )
 
       # now, we can write an own configiguration per node when we add them, hurray
       #
@@ -276,10 +277,11 @@ module Monitoring
       payload = {
         dns: host_data,
         force: true,
-        timestamp: Time.now.to_i
+        timestamp: Time.now.to_i,
+        annotation: true
       }
-
-      payload = JSON.generate(payload)
+      logger.debug( JSON.pretty_generate( payload ) )
+      # payload = JSON.generate(payload)
 
   #    logger.debug( format( 'force      : %s', force            ? 'true' : 'false' ) )
   #    logger.debug( format( 'discovery  : %s', enableDiscovery  ? 'true' : 'false' ) )
@@ -287,12 +289,12 @@ module Monitoring
   #    logger.debug( format( 'icinga     : %s', enabledIcinga    ? 'true' : 'false' ) )
   #    logger.debug( format( 'annotation : %s', annotation       ? 'true' : 'false' ) )
 
-      logger.debug( 'annotation for remove' )
-      annotation(
-        host: host,
-        dns: { ip: ip, short: host, fqdn: fqdn },
-        payload: { command: 'remove', argument: 'node', config: config }
-      )
+#       logger.debug( 'annotation for remove' )
+#       annotation(
+#         host: host,
+#         dns: { ip: ip, short: host, fqdn: fqdn },
+#         payload: { command: 'remove', argument: 'node', config: config }
+#       )
 
       logger.debug( 'remove icinga checks and notifications' )
       message_queue( cmd: 'remove', node: host, queue: 'mq-icinga', payload: payload, prio: 1 )

@@ -174,7 +174,7 @@ services:
 
   grafana:
     restart: always
-    image: bodsch/docker-grafana:4.6.2-r3
+    image: bodsch/docker-grafana:4.6.3-r1
     container_name: grafana
     hostname: grafana
     environment:
@@ -207,7 +207,7 @@ services:
       - memcached
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /share/opt/grafana/dashboards:/opt/grafana/dashboards
+      # - /share/opt/grafana/dashboards:/opt/grafana/dashboards
     networks:
       - mon
 
@@ -267,7 +267,7 @@ services:
 
   icingaweb2:
     restart: always
-    image: bodsch/docker-icingaweb2:2.5.0-r1
+    image: bodsch/docker-icingaweb2:2.5.0-r2
     container_name: icingaweb2
     hostname: icingaweb2
     environment:
@@ -467,24 +467,6 @@ services:
       - ./logs:/var/log
       - /share/usr/local/share/templates:/usr/local/share/templates
       - /share/etc/grafana_config.yml:/etc/grafana_config.yml
-    networks:
-      - mon
-
-  # single service
-  # use MQ to process data
-  cm-graphite-client:
-    restart: always
-    build: ../../docker-cm-graphite-client
-    container_name: cm-graphite-client
-    hostname: cm-graphite-client
-    depends_on:
-      - data
-      - beanstalkd
-    links:
-      - beanstalkd
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ./logs:/var/log
     networks:
       - mon
 

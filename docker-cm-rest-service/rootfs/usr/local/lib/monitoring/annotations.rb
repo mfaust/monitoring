@@ -5,6 +5,9 @@ module Monitoring
 
   module Annotations
 
+    # TODO
+    # better sanity checks for the function parameters
+    #
     def annotation( params )
 
       logger.debug( "annotation( #{params} )" )
@@ -36,9 +39,9 @@ module Monitoring
 
       return JSON.pretty_generate( status: 404, message: 'missing arguments for annotations' ) if( host.size == 0 && payload.size == 0 )
 
-      payload         = JSON.parse( payload ) if( payload.is_a?( String ) )
+      payload      = JSON.parse( payload ) if( payload.is_a?( String ) )
 
-      logger.debug( JSON.pretty_generate( payload ) )
+#       logger.debug( JSON.pretty_generate( payload ) )
 
       command      = payload.dig(:command)
       argument     = payload.dig(:argument)
@@ -48,142 +51,31 @@ module Monitoring
       config       = payload.dig(:config)
       timestamp    = payload.dig(:timestamp) || Time.now.to_i
 
-      if( command == 'create' || command == 'remove' )
-#     example:
-#     {
-#       "command": "create"
-#     }
-#
-#     {
-#       "command": "destroy"
-#     }
-
-        message     = nil
-        description = nil
-        tags        = []
+      unless( %w[create remove].include?( command ) )
 
         params = {
-          cmd: command,
+          cmd: 'annotation',
           node: host,
-          queue: 'mq-graphite',
+          queue: 'mq-grafana',
           payload: {
+            annotation: true,
             timestamp: timestamp,
-            config: config,
-            fqdn: fqdn,
-            node: host,
-            dns: { ip: ip, short: short, fqdn: fqdn }
-          },
-          prio: 0
-        }
-
-        logger.debug(params)
-
-        return message_queue(params)
-      end
-
-      if( command == 'loadtest' && ( argument == 'start' || argument == 'stop' ) )
-
-#     example:
-#     {
-#       "command": "loadtest",
-#       "argument": "start"
-#     }
-#
-#     {
-#       "command": "loadtest",
-#       "argument": "stop"
-#     }
-
-        message     = nil
-        description = nil
-        tags        = []
-
-        params = {
-          cmd: command,
-          node: host,
-          queue: 'mq-graphite',
-          payload: {
-            timestamp: timestamp,
-            config: config,
-            fqdn: fqdn,
-            argument: argument,
-            dns: { ip: ip, short: short, fqdn: fqdn }
-          },
-          prio: 0
-        }
-
-        logger.debug(params)
-
-        return message_queue(params)
-      end
-
-      if( command == 'deployment' )
-
-#     example:
-#     {
-#       "command": "deployment",
-#       "message": "version 7.1.50",
-#       "tags": [
-#         "development",
-#         "git-0000000"
-#       ]
-#     }
-        description = nil
-
-        params = {
-          cmd: command,
-          node: host,
-          queue: 'mq-graphite',
-          payload: {
-            timestamp: timestamp,
-            config: config,
-            fqdn: fqdn,
+            type: command,
             message: message,
+            argument: argument,
             tags: tags,
+            config: config,
             dns: { ip: ip, short: short, fqdn: fqdn }
           },
           prio: 0
         }
 
-        logger.debug(params)
-
+        # send to grafana
         return message_queue(params)
       end
 
-
-#     example:
-#     {
-#       "command": "",
-#       "message": "date: 2016-12-24, last-cristmas",
-#       "description": "never say ho-ho-ho",
-#       "tags": [
-#         "development",
-#         "git-0000000"
-#       ]
-#     }
-
-      params = {
-        cmd: 'general',
-        node: host,
-        queue: 'mq-graphite',
-        payload: {
-          timestamp: timestamp,
-          config: config,
-          fqdn: fqdn,
-          message: message,
-          tags: tags,
-          description: description,
-          dns: { ip: ip, short: short, fqdn: fqdn }
-        },
-        prio: 0
-      }
-
-      logger.debug(params)
-
-      return message_queue(params)
-
+      { status: 204, message: 'not found' }
     end
 
   end
-
 end

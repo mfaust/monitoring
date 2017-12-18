@@ -69,8 +69,9 @@ module MessageQueue
 
         response = @b.tubes[ tube.to_s ].put( job , :prio => prio, :ttr => ttr, :delay => delay )
         logger.debug( response )
-      end
 
+        response
+      end
     end
 
 
