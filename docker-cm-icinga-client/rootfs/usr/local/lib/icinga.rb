@@ -41,7 +41,7 @@ class CMIcinga2
 
     server_config_file     = settings.dig(:icinga, :server_config_file)
 
-    mq_host                = settings.dig(:mq, :host)                || 'localhost'
+    mq_host                = settings.dig(:mq, :host)
     mq_port                = settings.dig(:mq, :port)                || 11300
     @mq_queue              = settings.dig(:mq, :queue)               || 'mq-icinga'
 
@@ -55,10 +55,6 @@ class CMIcinga2
 
     @icinga_api_url_base   = format('https://%s:%d', @icinga_host, @icinga_api_port )
     @node_name             = Socket.gethostbyname(Socket.gethostname ).first
-
-    mq_settings    = { beanstalkHost: mq_host, beanstalkPort: mq_port, beanstalkQueue: @mq_queue }
-    mysql_settings = { mysql: { host: mysql_host, user: mysql_user, password: mysql_password, schema: mysql_schema } }
-    redis_settings = { redis: { host: redis_host } }
 
     super( settings )
 
@@ -89,12 +85,16 @@ class CMIcinga2
     logger.debug( format(' api pass : %s', @icinga_api_pass ) )
     logger.debug( format(' node name: %s', @node_name ) )
 
+    mq_settings    = { beanstalkHost: mq_host, beanstalkPort: mq_port, beanstalkQueue: @mq_queue }
+    mysql_settings = { mysql: { host: mysql_host, user: mysql_user, password: mysql_password, schema: mysql_schema } }
+    redis_settings = { redis: { host: redis_host } }
+
     @cache       = MiniCache::Store.new
     @jobs        = JobQueue::Job.new
-    @redis       = Storage::RedisClient.new( redis_settings )
-    @mq_consumer = MessageQueue::Consumer.new( mq_settings )
-    @mq_producer = MessageQueue::Producer.new( mq_settings )
-    @database    = Storage::MySQL.new( mysql_settings )
+    @redis       = Storage::RedisClient.new( redis_settings ) unless(redis_host.nil?)
+    @mq_consumer = MessageQueue::Consumer.new( mq_settings ) unless(mq_host.nil?)
+    @mq_producer = MessageQueue::Producer.new( mq_settings ) unless(mq_host.nil?)
+    @database    = Storage::MySQL.new( mysql_settings ) unless(mysql_host.nil?)
 
   end
 end

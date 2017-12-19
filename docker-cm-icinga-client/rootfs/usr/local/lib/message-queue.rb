@@ -154,7 +154,8 @@ module MessageQueue
 
       rescue => e
         logger.error( e )
-        raise sprintf( 'ERROR: %s' , e )
+        @b = nil
+#         raise sprintf( 'ERROR: %s' , e )
       end
 
 #       logger.info( '-----------------------------------------------------------------' )

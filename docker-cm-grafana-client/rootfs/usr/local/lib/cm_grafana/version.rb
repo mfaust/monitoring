@@ -8,7 +8,7 @@ class CMGrafana < Grafana::Client
 
   module Date
 
-    DATE = '2017-12-15'
+    DATE = '2017-12-19'
   end
 
 end

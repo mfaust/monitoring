@@ -8,7 +8,7 @@ ENV \
   BUILD_DATE="2017-12-04" \
   TERM=xterm \
   TZ='Europe/Berlin' \
-  GRAFANA_GEM_TYPE="stable" \
+  GRAFANA_GEM_TYPE="local" \
   GRAFANA_GEM_VERSION="0.9"
 
 # ---------------------------------------------------------------------------------------

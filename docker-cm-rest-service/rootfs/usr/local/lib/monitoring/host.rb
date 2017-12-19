@@ -31,6 +31,7 @@ module Monitoring
       force            = false
       annotation       = true
       grafana_overview = true
+      overview_grouped_by = []
       services         = []
       tags             = []
       config           = {}
@@ -44,27 +45,31 @@ module Monitoring
 
         result[host.to_s]['request'] = hash
 
-        force            = hash.keys.include?('force')        ? hash['force']        : false
-        annotation       = hash.keys.include?('annotation')   ? hash['annotation']   : true
-        grafana_overview = hash.keys.include?('overview')     ? hash['overview']     : true
-        services         = hash.keys.include?('services')     ? hash['services']     : []
-        tags             = hash.keys.include?('tags')         ? hash['tags']         : []
-        config           = hash.keys.include?('config')       ? hash['config']       : {}
+        if( hash.is_a?(Hash)
+          force               = hash.dig('force')               || false
+          annotation          = hash.dig('annotation')          || true
+          grafana_overview    = hash.dig('overview')            || true
+          overview_grouped_by = hash.dig('overview_grouped_by') || []
+          services            = hash.dig('services')            || []
+          tags                = hash.dig('tags')                || []
+          config              = hash.dig('config')              || {}
+        end
       end
 
       sanity_force = ( !force.nil? && force.is_a?(Boolean) )
       sanity_tags  = ( !tags.nil? && tags.is_a?(Array) )
       sanity_config = ( !config.nil? && config.is_a?(Hash) )
 
-      logger.debug( format( 'force      : %s (%s)', force           ? 'true' : 'false', force.class.to_s))
-      logger.debug( format( 'overview   : %s (%s)', grafana_overview ? 'true' : 'false', grafana_overview.class.to_s))
-      logger.debug( format( 'services   : %s (%s)', services , services.class.to_s) )
-      logger.debug( format( 'tags       : %s (%s)', tags , tags.class.to_s) )
-      logger.debug( format( 'config     : %s (%s)', config , config.class.to_s) )
+      logger.debug( format( 'force          : %s (%s)', force           ? 'true' : 'false', force.class.to_s))
+      logger.debug( format( 'overview       : %s (%s)', grafana_overview ? 'true' : 'false', grafana_overview.class.to_s))
+      logger.debug( format( ' `- grouped by : %s (%s)', overview_grouped_by, overview_grouped_by.class.to_s))
+      logger.debug( format( 'services       : %s (%s)', services , services.class.to_s) )
+      logger.debug( format( 'tags           : %s (%s)', tags , tags.class.to_s) )
+      logger.debug( format( 'config         : %s (%s)', config , config.class.to_s) )
 
-      logger.debug( format( 'sanity_force  : %s (%s)', sanity_force ? 'true' : 'false', sanity_force.class.to_s))
-      logger.debug( format( 'sanity_tags   : %s (%s)', sanity_tags  ? 'true' : 'false', sanity_tags.class.to_s))
-      logger.debug( format( 'sanity_config : %s (%s)', sanity_config   ? 'true' : 'false', sanity_config.class.to_s))
+      logger.debug( format( 'sanity_force   : %s (%s)', sanity_force ? 'true' : 'false', sanity_force.class.to_s))
+      logger.debug( format( 'sanity_tags    : %s (%s)', sanity_tags  ? 'true' : 'false', sanity_tags.class.to_s))
+      logger.debug( format( 'sanity_config  : %s (%s)', sanity_config   ? 'true' : 'false', sanity_config.class.to_s))
 
       if( sanity_force == false || sanity_tags == false || sanity_config == false )
 

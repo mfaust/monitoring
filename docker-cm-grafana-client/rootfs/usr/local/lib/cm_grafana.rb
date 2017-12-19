@@ -20,6 +20,8 @@ require_relative 'cm_grafana/configure_server'
 require_relative 'cm_grafana/queue'
 require_relative 'cm_grafana/coremedia/tools'
 require_relative 'cm_grafana/coremedia/dashboard'
+require_relative 'cm_grafana/coremedia/templates'
+require_relative 'cm_grafana/coremedia/annotations'
 
 class CMGrafana
 
@@ -34,9 +36,9 @@ class CMGrafana
   include CMGrafana::CoreMedia::Templates
   include CMGrafana::CoreMedia::Annotations
 
-  def initialize( settings = {} )
+  def initialize( settings )
 
-    host                 = settings.dig(:grafana, :host)          || 'localhost'
+    host                 = settings.dig(:grafana, :host)
     port                 = settings.dig(:grafana, :port)          || 80
     @user                = settings.dig(:grafana, :user)          || 'admin'
     @password            = settings.dig(:grafana, :password)
@@ -48,12 +50,12 @@ class CMGrafana
     server_config_file   = settings.dig(:grafana, :server_config_file)
     @template_directory  = settings.dig(:templateDirectory)       || '/usr/local/share/templates/grafana'
 
-    mq_host              = settings.dig(:mq, :host)               || 'localhost'
-    mq_port              = settings.dig(:mq, :port)               || 11300
+    mq_host              = settings.dig(:mq, :host)
+    mq_port              = settings.dig(:mq, :port)
     @mq_queue            = settings.dig(:mq, :queue)              || 'mq-grafana'
 
     redis_host           = settings.dig(:redis, :host)
-    redis_port           = settings.dig(:redis, :port)            || 6379
+    redis_port           = settings.dig(:redis, :port)
 
     mysql_host           = settings.dig(:mysql, :host)
     mysql_schema         = settings.dig(:mysql, :schema)

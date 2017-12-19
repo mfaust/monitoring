@@ -5,11 +5,11 @@ MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
   VERSION="1712" \
-  BUILD_DATE="2017-12-04" \
+  BUILD_DATE="2017-12-19" \
   TERM=xterm \
   TZ='Europe/Berlin' \
   ICINGA2_GEM_TYPE="local" \
-  ICINGA2_GEM_VERSION="1.0"
+  ICINGA2_GEM_VERSION="0.9"
 
 # ---------------------------------------------------------------------------------------
 

@@ -97,6 +97,7 @@ class CMGrafana < Grafana::Client
 
       tags       = payload.dig('tags')
       overview   = payload.dig('overview') || true
+      overview_grouped_by = payload.dig('overview_grouped_by') || []
       dns        = payload.dig('dns')
       annotation = payload.dig('annotation') || false
       timestamp  = payload.dig('timestamp') || Time.now.to_i
@@ -107,17 +108,11 @@ class CMGrafana < Grafana::Client
 
       logger.info( format( '%s host \'%s\'', command , node ) )
 
-#       logger.debug( "dns: #{dns} (#{dns.class.to_s})" )
-
       if( dns.is_a?(Hash) )
         ip = dns.dig('ip')
         short = dns.dig('short')
         fqdn = dns.dig('fqdn')
       end
-
-#       logger.debug( "ip: #{ip} (#{ip.class.to_s})" )
-#       logger.debug( "short: #{short} (#{short.class.to_s})" )
-#       logger.debug( "fqdn: #{fqdn} (#{fqdn.class.to_s})" )
 
       ip, short, fqdn = self.ns_lookup(node) if( ip == nil && short == nil && fqdn == nil )
 
@@ -156,15 +151,8 @@ class CMGrafana < Grafana::Client
       #
       if( command == 'annotation' )
 
-#         logger.debug( JSON.pretty_generate payload )
-
         params = {}
-
-#         logger.debug(payload)
-
-        time     = Time.at( timestamp ).strftime( '%Y-%m-%d %H:%M:%S' )
-
-#         logger.debug( "type: #{type}" )
+        time   = Time.at( timestamp ).strftime( '%Y-%m-%d %H:%M:%S' )
 
         unless( %w[loadtest deployment].include?(type) )
 
@@ -250,7 +238,7 @@ class CMGrafana < Grafana::Client
         # TODO
         # check payload!
         # e.g. for 'force' ...
-        result = self.create_dashboard_for_host( host: node, tags: tags, overview: overview )
+        result = self.create_dashboard_for_host( host: node, tags: tags, overview: overview, overview_grouped_by: overview_grouped_by )
 
         logger.debug( result )
 
@@ -264,7 +252,7 @@ class CMGrafana < Grafana::Client
       if( command == 'remove' )
 
         # add annotation
-        if(annotation==true)
+        if(annotation == true)
 
           time     = Time.at( timestamp ).strftime( '%Y-%m-%d %H:%M:%S' )  #unless( timestamp.nil? )
 

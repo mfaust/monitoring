@@ -19,7 +19,7 @@ users:
     pager: ''
     groups:
       - coremedia
-    enable_notifications: true
+    enable_notifications: false
 
 configuration_packages:
 

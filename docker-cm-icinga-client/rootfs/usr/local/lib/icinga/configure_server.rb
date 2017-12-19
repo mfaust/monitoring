@@ -67,16 +67,20 @@ class CMIcinga2 < Icinga2::Client
 
         groups          = config.select { |x| x == 'groups' }.values
         users           = config.select { |x| x == 'users' }.values
-        service_groups  = config.select { |x| x == 'service_groups' }.values
-        host_groups     = config.select { |x| x == 'host_groups' }.values
+        configuration_packages = config.select { |x| x == 'configuration_packages' }.values
+#         service_groups  = config.select { |x| x == 'service_groups' }.values
+#         host_groups     = config.select { |x| x == 'host_groups' }.values
 
         raise ArgumentError.new(format( 'groups must be an Array, given an %s', groups.class.to_s ) ) unless( groups.is_a?(Array) )
         raise ArgumentError.new(format( 'users must be an Array, given an %s', users.class.to_s ) ) unless( users.is_a?(Array) )
-        raise ArgumentError.new(format( 'service_groups must be an Array, given an %s', service_groups.class.to_s ) ) unless( service_groups.is_a?(Array) )
-        raise ArgumentError.new(format( 'host_groups must be an Array, given an %s', host_groups.class.to_s ) ) unless( host_groups.is_a?(Array) )
+        raise ArgumentError.new(format( 'configuration_packages must be an Array, given an %s', configuration_packages.class.to_s ) ) unless( configuration_packages.is_a?(Array) )
+
+#         raise ArgumentError.new(format( 'service_groups must be an Array, given an %s', service_groups.class.to_s ) ) unless( service_groups.is_a?(Array) )
+#         raise ArgumentError.new(format( 'host_groups must be an Array, given an %s', host_groups.class.to_s ) ) unless( host_groups.is_a?(Array) )
 
         result << icinga_groups( groups )
         result << icinga_users( users )
+        result << icinga_configuration_packages(configuration_packages)
 #         result << icinga_service_groups( service_groups )
 #         result << icinga_host_groups( host_groups )
 
@@ -179,6 +183,33 @@ class CMIcinga2 < Icinga2::Client
       end
     end
 
+
+    def icinga_configuration_packages( params )
+
+      if( params.count >= 1 )
+
+        result = []
+        params.each do |p|
+
+          p.each do |k,v|
+
+            v = JSON.parse(v) if( v.is_a?(String) )
+
+            package_type = k
+#             display_name = v.dig('display_name') || group_name
+#
+#             unless( exists_usergroup?( group_name ) )
+#
+#               logger.info( format('create group: %s (%s)', group_name, display_name ) )
+#               # create group
+#               result << add_usergroup( user_group: group_name, display_name: display_name )
+#            end
+
+          end
+
+        end
+      end
+    end
 
     def icinga_service_groups( params )
 
