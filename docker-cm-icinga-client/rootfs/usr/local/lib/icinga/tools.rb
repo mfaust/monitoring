@@ -78,7 +78,7 @@ class CMIcinga2 < Icinga2::Client
       logger.debug( "node_information( #{params} )" )
 
       ip      = params.dig(:ip)
-      host    = params.dig(:host)
+      host    = params.dig(:short)
       fqdn    = params.dig(:fqdn)
 
 #       full_config        = @database.config( ip: ip, short: host, fqdn: fqdn )

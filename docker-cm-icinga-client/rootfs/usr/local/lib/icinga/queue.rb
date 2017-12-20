@@ -32,7 +32,7 @@ class CMIcinga2 < Icinga2::Client
         end
 
         job_id = data.dig(:id )
-        result = self.process_queue(data )
+        result = process_queue(data)
         status = result.dig(:status).to_i
 
         if( status == 200 || status == 409 || status == 500 || status == 503 )
@@ -98,7 +98,7 @@ class CMIcinga2 < Icinga2::Client
       #
       if( command == 'add' )
 
-        services     = self.node_information( ip: ip, host: short, fqdn: fqdn )
+        services     = node_information( ip: ip, short: short, fqdn: fqdn )
         display_name = @database.config( ip: ip, short: short, fqdn: fqdn, key: 'display_name' )
 
         if( display_name.nil? )
@@ -113,24 +113,26 @@ class CMIcinga2 < Icinga2::Client
         payload = services unless( services.empty? )
 
         unless( tags.nil? )
-          tags.each do |t,v|
-            payload[t] = v
-          end
+
+          payload['tags'] = tags
+#          tags.each do |t,v|
+#            payload[t] = v
+#          end
         end
 
         # TODO
         # full API support
         params = {
-          host: fqdn,
-          fqdn: fqdn,
+          name: fqdn,
+          address: ip,
           display_name: display_name,
           enable_notifications: @icinga_notifications,
           vars: payload
         }
 
-#        logger.debug(JSON.pretty_generate(params))
+        logger.debug(JSON.pretty_generate(params))
 
-        result = self.add_host(params)
+        result = add_host(params)
         status = result.dig('code') || 500
 
         logger.debug( result )
@@ -147,7 +149,7 @@ class CMIcinga2 < Icinga2::Client
 
 #         logger.info( format( 'remove checks for node %s', node ) )
 
-        result = self.delete_host( host: fqdn, fqdn: fqdn )
+        result = delete_host( name: fqdn, cascade: true )
 
         logger.debug( result )
 
@@ -162,7 +164,7 @@ class CMIcinga2 < Icinga2::Client
 
 #         logger.info( format( 'give information for node %s', node ) )
 
-        result = self.hosts( host: fqdn )
+        result = hosts( name: fqdn )
 
         logger.debug( result )
 
@@ -175,7 +177,7 @@ class CMIcinga2 < Icinga2::Client
       #
       if( command == 'update' )
 
-        services     = self.node_information( ip: ip, host: short, fqdn: fqdn )
+        services     = node_information( ip: ip, host: short, fqdn: fqdn )
         display_name = @database.config( ip: ip, short: short, fqdn: fqdn, key: 'display_name' )
 
         if( display_name.nil? )
@@ -198,8 +200,8 @@ class CMIcinga2 < Icinga2::Client
         # TODO
         # full API support
         params = {
-          host: fqdn,
-          fqdn: fqdn,
+          name: fqdn,
+          address: ip,
           display_name: display_name,
           enable_notifications: @icinga_notifications,
           vars: payload,

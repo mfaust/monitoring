@@ -17,8 +17,12 @@ module Monitoring
   #          "ports": [50199],
   #          "display_name": "foo.bar.com",
   #          "services": [
-  #            "cae-live-1": {},
-  #            "content-managment-server": { "port": 41000 }
+  #            "cae-live-1",
+  #            "content-managment-server"
+  #          ],
+  #          "group_by": [
+  #            "dev",
+  #            "management"
   #          ]
   #        }
   #      }
@@ -45,24 +49,25 @@ module Monitoring
 
         result[host.to_s]['request'] = hash
 
-        if( hash.is_a?(Hash)
+        if( hash.is_a?(Hash) )
           force               = hash.dig('force')               || false
           annotation          = hash.dig('annotation')          || true
           grafana_overview    = hash.dig('overview')            || true
-          overview_grouped_by = hash.dig('overview_grouped_by') || []
           services            = hash.dig('services')            || []
           tags                = hash.dig('tags')                || []
           config              = hash.dig('config')              || {}
         end
       end
 
-      sanity_force = ( !force.nil? && force.is_a?(Boolean) )
-      sanity_tags  = ( !tags.nil? && tags.is_a?(Array) )
-      sanity_config = ( !config.nil? && config.is_a?(Hash) )
+      sanity_force    = ( !force.nil? && force.is_a?(Boolean) )
+      sanity_tags     = ( !tags.nil? && tags.is_a?(Array) )
+      sanity_config   = ( !config.nil? && config.is_a?(Hash) )
+
+      # no overview -> no group by
+      overview_grouped_by = []  if(grafana_overview == false)
 
       logger.debug( format( 'force          : %s (%s)', force           ? 'true' : 'false', force.class.to_s))
       logger.debug( format( 'overview       : %s (%s)', grafana_overview ? 'true' : 'false', grafana_overview.class.to_s))
-      logger.debug( format( ' `- grouped by : %s (%s)', overview_grouped_by, overview_grouped_by.class.to_s))
       logger.debug( format( 'services       : %s (%s)', services , services.class.to_s) )
       logger.debug( format( 'tags           : %s (%s)', tags , tags.class.to_s) )
       logger.debug( format( 'config         : %s (%s)', config , config.class.to_s) )

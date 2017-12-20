@@ -563,14 +563,13 @@ module Storage
 
     def config( params = {} )
 
-      if( ! @client )
-        return false
-      end
+      return false if( ! @client )
 
       ip     = params.dig(:ip)
       name   = params.dig(:short)
       fqdn   = params.dig(:fqdn)
       key    = params.dig(:key)
+      value  = params.dig(:value)
 
       result = nil
 
@@ -580,10 +579,7 @@ module Storage
         'select d.fqdn, c.`key`, c.`value` from dns as d, config as c where d.ip = c.dns_ip'
       )
 
-      if( key != nil )
-        statement = sprintf( '%s and `key` = \'%s\'', statement, key )
-      end
-
+      statement = sprintf( '%s and `key` = \'%s\'', statement, key ) unless( key.nil? )
       statement = sprintf(
         '%s and ( ip = \'%s\' or name = \'%s\' or fqdn = \'%s\' )',
         statement,
@@ -591,6 +587,17 @@ module Storage
         name,
         fqdn
       )
+
+      unless( value.nil? )
+
+        v = value
+        v = value.join('` or `value` like `') if (value.is_a?(Array)) # ( value like '%devr%' or value like '%foo%' )
+
+        statement = format(
+          '%s and (`value` like `%s`)',
+          v
+        )
+      end
 
       logger.debug( statement )
 

@@ -235,10 +235,15 @@ class CMGrafana < Grafana::Client
           end
         end
 
+        # get all group_by entrys for us
+        group_by = @database.config( ip: ip, short: host, fqdn: fqdn, key: 'group_by' )
+
+        logger.debug( "groub_by: #{group_by}" )
+
         # TODO
         # check payload!
         # e.g. for 'force' ...
-        result = self.create_dashboard_for_host( host: node, tags: tags, overview: overview, overview_grouped_by: overview_grouped_by )
+        result = self.create_dashboard_for_host( host: node, tags: tags, overview: overview )
 
         logger.debug( result )
 
