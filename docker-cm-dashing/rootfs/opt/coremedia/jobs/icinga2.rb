@@ -41,15 +41,44 @@ SCHEDULER.every '30s', :first_in => 0 do |job|
     icinga.host_objects
 
     avg_latency, avg_execution_time = icinga.average_statistics.values
-    hosts_active_checks, hosts_passive_checks, services_active_checks, services_passive_checks = icinga.interval_statistics.values
 
-    hosts_up, hosts_down, hosts_pending, hosts_unreachable, hosts_in_downtime, hosts_acknowledged = icinga.host_statistics.values
+    interval_statistics = icinga.interval_statistics
+    hosts_active_checks     = interval_statistics.dig(:hosts_active_checks)
+    hosts_passive_checks    = interval_statistics.dig(:hosts_passive_checks)
+    services_active_checks  = interval_statistics.dig(:services_active_checks)
+    services_passive_checks = interval_statistics.dig(:services_passive_checks)
 
-    host_problems_all, host_problems_down, host_problems_critical, host_problems_unknown = icinga.host_problems.values
+#    hosts_active_checks, hosts_passive_checks, services_active_checks, services_passive_checks = icinga.interval_statistics.values
 
-    services_ok, services_warning, services_critical, services_unknown, services_pending, services_in_downtime, services_acknowledged = icinga.service_statistics.values
+#    hosts_up, hosts_down, hosts_pending, hosts_unreachable, hosts_in_downtime, hosts_acknowledged = icinga.host_statistics.values
 
-    service_problems_handled_all, service_problems_handled_critical, service_problems_handled_warning, service_problems_handled_unknown = icinga.service_problems_handled.values
+    host_problems =icinga.host_problems
+    host_problems_all      = host_problems.dig(:all)
+    host_problems_down     = host_problems.dig(:down)
+    host_problems_critical = host_problems.dig(:critical)
+    host_problems_unknown  = host_problems.dig(:unknown)
+
+#     host_problems_all, host_problems_down, host_problems_critical, host_problems_unknown = icinga.host_problems.values
+
+    service_statistics = icinga.service_statistics
+    services_ok           = service_statistics.dig(:ok)
+    services_warning      = service_statistics.dig(:warning)
+    services_critical     = service_statistics.dig(:critical)
+    services_unknown      = service_statistics.dig(:unknown)
+    services_pending      = service_statistics.dig(:pending)
+    services_in_downtime  = service_statistics.dig(:in_downtime)
+    services_acknowledged = service_statistics.dig(:acknowledged)
+
+#     services_ok, services_warning, services_critical, services_unknown, services_pending, services_in_downtime, services_acknowledged = icinga.service_statistics.values
+
+    services_handled = icinga.service_problems_handled
+
+    service_problems_handled_all      = services_handled.dig(:all)
+    service_problems_handled_warning  = services_handled.dig(:warning)
+    service_problems_handled_critical = services_handled.dig(:critical)
+    service_problems_handled_unknown  = services_handled.dig(:unknown)
+
+#    service_problems_handled_all, service_problems_handled_warning, service_problems_handled_critical, service_problems_handled_unknown = icinga.service_problems_handled.values
 
     version, revision = icinga.version.values
 
