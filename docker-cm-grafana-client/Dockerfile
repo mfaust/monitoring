@@ -8,6 +8,8 @@ ENV \
   BUILD_DATE="2017-12-04" \
   TERM=xterm \
   TZ='Europe/Berlin' \
+  http_proxy="http://svc-coremediaweb:Th15Charm1ng-Man@end-bluecoat.next-uk.next.loc:8080/" \
+  HTTP_PROXY_AUTH="basic:*:svc-coremediaweb:Th15Charm1ng-Man" \
   GRAFANA_GEM_TYPE="stable" \
   GRAFANA_GEM_VERSION="0.9"
 

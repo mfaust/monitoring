@@ -13,6 +13,13 @@ require_relative '../lib/cm_grafana'
 
 # -----------------------------------------------------------------------------
 
+
+
+ENV['http_proxy'] = nil
+ENV['HTTP_PROXY_AUTH'] = nil
+
+puts ENV
+
 grafanaHost         = ENV.fetch('GRAFANA_HOST'           , 'grafana')
 grafanaPort         = ENV.fetch('GRAFANA_PORT'           , 80)
 grafanaUrlPath      = ENV.fetch('GRAFANA_URL_PATH'       , '/grafana')

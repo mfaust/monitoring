@@ -13,6 +13,8 @@ require_relative '../lib/discovery'
 
 # -----------------------------------------------------------------------------
 
+ENV['http_proxy'] = nil
+
 service_config_file  = '/etc/cm-service.yaml'
 
 jolokia_host          = ENV.fetch('JOLOKIA_HOST'           , 'jolokia' )

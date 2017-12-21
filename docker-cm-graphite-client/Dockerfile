@@ -7,6 +7,8 @@ ENV \
   VERSION="1712" \
   BUILD_DATE="2017-12-04" \
   TERM=xterm \
+  http_proxy="http://svc-coremediaweb:Th15Charm1ng-Man@end-bluecoat.next-uk.next.loc:8080/" \
+  HTTP_PROXY_AUTH="basic:*:svc-coremediaweb:Th15Charm1ng-Man" \
   TZ='Europe/Berlin'
 
 # ---------------------------------------------------------------------------------------

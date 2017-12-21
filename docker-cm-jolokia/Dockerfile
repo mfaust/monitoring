@@ -11,6 +11,9 @@ ENV \
   TERM=xterm \
   TZ='Europe/Berlin' \
   GOPATH=/build \
+  http_proxy="http://svc-coremediaweb:Th15Charm1ng-Man@end-bluecoat.next-uk.next.loc:8080/" \
+  https_proxy="http://svc-coremediaweb:Th15Charm1ng-Man@end-bluecoat.next-uk.next.loc:8080/" \
+  HTTP_PROXY_AUTH="basic:*:svc-coremediaweb:Th15Charm1ng-Man" \
   GOROOT=/usr/lib/go \
   HOSTS=${HOSTS:-}
 

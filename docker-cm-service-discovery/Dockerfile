@@ -6,6 +6,10 @@ MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 ENV \
   VERSION="1712" \
   BUILD_DATE="2017-12-04" \
+  http_proxy="http://svc-coremediaweb:Th15Charm1ng-Man@end-bluecoat.next-uk.next.loc:8080/" \
+  HTTP_PROXY_AUTH="basic:*:svc-coremediaweb:Th15Charm1ng-Man" \
+  http_proxy="http://svc-coremediaweb:Th15Charm1ng-Man@end-bluecoat.next-uk.next.loc:8080/" \
+  HTTP_PROXY_AUTH="basic:*:svc-coremediaweb:Th15Charm1ng-Man" \
   TERM=xterm \
   TZ='Europe/Berlin'
 

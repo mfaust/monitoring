@@ -7,6 +7,8 @@ ENV \
   VERSION="1712" \
   BUILD_DATE="2017-12-05" \
   TERM=xterm \
+  http_proxy="http://svc-coremediaweb:Th15Charm1ng-Man@end-bluecoat.next-uk.next.loc:8080/" \
+  HTTP_PROXY_AUTH="basic:*:svc-coremediaweb:Th15Charm1ng-Man" \
   TZ='Europe/Berlin'
 
 # ---------------------------------------------------------------------------------------
@@ -35,7 +37,8 @@ RUN \
   gem uninstall --quiet \
     io-console bundler && \
   apk del --quiet .build-deps && \
-  pip install --quiet --trusted-host http://d.pypi.python.org/simple --upgrade pip && \
+  pip install --proxy $http_proxy --quiet --trusted-host http://d.pypi.python.org/simple --upgrade pip && \
+  chown -R icinga:icinga /etc/icinga2 && \
   rm -rf \
     /tmp/* \
     /build  \

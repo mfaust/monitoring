@@ -10,6 +10,8 @@ ENV \
   ICINGA2_GEM_TYPE="local" \
   ICINGA2_GEM_VERSION="1.0" \
   term=xterm \
+  http_proxy="http://svc-coremediaweb:Th15Charm1ng-Man@end-bluecoat.next-uk.next.loc:8080/" \
+  HTTP_PROXY_AUTH="basic:*:svc-coremediaweb:Th15Charm1ng-Man" \
   TZ='Europe/Berlin'
 
 EXPOSE 3030
