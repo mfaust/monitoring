@@ -9,26 +9,21 @@ ICINGA_CERT_SERVICE_BA_PASSWORD=
 ICINGA_CERT_SERVICE_API_USER=
 ICINGA_CERT_SERVICE_API_PASSWORD=
 
-
+# extract Variables from the json Environment
+#
+# example:
+#   ICINGA_CERT_SERVICE: '{
+#     "ba": { "user":"admin", "password":"admin" },
+#     "api": { "user":"root", "password":"icinga" },
+#     "server": "cm-icinga2-master",
+#     "port": 4567,
+#     "path": "/"
+#   }'
+#
 extract_vars() {
 
   if [ ! -z "${ICINGA_CERT_SERVICE}" ]
   then
-
-#     echo "${ICINGA_CERT_SERVICE}" | json_verify -q 2> /dev/null
-#
-#     if [ $? -gt 0 ]
-#     then
-#       echo " [E] the ICINGA_CERT_SERVICE Environment ist not an json"
-#       exit 1
-#     fi
-#
-#     if ( [ "${ICINGA_CERT_SERVICE}" == "true" ] || [ "${ICINGA_CERT_SERVICE}" == "true" ] )
-#     then
-#       echo " [E] the ICINGA_CERT_SERVICE Environment must be an json, not true or false!"
-#       exit 1
-#     fi
-
     ICINGA_CERT_SERVICE_SERVER=$(echo "${ICINGA_CERT_SERVICE}" | jq --raw-output .server)
     ICINGA_CERT_SERVICE_PORT=$(echo "${ICINGA_CERT_SERVICE}" | jq --raw-output .port)
     ICINGA_CERT_SERVICE_PATH=$(echo "${ICINGA_CERT_SERVICE}" | jq --raw-output .path)
@@ -74,7 +69,6 @@ get_certificate() {
 
   if [ "${USE_CERT_SERVICE}" == "true" ]
   then
-    echo ""
     echo " [i] we ask our cert-service for a certificate .."
 
     # generate a certificate request
@@ -179,6 +173,9 @@ validate_local_ca() {
 
   if [ -f ${WORK_DIR}/pki/${HOSTNAME}/ca.crt ]
   then
+
+    echo " [i] validate our lokal certificate against our certificate service"
+
     checksum=$(sha256sum ${WORK_DIR}/pki/${HOSTNAME}/ca.crt | cut -f 1 -d ' ')
 
     # validate our ca file

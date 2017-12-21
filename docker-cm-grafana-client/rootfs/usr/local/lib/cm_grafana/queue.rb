@@ -238,7 +238,7 @@ class CMGrafana < Grafana::Client
         # get all group_by entrys for us
         group_by = @database.config( ip: ip, short: short, fqdn: fqdn, key: 'group_by' )
 
-        logger.debug( "groub_by: #{group_by}" )
+        logger.debug( "group_by: #{group_by}" )
 
         # TODO
         # check payload!

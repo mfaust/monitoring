@@ -168,7 +168,7 @@ module Monitoring
         status = @database.create_config( ip: ip, short: short, fqdn: fqdn, data: config )
       end
 
-      logger.debug( 'create message for discovery service' )
+      logger.info( 'create message for discovery service' )
       message_queue( cmd: 'add', node: host, queue: 'mq-discover', payload: payload, prio: 1, delay: 2 + delay.to_i )
 
       logger.info('sucessfull')
@@ -306,16 +306,29 @@ module Monitoring
 #         payload: { command: 'remove', argument: 'node', config: config }
 #       )
 
-      logger.debug( 'remove icinga checks and notifications' )
-      message_queue( cmd: 'remove', node: host, queue: 'mq-icinga', payload: payload, prio: 1 )
+      logger.info( 'create message for remove node from discovery service' )
+      message_queue( cmd: 'remove', node: host, queue: 'mq-discover', payload: payload, prio: 1, ttr: 1, delay: 0 )
+#      message_queue( cmd: 'remove', node: host, queue: 'mq-discover', payload: payload, prio: 1, delay: 5 )
 
-      logger.debug( 'remove grafana dashboards' )
-      message_queue( cmd: 'remove', node: host, queue: 'mq-grafana', payload: payload, prio: 1 )
+      logger.info( 'create message for remove icinga checks and notifications' )
+      message_queue( cmd: 'remove', node: host, queue: 'mq-icinga', payload: payload, prio: 1, ttr: 1, delay: 0 )
 
-      logger.debug( 'remove node from discovery service' )
-      message_queue( cmd: 'remove', node: host, queue: 'mq-discover', payload: payload, prio: 1, delay: 5 )
+      logger.info( 'create message for remove grafana dashboards' )
+      message_queue( cmd: 'remove', node: host, queue: 'mq-grafana', payload: payload, prio: 1, ttr: 1, delay: 0 )
 
-      @database.remove_dns( short: host )
+      sleep(3)
+
+      logger.debug( 'set node status to OFFLINE' )
+      status = @database.set_status( ip: ip, short: short, fqdn: fqdn, status: Storage::MySQL::OFFLINE )
+
+      logger.debug( 'remove configuration' )
+      status  = @database.remove_config( ip: ip, short: short, fqdn: fqdn )
+      logger.debug(status)
+
+      logger.debug( 'remove dns' )
+      status  = @database.remove_dns( ip: ip, short: short, fqdn: fqdn )
+
+      #@database.remove_dns( short: host )
 
       logger.info('sucessfull')
 

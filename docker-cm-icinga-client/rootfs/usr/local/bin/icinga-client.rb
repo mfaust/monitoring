@@ -31,8 +31,8 @@ mysql_host           = ENV.fetch('MYSQL_HOST'              , 'database')
 mysql_schema         = ENV.fetch('DISCOVERY_DATABASE_NAME' , 'discovery')
 mysql_user           = ENV.fetch('DISCOVERY_DATABASE_USER' , 'discovery')
 mysql_password       = ENV.fetch('DISCOVERY_DATABASE_PASS' , 'discovery')
-interval             = ENV.fetch('INTERVAL'                , '20s' )
-delay                = ENV.fetch('RUN_DELAY'               , '25s' )
+interval             = ENV.fetch('INTERVAL'                , '30s' )
+delay                = ENV.fetch('RUN_DELAY'               , '35s' )
 
 server_config_file  = ENV.fetch('SERVER_CONFIG_FILE'     , '/etc/icinga_server_config.yml' )
 
@@ -47,8 +47,8 @@ def validate_scheduler_values( duration, default )
   Rufus::Scheduler.to_duration( i )
 end
 
-interval         = validate_scheduler_values( interval, 20.0 )
-delay            = validate_scheduler_values( delay, 25.0 )
+interval         = validate_scheduler_values( interval, 30.0 )
+delay            = validate_scheduler_values( delay, 35.0 )
 
 # -----------------------------------------------------------------------------
 
@@ -102,14 +102,14 @@ Signal.trap('QUIT') { stop = true }
 
 i = CMIcinga2.new( config )
 
-cfg_scheduler = Rufus::Scheduler.singleton
+unless(server_config_file.nil?)
 
-cfg_scheduler.every( '60m', :first_in => delay.to_i ) do
-
-  i.configure_server( config_file: server_config_file ) unless( server_config_file.nil? )
-  cfg_scheduler.shutdown(:kill)
+  cfg_scheduler = Rufus::Scheduler.singleton
+  cfg_scheduler.every( '60m', :first_in => delay.to_i ) do
+    i.configure_server( config_file: server_config_file )
+    cfg_scheduler.shutdown(:kill)
+  end
 end
-
 
 scheduler = Rufus::Scheduler.new
 

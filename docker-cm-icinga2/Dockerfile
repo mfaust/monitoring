@@ -25,8 +25,6 @@ COPY build /build
 RUN \
   apk add --quiet --no-cache --virtual .build-deps \
     g++ make ruby-dev && \
-  apk add --quiet --no-cache \
-    py2-pip && \
   gem install --quiet --no-rdoc --no-ri \
     io-console bundler && \
   cd /build && \
@@ -35,7 +33,6 @@ RUN \
   gem uninstall --quiet \
     io-console bundler && \
   apk del --quiet .build-deps && \
-  pip install --quiet --trusted-host http://d.pypi.python.org/simple --upgrade pip && \
   rm -rf \
     /tmp/* \
     /build  \
