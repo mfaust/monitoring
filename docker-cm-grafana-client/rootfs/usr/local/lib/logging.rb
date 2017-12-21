@@ -20,22 +20,23 @@ module Logging
 
     def configure_logger_for( classname )
 
-      logFile         = '/var/log/grafana-client.log'
-      file            = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
-      file.sync       = true
-      logger          = Logger.new( file, 'weekly', 1024000 )
+#       logFile         = '/var/log/grafana-client.log'
+#       file            = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
+#       file.sync       = true
+#       logger          = Logger.new( file, 'weekly', 1024000 )
+#
+#       if( File.exists?( logFile ) )
+#         FileUtils.chmod( 0666, logFile )
+#         FileUtils.chown( 'nobody', 'nobody', logFile )
+#       end
 
-#      logger                 = Logger.new(STDOUT)
+      $stdout.sync = true
+      logger                 = Logger.new($stdout)
       logger.progname        = classname
       logger.level           = Logger::DEBUG
       logger.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
       logger.formatter       = proc do |severity, datetime, progname, msg|
         "[#{datetime.strftime( logger.datetime_format )}] #{severity.ljust(5)} : #{progname} - #{msg}\n"
-      end
-
-      if( File.exists?( logFile ) )
-        FileUtils.chmod( 0666, logFile )
-        FileUtils.chown( 'nobody', 'nobody', logFile )
       end
 
       logger

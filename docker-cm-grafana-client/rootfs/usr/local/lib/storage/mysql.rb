@@ -27,7 +27,7 @@ module Storage
       @write_timeout   = params.dig(:mysql, :timeout, :write)   || 15
       @connect_timeout = params.dig(:mysql, :timeout, :connect) || 25
 
-      logger.level = Logger::INFO
+      logger.level = Logger::UNKNOWN
 
       @client          = connect
 
@@ -561,7 +561,7 @@ module Storage
     end
 
 
-    def config( params = {} )
+    def config( params )
 
       return false if( ! @client )
 
@@ -586,15 +586,15 @@ module Storage
         ip,
         name,
         fqdn
-      )
+      ) unless( ip.nil? || name.nil? || fqdn.nil? )
 
       unless( value.nil? )
-
         v = value
-        v = value.join('` or `value` like `') if (value.is_a?(Array)) # ( value like '%devr%' or value like '%foo%' )
+        v = value.join('%" or `value` like "%') if (value.is_a?(Array)) # ( value like '%devr%' or value like '%foo%' )
 
         statement = format(
-          '%s and (`value` like `%s`)',
+          '%s and (`value` like "%%%s%%")',
+          statement,
           v
         )
       end
@@ -604,26 +604,36 @@ module Storage
       r    = @client.query( statement, :as => :hash )
 
       if( r.size == 0 )
-
         logger.debug( 'no result' )
         return nil
       end
 
+      logger.debug(r)
+
       array   = Array.new
       result  = Hash.new()
 
-      r.each do |row|
+      unless( value.nil? )
 
+        r.each do |row|
+          fqdn  = row.dig('fqdn')
+          key   = row.dig('key')
+          value = row.dig('value')
+
+          result[fqdn.to_s] ||= { key.to_s => self.parsedResponse( value ) }
+        end
+        return result
+      end
+
+      r.each do |row|
         fqdn  = row.dig('fqdn')
         key   = row.dig('key')
         value = row.dig('value')
 
         result[key.to_s] ||= self.parsedResponse( value )
-
       end
 
       return result
-
     end
     #
     # -- configurations -------------------------

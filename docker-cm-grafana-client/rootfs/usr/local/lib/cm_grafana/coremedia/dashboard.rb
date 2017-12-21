@@ -645,6 +645,29 @@ class CMGrafana
         create_dashboard_for_host( params )
       end
 
+      # create overview for a list of servers
+      #
+      # @param [Array] params are a Array with servers (fqdn)
+      #
+      def create_overview_dashboard_for_hosts( servers )
+
+        return { status: 404, message: 'no servers for grouped overview dashboard' } unless( servers.is_a?(Array) || servers.count == 0 )
+
+        rows = []
+
+        servers.each do |s|
+
+          logger.debug( "host: #{s}" )
+          discovery = discovery_data( fqdn: s )
+          services  = discovery.keys
+          logger.debug( "Found services: #{services}" )
+
+#           rows << overview_template_rows(services)
+        end
+
+
+#         logger.debug(rows)
+      end
 
     end
 

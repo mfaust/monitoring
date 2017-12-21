@@ -115,7 +115,12 @@ class CMGrafana
 
           @user      = admin_login_name
           @password  = admin_password
-          @logged_in = login( username: @user, password: @password, max_retries: 10, sleep_between_retries: 8 )
+          begin
+            @logged_in = login( username: @user, password: @password, max_retries: 10, sleep_between_retries: 8 )
+          rescue => error
+            logger.error( format( '  %s', error) )
+            exit 1
+          end
         end
       end
 

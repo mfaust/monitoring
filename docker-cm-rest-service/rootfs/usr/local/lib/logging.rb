@@ -30,7 +30,8 @@ module Logging
 #         FileUtils.chown( 'nobody', 'nobody', logFile )
 #       end
 
-      logger                 = Logger.new(STDOUT)
+      $stdout.sync = true
+      logger                 = Logger.new($stdout)
       logger.progname        = classname
       logger.level           = Logger::INFO
       logger.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
