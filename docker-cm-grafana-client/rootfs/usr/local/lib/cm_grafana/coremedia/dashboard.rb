@@ -660,7 +660,7 @@ class CMGrafana
           logger.debug( "host: #{s}" )
           discovery = discovery_data( fqdn: s )
           services  = discovery.keys
-          logger.debug( "Found services: #{services}" )
+          logger.debug( "  Found services: #{services}" )
 
 #           rows << overview_template_rows(services)
         end

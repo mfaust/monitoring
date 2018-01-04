@@ -199,9 +199,9 @@ class CMGrafana < Grafana::Client
         begin
           result = create_annotation_graphite( params )
           logger.debug(params)
-          logger.debug( result )
+          logger.debug(result)
         rescue => error
-          logger.error( error)
+          logger.error(error)
         end
 
         @jobs.del( job_option )
@@ -229,9 +229,9 @@ class CMGrafana < Grafana::Client
           begin
             result = create_annotation_graphite( params )
             logger.debug(params)
-            logger.debug( result )
+            logger.debug(result)
           rescue => error
-            logger.error( error)
+            logger.error(error)
           end
         end
 
