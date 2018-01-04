@@ -1,14 +1,14 @@
 
-FROM bodsch/docker-dashing:1711.1
+FROM bodsch/docker-dashing:1801-r1
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
   VERSION="1711" \
-  BUILD_DATE="2017-11-15" \
+  BUILD_DATE="2018-01-04" \
   DASHBOARD="coremedia" \
   ICINGA2_GEM_TYPE="local" \
-  ICINGA2_GEM_VERSION="1.0" \
+  ICINGA2_GEM_VERSION="0.9" \
   term=xterm \
   TZ='Europe/Berlin'
 
@@ -62,6 +62,6 @@ HEALTHCHECK \
   --interval=5s \
   --timeout=2s \
   --retries=12 \
-  CMD curl --silent --fail http://localhost:3030/dashing/coremedia || exit 1
+  CMD curl --silent --fail http://localhost:3030/dashing/${DASHBOARD} || exit 1
 
 CMD [ "/init/run.sh" ]

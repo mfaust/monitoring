@@ -25,7 +25,7 @@ Bases on [bodsch/docker-smashing](https://hub.docker.com/r/bodsch/docker-smashin
 | `ICINGA_CERT_SERVICE_BA_PASSWORD`  | `admin`              | The Basic Auth Password for the certicate Service               |
 | `ICINGA_CERT_SERVICE_API_USER`     | -                    | The Certificate Service needs also an API Users                 |
 | `ICINGA_CERT_SERVICE_API_PASSWORD` | -                    |                                                                 |
-| `ICINGA_CERT_SERVICE_SERVER`       | `localhost`          | Certificate Service Host                                        |
-| `ICINGA_CERT_SERVICE_PORT`         | `80`                 | Certificate Service Port                                        |
+| `ICINGA_CERT_SERVICE_SERVER`       | ``                   | Certificate Service Host                                        |
+| `ICINGA_CERT_SERVICE_PORT`         | `8080`               | Certificate Service Port                                        |
 | `ICINGA_CERT_SERVICE_PATH`         | `/`                  | Certificate Service Path (needful, when they run begind a Proxy |
 | `ICINGAWEB_URL`                    | `http://localhost/icingaweb2` | (not yet used)                                         |
