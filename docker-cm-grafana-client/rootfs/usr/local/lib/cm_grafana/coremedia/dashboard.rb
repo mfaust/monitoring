@@ -6,11 +6,11 @@ class CMGrafana
     module Dashboard
 
 
-      def prepare( host )
+      def prepare(host)
 
         # get a DNS record
         #
-        ip, short, fqdn = self.ns_lookup(host )
+        ip, short, fqdn = self.ns_lookup(host)
 
         @short_hostname     = short  # (%HOST%)
         @grafana_hostname   = fqdn   # name for the grafana title (%SHORTNAME%)
@@ -203,7 +203,7 @@ class CMGrafana
           create_license_template( host: fqdn, services: services )
         end
 
-        dashboards = self.list_dashboards( host: short ) #@grafana_hostname } )
+        dashboards = list_dashboards( tags: short ) #@grafana_hostname } )
         dashboards = dashboards.dig(:dashboards)
 
         # TODO
@@ -525,7 +525,7 @@ class CMGrafana
         # ensure, that we are logged in
         login( username: @user, password: @password, max_retries: 10 )
 
-        data = self.search_dashboards( tags: tags )
+        data = search_dashboards( tags: tags )
         data = data.dig('message') unless( data.nil? )
 
         return { status: 204, message: 'no Dashboards found' } if( data.nil? || data == false || data.count == 0 )
@@ -649,24 +649,135 @@ class CMGrafana
       #
       # @param [Array] params are a Array with servers (fqdn)
       #
-      def create_overview_dashboard_for_hosts( servers )
+      def create_overview_dashboard_for_hosts( servers, group_by_tags )
 
         return { status: 404, message: 'no servers for grouped overview dashboard' } unless( servers.is_a?(Array) || servers.count == 0 )
 
         rows = []
+        templating_list = []
+
+        # we need %SHORTHOST% and %STORAGE_IDENTIFIER% for every host
 
         servers.each do |s|
 
           logger.debug( "host: #{s}" )
+
+          ip, short, fqdn = self.ns_lookup(s)
+          short_hostname     = short  # (%HOST%)
+          grafana_hostname   = fqdn   # name for the grafana title (%SHORTNAME%)
+          storage_identifier = fqdn   # identifier for an storage path (%STORAGE_IDENTIFIER%) (useful for cloud stack on aws with changing hostnames)
+
+          # read the configuration for an customized display name
+          #
+          display     = @database.config( ip: ip, short: short, fqdn: fqdn, key: 'display_name' )
+          identifier  = @database.config( ip: ip, short: short, fqdn: fqdn, key: 'graphite_identifier' )
+
+          if( identifier != nil && identifier.dig( 'graphite_identifier' ) != nil )
+            storage_identifier = identifier.dig( 'graphite_identifier' ).to_s
+            logger.info( "use custom storage identifier from config: '#{storage_identifier}'" )
+          end
+
+          if( display != nil && display.dig( 'display_name' ) != nil )
+            grafana_hostname = display.dig( 'display_name' ).to_s
+            logger.info( "use custom display_name from config: '#{grafana_hostname}'" )
+          end
+
+          # grafana_hostname  = slug( grafana_hostname ).gsub( '.', '-' )
+
+#           # TODO
+#           # we need here the STORAGE_IDENTIFIER
+#           templating_list << %(
+#             {
+#               "current": { "value": "#{grafana_hostname}", "text": "#{grafana_hostname}" },
+#               "hide": 2,
+#               "label": null,
+#               "name": "host",
+#               "options": [ { "value": "#{grafana_hostname}", "text": "#{grafana_hostname}" } ],
+#               "query": "#{grafana_hostname}",
+#               "type": "constant"
+#             }
+#           )
+
+#          rows << overview_host_header(s)
+
           discovery = discovery_data( fqdn: s )
           services  = discovery.keys
           logger.debug( "  Found services: #{services}" )
 
-#           rows << overview_template_rows(services)
+          rows << overview_template_rows(services)
+
+          begin
+            # rows = rows.map { |s| s.gsub('%SHORTHOST%', short_hostname).gsub('$host', grafana_hostname) }
+            rows.gsub!('%SHORTHOST%', short_hostname)
+            rows.gsub!('$host', grafana_hostname)
+          rescue =>error
+            logger.error(error)
+          end
+
         end
 
-
 #         logger.debug(rows)
+
+        rows            = rows.join(',')
+#         templating_list = templating_list.join(',')
+
+        template = %(
+          {
+            "dashboard": {
+              "id": null,
+              "title": "= Overview",
+              "originalTitle": "= Overview",
+              "tags": [ "overview" ],
+              "style": "dark",
+              "timezone": "browser",
+              "editable": true,
+              "hideControls": false,
+              "sharedCrosshair": false,
+              "rows": [
+                #{rows}
+              ],
+              "time": {
+                "from": "now-2m",
+                "to": "now"
+              },
+              "timepicker": {
+                "refresh_intervals": [ "30s", "1m", "2m" ],
+                "time_options": [ "1m", "3m", "5m", "15m" ]
+              },
+              "templating": {
+                "list": []
+              },
+              "annotations": {
+                "list": []
+              },
+              "refresh": "1m",
+              "schemaVersion": 12,
+              "version": 0,
+              "links": []
+            }
+          }
+        )
+
+        template = JSON.parse( template ) if( template.is_a?( String ) )
+        template = expand_tags( dashboard: template, additional_tags: group_by_tags ) if( group_by_tags.count > 0 )
+        # now we must recreate *all* panel IDs for an propper import
+        template = JSON.parse( template ) if( template.is_a?( String ) )
+        template = regenerate_template_ids( template )
+        template = JSON.parse( template ) if( template.is_a?(String) )
+
+        title = template.dig('dashboard','title')
+
+        logger.debug( JSON.pretty_generate( template ) )
+
+        begin
+        response = create_dashboard( dashboard: template )
+        response_status  = response.dig('status').to_i
+        response_message = response.dig('message')
+        rescue => error
+          logger.error error
+        end
+
+        logger.warn( format('template can\'t be add: [%s] %s', response_status, response_message ) ) if( response_status != 200 )
       end
 
     end

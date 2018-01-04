@@ -47,6 +47,12 @@ class Array
   def compare( comparate )
     to_set == comparate.to_set
   end
+
+  def gsub!(pattern, replacement)
+    each { |x|
+      x.gsub!(pattern, replacement)
+    }
+  end
 end
 
 # -----------------------------------------------------------------------------

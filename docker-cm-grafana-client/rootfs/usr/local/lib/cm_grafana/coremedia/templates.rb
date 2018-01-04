@@ -144,14 +144,14 @@ class CMGrafana
       end
 
 
-      def overview_template_rows(services = [] )
+      def overview_template_rows(services = [])
 
         rows = Array.new
         dir  = Array.new
         srv  = Array.new
 
         services.each do |s|
-          srv << self.remove_postfix( s )
+          srv << remove_postfix( s )
         end
 
         regex = /
@@ -164,8 +164,6 @@ class CMGrafana
         Dir.chdir( sprintf( '%s/overview', @template_directory )  )
 
         dirs = Dir.glob( '**.tpl' ).sort
-
-#        dirs.sort!
 
         dirs.each do |f|
 
@@ -184,11 +182,7 @@ class CMGrafana
 #           service  = remove_postfix( service )
           template = Dir.glob( sprintf( '%s/overview/**%s.tpl', @template_directory, service ) ).first
 
-          if( File.exist?( template ) )
-
-            tpl = File.read( template )
-            rows << tpl
-          end
+          rows << File.read( template ) if( File.exist?( template ) )
         end
 
 #         logger.debug( " templates: #{dirs}" )
@@ -211,13 +205,9 @@ class CMGrafana
         short_hostname     = params.dig(:short_hostname)
         mls_identifier     = params.dig(:mls_identifier)
 
-        if( template.nil? )
-          return false
-        end
+        return false if( template.nil? )
 
-        if( template.is_a?( Hash ) )
-          template = JSON.generate( template )
-        end
+        template = JSON.generate( template ) if( template.is_a?( Hash ) )
 
         # replace Template Vars
         map = {
@@ -241,6 +231,30 @@ class CMGrafana
         template = JSON.parse( template ) if( template.is_a?( String ) )
 
         regenerate_template_ids( template )
+      end
+
+
+
+      def overview_host_header(host)
+
+        host_header = %(
+          {
+            "content": "# #{host}",
+            "gridPos": {
+              "h": 2,
+              "w": 24,
+              "x": 0,
+              "y": 0
+            },
+            "id": 101,
+            "links": [],
+            "mode": "markdown",
+            "title": "",
+            "transparent": true,
+            "type": "text"
+          }
+        )
+
       end
 
     end

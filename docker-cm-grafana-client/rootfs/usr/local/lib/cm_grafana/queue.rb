@@ -99,7 +99,7 @@ class CMGrafana < Grafana::Client
       overview   = payload.dig('overview') || true
       overview_grouped_by = payload.dig('overview_grouped_by') || []
       dns        = payload.dig('dns')
-      annotation = payload.dig('annotation') || false
+      annotation = payload.dig('annotation') || true
       timestamp  = payload.dig('timestamp') || Time.now.to_i
       type       = payload.dig('type')
       argument   = payload.dig('argument')
@@ -222,7 +222,7 @@ class CMGrafana < Grafana::Client
           params = {
             what: 'node created',
             when: timestamp,
-            tags: [ identifier, 'created' ],
+            tags: [ identifier, 'created' ], # TODO add custom tags?
             text: format( 'Node <b>%s</b> created (%s)', node, time )
           }
 
@@ -259,7 +259,7 @@ class CMGrafana < Grafana::Client
             group_by_hosts = @database.config( key: 'group_by', value: group_by )
             logger.debug( "group_by_hosts: #{group_by_hosts} (#{group_by_hosts.class.to_s})" )
 
-            create_overview_dashboard_for_hosts( group_by_hosts.keys )
+            create_overview_dashboard_for_hosts( group_by_hosts.keys, group_by )
           rescue => error
             logger.error(error)
           end
