@@ -48,8 +48,8 @@ services:
     image: bodsch/docker-mysql:10.1.28-r1
     container_name: database
     hostname: database
-    ports:
-      - 3306:3306
+#    ports:
+#      - 3306:3306
     environment:
       MYSQL_SYSTEM_USER: root
       MYSQL_ROOT_PASS: database.pass
@@ -77,24 +77,24 @@ services:
       osmc.local: 192.168.122.60
       blueprint-box: 192.168.252.100
 
-  memcached:
-    restart: always
-    image: bodsch/docker-memcached:1.5.3-r1
-    container_name: memcached
-    hostname: memcached
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-    command: "-l 0.0.0.0 -m 8 -u memcached"
-    networks:
-      - mon
+#  memcached:
+#    restart: always
+#    image: bodsch/docker-memcached:1.5.3-r1
+#    container_name: memcached
+#    hostname: memcached
+#    volumes:
+#      - /etc/localtime:/etc/localtime:ro
+#    command: "-l 0.0.0.0 -m 8 -u memcached"
+#    networks:
+#      - mon
 
   redis:
     restart: always
     image: bodsch/docker-redis:1711.1
     container_name: redis
     hostname: redis
-    ports:
-      - 6379:6379
+#    ports:
+#      - 6379:6379
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - redis:/var/lib/redis
@@ -188,7 +188,7 @@ services:
       # IF NOT, THEN SET THEN TO $GRAPHITE_HOST
       # (see above in this configuration part!)
       CARBON_HOST: carbon
-      MEMCACHE_HOST: memcached
+      # MEMCACHE_HOST: memcached
       LDAP: '{
         "server": "${LDAP_SERVER}",
         "port": "${LDAP_PORT}",
@@ -201,10 +201,10 @@ services:
     depends_on:
       - data
       - database
-      - memcached
+#      - memcached
     links:
       - database
-      - memcached
+#      - memcached
     volumes:
       - /etc/localtime:/etc/localtime:ro
       # - /share/opt/grafana/dashboards:/opt/grafana/dashboards
@@ -328,7 +328,6 @@ services:
         "ba": { "user":"admin", "password":"admin" },
         "api": { "user":"root", "password":"icinga" },
         "server": "cm-icinga2-master",
-        "port": 4567,
         "path": "/"
       }'
     depends_on:
@@ -482,7 +481,6 @@ services:
         "ba": { "user":"admin", "password":"admin" },
         "api": { "user":"root", "password":"icinga" },
         "server": "cm-icinga2-master",
-        "port": 4567,
         "path": "/"
       }'
       ICINGA_HOST: cm-icinga2-master

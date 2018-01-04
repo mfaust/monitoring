@@ -44,4 +44,4 @@ HEALTHCHECK \
   --interval=5s \
   --timeout=2s \
   --retries=12 \
-  CMD curl --silent --fail localhost:4567/v2/health-check || exit 1
+  CMD curl --silent --fail localhost:8080/v2/health-check || exit 1
