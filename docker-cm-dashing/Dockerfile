@@ -4,7 +4,7 @@ FROM bodsch/docker-dashing:1801-r1
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
-  VERSION="1711" \
+  VERSION="1801" \
   BUILD_DATE="2018-01-04" \
   DASHBOARD="coremedia" \
   ICINGA2_GEM_TYPE="local" \

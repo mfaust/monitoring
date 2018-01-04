@@ -1,13 +1,13 @@
 
-FROM bodsch/docker-jolokia:1.3.7
+FROM bodsch/docker-jolokia:1.3.7-r2
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ARG HOSTS
 
 ENV \
-  VERSION="1712" \
-  BUILD_DATE="2017-12-04" \
+  VERSION="1801" \
+  BUILD_DATE="2018-01-04" \
   TERM=xterm \
   TZ='Europe/Berlin' \
   GOPATH=/build \
