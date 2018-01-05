@@ -81,7 +81,7 @@ SCHEDULER.every '30s', :first_in => 0 do |job|
 
     # meter widget
     # we'll update the patched meter widget with absolute values (set max dynamically)
-    hosts_down          = hosts_down          # all hosts with problems (integer)
+    # hosts_down          = hosts_down          # all hosts with problems (integer)
     hosts_all           = icinga.hosts_all           # all hosts (integer)
     service_problems    = icinga.count_services_with_problems   # all services with problems (integer)
     services_all        = icinga.services_all        # all services (integer)
@@ -225,7 +225,7 @@ SCHEDULER.every '30s', :first_in => 0 do |job|
       title: 'Hosts down',
       value: hosts_down,
       moreinfo: "All Problems: #{host_problems_all.to_s}",
-      color: color_hosts_down_adjusted
+      color: color_hosts_down
     })
 
     send_event('icinga-service-problems-critical', {
