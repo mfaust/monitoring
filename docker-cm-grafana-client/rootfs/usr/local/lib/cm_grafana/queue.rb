@@ -97,7 +97,6 @@ class CMGrafana < Grafana::Client
 
       tags       = payload.dig('tags')
       overview   = payload.dig('overview') || true
-      overview_grouped_by = payload.dig('overview_grouped_by') || []
       dns        = payload.dig('dns')
       annotation = payload.dig('annotation') || true
       timestamp  = payload.dig('timestamp') || Time.now.to_i
@@ -235,38 +234,33 @@ class CMGrafana < Grafana::Client
           end
         end
 
-        # TODO
-        # check payload!
-        # e.g. for 'force' ...
-        result = self.create_dashboard_for_host( host: node, tags: tags, overview: overview )
-
-        logger.debug( result )
-
         ##
         # get all group_by entrys for us
         #
         group_by = @database.config( ip: ip, short: short, fqdn: fqdn, key: 'group_by' )
 
-        logger.debug( "group_by: #{group_by} (#{group_by.class.to_s})" )
+        # disable the general overview site, when a 'group_by' is ordered
+        #
+        overview = false if(group_by.is_a?(Hash))
+
+        # TODO
+        # check payload!
+        # e.g. for 'force' ...
+        result = self.create_dashboard_for_host( host: node, tags: tags, overview: overview )
 
         if(group_by.is_a?(Hash))
 
           group_by = group_by.dig('group_by')
-          logger.debug( "group_by: #{group_by} (#{group_by.class.to_s})" )
 
           begin
             group_by.sort!
             group_by_hosts = @database.config( key: 'group_by', value: group_by )
-            logger.debug( "group_by_hosts: #{group_by_hosts} (#{group_by_hosts.class.to_s})" )
 
             create_overview_dashboard_for_hosts( group_by_hosts.keys, group_by )
           rescue => error
             logger.error(error)
           end
         end
-        #
-        #
-        ##
 
         @jobs.del( job_option )
 

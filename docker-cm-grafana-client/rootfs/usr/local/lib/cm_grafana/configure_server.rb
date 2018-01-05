@@ -311,8 +311,19 @@ class CMGrafana < Grafana::Client
 
             logger.debug( format('datasource: %s :: %s', type, name ) )
 
-            data_src = datasource( name )
-            status = data_src.dig('status') || 500
+            # TODO
+            # strange bug ??
+            # issue: https://github.com/cm-xlabs/monitoring/issues/123
+            begin
+              data_src = datasource( name )
+              logger.debug("data_src: #{data_src} (#{data_src.class.to_s})")
+              status = data_src.dig('status') || 500
+
+            rescue => error
+
+              status = 500
+              logger.error error
+            end
 
             if( status == 500 )
 

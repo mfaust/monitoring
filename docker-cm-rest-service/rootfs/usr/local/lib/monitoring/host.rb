@@ -50,6 +50,9 @@ module Monitoring
         result[host.to_s]['request'] = hash
 
         if( hash.is_a?(Hash) )
+
+          logger.debug(JSON.pretty_generate(hash))
+
           force               = hash.dig('force')               || false
           annotation          = hash.dig('annotation')          || true
           grafana_overview    = hash.dig('overview')            || true
@@ -66,8 +69,9 @@ module Monitoring
       # no overview -> no group by
       overview_grouped_by = []  if(grafana_overview == false)
 
-      logger.debug( format( 'force          : %s (%s)', force           ? 'true' : 'false', force.class.to_s))
+      logger.debug( format( 'force          : %s (%s)', force            ? 'true' : 'false', force.class.to_s))
       logger.debug( format( 'overview       : %s (%s)', grafana_overview ? 'true' : 'false', grafana_overview.class.to_s))
+      logger.debug( format( 'annotation     : %s (%s)', annotation       ? 'true' : 'false', annotation.class.to_s))
       logger.debug( format( 'services       : %s (%s)', services , services.class.to_s) )
       logger.debug( format( 'tags           : %s (%s)', tags , tags.class.to_s) )
       logger.debug( format( 'config         : %s (%s)', config , config.class.to_s) )
@@ -96,9 +100,9 @@ module Monitoring
 
       return JSON.pretty_generate( status: 400, message: 'Host are not available (DNS Problem)' ) if( host_data == false )
 
-      ip              = host_data.dig(:ip)
-      short           = host_data.dig(:short)
-      fqdn            = host_data.dig(:fqdn)
+      ip    = host_data.dig(:ip)
+      short = host_data.dig(:short)
+      fqdn  = host_data.dig(:fqdn)
 
       return JSON.pretty_generate( status: 200, message: "Host '#{host}' is already in monitoring" ) if( force == false && in_monitoring == true )
 
@@ -112,11 +116,10 @@ module Monitoring
         payload = JSON.parse( payload )
       end
 
-      payload[:timestamp] = Time.now.to_i
-      payload[:dns] =  host_data
-      payload[:annotation] = annotation
-
-#       logger.debug( JSON.pretty_generate( payload ) )
+      # payload = payload.deep_symbolize_keys
+      payload[:timestamp]  = Time.now.to_i
+      payload[:dns]        = host_data
+#       payload[:annotation] = annotation
 
       delay = 0
 
@@ -159,7 +162,7 @@ module Monitoring
       #
       status = @database.create_dns( ip: ip, short: short, fqdn: fqdn )
 
-#       logger.debug( JSON.pretty_generate( payload ) )
+logger.debug( JSON.pretty_generate( payload ) )
 
       # now, we can write an own configiguration per node when we add them, hurray
       #

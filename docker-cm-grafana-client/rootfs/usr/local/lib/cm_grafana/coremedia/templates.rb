@@ -239,19 +239,24 @@ class CMGrafana
 
         host_header = %(
           {
-            "content": "# #{host}",
-            "gridPos": {
-              "h": 2,
-              "w": 24,
-              "x": 0,
-              "y": 0
-            },
-            "id": 101,
-            "links": [],
-            "mode": "markdown",
-            "title": "",
-            "transparent": true,
-            "type": "text"
+            "collapse": false,
+            "height": "35",
+            "panels": [
+              {
+                "content": "<h4>#{host}</h4>",
+                "id": 111,
+                "mode": "html",
+                "span": 12,
+                "transparent": true,
+                "type": "text"
+              }
+            ],
+            "repeat": null,
+            "repeatIteration": null,
+            "repeatRowId": null,
+            "showTitle": false,
+            "title": "#{host}",
+            "titleSize": "h5"
           }
         )
 

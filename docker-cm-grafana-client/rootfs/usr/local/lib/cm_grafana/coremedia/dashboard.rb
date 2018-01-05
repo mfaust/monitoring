@@ -654,10 +654,8 @@ class CMGrafana
         return { status: 404, message: 'no servers for grouped overview dashboard' } unless( servers.is_a?(Array) || servers.count == 0 )
 
         rows = []
-        templating_list = []
 
         # we need %SHORTHOST% and %STORAGE_IDENTIFIER% for every host
-
         servers.each do |s|
 
           logger.debug( "host: #{s}" )
@@ -682,23 +680,7 @@ class CMGrafana
             logger.info( "use custom display_name from config: '#{grafana_hostname}'" )
           end
 
-          # grafana_hostname  = slug( grafana_hostname ).gsub( '.', '-' )
-
-#           # TODO
-#           # we need here the STORAGE_IDENTIFIER
-#           templating_list << %(
-#             {
-#               "current": { "value": "#{grafana_hostname}", "text": "#{grafana_hostname}" },
-#               "hide": 2,
-#               "label": null,
-#               "name": "host",
-#               "options": [ { "value": "#{grafana_hostname}", "text": "#{grafana_hostname}" } ],
-#               "query": "#{grafana_hostname}",
-#               "type": "constant"
-#             }
-#           )
-
-#          rows << overview_host_header(s)
+          rows << overview_host_header(s)
 
           discovery = discovery_data( fqdn: s )
           services  = discovery.keys
@@ -707,19 +689,14 @@ class CMGrafana
           rows << overview_template_rows(services)
 
           begin
-            # rows = rows.map { |s| s.gsub('%SHORTHOST%', short_hostname).gsub('$host', grafana_hostname) }
             rows.gsub!('%SHORTHOST%', short_hostname)
             rows.gsub!('$host', grafana_hostname)
           rescue =>error
             logger.error(error)
           end
-
         end
 
-#         logger.debug(rows)
-
         rows            = rows.join(',')
-#         templating_list = templating_list.join(',')
 
         template = %(
           {
@@ -731,7 +708,7 @@ class CMGrafana
               "style": "dark",
               "timezone": "browser",
               "editable": true,
-              "hideControls": false,
+              "hideControls": true,
               "sharedCrosshair": false,
               "rows": [
                 #{rows}
@@ -765,19 +742,13 @@ class CMGrafana
         template = regenerate_template_ids( template )
         template = JSON.parse( template ) if( template.is_a?(String) )
 
-        title = template.dig('dashboard','title')
-
-        logger.debug( JSON.pretty_generate( template ) )
-
-        begin
-        response = create_dashboard( dashboard: template )
+        response         = create_dashboard( dashboard: template )
         response_status  = response.dig('status').to_i
         response_message = response.dig('message')
-        rescue => error
-          logger.error error
-        end
 
         logger.warn( format('template can\'t be add: [%s] %s', response_status, response_message ) ) if( response_status != 200 )
+
+        response
       end
 
     end
