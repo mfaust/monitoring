@@ -17,8 +17,12 @@ module Monitoring
   #          "ports": [50199],
   #          "display_name": "foo.bar.com",
   #          "services": [
-  #            "cae-live-1": {},
-  #            "content-managment-server": { "port": 41000 }
+  #            "cae-live-1",
+  #            "content-managment-server"
+  #          ],
+  #          "group_by": [
+  #            "dev",
+  #            "management"
   #          ]
   #        }
   #      }
@@ -45,24 +49,29 @@ module Monitoring
 
         result[host.to_s]['request'] = hash
 
-        if( hash.is_a?(Hash)
+        if( hash.is_a?(Hash) )
+
+          logger.debug(JSON.pretty_generate(hash))
+
           force               = hash.dig('force')               || false
           annotation          = hash.dig('annotation')          || true
           grafana_overview    = hash.dig('overview')            || true
-          overview_grouped_by = hash.dig('overview_grouped_by') || []
           services            = hash.dig('services')            || []
           tags                = hash.dig('tags')                || []
           config              = hash.dig('config')              || {}
         end
       end
 
-      sanity_force = ( !force.nil? && force.is_a?(Boolean) )
-      sanity_tags  = ( !tags.nil? && tags.is_a?(Array) )
-      sanity_config = ( !config.nil? && config.is_a?(Hash) )
+      sanity_force    = ( !force.nil? && force.is_a?(Boolean) )
+      sanity_tags     = ( !tags.nil? && tags.is_a?(Array) )
+      sanity_config   = ( !config.nil? && config.is_a?(Hash) )
 
-      logger.debug( format( 'force          : %s (%s)', force           ? 'true' : 'false', force.class.to_s))
+      # no overview -> no group by
+      overview_grouped_by = []  if(grafana_overview == false)
+
+      logger.debug( format( 'force          : %s (%s)', force            ? 'true' : 'false', force.class.to_s))
       logger.debug( format( 'overview       : %s (%s)', grafana_overview ? 'true' : 'false', grafana_overview.class.to_s))
-      logger.debug( format( ' `- grouped by : %s (%s)', overview_grouped_by, overview_grouped_by.class.to_s))
+      logger.debug( format( 'annotation     : %s (%s)', annotation       ? 'true' : 'false', annotation.class.to_s))
       logger.debug( format( 'services       : %s (%s)', services , services.class.to_s) )
       logger.debug( format( 'tags           : %s (%s)', tags , tags.class.to_s) )
       logger.debug( format( 'config         : %s (%s)', config , config.class.to_s) )
@@ -91,9 +100,9 @@ module Monitoring
 
       return JSON.pretty_generate( status: 400, message: 'Host are not available (DNS Problem)' ) if( host_data == false )
 
-      ip              = host_data.dig(:ip)
-      short           = host_data.dig(:short)
-      fqdn            = host_data.dig(:fqdn)
+      ip    = host_data.dig(:ip)
+      short = host_data.dig(:short)
+      fqdn  = host_data.dig(:fqdn)
 
       return JSON.pretty_generate( status: 200, message: "Host '#{host}' is already in monitoring" ) if( force == false && in_monitoring == true )
 
@@ -107,11 +116,10 @@ module Monitoring
         payload = JSON.parse( payload )
       end
 
-      payload[:timestamp] = Time.now.to_i
-      payload[:dns] =  host_data
-      payload[:annotation] = annotation
-
-#       logger.debug( JSON.pretty_generate( payload ) )
+      # payload = payload.deep_symbolize_keys
+      payload[:timestamp]  = Time.now.to_i
+      payload[:dns]        = host_data
+#       payload[:annotation] = annotation
 
       delay = 0
 
@@ -154,7 +162,7 @@ module Monitoring
       #
       status = @database.create_dns( ip: ip, short: short, fqdn: fqdn )
 
-#       logger.debug( JSON.pretty_generate( payload ) )
+# logger.debug( JSON.pretty_generate( payload ) )
 
       # now, we can write an own configiguration per node when we add them, hurray
       #
@@ -163,7 +171,7 @@ module Monitoring
         status = @database.create_config( ip: ip, short: short, fqdn: fqdn, data: config )
       end
 
-      logger.debug( 'create message for discovery service' )
+      logger.info( 'create message for discovery service' )
       message_queue( cmd: 'add', node: host, queue: 'mq-discover', payload: payload, prio: 1, delay: 2 + delay.to_i )
 
       logger.info('sucessfull')
@@ -301,16 +309,29 @@ module Monitoring
 #         payload: { command: 'remove', argument: 'node', config: config }
 #       )
 
-      logger.debug( 'remove icinga checks and notifications' )
-      message_queue( cmd: 'remove', node: host, queue: 'mq-icinga', payload: payload, prio: 1 )
+      logger.info( 'create message for remove node from discovery service' )
+      message_queue( cmd: 'remove', node: host, queue: 'mq-discover', payload: payload, prio: 1, ttr: 1, delay: 0 )
+#      message_queue( cmd: 'remove', node: host, queue: 'mq-discover', payload: payload, prio: 1, delay: 5 )
 
-      logger.debug( 'remove grafana dashboards' )
-      message_queue( cmd: 'remove', node: host, queue: 'mq-grafana', payload: payload, prio: 1 )
+      logger.info( 'create message for remove icinga checks and notifications' )
+      message_queue( cmd: 'remove', node: host, queue: 'mq-icinga', payload: payload, prio: 1, ttr: 1, delay: 0 )
 
-      logger.debug( 'remove node from discovery service' )
-      message_queue( cmd: 'remove', node: host, queue: 'mq-discover', payload: payload, prio: 1, delay: 5 )
+      logger.info( 'create message for remove grafana dashboards' )
+      message_queue( cmd: 'remove', node: host, queue: 'mq-grafana', payload: payload, prio: 1, ttr: 1, delay: 0 )
 
-      @database.remove_dns( short: host )
+      sleep(3)
+
+      logger.debug( 'set node status to OFFLINE' )
+      status = @database.set_status( ip: ip, short: short, fqdn: fqdn, status: Storage::MySQL::OFFLINE )
+
+      logger.debug( 'remove configuration' )
+      status  = @database.remove_config( ip: ip, short: short, fqdn: fqdn )
+      logger.debug(status)
+
+      logger.debug( 'remove dns' )
+      status  = @database.remove_dns( ip: ip, short: short, fqdn: fqdn )
+
+      #@database.remove_dns( short: host )
 
       logger.info('sucessfull')
 

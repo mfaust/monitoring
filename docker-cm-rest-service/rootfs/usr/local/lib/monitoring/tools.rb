@@ -120,6 +120,8 @@ module Monitoring
       result = @mq_producer.add_job( queue, job, prio, ttr, delay )
       result = JSON.parse( result ) if( result.is_a?( String ) )
 
+      return { status: 404, message: 'can\'t get status.' } if(result.nil?)
+
       status = result.dig(:status)
       id = result.dig(:id)
 

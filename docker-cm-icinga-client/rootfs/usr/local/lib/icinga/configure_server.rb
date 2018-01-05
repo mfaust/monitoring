@@ -53,8 +53,11 @@ class CMIcinga2 < Icinga2::Client
       while( icinga2_available == false || retries >= 20 )
 
         logger.debug(format('try to create the icinga2 connection (%d)', retries))
-
-        icinga2_available = available?
+        begin
+          icinga2_available = available?
+        rescue => error
+          logger.error(error)
+        end
         retries += 1
         sleep( 5 )
       end
