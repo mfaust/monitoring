@@ -12,9 +12,11 @@ Screenshots
 ## Dashboard
 ![dashboard](../assets/monitoring_3.png)
 
+## Gruppiertes Dashboard
+![grouped-dashboard](../assets/overview_grouped_by.png)
+
 ## Icinga2
 ![icinga2](../assets/monitoring_4.png)
-
 
 ## Grafana Time Ranges
 ![Time Ranges](../assets/21-time-ranges.png)
