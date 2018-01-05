@@ -162,7 +162,7 @@ module Monitoring
       #
       status = @database.create_dns( ip: ip, short: short, fqdn: fqdn )
 
-logger.debug( JSON.pretty_generate( payload ) )
+# logger.debug( JSON.pretty_generate( payload ) )
 
       # now, we can write an own configiguration per node when we add them, hurray
       #
