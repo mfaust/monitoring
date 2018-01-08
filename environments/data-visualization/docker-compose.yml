@@ -33,11 +33,11 @@ services:
 
   database:
     restart: always
-    image: bodsch/docker-mysql:1711.4
+    image: bodsch/docker-mysql:10.1.28-r1
     container_name: database
     hostname: database
-    ports:
-      - 3306:3306
+#    ports:
+#      - 3306:3306
     environment:
       MYSQL_SYSTEM_USER: root
       MYSQL_ROOT_PASS: database.pass
@@ -60,7 +60,7 @@ services:
 
   nginx:
     restart: always
-    image: bodsch/docker-nginx:1711.1
+    image: bodsch/docker-nginx:1.12.2
     container_name: nginx
     hostname: nginx
     ports:
@@ -96,7 +96,7 @@ services:
 
   carbon:
     restart: always
-    image: bodsch/docker-go-carbon:1711.1
+    image: bodsch/docker-go-carbon:0.12.0-rc1
     container_name: carbon
     hostname: carbon
     depends_on:
@@ -113,7 +113,7 @@ services:
 
   graphite:
     restart: always
-    image: bodsch/docker-graphite:1.1.0-r2
+    image: bodsch/docker-graphite:1.1.1-r1
     container_name: graphite
     hostname: graphite
     environment:
@@ -130,7 +130,7 @@ services:
 
   grafana:
     restart: always
-    image: bodsch/docker-grafana:4.6.2-r3
+    image: bodsch/docker-grafana:4.6.3-r1
     container_name: grafana
     hostname: grafana
     environment:
@@ -163,7 +163,7 @@ services:
       - memcached
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /share/opt/grafana/dashboards:/opt/grafana/dashboards
+      # - /share/opt/grafana/dashboards:/opt/grafana/dashboards
     networks:
       - mon
 
@@ -184,19 +184,11 @@ services:
       IDO_PASSWORD: ido.pass
       IDO_DATABASE_NAME: icinga2core
       CARBON_HOST: carbon
-      ICINGA_CLUSTER: 'true'
+      ICINGA_CLUSTER: 'false'
       ICINGA_MASTER: cm-icinga2-master
-      ICINGA_CERT_SERVICE: 'true'
-      ICINGA_CERT_SERVICE_BA_USER: admin
-      ICINGA_CERT_SERVICE_BA_PASSWORD: admin
-      ICINGA_CERT_SERVICE_API_USER: cert-service
-      ICINGA_CERT_SERVICE_API_PASSWORD: 47pswW14rzeV9MNFGruI
-      ICINGA_CERT_SERVICE_PATH: /cert-service/
       ICINGA_API_USERS: root:icinga,icingaweb:icingaweb,dashing:dashing,cert:foo-bar
-      REDIS_HOST: redis
     ports:
       - 5665:5665
-      - 6666:6666
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /share/etc/cm-icinga2.yaml:/etc/cm-icinga2.yaml
@@ -213,15 +205,21 @@ services:
       - /share/usr/lib/monitoring-plugins/check_cm_capconnection.rb:/usr/lib/monitoring-plugins/check_cm_capconnection
       - /share/usr/lib/monitoring-plugins/check_cm_runlevel.rb:/usr/lib/monitoring-plugins/check_cm_runlevel
       - /share/usr/lib/monitoring-plugins/check_cm_sequencenumbers.rb:/usr/lib/monitoring-plugins/check_cm_seqencenumbers
+      - /share/usr/lib/monitoring-plugins/check_cm_nodeexporter_disk.rb:/usr/lib/monitoring-plugins/check_cm_nodeexporter_disk
+      - /share/usr/lib/monitoring-plugins/check_cm_nodeexporter_memory.rb:/usr/lib/monitoring-plugins/check_cm_nodeexporter_memory
+      - /share/usr/lib/monitoring-plugins/check_cm_nodeexporter_load.rb:/usr/lib/monitoring-plugins/check_cm_nodeexporter_load
       - /share/usr/lib/monitoring-plugins/check_ssl_cert:/usr/lib/monitoring-plugins/check_ssl_cert
       - icinga:/srv
       - icinga:/var/lib/icinga2
     networks:
       - mon
+    extra_hosts:
+      osmc.local: 192.168.122.60
+      blueprint-box: 192.168.252.100
 
   icingaweb2:
     restart: always
-    image: bodsch/docker-icingaweb2:2.5.0-r1
+    image: bodsch/docker-icingaweb2:2.5.0-r2
     container_name: icingaweb2
     hostname: icingaweb2
     environment:
@@ -282,7 +280,6 @@ services:
         "ba": { "user":"admin", "password":"admin" },
         "api": { "user":"root", "password":"icinga" },
         "server": "cm-icinga2-master",
-        "port": 4567,
         "path": "/"
       }'
     depends_on:
