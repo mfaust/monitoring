@@ -26,6 +26,7 @@ services:
     environment:
       SILENT: 'true'
       SSL_SUBJECT: localhost
+      HOSTNAME: monitoring.local
     volumes:
       - ./certs:/certs
     depends_on:
