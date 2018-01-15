@@ -190,6 +190,7 @@ services:
       ICINGA_API_USERS: root:icinga,icingaweb:icingaweb,dashing:dashing,cert:foo-bar
     ports:
       - 5665:5665
+      - 8080:8080
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /share/etc/cm-icinga2.yaml:/etc/cm-icinga2.yaml
@@ -280,11 +281,13 @@ services:
       ICINGA_CERT_SERVICE: '{
         "ba": { "user":"admin", "password":"admin" },
         "api": { "user":"root", "password":"icinga" },
-        "server": "cm-icinga2-master",
+        "server": "icinga2-master",
         "path": "/"
       }'
     depends_on:
       - cm-icinga2-master
+    links:
+      - cm-icinga2-master:icinga2-master
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:
