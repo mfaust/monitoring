@@ -32,7 +32,7 @@ icinga = Icinga2::Client.new( config )
 
 
 
-SCHEDULER.every '30s', :first_in => 0 do |job|
+SCHEDULER.every '30s', :first_in => '10s' do |job|
 
   begin
 
