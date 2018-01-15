@@ -179,13 +179,12 @@ services:
     links:
       - database
     environment:
-      SERVICE_NAME: icinga2-master
+      ICINGA_HOST: cm-icinga2-master
       MYSQL_HOST: database
       MYSQL_ROOT_PASS: database.pass
       IDO_PASSWORD: ido.pass
       IDO_DATABASE_NAME: icinga2core
       CARBON_HOST: carbon
-      ICINGA_CLUSTER: 'false'
       ICINGA_MASTER: cm-icinga2-master
       ICINGA_API_USERS: root:icinga,icingaweb:icingaweb,dashing:dashing,cert:foo-bar
     ports:
@@ -281,13 +280,15 @@ services:
       ICINGA_CERT_SERVICE: '{
         "ba": { "user":"admin", "password":"admin" },
         "api": { "user":"root", "password":"icinga" },
-        "server": "icinga2-master",
-        "path": "/"
+        "server": "nginx",
+        "port": "80",
+        "path": "/cert-service"
       }'
     depends_on:
       - cm-icinga2-master
     links:
       - cm-icinga2-master:icinga2-master
+      - nginx:nginx
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:
