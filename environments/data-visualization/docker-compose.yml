@@ -25,8 +25,7 @@ services:
     container_name: 01-certificate
     environment:
       SILENT: 'true'
-      SSL_SUBJECT: localhost
-      HOSTNAME: monitoring.local
+      CERT_SUBJECT_CN: localhost
     volumes:
       - ./certs:/certs
     depends_on:
