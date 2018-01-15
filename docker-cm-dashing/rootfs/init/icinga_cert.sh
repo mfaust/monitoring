@@ -235,6 +235,7 @@ extract_vars() {
 
       # TODO fix *PATH
       # the fist and the last char should not be a  '/'
+      ICINGA_CERT_SERVICE_PATH=$(echo "${ICINGA_CERT_SERVICE_PATH}" | cut -d "/" -f 2
     fi
   fi
 

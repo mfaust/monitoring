@@ -54,29 +54,36 @@ SCHEDULER.every interval, :first_in => delay do |job|
       icinga.cib_data
       icinga.host_objects
 
-#       avg_latency, avg_execution_time = icinga.average_statistics.values
+      average_statistics = icinga.average_statistics
+      puts "average_statistics    : #{average_statistics}"
+      avg_latency        = average_statistics.dig(:avg_latency)
+      avg_execution_time = average_statistics.dig(:avg_execution_time)
 
-      interval_statistics = icinga.interval_statistics
+      interval_statistics     = icinga.interval_statistics
+      puts "interval_statistics : #{interval_statistics}"
       hosts_active_checks     = interval_statistics.dig(:hosts_active_checks)
       hosts_passive_checks    = interval_statistics.dig(:hosts_passive_checks)
       services_active_checks  = interval_statistics.dig(:services_active_checks)
       services_passive_checks = interval_statistics.dig(:services_passive_checks)
 
       host_statistics    = icinga.host_statistics
-      hosts_up           = host_statistics.dig(:hosts_up)
-      hosts_down         = host_statistics.dig(:hosts_down)
-      hosts_pending      = host_statistics.dig(:hosts_pending)
-      hosts_unreachable  = host_statistics.dig(:hosts_unreachable)
-      hosts_in_downtime  = host_statistics.dig(:hosts_in_downtime)
-      hosts_acknowledged = host_statistics.dig(:hosts_acknowledged)
+      puts "host_statistics   : #{host_statistics}"
+      hosts_up           = host_statistics.dig(:up)
+      hosts_down         = host_statistics.dig(:down)
+      hosts_pending      = host_statistics.dig(:pending)
+      hosts_unreachable  = host_statistics.dig(:unreachable)
+      hosts_in_downtime  = host_statistics.dig(:in_downtime)
+      hosts_acknowledged = host_statistics.dig(:acknowledged)
 
       host_problems          = icinga.host_problems
+      puts "host_problems: #{host_problems}"
       host_problems_all      = host_problems.dig(:all)
       host_problems_down     = host_problems.dig(:down)
       host_problems_critical = host_problems.dig(:critical)
       host_problems_unknown  = host_problems.dig(:unknown)
 
       service_statistics    = icinga.service_statistics
+      puts "service_statistics: #{service_statistics}"
       services_ok           = service_statistics.dig(:ok)
       services_warning      = service_statistics.dig(:warning)
       services_critical     = service_statistics.dig(:critical)
@@ -86,6 +93,7 @@ SCHEDULER.every interval, :first_in => delay do |job|
       services_acknowledged = service_statistics.dig(:acknowledged)
 
       services_handled = icinga.service_problems_handled
+      puts "services_handled: #{services_handled}"
       service_problems_handled_all      = services_handled.dig(:all)
       service_problems_handled_warning  = services_handled.dig(:warning)
       service_problems_handled_critical = services_handled.dig(:critical)
@@ -119,7 +127,7 @@ SCHEDULER.every interval, :first_in => delay do |job|
         icinga_stats.push( { label: name, value: '%0.2f' % value } )
       end
 
-      hosts_handled_problems, hosts_down_adjusted = icinga.hosts_adjusted.values
+#      hosts_handled_problems, hosts_down_adjusted = icinga.hosts_adjusted.values
 
       # -----------------------------------------------------------------------------------
 
@@ -136,7 +144,7 @@ SCHEDULER.every interval, :first_in => delay do |job|
       color_services_in_downtime  = services_in_downtime.to_i == 0  ? 'nothing' : 'green'
       color_services_acknowledged = services_acknowledged.to_i == 0 ? 'nothing' : 'green'
 
-      color_hosts_down_adjusted       = hosts_down_adjusted.to_i == 0 ? 'blue' : 'red'
+#       color_hosts_down_adjusted       = hosts_down_adjusted.to_i == 0 ? 'blue' : 'red'
       color_services_handled_critical = service_problems_handled_critical.to_i == 0 ? 'blue' : 'red'
       color_services_handled_warning  = service_problems_handled_warning.to_i == 0 ? 'blue' : 'yellow'
       color_services_handled_unknown  = service_problems_handled_unknown.to_i == 0 ? 'blue' : 'purple'
@@ -184,20 +192,20 @@ SCHEDULER.every interval, :first_in => delay do |job|
       puts "service handled warnings: " + service_problems_handled_warning.to_s
       puts "service handled unknowns: " + service_problems_handled_unknown.to_s
 
-      puts format('Host Up             : %d', hosts_up)
-      puts format('Host Down           : %d', hosts_down)
-      puts format('Host pending        : %d', hosts_pending)
-      puts format('Host unrechable     : %d', hosts_unreachable)
-      puts format('Host in Downtime    : %d', hosts_in_downtime)
-      puts format('Host acknowledged   : %d', hosts_acknowledged)
+      puts format('Host Up             : %s', hosts_up)
+      puts format('Host Down           : %s', hosts_down)
+      puts format('Host pending        : %s', hosts_pending)
+      puts format('Host unrechable     : %s', hosts_unreachable)
+      puts format('Host in Downtime    : %s', hosts_in_downtime)
+      puts format('Host acknowledged   : %s', hosts_acknowledged)
 
-      puts format('Service Critical    : %d', services_critical)
-      puts format('Service Warning     : %d', services_warning)
-      puts format('Service Unknown     : %d', services_unknown )
-      puts format('Service Acknowledged: %d', services_acknowledged)
-      puts format('Host Acknowledged   : %d', hosts_acknowledged)
-      puts format('Service In Downtime : %d', services_in_downtime)
-      puts format('Host In Downtime    : %d', hosts_in_downtime)
+      puts format('Service Critical    : %s', services_critical)
+      puts format('Service Warning     : %s', services_warning)
+      puts format('Service Unknown     : %s', services_unknown )
+      puts format('Service Acknowledged: %s', services_acknowledged)
+      puts format('Host Acknowledged   : %s', hosts_acknowledged)
+      puts format('Service In Downtime : %s', services_in_downtime)
+      puts format('Host In Downtime    : %s', hosts_in_downtime)
       # -----------------------------------------------------------------------------------
 
       send_event('icinga-host-meter', {
