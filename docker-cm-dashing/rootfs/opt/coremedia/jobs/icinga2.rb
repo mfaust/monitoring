@@ -81,6 +81,7 @@ SCHEDULER.every interval, :first_in => delay do |job|
       host_problems_down     = host_problems.dig(:down)
       host_problems_critical = host_problems.dig(:critical)
       host_problems_unknown  = host_problems.dig(:unknown)
+      host_problems_adjusted = host_problems.dig(:adjusted)
 
       service_statistics    = icinga.service_statistics
       puts "service_statistics: #{service_statistics}"
@@ -144,7 +145,7 @@ SCHEDULER.every interval, :first_in => delay do |job|
       color_services_in_downtime  = services_in_downtime.to_i == 0  ? 'nothing' : 'green'
       color_services_acknowledged = services_acknowledged.to_i == 0 ? 'nothing' : 'green'
 
-#       color_hosts_down_adjusted       = hosts_down_adjusted.to_i == 0 ? 'blue' : 'red'
+      color_hosts_down_adjusted       = host_problems_adjusted.to_i == 0 ? 'blue' : 'red'
       color_services_handled_critical = service_problems_handled_critical.to_i == 0 ? 'blue' : 'red'
       color_services_handled_warning  = service_problems_handled_warning.to_i == 0 ? 'blue' : 'yellow'
       color_services_handled_unknown  = service_problems_handled_unknown.to_i == 0 ? 'blue' : 'purple'
@@ -254,7 +255,7 @@ SCHEDULER.every interval, :first_in => delay do |job|
         title: 'Hosts down',
         value: hosts_down,
         moreinfo: "All Problems: " + host_problems_all.to_s,
-        color: color_hosts_down
+        color: color_hosts_down_adjusted
       })
 
       send_event('icinga-service-problems-critical', {
