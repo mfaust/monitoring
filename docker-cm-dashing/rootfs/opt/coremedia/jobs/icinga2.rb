@@ -18,7 +18,7 @@ config = {
     host: icinga_host,
     api: {
       port: icinga_api_port,
-      user: icinga_api_user,
+      username: icinga_api_user,
       password: icinga_api_password,
       pki_path: icinga_api_pki_path,
       node_name: icinga_api_node_name
