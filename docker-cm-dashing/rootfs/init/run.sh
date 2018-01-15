@@ -6,7 +6,7 @@ export WORK_DIR=/srv
 
 # -------------------------------------------------------------------------------------------------
 
-. /init/icinga_cert.sh
+# . /init/icinga_cert.sh
 . /init/configure_smashing.sh
 
 echo -e "\n"

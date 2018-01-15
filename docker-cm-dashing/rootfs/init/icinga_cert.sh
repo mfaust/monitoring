@@ -228,6 +228,10 @@ extract_vars() {
       ICINGA_CERT_SERVICE_BA_USER=${ICINGA_CERT_SERVICE_BA_USER:-"admin"}
       ICINGA_CERT_SERVICE_BA_PASSWORD=${ICINGA_CERT_SERVICE_BA_PASSWORD:-"admin"}
 
+      if [[ "${ICINGA_CERT_SERVICE_PATH: -1}" = "/" ]]
+      then
+        :
+      fi
 
       # TODO fix *PATH
       # the fist and the last char should not be a  '/'
@@ -260,7 +264,6 @@ if [ -d ${WORK_DIR}/pki/${HOSTNAME} ]
 then
   echo " [i] export PKI vars"
 
-  export ICINGA_HOST=${ICINGA_CERT_SERVICE_SERVER}
   export ICINGA_API_USER=${ICINGA_CERT_SERVICE_API_USER}
   export ICINGA_API_PASSWORD=${ICINGA_CERT_SERVICE_API_PASSWORD}
 
