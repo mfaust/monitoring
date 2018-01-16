@@ -10,6 +10,8 @@ icinga_api_node_name = ENV.fetch('ICINGA_API_NODE_NAME' , nil)
 interval             = ENV.fetch('INTERVAL'             , '20s')
 delay                = ENV.fetch('RUN_DELAY'            , '10s')
 
+debug                = ENV.fetch('DEBUG'                , nil)
+
 # -----------------------------------------------------------------------------
 # validate durations for the Scheduler
 
@@ -181,32 +183,35 @@ SCHEDULER.every interval, :first_in => delay do |job|
         { label: 'Acknowledged', value: services_acknowledged, color: color_services_acknowledged }
       ]
       # -----------------------------------------------------------------------------------
-      puts "Severity: #{severity_stats}"
-      puts "Icinga  : #{icinga_stats}"
-      puts "Handled : #{handled_stats}"
-      puts "hosts_adjusted    : #{icinga.hosts_adjusted}"
-      puts "services_adjusted : #{icinga.services_adjusted}"
-      puts "host_statistics   : #{icinga.host_statistics}"
-      puts "service_statistics: #{icinga.service_statistics}"
 
-      puts "service handled critical: " + service_problems_handled_critical.to_s
-      puts "service handled warnings: " + service_problems_handled_warning.to_s
-      puts "service handled unknowns: " + service_problems_handled_unknown.to_s
+      unless(debug.nil?)
+        puts "Severity: #{severity_stats}"
+        puts "Icinga  : #{icinga_stats}"
+        puts "Handled : #{handled_stats}"
+        puts "hosts_adjusted    : #{icinga.hosts_adjusted}"
+        puts "services_adjusted : #{icinga.services_adjusted}"
+        puts "host_statistics   : #{icinga.host_statistics}"
+        puts "service_statistics: #{icinga.service_statistics}"
 
-      puts format('Host Up             : %s', hosts_up)
-      puts format('Host Down           : %s', hosts_down)
-      puts format('Host pending        : %s', hosts_pending)
-      puts format('Host unrechable     : %s', hosts_unreachable)
-      puts format('Host in Downtime    : %s', hosts_in_downtime)
-      puts format('Host acknowledged   : %s', hosts_acknowledged)
+        puts "service handled critical: " + service_problems_handled_critical.to_s
+        puts "service handled warnings: " + service_problems_handled_warning.to_s
+        puts "service handled unknowns: " + service_problems_handled_unknown.to_s
 
-      puts format('Service Critical    : %s', services_critical)
-      puts format('Service Warning     : %s', services_warning)
-      puts format('Service Unknown     : %s', services_unknown )
-      puts format('Service Acknowledged: %s', services_acknowledged)
-      puts format('Host Acknowledged   : %s', hosts_acknowledged)
-      puts format('Service In Downtime : %s', services_in_downtime)
-      puts format('Host In Downtime    : %s', hosts_in_downtime)
+        puts format('Host Up             : %s', hosts_up)
+        puts format('Host Down           : %s', hosts_down)
+        puts format('Host pending        : %s', hosts_pending)
+        puts format('Host unrechable     : %s', hosts_unreachable)
+        puts format('Host in Downtime    : %s', hosts_in_downtime)
+        puts format('Host acknowledged   : %s', hosts_acknowledged)
+
+        puts format('Service Critical    : %s', services_critical)
+        puts format('Service Warning     : %s', services_warning)
+        puts format('Service Unknown     : %s', services_unknown )
+        puts format('Service Acknowledged: %s', services_acknowledged)
+        puts format('Host Acknowledged   : %s', hosts_acknowledged)
+        puts format('Service In Downtime : %s', services_in_downtime)
+        puts format('Host In Downtime    : %s', hosts_in_downtime)
+      end
       # -----------------------------------------------------------------------------------
 
       send_event('icinga-host-meter', {

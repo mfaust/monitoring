@@ -119,6 +119,7 @@ services:
     links:
       - grafana
       - icingaweb2
+      - cm-icinga2-master:icinga2-master
       - cm-rest-service
       - markdown-service
     volumes:
@@ -129,10 +130,12 @@ services:
       - /share/etc/nginx/sites-enabled/01-default.conf:/etc/nginx/sites-enabled/01-default.conf
       - /share/etc/nginx/nginx.conf:/etc/nginx/nginx.conf
       - /share/etc/nginx/modules.d/00-restrictions.conf:/etc/nginx/modules.d/00-restrictions.conf
+      - /share/etc/nginx/modules.d/00-dnsresolver.conf:/etc/nginx/modules.d/00-dnsresolver.conf
       - /share/etc/nginx/modules.d/01-proxy-rest-service.conf:/etc/nginx/modules.d/01-proxy-rest-service.conf:ro
       - /share/etc/nginx/modules.d/01-proxy-grafana.conf:/etc/nginx/modules.d/01-proxy-grafana.conf
       - /share/etc/nginx/modules.d/01-proxy-graphite.conf:/etc/nginx/modules.d/01-proxy-graphite.conf
       - /share/etc/nginx/modules.d/01-proxy-icingaweb2.conf:/etc/nginx/modules.d/01-proxy-icingaweb2.conf
+      - /share/etc/nginx/modules.d/01-proxy-icinga-cert-service.conf:/etc/nginx/modules.d/01-proxy-icingaweb-cert-service.conf
       - /share/etc/nginx/modules.d/01-proxy-dashing-icinga2.conf:/etc/nginx/modules.d/01-proxy-dashing-icinga2.conf
       - /share/etc/nginx/modules.d/01-proxy-markdown-service.conf:/etc/nginx/modules.d/01-proxy-markdown-service.conf
     networks:
@@ -224,7 +227,7 @@ services:
       - database
       - redis
     environment:
-      SERVICE_NAME: icinga2-master
+      ICINGA_HOST: cm-icinga2-master
       MYSQL_HOST: database
       MYSQL_ROOT_PASS: database.pass
       IDO_PASSWORD: ido.pass
@@ -236,7 +239,7 @@ services:
       REDIS_HOST: redis
     ports:
       - 5665:5665
-      - 6666:6666
+      - 8080
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /share/etc/cm-icinga2.yaml:/etc/cm-icinga2.yaml
@@ -323,15 +326,20 @@ services:
     container_name: cm-dashing
     hostname: cm-dashing
     environment:
-      ICINGA_HOST: cm-icinga2-master
+      ICINGA_MASTER: cm-icinga2-master
       ICINGA_CERT_SERVICE: '{
         "ba": { "user":"admin", "password":"admin" },
         "api": { "user":"root", "password":"icinga" },
-        "server": "cm-icinga2-master",
-        "path": "/"
+        "server": "nginx",
+        "port": "80",
+        "path": "/cert-service"
       }'
     depends_on:
       - cm-icinga2-master
+      - nginx
+    links:
+      - cm-icinga2-master
+      - nginx
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:
@@ -480,8 +488,9 @@ services:
       ICINGA_CERT_SERVICE: '{
         "ba": { "user":"admin", "password":"admin" },
         "api": { "user":"root", "password":"icinga" },
-        "server": "cm-icinga2-master",
-        "path": "/"
+        "server": "nginx",
+        "port": "80",
+        "path": "/cert-service"
       }'
       ICINGA_HOST: cm-icinga2-master
       # ENABLE_NOTIFICATIONS: 'true'
@@ -490,6 +499,7 @@ services:
       - beanstalkd
     links:
       - beanstalkd
+      - nginx
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./logs:/var/log
