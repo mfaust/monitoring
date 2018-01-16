@@ -57,19 +57,19 @@ SCHEDULER.every interval, :first_in => delay do |job|
       icinga.host_objects
 
       average_statistics = icinga.average_statistics
-      puts "average_statistics    : #{average_statistics}"
+      puts "average_statistics    : #{average_statistics}" unless(debug.nil?)
       avg_latency        = average_statistics.dig(:avg_latency)
       avg_execution_time = average_statistics.dig(:avg_execution_time)
 
       interval_statistics     = icinga.interval_statistics
-      puts "interval_statistics : #{interval_statistics}"
+      puts "interval_statistics : #{interval_statistics}" unless(debug.nil?)
       hosts_active_checks     = interval_statistics.dig(:hosts_active_checks)
       hosts_passive_checks    = interval_statistics.dig(:hosts_passive_checks)
       services_active_checks  = interval_statistics.dig(:services_active_checks)
       services_passive_checks = interval_statistics.dig(:services_passive_checks)
 
       host_statistics    = icinga.host_statistics
-      puts "host_statistics   : #{host_statistics}"
+      puts "host_statistics   : #{host_statistics}" unless(debug.nil?)
       hosts_up           = host_statistics.dig(:up)
       hosts_down         = host_statistics.dig(:down)
       hosts_pending      = host_statistics.dig(:pending)
@@ -78,7 +78,7 @@ SCHEDULER.every interval, :first_in => delay do |job|
       hosts_acknowledged = host_statistics.dig(:acknowledged)
 
       host_problems          = icinga.host_problems
-      puts "host_problems: #{host_problems}"
+      puts "host_problems: #{host_problems}" unless(debug.nil?)
       host_problems_all      = host_problems.dig(:all)
       host_problems_down     = host_problems.dig(:down)
       host_problems_critical = host_problems.dig(:critical)
@@ -86,7 +86,7 @@ SCHEDULER.every interval, :first_in => delay do |job|
       host_problems_adjusted = host_problems.dig(:adjusted)
 
       service_statistics    = icinga.service_statistics
-      puts "service_statistics: #{service_statistics}"
+      puts "service_statistics: #{service_statistics}" unless(debug.nil?)
       services_ok           = service_statistics.dig(:ok)
       services_warning      = service_statistics.dig(:warning)
       services_critical     = service_statistics.dig(:critical)
@@ -96,7 +96,7 @@ SCHEDULER.every interval, :first_in => delay do |job|
       services_acknowledged = service_statistics.dig(:acknowledged)
 
       services_handled = icinga.service_problems_handled
-      puts "services_handled: #{services_handled}"
+      puts "services_handled: #{services_handled}" unless(debug.nil?)
       service_problems_handled_all      = services_handled.dig(:all)
       service_problems_handled_warning  = services_handled.dig(:warning)
       service_problems_handled_critical = services_handled.dig(:critical)

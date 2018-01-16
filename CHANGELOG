@@ -1,0 +1,23 @@
+
+
+1801
+
+  - environments
+    - update data-visualisation environment
+
+  - default log output ist now stdout
+  - icinga2-master / icinga2-satellite / icinga-client
+    - update the complet icingasuite
+    - enable safe master/satellite communication with self-monitoring
+    - use icinga-cert-service in version 0.16.3
+    - use icinga2 gem in version 0.9.3.6 (1.0-rc)
+
+  - dashing
+    - update for icinga-cert-service
+    - use puma instead of thin
+
+  - grafana / grafana-client
+    - overview dashboards can now be grouped by an array of tags
+    - use the new annotation feature of Grafana 4.6
+      remove the graphite-client, container is no longer needed
+

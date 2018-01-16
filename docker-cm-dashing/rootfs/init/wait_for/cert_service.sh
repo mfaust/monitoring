@@ -30,7 +30,7 @@ wait_for_icinga_cert_service() {
 
       [[ $? -eq 0 ]] && break
 
-      sleep 5s
+      sleep 15s
       RETRY=$(expr ${RETRY} - 1)
     done
 
@@ -50,7 +50,6 @@ wait_for_icinga_cert_service() {
     #
     until [[ ${RETRY} -le 0 ]]
     do
-
       health=$(curl \
         --silent \
         --request GET \
@@ -66,7 +65,7 @@ wait_for_icinga_cert_service() {
       health=
 
       log_info "wait for the health check on '${ICINGA_CERT_SERVICE_SERVER}' for the certificate service"
-      sleep 5s
+      sleep 15s
       RETRY=$(expr ${RETRY} - 1)
     done
 

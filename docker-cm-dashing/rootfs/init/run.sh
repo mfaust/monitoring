@@ -16,33 +16,11 @@ log_info "==================================================================="
 
 # -------------------------------------------------------------------------------------------------
 
-
 log_info "start init process ..."
 
 cd /opt/${DASHBOARD}
 
 /usr/bin/puma \
-  --quiet \
-  --config /opt/${DASHBOARD}/config/puma.rb
-
-
-
-# /usr/bin/thin \
-#   --pid /tmp/thin.pid \
-#   --quiet \
-#   --log /dev/stdout \
-#   --port 3030 \
-#   --chdir /opt/${DASHBOARD} \
-#   --environment production \
-#   --rackup /opt/${DASHBOARD}/config.ru \
-#   start
-
-#log_info "Starting Supervisor."
-#
-#if [ -f /etc/supervisord.conf ]
-#then
-#  /usr/bin/supervisord -c /etc/supervisord.conf >> /dev/null
-#fi
-
+  --config /opt/${DASHBOARD}/config/puma.rb > /dev/null
 
 # EOF

@@ -5,7 +5,7 @@ MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
   VERSION="1801" \
-  BUILD_DATE="2018-01-04" \
+  BUILD_DATE="2018-01-16" \
   DASHBOARD="coremedia" \
   ICINGA2_GEM_TYPE="local" \
   ICINGA2_GEM_VERSION="0.9" \
