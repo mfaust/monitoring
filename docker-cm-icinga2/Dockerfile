@@ -1,11 +1,11 @@
 
-FROM bodsch/docker-icinga2:1801-dev
+FROM bodsch/docker-icinga2:2.8.0-r4
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
   VERSION="1801" \
-  BUILD_DATE="2018-01-16" \
+  BUILD_DATE="2018-01-18" \
   TERM=xterm \
   TZ='Europe/Berlin'
 
@@ -19,8 +19,8 @@ RUN \
     g++ make ruby-dev tzdata && \
   gem install --quiet --no-rdoc --no-ri \
     io-console bundler && \
-  cp /usr/share/zoneinfo/$TZ /etc/localtime && \
-  echo $TZ > /etc/timezone && \
+  cp /usr/share/zoneinfo/${TZ} /etc/localtime && \
+  echo ${TZ} > /etc/timezone && \
   cd /build && \
   bundle install --quiet && \
   for g in $(ls -1 /build/*.gem 2> /dev/null) ; do echo $g; gem install --quiet --no-rdoc --no-ri ${g} ; done && \

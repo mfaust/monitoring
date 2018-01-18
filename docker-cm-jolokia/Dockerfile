@@ -7,7 +7,7 @@ ARG HOSTS
 
 ENV \
   VERSION="1801" \
-  BUILD_DATE="2018-01-04" \
+  BUILD_DATE="2018-01-18" \
   TERM=xterm \
   TZ='Europe/Berlin' \
   GOPATH=/build \
@@ -18,26 +18,21 @@ EXPOSE 8080 8088
 
 # ---------------------------------------------------------------------------------------
 
-RUN \
-  apk --quiet --no-cache update && \
-  apk --quiet --no-cache upgrade && \
-  apk add --quiet --no-cache --virtual .build-deps tzdata && \
-  cp /usr/share/zoneinfo/$TZ /etc/localtime && \
-  echo $TZ > /etc/timezone && \
-  apk del --quiet .build-deps
-
 COPY build/ /build
 
 RUN \
+  apk --quiet --no-cache update && \
   apk add --quiet --no-cache --virtual .build-deps \
-    git g++ make go && \
+    git g++ make go tzdata && \
   apk add --quiet --no-cache \
     curl && \
+  cp /usr/share/zoneinfo/${TZ} /etc/localtime && \
+  echo ${TZ} > /etc/timezone && \
   cd ${GOPATH}/src && \
   go get github.com/gorilla/mux && \
   go build -ldflags="-s -w" -o service-discovery && \
   mv service-discovery /usr/bin && \
-  apk del --quiet .build-deps && \
+  apk --quiet --purge del .build-deps && \
   rm -rf \
     /tmp/* \
     /build \
