@@ -2,6 +2,8 @@
 ICINGA_API_PORT=${ICINGA_API_PORT:-5665}
 USE_CERT_SERVICE=${USE_CERT_SERVICE:-'false'}
 
+ICINGA_MASTER=${ICINGA_MASTER:-${ICINGA_HOST}}
+
 # ICINGA_CERT_SERVICE_SERVER=
 # ICINGA_CERT_SERVICE_PORT=
 # ICINGA_CERT_SERVICE_BA_USER=
@@ -368,6 +370,12 @@ restart_master() {
 
   sleep 5s
 }
+
+if [[ -z ${ICINGA_MASTER} ]]
+then
+  log_error "the ICINGA_MASTER environment is missing."
+  exit 1
+fi
 
 
 extract_vars
