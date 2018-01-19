@@ -132,6 +132,10 @@ class CMIcinga2 < Icinga2::Client
 
             services['replication-live-server']['master_live_server'] = master_live_server unless( master_live_server.nil? )
           end
+
+          # TODO
+          # create an job, when we found no MLS to update this host
+
         end
 
         unless( services.dig('cae-live').nil? )

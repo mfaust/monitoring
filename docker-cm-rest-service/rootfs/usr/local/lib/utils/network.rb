@@ -9,7 +9,7 @@ module Utils
 
     def self.resolv( host )
 
-#       puts("self.resolv( #{host} )")
+#       $stdout.puts("self.resolv( #{host} )")
 
       line  = nil
       fqdn  = nil
@@ -43,7 +43,7 @@ module Utils
         end
       end
 
-#       puts(" #1 host  #{host} ")
+#       $stdout.puts(" #1 host  #{host} ")
 
       # use host to resolve hostname
       #  host -t A $hostname
@@ -58,18 +58,24 @@ module Utils
         line = std_out if( return_value == 0 && !std_out.to_s.empty? )
       end
 
-#       puts(" #1 line  #{line} ")
+#       $stdout.puts(" #1 line  #{line} ")
 
       # the host command above was disfunctional
       # we try the ruby resolv class
       if( line == nil )
 
         begin
-          ip   =  Resolv.getaddress( host )
+          ip   = Resolv.getaddress( host )
+          fqdn = Resolv.getname( ip )
+
+          short = fqdn.split('.').first
+
+          return { ip: ip, short: short, fqdn: fqdn }
+
           # BAD HACK
           # recursive call without a break :(
           #
-          return self.resolv( ip )
+          # return self.resolv( ip )
         rescue => e
           puts ( e )
           return { ip: nil, short: nil, fqdn: nil }
@@ -119,7 +125,9 @@ module Utils
         short: short,
         fqdn: fqdn
       }
-#       puts( "result: #{result}" )
+
+      $stdout.puts( "result: #{result}" )
+
       result
     end
 
