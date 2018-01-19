@@ -5,7 +5,7 @@ MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
   VERSION="1801" \
-  BUILD_DATE="2018-01-18" \
+  BUILD_DATE="2018-01-19" \
   TERM=xterm \
   TZ='Europe/Berlin'
 
@@ -23,7 +23,11 @@ RUN \
   echo ${TZ} > /etc/timezone && \
   cd /build && \
   bundle install --quiet && \
-  for g in $(ls -1 /build/*.gem 2> /dev/null) ; do echo $g; gem install --quiet --no-rdoc --no-ri ${g} ; done && \
+  for g in $(ls -1 /build/*.gem 2> /dev/null) ; \
+  do \
+    echo $g; \
+    gem install --quiet --no-rdoc --no-ri ${g} ; \
+  done && \
   gem uninstall --quiet \
     io-console bundler && \
   apk del --quiet .build-deps && \
@@ -33,3 +37,5 @@ RUN \
     /root/.bundle \
     /root/.gem \
     /var/cache/apk/*
+
+COPY rootfs/ /

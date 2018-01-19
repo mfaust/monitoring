@@ -22,7 +22,7 @@ RUN \
   apk add --quiet --no-cache --virtual .build-deps \
     build-base git ruby-dev ruby-rdoc tzdata && \
   apk --quiet --no-cache add \
-    bind-tools curl drill mariadb-dev mariadb-client-libs jq libressl-dev ruby-irb yajl-tools &&\
+    bind-tools curl drill mariadb-dev mariadb-client-libs jq libressl-dev ruby-irb yajl-tools && \
   cp /usr/share/zoneinfo/${TZ} /etc/localtime && \
   echo ${TZ} > /etc/timezone && \
   echo 'gem: --no-document' >> /etc/gemrc && \

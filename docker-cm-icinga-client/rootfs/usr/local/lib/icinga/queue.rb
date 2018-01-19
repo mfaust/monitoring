@@ -124,7 +124,7 @@ class CMIcinga2 < Icinga2::Client
         # full API support
         params = {
           name: fqdn,
-          address: ip,
+          address: fqdn,
           display_name: display_name,
           enable_notifications: @icinga_notifications,
           vars: payload

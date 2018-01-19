@@ -123,6 +123,8 @@ class CMIcinga2 < Icinga2::Client
 
           replicator_value = content_server( fqdn: fqdn, mbean: 'Replicator', service: 'replication-live-server' )
 
+          logger.debug(replicator_value)
+
           unless( replicator_value.nil? )
 
             master_live_server = replicator_value.dig('MasterLiveServer','host')
