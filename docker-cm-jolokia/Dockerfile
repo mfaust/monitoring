@@ -1,5 +1,5 @@
 
-FROM bodsch/docker-jolokia:1.3.7-r2
+FROM bodsch/docker-jolokia:1.3.7-r3
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 

@@ -90,7 +90,7 @@ services:
 
   redis:
     restart: always
-    image: bodsch/docker-redis:1711.1
+    image: bodsch/docker-redis:3.2.8-r1
     container_name: redis
     hostname: redis
 #    ports:
@@ -270,7 +270,7 @@ services:
 
   icingaweb2:
     restart: always
-    image: bodsch/docker-icingaweb2:2.5.0-r2
+    image: bodsch/docker-icingaweb2:2.5.0-r4
     container_name: icingaweb2
     hostname: icingaweb2
     environment:
@@ -492,7 +492,7 @@ services:
         "port": "80",
         "path": "/cert-service"
       }'
-      ICINGA_HOST: cm-icinga2-master
+      ICINGA_MASTER: cm-icinga2-master
       # ENABLE_NOTIFICATIONS: 'true'
     depends_on:
       - data
