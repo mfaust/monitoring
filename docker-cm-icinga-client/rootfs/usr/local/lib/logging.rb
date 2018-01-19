@@ -20,18 +20,9 @@ module Logging
 
     def configure_logger_for( classname )
 
-#       logFile         = '/var/log/icinga2-client.log'
-#       file            = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
-#       file.sync       = true
-#       logger          = Logger.new( file, 'weekly', 1024000 )
-#
-#       if( File.exists?( logFile ) )
-#         FileUtils.chmod( 0666, logFile )
-#         FileUtils.chown( 'nobody', 'nobody', logFile )
-#       end
-
-      logger                 = Logger.new(STDOUT)
-      logger.progname        = classname
+      $stdout.sync = true
+      logger                 = Logger.new($stdout)
+#      logger.progname        = classname
       logger.level           = Logger::INFO
       logger.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
       logger.formatter       = proc do |severity, datetime, progname, msg|

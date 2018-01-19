@@ -1,5 +1,5 @@
 
-FROM bodsch/docker-icinga2:2.8.0-r4
+FROM bodsch/docker-icinga2:2.8.0-r5
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 

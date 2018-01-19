@@ -4,8 +4,8 @@ FROM alpine:3.7
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
-  VERSION="1712" \
-  BUILD_DATE="2017-12-19" \
+  VERSION="1801" \
+  BUILD_DATE="2018-01-19" \
   TERM=xterm \
   TZ='Europe/Berlin' \
   ICINGA2_GEM_TYPE="local" \
@@ -13,21 +13,18 @@ ENV \
 
 # ---------------------------------------------------------------------------------------
 
-RUN \
-  apk --quiet --no-cache update && \
-  apk --quiet --no-cache upgrade && \
-  apk add --quiet --no-cache --virtual .build-deps tzdata && \
-  cp /usr/share/zoneinfo/$TZ /etc/localtime && \
-  echo $TZ > /etc/timezone && \
-  apk del --quiet .build-deps
-
 COPY build /build
 
 RUN \
+  apk --quiet --no-cache update && \
+  apk --quiet --no-cache upgrade && \
+
   apk add --quiet --no-cache --virtual .build-deps \
-    build-base git ruby-dev ruby-rdoc && \
+    build-base git ruby-dev ruby-rdoc tzdata && \
   apk --quiet --no-cache add \
     bind-tools curl drill mariadb-dev mariadb-client-libs jq libressl-dev ruby-irb yajl-tools &&\
+  cp /usr/share/zoneinfo/${TZ} /etc/localtime && \
+  echo ${TZ} > /etc/timezone && \
   echo 'gem: --no-document' >> /etc/gemrc && \
   gem install --quiet --no-rdoc --no-ri \
     io-console bundler && \
