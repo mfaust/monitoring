@@ -300,7 +300,7 @@ module ServiceDiscovery
 
       # if the destination host available (simple check with ping)
       #
-      unless( Utils::Network.isRunning?( fqdn ) )
+      unless( Utils::Network.is_running?( fqdn ) )
 
         # delete dns entry
         result  = @database.removeDNS( ip: ip, short: short, fqdn: fqdn )

@@ -118,7 +118,7 @@ module DataCollector
 
       return { status: 500, message: 'no host name for mongodb_data data' } if( host.nil? )
 
-      if( Utils::Network.portOpen?( host, port ) == false )
+      if( Utils::Network.port_open?( host, port ) == false )
         logger.warn( format( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
         return JSON.parse( JSON.generate( status: 500 ) )
       end
@@ -151,7 +151,7 @@ module DataCollector
       # we need an low-level-priv User for Monitoring!
       settings = { host: host, username: user, password: pass } unless( port.nil? )
 
-      if( Utils::Network.portOpen?( host, port ) == false )
+      if( Utils::Network.port_open?( host, port ) == false )
         logger.warn( format( 'The Port \'%s\' on Host \'%s\' is not open, skip ...', port, host ) )
         return JSON.parse( JSON.generate( status: 500 ) )
       end
@@ -224,7 +224,7 @@ module DataCollector
         }
       end
 
-      result = Utils::Network.portOpen?( host, port )
+      result = Utils::Network.port_open?( host, port )
 
       if( result == false )
         logger.warn( format( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
@@ -245,7 +245,7 @@ module DataCollector
 
       return { status: 500, message: 'no host name for redis_data data' } if( host.nil? )
 
-      if( Utils::Network.portOpen?( host, port ) == false )
+      if( Utils::Network.port_open?( host, port ) == false )
         logger.warn( format( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
         return JSON.parse( JSON.generate( status: 500 ) )
       end
@@ -265,7 +265,7 @@ module DataCollector
 
       return { status: 500, message: 'no host name for node_exporter data' } if( host.nil? )
 
-      if( Utils::Network.portOpen?( host, port ) == false )
+      if( Utils::Network.port_open?( host, port ) == false )
         logger.warn( format( 'The Port %s for node_exporter on Host %s is not open, skip sending data', port, host ) )
         return JSON.parse( JSON.generate( status: 500 ) )
       end
@@ -284,7 +284,7 @@ module DataCollector
 
       return { status: 500, message: 'no host name for resourced_data data' } if( host.nil? )
 
-      if( Utils::Network.portOpen?( host, port ) == false )
+      if( Utils::Network.port_open?( host, port ) == false )
         logger.warn( format( 'The Port \'%s\' on Host \'%s\' is not open, skip ...', port, host ) )
         return JSON.parse( JSON.generate( status: 500 ) )
       end
@@ -308,7 +308,7 @@ module DataCollector
 
       return { status: 500, message: 'no host name for apache_mod_status data' } if( host.nil? )
 
-      result = Utils::Network.portOpen?( host, port )
+      result = Utils::Network.port_open?( host, port )
 
       if( result == false )
         logger.warn( format( 'The Port \'%s\' on Host \'%s\' is not open, skip ...', port, host ) )
@@ -495,7 +495,7 @@ module DataCollector
 
 #       logger.debug( format( 'check Port %s on Host %s for sending data', dest_port, dest_host ) )
 
-      result = Utils::Network.portOpen?( dest_host, dest_port )
+      result = Utils::Network.port_open?( dest_host, dest_port )
 
       logger.warn( format( 'The Port %s on Host %s is not open, skip sending data', dest_port, dest_host ) ) if( result == false )
 

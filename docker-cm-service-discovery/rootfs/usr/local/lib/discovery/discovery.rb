@@ -376,7 +376,7 @@ module ServiceDiscovery
         #
         ports.each do |p|
 
-          open = Utils::Network.portOpen?( fqdn, p )
+          open = Utils::Network.port_open?( fqdn, p )
 
           logger.debug( sprintf( 'Host: %s | Port: %s   %s', fqdn, p, open ? 'open' : 'closed' ) )
 

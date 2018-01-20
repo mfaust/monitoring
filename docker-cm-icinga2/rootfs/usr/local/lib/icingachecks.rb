@@ -101,7 +101,7 @@ class Icinga2Check
 
     # return dns.dig(:fqdn) unless(dns.nil?)
 
-    long = Utils::Network.resolv( hostname ).dig(:long)
+    long = Utils::Network.resolv( hostname ).dig(:fqdn)
 
     logger.debug( "resolver: #{long}" )
 

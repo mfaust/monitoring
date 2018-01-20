@@ -88,7 +88,7 @@ module PortDiscovery
       port = params.dig(:port) ||  @Port
 
       # if our jolokia proxy available?
-      if( ! Utils::Network.portOpen?( host, port ) )
+      if( ! Utils::Network.port_open?( host, port ) )
         logger.error( 'port discovery service is not available!' )
         return false
       end

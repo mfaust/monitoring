@@ -742,7 +742,7 @@ module Storage
         }
       end
 
-      if( Utils::Network.isIp?( short ) )
+      if( Utils::Network.is_ip?( short ) )
 
         logger.debug( 'ip given' )
 

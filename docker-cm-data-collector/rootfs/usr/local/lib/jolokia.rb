@@ -113,7 +113,7 @@ module Jolokia
     def available?
 
       # if our jolokia proxy available?
-      false if( ! Utils::Network.portOpen?( @Host, @Port ) )
+      false if( ! Utils::Network.port_open?( @Host, @Port ) )
 
       true
     end
