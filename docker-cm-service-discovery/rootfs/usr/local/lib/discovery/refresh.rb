@@ -19,7 +19,7 @@ module ServiceDiscovery
         # if the destination host available (simple check with ping)
         #
         # 503 Service Unavailable
-        return { status: 503,  message: format( 'Host %s are unavailable', fqdn ) } unless( Utils::Network.isRunning?( fqdn ) )
+        return { status: 503,  message: format( 'Host %s are unavailable', fqdn ) } unless( Utils::Network.is_running?( fqdn ) )
 
         logger.info(format('refresh services for host \'%s\'', fqdn))
 

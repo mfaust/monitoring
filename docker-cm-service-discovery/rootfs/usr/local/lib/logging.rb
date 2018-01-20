@@ -21,19 +21,21 @@ module Logging
 
     def configure_logger_for( classname )
 
-      logFile         = '/var/log/service-discovery.log'
-      file            = File.new( logFile, File::WRONLY | File::APPEND | File::CREAT, 0666 )
-      file.sync       = true
-      logger          = Logger.new( file, 'weekly', 1024000 )
-
-      if( File.exists?( logFile ) )
-        FileUtils.chmod( 0666, logFile )
-        FileUtils.chown( 'nobody', 'nobody', logFile )
-      end
+#      logFile         = '/var/log/service-discovery.log'
+#      file            = File.new( logFile, File::WRONLY | File::APPEND | File::CREAT, 0666 )
+#      file.sync       = true
+#      logger          = Logger.new( file, 'weekly', 1024000 )
+#
+#      if( File.exists?( logFile ) )
+#        FileUtils.chmod( 0666, logFile )
+#        FileUtils.chown( 'nobody', 'nobody', logFile )
+#      end
 
 #       logger                 = Logger.new(STDOUT)
-      logger.progname        = classname
-      logger.level           = Logger::INFO
+#       logger.progname        = classname
+      $stdout.sync = true
+      logger                 = Logger.new($stdout)
+      logger.level           = Logger::DEBUG
       logger.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
       logger.formatter       = proc do |severity, datetime, progname, msg|
         "[#{datetime.strftime( logger.datetime_format )}] #{severity.ljust(5)} : #{progname} - #{msg}\n"

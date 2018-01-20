@@ -25,8 +25,6 @@ module Sinatra
 
       set :environment, :production
 
-      @log_directory     = '/var/log'
-
       @rest_service_port = ENV.fetch('REST_SERVICE_PORT'      , 8080 )
       @rest_service_bind = ENV.fetch('REST_SERVICE_BIND'      , '0.0.0.0' )
       @mq_host           = ENV.fetch('MQ_HOST'                , 'beanstalkd' )
@@ -39,19 +37,9 @@ module Sinatra
       @mysql_schema      = ENV.fetch('DISCOVERY_DATABASE_NAME', 'discovery')
       @mysql_user        = ENV.fetch('DISCOVERY_DATABASE_USER', 'discovery')
       @mysql_password    = ENV.fetch('DISCOVERY_DATABASE_PASS', 'discovery')
-
-
-      #FileUtils.chmod( 1775, @log_directory )
-      #FileUtils.chown( 'nobody', 'nobody', @log_directory )
-      #
-      #file      = File.new( sprintf( '%s/rest-service.log', @log_directory ), File::WRONLY | File::APPEND | File::CREAT )
-      #file.sync = true
-      #
-      #use Rack::CommonLogger, file
-
     end
 
-    set :logging, false
+    set :logging, true
     set :app_file, caller_files.first || $0
     set :run, Proc.new { $0 == app_file }
     set :dump_errors, true

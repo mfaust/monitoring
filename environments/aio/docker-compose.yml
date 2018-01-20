@@ -22,16 +22,16 @@ services:
     volumes:
       - /share:/share
 
-  certificate:
-    image: bodsch/omgwtfssl
-    container_name: 01-certificate
-    environment:
-      SILENT: 'true'
-      CERT_SUBJECT_CN: localhost
-    volumes:
-      - ./certs:/certs
-    depends_on:
-      - data
+#  certificate:
+#    image: bodsch/omgwtfssl
+#    container_name: 01-certificate
+#    environment:
+#      SILENT: 'true'
+#      CERT_SUBJECT_CN: localhost
+#    volumes:
+#      - ./certs:/certs
+#    depends_on:
+#      - data
 
   beanstalkd:
     restart: always
@@ -108,10 +108,8 @@ services:
     hostname: nginx
     ports:
       - 80:80
-      - 443:443
     depends_on:
       - data
-      - certificate
       - grafana
       - icingaweb2
       - cm-rest-service
@@ -123,10 +121,9 @@ services:
       - cm-rest-service
       - markdown-service
     volumes:
-      - ./certs:/etc/nginx/secure/
       - /etc/localtime:/etc/localtime:ro
       - /share/www/entry-page:/var/www/entry-page
-      - /share/etc/nginx/external/https.conf:/etc/nginx/external/https.conf
+#      - /share/etc/nginx/external/https.conf:/etc/nginx/external/https.conf
       - /share/etc/nginx/sites-enabled/01-default.conf:/etc/nginx/sites-enabled/01-default.conf
       - /share/etc/nginx/nginx.conf:/etc/nginx/nginx.conf
       - /share/etc/nginx/modules.d/00-restrictions.conf:/etc/nginx/modules.d/00-restrictions.conf

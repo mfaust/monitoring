@@ -298,6 +298,10 @@ module ServiceDiscovery
       #
       ip, short, fqdn = self.ns_lookup( host )
 
+logger.debug(ip)
+logger.debug(short)
+logger.debug(fqdn)
+
       # if the destination host available (simple check with ping)
       #
       unless( Utils::Network.is_running?( fqdn ) )

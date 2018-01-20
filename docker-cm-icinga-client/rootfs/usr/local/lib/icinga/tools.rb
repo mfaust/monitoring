@@ -80,6 +80,7 @@ class CMIcinga2 < Icinga2::Client
       ip      = params.dig(:ip)
       host    = params.dig(:short)
       fqdn    = params.dig(:fqdn)
+      org_payload = params.dig(:payload)
 
 #       full_config        = @database.config( ip: ip, short: host, fqdn: fqdn )
       team_config        = @database.config( ip: ip, short: host, fqdn: fqdn, key: 'team' )
@@ -128,14 +129,27 @@ class CMIcinga2 < Icinga2::Client
           unless( replicator_value.nil? )
 
             master_live_server = replicator_value.dig('MasterLiveServer','host')
-            logger.debug( "content server for replication-live-server: #{master_live_server}" )
+            master_live_server_port = replicator_value.dig('MasterLiveServer','port')
 
-            services['replication-live-server']['master_live_server'] = master_live_server unless( master_live_server.nil? )
+            if( Utils::Network.is_running?( master_live_server ) && Utils::Network.port_open?( master_live_server, master_live_server_port ) )
+              logger.debug( "content server for replication-live-server: #{master_live_server}" )
+              services['replication-live-server']['master_live_server'] = master_live_server unless( master_live_server.nil? )
+            else
+              # TODO
+              # create an job, when we found no MLS to update this host
+
+              logger.warn( 'content server for replication-live-server is current not available' )
+              logger.info( 'i create an node rescan job to complete my job.' )
+
+              send_message(
+                cmd: 'rescan',
+                node: fqdn,
+                queue: @mq_queue,
+                payload: org_payload,
+                delay: 120
+              )
+            end
           end
-
-          # TODO
-          # create an job, when we found no MLS to update this host
-
         end
 
         unless( services.dig('cae-live').nil? )

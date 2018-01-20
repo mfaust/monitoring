@@ -1,7 +1,8 @@
 
 require 'ipaddress'
-require 'open3'
+# require 'open3'
 require 'resolv'
+require 'net/ping'
 
 module Utils
 
@@ -47,9 +48,7 @@ module Utils
   class Network
 
     def self.resolv( host )
-
-      $stdout.puts("self.resolv( #{host} )")
-
+#       $stdout.puts("self.resolv( #{host} )")
       result = { ip: nil, short: nil, fqdn: nil }
 
       begin
@@ -72,7 +71,7 @@ module Utils
         result = { ip: nil, short: nil, fqdn: nil }
       end
 
-      $stdout.puts( "result: #{result}" )
+#       $stdout.puts( "result: #{result}" )
       result
     end
 
@@ -101,8 +100,10 @@ module Utils
     # check if Node exists (simple ping)
     # result @bool
     def self.is_running?( ip )
-      return true if( system( format( 'ping -c1 -w1 %s > /dev/null', ip.to_s ) ) == true )
-      false
+      check = Net::Ping::External.new(ip)
+      check.ping?
+#      return true if( system( format( 'ping -c1 -w1 %s > /dev/null', ip.to_s ) ) == true )
+#      false
     end
 
   end

@@ -147,7 +147,7 @@ end
 
 # check if Node exists (simple ping)
 # result @bool
-def isRunning? ( ip )
+def is_running? ( ip )
 
   # first, ping check
   if( system( 'ping -c1 -w1 ' + ip.to_s + ' > /dev/null' ) == true )

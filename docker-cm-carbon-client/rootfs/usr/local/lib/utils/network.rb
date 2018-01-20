@@ -47,9 +47,7 @@ module Utils
   class Network
 
     def self.resolv( host )
-
-      $stdout.puts("self.resolv( #{host} )")
-
+#       $stdout.puts("self.resolv( #{host} )")
       result = { ip: nil, short: nil, fqdn: nil }
 
       begin
@@ -72,7 +70,7 @@ module Utils
         result = { ip: nil, short: nil, fqdn: nil }
       end
 
-      $stdout.puts( "result: #{result}" )
+#       $stdout.puts( "result: #{result}" )
       result
     end
 

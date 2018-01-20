@@ -94,11 +94,14 @@ class CMIcinga2 < Icinga2::Client
 
       @cache.set(format( 'dns-%s', node ) , expires_in: 320 ) { MiniCache::Data.new( ip: ip, short: short, long: fqdn ) }
 
+      # rescan services and update host object
+      #
+
       # add Node
       #
-      if( command == 'add' )
+      if( command == 'add' || command == 'rescan' )
 
-        services     = node_information( ip: ip, short: short, fqdn: fqdn )
+        services     = node_information( ip: ip, short: short, fqdn: fqdn, payload: payload )
         display_name = @database.config( ip: ip, short: short, fqdn: fqdn, key: 'display_name' )
 
         if( display_name.nil? )
@@ -112,13 +115,7 @@ class CMIcinga2 < Icinga2::Client
         payload = {}
         payload = services unless( services.empty? )
 
-        unless( tags.nil? )
-
-          payload['tags'] = tags
-#          tags.each do |t,v|
-#            payload[t] = v
-#          end
-        end
+        payload['tags'] = tags unless( tags.nil? )
 
         # TODO
         # full API support
@@ -130,9 +127,13 @@ class CMIcinga2 < Icinga2::Client
           vars: payload
         }
 
+        params[:merge_vars] = true if( command == 'rescan' )
+
         logger.debug(JSON.pretty_generate(params))
 
-        result = add_host(params)
+        result = add_host(params)    if( command == 'add' )
+        result = modify_host(params) if( command == 'rescan' )
+
         status = result.dig('code') || 500
 
         logger.debug( result )
