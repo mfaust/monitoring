@@ -43,7 +43,7 @@ module DataCollector
 
         ip    = dns.dig(:ip)
         short = dns.dig(:short)
-        fqdn  = dns.dig(:long)
+        fqdn  = dns.dig(:fqdn)
 
         if( ip != nil && short != nil && fqdn != nil )
 
@@ -58,7 +58,7 @@ module DataCollector
 
         ip    = dns.dig(:ip)
         short = dns.dig(:short)
-        fqdn  = dns.dig(:long)
+        fqdn  = dns.dig(:fqdn)
       end
       #
       # ------------------------------------------------

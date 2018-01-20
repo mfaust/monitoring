@@ -706,7 +706,12 @@ module DataCollector
 
         logger.debug( format('search dns entry for \'%s\'', host) )
 
-        ip, short, fqdn = ns_lookup(host, 60)
+        # ip, short, fqdn = ns_lookup(host, 60)
+        dns      = Utils::Network.resolv( host )
+
+        ip    = dns.dig(:ip)
+        short = dns.dig(:short)
+        fqdn  = dns.dig(:fqdn)
 
         if( !ip.nil? && !short.nil? && !fqdn.nil? )
 
@@ -799,7 +804,12 @@ module DataCollector
 
           logger.debug( format('search dns entry for \'%s\'', host) )
 
-          ip, short, fqdn = ns_lookup(host, 60)
+          #ip, short, fqdn = ns_lookup(host, 60)
+          dns      = Utils::Network.resolv( host )
+
+          ip    = dns.dig(:ip)
+          short = dns.dig(:short)
+          fqdn  = dns.dig(:fqdn)
 
           if( !ip.nil? && !short.nil? && !fqdn.nil? )
 
@@ -1033,7 +1043,12 @@ module DataCollector
 
         # get dns data!
         #
-        ip, short, fqdn = ns_lookup( h )
+        #ip, short, fqdn = ns_lookup( h )
+        dns      = Utils::Network.resolv( h )
+
+        ip    = dns.dig(:ip)
+        short = dns.dig(:short)
+        fqdn  = dns.dig(:fqdn)
 
         discovery_data = nil
 

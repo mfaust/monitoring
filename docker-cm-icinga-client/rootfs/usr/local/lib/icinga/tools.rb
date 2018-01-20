@@ -45,7 +45,7 @@ class CMIcinga2 < Icinga2::Client
 
         ip    = dns.dig(:ip)
         short = dns.dig(:short)
-        fqdn  = dns.dig(:long)
+        fqdn  = dns.dig(:fqdn)
 
         if( ip != nil && short != nil && fqdn != nil )
 
@@ -60,7 +60,7 @@ class CMIcinga2 < Icinga2::Client
 
         ip    = dns.dig(:ip)
         short = dns.dig(:short)
-        fqdn  = dns.dig(:long)
+        fqdn  = dns.dig(:fqdn)
       end
       #
       # ------------------------------------------------

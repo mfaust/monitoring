@@ -134,6 +134,8 @@ class CMIcinga2 < Icinga2::Client
         result = add_host(params)    if( command == 'add' )
         result = modify_host(params) if( command == 'rescan' )
 
+        restart_process if( command == 'rescan' )
+
         status = result.dig('code') || 500
 
         logger.debug( result )
@@ -210,6 +212,8 @@ class CMIcinga2 < Icinga2::Client
         }
 
         result = self.modify_host(params)
+        restart_process if( command == 'rescan' )
+
         status = result.dig('code') || 500
 
         logger.debug( result )

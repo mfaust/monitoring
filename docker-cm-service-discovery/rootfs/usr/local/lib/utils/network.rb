@@ -100,7 +100,7 @@ module Utils
     # check if Node exists (simple ping)
     # result @bool
     def self.is_running?( ip )
-      check = Net::Ping::External.new(ip)
+      check = Net::Ping::ICMP.new(ip,1,1) # (host=nil, port=nil, timeout=5)
       check.ping?
 #      return true if( system( format( 'ping -c1 -w1 %s > /dev/null', ip.to_s ) ) == true )
 #      false

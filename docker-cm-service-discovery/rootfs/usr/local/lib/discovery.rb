@@ -261,7 +261,12 @@ module ServiceDiscovery
 
       # get a DNS record
       #
-      ip, short, fqdn = self.ns_lookup( host )
+      #ip, short, fqdn = self.ns_lookup( host )
+      dns      = Utils::Network.resolv( host )
+
+      ip    = dns.dig(:ip)
+      short = dns.dig(:short)
+      fqdn  = dns.dig(:fqdn)
 
       # DELETE ONLY WHEN THES STATUS ARE DELETED!
       #
@@ -296,15 +301,21 @@ module ServiceDiscovery
 
       # get a DNS record
       #
-      ip, short, fqdn = self.ns_lookup( host )
+      dns      = Utils::Network.resolv( host )
 
+      ip    = dns.dig(:ip)
+      short = dns.dig(:short)
+      fqdn  = dns.dig(:fqdn)
+
+#      ip, short, fqdn = ns_lookup( host )
+#
 logger.debug(ip)
 logger.debug(short)
 logger.debug(fqdn)
 
       # if the destination host available (simple check with ping)
       #
-      unless( Utils::Network.is_running?( fqdn ) )
+      unless( Utils::Network.is_running?( ip ) )
 
         # delete dns entry
         result  = @database.removeDNS( ip: ip, short: short, fqdn: fqdn )
@@ -413,7 +424,12 @@ logger.debug(fqdn)
 
         # get a DNS record
         #
-        ip, short, fqdn = self.ns_lookup( host )
+        #ip, short, fqdn = self.ns_lookup( host )
+        dns      = Utils::Network.resolv( host )
+
+        ip    = dns.dig(:ip)
+        short = dns.dig(:short)
+        fqdn  = dns.dig(:fqdn)
 
         discovery_data   = @database.discoveryData( ip: ip, short: short, fqdn: fqdn )
 

@@ -19,11 +19,11 @@ module ServiceDiscovery
 
         ip    = dns.dig(:ip)
         short = dns.dig(:short)
-        fqdn  = dns.dig(:long)
+        fqdn  = dns.dig(:fqdn)
 
         if( !ip.nil? && !short.nil? && !fqdn.nil? )
 
-          @cache.set(hostname , expires_in: expire ) { MiniCache::Data.new( ip: ip, short: short, long: fqdn ) }
+          @cache.set(hostname , expires_in: expire ) { MiniCache::Data.new( ip: ip, short: short, fqdn: fqdn ) }
         else
           logger.error( 'no DNS data found!' )
           logger.error( " => #{dns}" )
@@ -34,7 +34,7 @@ module ServiceDiscovery
 
         ip    = dns.dig(:ip)
         short = dns.dig(:short)
-        fqdn  = dns.dig(:long)
+        fqdn  = dns.dig(:fqdn)
 
       end
       #
