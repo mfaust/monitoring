@@ -1,7 +1,0 @@
-source ENV['GEM_SOURCE'] || "https://rubygems.org"
-
-gem 'beaneater', '~> 1.0'
-gem 'json', '~> 2.1'
-gem 'rest-client', '~> 2.0'
-gem 'rufus-scheduler', '~> 3.4'
-gem 'tzinfo-data', '~> 1.2017'

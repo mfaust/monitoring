@@ -1,6 +1,0 @@
-#!/bin/bash
-#
-# dummy check for alpine
-
-exit 0
-
