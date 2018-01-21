@@ -1,4 +1,3 @@
-#!/usr/bin/ruby
 
 require 'logger'
 
@@ -14,29 +13,38 @@ module Logging
   @loggers = {}
 
   class << self
+
     def logger_for( classname )
       @loggers[classname] ||= configure_logger_for( classname )
     end
 
     def configure_logger_for( classname )
 
-#       logFile         = '/var/log/grafana-client.log'
-#       file            = File.open( logFile, File::WRONLY | File::APPEND | File::CREAT )
-#       file.sync       = true
-#       logger          = Logger.new( file, 'weekly', 1024000 )
-#
-#       if( File.exists?( logFile ) )
-#         FileUtils.chmod( 0666, logFile )
-#         FileUtils.chown( 'nobody', 'nobody', logFile )
-#       end
+      log_level = ENV.fetch('LOG_LEVEL', 'INFO' )
+      level = log_level.dup
 
-      $stdout.sync = true
+      # DEBUG < INFO < WARN < ERROR < FATAL < UNKNOWN
+      log_level = case level.upcase
+        when 'DEBUG'
+          Logger::DEBUG   # Low-level information for developers.
+        when 'INFO'
+          Logger::INFO    # Generic (useful) information about system operation.
+        when 'WARN'
+          Logger::WARN    # A warning.
+        when 'ERROR'
+          Logger::ERROR   # A handleable error condition.
+        when 'FATAL'
+          Logger::FATAL   # An unhandleable error that results in a program crash.
+        else
+          Logger::UNKNOWN  # An unknown message that should always be logged.
+        end
+
+      $stdout.sync           = true
       logger                 = Logger.new($stdout)
-      logger.progname        = classname
-      logger.level           = Logger::DEBUG
-      logger.datetime_format = "%Y-%m-%d %H:%M:%S::%3N"
+      logger.level           = log_level
+      logger.datetime_format = "%Y-%m-%d %H:%M:%S %z"
       logger.formatter       = proc do |severity, datetime, progname, msg|
-        "[#{datetime.strftime( logger.datetime_format )}] #{severity.ljust(5)} : #{progname} - #{msg}\n"
+        "[#{datetime.strftime( logger.datetime_format )}] #{severity.ljust(5)}  #{msg}\n"
       end
 
       logger
