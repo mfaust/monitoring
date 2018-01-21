@@ -262,19 +262,13 @@ module ServiceDiscovery
       # get a DNS record
       #
       ip, short, fqdn = self.ns_lookup( host )
-#       dns      = Utils::Network.resolv( host )
-#
-#       ip    = dns.dig(:ip)
-#       short = dns.dig(:short)
-#       fqdn  = dns.dig(:fqdn)
 
       # DELETE ONLY WHEN THES STATUS ARE DELETED!
       #
       params = { ip: ip, short: short, fqdn: fqdn, status: [Storage::MySQL::DELETE] }
       nodes = @database.nodes( params )
 
-      logger.debug( "nodes: #{nodes}" )
-      logger.debug( "nodes: #{nodes.class.to_s}" )
+      logger.debug( "nodes: #{nodes} (#{nodes.class.to_s})" )
 
       if( nodes.is_a?( Array ) && nodes.count != 0 )
 
@@ -302,11 +296,6 @@ module ServiceDiscovery
       # get a DNS record
       #
       ip, short, fqdn = ns_lookup( host )
-#       dns      = Utils::Network.resolv( host )
-#
-#       ip    = dns.dig(:ip)
-#       short = dns.dig(:short)
-#       fqdn  = dns.dig(:fqdn)
 
       # if the destination host available (simple check with ping)
       #
@@ -420,11 +409,6 @@ module ServiceDiscovery
         # get a DNS record
         #
         ip, short, fqdn = self.ns_lookup( host )
-#         dns      = Utils::Network.resolv( host )
-#
-#         ip    = dns.dig(:ip)
-#         short = dns.dig(:short)
-#         fqdn  = dns.dig(:fqdn)
 
         discovery_data   = @database.discoveryData( ip: ip, short: short, fqdn: fqdn )
 
