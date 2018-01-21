@@ -706,12 +706,7 @@ module DataCollector
 
         logger.debug( format('search dns entry for \'%s\'', host) )
 
-        # ip, short, fqdn = ns_lookup(host, 60)
-        dns      = Utils::Network.resolv( host )
-
-        ip    = dns.dig(:ip)
-        short = dns.dig(:short)
-        fqdn  = dns.dig(:fqdn)
+        ip, short, fqdn = ns_lookup(host, 60)
 
         if( !ip.nil? && !short.nil? && !fqdn.nil? )
 
@@ -804,12 +799,7 @@ module DataCollector
 
           logger.debug( format('search dns entry for \'%s\'', host) )
 
-          #ip, short, fqdn = ns_lookup(host, 60)
-          dns      = Utils::Network.resolv( host )
-
-          ip    = dns.dig(:ip)
-          short = dns.dig(:short)
-          fqdn  = dns.dig(:fqdn)
+          ip, short, fqdn = ns_lookup(host, 60)
 
           if( !ip.nil? && !short.nil? && !fqdn.nil? )
 
@@ -1038,17 +1028,11 @@ module DataCollector
 
       return { status: 204, message: 'no online server found' } if( monitored_server.nil? || monitored_server.is_a?( FalseClass ) || monitored_server.count == 0 )
 
-
       monitored_server.each do |h|
 
         # get dns data!
         #
-        #ip, short, fqdn = ns_lookup( h )
-        dns      = Utils::Network.resolv( h )
-
-        ip    = dns.dig(:ip)
-        short = dns.dig(:short)
-        fqdn  = dns.dig(:fqdn)
+        ip, short, fqdn = ns_lookup( h )
 
         discovery_data = nil
 
