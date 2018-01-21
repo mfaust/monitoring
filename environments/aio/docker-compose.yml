@@ -128,7 +128,7 @@ services:
       - /share/etc/nginx/nginx.conf:/etc/nginx/nginx.conf
       - /share/etc/nginx/modules.d/00-restrictions.conf:/etc/nginx/modules.d/00-restrictions.conf
       #- /share/etc/nginx/modules.d/00-dnsresolver.conf:/etc/nginx/modules.d/00-dnsresolver.conf
-      - /share/etc/nginx/modules.d/01-proxy-rest-service.conf:/etc/nginx/modules.d/01-proxy-rest-service.conf:ro
+      - /share/etc/nginx/modules.d/01-proxy-rest-service.conf:/etc/nginx/modules.d/01-proxy-rest-service.conf
       - /share/etc/nginx/modules.d/01-proxy-grafana.conf:/etc/nginx/modules.d/01-proxy-grafana.conf
       - /share/etc/nginx/modules.d/01-proxy-graphite.conf:/etc/nginx/modules.d/01-proxy-graphite.conf
       - /share/etc/nginx/modules.d/01-proxy-icingaweb2.conf:/etc/nginx/modules.d/01-proxy-icingaweb2.conf
@@ -150,7 +150,6 @@ services:
       - 2003:2003/udp
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /var/log/:/var/tmp/docker-log
       - carbon:/srv
     networks:
       - mon
@@ -361,7 +360,6 @@ services:
       - database
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ./logs:/var/log
     networks:
       - mon
     extra_hosts:
@@ -389,7 +387,6 @@ services:
       - redis
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ./logs:/var/log
       - /share/etc/cm-service.yaml:/etc/cm-service.yaml
       - /share/etc/cm-application.yaml:/etc/cm-application.yaml
     networks:
@@ -417,7 +414,6 @@ services:
       - redis
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ./logs:/var/log
       - /share/etc/cm-service.yaml:/etc/cm-service.yaml
       - /share/etc/cm-application.yaml:/etc/cm-application.yaml
     networks:
@@ -443,7 +439,6 @@ services:
       - redis
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ./logs:/var/log
     networks:
       - mon
 
@@ -468,7 +463,6 @@ services:
       - database
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ./logs:/var/log
       - /share/usr/local/share/templates:/usr/local/share/templates
       - /share/etc/grafana_config.yml:/etc/grafana_config.yml
     networks:
@@ -499,7 +493,6 @@ services:
       - nginx
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ./logs:/var/log
       - /share/etc/icinga_server_config.yml:/etc/icinga_server_config.yml
     networks:
       - mon
