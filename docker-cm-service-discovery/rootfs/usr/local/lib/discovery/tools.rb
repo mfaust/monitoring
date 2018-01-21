@@ -4,26 +4,53 @@ module ServiceDiscovery
   # noinspection ALL
   module Tools
 
-    def ns_lookup(name, expire = 120 )
+    def ns_lookup( name, expire = 120 )
+
+      logger.debug( "ns_lookup( #{name}, #{expire} )" )
 
       # DNS
       #
-      hostname = sprintf( 'dns-%s', name )
+      hostname = format( 'dns-%s', name )
+
+      ip       = nil
+      short    = nil
+      fqdn     = nil
+
       dns      = @cache.get( hostname )
 
       if( dns.nil? )
 
-        logger.debug( 'create cached DNS data' )
+        logger.debug( 'no cached DNS data' )
+
+#         dns = @database.dnsData( short: name, fqdn: name )
+#
+#         unless( dns.nil? )
+#
+#           logger.debug( 'use database entries' )
+#
+#           ip    = dns.dig('ip')
+#           short = dns.dig('name')
+#           fqdn  = dns.dig('fqdn')
+#
+#           @cache.set( hostname , expires_in: expire ) { MiniCache::Data.new( ip: ip, short: short, long: fqdn ) }
+#
+#           return ip, short, fqdn
+#         end
+
+        logger.debug( format( 'resolve dns name %s', name ) )
+
         # create DNS Information
         dns      = Utils::Network.resolv( name )
+        logger.debug("dns: #{dns}")
 
         ip    = dns.dig(:ip)
         short = dns.dig(:short)
         fqdn  = dns.dig(:fqdn)
 
-        if( !ip.nil? && !short.nil? && !fqdn.nil? )
+        unless( ip.nil? | short.nil? || fqdn.nil? )
 
-          @cache.set(hostname , expires_in: expire ) { MiniCache::Data.new( ip: ip, short: short, fqdn: fqdn ) }
+          logger.debug('save dns data in our short term cache')
+          @cache.set(hostname , expires_in: expire ) { MiniCache::Data.new({ ip: ip, short: short, long: fqdn } ) }
         else
           logger.error( 'no DNS data found!' )
           logger.error( " => #{dns}" )
@@ -35,17 +62,15 @@ module ServiceDiscovery
         ip    = dns.dig(:ip)
         short = dns.dig(:short)
         fqdn  = dns.dig(:fqdn)
-
       end
       #
       # ------------------------------------------------
 
-      logger.debug( sprintf( ' ip   %s ', ip ) )
-      logger.debug( sprintf( ' host %s ', short ) )
-      logger.debug( sprintf( ' fqdn %s ', fqdn ) )
+      logger.debug( format( ' ip   %s ', ip ) )
+      logger.debug( format( ' host %s ', short ) )
+      logger.debug( format( ' fqdn %s ', fqdn ) )
 
-      return ip, short, fqdn
-
+      [ip, short, fqdn]
     end
 
   end
