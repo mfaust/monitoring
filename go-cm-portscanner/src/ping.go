@@ -8,7 +8,7 @@ import (
 
 func PingHost(host string) (bool) {
 
-  cmd := exec.Command("ping", host, "-c 1", "-t 2")
+  cmd := exec.Command("ping", host, "-4", "-c1", "-w1", "-W1")
 
   output, err := cmd.CombinedOutput()
 
@@ -21,5 +21,4 @@ func PingHost(host string) (bool) {
   } else {
     return true
   }
-
 }
