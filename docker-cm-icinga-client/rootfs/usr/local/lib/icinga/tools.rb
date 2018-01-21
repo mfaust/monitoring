@@ -93,16 +93,16 @@ class CMIcinga2 < Icinga2::Client
       logger.debug( "node_information( #{params} )" )
 
       ip      = params.dig(:ip)
-      host    = params.dig(:short)
+      short   = params.dig(:short)
       fqdn    = params.dig(:fqdn)
       org_payload = params.dig(:payload)
 
-#       full_config        = @database.config( ip: ip, short: host, fqdn: fqdn )
-      team_config        = @database.config( ip: ip, short: host, fqdn: fqdn, key: 'team' )
-      environment_config = @database.config( ip: ip, short: host, fqdn: fqdn, key: 'environment' )
-      aws_config         = @database.config( ip: ip, short: host, fqdn: fqdn, key: 'aws' )
-      vhost_http_config  = @database.config( ip: ip, short: host, fqdn: fqdn, key: 'vhost_http' )
-      vhost_https_config = @database.config( ip: ip, short: host, fqdn: fqdn, key: 'vhost_https' )
+#       full_config        = @database.config( ip: ip, short: short, fqdn: fqdn )
+      team_config        = @database.config( ip: ip, short: short, fqdn: fqdn, key: 'team' )
+      environment_config = @database.config( ip: ip, short: short, fqdn: fqdn, key: 'environment' )
+      aws_config         = @database.config( ip: ip, short: short, fqdn: fqdn, key: 'aws' )
+      vhost_http_config  = @database.config( ip: ip, short: short, fqdn: fqdn, key: 'vhost_http' )
+      vhost_https_config = @database.config( ip: ip, short: short, fqdn: fqdn, key: 'vhost_https' )
 
       logger.debug( "team_config       : #{team_config}" )
       logger.debug( "environment_config: #{environment_config}" )
@@ -117,7 +117,9 @@ class CMIcinga2 < Icinga2::Client
 
         logger.debug( format( 'get data for \'%s\' ...', fqdn ) )
 
-        result = @database.discoveryData( ip: ip, short: host, fqdn: fqdn )
+        result = @database.discoveryData( ip: ip, short: short, fqdn: fqdn )
+
+#         logger.debug( format( '  result %s (%s)', result, result.class.to_s ) )
 
         if( result.is_a?( Hash ) && result.count != 0 )
           services = result
@@ -130,7 +132,7 @@ class CMIcinga2 < Icinga2::Client
 
       payload = {}
 
-#       logger.debug( JSON.pretty_generate(services) )
+      logger.debug( JSON.pretty_generate(services) )
 
       unless( services.nil?  )
 
@@ -138,20 +140,23 @@ class CMIcinga2 < Icinga2::Client
         unless( services.dig('replication-live-server').nil? )
 
           replicator_value = content_server( fqdn: fqdn, mbean: 'Replicator', service: 'replication-live-server' )
-
-          logger.debug(replicator_value)
-
+#           logger.debug(replicator_value)
           unless( replicator_value.nil? )
 
             master_live_server = replicator_value.dig('MasterLiveServer','host')
             master_live_server_port = replicator_value.dig('MasterLiveServer','port')
 
             if( Utils::Network.is_running?( master_live_server ) && Utils::Network.port_open?( master_live_server, master_live_server_port ) )
-              logger.debug( "content server for replication-live-server: #{master_live_server}" )
-              services['replication-live-server']['master_live_server'] = master_live_server unless( master_live_server.nil? )
+#               logger.debug( "content server for replication-live-server: #{master_live_server}" )
+              unless( master_live_server.nil? )
+                services['replication-live-server']['master_live_server'] = master_live_server
+                services['replication-live-server']['sequencenumbers'] = true
+              end
             else
               # TODO
               # create an job, when we found no MLS to update this host
+
+              services['replication-live-server'].delete('sequencenumbers') if( services['replication-live-server']['sequencenumbers'] )
 
               logger.warn( 'content server for replication-live-server is current not available' )
               logger.info( 'i create an node rescan job to complete my job.' )

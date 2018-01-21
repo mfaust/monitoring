@@ -119,6 +119,10 @@ class CMIcinga2 < Icinga2::Client
 
         # TODO
         # full API support
+        #
+        # BUG
+        # miss zone entry for distributed monitoring
+        #
         params = {
           name: fqdn,
           address: fqdn,
@@ -129,7 +133,7 @@ class CMIcinga2 < Icinga2::Client
 
         params[:merge_vars] = true if( command == 'rescan' )
 
-        logger.debug(JSON.pretty_generate(params))
+#         logger.debug(JSON.pretty_generate(params))
 
         result = add_host(params)    if( command == 'add' )
         result = modify_host(params) if( command == 'rescan' )
@@ -139,7 +143,13 @@ class CMIcinga2 < Icinga2::Client
         logger.debug( result )
         logger.error( result ) if( status != 200 )
 
-        restart_process
+        sleep 8
+
+        logger.debug( ' => restart_process' ) if( command == 'add' )
+        logger.debug( ' => shutdown_process' ) if( command == 'rescan' )
+
+#         restart_process if( command == 'add' )
+#         shutdown_process if( command == 'rescan' )
 
         @jobs.del( job_option )
 
@@ -180,7 +190,7 @@ class CMIcinga2 < Icinga2::Client
       #
       if( command == 'update' )
 
-        services     = node_information( ip: ip, host: short, fqdn: fqdn )
+        services     = node_information( ip: ip, short: short, fqdn: fqdn, payload: payload )
         display_name = @database.config( ip: ip, short: short, fqdn: fqdn, key: 'display_name' )
 
         if( display_name.nil? )
@@ -204,20 +214,32 @@ class CMIcinga2 < Icinga2::Client
         # full API support
         params = {
           name: fqdn,
-          address: ip,
+          address: fqdn,
           display_name: display_name,
           enable_notifications: @icinga_notifications,
           vars: payload,
           merge_vars: true
         }
 
+        # result = delete_host(fqdn)
+        #
+        # status = result.dig('code') || 500
+        #
+        # logger.debug( result )
+        # logger.error( result ) if( status != 200 )
+        #
+        # result = add_host(params)
+
         result = modify_host(params)
-        restart_process
 
         status = result.dig('code') || 500
 
         logger.debug( result )
         logger.error( result ) if( status != 200 )
+
+#        sleep 8
+#        logger.debug( ' => shutdown_process' ) if( command == 'update' )
+#        shutdown_process
 
         @jobs.del( job_option )
 

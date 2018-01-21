@@ -327,7 +327,6 @@ module DataCollector
     # return all known and active (online) server for monitoring
     #
     def monitored_server()
-
       @database.nodes( status: [ Storage::MySQL::ONLINE ] )
     end
 

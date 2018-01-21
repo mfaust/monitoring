@@ -476,6 +476,7 @@ services:
     container_name: cm-icinga-client
     hostname: cm-icinga-client
     environment:
+      LOG_LEVEL: debug
       ICINGA_CERT_SERVICE: '{
         "ba": { "user":"admin", "password":"admin" },
         "api": { "user":"root", "password":"icinga" },

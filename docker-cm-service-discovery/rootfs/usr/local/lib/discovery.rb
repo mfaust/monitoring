@@ -364,6 +364,7 @@ module ServiceDiscovery
       discovered_services = create_host_config( ip: ip, short: short, fqdn: fqdn, data: discovered_services )
 
       result    = @database.createDiscovery( ip: ip, short: short, fqdn: fqdn, data: discovered_services )
+#       logger.debug( "createDiscovery : #{result}" )
 
       logger.debug( 'set host status to ONLINE' )
       result    = @database.setStatus( ip: ip, short: short, fqdn: fqdn, status: Storage::MySQL::ONLINE )
