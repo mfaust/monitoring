@@ -42,9 +42,7 @@ func ScanHost(w http.ResponseWriter, r *http.Request) {
   }
 
   if len( body ) != 0 {
-
     if err := json.Unmarshal(body, &request); err != nil {
-
       checkError(err)
     }
   }
@@ -52,7 +50,6 @@ func ScanHost(w http.ResponseWriter, r *http.Request) {
   var ports []int
 
   if PingHost( host_name ) == true {
-
     ports = scan_port( host_name, request.Ports )
   }
 
