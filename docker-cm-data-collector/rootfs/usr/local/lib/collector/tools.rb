@@ -3,51 +3,66 @@ module DataCollector
 
   module Tools
 
+
     def ns_lookup( name, expire = 45 )
 
       logger.debug( "ns_lookup( #{name}, #{expire} )" )
 
       # DNS
       #
-      hostname = format( 'dns-%s', name )
+      cache_key = format( 'dns::%s', name )
 
       ip       = nil
       short    = nil
       fqdn     = nil
 
-      dns      = @cache.get( hostname )
+      dns      = @cache.get( cache_key )
+
+      logger.debug("dns: #{dns}")
+
+      unless( dns.nil? )
+        ip    = dns.dig(:ip)
+        short = dns.dig(:short)
+        fqdn  = dns.dig(:fqdn)
+      end
+
+      # delete incomplete cache entry
+      #
+      dns = nil if( ip.nil? || short.nil? || fqdn.nil? )
 
       if( dns.nil? )
 
         logger.debug( 'no cached DNS data' )
 
-        dns = @database.dnsData( short: name, fqdn: name )
-
-        unless( dns.nil? )
-
-          logger.debug( 'use database entries' )
-
-          ip    = dns.dig('ip')
-          short = dns.dig('name')
-          fqdn  = dns.dig('fqdn')
-
-          @cache.set( hostname , expires_in: expire ) { MiniCache::Data.new( ip: ip, short: short, long: fqdn ) }
-
-          return ip, short, fqdn
-        end
+#         dns = @database.dnsData( short: name, fqdn: name )
+#
+#         unless( dns.nil? )
+#
+#           logger.debug( 'use database entries' )
+#
+#           ip    = dns.dig('ip')
+#           short = dns.dig('name')
+#           fqdn  = dns.dig('fqdn')
+#
+#           @cache.set( hostname , expires_in: expire ) { MiniCache::Data.new( ip: ip, short: short, fqdn: fqdn ) }
+#
+#           return ip, short, fqdn
+#         end
 
         logger.debug( format( 'resolve dns name %s', name ) )
 
         # create DNS Information
         dns      = Utils::Network.resolv( name )
+        logger.debug("dns: #{dns}")
 
         ip    = dns.dig(:ip)
         short = dns.dig(:short)
         fqdn  = dns.dig(:fqdn)
 
-        if( ip != nil && short != nil && fqdn != nil )
+        unless( ip.nil? || short.nil? || fqdn.nil? )
 
-          @cache.set( hostname , expires_in: expire ) { MiniCache::Data.new( ip: ip, short: short, long: fqdn ) }
+          logger.debug('save dns data in our short term cache')
+          @cache.set( cache_key , expires_in: expire ) { MiniCache::Data.new({ ip: ip, short: short, fqdn: fqdn } ) }
         else
           logger.error( 'no DNS data found!' )
           logger.error( " => #{dns}" )
@@ -63,8 +78,11 @@ module DataCollector
       #
       # ------------------------------------------------
 
-      return ip, short, fqdn
+      logger.debug( format( ' ip    %s ', ip ) )
+      logger.debug( format( ' short %s ', short ) )
+      logger.debug( format( ' fqdn  %s ', fqdn ) )
 
+      [ip, short, fqdn]
     end
 
 

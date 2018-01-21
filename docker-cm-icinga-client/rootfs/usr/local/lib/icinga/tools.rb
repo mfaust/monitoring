@@ -5,19 +5,32 @@ class CMIcinga2 < Icinga2::Client
 
   module Tools
 
+
     def ns_lookup( name, expire = 120 )
 
       logger.debug( "ns_lookup( #{name}, #{expire} )" )
 
       # DNS
       #
-      hostname = format( 'dns-%s', name )
+      cache_key = format( 'dns::%s', name )
 
       ip       = nil
       short    = nil
       fqdn     = nil
 
-      dns      = @cache.get( hostname )
+      dns      = @cache.get( cache_key )
+
+      logger.debug("dns: #{dns}")
+
+      unless( dns.nil? )
+        ip    = dns.dig(:ip)
+        short = dns.dig(:short)
+        fqdn  = dns.dig(:fqdn)
+      end
+
+      # delete incomplete cache entry
+      #
+      dns = nil if( ip.nil? || short.nil? || fqdn.nil? )
 
       if( dns.nil? )
 
@@ -33,7 +46,7 @@ class CMIcinga2 < Icinga2::Client
 #           short = dns.dig('name')
 #           fqdn  = dns.dig('fqdn')
 #
-#           @cache.set( hostname , expires_in: expire ) { MiniCache::Data.new( ip: ip, short: short, long: fqdn ) }
+#           @cache.set( hostname , expires_in: expire ) { MiniCache::Data.new( ip: ip, short: short, fqdn: fqdn ) }
 #
 #           return ip, short, fqdn
 #         end
@@ -48,10 +61,10 @@ class CMIcinga2 < Icinga2::Client
         short = dns.dig(:short)
         fqdn  = dns.dig(:fqdn)
 
-        unless( ip.nil? | short.nil? || fqdn.nil? )
+        unless( ip.nil? || short.nil? || fqdn.nil? )
 
           logger.debug('save dns data in our short term cache')
-          @cache.set(hostname , expires_in: expire ) { MiniCache::Data.new({ ip: ip, short: short, long: fqdn } ) }
+          @cache.set( cache_key , expires_in: expire ) { MiniCache::Data.new({ ip: ip, short: short, fqdn: fqdn } ) }
         else
           logger.error( 'no DNS data found!' )
           logger.error( " => #{dns}" )
@@ -67,9 +80,9 @@ class CMIcinga2 < Icinga2::Client
       #
       # ------------------------------------------------
 
-      logger.debug( format( ' ip   %s ', ip ) )
-      logger.debug( format( ' host %s ', short ) )
-      logger.debug( format( ' fqdn %s ', fqdn ) )
+      logger.debug( format( ' ip    %s ', ip ) )
+      logger.debug( format( ' short %s ', short ) )
+      logger.debug( format( ' fqdn  %s ', fqdn ) )
 
       [ip, short, fqdn]
     end

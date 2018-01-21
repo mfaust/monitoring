@@ -67,18 +67,13 @@ module ServiceDiscovery
 
       logger.debug( JSON.pretty_generate payload )
 
-
       dns      = payload.dig('dns') unless( payload.is_a?(String))
-
 #       logger.info( format( '  %s node %s', command , node ) )
+      ip, short, fqdn = ns_lookup( node ) if( dns.nil? )
 
-      if (dns.nil?)
-        ip, short, fqdn = self.ns_lookup(node)
-      else
-        ip = dns.dig('ip')
-        short = dns.dig('short')
-        fqdn = dns.dig('fqdn')
-      end
+      ip = dns.dig('ip')
+      short = dns.dig('short')
+      fqdn = dns.dig('fqdn')
 
       job_option = { command: command, ip: ip, short: short, fqdn: fqdn }
 
@@ -86,7 +81,7 @@ module ServiceDiscovery
 
       @jobs.add( job_option )
 
-      @cache.set(format( 'dns-%s', node ) , expires_in: 320 ) { MiniCache::Data.new( ip: ip, short: short, long: fqdn ) }
+      @cache.set(format( 'dns::%s', node ) , expires_in: 320 ) { MiniCache::Data.new( ip: ip, short: short, fqdn: fqdn ) }
 
       # add Node
       #

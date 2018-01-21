@@ -134,7 +134,7 @@ class CMGrafana < Grafana::Client
 
       @jobs.add( job_option )
 
-      @cache.set(format( 'dns-%s', node ) , expires_in: 320 ) { MiniCache::Data.new( ip: ip, short: short, long: fqdn ) }
+      @cache.set(format( 'dns::%s', node ) , expires_in: 320 ) { MiniCache::Data.new( ip: ip, short: short, fqdn: fqdn ) }
 
       identifier  = @database.config( ip: ip, short: short, fqdn: fqdn, key: 'graphite_identifier' )
 

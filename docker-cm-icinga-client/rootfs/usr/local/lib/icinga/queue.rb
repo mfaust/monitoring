@@ -92,7 +92,7 @@ class CMIcinga2 < Icinga2::Client
 
       @jobs.add( job_option )
 
-      @cache.set(format( 'dns-%s', node ) , expires_in: 320 ) { MiniCache::Data.new( ip: ip, short: short, long: fqdn ) }
+      @cache.set(format( 'dns::%s', node ) , expires_in: 320 ) { MiniCache::Data.new( ip: ip, short: short, fqdn: fqdn ) }
 
       # rescan services and update host object
       #

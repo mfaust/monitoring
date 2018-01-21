@@ -10,13 +10,25 @@ module ServiceDiscovery
 
       # DNS
       #
-      hostname = format( 'dns-%s', name )
+      cache_key = format( 'dns::%s', name )
 
       ip       = nil
       short    = nil
       fqdn     = nil
 
-      dns      = @cache.get( hostname )
+      dns      = @cache.get( cache_key )
+
+      logger.debug("dns: #{dns}")
+
+      unless( dns.nil? )
+        ip    = dns.dig(:ip)
+        short = dns.dig(:short)
+        fqdn  = dns.dig(:fqdn)
+      end
+
+      # delete incomplete cache entry
+      #
+      dns = nil if( ip.nil? || short.nil? || fqdn.nil? )
 
       if( dns.nil? )
 
@@ -32,7 +44,7 @@ module ServiceDiscovery
 #           short = dns.dig('name')
 #           fqdn  = dns.dig('fqdn')
 #
-#           @cache.set( hostname , expires_in: expire ) { MiniCache::Data.new( ip: ip, short: short, long: fqdn ) }
+#           @cache.set( hostname , expires_in: expire ) { MiniCache::Data.new( ip: ip, short: short, fqdn: fqdn ) }
 #
 #           return ip, short, fqdn
 #         end
@@ -47,10 +59,10 @@ module ServiceDiscovery
         short = dns.dig(:short)
         fqdn  = dns.dig(:fqdn)
 
-        unless( ip.nil? | short.nil? || fqdn.nil? )
+        unless( ip.nil? || short.nil? || fqdn.nil? )
 
           logger.debug('save dns data in our short term cache')
-          @cache.set(hostname , expires_in: expire ) { MiniCache::Data.new({ ip: ip, short: short, long: fqdn } ) }
+          @cache.set( cache_key , expires_in: expire ) { MiniCache::Data.new({ ip: ip, short: short, fqdn: fqdn } ) }
         else
           logger.error( 'no DNS data found!' )
           logger.error( " => #{dns}" )
@@ -66,9 +78,9 @@ module ServiceDiscovery
       #
       # ------------------------------------------------
 
-      logger.debug( format( ' ip   %s ', ip ) )
-      logger.debug( format( ' host %s ', short ) )
-      logger.debug( format( ' fqdn %s ', fqdn ) )
+      logger.debug( format( ' ip    %s ', ip ) )
+      logger.debug( format( ' short %s ', short ) )
+      logger.debug( format( ' fqdn  %s ', fqdn ) )
 
       [ip, short, fqdn]
     end
