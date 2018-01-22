@@ -67,8 +67,6 @@ services:
     ports:
       - 8080:8080
       - 8088:8088
-    depends_on:
-      - data
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:
@@ -122,7 +120,7 @@ services:
       - markdown-service
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ../../docker-data/rootfs/data/www/entry-page:/var/www/entry-page
+      - ../../docker-cm-data/rootfs/data/www/entry-page:/var/www/entry-page
 #      - /share/etc/nginx/external/https.conf:/etc/nginx/external/https.conf
       - /share/etc/nginx/sites-enabled/01-default.conf:/etc/nginx/sites-enabled/01-default.conf
       - /share/etc/nginx/nginx.conf:/etc/nginx/nginx.conf

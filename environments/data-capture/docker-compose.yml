@@ -3,86 +3,73 @@
 #
 # data-capture
 
-version: '2.0'
+version: '3.3'
+
+networks:
+  mon:
+
+volumes:
+  database:
+    driver: local
+  redis:
+    driver: local
+  carbon:
+    driver: local
+  icinga:
+    driver: local
 
 volumes:
   database:
   persistent:
   redis:
 
-networks:
-  mon:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 192.168.2.0/24
-
 services:
   data:
     build: ../../docker-cm-data
     container_name: 01-data
-    depends_on:
-      - dnsdock
     volumes:
       - /share:/share
 
-  dnsdock:
-    restart: always
-    image: bodsch/docker-dnsdock:1707-27.1
-    container_name: dnsdock
-    hostname: dnsdock
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /var/run/docker.sock:/var/run/docker.sock
-    # You can use also Environment vars like this:
-    # command: "--nameserver='${DNS_1}:53' --nameserver='${DNS_2}:53' --http=:80"
-    command: " --nameserver='10.1.2.14:53' --nameserver='10.1.2.63:53' --http=:80 --verbose"
-    networks:
-      mon:
-        ipv4_address: 192.168.2.5
-
   beanstalkd:
     restart: always
-    image: bodsch/docker-beanstalkd:1707-27.1
+    image: bodsch/docker-beanstalkd:1.10
     container_name: beanstalkd
     hostname: beanstalkd
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:
-      mon:
-        ipv4_address: 192.168.2.6
-
-  jolokia:
-    restart: always
-    image: bodsch/docker-jolokia:1707-30.1
-    container_name: jolokia
-    hostname: jolokia
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-    networks:
-      mon:
-        ipv4_address: 192.168.2.7
-    dns:
-      - 192.168.2.5
+      - mon
 
   database:
     restart: always
-    image: bodsch/docker-mysql:1707-30.1
+    image: bodsch/docker-mysql:10.1.28-r1
     container_name: database
     hostname: database
-    extends:
-      file: environments.yml
-      service: database
+    environment:
+      MYSQL_SYSTEM_USER: root
+      MYSQL_ROOT_PASS: database.pass
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - database:/srv
     networks:
-      mon:
-        ipv4_address: 192.168.2.8
+      - mon
+
+  jolokia:
+    restart: always
+    build: ../../docker-cm-jolokia
+    container_name: jolokia
+    hostname: jolokia
+    ports:
+      - 8080:8080
+      - 8088:8088
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - mon
 
   redis:
     restart: always
-    image: bodsch/docker-redis:1707-27.1
+    image: bodsch/docker-redis:3.2.8-r1
     container_name: redis
     hostname: redis
     ports:
@@ -91,13 +78,11 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - redis:/var/lib/redis
     networks:
-      mon:
-        ipv4_address: 192.168.2.9
-
+      - mon
 
   nginx:
     restart: always
-    image: bodsch/docker-nginx:1707-27.1
+    image: bodsch/docker-nginx:1.12.2-r1
     container_name: nginx
     hostname: nginx
     ports:
@@ -113,31 +98,36 @@ services:
       - /share/etc/nginx/modules.d/00-restrictions.conf:/etc/nginx/modules.d/00-restrictions.conf
       - /share/etc/nginx/modules.d/01-proxy-rest-service.conf:/etc/nginx/modules.d/01-proxy-rest-service.conf:ro
     networks:
-      mon:
-        ipv4_address: 192.168.2.20
+      - mon
 
   carbon-relay:
     restart: always
-    image: bodsch/docker-carbon-relay-ng:1704-01
+    image: bodsch/docker-carbon-relay-ng:0.9.4-r1
     container_name: carbon-relay
     hostname: carbon-relay
-    extends:
-      file: environments.yml
-      service: carbon-relay
+    environment:
+      GRAPHITE_HOST: carbon.docker
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:
-      mon:
-        ipv4_address: 192.168.2.21
+      - mon
 
   icinga2-satellite:
     restart: always
     build: ../../docker-cm-icinga2
     container_name: icinga2-satellite
     hostname: icinga2-satellite
-    extends:
-      file: environments.yml
-      service: icinga2-satellite
+    environment:
+      # external service
+      ICINGA_MASTER: icinga2-master.docker
+      ICINGA_CERT_SERVICE_BA_USER: admin
+      ICINGA_CERT_SERVICE_BA_PASSWORD: admin
+      ICINGA_CERT_SERVICE_API_USER: root
+      ICINGA_CERT_SERVICE_API_PASSWORD: icinga
+      # external service
+      ICINGA_CERT_SERVICE_SERVER: nginx-proxy
+      ICINGA_CERT_SERVICE_PORT: 80
+      ICINGA_CERT_SERVICE_PATH: /cert-service/
     depends_on:
       - data
       - redis
@@ -145,7 +135,6 @@ services:
       - redis
     ports:
       - 5665:5665
-      - 6666:6666
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /share/etc/cm-icinga2.yaml:/etc/cm-icinga2.yaml
@@ -164,8 +153,7 @@ services:
       - icinga:/srv
       - icinga:/var/lib/icinga2
     networks:
-      mon:
-        ipv4_address: 192.168.2.22
+      - mon
 
   #
   # CoreMedia Glue and Logic
@@ -183,17 +171,18 @@ services:
       - jolokia
       - beanstalkd
       - redis
+      - database
     links:
       - jolokia
       - beanstalkd
       - redis
+      - database
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /share/etc/cm-service.yaml:/etc/cm-service.yaml
       - /share/etc/cm-application.yaml:/etc/cm-application.yaml
     networks:
-      mon:
-        ipv4_address: 192.168.2.30
+      - mon
 
   cm-data-collector:
     restart: always
@@ -208,88 +197,73 @@ services:
       - jolokia
       - beanstalkd
       - redis
+      - database
     links:
       - jolokia
       - beanstalkd
       - redis
+      - database
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /share/etc/cm-service.yaml:/etc/cm-service.yaml
       - /share/etc/cm-application.yaml:/etc/cm-application.yaml
     networks:
-      mon:
-        ipv4_address: 192.168.2.31
+      - mon
 
   cm-carbon-client:
     restart: always
     build: ../../docker-cm-carbon-client
     container_name: cm-carbon-client
     hostname: cm-carbon-client
-    extends:
-      file: environments.yml
-      service: cm-carbon-client
+    environment:
+      # USE ONLY WITH AND EXTERNAL CARBON-WRITER!
+      GRAPHITE_HOST: carbon
     depends_on:
       - data
-      #- beanstalkd
       - redis
     links:
-      #- beanstalkd
       - redis
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:
-      mon:
-        ipv4_address: 192.168.2.32
+      - mon
 
   cm-grafana-client:
     restart: always
     build: ../../docker-cm-grafana-client
     container_name: cm-grafana-client
     hostname: cm-grafana-client
-    extends:
-      file: environments.yml
-      service: cm-grafana-client
+    environment:
+      # external service
+      GRAFANA_HOST: nginx-proxy
     depends_on:
       - data
       - beanstalkd
       - redis
+      - database
     links:
       - beanstalkd
       - redis
+      - database
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /share/usr/local/share/templates:/usr/local/share/templates
+      - /share/etc/grafana_config.yml:/etc/grafana_config.yml
     networks:
-      mon:
-        ipv4_address: 192.168.2.33
-
-  cm-graphite-client:
-    restart: always
-    build: ../../docker-cm-graphite-client
-    container_name: cm-graphite-client
-    hostname: cm-graphite-client
-    extends:
-      file: environments.yml
-      service: cm-graphite-client
-    depends_on:
-      - data
-      - beanstalkd
-    links:
-      - beanstalkd
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-    networks:
-      mon:
-        ipv4_address: 192.168.2.34
+      - mon
 
   cm-icinga-client:
     restart: always
     build: ../../docker-cm-icinga-client
     container_name: cm-icinga-client
     hostname: cm-icinga-client
-    extends:
-      file: environments.yml
-      service: cm-icinga-client
+    environment:
+      # external service
+      ICINGA_MASTER: icinga2-master.docker
+      ICINGA_API_USER: root
+      ICINGA_API_PASSWORD: icinga
+      ICINGA_CLUSTER_SATELLITE: icinga2-satellite
+      ENABLE_NOTIFICATIONS: 'true'
     depends_on:
       - data
       - beanstalkd
@@ -298,26 +272,25 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:
-      mon:
-        ipv4_address: 192.168.2.35
+      - mon
 
   cm-rest-service:
     restart: always
     build: ../../docker-cm-rest-service
     container_name: cm-rest-service
     hostname: cm-rest-service
-    extends:
-      file: environments.yml
-      service: cm-rest-service
+    environment:
+      MYSQL_ROOT_PASS: database.pass
     depends_on:
       - data
       - redis
+      - database
     links:
       - redis
+      - database
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:
-      mon:
-        ipv4_address: 192.168.2.36
+      - mon
 
 # EOF
