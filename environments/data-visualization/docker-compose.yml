@@ -49,12 +49,14 @@ services:
 
   memcached:
     restart: always
-    image: bodsch/docker-memcached:1.5.3-r1
+    #image: bodsch/docker-memcached:1.5.3-r1
+    image: memcached:1.5.4-alpine
     container_name: memcached
     hostname: memcached
+    privileged: true
     volumes:
       - /etc/localtime:/etc/localtime:ro
-    command: "-l 0.0.0.0 -m 8 -u memcached"
+    command: "--listen=0.0.0.0 --memory-limit=8"
     networks:
       - mon
 

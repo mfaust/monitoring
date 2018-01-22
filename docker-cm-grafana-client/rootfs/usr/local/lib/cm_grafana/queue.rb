@@ -154,7 +154,6 @@ class CMGrafana < Grafana::Client
         time   = Time.at( timestamp ).strftime( '%Y-%m-%d %H:%M:%S' )
 
         unless( %w[loadtest deployment].include?(type) )
-
           # TODO
           # general and free-text annotation ...
           params = {}
@@ -162,6 +161,9 @@ class CMGrafana < Grafana::Client
 
         # loadtest start / stop
         if( type == 'loadtest' )
+
+          logger.debug( 'loadtest annotation' )
+
           params = {
             what: format( 'loadtest %s', argument ),
             when: timestamp,
@@ -172,6 +174,8 @@ class CMGrafana < Grafana::Client
 
         # deployment
         if( type == 'deployment' )
+
+          logger.debug( 'deployment annotation' )
 
           tag = [ identifier, 'deployment' ]
 

@@ -75,16 +75,16 @@ services:
       osmc.local: 192.168.122.60
       blueprint-box: 192.168.252.100
 
-#  memcached:
-#    restart: always
-#    image: bodsch/docker-memcached:1.5.3-r1
-#    container_name: memcached
-#    hostname: memcached
-#    volumes:
-#      - /etc/localtime:/etc/localtime:ro
-#    command: "-l 0.0.0.0 -m 8 -u memcached"
-#    networks:
-#      - mon
+  memcached:
+    restart: always
+    image: memcached:1.5.4-alpine
+    container_name: memcached
+    hostname: memcached
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    command: "-l 0.0.0.0 -m 8 -u memcached"
+    networks:
+      - mon
 
   redis:
     restart: always
@@ -185,7 +185,7 @@ services:
       # IF NOT, THEN SET THEN TO $GRAPHITE_HOST
       # (see above in this configuration part!)
       CARBON_HOST: carbon
-      # MEMCACHE_HOST: memcached
+      MEMCACHE_HOST: memcached
       LDAP: '{
         "server": "${LDAP_SERVER}",
         "port": "${LDAP_PORT}",
@@ -198,10 +198,10 @@ services:
     depends_on:
       - data
       - database
-#      - memcached
+      - memcached
     links:
       - database
-#      - memcached
+      - memcached
     volumes:
       - /etc/localtime:/etc/localtime:ro
       # - /share/opt/grafana/dashboards:/opt/grafana/dashboards
@@ -448,6 +448,7 @@ services:
     container_name: cm-grafana-client
     hostname: cm-grafana-client
     environment:
+      LOG_LEVEL: debug
       GRAFANA_HOST: nginx
     depends_on:
       - data
