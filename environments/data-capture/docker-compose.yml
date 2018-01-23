@@ -18,10 +18,10 @@ volumes:
   icinga:
     driver: local
 
-volumes:
-  database:
-  persistent:
-  redis:
+#volumes:
+  #database:
+  #persistent:
+  #redis:
 
 services:
   data:
@@ -47,7 +47,7 @@ services:
     hostname: database
     environment:
       MYSQL_SYSTEM_USER: root
-      MYSQL_ROOT_PASS: database.pass
+      MYSQL_ROOT_PASS: ${MYSQL_ROOT_PASSWORD}
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - database:/srv
@@ -106,7 +106,10 @@ services:
     container_name: carbon-relay
     hostname: carbon-relay
     environment:
-      GRAPHITE_HOST: carbon.docker
+      # externa service
+      GRAPHITE_HOST: ${VISUALISATION_HOST}
+    tmpfs:
+      - /var/spool
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:
@@ -119,13 +122,21 @@ services:
     hostname: icinga2-satellite
     environment:
       # external service
-      ICINGA_MASTER: icinga2-master.docker
+      ICINGA_MASTER: ${VISUALISATION_HOST}
+      ICINGA_PARENT: ${VISUALISATION_HOST}
+#      ICINGA_CERT_SERVICE: '{
+#        "ba": { "user":"admin", "password":"admin" },
+#        "api": { "user":"root", "password":"icinga" },
+#        "server": "${VISUALISATION_HOST}",
+#        "port": "80",
+#        "path": "/cert-service"
+#      }'
       ICINGA_CERT_SERVICE_BA_USER: admin
       ICINGA_CERT_SERVICE_BA_PASSWORD: admin
       ICINGA_CERT_SERVICE_API_USER: root
       ICINGA_CERT_SERVICE_API_PASSWORD: icinga
-      # external service
-      ICINGA_CERT_SERVICE_SERVER: nginx-proxy
+#      # external service
+      ICINGA_CERT_SERVICE_SERVER: ${VISUALISATION_HOST}
       ICINGA_CERT_SERVICE_PORT: 80
       ICINGA_CERT_SERVICE_PATH: /cert-service/
     depends_on:
@@ -137,20 +148,6 @@ services:
       - 5665:5665
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /share/etc/cm-icinga2.yaml:/etc/cm-icinga2.yaml
-      - /share/etc/icinga2/objects.d:/etc/icinga2/objects.d
-      - /share/usr/local/share/icinga2:/usr/local/share/icinga2
-      - /share/usr/lib/monitoring-plugins/tools:/usr/local/share/icinga2
-      - /share/usr/lib/monitoring-plugins/icingachecks.rb:/usr/local/lib/icingachecks.rb
-      - /share/usr/lib/monitoring-plugins/check_cm_feeder_status.rb:/usr/lib/monitoring-plugins/check_cm_feeder_status
-      - /share/usr/lib/monitoring-plugins/check_cm_cache.rb:/usr/lib/monitoring-plugins/check_cm_cache
-      - /share/usr/lib/monitoring-plugins/check_cm_memory.rb:/usr/lib/monitoring-plugins/check_cm_memory
-      - /share/usr/lib/monitoring-plugins/check_cm_license.rb:/usr/lib/monitoring-plugins/check_cm_license
-      - /share/usr/lib/monitoring-plugins/check_cm_capconnection.rb:/usr/lib/monitoring-plugins/check_cm_capconnection
-      - /share/usr/lib/monitoring-plugins/check_cm_runlevel.rb:/usr/lib/monitoring-plugins/check_cm_runlevel
-      - /share/usr/lib/monitoring-plugins/check_cm_sequencenumbers.rb:/usr/lib/monitoring-plugins/check_cm_seqencenumbers
-      - /share/usr/lib/monitoring-plugins/check_ssl_cert:/usr/lib/monitoring-plugins/check_ssl_cert
-      - icinga:/srv
       - icinga:/var/lib/icinga2
     networks:
       - mon
@@ -163,9 +160,6 @@ services:
     build: ../../docker-cm-service-discovery
     container_name: cm-service-discover
     hostname: cm-service-discover
-    extends:
-      file: environments.yml
-      service: cm-service-discovery
     depends_on:
       - data
       - jolokia
@@ -189,9 +183,6 @@ services:
     build: ../../docker-cm-data-collector
     container_name: cm-data-collector
     hostname: cm-data-collector
-    extends:
-      file: environments.yml
-      service: cm-data-collector
     depends_on:
       - data
       - jolokia
@@ -217,7 +208,7 @@ services:
     hostname: cm-carbon-client
     environment:
       # USE ONLY WITH AND EXTERNAL CARBON-WRITER!
-      GRAPHITE_HOST: carbon
+      GRAPHITE_HOST: carbon-relay
     depends_on:
       - data
       - redis
@@ -234,10 +225,10 @@ services:
     container_name: cm-grafana-client
     hostname: cm-grafana-client
     environment:
+      LOG_LEVEL: debug
       # external service
-      GRAFANA_HOST: nginx-proxy
+      GRAFANA_HOST: ${VISUALISATION_HOST}
     depends_on:
-      - data
       - beanstalkd
       - redis
       - database
@@ -247,8 +238,8 @@ services:
       - database
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /share/usr/local/share/templates:/usr/local/share/templates
-      - /share/etc/grafana_config.yml:/etc/grafana_config.yml
+      - ../../docker-cm-data/rootfs/data/usr/local/share/templates:/usr/local/share/templates
+      - ../../docker-cm-data/rootfs/data/etc/grafana_config.yml:/etc/grafana_config.yml
     networks:
       - mon
 
@@ -259,9 +250,16 @@ services:
     hostname: cm-icinga-client
     environment:
       # external service
-      ICINGA_MASTER: icinga2-master.docker
-      ICINGA_API_USER: root
-      ICINGA_API_PASSWORD: icinga
+      ICINGA_MASTER: ${VISUALISATION_HOST}
+      ICINGA_CERT_SERVICE: '{
+        "ba": { "user":"admin", "password":"admin" },
+        "api": { "user":"root", "password":"icinga" },
+        "server": "${VISUALISATION_HOST}",
+        "port": "80",
+        "path": "/cert-service"
+      }'
+#      ICINGA_API_USER: root
+#      ICINGA_API_PASSWORD: icinga
       ICINGA_CLUSTER_SATELLITE: icinga2-satellite
       ENABLE_NOTIFICATIONS: 'true'
     depends_on:
@@ -280,7 +278,7 @@ services:
     container_name: cm-rest-service
     hostname: cm-rest-service
     environment:
-      MYSQL_ROOT_PASS: database.pass
+      MYSQL_ROOT_PASS: ${MYSQL_ROOT_PASSWORD}
     depends_on:
       - data
       - redis
