@@ -19,7 +19,7 @@ icinga_api_user      = ENV.fetch('ICINGA_API_USER'         , 'admin' )
 icinga_api_password  = ENV.fetch('ICINGA_API_PASSWORD'     , 'icinga' )
 icinga_api_pki_path  = ENV.fetch('ICINGA_API_PKI_PATH'     , nil )
 icinga_api_node_name = ENV.fetch('ICINGA_API_NODE_NAME'    , nil )
-icinga_cluster       = ENV.fetch('ICINGA_CLUSTER'          , false )
+# icinga_cluster       = ENV.fetch('ICINGA_CLUSTER'          , false )
 icinga_satellite     = ENV.fetch('ICINGA_CLUSTER_SATELLITE', nil )
 icinga_notifications = ENV.fetch('ENABLE_NOTIFICATIONS'    , false )
 mq_host              = ENV.fetch('MQ_HOST'                 , 'beanstalkd' )
@@ -53,7 +53,7 @@ delay            = validate_scheduler_values( delay, 35.0 )
 # -----------------------------------------------------------------------------
 
 # convert string to bool
-icinga_cluster       = icinga_cluster.to_s.eql?('true') ? true : false
+# icinga_cluster       = icinga_cluster.to_s.eql?('true') ? true : false
 icinga_notifications = icinga_notifications.to_s.eql?('true') ? true : false
 
 config = {
@@ -66,7 +66,6 @@ config = {
       pki_path: icinga_api_pki_path,
       node_name: icinga_api_node_name
     },
-    cluster: icinga_cluster,
     satellite: icinga_satellite,
     server_config_file: server_config_file,
     notifications: icinga_notifications

@@ -4,12 +4,26 @@
 
   - environments
     - update data-visualisation environment
+    - update data-compose environment
 
-  - default log output ist now stdout
+  - default log output is now stdout
+  - DNS resolver rewritten
+  - change output format
+  - singulary environment and json are now possible
+  - add Loglevel over Environment Variable
+    * you can now set a LOG_LEVEL Environment to modify the Loglevel
+      possible values are: DEBUG < INFO < WARN < ERROR < FATAL < UNKNOWN
+      default is INFO
+      no valid value will set to UNKNOWN
+  - remove some obsolete parts
+
+  - use new version for icinga2 certificate exchange (0.16.3)
+
+  - first step to fix #126
+
   - icinga2-master / icinga2-satellite / icinga-client
-    - update the complet icingasuite
+    - update the complete icinga suite
     - enable safe master/satellite communication with self-monitoring
-    - use icinga-cert-service in version 0.16.3
     - use icinga2 gem in version 0.9.3.6 (1.0-rc)
 
   - dashing
@@ -20,4 +34,6 @@
     - overview dashboards can now be grouped by an array of tags
     - use the new annotation feature of Grafana 4.6
       remove the graphite-client, container is no longer needed
+
+  - remove cm-external-discover container (is no longer needed)
 

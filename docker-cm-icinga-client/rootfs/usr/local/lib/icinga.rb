@@ -35,7 +35,7 @@ class CMIcinga2
     @icinga_api_port       = settings.dig(:icinga, :api, :port)      || 5665
     @icinga_api_user       = settings.dig(:icinga, :api, :user)
     @icinga_api_pass       = settings.dig(:icinga, :api, :password)
-    @icinga_cluster        = settings.dig(:icinga, :cluster)         || false
+#    @icinga_cluster        = settings.dig(:icinga, :cluster)         || false
     @icinga_satellite      = settings.dig(:icinga, :satellite)
     @icinga_notifications  = settings.dig(:icinga, :notifications)   || false
 
@@ -66,8 +66,8 @@ class CMIcinga2
     logger.info( "  Version #{version} (#{date})" )
     logger.info( '  Copyright 2017 CoreMedia' )
     logger.info( "  Backendsystem #{@icinga_api_url_base}" )
-    logger.info( format( '    cluster enabled: %s', @icinga_cluster ? 'true' : 'false' ) )
-    if( @icinga_cluster )
+#    logger.info( format( '    cluster enabled: %s', @icinga_cluster ? 'true' : 'false' ) )
+    unless( @icinga_satellite.nil? )
       logger.info( format('    satellite endpoint: %s', @icinga_satellite ) )
     end
     logger.info( format('    notifications enabled: %s', @icinga_notifications ? 'true' : 'false' ) )

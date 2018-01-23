@@ -16,6 +16,8 @@ module Monitoring
 
       logger.debug( "dns cache: #{dns} (#{dns.class.to_s})" )
 
+      dns = nil
+
       if( dns.nil? )
 
         logger.debug( 'no cached DNS data' )

@@ -128,10 +128,11 @@ class CMIcinga2 < Icinga2::Client
           address: fqdn,
           display_name: display_name,
           enable_notifications: @icinga_notifications,
-          vars: payload
+          vars: payload,
         }
 
         params[:merge_vars] = true if( command == 'rescan' )
+        params[:zone] = @icinga_satellite unless( @icinga_satellite.nil? )
 
 #         logger.debug(JSON.pretty_generate(params))
 
@@ -221,16 +222,18 @@ class CMIcinga2 < Icinga2::Client
           merge_vars: true
         }
 
-        # result = delete_host(fqdn)
-        #
-        # status = result.dig('code') || 500
-        #
-        # logger.debug( result )
-        # logger.error( result ) if( status != 200 )
-        #
-        # result = add_host(params)
+        params[:zone] = @icinga_satellite unless( @icinga_satellite.nil? )
 
-        result = modify_host(params)
+        result = delete_host( name: fqdn, cascade: true )
+
+        status = result.dig('code') || 500
+
+        logger.debug( result )
+        logger.error( result ) if( status != 200 )
+
+        result = add_host(params)
+
+        # result = modify_host(params)
 
         status = result.dig('code') || 500
 

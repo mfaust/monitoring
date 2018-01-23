@@ -148,7 +148,8 @@ services:
       - 5665:5665
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - icinga:/var/lib/icinga2
+      - ./icinga2-satellite:/var/lib/icinga2
+#      - icinga:/var/lib/icinga2
     networks:
       - mon
 
@@ -225,7 +226,6 @@ services:
     container_name: cm-grafana-client
     hostname: cm-grafana-client
     environment:
-      LOG_LEVEL: debug
       # external service
       GRAFANA_HOST: ${VISUALISATION_HOST}
     depends_on:
@@ -269,6 +269,7 @@ services:
       - beanstalkd
     volumes:
       - /etc/localtime:/etc/localtime:ro
+      - ../../docker-cm-data/rootfs/data/etc/icinga_server_config.yml:/etc/icinga_server_config.yml
     networks:
       - mon
 
@@ -278,6 +279,7 @@ services:
     container_name: cm-rest-service
     hostname: cm-rest-service
     environment:
+      LOG_LEVEL: debug
       MYSQL_ROOT_PASS: ${MYSQL_ROOT_PASSWORD}
     depends_on:
       - data

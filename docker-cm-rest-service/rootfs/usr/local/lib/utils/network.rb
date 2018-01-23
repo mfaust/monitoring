@@ -48,7 +48,7 @@ module Utils
 
     def self.resolv( host )
 
-#       $stdout.puts("self.resolv( #{host} )")
+      $stdout.puts("self.resolv( #{host} )")
 
       result = { ip: nil, short: nil, fqdn: nil }
 
@@ -57,7 +57,6 @@ module Utils
         fqdn    = Resolv.getnames( ip ).sort.last
 
         fqdn    = host if( DnsCheck.new( host ).cname? )
-        fqdn    = host if( fqdn != host ) unless( IPAddress.valid?( host ) )
 
         short   = fqdn.split('.')
         short   = if( short.count > 2 )
@@ -66,13 +65,22 @@ module Utils
           fqdn
         end
 
+#        fqdn    = host if( fqdn != host ) unless( IPAddress.valid?( host ) )
+
+#        short   = fqdn.split('.')
+#        short   = if( short.count > 2 )
+#          short.first
+#        else
+#          fqdn
+#        end
+
         result = { ip: ip, short: short, fqdn: fqdn }
 
       rescue => error
         result = { ip: nil, short: nil, fqdn: nil }
       end
 
-#       $stdout.puts( "result: #{result}" )
+      $stdout.puts( "result: #{result}" )
       result
     end
 

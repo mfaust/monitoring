@@ -152,12 +152,10 @@ class CMGrafana < Grafana::Client
         status = org_by_name.dig('status') || 500
 
         if( status == 500 )
-
           logger.error( 'internal server error' )
-
         elsif( status == 404 )
-
           # org not exists
+          #
           logger.debug( 'create org' )
 
           org_created = create_organisation(
