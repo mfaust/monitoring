@@ -47,7 +47,7 @@ class CMGrafana
     @timeout             = settings.dig(:grafana, :timeout)       || 5
     @open_timeout        = settings.dig(:grafana, :open_timeout)  || 5
     @http_headers        = settings.dig(:grafana, :headers)       || {}
-    server_config_file   = settings.dig(:grafana, :server_config_file)
+    @server_config_file  = settings.dig(:grafana, :server_config_file)
     @template_directory  = settings.dig(:templateDirectory)       || '/usr/local/share/templates/grafana'
 
     mq_host              = settings.dig(:mq, :host)
@@ -67,7 +67,7 @@ class CMGrafana
 
     super( settings )
 
-    @debug  = false
+    @debug  = true
     @logger = logger
 
     version       = CMGrafana::Version::VERSION
@@ -84,47 +84,7 @@ class CMGrafana
     logger.info( "    - message queue: #{mq_host}:#{mq_port}/#{@mq_queue}" )
     logger.info( '-----------------------------------------------------------------' )
 
-    begin
-
-      @logged_in = login( username: @user, password: @password )
-    rescue => e
-
-      if( server_config_file.nil? )
-
-        logger.error( 'no server configuration found' )
-      else
-
-        # read config file
-        config = read_config_file( config_file: server_config_file )
-
-        if( config.nil? )
-
-          logger.error( 'no configuration found')
-
-          server_config_file = nil
-
-        else
-
-          admin_user = config.select { |x| x == 'admin_user' }.values
-          admin_user = admin_user.first if( admin_user.is_a?(Array) )
-
-          admin_login_name = admin_user.dig('login_name')
-          admin_password   = admin_user.dig('password')
-
-          logger.debug( format( 'use new admin credetials for \'%s\' :: %s', admin_login_name, admin_password ) )
-
-          @user      = admin_login_name
-          @password  = admin_password
-          begin
-            @logged_in = login( username: @user, password: @password, max_retries: 10, sleep_between_retries: 8 )
-          rescue => error
-            logger.error( format( '  %s', error) )
-            exit 1
-          end
-        end
-      end
-
-    end
+#    grafana_login
 
     @redis        = Storage::RedisClient.new( redis: { host: redis_host } )
     @mbean        = MBean::Client.new( redis: @redis )

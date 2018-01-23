@@ -40,9 +40,56 @@ class CMGrafana < Grafana::Client
     end
 
 
+    def grafana_login
+
+      begin
+        @logged_in = login( username: @user, password: @password )
+
+        logger.debug("logged in: #{@logged_in} (#{@logged_in.class.to_s})")
+
+        ping_session
+      rescue => error
+
+        logger.error( format( '  %s', error) )
+
+        logger.warn( 'no server configuration found' ) if( @server_config_file.nil? )
+
+        # read config file
+        #
+        config = read_config_file( config_file: @server_config_file ) unless( @server_config_file.nil? )
+
+        logger.debug(config)
+
+        unless( config.nil? )
+
+          admin_user = config.select { |x| x == 'admin_user' }.values
+          admin_user = admin_user.first if( admin_user.is_a?(Array) )
+
+          admin_login_name = admin_user.dig('login_name')
+          admin_password   = admin_user.dig('password')
+
+          logger.debug( format( 'use new admin credentials for \'%s\' :: %s', admin_login_name, admin_password ) )
+
+          @user      = admin_login_name
+          @password  = admin_password
+
+          begin
+            @logged_in = login( username: @user, password: @password, max_retries: 10, sleep_between_retries: 8 )
+          rescue => error
+            logger.error( format( '  %s', error) )
+            exit 1
+          end
+        end
+      end
+
+    end
+
+
     def configure_server( params )
 
       logger.debug( "configure_server( #{params} )" )
+
+      grafana_login
 
       config_file = params.dig(:config_file)
       config_file = File.expand_path( config_file )
@@ -69,13 +116,13 @@ class CMGrafana < Grafana::Client
         # TODO
         # read default organisation
 
-  #     if( @logged_in == true )
-  #       logger.debug( JSON.pretty_generate( admin_settings ) )
-  #       logger.debug( JSON.pretty_generate( admin_stats ) )
-  #     end
+        if( @logged_in == true )
+          logger.debug( JSON.pretty_generate( admin_settings ) )
+          logger.debug( JSON.pretty_generate( admin_stats ) )
+        end
 
-        result << grafana_organisation( organisation )
         result << grafana_users( users )
+        result << grafana_organisation( organisation )
         result << grafana_datasources( datasources )
         result << grafana_dashboards( dashboards )
         result << grafana_admin_user( admin_user )

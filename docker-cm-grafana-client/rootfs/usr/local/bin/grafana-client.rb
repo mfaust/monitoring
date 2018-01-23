@@ -46,7 +46,7 @@ end
 
 interval         = validate_scheduler_values( interval, 20.0 )
 delay_config     = validate_scheduler_values( delay, 30.0 )
-delay            = validate_scheduler_values( delay, 35.0 )
+delay            = validate_scheduler_values( delay, 50.0 )
 
 # -----------------------------------------------------------------------------
 
