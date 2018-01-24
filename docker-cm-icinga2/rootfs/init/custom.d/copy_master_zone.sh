@@ -10,7 +10,13 @@ then
 
   [[ -d /etc/icinga2/zones.d/global-templates ]] || mkdir -p /etc/icinga2/zones.d/global-templates
 
-    cat << EOF > /etc/icinga2/zones.d/global-templates/coremedia_templates.conf
+  template_file="/etc/icinga2/zones.d/global-templates/coremedia_templates.conf"
+
+  if [[ ! -f ${template_file} ]]
+  then
+    if [[ $(grep -c 'template Host "default-host-ping"' ${template_file}) -eq 0 ]]
+    then
+      cat << EOF > /etc/icinga2/zones.d/global-templates/coremedia_templates.conf
 
 /** CoreMedia specific Host Template */
 
@@ -29,7 +35,8 @@ template Host "default-host-ping" {
   vars.fping_interval             = 500
 }
 EOF
-
+    fi
+  fi
 fi
 
 log_info " ------------------------------------------------------ "
