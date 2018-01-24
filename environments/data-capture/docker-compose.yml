@@ -148,7 +148,7 @@ services:
       - 5665:5665
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ./icinga2-satellite:/var/lib/icinga2
+#      - ./icinga2-satellite:/var/lib/icinga2
 #      - icinga:/var/lib/icinga2
     networks:
       - mon

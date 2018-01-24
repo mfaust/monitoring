@@ -2,12 +2,8 @@
 
 . /init/output.sh
 
-log_info " ------------------------------------------------------ "
-log_info " create custom master zone"
-
 if [[ "${ICINGA_TYPE}" = "Master" ]]
 then
-
   [[ -d /etc/icinga2/zones.d/global-templates ]] || mkdir -p /etc/icinga2/zones.d/global-templates
 
   template_file="/etc/icinga2/zones.d/global-templates/coremedia_templates.conf"
@@ -16,6 +12,8 @@ then
   then
     if [[ $(grep -c 'template Host "default-host-ping"' ${template_file}) -eq 0 ]]
     then
+      log_info " create custom master zone : '$(basename ${template_file})'"
+
       cat << EOF > /etc/icinga2/zones.d/global-templates/coremedia_templates.conf
 
 /** CoreMedia specific Host Template */
@@ -38,5 +36,3 @@ EOF
     fi
   fi
 fi
-
-log_info " ------------------------------------------------------ "
