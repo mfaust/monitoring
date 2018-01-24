@@ -19,7 +19,7 @@ then
 /** CoreMedia specific Host Template */
 
 template Host "default-host-ping" {
-  check_command                   = "fping4"
+  check_command                   = "ping4"
   max_check_attempts              = 5
   check_period                    = "24x7"
   check_interval                  = 3m
