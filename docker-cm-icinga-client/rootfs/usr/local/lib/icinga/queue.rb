@@ -94,6 +94,9 @@ class CMIcinga2 < Icinga2::Client
 
       @cache.set(format( 'dns::%s', node ) , expires_in: 320 ) { MiniCache::Data.new( ip: ip, short: short, fqdn: fqdn ) }
 
+
+      # 'default-host-ping'
+
       # rescan services and update host object
       #
 
@@ -132,6 +135,7 @@ class CMIcinga2 < Icinga2::Client
         }
 
         params[:merge_vars] = true if( command == 'rescan' )
+        params[:templates] = ['default-host-ping'] unless( @icinga_satellite.nil? )
         params[:zone] = @icinga_satellite unless( @icinga_satellite.nil? )
 
 #         logger.debug(JSON.pretty_generate(params))
@@ -222,6 +226,7 @@ class CMIcinga2 < Icinga2::Client
           merge_vars: true
         }
 
+        params[:templates] = ['default-host-ping'] unless( @icinga_satellite.nil? )
         params[:zone] = @icinga_satellite unless( @icinga_satellite.nil? )
 
         result = delete_host( name: fqdn, cascade: true )
