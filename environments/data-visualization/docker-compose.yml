@@ -14,12 +14,12 @@ volumes:
 
 services:
 
-  data:
-    build: ../../docker-cm-data
-    container_name: 01-data
-    volumes:
-      - /share:/share
-
+#  data:
+#    build: ../../docker-cm-data
+#    container_name: 01-data
+#    volumes:
+#      - /share:/share
+#
 #  certificate:
 #    image: bodsch/omgwtfssl
 #    container_name: 01-certificate
@@ -36,8 +36,6 @@ services:
     image: bodsch/docker-mysql:10.1.28-r1
     container_name: database
     hostname: database
-#    ports:
-#      - 3306:3306
     environment:
       MYSQL_SYSTEM_USER: root
       MYSQL_ROOT_PASS: database.pass
@@ -68,7 +66,6 @@ services:
     ports:
       - 80:80
     depends_on:
-      - data
       - graphite
       - grafana
       - icingaweb2
@@ -81,17 +78,17 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ../../docker-cm-data/rootfs/data/www/entry-page:/var/www/entry-page
-#      - /share/etc/nginx/external/https.conf:/etc/nginx/external/https.conf
-      - /share/etc/nginx/sites-enabled/01-default.conf:/etc/nginx/sites-enabled/01-default.conf
-      - /share/etc/nginx/nginx.conf:/etc/nginx/nginx.conf
-      - /share/etc/nginx/modules.d/00-restrictions.conf:/etc/nginx/modules.d/00-restrictions.conf
-#      - /share/etc/nginx/modules.d/00-dnsresolver.conf:/etc/nginx/modules.d/00-dnsresolver.conf
-      - /share/etc/nginx/modules.d/01-proxy-grafana.conf:/etc/nginx/modules.d/01-proxy-grafana.conf
-      - /share/etc/nginx/modules.d/01-proxy-graphite.conf:/etc/nginx/modules.d/01-proxy-graphite.conf
-      - /share/etc/nginx/modules.d/01-proxy-icingaweb2.conf:/etc/nginx/modules.d/01-proxy-icingaweb2.conf
-      - /share/etc/nginx/modules.d/01-proxy-icinga-cert-service.conf:/etc/nginx/modules.d/01-proxy-icingaweb-cert-service.conf
-      - /share/etc/nginx/modules.d/01-proxy-markdown-service.conf:/etc/nginx/modules.d/01-proxy-markdown-service.conf
-      - /share/etc/nginx/modules.d/01-proxy-dashing-icinga2.conf:/etc/nginx/modules.d/01-proxy-dashing-icinga2.conf
+#      - ../../docker-cm-data/rootfs/data/etc/nginx/external/https.conf:/etc/nginx/external/https.conf
+      - ../../docker-cm-data/rootfs/data/etc/nginx/sites-enabled/01-default.conf:/etc/nginx/sites-enabled/01-default.conf
+      - ../../docker-cm-data/rootfs/data/etc/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ../../docker-cm-data/rootfs/data/etc/nginx/modules.d/00-restrictions.conf:/etc/nginx/modules.d/00-restrictions.conf
+#      - ../../docker-cm-data/rootfs/data/etc/nginx/modules.d/00-dnsresolver.conf:/etc/nginx/modules.d/00-dnsresolver.conf
+      - ../../docker-cm-data/rootfs/data/etc/nginx/modules.d/01-proxy-grafana.conf:/etc/nginx/modules.d/01-proxy-grafana.conf
+      - ../../docker-cm-data/rootfs/data/etc/nginx/modules.d/01-proxy-graphite.conf:/etc/nginx/modules.d/01-proxy-graphite.conf
+      - ../../docker-cm-data/rootfs/data/etc/nginx/modules.d/01-proxy-icingaweb2.conf:/etc/nginx/modules.d/01-proxy-icingaweb2.conf
+      - ../../docker-cm-data/rootfs/data/etc/nginx/modules.d/01-proxy-icinga-cert-service.conf:/etc/nginx/modules.d/01-proxy-icingaweb-cert-service.conf
+      - ../../docker-cm-data/rootfs/data/etc/nginx/modules.d/01-proxy-markdown-service.conf:/etc/nginx/modules.d/01-proxy-markdown-service.conf
+      - ../../docker-cm-data/rootfs/data/etc/nginx/modules.d/01-proxy-dashing-icinga2.conf:/etc/nginx/modules.d/01-proxy-dashing-icinga2.conf
     networks:
       - mon
 
@@ -100,8 +97,6 @@ services:
     image: bodsch/docker-go-carbon:0.12.0-rc1
     container_name: carbon
     hostname: carbon
-    depends_on:
-      - data
     ports:
       - 2003:2003
       - 2003:2003/udp
@@ -120,8 +115,6 @@ services:
       # THIS TURN OFF THE INTERNAL CARBON!
       # USE THIS ONLY WITH AN OTHER CARBON-WRITER (e.g. bodsch/docker-go-carbon)
       USE_EXTERNAL_CARBON: 'true'
-    depends_on:
-      - data
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - carbon:/srv
@@ -145,17 +138,14 @@ services:
       # (see above in this configuration part!)
       CARBON_HOST: carbon
       MEMCACHE_HOST: memcached
-      LDAP: '{
-        "server": "${LDAP_SERVER}",
-        "port": "${LDAP_PORT}",
-        "bind_dn": "${LDAP_BIND_DN}",
-        "bind_password": "${LDAP_BIND_PASSWORD}",
-        "base_dn": "${LDAP_BASE_DN}",
-        "group_dn": "${LDAP_GROUP_DN}",
-        "search_filter": "${LDAP_SEARCH_FILTER}"
-      }'
+      # LDAP_SERVER: ${LDAP_SERVER}
+      # LDAP_PORT: 389
+      # LDAP_BIND_DN: ${LDAP_BIND_DN}
+      # LDAP_BIND_PASSWORD: ${LDAP_BIND_PASSWORD}
+      # LDAP_BASE_DN: ${LDAP_BASE_DN}
+      # LDAP_GROUP_DN: ${LDAP_GROUP_DN}
+      # LDAP_SEARCH_FILTER: ${LDAP_SEARCH_FILTER}
     depends_on:
-      - data
       - database
       - memcached
     links:
@@ -173,7 +163,6 @@ services:
     container_name: cm-icinga2-master
     hostname: cm-icinga2-master
     depends_on:
-      - data
       - database
     links:
       - database
@@ -214,20 +203,15 @@ services:
       ICINGA2_CMD_API_PASS: icingaweb
       GRAPHITE_HOST: graphite
       ICINGAWEB2_USERS: coremedia:coremedia,icinga:icinga
-      LDAP: '{
-        "active_directory": "true",
-        "server": "${LDAP_SERVER}",
-        "port": "${LDAP_PORT}",
-        "bind_dn": "${LDAP_BIND_DN}",
-        "bind_password": "${LDAP_BIND_PASSWORD}",
-        "base_dn": "${LDAP_BASE_DN}",
-        "filter": "${LDAP_FILTER}",
-        "role": {
-          "groups": "${LDAP_GROUP_NAMES}",
-          "permissions": "${GROUP_PERMISSIONS}"
-        }'
+      # LDAP_AD: 'true'
+      # LDAP_SERVER: ${LDAP_SERVER}
+      # LDAP_PORT: 389
+      # LDAP_BIND_DN: ${LDAP_BIND_DN}
+      # LDAP_BIND_PASSWORD: ${LDAP_BIND_PASSWORD}
+      # LDAP_BASE_DN: ${LDAP_BASE_DN}
+      # LDAP_FILTER: ${LDAP_FILTER}
+      # LDAP_ROLE_GROUPS: cm-common
     depends_on:
-      - data
       - database
       - cm-icinga2-master
     links:
