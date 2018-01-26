@@ -1,11 +1,11 @@
 
-FROM bodsch/docker-icinga2:1801-local
+FROM bodsch/docker-icinga2:2.8.0-r6
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
   VERSION="1801" \
-  BUILD_DATE="2018-01-24" \
+  BUILD_DATE="2018-01-26" \
   TERM=xterm \
   TZ='Europe/Berlin'
 
