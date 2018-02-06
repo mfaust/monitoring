@@ -1,0 +1,586 @@
+{
+  "dashboard": {
+    "schemaVersion": 12,
+    "refresh": "1m",
+    "annotations": {
+      "list": []
+    },
+    "links": [],
+    "editable": true,
+    "uid": null,
+    "tags": [
+      "<%= short_hostname %>",
+      "content-server"
+    ],
+    "id": null,
+    "sharedCrosshair": true,
+    "time": {
+      "from": "now-3h",
+      "to": "now"
+    },
+    "templating": {
+      "list": [
+        {
+          "current": {
+            "text": "<%= slug %>",
+            "value": "<%= graphite_identifier %>"
+          },
+          "options": [
+            {
+              "value": "<%= graphite_identifier %>",
+              "text": "<%= slug %>"
+            }
+          ],
+          "hide": 2,
+          "label": null,
+          "name": "host",
+          "query": "<%= graphite_identifier %>",
+          "type": "constant"
+        },
+        {
+          "name": "mls",
+          "label": null,
+          "type": "constant",
+          "query": "<%= graphite_identifier %>",
+          "hide": 2,
+          "current": {
+            "value": "<%= graphite_identifier %>",
+            "text": "<%= slug %>"
+          },
+          "options": [
+            {
+              "text": "<%= slug %>",
+              "value": "<%= graphite_identifier %>"
+            }
+          ]
+        }
+      ]
+    },
+    "version": 1,
+    "style": "dark",
+    "title": "<%= slug %> - ContentServer RLS",
+    "timezone": "browser",
+    "timepicker": {
+      "time_options": [
+        "5m",
+        "15m",
+        "1h",
+        "6h",
+        "12h",
+        "24h",
+        "2d",
+        "7d",
+        "30d"
+      ],
+      "now": true,
+      "refresh_intervals": [
+        "10s",
+        "30s",
+        "1m",
+        "2m",
+        "4m",
+        "10m"
+      ]
+    },
+    "rows": [
+      {
+        "height": 42,
+        "repeatRowId": null,
+        "repeat": null,
+        "titleSize": "h6",
+        "panels": [
+          {
+            "mode": "html",
+            "id": 10,
+            "type": "text",
+            "content": "<h3><center><a href=\"<%= tomcat_dashboard_url %>?var-Application=RLS\">Tomcat</a></center></h3>",
+            "transparent": true,
+            "links": [],
+            "span": 12,
+            "title": ""
+          }
+        ],
+        "repeatIteration": null,
+        "title": "",
+        "collapse": false,
+        "showTitle": false
+      },
+      {
+        "collapse": false,
+        "title": "",
+        "panels": [
+          {
+            "content": "<h2><center>RLS</center></h2>",
+            "type": "text",
+            "transparent": true,
+            "error": false,
+            "mode": "html",
+            "id": 11,
+            "span": 12,
+            "links": [],
+            "editable": true,
+            "title": "",
+            "isNew": true
+          }
+        ],
+        "height": "25px",
+        "editable": true
+      },
+      {
+        "height": "150px",
+        "editable": true,
+        "panels": [
+          {
+            "yaxes": [
+              {
+                "format": "none",
+                "logBase": 1,
+                "max": null,
+                "show": true,
+                "min": null
+              },
+              {
+                "format": "short",
+                "show": false,
+                "min": null,
+                "logBase": 1,
+                "max": null
+              }
+            ],
+            "pointradius": 5,
+            "decimals": 0,
+            "xaxis": {
+              "show": true
+            },
+            "targets": [
+              {
+                "refId": "A",
+                "target": "alias(carbon-writer.$host.RLS.QueryPool.queries.max, 'queries max')",
+                "textEditor": false
+              },
+              {
+                "textEditor": false,
+                "refId": "B",
+                "target": "alias(carbon-writer.$host.RLS.QueryPool.queries.waiting, 'queries waiting')"
+              },
+              {
+                "refId": "C",
+                "target": "alias(carbon-writer.$host.RLS.QueryPool.executors.idle, 'executors idle')",
+                "textEditor": false
+              },
+              {
+                "textEditor": false,
+                "target": "alias(carbon-writer.$host.RLS.QueryPool.executors.running, 'executors running')",
+                "refId": "D"
+              }
+            ],
+            "lines": true,
+            "stack": false,
+            "timeFrom": null,
+            "timeShift": null,
+            "percentage": false,
+            "grid": {
+              "threshold2": null,
+              "thresholdLine": false,
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2Color": "rgba(234, 112, 112, 0.22)",
+              "threshold1": null
+            },
+            "steppedLine": false,
+            "title": "Query Pool",
+            "isNew": true,
+            "bars": false,
+            "type": "graph",
+            "datasource": "graphite",
+            "tooltip": {
+              "sort": 0,
+              "msResolution": false,
+              "ordering": "alphabetical",
+              "value_type": "cumulative",
+              "shared": true
+            },
+            "legend": {
+              "max": false,
+              "total": false,
+              "current": true,
+              "show": true,
+              "rightSide": true,
+              "min": false,
+              "alignAsTable": true,
+              "avg": false,
+              "values": true
+            },
+            "error": false,
+            "nullPointMode": "connected",
+            "id": 12,
+            "renderer": "flot",
+            "editable": true,
+            "links": [],
+            "fill": 3,
+            "span": 12,
+            "seriesOverrides": [],
+            "linewidth": 1,
+            "aliasColors": {},
+            "points": false
+          }
+        ],
+        "title": "Query Pool",
+        "collapse": false
+      },
+      {
+        "panels": [
+          {
+            "type": "graph",
+            "bars": false,
+            "datasource": "graphite",
+            "legend": {
+              "max": false,
+              "total": false,
+              "rightSide": true,
+              "show": true,
+              "current": true,
+              "min": false,
+              "values": true,
+              "avg": false,
+              "alignAsTable": true
+            },
+            "error": false,
+            "tooltip": {
+              "value_type": "cumulative",
+              "ordering": "alphabetical",
+              "shared": true,
+              "sort": 0,
+              "msResolution": false
+            },
+            "stack": false,
+            "timeShift": null,
+            "timeFrom": null,
+            "yaxes": [
+              {
+                "max": null,
+                "logBase": 1,
+                "min": null,
+                "show": true,
+                "format": "none"
+              },
+              {
+                "format": "short",
+                "show": true,
+                "min": null,
+                "logBase": 1,
+                "max": null
+              }
+            ],
+            "pointradius": 5,
+            "xaxis": {
+              "show": true
+            },
+            "lines": true,
+            "targets": [
+              {
+                "textEditor": false,
+                "refId": "A",
+                "target": "aliasByMetric(perSecond(carbon-writer.$host.RLS.StatisticsResourceCache.cache.*))"
+              }
+            ],
+            "title": "Statistic Resource Cache",
+            "steppedLine": false,
+            "isNew": true,
+            "percentage": false,
+            "grid": {
+              "threshold1": null,
+              "threshold2Color": "rgba(234, 112, 112, 0.22)",
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2": null
+            },
+            "points": false,
+            "seriesOverrides": [],
+            "linewidth": 1,
+            "aliasColors": {},
+            "nullPointMode": "connected",
+            "id": 13,
+            "renderer": "flot",
+            "links": [],
+            "editable": true,
+            "span": 12,
+            "fill": 3
+          }
+        ],
+        "title": "Statistic Resource Cache",
+        "height": "200px",
+        "editable": true,
+        "collapse": false
+      },
+      {
+        "height": "150px",
+        "editable": true,
+        "panels": [
+          {
+            "points": false,
+            "aliasColors": {},
+            "linewidth": 1,
+            "seriesOverrides": [],
+            "span": 12,
+            "fill": 3,
+            "links": [],
+            "editable": true,
+            "renderer": "flot",
+            "id": 14,
+            "nullPointMode": "connected",
+            "error": false,
+            "legend": {
+              "min": false,
+              "show": true,
+              "rightSide": true,
+              "current": true,
+              "alignAsTable": true,
+              "avg": false,
+              "values": true,
+              "max": false,
+              "total": false
+            },
+            "tooltip": {
+              "shared": true,
+              "value_type": "cumulative",
+              "ordering": "alphabetical",
+              "msResolution": false,
+              "sort": 0
+            },
+            "datasource": "graphite",
+            "bars": false,
+            "type": "graph",
+            "steppedLine": false,
+            "title": "Statistic Jobresult",
+            "isNew": true,
+            "grid": {
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2Color": "rgba(234, 112, 112, 0.22)",
+              "threshold1": null,
+              "threshold2": null
+            },
+            "percentage": false,
+            "timeShift": null,
+            "timeFrom": null,
+            "stack": false,
+            "targets": [
+              {
+                "textEditor": false,
+                "target": "aliasByMetric(perSecond(carbon-writer.$host.RLS.StatisticsJobResult.*))",
+                "refId": "A"
+              }
+            ],
+            "xaxis": {
+              "show": true
+            },
+            "lines": true,
+            "yaxes": [
+              {
+                "show": true,
+                "min": null,
+                "max": null,
+                "logBase": 1,
+                "format": "none"
+              },
+              {
+                "format": "short",
+                "show": true,
+                "min": null,
+                "max": null,
+                "logBase": 1
+              }
+            ],
+            "pointradius": 5
+          }
+        ],
+        "title": "Statistic Jobresult",
+        "collapse": false
+      },
+      {
+        "editable": true,
+        "height": "200px",
+        "panels": [
+          {
+            "yaxes": [
+              {
+                "format": "none",
+                "label": null,
+                "show": true,
+                "min": null,
+                "logBase": 1,
+                "max": null
+              },
+              {
+                "format": "short",
+                "label": null,
+                "max": null,
+                "logBase": 1,
+                "show": false,
+                "min": null
+              }
+            ],
+            "pointradius": 5,
+            "targets": [
+              {
+                "textEditor": false,
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(carbon-writer.$host.RLS.Server.ResourceCache.*, '(.*)-', ''))"
+              }
+            ],
+            "xaxis": {
+              "show": true
+            },
+            "lines": true,
+            "stack": false,
+            "timeFrom": null,
+            "timeShift": null,
+            "percentage": false,
+            "grid": {
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2Color": "rgba(234, 112, 112, 0.22)",
+              "threshold1": null,
+              "threshold2": null
+            },
+            "title": "Server Resource Cache",
+            "steppedLine": false,
+            "isNew": true,
+            "type": "graph",
+            "bars": false,
+            "datasource": "graphite",
+            "tooltip": {
+              "value_type": "cumulative",
+              "shared": true,
+              "sort": 0,
+              "msResolution": false
+            },
+            "legend": {
+              "rightSide": true,
+              "show": true,
+              "min": false,
+              "current": true,
+              "values": true,
+              "avg": false,
+              "alignAsTable": true,
+              "max": false,
+              "total": false
+            },
+            "error": false,
+            "id": 15,
+            "nullPointMode": "connected",
+            "renderer": "flot",
+            "editable": true,
+            "links": [],
+            "span": 12,
+            "fill": 3,
+            "seriesOverrides": [],
+            "aliasColors": {},
+            "linewidth": 1,
+            "points": false
+          }
+        ],
+        "title": "Server Resource Cache",
+        "collapse": false
+      },
+      {
+        "title": "diff Sequence Numbers between MLS & RLS",
+        "showTitle": false,
+        "collapse": false,
+        "repeat": null,
+        "titleSize": "h6",
+        "panels": [
+          {
+            "height": "200",
+            "linewidth": 1,
+            "aliasColors": {},
+            "seriesOverrides": [],
+            "thresholds": [],
+            "points": false,
+            "span": 12,
+            "fill": 3,
+            "links": [],
+            "renderer": "flot",
+            "id": 16,
+            "nullPointMode": "connected",
+            "tooltip": {
+              "sort": 0,
+              "shared": true,
+              "value_type": "individual"
+            },
+            "legend": {
+              "max": true,
+              "total": false,
+              "current": true,
+              "show": true,
+              "rightSide": true,
+              "min": false,
+              "alignAsTable": true,
+              "avg": false,
+              "values": true
+            },
+            "datasource": "graphite",
+            "type": "graph",
+            "bars": false,
+            "percentage": false,
+            "title": "diff Sequence Numbers between MLS & RLS",
+            "steppedLine": false,
+            "xaxis": {
+              "show": true,
+              "values": [],
+              "mode": "time",
+              "name": null
+            },
+            "lines": true,
+            "targets": [
+              {
+                "target": "alias(carbon-writer.$mls.MLS.Server.Repository.SequenceNumber, 'seq MLS')",
+                "refId": "A",
+                "hide": true
+              },
+              {
+                "hide": true,
+                "target": "alias(carbon-writer.$host.RLS.Replicator.completedSequenceNumber, 'seq RLS')",
+                "refId": "B"
+              },
+              {
+                "hide": false,
+                "refId": "C",
+                "target": "alias(carbon-writer.$host.RLS.SequenceNumber.diffToMLS, 'diff to MLS')"
+              },
+              {
+                "targetFull": "alias(diffSeries(carbon-writer.$mls.MLS.Server.Repository.SequenceNumber, carbon-writer.$host.RLS.Replicator.completedSequenceNumber), 'MLS vs. RLS')",
+                "hide": true,
+                "target": "alias(diffSeries(#A, #B), 'MLS vs. RLS')",
+                "refId": "D"
+              }
+            ],
+            "yaxes": [
+              {
+                "format": "none",
+                "label": null,
+                "show": true,
+                "min": "0",
+                "logBase": 1,
+                "max": null
+              },
+              {
+                "format": "short",
+                "label": null,
+                "max": null,
+                "logBase": 1,
+                "show": false,
+                "min": null
+              }
+            ],
+            "pointradius": 5,
+            "timeFrom": null,
+            "timeShift": null,
+            "stack": false
+          }
+        ],
+        "repeatRowId": null,
+        "height": 250,
+        "repeatIteration": null
+      }
+    ],
+    "hideControls": false
+  }
+}

@@ -1,57 +1,50 @@
 
-FROM bodsch/docker-jolokia:1.3.7-r3
+FROM alpine:3.7 as builder
 
-MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
+COPY build/ /build
 
-ARG HOSTS
+WORKDIR /build
 
-ENV \
-  VERSION="1801" \
-  BUILD_DATE="2018-01-18" \
-  TERM=xterm \
-  TZ='Europe/Berlin' \
-  GOPATH=/build \
-  GOROOT=/usr/lib/go \
-  HOSTS=${HOSTS:-}
-
-EXPOSE 8080 8088
+RUN \
+  apk update --quiet --no-cache && \
+  apk upgrade --quiet --no-cache && \
+  apk add --quiet --virtual .build-deps \
+    g++ git go make && \
+  export GOPATH=/build && \
+  export GOROOT=/usr/lib/go && \
+  cd ${GOPATH}/src && \
+  go get github.com/gorilla/mux && \
+  go build -ldflags="-s -w" -o service-discovery && \
+  mv service-discovery /
 
 # ---------------------------------------------------------------------------------------
 
-COPY build/ /build
+FROM bodsch/docker-jolokia:1.4.0-r1
+
+ENV \
+  VERSION="1802" \
+  BUILD_DATE="2018-02-16" \
+  TZ='Europe/Berlin'
+
+EXPOSE 8080 8088
+
+LABEL \
+  version="1802" \
+  maintainer="Bodo Schulz <bodo.schulz@coremedia.com>" \
+  org.label-schema.build-date=${BUILD_DATE}
 
 RUN \
   apk --quiet --no-cache update && \
   apk add --quiet --no-cache --virtual .build-deps \
-    git g++ make go tzdata && \
-  apk add --quiet --no-cache \
-    curl && \
+    tzdata && \
   cp /usr/share/zoneinfo/${TZ} /etc/localtime && \
   echo ${TZ} > /etc/timezone && \
-  cd ${GOPATH}/src && \
-  go get github.com/gorilla/mux && \
-  go build -ldflags="-s -w" -o service-discovery && \
-  mv service-discovery /usr/bin && \
   apk --quiet --purge del .build-deps && \
   rm -rf \
     /tmp/* \
-    /build \
-    /var/cache/apk/* \
-    ${GOPATH} \
-    /usr/lib/go \
-    /usr/bin/go* \
-    /root/.n* \
-    /root/.cache \
-    /root/.config \
-    /usr/local/* && \
-  [ ! -n "${HOSTS}" ] && echo "${HOSTS}" >> /etc/hosts
+    /var/cache/apk/*
 
+COPY --from=builder /service-discovery /usr/bin/
 COPY rootfs/ /
 
 WORKDIR /
-
-HEALTHCHECK \
-  --interval=5s \
-  --timeout=2s \
-  --retries=12 \
-  CMD curl --silent --fail http://localhost:8080/jolokia || exit 1

@@ -18,7 +18,8 @@ This service runs every `INTERVAL` seconds.
 | `GRAFANA_URL_PATH`          | `/grafana`           | grafana URL Path                                                |
 | `GRAFANA_API_USER`          | `admin`              | grafana API user                                                |
 | `GRAFANA_API_PASSWORD`      | `admin`              | grafana API password                                            |
-| `GRAFANA_TEMPLATE_PATH`     | `/usr/local/share/templates/grafana` | database schema name for the discovery service  |
+| `GRAFANA_VERSION`           | `4`                  | grafana version. we support Version 4 and 5.<br>**templates for both version are different** |
+| `GRAFANA_TEMPLATE_PATH`     | `/usr/local/templates` | base directory for all grafana templates. for every major version exists an seperate sub directory. |
 | `MQ_HOST`                   | `beanstalkd`         | beanstalkd (message queue) Host                                 |
 | `MQ_PORT`                   | `11300`              | beanstalkd (message queue) Port                                 |
 | `MQ_QUEUE`                  | `mq-grafana`         | beanstalkd (message queue) Queue                                |
@@ -30,14 +31,42 @@ This service runs every `INTERVAL` seconds.
 | `DISCOVERY_DATABASE_PASS`   | `discovery`          | database password for the discovery service                     |
 | `INTERVAL`                  | `20s`                | run interval for the scheduler (minimum are `20s`)              |
 | `RUN_DELAY`                 | `30s`                | delay for the first run                                         |
-| `SERVER_CONFIG_FILE`        | `/etc/grafana/server_config.yml` | configure file for grafana |
+| `SERVER_CONFIG_FILE`        | `/etc/server_config.yml` | configure file for grafana |
 
 For all Scheduler Variables, you can use simple integer values like `10`, this will be interpreted as `second`.
+
 Other Values are also possible:
-  - `1h` for 1 hour
-  - `1w` for 1 week
+
+- `1h` for 1 hour
+- `1w` for 1 week
 
 Kombinations are also possible:
-  - `5m10s` for 5 minutes and 10 seconds
-  - `1h10s` for 1 hour and 20 minutes
 
+- `5m10s` for 5 minutes and 10 seconds
+- `1h10s` for 1 hour and 20 minutes
+
+# Templates
+
+- `slug`<br>
+   *Example:* dns FQDN or overwrite with configuration `display_name`<br>
+   `slug` is the url friendly version of the dashboard title.<br>
+   `.` are replaced with `-`
+
+- `short_hostname`<br>
+   dns shortname
+
+- `normalized_name`<br>
+   normalized servicename<br>
+   example: `content-management-server` => `CMS` or `caefeeder-live` => `FEEDER_LIVE`
+
+- `description`<br>
+   service description taken from `cm-service.yaml`
+
+- `graphite_identifier`<br>
+   dns FQDN or overwrite with configuration `graphite_identifier`
+
+- `mls_identifier`<br>
+   the `graphite_identifier` for an *Master Live Server*
+
+- `icinga_identifier`<br>
+   same as `graphite_identifier`, but `_` insteed of `.`

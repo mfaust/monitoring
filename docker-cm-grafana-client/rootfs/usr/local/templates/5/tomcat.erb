@@ -1,0 +1,663 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": null,
+    "tags": [ "<%= short_hostname %>", "tomcats" ],
+    "title": "<%= slug %> - Tomcats",
+    "version": 1,
+    "schemaVersion": 12,
+    "editable": true,
+    "style": "dark",
+    "time": {
+      "from": "now-3h",
+      "to": "now"
+    },
+    "templating": {
+      "list": [
+        {
+          "label": null,
+          "options": [
+            {
+              "value": "<%= graphite_identifier %>",
+              "text": "<%= slug %>"
+            }
+          ],
+          "query": "<%= slug %>",
+          "name": "host",
+          "type": "constant",
+          "current": {
+            "value": "<%= graphite_identifier %>",
+            "text": "<%= slug %>"
+          },
+          "hide": 2
+        },
+        {
+          "refresh": 1,
+          "tagValuesQuery": null,
+          "name": "Application",
+          "type": "query",
+          "sort": 0,
+          "tags": [],
+          "hide": 1,
+          "tagsQuery": null,
+          "query": "carbon-writer.$host.*",
+          "regex": "/^(?!MONGODB|MYSQL|NODE_EXPORTER|HTTP).*$/"
+        }
+      ]
+    },
+    "rows": [
+      {
+        "repeat": null,
+        "showTitle": false,
+        "titleSize": "h6",
+        "repeatIteration": null,
+        "panels": [
+          {
+            "error": false,
+            "title": "",
+            "links": [],
+            "type": "text",
+            "id": 10,
+            "content": "<h2><center>Tomcat</center></h2>",
+            "span": 12,
+            "transparent": true,
+            "mode": "html",
+            "editable": true
+          }
+        ],
+        "repeatRowId": null,
+        "title": "Row title",
+        "collapse": false,
+        "height": "25px"
+      },
+      {
+        "showTitle": false,
+        "repeat": null,
+        "repeatIteration": null,
+        "panels": [
+          {
+            "seriesOverrides": [
+              {
+                "yaxis": 2,
+                "alias": "percent",
+                "color": "#C15C17"
+              },
+              {
+                "alias": "percent (avg)",
+                "yaxis": 2,
+                "color": "#BF1B00"
+              }
+            ],
+            "decimals": 1,
+            "tooltip": {
+              "value_type": "cumulative",
+              "shared": true,
+              "ordering": "alphabetical",
+              "msResolution": false,
+              "sort": 0
+            },
+            "targets": [
+              {
+                "hide": false,
+                "textEditor": false,
+                "target": "aliasByMetric(carbon-writer.$host.$Application.Memory.heap_memory.max)",
+                "refId": "A"
+              },
+              {
+                "target": "aliasByMetric(carbon-writer.$host.$Application.Memory.heap_memory.committed)",
+                "refId": "B",
+                "textEditor": false,
+                "hide": false
+              },
+              {
+                "hide": false,
+                "target": "aliasByMetric(carbon-writer.$host.$Application.Memory.heap_memory.used)",
+                "refId": "C",
+                "textEditor": false
+              },
+              {
+                "hide": false,
+                "textEditor": false,
+                "target": "alias(smartSummarize(aliasSub(carbon-writer.$host.$Application.Memory.heap_memory.used_percent, '(.*)-', ''), '3m', 'avg'), 'percent (avg)')",
+                "refId": "D"
+              },
+              {
+                "target": "aliasByMetric(alias(aliasSub(carbon-writer.$host.$Application.Memory.heap_memory.used_percent, '(.*)-', ''), 'percent'))",
+                "refId": "E",
+                "textEditor": false,
+                "hide": true
+              }
+            ],
+            "editable": true,
+            "pointradius": 5,
+            "renderer": "flot",
+            "xaxis": {
+              "name": null,
+              "mode": "time",
+              "values": [],
+              "show": true
+            },
+            "aliasColors": {},
+            "legend": {
+              "rightSide": true,
+              "total": false,
+              "alignAsTable": true,
+              "max": false,
+              "values": true,
+              "show": true,
+              "sideWidth": 230,
+              "min": false,
+              "current": true,
+              "avg": false
+            },
+            "timeShift": null,
+            "grid": {},
+            "thresholds": [],
+            "lines": true,
+            "span": 12,
+            "id": 11,
+            "percentage": false,
+            "fill": 3,
+            "datasource": "graphite",
+            "timeFrom": null,
+            "title": "Heap Memory",
+            "nullPointMode": "connected",
+            "steppedLine": false,
+            "yaxes": [
+              {
+                "format": "bytes",
+                "min": null,
+                "logBase": 1,
+                "max": null,
+                "show": true
+              },
+              {
+                "logBase": 1,
+                "format": "none",
+                "min": null,
+                "show": true,
+                "label": "percent",
+                "max": "110"
+              }
+            ],
+            "error": false,
+            "stack": false,
+            "points": false,
+            "type": "graph",
+            "linewidth": 1,
+            "links": [],
+            "bars": false
+          }
+        ],
+        "titleSize": "h6",
+        "repeatRowId": null,
+        "title": "Heap Memory",
+        "collapse": false,
+        "height": "150px"
+      },
+      {
+        "showTitle": false,
+        "repeat": null,
+        "panels": [
+          {
+            "lines": true,
+            "grid": {},
+            "thresholds": [],
+            "timeShift": null,
+            "legend": {
+              "show": true,
+              "values": true,
+              "max": false,
+              "current": true,
+              "avg": false,
+              "min": false,
+              "sideWidth": 230,
+              "rightSide": true,
+              "total": false,
+              "alignAsTable": true
+            },
+            "aliasColors": {},
+            "xaxis": {
+              "show": true,
+              "values": [],
+              "mode": "time",
+              "name": null
+            },
+            "renderer": "flot",
+            "targets": [
+              {
+                "target": "aliasByMetric(carbon-writer.$host.$Application.Memory.perm_memory.committed)",
+                "refId": "A",
+                "textEditor": false
+              },
+              {
+                "refId": "B",
+                "target": "aliasByMetric(carbon-writer.$host.$Application.Memory.perm_memory.used)",
+                "textEditor": false
+              },
+              {
+                "target": "alias(smartSummarize(aliasSub(carbon-writer.$host.$Application.Memory.perm_memory.used_percent, '(.*)-', ''), '3m', 'avg'), 'percent (avg)')",
+                "refId": "C",
+                "textEditor": false,
+                "hide": false
+              },
+              {
+                "target": "aliasByMetric(alias(aliasSub(carbon-writer.$host.$Application.Memory.perm_memory.used_percent, '(.*)-', ''), 'percent'))",
+                "refId": "D",
+                "textEditor": false,
+                "hide": true
+              }
+            ],
+            "editable": true,
+            "pointradius": 5,
+            "decimals": 1,
+            "tooltip": {
+              "shared": true,
+              "value_type": "cumulative",
+              "sort": 0,
+              "msResolution": false,
+              "ordering": "alphabetical"
+            },
+            "seriesOverrides": [
+              {
+                "yaxis": 2,
+                "alias": "percent",
+                "color": "#C15C17"
+              },
+              {
+                "alias": "percent (avg)",
+                "yaxis": 2,
+                "color": "#BF1B00"
+              }
+            ],
+            "bars": false,
+            "links": [],
+            "linewidth": 1,
+            "points": false,
+            "type": "graph",
+            "stack": false,
+            "yaxes": [
+              {
+                "format": "bytes",
+                "min": null,
+                "logBase": 1,
+                "max": null,
+                "show": true
+              },
+              {
+                "label": "percent",
+                "show": true,
+                "max": "110",
+                "logBase": 1,
+                "min": null,
+                "format": "none"
+              }
+            ],
+            "error": false,
+            "steppedLine": false,
+            "nullPointMode": "connected",
+            "title": "Perm Memory",
+            "timeFrom": null,
+            "datasource": "graphite",
+            "fill": 1,
+            "percentage": false,
+            "id": 12,
+            "span": 12
+          }
+        ],
+        "repeatIteration": null,
+        "titleSize": "h6",
+        "collapse": false,
+        "repeatRowId": null,
+        "title": "Perm Memory",
+        "height": "150px"
+      },
+      {
+        "repeatRowId": null,
+        "title": "Garbage Collector",
+        "collapse": false,
+        "height": "150px",
+        "showTitle": false,
+        "repeat": null,
+        "repeatIteration": null,
+        "panels": [
+          {
+            "tooltip": {
+              "value_type": "cumulative",
+              "shared": true,
+              "msResolution": false,
+              "ordering": "alphabetical",
+              "sort": 0
+            },
+            "targets": [
+              {
+                "refId": "A",
+                "target": "aliasByMetric(alias(aliasSub(carbon-writer.$host.$Application.GarbageCollector.ParNew.duration.time, '(.*)-', ''), 'Par New'))",
+                "textEditor": false
+              },
+              {
+                "refId": "B",
+                "target": "aliasByMetric(alias(aliasSub(carbon-writer.$host.$Application.GarbageCollector.ConcurrentMarkSweep.duration.time, '(.*)-', ''), 'Con Mark Sweep'))",
+                "textEditor": false
+              }
+            ],
+            "pointradius": 5,
+            "editable": true,
+            "aliasColors": {},
+            "xaxis": {
+              "show": true,
+              "mode": "time",
+              "values": [],
+              "name": null
+            },
+            "thresholds": [],
+            "timeShift": null,
+            "id": 13,
+            "percentage": false,
+            "yaxes": [
+              {
+                "show": true,
+                "max": null,
+                "logBase": 1,
+                "min": null,
+                "format": "ms"
+              },
+              {
+                "label": "percent",
+                "show": true,
+                "max": "100",
+                "logBase": 1,
+                "min": null,
+                "format": "none"
+              }
+            ],
+            "steppedLine": false,
+            "nullPointMode": "connected",
+            "bars": false,
+            "stack": false,
+            "decimals": 2,
+            "seriesOverrides": [
+              {
+                "color": "#C15C17",
+                "alias": "percent",
+                "yaxis": 2
+              },
+              {
+                "yaxis": 2,
+                "alias": "percent (avg)",
+                "color": "#BF1B00"
+              }
+            ],
+            "renderer": "flot",
+            "legend": {
+              "values": true,
+              "show": true,
+              "max": false,
+              "current": true,
+              "avg": false,
+              "sideWidth": 230,
+              "min": false,
+              "rightSide": true,
+              "alignAsTable": true,
+              "total": false
+            },
+            "lines": true,
+            "grid": {},
+            "maxDataPoints": "",
+            "span": 12,
+            "cacheTimeout": "",
+            "datasource": "graphite",
+            "fill": 3,
+            "error": false,
+            "title": "Garbage Collector Duration",
+            "timeFrom": null,
+            "links": [],
+            "linewidth": 1,
+            "type": "graph",
+            "points": false
+          }
+        ],
+        "titleSize": "h6"
+      },
+      {
+        "repeatRowId": null,
+        "title": "Threads",
+        "collapse": false,
+        "height": "150px",
+        "repeat": null,
+        "showTitle": false,
+        "titleSize": "h6",
+        "repeatIteration": null,
+        "panels": [
+          {
+            "tooltip": {
+              "shared": true,
+              "value_type": "cumulative",
+              "sort": 0,
+              "ordering": "alphabetical",
+              "msResolution": false
+            },
+            "targets": [
+              {
+                "refId": "A",
+                "target": "aliasByMetric(carbon-writer.$host.$Application.Threading.count)",
+                "textEditor": false
+              },
+              {
+                "textEditor": false,
+                "target": "aliasByMetric(carbon-writer.$host.$Application.Threading.peak)",
+                "refId": "B"
+              }
+            ],
+            "editable": true,
+            "pointradius": 5,
+            "xaxis": {
+              "name": null,
+              "show": true,
+              "values": [],
+              "mode": "time"
+            },
+            "aliasColors": {},
+            "timeShift": null,
+            "thresholds": [],
+            "id": 14,
+            "percentage": false,
+            "nullPointMode": "connected",
+            "steppedLine": false,
+            "yaxes": [
+              {
+                "show": true,
+                "max": null,
+                "logBase": 1,
+                "min": null,
+                "format": "none"
+              },
+              {
+                "logBase": 1,
+                "min": null,
+                "format": "none",
+                "show": true,
+                "label": "percent",
+                "max": "110"
+              }
+            ],
+            "stack": false,
+            "bars": false,
+            "seriesOverrides": [
+              {
+                "alias": "percent",
+                "yaxis": 2,
+                "color": "#C15C17"
+              },
+              {
+                "alias": "percent (avg)",
+                "yaxis": 2,
+                "color": "#BF1B00"
+              }
+            ],
+            "decimals": 0,
+            "renderer": "flot",
+            "legend": {
+              "avg": false,
+              "current": true,
+              "min": false,
+              "sideWidth": 230,
+              "show": true,
+              "values": true,
+              "max": false,
+              "alignAsTable": true,
+              "total": false,
+              "rightSide": true
+            },
+            "grid": {},
+            "lines": true,
+            "cacheTimeout": "",
+            "span": 12,
+            "maxDataPoints": "",
+            "fill": 3,
+            "datasource": "graphite",
+            "timeFrom": null,
+            "title": "Threads",
+            "error": false,
+            "type": "graph",
+            "points": false,
+            "links": [],
+            "linewidth": 1
+          }
+        ]
+      },
+      {
+        "collapse": false,
+        "title": "Tomcat Sessions",
+        "repeatRowId": null,
+        "height": "300px",
+        "repeat": null,
+        "showTitle": false,
+        "titleSize": "h6",
+        "panels": [
+          {
+            "editable": true,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(carbon-writer.$host.$Application.Manager.sessions.*, '(.*)-', ''))",
+                "textEditor": false
+              }
+            ],
+            "pointradius": 5,
+            "tooltip": {
+              "sort": 0,
+              "msResolution": false,
+              "ordering": "alphabetical",
+              "shared": true,
+              "value_type": "cumulative"
+            },
+            "timeShift": null,
+            "thresholds": [],
+            "xaxis": {
+              "values": [],
+              "mode": "time",
+              "show": true,
+              "name": null
+            },
+            "aliasColors": {},
+            "percentage": false,
+            "id": 15,
+            "stack": false,
+            "bars": false,
+            "nullPointMode": "connected",
+            "steppedLine": false,
+            "yaxes": [
+              {
+                "show": true,
+                "max": null,
+                "logBase": 1,
+                "format": "none",
+                "min": null
+              },
+              {
+                "max": "110",
+                "label": "percent",
+                "show": true,
+                "min": null,
+                "format": "none",
+                "logBase": 1
+              }
+            ],
+            "renderer": "flot",
+            "seriesOverrides": [
+              {
+                "yaxis": 2,
+                "alias": "percent",
+                "color": "#C15C17"
+              },
+              {
+                "color": "#BF1B00",
+                "alias": "percent (avg)",
+                "yaxis": 2
+              }
+            ],
+            "decimals": 0,
+            "grid": {},
+            "lines": true,
+            "legend": {
+              "max": false,
+              "values": true,
+              "show": true,
+              "sideWidth": 230,
+              "min": false,
+              "avg": false,
+              "current": true,
+              "rightSide": true,
+              "alignAsTable": true,
+              "total": false
+            },
+            "fill": 3,
+            "datasource": "graphite",
+            "span": 12,
+            "cacheTimeout": "",
+            "maxDataPoints": "",
+            "points": false,
+            "type": "graph",
+            "linewidth": 1,
+            "links": [],
+            "timeFrom": null,
+            "title": "Tomcat Sessions",
+            "error": false
+          }
+        ],
+        "repeatIteration": null
+      }
+    ],
+    "timezone": "browser",
+    "timepicker": {
+      "refresh_intervals": [
+        "10s",
+        "30s",
+        "1m",
+        "2m",
+        "4m",
+        "10m"
+      ],
+      "time_options": [
+        "5m",
+        "15m",
+        "1h",
+        "6h",
+        "12h",
+        "24h",
+        "2d",
+        "7d",
+        "30d"
+      ],
+      "now": true
+    },
+    "annotations": {
+      "list": []
+    },
+    "hideControls": false,
+    "refresh": "1m",
+    "sharedCrosshair": true,
+    "links": []
+  }
+}

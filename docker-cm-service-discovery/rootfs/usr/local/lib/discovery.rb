@@ -10,6 +10,7 @@ require 'json'
 require 'yaml'
 require 'fileutils'
 require 'mini_cache'
+require 'storage'
 
 require_relative 'logging'
 require_relative 'utils/network'
@@ -17,7 +18,7 @@ require_relative 'jolokia'
 require_relative 'port_discovery'
 require_relative 'job-queue'
 require_relative 'message-queue'
-require_relative 'storage'
+# require_relative 'storage'
 require_relative 'discovery/version'
 require_relative 'discovery/tools'
 require_relative 'discovery/queue'
@@ -135,11 +136,11 @@ module ServiceDiscovery
 
       @cache       = MiniCache::Store.new
       @jobs        = JobQueue::Job.new
-      @jolokia     = Jolokia::Client.new( jolokia_settings )
-      @mq_consumer = MessageQueue::Consumer.new(mq_settings )
-      @mq_producer = MessageQueue::Producer.new(mq_settings )
+      @jolokia     = Jolokia::Client.new( jolokia_settings)
+      @mq_consumer = MessageQueue::Consumer.new(mq_settings)
+      @mq_producer = MessageQueue::Producer.new(mq_settings)
 
-      @database    = Storage::MySQL.new(mysql_settings )
+      @database    = Storage::MySQL.new(mysql_settings)
 
       self.read_configurations
 
@@ -255,25 +256,54 @@ module ServiceDiscovery
 
     # delete the directory with all files inside
     #
-    def delete_host( host )
+    def delete_host( host, payload = {} )
 
       logger.info( format( 'delete Host \'%s\'',  host ) )
 
       # get a DNS record
       #
-      ip, short, fqdn = self.ns_lookup( host )
+      ip, short, fqdn = ns_lookup( host )
 
       # DELETE ONLY WHEN THES STATUS ARE DELETED!
       #
-      params = { ip: ip, short: short, fqdn: fqdn, status: [Storage::MySQL::DELETE] }
+      params = { ip: ip, short: short, fqdn: fqdn, status: Storage::MySQL::DELETE }
       nodes = @database.nodes( params )
 
       logger.debug( "nodes: #{nodes} (#{nodes.class.to_s})" )
 
       if( nodes.is_a?( Array ) && nodes.count != 0 )
 
-        result  = @database.removeDNS( ip: ip, short: short, fqdn: fqdn )
+#        payload = {
+#          dns: {
+#            ip: ip,
+#            short: short,
+#            fqdn: fqdn
+#          },
+#          force: true,
+#          timestamp: Time.now.to_i,
+#          annotation: true
+#        }
 
+        logger.debug( JSON.pretty_generate( payload ) )
+
+        logger.info( 'create message for grafana to remove dashboards and annotations' )
+        send_message( cmd: 'remove', node: host, queue: 'mq-grafana', payload: payload, prio: 1, ttr: 1, delay: 0 )
+
+        logger.info( 'create message for icinga to remove host, apply checks and notifications' )
+        send_message( cmd: 'remove', node: host, queue: 'mq-icinga', payload: payload, prio: 1, ttr: 1, delay: 0 )
+
+        logger.debug( 'set node status to OFFLINE' )
+        status = @database.set_status( ip: ip, short: short, fqdn: fqdn, status: Storage::MySQL::OFFLINE )
+        logger.debug(status)
+
+        logger.debug( 'remove configuration' )
+        status  = @database.remove_config( ip: ip, short: short, fqdn: fqdn )
+        logger.debug(status)
+
+        logger.debug( 'remove dns' )
+        result  = @database.remove_dns( ip: ip, short: short, fqdn: fqdn )
+
+        logger.debug( result )
         return { status: 200, message: 'Host successful removed' } unless( result.nil? )
       end
 
@@ -300,27 +330,26 @@ module ServiceDiscovery
       # if the destination host available (simple check with ping)
       #
       unless( Utils::Network.is_running?( ip ) )
-
         # delete dns entry
-        result  = @database.removeDNS( ip: ip, short: short, fqdn: fqdn )
+        #result  = @database.removeDNS( ip: ip, short: short, fqdn: fqdn )
+        result  = @database.remove_dns( ip: ip, short: short, fqdn: fqdn )
         # 503 Service Unavailable
         return { status: 503,  message: format('Host %s are unavailable', host) }
       end
 
       # check discovered datas from the past
       #
-      discovery_data    = @database.discoveryData( ip: ip, short: short, fqdn: fqdn )
+      #discovery_data    = @database.discoveryData( ip: ip, short: short, fqdn: fqdn )
+      discovery_data  = @database.discovery_data( ip: ip, short: short, fqdn: fqdn )
 
       unless( discovery_data.nil? )
-
         logger.warn( 'Host already created' )
 
         # look for online status ...
         #
         status = @database.status( ip: ip, short: short, fqdn: fqdn )
 
-        if( status == nil )
-
+        if( status.nil? )
           logger.warn( 'host not found' )
           return { status: 404, message: 'Host not found' }
         end
@@ -330,7 +359,8 @@ module ServiceDiscovery
         if( status != nil || status != Storage::MySQL::OFFLINE )
 
           logger.debug( 'set host status to ONLINE' )
-          status = @database.setStatus( ip: ip, short: short, fqdn: fqdn, status: Storage::MySQL::ONLINE )
+          #status = @database.setStatus( ip: ip, short: short, fqdn: fqdn, status: Storage::MySQL::ONLINE )
+          status = @database.set_status( ip: ip, short: short, fqdn: fqdn, status: Storage::MySQL::ONLINE )
         end
 
         # 409 Conflict
@@ -350,10 +380,10 @@ module ServiceDiscovery
       services = (services != nil) ? services.dig( 'services' ) : services
 
       # our default known ports
-      ports = @scan_ports if( ports == nil )
+      ports = @scan_ports if( ports.nil? )
 
       # our default known ports
-      services = [] if( services == nil )
+      services = [] if( services.nil? )
 
       logger.debug( "use ports          : #{ports}" )
       logger.debug( "additional services: #{services}" )
@@ -363,11 +393,13 @@ module ServiceDiscovery
       discovered_services = merge_services( discovered_services, services )
       discovered_services = create_host_config( ip: ip, short: short, fqdn: fqdn, data: discovered_services )
 
-      result    = @database.createDiscovery( ip: ip, short: short, fqdn: fqdn, data: discovered_services )
+#       result    = @database.createDiscovery( ip: ip, short: short, fqdn: fqdn, data: discovered_services )
+      result    = @database.create_discovery( ip: ip, short: short, fqdn: fqdn, data: discovered_services )
 #       logger.debug( "createDiscovery : #{result}" )
 
       logger.debug( 'set host status to ONLINE' )
-      result    = @database.setStatus( ip: ip, short: short, fqdn: fqdn, status: Storage::MySQL::ONLINE )
+#      result    = @database.setStatus( ip: ip, short: short, fqdn: fqdn, status: Storage::MySQL::ONLINE )
+      result    = @database.set_status( ip: ip, short: short, fqdn: fqdn, status: Storage::MySQL::ONLINE )
 
       finish = Time.now
       logger.info( format( 'overall runtime: %s seconds', (finish - start).round(2) ) )
@@ -398,92 +430,81 @@ module ServiceDiscovery
       result   = Hash.new
       services = Hash.new
 
-      if( host == nil )
+      # all nodes, no filter
+      #
+      # TODO
+      # what is with offline or other hosts?
+      return @database.nodes if( host.nil? )
 
-        # all nodes, no filter
-        #
-        # TODO
-        # what is with offline or other hosts?
-        return @database.nodes
-      else
+      # get a DNS record
+      #
+      ip, short, fqdn = self.ns_lookup( host )
 
-        # get a DNS record
-        #
-        ip, short, fqdn = self.ns_lookup( host )
+      discovery_data   = @database.discovery_data( ip: ip, short: short, fqdn: fqdn )
 
-        discovery_data   = @database.discoveryData( ip: ip, short: short, fqdn: fqdn )
+      return { status: 204, message: 'no node data found' } if( discovery_data.nil? )
 
-        return { status: 204, message: 'no node data found' } if( discovery_data == nil )
+      discovery_data.each do |s|
+        data = s.last
 
-        discovery_data.each do |s|
-
-          data = s.last
-
-          if( data != nil )
-            data.reject! { |k| k == 'application' }
-            data.reject! { |k| k == 'template' }
-          end
-
-          services[s.first.to_sym] ||= {}
-          services[s.first.to_sym] = data
+        unless( data.nil? )
+          data.reject! { |k| k == 'application' }
+          data.reject! { |k| k == 'template' }
         end
 
-        status = nil
-
-        # get node data from redis cache
-        #
-        (1..15).each {|y|
-
-          result = @database.status( ip: ip, short: short, fqdn: fqdn )
-
-          if (result != nil)
-            status = result
-            break
-          else
-            logger.debug(format('Waiting for data ... %d', y))
-            sleep(4)
-          end
-        }
-
-        # parse the creation date
-        #
-        created        = status.dig( :created )
-
-        if( created.nil? )
-          created      = 'unknown'
-        else
-          created      = Time.parse( created ).strftime( '%Y-%m-%d %H:%M:%S' )
-        end
-
-        unless( status.ia_a?( String ) )
-
-          # parse the online state
-          #
-          online         = status.dig( :status )
-
-          # and transform the state to human readable
-          #
-          case online
-          when Storage::MySQL::OFFLINE
-            status = 'offline'
-          when Storage::MySQL::ONLINE
-            status = 'online'
-          when Storage::MySQL::DELETE
-            status = 'delete'
-          when Storage::MySQL::PREPARE
-            status = 'prepare'
-          else
-            status = 'unknown'
-          end
-
-        end
-
-        { status: 200, mode: status, services: services, created: created }
+        services[s.first.to_sym] ||= {}
+        services[s.first.to_sym] = data
       end
 
+      status = nil
+
+      # get node data from redis cache
+      #
+      (1..15).each {|y|
+
+        result = @database.status( ip: ip, short: short, fqdn: fqdn )
+
+        if( result != nil )
+          status = result
+          break
+        else
+          logger.debug(format('Waiting for data ... %d', y))
+          sleep(4)
+        end
+      }
+
+      # parse the creation date
+      #
+      created_status = status.dig( :created )
+      created      = 'unknown'
+      created      = Time.parse( created_status ).strftime( '%Y-%m-%d %H:%M:%S' ) if( created_status.nil? )
+
+
+      unless( status.ia_a?( String ) )
+
+        # parse the online state
+        #
+        online         = status.dig( :status )
+
+        # and transform the state to human readable
+        #
+        status = case online
+        when Storage::MySQL::OFFLINE
+          'offline'
+        when Storage::MySQL::ONLINE
+          'online'
+        when Storage::MySQL::DELETE
+          'delete'
+        when Storage::MySQL::PREPARE
+          'prepare'
+        else
+          'unknown'
+        end
+
+      end
+
+      { status: 200, mode: status, services: services, created: created }
     end
 
-
   end
-
 end

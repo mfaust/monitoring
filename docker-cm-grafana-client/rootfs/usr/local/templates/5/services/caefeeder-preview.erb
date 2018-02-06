@@ -1,0 +1,332 @@
+{
+  "dashboard": {
+    "hideControls": false,
+    "refresh": "1m",
+    "title": "<%= slug %> - CAE Feeder Preview",
+    "schemaVersion": 12,
+    "time": {
+      "to": "now",
+      "from": "now-3h"
+    },
+    "id": null,
+    "tags": [
+      "<%= short_hostname %>",
+      "feeder"
+    ],
+    "timezone": "browser",
+    "timepicker": {
+      "time_options": [
+        "5m",
+        "15m",
+        "1h",
+        "6h",
+        "12h",
+        "24h",
+        "2d",
+        "7d",
+        "30d"
+      ],
+      "now": true,
+      "refresh_intervals": [
+        "10s",
+        "30s",
+        "1m",
+        "2m",
+        "4m",
+        "10m"
+      ]
+    },
+    "sharedCrosshair": true,
+    "editable": true,
+    "style": "dark",
+    "version": 1,
+    "gnetId": null,
+    "rows": [
+      {
+        "collapse": false,
+        "height": 42,
+        "panels": [
+          {
+            "mode": "html",
+            "title": "",
+            "span": 12,
+            "links": [],
+            "content": "<h3><center><a href=\"<%= tomcat_dashboard_url %>?var-Application=FEEDER_PREV\">Tomcat</a></center></h3>",
+            "transparent": true,
+            "type": "text",
+            "id": 10
+          }
+        ],
+        "repeatIteration": null,
+        "showTitle": false,
+        "title": "",
+        "repeat": null,
+        "titleSize": "h6",
+        "repeatRowId": null
+      },
+      {
+        "title": "",
+        "collapse": false,
+        "editable": true,
+        "height": "25px",
+        "panels": [
+          {
+            "mode": "html",
+            "span": 12,
+            "isNew": true,
+            "content": "<h2><center>CAE Preview Feeder</center></h2>",
+            "links": [],
+            "id": 11,
+            "editable": true,
+            "title": "",
+            "transparent": true,
+            "error": false,
+            "type": "text"
+          }
+        ]
+      },
+      {
+        "title": "Feeder Elements",
+        "collapse": false,
+        "editable": true,
+        "height": "150px",
+        "panels": [
+          {
+            "type": "graph",
+            "pointradius": 5,
+            "percentage": false,
+            "decimals": 0,
+            "targets": [
+              {
+                "textEditor": false,
+                "target": "aliasByMetric(aliasSub(carbon-writer.$host.FEEDER_PREV.ProactiveEngine.feeder.entries.diff, '(.*)-', ''))",
+                "refId": "A"
+              },
+              {
+                "hide": false,
+                "textEditor": false,
+                "target": "aliasByMetric(aliasSub(carbon-writer.$host.FEEDER_PREV.ProactiveEngine.feeder.entries.current, '(.*)-', ''))",
+                "refId": "B"
+              },
+              {
+                "refId": "C",
+                "target": "aliasByMetric(aliasSub(carbon-writer.$host.FEEDER_PREV.ProactiveEngine.feeder.entries.max, '(.*)-', ''))",
+                "textEditor": false,
+                "hide": false
+              },
+              {
+                "target": "aliasByMetric(aliasSub(carbon-writer.$host.FEEDER_PREV.ProactiveEngine.feeder.invalidations, '(.*)-', ''))",
+                "refId": "D",
+                "textEditor": false,
+                "hide": true
+              },
+              {
+                "textEditor": false,
+                "target": "aliasByMetric(aliasSub(carbon-writer.$host.FEEDER_PREV.ProactiveEngine.feeder.heartbeat, '(.*)-', ''))",
+                "refId": "E"
+              }
+            ],
+            "editable": true,
+            "grid": {
+              "threshold2": null,
+              "threshold1": null,
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2Color": "rgba(234, 112, 112, 0.22)"
+            },
+            "steppedLine": false,
+            "links": [],
+            "isNew": true,
+            "seriesOverrides": [
+              {
+                "alias": "heartbeat",
+                "yaxis": 2
+              }
+            ],
+            "nullPointMode": "connected",
+            "linewidth": 1,
+            "aliasColors": {},
+            "error": false,
+            "lines": true,
+            "timeFrom": null,
+            "title": "Feeder Elements",
+            "id": 12,
+            "renderer": "flot",
+            "xaxis": {
+              "show": true
+            },
+            "fill": 3,
+            "yaxes": [
+              {
+                "logBase": 1,
+                "format": "none",
+                "min": 0,
+                "show": true,
+                "max": null
+              },
+              {
+                "min": null,
+                "show": true,
+                "logBase": 1,
+                "format": "ms",
+                "max": null
+              }
+            ],
+            "datasource": "graphite",
+            "points": false,
+            "tooltip": {
+              "sort": 0,
+              "msResolution": false,
+              "value_type": "cumulative",
+              "ordering": "alphabetical",
+              "shared": true
+            },
+            "span": 12,
+            "legend": {
+              "rightSide": true,
+              "total": false,
+              "min": false,
+              "max": true,
+              "alignAsTable": true,
+              "avg": false,
+              "show": true,
+              "current": true,
+              "values": true
+            },
+            "bars": false,
+            "timeShift": null,
+            "stack": false
+          }
+        ]
+      },
+      {
+        "panels": [
+          {
+            "linewidth": 1,
+            "lines": true,
+            "aliasColors": {},
+            "error": false,
+            "title": "UAPI Cache",
+            "timeFrom": null,
+            "xaxis": {
+              "show": true
+            },
+            "id": 13,
+            "renderer": "flot",
+            "yaxes": [
+              {
+                "label": null,
+                "max": null,
+                "min": 0,
+                "show": true,
+                "logBase": 1,
+                "format": "bytes"
+              },
+              {
+                "label": "percent",
+                "max": "110",
+                "format": "none",
+                "logBase": 1,
+                "show": true,
+                "min": null
+              }
+            ],
+            "datasource": "graphite",
+            "fill": 3,
+            "span": 12,
+            "tooltip": {
+              "msResolution": false,
+              "sort": 0,
+              "value_type": "cumulative",
+              "ordering": "alphabetical",
+              "shared": true
+            },
+            "legend": {
+              "max": true,
+              "min": false,
+              "total": false,
+              "rightSide": true,
+              "values": true,
+              "current": true,
+              "show": true,
+              "avg": false,
+              "alignAsTable": true
+            },
+            "points": false,
+            "bars": false,
+            "timeShift": null,
+            "stack": false,
+            "percentage": false,
+            "pointradius": 5,
+            "type": "graph",
+            "decimals": 1,
+            "targets": [
+              {
+                "textEditor": false,
+                "refId": "A",
+                "target": "alias(aliasSub(carbon-writer.$host.FEEDER_PREV.CapConnection.heap.cache.size, '(.*)-', ''), 'max')"
+              },
+              {
+                "textEditor": false,
+                "target": "alias(aliasSub(carbon-writer.$host.FEEDER_PREV.CapConnection.heap.cache.used, '(.*)-', ''), 'used')",
+                "refId": "B"
+              },
+              {
+                "refId": "C",
+                "target": "alias(aliasSub(carbon-writer.$host.FEEDER_PREV.CapConnection.heap.cache.used_percent, '(.*)-', ''), 'percent')",
+                "textEditor": false
+              }
+            ],
+            "editable": true,
+            "grid": {
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2Color": "rgba(234, 112, 112, 0.22)",
+              "threshold2": null,
+              "threshold1": null
+            },
+            "links": [],
+            "steppedLine": false,
+            "seriesOverrides": [
+              {
+                "yaxis": 2,
+                "alias": "percent",
+                "color": "#BF1B00"
+              }
+            ],
+            "isNew": true,
+            "nullPointMode": "connected"
+          }
+        ],
+        "height": "150px",
+        "editable": true,
+        "title": "UAPI Cache",
+        "collapse": false
+      }
+    ],
+    "annotations": {
+      "list": []
+    },
+    "uid": null,
+    "links": [],
+    "templating": {
+      "list": [
+        {
+          "options": [
+            {
+              "value": "<%= graphite_identifier %>",
+              "text": "<%= slug %>"
+            }
+          ],
+          "name": "host",
+          "current": {
+            "text": "<%= slug %>",
+            "value": "<%= graphite_identifier %>"
+          },
+          "hide": 2,
+          "label": null,
+          "query": "<%= graphite_identifier %>",
+          "type": "constant"
+        }
+      ]
+    }
+  }
+}

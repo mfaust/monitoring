@@ -8,10 +8,10 @@ class CMGrafana
       # add standard annotations to all Templates
       #
       #
-      def add_annotations(template_json )
+      def add_annotations(template_json)
 
         # add or overwrite annotations
-        annotations = '
+        annotations = %(
           {
             "list": [
               {
@@ -22,10 +22,7 @@ class CMGrafana
                 "limit": 10,
                 "name": "created",
                 "showIn": 0,
-                "tags": [
-                  "%TAG%",
-                  "created"
-                ],
+                "tags": [ "<%= short_hostname %>", "created" ],
                 "type": "tags"
               },
               {
@@ -34,12 +31,9 @@ class CMGrafana
                 "hide": false,
                 "iconColor": "rgb(227, 57, 12)",
                 "limit": 10,
-                "name": "destoyed",
+                "name": "destroyed",
                 "showIn": 0,
-                "tags": [
-                  "%TAG%",
-                  "destoyed"
-                ],
+                "tags": [ "<%= short_hostname %>", "destroyed" ],
                 "type": "tags"
               },
               {
@@ -50,10 +44,7 @@ class CMGrafana
                 "limit": 10,
                 "name": "Load Tests",
                 "showIn": 0,
-                "tags": [
-                  "%TAG%",
-                  "loadtest"
-                ],
+                "tags": [ "<%= short_hostname %>", "loadtest" ],
                 "type": "tags"
               },
               {
@@ -64,32 +55,21 @@ class CMGrafana
                 "limit": 10,
                 "name": "Deployments",
                 "showIn": 0,
-                "tags": [
-                  "%TAG%",
-                  "deployment"
-                ],
+                "tags": [ "<%= short_hostname %>", "deployment" ],
                 "type": "tags"
               }
             ]
           }
-        '
+        )
 
-        if( template_json.is_a?( String ) )
-          template_json = JSON.parse( template_json )
-        end
+        template_json = JSON.parse( template_json ) if( template_json.is_a?( String ) )
+        annotation    = template_json.dig( 'dashboard', 'annotations' )
 
-        annotation = template_json.dig( 'dashboard', 'annotations' )
-
-        if( annotation != nil )
-          template_json['dashboard']['annotations'] = JSON.parse( annotations )
-        end
+        template_json['dashboard']['annotations'] = JSON.parse( annotations ) unless( annotation.nil? )
 
         template_json
-
       end
-
     end
-
   end
 end
 
