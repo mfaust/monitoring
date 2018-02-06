@@ -32,4 +32,3 @@ log_error() {
   message="${1}"
   log_output "${RED}${BOLD}ERROR${NC}" "${message}"
 }
-

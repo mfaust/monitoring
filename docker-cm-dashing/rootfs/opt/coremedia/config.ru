@@ -6,9 +6,6 @@ configure do
   set :raise_errors, true
 
   # we need this for running behind a proxy
-  #
-#  set :default_dashboard, 'icinga2'
-
   set :default_dashboard, '%PROXY_PATH%/%DASHBOARD%'
   set :assets_prefix,     '%PROXY_PATH%/assets'
 
@@ -16,7 +13,6 @@ configure do
   # https://github.com/Shopify/dashing/issues/199
   # thx Sandro Lang
   set :protection, :except => :frame_options
-
 
   helpers do
     def protected!

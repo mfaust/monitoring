@@ -1,31 +1,30 @@
-
-CoreMedia smashing
-========================
-
-# short Description
+# CoreMedia dashing
 
 A small and powerful dashboard system.
 
-Bases on [bodsch/docker-smashing](https://hub.docker.com/r/bodsch/docker-smashing/)
 
+Docker Container based on [docker-dashing](https://github.com/bodsch/docker-dashing) with Icinga2 Integration
 
-# Environment Variables
+This Container use the [icinga2 gem](https://rubygems.org/gems/icinga2) and implements the
+dashboard from the official [Icinga2 Dashing](https://github.com/Icinga/dashing-icinga2)
 
-| Environmental Variable             | Default Value        | Description                                                     |
-| :--------------------------------- | :-------------       | :-----------                                                    |
-| `ICINGA_HOST`                      | `icinga2`            | icinga2 Host                                                    |
-| `ICINGA_API_PORT`                  | `5665`               | icinga2 API Port                                                |
-| `ICINGA_API_USER`                  | `admin`              | icinga2 API User                                                |
-| `ICINGA_API_PASSWORD`              | ``                   | icinga2 API Password                                            |
-| `ICINGA_CLUSTER`                   | `false`              | icinga2 Cluster Mode                                            |
-| `ICINGA_CLUSTER_SATELLITE`         | ``                   | icinga2 Cluster Satellite                                       |
-|                                    |                      |                                                                 |
-| `ICINGA_CERT_SERVICE`              | `false`              | enable the Icinga2 Certificate Service                          |
-| `ICINGA_CERT_SERVICE_BA_USER`      | `admin`              | The Basic Auth User for the certicate Service                   |
-| `ICINGA_CERT_SERVICE_BA_PASSWORD`  | `admin`              | The Basic Auth Password for the certicate Service               |
-| `ICINGA_CERT_SERVICE_API_USER`     | -                    | The Certificate Service needs also an API Users                 |
-| `ICINGA_CERT_SERVICE_API_PASSWORD` | -                    |                                                                 |
-| `ICINGA_CERT_SERVICE_SERVER`       | ``                   | Certificate Service Host                                        |
-| `ICINGA_CERT_SERVICE_PORT`         | `8080`               | Certificate Service Port                                        |
-| `ICINGA_CERT_SERVICE_PATH`         | `/`                  | Certificate Service Path (needful, when they run begind a Proxy |
-| `ICINGAWEB_URL`                    | `http://localhost/icingaweb2` | (not yet used)                                         |
+# Build
+
+Your can use the included Makefile.
+
+# supported environment variables
+
+- `ICINGA_MASTER` (default: `icinga2`) - icinga2 Master
+- `ICINGA_API_PORT` (default: `5665`) - icinga2 API Port
+- `ICINGA_API_USER` (default: `admin`) - icinga2 API User
+- `ICINGA_API_PASSWORD` (default: ``) - icinga2 API Password
+
+- `ICINGA_CERT_SERVICE_BA_USER` (default: `admin`) - the basic auth user for the certificate service
+- `ICINGA_CERT_SERVICE_BA_PASSWORD` (default: `admin`) - the basic auth password for the certificate service
+- `ICINGA_CERT_SERVICE_API_USER` (default: ``) - the certificate service needs also an valid API users
+- `ICINGA_CERT_SERVICE_API_PASSWORD` (default: ``)
+- `ICINGA_CERT_SERVICE_SERVER` (default: ``) - certificate service Host
+- `ICINGA_CERT_SERVICE_PORT` (default: `8080`) - certificate service Port
+- `ICINGA_CERT_SERVICE_PATH` (default: `/`) - certificate service Path (needful, when they run behind a Proxy
+
+- `ICINGAWEB_URL` (default: `http://localhost/icingaweb2`) - (not yet used)

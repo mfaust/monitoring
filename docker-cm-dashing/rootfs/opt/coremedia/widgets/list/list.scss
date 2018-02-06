@@ -1,54 +1,30 @@
 // ----------------------------------------------------------------------------
 // Sass declarations
 // ----------------------------------------------------------------------------
-$background-color:  #165aa8;
 $value-color:       #fff;
-
-$title-color:       rgba(255, 255, 255, 0.7);
 $label-color:       rgba(255, 255, 255, 0.7);
-$moreinfo-color:    rgba(255, 255, 255, 0.7);
 
 // ----------------------------------------------------------------------------
 // Widget-list styles
 // ----------------------------------------------------------------------------
 .widget-list {
 
-/*   background-color: $background-color; */
-
-  .title {
-    color: $title-color;
-    position: absolute;
-    top: 0;
-    left: 2.2em;
-    font-size: 1.4em;
-    text-align: center;
-  }
-
-/*
-  .title {
-    color: $title-color;
-    position: absolute;
-    left: 0px;
-    top: 0px;
-    margin-bottom: 15px;
-    font-size: 25px;
-    text-align: center;
-  }
-*/
   ol, ul {
-    margin: 0 5px;
     text-align: left;
-    color: $label-color;
-    position: absolute;
-    top: 2.5em;
+    color: $value-color;
   }
 
   ol {
     list-style-position: inside;
   }
 
+  ol, ul div {
+    padding: 0 4px 2px 4px;
+    border-radius: 3px;
+  }
+
   li {
-    margin-bottom: 5px;
+    margin-bottom: 3px;
   }
 
   .list-nostyle {
@@ -57,40 +33,31 @@ $moreinfo-color:    rgba(255, 255, 255, 0.7);
 
   .label {
     color: $label-color;
-    font-size: 15px;
+/*     font-size: 15px; */
   }
 
   .value {
     float: right;
-    margin-left: 50px;
-    margin-top: 5px;
+    margin-left: 10px;
     font-weight: 500;
-    font-size: 15px;
+/*     font-size: 15px; */
     color: $value-color;
   }
 
-  .updated-at {
-    color: darken($background-color, 25%);
-  }
-
-  .more-info {
-    color: $moreinfo-color;
-  }
-
   .green {
-    color: #44bb77;
+    background-color: #44bb77;
     font-size: 15px;
   }
   .yellow {
-    color: #ffaa44;
+    background-color: #44bb77;
     font-size: 15px;
   }
   .red {
-    color: #ff5566;
+    background-color: #ff5566;
     font-size: 15px;
   }
   .purple {
-    color: #aa44ff;
+    background-color: #aa44ff;
     font-size: 15px;
   }
 }

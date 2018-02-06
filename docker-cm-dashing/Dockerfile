@@ -1,53 +1,55 @@
 
 FROM bodsch/docker-dashing:1801-r1
 
-MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
-
 ENV \
-  VERSION="1801" \
-  BUILD_DATE="2018-01-16" \
+  BUILD_DATE="2018-02-06" \
+  TZ='Europe/Berlin' \
   DASHBOARD="coremedia" \
-  ICINGA2_GEM_TYPE="local" \
-  ICINGA2_GEM_VERSION="0.9" \
-  term=xterm \
-  TZ='Europe/Berlin'
+  ICINGA2_GEM_VERSION="0.9"
 
 EXPOSE 3030
+
+LABEL \
+  version="1802" \
+  maintainer="Bodo Schulz <bodo@coremedia.com>" \
+  org.label-schema.build-date=${BUILD_DATE}
 
 # ---------------------------------------------------------------------------------------
 
 COPY build /build
 
 RUN \
-  apk --quiet --no-cache update && \
-  apk add --quiet --no-cache --virtual .build-deps \
-    build-base git openssl-dev ruby-dev && \
+  apk update  --quiet --no-cache && \
+  apk upgrade --quiet --no-cache && \
+  apk add --quiet --virtual .build-deps \
+    build-base git ruby-dev openssl-dev && \
   apk add --quiet --no-cache \
-    bind-tools drill jq ruby-irb tzdata yajl-tools && \
+    jq tzdata yajl-tools && \
   cp /usr/share/zoneinfo/${TZ} /etc/localtime && \
   echo ${TZ} > /etc/timezone && \
-  gem install --quiet --no-rdoc --no-ri \
-    io-console bundler && \
-  for g in $(ls -1 /build/*.gem 2> /dev/null) ; do echo $g; gem install --quiet --no-rdoc --no-ri ${g} ; done && \
   cd /opt && \
   smashing new ${DASHBOARD} && \
   rm -f /opt/${DASHBOARD}/jobs/twitter* && \
   rm -f /opt/${DASHBOARD}/dashboards/* && \
   cd ${DASHBOARD} && \
+  bundle config local.icinga2 /build && \
   sed -i "/gem 'twitter'/d" Gemfile && \
   echo "gem 'puma', '~> 3.10'" >> Gemfile && \
-  if [ "${ICINGA2_GEM_TYPE}" == "stable" ] ; then \
+  count=$(ls -1 /build/*.gem 2> /dev/null | tail -n1) && \
+  if [ ! -z ${count} ] ; then \
+    gem install --no-rdoc --no-ri ${count} ; \
+  else \
     echo "gem 'icinga2', '~> ${ICINGA2_GEM_VERSION}'" >> Gemfile ; \
   fi && \
   bundle update --quiet && \
-  apk del --quiet .build-deps && \
+  apk del --quiet --purge .build-deps && \
   rm -rf \
     /tmp/* \
     /build \
-    /root/.bundle \
-    /root/.gem \
     /var/cache/apk/* \
-    /usr/lib/ruby/gems/current/cache/*
+    /usr/lib/ruby/gems/current/cache/* \
+    /root/.gem \
+    /root/.bundle
 
 COPY rootfs/ /
 
@@ -60,3 +62,5 @@ HEALTHCHECK \
   CMD curl --silent --fail http://localhost:3030/dashing/${DASHBOARD} || exit 1
 
 CMD [ "/init/run.sh" ]
+
+# ---------------------------------------------------------------------------------------

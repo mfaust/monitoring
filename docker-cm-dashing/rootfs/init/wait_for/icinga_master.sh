@@ -3,7 +3,7 @@
 #
 wait_for_icinga_master() {
 
-  [[ "${USE_CERT_SERVICE}" == "false" ]] && return
+  [[ ${USE_CERT_SERVICE} == "false" ]] && return
 
   RETRY=50
 
@@ -13,7 +13,7 @@ wait_for_icinga_master() {
 
     [[ $? -eq 0 ]] && break
 
-    sleep 15s
+    sleep 5s
     RETRY=$(expr ${RETRY} - 1)
   done
 

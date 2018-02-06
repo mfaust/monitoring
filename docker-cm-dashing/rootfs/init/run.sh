@@ -7,8 +7,8 @@ export WORK_DIR=/srv
 # -------------------------------------------------------------------------------------------------
 
 . /init/output.sh
-. /init/icinga_cert.sh
 . /init/configure_smashing.sh
+. /init/icinga_cert.sh
 
 log_info "==================================================================="
 log_info " Dashing AUTH_TOKEN set to '${AUTH_TOKEN}'"

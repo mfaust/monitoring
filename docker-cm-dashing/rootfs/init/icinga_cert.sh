@@ -290,20 +290,6 @@ extract_vars() {
   ICINGA_CERT_SERVICE_PATH=$(echo "${ICINGA_CERT_SERVICE_PATH}" | cut -d "/" -f 2)
 
   validate_certservice_environment
-
-#   if (
-#     [ ! -z ${ICINGA_CERT_SERVICE_SERVER} ] &&
-#     [ ! -z ${ICINGA_CERT_SERVICE_PORT} ] &&
-#     [ ! -z ${ICINGA_CERT_SERVICE_BA_USER} ] &&
-#     [ ! -z ${ICINGA_CERT_SERVICE_BA_PASSWORD} ] &&
-#     [ ! -z ${ICINGA_CERT_SERVICE_API_USER} ] &&
-#     [ ! -z ${ICINGA_CERT_SERVICE_API_PASSWORD} ]
-#   )
-#   then
-#     USE_CERT_SERVICE="true"
-#   else
-#     USE_CERT_SERVICE="false"
-#   fi
 }
 
 
