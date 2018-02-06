@@ -16,23 +16,6 @@ volumes:
 
 services:
 
-  data:
-    build: ../../docker-cm-data
-    container_name: 01-data
-    volumes:
-      - /share:/share
-
-#  certificate:
-#    image: bodsch/omgwtfssl
-#    container_name: 01-certificate
-#    environment:
-#      SILENT: 'true'
-#      CERT_SUBJECT_CN: localhost
-#    volumes:
-#      - ./certs:/certs
-#    depends_on:
-#      - data
-
   beanstalkd:
     restart: always
     image: bodsch/docker-beanstalkd:1.10
@@ -102,6 +85,7 @@ services:
     hostname: nginx
     ports:
       - 80:80
+      - 443:443
     depends_on:
       - data
       - grafana
@@ -117,18 +101,9 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ../../docker-cm-data/rootfs/data/www/entry-page:/var/www/entry-page
-#      - /share/etc/nginx/external/https.conf:/etc/nginx/external/https.conf
-      - /share/etc/nginx/sites-enabled/01-default.conf:/etc/nginx/sites-enabled/01-default.conf
-      - /share/etc/nginx/nginx.conf:/etc/nginx/nginx.conf
-      - /share/etc/nginx/modules.d/00-restrictions.conf:/etc/nginx/modules.d/00-restrictions.conf
-      #- /share/etc/nginx/modules.d/00-dnsresolver.conf:/etc/nginx/modules.d/00-dnsresolver.conf
-      - /share/etc/nginx/modules.d/01-proxy-rest-service.conf:/etc/nginx/modules.d/01-proxy-rest-service.conf
-      - /share/etc/nginx/modules.d/01-proxy-grafana.conf:/etc/nginx/modules.d/01-proxy-grafana.conf
-      - /share/etc/nginx/modules.d/01-proxy-graphite.conf:/etc/nginx/modules.d/01-proxy-graphite.conf
-      - /share/etc/nginx/modules.d/01-proxy-icingaweb2.conf:/etc/nginx/modules.d/01-proxy-icingaweb2.conf
-      - /share/etc/nginx/modules.d/01-proxy-icinga-cert-service.conf:/etc/nginx/modules.d/01-proxy-icingaweb-cert-service.conf
-      - /share/etc/nginx/modules.d/01-proxy-dashing-icinga2.conf:/etc/nginx/modules.d/01-proxy-dashing-icinga2.conf
-      - /share/etc/nginx/modules.d/01-proxy-markdown-service.conf:/etc/nginx/modules.d/01-proxy-markdown-service.conf
+      - ../../docker-cm-data/rootfs/data/etc/nginx/sites-enabled/01-all-in-one.conf:/etc/nginx/sites-enabled/01-all-in-one.conf:ro
+      - ../../docker-cm-data/rootfs/data/etc/nginx/nginx.conf-aio:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/secure/localhost:ro
     networks:
       - mon
 
@@ -237,24 +212,6 @@ services:
       - 8080
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      #- /share/etc/cm-icinga2.yaml:/etc/cm-icinga2.yaml
-      #- /share/etc/icinga2/objects.d:/etc/icinga2/objects.d
-      #- /share/usr/local/share/icinga2:/usr/local/share/icinga2
-      #- /share/etc/icinga2/conf.d/coremedia_notifications.conf:/etc/icinga2/conf.d/coremedia_notifications.conf
-      #- /share/etc/icinga2/scripts/aws-notifications.rb:/etc/icinga2/scripts/aws-notifications.rb
-      #- /share/etc/icinga2/scripts/notification.erb:/etc/icinga2/scripts/notification.erb
-      #- /share/usr/lib/monitoring-plugins/icingachecks.rb:/usr/local/lib/icingachecks.rb
-      #- /share/usr/lib/monitoring-plugins/check_cm_feeder_status.rb:/usr/lib/monitoring-plugins/check_cm_feeder_status
-      #- /share/usr/lib/monitoring-plugins/check_cm_cache.rb:/usr/lib/monitoring-plugins/check_cm_cache
-      #- /share/usr/lib/monitoring-plugins/check_cm_memory.rb:/usr/lib/monitoring-plugins/check_cm_memory
-      #- /share/usr/lib/monitoring-plugins/check_cm_license.rb:/usr/lib/monitoring-plugins/check_cm_license
-      #- /share/usr/lib/monitoring-plugins/check_cm_capconnection.rb:/usr/lib/monitoring-plugins/check_cm_capconnection
-      #- /share/usr/lib/monitoring-plugins/check_cm_runlevel.rb:/usr/lib/monitoring-plugins/check_cm_runlevel
-      #- /share/usr/lib/monitoring-plugins/check_cm_sequencenumbers.rb:/usr/lib/monitoring-plugins/check_cm_seqencenumbers
-      #- /share/usr/lib/monitoring-plugins/check_cm_nodeexporter_disk.rb:/usr/lib/monitoring-plugins/check_cm_nodeexporter_disk
-      #- /share/usr/lib/monitoring-plugins/check_cm_nodeexporter_memory.rb:/usr/lib/monitoring-plugins/check_cm_nodeexporter_memory
-      #- /share/usr/lib/monitoring-plugins/check_cm_nodeexporter_load.rb:/usr/lib/monitoring-plugins/check_cm_nodeexporter_load
-      #- /share/usr/lib/monitoring-plugins/check_ssl_cert:/usr/lib/monitoring-plugins/check_ssl_cert
       - icinga:/srv
       - icinga:/var/lib/icinga2
     networks:
@@ -308,7 +265,7 @@ services:
       - data
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /share/www/markdown-service:/var/www
+      - ../../docker-cm-data/rootfs/data/www/markdown-service:/var/www
     networks:
       - mon
 
@@ -383,8 +340,8 @@ services:
       - redis
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /share/etc/cm-service.yaml:/etc/cm-service.yaml
-      - /share/etc/cm-application.yaml:/etc/cm-application.yaml
+      - ../../docker-cm-data/rootfs/data/etc/cm-service.yaml:/etc/cm-service.yaml
+      - ../../docker-cm-data/rootfs/data/etc/cm-application.yaml:/etc/cm-application.yaml
     networks:
       - mon
     extra_hosts:
@@ -410,8 +367,8 @@ services:
       - redis
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /share/etc/cm-service.yaml:/etc/cm-service.yaml
-      - /share/etc/cm-application.yaml:/etc/cm-application.yaml
+      - ../../docker-cm-data/rootfs/data/etc/cm-service.yaml:/etc/cm-service.yaml
+      - ../../docker-cm-data/rootfs/data/etc/cm-application.yaml:/etc/cm-application.yaml
     networks:
       - mon
     extra_hosts:
@@ -460,8 +417,8 @@ services:
       - database
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /share/usr/local/share/templates:/usr/local/share/templates
-      - /share/etc/grafana_config.yml:/etc/grafana_config.yml
+      - ../../docker-cm-data/rootfs/data/usr/local/share/templates:/usr/local/share/templates
+      - ../../docker-cm-data/rootfs/data/etc/grafana_config.yml:/etc/grafana_config.yml
     networks:
       - mon
 
@@ -491,7 +448,7 @@ services:
       - nginx
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /share/etc/icinga_server_config.yml:/etc/icinga_server_config.yml
+      - ../../docker-cm-data/rootfs/data/etc/icinga_server_config.yml:/etc/icinga_server_config.yml
     networks:
       - mon
     extra_hosts:

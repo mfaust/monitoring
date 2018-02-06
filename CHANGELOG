@@ -17,14 +17,14 @@
       no valid value will set to UNKNOWN
   - remove some obsolete parts
 
-  - use new version for icinga2 certificate exchange (0.16.3)
+  - use new version for icinga2 certificate exchange (0.17.5)
 
   - first step to fix #126
 
   - icinga2-master / icinga2-satellite / icinga-client
     - update the complete icinga suite
     - enable safe master/satellite communication with self-monitoring
-    - use icinga2 gem in version 0.9.3.6 (1.0-rc)
+    - use icinga2 gem in version 0.9.3.7 (1.0-rc)
 
   - dashing
     - update for icinga-cert-service
@@ -37,3 +37,4 @@
 
   - remove cm-external-discover container (is no longer needed)
 
+  - https support for webservice

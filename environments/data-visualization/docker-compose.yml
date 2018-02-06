@@ -14,23 +14,6 @@ volumes:
 
 services:
 
-#  data:
-#    build: ../../docker-cm-data
-#    container_name: 01-data
-#    volumes:
-#      - /share:/share
-#
-#  certificate:
-#    image: bodsch/omgwtfssl
-#    container_name: 01-certificate
-#    environment:
-#      SILENT: 'true'
-#      CERT_SUBJECT_CN: localhost
-#    volumes:
-#      - ./certs:/certs
-#    depends_on:
-#      - data
-#
   database:
     restart: always
     image: bodsch/docker-mysql:10.1.28-r1
@@ -38,7 +21,7 @@ services:
     hostname: database
     environment:
       MYSQL_SYSTEM_USER: root
-      MYSQL_ROOT_PASS: database.pass
+      MYSQL_ROOT_PASS: ${MYSQL_ROOT_PASSWORD}
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - database:/srv
@@ -47,7 +30,6 @@ services:
 
   memcached:
     restart: always
-    #image: bodsch/docker-memcached:1.5.3-r1
     image: memcached:1.5.4-alpine
     container_name: memcached
     hostname: memcached
@@ -65,6 +47,7 @@ services:
     hostname: nginx
     ports:
       - 80:80
+      - 443:443
     depends_on:
       - graphite
       - grafana
@@ -78,17 +61,8 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ../../docker-cm-data/rootfs/data/www/entry-page:/var/www/entry-page
-#      - ../../docker-cm-data/rootfs/data/etc/nginx/external/https.conf:/etc/nginx/external/https.conf
-      - ../../docker-cm-data/rootfs/data/etc/nginx/sites-enabled/01-default.conf:/etc/nginx/sites-enabled/01-default.conf
-      - ../../docker-cm-data/rootfs/data/etc/nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ../../docker-cm-data/rootfs/data/etc/nginx/modules.d/00-restrictions.conf:/etc/nginx/modules.d/00-restrictions.conf
-#      - ../../docker-cm-data/rootfs/data/etc/nginx/modules.d/00-dnsresolver.conf:/etc/nginx/modules.d/00-dnsresolver.conf
-      - ../../docker-cm-data/rootfs/data/etc/nginx/modules.d/01-proxy-grafana.conf:/etc/nginx/modules.d/01-proxy-grafana.conf
-      - ../../docker-cm-data/rootfs/data/etc/nginx/modules.d/01-proxy-graphite.conf:/etc/nginx/modules.d/01-proxy-graphite.conf
-      - ../../docker-cm-data/rootfs/data/etc/nginx/modules.d/01-proxy-icingaweb2.conf:/etc/nginx/modules.d/01-proxy-icingaweb2.conf
-      - ../../docker-cm-data/rootfs/data/etc/nginx/modules.d/01-proxy-icinga-cert-service.conf:/etc/nginx/modules.d/01-proxy-icingaweb-cert-service.conf
-      - ../../docker-cm-data/rootfs/data/etc/nginx/modules.d/01-proxy-markdown-service.conf:/etc/nginx/modules.d/01-proxy-markdown-service.conf
-      - ../../docker-cm-data/rootfs/data/etc/nginx/modules.d/01-proxy-dashing-icinga2.conf:/etc/nginx/modules.d/01-proxy-dashing-icinga2.conf
+      - ../../docker-cm-data/rootfs/data/etc/nginx/sites-enabled/01-data-visulization.conf:/etc/nginx/sites-enabled/01-all-in-one.conf:ro
+      - ../../docker-cm-data/rootfs/data/etc/nginx/nginx.conf-visulization:/etc/nginx/nginx.conf:ro
     networks:
       - mon
 
@@ -131,7 +105,7 @@ services:
       ORGANISATION: CoreMedia
       DATABASE_TYPE: mysql
       MYSQL_HOST: database
-      MYSQL_ROOT_PASS: database.pass
+      MYSQL_ROOT_PASS: ${MYSQL_ROOT_PASSWORD}
       GRAPHITE_HOST: graphite
       # WE USE AN SEPERATE CARBON SERVICE
       # IF NOT, THEN SET THEN TO $GRAPHITE_HOST
@@ -169,8 +143,8 @@ services:
     environment:
       ICINGA_HOST: cm-icinga2-master
       MYSQL_HOST: database
-      MYSQL_ROOT_PASS: database.pass
-      IDO_PASSWORD: ido.pass
+      MYSQL_ROOT_PASS: ${MYSQL_ROOT_PASSWORD}
+      IDO_PASSWORD: ${IDO_PASSWORD}
       IDO_DATABASE_NAME: icinga2core
       CARBON_HOST: carbon
       ICINGA_MASTER: cm-icinga2-master
@@ -195,8 +169,8 @@ services:
     hostname: icingaweb2
     environment:
       MYSQL_HOST: database
-      MYSQL_ROOT_PASS: database.pass
-      IDO_PASSWORD: ido.pass
+      MYSQL_ROOT_PASS: ${MYSQL_ROOT_PASSWORD}
+      IDO_PASSWORD: ${IDO_PASSWORD}
       IDO_DATABASE_NAME: icinga2core
       ICINGA2_HOST: cm-icinga2-master
       ICINGA2_CMD_API_USER: icingaweb
@@ -240,13 +214,13 @@ services:
     hostname: cm-dashing
     environment:
       ICINGA_MASTER: cm-icinga2-master
-      ICINGA_CERT_SERVICE: '{
-        "ba": { "user":"admin", "password":"admin" },
-        "api": { "user":"root", "password":"icinga" },
-        "server": "nginx",
-        "port": "80",
-        "path": "/cert-service"
-      }'
+      ICINGA_CERT_SERVICE_BA_USER: ${CERT_SERVICE_BA_USER}
+      ICINGA_CERT_SERVICE_BA_PASSWORD: ${CERT_SERVICE_BA_PASSWORD}
+      ICINGA_CERT_SERVICE_API_USER: dashing
+      ICINGA_CERT_SERVICE_API_PASSWORD: dashing
+      ICINGA_CERT_SERVICE_SERVER: nginx
+      ICINGA_CERT_SERVICE_PORT: 80
+      ICINGA_CERT_SERVICE_PATH: /cert-service
     depends_on:
       - cm-icinga2-master
       - nginx

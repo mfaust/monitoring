@@ -18,17 +18,7 @@ volumes:
   icinga:
     driver: local
 
-#volumes:
-  #database:
-  #persistent:
-  #redis:
-
 services:
-  data:
-    build: ../../docker-cm-data
-    container_name: 01-data
-    volumes:
-      - /share:/share
 
   beanstalkd:
     restart: always
@@ -72,8 +62,8 @@ services:
     image: bodsch/docker-redis:3.2.8-r1
     container_name: redis
     hostname: redis
-    ports:
-      - 6379:6379
+#    ports:
+#      - 6379:6379
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - redis:/var/lib/redis
@@ -87,16 +77,15 @@ services:
     hostname: nginx
     ports:
       - 80:80
+      - 443:443
     depends_on:
       - data
       - cm-rest-service
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /share/var/www/localhost:/var/www/localhost
-      - /share/etc/nginx/sites-enabled:/etc/nginx/sites-enabled
-      - /share/etc/nginx/nginx.conf:/etc/nginx/nginx.conf
-      - /share/etc/nginx/modules.d/00-restrictions.conf:/etc/nginx/modules.d/00-restrictions.conf
-      - /share/etc/nginx/modules.d/01-proxy-rest-service.conf:/etc/nginx/modules.d/01-proxy-rest-service.conf:ro
+      - ../../docker-cm-data/rootfs/data/etc/nginx/sites-enabled/01-data-capture.conf:/etc/nginx/sites-enabled/01-all-in-one.conf:ro
+      - ../../docker-cm-data/rootfs/data/etc/nginx/nginx.conf-capture:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/secure/localhost:ro
     networks:
       - mon
 
@@ -124,13 +113,6 @@ services:
       # external service
       ICINGA_MASTER: ${VISUALISATION_HOST}
       ICINGA_PARENT: ${VISUALISATION_HOST}
-#      ICINGA_CERT_SERVICE: '{
-#        "ba": { "user":"admin", "password":"admin" },
-#        "api": { "user":"root", "password":"icinga" },
-#        "server": "${VISUALISATION_HOST}",
-#        "port": "80",
-#        "path": "/cert-service"
-#      }'
       ICINGA_CERT_SERVICE_BA_USER: admin
       ICINGA_CERT_SERVICE_BA_PASSWORD: admin
       ICINGA_CERT_SERVICE_API_USER: root
@@ -174,8 +156,8 @@ services:
       - database
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /share/etc/cm-service.yaml:/etc/cm-service.yaml
-      - /share/etc/cm-application.yaml:/etc/cm-application.yaml
+      - ../../docker-cm-data/rootfs/data/etc/cm-service.yaml:/etc/cm-service.yaml
+      - ../../docker-cm-data/rootfs/data/etc/cm-application.yaml:/etc/cm-application.yaml
     networks:
       - mon
 
@@ -197,8 +179,8 @@ services:
       - database
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /share/etc/cm-service.yaml:/etc/cm-service.yaml
-      - /share/etc/cm-application.yaml:/etc/cm-application.yaml
+      - ../../docker-cm-data/rootfs/data/etc/cm-service.yaml:/etc/cm-service.yaml
+      - ../../docker-cm-data/rootfs/data/etc/cm-application.yaml:/etc/cm-application.yaml
     networks:
       - mon
 
@@ -251,16 +233,13 @@ services:
     environment:
       # external service
       ICINGA_MASTER: ${VISUALISATION_HOST}
-      ICINGA_CERT_SERVICE: '{
-        "ba": { "user":"admin", "password":"admin" },
-        "api": { "user":"root", "password":"icinga" },
-        "server": "${VISUALISATION_HOST}",
-        "port": "80",
-        "path": "/cert-service"
-      }'
-#      ICINGA_API_USER: root
-#      ICINGA_API_PASSWORD: icinga
-      ICINGA_CLUSTER_SATELLITE: icinga2-satellite
+      ICINGA_CERT_SERVICE_BA_USER: ${CERT_SERVICE_BA_USER}
+      ICINGA_CERT_SERVICE_BA_PASSWORD: ${CERT_SERVICE_BA_PASSWORD}
+      ICINGA_CERT_SERVICE_API_USER: dashing
+      ICINGA_CERT_SERVICE_API_PASSWORD: dashing
+      ICINGA_CERT_SERVICE_SERVER: ${VISUALISATION_HOST}
+      ICINGA_CERT_SERVICE_PORT: 80
+      ICINGA_CERT_SERVICE_PATH: /cert-service
       ENABLE_NOTIFICATIONS: 'true'
     depends_on:
       - data
