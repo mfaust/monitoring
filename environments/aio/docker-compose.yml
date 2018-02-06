@@ -87,7 +87,6 @@ services:
       - 80:80
       - 443:443
     depends_on:
-      - data
       - grafana
       - icingaweb2
       - cm-rest-service
@@ -112,8 +111,6 @@ services:
     image: bodsch/docker-go-carbon:0.12.0-rc1
     container_name: carbon
     hostname: carbon
-    depends_on:
-      - data
     ports:
       - 2003:2003
       - 2003:2003/udp
@@ -132,8 +129,6 @@ services:
       # THIS TURN OFF THE INTERNAL CARBON!
       # USE THIS ONLY WITH AN OTHER CARBON-WRITER (e.g. bodsch/docker-go-carbon)
       USE_EXTERNAL_CARBON: 'true'
-    depends_on:
-      - data
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - carbon:/srv
@@ -165,7 +160,6 @@ services:
       # LDAP_GROUP_DN: ${LDAP_GROUP_DN}
       # LDAP_SEARCH_FILTER: ${LDAP_SEARCH_FILTER}
     depends_on:
-      - data
       - database
       - memcached
     links:
@@ -183,7 +177,6 @@ services:
     container_name: cm-icinga2-master
     hostname: cm-icinga2-master
     depends_on:
-      - data
       - database
       - redis
     links:
@@ -245,7 +238,6 @@ services:
       # LDAP_FILTER: ${LDAP_FILTER}
       # LDAP_ROLE_GROUPS: cm-common
     depends_on:
-      - data
       - database
       - cm-icinga2-master
     links:
@@ -261,8 +253,6 @@ services:
     image: bodsch/docker-markdown-service:1.1.0
     container_name: markdown-service
     hostname: markdown-service
-    depends_on:
-      - data
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ../../docker-cm-data/rootfs/data/www/markdown-service:/var/www
@@ -305,7 +295,6 @@ services:
     environment:
       MYSQL_ROOT_PASS: ${MYSQL_ROOT_PASSWORD}
     depends_on:
-      - data
       - redis
       - database
     links:
@@ -329,7 +318,6 @@ services:
     environment:
       REFRESH_ENABLED: 'true'
     depends_on:
-      - data
       - jolokia
       - beanstalkd
       - redis
@@ -356,7 +344,6 @@ services:
     container_name: cm-data-collector
     hostname: cm-data-collector
     depends_on:
-      - data
       - jolokia
       - beanstalkd
       - redis
@@ -386,7 +373,6 @@ services:
       # USE ONLY WITH AND EXTERNAL CARBON-WRITER!
       GRAPHITE_HOST: carbon
     depends_on:
-      - data
       - redis
     links:
       - redis
@@ -406,7 +392,6 @@ services:
       LOG_LEVEL: info
       GRAFANA_HOST: nginx
     depends_on:
-      - data
       - beanstalkd
       - redis
       - database
@@ -441,7 +426,6 @@ services:
       ICINGA_CERT_SERVICE_PATH: /cert-service
       # ENABLE_NOTIFICATIONS: 'true'
     depends_on:
-      - data
       - beanstalkd
     links:
       - beanstalkd

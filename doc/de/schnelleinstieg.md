@@ -1,5 +1,6 @@
-Schnelleinstieg
-===============
+
+# Schnelleinstieg
+
 
 In diesem kurzen Kapitel geht es darum einen Monitoring-Stack in möglichst kurzer Zeit zu starten.
 
@@ -62,8 +63,63 @@ curl -L ${URL} > /usr/bin/docker-compose_${COMPOSE_VERSION}
 ln -s /usr/bin/docker-compose_${COMPOSE_VERSION} /usr/bin/docker-compose
 ```
 
+### Post-Installation
 
-### Post-Installation (optional)
+#### SSL Zertifikat erstellen
+
+Seit Version *1802* unterstützt die Toolbox HTTPS.
+
+Per default ist die Unterstützung aktiviert, es muß nur noch ein gültiges Zertifikat in den `nginx` Container kopiert werden.
+
+Je nach Umgebung müssen in das Verzeichniss `ssl` folgende Dateien hinterlegt werden:
+
+- `cert.pem`
+- `key.pem`
+- `dh.pem`
+
+Für Testzwecke kann man sich ein eigenes, selbst-signiertes, Zertifikat erstellen, welches anschließend im Browser bestätigt werden muß.
+
+Bei der folgenden Eingabeaufforderung ist die wichtigste Zeile ist diejenige, die den **`Common Name`** anfordert.
+
+Hier muss der Domainname eingeben werden, der dem jeweiligen Rechner zugeordnet ist (`hostname -f` oder `localhost`).
+
+
+```bash
+$ openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ssl/key.pem -out ssl/cert.pem
+
+Generating a 2048 bit RSA private key
+.....+++
+..........................................+++
+writing new private key to 'ssl/key.pem'
+-----
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter '.', the field will be left blank.
+-----
+Country Name (2 letter code) [AU]:DE
+State or Province Name (full name) [Some-State]:Hamburg
+Locality Name (eg, city) []:Hamburg
+Organization Name (eg, company) [Internet Widgits Pty Ltd]:
+Organizational Unit Name (eg, section) []:
+Common Name (e.g. server FQDN or YOUR name) []:localhost
+Email Address []:
+```
+
+Anschließend erstellen wir noch eine Diffie-Hellman Gruppe um `Perfect Forward Secrecy` zu aktivieren:
+
+```bash
+$ openssl dhparam -out ssl/dh.pem 2048
+Generating DH parameters, 2048 bit long safe prime, generator 2
+This is going to take a long time
+....................................
+```
+
+
+
+#### docker user erstellen (optional)
 
 Wenn ein spezieller User `docker` benutzen soll, benötigen wir noch eine entsprechende Gruppe und fügen diesen User dier Gruppe hinzu:
 
@@ -87,7 +143,7 @@ cd cm-monitoring-toolbox
 git clone https://github.com/cm-xlabs/monitoring.git
 ```
 
-Nach dem erfolgreichen clonen sollte ungefähr diese Verzeichnissstruktur vorhanden sein:
+Nach dem erfolgreichen clonen sollte **ungefähr** diese Verzeichnissstruktur vorhanden sein:
 
 ```bash
 monitoring
@@ -116,14 +172,14 @@ monitoring
   └── tools
 ```
 
-Alle Verzeichnisse, die mit `docker-cm` beginnen, beinhalten die komplette CoreMedia Logik bezüglich des Monitorings, 
+Alle Verzeichnisse, die mit `docker-cm` beginnen, beinhalten die komplette CoreMedia Logik bezüglich des Monitorings,
 oder sind spezielle Clients für OpenSource Komponenten.
 
 
 Im Verzeichniss `environments` befinden sich 3 verschieden Monitoringumgebungen:
 
-  * `aio` (All-In-One) - beinhaltet die komplette Toolbox. 
-   Diese kann idealerweise auf einem dezidiertem Server oder einem Notebook installiert werden und bietet die geringsten Einstiegshürden.
+  * `aio` (All-In-One) - beinhaltet die komplette Toolbox.
+   Diese kann idealerweise auf einem dezidiertem Server oder einem Notebook installiert werden und bietet die geringsten Einstiegshürden.<br>
    Dies ist die Basis für den folgenden Schnelleinstieg.
   * `data-capture` - beinhaltet alle Services um Daten zu erfassen und an externe Services weiterzuleiten.
   * `data-visualization` - beinhaltet alle Services um Monitoringdaten darzustellen.
@@ -137,15 +193,19 @@ Vor dem ersten Start müssen wir in das gewünschte Environment wechseln
 
 ```bash
 cd ~/cm-monitoring-toolbox/monitoring/environments/aio
-ls -1
+ls -1a
   docker-compose.yml
-  environments.yml
+  .env
   Makefile
+  ssl
 ```
 
-Die Datei `docker-compose.yml` umfasst alle Docker-Container, die der Stack bereitstellen wird. 
-In `environments.yml` ist die komplette Konfiguration zusammen gefasst.
+Die Datei `docker-compose.yml` umfasst alle Docker-Container, die der Stack bereitstellen wird.
+In `.env` sind einige Environment Variablen hinterlegt, die durch die comose Datei eingelesen werden.
+Das könnten z.B. Passwörter sein, die man individuell erstellt.
 Beide Dateien muss man nicht ändern, sie laufen *out-of-the-box*.
+
+Im Verzeichniss `ssl` können die oben erwähnten Zertifikate hinterlegt werden.
 
 Die Monitoring-Toolbox lässt sich jetzt mit einem einfachen `docker-compose up --build -d` starten.
 
@@ -156,27 +216,25 @@ docker-compose ps
 
        Name                      Command               State                                            Ports
 ------------------------------------------------------------------------------------------------------------------------------------------------------
-01-data               /bin/sh -c "/init/run.sh"  ...   Exit 0
-beanstalkd            /usr/bin/beanstalkd -b /va ...   Up       11300/tcp
-carbon                /init/run.sh                     Up       0.0.0.0:2003->2003/tcp, 0.0.0.0:2003->2003/udp, 2004/tcp, 7002/tcp, 7007/tcp, 8080/tcp
+beanstalkd            /usr/bin/beanstalkd -b /va ...   Up      11300/tcp
+carbon                /init/run.sh                     Up      0.0.0.0:2003->2003/tcp, 0.0.0.0:2003->2003/udp, 2004/tcp, 7002/tcp, 7003/tcp, 7007/tcp, 8080/tcp
 cm-carbon-client      /usr/local/bin/carbon-data.rb    Up
+cm-dashing            /init/run.sh                     Up      3030/tcp
 cm-data-collector     /usr/local/bin/data-collec ...   Up
 cm-grafana-client     /usr/local/bin/grafana-cli ...   Up
-cm-graphite-client    /usr/local/bin/graphite-cl ...   Up
-cm-icinga-client      /usr/local/bin/icinga-clie ...   Up
+cm-icinga-client      /init/run.sh /usr/local/bi ...   Up
+cm-icinga2-master     /init/run.sh                     Up      0.0.0.0:5665->5665/tcp, 0.0.0.0:32791->8080/tcp
 cm-rest-service       /init/run.sh                     Up
 cm-service-discover   /usr/local/bin/service-dis ...   Up
-database              /init/run.sh                     Up       3306/tcp
-dnsdock               /usr/bin/dnsdock --nameser ...   Up       53/tcp, 53/udp, 80/tcp
-grafana               /init/run.sh                     Up       3000/tcp
-graphite              /init/run.sh                     Up       2003/tcp, 2003/udp, 7002/tcp, 8080/tcp
-icinga2-master        /init/run.sh                     Up       0.0.0.0:5665->5665/tcp, 0.0.0.0:6666->6666/tcp
-icingaweb2            /init/run.sh                     Up       80/tcp
-jolokia               /init/run.sh                     Up       8080/tcp
-markdown-service      /srv/ruby-markdown-service ...   Up       2222/tcp
-memcached             /usr/bin/memcached -l 0.0. ...   Up       11211/tcp
-nginx                 /usr/sbin/nginx                  Up       443/tcp, 0.0.0.0:80->80/tcp
-redis                 /usr/bin/redis-server /etc ...   Up       6379/tcp
+database              /init/run.sh                     Up      3306/tcp
+grafana               /init/run.sh                     Up      3000/tcp
+graphite              /init/run.sh                     Up      2003/tcp, 2003/udp, 7002/tcp, 8080/tcp
+icingaweb2            /init/run.sh                     Up      80/tcp
+jolokia               /init/run.sh                     Up      22222/tcp, 0.0.0.0:8080->8080/tcp, 0.0.0.0:8088->8088/tcp
+markdown-service      /srv/ruby-markdown-service ...   Up      2222/tcp
+memcached             docker-entrypoint.sh --lis ...   Up      11211/tcp
+nginx                 /init/run.sh /usr/sbin/nginx     Up      0.0.0.0:443->443/tcp, 0.0.0.0:80->80/tcp
+redis                 /usr/bin/redis-server /etc ...   Up      6379/tcp
 ```
 
 Dabei werden alle Abhängigkeiten aus dem Internet geladen (das betrifft alle OpenSource Container, die bereits vorab gebaut wurden und auf `https://hub.docker.com` zum Download vorliegen)
@@ -249,7 +307,7 @@ Nach einiger Zeit kann man sich das Ergebniss ansehen
     }
   }
 }
-```    
+```
 
 Auf Grund der Entkopplung von REST-Interface zu den Backendservices wie Grafana und Icinga, kann es unter Umständen bis zu 2 Minuten dauern, bis visuelle Ergebnisse zur Verfügung stehen.
 
