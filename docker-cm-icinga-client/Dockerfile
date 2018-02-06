@@ -18,7 +18,6 @@ COPY build /build
 RUN \
   apk --quiet --no-cache update && \
   apk --quiet --no-cache upgrade && \
-
   apk add --quiet --no-cache --virtual .build-deps \
     build-base git ruby-dev ruby-rdoc tzdata && \
   apk --quiet --no-cache add \
