@@ -192,6 +192,30 @@ class CMGrafana < Grafana::Client
           }
         end
 
+        if( type == 'create' )
+
+          logger.debug( 'create annotation' )
+
+          params = {
+            what: 'node created',
+            when: timestamp,
+            tags: [ identifier, 'created' ],
+            text: format( 'Node <b>%s</b> created (%s)', node, time )
+          }
+        end
+
+        if( type == 'destroy' )
+
+          logger.debug( 'destroy annotation' )
+
+          params = {
+            what: 'node destroyed',
+            when: timestamp,
+            tags: [ identifier, 'destroyed' ],
+            text: format( 'Node <b>%s</b> destroyed (%s)', node, time )
+          }
+        end
+
         logger.debug(params)
 
         if( params.count.zero? )
