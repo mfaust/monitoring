@@ -137,8 +137,8 @@ services:
 
   grafana:
     restart: always
-#    image: bodsch/docker-grafana:5.0.0-beta4
-    image: bodsch/docker-grafana:4.6.3-r2
+    image: bodsch/docker-grafana:5.0.0-beta4
+#    image: bodsch/docker-grafana:4.6.3-r2
     container_name: grafana
     hostname: grafana
     environment:
@@ -152,7 +152,7 @@ services:
       # IF NOT, THEN SET THEN TO $GRAPHITE_HOST
       # (see above in this configuration part!)
       CARBON_HOST: carbon
-      ##MEMCACHE_HOST: memcached
+      MEMCACHE_HOST: memcached
       # LDAP_SERVER: ${LDAP_SERVER}
       # LDAP_PORT: 389
       # LDAP_BIND_DN: ${LDAP_BIND_DN}
@@ -408,7 +408,7 @@ services:
     hostname: cm-grafana-client
     environment:
       LOG_LEVEL: debug
-      GRAFANA_VERSION: 4
+      GRAFANA_VERSION: 5
       GRAFANA_HOST: nginx
     depends_on:
       - beanstalkd
