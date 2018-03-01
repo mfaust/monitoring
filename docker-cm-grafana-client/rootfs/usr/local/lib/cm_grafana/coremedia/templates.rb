@@ -55,6 +55,9 @@ class CMGrafana
         additional_template_paths = params.dig(:additional_template_paths) || []
         tomcat_dashboard_url     = params.dig(:tomcat_dashboard_url)
         mls_identifier           = @graphite_identifier
+        slug                     = @slug
+        graphite_identifier      = @graphite_identifier
+        short_hostname           = @short_hostname
 
         logger.info( sprintf( 'Creating dashboard for \'%s\'', service_name ) )
 
@@ -109,7 +112,11 @@ class CMGrafana
         end
 
         template_file = File.read( service_template )
-        template_json = JSON.parse( template_file )
+
+        template = ERB.new(template_file)
+        template = template.result(binding)
+
+        template_json = JSON.parse( template ) if( template.is_a?( String ) )
 
         rows         = template_json.dig( 'dashboard', 'rows' )
 
@@ -133,19 +140,19 @@ class CMGrafana
 
         # TODO
         # switch to gem
-        template_json = add_annotations(template_json)
+        json = add_annotations(template_json)
 
-        json = normalize_template(
-          template: template_json,
-          service_name: service_name,
-          description: description,
-          normalized_name: normalized_name,
-          slug: @slug,
-          graphite_identifier: @graphite_identifier,
-          short_hostname: @short_hostname,
-          mls_identifier: mls_identifier,
-          tomcat_dashboard_url: tomcat_dashboard_url
-        )
+#         json = normalize_template(
+#           template: template_json,
+#           service_name: service_name,
+#           description: description,
+#           normalized_name: normalized_name,
+#           slug: @slug,
+#           graphite_identifier: @graphite_identifier,
+#           short_hostname: @short_hostname,
+#           mls_identifier: mls_identifier,
+#           tomcat_dashboard_url: tomcat_dashboard_url
+#         )
 
         json = JSON.parse( json ) if( json.is_a?(String) )
         title = json.dig('dashboard','title')

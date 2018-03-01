@@ -137,7 +137,7 @@ services:
 
   grafana:
     restart: always
-    image: bodsch/docker-grafana:5.0.0-beta4
+    image: bodsch/docker-grafana:5.0.0
 #    image: bodsch/docker-grafana:4.6.3-r2
     container_name: grafana
     hostname: grafana
