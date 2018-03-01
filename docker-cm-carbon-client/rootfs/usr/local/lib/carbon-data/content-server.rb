@@ -24,25 +24,23 @@ module CarbonData
         executorsIdle    = value.dig('IdleExecutors')
         queriesMax       = value.dig('MaxQueries')
         queriesWaiting   = value.dig('WaitingQueries')
-
       end
 
       result << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'executors', 'running' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'executors', 'running' ),
         :value => executorsRunning
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'executors', 'idle' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'executors', 'idle' ),
         :value => executorsIdle
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'queries', 'max' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'queries', 'max' ),
         :value => queriesMax
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'queries', 'waiting' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'queries', 'waiting' ),
         :value => queriesWaiting
       }
 
-      return result
-
+      result
     end
 
 
@@ -68,28 +66,26 @@ module CarbonData
         idle   = value.dig('IdleConnections')
         busy   = value.dig('BusyConnections')
         min    = value.dig('MinConnections')
-
       end
 
       result << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'connections', 'open' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'connections', 'open' ),
         :value => open
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'connections', 'max' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'connections', 'max' ),
         :value => max
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'connections', 'idle' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'connections', 'idle' ),
         :value => idle
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'connections', 'busy' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'connections', 'busy' ),
         :value => busy
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'connections', 'min' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'connections', 'min' ),
         :value => min
       }
 
-      return result
-
+      result
     end
 
 
@@ -133,10 +129,9 @@ module CarbonData
 
         if( replicatorData == false )
 
-          logger.error( sprintf( 'No mbean \'Replicator\' for Service %s found!', @serviceName ) )
+          logger.error( format( 'No mbean \'Replicator\' for Service %s found!', @serviceName ) )
 
-          return completedSequenceNumber, result
-
+          [completedSequenceNumber, result]
         else
 
           replicatorStatus = replicatorData.dig('status') || 505
@@ -157,40 +152,33 @@ module CarbonData
             controllerState.downcase!
 
             result << {
-              :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, 'Replicator', 'completedSequenceNumber' ),
+              :key   => format( '%s.%s.%s.%s', @identifier, @Service, 'Replicator', 'completedSequenceNumber' ),
               :value => completedSequenceNumber
             } << {
-              :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, 'Replicator', 'uncompleted' ),
+              :key   => format( '%s.%s.%s.%s', @identifier, @Service, 'Replicator', 'uncompleted' ),
               :value => uncompletedCount
             } << {
-              :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, 'Replicator', 'completed' ),
+              :key   => format( '%s.%s.%s.%s', @identifier, @Service, 'Replicator', 'completed' ),
               :value => completedCount
             }
           end
 
-          return completedSequenceNumber, result
+          [completedSequenceNumber, result]
         end
       end
 
 
       def mlsSequenceNumber( rlsSequenceNumber )
 
-#         logger.debug( "mlsSequenceNumber( #{rlsSequenceNumber} )" )
-
         result            = []
         mlsSequenceNumber = 0
-
-#         logger.debug( @identifier )
-#         logger.debug( @serviceName )
 
         replicatorData = @mbean.bean( @Server, @serviceName, 'Replicator' )
 
         if( replicatorData == false )
-
-          logger.error( sprintf( 'No mbean \'Replicator\' for Service %s found!', @serviceName ) )
+          logger.error( format( 'No mbean \'Replicator\' for Service %s found!', @serviceName ) )
           logger.debug( "#{@Server}, #{@serviceName}, 'Replicator'" )
-
-          [mlsSequenceNumber, result]
+#          return [mlsSequenceNumber, result]
         else
 
           replicatorStatus = replicatorData.dig('status') || 505
@@ -206,19 +194,14 @@ module CarbonData
 
             logger.debug( "masterLiveServer: #{masterLiveServer}" )
 
-            if( masterLiveServer.nil? )
-              masterLiveServer = @Server
-            end
+            masterLiveServer = @Server if( masterLiveServer.nil? )
 
-            # {:host=>"blueprint-box", :pre=>"result", :service=>"master-live-server"}
             repositoryData    = @mbean.bean( masterLiveServer, 'master-live-server', 'Server' )
 
             if( repositoryData == false )
-
               logger.error( 'No mbean \'Server\' for Service \'master-live-server\' found!' )
               logger.debug( "#{masterLiveServer}, 'master-live-server', 'Server'" )
-
-              [mlsSequenceNumber, result]
+#              return [mlsSequenceNumber, result]
             else
 
               repositoryStatus = repositoryData.dig('status') || 505
@@ -227,24 +210,23 @@ module CarbonData
               if( repositoryStatus == 200 && repositoryValue != nil )
 
                 repositoryValue         = repositoryValue.values.first
-
 #                 logger.debug( repositoryValue )
-
                 mlsSequenceNumber  = repositoryValue.dig('RepositorySequenceNumber')
 
                 diffSequenceNumber = mlsSequenceNumber.to_i - rlsSequenceNumber.to_i
 
                 result << {
-                  :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, 'SequenceNumber', 'diffToMLS' ),
+                  :key   => format( '%s.%s.%s.%s', @identifier, @Service, 'SequenceNumber', 'diffToMLS' ),
                   :value => diffSequenceNumber
                 }
-
               end
 
-              [mlsSequenceNumber, result]
+#              [mlsSequenceNumber, result]
             end
           end
         end
+
+        [mlsSequenceNumber, result]
       end
 
 
@@ -272,15 +254,11 @@ module CarbonData
 
           incomingCount, replicatorResult = replicatorData()
 
-          if( replicatorResult != nil && replicatorResult.count != 0 )
-            result << replicatorResult
-          end
+          result << replicatorResult if( replicatorResult != nil && replicatorResult.count != 0 )
 
           mlsSequenceNumber, mlsSequenceResult = mlsSequenceNumber( incomingCount )
 
-          if( mlsSequenceResult != nil && mlsSequenceResult.count != 0 )
-            result << mlsSequenceResult
-          end
+          result << mlsSequenceResult if( mlsSequenceResult != nil && mlsSequenceResult.count != 0 )
         end
 
         # in maintenance mode the Server mbean is not available
@@ -297,11 +275,11 @@ module CarbonData
 
         if( serviceInfos != nil )
 
-          format = 'PUTVAL %s/%s-%s-%s-%s/count-%s interval=%s N:%s'
+#           format = 'PUTVAL %s/%s-%s-%s-%s/count-%s interval=%s N:%s'
 
           serviceInfos.each do |s,v|
 
-            enabled = v['enabled'] ? v['enabled'] : false
+            enabled = v.dig('enabled') || false # ] ? v['enabled'] : false
 
             if( enabled == true )
 
@@ -313,25 +291,24 @@ module CarbonData
               concurrentDiff = concurrentMax - concurrent
 
               result << {
-                :key   => sprintf( '%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'ServiceInfo', s, 'named' ),
+                :key   => format( '%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'ServiceInfo', s, 'named' ),
                 :value => named
               } << {
-                :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'ServiceInfo', s, 'named', 'max' ),
+                :key   => format( '%s.%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'ServiceInfo', s, 'named', 'max' ),
                 :value => namedMax
               } << {
-                :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'ServiceInfo', s, 'named', 'diff' ),
+                :key   => format( '%s.%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'ServiceInfo', s, 'named', 'diff' ),
                 :value => namedDiff
               } << {
-                :key   => sprintf( '%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'ServiceInfo', s, 'concurrent' ),
+                :key   => format( '%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'ServiceInfo', s, 'concurrent' ),
                 :value => concurrent
               } << {
-                :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'ServiceInfo', s, 'concurrent', 'max' ),
+                :key   => format( '%s.%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'ServiceInfo', s, 'concurrent', 'max' ),
                 :value => concurrentMax
               } << {
-                :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'ServiceInfo', s, 'concurrent', 'diff' ),
+                :key   => format( '%s.%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'ServiceInfo', s, 'concurrent', 'diff' ),
                 :value => concurrentDiff
               }
-
             end
           end
         end
@@ -344,10 +321,9 @@ module CarbonData
           if( licenseValidFrom != nil )
 
             result << {
-              :key   => sprintf( '%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'license', 'from', 'raw' ),
+              :key   => format( '%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'license', 'from', 'raw' ),
               :value => licenseValidFrom / 1000
             }
-
           end
 
 
@@ -359,19 +335,18 @@ module CarbonData
             validUntilSoftDays  = x.dig(:days)
 
             result << {
-              :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'license', 'until', 'soft', 'raw' ),
+              :key   => format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'license', 'until', 'soft', 'raw' ),
               :value => licenseValidUntilSoft / 1000
             } << {
-              :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'license', 'until', 'soft', 'month' ),
+              :key   => format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'license', 'until', 'soft', 'month' ),
               :value => validUntilSoftMonth
             }  << {
-              :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'license', 'until', 'soft', 'weeks' ),
+              :key   => format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'license', 'until', 'soft', 'weeks' ),
               :value => validUntilSoftWeek
             }  << {
-              :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'license', 'until', 'soft', 'days' ),
+              :key   => format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'license', 'until', 'soft', 'days' ),
               :value => validUntilSoftDays
             }
-
           end
 
           if( licenseValidUntilHard != nil )
@@ -382,55 +357,53 @@ module CarbonData
             validUntilHardDays  = x.dig(:days)
 
             result << {
-              :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'license', 'until', 'hard', 'raw' ),
+              :key   => format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'license', 'until', 'hard', 'raw' ),
               :value => licenseValidUntilHard / 1000
             } << {
-              :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'license', 'until', 'hard', 'month' ),
+              :key   => format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'license', 'until', 'hard', 'month' ),
               :value => validUntilHardMonth
             }  << {
-              :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'license', 'until', 'hard', 'weeks' ),
+              :key   => format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'license', 'until', 'hard', 'weeks' ),
               :value => validUntilHardWeek
             }  << {
-              :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'license', 'until', 'hard', 'days' ),
+              :key   => format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'license', 'until', 'hard', 'days' ),
               :value => validUntilHardDays
             }
-
           end
         end
 
       end
 
       result << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'ResourceCache', 'hits' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'ResourceCache', 'hits' ),
         :value => cacheHits
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'ResourceCache', 'evicts' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'ResourceCache', 'evicts' ),
         :value => cacheEvicts
       }  << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'ResourceCache', 'entries' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'ResourceCache', 'entries' ),
         :value => cacheEntries
       }  << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'ResourceCache', 'interval' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'ResourceCache', 'interval' ),
         :value => cacheInterval
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'ResourceCache', 'size' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'ResourceCache', 'size' ),
         :value => cacheSize
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'Repository', 'SequenceNumber' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'Repository', 'SequenceNumber' ),
         :value => reqSeqNumber
       }  << {
-        :key   => sprintf( '%s.%s.%s.%s'   , @identifier, @Service, mbean, 'connection' ),
+        :key   => format( '%s.%s.%s.%s'   , @identifier, @Service, mbean, 'connection' ),
         :value => connectionCount
       }  << {
-        :key   => sprintf( '%s.%s.%s.%s'   , @identifier, @Service, mbean, 'uptime' ),
+        :key   => format( '%s.%s.%s.%s'   , @identifier, @Service, mbean, 'uptime' ),
         :value => uptime
       }  << {
-        :key   => sprintf( '%s.%s.%s.%s'   , @identifier, @Service, mbean, 'runlevel' ),
+        :key   => format( '%s.%s.%s.%s'   , @identifier, @Service, mbean, 'runlevel' ),
         :value => runlevel
       }
 
-      return result
-
+      result
     end
 
 
@@ -452,22 +425,20 @@ module CarbonData
         failed        = value.dig('Failed')
         successful    = value.dig('Successful')
         unrecoverable = value.dig('Unrecoverable')
-
       end
 
       result << {
-        :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, mbean, 'failed' ),
+        :key   => format( '%s.%s.%s.%s', @identifier, @Service, mbean, 'failed' ),
         :value => failed
       } << {
-        :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, mbean, 'successful' ),
+        :key   => format( '%s.%s.%s.%s', @identifier, @Service, mbean, 'successful' ),
         :value => successful
       } << {
-        :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, mbean, 'unrecoverable' ),
+        :key   => format( '%s.%s.%s.%s', @identifier, @Service, mbean, 'unrecoverable' ),
         :value => unrecoverable
       }
 
-      return result
-
+      result
     end
 
 
@@ -493,28 +464,26 @@ module CarbonData
         faults   = value.dig('CacheFaults')
         misses   = value.dig('CacheMisses')
         hits     = value.dig('CacheHits')
-
       end
 
       result << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'cache', 'size' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'cache', 'size' ),
         :value => size
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'cache', 'removed' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'cache', 'removed' ),
         :value => removed
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'cache', 'faults' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'cache', 'faults' ),
         :value => faults
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'cache', 'misses' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'cache', 'misses' ),
         :value => misses
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'cache', 'hits' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'cache', 'hits' ),
         :value => hits
       }
 
-      return result
-
+      result
     end
 
 

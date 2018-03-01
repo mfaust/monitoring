@@ -18,19 +18,16 @@ module CarbonData
 
       parts          = mbean.match( regex )
 
-      return sprintf( 'core_%s', parts['core'].to_s.strip.tr( '. ', '' ).downcase )
-
+      format( 'core_%s', parts['core'].to_s.strip.tr( '. ', '' ).downcase )
     end
 
 
     def solrCache( mbean, data = {} )
 
       result    = []
-#       format    = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
       value     = data.dig('value')
       request   = data.dig('request')
       solrMbean = data.dig('request', 'mbean' )
-#      solrMbean = ( request != nil && request['mbean'] ) ? request['mbean'] : nil
       solrCore  = self.solrCore( solrMbean )
 
       # defaults
@@ -59,44 +56,41 @@ module CarbonData
       end
 
       result << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, solrCore, mbean, 'warmupTime' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, solrCore, mbean, 'warmupTime' ),
         :value => warmupTime
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, solrCore, mbean, 'lookups' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, solrCore, mbean, 'lookups' ),
         :value => lookups
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, solrCore, mbean, 'evictions' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, solrCore, mbean, 'evictions' ),
         :value => evictions
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, solrCore, mbean, 'inserts' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, solrCore, mbean, 'inserts' ),
         :value => inserts
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, solrCore, mbean, 'hits' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, solrCore, mbean, 'hits' ),
         :value => hits
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, solrCore, mbean, 'size' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, solrCore, mbean, 'size' ),
         :value => size
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, solrCore, mbean, 'hitratio' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, solrCore, mbean, 'hitratio' ),
         :value => hitratio
       }
 
-      return result
-
+      result
     end
 
 
     def solrQueryResultCache( data = {} )
 
-      return self.solrCache( 'QueryResultCache', data )
-
+      solrCache( 'QueryResultCache', data )
     end
 
 
     def solrDocumentCache( data = {} )
 
-      return self.solrCache( 'DocumentCache', data )
-
+      solrCache( 'DocumentCache', data )
     end
 
 
@@ -104,7 +98,6 @@ module CarbonData
 
       result    = []
       mbean     = 'Replication'
-#       format    = 'PUTVAL %s/%s-%s-%s/count-%s interval=%s N:%s'
       value     = data.dig('value')
       request   = data.dig('request')
       solrMbean = data.dig('request', 'mbean' )
@@ -135,40 +128,35 @@ module CarbonData
         isMaster          = value.dig('isMaster')  || 1
         isSlave           = value.dig('isSlave')   || 0
 
-#         logger.debug( sprintf( 'index size: %s', indexSize ) )
-
         # achtung!
         # indexSize ist irrsinnigerweise als human readable ausgeführt worden!
-        if( indexSize != nil && ( indexSize.include?( 'bytes' ) ) )
-          indexSize = indexSize.gsub!( 'ytes','' )
-        end
-#         logger.debug( sprintf( 'index size: %s', indexSize ) )
+        indexSize = indexSize.gsub!( 'ytes','' ) if( indexSize != nil && ( indexSize.include?( 'bytes' ) ) )
+
+#         logger.debug( format( 'index size: %s', indexSize ) )
 #         logger.debug( indexSize.class.to_s )
 
         indexSize         = Filesize.from( indexSize ).to_i
-#         logger.debug( sprintf( 'index size: %s', indexSize ) )
-
+#         logger.debug( format( 'index size: %s', indexSize ) )
       end
 
       result << {
-        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, solrCore, mbean, 'index', 'size' ),
+        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, solrCore, mbean, 'index', 'size' ),
         :value => indexSize.to_s
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, solrCore, mbean, 'index', 'version' ),
+        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, solrCore, mbean, 'index', 'version' ),
         :value => indexVersion
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, solrCore, mbean, 'errors' ),
+        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, solrCore, mbean, 'errors' ),
         :value => errors
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, solrCore, mbean, 'requests' ),
+        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, solrCore, mbean, 'requests' ),
         :value => requests
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, solrCore, mbean, 'errors' ),
+        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, solrCore, mbean, 'errors' ),
         :value => errors
       }
 
-      return result
-
+      result
     end
 
 
@@ -197,34 +185,30 @@ module CarbonData
         requests               = value.dig('requests')
         timeouts               = value.dig('timeouts')
         errors                 = value.dig('errors')
-
       end
 
 
       result << {
-        :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, solrCore, mbean, 'requests' ),
+        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, solrCore, mbean, 'requests' ),
         :value => requests
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, solrCore, mbean, 'timeouts' ),
+        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, solrCore, mbean, 'timeouts' ),
         :value => timeouts
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, solrCore, mbean, 'errors' ),
+        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, solrCore, mbean, 'errors' ),
         :value => errors
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, solrCore, mbean, 'requestPerSecond', 'avg' ),
+        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, solrCore, mbean, 'requestPerSecond', 'avg' ),
         :value => avgRequestsPerSecond
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, solrCore, mbean, 'timePerRequest', 'avg' ),
+        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, solrCore, mbean, 'timePerRequest', 'avg' ),
         :value => avgTimePerRequest
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, solrCore, mbean, 'RequestTime', 'median' ),
+        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, solrCore, mbean, 'RequestTime', 'median' ),
         :value => medianRequestTime
       }
 
-      return result
+      result
     end
-
-
   end
-
 end

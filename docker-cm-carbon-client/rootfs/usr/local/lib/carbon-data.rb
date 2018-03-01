@@ -13,10 +13,10 @@ require 'json'
 require 'filesize'
 require 'fileutils'
 require 'mini_cache'
+require 'storage'
 
 require_relative 'logging'
 
-require_relative 'storage'
 require_relative 'mbean'
 
 require_relative 'carbon-data/version'
@@ -181,23 +181,19 @@ module CarbonData
         graphiteOutput.push( self.solrSelect( values ) )
       end
 
-      return graphiteOutput
+      graphiteOutput
     end
 
 
     def nodes()
 
-      r = self.monitoredServer()
-
-      logger.debug("#{r}")
-
-      return r
+      monitoredServer()
     end
 
 
     def storagePath( host )
 
-      key    = sprintf( 'config-%s', host )
+      key    = format( 'config-%s', host )
       data   = @cache.get( key )
 
       result = host
@@ -210,32 +206,26 @@ module CarbonData
 
           identifier = identifier.dig( 'graphite_identifier' )
 
-          if( identifier != nil )
-            result     = identifier
-          end
+          result = identifier if( identifier != nil )
 
           @cache.set(key, expires_in: 320 ) { MiniCache::Data.new( result ) }
         end
 
       else
-
         result = data
       end
 
-      return result
+      result
     end
 
 
 
     def run( fqdn = nil )
 
-      logger.debug( "run( #{fqdn} )" )
+#      logger.debug( "run( #{fqdn} )" )
 
-      if( fqdn == nil )
-        logger.error( 'no node given' )
-
-        return []
-      end
+      # logger.error( 'no node given' )
+      return [] if( fqdn == nil )
 
       data    = nil
 
@@ -243,29 +233,24 @@ module CarbonData
       @Server        = fqdn
       graphiteOutput = Array.new()
 
-      data    = @database.discoveryData( { :short => fqdn, :fqdn => fqdn } )
+      data    = @database.discovery_data( { :short => fqdn, :fqdn => fqdn } )
 
-      logger.info( sprintf( 'Host: %s - \'%s\'', fqdn, @identifier ) )
+      logger.info( format( 'Host: %s - \'%s\'', fqdn, @identifier ) )
 
       # no discovery data found
       #
-      if( data == nil )
-        logger.warn( 'no discovery data found' )
-        return graphiteOutput
-      end
+      return graphiteOutput if( data == nil )
 
       data.each do |service, d|
 
         @serviceName = service
         @Service     = self.normalizeService( service )
 
-        if( service.downcase == 'timestamp' )
-          next
-        end
+        next if( service.downcase == 'timestamp' )
 
-        logger.info( sprintf( '  - \'%s\' (%s)', service, @Service ) )
+        logger.info( format( '  - \'%s\' (%s)', service, @Service ) )
 
-        cacheKey     = Storage::RedisClient.cacheKey( { :host => fqdn, :pre => 'result', :service => service } )
+        cacheKey     = Storage::RedisClient.cache_key( { :host => fqdn, :pre => 'result', :service => service } )
 
         result = @redis.get( cacheKey )
 
@@ -275,7 +260,7 @@ module CarbonData
           if( result.is_a?( Hash ) )
             graphiteOutput.push( self.databaseMongoDB( result ) )
           else
-            logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
+            logger.error( format( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
           end
 
         when 'mysql'
@@ -283,7 +268,7 @@ module CarbonData
           if( result.is_a?( Hash ) )
             graphiteOutput.push( self.databaseMySQL( result ) )
           else
-            logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
+            logger.error( format( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
           end
 
         when 'postgres'
@@ -291,7 +276,7 @@ module CarbonData
           if( result.is_a?( Hash ) )
             graphiteOutput.push( self.databasePostgres( result ) )
           else
-            logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
+            logger.error( format( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
           end
 
         when 'node-exporter'
@@ -299,7 +284,7 @@ module CarbonData
           if( result.is_a?( Hash ) )
             graphiteOutput.push( self.operatingSystemNodeExporter( result ) )
           else
-            logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
+            logger.error( format( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
           end
 
         when 'http-status'
@@ -307,7 +292,7 @@ module CarbonData
           if( result.is_a?( Hash ) )
             graphiteOutput.push( self.http_server_status( result ) )
           else
-            logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
+            logger.error( format( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
           end
 
         else
@@ -322,7 +307,7 @@ module CarbonData
 
             end
           else
-            logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
+            logger.error( format( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
             logger.error( result.class.to_s )
           end
         end

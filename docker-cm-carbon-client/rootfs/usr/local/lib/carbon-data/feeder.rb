@@ -9,26 +9,26 @@ module CarbonData
       mbean       = 'Health'
       value       = data.dig('value')
 
-      # defaults
-      healthy = -1 # 0: false, 1: true, -1: N/A
+      # defines:
+      #   0: false
+      #   1: true
+      #  -1: N/A
+      healthy = -1
 
       if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil )
 
         value = value.values.first
 
         healthy   = value.dig('Healthy')
-        if ( healthy != nil )
-          healthy           = healthy == true ? 1 : 0
-        end
-
+        healthy   = healthy == true ? 1 : 0 if ( healthy != nil )
       end
 
       result << {
-        :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, mbean, 'healthy' ),
+        :key   => format( '%s.%s.%s.%s', @identifier, @Service, mbean, 'healthy' ),
         :value => healthy
       }
 
-      return result
+      result
     end
 
 
@@ -65,35 +65,33 @@ module CarbonData
 
       end
 
-
-
       result << {
-        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'feeder', 'entries', 'max' ),
+        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'feeder', 'entries', 'max' ),
         :value => maxEntries
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'feeder', 'entries', 'current' ),
+        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'feeder', 'entries', 'current' ),
         :value => currentEntries
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'feeder', 'entries', 'diff' ),
+        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'feeder', 'entries', 'diff' ),
         :value => diffEntries
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'feeder', 'invalidations' ),
+        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'feeder', 'invalidations' ),
         :value => invalidations
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'feeder', 'heartbeat' ),
+        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'feeder', 'heartbeat' ),
         :value => heartbeat
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'queue', 'capacity' ),
+        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'queue', 'capacity' ),
         :value => queueCapacity
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'queue', 'max_waiting' ),
+        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'queue', 'max_waiting' ),
         :value => queueMaxSize
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'queue', 'waiting' ),
+        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'queue', 'waiting' ),
         :value => queueSize
       }
 
-      return result
+      result
     end
 
 
@@ -117,25 +115,23 @@ module CarbonData
         indexDocuments          = value.dig('IndexDocuments')
         indexContentDocuments   = value.dig('IndexContentDocuments')
         currentPendingDocuments = value.dig('CurrentPendingDocuments')
-
       end
 
       result << {
-        :key   => sprintf( '%s.%s.%s.%s'   , @identifier, @Service, mbean, 'pending_events' ),
+        :key   => format( '%s.%s.%s.%s'   , @identifier, @Service, mbean, 'pending_events' ),
         :value => pendingEvents
       } << {
-        :key   => sprintf( '%s.%s.%s.%s'   , @identifier, @Service, mbean, 'index_documents' ),
+        :key   => format( '%s.%s.%s.%s'   , @identifier, @Service, mbean, 'index_documents' ),
         :value => indexDocuments
       } << {
-        :key   => sprintf( '%s.%s.%s.%s'   , @identifier, @Service, mbean, 'index_content_documents' ),
+        :key   => format( '%s.%s.%s.%s'   , @identifier, @Service, mbean, 'index_content_documents' ),
         :value => indexContentDocuments
       } << {
-        :key   => sprintf( '%s.%s.%s.%s'   , @identifier, @Service, mbean, 'current_pending_documents' ),
+        :key   => format( '%s.%s.%s.%s'   , @identifier, @Service, mbean, 'current_pending_documents' ),
         :value => currentPendingDocuments
       }
 
-      return result
-
+      result
     end
 
 
@@ -179,57 +175,53 @@ module CarbonData
         recall                  = value.dig('RecallCount')
         rotate                  = value.dig('RotateCount')
         access                  = value.dig('AccessCount')
-
       end
 
       result << {
-        :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'cache', 'size' ),
+        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'cache', 'size' ),
         :value => cacheSize
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'cache', 'level' ),
+        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'cache', 'level' ),
         :value => cacheLevel
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'cache', 'initial_level' ),
+        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'cache', 'initial_level' ),
         :value => cacheInitialLevel
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'cache', 'new_gen', 'size' ),
+        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'cache', 'new_gen', 'size' ),
         :value => newGenCacheSize
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'cache', 'new_gen', 'level' ),
+        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'cache', 'new_gen', 'level' ),
         :value => newGenCacheLevel
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'cache', 'new_gen', 'initial_level' ),
+        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'cache', 'new_gen', 'initial_level' ),
         :value => newGenCacheInitialLevel
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'cache', 'old_gen', 'size' ),
+        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'cache', 'old_gen', 'size' ),
         :value => oldGenCacheLevel
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'cache', 'old_gen', 'initial_level' ),
+        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'cache', 'old_gen', 'initial_level' ),
         :value => oldGenCacheInitialLevel
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'fault', 'count' ),
+        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'fault', 'count' ),
         :value => fault
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'fault', 'size' ),
+        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'fault', 'size' ),
         :value => faultSize
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'recall', 'count' ),
+        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'recall', 'count' ),
         :value => recall
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'recall', 'size' ),
+        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'recall', 'size' ),
         :value => recallSize
       } << {
-        :key   => sprintf( '%s.%s.%s.%s'      , @identifier, @Service, mbean, 'rotate' ),
+        :key   => format( '%s.%s.%s.%s'      , @identifier, @Service, mbean, 'rotate' ),
         :value => rotate
       } << {
-        :key   => sprintf( '%s.%s.%s.%s'      , @identifier, @Service, mbean, 'access' ),
+        :key   => format( '%s.%s.%s.%s'      , @identifier, @Service, mbean, 'access' ),
         :value => access
       }
 
-      return result
-
+      result
     end
-
   end
-
 end

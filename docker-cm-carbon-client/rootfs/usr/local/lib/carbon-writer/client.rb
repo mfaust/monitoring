@@ -79,7 +79,7 @@ module CarbonWriter
 
           finish = Time.now
 
-          logger.info( sprintf( 'getting %s measurepoints in %s seconds', data.count, (finish - start).round(3) ) )
+          logger.info( format( 'getting %s measurepoints in %s seconds', data.count, (finish - start).round(3) ) )
 
           data.each do |m|
             self.metric( m )
@@ -109,12 +109,12 @@ module CarbonWriter
 
         if( key == nil )
           logger.error( 'missing \'key\' entry' )
-          logger.debug( sprintf( 'metric( %s )', metric ) )
+          logger.debug( format( 'metric( %s )', metric ) )
         end
 
         if( value == nil )
           logger.error( 'missing \'value\' entry' )
-          logger.debug( sprintf( 'metric( %s )', metric ) )
+          logger.debug( format( 'metric( %s )', metric ) )
         end
 
         return

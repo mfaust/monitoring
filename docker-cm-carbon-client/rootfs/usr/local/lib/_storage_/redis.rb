@@ -66,7 +66,7 @@ module Storage
     end
 
 
-    def self.cacheKey( params = {} )
+    def self.cache_key( params = {} )
 
       params   = Hash[params.sort]
       checksum = Digest::MD5.hexdigest( params.to_s )
@@ -136,7 +136,7 @@ module Storage
       short   = params.dig(:short)
       long    = params.dig(:long)
 
-      cachekey = Storage::RedisClient.cacheKey( { :short => short } )
+      cachekey = Storage::RedisClient.cache_key( { :short => short } )
 
       dns = @redis.get( sprintf( '%s-dns', cachekey ) )
 
@@ -168,7 +168,7 @@ module Storage
 
       short   = params.dig(:short)
 
-      cachekey = Storage::RedisClient.cacheKey( { :short => short } )
+      cachekey = Storage::RedisClient.cache_key( { :short => short } )
 
       self.setStatus( { :short => short, :status => Storage::RedisClient::DELETE } )
 
@@ -213,7 +213,7 @@ module Storage
 
       cachekey = sprintf(
         '%s-dns',
-        Storage::RedisClient.cacheKey( { :short => short } )
+        Storage::RedisClient.cache_key( { :short => short } )
       )
 
       result = @redis.get( cachekey )
@@ -254,7 +254,7 @@ module Storage
 
       cachekey = sprintf(
         '%s-config',
-        Storage::RedisClient.cacheKey( { :short => dnsShortname } )
+        Storage::RedisClient.cache_key( { :short => dnsShortname } )
       )
 
       if( append == true )
@@ -313,7 +313,7 @@ module Storage
 
       cachekey = sprintf(
         '%s-config',
-        Storage::RedisClient.cacheKey( { :short => dnsShortname } )
+        Storage::RedisClient.cache_key( { :short => dnsShortname } )
       )
 
       # delete single config
@@ -354,7 +354,7 @@ module Storage
 
       cachekey = sprintf(
         '%s-config',
-        Storage::RedisClient.cacheKey( { :short => dnsShortname } )
+        Storage::RedisClient.cache_key( { :short => dnsShortname } )
       )
 
       result = @redis.get( cachekey )
@@ -400,7 +400,7 @@ module Storage
 
       cachekey = sprintf(
         '%s-discovery',
-        Storage::RedisClient.cacheKey( { :short => dnsShortname } )
+        Storage::RedisClient.cache_key( { :short => dnsShortname } )
       )
 
       if( append == true )
@@ -449,7 +449,7 @@ module Storage
 
       cachekey = sprintf(
         '%s-discovery',
-        Storage::RedisClient.cacheKey( { :short => short } )
+        Storage::RedisClient.cache_key( { :short => short } )
       )
 
       result = @redis.get( cachekey )
@@ -491,7 +491,7 @@ module Storage
 
       cachekey = sprintf(
         '%s-measurements',
-        Storage::RedisClient.cacheKey( { :short => dnsShortname } )
+        Storage::RedisClient.cache_key( { :short => dnsShortname } )
       )
 
       toStore = { short: dnsShortname, data: data, created: DateTime.now() }.to_json
@@ -513,7 +513,7 @@ module Storage
 
       cachekey = sprintf(
         '%s-measurements',
-        Storage::RedisClient.cacheKey( { :short => dnsShortname } )
+        Storage::RedisClient.cache_key( { :short => dnsShortname } )
       )
 
       result = @redis.get( cachekey )
@@ -621,7 +621,7 @@ module Storage
       end
 
       data = existingData.dig('data')
-      data = data.tap { |hs,d| hs.delete(  Storage::RedisClient.cacheKey( { :short => short } ) ) }
+      data = data.tap { |hs,d| hs.delete(  Storage::RedisClient.cache_key( { :short => short } ) ) }
 
 #       existingData['data'] = data
 
@@ -762,7 +762,7 @@ module Storage
 
       cachekey = sprintf(
         '%s-dns',
-        Storage::RedisClient.cacheKey( { :short => short } )
+        Storage::RedisClient.cache_key( { :short => short } )
       )
 
       result = @redis.get( cachekey )
@@ -809,7 +809,7 @@ module Storage
 
       cachekey = sprintf(
         '%s-dns',
-        Storage::RedisClient.cacheKey( { :short => short } )
+        Storage::RedisClient.cache_key( { :short => short } )
       )
 
       result = @redis.get( cachekey )

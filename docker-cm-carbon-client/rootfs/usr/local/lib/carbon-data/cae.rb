@@ -2,7 +2,6 @@ module CarbonData
 
   module Cae
 
-
     def caeDataViewFactory( data = {} )
 
       result    = []
@@ -33,30 +32,29 @@ module CarbonData
       end
 
       result << {
-        :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, mbean, 'lookups' ),
+        :key   => format( '%s.%s.%s.%s', @identifier, @Service, mbean, 'lookups' ),
         :value => lookups
       } << {
-        :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, mbean, 'computed' ),
+        :key   => format( '%s.%s.%s.%s', @identifier, @Service, mbean, 'computed' ),
         :value => computed
       } << {
-        :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, mbean, 'cached' ),
+        :key   => format( '%s.%s.%s.%s', @identifier, @Service, mbean, 'cached' ),
         :value => cached
       } << {
-        :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, mbean, 'invalidated' ),
+        :key   => format( '%s.%s.%s.%s', @identifier, @Service, mbean, 'invalidated' ),
         :value => invalidated
       } << {
-        :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, mbean, 'evicted' ),
+        :key   => format( '%s.%s.%s.%s', @identifier, @Service, mbean, 'evicted' ),
         :value => evicted
       } << {
-        :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, mbean, 'activeTime' ),
+        :key   => format( '%s.%s.%s.%s', @identifier, @Service, mbean, 'activeTime' ),
         :value => activeTime
       } << {
-        :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, mbean, 'totalTime' ),
+        :key   => format( '%s.%s.%s.%s', @identifier, @Service, mbean, 'totalTime' ),
         :value => totalTime
       }
 
-      return result
-
+      result
     end
 
 
@@ -67,12 +65,14 @@ module CarbonData
       value       = data.dig('value')
       status      = data.dig('status') || 404
 
-      if( status == 404 )
-
-        # solr 6 has no tomcat and also no manager mbean
-        logger.debug( "status 404 for service #{@Service} and bean #{mbean}" )
-        return
-      end
+      # we habe more CacheClasses Types:
+      #   com.coremedia:CacheClass=\"com.coremedia.blueprint...\"
+      #
+      #   com.coremedia:CacheClass=\"com.coremedia.livecontext.ecommerce...\"
+      #
+      # the livecontext.ecommerce Caches are only available with an ecommerce system
+      #
+      return if( status == 404 )
 
       cacheClass  = key.gsub( mbean, '' )
 
@@ -102,33 +102,30 @@ module CarbonData
       end
 
       result << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, cacheClass, 'evaluated' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, cacheClass, 'evaluated' ),
         :value => evaluated
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, cacheClass, 'evicted' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, cacheClass, 'evicted' ),
         :value => evicted
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, cacheClass, 'inserted' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, cacheClass, 'inserted' ),
         :value => inserted
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, cacheClass, 'removed' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, cacheClass, 'removed' ),
         :value => removed
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, cacheClass, 'level' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, cacheClass, 'level' ),
         :value => level
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, cacheClass, 'capacity' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, cacheClass, 'capacity' ),
         :value => capacity
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, cacheClass, 'missRate' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, cacheClass, 'missRate' ),
         :value => missRate
       }
 
-      return result
-
+      result
     end
-
-
   end
 end
 

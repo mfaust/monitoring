@@ -87,7 +87,7 @@ def hostResolve( host )
 
   if( IPAddress.valid?( host ) )
 
-    cmd = sprintf( 'dig -x %s +short', host )
+    cmd = format( 'dig -x %s +short', host )
 
 #     logger.debug( cmd )
 
@@ -107,7 +107,7 @@ def hostResolve( host )
 
   line  = nil
 
-  cmd   = sprintf( 'host -t A %s', host )
+  cmd   = format( 'host -t A %s', host )
 
 #   logger.debug( cmd )
 
@@ -175,7 +175,7 @@ def cacheKey( pre, host, v )
 
   ip = ip( host )
 
-  return sprintf( '%s__%s__%s', pre, ip, v )
+  return format( '%s__%s__%s', pre, ip, v )
 
 end
 

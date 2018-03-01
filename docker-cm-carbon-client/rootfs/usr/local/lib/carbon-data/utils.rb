@@ -7,23 +7,16 @@ module CarbonData
     #
     def monitoredServer()
 
-      nodes = @database.nodes( { :status => [ Storage::MySQL::ONLINE ] } )
-
-#       logger.debug( "database: #{nodes}" )
-
-      return nodes
-
+      @database.nodes( status: [ Storage::MySQL::ONLINE ] )
     end
 
 
     def output( data = [] )
 
       data.each do |d|
-        if( d )
-          puts d
-        end
-      end
 
+        puts d if( d )
+      end
     end
 
 
@@ -57,8 +50,7 @@ module CarbonData
           service = 'HTTP_STATUS'
       end
 
-      return service.tr('-', '_').upcase
-
+      service.tr('-', '_').upcase
     end
 
     def timeParser( start_time, end_time )

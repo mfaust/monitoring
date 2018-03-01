@@ -77,171 +77,171 @@ module CarbonData
           innodbRowsUpdated               = value.dig('Innodb_rows_updated')
 
           result << {
-            :key   => sprintf( '%s.%s.%s'         , @identifier, @Service, 'uptime' ),
+            :key   => format( '%s.%s.%s'         , @identifier, @Service, 'uptime' ),
             :value => uptime
           } << {
-            :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, 'network', 'bytes', 'tx' ),
+            :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, 'network', 'bytes', 'tx' ),
             :value => bytesReceived
           } <<  {
-            :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, 'network', 'bytes', 'rx' ),
+            :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, 'network', 'bytes', 'rx' ),
             :value => bytesSent
           } <<  {
-            :key   => sprintf( '%s.%s.%s'         , @identifier, @Service, 'connections' ),
+            :key   => format( '%s.%s.%s'         , @identifier, @Service, 'connections' ),
             :value => connections
           } <<  {
-            :key   => sprintf( '%s.%s.%s'         , @identifier, @Service, 'queries' ),
+            :key   => format( '%s.%s.%s'         , @identifier, @Service, 'queries' ),
             :value => queries
           } <<  {
-            :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, 'created', 'tmp', 'disk_tables' ),
+            :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, 'created', 'tmp', 'disk_tables' ),
             :value => createdTmpDiskTables
           } <<  {
-            :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, 'created', 'tmp', 'files' ),
+            :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, 'created', 'tmp', 'files' ),
             :value => createdTmpFiles
           } <<  {
-            :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, 'created', 'tmp', 'tables' ),
+            :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, 'created', 'tmp', 'tables' ),
             :value => createdTmpTables
           } << {
-            :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, 'qcache', 'free', 'blocks' ),
+            :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, 'qcache', 'free', 'blocks' ),
             :value => qcacheFreeBlocks
           } << {
-            :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, 'qcache', 'free', 'memory' ),
+            :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, 'qcache', 'free', 'memory' ),
             :value => qcacheFreeMemory
           } <<  {
-            :key   => sprintf( '%s.%s.%s.%s'      , @identifier, @Service, 'qcache', 'hits' ),
+            :key   => format( '%s.%s.%s.%s'      , @identifier, @Service, 'qcache', 'hits' ),
             :value => qcacheHits
           } <<  {
-            :key   => sprintf( '%s.%s.%s.%s'      , @identifier, @Service, 'qcache', 'inserts' ),
+            :key   => format( '%s.%s.%s.%s'      , @identifier, @Service, 'qcache', 'inserts' ),
             :value => qcacheInserts
           } << {
-            :key   => sprintf( '%s.%s.%s.%s'      , @identifier, @Service, 'qcache', 'low_mem_prunes' ),
+            :key   => format( '%s.%s.%s.%s'      , @identifier, @Service, 'qcache', 'low_mem_prunes' ),
             :value => qcacheLowmemPrunes
           } << {
-            :key   => sprintf( '%s.%s.%s.%s'      , @identifier, @Service, 'qcache', 'not_cached' ),
+            :key   => format( '%s.%s.%s.%s'      , @identifier, @Service, 'qcache', 'not_cached' ),
             :value => qcacheNotCached
           } <<  {
-            :key   => sprintf( '%s.%s.%s.%s'      , @identifier, @Service, 'qcache', 'queries_in_cache' ),
+            :key   => format( '%s.%s.%s.%s'      , @identifier, @Service, 'qcache', 'queries_in_cache' ),
             :value => qcacheQueriesInCache
           } <<  {
-            :key   => sprintf( '%s.%s.%s.%s'      , @identifier, @Service, 'qcache', 'total_blocks' ),
+            :key   => format( '%s.%s.%s.%s'      , @identifier, @Service, 'qcache', 'total_blocks' ),
             :value => qcacheTotalBlocks
           } << {
-            :key   => sprintf( '%s.%s.%s.%s'      , @identifier, @Service, 'threads', 'cached' ),
+            :key   => format( '%s.%s.%s.%s'      , @identifier, @Service, 'threads', 'cached' ),
             :value => threadsCached
           } << {
-            :key   => sprintf( '%s.%s.%s.%s'      , @identifier, @Service, 'threads', 'connected' ),
+            :key   => format( '%s.%s.%s.%s'      , @identifier, @Service, 'threads', 'connected' ),
             :value => threadsConnected
           } <<  {
-            :key   => sprintf( '%s.%s.%s.%s'      , @identifier, @Service, 'threads', 'created' ),
+            :key   => format( '%s.%s.%s.%s'      , @identifier, @Service, 'threads', 'created' ),
             :value => threadsCreated
           } <<  {
-            :key   => sprintf( '%s.%s.%s.%s'      , @identifier, @Service, 'threads', 'running' ),
+            :key   => format( '%s.%s.%s.%s'      , @identifier, @Service, 'threads', 'running' ),
             :value => threadsRunning
           } << {
-            :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, 'innodb', 'buffer_pool', 'pages', 'data' ),
+            :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, 'innodb', 'buffer_pool', 'pages', 'data' ),
             :value => innodbBufferPoolPagesData
           } <<  {
-            :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, 'innodb', 'buffer_pool', 'pages', 'dirty' ),
+            :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, 'innodb', 'buffer_pool', 'pages', 'dirty' ),
             :value => innodbBufferPoolPagesDirty
           } <<  {
-            :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, 'innodb', 'buffer_pool', 'pages', 'flushed' ),
+            :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, 'innodb', 'buffer_pool', 'pages', 'flushed' ),
             :value => innodbBufferPoolPagesFlushed
           } << {
-            :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, 'innodb', 'buffer_pool', 'pages', 'free' ),
+            :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, 'innodb', 'buffer_pool', 'pages', 'free' ),
             :value => innodbBufferPoolPagesFree
           } << {
-            :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, 'innodb', 'buffer_pool', 'pages', 'misc' ),
+            :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, 'innodb', 'buffer_pool', 'pages', 'misc' ),
             :value => innodbBufferPoolPagesMisc
           } <<  {
-            :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, 'innodb', 'buffer_pool', 'pages', 'total' ),
+            :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, 'innodb', 'buffer_pool', 'pages', 'total' ),
             :value => innodbBufferPoolPagesTotal
           } <<  {
-            :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, 'innodb', 'buffer_pool', 'pages', 'data' ),
+            :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, 'innodb', 'buffer_pool', 'pages', 'data' ),
             :value => innodbBufferPoolBytesData
           } << {
-            :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, 'innodb', 'buffer_pool', 'pages', 'dirty' ),
+            :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, 'innodb', 'buffer_pool', 'pages', 'dirty' ),
             :value => innodbBufferPoolBytesDirty
           } <<  {
-            :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, 'innodb', 'buffer_pool', 'read', 'ahead' ),
+            :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, 'innodb', 'buffer_pool', 'read', 'ahead' ),
             :value => innodbBufferPoolReadAhead
           } <<  {
-            :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, 'innodb', 'buffer_pool', 'read', 'ahead_rnd' ),
+            :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, 'innodb', 'buffer_pool', 'read', 'ahead_rnd' ),
             :value => innodbBufferPoolReadAheadRnd
           } << {
-            :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, 'innodb', 'buffer_pool', 'read', 'ahead_evicted' ),
+            :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, 'innodb', 'buffer_pool', 'read', 'ahead_evicted' ),
             :value => innodbBufferPoolReadAheadEviced
           } << {
-            :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, 'innodb', 'buffer_pool', 'read', 'requests' ),
+            :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, 'innodb', 'buffer_pool', 'read', 'requests' ),
             :value => innodbBufferPoolReadRequests
           } <<  {
-            :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, 'innodb', 'page', 'size' ),
+            :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, 'innodb', 'page', 'size' ),
             :value => innodbPageSize
           } <<  {
-            :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, 'innodb', 'pages', 'created' ),
+            :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, 'innodb', 'pages', 'created' ),
             :value => innodbPagesCreated
           }  <<  {
-            :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, 'innodb', 'pages', 'read' ),
+            :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, 'innodb', 'pages', 'read' ),
             :value => innodbPagesRead
           }  <<  {
-            :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, 'innodb', 'pages', 'written' ),
+            :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, 'innodb', 'pages', 'written' ),
             :value => innodbPagesWritten
           }  <<  {
-            :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, 'innodb', 'rows', 'deleted' ),
+            :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, 'innodb', 'rows', 'deleted' ),
             :value => innodbRowsDeleted
           }  <<  {
-            :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, 'innodb', 'rows', 'inserted' ),
+            :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, 'innodb', 'rows', 'inserted' ),
             :value => innodbRowsInserted
           }  <<  {
-            :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, 'innodb', 'rows', 'read' ),
+            :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, 'innodb', 'rows', 'read' ),
             :value => innodbRowsRead
           }  <<  {
-            :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, 'innodb', 'rows', 'updated' ),
+            :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, 'innodb', 'rows', 'updated' ),
             :value => innodbRowsUpdated
           }
 
-#           result.push( sprintf( 'PUTVAL %s/%s-%s/%s interval=%s N:%s' , @identifier, @Service, 'uptime' , 'uptime'   , @interval, uptime ) )
+#           result.push( format( 'PUTVAL %s/%s-%s/%s interval=%s N:%s' , @identifier, @Service, 'uptime' , 'uptime'   , @interval, uptime ) )
 #
-#           result.push( sprintf( 'PUTVAL %s/%s-%s/%s interval=%s N:%s' , @identifier, @Service, 'network', 'bytes-in' , @interval, bytesReceived ) )
-#           result.push( sprintf( 'PUTVAL %s/%s-%s/%s interval=%s N:%s' , @identifier, @Service, 'network', 'bytes-out', @interval, bytesSent ) )
+#           result.push( format( 'PUTVAL %s/%s-%s/%s interval=%s N:%s' , @identifier, @Service, 'network', 'bytes-in' , @interval, bytesReceived ) )
+#           result.push( format( 'PUTVAL %s/%s-%s/%s interval=%s N:%s' , @identifier, @Service, 'network', 'bytes-out', @interval, bytesSent ) )
 #
-#           result.push( sprintf( 'PUTVAL %s/%s-%s/%s interval=%s N:%s' , @identifier, @Service, 'connections', 'count', @interval, connections ) )
+#           result.push( format( 'PUTVAL %s/%s-%s/%s interval=%s N:%s' , @identifier, @Service, 'connections', 'count', @interval, connections ) )
 #
-#           result.push( sprintf( format ,  @identifier, @Service, 'qcache', 'count', 'free_blocks'     , @interval, qcacheFreeBlocks ) )
-#           result.push( sprintf( format ,  @identifier, @Service, 'qcache', 'count', 'free_memory'     , @interval, qcacheFreeMemory ) )
-#           result.push( sprintf( format ,  @identifier, @Service, 'qcache', 'count', 'hits'            , @interval, qcacheHits ) )
-#           result.push( sprintf( format ,  @identifier, @Service, 'qcache', 'count', 'inserts'         , @interval, qcacheInserts ) )
-#           result.push( sprintf( format ,  @identifier, @Service, 'qcache', 'count', 'low_mem_prunes'  , @interval, qcacheLowmemPrunes ) )
-#           result.push( sprintf( format ,  @identifier, @Service, 'qcache', 'count', 'not_cached'      , @interval, qcacheNotCached ) )
-#           result.push( sprintf( format ,  @identifier, @Service, 'qcache', 'count', 'queries_in_cache', @interval, qcacheQueriesInCache ) )
-#           result.push( sprintf( format ,  @identifier, @Service, 'qcache', 'count', 'total_blocks'    , @interval, qcacheTotalBlocks ) )
+#           result.push( format( format ,  @identifier, @Service, 'qcache', 'count', 'free_blocks'     , @interval, qcacheFreeBlocks ) )
+#           result.push( format( format ,  @identifier, @Service, 'qcache', 'count', 'free_memory'     , @interval, qcacheFreeMemory ) )
+#           result.push( format( format ,  @identifier, @Service, 'qcache', 'count', 'hits'            , @interval, qcacheHits ) )
+#           result.push( format( format ,  @identifier, @Service, 'qcache', 'count', 'inserts'         , @interval, qcacheInserts ) )
+#           result.push( format( format ,  @identifier, @Service, 'qcache', 'count', 'low_mem_prunes'  , @interval, qcacheLowmemPrunes ) )
+#           result.push( format( format ,  @identifier, @Service, 'qcache', 'count', 'not_cached'      , @interval, qcacheNotCached ) )
+#           result.push( format( format ,  @identifier, @Service, 'qcache', 'count', 'queries_in_cache', @interval, qcacheQueriesInCache ) )
+#           result.push( format( format ,  @identifier, @Service, 'qcache', 'count', 'total_blocks'    , @interval, qcacheTotalBlocks ) )
 #
-#           result.push( sprintf( format ,  @identifier, @Service, 'threads', 'count', 'cached'         , @interval, threadsCached ) )
-#           result.push( sprintf( format ,  @identifier, @Service, 'threads', 'count', 'connected'      , @interval, threadsConnected ) )
-#           result.push( sprintf( format ,  @identifier, @Service, 'threads', 'count', 'created'        , @interval, threadsCreated ) )
-#           result.push( sprintf( format ,  @identifier, @Service, 'threads', 'count', 'running'        , @interval, threadsRunning ) )
+#           result.push( format( format ,  @identifier, @Service, 'threads', 'count', 'cached'         , @interval, threadsCached ) )
+#           result.push( format( format ,  @identifier, @Service, 'threads', 'count', 'connected'      , @interval, threadsConnected ) )
+#           result.push( format( format ,  @identifier, @Service, 'threads', 'count', 'created'        , @interval, threadsCreated ) )
+#           result.push( format( format ,  @identifier, @Service, 'threads', 'count', 'running'        , @interval, threadsRunning ) )
 #
 #
-#           result.push( sprintf( format ,  @identifier, @Service, 'innodb_buffer_pool', 'count', 'pages_data'         , @interval, innodbBufferPoolPagesData ) )
-#           result.push( sprintf( format ,  @identifier, @Service, 'innodb_buffer_pool', 'count', 'pages_dirty'        , @interval, innodbBufferPoolPagesDirty ) )
-#           result.push( sprintf( format ,  @identifier, @Service, 'innodb_buffer_pool', 'count', 'pages_flushed'      , @interval, innodbBufferPoolPagesFlushed ) )
-#           result.push( sprintf( format ,  @identifier, @Service, 'innodb_buffer_pool', 'count', 'pages_free'         , @interval, innodbBufferPoolPagesFree ) )
-#           result.push( sprintf( format ,  @identifier, @Service, 'innodb_buffer_pool', 'count', 'pages_misc'         , @interval, innodbBufferPoolPagesMisc ) )
-#           result.push( sprintf( format ,  @identifier, @Service, 'innodb_buffer_pool', 'count', 'pages_total'        , @interval, innodbBufferPoolPagesTotal ) )
-#           result.push( sprintf( format ,  @identifier, @Service, 'innodb_buffer_pool', 'count', 'bytes_data'         , @interval, innodbBufferPoolBytesData ) )
-#           result.push( sprintf( format ,  @identifier, @Service, 'innodb_buffer_pool', 'count', 'bytes_dirty'        , @interval, innodbBufferPoolBytesDirty ) )
-#           result.push( sprintf( format ,  @identifier, @Service, 'innodb_buffer_pool', 'count', 'read_ahead_rnd'     , @interval, innodbBufferPoolReadAheadRnd ) )
-#           result.push( sprintf( format ,  @identifier, @Service, 'innodb_buffer_pool', 'count', 'read_ahead'         , @interval, innodbBufferPoolReadAhead ) )
-#           result.push( sprintf( format ,  @identifier, @Service, 'innodb_buffer_pool', 'count', 'read_ahead_evicted' , @interval, innodbBufferPoolReadAheadEviced ) )
-#           result.push( sprintf( format ,  @identifier, @Service, 'innodb_buffer_pool', 'count', 'read_requests'      , @interval, innodbBufferPoolReadRequests ) )
+#           result.push( format( format ,  @identifier, @Service, 'innodb_buffer_pool', 'count', 'pages_data'         , @interval, innodbBufferPoolPagesData ) )
+#           result.push( format( format ,  @identifier, @Service, 'innodb_buffer_pool', 'count', 'pages_dirty'        , @interval, innodbBufferPoolPagesDirty ) )
+#           result.push( format( format ,  @identifier, @Service, 'innodb_buffer_pool', 'count', 'pages_flushed'      , @interval, innodbBufferPoolPagesFlushed ) )
+#           result.push( format( format ,  @identifier, @Service, 'innodb_buffer_pool', 'count', 'pages_free'         , @interval, innodbBufferPoolPagesFree ) )
+#           result.push( format( format ,  @identifier, @Service, 'innodb_buffer_pool', 'count', 'pages_misc'         , @interval, innodbBufferPoolPagesMisc ) )
+#           result.push( format( format ,  @identifier, @Service, 'innodb_buffer_pool', 'count', 'pages_total'        , @interval, innodbBufferPoolPagesTotal ) )
+#           result.push( format( format ,  @identifier, @Service, 'innodb_buffer_pool', 'count', 'bytes_data'         , @interval, innodbBufferPoolBytesData ) )
+#           result.push( format( format ,  @identifier, @Service, 'innodb_buffer_pool', 'count', 'bytes_dirty'        , @interval, innodbBufferPoolBytesDirty ) )
+#           result.push( format( format ,  @identifier, @Service, 'innodb_buffer_pool', 'count', 'read_ahead_rnd'     , @interval, innodbBufferPoolReadAheadRnd ) )
+#           result.push( format( format ,  @identifier, @Service, 'innodb_buffer_pool', 'count', 'read_ahead'         , @interval, innodbBufferPoolReadAhead ) )
+#           result.push( format( format ,  @identifier, @Service, 'innodb_buffer_pool', 'count', 'read_ahead_evicted' , @interval, innodbBufferPoolReadAheadEviced ) )
+#           result.push( format( format ,  @identifier, @Service, 'innodb_buffer_pool', 'count', 'read_requests'      , @interval, innodbBufferPoolReadRequests ) )
 #
-#           result.push( sprintf( format ,  @identifier, @Service, 'innodb_page' , 'count', 'size'                     , @interval, innodbPageSize ) )
-#           result.push( sprintf( format ,  @identifier, @Service, 'innodb_pages', 'count', 'created'                  , @interval, innodbPagesCreated ) )
-#           result.push( sprintf( format ,  @identifier, @Service, 'innodb_pages', 'count', 'read'                     , @interval, innodbPagesRead ) )
-#           result.push( sprintf( format ,  @identifier, @Service, 'innodb_pages', 'count', 'written'                  , @interval, innodbPagesWritten ) )
+#           result.push( format( format ,  @identifier, @Service, 'innodb_page' , 'count', 'size'                     , @interval, innodbPageSize ) )
+#           result.push( format( format ,  @identifier, @Service, 'innodb_pages', 'count', 'created'                  , @interval, innodbPagesCreated ) )
+#           result.push( format( format ,  @identifier, @Service, 'innodb_pages', 'count', 'read'                     , @interval, innodbPagesRead ) )
+#           result.push( format( format ,  @identifier, @Service, 'innodb_pages', 'count', 'written'                  , @interval, innodbPagesWritten ) )
 #
-#           result.push( sprintf( format ,  @identifier, @Service, 'innodb_rows', 'count', 'deleted'                   , @interval, innodbRowsDeleted ) )
-#           result.push( sprintf( format ,  @identifier, @Service, 'innodb_rows', 'count', 'inserted'                  , @interval, innodbRowsInserted ) )
-#           result.push( sprintf( format ,  @identifier, @Service, 'innodb_rows', 'count', 'read'                      , @interval, innodbRowsRead ) )
-#           result.push( sprintf( format ,  @identifier, @Service, 'innodb_rows', 'count', 'updated'                   , @interval, innodbRowsUpdated ) )
+#           result.push( format( format ,  @identifier, @Service, 'innodb_rows', 'count', 'deleted'                   , @interval, innodbRowsDeleted ) )
+#           result.push( format( format ,  @identifier, @Service, 'innodb_rows', 'count', 'inserted'                  , @interval, innodbRowsInserted ) )
+#           result.push( format( format ,  @identifier, @Service, 'innodb_rows', 'count', 'read'                      , @interval, innodbRowsRead ) )
+#           result.push( format( format ,  @identifier, @Service, 'innodb_rows', 'count', 'updated'                   , @interval, innodbRowsUpdated ) )
 
         end
 
