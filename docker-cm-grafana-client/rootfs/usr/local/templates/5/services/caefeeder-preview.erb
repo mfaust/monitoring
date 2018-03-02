@@ -103,7 +103,7 @@
                 "refId": "A"
               },
               {
-                "hide": false,
+                "hide": true,
                 "textEditor": false,
                 "target": "aliasByMetric(aliasSub(carbon-writer.$host.FEEDER_PREV.ProactiveEngine.feeder.entries.current, '(.*)-', ''))",
                 "refId": "B"
@@ -112,7 +112,7 @@
                 "refId": "C",
                 "target": "aliasByMetric(aliasSub(carbon-writer.$host.FEEDER_PREV.ProactiveEngine.feeder.entries.max, '(.*)-', ''))",
                 "textEditor": false,
-                "hide": false
+                "hide": true
               },
               {
                 "target": "aliasByMetric(aliasSub(carbon-writer.$host.FEEDER_PREV.ProactiveEngine.feeder.invalidations, '(.*)-', ''))",
@@ -164,11 +164,11 @@
                 "max": null
               },
               {
-                "min": null,
+                "min": 0,
                 "show": true,
                 "logBase": 1,
                 "format": "ms",
-                "max": null
+                "max": 60000
               }
             ],
             "datasource": "graphite",

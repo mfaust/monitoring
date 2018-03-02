@@ -134,10 +134,10 @@
                 "target": "aliasByMetric(aliasSub(carbon-writer.$host.FEEDER_LIVE.ProactiveEngine.feeder.entries.current, '(.*)-', ''))",
                 "textEditor": false,
                 "refId": "B",
-                "hide": false
+                "hide": true
               },
               {
-                "hide": false,
+                "hide": true,
                 "refId": "C",
                 "target": "aliasByMetric(aliasSub(carbon-writer.$host.FEEDER_LIVE.ProactiveEngine.feeder.entries.max, '(.*)-', ''))",
                 "textEditor": false
@@ -186,8 +186,8 @@
                 "min": 0
               },
               {
-                "min": null,
-                "max": null,
+                "min": 0,
+                "max": 60000,
                 "show": true,
                 "logBase": 1,
                 "format": "ms"
