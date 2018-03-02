@@ -39,6 +39,9 @@
     - enable grafana5
     - the grafana-client used now ruby erb templates insteed prepared json files
 
+  - carbon-client
+    - code optimizations
+    - add support for CoreMedia/cms#13125
 
   - remove cm-external-discover container (is no longer needed)
 
