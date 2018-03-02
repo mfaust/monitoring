@@ -1,5 +1,7 @@
 
-require_relative 'logging'
+require_relative 'version'
+require_relative 'client'
+require_relative '../logging'
 require_relative '../carbon-data'
 
 module CarbonWriter
@@ -10,30 +12,35 @@ module CarbonWriter
 
     def initialize( settings = {} )
 
-      redisHost     = settings.dig(:redis, :host)   || 'localhost'
-      redisPort     = settings.dig(:redis, :port)   || 6379
+      redis_host     = settings.dig(:redis, :host)   || 'localhost'
+      redis_port     = settings.dig(:redis, :port)   || 6379
 
-      mysqlHost     = settings.dig(:mysql, :host)
-      mysqlSchema   = settings.dig(:mysql, :schema)
-      mysqlUser     = settings.dig(:mysql, :user)
-      mysqlPassword = settings.dig(:mysql, :password)
+      mysql_host     = settings.dig(:mysql, :host)
+      mysql_schema   = settings.dig(:mysql, :schema)
+      mysql_user     = settings.dig(:mysql, :user)
+      mysql_password = settings.dig(:mysql, :password)
 
-      @graphiteHost = settings.dig( :graphite, :host )
-      @graphitePort = settings.dig( :graphite, :port )
+      @graphite_host = settings.dig(:graphite, :host)
+      @graphite_port = settings.dig(:graphite, :port)
 
-      version             = '1.4.2'
-      date                = '2017-06-28'
+      version             = CarbonWriter::VERSION
+      date                = CarbonWriter::DATE
 
       logger.info( '-----------------------------------------------------------------' )
-      logger.info( ' CoreMedia - Carbon client' )
+      logger.info( ' CoreMedia - Carbon Client' )
       logger.info( "  Version #{version} (#{date})" )
-      logger.info( '  Copyright 2017 CoreMedia' )
+      logger.info( '  Copyright 2017-2018 CoreMedia' )
       logger.info( '  used Services:' )
-      logger.info( "    - carbon       : #{@graphiteHost}:#{@graphitePort}" )
+      logger.info( "    - carbon       : #{@graphite_host}:#{@graphite_port}" )
       logger.info( '-----------------------------------------------------------------' )
       logger.info( '' )
 
-      @carbonData   = CarbonData::Consumer.new( { :redis => { :host => redisHost, :port => redisPort }, :mysql => { :host => mysqlHost, :schema => mysqlSchema, :user => mysqlUser, :password  => mysqlPassword } } )
+      consumer_setting = {
+        redis: { host: redis_host, port: redis_port },
+        mysql: { host: mysql_host, schema: mysql_schema, user: mysql_user, password: mysql_password }
+      }
+
+      @carbon_data   = CarbonData::Consumer.new(consumer_setting)
 
     end
 
@@ -43,60 +50,49 @@ module CarbonWriter
       if( ! @socket || @socket.closed? )
 
         begin
-
-          @socket = TCPSocket.new( @graphiteHost, @graphitePort )
-
+          @socket = TCPSocket.new( @graphite_host, @graphite_port )
         rescue => e
-
           logger.error( e )
-
         retry
           sleep( 5 )
         end
       end
 
-      return @socket
-
+      @socket
     end
 
 
     def run()
 
       start = Time.now
-      nodes = @carbonData.nodes()
+      nodes = @carbon_data.nodes()
 
-      if( nodes == nil || nodes.is_a?( FalseClass ) )
+      if( nodes.nil? || nodes.is_a?( FalseClass ) )
         logger.debug( 'no online server found' )
       else
 
         nodes.each do |n|
 
-          data = @carbonData.run( n )
+          data = @carbon_data.run( n )
 
-          if( data.is_a?( Array ) )
-            data.flatten!
-          end
+          data.flatten! if( data.is_a?( Array ) )
 
           finish = Time.now
 
           logger.info( format( 'getting %s measurepoints in %s seconds', data.count, (finish - start).round(3) ) )
 
           data.each do |m|
-            self.metric( m )
+            metric( m )
           end
 
         end
-
       end
-
     end
 
 
     def metric( metric = {} )
 
-      if( metric == nil )
-        return
-      end
+      return if( metric.nil? )
 
       key   = metric.dig(:key)
       value = metric.dig(:value)
@@ -105,42 +101,33 @@ module CarbonWriter
       # TODO
       # value must be an float!
 
-      if( key == nil || value == nil )
+      if( key.nil? || value.nil? )
 
-        if( key == nil )
-          logger.error( 'missing \'key\' entry' )
-          logger.debug( format( 'metric( %s )', metric ) )
+        if( key.nil? )
+          logger.debug( 'missing \'key\' entry' )
+          logger.debug( "metric: #{metric}  (#{metric.class.to_s})")
         end
 
-        if( value == nil )
-          logger.error( 'missing \'value\' entry' )
-          logger.debug( format( 'metric( %s )', metric ) )
+        if( value.nil? )
+          logger.debug( 'missing \'value\' entry' )
+          logger.debug( "metric: #{metric}  (#{metric.class.to_s})")
         end
 
         return
       end
 
       begin
-
 #        logger.debug( " = carbon-writer.#{key} #{value.to_f} #{time.to_i}" )
-
-        self.socket.write( "carbon-writer.#{key} #{value.to_f} #{time.to_i}\n" )
-
+        socket.write( "carbon-writer.#{key} #{value.to_f} #{time.to_i}\n" )
       rescue Errno::EPIPE, Errno::EHOSTUNREACH, Errno::ECONNREFUSED
-
         @socket = nil
         nil
-
       end
     end
 
 
-    def closeSocket()
-
-      if( @socket )
-        @socket.close
-      end
-
+    def close_socket()
+      @socket.close if( @socket )
       @socket = nil
     end
 

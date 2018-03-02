@@ -210,7 +210,7 @@ module CarbonData
         value: recall_count
       } << {
         key: format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'recall', 'size' ),
-        value: recallSize
+        value: recall_size_summary
       } << {
         key: format( '%s.%s.%s.%s'      , @identifier, @normalized_service_name, mbean, 'rotate' ),
         value: rotate_count

@@ -73,7 +73,7 @@ module CarbonData
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - CarbonData' )
       logger.info( "  Version #{version} (#{date})" )
-      logger.info( '  Copyright 2016-2017 CoreMedia' )
+      logger.info( '  Copyright 2016-2018 CoreMedia' )
       logger.info( '  used Services:' )
       logger.info( "    - redis        : #{redis_host}:#{redis_port}" )
       if( mysql_host != nil )
@@ -228,7 +228,7 @@ module CarbonData
 
       data    = @database.discovery_data( { :short => fqdn, :fqdn => fqdn } )
 
-      logger.info( format( 'Host: %s - \'%s\'', fqdn, @identifier ) )
+      logger.info( format( 'found host \'%s\' for monitoring', fqdn ) )
 
       # no discovery data found
       #
@@ -241,7 +241,7 @@ module CarbonData
 
         next if( service.downcase == 'timestamp' )
 
-        logger.info( format( '  - \'%s\' (%s)', service, @normalized_service_name ) )
+        logger.debug( format( '  - \'%s\' (%s)', service, @normalized_service_name ) )
 
         cacheKey     = Storage::RedisClient.cache_key( { :host => fqdn, :pre => 'result', :service => service } )
 
@@ -253,7 +253,7 @@ module CarbonData
           if( result.is_a?( Hash ) )
             graphite_output.push( database_mongodb( result ) )
           else
-            logger.error( format( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
+            logger.error( format( 'the result isn\'t a hash (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
           end
 
         when 'mysql'
@@ -261,7 +261,7 @@ module CarbonData
           if( result.is_a?( Hash ) )
             graphite_output.push( database_mysql( result ) )
           else
-            logger.error( format( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
+            logger.error( format( 'the result isn\'t a hash (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
           end
 
         when 'postgres'
@@ -269,7 +269,7 @@ module CarbonData
           if( result.is_a?( Hash ) )
             graphite_output.push( database_postgres( result ) )
           else
-            logger.error( format( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
+            logger.error( format( 'the result isn\'t a hash (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
           end
 
         when 'node-exporter'
@@ -277,7 +277,7 @@ module CarbonData
           if( result.is_a?( Hash ) )
             graphite_output.push( operating_system_node_exporter( result ) )
           else
-            logger.error( format( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
+            logger.error( format( 'the result isn\'t a hash (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
           end
 
         when 'http-status'
@@ -285,12 +285,14 @@ module CarbonData
           if( result.is_a?( Hash ) )
             graphite_output.push( http_server_status( result ) )
           else
-            logger.error( format( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
+            logger.error( format( 'the result isn\'t a hash (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
           end
 
         else
 
-          if( result != nil && result.is_a?( Array ) )
+          next if( result.nil? )
+
+          if( result.is_a?( Array ) )
 
             result.each do |r|
               key    = r.keys.first
@@ -300,7 +302,7 @@ module CarbonData
 
             end
           else
-            logger.error( format( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
+            logger.error( format( 'the result isn\'t a array (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
             logger.error( result.class.to_s )
           end
         end

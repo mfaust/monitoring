@@ -115,7 +115,7 @@ module CarbonData
               value: memory_used_percent
             } << {
               key: format( '%s.%s.%s.%s'         , @identifier, @normalized_service_name, 'swap', 'cached' ),
-              value: swapCached
+              value: swap_cached
             } << {
               key: format( '%s.%s.%s.%s'         , @identifier, @normalized_service_name, 'swap', 'free' ),
               value: swap_free
