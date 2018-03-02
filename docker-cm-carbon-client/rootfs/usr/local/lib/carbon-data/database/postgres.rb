@@ -6,7 +6,7 @@ module CarbonData
     module Postgres
 
 
-      def databasePostgres( value = {} )
+      def database_postgres( value = {} )
 
         format = 'PUTVAL %s/%s-%s/%s-%s interval=%s N:%s'
         result = []

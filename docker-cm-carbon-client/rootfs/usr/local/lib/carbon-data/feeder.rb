@@ -3,233 +3,223 @@ module CarbonData
   module Feeder
 
 
-    def feederHealth( data = {} )
+    def feeder_health( data = {} )
 
       result      = []
       mbean       = 'Health'
       value       = data.dig('value')
 
-      # defaults
-      healthy = -1 # 0: false, 1: true, -1: N/A
+      # defines:
+      #   0: false
+      #   1: true
+      #  -1: N/A
+      healthy = -1
 
       if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil )
 
         value = value.values.first
 
         healthy   = value.dig('Healthy')
-        if ( healthy != nil )
-          healthy           = healthy == true ? 1 : 0
-        end
-
+        healthy   = healthy == true ? 1 : 0 if ( healthy != nil )
       end
 
       result << {
-        :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, mbean, 'healthy' ),
-        :value => healthy
+        key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'healthy' ),
+        value: healthy
       }
 
-      return result
+      result
     end
 
 
     # Check for the CAEFeeder
-    def feederProactiveEngine( data = {} )
+    def feeder_proactive_engine( data = {} )
 
       result      = []
       mbean       = 'ProactiveEngine'
       value       = data.dig('value')
 
       # defaults
-      maxEntries     = 0  # (KeysCount) Number of (active) keys
-      currentEntries = 0  # (ValuesCount) Number of (valid) values. It is less or equal to 'keysCount'
-      diffEntries    = 0  #
-      invalidations  = 0  # (InvalidationCount) Number of invalidations which have been received
-      heartbeat      = 0  # (HeartBeat) The heartbeat of this service: Milliseconds between now and the latest activity. A low value indicates that the service is alive. An constantly increasing value might be caused by a 'sick' or dead service
-      queueCapacity  = 0  # (QueueCapacity) The queue's capacity: Maximum number of items which can be enqueued
-      queueMaxSize   = 0  # (QueueMaxSize) Maximum number of items which had been waiting in the queue
-      queueSize      = 0  # (QueueSize) Number of items waiting in the queue for being processed. Less or equal than 'queueCapacity'. Zero means that ProactiveEngine is idle.
+      max_entries     = 0  # (KeysCount) Number of (active) keys
+      current_entries = 0  # (ValuesCount) Number of (valid) values. It is less or equal to 'keysCount'
+      diff_entries    = 0  #
+      invalidations   = 0  # (InvalidationCount) Number of invalidations which have been received
+      heartbeat       = 0  # (HeartBeat) The heartbeat of this service: Milliseconds between now and the latest activity. A low value indicates that the service is alive. An constantly increasing value might be caused by a 'sick' or dead service
+      queue_capacity  = 0  # (QueueCapacity) The queue's capacity: Maximum number of items which can be enqueued
+      queue_max_size  = 0  # (QueueMaxSize) Maximum number of items which had been waiting in the queue
+      queue_size      = 0  # (QueueSize) Number of items waiting in the queue for being processed. Less or equal than 'queue_capacity'. Zero means that ProactiveEngine is idle.
 
       if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil )
 
         value = value.values.first
 
-        maxEntries     = value.dig('KeysCount')   || 0
-        currentEntries = value.dig('ValuesCount') || 0
-        diffEntries    = ( maxEntries - currentEntries ).to_i
-
-        invalidations  = value.dig('InvalidationCount')
-        heartbeat      = value.dig('HeartBeat')
-        queueCapacity  = value.dig('QueueCapacity')
-        queueMaxSize   = value.dig('QueueMaxSize')
-        queueSize      = value.dig('QueueSize')
-
+        max_entries     = value.dig('KeysCount')   || 0
+        current_entries = value.dig('ValuesCount') || 0
+        diff_entries    = ( max_entries - current_entries ).to_i
+        invalidations   = value.dig('InvalidationCount')
+        heartbeat       = value.dig('HeartBeat')
+        queue_capacity  = value.dig('QueueCapacity')
+        queue_max_size  = value.dig('QueueMaxSize')
+        queue_size      = value.dig('QueueSize')
       end
 
-
-
       result << {
-        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'feeder', 'entries', 'max' ),
-        :value => maxEntries
+        key: format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'feeder', 'entries', 'max' ),
+        value: max_entries
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'feeder', 'entries', 'current' ),
-        :value => currentEntries
+        key: format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'feeder', 'entries', 'current' ),
+        value: current_entries
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'feeder', 'entries', 'diff' ),
-        :value => diffEntries
+        key: format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'feeder', 'entries', 'diff' ),
+        value: diff_entries
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'feeder', 'invalidations' ),
-        :value => invalidations
+        key: format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'feeder', 'invalidations' ),
+        value: invalidations
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'feeder', 'heartbeat' ),
-        :value => heartbeat
+        key: format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'feeder', 'heartbeat' ),
+        value: heartbeat
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'queue', 'capacity' ),
-        :value => queueCapacity
+        key: format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'queue', 'capacity' ),
+        value: queue_capacity
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'queue', 'max_waiting' ),
-        :value => queueMaxSize
+        key: format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'queue', 'max_waiting' ),
+        value: queue_max_size
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'queue', 'waiting' ),
-        :value => queueSize
+        key: format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'queue', 'waiting' ),
+        value: queue_size
       }
 
-      return result
+      result
     end
 
 
-    def feederFeeder( data = {} )
+    def feeder_feeder( data = {} )
 
       result = []
       mbean  = 'Feeder'
       value       = data.dig('value')
 
       # defaults
-      pendingEvents           = 0
-      indexDocuments          = 0
-      indexContentDocuments   = 0
-      currentPendingDocuments = 0
+      pending_events            = 0
+      index_documents           = 0
+      index_content_documents   = 0
+      current_pending_documents = 0
 
       if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil )
 
         value = value.values.first
 
-        pendingEvents           = value.dig('PendingEvents')
-        indexDocuments          = value.dig('IndexDocuments')
-        indexContentDocuments   = value.dig('IndexContentDocuments')
-        currentPendingDocuments = value.dig('CurrentPendingDocuments')
-
+        pending_events            = value.dig('PendingEvents')
+        index_documents           = value.dig('IndexDocuments')
+        index_content_documents   = value.dig('IndexContentDocuments')
+        current_pending_documents = value.dig('CurrentPendingDocuments')
       end
 
       result << {
-        :key   => sprintf( '%s.%s.%s.%s'   , @identifier, @Service, mbean, 'pending_events' ),
-        :value => pendingEvents
+        key: format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'pending_events' ),
+        value: pending_events
       } << {
-        :key   => sprintf( '%s.%s.%s.%s'   , @identifier, @Service, mbean, 'index_documents' ),
-        :value => indexDocuments
+        key: format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'index_documents' ),
+        value: index_documents
       } << {
-        :key   => sprintf( '%s.%s.%s.%s'   , @identifier, @Service, mbean, 'index_content_documents' ),
-        :value => indexContentDocuments
+        key: format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'index_content_documents' ),
+        value: index_content_documents
       } << {
-        :key   => sprintf( '%s.%s.%s.%s'   , @identifier, @Service, mbean, 'current_pending_documents' ),
-        :value => currentPendingDocuments
+        key: format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'current_pending_documents' ),
+        value: current_pending_documents
       }
 
-      return result
-
+      result
     end
 
 
-    def feederTransformedBlobCacheManager( data = {} )
+    def feeder_transformed_blobcache_manager( data = {} )
 
       result    = []
       mbean     = 'TransformedBlobCacheManager'
       value     = data.dig('value')
 
       # defaults
-      cacheSize          = 0   # set the cache size in bytes
-      cacheLevel         = 0   # cache level in bytes
-      cacheInitialLevel  = 0   # initial cache level in bytes
-      newGenCacheSize    = 0   # cache size of new generation folder in bytes
-      newGenLevel        = 0   # cache level of the new generation in bytes
-      newGenInitialLevel = 0   # initial cache level of the new generation in bytes
-      oldGenLevel        = 0   # cache level of the old generation in bytes
-      oldGenInitialLevel = 0   # initial cache level of the old generation level in bytes
-      faultSizeSum       = 0   # sum of sizes in bytes of all blobs faulted since system start
-      faultCount         = 0   # count of faults since system start
-      recallSizeSum      = 0   # sum of sizes in bytes of all blobs recalled since system start
-      recallCount        = 0   # count of recalls since system start
-      rotateCount        = 0   # count of rotates since system start
-      accessCount        = 0   # count of accesses since system start
+      cache_size                  = 0   # set the cache size in bytes
+      cache_level                 = 0   # cache level in bytes
+      cache_initial_level         = 0   # initial cache level in bytes
+      new_gen_cache_size          = 0   # cache size of new generation folder in bytes
+      new_gen_cache_level         = 0   # cache level of the new generation in bytes
+      new_gen_cache_initial_level = 0   # initial cache level of the new generation in bytes
+      old_gen_cache_level         = 0   # cache level of the old generation in bytes
+      old_gen_cache_initial_level = 0   # initial cache level of the old generation level in bytes
+      fault_size_summary          = 0   # sum of sizes in bytes of all blobs faulted since system start
+      fault_count                 = 0   # count of faults since system start
+      recall_size_summary         = 0   # sum of sizes in bytes of all blobs recalled since system start
+      recall_count                = 0   # count of recalls since system start
+      rotate_count                = 0   # count of rotates since system start
+      access_count                = 0   # count of accesses since system start
 
       if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil )
 
         value = value.values.first
 
-        cacheSize               = value.dig('CacheSize')
-        cacheLevel              = value.dig('Level')
-        cacheInitialLevel       = value.dig('InitialLevel')
-        newGenCacheSize         = value.dig('NewGenerationCacheSize')
-        newGenCacheLevel        = value.dig('NewGenerationLevel')
-        newGenCacheInitialLevel = value.dig('NewGenerationInitialLevel')
-        oldGenCacheLevel        = value.dig('OldGenerationLevel')
-        oldGenCacheInitialLevel = value.dig('OldGenerationInitialLevel')
-        faultSize               = value.dig('FaultSizeSum')
-        fault                   = value.dig('FaultCount')
-        recallSize              = value.dig('RecallSizeSum')
-        recall                  = value.dig('RecallCount')
-        rotate                  = value.dig('RotateCount')
-        access                  = value.dig('AccessCount')
-
+        cache_size                  = value.dig('CacheSize')
+        cache_level                 = value.dig('Level')
+        cache_initial_level         = value.dig('InitialLevel')
+        new_gen_cache_size          = value.dig('NewGenerationCacheSize')
+        new_gen_cache_level         = value.dig('NewGenerationLevel')
+        new_gen_cache_initial_level = value.dig('NewGenerationInitialLevel')
+        old_gen_cache_level         = value.dig('OldGenerationLevel')
+        old_gen_cache_initial_level = value.dig('OldGenerationInitialLevel')
+        fault_size_summary          = value.dig('FaultSizeSum')
+        fault_count                 = value.dig('FaultCount')
+        recall_size_summary         = value.dig('RecallSizeSum')
+        recall_count                = value.dig('RecallCount')
+        rotate_count                = value.dig('RotateCount')
+        access_count                = value.dig('AccessCount')
       end
 
       result << {
-        :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'cache', 'size' ),
-        :value => cacheSize
+        key: format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'cache', 'size' ),
+        value: cache_size
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'cache', 'level' ),
-        :value => cacheLevel
+        key: format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'cache', 'level' ),
+        value: cache_level
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'cache', 'initial_level' ),
-        :value => cacheInitialLevel
+        key: format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'cache', 'initial_level' ),
+        value: cache_initial_level
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'cache', 'new_gen', 'size' ),
-        :value => newGenCacheSize
+        key: format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'cache', 'new_gen', 'size' ),
+        value: new_gen_cache_size
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'cache', 'new_gen', 'level' ),
-        :value => newGenCacheLevel
+        key: format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'cache', 'new_gen', 'level' ),
+        value: new_gen_cache_level
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'cache', 'new_gen', 'initial_level' ),
-        :value => newGenCacheInitialLevel
+        key: format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'cache', 'new_gen', 'initial_level' ),
+        value: new_gen_cache_initial_level
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'cache', 'old_gen', 'size' ),
-        :value => oldGenCacheLevel
+        key: format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'cache', 'old_gen', 'size' ),
+        value: old_gen_cache_level
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'cache', 'old_gen', 'initial_level' ),
-        :value => oldGenCacheInitialLevel
+        key: format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'cache', 'old_gen', 'initial_level' ),
+        value: old_gen_cache_initial_level
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'fault', 'count' ),
-        :value => fault
+        key: format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'fault', 'count' ),
+        value: fault_count
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'fault', 'size' ),
-        :value => faultSize
+        key: format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'fault', 'size' ),
+        value: fault_size_summary
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'recall', 'count' ),
-        :value => recall
+        key: format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'recall', 'count' ),
+        value: recall_count
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'recall', 'size' ),
-        :value => recallSize
+        key: format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'recall', 'size' ),
+        value: recall_size_summary
       } << {
-        :key   => sprintf( '%s.%s.%s.%s'      , @identifier, @Service, mbean, 'rotate' ),
-        :value => rotate
+        key: format( '%s.%s.%s.%s'      , @identifier, @normalized_service_name, mbean, 'rotate' ),
+        value: rotate_count
       } << {
-        :key   => sprintf( '%s.%s.%s.%s'      , @identifier, @Service, mbean, 'access' ),
-        :value => access
+        key: format( '%s.%s.%s.%s'      , @identifier, @normalized_service_name, mbean, 'access' ),
+        value: access_count
       }
 
-      return result
-
+      result
     end
-
   end
-
 end

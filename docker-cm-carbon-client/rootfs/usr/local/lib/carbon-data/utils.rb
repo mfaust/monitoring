@@ -5,63 +5,58 @@ module CarbonData
 
     # return all known and active (online) server for monitoring
     #
-    def monitoredServer()
+    def monitored_server()
 
-      nodes = @database.nodes( { :status => [ Storage::MySQL::ONLINE ] } )
-
-#       logger.debug( "database: #{nodes}" )
-
-      return nodes
-
+      @database.nodes( status: [ Storage::MySQL::ONLINE ] )
     end
 
 
     def output( data = [] )
 
       data.each do |d|
-        if( d )
-          puts d
-        end
-      end
 
+        puts d if( d )
+      end
     end
 
 
-    def normalizeService( service )
+    def normalize_service( s )
 
       # normalize service names for grafana
-      case service
+      service = case s
         when 'content-management-server'
-          service = 'CMS'
+          'CMS'
         when 'master-live-server'
-          service = 'MLS'
+          'MLS'
         when 'replication-live-server'
-          service = 'RLS'
+          'RLS'
         when 'workflow-server'
-          service = 'WFS'
+          'WFS'
         when /^cae-live/
-          service = 'CAE_LIVE'
+          'CAE_LIVE'
         when /^cae-preview/
-          service = 'CAE_PREV'
+          'CAE_PREV'
         when 'solr-master'
-          service = 'SOLR_MASTER'
+          'SOLR_MASTER'
         when 'content-feeder'
-          service = 'FEEDER_CONTENT'
+          'FEEDER_CONTENT'
         when 'caefeeder-live'
-          service = 'FEEDER_LIVE'
+          'FEEDER_LIVE'
         when 'caefeeder-preview'
-          service = 'FEEDER_PREV'
+          'FEEDER_PREV'
         when 'node-exporter'
-          service = 'NODE_EXPORTER'
+          'NODE_EXPORTER'
         when 'http-status'
-          service = 'HTTP_STATUS'
+          'HTTP_STATUS'
+        else
+          s
       end
 
-      return service.tr('-', '_').upcase
-
+      service.tr('-', '_').upcase
     end
 
-    def timeParser( start_time, end_time )
+
+    def time_parser( start_time, end_time )
 
       seconds_diff = (start_time - end_time).to_i.abs
 

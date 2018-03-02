@@ -370,6 +370,7 @@ services:
     container_name: cm-carbon-client
     hostname: cm-carbon-client
     environment:
+      LOG_LEVEL: debug
       # USE ONLY WITH AND EXTERNAL CARBON-WRITER!
       GRAPHITE_HOST: carbon
     depends_on:

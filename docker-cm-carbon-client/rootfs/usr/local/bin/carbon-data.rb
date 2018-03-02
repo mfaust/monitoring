@@ -16,31 +16,31 @@ require_relative '../lib/carbon-writer'
 
 # -----------------------------------------------------------------------------
 
-redisHost         = ENV.fetch('REDIS_HOST'             , 'redis' )
-redisPort         = ENV.fetch('REDIS_PORT'             , 6379 )
-carbonHost        = ENV.fetch('GRAPHITE_HOST'          , 'carbon' )
-carbonPort        = ENV.fetch('GRAPHITE_PORT'          , 2003 )
-mysqlHost         = ENV.fetch('MYSQL_HOST'             , 'database')
-mysqlSchema       = ENV.fetch('DISCOVERY_DATABASE_NAME', 'discovery')
-mysqlUser         = ENV.fetch('DISCOVERY_DATABASE_USER', 'discovery')
-mysqlPassword     = ENV.fetch('DISCOVERY_DATABASE_PASS', 'discovery')
+redis_host        = ENV.fetch('REDIS_HOST'             , 'redis' )
+redis_port        = ENV.fetch('REDIS_PORT'             , 6379 )
+carbon_host       = ENV.fetch('GRAPHITE_HOST'          , 'carbon' )
+carbon_port       = ENV.fetch('GRAPHITE_PORT'          , 2003 )
+mysql_host        = ENV.fetch('MYSQL_HOST'             , 'database')
+mysql_schema      = ENV.fetch('DISCOVERY_DATABASE_NAME', 'discovery')
+mysql_user        = ENV.fetch('DISCOVERY_DATABASE_USER', 'discovery')
+mysql_password    = ENV.fetch('DISCOVERY_DATABASE_PASS', 'discovery')
 interval          = ENV.fetch('INTERVAL'               , 30 )
 delay             = ENV.fetch('RUN_DELAY'              , 10 )
 
 config = {
-  :redis       => {
-    :host => redisHost,
-    :port => redisPort
+  redis: {
+    host: redis_host,
+    port: redisPort
   },
-  :graphite    => {
-    :host => carbonHost,
-    :port => carbonPort
+  graphite: {
+    host: carbonHost,
+    port: carbonPort
   },
-  :mysql    => {
-    :host      => mysqlHost,
-    :schema    => mysqlSchema,
-    :user      => mysqlUser,
-    :password  => mysqlPassword
+  mysql: {
+    host: mysqlHost,
+    schema: mysqlSchema,
+    user: mysqlUser,
+    password: mysqlPassword
   }
 }
 
@@ -64,7 +64,6 @@ scheduler = Rufus::Scheduler.new
 scheduler.every( interval, :first_in => delay ) do
 
   writer.run()
-
 end
 
 
@@ -76,8 +75,6 @@ scheduler.every( '5s' ) do
 
     scheduler.shutdown(:kill)
   end
-
 end
-
 
 scheduler.join

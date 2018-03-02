@@ -2,8 +2,7 @@ module CarbonData
 
   module Cae
 
-
-    def caeDataViewFactory( data = {} )
+    def cae_dataview_factory( data = {} )
 
       result    = []
       mbean     = 'DataViewFactory'
@@ -15,8 +14,8 @@ module CarbonData
       cached       = 0
       invalidated  = 0
       evicted      = 0
-      activeTime   = 0
-      totalTime    = 0
+      active_time   = 0
+      total_time    = 0
 
       if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil )
 
@@ -27,56 +26,57 @@ module CarbonData
         cached       = value.dig('NumberOfCachedDataViews')
         invalidated  = value.dig('NumberOfInvalidatedDataViews')
         evicted      = value.dig('NumberOfEvictedDataViews')
-        activeTime   = value.dig('ActiveTimeOfComputedDataViews')
-        totalTime    = value.dig('TotalTimeOfComputedDataViews')
+        active_time  = value.dig('ActiveTimeOfComputedDataViews')
+        total_time   = value.dig('TotalTimeOfComputedDataViews')
 
       end
 
       result << {
-        :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, mbean, 'lookups' ),
-        :value => lookups
+        key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'lookups' ),
+        value: lookups
       } << {
-        :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, mbean, 'computed' ),
-        :value => computed
+        key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'computed' ),
+        value: computed
       } << {
-        :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, mbean, 'cached' ),
-        :value => cached
+        key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'cached' ),
+        value: cached
       } << {
-        :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, mbean, 'invalidated' ),
-        :value => invalidated
+        key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'invalidated' ),
+        value: invalidated
       } << {
-        :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, mbean, 'evicted' ),
-        :value => evicted
+        key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'evicted' ),
+        value: evicted
       } << {
-        :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, mbean, 'activeTime' ),
-        :value => activeTime
+        key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'activeTime' ),
+        value: active_time
       } << {
-        :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, mbean, 'totalTime' ),
-        :value => totalTime
+        key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'totalTime' ),
+        value: total_time
       }
 
-      return result
-
+      result
     end
 
 
-    def caeCacheClasses( key, data = {} )
+    def cae_cache_classes( key, data = {} )
 
       result      = []
       mbean       = 'CacheClasses'
       value       = data.dig('value')
       status      = data.dig('status') || 404
 
-      if( status == 404 )
+      # we habe more CacheClasses Types:
+      #   com.coremedia:CacheClass=\"com.coremedia.blueprint...\"
+      #
+      #   com.coremedia:CacheClass=\"com.coremedia.livecontext.ecommerce...\"
+      #
+      # the livecontext.ecommerce Caches are only available with an ecommerce system
+      #
+      return if( status == 404 )
 
-        # solr 6 has no tomcat and also no manager mbean
-        logger.debug( "status 404 for service #{@Service} and bean #{mbean}" )
-        return
-      end
+      cache_class  = key.gsub( mbean, '' )
 
-      cacheClass  = key.gsub( mbean, '' )
-
-      data['service'] = @Service
+      data['service'] = @normalized_service_name
 
       # defaults
       capacity  = 0
@@ -85,7 +85,7 @@ module CarbonData
       inserted  = 0
       removed   = 0
       level     = 0
-      missRate  = 0
+      miss_rate  = 0
 
       if( @mbean.checkBeanConsistency( key, data ) == true && value != nil )
 
@@ -97,38 +97,34 @@ module CarbonData
         inserted  = value.dig('Inserted')
         removed   = value.dig('Removed')
         level     = value.dig('Level')
-        missRate  = value.dig('MissRate')
-
+        miss_rate  = value.dig('MissRate')
       end
 
       result << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, cacheClass, 'evaluated' ),
-        :value => evaluated
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, cache_class, 'evaluated' ),
+        value: evaluated
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, cacheClass, 'evicted' ),
-        :value => evicted
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, cache_class, 'evicted' ),
+        value: evicted
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, cacheClass, 'inserted' ),
-        :value => inserted
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, cache_class, 'inserted' ),
+        value: inserted
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, cacheClass, 'removed' ),
-        :value => removed
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, cache_class, 'removed' ),
+        value: removed
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, cacheClass, 'level' ),
-        :value => level
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, cache_class, 'level' ),
+        value: level
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, cacheClass, 'capacity' ),
-        :value => capacity
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, cache_class, 'capacity' ),
+        value: capacity
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, cacheClass, 'missRate' ),
-        :value => missRate
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, cache_class, 'missRate' ),
+        value: miss_rate
       }
 
-      return result
-
+      result
     end
-
-
   end
 end
 
