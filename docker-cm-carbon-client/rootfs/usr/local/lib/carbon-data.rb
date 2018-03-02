@@ -13,10 +13,10 @@ require 'json'
 require 'filesize'
 require 'fileutils'
 require 'mini_cache'
+require 'storage'
 
 require_relative 'logging'
 
-require_relative 'storage'
 require_relative 'mbean'
 
 require_relative 'carbon-data/version'
@@ -56,49 +56,42 @@ module CarbonData
 
     def initialize( settings = {} )
 
-      redisHost           = settings.dig(:redis, :host)
-      redisPort           = settings.dig(:redis, :port)             || 6379
+      redis_host      = settings.dig(:redis, :host)
+      redis_port      = settings.dig(:redis, :port)             || 6379
 
-      mysqlHost           = settings.dig(:mysql, :host)
-      mysqlSchema         = settings.dig(:mysql, :schema)
-      mysqlUser           = settings.dig(:mysql, :user)
-      mysqlPassword       = settings.dig(:mysql, :password)
+      mysql_host      = settings.dig(:mysql, :host)
+      mysql_schema    = settings.dig(:mysql, :schema)
+      mysql_user      = settings.dig(:mysql, :user)
+      mysql_password  = settings.dig(:mysql, :password)
 
-      version             = CarbonData::VERSION # '2.0.0'
-      date                = CarbonData::DATE    # '2017-04-13'
+      version         = CarbonData::VERSION
+      date            = CarbonData::DATE
+
+      redis_settings  = { redis: { host: redis_host } }
+      mysql_settings  = { mysql: { host: mysql_host, user: mysql_user, password: mysql_password, schema: mysql_schema } }
 
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - CarbonData' )
       logger.info( "  Version #{version} (#{date})" )
-      logger.info( '  Copyright 2016-2017 CoreMedia' )
+      logger.info( '  Copyright 2016-2018 CoreMedia' )
       logger.info( '  used Services:' )
-      logger.info( "    - redis        : #{redisHost}:#{redisPort}" )
-      if( mysqlHost != nil )
-        logger.info( "    - mysql        : #{mysqlHost}@#{mysqlSchema}" )
+      logger.info( "    - redis        : #{redis_host}:#{redis_port}" )
+      if( mysql_host != nil )
+        logger.info( "    - mysql        : #{mysql_host}@#{mysql_schema}" )
       end
       logger.info( '-----------------------------------------------------------------' )
       logger.info( '' )
 
       @cache  = MiniCache::Store.new()
-      @redis  = Storage::RedisClient.new( { :redis => { :host => redisHost } } )
-      @mbean  = MBean::Client.new( { :redis => @redis } )
+      @redis  = Storage::RedisClient.new( redis_settings )
+      @mbean  = MBean::Client.new( redis: @redis )
       @database   = nil
 
-      if( mysqlHost != nil )
+      if( mysql_host != nil )
 
         begin
-
           until( @database != nil )
-
-            @database   = Storage::MySQL.new( {
-              :mysql => {
-                :host     => mysqlHost,
-                :user     => mysqlUser,
-                :password => mysqlPassword,
-                :schema   => mysqlSchema
-              }
-            } )
-
+            @database   = Storage::MySQL.new( mysql_settings )
           end
         rescue => e
 
@@ -108,101 +101,97 @@ module CarbonData
     end
 
 
-    def createGraphiteOutput( key, values )
+    def create_graphite_output( key, values )
 
-      graphiteOutput = Array.new()
+      graphite_output = []
 
       case key
         # Tomcats
       when 'Runtime'
-        graphiteOutput.push( self.tomcatRuntime( values ) )
+        graphite_output.push( tomcat_runtime( values ) )
       # really not a good idea
 #      when 'OperatingSystem'
-#        graphiteOutput.push( self.tomcatOperatingSystem( values ) )
+#        graphite_output.push( tomcatOperatingSystem( values ) )
       when 'Manager'
-        graphiteOutput.push( self.tomcatManager( values ) )
+        graphite_output.push( tomcat_manager( values ) )
       when 'Memory'
-        graphiteOutput.push( self.tomcatMemoryUsage( values ) )
+        graphite_output.push( tomcat_memory_usage( values ) )
       when 'Threading'
-        graphiteOutput.push( self.tomcatThreading( values ) )
+        graphite_output.push( tomcat_threading( values ) )
       when 'GarbageCollectorParNew'
-        graphiteOutput.push( self.tomcatGCParNew( values ) )
+        graphite_output.push( tomcat_gc_parnew( values ) )
       when 'GarbageCollectorConcurrentMarkSweep'
-        graphiteOutput.push( self.tomcatGCConcurrentMarkSweep( values ) )
+        graphite_output.push( tomcat_gc_concurrentmarksweep( values ) )
       when 'ClassLoading'
-        graphiteOutput.push( self.tomcatClassLoading( values ) )
+        graphite_output.push( tomcat_class_loading( values ) )
       when 'ThreadPool'
-        graphiteOutput.push( self.tomcatThreadPool( values ) )
+        graphite_output.push( tomcat_thread_pool( values ) )
 
         # CAE
       when 'DataViewFactory'
-        graphiteOutput.push( self.caeDataViewFactory( values ) )
+        graphite_output.push( cae_dataview_factory( values ) )
       when /^CacheClasses/
-        graphiteOutput.push( self.caeCacheClasses( key, values ) )
+        graphite_output.push( cae_cache_classes( key, values ) )
 
         # Content Server
       when 'StoreQueryPool'
-        graphiteOutput.push( self.contentServerQueryPool( values ) )
+        graphite_output.push( contentserver_query_pool( values ) )
       when 'StoreConnectionPool'
-        graphiteOutput.push( self.contentServerConnectionPool( values ) )
+        graphite_output.push( contentserver_connection_pool( values ) )
       when 'Server'
-        graphiteOutput.push( self.contentServerServer( values ) )
+        graphite_output.push( contentserver_server( values ) )
       when 'StatisticsJobResult'
-        graphiteOutput.push( self.contentServerStatisticsJobResult( values ) )
+        graphite_output.push( contentserver_statistics_job_result( values ) )
       when 'StatisticsResourceCache'
-        graphiteOutput.push( self.contentServerStatisticsResourceCache( values ) )
+        graphite_output.push( contentserver_statistics_resource_cache( values ) )
 
         # Clients
       when 'CapConnection'
-        graphiteOutput.push( self.clientsCapConnection( values ) )
+        graphite_output.push( clients_cap_connection( values ) )
       when /^MemoryPool*/
-        graphiteOutput.push( self.clientsMemoryPool( key, values ) )
+        graphite_output.push( clients_memory_pool( key, values ) )
 
         # Feeder
       when 'Health'
-        graphiteOutput.push( self.feederHealth( values ) )
+        graphite_output.push( feeder_health( values ) )
       when 'ProactiveEngine'
-        graphiteOutput.push( self.feederProactiveEngine( values ) )
+        graphite_output.push( feeder_proactive_engine( values ) )
       when 'Feeder'
-        graphiteOutput.push( self.feederFeeder( values ) )
+        graphite_output.push( feeder_feeder( values ) )
       # currently disabled
       # need information or discusion about it
       when 'TransformedBlobCacheManager'
-        graphiteOutput.push( self.feederTransformedBlobCacheManager( values ) )
+        graphite_output.push( feeder_transformed_blobcache_manager( values ) )
 
         # Solr
       when /^Solr.*Replication/
-        graphiteOutput.push( self.solrReplication( values ) )
+        graphite_output.push( solr_replication( values ) )
       when /^Solr.*QueryResultCache/
-        graphiteOutput.push( self.solrQueryResultCache( values ) )
+        graphite_output.push( solr_query_result_cache( values ) )
       when /^Solr.*DocumentCache/
-        graphiteOutput.push( self.solrDocumentCache( values ) )
+        graphite_output.push( solr_document_cache( values ) )
       when /^Solr.*Select/
-        graphiteOutput.push( self.solrSelect( values ) )
+        graphite_output.push( solr_select( values ) )
       end
 
-      return graphiteOutput
+      graphite_output
     end
 
 
     def nodes()
 
-      r = self.monitoredServer()
-
-      logger.debug("#{r}")
-
-      return r
+      monitored_server()
     end
 
 
-    def storagePath( host )
+    def storage_path( host )
 
-      key    = sprintf( 'config-%s', host )
+      key    = format( 'config-%s', host )
       data   = @cache.get( key )
 
       result = host
 
-      if( data == nil )
+      if( data.nil? )
 
         identifier  = @database.config( { :short => host, :fqdn => host, :key => 'graphite_identifier' } )
 
@@ -210,62 +199,51 @@ module CarbonData
 
           identifier = identifier.dig( 'graphite_identifier' )
 
-          if( identifier != nil )
-            result     = identifier
-          end
+          result = identifier if( identifier != nil )
 
           @cache.set(key, expires_in: 320 ) { MiniCache::Data.new( result ) }
         end
 
       else
-
         result = data
       end
 
-      return result
+      result
     end
 
 
 
     def run( fqdn = nil )
 
-      logger.debug( "run( #{fqdn} )" )
+#      logger.debug( "run( #{fqdn} )" )
 
-      if( fqdn == nil )
-        logger.error( 'no node given' )
-
-        return []
-      end
+      # logger.error( 'no node given' )
+      return [] if( fqdn == nil )
 
       data    = nil
 
-      @identifier    = self.storagePath( fqdn )
+      @identifier    = storage_path( fqdn )
       @Server        = fqdn
-      graphiteOutput = Array.new()
+      graphite_output = []
 
-      data    = @database.discoveryData( { :short => fqdn, :fqdn => fqdn } )
+      data    = @database.discovery_data( { :short => fqdn, :fqdn => fqdn } )
 
-      logger.info( sprintf( 'Host: %s - \'%s\'', fqdn, @identifier ) )
+      logger.info( format( 'found host \'%s\' for monitoring', fqdn ) )
 
       # no discovery data found
       #
-      if( data == nil )
-        logger.warn( 'no discovery data found' )
-        return graphiteOutput
-      end
+      return graphite_output if( data == nil )
 
       data.each do |service, d|
 
-        @serviceName = service
-        @Service     = self.normalizeService( service )
+        @service_name = service
+        @normalized_service_name     = normalize_service( service )
 
-        if( service.downcase == 'timestamp' )
-          next
-        end
+        next if( service.downcase == 'timestamp' )
 
-        logger.info( sprintf( '  - \'%s\' (%s)', service, @Service ) )
+        logger.debug( format( '  - \'%s\' (%s)', service, @normalized_service_name ) )
 
-        cacheKey     = Storage::RedisClient.cacheKey( { :host => fqdn, :pre => 'result', :service => service } )
+        cacheKey     = Storage::RedisClient.cache_key( { :host => fqdn, :pre => 'result', :service => service } )
 
         result = @redis.get( cacheKey )
 
@@ -273,63 +251,65 @@ module CarbonData
         when 'mongodb'
 
           if( result.is_a?( Hash ) )
-            graphiteOutput.push( self.databaseMongoDB( result ) )
+            graphite_output.push( database_mongodb( result ) )
           else
-            logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
+            logger.error( format( 'the result isn\'t a hash (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
           end
 
         when 'mysql'
 
           if( result.is_a?( Hash ) )
-            graphiteOutput.push( self.databaseMySQL( result ) )
+            graphite_output.push( database_mysql( result ) )
           else
-            logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
+            logger.error( format( 'the result isn\'t a hash (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
           end
 
         when 'postgres'
 
           if( result.is_a?( Hash ) )
-            graphiteOutput.push( self.databasePostgres( result ) )
+            graphite_output.push( database_postgres( result ) )
           else
-            logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
+            logger.error( format( 'the result isn\'t a hash (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
           end
 
         when 'node-exporter'
 
           if( result.is_a?( Hash ) )
-            graphiteOutput.push( self.operatingSystemNodeExporter( result ) )
+            graphite_output.push( operating_system_node_exporter( result ) )
           else
-            logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
+            logger.error( format( 'the result isn\'t a hash (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
           end
 
         when 'http-status'
 
           if( result.is_a?( Hash ) )
-            graphiteOutput.push( self.http_server_status( result ) )
+            graphite_output.push( http_server_status( result ) )
           else
-            logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
+            logger.error( format( 'the result isn\'t a hash (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
           end
 
         else
 
-          if( result != nil && result.is_a?( Array ) )
+          next if( result.nil? )
+
+          if( result.is_a?( Array ) )
 
             result.each do |r|
               key    = r.keys.first
               values = r.values.first
 
-              graphiteOutput.push( self.createGraphiteOutput( key, values ) )
+              graphite_output.push( create_graphite_output( key, values ) )
 
             end
           else
-            logger.error( sprintf( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
+            logger.error( format( 'the result isn\'t a array (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
             logger.error( result.class.to_s )
           end
         end
 
       end
 
-      graphiteOutput
+      graphite_output
     end
 
   end

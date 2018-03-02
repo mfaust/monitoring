@@ -6,11 +6,11 @@ module CarbonData
     module MongoDB
 
 
-      def databaseMongoDB( value = {} )
+      def database_mongodb( value = {} )
 
         result = []
 
-        if( value != nil )
+        unless( value.nil? )
 
           uptime         = value.dig('uptime')
 
@@ -19,19 +19,19 @@ module CarbonData
           network        = value.dig('network')
           opcounters     = value.dig('opcounters')
           tcmalloc       = value.dig('tcmalloc')
-          storageEngine  = value.dig('storageEngine')
+          storage_engine = value.dig('storageEngine')
           metrics        = value.dig('metrics')
           mem            = value.dig('mem')
-          extraInfo      = value.dig('extra_info')
-          wiredTiger     = value.dig('wiredTiger')
-          globalLock     = value.dig('globalLock')
+          extra_info     = value.dig('extra_info')
+          wired_tiger    = value.dig('wiredTiger')
+          global_lock    = value.dig('globalLock')
 
           result << {
-            :key   => sprintf( '%s.%s.%s', @identifier, @Service, 'uptime' ),
-            :value => uptime
+            key: format( '%s.%s.%s', @identifier, @normalized_service_name, 'uptime' ),
+            value: uptime
           }
 
-          if( asserts != nil )
+          unless( asserts.nil? )
 
             regular   = asserts.dig('regular')
             warning   = asserts.dig('warning')
@@ -40,77 +40,66 @@ module CarbonData
             rollovers = asserts.dig('rollovers')
 
             result << {
-              :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, 'asserts', 'regular' ),
-              :value => regular
+              key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, 'asserts', 'regular' ),
+              value: regular
             } << {
-              :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, 'asserts', 'warning' ),
-              :value => warning
+              key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, 'asserts', 'warning' ),
+              value: warning
             } << {
-              :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, 'asserts', 'message' ),
-              :value => message
+              key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, 'asserts', 'message' ),
+              value: message
             } << {
-              :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, 'asserts', 'user' ),
-              :value => user
+              key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, 'asserts', 'user' ),
+              value: user
             } << {
-              :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, 'asserts', 'rollovers' ),
-              :value => rollovers
+              key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, 'asserts', 'rollovers' ),
+              value: rollovers
             }
 
           end
 
-          if( connections != nil )
+          unless( connections.nil? )
 
             current        = connections.dig( 'current' )
             available      = connections.dig( 'available' )
-            totalCreated   = connections.dig( 'totalCreated' )
-
-            if( totalCreated.is_a?( Hash ) )
-              totalCreated = connections.dig( 'totalCreated', '$numberLong' )
-            end
+            total_created  = connections.dig( 'totalCreated' )
+            total_created  = connections.dig( 'totalCreated', '$numberLong' ) if( total_created.is_a?( Hash ) )
 
             result << {
-              :key   => sprintf( '%s.%s.%s.%s'   , @identifier, @Service, 'connections', 'current' ),
-              :value => current
+              key: format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'connections', 'current' ),
+              value: current
             } << {
-              :key   => sprintf( '%s.%s.%s.%s'   , @identifier, @Service, 'connections', 'available' ),
-              :value => available
+              key: format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'connections', 'available' ),
+              value: available
             } << {
-              :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, 'connections', 'created', 'total' ),
-              :value => totalCreated
+              key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'connections', 'created', 'total' ),
+              value: total_created
             }
-
-#             result.push( sprintf( format, @identifier, @Service, 'connections', 'current'     , @interval, current ) )
-#             result.push( sprintf( format, @identifier, @Service, 'connections', 'available'   , @interval, available ) )
-#             result.push( sprintf( format, @identifier, @Service, 'connections', 'totalCreated', @interval, totalCreated ) )
           end
 
-          if( network != nil )
+          unless( network.nil? )
 
-            bytesIn   = network.dig('bytesIn')
-            bytesOut  = network.dig('bytesOut')
-            requests  = network.dig('numRequests')
+            bytes_in   = network.dig('bytesIn')
+            bytes_out  = network.dig('bytesOut')
+            requests   = network.dig('numRequests')
 
-            bytesIn   = bytesIn.dig('$numberLong')    # RX - Receive TO this server
-            bytesOut  = bytesOut.dig('$numberLong')   # TX - Transmit FROM this server
-            requests  = requests.dig('$numberLong')
+            bytes_in   = bytes_in.dig('$numberLong')    # RX - Receive TO this server
+            bytes_out  = bytes_out.dig('$numberLong')   # TX - Transmit FROM this server
+            requests   = requests.dig('$numberLong')
 
             result << {
-              :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, 'network', 'bytes', 'tx' ),
-              :value => bytesOut
+              key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'network', 'bytes', 'tx' ),
+              value: bytes_out
             } << {
-              :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, 'network', 'bytes', 'rx' ),
-              :value => bytesIn
+              key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'network', 'bytes', 'rx' ),
+              value: bytes_in
             } << {
-              :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, 'network', 'requests', 'total' ),
-              :value => requests
+              key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'network', 'requests', 'total' ),
+              value: requests
             }
-
-#             result.push( sprintf( 'PUTVAL %s/%s-%s/%s interval=%s N:%s', @identifier, @Service, 'network', 'bytes-in', @interval, bytesIn ) )
-#             result.push( sprintf( 'PUTVAL %s/%s-%s/%s interval=%s N:%s', @identifier, @Service, 'network', 'bytes-out', @interval, bytesOut ) )
-#             result.push( sprintf( format, @identifier, @Service, 'network', 'total_requests' , @interval, requests ) )
           end
 
-          if( opcounters != nil )
+          unless( opcounters.nil? )
 
             insert  = opcounters.dig('insert')
             query   = opcounters.dig('query')
@@ -120,365 +109,313 @@ module CarbonData
             command = opcounters.dig('command')
 
             result << {
-              :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, 'opcounters', 'insert' ),
-              :value => insert
+              key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, 'opcounters', 'insert' ),
+              value: insert
             } << {
-              :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, 'opcounters', 'query' ),
-              :value => query
+              key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, 'opcounters', 'query' ),
+              value: query
             } << {
-              :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, 'opcounters', 'update' ),
-              :value => update
+              key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, 'opcounters', 'update' ),
+              value: update
             } << {
-              :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, 'opcounters', 'delete' ),
-              :value => delete
+              key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, 'opcounters', 'delete' ),
+              value: delete
             } << {
-              :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, 'opcounters', 'getmore' ),
-              :value => getmore
+              key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, 'opcounters', 'getmore' ),
+              value: getmore
             } << {
-              :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, 'opcounters', 'command' ),
-              :value => command
+              key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, 'opcounters', 'command' ),
+              value: command
             }
-
-#             result.push( sprintf( format, @identifier, @Service, 'opcounters', 'insert'  , @interval, insert ) )
-#             result.push( sprintf( format, @identifier, @Service, 'opcounters', 'query'   , @interval, query ) )
-#             result.push( sprintf( format, @identifier, @Service, 'opcounters', 'update'  , @interval, update ) )
-#             result.push( sprintf( format, @identifier, @Service, 'opcounters', 'delete'  , @interval, delete ) )
-#             result.push( sprintf( format, @identifier, @Service, 'opcounters', 'getmore' , @interval, getmore ) )
-#             result.push( sprintf( format, @identifier, @Service, 'opcounters', 'command' , @interval, command ) )
           end
 
-          if( tcmalloc != nil )
+          unless( tcmalloc.nil? )
 
             generic = tcmalloc.dig('generic')
-            malloc  = tcmalloc.dig('tcmalloc')
 
-            heapSize         = generic.dig('heap_size')
-            heapUsed         = generic.dig('current_allocated_bytes')
-
-            percent   = ( 100 * heapUsed / heapSize )
-
-            # pageMapFree      = tcmalloc['pageheap_free_bytes']              ? tcmalloc['pageheap_free_bytes']              : nil  # Bytes in page heap freelist
-            # centralCacheFree = tcmalloc['central_cache_free_bytes' ]        ? tcmalloc['central_cache_free_bytes' ]        : nil  # Bytes in central cache freelist
-            # transferCacheFee = tcmalloc['transfer_cache_free_bytes']        ? tcmalloc['transfer_cache_free_bytes']        : nil  # Bytes in transfer cache freelist
-            # threadCacheSize  = tcmalloc['current_total_thread_cache_bytes'] ? tcmalloc['current_total_thread_cache_bytes'] : nil  # Bytes in thread cache freelists
-            # threadCacheFree  = tcmalloc['thread_cache_free_bytes']          ? tcmalloc['thread_cache_free_bytes']          : nil  #
-            # maxThreadCache   = tcmalloc['max_total_thread_cache_bytes']     ? tcmalloc['max_total_thread_cache_bytes']     : nil  #
-            # maxThreadCache   = maxThreadCache['$numberLong']                ? maxThreadCache['$numberLong']                : nil  #
+            heap_size  = generic.dig('heap_size')
+            heap_used  = generic.dig('current_allocated_bytes')
+            percent    = ( 100 * heap_used / heap_size )
 
             result << {
-              :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, 'memory', 'heap', 'size' ),
-              :value => heapSize
+              key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'memory', 'heap', 'size' ),
+              value: heap_size
             } << {
-              :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, 'memory', 'heap', 'used' ),
-              :value => heapUsed
+              key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'memory', 'heap', 'used' ),
+              value: heap_used
             } << {
-              :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, 'memory', 'heap', 'used_percent' ),
-              :value => percent
+              key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'memory', 'heap', 'used_percent' ),
+              value: percent
             }
 
-#             result.push( sprintf( format, @identifier, @Service, 'heap_memory', 'size' , @interval, heapSize ) )
-#             result.push( sprintf( format, @identifier, @Service, 'heap_memory', 'used' , @interval, heapUsed ) )
-#             result.push( sprintf( format, @identifier, @Service, 'heap_memory', 'used_percent', @interval, percent ) )
-    #
-            # result.push( sprintf( format, @identifier, @Service, 'cache', 'central_free' , @interval, centralCacheFree ) )
-            # result.push( sprintf( format, @identifier, @Service, 'cache', 'transfer_free', @interval, transferCacheFee ) )
-            # result.push( sprintf( format, @identifier, @Service, 'cache', 'thread_size'  , @interval, maxThreadCache ) )
-            # result.push( sprintf( format, @identifier, @Service, 'cache', 'thread_used'  , @interval, threadCacheSize ) )
-            # result.push( sprintf( format, @identifier, @Service, 'cache', 'thread_free'  , @interval, threadCacheFree ) )
-
+#             malloc  = tcmalloc.dig('tcmalloc')
+#             unless( malloc.nil? )
+#               page_map_free      = malloc.dig('pageheap_free_bytes')              || 0 # Bytes in page heap freelist
+#               central_cache_free = malloc.dig('central_cache_free_bytes')         || 0 # Bytes in central cache freelist
+#               transfer_cache_fee = malloc.dig('transfer_cache_free_bytes')        || 0 # Bytes in transfer cache freelist
+#               thread_cache_size  = malloc.dig('current_total_thread_cache_bytes') || 0 # Bytes in thread cache freelists
+#               thread_cache_free  = malloc.dig('thread_cache_free_bytes')          || 0 #
+#               max_thread_cache   = malloc.dig('max_total_thread_cache_bytes','$numberLong')     || 0 #
+#
+#               result << {
+#                 key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'cache', 'thread', 'size' ),
+#                 value: heap_size
+#               } << {
+#                 key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'cache', 'thread', 'used' ),
+#                 value: heap_used
+#               } << {
+#                 key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'cache', 'thread', 'used_percent' ),
+#                 value: percent
+#               }
+#             end
           end
 
-          if( storageEngine != nil )
+          unless( storage_engine.nil? )
 
-            storageEngine  = storageEngine.dig('name')
+            storage_engine  = storage_engine.dig('name')
 
-            if( storageEngine != nil )
+            unless( storage_engine.nil? )
 
-              storage = value.dig( storageEngine )
+              storage = value.dig( storage_engine )
 
-              if( storage != nil )
+              unless( storage.nil? )
 
-                blockManager = storage.dig('block-manager')
-                connection   = storage.dig('connection')
+                block_manager = storage.dig('block-manager')
+                connection    = storage.dig('connection')
 
-                storageBytesRead           = blockManager.dig('bytes read')
-                storageBytesWritten        = blockManager.dig('bytes written')
-                storageBlocksRead          = blockManager.dig('blocks read')
-                storageBlocksWritten       = blockManager.dig('blocks written')
-
-                storageConnectionIORead    = connection.dig('total read I/Os')
-                storageConnectionIOWrite   = connection.dig('total write I/Os')
-                storageConnectionFilesOpen = connection.dig('files currently open')
+                storage_bytes_read            = block_manager.dig('bytes read')
+                storage_bytes_written         = block_manager.dig('bytes written')
+                storage_blocks_read           = block_manager.dig('blocks read')
+                storage_blocks_written        = block_manager.dig('blocks written')
+                storage_connection_io_read    = connection.dig('total read I/Os')
+                storage_connection_io_write   = connection.dig('total write I/Os')
+                storage_connection_files_open = connection.dig('files currently open')
 
                 result << {
-                  :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, 'storage-engine', storageEngine, 'block-manager', 'bytes', 'rx' ),
-                  :value => storageBytesRead
+                  key: format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'storage-engine', storage_engine, 'block-manager', 'bytes', 'rx' ),
+                  value: storage_bytes_read
                 } << {
-                  :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, 'storage-engine', storageEngine, 'block-manager', 'bytes', 'tx' ),
-                  :value => storageBytesWritten
+                  key: format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'storage-engine', storage_engine, 'block-manager', 'bytes', 'tx' ),
+                  value: storage_bytes_written
                 } << {
-                  :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, 'storage-engine', storageEngine, 'block-manager', 'blocks', 'rx' ),
-                  :value => storageBlocksRead
+                  key: format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'storage-engine', storage_engine, 'block-manager', 'blocks', 'rx' ),
+                  value: storage_blocks_read
                 } << {
-                  :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, 'storage-engine', storageEngine, 'block-manager', 'blocks', 'tx' ),
-                  :value => storageBlocksWritten
+                  key: format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'storage-engine', storage_engine, 'block-manager', 'blocks', 'tx' ),
+                  value: storage_blocks_written
                 } << {
-                  :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s.%s', @identifier, @Service, 'storage-engine', storageEngine, 'connection', 'io', 'read', 'total' ),
-                  :value => storageConnectionIORead
+                  key: format( '%s.%s.%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'storage-engine', storage_engine, 'connection', 'io', 'read', 'total' ),
+                  value: storage_connection_io_read
                 } << {
-                  :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s.%s', @identifier, @Service, 'storage-engine', storageEngine, 'connection', 'io', 'write', 'total' ),
-                  :value => storageConnectionIOWrite
+                  key: format( '%s.%s.%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'storage-engine', storage_engine, 'connection', 'io', 'write', 'total' ),
+                  value: storage_connection_io_write
                 } << {
-                  :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, 'storage-engine', storageEngine, 'connection', 'files', 'open' ),
-                  :value => storageConnectionFilesOpen
+                  key: format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'storage-engine', storage_engine, 'connection', 'files', 'open' ),
+                  value: storage_connection_files_open
                 }
-
-#                 result.push( sprintf( 'PUTVAL %s/%s-%s/%s interval=%s N:%s', @identifier, @Service, 'bytes', 'bytes-read', @interval , storageBytesRead ) )
-#                 result.push( sprintf( 'PUTVAL %s/%s-%s/%s interval=%s N:%s', @identifier, @Service, 'bytes', 'bytes-write', @interval, storageBytesWritten ) )
-#                 result.push( sprintf( format, @identifier, @Service, 'blocks', 'read'  , @interval, storageBlocksRead ) )
-#                 result.push( sprintf( format, @identifier, @Service, 'blocks', 'write' , @interval, storageBlocksWritten ) )
-#
-#                 result.push( sprintf( 'PUTVAL %s/%s-%s/%s interval=%s N:%s', @identifier, @Service, 'io', 'count-read', @interval , storageConnectionIORead ) )
-#                 result.push( sprintf( 'PUTVAL %s/%s-%s/%s interval=%s N:%s', @identifier, @Service, 'io', 'count-write', @interval, storageConnectionIOWrite ) )
-#
-#                 result.push( sprintf( format, @identifier, @Service, 'files', 'open', @interval, storageConnectionFilesOpen ) )
               end
             end
           end
 
-          if( metrics != nil )
+          unless( metrics.nil? )
 
             commands = metrics.dig('commands')
 
-            if( commands != nil )
+            unless( commands.nil? )
 
               ['authenticate','buildInfo','createIndexes','delete','drop','find','findAndModify','insert','listCollections','mapReduce','renameCollection','update'].each do |m|
 
                 cmd = commands.dig( m )
 
-                if( cmd != nil )
-    #              d = cmd['total']['$numberLong'] ? cmd['total']['$numberLong']  : nil
+                unless( cmd.nil? )
                   d  = cmd.dig( 'total', '$numberLong' )
 
                   result << {
-                    :key   => sprintf( '%s.%s.%s.%s'   , @identifier, @Service, 'commands', m ),
-                    :value => d
+                    key: format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'commands', m ),
+                    value: d
                   }
-
-#                   result.push( sprintf( format, @identifier, @Service, 'commands', m , @interval, d ) )
                 end
               end
 
 
-              currentOp = commands.dig('currentOp')
+              current_operation = commands.dig('currentOp')
 
-              if (currentOp != nil)
+              unless(current_operation.nil?)
 
-                total  = currentOp.dig('total' , '$numberLong')
-                failed = currentOp.dig('failed', '$numberLong')
+                total  = current_operation.dig('total' , '$numberLong')
+                failed = current_operation.dig('failed', '$numberLong')
 
                 result << {
-                  :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, 'commands', 'currentOp', 'total' ),
-                  :value => total
+                  key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'commands', 'currentOp', 'total' ),
+                  value: total
                 } << {
-                  :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, 'commands', 'currentOp', 'failed' ),
-                  :value => failed
+                  key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'commands', 'currentOp', 'failed' ),
+                  value: failed
                 }
-
-#                 result.push( sprintf( format, @identifier, @Service, 'currentOp', 'total',  @interval, total ) )
-#                 result.push( sprintf( format, @identifier, @Service, 'currentOp', 'failed', @interval, failed ) )
               end
 
             end
 
             cursor = metrics.dig('cursor')
 
-            if( cursor != nil )
+            unless( cursor.nil? )
 
-              cursorOpen     = cursor.dig('open')
-              cursorTimedOut = cursor.dig('timedOut')
+              cursor_open      = cursor.dig('open')
+              cursor_timed_out = cursor.dig('timedOut')
 
-              if( cursorOpen != nil && cursorTimedOut != nil )
+              unless( cursor_open.nil? && cursor_timed_out.nil? )
 
-                openNoTimeout = cursorOpen.dig( 'noTimeout', '$numberLong' )
-                openTotal     = cursorOpen.dig( 'total'    , '$numberLong' )
-                timedOut      = cursorTimedOut.dig( '$numberLong' )
+                open_no_timeout = cursor_open.dig( 'noTimeout', '$numberLong' )
+                open_total     = cursor_open.dig( 'total'    , '$numberLong' )
+                timed_out      = cursor_timed_out.dig( '$numberLong' )
 
                 result << {
-                  :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, 'cursor', 'open', 'total' ),
-                  :value => openTotal
+                  key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'cursor', 'open', 'total' ),
+                  value: open_total
                 } << {
-                  :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, 'cursor', 'open', 'no-timeout' ),
-                  :value => openNoTimeout
+                  key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'cursor', 'open', 'no-timeout' ),
+                  value: open_no_timeout
                 } << {
-                  :key   => sprintf( '%s.%s.%s.%s'   , @identifier, @Service, 'cursor', 'timed-out' ),
-                  :value => timedOut
+                  key: format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'cursor', 'timed-out' ),
+                  value: timed_out
                 }
-
-#                 result.push( sprintf( format, @identifier, @Service, 'cursor', 'open-total',      @interval, openTotal ) )
-#                 result.push( sprintf( format, @identifier, @Service, 'cursor', 'open-no-timeout', @interval, openNoTimeout ) )
-#                 result.push( sprintf( format, @identifier, @Service, 'cursor', 'timed-out',       @interval, timedOut ) )
               end
 
             end
 
           end
 
-          if( mem != nil )
+          unless( mem.nil? )
 
             virtual        = mem.dig('virtual')
             resident       = mem.dig('resident')
 
             result << {
-              :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, 'memory', 'virtual' ),
-              :value => virtual
+              key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, 'memory', 'virtual' ),
+              value: virtual
             } << {
-              :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, 'memory', 'resident' ),
-              :value => resident
+              key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, 'memory', 'resident' ),
+              value: resident
             }
-
-#             result.push( sprintf( format, @identifier, @Service, 'mem', 'virtual'    , @interval, virtual ) )
-#             result.push( sprintf( format, @identifier, @Service, 'mem', 'resident'   , @interval, resident ) )
           end
 
-          if( extraInfo != nil )
+          unless( extra_info.nil? )
 
-            pageFaults        = extraInfo.dig('page_faults')
+            page_faults        = extra_info.dig('page_faults')
 
             result << {
-              :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, 'extraInfo', 'pageFaults' ),
-              :value => pageFaults
+              key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, 'extra_info', 'page_faults' ),
+              value: page_faults
             }
-
-#             result.push( sprintf( format, @identifier, @Service, 'extraInfo', 'pageFaults' , @interval, pageFaults ) )
           end
 
-          if( wiredTiger != nil )
+          unless( wired_tiger.nil? )
 
-            wiredTigerCache        = wiredTiger.dig('cache')
-            concurrentTransactions = wiredTiger.dig('concurrentTransactions')
+            wired_tiger_cache       = wired_tiger.dig('cache')
+            concurrent_transactions = wired_tiger.dig('concurrentTransactions')
 
-            if( wiredTigerCache != nil )
+            unless( wired_tiger_cache.nil? )
 
-              bytes         = wiredTigerCache.dig('bytes currently in the cache')
-              maximum       = wiredTigerCache.dig('maximum bytes configured')
-              tracked       = wiredTigerCache.dig('tracked dirty bytes in the cache')
-              unmodified    = wiredTigerCache.dig('unmodified pages evicted')
-              modified      = wiredTigerCache.dig('modified pages evicted')
+              bytes         = wired_tiger_cache.dig('bytes currently in the cache')
+              maximum       = wired_tiger_cache.dig('maximum bytes configured')
+              tracked       = wired_tiger_cache.dig('tracked dirty bytes in the cache')
+              unmodified    = wired_tiger_cache.dig('unmodified pages evicted')
+              modified      = wired_tiger_cache.dig('modified pages evicted')
 
               result << {
-                :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, 'wiredTiger', 'cache', 'in-cache', 'bytes' ),
-                :value => bytes
+                key: format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'wiredTiger', 'cache', 'in-cache', 'bytes' ),
+                value: bytes
               } << {
-                :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, 'wiredTiger', 'cache', 'in-cache', 'tracked-dirty' ),
-                :value => tracked
+                key: format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'wiredTiger', 'cache', 'in-cache', 'tracked-dirty' ),
+                value: tracked
               } << {
-                :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, 'wiredTiger', 'cache', 'configured', 'max-bytes' ),
-                :value => maximum
+                key: format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'wiredTiger', 'cache', 'configured', 'max-bytes' ),
+                value: maximum
               } << {
-                :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, 'wiredTiger', 'cache', 'evicted-pages', 'modified' ),
-                :value => modified
+                key: format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'wiredTiger', 'cache', 'evicted-pages', 'modified' ),
+                value: modified
               } << {
-                :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, 'wiredTiger', 'cache', 'evicted-pages', 'unmodified' ),
-                :value => unmodified
+                key: format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'wiredTiger', 'cache', 'evicted-pages', 'unmodified' ),
+                value: unmodified
               }
-
-#               result.push( sprintf( format, @identifier, @Service, 'wiredTigerCache', 'bytes'      , @interval, bytes ) )
-#               result.push( sprintf( format, @identifier, @Service, 'wiredTigerCache', 'maximum'    , @interval, maximum ) )
-#               result.push( sprintf( format, @identifier, @Service, 'wiredTigerCache', 'tracked'    , @interval, tracked ) )
-#               result.push( sprintf( format, @identifier, @Service, 'wiredTigerCache', 'unmodified' , @interval, unmodified ) )
-#               result.push( sprintf( format, @identifier, @Service, 'wiredTigerCache', 'modified'   , @interval, modified ) )
             end
 
-            if( concurrentTransactions != nil )
+            unless( concurrent_transactions.nil? )
 
-              read        = concurrentTransactions.dig('read')
-              write       = concurrentTransactions.dig('write')
+              read        = concurrent_transactions.dig('read')
+              write       = concurrent_transactions.dig('write')
 
-              if( read != nil && write != nil )
+              unless( read.nil? && write.nil? )
 
-                readOut          = read.dig('out')
-                readAvailable    = read.dig('available')
+                read_out          = read.dig('out')
+                read_available    = read.dig('available')
 
-                writeOut         = write.dig('out')
-                writeAvailable   = write.dig('available')
+                write_out         = write.dig('out')
+                write_available   = write.dig('available')
 
                 result << {
-                  :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, 'wiredTiger', 'concurrentTransactions', 'read', 'out' ),
-                  :value => readOut
+                  key: format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'wiredTiger', 'concurrentTransactions', 'read', 'out' ),
+                  value: read_out
                 } << {
-                  :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, 'wiredTiger', 'concurrentTransactions', 'read', 'available' ),
-                  :value => readAvailable
+                  key: format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'wiredTiger', 'concurrentTransactions', 'read', 'available' ),
+                  value: read_available
                 } << {
-                  :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, 'wiredTiger', 'concurrentTransactions', 'write', 'out' ),
-                  :value => writeOut
+                  key: format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'wiredTiger', 'concurrentTransactions', 'write', 'out' ),
+                  value: write_out
                 } << {
-                  :key   => sprintf( '%s.%s.%s.%s.%s.%s', @identifier, @Service, 'wiredTiger', 'concurrentTransactions', 'write', 'available' ),
-                  :value => writeAvailable
+                  key: format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'wiredTiger', 'concurrentTransactions', 'write', 'available' ),
+                  value: write_available
                 }
-
-#                 result.push( sprintf( format, @identifier, @Service, 'wiredTigerConcTrans', 'readOut'          , @interval, readOut ) )
-#                 result.push( sprintf( format, @identifier, @Service, 'wiredTigerConcTrans', 'readAvailable'    , @interval, readAvailable ) )
-#                 result.push( sprintf( format, @identifier, @Service, 'wiredTigerConcTrans', 'writeOut'         , @interval, writeOut ) )
-#                 result.push( sprintf( format, @identifier, @Service, 'wiredTigerConcTrans', 'writeAvailable'   , @interval, writeAvailable ) )
               end
 
             end
           end
 
-          if( globalLock != nil )
+          unless( global_lock.nil? )
 
-            currentQueue  = globalLock.dig('currentQueue')
-            activeClients = globalLock.dig('activeClients')
+            current_queue  = global_lock.dig('currentQueue')
+            active_clients = global_lock.dig('activeClients')
 
-            if( currentQueue != nil )
+            unless( current_queue.nil? )
 
-              readers       = currentQueue.dig('readers')
-              writers       = currentQueue.dig('writers')
-              total         = currentQueue.dig('total')
+              readers       = current_queue.dig('readers')
+              writers       = current_queue.dig('writers')
+              total         = current_queue.dig('total')
 
               result << {
-                :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, 'globalLock', 'currentQueue', 'readers' ),
-                :value => readers
+                key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'globalLock', 'currentQueue', 'readers' ),
+                value: readers
               } << {
-                :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, 'globalLock', 'currentQueue', 'writers' ),
-                :value => writers
+                key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'globalLock', 'currentQueue', 'writers' ),
+                value: writers
               } << {
-                :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, 'globalLock', 'currentQueue', 'total' ),
-                :value => total
+                key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'globalLock', 'currentQueue', 'total' ),
+                value: total
               }
-
-#               result.push( sprintf( format, @identifier, @Service, 'globalLockCurrentQueue', 'readers'    , @interval, readers ) )
-#               result.push( sprintf( format, @identifier, @Service, 'globalLockCurrentQueue', 'writers'    , @interval, writers ) )
-#               result.push( sprintf( format, @identifier, @Service, 'globalLockCurrentQueue', 'total'      , @interval, total ) )
             end
 
-            if( activeClients != nil )
+            unless( active_clients.nil? )
 
-              readers     = activeClients.dig('readers')
-              writers     = activeClients.dig('writers')
-              total       = activeClients.dig('total')
+              readers     = active_clients.dig('readers')
+              writers     = active_clients.dig('writers')
+              total       = active_clients.dig('total')
 
               result << {
-                :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, 'globalLock', 'activeClients', 'readers' ),
-                :value => readers
+                key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'globalLock', 'activeClients', 'readers' ),
+                value: readers
               } << {
-                :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, 'globalLock', 'activeClients', 'writers' ),
-                :value => writers
+                key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'globalLock', 'activeClients', 'writers' ),
+                value: writers
               } << {
-                :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, 'globalLock', 'activeClients', 'total' ),
-                :value => total
+                key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'globalLock', 'activeClients', 'total' ),
+                value: total
               }
-
-#               result.push( sprintf( format, @identifier, @Service, 'globalLockActiveClients', 'readers'    , @interval, readers ) )
-#               result.push( sprintf( format, @identifier, @Service, 'globalLockActiveClients', 'writers'    , @interval, writers ) )
-#               result.push( sprintf( format, @identifier, @Service, 'globalLockActiveClients', 'total'      , @interval, total ) )
             end
           end
 
-          return result
-
         end
+
+        result
       end
 
     end

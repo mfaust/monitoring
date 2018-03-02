@@ -74,7 +74,6 @@ module MessageQueue
 
         logger.debug( response )
       end
-
     end
 
 

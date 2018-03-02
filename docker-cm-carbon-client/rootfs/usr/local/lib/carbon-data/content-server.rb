@@ -4,49 +4,47 @@ module CarbonData
   module ContentServer
 
 
-    def contentServerQueryPool( data = {} )
+    def contentserver_query_pool( data = {} )
 
       result    = []
       mbean     = 'QueryPool'
       value     = data.dig('value')
 
       # defaults
-      executorsRunning = 0
-      executorsIdle    = 0
-      queriesMax       = 0
-      queriesWaiting   = 0
+      executors_running = 0
+      executors_idle    = 0
+      queries_max       = 0
+      queries_waiting   = 0
 
       if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil )
 
         value = value.values.first
 
-        executorsRunning = value.dig('RunningExecutors')
-        executorsIdle    = value.dig('IdleExecutors')
-        queriesMax       = value.dig('MaxQueries')
-        queriesWaiting   = value.dig('WaitingQueries')
-
+        executors_running = value.dig('RunningExecutors')
+        executors_idle    = value.dig('IdleExecutors')
+        queries_max       = value.dig('MaxQueries')
+        queries_waiting   = value.dig('WaitingQueries')
       end
 
       result << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'executors', 'running' ),
-        :value => executorsRunning
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'executors', 'running' ),
+        value: executors_running
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'executors', 'idle' ),
-        :value => executorsIdle
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'executors', 'idle' ),
+        value: executors_idle
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'queries', 'max' ),
-        :value => queriesMax
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'queries', 'max' ),
+        value: queries_max
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'queries', 'waiting' ),
-        :value => queriesWaiting
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'queries', 'waiting' ),
+        value: queries_waiting
       }
 
-      return result
-
+      result
     end
 
 
-    def contentServerConnectionPool( data = {} )
+    def contentserver_connection_pool( data = {} )
 
       result    = []
       mbean     = 'ConnectionPool'
@@ -68,240 +66,121 @@ module CarbonData
         idle   = value.dig('IdleConnections')
         busy   = value.dig('BusyConnections')
         min    = value.dig('MinConnections')
-
       end
 
       result << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'connections', 'open' ),
-        :value => open
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'connections', 'open' ),
+        value: open
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'connections', 'max' ),
-        :value => max
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'connections', 'max' ),
+        value: max
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'connections', 'idle' ),
-        :value => idle
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'connections', 'idle' ),
+        value: idle
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'connections', 'busy' ),
-        :value => busy
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'connections', 'busy' ),
+        value: busy
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'connections', 'min' ),
-        :value => min
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'connections', 'min' ),
+        value: min
       }
 
-      return result
-
+      result
     end
 
 
-    def contentServerServer( data = {} )
+    def contentserver_server( data = {} )
 
       result    = []
       mbean     = 'Server'
       value     = data.dig('value')
 
       # defaults
-      cacheHits             = 0
-      cacheEvicts           = 0
-      cacheEntries          = 0
-      cacheInterval         = 0
-      cacheSize             = 0
-      reqSeqNumber          = nil
-      connectionCount       = 0
-      runlevel              = nil
-      uptime                = nil
-      serviceInfos          = nil
-      licenseValidFrom      = nil
-      licenseValidUntilSoft = nil
-      licenseValidUntilHard = nil
+      cache_hits                 = 0
+      cache_evicts               = 0
+      cache_entries              = 0
+      cache_interval             = 0
+      cache_size                 = 0
+      repository_sequence_number = nil
+      connection_count           = 0
+      #
+      #  0: offline
+      #  1: online
+      # 11: administration
+      runlevel                   = 0
+      #
+      # 0: stopped
+      # 1: starting
+      # 2: initializing
+      # 3: running
+      # 4: failed
+      runlevel_numeric           = 0
+      uptime                     = nil
+      service_infos              = nil
+      license_valid_from         = nil
+      license_valid_until_soft   = nil
+      license_valid_until_hard   = nil
 
       # RLS Specific
-      connectionUp          = false
-      controllerState       = nil
-      incomingCount         = 0
-      enabled               = false
-      pipelineUp            = false
-      uncompletedCount      = 0
-      completedCount        = 0
-
-
-      def replicatorData()
-
-        result                  = []
-        completedSequenceNumber = 0
-
-        replicatorData = @mbean.bean( @Server, @serviceName, 'Replicator' )
-
-        if( replicatorData == false )
-
-          logger.error( sprintf( 'No mbean \'Replicator\' for Service %s found!', @serviceName ) )
-
-          return completedSequenceNumber, result
-
-        else
-
-          replicatorStatus = replicatorData.dig('status') || 505
-          replicatorValue  = replicatorData.dig('value')
-
-          if( replicatorStatus == 200 && replicatorValue != nil )
-
-            replicatorValue         = replicatorValue.values.first
-
-            connectionUp            = replicatorValue.dig('ConnectionUp')                  || false
-            controllerState         = replicatorValue.dig('ControllerState')
-            completedSequenceNumber = replicatorValue.dig('LatestCompletedSequenceNumber') || 0
-            enabled                 = replicatorValue.dig('Enabled')                       || false
-            pipelineUp              = replicatorValue.dig('PipelineUp')                    || false
-            uncompletedCount        = replicatorValue.dig('UncompletedCount')              || 0
-            completedCount          = replicatorValue.dig('CompletedCount')                || 0
-
-            controllerState.downcase!
-
-            result << {
-              :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, 'Replicator', 'completedSequenceNumber' ),
-              :value => completedSequenceNumber
-            } << {
-              :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, 'Replicator', 'uncompleted' ),
-              :value => uncompletedCount
-            } << {
-              :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, 'Replicator', 'completed' ),
-              :value => completedCount
-            }
-          end
-
-          return completedSequenceNumber, result
-        end
-      end
-
-
-      def mlsSequenceNumber( rlsSequenceNumber )
-
-#         logger.debug( "mlsSequenceNumber( #{rlsSequenceNumber} )" )
-
-        result            = []
-        mlsSequenceNumber = 0
-
-#         logger.debug( @identifier )
-#         logger.debug( @serviceName )
-
-        replicatorData = @mbean.bean( @Server, @serviceName, 'Replicator' )
-
-        if( replicatorData == false )
-
-          logger.error( sprintf( 'No mbean \'Replicator\' for Service %s found!', @serviceName ) )
-          logger.debug( "#{@Server}, #{@serviceName}, 'Replicator'" )
-
-          [mlsSequenceNumber, result]
-        else
-
-          replicatorStatus = replicatorData.dig('status') || 505
-          replicatorValue  = replicatorData.dig('value')
-
-          if( replicatorStatus == 200 && replicatorValue != nil )
-
-            replicatorValue   = replicatorValue.values.first
-
-            logger.debug( "replicatorValue : #{replicatorValue}" )
-
-            masterLiveServer  = replicatorValue.dig('MasterLiveServer','host')
-
-            logger.debug( "masterLiveServer: #{masterLiveServer}" )
-
-            if( masterLiveServer.nil? )
-              masterLiveServer = @Server
-            end
-
-            # {:host=>"blueprint-box", :pre=>"result", :service=>"master-live-server"}
-            repositoryData    = @mbean.bean( masterLiveServer, 'master-live-server', 'Server' )
-
-            if( repositoryData == false )
-
-              logger.error( 'No mbean \'Server\' for Service \'master-live-server\' found!' )
-              logger.debug( "#{masterLiveServer}, 'master-live-server', 'Server'" )
-
-              [mlsSequenceNumber, result]
-            else
-
-              repositoryStatus = repositoryData.dig('status') || 505
-              repositoryValue  = repositoryData.dig('value')
-
-              if( repositoryStatus == 200 && repositoryValue != nil )
-
-                repositoryValue         = repositoryValue.values.first
-
-#                 logger.debug( repositoryValue )
-
-                mlsSequenceNumber  = repositoryValue.dig('RepositorySequenceNumber')
-
-                diffSequenceNumber = mlsSequenceNumber.to_i - rlsSequenceNumber.to_i
-
-                result << {
-                  :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, 'SequenceNumber', 'diffToMLS' ),
-                  :value => diffSequenceNumber
-                }
-
-              end
-
-              [mlsSequenceNumber, result]
-            end
-          end
-        end
-      end
-
+      connection_up              = false
+      controller_state           = nil
+      incoming_count             = 0
+      enabled                    = false
+      pipeline_up                = false
+      uncompleted_count          = 0
+      completed_count            = 0
 
       if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil )
 
         value = value.values.first
 
         # identical Data from MLS & RLS
-        cacheHits             = value.dig('ResourceCacheHits')
-        cacheEvicts           = value.dig('ResourceCacheEvicts')
-        cacheEntries          = value.dig('ResourceCacheEntries')
-        cacheInterval         = value.dig('ResourceCacheInterval')
-        cacheSize             = value.dig('ResourceCacheSize')
-        reqSeqNumber          = value.dig('RepositorySequenceNumber')
-        connectionCount       = value.dig('ConnectionCount')
-        runlevel              = value.dig('RunLevel')
-        uptime                = value.dig('Uptime')
-        serviceInfos          = value.dig('ServiceInfos')
-        licenseValidFrom      = value.dig('LicenseValidFrom')
-        licenseValidUntilSoft = value.dig('LicenseValidUntilSoft')
-        licenseValidUntilHard = value.dig('LicenseValidUntilHard')
+        cache_hits                 = value.dig('ResourceCacheHits')
+        cache_evicts               = value.dig('ResourceCacheEvicts')
+        cache_entries              = value.dig('ResourceCacheEntries')
+        cache_interval             = value.dig('ResourceCacheInterval')
+        cache_size                 = value.dig('ResourceCacheSize')
+        repository_sequence_number = value.dig('RepositorySequenceNumber')
+        connection_count           = value.dig('ConnectionCount')
+        runlevel                   = value.dig('RunLevel')
+        runlevel_numeric           = value.dig('RunLevelNumeric')
+        uptime                     = value.dig('Uptime')
+        service_infos              = value.dig('ServiceInfos')
+        license_valid_from         = value.dig('LicenseValidFrom')
+        license_valid_until_soft   = value.dig('LicenseValidUntilSoft')
+        license_valid_until_hard   = value.dig('LicenseValidUntilHard')
 
         # Data from RLS
-        if( @Service == 'RLS' )
+        if( @normalized_service_name == 'RLS' )
 
-          incomingCount, replicatorResult = replicatorData()
+          incoming_count, replicator_result = replicator_data()
 
-          if( replicatorResult != nil && replicatorResult.count != 0 )
-            result << replicatorResult
-          end
+          result << replicator_result if( replicator_result != nil && replicator_result.count != 0 )
 
-          mlsSequenceNumber, mlsSequenceResult = mlsSequenceNumber( incomingCount )
+          mls_sequence_number, mls_sequence_result = mls_sequence_number( incoming_count )
 
-          if( mlsSequenceResult != nil && mlsSequenceResult.count != 0 )
-            result << mlsSequenceResult
-          end
+          result << mls_sequence_result if( mls_sequence_result != nil && mls_sequence_result.count != 0 )
         end
 
         # in maintenance mode the Server mbean is not available
-        case runlevel.downcase
+        runlevel = case runlevel.downcase
           when 'offline'
-            runlevel = 0
+            0
           when 'online'
-            runlevel = 1
+            1
           when 'administration'
-            runlevel = 11
-        else
-          runlevel = 0
+            11
+          else
+            0
         end
 
-        if( serviceInfos != nil )
+        if( service_infos != nil )
 
-          format = 'PUTVAL %s/%s-%s-%s-%s/count-%s interval=%s N:%s'
+#           format = 'PUTVAL %s/%s-%s-%s-%s/count-%s interval=%s N:%s'
 
-          serviceInfos.each do |s,v|
+          service_infos.each do |s,v|
 
-            enabled = v['enabled'] ? v['enabled'] : false
+            enabled = v.dig('enabled') || false # ] ? v['enabled'] : false
 
             if( enabled == true )
 
@@ -313,128 +192,83 @@ module CarbonData
               concurrentDiff = concurrentMax - concurrent
 
               result << {
-                :key   => sprintf( '%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'ServiceInfo', s, 'named' ),
-                :value => named
+                key: format( '%s.%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'ServiceInfo', s, 'named' ),
+                value: named
               } << {
-                :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'ServiceInfo', s, 'named', 'max' ),
-                :value => namedMax
+                key: format( '%s.%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'ServiceInfo', s, 'named', 'max' ),
+                value: namedMax
               } << {
-                :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'ServiceInfo', s, 'named', 'diff' ),
-                :value => namedDiff
+                key: format( '%s.%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'ServiceInfo', s, 'named', 'diff' ),
+                value: namedDiff
               } << {
-                :key   => sprintf( '%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'ServiceInfo', s, 'concurrent' ),
-                :value => concurrent
+                key: format( '%s.%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'ServiceInfo', s, 'concurrent' ),
+                value: concurrent
               } << {
-                :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'ServiceInfo', s, 'concurrent', 'max' ),
-                :value => concurrentMax
+                key: format( '%s.%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'ServiceInfo', s, 'concurrent', 'max' ),
+                value: concurrentMax
               } << {
-                :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'ServiceInfo', s, 'concurrent', 'diff' ),
-                :value => concurrentDiff
+                key: format( '%s.%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'ServiceInfo', s, 'concurrent', 'diff' ),
+                value: concurrentDiff
               }
-
             end
           end
         end
 
-        if( licenseValidFrom != nil || licenseValidUntilSoft != nil || licenseValidUntilHard != nil )
+        if( license_valid_from != nil || license_valid_until_soft != nil || license_valid_until_hard != nil )
 
           t      = Date.parse( Time.now().to_s )
           today  = Time.new( t.year, t.month, t.day )
 
-          if( licenseValidFrom != nil )
-
+          unless( license_valid_from.nil? )
             result << {
-              :key   => sprintf( '%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'license', 'from', 'raw' ),
-              :value => licenseValidFrom / 1000
+              key: format( '%s.%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'license', 'from', 'raw' ),
+              value: license_valid_from / 1000
             }
-
           end
 
-
-          if( licenseValidUntilSoft != nil )
-
-            x                   = timeParser( today, Time.at( licenseValidUntilSoft / 1000 ) )
-            validUntilSoftMonth = x.dig(:months)
-            validUntilSoftWeek  = x.dig(:weeks)
-            validUntilSoftDays  = x.dig(:days)
-
-            result << {
-              :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'license', 'until', 'soft', 'raw' ),
-              :value => licenseValidUntilSoft / 1000
-            } << {
-              :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'license', 'until', 'soft', 'month' ),
-              :value => validUntilSoftMonth
-            }  << {
-              :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'license', 'until', 'soft', 'weeks' ),
-              :value => validUntilSoftWeek
-            }  << {
-              :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'license', 'until', 'soft', 'days' ),
-              :value => validUntilSoftDays
-            }
-
-          end
-
-          if( licenseValidUntilHard != nil )
-
-            x                   = timeParser( today, Time.at( licenseValidUntilHard / 1000 ) )
-            validUntilHardMonth = x.dig(:months)
-            validUntilHardWeek  = x.dig(:weeks)
-            validUntilHardDays  = x.dig(:days)
-
-            result << {
-              :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'license', 'until', 'hard', 'raw' ),
-              :value => licenseValidUntilHard / 1000
-            } << {
-              :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'license', 'until', 'hard', 'month' ),
-              :value => validUntilHardMonth
-            }  << {
-              :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'license', 'until', 'hard', 'weeks' ),
-              :value => validUntilHardWeek
-            }  << {
-              :key   => sprintf( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'license', 'until', 'hard', 'days' ),
-              :value => validUntilHardDays
-            }
-
-          end
+          result << license_valid( license_valid_until_soft, mbean, 'soft' ) unless( license_valid_until_soft.nil? )
+          result << license_valid( license_valid_until_hard, mbean, 'hard' ) unless( license_valid_until_hard.nil? )
         end
 
       end
 
       result << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'ResourceCache', 'hits' ),
-        :value => cacheHits
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'ResourceCache', 'hits' ),
+        value: cache_hits
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'ResourceCache', 'evicts' ),
-        :value => cacheEvicts
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'ResourceCache', 'evicts' ),
+        value: cache_evicts
       }  << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'ResourceCache', 'entries' ),
-        :value => cacheEntries
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'ResourceCache', 'entries' ),
+        value: cache_entries
       }  << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'ResourceCache', 'interval' ),
-        :value => cacheInterval
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'ResourceCache', 'interval' ),
+        value: cache_interval
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'ResourceCache', 'size' ),
-        :value => cacheSize
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'ResourceCache', 'size' ),
+        value: cache_size
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'Repository', 'SequenceNumber' ),
-        :value => reqSeqNumber
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'Repository', 'SequenceNumber' ),
+        value: repository_sequence_number
       }  << {
-        :key   => sprintf( '%s.%s.%s.%s'   , @identifier, @Service, mbean, 'connection' ),
-        :value => connectionCount
+        key: format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'connection' ),
+        value: connection_count
       }  << {
-        :key   => sprintf( '%s.%s.%s.%s'   , @identifier, @Service, mbean, 'uptime' ),
-        :value => uptime
+        key: format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'uptime' ),
+        value: uptime
       }  << {
-        :key   => sprintf( '%s.%s.%s.%s'   , @identifier, @Service, mbean, 'runlevel' ),
-        :value => runlevel
+        key: format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'runlevel' ),
+        value: runlevel
+      }  << {
+        key: format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'runlevel_numeric' ),
+        value: runlevel_numeric
       }
 
-      return result
-
+      result
     end
 
 
-    def contentServerStatisticsJobResult( data = {} )
+    def contentserver_statistics_job_result( data = {} )
 
       result    = []
       mbean     = 'StatisticsJobResult'
@@ -452,26 +286,24 @@ module CarbonData
         failed        = value.dig('Failed')
         successful    = value.dig('Successful')
         unrecoverable = value.dig('Unrecoverable')
-
       end
 
       result << {
-        :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, mbean, 'failed' ),
-        :value => failed
+        key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'failed' ),
+        value: failed
       } << {
-        :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, mbean, 'successful' ),
-        :value => successful
+        key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'successful' ),
+        value: successful
       } << {
-        :key   => sprintf( '%s.%s.%s.%s', @identifier, @Service, mbean, 'unrecoverable' ),
-        :value => unrecoverable
+        key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'unrecoverable' ),
+        value: unrecoverable
       }
 
-      return result
-
+      result
     end
 
 
-    def contentServerStatisticsResourceCache( data = {} )
+    def contentserver_statistics_resource_cache( data = {} )
 
       result    = []
       mbean     = 'StatisticsResourceCache'
@@ -493,32 +325,30 @@ module CarbonData
         faults   = value.dig('CacheFaults')
         misses   = value.dig('CacheMisses')
         hits     = value.dig('CacheHits')
-
       end
 
       result << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'cache', 'size' ),
-        :value => size
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'cache', 'size' ),
+        value: size
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'cache', 'removed' ),
-        :value => removed
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'cache', 'removed' ),
+        value: removed
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'cache', 'faults' ),
-        :value => faults
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'cache', 'faults' ),
+        value: faults
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'cache', 'misses' ),
-        :value => misses
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'cache', 'misses' ),
+        value: misses
       } << {
-        :key   => sprintf( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'cache', 'hits' ),
-        :value => hits
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'cache', 'hits' ),
+        value: hits
       }
 
-      return result
-
+      result
     end
 
 
-    def contentServerStatisticsBlobStoreMethods( data = {} )
+    def contentserver_statistics_blob_store_methods( data = {} )
 
       # was für komische
       # müssen wir klären
@@ -526,7 +356,7 @@ module CarbonData
     end
 
 
-    def contentServerStatisticsResource( data = {} )
+    def contentserver_statistics_resource( data = {} )
 
       # was für komische
       # müssen wir klären
@@ -534,7 +364,7 @@ module CarbonData
     end
 
 
-    def contentServerStatisticsTextStoreMethods( data = {} )
+    def contentserver_statistics_text_store_methods( data = {} )
 
       # was für komische
       # müssen wir klären
@@ -542,7 +372,7 @@ module CarbonData
     end
 
 
-    def contentServerStatisticsPublisherMethods( data = {} )
+    def contentserver_statistics_publisher_methods( data = {} )
 
       # was für komische
       # müssen wir klären
@@ -550,10 +380,152 @@ module CarbonData
     end
 
 
-    def contentServerStatisticsBlobStoreMethods( data = {} )
+    def contentserver_statistics_blob_store_methods( data = {} )
 
       # was für komische Werte kommen da aus JMX raus?
       # müssen wir klären
+
+    end
+
+
+    private
+    def replicator_data()
+
+      result                  = []
+      completed_sequence_number = 0
+
+      replicator_data = @mbean.bean( @Server, @service_name, 'Replicator' )
+
+      if( replicator_data == false )
+
+        logger.error( format( 'No mbean \'Replicator\' for Service %s found!', @service_name ) )
+
+        [completed_sequence_number, result]
+      else
+
+        replicator_status = replicator_data.dig('status') || 505
+        replicator_value  = replicator_data.dig('value')
+
+        if( replicator_status == 200 && replicator_value != nil )
+
+          replicator_value           = replicator_value.values.first
+
+          connection_up             = replicator_value.dig('ConnectionUp')                  || false # why and what?
+          controller_state          = replicator_value.dig('ControllerState')                        #  why and what?
+          completed_sequence_number = replicator_value.dig('LatestCompletedSequenceNumber') || 0
+          enabled                   = replicator_value.dig('Enabled')                       || false
+          pipeline_up               = replicator_value.dig('PipelineUp')                    || false #  why and what?
+          uncompleted_count         = replicator_value.dig('UncompletedCount')              || 0
+          completed_count           = replicator_value.dig('CompletedCount')                || 0
+
+          # TODO
+          #  why and what?
+          controller_state.downcase!
+
+          result << {
+            key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, 'Replicator', 'completed_sequence_number' ),
+            value: completed_sequence_number
+          } << {
+            key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, 'Replicator', 'uncompleted' ),
+            value: uncompleted_count
+          } << {
+            key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, 'Replicator', 'completed' ),
+            value: completed_count
+          }
+        end
+
+        [completed_sequence_number, result]
+      end
+    end
+
+
+    def mls_sequence_number( rlsSequenceNumber )
+
+      result            = []
+      mls_sequence_number = 0
+
+      replicator_data = @mbean.bean( @Server, @service_name, 'Replicator' )
+
+      if( replicator_data == false )
+        logger.error( format( 'No mbean \'Replicator\' for Service %s found!', @service_name ) )
+        logger.debug( "#{@Server}, #{@service_name}, 'Replicator'" )
+#        return [mls_sequence_number, result]
+      else
+
+        replicator_status = replicator_data.dig('status') || 505
+        replicator_value  = replicator_data.dig('value')
+
+        if( replicator_status == 200 && replicator_value != nil )
+
+          replicator_value   = replicator_value.values.first
+
+#           logger.debug( "replicator_value : #{replicator_value}" )
+
+          master_live_server  = replicator_value.dig('MasterLiveServer','host')
+
+#           logger.debug( "master_live_server: #{master_live_server}" )
+
+          master_live_server = @Server if( master_live_server.nil? )
+
+          repository_data    = @mbean.bean( master_live_server, 'master-live-server', 'Server' )
+
+          if( repository_data == false )
+            logger.error( 'No mbean \'Server\' for Service \'master-live-server\' found!' )
+#             logger.debug( "#{master_live_server}, 'master-live-server', 'Server'" )
+#             return [mls_sequence_number, result]
+          else
+
+            repository_status = repository_data.dig('status') || 505
+            repository_value  = repository_data.dig('value')
+
+            if( repository_status == 200 && repository_value != nil )
+
+              repository_value = repository_value.values.first
+#               logger.debug( repository_value )
+              mls_sequence_number  = repository_value.dig('RepositorySequenceNumber')
+
+              diff_sequence_number = mls_sequence_number.to_i - rlsSequenceNumber.to_i
+
+              result << {
+                key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, 'SequenceNumber', 'diffToMLS' ),
+                value: diff_sequence_number
+              }
+            end
+#             [mls_sequence_number, result]
+          end
+        end
+      end
+
+      [mls_sequence_number, result]
+    end
+
+
+    #
+    #
+    def license_valid( license_valid_until, mbean, type )
+
+      result = []
+      t      = Date.parse( Time.now().to_s )
+      today  = Time.new( t.year, t.month, t.day )
+
+      x = time_parser( today, Time.at( license_valid_until / 1000 ) )
+      month = x.dig(:months)
+      week  = x.dig(:weeks)
+      days  = x.dig(:days)
+
+      result << {
+        key: format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'license', 'until', type, 'raw' ),
+        value: license_valid_until / 1000
+      } << {
+        key: format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'license', 'until', type, 'month' ),
+        value: month
+      }  << {
+        key: format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'license', 'until', type, 'weeks' ),
+        value: week
+      }  << {
+        key: format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'license', 'until', type, 'days' ),
+        value: days
+      }
 
     end
 

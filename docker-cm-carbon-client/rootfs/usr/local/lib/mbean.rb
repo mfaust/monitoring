@@ -3,7 +3,7 @@
 #
 
 require_relative 'monkey'
-require_relative 'storage'
+require 'storage'
 
 module MBean
 
@@ -31,7 +31,7 @@ module MBean
       data = {}
 
       logger.debug( { :host => host, :pre => 'result', :service => service } )
-      cacheKey = Storage::RedisClient.cacheKey( { :host => host, :pre => 'result', :service => service } )
+      cacheKey = Storage::RedisClient.cache_key( { :host => host, :pre => 'result', :service => service } )
 
       begin
         result = @redis.get( cacheKey )
@@ -141,14 +141,14 @@ module MBean
       data     = nil
 
       logger.debug( { :host => host, :pre => 'result', :service => service } )
-      cacheKey = Storage::RedisClient.cacheKey( { :host => host, :pre => 'result', :service => service } )
+      cacheKey = Storage::RedisClient.cache_key( { :host => host, :pre => 'result', :service => service } )
 
       (1..15).each { |x|
 
         redis_data = @redis.get( cacheKey )
 
         if( redis_data.nil? )
-          logger.debug(sprintf('wait for discovery data for node \'%s\' ... %d', host, x))
+          logger.debug(format('wait for discovery data for node \'%s\' ... %d', host, x))
           sleep(3)
         else
           data = { service => redis_data }
@@ -213,9 +213,9 @@ module MBean
 
         if( difference > quorum + 1 )
 
-          logger.debug( sprintf( ' now       : %s', n.to_datetime.strftime("%d %m %Y %H:%M:%S") ) )
-          logger.debug( sprintf( ' timestamp : %s', t.to_datetime.strftime("%d %m %Y %H:%M:%S") ) )
-          logger.debug( sprintf( ' difference: %d', difference ) )
+          logger.debug( format( ' now       : %s', n.to_datetime.strftime("%d %m %Y %H:%M:%S") ) )
+          logger.debug( format( ' timestamp : %s', t.to_datetime.strftime("%d %m %Y %H:%M:%S") ) )
+          logger.debug( format( ' difference: %d', difference ) )
 
           result = true
         end
@@ -241,7 +241,7 @@ module MBean
 
       return true if( status.to_i == 200 )
 
-      logger.debug( sprintf( '  status: %d: %s (Host: \'%s\' :: mbean: \'%s\')', status, timestamp, host, mbean ) )
+      logger.debug( format( '  status: %d: %s (Host: \'%s\' :: mbean: \'%s\')', status, timestamp, host, mbean ) )
       return false if( self.beanTimeout?( timestamp ) )
 
       true
