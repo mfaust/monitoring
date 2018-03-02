@@ -3,7 +3,7 @@ module CarbonData
 
   module Tomcat
 
-    def tomcatRuntime( data = {} )
+    def tomcat_runtime( data = {} )
 
       result    = []
       mbean     = 'Runtime'
@@ -19,10 +19,10 @@ module CarbonData
       end
 
       result << {
-        :key   => format( '%s.%s.%s.%s', @identifier, @Service, mbean, 'uptime' ),
+        :key   => format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'uptime' ),
         :value => uptime
       } << {
-        :key   => format( '%s.%s.%s.%s', @identifier, @Service, mbean, 'starttime' ),
+        :key   => format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'starttime' ),
         :value => start
       }
 
@@ -30,145 +30,93 @@ module CarbonData
     end
 
 
-    def tomcatOperatingSystem( data = {} )
-
-      result    = []
-      mbean     = 'OperatingSystem'
-      value     = data.dig('value')
-
-      # defaults
-      physicalMemorySizeTotal    = 0
-      physicalMemorySizeFree     = 0
-      virtualMemorySizeCommitted = 0
-      swapSpaceSizeTotal         = 0
-      swapSpaceSizeFree          = 0
-      systemLoadAverage          = 0
-      systemCpuLoad              = 0
-      fileDescriptorCountMax     = 0
-      fileDescriptorCountOpen    = 0
-      vvailableProcessors        = 0
-
-      if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil )
-
-        logger.debug( JSON.pretty_generate( value ) )
-
-  #       value = value.values.first
-      end
-
-      return result
-
-  #             "value" : {
-  #                "TotalPhysicalMemorySize" : 10317664256,
-  #                "SystemLoadAverage" : 9.23,
-  #                "Arch" : "amd64",
-  #                "ProcessCpuLoad" : 0.00165745856353591,
-  #                "MaxFileDescriptorCount" : 4096,
-  #                "AvailableProcessors" : 2,
-  #                "OpenFileDescriptorCount" : 82,
-  #                "FreePhysicalMemorySize" : 138825728,
-  #                "TotalSwapSpaceSize" : 0,
-  #                "ObjectName" : {
-  #                   "objectName" : "java.lang:type=OperatingSystem"
-  #                },
-  #                "CommittedVirtualMemorySize" : 3045675008,
-  #                "Name" : "Linux",
-  #                "Version" : "3.10.0-327.22.2.el7.x86_64",
-  #                "ProcessCpuTime" : 277100000000,
-  #                "SystemCpuLoad" : 0.986195472114854,
-  #                "FreeSwapSpaceSize" : 0
-  #             },
-    end
-
-
-    def  tomcatManager( data = {} )
+    def tomcat_manager( data = {} )
 
       result    = []
       mbean     = 'Manager'
       value     = data.dig('value')
       status    = data.dig('status') || 404
 
-      if( status == 404 )
-        # solr 6 has no tomcat and also no manager mbean
-        logger.debug( "status 404 for service #{@Service} and bean #{mbean}" )
-        return
-      end
+      # solr 6 has no tomcat and also no manager mbean
+      # logger.debug( "status 404 for service #{@normalized_service_name} and bean #{mbean}" )
+      return if( status == 404 )
 
       # defaults
-      processingTime          = 0       # Time spent doing housekeeping and expiration
-      duplicates              = 0       # Number of duplicated session ids generated
-      maxActiveSessions       = 0       # The maximum number of active Sessions allowed, or -1 for no limit
-      sessionMaxAliveTime     = 0       # Longest time an expired session had been alive
-      maxInactiveInterval     = 3600    # The default maximum inactive interval for Sessions created by this Manager
-      sessionExpireRate       = 0       # Session expiration rate in sessions per minute
-      sessionAverageAliveTime = 0       # Average time an expired session had been alive
-      rejectedSessions        = 0       # Number of sessions we rejected due to maxActive beeing reached
-      processExpiresFrequency = 0       # The frequency of the manager checks (expiration and passivation)
-      activeSessions          = 0       # Number of active sessions at this moment
-      sessionCreateRate       = 0       # Session creation rate in sessions per minute
-      expiredSessions         = 0       # Number of sessions that expired ( doesn't include explicit invalidations )
-      sessionCounter          = 0       # Total number of sessions created by this manager
-      maxActive               = 0       # Maximum number of active sessions so far
+      processing_time            = 0       # Time spent doing housekeeping and expiration
+      duplicates                 = 0       # Number of duplicated session ids generated
+      max_active_sessions        = 0       # The maximum number of active Sessions allowed, or -1 for no limit
+      session_max_alive_time     = 0       # Longest time an expired session had been alive
+      max_inactive_interval      = 3600    # The default maximum inactive interval for Sessions created by this Manager
+      session_expire_rate        = 0       # Session expiration rate in sessions per minute
+      session_average_alive_time = 0       # Average time an expired session had been alive
+      rejected_sessions          = 0       # Number of sessions we rejected due to maxActive beeing reached
+      process_expires_frequency  = 0       # The frequency of the manager checks (expiration and passivation)
+      active_sessions            = 0       # Number of active sessions at this moment
+      session_create_rate        = 0       # Session creation rate in sessions per minute
+      expired_sessions           = 0       # Number of sessions that expired ( doesn't include explicit invalidations )
+      session_counter            = 0       # Total number of sessions created by this manager
+      max_active                 = 0       # Maximum number of active sessions so far
 
       if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil )
 
         value = value.values.first
 
-        duplicates              = value.dig('duplicates')
-        maxActiveSessions       = value.dig('maxActiveSessions')
-        sessionMaxAliveTime     = value.dig('sessionMaxAliveTime')
-        processingTime          = value.dig('processingTime')
-        maxInactiveInterval     = value.dig('maxInactiveInterval')
-        sessionExpireRate       = value.dig('sessionExpireRate')
-        sessionAverageAliveTime = value.dig('sessionAverageAliveTime')
-        rejectedSessions        = value.dig('rejectedSessions')
-        processExpiresFrequency = value.dig('processExpiresFrequency')
-        activeSessions          = value.dig('activeSessions')
-        sessionCreateRate       = value.dig('sessionCreateRate')
-        expiredSessions         = value.dig('expiredSessions')
-        sessionCounter          = value.dig('sessionCounter')
-        maxActive               = value.dig('maxActive')
+        processing_time            = value.dig('processingTime')
+        duplicates                 = value.dig('duplicates')
+        max_active_sessions        = value.dig('maxActiveSessions')
+        session_max_alive_time     = value.dig('sessionMaxAliveTime')
+        max_inactive_interval      = value.dig('maxInactiveInterval')
+        session_expire_rate        = value.dig('sessionExpireRate')
+        session_average_alive_time = value.dig('sessionAverageAliveTime')
+        rejected_sessions          = value.dig('rejectedSessions')
+        process_expires_frequency  = value.dig('processExpiresFrequency')
+        active_sessions            = value.dig('activeSessions')
+        session_create_rate        = value.dig('sessionCreateRate')
+        expired_sessions           = value.dig('expiredSessions')
+        session_counter            = value.dig('sessionCounter')
+        max_active                 = value.dig('maxActive')
       end
 
       result << {
         # PUTVAL master-17-tomcat/WFS-Manager-processing/count-time interval=15 N:4
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'processing', 'time' ),
-        :value => processingTime
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'processing', 'time' ),
+        :value => processing_time
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'sessions', 'count' ),
-        :value => sessionCounter
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'sessions', 'count' ),
+        :value => session_counter
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'sessions', 'expired' ),
-        :value => expiredSessions
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'sessions', 'expired' ),
+        :value => expired_sessions
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'sessions', 'alive_avg' ),
-        :value => sessionAverageAliveTime
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'sessions', 'alive_avg' ),
+        :value => session_average_alive_time
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'sessions', 'rejected' ),
-        :value => rejectedSessions
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'sessions', 'rejected' ),
+        :value => rejected_sessions
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'sessions', 'duplicates' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'sessions', 'duplicates' ),
         :value => duplicates
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'sessions', 'max_alive' ),
-        :value => sessionMaxAliveTime
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'sessions', 'max_alive' ),
+        :value => session_max_alive_time
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'sessions', 'expire_rate' ),
-        :value => sessionExpireRate
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'sessions', 'expire_rate' ),
+        :value => session_expire_rate
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'sessions', 'create_rate' ),
-        :value => sessionCreateRate
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'sessions', 'create_rate' ),
+        :value => session_create_rate
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'sessions', 'max_active' ),
-        :value => maxActive
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'sessions', 'max_active' ),
+        :value => max_active
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'sessions', 'expire_freq' ),
-        :value => processExpiresFrequency
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'sessions', 'expire_freq' ),
+        :value => process_expires_frequency
       }
 
-      if( maxActiveSessions.to_i != -1 )
+      if( max_active_sessions.to_i != -1 )
         result << {
-          :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'sessions', 'max_active_allowed' ),
-          :value => maxActiveSessions
+          :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'sessions', 'max_active_allowed' ),
+          :value => max_active_sessions
         }
       end
 
@@ -176,13 +124,13 @@ module CarbonData
     end
 
 
-    def tomcatMemoryUsage( data = {} )
+    def tomcat_memory_usage( data = {} )
 
       result    = []
       mbean     = 'Memory'
       value     = data.dig('value')
 
-      memoryTypes = ['HeapMemoryUsage', 'NonHeapMemoryUsage']
+      memory_types = ['HeapMemoryUsage', 'NonHeapMemoryUsage']
 
       # defaults
       init      = 0
@@ -191,22 +139,9 @@ module CarbonData
       committed = 0
       percent   = 0
 
-
-      def memType( m )
-
-        type = case m
-        when 'HeapMemoryUsage'
-          'heap_memory'
-        else
-          'perm_memory'
-        end
-
-        type
-      end
-
       if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil )
 
-        memoryTypes.each do |m|
+        memory_types.each do |m|
 
           init      = value.dig( m, 'init' )
           max       = value.dig( m, 'max' )
@@ -215,22 +150,27 @@ module CarbonData
 
           percent   = ( 100 * used / committed )
 
-          type      = memType( m )
+          type      = case m
+            when 'HeapMemoryUsage'
+              'heap_memory'
+            else
+              'perm_memory'
+            end
 
           result << {
-            :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, type, 'init' ),
+            :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, type, 'init' ),
             :value => init
           } << {
-            :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, type, 'max' ),
+            :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, type, 'max' ),
             :value => max
           } << {
-            :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, type, 'used' ),
+            :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, type, 'used' ),
             :value => used
           } << {
-            :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, type, 'used_percent' ),
+            :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, type, 'used_percent' ),
             :value => percent
           } << {
-            :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, type, 'committed' ),
+            :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, type, 'committed' ),
             :value => committed
           }
         end
@@ -240,7 +180,7 @@ module CarbonData
     end
 
 
-    def tomcatThreading( data = {} )
+    def tomcat_threading( data = {} )
 
       result    = []
       mbean     = 'Threading'
@@ -251,16 +191,15 @@ module CarbonData
       count  = 0
 
       if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil )
-
         peak   = value.dig('PeakThreadCount')
         count  = value.dig('ThreadCount')
       end
 
       result << {
-        :key   => format( '%s.%s.%s.%s'   , @identifier, @Service, mbean, 'peak' ),
+        :key   => format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'peak' ),
         :value => peak
       } << {
-        :key   => format( '%s.%s.%s.%s'   , @identifier, @Service, mbean, 'count' ),
+        :key   => format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'count' ),
         :value => count
       }
 
@@ -268,27 +207,79 @@ module CarbonData
     end
 
 
-    def tomcatGCMemoryUsage( mbean, data )
+    def tomcat_gc_parnew( data = {} )
+
+      tomcat_gc_memory_usage( 'GCParNew', data )
+    end
+
+
+    def tomcat_gc_concurrentmarksweep( data = {} )
+
+      tomcat_gc_memory_usage( 'GCConcurrentMarkSweep', data )
+    end
+
+
+    def tomcat_class_loading( data = {} )
+
+      result    = []
+      mbean     = 'ClassLoading'
+      value     = data.dig('value')
+
+      # defaults
+      loaded       = 0
+      total_loaded = 0
+      unloaded     = 0
+
+      if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil )
+        loaded       = value.dig('LoadedClassCount')
+        total_loaded = value.dig('TotalLoadedClassCount')
+        unloaded     = value.dig('UnloadedClassCount')
+      end
+
+      result << {
+        :key   => format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'loaded' ),
+        :value => loaded
+      } << {
+        :key   => format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'total' ),
+        :value => total_loaded
+      } << {
+        :key   => format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'unloaded' ),
+        :value => unloaded
+      }
+
+      result
+    end
+
+
+    def tomcat_thread_pool( data = {} )
+
+      # was für komische
+      # müssen wir klären
+    end
+
+
+    private
+    def tomcat_gc_memory_usage( mbean, data )
 
       value     = data.dig('value')
       result    = []
 
       if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil )
 
-        lastGcInfo = value.dig('LastGcInfo')
+        last_gc_info = value.dig('LastGcInfo')
 
-        if( lastGcInfo != nil )
+        if( last_gc_info != nil )
 
-          threadCount   = lastGcInfo.dig('GcThreadCount')   # The number of GC threads.
-          duration      = lastGcInfo.dig('duration')        # The elapsed time of this GC. (milliseconds)
+          thread_count  = last_gc_info.dig('GcThreadCount')   # The number of GC threads.
+          duration      = last_gc_info.dig('duration')        # The elapsed time of this GC. (milliseconds)
 
           mbean.gsub!( 'GC', 'GarbageCollector.' )
 
           result << {
-            :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'threads', 'count' ),
-            :value => threadCount
+            :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'threads', 'count' ),
+            :value => thread_count
           } << {
-            :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'duration', 'time' ),
+            :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'duration', 'time' ),
             :value => duration
           }
 
@@ -309,28 +300,28 @@ module CarbonData
 #
 #            ['Par Survivor Space', 'CMS Perm Gen', 'Code Cache', 'Par Eden Space', 'CMS Old Gen', 'Compressed Class Space', 'Metaspace' ].each do |type|
 #
-#              lastGcInfoType = lastGcInfo.dig( gc, type )
+#              last_gc_infoType = last_gc_info.dig( gc, type )
 #
-#              if( lastGcInfoType != nil )
+#              if( last_gc_infoType != nil )
 #
-#                init      = lastGcInfoType.dig( 'init' )
-#                committed = lastGcInfoType.dig( 'committed' )
-#                max       = lastGcInfoType.dig( 'max' )
-#                used      = lastGcInfoType.dig( 'used' )
+#                init      = last_gc_infoType.dig( 'init' )
+#                committed = last_gc_infoType.dig( 'committed' )
+#                max       = last_gc_infoType.dig( 'max' )
+#                used      = last_gc_infoType.dig( 'used' )
 #
 #                type      = type.strip.tr( ' ', '_' ).downcase
 #
 #                result << {
-#                  :key   => format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'duration', gcType, type, 'init' ),
+#                  :key   => format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'duration', gcType, type, 'init' ),
 #                  :value => init
 #                } << {
-#                  :key   => format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'duration', gcType, type, 'committed' ),
+#                  :key   => format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'duration', gcType, type, 'committed' ),
 #                  :value => committed
 #                } << {
-#                  :key   => format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'duration', gcType, type, 'max' ),
+#                  :key   => format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'duration', gcType, type, 'max' ),
 #                  :value => max
 #                } << {
-#                  :key   => format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'duration', gcType, type, 'used' ),
+#                  :key   => format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'duration', gcType, type, 'used' ),
 #                  :value => used
 #                }
 #
@@ -345,55 +336,6 @@ module CarbonData
     end
 
 
-    def tomcatGCParNew( data = {} )
 
-      tomcatGCMemoryUsage( 'GCParNew', data )
-    end
-
-
-    def tomcatGCConcurrentMarkSweep( data = {} )
-
-      tomcatGCMemoryUsage( 'GCConcurrentMarkSweep', data )
-    end
-
-
-    def tomcatClassLoading( data = {} )
-
-      result    = []
-      mbean     = 'ClassLoading'
-      value     = data.dig('value')
-
-      # defaults
-      loaded      = 0
-      totalLoaded = 0
-      unloaded    = 0
-
-      if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil )
-
-        loaded      = value.dig('LoadedClassCount')
-        totalLoaded = value.dig('TotalLoadedClassCount')
-        unloaded    = value.dig('UnloadedClassCount')
-      end
-
-      result << {
-        :key   => format( '%s.%s.%s.%s'   , @identifier, @Service, mbean, 'loaded' ),
-        :value => loaded
-      } << {
-        :key   => format( '%s.%s.%s.%s'   , @identifier, @Service, mbean, 'total' ),
-        :value => totalLoaded
-      } << {
-        :key   => format( '%s.%s.%s.%s'   , @identifier, @Service, mbean, 'unloaded' ),
-        :value => unloaded
-      }
-
-      result
-    end
-
-
-    def tomcatThreadPool( data = {} )
-
-      # was für komische
-      # müssen wir klären
-    end
   end
 end

@@ -24,7 +24,7 @@ module CarbonData
       end
 
       result << {
-        :key   => format( '%s.%s.%s.%s', @identifier, @Service, mbean, 'healthy' ),
+        :key   => format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'healthy' ),
         :value => healthy
       }
 
@@ -66,28 +66,28 @@ module CarbonData
       end
 
       result << {
-        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'feeder', 'entries', 'max' ),
+        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'feeder', 'entries', 'max' ),
         :value => maxEntries
       } << {
-        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'feeder', 'entries', 'current' ),
+        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'feeder', 'entries', 'current' ),
         :value => currentEntries
       } << {
-        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'feeder', 'entries', 'diff' ),
+        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'feeder', 'entries', 'diff' ),
         :value => diffEntries
       } << {
-        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'feeder', 'invalidations' ),
+        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'feeder', 'invalidations' ),
         :value => invalidations
       } << {
-        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'feeder', 'heartbeat' ),
+        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'feeder', 'heartbeat' ),
         :value => heartbeat
       } << {
-        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'queue', 'capacity' ),
+        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'queue', 'capacity' ),
         :value => queueCapacity
       } << {
-        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'queue', 'max_waiting' ),
+        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'queue', 'max_waiting' ),
         :value => queueMaxSize
       } << {
-        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'queue', 'waiting' ),
+        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'queue', 'waiting' ),
         :value => queueSize
       }
 
@@ -118,16 +118,16 @@ module CarbonData
       end
 
       result << {
-        :key   => format( '%s.%s.%s.%s'   , @identifier, @Service, mbean, 'pending_events' ),
+        :key   => format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'pending_events' ),
         :value => pendingEvents
       } << {
-        :key   => format( '%s.%s.%s.%s'   , @identifier, @Service, mbean, 'index_documents' ),
+        :key   => format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'index_documents' ),
         :value => indexDocuments
       } << {
-        :key   => format( '%s.%s.%s.%s'   , @identifier, @Service, mbean, 'index_content_documents' ),
+        :key   => format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'index_content_documents' ),
         :value => indexContentDocuments
       } << {
-        :key   => format( '%s.%s.%s.%s'   , @identifier, @Service, mbean, 'current_pending_documents' ),
+        :key   => format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'current_pending_documents' ),
         :value => currentPendingDocuments
       }
 
@@ -178,46 +178,46 @@ module CarbonData
       end
 
       result << {
-        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'cache', 'size' ),
+        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'cache', 'size' ),
         :value => cacheSize
       } << {
-        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'cache', 'level' ),
+        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'cache', 'level' ),
         :value => cacheLevel
       } << {
-        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'cache', 'initial_level' ),
+        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'cache', 'initial_level' ),
         :value => cacheInitialLevel
       } << {
-        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'cache', 'new_gen', 'size' ),
+        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'cache', 'new_gen', 'size' ),
         :value => newGenCacheSize
       } << {
-        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'cache', 'new_gen', 'level' ),
+        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'cache', 'new_gen', 'level' ),
         :value => newGenCacheLevel
       } << {
-        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'cache', 'new_gen', 'initial_level' ),
+        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'cache', 'new_gen', 'initial_level' ),
         :value => newGenCacheInitialLevel
       } << {
-        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'cache', 'old_gen', 'size' ),
+        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'cache', 'old_gen', 'size' ),
         :value => oldGenCacheLevel
       } << {
-        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'cache', 'old_gen', 'initial_level' ),
+        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'cache', 'old_gen', 'initial_level' ),
         :value => oldGenCacheInitialLevel
       } << {
-        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'fault', 'count' ),
+        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'fault', 'count' ),
         :value => fault
       } << {
-        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'fault', 'size' ),
+        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'fault', 'size' ),
         :value => faultSize
       } << {
-        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'recall', 'count' ),
+        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'recall', 'count' ),
         :value => recall
       } << {
-        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'recall', 'size' ),
+        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'recall', 'size' ),
         :value => recallSize
       } << {
-        :key   => format( '%s.%s.%s.%s'      , @identifier, @Service, mbean, 'rotate' ),
+        :key   => format( '%s.%s.%s.%s'      , @identifier, @normalized_service_name, mbean, 'rotate' ),
         :value => rotate
       } << {
-        :key   => format( '%s.%s.%s.%s'      , @identifier, @Service, mbean, 'access' ),
+        :key   => format( '%s.%s.%s.%s'      , @identifier, @normalized_service_name, mbean, 'access' ),
         :value => access
       }
 

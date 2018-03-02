@@ -32,25 +32,25 @@ module CarbonData
       end
 
       result << {
-        :key   => format( '%s.%s.%s.%s', @identifier, @Service, mbean, 'lookups' ),
+        :key   => format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'lookups' ),
         :value => lookups
       } << {
-        :key   => format( '%s.%s.%s.%s', @identifier, @Service, mbean, 'computed' ),
+        :key   => format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'computed' ),
         :value => computed
       } << {
-        :key   => format( '%s.%s.%s.%s', @identifier, @Service, mbean, 'cached' ),
+        :key   => format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'cached' ),
         :value => cached
       } << {
-        :key   => format( '%s.%s.%s.%s', @identifier, @Service, mbean, 'invalidated' ),
+        :key   => format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'invalidated' ),
         :value => invalidated
       } << {
-        :key   => format( '%s.%s.%s.%s', @identifier, @Service, mbean, 'evicted' ),
+        :key   => format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'evicted' ),
         :value => evicted
       } << {
-        :key   => format( '%s.%s.%s.%s', @identifier, @Service, mbean, 'activeTime' ),
+        :key   => format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'activeTime' ),
         :value => activeTime
       } << {
-        :key   => format( '%s.%s.%s.%s', @identifier, @Service, mbean, 'totalTime' ),
+        :key   => format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'totalTime' ),
         :value => totalTime
       }
 
@@ -76,7 +76,7 @@ module CarbonData
 
       cacheClass  = key.gsub( mbean, '' )
 
-      data['service'] = @Service
+      data['service'] = @normalized_service_name
 
       # defaults
       capacity  = 0
@@ -102,25 +102,25 @@ module CarbonData
       end
 
       result << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, cacheClass, 'evaluated' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, cacheClass, 'evaluated' ),
         :value => evaluated
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, cacheClass, 'evicted' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, cacheClass, 'evicted' ),
         :value => evicted
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, cacheClass, 'inserted' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, cacheClass, 'inserted' ),
         :value => inserted
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, cacheClass, 'removed' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, cacheClass, 'removed' ),
         :value => removed
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, cacheClass, 'level' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, cacheClass, 'level' ),
         :value => level
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, cacheClass, 'capacity' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, cacheClass, 'capacity' ),
         :value => capacity
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, cacheClass, 'missRate' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, cacheClass, 'missRate' ),
         :value => missRate
       }
 

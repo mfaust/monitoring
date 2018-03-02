@@ -5,7 +5,7 @@ module CarbonData
 
     # return all known and active (online) server for monitoring
     #
-    def monitoredServer()
+    def monitored_server()
 
       @database.nodes( status: [ Storage::MySQL::ONLINE ] )
     end
@@ -20,38 +20,41 @@ module CarbonData
     end
 
 
-    def normalizeService( service )
+    def normalize_service( s )
 
       # normalize service names for grafana
-      case service
+      service = case s
         when 'content-management-server'
-          service = 'CMS'
+          'CMS'
         when 'master-live-server'
-          service = 'MLS'
+          'MLS'
         when 'replication-live-server'
-          service = 'RLS'
+          'RLS'
         when 'workflow-server'
-          service = 'WFS'
+          'WFS'
         when /^cae-live/
-          service = 'CAE_LIVE'
+          'CAE_LIVE'
         when /^cae-preview/
-          service = 'CAE_PREV'
+          'CAE_PREV'
         when 'solr-master'
-          service = 'SOLR_MASTER'
+          'SOLR_MASTER'
         when 'content-feeder'
-          service = 'FEEDER_CONTENT'
+          'FEEDER_CONTENT'
         when 'caefeeder-live'
-          service = 'FEEDER_LIVE'
+          'FEEDER_LIVE'
         when 'caefeeder-preview'
-          service = 'FEEDER_PREV'
+          'FEEDER_PREV'
         when 'node-exporter'
-          service = 'NODE_EXPORTER'
+          'NODE_EXPORTER'
         when 'http-status'
-          service = 'HTTP_STATUS'
+          'HTTP_STATUS'
+        else
+          s
       end
 
       service.tr('-', '_').upcase
     end
+
 
     def timeParser( start_time, end_time )
 

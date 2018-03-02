@@ -27,7 +27,7 @@ module CarbonData
           globalLock     = value.dig('globalLock')
 
           result << {
-            :key   => format( '%s.%s.%s', @identifier, @Service, 'uptime' ),
+            :key   => format( '%s.%s.%s', @identifier, @normalized_service_name, 'uptime' ),
             :value => uptime
           }
 
@@ -40,19 +40,19 @@ module CarbonData
             rollovers = asserts.dig('rollovers')
 
             result << {
-              :key   => format( '%s.%s.%s.%s', @identifier, @Service, 'asserts', 'regular' ),
+              :key   => format( '%s.%s.%s.%s', @identifier, @normalized_service_name, 'asserts', 'regular' ),
               :value => regular
             } << {
-              :key   => format( '%s.%s.%s.%s', @identifier, @Service, 'asserts', 'warning' ),
+              :key   => format( '%s.%s.%s.%s', @identifier, @normalized_service_name, 'asserts', 'warning' ),
               :value => warning
             } << {
-              :key   => format( '%s.%s.%s.%s', @identifier, @Service, 'asserts', 'message' ),
+              :key   => format( '%s.%s.%s.%s', @identifier, @normalized_service_name, 'asserts', 'message' ),
               :value => message
             } << {
-              :key   => format( '%s.%s.%s.%s', @identifier, @Service, 'asserts', 'user' ),
+              :key   => format( '%s.%s.%s.%s', @identifier, @normalized_service_name, 'asserts', 'user' ),
               :value => user
             } << {
-              :key   => format( '%s.%s.%s.%s', @identifier, @Service, 'asserts', 'rollovers' ),
+              :key   => format( '%s.%s.%s.%s', @identifier, @normalized_service_name, 'asserts', 'rollovers' ),
               :value => rollovers
             }
 
@@ -69,19 +69,19 @@ module CarbonData
             end
 
             result << {
-              :key   => format( '%s.%s.%s.%s'   , @identifier, @Service, 'connections', 'current' ),
+              :key   => format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'connections', 'current' ),
               :value => current
             } << {
-              :key   => format( '%s.%s.%s.%s'   , @identifier, @Service, 'connections', 'available' ),
+              :key   => format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'connections', 'available' ),
               :value => available
             } << {
-              :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, 'connections', 'created', 'total' ),
+              :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'connections', 'created', 'total' ),
               :value => totalCreated
             }
 
-#             result.push( format( format, @identifier, @Service, 'connections', 'current'     , @interval, current ) )
-#             result.push( format( format, @identifier, @Service, 'connections', 'available'   , @interval, available ) )
-#             result.push( format( format, @identifier, @Service, 'connections', 'totalCreated', @interval, totalCreated ) )
+#             result.push( format( format, @identifier, @normalized_service_name, 'connections', 'current'     , @interval, current ) )
+#             result.push( format( format, @identifier, @normalized_service_name, 'connections', 'available'   , @interval, available ) )
+#             result.push( format( format, @identifier, @normalized_service_name, 'connections', 'totalCreated', @interval, totalCreated ) )
           end
 
           if( network != nil )
@@ -95,19 +95,19 @@ module CarbonData
             requests  = requests.dig('$numberLong')
 
             result << {
-              :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, 'network', 'bytes', 'tx' ),
+              :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'network', 'bytes', 'tx' ),
               :value => bytesOut
             } << {
-              :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, 'network', 'bytes', 'rx' ),
+              :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'network', 'bytes', 'rx' ),
               :value => bytesIn
             } << {
-              :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, 'network', 'requests', 'total' ),
+              :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'network', 'requests', 'total' ),
               :value => requests
             }
 
-#             result.push( format( 'PUTVAL %s/%s-%s/%s interval=%s N:%s', @identifier, @Service, 'network', 'bytes-in', @interval, bytesIn ) )
-#             result.push( format( 'PUTVAL %s/%s-%s/%s interval=%s N:%s', @identifier, @Service, 'network', 'bytes-out', @interval, bytesOut ) )
-#             result.push( format( format, @identifier, @Service, 'network', 'total_requests' , @interval, requests ) )
+#             result.push( format( 'PUTVAL %s/%s-%s/%s interval=%s N:%s', @identifier, @normalized_service_name, 'network', 'bytes-in', @interval, bytesIn ) )
+#             result.push( format( 'PUTVAL %s/%s-%s/%s interval=%s N:%s', @identifier, @normalized_service_name, 'network', 'bytes-out', @interval, bytesOut ) )
+#             result.push( format( format, @identifier, @normalized_service_name, 'network', 'total_requests' , @interval, requests ) )
           end
 
           if( opcounters != nil )
@@ -120,31 +120,31 @@ module CarbonData
             command = opcounters.dig('command')
 
             result << {
-              :key   => format( '%s.%s.%s.%s', @identifier, @Service, 'opcounters', 'insert' ),
+              :key   => format( '%s.%s.%s.%s', @identifier, @normalized_service_name, 'opcounters', 'insert' ),
               :value => insert
             } << {
-              :key   => format( '%s.%s.%s.%s', @identifier, @Service, 'opcounters', 'query' ),
+              :key   => format( '%s.%s.%s.%s', @identifier, @normalized_service_name, 'opcounters', 'query' ),
               :value => query
             } << {
-              :key   => format( '%s.%s.%s.%s', @identifier, @Service, 'opcounters', 'update' ),
+              :key   => format( '%s.%s.%s.%s', @identifier, @normalized_service_name, 'opcounters', 'update' ),
               :value => update
             } << {
-              :key   => format( '%s.%s.%s.%s', @identifier, @Service, 'opcounters', 'delete' ),
+              :key   => format( '%s.%s.%s.%s', @identifier, @normalized_service_name, 'opcounters', 'delete' ),
               :value => delete
             } << {
-              :key   => format( '%s.%s.%s.%s', @identifier, @Service, 'opcounters', 'getmore' ),
+              :key   => format( '%s.%s.%s.%s', @identifier, @normalized_service_name, 'opcounters', 'getmore' ),
               :value => getmore
             } << {
-              :key   => format( '%s.%s.%s.%s', @identifier, @Service, 'opcounters', 'command' ),
+              :key   => format( '%s.%s.%s.%s', @identifier, @normalized_service_name, 'opcounters', 'command' ),
               :value => command
             }
 
-#             result.push( format( format, @identifier, @Service, 'opcounters', 'insert'  , @interval, insert ) )
-#             result.push( format( format, @identifier, @Service, 'opcounters', 'query'   , @interval, query ) )
-#             result.push( format( format, @identifier, @Service, 'opcounters', 'update'  , @interval, update ) )
-#             result.push( format( format, @identifier, @Service, 'opcounters', 'delete'  , @interval, delete ) )
-#             result.push( format( format, @identifier, @Service, 'opcounters', 'getmore' , @interval, getmore ) )
-#             result.push( format( format, @identifier, @Service, 'opcounters', 'command' , @interval, command ) )
+#             result.push( format( format, @identifier, @normalized_service_name, 'opcounters', 'insert'  , @interval, insert ) )
+#             result.push( format( format, @identifier, @normalized_service_name, 'opcounters', 'query'   , @interval, query ) )
+#             result.push( format( format, @identifier, @normalized_service_name, 'opcounters', 'update'  , @interval, update ) )
+#             result.push( format( format, @identifier, @normalized_service_name, 'opcounters', 'delete'  , @interval, delete ) )
+#             result.push( format( format, @identifier, @normalized_service_name, 'opcounters', 'getmore' , @interval, getmore ) )
+#             result.push( format( format, @identifier, @normalized_service_name, 'opcounters', 'command' , @interval, command ) )
           end
 
           if( tcmalloc != nil )
@@ -166,25 +166,25 @@ module CarbonData
             # maxThreadCache   = maxThreadCache['$numberLong']                ? maxThreadCache['$numberLong']                : nil  #
 
             result << {
-              :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, 'memory', 'heap', 'size' ),
+              :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'memory', 'heap', 'size' ),
               :value => heapSize
             } << {
-              :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, 'memory', 'heap', 'used' ),
+              :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'memory', 'heap', 'used' ),
               :value => heapUsed
             } << {
-              :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, 'memory', 'heap', 'used_percent' ),
+              :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'memory', 'heap', 'used_percent' ),
               :value => percent
             }
 
-#             result.push( format( format, @identifier, @Service, 'heap_memory', 'size' , @interval, heapSize ) )
-#             result.push( format( format, @identifier, @Service, 'heap_memory', 'used' , @interval, heapUsed ) )
-#             result.push( format( format, @identifier, @Service, 'heap_memory', 'used_percent', @interval, percent ) )
+#             result.push( format( format, @identifier, @normalized_service_name, 'heap_memory', 'size' , @interval, heapSize ) )
+#             result.push( format( format, @identifier, @normalized_service_name, 'heap_memory', 'used' , @interval, heapUsed ) )
+#             result.push( format( format, @identifier, @normalized_service_name, 'heap_memory', 'used_percent', @interval, percent ) )
     #
-            # result.push( format( format, @identifier, @Service, 'cache', 'central_free' , @interval, centralCacheFree ) )
-            # result.push( format( format, @identifier, @Service, 'cache', 'transfer_free', @interval, transferCacheFee ) )
-            # result.push( format( format, @identifier, @Service, 'cache', 'thread_size'  , @interval, maxThreadCache ) )
-            # result.push( format( format, @identifier, @Service, 'cache', 'thread_used'  , @interval, threadCacheSize ) )
-            # result.push( format( format, @identifier, @Service, 'cache', 'thread_free'  , @interval, threadCacheFree ) )
+            # result.push( format( format, @identifier, @normalized_service_name, 'cache', 'central_free' , @interval, centralCacheFree ) )
+            # result.push( format( format, @identifier, @normalized_service_name, 'cache', 'transfer_free', @interval, transferCacheFee ) )
+            # result.push( format( format, @identifier, @normalized_service_name, 'cache', 'thread_size'  , @interval, maxThreadCache ) )
+            # result.push( format( format, @identifier, @normalized_service_name, 'cache', 'thread_used'  , @interval, threadCacheSize ) )
+            # result.push( format( format, @identifier, @normalized_service_name, 'cache', 'thread_free'  , @interval, threadCacheFree ) )
 
           end
 
@@ -211,37 +211,37 @@ module CarbonData
                 storageConnectionFilesOpen = connection.dig('files currently open')
 
                 result << {
-                  :key   => format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, 'storage-engine', storageEngine, 'block-manager', 'bytes', 'rx' ),
+                  :key   => format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'storage-engine', storageEngine, 'block-manager', 'bytes', 'rx' ),
                   :value => storageBytesRead
                 } << {
-                  :key   => format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, 'storage-engine', storageEngine, 'block-manager', 'bytes', 'tx' ),
+                  :key   => format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'storage-engine', storageEngine, 'block-manager', 'bytes', 'tx' ),
                   :value => storageBytesWritten
                 } << {
-                  :key   => format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, 'storage-engine', storageEngine, 'block-manager', 'blocks', 'rx' ),
+                  :key   => format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'storage-engine', storageEngine, 'block-manager', 'blocks', 'rx' ),
                   :value => storageBlocksRead
                 } << {
-                  :key   => format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, 'storage-engine', storageEngine, 'block-manager', 'blocks', 'tx' ),
+                  :key   => format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'storage-engine', storageEngine, 'block-manager', 'blocks', 'tx' ),
                   :value => storageBlocksWritten
                 } << {
-                  :key   => format( '%s.%s.%s.%s.%s.%s.%s.%s', @identifier, @Service, 'storage-engine', storageEngine, 'connection', 'io', 'read', 'total' ),
+                  :key   => format( '%s.%s.%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'storage-engine', storageEngine, 'connection', 'io', 'read', 'total' ),
                   :value => storageConnectionIORead
                 } << {
-                  :key   => format( '%s.%s.%s.%s.%s.%s.%s.%s', @identifier, @Service, 'storage-engine', storageEngine, 'connection', 'io', 'write', 'total' ),
+                  :key   => format( '%s.%s.%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'storage-engine', storageEngine, 'connection', 'io', 'write', 'total' ),
                   :value => storageConnectionIOWrite
                 } << {
-                  :key   => format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, 'storage-engine', storageEngine, 'connection', 'files', 'open' ),
+                  :key   => format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'storage-engine', storageEngine, 'connection', 'files', 'open' ),
                   :value => storageConnectionFilesOpen
                 }
 
-#                 result.push( format( 'PUTVAL %s/%s-%s/%s interval=%s N:%s', @identifier, @Service, 'bytes', 'bytes-read', @interval , storageBytesRead ) )
-#                 result.push( format( 'PUTVAL %s/%s-%s/%s interval=%s N:%s', @identifier, @Service, 'bytes', 'bytes-write', @interval, storageBytesWritten ) )
-#                 result.push( format( format, @identifier, @Service, 'blocks', 'read'  , @interval, storageBlocksRead ) )
-#                 result.push( format( format, @identifier, @Service, 'blocks', 'write' , @interval, storageBlocksWritten ) )
+#                 result.push( format( 'PUTVAL %s/%s-%s/%s interval=%s N:%s', @identifier, @normalized_service_name, 'bytes', 'bytes-read', @interval , storageBytesRead ) )
+#                 result.push( format( 'PUTVAL %s/%s-%s/%s interval=%s N:%s', @identifier, @normalized_service_name, 'bytes', 'bytes-write', @interval, storageBytesWritten ) )
+#                 result.push( format( format, @identifier, @normalized_service_name, 'blocks', 'read'  , @interval, storageBlocksRead ) )
+#                 result.push( format( format, @identifier, @normalized_service_name, 'blocks', 'write' , @interval, storageBlocksWritten ) )
 #
-#                 result.push( format( 'PUTVAL %s/%s-%s/%s interval=%s N:%s', @identifier, @Service, 'io', 'count-read', @interval , storageConnectionIORead ) )
-#                 result.push( format( 'PUTVAL %s/%s-%s/%s interval=%s N:%s', @identifier, @Service, 'io', 'count-write', @interval, storageConnectionIOWrite ) )
+#                 result.push( format( 'PUTVAL %s/%s-%s/%s interval=%s N:%s', @identifier, @normalized_service_name, 'io', 'count-read', @interval , storageConnectionIORead ) )
+#                 result.push( format( 'PUTVAL %s/%s-%s/%s interval=%s N:%s', @identifier, @normalized_service_name, 'io', 'count-write', @interval, storageConnectionIOWrite ) )
 #
-#                 result.push( format( format, @identifier, @Service, 'files', 'open', @interval, storageConnectionFilesOpen ) )
+#                 result.push( format( format, @identifier, @normalized_service_name, 'files', 'open', @interval, storageConnectionFilesOpen ) )
               end
             end
           end
@@ -261,11 +261,11 @@ module CarbonData
                   d  = cmd.dig( 'total', '$numberLong' )
 
                   result << {
-                    :key   => format( '%s.%s.%s.%s'   , @identifier, @Service, 'commands', m ),
+                    :key   => format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'commands', m ),
                     :value => d
                   }
 
-#                   result.push( format( format, @identifier, @Service, 'commands', m , @interval, d ) )
+#                   result.push( format( format, @identifier, @normalized_service_name, 'commands', m , @interval, d ) )
                 end
               end
 
@@ -278,15 +278,15 @@ module CarbonData
                 failed = currentOp.dig('failed', '$numberLong')
 
                 result << {
-                  :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, 'commands', 'currentOp', 'total' ),
+                  :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'commands', 'currentOp', 'total' ),
                   :value => total
                 } << {
-                  :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, 'commands', 'currentOp', 'failed' ),
+                  :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'commands', 'currentOp', 'failed' ),
                   :value => failed
                 }
 
-#                 result.push( format( format, @identifier, @Service, 'currentOp', 'total',  @interval, total ) )
-#                 result.push( format( format, @identifier, @Service, 'currentOp', 'failed', @interval, failed ) )
+#                 result.push( format( format, @identifier, @normalized_service_name, 'currentOp', 'total',  @interval, total ) )
+#                 result.push( format( format, @identifier, @normalized_service_name, 'currentOp', 'failed', @interval, failed ) )
               end
 
             end
@@ -305,19 +305,19 @@ module CarbonData
                 timedOut      = cursorTimedOut.dig( '$numberLong' )
 
                 result << {
-                  :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, 'cursor', 'open', 'total' ),
+                  :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'cursor', 'open', 'total' ),
                   :value => openTotal
                 } << {
-                  :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, 'cursor', 'open', 'no-timeout' ),
+                  :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'cursor', 'open', 'no-timeout' ),
                   :value => openNoTimeout
                 } << {
-                  :key   => format( '%s.%s.%s.%s'   , @identifier, @Service, 'cursor', 'timed-out' ),
+                  :key   => format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'cursor', 'timed-out' ),
                   :value => timedOut
                 }
 
-#                 result.push( format( format, @identifier, @Service, 'cursor', 'open-total',      @interval, openTotal ) )
-#                 result.push( format( format, @identifier, @Service, 'cursor', 'open-no-timeout', @interval, openNoTimeout ) )
-#                 result.push( format( format, @identifier, @Service, 'cursor', 'timed-out',       @interval, timedOut ) )
+#                 result.push( format( format, @identifier, @normalized_service_name, 'cursor', 'open-total',      @interval, openTotal ) )
+#                 result.push( format( format, @identifier, @normalized_service_name, 'cursor', 'open-no-timeout', @interval, openNoTimeout ) )
+#                 result.push( format( format, @identifier, @normalized_service_name, 'cursor', 'timed-out',       @interval, timedOut ) )
               end
 
             end
@@ -330,15 +330,15 @@ module CarbonData
             resident       = mem.dig('resident')
 
             result << {
-              :key   => format( '%s.%s.%s.%s', @identifier, @Service, 'memory', 'virtual' ),
+              :key   => format( '%s.%s.%s.%s', @identifier, @normalized_service_name, 'memory', 'virtual' ),
               :value => virtual
             } << {
-              :key   => format( '%s.%s.%s.%s', @identifier, @Service, 'memory', 'resident' ),
+              :key   => format( '%s.%s.%s.%s', @identifier, @normalized_service_name, 'memory', 'resident' ),
               :value => resident
             }
 
-#             result.push( format( format, @identifier, @Service, 'mem', 'virtual'    , @interval, virtual ) )
-#             result.push( format( format, @identifier, @Service, 'mem', 'resident'   , @interval, resident ) )
+#             result.push( format( format, @identifier, @normalized_service_name, 'mem', 'virtual'    , @interval, virtual ) )
+#             result.push( format( format, @identifier, @normalized_service_name, 'mem', 'resident'   , @interval, resident ) )
           end
 
           if( extraInfo != nil )
@@ -346,11 +346,11 @@ module CarbonData
             pageFaults        = extraInfo.dig('page_faults')
 
             result << {
-              :key   => format( '%s.%s.%s.%s', @identifier, @Service, 'extraInfo', 'pageFaults' ),
+              :key   => format( '%s.%s.%s.%s', @identifier, @normalized_service_name, 'extraInfo', 'pageFaults' ),
               :value => pageFaults
             }
 
-#             result.push( format( format, @identifier, @Service, 'extraInfo', 'pageFaults' , @interval, pageFaults ) )
+#             result.push( format( format, @identifier, @normalized_service_name, 'extraInfo', 'pageFaults' , @interval, pageFaults ) )
           end
 
           if( wiredTiger != nil )
@@ -367,27 +367,27 @@ module CarbonData
               modified      = wiredTigerCache.dig('modified pages evicted')
 
               result << {
-                :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, 'wiredTiger', 'cache', 'in-cache', 'bytes' ),
+                :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'wiredTiger', 'cache', 'in-cache', 'bytes' ),
                 :value => bytes
               } << {
-                :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, 'wiredTiger', 'cache', 'in-cache', 'tracked-dirty' ),
+                :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'wiredTiger', 'cache', 'in-cache', 'tracked-dirty' ),
                 :value => tracked
               } << {
-                :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, 'wiredTiger', 'cache', 'configured', 'max-bytes' ),
+                :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'wiredTiger', 'cache', 'configured', 'max-bytes' ),
                 :value => maximum
               } << {
-                :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, 'wiredTiger', 'cache', 'evicted-pages', 'modified' ),
+                :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'wiredTiger', 'cache', 'evicted-pages', 'modified' ),
                 :value => modified
               } << {
-                :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, 'wiredTiger', 'cache', 'evicted-pages', 'unmodified' ),
+                :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'wiredTiger', 'cache', 'evicted-pages', 'unmodified' ),
                 :value => unmodified
               }
 
-#               result.push( format( format, @identifier, @Service, 'wiredTigerCache', 'bytes'      , @interval, bytes ) )
-#               result.push( format( format, @identifier, @Service, 'wiredTigerCache', 'maximum'    , @interval, maximum ) )
-#               result.push( format( format, @identifier, @Service, 'wiredTigerCache', 'tracked'    , @interval, tracked ) )
-#               result.push( format( format, @identifier, @Service, 'wiredTigerCache', 'unmodified' , @interval, unmodified ) )
-#               result.push( format( format, @identifier, @Service, 'wiredTigerCache', 'modified'   , @interval, modified ) )
+#               result.push( format( format, @identifier, @normalized_service_name, 'wiredTigerCache', 'bytes'      , @interval, bytes ) )
+#               result.push( format( format, @identifier, @normalized_service_name, 'wiredTigerCache', 'maximum'    , @interval, maximum ) )
+#               result.push( format( format, @identifier, @normalized_service_name, 'wiredTigerCache', 'tracked'    , @interval, tracked ) )
+#               result.push( format( format, @identifier, @normalized_service_name, 'wiredTigerCache', 'unmodified' , @interval, unmodified ) )
+#               result.push( format( format, @identifier, @normalized_service_name, 'wiredTigerCache', 'modified'   , @interval, modified ) )
             end
 
             if( concurrentTransactions != nil )
@@ -404,23 +404,23 @@ module CarbonData
                 writeAvailable   = write.dig('available')
 
                 result << {
-                  :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, 'wiredTiger', 'concurrentTransactions', 'read', 'out' ),
+                  :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'wiredTiger', 'concurrentTransactions', 'read', 'out' ),
                   :value => readOut
                 } << {
-                  :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, 'wiredTiger', 'concurrentTransactions', 'read', 'available' ),
+                  :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'wiredTiger', 'concurrentTransactions', 'read', 'available' ),
                   :value => readAvailable
                 } << {
-                  :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, 'wiredTiger', 'concurrentTransactions', 'write', 'out' ),
+                  :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'wiredTiger', 'concurrentTransactions', 'write', 'out' ),
                   :value => writeOut
                 } << {
-                  :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, 'wiredTiger', 'concurrentTransactions', 'write', 'available' ),
+                  :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'wiredTiger', 'concurrentTransactions', 'write', 'available' ),
                   :value => writeAvailable
                 }
 
-#                 result.push( format( format, @identifier, @Service, 'wiredTigerConcTrans', 'readOut'          , @interval, readOut ) )
-#                 result.push( format( format, @identifier, @Service, 'wiredTigerConcTrans', 'readAvailable'    , @interval, readAvailable ) )
-#                 result.push( format( format, @identifier, @Service, 'wiredTigerConcTrans', 'writeOut'         , @interval, writeOut ) )
-#                 result.push( format( format, @identifier, @Service, 'wiredTigerConcTrans', 'writeAvailable'   , @interval, writeAvailable ) )
+#                 result.push( format( format, @identifier, @normalized_service_name, 'wiredTigerConcTrans', 'readOut'          , @interval, readOut ) )
+#                 result.push( format( format, @identifier, @normalized_service_name, 'wiredTigerConcTrans', 'readAvailable'    , @interval, readAvailable ) )
+#                 result.push( format( format, @identifier, @normalized_service_name, 'wiredTigerConcTrans', 'writeOut'         , @interval, writeOut ) )
+#                 result.push( format( format, @identifier, @normalized_service_name, 'wiredTigerConcTrans', 'writeAvailable'   , @interval, writeAvailable ) )
               end
 
             end
@@ -438,19 +438,19 @@ module CarbonData
               total         = currentQueue.dig('total')
 
               result << {
-                :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, 'globalLock', 'currentQueue', 'readers' ),
+                :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'globalLock', 'currentQueue', 'readers' ),
                 :value => readers
               } << {
-                :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, 'globalLock', 'currentQueue', 'writers' ),
+                :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'globalLock', 'currentQueue', 'writers' ),
                 :value => writers
               } << {
-                :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, 'globalLock', 'currentQueue', 'total' ),
+                :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'globalLock', 'currentQueue', 'total' ),
                 :value => total
               }
 
-#               result.push( format( format, @identifier, @Service, 'globalLockCurrentQueue', 'readers'    , @interval, readers ) )
-#               result.push( format( format, @identifier, @Service, 'globalLockCurrentQueue', 'writers'    , @interval, writers ) )
-#               result.push( format( format, @identifier, @Service, 'globalLockCurrentQueue', 'total'      , @interval, total ) )
+#               result.push( format( format, @identifier, @normalized_service_name, 'globalLockCurrentQueue', 'readers'    , @interval, readers ) )
+#               result.push( format( format, @identifier, @normalized_service_name, 'globalLockCurrentQueue', 'writers'    , @interval, writers ) )
+#               result.push( format( format, @identifier, @normalized_service_name, 'globalLockCurrentQueue', 'total'      , @interval, total ) )
             end
 
             if( activeClients != nil )
@@ -460,19 +460,19 @@ module CarbonData
               total       = activeClients.dig('total')
 
               result << {
-                :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, 'globalLock', 'activeClients', 'readers' ),
+                :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'globalLock', 'activeClients', 'readers' ),
                 :value => readers
               } << {
-                :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, 'globalLock', 'activeClients', 'writers' ),
+                :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'globalLock', 'activeClients', 'writers' ),
                 :value => writers
               } << {
-                :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, 'globalLock', 'activeClients', 'total' ),
+                :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'globalLock', 'activeClients', 'total' ),
                 :value => total
               }
 
-#               result.push( format( format, @identifier, @Service, 'globalLockActiveClients', 'readers'    , @interval, readers ) )
-#               result.push( format( format, @identifier, @Service, 'globalLockActiveClients', 'writers'    , @interval, writers ) )
-#               result.push( format( format, @identifier, @Service, 'globalLockActiveClients', 'total'      , @interval, total ) )
+#               result.push( format( format, @identifier, @normalized_service_name, 'globalLockActiveClients', 'readers'    , @interval, readers ) )
+#               result.push( format( format, @identifier, @normalized_service_name, 'globalLockActiveClients', 'writers'    , @interval, writers ) )
+#               result.push( format( format, @identifier, @normalized_service_name, 'globalLockActiveClients', 'total'      , @interval, total ) )
             end
           end
 

@@ -47,34 +47,34 @@ module CarbonData
 
 
       result << {
-        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'blob', 'cache', 'size' ),
+        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'blob', 'cache', 'size' ),
         :value => blobCacheSize
       } << {
-        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'blob', 'cache', 'used' ),
+        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'blob', 'cache', 'used' ),
         :value => blobCacheLevel
       } << {
-        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'blob', 'cache', 'fault' ),
+        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'blob', 'cache', 'fault' ),
         :value => blobCacheFaults
       } << {
-        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'blob', 'cache', 'used_percent' ),
+        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'blob', 'cache', 'used_percent' ),
         :value => blobCachePercent
       } << {
-        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'heap', 'cache', 'size' ),
+        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'heap', 'cache', 'size' ),
         :value => heapCacheSize
       } << {
-        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'heap', 'cache', 'used' ),
+        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'heap', 'cache', 'used' ),
         :value => heapCacheLevel
       } << {
-        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'heap', 'cache', 'fault' ),
+        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'heap', 'cache', 'fault' ),
         :value => heapCacheFaults
       } << {
-        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'heap', 'cache', 'used_percent' ),
+        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'heap', 'cache', 'used_percent' ),
         :value => heapCachePercent
       } << {
-        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'su_sessions', 'sessions' ),
+        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'su_sessions', 'sessions' ),
         :value => suSessions
       } << {
-        :key   => format( '%s.%s.%s.%s'      , @identifier, @Service, mbean, 'open' ),
+        :key   => format( '%s.%s.%s.%s'      , @identifier, @normalized_service_name, mbean, 'open' ),
         :value => open
       }
 
@@ -112,19 +112,19 @@ module CarbonData
       end
 
       result << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, mbeanName, 'init' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, mbeanName, 'init' ),
         :value => init
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, mbeanName, 'committed' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, mbeanName, 'committed' ),
         :value => committed
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, mbeanName, 'max' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, mbeanName, 'max' ),
         :value => max
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, mbeanName, 'used_percent' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, mbeanName, 'used_percent' ),
         :value => percent
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, mbeanName, 'used' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, mbeanName, 'used' ),
         :value => used
       }
 

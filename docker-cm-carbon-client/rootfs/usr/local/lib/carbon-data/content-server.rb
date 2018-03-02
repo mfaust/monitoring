@@ -27,16 +27,16 @@ module CarbonData
       end
 
       result << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'executors', 'running' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'executors', 'running' ),
         :value => executorsRunning
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'executors', 'idle' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'executors', 'idle' ),
         :value => executorsIdle
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'queries', 'max' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'queries', 'max' ),
         :value => queriesMax
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'queries', 'waiting' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'queries', 'waiting' ),
         :value => queriesWaiting
       }
 
@@ -69,19 +69,19 @@ module CarbonData
       end
 
       result << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'connections', 'open' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'connections', 'open' ),
         :value => open
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'connections', 'max' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'connections', 'max' ),
         :value => max
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'connections', 'idle' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'connections', 'idle' ),
         :value => idle
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'connections', 'busy' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'connections', 'busy' ),
         :value => busy
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'connections', 'min' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'connections', 'min' ),
         :value => min
       }
 
@@ -125,11 +125,11 @@ module CarbonData
         result                  = []
         completedSequenceNumber = 0
 
-        replicatorData = @mbean.bean( @Server, @serviceName, 'Replicator' )
+        replicatorData = @mbean.bean( @Server, @service_name, 'Replicator' )
 
         if( replicatorData == false )
 
-          logger.error( format( 'No mbean \'Replicator\' for Service %s found!', @serviceName ) )
+          logger.error( format( 'No mbean \'Replicator\' for Service %s found!', @service_name ) )
 
           [completedSequenceNumber, result]
         else
@@ -152,13 +152,13 @@ module CarbonData
             controllerState.downcase!
 
             result << {
-              :key   => format( '%s.%s.%s.%s', @identifier, @Service, 'Replicator', 'completedSequenceNumber' ),
+              :key   => format( '%s.%s.%s.%s', @identifier, @normalized_service_name, 'Replicator', 'completedSequenceNumber' ),
               :value => completedSequenceNumber
             } << {
-              :key   => format( '%s.%s.%s.%s', @identifier, @Service, 'Replicator', 'uncompleted' ),
+              :key   => format( '%s.%s.%s.%s', @identifier, @normalized_service_name, 'Replicator', 'uncompleted' ),
               :value => uncompletedCount
             } << {
-              :key   => format( '%s.%s.%s.%s', @identifier, @Service, 'Replicator', 'completed' ),
+              :key   => format( '%s.%s.%s.%s', @identifier, @normalized_service_name, 'Replicator', 'completed' ),
               :value => completedCount
             }
           end
@@ -173,11 +173,11 @@ module CarbonData
         result            = []
         mlsSequenceNumber = 0
 
-        replicatorData = @mbean.bean( @Server, @serviceName, 'Replicator' )
+        replicatorData = @mbean.bean( @Server, @service_name, 'Replicator' )
 
         if( replicatorData == false )
-          logger.error( format( 'No mbean \'Replicator\' for Service %s found!', @serviceName ) )
-          logger.debug( "#{@Server}, #{@serviceName}, 'Replicator'" )
+          logger.error( format( 'No mbean \'Replicator\' for Service %s found!', @service_name ) )
+          logger.debug( "#{@Server}, #{@service_name}, 'Replicator'" )
 #          return [mlsSequenceNumber, result]
         else
 
@@ -216,7 +216,7 @@ module CarbonData
                 diffSequenceNumber = mlsSequenceNumber.to_i - rlsSequenceNumber.to_i
 
                 result << {
-                  :key   => format( '%s.%s.%s.%s', @identifier, @Service, 'SequenceNumber', 'diffToMLS' ),
+                  :key   => format( '%s.%s.%s.%s', @identifier, @normalized_service_name, 'SequenceNumber', 'diffToMLS' ),
                   :value => diffSequenceNumber
                 }
               end
@@ -250,7 +250,7 @@ module CarbonData
         licenseValidUntilHard = value.dig('LicenseValidUntilHard')
 
         # Data from RLS
-        if( @Service == 'RLS' )
+        if( @normalized_service_name == 'RLS' )
 
           incomingCount, replicatorResult = replicatorData()
 
@@ -291,22 +291,22 @@ module CarbonData
               concurrentDiff = concurrentMax - concurrent
 
               result << {
-                :key   => format( '%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'ServiceInfo', s, 'named' ),
+                :key   => format( '%s.%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'ServiceInfo', s, 'named' ),
                 :value => named
               } << {
-                :key   => format( '%s.%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'ServiceInfo', s, 'named', 'max' ),
+                :key   => format( '%s.%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'ServiceInfo', s, 'named', 'max' ),
                 :value => namedMax
               } << {
-                :key   => format( '%s.%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'ServiceInfo', s, 'named', 'diff' ),
+                :key   => format( '%s.%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'ServiceInfo', s, 'named', 'diff' ),
                 :value => namedDiff
               } << {
-                :key   => format( '%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'ServiceInfo', s, 'concurrent' ),
+                :key   => format( '%s.%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'ServiceInfo', s, 'concurrent' ),
                 :value => concurrent
               } << {
-                :key   => format( '%s.%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'ServiceInfo', s, 'concurrent', 'max' ),
+                :key   => format( '%s.%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'ServiceInfo', s, 'concurrent', 'max' ),
                 :value => concurrentMax
               } << {
-                :key   => format( '%s.%s.%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'ServiceInfo', s, 'concurrent', 'diff' ),
+                :key   => format( '%s.%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'ServiceInfo', s, 'concurrent', 'diff' ),
                 :value => concurrentDiff
               }
             end
@@ -321,7 +321,7 @@ module CarbonData
           if( licenseValidFrom != nil )
 
             result << {
-              :key   => format( '%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'license', 'from', 'raw' ),
+              :key   => format( '%s.%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'license', 'from', 'raw' ),
               :value => licenseValidFrom / 1000
             }
           end
@@ -335,16 +335,16 @@ module CarbonData
             validUntilSoftDays  = x.dig(:days)
 
             result << {
-              :key   => format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'license', 'until', 'soft', 'raw' ),
+              :key   => format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'license', 'until', 'soft', 'raw' ),
               :value => licenseValidUntilSoft / 1000
             } << {
-              :key   => format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'license', 'until', 'soft', 'month' ),
+              :key   => format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'license', 'until', 'soft', 'month' ),
               :value => validUntilSoftMonth
             }  << {
-              :key   => format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'license', 'until', 'soft', 'weeks' ),
+              :key   => format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'license', 'until', 'soft', 'weeks' ),
               :value => validUntilSoftWeek
             }  << {
-              :key   => format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'license', 'until', 'soft', 'days' ),
+              :key   => format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'license', 'until', 'soft', 'days' ),
               :value => validUntilSoftDays
             }
           end
@@ -357,16 +357,16 @@ module CarbonData
             validUntilHardDays  = x.dig(:days)
 
             result << {
-              :key   => format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'license', 'until', 'hard', 'raw' ),
+              :key   => format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'license', 'until', 'hard', 'raw' ),
               :value => licenseValidUntilHard / 1000
             } << {
-              :key   => format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'license', 'until', 'hard', 'month' ),
+              :key   => format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'license', 'until', 'hard', 'month' ),
               :value => validUntilHardMonth
             }  << {
-              :key   => format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'license', 'until', 'hard', 'weeks' ),
+              :key   => format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'license', 'until', 'hard', 'weeks' ),
               :value => validUntilHardWeek
             }  << {
-              :key   => format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @Service, mbean, 'license', 'until', 'hard', 'days' ),
+              :key   => format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'license', 'until', 'hard', 'days' ),
               :value => validUntilHardDays
             }
           end
@@ -375,31 +375,31 @@ module CarbonData
       end
 
       result << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'ResourceCache', 'hits' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'ResourceCache', 'hits' ),
         :value => cacheHits
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'ResourceCache', 'evicts' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'ResourceCache', 'evicts' ),
         :value => cacheEvicts
       }  << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'ResourceCache', 'entries' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'ResourceCache', 'entries' ),
         :value => cacheEntries
       }  << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'ResourceCache', 'interval' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'ResourceCache', 'interval' ),
         :value => cacheInterval
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'ResourceCache', 'size' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'ResourceCache', 'size' ),
         :value => cacheSize
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'Repository', 'SequenceNumber' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'Repository', 'SequenceNumber' ),
         :value => reqSeqNumber
       }  << {
-        :key   => format( '%s.%s.%s.%s'   , @identifier, @Service, mbean, 'connection' ),
+        :key   => format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'connection' ),
         :value => connectionCount
       }  << {
-        :key   => format( '%s.%s.%s.%s'   , @identifier, @Service, mbean, 'uptime' ),
+        :key   => format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'uptime' ),
         :value => uptime
       }  << {
-        :key   => format( '%s.%s.%s.%s'   , @identifier, @Service, mbean, 'runlevel' ),
+        :key   => format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'runlevel' ),
         :value => runlevel
       }
 
@@ -428,13 +428,13 @@ module CarbonData
       end
 
       result << {
-        :key   => format( '%s.%s.%s.%s', @identifier, @Service, mbean, 'failed' ),
+        :key   => format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'failed' ),
         :value => failed
       } << {
-        :key   => format( '%s.%s.%s.%s', @identifier, @Service, mbean, 'successful' ),
+        :key   => format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'successful' ),
         :value => successful
       } << {
-        :key   => format( '%s.%s.%s.%s', @identifier, @Service, mbean, 'unrecoverable' ),
+        :key   => format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'unrecoverable' ),
         :value => unrecoverable
       }
 
@@ -467,19 +467,19 @@ module CarbonData
       end
 
       result << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'cache', 'size' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'cache', 'size' ),
         :value => size
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'cache', 'removed' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'cache', 'removed' ),
         :value => removed
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'cache', 'faults' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'cache', 'faults' ),
         :value => faults
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'cache', 'misses' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'cache', 'misses' ),
         :value => misses
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @Service, mbean, 'cache', 'hits' ),
+        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'cache', 'hits' ),
         :value => hits
       }
 

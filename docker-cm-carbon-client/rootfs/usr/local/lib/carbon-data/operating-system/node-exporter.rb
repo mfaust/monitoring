@@ -24,13 +24,13 @@ module CarbonData
 
             if( boot_time != nil )
               result << {
-                :key   => format( '%s.%s.%s.%s'         , @identifier, @Service, 'uptime', 'boot_time' ),
+                :key   => format( '%s.%s.%s.%s'         , @identifier, @normalized_service_name, 'uptime', 'boot_time' ),
                 :value => boot_time
               }
             end
             if( uptime != nil )
               result << {
-                :key   => format( '%s.%s.%s.%s'         , @identifier, @Service, 'uptime', 'uptime' ),
+                :key   => format( '%s.%s.%s.%s'         , @identifier, @normalized_service_name, 'uptime', 'uptime' ),
                 :value => uptime
               }
             end
@@ -50,7 +50,7 @@ module CarbonData
                 if( point != nil )
 
                   result << {
-                    :key   => format( '%s.%s.%s.%s.%s'         , @identifier, @Service, 'cpu', c, m ),
+                    :key   => format( '%s.%s.%s.%s.%s'         , @identifier, @normalized_service_name, 'cpu', c, m ),
                     :value => point
                   }
                 end
@@ -68,7 +68,7 @@ module CarbonData
               if( point != nil )
 
                 result << {
-                  :key   => format( '%s.%s.%s.%s'         , @identifier, @Service, 'load', m ),
+                  :key   => format( '%s.%s.%s.%s'         , @identifier, @normalized_service_name, 'load', m ),
                   :value => point
                 }
               end
@@ -106,34 +106,34 @@ module CarbonData
             end
 
             result << {
-              :key   => format( '%s.%s.%s.%s'         , @identifier, @Service, 'memory', 'available' ),
+              :key   => format( '%s.%s.%s.%s'         , @identifier, @normalized_service_name, 'memory', 'available' ),
               :value => memAvailable
             } << {
-              :key   => format( '%s.%s.%s.%s'         , @identifier, @Service, 'memory', 'free' ),
+              :key   => format( '%s.%s.%s.%s'         , @identifier, @normalized_service_name, 'memory', 'free' ),
               :value => memFree
             } << {
-              :key   => format( '%s.%s.%s.%s'         , @identifier, @Service, 'memory', 'total' ),
+              :key   => format( '%s.%s.%s.%s'         , @identifier, @normalized_service_name, 'memory', 'total' ),
               :value => memTotal
             } << {
-              :key   => format( '%s.%s.%s.%s'         , @identifier, @Service, 'memory', 'used' ),
+              :key   => format( '%s.%s.%s.%s'         , @identifier, @normalized_service_name, 'memory', 'used' ),
               :value => memUsed
             } << {
-              :key   => format( '%s.%s.%s.%s'         , @identifier, @Service, 'memory', 'used_percent' ),
+              :key   => format( '%s.%s.%s.%s'         , @identifier, @normalized_service_name, 'memory', 'used_percent' ),
               :value => memUsedPercent
             } << {
-              :key   => format( '%s.%s.%s.%s'         , @identifier, @Service, 'swap', 'cached' ),
+              :key   => format( '%s.%s.%s.%s'         , @identifier, @normalized_service_name, 'swap', 'cached' ),
               :value => swapCached
             } << {
-              :key   => format( '%s.%s.%s.%s'         , @identifier, @Service, 'swap', 'free' ),
+              :key   => format( '%s.%s.%s.%s'         , @identifier, @normalized_service_name, 'swap', 'free' ),
               :value => swapFree
             } << {
-              :key   => format( '%s.%s.%s.%s'         , @identifier, @Service, 'swap', 'total' ),
+              :key   => format( '%s.%s.%s.%s'         , @identifier, @normalized_service_name, 'swap', 'total' ),
               :value => swapTotal
             } << {
-              :key   => format( '%s.%s.%s.%s'         , @identifier, @Service, 'swap', 'used' ),
+              :key   => format( '%s.%s.%s.%s'         , @identifier, @normalized_service_name, 'swap', 'used' ),
               :value => swapUsed
             } << {
-              :key   => format( '%s.%s.%s.%s'         , @identifier, @Service, 'swap', 'used_percent' ),
+              :key   => format( '%s.%s.%s.%s'         , @identifier, @normalized_service_name, 'swap', 'used_percent' ),
               :value => swapUsedPercent
             }
 
@@ -157,16 +157,16 @@ module CarbonData
               usedPercent  = ( 100 * used.to_i / size.to_i ).to_i
 
               result << {
-                :key   => format( '%s.%s.%s.%s.%s'         , @identifier, @Service, 'filesystem', f, 'total' ),
+                :key   => format( '%s.%s.%s.%s.%s'         , @identifier, @normalized_service_name, 'filesystem', f, 'total' ),
                 :value => size
               } << {
-                :key   => format( '%s.%s.%s.%s.%s'         , @identifier, @Service, 'filesystem', f, 'free' ),
+                :key   => format( '%s.%s.%s.%s.%s'         , @identifier, @normalized_service_name, 'filesystem', f, 'free' ),
                 :value => avail
               } << {
-                :key   => format( '%s.%s.%s.%s.%s'         , @identifier, @Service, 'filesystem', f, 'used' ),
+                :key   => format( '%s.%s.%s.%s.%s'         , @identifier, @normalized_service_name, 'filesystem', f, 'used' ),
                 :value => used
               } << {
-                :key   => format( '%s.%s.%s.%s.%s'         , @identifier, @Service, 'filesystem', f, 'used_percent' ),
+                :key   => format( '%s.%s.%s.%s.%s'         , @identifier, @normalized_service_name, 'filesystem', f, 'used_percent' ),
                 :value => usedPercent
               }
 
