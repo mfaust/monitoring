@@ -5,12 +5,11 @@ module CarbonData
 
     module MySQL
 
-      def databaseMySQL( value = {} )
+      def database_mysql( value = {} )
 
-        format = 'PUTVAL %s/%s-%s/%s-%s interval=%s N:%s'
         result = []
 
-        if( value != nil )
+        unless( value.nil? )
 
           # READ THIS : http://dev.mysql.com/doc/refman/5.7/en/server-status-variables.html
 
@@ -77,179 +76,131 @@ module CarbonData
           innodbRowsUpdated               = value.dig('Innodb_rows_updated')
 
           result << {
-            :key   => format( '%s.%s.%s'         , @identifier, @normalized_service_name, 'uptime' ),
-            :value => uptime
+            key: format( '%s.%s.%s'         , @identifier, @normalized_service_name, 'uptime' ),
+            value: uptime
           } << {
-            :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'network', 'bytes', 'tx' ),
-            :value => bytesReceived
+            key: format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'network', 'bytes', 'tx' ),
+            value: bytesReceived
           } <<  {
-            :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'network', 'bytes', 'rx' ),
-            :value => bytesSent
+            key: format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'network', 'bytes', 'rx' ),
+            value: bytesSent
           } <<  {
-            :key   => format( '%s.%s.%s'         , @identifier, @normalized_service_name, 'connections' ),
-            :value => connections
+            key: format( '%s.%s.%s'         , @identifier, @normalized_service_name, 'connections' ),
+            value: connections
           } <<  {
-            :key   => format( '%s.%s.%s'         , @identifier, @normalized_service_name, 'queries' ),
-            :value => queries
+            key: format( '%s.%s.%s'         , @identifier, @normalized_service_name, 'queries' ),
+            value: queries
           } <<  {
-            :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'created', 'tmp', 'disk_tables' ),
-            :value => createdTmpDiskTables
+            key: format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'created', 'tmp', 'disk_tables' ),
+            value: createdTmpDiskTables
           } <<  {
-            :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'created', 'tmp', 'files' ),
-            :value => createdTmpFiles
+            key: format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'created', 'tmp', 'files' ),
+            value: createdTmpFiles
           } <<  {
-            :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'created', 'tmp', 'tables' ),
-            :value => createdTmpTables
+            key: format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'created', 'tmp', 'tables' ),
+            value: createdTmpTables
           } << {
-            :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'qcache', 'free', 'blocks' ),
-            :value => qcacheFreeBlocks
+            key: format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'qcache', 'free', 'blocks' ),
+            value: qcacheFreeBlocks
           } << {
-            :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'qcache', 'free', 'memory' ),
-            :value => qcacheFreeMemory
+            key: format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'qcache', 'free', 'memory' ),
+            value: qcacheFreeMemory
           } <<  {
-            :key   => format( '%s.%s.%s.%s'      , @identifier, @normalized_service_name, 'qcache', 'hits' ),
-            :value => qcacheHits
+            key: format( '%s.%s.%s.%s'      , @identifier, @normalized_service_name, 'qcache', 'hits' ),
+            value: qcacheHits
           } <<  {
-            :key   => format( '%s.%s.%s.%s'      , @identifier, @normalized_service_name, 'qcache', 'inserts' ),
-            :value => qcacheInserts
+            key: format( '%s.%s.%s.%s'      , @identifier, @normalized_service_name, 'qcache', 'inserts' ),
+            value: qcacheInserts
           } << {
-            :key   => format( '%s.%s.%s.%s'      , @identifier, @normalized_service_name, 'qcache', 'low_mem_prunes' ),
-            :value => qcacheLowmemPrunes
+            key: format( '%s.%s.%s.%s'      , @identifier, @normalized_service_name, 'qcache', 'low_mem_prunes' ),
+            value: qcacheLowmemPrunes
           } << {
-            :key   => format( '%s.%s.%s.%s'      , @identifier, @normalized_service_name, 'qcache', 'not_cached' ),
-            :value => qcacheNotCached
+            key: format( '%s.%s.%s.%s'      , @identifier, @normalized_service_name, 'qcache', 'not_cached' ),
+            value: qcacheNotCached
           } <<  {
-            :key   => format( '%s.%s.%s.%s'      , @identifier, @normalized_service_name, 'qcache', 'queries_in_cache' ),
-            :value => qcacheQueriesInCache
+            key: format( '%s.%s.%s.%s'      , @identifier, @normalized_service_name, 'qcache', 'queries_in_cache' ),
+            value: qcacheQueriesInCache
           } <<  {
-            :key   => format( '%s.%s.%s.%s'      , @identifier, @normalized_service_name, 'qcache', 'total_blocks' ),
-            :value => qcacheTotalBlocks
+            key: format( '%s.%s.%s.%s'      , @identifier, @normalized_service_name, 'qcache', 'total_blocks' ),
+            value: qcacheTotalBlocks
           } << {
-            :key   => format( '%s.%s.%s.%s'      , @identifier, @normalized_service_name, 'threads', 'cached' ),
-            :value => threadsCached
+            key: format( '%s.%s.%s.%s'      , @identifier, @normalized_service_name, 'threads', 'cached' ),
+            value: threadsCached
           } << {
-            :key   => format( '%s.%s.%s.%s'      , @identifier, @normalized_service_name, 'threads', 'connected' ),
-            :value => threadsConnected
+            key: format( '%s.%s.%s.%s'      , @identifier, @normalized_service_name, 'threads', 'connected' ),
+            value: threadsConnected
           } <<  {
-            :key   => format( '%s.%s.%s.%s'      , @identifier, @normalized_service_name, 'threads', 'created' ),
-            :value => threadsCreated
+            key: format( '%s.%s.%s.%s'      , @identifier, @normalized_service_name, 'threads', 'created' ),
+            value: threadsCreated
           } <<  {
-            :key   => format( '%s.%s.%s.%s'      , @identifier, @normalized_service_name, 'threads', 'running' ),
-            :value => threadsRunning
+            key: format( '%s.%s.%s.%s'      , @identifier, @normalized_service_name, 'threads', 'running' ),
+            value: threadsRunning
           } << {
-            :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'innodb', 'buffer_pool', 'pages', 'data' ),
-            :value => innodbBufferPoolPagesData
+            key: format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'innodb', 'buffer_pool', 'pages', 'data' ),
+            value: innodbBufferPoolPagesData
           } <<  {
-            :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'innodb', 'buffer_pool', 'pages', 'dirty' ),
-            :value => innodbBufferPoolPagesDirty
+            key: format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'innodb', 'buffer_pool', 'pages', 'dirty' ),
+            value: innodbBufferPoolPagesDirty
           } <<  {
-            :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'innodb', 'buffer_pool', 'pages', 'flushed' ),
-            :value => innodbBufferPoolPagesFlushed
+            key: format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'innodb', 'buffer_pool', 'pages', 'flushed' ),
+            value: innodbBufferPoolPagesFlushed
           } << {
-            :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'innodb', 'buffer_pool', 'pages', 'free' ),
-            :value => innodbBufferPoolPagesFree
+            key: format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'innodb', 'buffer_pool', 'pages', 'free' ),
+            value: innodbBufferPoolPagesFree
           } << {
-            :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'innodb', 'buffer_pool', 'pages', 'misc' ),
-            :value => innodbBufferPoolPagesMisc
+            key: format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'innodb', 'buffer_pool', 'pages', 'misc' ),
+            value: innodbBufferPoolPagesMisc
           } <<  {
-            :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'innodb', 'buffer_pool', 'pages', 'total' ),
-            :value => innodbBufferPoolPagesTotal
+            key: format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'innodb', 'buffer_pool', 'pages', 'total' ),
+            value: innodbBufferPoolPagesTotal
           } <<  {
-            :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'innodb', 'buffer_pool', 'pages', 'data' ),
-            :value => innodbBufferPoolBytesData
+            key: format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'innodb', 'buffer_pool', 'pages', 'data' ),
+            value: innodbBufferPoolBytesData
           } << {
-            :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'innodb', 'buffer_pool', 'pages', 'dirty' ),
-            :value => innodbBufferPoolBytesDirty
+            key: format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'innodb', 'buffer_pool', 'pages', 'dirty' ),
+            value: innodbBufferPoolBytesDirty
           } <<  {
-            :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'innodb', 'buffer_pool', 'read', 'ahead' ),
-            :value => innodbBufferPoolReadAhead
+            key: format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'innodb', 'buffer_pool', 'read', 'ahead' ),
+            value: innodbBufferPoolReadAhead
           } <<  {
-            :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'innodb', 'buffer_pool', 'read', 'ahead_rnd' ),
-            :value => innodbBufferPoolReadAheadRnd
+            key: format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'innodb', 'buffer_pool', 'read', 'ahead_rnd' ),
+            value: innodbBufferPoolReadAheadRnd
           } << {
-            :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'innodb', 'buffer_pool', 'read', 'ahead_evicted' ),
-            :value => innodbBufferPoolReadAheadEviced
+            key: format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'innodb', 'buffer_pool', 'read', 'ahead_evicted' ),
+            value: innodbBufferPoolReadAheadEviced
           } << {
-            :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'innodb', 'buffer_pool', 'read', 'requests' ),
-            :value => innodbBufferPoolReadRequests
+            key: format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'innodb', 'buffer_pool', 'read', 'requests' ),
+            value: innodbBufferPoolReadRequests
           } <<  {
-            :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'innodb', 'page', 'size' ),
-            :value => innodbPageSize
+            key: format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'innodb', 'page', 'size' ),
+            value: innodbPageSize
           } <<  {
-            :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'innodb', 'pages', 'created' ),
-            :value => innodbPagesCreated
+            key: format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'innodb', 'pages', 'created' ),
+            value: innodbPagesCreated
           }  <<  {
-            :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'innodb', 'pages', 'read' ),
-            :value => innodbPagesRead
+            key: format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'innodb', 'pages', 'read' ),
+            value: innodbPagesRead
           }  <<  {
-            :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'innodb', 'pages', 'written' ),
-            :value => innodbPagesWritten
+            key: format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'innodb', 'pages', 'written' ),
+            value: innodbPagesWritten
           }  <<  {
-            :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'innodb', 'rows', 'deleted' ),
-            :value => innodbRowsDeleted
+            key: format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'innodb', 'rows', 'deleted' ),
+            value: innodbRowsDeleted
           }  <<  {
-            :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'innodb', 'rows', 'inserted' ),
-            :value => innodbRowsInserted
+            key: format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'innodb', 'rows', 'inserted' ),
+            value: innodbRowsInserted
           }  <<  {
-            :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'innodb', 'rows', 'read' ),
-            :value => innodbRowsRead
+            key: format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'innodb', 'rows', 'read' ),
+            value: innodbRowsRead
           }  <<  {
-            :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'innodb', 'rows', 'updated' ),
-            :value => innodbRowsUpdated
+            key: format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'innodb', 'rows', 'updated' ),
+            value: innodbRowsUpdated
           }
-
-#           result.push( format( 'PUTVAL %s/%s-%s/%s interval=%s N:%s' , @identifier, @normalized_service_name, 'uptime' , 'uptime'   , @interval, uptime ) )
-#
-#           result.push( format( 'PUTVAL %s/%s-%s/%s interval=%s N:%s' , @identifier, @normalized_service_name, 'network', 'bytes-in' , @interval, bytesReceived ) )
-#           result.push( format( 'PUTVAL %s/%s-%s/%s interval=%s N:%s' , @identifier, @normalized_service_name, 'network', 'bytes-out', @interval, bytesSent ) )
-#
-#           result.push( format( 'PUTVAL %s/%s-%s/%s interval=%s N:%s' , @identifier, @normalized_service_name, 'connections', 'count', @interval, connections ) )
-#
-#           result.push( format( format ,  @identifier, @normalized_service_name, 'qcache', 'count', 'free_blocks'     , @interval, qcacheFreeBlocks ) )
-#           result.push( format( format ,  @identifier, @normalized_service_name, 'qcache', 'count', 'free_memory'     , @interval, qcacheFreeMemory ) )
-#           result.push( format( format ,  @identifier, @normalized_service_name, 'qcache', 'count', 'hits'            , @interval, qcacheHits ) )
-#           result.push( format( format ,  @identifier, @normalized_service_name, 'qcache', 'count', 'inserts'         , @interval, qcacheInserts ) )
-#           result.push( format( format ,  @identifier, @normalized_service_name, 'qcache', 'count', 'low_mem_prunes'  , @interval, qcacheLowmemPrunes ) )
-#           result.push( format( format ,  @identifier, @normalized_service_name, 'qcache', 'count', 'not_cached'      , @interval, qcacheNotCached ) )
-#           result.push( format( format ,  @identifier, @normalized_service_name, 'qcache', 'count', 'queries_in_cache', @interval, qcacheQueriesInCache ) )
-#           result.push( format( format ,  @identifier, @normalized_service_name, 'qcache', 'count', 'total_blocks'    , @interval, qcacheTotalBlocks ) )
-#
-#           result.push( format( format ,  @identifier, @normalized_service_name, 'threads', 'count', 'cached'         , @interval, threadsCached ) )
-#           result.push( format( format ,  @identifier, @normalized_service_name, 'threads', 'count', 'connected'      , @interval, threadsConnected ) )
-#           result.push( format( format ,  @identifier, @normalized_service_name, 'threads', 'count', 'created'        , @interval, threadsCreated ) )
-#           result.push( format( format ,  @identifier, @normalized_service_name, 'threads', 'count', 'running'        , @interval, threadsRunning ) )
-#
-#
-#           result.push( format( format ,  @identifier, @normalized_service_name, 'innodb_buffer_pool', 'count', 'pages_data'         , @interval, innodbBufferPoolPagesData ) )
-#           result.push( format( format ,  @identifier, @normalized_service_name, 'innodb_buffer_pool', 'count', 'pages_dirty'        , @interval, innodbBufferPoolPagesDirty ) )
-#           result.push( format( format ,  @identifier, @normalized_service_name, 'innodb_buffer_pool', 'count', 'pages_flushed'      , @interval, innodbBufferPoolPagesFlushed ) )
-#           result.push( format( format ,  @identifier, @normalized_service_name, 'innodb_buffer_pool', 'count', 'pages_free'         , @interval, innodbBufferPoolPagesFree ) )
-#           result.push( format( format ,  @identifier, @normalized_service_name, 'innodb_buffer_pool', 'count', 'pages_misc'         , @interval, innodbBufferPoolPagesMisc ) )
-#           result.push( format( format ,  @identifier, @normalized_service_name, 'innodb_buffer_pool', 'count', 'pages_total'        , @interval, innodbBufferPoolPagesTotal ) )
-#           result.push( format( format ,  @identifier, @normalized_service_name, 'innodb_buffer_pool', 'count', 'bytes_data'         , @interval, innodbBufferPoolBytesData ) )
-#           result.push( format( format ,  @identifier, @normalized_service_name, 'innodb_buffer_pool', 'count', 'bytes_dirty'        , @interval, innodbBufferPoolBytesDirty ) )
-#           result.push( format( format ,  @identifier, @normalized_service_name, 'innodb_buffer_pool', 'count', 'read_ahead_rnd'     , @interval, innodbBufferPoolReadAheadRnd ) )
-#           result.push( format( format ,  @identifier, @normalized_service_name, 'innodb_buffer_pool', 'count', 'read_ahead'         , @interval, innodbBufferPoolReadAhead ) )
-#           result.push( format( format ,  @identifier, @normalized_service_name, 'innodb_buffer_pool', 'count', 'read_ahead_evicted' , @interval, innodbBufferPoolReadAheadEviced ) )
-#           result.push( format( format ,  @identifier, @normalized_service_name, 'innodb_buffer_pool', 'count', 'read_requests'      , @interval, innodbBufferPoolReadRequests ) )
-#
-#           result.push( format( format ,  @identifier, @normalized_service_name, 'innodb_page' , 'count', 'size'                     , @interval, innodbPageSize ) )
-#           result.push( format( format ,  @identifier, @normalized_service_name, 'innodb_pages', 'count', 'created'                  , @interval, innodbPagesCreated ) )
-#           result.push( format( format ,  @identifier, @normalized_service_name, 'innodb_pages', 'count', 'read'                     , @interval, innodbPagesRead ) )
-#           result.push( format( format ,  @identifier, @normalized_service_name, 'innodb_pages', 'count', 'written'                  , @interval, innodbPagesWritten ) )
-#
-#           result.push( format( format ,  @identifier, @normalized_service_name, 'innodb_rows', 'count', 'deleted'                   , @interval, innodbRowsDeleted ) )
-#           result.push( format( format ,  @identifier, @normalized_service_name, 'innodb_rows', 'count', 'inserted'                  , @interval, innodbRowsInserted ) )
-#           result.push( format( format ,  @identifier, @normalized_service_name, 'innodb_rows', 'count', 'read'                      , @interval, innodbRowsRead ) )
-#           result.push( format( format ,  @identifier, @normalized_service_name, 'innodb_rows', 'count', 'updated'                   , @interval, innodbRowsUpdated ) )
-
         end
 
-        return result
+        result
       end
 
     end
-
   end
-
 end

@@ -2,22 +2,22 @@ module CarbonData
 
   module Clients
 
-    def clientsCapConnection( data = {} )
+    def clients_cap_connection( data = {} )
 
       result    = []
       mbean     = 'CapConnection'
       value     = data.dig('value')
 
       # defaults
-      blobCacheSize    = 0
-      blobCacheLevel   = 0
-      blobCacheFaults  = 0
-      blobCachePercent = 0
-      heapCacheSize    = 0
-      heapCacheLevel   = 0
-      heapCacheFaults  = 0
-      heapCachePercent = 0
-      suSessions       = 0
+      blob_cache_size    = 0
+      blob_cache_level   = 0
+      blob_cache_faults  = 0
+      blob_cache_percent = 0
+      heap_cache_size    = 0
+      heap_cache_level   = 0
+      heap_cache_faults  = 0
+      heap_cache_percent = 0
+      su_sessions        = 0
 
       # defines:
       #   0: false
@@ -29,60 +29,60 @@ module CarbonData
 
         value = value.values.first
 
-        blobCacheSize    = value.dig('BlobCacheSize')
-        blobCacheLevel   = value.dig('BlobCacheLevel')
-        blobCacheFaults  = value.dig('BlobCacheFaults')
-        blobCachePercent = ( 100 * blobCacheLevel.to_i / blobCacheSize.to_i ).to_i
+        blob_cache_size    = value.dig('BlobCacheSize')
+        blob_cache_level   = value.dig('BlobCacheLevel')
+        blob_cache_faults  = value.dig('BlobCacheFaults')
+        blob_cache_percent = ( 100 * blob_cache_level.to_i / blob_cache_size.to_i ).to_i
 
-        heapCacheSize    = value.dig('HeapCacheSize')
-        heapCacheLevel   = value.dig('HeapCacheLevel')
-        heapCacheFaults  = value.dig('HeapCacheFaults')
-        heapCachePercent = ( 100 * heapCacheLevel.to_i / heapCacheSize.to_i ).to_i
+        heap_cache_size    = value.dig('HeapCacheSize')
+        heap_cache_level   = value.dig('HeapCacheLevel')
+        heap_cache_faults  = value.dig('HeapCacheFaults')
+        heap_cache_percent = ( 100 * heap_cache_level.to_i / heap_cache_size.to_i ).to_i
 
-        suSessions       = value.dig('NumberOfSUSessions')
+        su_sessions        = value.dig('NumberOfSUSessions')
 
-        connectionOpen   = value.dig('Open')
-        open = connectionOpen ? 1 : 0 if( connectionOpen != nil )
+        open_connections   = value.dig('Open')
+        open_connections   = open_connections ? 1 : 0 if( open_connections != nil )
       end
 
 
       result << {
-        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'blob', 'cache', 'size' ),
-        :value => blobCacheSize
+        key: format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'blob', 'cache', 'size' ),
+        value: blob_cache_size
       } << {
-        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'blob', 'cache', 'used' ),
-        :value => blobCacheLevel
+        key: format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'blob', 'cache', 'used' ),
+        value: blob_cache_level
       } << {
-        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'blob', 'cache', 'fault' ),
-        :value => blobCacheFaults
+        key: format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'blob', 'cache', 'fault' ),
+        value: blob_cache_faults
       } << {
-        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'blob', 'cache', 'used_percent' ),
-        :value => blobCachePercent
+        key: format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'blob', 'cache', 'used_percent' ),
+        value: blob_cache_percent
       } << {
-        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'heap', 'cache', 'size' ),
-        :value => heapCacheSize
+        key: format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'heap', 'cache', 'size' ),
+        value: heap_cache_size
       } << {
-        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'heap', 'cache', 'used' ),
-        :value => heapCacheLevel
+        key: format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'heap', 'cache', 'used' ),
+        value: heap_cache_level
       } << {
-        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'heap', 'cache', 'fault' ),
-        :value => heapCacheFaults
+        key: format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'heap', 'cache', 'fault' ),
+        value: heap_cache_faults
       } << {
-        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'heap', 'cache', 'used_percent' ),
-        :value => heapCachePercent
+        key: format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'heap', 'cache', 'used_percent' ),
+        value: heap_cache_percent
       } << {
-        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'su_sessions', 'sessions' ),
-        :value => suSessions
+        key: format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'su_sessions', 'sessions' ),
+        value: su_sessions
       } << {
-        :key   => format( '%s.%s.%s.%s'      , @identifier, @normalized_service_name, mbean, 'open' ),
-        :value => open
+        key: format( '%s.%s.%s.%s'      , @identifier, @normalized_service_name, mbean, 'open' ),
+        value: open_connections
       }
 
       result
     end
 
 
-    def clientsMemoryPool( key, data = {} )
+    def clients_memory_pool( key, data = {} )
 
       result  = []
       mbean   = 'MemoryPool'
@@ -97,8 +97,8 @@ module CarbonData
       used      = 0
       committed = 0
       percent   = 0
-      mbeanName = @mbean.beanName( bean )
-      mbeanName = mbeanName.strip.tr( ' ', '_' )
+      mbean_name = @mbean.beanName( bean )
+      mbean_name = mbean_name.strip.tr( ' ', '_' )
 
       if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil && usage != nil )
 
@@ -112,20 +112,20 @@ module CarbonData
       end
 
       result << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, mbeanName, 'init' ),
-        :value => init
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, mbean_name, 'init' ),
+        value: init
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, mbeanName, 'committed' ),
-        :value => committed
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, mbean_name, 'committed' ),
+        value: committed
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, mbeanName, 'max' ),
-        :value => max
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, mbean_name, 'max' ),
+        value: max
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, mbeanName, 'used_percent' ),
-        :value => percent
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, mbean_name, 'used_percent' ),
+        value: percent
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, mbeanName, 'used' ),
-        :value => used
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, mbean_name, 'used' ),
+        value: used
       }
 
       result

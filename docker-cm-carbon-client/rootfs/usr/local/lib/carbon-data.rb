@@ -129,39 +129,39 @@ module CarbonData
 
         # CAE
       when 'DataViewFactory'
-        graphite_output.push( caeDataViewFactory( values ) )
+        graphite_output.push( cae_dataview_factory( values ) )
       when /^CacheClasses/
-        graphite_output.push( caeCacheClasses( key, values ) )
+        graphite_output.push( cae_cache_classes( key, values ) )
 
         # Content Server
       when 'StoreQueryPool'
-        graphite_output.push( contentServerQueryPool( values ) )
+        graphite_output.push( contentserver_query_pool( values ) )
       when 'StoreConnectionPool'
-        graphite_output.push( contentServerConnectionPool( values ) )
+        graphite_output.push( contentserver_connection_pool( values ) )
       when 'Server'
-        graphite_output.push( contentServerServer( values ) )
+        graphite_output.push( contentserver_server( values ) )
       when 'StatisticsJobResult'
-        graphite_output.push( contentServerStatisticsJobResult( values ) )
+        graphite_output.push( contentserver_statistics_job_result( values ) )
       when 'StatisticsResourceCache'
-        graphite_output.push( contentServerStatisticsResourceCache( values ) )
+        graphite_output.push( contentserver_statistics_resource_cache( values ) )
 
         # Clients
       when 'CapConnection'
-        graphite_output.push( clientsCapConnection( values ) )
+        graphite_output.push( clients_cap_connection( values ) )
       when /^MemoryPool*/
-        graphite_output.push( clientsMemoryPool( key, values ) )
+        graphite_output.push( clients_memory_pool( key, values ) )
 
         # Feeder
       when 'Health'
-        graphite_output.push( feederHealth( values ) )
+        graphite_output.push( feeder_health( values ) )
       when 'ProactiveEngine'
-        graphite_output.push( feederProactiveEngine( values ) )
+        graphite_output.push( feeder_proactive_engine( values ) )
       when 'Feeder'
-        graphite_output.push( feederFeeder( values ) )
+        graphite_output.push( feeder_feeder( values ) )
       # currently disabled
       # need information or discusion about it
       when 'TransformedBlobCacheManager'
-        graphite_output.push( feederTransformedBlobCacheManager( values ) )
+        graphite_output.push( feeder_transformed_blobcache_manager( values ) )
 
         # Solr
       when /^Solr.*Replication/
@@ -251,7 +251,7 @@ module CarbonData
         when 'mongodb'
 
           if( result.is_a?( Hash ) )
-            graphite_output.push( databaseMongoDB( result ) )
+            graphite_output.push( database_mongodb( result ) )
           else
             logger.error( format( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
           end
@@ -259,7 +259,7 @@ module CarbonData
         when 'mysql'
 
           if( result.is_a?( Hash ) )
-            graphite_output.push( databaseMySQL( result ) )
+            graphite_output.push( database_mysql( result ) )
           else
             logger.error( format( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
           end
@@ -267,7 +267,7 @@ module CarbonData
         when 'postgres'
 
           if( result.is_a?( Hash ) )
-            graphite_output.push( databasePostgres( result ) )
+            graphite_output.push( database_postgres( result ) )
           else
             logger.error( format( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
           end
@@ -275,7 +275,7 @@ module CarbonData
         when 'node-exporter'
 
           if( result.is_a?( Hash ) )
-            graphite_output.push( operatingSystemNodeExporter( result ) )
+            graphite_output.push( operating_system_node_exporter( result ) )
           else
             logger.error( format( 'result is not valid (Host: \'%s\' :: service \'%s\')', @identifier, service ) )
           end

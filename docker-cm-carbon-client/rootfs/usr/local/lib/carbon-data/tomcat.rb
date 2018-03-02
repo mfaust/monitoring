@@ -19,11 +19,11 @@ module CarbonData
       end
 
       result << {
-        :key   => format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'uptime' ),
-        :value => uptime
+        key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'uptime' ),
+        value: uptime
       } << {
-        :key   => format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'starttime' ),
-        :value => start
+        key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'starttime' ),
+        value: start
       }
 
       result
@@ -79,44 +79,44 @@ module CarbonData
 
       result << {
         # PUTVAL master-17-tomcat/WFS-Manager-processing/count-time interval=15 N:4
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'processing', 'time' ),
-        :value => processing_time
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'processing', 'time' ),
+        value: processing_time
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'sessions', 'count' ),
-        :value => session_counter
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'sessions', 'count' ),
+        value: session_counter
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'sessions', 'expired' ),
-        :value => expired_sessions
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'sessions', 'expired' ),
+        value: expired_sessions
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'sessions', 'alive_avg' ),
-        :value => session_average_alive_time
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'sessions', 'alive_avg' ),
+        value: session_average_alive_time
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'sessions', 'rejected' ),
-        :value => rejected_sessions
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'sessions', 'rejected' ),
+        value: rejected_sessions
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'sessions', 'duplicates' ),
-        :value => duplicates
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'sessions', 'duplicates' ),
+        value: duplicates
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'sessions', 'max_alive' ),
-        :value => session_max_alive_time
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'sessions', 'max_alive' ),
+        value: session_max_alive_time
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'sessions', 'expire_rate' ),
-        :value => session_expire_rate
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'sessions', 'expire_rate' ),
+        value: session_expire_rate
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'sessions', 'create_rate' ),
-        :value => session_create_rate
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'sessions', 'create_rate' ),
+        value: session_create_rate
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'sessions', 'max_active' ),
-        :value => max_active
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'sessions', 'max_active' ),
+        value: max_active
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'sessions', 'expire_freq' ),
-        :value => process_expires_frequency
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'sessions', 'expire_freq' ),
+        value: process_expires_frequency
       }
 
       if( max_active_sessions.to_i != -1 )
         result << {
-          :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'sessions', 'max_active_allowed' ),
-          :value => max_active_sessions
+          key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'sessions', 'max_active_allowed' ),
+          value: max_active_sessions
         }
       end
 
@@ -158,20 +158,20 @@ module CarbonData
             end
 
           result << {
-            :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, type, 'init' ),
-            :value => init
+            key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, type, 'init' ),
+            value: init
           } << {
-            :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, type, 'max' ),
-            :value => max
+            key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, type, 'max' ),
+            value: max
           } << {
-            :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, type, 'used' ),
-            :value => used
+            key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, type, 'used' ),
+            value: used
           } << {
-            :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, type, 'used_percent' ),
-            :value => percent
+            key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, type, 'used_percent' ),
+            value: percent
           } << {
-            :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, type, 'committed' ),
-            :value => committed
+            key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, type, 'committed' ),
+            value: committed
           }
         end
       end
@@ -196,11 +196,11 @@ module CarbonData
       end
 
       result << {
-        :key   => format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'peak' ),
-        :value => peak
+        key: format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'peak' ),
+        value: peak
       } << {
-        :key   => format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'count' ),
-        :value => count
+        key: format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'count' ),
+        value: count
       }
 
       result
@@ -237,25 +237,21 @@ module CarbonData
       end
 
       result << {
-        :key   => format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'loaded' ),
-        :value => loaded
+        key: format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'loaded' ),
+        value: loaded
       } << {
-        :key   => format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'total' ),
-        :value => total_loaded
+        key: format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'total' ),
+        value: total_loaded
       } << {
-        :key   => format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'unloaded' ),
-        :value => unloaded
+        key: format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'unloaded' ),
+        value: unloaded
       }
 
       result
     end
 
-
-    def tomcat_thread_pool( data = {} )
-
-      # was für komische
-      # müssen wir klären
-    end
+    # not used
+    def tomcat_thread_pool( data = {} ) ; end
 
 
     private
@@ -276,11 +272,11 @@ module CarbonData
           mbean.gsub!( 'GC', 'GarbageCollector.' )
 
           result << {
-            :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'threads', 'count' ),
-            :value => thread_count
+            key: format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'threads', 'count' ),
+            value: thread_count
           } << {
-            :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'duration', 'time' ),
-            :value => duration
+            key: format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'duration', 'time' ),
+            value: duration
           }
 
           # currently not needed
@@ -312,17 +308,17 @@ module CarbonData
 #                type      = type.strip.tr( ' ', '_' ).downcase
 #
 #                result << {
-#                  :key   => format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'duration', gcType, type, 'init' ),
-#                  :value => init
+#                  key: format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'duration', gcType, type, 'init' ),
+#                  value: init
 #                } << {
-#                  :key   => format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'duration', gcType, type, 'committed' ),
-#                  :value => committed
+#                  key: format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'duration', gcType, type, 'committed' ),
+#                  value: committed
 #                } << {
-#                  :key   => format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'duration', gcType, type, 'max' ),
-#                  :value => max
+#                  key: format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'duration', gcType, type, 'max' ),
+#                  value: max
 #                } << {
-#                  :key   => format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'duration', gcType, type, 'used' ),
-#                  :value => used
+#                  key: format( '%s.%s.%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'duration', gcType, type, 'used' ),
+#                  value: used
 #                }
 #
 #              end
@@ -334,7 +330,6 @@ module CarbonData
 
       result
     end
-
 
 
   end

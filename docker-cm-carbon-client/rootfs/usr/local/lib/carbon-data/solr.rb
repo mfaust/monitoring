@@ -4,24 +4,6 @@ module CarbonData
   module Solr
 
 
-    def solr_core( mbean )
-
-      regex = /
-        ^                     # Starting at the front of the string
-        solr\/                #
-        (?<core>.+[a-zA-Z0-9]):  #
-        (.*)                  #
-        type=                 #
-        (?<type>.+[a-zA-Z])   #
-        $
-      /x
-
-      parts          = mbean.match( regex )
-
-      format( 'core_%s', parts['core'].to_s.strip.tr( '. ', '' ).downcase )
-    end
-
-
     def solr_cache( mbean, data = {} )
 
       result    = []
@@ -38,11 +20,6 @@ module CarbonData
       hits                 = 0
       size                 = 0
       hitratio             = 0
-      cumulative_inserts   = 0
-      cumulative_hits      = 0
-      cumulative_evictions = 0
-      cumulative_hitratio  = 0
-      cumulative_lookups   = 0
 
       if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil )
 
@@ -56,26 +33,26 @@ module CarbonData
       end
 
       result << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, solr_core, mbean, 'warmupTime' ),
-        :value => warmup_time
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, solr_core, mbean, 'warmupTime' ),
+        value: warmup_time
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, solr_core, mbean, 'lookups' ),
-        :value => lookups
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, solr_core, mbean, 'lookups' ),
+        value: lookups
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, solr_core, mbean, 'evictions' ),
-        :value => evictions
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, solr_core, mbean, 'evictions' ),
+        value: evictions
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, solr_core, mbean, 'inserts' ),
-        :value => inserts
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, solr_core, mbean, 'inserts' ),
+        value: inserts
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, solr_core, mbean, 'hits' ),
-        :value => hits
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, solr_core, mbean, 'hits' ),
+        value: hits
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, solr_core, mbean, 'size' ),
-        :value => size
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, solr_core, mbean, 'size' ),
+        value: size
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, solr_core, mbean, 'hitratio' ),
-        :value => hitratio
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, solr_core, mbean, 'hitratio' ),
+        value: hitratio
       }
 
       result
@@ -140,20 +117,20 @@ module CarbonData
       end
 
       result << {
-        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, solr_core, mbean, 'index', 'size' ),
-        :value => index_size.to_s
+        key: format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, solr_core, mbean, 'index', 'size' ),
+        value: index_size.to_s
       } << {
-        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, solr_core, mbean, 'index', 'version' ),
-        :value => index_version
+        key: format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, solr_core, mbean, 'index', 'version' ),
+        value: index_version
       } << {
-        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, solr_core, mbean, 'errors' ),
-        :value => errors
+        key: format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, solr_core, mbean, 'errors' ),
+        value: errors
       } << {
-        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, solr_core, mbean, 'requests' ),
-        :value => requests
+        key: format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, solr_core, mbean, 'requests' ),
+        value: requests
       } << {
-        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, solr_core, mbean, 'errors' ),
-        :value => errors
+        key: format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, solr_core, mbean, 'errors' ),
+        value: errors
       }
 
       result
@@ -189,26 +166,46 @@ module CarbonData
 
 
       result << {
-        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, solr_core, mbean, 'requests' ),
-        :value => requests
+        key: format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, solr_core, mbean, 'requests' ),
+        value: requests
       } << {
-        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, solr_core, mbean, 'timeouts' ),
-        :value => timeouts
+        key: format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, solr_core, mbean, 'timeouts' ),
+        value: timeouts
       } << {
-        :key   => format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, solr_core, mbean, 'errors' ),
-        :value => errors
+        key: format( '%s.%s.%s.%s.%s'   , @identifier, @normalized_service_name, solr_core, mbean, 'errors' ),
+        value: errors
       } << {
-        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, solr_core, mbean, 'requestPerSecond', 'avg' ),
-        :value => avg_requests_per_second
+        key: format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, solr_core, mbean, 'requestPerSecond', 'avg' ),
+        value: avg_requests_per_second
       } << {
-        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, solr_core, mbean, 'timePerRequest', 'avg' ),
-        :value => avg_time_per_request
+        key: format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, solr_core, mbean, 'timePerRequest', 'avg' ),
+        value: avg_time_per_request
       } << {
-        :key   => format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, solr_core, mbean, 'RequestTime', 'median' ),
-        :value => median_request_time
+        key: format( '%s.%s.%s.%s.%s.%s', @identifier, @normalized_service_name, solr_core, mbean, 'RequestTime', 'median' ),
+        value: median_request_time
       }
 
       result
     end
+
+
+    private
+    def solr_core( mbean )
+
+      regex = /
+        ^                     # Starting at the front of the string
+        solr\/                #
+        (?<core>.+[a-zA-Z0-9]):  #
+        (.*)                  #
+        type=                 #
+        (?<type>.+[a-zA-Z])   #
+        $
+      /x
+
+      parts          = mbean.match( regex )
+
+      format( 'core_%s', parts['core'].to_s.strip.tr( '. ', '' ).downcase )
+    end
+
   end
 end

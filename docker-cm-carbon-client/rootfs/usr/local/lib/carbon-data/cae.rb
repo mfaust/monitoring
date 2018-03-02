@@ -2,7 +2,7 @@ module CarbonData
 
   module Cae
 
-    def caeDataViewFactory( data = {} )
+    def cae_dataview_factory( data = {} )
 
       result    = []
       mbean     = 'DataViewFactory'
@@ -14,8 +14,8 @@ module CarbonData
       cached       = 0
       invalidated  = 0
       evicted      = 0
-      activeTime   = 0
-      totalTime    = 0
+      active_time   = 0
+      total_time    = 0
 
       if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil )
 
@@ -26,39 +26,39 @@ module CarbonData
         cached       = value.dig('NumberOfCachedDataViews')
         invalidated  = value.dig('NumberOfInvalidatedDataViews')
         evicted      = value.dig('NumberOfEvictedDataViews')
-        activeTime   = value.dig('ActiveTimeOfComputedDataViews')
-        totalTime    = value.dig('TotalTimeOfComputedDataViews')
+        active_time  = value.dig('ActiveTimeOfComputedDataViews')
+        total_time   = value.dig('TotalTimeOfComputedDataViews')
 
       end
 
       result << {
-        :key   => format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'lookups' ),
-        :value => lookups
+        key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'lookups' ),
+        value: lookups
       } << {
-        :key   => format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'computed' ),
-        :value => computed
+        key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'computed' ),
+        value: computed
       } << {
-        :key   => format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'cached' ),
-        :value => cached
+        key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'cached' ),
+        value: cached
       } << {
-        :key   => format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'invalidated' ),
-        :value => invalidated
+        key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'invalidated' ),
+        value: invalidated
       } << {
-        :key   => format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'evicted' ),
-        :value => evicted
+        key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'evicted' ),
+        value: evicted
       } << {
-        :key   => format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'activeTime' ),
-        :value => activeTime
+        key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'activeTime' ),
+        value: active_time
       } << {
-        :key   => format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'totalTime' ),
-        :value => totalTime
+        key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'totalTime' ),
+        value: total_time
       }
 
       result
     end
 
 
-    def caeCacheClasses( key, data = {} )
+    def cae_cache_classes( key, data = {} )
 
       result      = []
       mbean       = 'CacheClasses'
@@ -74,7 +74,7 @@ module CarbonData
       #
       return if( status == 404 )
 
-      cacheClass  = key.gsub( mbean, '' )
+      cache_class  = key.gsub( mbean, '' )
 
       data['service'] = @normalized_service_name
 
@@ -85,7 +85,7 @@ module CarbonData
       inserted  = 0
       removed   = 0
       level     = 0
-      missRate  = 0
+      miss_rate  = 0
 
       if( @mbean.checkBeanConsistency( key, data ) == true && value != nil )
 
@@ -97,31 +97,30 @@ module CarbonData
         inserted  = value.dig('Inserted')
         removed   = value.dig('Removed')
         level     = value.dig('Level')
-        missRate  = value.dig('MissRate')
-
+        miss_rate  = value.dig('MissRate')
       end
 
       result << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, cacheClass, 'evaluated' ),
-        :value => evaluated
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, cache_class, 'evaluated' ),
+        value: evaluated
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, cacheClass, 'evicted' ),
-        :value => evicted
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, cache_class, 'evicted' ),
+        value: evicted
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, cacheClass, 'inserted' ),
-        :value => inserted
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, cache_class, 'inserted' ),
+        value: inserted
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, cacheClass, 'removed' ),
-        :value => removed
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, cache_class, 'removed' ),
+        value: removed
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, cacheClass, 'level' ),
-        :value => level
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, cache_class, 'level' ),
+        value: level
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, cacheClass, 'capacity' ),
-        :value => capacity
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, cache_class, 'capacity' ),
+        value: capacity
       } << {
-        :key   => format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, cacheClass, 'missRate' ),
-        :value => missRate
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, cache_class, 'missRate' ),
+        value: miss_rate
       }
 
       result

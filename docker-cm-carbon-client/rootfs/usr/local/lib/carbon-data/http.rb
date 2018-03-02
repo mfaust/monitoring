@@ -54,56 +54,56 @@ module CarbonData
 #           cache_remove_miss      = value.dig('CacheRemoveMissCount') || 0
 
           result << {
-            :key   => format( '%s.%s.%s'      , @identifier, @normalized_service_name, 'uptime' ),
-            :value => uptime
+            key: format( '%s.%s.%s'      , @identifier, @normalized_service_name, 'uptime' ),
+            value: uptime
           } << {
-            :key   => format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'workers', 'busy' ),
-            :value => busy_workers
+            key: format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'workers', 'busy' ),
+            value: busy_workers
           } << {
-            :key   => format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'workers', 'idle' ),
-            :value => idle_workers
+            key: format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'workers', 'idle' ),
+            value: idle_workers
           } << {
-            :key   => format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'scoreboard', 'waiting' ),
-            :value => sb_waiting
+            key: format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'scoreboard', 'waiting' ),
+            value: sb_waiting
           } << {
-            :key   => format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'scoreboard', 'sending' ),
-            :value => sb_sending
+            key: format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'scoreboard', 'sending' ),
+            value: sb_sending
           } << {
-            :key   => format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'scoreboard', 'open' ),
-            :value => sb_open
+            key: format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'scoreboard', 'open' ),
+            value: sb_open
           } << {
-            :key   => format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'scoreboard', 'starting' ),
-            :value => sb_starting
+            key: format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'scoreboard', 'starting' ),
+            value: sb_starting
           } << {
-            :key   => format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'scoreboard', 'reading' ),
-            :value => sb_reading
+            key: format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'scoreboard', 'reading' ),
+            value: sb_reading
           } << {
-            :key   => format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'scoreboard', 'keepalive' ),
-            :value => sb_keepalive
+            key: format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'scoreboard', 'keepalive' ),
+            value: sb_keepalive
           } << {
-            :key   => format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'scoreboard', 'dns' ),
-            :value => sb_dns
+            key: format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'scoreboard', 'dns' ),
+            value: sb_dns
           } << {
-            :key   => format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'scoreboard', 'closing' ),
-            :value => sb_closing
+            key: format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'scoreboard', 'closing' ),
+            value: sb_closing
           } << {
-            :key   => format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'scoreboard', 'logging' ),
-            :value => sb_logging
+            key: format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'scoreboard', 'logging' ),
+            value: sb_logging
           } << {
-            :key   => format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'scoreboard', 'graceful' ),
-            :value => sb_graceful
+            key: format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'scoreboard', 'graceful' ),
+            value: sb_graceful
           } << {
-            :key   => format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'scoreboard', 'idle' ),
-            :value => sb_idle
+            key: format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'scoreboard', 'idle' ),
+            value: sb_idle
           } << {
-            :key   => format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'bytes', 'per_sec' ),
-            :value => bytes_per_sec
+            key: format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'bytes', 'per_sec' ),
+            value: bytes_per_sec
           } << {
-            :key   => format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'bytes', 'per_req' ),
-            :value => bytes_per_req
+            key: format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'bytes', 'per_req' ),
+            value: bytes_per_req
           } << {
-            :key   => format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'requests', 'per_sec' ),
-            :value => req_per_sec
+            key: format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'requests', 'per_sec' ),
+            value: req_per_sec
           }
 
         end

@@ -56,7 +56,7 @@ module CarbonData
     end
 
 
-    def timeParser( start_time, end_time )
+    def time_parser( start_time, end_time )
 
       seconds_diff = (start_time - end_time).to_i.abs
 
