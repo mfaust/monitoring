@@ -24,23 +24,39 @@ mysql_host        = ENV.fetch('MYSQL_HOST'             , 'database')
 mysql_schema      = ENV.fetch('DISCOVERY_DATABASE_NAME', 'discovery')
 mysql_user        = ENV.fetch('DISCOVERY_DATABASE_USER', 'discovery')
 mysql_password    = ENV.fetch('DISCOVERY_DATABASE_PASS', 'discovery')
-interval          = ENV.fetch('INTERVAL'               , 30 )
-delay             = ENV.fetch('RUN_DELAY'              , 10 )
+interval          = ENV.fetch('INTERVAL'               , '45s' )
+delay             = ENV.fetch('RUN_DELAY'              , '20s' )
+
+# -----------------------------------------------------------------------------
+# validate durations for the Scheduler
+
+def validate_scheduler_values( duration, default )
+  raise ArgumentError.new(format('wrong type. \'duration\' must be an String, given %s', duration.class.to_s )) unless( duration.is_a?(String) )
+  raise ArgumentError.new(format('wrong type. \'default\' must be an Float, given %s', default.class.to_s )) unless( default.is_a?(Float) )
+  i = Rufus::Scheduler.parse( duration.to_s )
+  i = default.to_f if( i < default.to_f )
+  Rufus::Scheduler.to_duration( i )
+end
+
+interval         = validate_scheduler_values( interval, 10.0 )
+delay            = validate_scheduler_values( delay, 30.0 )
+
+# -----------------------------------------------------------------------------
 
 config = {
   redis: {
     host: redis_host,
-    port: redisPort
+    port: redis_port
   },
   graphite: {
-    host: carbonHost,
-    port: carbonPort
+    host: carbon_host,
+    port: carbon_port
   },
   mysql: {
-    host: mysqlHost,
-    schema: mysqlSchema,
-    user: mysqlUser,
-    password: mysqlPassword
+    host: mysql_host,
+    schema: mysql_schema,
+    user: mysql_user,
+    password: mysql_password
   }
 }
 
