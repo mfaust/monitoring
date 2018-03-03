@@ -57,7 +57,9 @@ class CMGrafana
         mls_identifier           = @graphite_identifier
         slug                     = @slug
         graphite_identifier      = @graphite_identifier
+        icinga_identifier        = graphite_identifier.gsub('.','_')
         short_hostname           = @short_hostname
+        grafana_title            = format('%s - %s', slug, description )
 
         logger.info( sprintf( 'Creating dashboard for \'%s\'', service_name ) )
 

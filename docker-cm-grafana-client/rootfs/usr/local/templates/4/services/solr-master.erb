@@ -53,13 +53,13 @@
         "title": "New row"
       },
       {
-        "title": "Query Result - Cache Index Size",
+        "title": "Query Result",
         "height": "200px",
         "editable": true,
         "collapse": false,
         "panels": [
           {
-            "title": "Query Result - Cache Index Size",
+            "title": "Query Result",
             "error": false,
             "span": 12,
             "editable": true,
@@ -70,6 +70,16 @@
               {
                 "refId": "A",
                 "target": "aliasByNode(carbon-writer.$host.SOLR_MASTER.core_$core.QueryResultCache.size, 3)",
+                "textEditor": false
+              },
+              {
+                "refId": "B",
+                "target": "aliasByNode(carbon-writer.$host.SOLR_MASTER.core_$core.QueryResultCache.hits, 3)",
+                "textEditor": false
+              },
+              {
+                "refId": "C",
+                "target": "aliasByNode(carbon-writer.$host.SOLR_MASTER.core_$core.QueryResultCache.hitratio, 3)",
                 "textEditor": false
               }
             ],
