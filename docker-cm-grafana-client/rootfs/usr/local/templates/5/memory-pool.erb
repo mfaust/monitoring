@@ -1,87 +1,13 @@
 {
-  "meta": {
-    "updated": "2018-02-10T09:46:06+01:00",
-    "created": "2018-02-10T09:46:06+01:00",
-    "updatedBy": "admin",
-    "slug": "<%= slug %>-memory-pools",
-    "canEdit": true,
-    "folderId": 0,
-    "expires": "0001-01-01T00:00:00Z",
-    "canSave": true,
-    "url": "/grafana/d/6zA1Viqzz/<%= slug %>-memory-pools",
-    "version": 1,
-    "folderTitle": "General",
-    "createdBy": "admin",
-    "canStar": true,
-    "hasAcl": false,
-    "isFolder": false,
-    "canAdmin": true,
-    "folderUrl": "",
-    "type": "db"
-  },
   "dashboard": {
+    "id": null,
+    "uid": null,
     "title": "<%= slug %> - Memory Pools",
+    "tags": [ "<%= short_hostname %>" ],
+    "editable": true,
     "annotations": {
-      "list": [
-        {
-          "iconColor": "rgb(93, 227, 12)",
-          "showIn": 0,
-          "datasource": "-- Grafana --",
-          "type": "tags",
-          "tags": [
-            "<%= slug %>",
-            "created"
-          ],
-          "hide": false,
-          "enable": true,
-          "name": "created",
-          "limit": 10
-        },
-        {
-          "type": "tags",
-          "datasource": "-- Grafana --",
-          "tags": [
-            "<%= slug %>",
-            "destoyed"
-          ],
-          "showIn": 0,
-          "iconColor": "rgb(227, 57, 12)",
-          "hide": false,
-          "enable": true,
-          "name": "destoyed",
-          "limit": 10
-        },
-        {
-          "enable": true,
-          "hide": false,
-          "iconColor": "rgb(26, 196, 220)",
-          "showIn": 0,
-          "datasource": "-- Grafana --",
-          "type": "tags",
-          "tags": [
-            "<%= slug %>",
-            "loadtest"
-          ],
-          "limit": 10,
-          "name": "Load Tests"
-        },
-        {
-          "enable": true,
-          "hide": false,
-          "tags": [
-            "<%= slug %>",
-            "deployment"
-          ],
-          "type": "tags",
-          "datasource": "-- Grafana --",
-          "showIn": 0,
-          "iconColor": "rgb(176, 40, 253)",
-          "limit": 10,
-          "name": "Deployments"
-        }
-      ]
+      "list": []
     },
-    "uid": "6zA1Viqzz",
     "timepicker": {
       "now": true,
       "refresh_intervals": [
@@ -224,15 +150,9 @@
         }
       ]
     },
-    "editable": true,
-    "originalTitle": "<%= slug %> - Memory Pools",
-    "id": null,
-    "tags": [
-      "<%= short_hostname %>"
-    ],
     "rows": [
       {
-        "height": "150px",
+        "height": "160px",
         "collapse": false,
         "title": "Par Eden Space",
         "editable": true,
@@ -246,13 +166,15 @@
             "seriesOverrides": [
               {
                 "yaxis": 2,
-                "alias": "percent",
-                "color": "#C15C17"
+                "fill": 4,
+                "color": "#C15C17",
+                "alias": "percent"
               },
               {
                 "yaxis": 2,
-                "alias": "percent (avg)",
-                "color": "#BF1B00"
+                "fill": 4,
+                "color": "#BF1B00",
+                "alias": "percent (avg)"
               }
             ],
             "stack": false,
@@ -334,7 +256,6 @@
               "min": false,
               "avg": false,
               "show": true,
-              "sideWidth": 200,
               "alignAsTable": true
             },
             "id": 10,
@@ -351,7 +272,7 @@
         ]
       },
       {
-        "height": "150px",
+        "height": "160px",
         "collapse": false,
         "title": "Par Survivor Space",
         "panels": [
@@ -362,7 +283,6 @@
               "avg": false,
               "min": false,
               "show": true,
-              "sideWidth": 200,
               "alignAsTable": true,
               "max": false,
               "total": false,
@@ -401,13 +321,15 @@
             "seriesOverrides": [
               {
                 "yaxis": 2,
-                "alias": "percent",
-                "color": "#C15C17"
+                "fill": 4,
+                "color": "#C15C17",
+                "alias": "percent"
               },
               {
-                "alias": "percent (avg)",
+                "yaxis": 2,
+                "fill": 4,
                 "color": "#BF1B00",
-                "yaxis": 2
+                "alias": "percent (avg)"
               }
             ],
             "renderer": "flot",
@@ -533,13 +455,15 @@
             "seriesOverrides": [
               {
                 "yaxis": 2,
+                "fill": 4,
                 "color": "#C15C17",
                 "alias": "percent"
               },
               {
+                "yaxis": 2,
+                "fill": 4,
                 "color": "#BF1B00",
-                "alias": "percent (avg)",
-                "yaxis": 2
+                "alias": "percent (avg)"
               }
             ],
             "error": false,
@@ -585,7 +509,7 @@
             "nullPointMode": "connected"
           }
         ],
-        "height": "150px",
+        "height": "160px",
         "collapse": false
       },
       {
@@ -647,13 +571,15 @@
             "seriesOverrides": [
               {
                 "yaxis": 2,
+                "fill": 4,
                 "color": "#C15C17",
                 "alias": "percent"
               },
               {
                 "yaxis": 2,
-                "alias": "percent (avg)",
-                "color": "#BF1B00"
+                "fill": 4,
+                "color": "#BF1B00",
+                "alias": "percent (avg)"
               }
             ],
             "stack": false,
@@ -678,7 +604,6 @@
               "avg": false,
               "min": false,
               "show": true,
-              "sideWidth": 200,
               "alignAsTable": true,
               "max": false,
               "total": false,
@@ -746,7 +671,6 @@
               "avg": false,
               "min": false,
               "show": true,
-              "sideWidth": 200,
               "alignAsTable": true,
               "values": true,
               "total": false,
@@ -812,24 +736,26 @@
             "stack": false,
             "seriesOverrides": [
               {
+                "yaxis": 2,
+                "fill": 4,
                 "color": "#C15C17",
-                "alias": "percent",
-                "yaxis": 2
+                "alias": "percent"
               },
               {
                 "yaxis": 2,
+                "fill": 4,
                 "color": "#BF1B00",
                 "alias": "percent (avg)"
               }
             ]
           }
         ],
-        "height": "150px",
+        "height": "160px",
         "collapse": false
       },
       {
         "collapse": false,
-        "height": "150px",
+        "height": "160px",
         "editable": true,
         "panels": [
           {
@@ -860,7 +786,6 @@
               "show": true,
               "min": false,
               "avg": false,
-              "sideWidth": 200,
               "alignAsTable": true,
               "values": true,
               "total": false,
@@ -916,14 +841,16 @@
             "stack": false,
             "seriesOverrides": [
               {
+                "yaxis": 2,
+                "fill": 4,
                 "color": "#C15C17",
-                "alias": "percent",
-                "yaxis": 2
+                "alias": "percent"
               },
               {
+                "yaxis": 2,
+                "fill": 4,
                 "color": "#BF1B00",
-                "alias": "percent (avg)",
-                "yaxis": 2
+                "alias": "percent (avg)"
               }
             ],
             "tooltip": {

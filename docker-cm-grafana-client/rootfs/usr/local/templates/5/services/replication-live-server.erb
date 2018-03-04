@@ -1,19 +1,21 @@
+<%- id = 10; -%>
 {
   "dashboard": {
+    "id": null,
+    "uid": null,
+    "title": "<%= slug %> - RLS",
+    "tags": [ "<%= short_hostname %>", "content-server" ],
+    "style": "dark",
+    "timezone": "browser",
+    "editable": true,
+    "hideControls": false,
+    "sharedCrosshair": true,
     "schemaVersion": 12,
     "refresh": "1m",
     "annotations": {
       "list": []
     },
     "links": [],
-    "editable": true,
-    "uid": null,
-    "tags": [
-      "<%= short_hostname %>",
-      "content-server"
-    ],
-    "id": null,
-    "sharedCrosshair": true,
     "time": {
       "from": "now-3h",
       "to": "now"
@@ -57,9 +59,6 @@
       ]
     },
     "version": 1,
-    "style": "dark",
-    "title": "<%= slug %> - RLS",
-    "timezone": "browser",
     "timepicker": {
       "time_options": [
         "5m",
@@ -84,14 +83,14 @@
     },
     "rows": [
       {
-        "height": 42,
+        "height": "25px",
         "repeatRowId": null,
         "repeat": null,
         "titleSize": "h6",
         "panels": [
           {
             "mode": "html",
-            "id": 10,
+            "id": <%= id += 1 %>,
             "type": "text",
             "content": "<h3><center><a href=\"<%= tomcat_dashboard_url %>?var-Application=RLS\">Tomcat</a></center></h3>",
             "transparent": true,
@@ -115,7 +114,7 @@
             "transparent": true,
             "error": false,
             "mode": "html",
-            "id": 11,
+            "id": <%= id += 1 %>,
             "span": 12,
             "links": [],
             "editable": true,
@@ -127,7 +126,7 @@
         "editable": true
       },
       {
-        "height": "150px",
+        "height": "170px",
         "editable": true,
         "panels": [
           {
@@ -137,12 +136,12 @@
                 "logBase": 1,
                 "max": null,
                 "show": true,
-                "min": null
+                "min": 0
               },
               {
                 "format": "short",
                 "show": false,
-                "min": null,
+                "min": 0,
                 "logBase": 1,
                 "max": null
               }
@@ -212,7 +211,7 @@
             },
             "error": false,
             "nullPointMode": "connected",
-            "id": 12,
+            "id": <%= id += 1 %>,
             "renderer": "flot",
             "editable": true,
             "links": [],
@@ -259,14 +258,14 @@
               {
                 "max": null,
                 "logBase": 1,
-                "min": null,
+                "min": 0,
                 "show": true,
                 "format": "none"
               },
               {
                 "format": "short",
                 "show": true,
-                "min": null,
+                "min": 0,
                 "logBase": 1,
                 "max": null
               }
@@ -298,7 +297,7 @@
             "linewidth": 1,
             "aliasColors": {},
             "nullPointMode": "connected",
-            "id": 13,
+            "id": <%= id += 1 %>,
             "renderer": "flot",
             "links": [],
             "editable": true,
@@ -325,7 +324,7 @@
             "links": [],
             "editable": true,
             "renderer": "flot",
-            "id": 14,
+            "id": <%= id += 1 %>,
             "nullPointMode": "connected",
             "error": false,
             "legend": {
@@ -376,7 +375,7 @@
             "yaxes": [
               {
                 "show": true,
-                "min": null,
+                "min": 0,
                 "max": null,
                 "logBase": 1,
                 "format": "none"
@@ -384,7 +383,7 @@
               {
                 "format": "short",
                 "show": true,
-                "min": null,
+                "min": 0,
                 "max": null,
                 "logBase": 1
               }
@@ -405,7 +404,7 @@
                 "format": "none",
                 "label": null,
                 "show": true,
-                "min": null,
+                "min": 0,
                 "logBase": 1,
                 "max": null
               },
@@ -464,7 +463,7 @@
               "total": false
             },
             "error": false,
-            "id": 15,
+            "id": <%= id += 1 %>,
             "nullPointMode": "connected",
             "renderer": "flot",
             "editable": true,
@@ -498,7 +497,7 @@
             "fill": 3,
             "links": [],
             "renderer": "flot",
-            "id": 16,
+            "id": <%= id += 1 %>,
             "nullPointMode": "connected",
             "tooltip": {
               "sort": 0,
@@ -580,7 +579,6 @@
         "height": 250,
         "repeatIteration": null
       }
-    ],
-    "hideControls": false
+    ]
   }
 }

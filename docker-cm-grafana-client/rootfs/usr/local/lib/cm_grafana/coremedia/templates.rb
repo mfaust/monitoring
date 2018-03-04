@@ -61,6 +61,21 @@ class CMGrafana
         short_hostname           = @short_hostname
         grafana_title            = format('%s - %s', slug, description )
 
+        ## -------------------------------------------------------
+        #logger.debug( sprintf( '  service_name       \'%s\'', service_name ) )
+        #logger.debug( sprintf( '  description        \'%s\'', description ) )
+        #logger.debug( sprintf( '  normalized_name    \'%s\'', normalized_name ) )
+        #logger.debug( sprintf( '  service_template    \'%s\'', service_template ) )
+        #logger.debug( sprintf( '  additional_template_paths    \'%s\'', additional_template_paths ) )
+        #logger.debug( sprintf( '  slug               \'%s\'', slug ) )
+        #logger.debug( sprintf( '  graphite_identifier \'%s\'', graphite_identifier ) )
+        #logger.debug( sprintf( '  short_hostname     \'%s\'', short_hostname ) )
+        #logger.debug( sprintf( '  mls_identifier     \'%s\'', mls_identifier ) )
+        #logger.debug( sprintf( '  tomcat_dashboard_url \'%s\'', tomcat_dashboard_url ) )
+        #logger.debug( sprintf( '  icinga_identifier  \'%s\'', icinga_identifier ) )
+        #logger.debug( sprintf( '  grafana_title      \'%s\'', grafana_title ) )
+        ## -------------------------------------------------------
+
         logger.info( sprintf( 'Creating dashboard for \'%s\'', service_name ) )
 
         if( service_name == 'replication-live-server' )
@@ -115,7 +130,7 @@ class CMGrafana
 
         template_file = File.read( service_template )
 
-        template = ERB.new(template_file)
+        template = ERB.new(template_file, nil, '-' )
         template = template.result(binding)
 
         template_json = JSON.parse( template ) if( template.is_a?( String ) )
@@ -143,38 +158,12 @@ class CMGrafana
         # TODO
         # switch to gem
         json = add_annotations(template_json)
-
-#         json = normalize_template(
-#           template: template_json,
-#           service_name: service_name,
-#           description: description,
-#           normalized_name: normalized_name,
-#           slug: @slug,
-#           graphite_identifier: @graphite_identifier,
-#           short_hostname: @short_hostname,
-#           mls_identifier: mls_identifier,
-#           tomcat_dashboard_url: tomcat_dashboard_url
-#         )
-
         json = JSON.parse( json ) if( json.is_a?(String) )
         title = json.dig('dashboard','title')
 
-        # TODO
-        # check, if dashboard exists
-        # check, if we can overwrite the dashboard
         response = create_dashboard( title: title, dashboard: json )
         response_status  = response.dig('status').to_i
         response_message = response.dig('message')
-
-
-        # {"id"=>63, "slug"=>"osmc-local-delivery-cae", "status"=>200, "uid"=>"1KQmzwqkk",
-        #"url"=>"/grafana/d/1KQmzwqkk/osmc-local-delivery-cae", "version"=>1, "message"=>"success"}
-
-        #logger.debug('------------------------------')
-        #logger.debug("response: #{response} (#{response.class.to_s})")
-        #logger.debug(response.dig('message'))
-        #logger.debug(response.dig(:message))
-        #logger.debug('------------------------------')
 
         logger.warn( format('template can\'t be add: [%s] %s', response_status, response_message ) ) if( response_status != 200 )
 
@@ -241,7 +230,7 @@ class CMGrafana
         service_name       = params.dig(:service_name)
         description        = params.dig(:description)
         normalized_name    = params.dig(:normalized_name)
-        slug   = params.dig(:slug)
+        slug               = params.dig(:slug)
         graphite_identifier = params.dig(:graphite_identifier)
         short_hostname     = params.dig(:short_hostname)
         mls_identifier     = params.dig(:mls_identifier)
@@ -254,7 +243,7 @@ class CMGrafana
         #logger.debug( sprintf( '  service_name       \'%s\'', service_name ) )
         #logger.debug( sprintf( '  description        \'%s\'', description ) )
         #logger.debug( sprintf( '  normalized_name    \'%s\'', normalized_name ) )
-        #logger.debug( sprintf( '  slug   \'%s\'', slug ) )
+        #logger.debug( sprintf( '  slug               \'%s\'', slug ) )
         #logger.debug( sprintf( '  graphite_identifier \'%s\'', graphite_identifier ) )
         #logger.debug( sprintf( '  short_hostname     \'%s\'', short_hostname ) )
         #logger.debug( sprintf( '  mls_identifier     \'%s\'', mls_identifier ) )
@@ -268,7 +257,7 @@ class CMGrafana
         template = JSON.generate(template) if( template.is_a?( Hash ) )
 
         # use ruby internal template engine ERB
-        template = ERB.new(template)
+        template = ERB.new(template, nil, '-' )
         template = template.result(binding)
 
         begin
