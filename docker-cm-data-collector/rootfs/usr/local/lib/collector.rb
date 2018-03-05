@@ -539,7 +539,13 @@ module DataCollector
 
           result[v] ||= []
 
-          cacheKey = Storage::RedisClient.cacheKey( host: fqdn, pre: 'result', service: v )
+          cache_key = { host: fqdn, pre: 'result', service: v }
+          logger.debug( "plain cache_key: #{cache_key}" )
+
+          cacheKey = Storage::RedisClient.cacheKey( cache_key )
+          logger.debug( "redis cache_key: #{cacheKey}" )
+
+          #cacheKey = Storage::RedisClient.cacheKey( host: fqdn, pre: 'result', service: v )
 
           if( i.count > 1 )
 
