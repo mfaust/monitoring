@@ -423,7 +423,7 @@ module CarbonData
           controller_state.downcase!
 
           result << {
-            key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, 'Replicator', 'CompletedSequenceNumber' ),
+            key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, 'Replicator', 'completedSequenceNumber' ),
             value: completed_sequence_number
           } << {
             key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, 'Replicator', 'uncompleted' ),
