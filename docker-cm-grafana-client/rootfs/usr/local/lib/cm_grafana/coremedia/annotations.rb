@@ -62,10 +62,21 @@ class CMGrafana
           }
         )
 
+        short_hostname           = @short_hostname
+        renderer = ERB.new(annotations)
+        template = renderer.result(binding)
+        annotations = JSON.parse( template ) if( template.is_a?( String ) )
+
         template_json = JSON.parse( template_json ) if( template_json.is_a?( String ) )
         annotation    = template_json.dig( 'dashboard', 'annotations' )
 
-        template_json['dashboard']['annotations'] = JSON.parse( annotations ) unless( annotation.nil? )
+#         logger.debug( "annotation: #{annotation.size} #{annotation.class.to_s}" )
+
+        begin
+          template_json['dashboard']['annotations'] = annotations unless( annotation.nil? )
+        rescue => error
+          logger.error( error )
+        end
 
         template_json
       end
