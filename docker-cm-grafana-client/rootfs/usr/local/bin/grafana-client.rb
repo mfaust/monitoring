@@ -13,25 +13,25 @@ require_relative '../lib/cm_grafana'
 
 # -----------------------------------------------------------------------------
 
-grafanaHost         = ENV.fetch('GRAFANA_HOST'           , 'grafana')
-grafanaPort         = ENV.fetch('GRAFANA_PORT'           , 80)
-grafanaUrlPath      = ENV.fetch('GRAFANA_URL_PATH'       , '/grafana')
-grafanaApiUser      = ENV.fetch('GRAFANA_API_USER'       , 'admin')
-grafanaApiPassword  = ENV.fetch('GRAFANA_API_PASSWORD'   , 'admin')
-grafanaTemplatePath = ENV.fetch('GRAFANA_TEMPLATE_PATH'  , '/usr/local/share/templates/grafana')
-mqHost              = ENV.fetch('MQ_HOST'                , 'beanstalkd')
-mqPort              = ENV.fetch('MQ_PORT'                , 11300)
-mqQueue             = ENV.fetch('MQ_QUEUE'               , 'mq-grafana')
-redisHost           = ENV.fetch('REDIS_HOST'             , 'redis' )
-redisPort           = ENV.fetch('REDIS_PORT'             , 6379 )
-mysqlHost           = ENV.fetch('MYSQL_HOST'             , 'database')
-mysqlSchema         = ENV.fetch('DISCOVERY_DATABASE_NAME', 'discovery')
-mysqlUser           = ENV.fetch('DISCOVERY_DATABASE_USER', 'discovery')
-mysqlPassword       = ENV.fetch('DISCOVERY_DATABASE_PASS', 'discovery')
-interval            = ENV.fetch('INTERVAL'               , '20s' )
-delay               = ENV.fetch('RUN_DELAY'              , '35s' )
-
-server_config_file  = ENV.fetch('SERVER_CONFIG_FILE'     , '/etc/grafana_config.yml' )
+grafana_host          = ENV.fetch('GRAFANA_HOST'           , 'grafana')
+grafana_port          = ENV.fetch('GRAFANA_PORT'           , 80)
+grafana_url_path      = ENV.fetch('GRAFANA_URL_PATH'       , '/grafana')
+grafana_api_user      = ENV.fetch('GRAFANA_API_USER'       , 'admin')
+grafana_api_password  = ENV.fetch('GRAFANA_API_PASSWORD'   , 'admin')
+grafana_template_path = ENV.fetch('GRAFANA_TEMPLATE_PATH'  , '/usr/local/templates')
+grafana_version       = ENV.fetch('GRAFANA_VERSION'        , 4)
+mq_host               = ENV.fetch('MQ_HOST'                , 'beanstalkd')
+mq_port               = ENV.fetch('MQ_PORT'                , 11300)
+mq_queue              = ENV.fetch('MQ_QUEUE'               , 'mq-grafana')
+redis_host            = ENV.fetch('REDIS_HOST'             , 'redis' )
+redis_port            = ENV.fetch('REDIS_PORT'             , 6379 )
+mysql_host            = ENV.fetch('MYSQL_HOST'             , 'database')
+mysql_schema          = ENV.fetch('DISCOVERY_DATABASE_NAME', 'discovery')
+mysql_user            = ENV.fetch('DISCOVERY_DATABASE_USER', 'discovery')
+mysql_password        = ENV.fetch('DISCOVERY_DATABASE_PASS', 'discovery')
+interval              = ENV.fetch('INTERVAL'               , '20s' )
+delay                 = ENV.fetch('RUN_DELAY'              , '35s' )
+server_config_file    = ENV.fetch('SERVER_CONFIG_FILE'     , '/etc/grafana_config.yml' )
 
 # -----------------------------------------------------------------------------
 # validate durations for the Scheduler
@@ -51,31 +51,28 @@ delay            = validate_scheduler_values( delay, 50.0 )
 # -----------------------------------------------------------------------------
 
 config = {
-  :grafana => {
-    :host              => grafanaHost,
-    :port              => grafanaPort,
-    :user              => grafanaApiUser,
-    :password          => grafanaApiPassword,
-    :timeout           => 10,
-    :ssl               => false,
-    :url_path          => grafanaUrlPath,
-    :templateDirectory => grafanaTemplatePath,
-    :server_config_file => server_config_file
+  grafana: {
+    host: grafana_host,
+    port: grafana_port,
+    user: grafana_api_user,
+    password: grafana_api_password,
+    url_path: grafana_url_path,
+    template_directory: format('%s/%s',grafana_template_path,grafana_version)
   },
-  :mq          => {
-    :host  => mqHost,
-    :port  => mqPort,
-    :queue => mqQueue
+  mq: {
+    host: mq_host,
+    port: mq_port,
+    queue: mq_queue
   },
-  :redis       => {
-    :host => redisHost,
-    :port => redisPort
+  redis: {
+    host: redis_host,
+    port: redis_port
   },
-  :mysql    => {
-    :host      => mysqlHost,
-    :schema    => mysqlSchema,
-    :user      => mysqlUser,
-    :password  => mysqlPassword
+  mysql: {
+    host: mysql_host,
+    schema: mysql_schema,
+    user: mysql_user,
+    password: mysql_password
   }
 }
 

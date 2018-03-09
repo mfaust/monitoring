@@ -45,9 +45,9 @@ services:
     build: ../../docker-cm-jolokia
     container_name: jolokia
     hostname: jolokia
-    ports:
-      - 8080:8080
-      - 8088:8088
+#    ports:
+#      - 8080:8080
+#      - 8088:8088
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:
@@ -69,12 +69,14 @@ services:
 
   redis:
     restart: always
-    image: bodsch/docker-redis:3.2.8-r1
+    image: redis:4-alpine
     container_name: redis
     hostname: redis
+    ports:
+      - 6379:6379
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - redis:/var/lib/redis
+      - redis:/data
     networks:
       - mon
 
@@ -122,7 +124,7 @@ services:
 
   graphite:
     restart: always
-    image: bodsch/docker-graphite:1.1.1-r1
+    image: bodsch/docker-graphite:1.1.2-r1
     container_name: graphite
     hostname: graphite
     environment:
@@ -137,7 +139,8 @@ services:
 
   grafana:
     restart: always
-    image: bodsch/docker-grafana:4.6.3-r2
+    image: bodsch/docker-grafana:5.0.0
+#    image: bodsch/docker-grafana:4.6.3-r2
     container_name: grafana
     hostname: grafana
     environment:
@@ -250,7 +253,7 @@ services:
 
   markdown-service:
     restart: always
-    image: bodsch/docker-markdown-service:1.1.0
+    image: bodsch/docker-markdown-service:1.2.0
     container_name: markdown-service
     hostname: markdown-service
     volumes:
@@ -258,6 +261,21 @@ services:
       - ../../docker-cm-data/rootfs/data/www/markdown-service:/var/www
     networks:
       - mon
+
+
+#  allmark:
+#    restart: always
+#    image: andreaskoch/allmark
+#    container_name: allmark
+#    hostname: allmark
+#    ports:
+#      - 8088:33001
+#    volumes:
+#      - /etc/localtime:/etc/localtime:ro
+#      - ../../docker-cm-data/rootfs/data/www/markdown-service:/data
+#    networks:
+#      - mon
+
 
   cm-dashing:
     restart: always
@@ -293,6 +311,7 @@ services:
     container_name: cm-rest-service
     hostname: cm-rest-service
     environment:
+      LOG_LEVEL: info
       MYSQL_ROOT_PASS: ${MYSQL_ROOT_PASSWORD}
     depends_on:
       - redis
@@ -316,6 +335,7 @@ services:
     container_name: cm-service-discover
     hostname: cm-service-discover
     environment:
+      LOG_LEVEL: debug
       REFRESH_ENABLED: 'true'
     depends_on:
       - jolokia
@@ -343,6 +363,8 @@ services:
     build: ../../docker-cm-data-collector
     container_name: cm-data-collector
     hostname: cm-data-collector
+    environment:
+      LOG_LEVEL: debug
     depends_on:
       - jolokia
       - beanstalkd
@@ -390,7 +412,8 @@ services:
     container_name: cm-grafana-client
     hostname: cm-grafana-client
     environment:
-      LOG_LEVEL: info
+      LOG_LEVEL: debug
+      GRAFANA_VERSION: 5
       GRAFANA_HOST: nginx
     depends_on:
       - beanstalkd
@@ -403,8 +426,6 @@ services:
       - database
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ../../docker-cm-data/rootfs/data/usr/local/share/templates:/usr/local/share/templates
-      - ../../docker-cm-data/rootfs/data/etc/grafana_config.yml:/etc/grafana_config.yml
     networks:
       - mon
 

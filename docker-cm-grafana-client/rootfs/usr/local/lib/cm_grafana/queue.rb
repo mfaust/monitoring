@@ -64,31 +64,10 @@ class CMGrafana < Grafana::Client
       overview = true
       dns = nil
 
-      if( command == nil || node == nil || payload == nil )
-
-        status = 500
-
-        if( command == nil )
-          e = 'missing command'
-          logger.error( e )
-          logger.error( data )
-          return { :status  => status, :message => e }
-        end
-
-        if( node == nil )
-          e = 'missing node'
-          logger.error( e )
-          logger.error( data )
-          return { :status  => status, :message => e }
-        end
-
-        if( payload == nil )
-          e = 'missing payload'
-          logger.error( e )
-          logger.error( data )
-          return { :status  => status, :message => e }
-        end
-
+      if( command.nil? || node.nil? || payload.nil? )
+        return { :status  => 500, :message => 'missing command' } if( command.nil? )
+        return { :status  => 500, :message => 'missing node' } if( node.nil? )
+        return { :status  => 500, :message => 'missing payload' } if( payload.nil? )
       end
 
       payload  = JSON.parse( payload ) if( payload.is_a?( String ) == true && payload.to_s != '' )
@@ -113,11 +92,11 @@ class CMGrafana < Grafana::Client
         fqdn = dns.dig('fqdn')
       end
 
-      ip, short, fqdn = self.ns_lookup(node) if( ip == nil && short == nil && fqdn == nil )
+      ip, short, fqdn = ns_lookup(node) if( ip.nil? && short.nil? && fqdn.nil? )
 
       # no DNS data?
       #
-      if( ip == nil && short == nil && fqdn == nil )
+      if( ip.nil? && short.nil? && fqdn.nil? )
 
         logger.warn( 'we found no dns data!' )
 
@@ -150,7 +129,7 @@ class CMGrafana < Grafana::Client
       #
       if( command == 'annotation' )
 
-        params = {}
+        # params = {}
         time   = Time.at( timestamp ).strftime( '%Y-%m-%d %H:%M:%S' )
 
         unless( %w[loadtest deployment].include?(type) )
@@ -276,6 +255,8 @@ class CMGrafana < Grafana::Client
         # e.g. for 'force' ...
         result = self.create_dashboard_for_host( host: node, tags: tags, overview: overview )
 
+        logger.debug(result)
+
         if(group_by.is_a?(Hash))
 
           group_by = group_by.dig('group_by')
@@ -300,7 +281,7 @@ class CMGrafana < Grafana::Client
       if( command == 'remove' )
 
         # add annotation
-        if(annotation == true)
+        if( annotation == true )
 
           time     = Time.at( timestamp ).strftime( '%Y-%m-%d %H:%M:%S' )  #unless( timestamp.nil? )
 
@@ -320,10 +301,7 @@ class CMGrafana < Grafana::Client
           end
         end
 
-
-#         logger.info( format( 'remove dashboards for node %s', node ) )
         result = self.delete_dashboards( ip: ip, host: node, fqdn: fqdn )
-
         logger.debug( result )
 
         @jobs.del( job_option )

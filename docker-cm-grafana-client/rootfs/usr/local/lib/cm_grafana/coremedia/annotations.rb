@@ -8,10 +8,10 @@ class CMGrafana
       # add standard annotations to all Templates
       #
       #
-      def add_annotations(template_json )
+      def add_annotations(template_json)
 
         # add or overwrite annotations
-        annotations = '
+        annotations = %(
           {
             "list": [
               {
@@ -22,10 +22,7 @@ class CMGrafana
                 "limit": 10,
                 "name": "created",
                 "showIn": 0,
-                "tags": [
-                  "%TAG%",
-                  "created"
-                ],
+                "tags": [ "<%= short_hostname %>", "created" ],
                 "type": "tags"
               },
               {
@@ -34,12 +31,9 @@ class CMGrafana
                 "hide": false,
                 "iconColor": "rgb(227, 57, 12)",
                 "limit": 10,
-                "name": "destoyed",
+                "name": "destroyed",
                 "showIn": 0,
-                "tags": [
-                  "%TAG%",
-                  "destoyed"
-                ],
+                "tags": [ "<%= short_hostname %>", "destroyed" ],
                 "type": "tags"
               },
               {
@@ -50,10 +44,7 @@ class CMGrafana
                 "limit": 10,
                 "name": "Load Tests",
                 "showIn": 0,
-                "tags": [
-                  "%TAG%",
-                  "loadtest"
-                ],
+                "tags": [ "<%= short_hostname %>", "loadtest" ],
                 "type": "tags"
               },
               {
@@ -64,32 +55,32 @@ class CMGrafana
                 "limit": 10,
                 "name": "Deployments",
                 "showIn": 0,
-                "tags": [
-                  "%TAG%",
-                  "deployment"
-                ],
+                "tags": [ "<%= short_hostname %>", "deployment" ],
                 "type": "tags"
               }
             ]
           }
-        '
+        )
 
-        if( template_json.is_a?( String ) )
-          template_json = JSON.parse( template_json )
-        end
+        short_hostname           = @short_hostname
+        renderer = ERB.new(annotations)
+        template = renderer.result(binding)
+        annotations = JSON.parse( template ) if( template.is_a?( String ) )
 
-        annotation = template_json.dig( 'dashboard', 'annotations' )
+        template_json = JSON.parse( template_json ) if( template_json.is_a?( String ) )
+        annotation    = template_json.dig( 'dashboard', 'annotations' )
 
-        if( annotation != nil )
-          template_json['dashboard']['annotations'] = JSON.parse( annotations )
+#         logger.debug( "annotation: #{annotation.size} #{annotation.class.to_s}" )
+
+        begin
+          template_json['dashboard']['annotations'] = annotations unless( annotation.nil? )
+        rescue => error
+          logger.error( error )
         end
 
         template_json
-
       end
-
     end
-
   end
 end
 

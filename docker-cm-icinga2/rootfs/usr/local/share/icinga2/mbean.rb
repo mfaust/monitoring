@@ -30,8 +30,11 @@ module MBean
 
       data = {}
 
-      logger.debug( { :host => host, :pre => 'result', :service => service } )
-      cacheKey = Storage::RedisClient.cacheKey( { :host => host, :pre => 'result', :service => service } )
+      cache_key = { host: host, pre: 'result', service: service }
+      logger.debug( "plain cache_key: #{cache_key}" )
+
+      cacheKey = Storage::RedisClient.cacheKey( cache_key )
+      logger.debug( "redis cache_key: #{cacheKey}" )
 
       begin
         result = @redis.get( cacheKey )
@@ -140,8 +143,14 @@ module MBean
 
       data     = nil
 
-      logger.debug( { :host => host, :pre => 'result', :service => service } )
-      cacheKey = Storage::RedisClient.cacheKey( { :host => host, :pre => 'result', :service => service } )
+      cache_key = { host: host, pre: 'result', service: service }
+      logger.debug( "plain cache_key: #{cache_key}" )
+
+      cacheKey = Storage::RedisClient.cacheKey( cache_key )
+      logger.debug( "redis cache_key: #{cacheKey}" )
+
+#      logger.debug( { :host => host, :pre => 'result', :service => service } )
+#      cacheKey = Storage::RedisClient.cacheKey( { :host => host, :pre => 'result', :service => service } )
 
       (1..15).each { |x|
 

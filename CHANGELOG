@@ -34,6 +34,14 @@
     - overview dashboards can now be grouped by an array of tags
     - use the new annotation feature of Grafana 4.6
       remove the graphite-client, container is no longer needed
+    - fix typos
+    - fix bug with template_directory
+    - enable grafana5
+    - the grafana-client used now ruby erb templates insteed prepared json files
+
+  - carbon-client
+    - code optimizations
+    - add support for CoreMedia/cms#13125
 
   - remove cm-external-discover container (is no longer needed)
 

@@ -243,9 +243,15 @@ module CarbonData
 
         logger.debug( format( '  - \'%s\' (%s)', service, @normalized_service_name ) )
 
-        cacheKey     = Storage::RedisClient.cache_key( { :host => fqdn, :pre => 'result', :service => service } )
+	cache_key = { host: fqdn, pre: 'result', service: service }
 
-        result = @redis.get( cacheKey )
+        logger.debug( "plain cache_key: #{cache_key}" )
+
+        cache_key     = Storage::RedisClient.cache_key( cache_key )
+
+        logger.debug( "redis cache_key: #{cache_key}" )
+
+        result = @redis.get( cache_key )
 
         case service
         when 'mongodb'

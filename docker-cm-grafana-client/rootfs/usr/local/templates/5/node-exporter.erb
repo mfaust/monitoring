@@ -1,0 +1,532 @@
+{
+  "dashboard": {
+    "rows": [
+      {
+        "height": "150",
+        "repeatIteration": null,
+        "titleSize": "h6",
+        "showTitle": false,
+        "collapse": false,
+        "repeat": null,
+        "title": "Dashboard Row",
+        "repeatRowId": null,
+        "panels": [
+          {
+            "steppedLine": false,
+            "type": "graph",
+            "legend": {
+              "total": false,
+              "min": false,
+              "avg": false,
+              "rightSide": true,
+              "show": true,
+              "max": true,
+              "alignAsTable": true,
+              "current": true,
+              "values": true
+            },
+            "aliasColors": {},
+            "id": 10,
+            "decimals": 1,
+            "span": 12,
+            "thresholds": [],
+            "linewidth": 1,
+            "nullPointMode": "connected",
+            "timeFrom": null,
+            "lines": true,
+            "yaxes": [
+              {
+                "min": null,
+                "show": true,
+                "max": null,
+                "logBase": 1,
+                "format": "none",
+                "label": null
+              },
+              {
+                "min": null,
+                "format": "short",
+                "logBase": 1,
+                "label": null,
+                "max": null,
+                "show": true
+              }
+            ],
+            "links": [],
+            "stack": false,
+            "datasource": "graphite",
+            "percentage": false,
+            "title": "Load",
+            "pointradius": 5,
+            "seriesOverrides": [],
+            "fill": 2,
+            "xaxis": {
+              "name": null,
+              "show": true,
+              "values": [],
+              "mode": "time"
+            },
+            "bars": false,
+            "targets": [
+              {
+                "textEditor": false,
+                "refId": "A",
+                "target": "aliasSub(carbon-writer.$host.NODE_EXPORTER.load.*, '(.*).', '')"
+              }
+            ],
+            "timeShift": null,
+            "tooltip": {
+              "shared": true,
+              "sort": 0,
+              "value_type": "individual"
+            },
+            "renderer": "flot",
+            "points": false
+          }
+        ]
+      },
+      {
+        "showTitle": false,
+        "titleSize": "h6",
+        "height": "150",
+        "repeatIteration": null,
+        "collapse": false,
+        "repeat": null,
+        "title": "Dashboard Row",
+        "repeatRowId": null,
+        "panels": [
+          {
+            "datasource": "graphite",
+            "percentage": false,
+            "yaxes": [
+              {
+                "max": null,
+                "show": true,
+                "logBase": 1,
+                "format": "bytes",
+                "label": null,
+                "min": null
+              },
+              {
+                "min": null,
+                "label": "percent",
+                "logBase": 1,
+                "format": "none",
+                "show": true,
+                "max": "110"
+              }
+            ],
+            "links": [],
+            "stack": false,
+            "timeShift": null,
+            "tooltip": {
+              "value_type": "individual",
+              "sort": 0,
+              "shared": true
+            },
+            "renderer": "flot",
+            "points": false,
+            "seriesOverrides": [
+              {
+                "color": "#890F02",
+                "yaxis": 2,
+                "alias": "percent"
+              }
+            ],
+            "title": "root Filesystem",
+            "pointradius": 5,
+            "fill": 2,
+            "xaxis": {
+              "show": true,
+              "name": null,
+              "mode": "time",
+              "values": []
+            },
+            "targets": [
+              {
+                "target": "alias(carbon-writer.$host.NODE_EXPORTER.filesystem.rootfs.total, 'total')",
+                "refId": "A"
+              },
+              {
+                "target": "alias(carbon-writer.$host.NODE_EXPORTER.filesystem.rootfs.free, 'free')",
+                "refId": "B"
+              },
+              {
+                "target": "alias(carbon-writer.$host.NODE_EXPORTER.filesystem.rootfs.used_percent, 'percent')",
+                "refId": "C"
+              }
+            ],
+            "bars": false,
+            "type": "graph",
+            "legend": {
+              "avg": false,
+              "min": false,
+              "rightSide": true,
+              "total": false,
+              "values": true,
+              "current": true,
+              "max": true,
+              "show": true,
+              "alignAsTable": true
+            },
+            "aliasColors": {},
+            "id": 11,
+            "steppedLine": false,
+            "nullPointMode": "connected",
+            "timeFrom": null,
+            "lines": true,
+            "decimals": 1,
+            "span": 12,
+            "thresholds": [],
+            "linewidth": 1
+          }
+        ]
+      },
+      {
+        "height": "150px",
+        "repeatIteration": null,
+        "titleSize": "h6",
+        "showTitle": false,
+        "collapse": false,
+        "title": "Dashboard Row",
+        "repeat": null,
+        "repeatRowId": null,
+        "panels": [
+          {
+            "renderer": "flot",
+            "tooltip": {
+              "value_type": "individual",
+              "shared": true,
+              "sort": 0
+            },
+            "points": false,
+            "timeShift": null,
+            "xaxis": {
+              "mode": "time",
+              "values": [],
+              "show": true,
+              "name": null
+            },
+            "bars": false,
+            "targets": [
+              {
+                "target": "alias(carbon-writer.$host.NODE_EXPORTER.memory.total, 'total')",
+                "refId": "A"
+              },
+              {
+                "refId": "C",
+                "textEditor": false,
+                "target": "alias(carbon-writer.$host.NODE_EXPORTER.memory.used, 'used')"
+              },
+              {
+                "refId": "D",
+                "textEditor": false,
+                "target": "alias(carbon-writer.$host.NODE_EXPORTER.memory.used_percent, 'percent')"
+              }
+            ],
+            "seriesOverrides": [
+              {
+                "color": "#890F02",
+                "yaxis": 2,
+                "alias": "percent"
+              }
+            ],
+            "title": "Memory",
+            "pointradius": 5,
+            "fill": 2,
+            "datasource": "graphite",
+            "percentage": false,
+            "stack": false,
+            "yaxes": [
+              {
+                "max": null,
+                "show": true,
+                "format": "bytes",
+                "logBase": 1,
+                "label": null,
+                "min": null
+              },
+              {
+                "min": null,
+                "show": true,
+                "max": "110",
+                "logBase": 1,
+                "format": "none",
+                "label": "percent used"
+              }
+            ],
+            "links": [],
+            "timeFrom": null,
+            "lines": true,
+            "nullPointMode": "connected",
+            "span": 12,
+            "linewidth": 1,
+            "thresholds": [],
+            "decimals": 1,
+            "id": 12,
+            "type": "graph",
+            "legend": {
+              "values": true,
+              "current": true,
+              "show": true,
+              "max": true,
+              "alignAsTable": true,
+              "avg": false,
+              "min": false,
+              "rightSide": true,
+              "total": false
+            },
+            "aliasColors": {},
+            "steppedLine": false
+          }
+        ]
+      },
+      {
+        "collapse": false,
+        "titleSize": "h6",
+        "showTitle": false,
+        "height": "150",
+        "repeatIteration": null,
+        "panels": [
+          {
+            "timeShift": null,
+            "tooltip": {
+              "shared": true,
+              "sort": 0,
+              "value_type": "individual"
+            },
+            "renderer": "flot",
+            "points": false,
+            "seriesOverrides": [
+              {
+                "alias": "percent",
+                "yaxis": 2,
+                "color": "#890F02"
+              }
+            ],
+            "title": "Swap",
+            "pointradius": 5,
+            "fill": 2,
+            "xaxis": {
+              "name": null,
+              "show": true,
+              "values": [],
+              "mode": "time"
+            },
+            "bars": false,
+            "targets": [
+              {
+                "target": "alias(carbon-writer.$host.NODE_EXPORTER.swap.total, 'total')",
+                "refId": "A"
+              },
+              {
+                "refId": "B",
+                "target": "alias(carbon-writer.$host.NODE_EXPORTER.swap.used, 'used')"
+              },
+              {
+                "target": "alias(carbon-writer.$host.NODE_EXPORTER.swap.used_percent, 'percent')",
+                "refId": "C"
+              }
+            ],
+            "datasource": "graphite",
+            "percentage": false,
+            "yaxes": [
+              {
+                "min": null,
+                "show": true,
+                "max": null,
+                "label": null,
+                "logBase": 1,
+                "format": "bytes"
+              },
+              {
+                "logBase": 1,
+                "format": "none",
+                "label": "percent",
+                "max": "110",
+                "show": true,
+                "min": null
+              }
+            ],
+            "links": [],
+            "stack": false,
+            "nullPointMode": "connected",
+            "timeFrom": null,
+            "lines": true,
+            "decimals": 1,
+            "span": 12,
+            "thresholds": [],
+            "linewidth": 1,
+            "type": "graph",
+            "legend": {
+              "total": false,
+              "rightSide": true,
+              "avg": false,
+              "min": false,
+              "alignAsTable": true,
+              "show": true,
+              "max": true,
+              "values": true,
+              "current": true
+            },
+            "aliasColors": {},
+            "id": 13,
+            "steppedLine": false
+          }
+        ],
+        "title": "Dashboard Row",
+        "repeatRowId": null,
+        "repeat": null
+      },
+      {
+        "titleSize": "h6",
+        "showTitle": false,
+        "height": 180,
+        "repeatIteration": null,
+        "collapse": false,
+        "title": "CPU",
+        "repeat": null,
+        "repeatRowId": null,
+        "panels": [
+          {
+            "percentage": false,
+            "datasource": "graphite",
+            "yaxes": [
+              {
+                "min": "0",
+                "logBase": 1,
+                "format": "short",
+                "label": null,
+                "max": null,
+                "show": true
+              },
+              {
+                "min": "0",
+                "format": "short",
+                "logBase": 1,
+                "label": null,
+                "show": false,
+                "max": null
+              }
+            ],
+            "stack": false,
+            "timeShift": null,
+            "points": false,
+            "renderer": "flot",
+            "tooltip": {
+              "value_type": "individual",
+              "shared": true,
+              "sort": 0
+            },
+            "pointradius": 5,
+            "title": "CPU",
+            "seriesOverrides": [],
+            "fill": 2,
+            "bars": false,
+            "targets": [
+              {
+                "refId": "A",
+                "textEditor": false,
+                "target": "aliasByMetric(averageSeriesWithWildcards(sumSeriesWithWildcards(perSecond(carbon-writer.$host.NODE_EXPORTER.cpu.cpu[0-9].*), 4), 5))"
+              }
+            ],
+            "xaxis": {
+              "values": [],
+              "mode": "time",
+              "name": null,
+              "show": true
+            },
+            "aliasColors": {},
+            "legend": {
+              "alignAsTable": true,
+              "max": true,
+              "show": true,
+              "current": true,
+              "values": true,
+              "total": false,
+              "rightSide": true,
+              "min": false,
+              "avg": false
+            },
+            "type": "graph",
+            "id": 14,
+            "steppedLine": false,
+            "nullPointMode": "connected",
+            "lines": true,
+            "timeFrom": null,
+            "decimals": 1,
+            "linewidth": 1,
+            "thresholds": [],
+            "span": 12
+          }
+        ]
+      }
+    ],
+    "links": [],
+    "annotations": {
+      "list": []
+    },
+    "version": 1,
+    "title": "<%= slug %> - Operating System",
+    "templating": {
+      "list": [
+        {
+          "current": {
+            "value": "<%= graphite_identifier %>",
+            "text": "<%= slug %>"
+          },
+          "type": "constant",
+          "query": "<%= slug %>",
+          "options": [
+            {
+              "value": "<%= graphite_identifier %>",
+              "text": "<%= slug %>"
+            }
+          ],
+          "name": "host",
+          "label": null,
+          "hide": 2
+        }
+      ]
+    },
+    "editable": true,
+    "refresh": "1m",
+    "time": {
+      "to": "now",
+      "from": "now-3h"
+    },
+    "schemaVersion": 12,
+    "id": null,
+    "timezone": "browser",
+    "sharedCrosshair": true,
+    "style": "dark",
+    "timepicker": {
+      "now": true,
+      "refresh_intervals": [
+        "10s",
+        "30s",
+        "1m",
+        "2m",
+        "4m",
+        "10m"
+      ],
+      "time_options": [
+        "5m",
+        "15m",
+        "1h",
+        "6h",
+        "12h",
+        "24h",
+        "2d",
+        "7d",
+        "30d"
+      ]
+    },
+    "hideControls": false,
+    "uid": null,
+    "tags": [
+      "<%= short_hostname %>",
+      "os"
+    ]
+  }
+}

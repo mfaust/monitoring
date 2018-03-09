@@ -62,7 +62,8 @@ module ServiceDiscovery
 
           # step 1
           # update our database
-          result    = @database.createDiscovery( ip: ip, short: short, fqdn: fqdn, data: data )
+#           result    = @database.createDiscovery( ip: ip, short: short, fqdn: fqdn, data: data )
+          result    = @database.create_discovery( ip: ip, short: short, fqdn: fqdn, data: data )
 
           options = { dns: { ip: ip, short: short, fqdn: fqdn } }
           host    = fqdn
@@ -96,7 +97,9 @@ module ServiceDiscovery
 
       # check discovered datas from the past
       #
-      discovery_data   = @database.discoveryData( ip: ip, short: short, fqdn: fqdn )
+#       discovery_data   = @database.discoveryData( ip: ip, short: short, fqdn: fqdn )
+      discovery_data   = @database.discovery_data( ip: ip, short: short, fqdn: fqdn )
+
       services = discovery_data.keys.sort
 
       services_count   = services.count

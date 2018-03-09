@@ -110,14 +110,12 @@ module ServiceDiscovery
 
         # check first for existing node!
         #
-        result = @database.nodes( short: node, status: Storage::MySQL::DELETE )
+        params = { ip: ip, short: short, fqdn: fqdn, status: Storage::MySQL::DELETE }
+        result = @database.nodes(params)
 
-        if( result != nil && result.to_s != node.to_s )
-
+        unless( result.is_a?( Array ) && result.count != 0 )
           logger.info( 'node not in monitoring. skipping delete' )
-
           @jobs.del( job_option )
-
           return { status: 200, message: format('node not in monitoring. skipping delete ...') }
         end
 
@@ -127,10 +125,7 @@ module ServiceDiscovery
           #
           self.send_message( cmd: command, node: node, queue: 'mq-collector', payload: { host: node, pre: 'prepare' }, ttr: 1, delay: 0 )
 
-          result = self.delete_host(node )
-
-          logger.debug( result )
-
+          result = self.delete_host( node, payload )
         rescue => e
 
           logger.error( e )

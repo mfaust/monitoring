@@ -58,7 +58,7 @@ class CMGrafana < Grafana::Client
         #
         config = read_config_file( config_file: @server_config_file ) unless( @server_config_file.nil? )
 
-        logger.debug(config)
+#         logger.debug(config)
 
         unless( config.nil? )
 
@@ -116,10 +116,10 @@ class CMGrafana < Grafana::Client
         # TODO
         # read default organisation
 
-        if( @logged_in == true )
-          logger.debug( JSON.pretty_generate( admin_settings ) )
-          logger.debug( JSON.pretty_generate( admin_stats ) )
-        end
+#         if( @logged_in == true )
+#           logger.debug( JSON.pretty_generate( admin_settings ) )
+#           logger.debug( JSON.pretty_generate( admin_stats ) )
+#         end
 
         result << grafana_users( users )
         result << grafana_organisation( organisation )
@@ -135,6 +135,8 @@ class CMGrafana < Grafana::Client
     def grafana_organisation( params  )
 
       if( params.count >= 1 )
+
+        grafana_login
 
         params = params.first if( params.is_a?(Array) )
 
@@ -156,13 +158,13 @@ class CMGrafana < Grafana::Client
         elsif( status == 404 )
           # org not exists
           #
-          logger.debug( 'create org' )
+#           logger.debug( 'create org' )
 
           org_created = create_organisation(
             name: @org_name
           )
 
-          logger.debug( org_created )
+#           logger.debug( org_created )
 
         elsif( status == 200 )
           # org already exists
@@ -179,6 +181,8 @@ class CMGrafana < Grafana::Client
     def grafana_users( params )
 
       if( params.count >= 1 )
+
+        grafana_login
 
         result = []
 
@@ -231,7 +235,7 @@ class CMGrafana < Grafana::Client
               password: password
             }
 
-            logger.debug( config )
+#             logger.debug( config )
 
             ## Global Users
             result << add_user( config )
@@ -307,6 +311,8 @@ class CMGrafana < Grafana::Client
     def grafana_datasources( params )
 
       if( params.count >= 1 )
+
+        grafana_login
 
         datasources = params.dig('datasources')
 
@@ -432,6 +438,8 @@ class CMGrafana < Grafana::Client
 
       if( params.count >= 1 )
 
+        grafana_login
+
         params = params.first if( params.is_a?(Array) )
 
         import_from = params.dig('import_from_directory')
@@ -449,6 +457,8 @@ class CMGrafana < Grafana::Client
     def grafana_admin_user( params )
 
       if( params.count >= 1 )
+
+        grafana_login
 
         params = params.first if( params.is_a?(Array) )
 

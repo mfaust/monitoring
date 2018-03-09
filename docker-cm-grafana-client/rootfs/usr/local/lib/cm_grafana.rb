@@ -7,6 +7,7 @@
 require 'grafana'
 require 'grafana/tags'
 require 'mini_cache'
+require 'erb'
 
 require_relative 'logging'
 require_relative 'monkey'
@@ -38,17 +39,19 @@ class CMGrafana
 
   def initialize( settings )
 
+    logger.debug(settings)
+
     host                 = settings.dig(:grafana, :host)
     port                 = settings.dig(:grafana, :port)          || 80
     @user                = settings.dig(:grafana, :user)          || 'admin'
     @password            = settings.dig(:grafana, :password)
     url_path             = settings.dig(:grafana, :url_path)
     ssl                  = settings.dig(:grafana, :ssl)           || false
-    @timeout             = settings.dig(:grafana, :timeout)       || 5
+    @timeout             = settings.dig(:grafana, :timeout)       || 10
     @open_timeout        = settings.dig(:grafana, :open_timeout)  || 5
     @http_headers        = settings.dig(:grafana, :headers)       || {}
-    @server_config_file  = settings.dig(:grafana, :server_config_file)
-    @template_directory  = settings.dig(:templateDirectory)       || '/usr/local/share/templates/grafana'
+    @server_config_file  = settings.dig(:grafana, :server_config_file) || '/etc/grafana_config.yml'
+    @template_directory  = settings.dig(:grafana, :template_directory) || '/usr/local/templates'
 
     mq_host              = settings.dig(:mq, :host)
     mq_port              = settings.dig(:mq, :port)
@@ -76,7 +79,7 @@ class CMGrafana
     logger.info( '-----------------------------------------------------------------' )
     logger.info( " CoreMedia - Grafana Client - gem Version #{Grafana::VERSION}" )
     logger.info( "  Version #{version} (#{date})" )
-    logger.info( '  Copyright 2016-2017 CoreMedia' )
+    logger.info( '  Copyright 2016-2018 CoreMedia' )
     logger.info( '  used Services:' )
     logger.info( "    - grafana      : #{@url}" )
     logger.info( "    - redis        : #{redis_host}:#{redis_port}" )

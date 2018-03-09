@@ -7,6 +7,7 @@
 
 # -----------------------------------------------------------------------------
 
+require 'rack'
 require 'sinatra/base'
 require 'logger'
 require 'json'
@@ -16,6 +17,26 @@ require 'resolve/hostname'
 require_relative '../lib/monitoring'
 
 module Sinatra
+
+  LOGGING_BLACKLIST = ['/health']
+
+  class FilteredCommonLogger < Rack::CommonLogger
+    def call(env)
+      if filter_log(env)
+        # default CommonLogger behaviour: log and move on
+        super
+      else
+        # pass request to next component without logging
+        @app.call(env)
+      end
+    end
+
+    # return true if request should be logged
+    def filter_log(env)
+      !LOGGING_BLACKLIST.include?(env['PATH_INFO'])
+    end
+  end
+
 
   class MonitoringRest < Base
 
@@ -39,15 +60,17 @@ module Sinatra
       @mysql_password    = ENV.fetch('DISCOVERY_DATABASE_PASS', 'discovery')
     end
 
-    set :logging, true
+    set :logging, false
     set :app_file, caller_files.first || $0
     set :run, Proc.new { $0 == app_file }
     set :dump_errors, true
-    set :show_exceptions, true
+    set :show_exceptions, false
     set :public_folder, '/var/www/monitoring'
 
     set :bind, @rest_service_bind
     set :port, @rest_service_port.to_i
+
+    use FilteredCommonLogger
 
     # -----------------------------------------------------------------------------
 

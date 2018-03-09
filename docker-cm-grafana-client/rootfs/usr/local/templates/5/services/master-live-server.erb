@@ -1,0 +1,473 @@
+{
+  "dashboard": {
+    "time": {
+      "to": "now",
+      "from": "now-3h"
+    },
+    "version": 1,
+    "rows": [
+      {
+        "collapse": false,
+        "showTitle": false,
+        "repeatIteration": null,
+        "title": "",
+        "repeat": null,
+        "height": 42,
+        "panels": [
+          {
+            "content": "<h3><center><a href=\"<%= tomcat_dashboard_url %>?var-Application=MLS\">Tomcat</a></center></h3>",
+            "transparent": true,
+            "span": 12,
+            "mode": "html",
+            "id": 10,
+            "type": "text",
+            "links": [],
+            "title": ""
+          }
+        ],
+        "titleSize": "h6",
+        "repeatRowId": null
+      },
+      {
+        "editable": true,
+        "panels": [
+          {
+            "title": "",
+            "id": 11,
+            "transparent": true,
+            "content": "<h2><center>MLS</center></h2>",
+            "span": 12,
+            "isNew": true,
+            "links": [],
+            "type": "text",
+            "error": false,
+            "mode": "html",
+            "editable": true
+          }
+        ],
+        "title": "New row",
+        "collapse": false,
+        "height": "25px"
+      },
+      {
+        "editable": true,
+        "collapse": false,
+        "height": "150px",
+        "panels": [
+          {
+            "timeFrom": null,
+            "lines": true,
+            "editable": true,
+            "renderer": "flot",
+            "yaxes": [
+              {
+                "max": null,
+                "logBase": 1,
+                "show": true,
+                "min": 0,
+                "format": "none"
+              },
+              {
+                "format": "short",
+                "min": 0,
+                "logBase": 1,
+                "show": false,
+                "max": null
+              }
+            ],
+            "points": false,
+            "steppedLine": false,
+            "type": "graph",
+            "pointradius": 5,
+            "isNew": true,
+            "nullPointMode": "connected",
+            "id": 12,
+            "fill": 3,
+            "grid": {
+              "threshold1": null,
+              "thresholdLine": false,
+              "threshold2Color": "rgba(234, 112, 112, 0.22)",
+              "threshold2": null,
+              "threshold1Color": "rgba(216, 200, 27, 0.27)"
+            },
+            "timeShift": null,
+            "legend": {
+              "rightSide": true,
+              "total": false,
+              "current": true,
+              "avg": false,
+              "min": false,
+              "alignAsTable": true,
+              "max": false,
+              "show": true,
+              "sideWidth": 200,
+              "values": true
+            },
+            "xaxis": {
+              "show": true
+            },
+            "aliasColors": {},
+            "error": false,
+            "links": [],
+            "datasource": "graphite",
+            "percentage": false,
+            "span": 12,
+            "decimals": 0,
+            "tooltip": {
+              "ordering": "alphabetical",
+              "msResolution": false,
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "stack": false,
+            "linewidth": 1,
+            "bars": false,
+            "targets": [
+              {
+                "textEditor": false,
+                "target": "alias(carbon-writer.$host.MLS.QueryPool.queries.max, 'queries max')",
+                "refId": "A"
+              },
+              {
+                "refId": "B",
+                "target": "alias(carbon-writer.$host.MLS.QueryPool.queries.waiting, 'queries waiting')",
+                "textEditor": false
+              },
+              {
+                "refId": "C",
+                "textEditor": false,
+                "target": "alias(carbon-writer.$host.MLS.QueryPool.executors.idle, 'executors idle')"
+              },
+              {
+                "refId": "D",
+                "textEditor": false,
+                "target": "alias(carbon-writer.$host.MLS.QueryPool.executors.running, 'executors running')"
+              }
+            ],
+            "seriesOverrides": [],
+            "title": "Query Pool"
+          }
+        ],
+        "title": "Query Pool"
+      },
+      {
+        "height": "200px",
+        "collapse": false,
+        "title": "Statistic Resource Cache",
+        "panels": [
+          {
+            "steppedLine": false,
+            "type": "graph",
+            "pointradius": 5,
+            "timeFrom": null,
+            "lines": true,
+            "editable": true,
+            "renderer": "flot",
+            "yaxes": [
+              {
+                "max": null,
+                "min": 0,
+                "format": "none",
+                "logBase": 1,
+                "show": true
+              },
+              {
+                "show": true,
+                "logBase": 1,
+                "min": 0,
+                "format": "short",
+                "max": null
+              }
+            ],
+            "points": false,
+            "id": 13,
+            "fill": 3,
+            "isNew": true,
+            "nullPointMode": "connected",
+            "links": [],
+            "grid": {
+              "threshold1": null,
+              "threshold2Color": "rgba(234, 112, 112, 0.22)",
+              "threshold2": null,
+              "threshold1Color": "rgba(216, 200, 27, 0.27)"
+            },
+            "legend": {
+              "show": true,
+              "sideWidth": 200,
+              "values": true,
+              "alignAsTable": true,
+              "max": false,
+              "avg": false,
+              "min": false,
+              "rightSide": true,
+              "total": false,
+              "current": true
+            },
+            "timeShift": null,
+            "aliasColors": {},
+            "xaxis": {
+              "show": true
+            },
+            "error": false,
+            "linewidth": 1,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "aliasByMetric(perSecond(carbon-writer.$host.MLS.StatisticsResourceCache.cache.*))",
+                "textEditor": false
+              }
+            ],
+            "bars": false,
+            "title": "Statistic Resource Cache",
+            "seriesOverrides": [],
+            "datasource": "graphite",
+            "percentage": false,
+            "span": 12,
+            "tooltip": {
+              "ordering": "alphabetical",
+              "msResolution": false,
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "stack": false
+          }
+        ],
+        "editable": true
+      },
+      {
+        "editable": true,
+        "height": "150px",
+        "collapse": false,
+        "title": "Statistic Jobresult",
+        "panels": [
+          {
+            "nullPointMode": "connected",
+            "isNew": true,
+            "id": 14,
+            "fill": 3,
+            "yaxes": [
+              {
+                "max": null,
+                "logBase": 1,
+                "show": true,
+                "min": 0,
+                "format": "none"
+              },
+              {
+                "format": "short",
+                "min": 0,
+                "logBase": 1,
+                "show": true,
+                "max": null
+              }
+            ],
+            "points": false,
+            "renderer": "flot",
+            "editable": true,
+            "lines": true,
+            "timeFrom": null,
+            "pointradius": 5,
+            "type": "graph",
+            "steppedLine": false,
+            "tooltip": {
+              "value_type": "cumulative",
+              "sort": 0,
+              "msResolution": false,
+              "shared": true,
+              "ordering": "alphabetical"
+            },
+            "stack": false,
+            "percentage": false,
+            "span": 12,
+            "datasource": "graphite",
+            "seriesOverrides": [],
+            "title": "Statistic Jobresult",
+            "targets": [
+              {
+                "textEditor": false,
+                "target": "aliasByMetric(perSecond(carbon-writer.$host.MLS.StatisticsJobResult.*))",
+                "refId": "A"
+              }
+            ],
+            "bars": false,
+            "linewidth": 1,
+            "error": false,
+            "aliasColors": {},
+            "xaxis": {
+              "show": true
+            },
+            "timeShift": null,
+            "legend": {
+              "max": false,
+              "alignAsTable": true,
+              "show": true,
+              "values": true,
+              "sideWidth": 200,
+              "total": false,
+              "rightSide": true,
+              "current": true,
+              "min": false,
+              "avg": false
+            },
+            "grid": {
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2": null,
+              "threshold2Color": "rgba(234, 112, 112, 0.22)",
+              "threshold1": null
+            },
+            "links": []
+          }
+        ]
+      },
+      {
+        "panels": [
+          {
+            "id": 15,
+            "fill": 3,
+            "isNew": true,
+            "nullPointMode": "connected",
+            "steppedLine": false,
+            "type": "graph",
+            "pointradius": 5,
+            "timeFrom": null,
+            "lines": true,
+            "editable": true,
+            "renderer": "flot",
+            "points": false,
+            "yaxes": [
+              {
+                "min": 0,
+                "format": "none",
+                "logBase": 1,
+                "show": true,
+                "label": null,
+                "max": null
+              },
+              {
+                "label": null,
+                "max": null,
+                "show": false,
+                "logBase": 1,
+                "format": "short",
+                "min": null
+              }
+            ],
+            "linewidth": 1,
+            "targets": [
+              {
+                "refId": "A",
+                "textEditor": false,
+                "target": "aliasByMetric(aliasSub(carbon-writer.$host.MLS.Server.ResourceCache.*, '(.*)-', ''))"
+              }
+            ],
+            "bars": false,
+            "title": "Server Resource Cache",
+            "seriesOverrides": [],
+            "datasource": "graphite",
+            "percentage": false,
+            "span": 12,
+            "stack": false,
+            "tooltip": {
+              "sort": 0,
+              "value_type": "cumulative",
+              "msResolution": false,
+              "shared": true
+            },
+            "links": [],
+            "grid": {
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2Color": "rgba(234, 112, 112, 0.22)",
+              "threshold1": null,
+              "threshold2": null
+            },
+            "timeShift": null,
+            "legend": {
+              "min": false,
+              "avg": false,
+              "current": true,
+              "total": false,
+              "rightSide": true,
+              "values": true,
+              "sideWidth": 200,
+              "show": true,
+              "alignAsTable": true,
+              "max": false
+            },
+            "xaxis": {
+              "show": true
+            },
+            "aliasColors": {},
+            "error": false
+          }
+        ],
+        "title": "Server Resource Cache",
+        "collapse": false,
+        "height": "200px",
+        "editable": true
+      }
+    ],
+    "timepicker": {
+      "refresh_intervals": [
+        "10s",
+        "30s",
+        "1m",
+        "2m",
+        "4m",
+        "10m"
+      ],
+      "now": true,
+      "time_options": [
+        "5m",
+        "15m",
+        "1h",
+        "6h",
+        "12h",
+        "24h",
+        "2d",
+        "7d",
+        "30d"
+      ]
+    },
+    "title": "<%= slug %> - MLS",
+    "uid": null,
+    "links": [],
+    "style": "dark",
+    "templating": {
+      "list": [
+        {
+          "current": {
+            "value": "<%= graphite_identifier %>",
+            "text": "<%= slug %>"
+          },
+          "options": [
+            {
+              "text": "<%= slug %>",
+              "value": "<%= graphite_identifier %>"
+            }
+          ],
+          "label": null,
+          "hide": 2,
+          "query": "<%= graphite_identifier %>",
+          "type": "constant",
+          "name": "host"
+        }
+      ]
+    },
+    "schemaVersion": 12,
+    "refresh": "1m",
+    "sharedCrosshair": true,
+    "tags": [
+      "<%= short_hostname %>",
+      "content-server"
+    ],
+    "timezone": "browser",
+    "id": null,
+    "hideControls": false,
+    "annotations": {
+      "list": []
+    },
+    "editable": true
+  }
+}

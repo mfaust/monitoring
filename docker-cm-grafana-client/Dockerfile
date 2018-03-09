@@ -4,8 +4,8 @@ FROM alpine:3.7
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
-  VERSION="1712" \
-  BUILD_DATE="2017-12-04" \
+  VERSION="1802" \
+  BUILD_DATE="2018-02-26" \
   TERM=xterm \
   TZ='Europe/Berlin' \
   GRAFANA_GEM_TYPE="local" \
@@ -13,21 +13,17 @@ ENV \
 
 # ---------------------------------------------------------------------------------------
 
-RUN \
-  apk --quiet --no-cache update && \
-  apk --quiet --no-cache upgrade && \
-  apk add --quiet --no-cache --virtual .build-deps tzdata && \
-  cp /usr/share/zoneinfo/$TZ /etc/localtime && \
-  echo $TZ > /etc/timezone && \
-  apk del --quiet .build-deps
-
 COPY build /build
 
 RUN \
+  apk --quiet --no-cache update && \
+  apk --quiet --no-cache upgrade && \
   apk add --quiet --no-cache --virtual .build-deps \
-    build-base imagemagick-dev ruby-dev mariadb-dev && \
+    build-base imagemagick-dev ruby-dev mariadb-dev tzdata && \
   apk add --quiet --no-cache \
     bind-tools drill mariadb-client mariadb-client-libs ruby-irb && \
+  cp /usr/share/zoneinfo/$TZ /etc/localtime && \
+  echo $TZ > /etc/timezone && \
   gem install --quiet --no-rdoc --no-ri \
     io-console bundler && \
   cd /build && \

@@ -247,13 +247,16 @@ module Monitoring
 
       in_monitoring = host_exists?( host )
       host_data     = host_avail?( host )
+      force         = false
+      annotation    = true
+
+      logger.debug( "in_monitoring:  #{in_monitoring}" )
+      logger.debug( "host_data    :  #{JSON.pretty_generate( host_data )}" )
 
       return JSON.pretty_generate( status: 404, message: format('we have problems with our dns to resolve \'%s\'', host ) ) if( host_data == false )
 
       result    = Hash.new()
       hash      = Hash.new()
-
-      annotation      = true
 
       result[host.to_s] ||= {}
 
@@ -263,75 +266,41 @@ module Monitoring
 
         result[host.to_s]['request'] = hash
 
-        force           = hash.keys.include?('force')      ? hash['force']      : false
-        enabledGrafana  = hash.keys.include?('grafana')    ? hash['grafana']    : @enabledGrafana
+        if( hash.is_a?(Hash) )
+
+          logger.debug(JSON.pretty_generate(hash))
+          force = hash.dig('force') || false
+        end
       end
 
       return JSON.pretty_generate( status: 200, message: format( 'host \'%s\' is not in monitoring', host ) ) if( in_monitoring == false && force == false )
 
       annotation = false if( in_monitoring == false && force == true )
 
-#       logger.warn( "force delete" )
-#       logger.warn( "but node '#{host}' is not in monitoring" )
-
       ip    = host_data.dig(:ip)
       short = host_data.dig(:short)
       fqdn  = host_data.dig(:fqdn)
 
-      # read the customized configuration
-      #
-      config = @database.config( ip: ip, short: host, fqdn: fqdn )
-
       status = @database.set_status( ip: ip, short: host, fqdn: fqdn, status: Storage::MySQL::DELETE )
+
+      logger.debug(status)
 
       # insert the DNS data into the payload
       #
       payload = Hash.new
       payload = {
         dns: host_data,
-        force: true,
+        force: force,
         timestamp: Time.now.to_i,
-        annotation: true
+        annotation: annotation
       }
       logger.debug( JSON.pretty_generate( payload ) )
-      # payload = JSON.generate(payload)
 
-  #    logger.debug( format( 'force      : %s', force            ? 'true' : 'false' ) )
-  #    logger.debug( format( 'discovery  : %s', enableDiscovery  ? 'true' : 'false' ) )
-  #    logger.debug( format( 'grafana    : %s', enabledGrafana   ? 'true' : 'false' ) )
-  #    logger.debug( format( 'icinga     : %s', enabledIcinga    ? 'true' : 'false' ) )
-  #    logger.debug( format( 'annotation : %s', annotation       ? 'true' : 'false' ) )
-
-#       logger.debug( 'annotation for remove' )
-#       annotation(
-#         host: host,
-#         dns: { ip: ip, short: host, fqdn: fqdn },
-#         payload: { command: 'remove', argument: 'node', config: config }
-#       )
 
       logger.info( 'create message for remove node from discovery service' )
       message_queue( cmd: 'remove', node: host, queue: 'mq-discover', payload: payload, prio: 1, ttr: 1, delay: 0 )
-#      message_queue( cmd: 'remove', node: host, queue: 'mq-discover', payload: payload, prio: 1, delay: 5 )
-
-      logger.info( 'create message for remove icinga checks and notifications' )
-      message_queue( cmd: 'remove', node: host, queue: 'mq-icinga', payload: payload, prio: 1, ttr: 1, delay: 0 )
-
-      logger.info( 'create message for remove grafana dashboards' )
-      message_queue( cmd: 'remove', node: host, queue: 'mq-grafana', payload: payload, prio: 1, ttr: 1, delay: 0 )
 
       sleep(3)
-
-      logger.debug( 'set node status to OFFLINE' )
-      status = @database.set_status( ip: ip, short: short, fqdn: fqdn, status: Storage::MySQL::OFFLINE )
-
-      logger.debug( 'remove configuration' )
-      status  = @database.remove_config( ip: ip, short: short, fqdn: fqdn )
-      logger.debug(status)
-
-      logger.debug( 'remove dns' )
-      status  = @database.remove_dns( ip: ip, short: short, fqdn: fqdn )
-
-      #@database.remove_dns( short: host )
 
       logger.info('sucessfull')
 

@@ -78,7 +78,6 @@ module Storage
       checksum = Digest::MD5.hexdigest( params.to_s )
 
       return checksum
-
     end
 
 

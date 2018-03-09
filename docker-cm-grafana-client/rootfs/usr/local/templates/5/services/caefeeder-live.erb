@@ -1,0 +1,332 @@
+{
+  "dashboard": {
+    "uid": null,
+    "style": "dark",
+    "links": [],
+    "title": "<%= slug %> - CAE Feeder Live",
+    "templating": {
+      "list": [
+        {
+          "hide": 2,
+          "query": "<%= graphite_identifier %>",
+          "current": {
+            "value": "<%= graphite_identifier %>",
+            "text": "<%= slug %>"
+          },
+          "label": null,
+          "name": "host",
+          "options": [
+            {
+              "text": "<%= slug %>",
+              "value": "<%= graphite_identifier %>"
+            }
+          ],
+          "type": "constant"
+        }
+      ]
+    },
+    "tags": [
+      "<%= short_hostname %>",
+      "feeder"
+    ],
+    "id": null,
+    "timepicker": {
+      "refresh_intervals": [
+        "10s",
+        "30s",
+        "1m",
+        "2m",
+        "4m",
+        "10m"
+      ],
+      "now": true,
+      "time_options": [
+        "5m",
+        "15m",
+        "1h",
+        "6h",
+        "12h",
+        "24h",
+        "2d",
+        "7d",
+        "30d"
+      ]
+    },
+    "refresh": "1m",
+    "editable": true,
+    "hideControls": false,
+    "schemaVersion": 12,
+    "version": 1,
+    "gnetId": null,
+    "annotations": {
+      "list": []
+    },
+    "time": {
+      "to": "now",
+      "from": "now-3h"
+    },
+    "rows": [
+      {
+        "showTitle": false,
+        "collapse": false,
+        "height": 42,
+        "title": "",
+        "panels": [
+          {
+            "links": [],
+            "id": 10,
+            "title": "",
+            "type": "text",
+            "span": 12,
+            "mode": "html",
+            "transparent": true,
+            "content": "<h3><center><a href=\"<%= tomcat_dashboard_url %>?var-Application=FEEDER_LIVE\">Tomcat</a></center></h3>"
+          }
+        ],
+        "repeat": null,
+        "repeatRowId": null,
+        "repeatIteration": null,
+        "titleSize": "h6"
+      },
+      {
+        "panels": [
+          {
+            "content": "<h2><center>CAE Live Feeder</center></h2>",
+            "transparent": true,
+            "mode": "html",
+            "span": 12,
+            "title": "",
+            "id": 11,
+            "links": [],
+            "editable": true,
+            "error": false,
+            "type": "text",
+            "isNew": true
+          }
+        ],
+        "height": "25px",
+        "title": "",
+        "collapse": false,
+        "editable": true
+      },
+      {
+        "panels": [
+          {
+            "legend": {
+              "alignAsTable": true,
+              "rightSide": true,
+              "total": false,
+              "max": true,
+              "avg": false,
+              "show": true,
+              "current": true,
+              "min": false,
+              "values": true
+            },
+            "timeFrom": null,
+            "targets": [
+              {
+                "refId": "A",
+                "textEditor": false,
+                "target": "aliasByMetric(aliasSub(carbon-writer.$host.FEEDER_LIVE.ProactiveEngine.feeder.entries.diff, '(.*)-', ''))"
+              },
+              {
+                "target": "aliasByMetric(aliasSub(carbon-writer.$host.FEEDER_LIVE.ProactiveEngine.feeder.entries.current, '(.*)-', ''))",
+                "textEditor": false,
+                "refId": "B",
+                "hide": true
+              },
+              {
+                "hide": true,
+                "refId": "C",
+                "target": "aliasByMetric(aliasSub(carbon-writer.$host.FEEDER_LIVE.ProactiveEngine.feeder.entries.max, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "hide": true,
+                "refId": "D",
+                "target": "aliasByMetric(aliasSub(carbon-writer.$host.FEEDER_LIVE.ProactiveEngine.feeder.invalidations, '(.*)-', ''))",
+                "textEditor": false
+              },
+              {
+                "refId": "E",
+                "textEditor": false,
+                "target": "aliasByMetric(aliasSub(carbon-writer.$host.FEEDER_LIVE.ProactiveEngine.feeder.heartbeat, '(.*)-', ''))"
+              }
+            ],
+            "id": 12,
+            "points": false,
+            "span": 12,
+            "title": "Feeder Elements",
+            "links": [],
+            "xaxis": {
+              "show": true
+            },
+            "editable": true,
+            "timeShift": null,
+            "grid": {
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold1": null,
+              "threshold2": null,
+              "threshold2Color": "rgba(234, 112, 112, 0.22)"
+            },
+            "tooltip": {
+              "shared": true,
+              "ordering": "alphabetical",
+              "value_type": "cumulative",
+              "msResolution": false,
+              "sort": 0
+            },
+            "yaxes": [
+              {
+                "format": "none",
+                "show": true,
+                "logBase": 1,
+                "max": null,
+                "min": 0
+              },
+              {
+                "min": 0,
+                "max": 60000,
+                "show": true,
+                "logBase": 1,
+                "format": "ms"
+              }
+            ],
+            "isNew": true,
+            "type": "graph",
+            "percentage": false,
+            "fill": 3,
+            "decimals": 0,
+            "linewidth": 1,
+            "lines": true,
+            "nullPointMode": "connected",
+            "aliasColors": {},
+            "pointradius": 5,
+            "steppedLine": false,
+            "renderer": "flot",
+            "bars": false,
+            "error": false,
+            "stack": false,
+            "seriesOverrides": [
+              {
+                "alias": "heartbeat",
+                "yaxis": 2
+              }
+            ],
+            "datasource": "graphite"
+          }
+        ],
+        "height": "150px",
+        "title": "Feeder Elements",
+        "collapse": false,
+        "editable": true
+      },
+      {
+        "title": "UAPI Cache",
+        "height": "150px",
+        "panels": [
+          {
+            "nullPointMode": "connected",
+            "fill": 3,
+            "decimals": 1,
+            "linewidth": 1,
+            "lines": true,
+            "datasource": "graphite",
+            "stack": false,
+            "seriesOverrides": [
+              {
+                "alias": "percent",
+                "yaxis": 2,
+                "color": "#BF1B00"
+              }
+            ],
+            "aliasColors": {},
+            "steppedLine": false,
+            "pointradius": 5,
+            "renderer": "flot",
+            "error": false,
+            "bars": false,
+            "id": 13,
+            "points": false,
+            "span": 12,
+            "title": "UAPI Cache",
+            "links": [],
+            "legend": {
+              "alignAsTable": true,
+              "rightSide": true,
+              "max": true,
+              "total": false,
+              "current": true,
+              "avg": false,
+              "show": true,
+              "values": true,
+              "min": false
+            },
+            "timeFrom": null,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "alias(aliasSub(carbon-writer.$host.FEEDER_LIVE.CapConnection.heap.cache.size, '(.*)-', ''), 'max')",
+                "textEditor": false
+              },
+              {
+                "refId": "B",
+                "textEditor": false,
+                "target": "alias(aliasSub(carbon-writer.$host.FEEDER_LIVE.CapConnection.heap.cache.used, '(.*)-', ''), 'used')"
+              },
+              {
+                "textEditor": false,
+                "target": "alias(aliasSub(carbon-writer.$host.FEEDER_LIVE.CapConnection.heap.cache.used_percent, '(.*)-', ''), 'percent')",
+                "refId": "C"
+              }
+            ],
+            "yaxes": [
+              {
+                "min": 0,
+                "max": null,
+                "logBase": 1,
+                "show": true,
+                "format": "bytes",
+                "label": null
+              },
+              {
+                "label": "percent",
+                "format": "none",
+                "show": true,
+                "logBase": 1,
+                "max": "110",
+                "min": null
+              }
+            ],
+            "type": "graph",
+            "percentage": false,
+            "isNew": true,
+            "xaxis": {
+              "show": true
+            },
+            "editable": true,
+            "timeShift": null,
+            "tooltip": {
+              "value_type": "cumulative",
+              "msResolution": false,
+              "sort": 0,
+              "ordering": "alphabetical",
+              "shared": true
+            },
+            "grid": {
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2Color": "rgba(234, 112, 112, 0.22)",
+              "threshold2": null,
+              "threshold1": null
+            }
+          }
+        ],
+        "editable": true,
+        "collapse": false
+      }
+    ],
+    "sharedCrosshair": true,
+    "timezone": "browser"
+  }
+}
