@@ -347,27 +347,23 @@ module ExternalClients
       response = nil
 
       begin
-
         Net::HTTP.start( uri.host, uri.port ) do |http|
           request = Net::HTTP::Get.new( uri.request_uri )
 
           response     = http.request( request )
-          responseCode = response.code.to_i
+          response_code = response.code.to_i
 
           # TODO
           # Errorhandling
-          if( responseCode != 200 )
-            logger.error( sprintf( ' [%s] - Error', responseCode ) )
+          if( response_code != 200 )
+            logger.error( sprintf( ' [%s] - Error', response_code ) )
             logger.error( response.body )
-          elsif( responseCode == 200 )
+          elsif( response_code == 200 )
 
             body = response.body
-
 #             logger.debug( body )
-
             # remove all comments
             body        = body.each_line.reject{ |x| x.strip =~ /(^.*)#/ }.join
-
             # get groups
             @boot       = body.each_line.select { |name| name =~ /^node_boot_time/ }
             @cpu        = body.each_line.select { |name| name =~ /^node_cpu/ }
@@ -380,13 +376,12 @@ module ExternalClients
             @memory     = body.each_line.select { |name| name =~ /^node_memory/ }
             @netstat    = body.each_line.select { |name| name =~ /^node_netstat/ }
             @network    = body.each_line.select { |name| name =~ /^node_network/ }
-
           end
         end
-      rescue Exception => e
-  #      logger.error( e )
-  #      logger.error( e.backtrace )
-        raise( e )
+      rescue Exception => error
+        logger.error( error )
+        logger.error( error.backtrace )
+        # raise( e )
       end
 
     end
@@ -396,13 +391,11 @@ module ExternalClients
 
       result    = Hash.new()
       parts    = data.last.split( ' ' )
-      bootTime = sprintf( "%f", parts[1].to_s ).sub(/\.?0*$/, "" )
-      uptime   = Time.at( Time.now() - Time.at( bootTime.to_i ) ).to_i
+      boot_time = parts[1].to_f.to_i
+      # boot_time = sprintf( "%f", parts[1].to_s ).sub(/\.?0*$/, "" )
+      uptime   = Time.at( Time.now() - Time.at( boot_time.to_i ) ).to_i
 
-      result[parts[0]] = bootTime
-      result['uptime'] = uptime
-
-      result
+      { 'boot_time' => boot_time, 'uptime' => uptime }
     end
 
 
@@ -418,7 +411,7 @@ module ExternalClients
 
           core, mode, mes = parts.captures
 
-          mes = sprintf( "%f", mes.to_s.strip ).sub(/\.?0*$/, "" )
+          mes = mes.to_s.strip.to_f.to_i # sprintf( "%f", mes.to_s.strip ).sub(/\.?0*$/, "" )
 
           if( core != tmpCore )
             result[core] = { mode => mes }
@@ -476,6 +469,51 @@ module ExternalClients
         end
       end
 
+      data.each do |c|
+        c.gsub!('node_memory_', ' ' )
+        if( parts = c.match( regex ) )
+          parts = c.split( ' ' )
+          key   = parts[0].downcase
+          value = parts[1].to_f.to_i
+
+          if( key =~ /^mem/ )
+            _key = key.gsub('mem','')
+            result["memory"] ||= {}
+            result["memory"][_key] = value
+          end
+
+          if( key =~ /^swap/ )
+            _key = key.gsub('swap','')
+            result["swap"] ||= {}
+            result["swap"][_key] = value
+          end
+        end
+      end
+
+      if(result.dig('memory','total') && result.dig('memory','available'))
+        mem_total        = result.dig('memory','total')
+        mem_available    = result.dig('memory','available')
+        mem_used         = ( mem_total.to_i - mem_available.to_i )
+        mem_used_percent = ( 100 * mem_used.to_i / mem_total.to_i ).to_i
+
+        result["memory"]["used"] = mem_used
+        result["memory"]["used_percent"] = mem_used_percent
+      end
+
+      if(result.dig('swap','total') && result.dig('swap','free'))
+        swap_total   = result.dig('swap','total') || 0
+        swap_free    = result.dig('swap','free')  || 0
+
+        if( swap_total != 0 )
+          swap_used        = ( swap_total.to_i - swap_free.to_i )
+          swap_used_percent = 0
+          swap_used_percent = ( 100 * swap_used.to_i / swap_total.to_i ).to_i if( swap_used.to_i > 0 && swap_total.to_i > 0 )
+
+          result["swap"]["used"] = swap_used
+          result["swap"]["used_percent"] = swap_used_percent
+        end
+      end
+
       result
     end
 
@@ -513,12 +551,11 @@ module ExternalClients
             hash[ d.to_s ] ||= {}
             hash[ d.to_s ][ direction.to_s ] ||= {}
             hash[ d.to_s ][ direction.to_s ][ type.to_s ] ||= {}
-            hash[ d.to_s ][ direction.to_s ][ type.to_s ] = sprintf( "%f", mes.to_s ).sub(/\.?0*$/, "" )
+            hash[ d.to_s ][ direction.to_s ][ type.to_s ] = mes.to_f.to_i # sprintf( "%f", mes.to_s ).sub(/\.?0*$/, "" )
           end
         end
 
         r.push( hash )
-
       end
 
       r.reduce( :merge )
@@ -561,7 +598,7 @@ module ExternalClients
             hash[ d.to_s ] ||= {}
             hash[ d.to_s ][ type.to_s ] ||= {}
             hash[ d.to_s ][ type.to_s ][ direction.to_s ] ||= {}
-            hash[ d.to_s ][ type.to_s ][ direction.to_s ] = sprintf( "%f", mes.to_s ).sub(/\.?0*$/, "" )
+            hash[ d.to_s ][ type.to_s ][ direction.to_s ] = mes.to_f.to_i # sprintf( "%f", mes.to_s ).sub(/\.?0*$/, "" )
 
           end
         end
@@ -637,18 +674,38 @@ module ExternalClients
             device = 'rootfs' if( device =~ /xvda/ )
             mountpoint = '/' if( device == 'rootfs' )
 
+            # skip
+            next if( mountpoint =~ /^\/rootfs/ )
+
             hash[ device.to_s ] ||= {}
             hash[ device.to_s ][ type.to_s ] ||= {}
-            hash[ device.to_s ][ type.to_s ]  = sprintf( "%f", mes.to_s ).sub(/\.?0*$/, "" )
+            hash[ device.to_s ][ type.to_s ]  = mes.to_f.to_i # sprintf( "%f", mes.to_s ).sub(/\.?0*$/, "" )
             hash[ device.to_s ]['mountpoint'] = mountpoint
           end
         end
 
         r.push( hash )
-
       end
 
-      r.reduce( :merge )
+      result = r.reduce( :merge ).clone
+
+      result.each do |k,v|
+        if(v)
+          avail = v.dig('avail')
+          size  = v.dig('size')
+
+          if( size.to_i > 0 )
+            used          = ( size.to_i - avail.to_i )
+            used_percent  = ( 100 * used.to_i / size.to_i ).to_i
+
+            result[k]["used"] = used
+            result[k]["used_percent"] = used_percent
+          end
+
+        end
+      end
+
+      result
     end
 
 
@@ -656,19 +713,19 @@ module ExternalClients
 
       begin
 
-        self.call_service
+        call_service
 
-        return {
-          :uptime     => self.collect_uptime( @boot ),
-          :cpu        => self.collect_cpu( @cpu ),
-          :load       => self.collect_load( @load ),
-          :memory     => self.collect_memory( @memory ),
-          :network    => self.collect_network( @network ),
-          :disk       => self.collect_disk( @disk ),
-          :filesystem => self.collect_filesystem( @filesystem )
+        {
+          uptime: collect_uptime( @boot ),
+          cpu: collect_cpu( @cpu ),
+          load: collect_load( @load ),
+          memory: collect_memory( @memory ),
+          network: collect_network( @network ),
+          disk: collect_disk( @disk ),
+          filesystem: collect_filesystem( @filesystem )
         }
-      rescue Exception => e
-        logger.error( "An error occurred for query: #{e}" )
+      rescue Exception => error
+        logger.error( "An error occurred for query: #{error}" )
         return false
       end
 
@@ -701,14 +758,14 @@ module ExternalClients
           request = Net::HTTP::Get.new( uri.request_uri )
 
           response     = http.request( request )
-          responseCode = response.code.to_i
+          response_code = response.code.to_i
 
           # TODO
           # Errorhandling
-          if( responseCode != 200 )
-            logger.error( sprintf( ' [%s] - Error', responseCode ) )
+          if( response_code != 200 )
+            logger.error( sprintf( ' [%s] - Error', response_code ) )
             logger.error( response.body )
-          elsif( responseCode == 200 )
+          elsif( response_code == 200 )
 
             body = response.body
 
