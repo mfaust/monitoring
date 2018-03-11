@@ -364,7 +364,7 @@ services:
     container_name: cm-data-collector
     hostname: cm-data-collector
     environment:
-      LOG_LEVEL: info
+      LOG_LEVEL: debug
     depends_on:
       - jolokia
       - beanstalkd

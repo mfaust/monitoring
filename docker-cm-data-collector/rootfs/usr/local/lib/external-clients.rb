@@ -442,7 +442,7 @@ module ExternalClients
           parts = c.split( ' ' )
 
           key   = parts[0]
-          value = parts[1]
+          value = parts[1].to_f
 
           result[key] = value
         end
