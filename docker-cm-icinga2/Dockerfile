@@ -41,13 +41,13 @@ RUN \
 
 # ---------------------------------------------------------------------------------------
 
-FROM bodsch/docker-icinga2:2.8.1-master-r1
+FROM bodsch/docker-icinga2:2.8.1-master-r2
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
   VERSION="1803" \
-  BUILD_DATE="2018-03-09" \
+  BUILD_DATE="2018-03-16" \
   TERM=xterm \
   TZ='Europe/Berlin'
 
