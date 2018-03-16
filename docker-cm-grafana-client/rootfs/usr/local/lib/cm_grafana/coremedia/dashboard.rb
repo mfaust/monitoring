@@ -733,21 +733,25 @@ class CMGrafana
 
         params[:overview] = true if(overview_dashboard)
 
-        logger.debug( "overview_dashboard: #{overview_dashboard}" )
+        unless(overview_dashboard.nil? )
 
-        logger.debug( 'first, delete combined dashboards: overview and licenses' )
-        overview_dashboard.each do |d|
-          logger.debug( format( '  - %s :: %s', host, d ) )
-          response = delete_dashboard( d )
-          # logger.debug( response )
-          status = response.dig('status')
-        end
+          logger.debug( "overview_dashboard: #{overview_dashboard}" )
 
-        licenses_dashboard.each do |d|
-          logger.debug( format( '  - %s :: %s', host, d ) )
-          response = delete_dashboard( d )
-          # logger.debug( response )
-          status = response.dig('status')
+          logger.debug( 'first, delete combined dashboards: overview and licenses' )
+          overview_dashboard.each do |d|
+            logger.debug( format( '  - %s :: %s', host, d ) )
+            response = delete_dashboard( d )
+            # logger.debug( response )
+            status = response.dig('status')
+          end
+
+          licenses_dashboard.each do |d|
+            logger.debug( format( '  - %s :: %s', host, d ) )
+            response = delete_dashboard( d )
+            # logger.debug( response )
+            status = response.dig('status')
+          end
+
         end
 
         create_dashboard_for_host( params )
