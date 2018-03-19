@@ -33,11 +33,14 @@ class CMGrafana
 
         @slug  = slug( @slug ).gsub( '.', '-' )
 
+        @uuid  = @slug.gsub(/-\w{1,2}-\d{1,2}-(.*)-tomcat-/, '-')
+
         logger.debug( format('ip   : %s', ip))
         logger.debug( format('short: %s', short))
         logger.debug( format('fqdn : %s', fqdn))
         logger.debug( "short hostname     : #{@short_hostname}" )
         logger.debug( "slug               : #{@slug}" )
+        logger.debug( "uuid               : #{@uuid}" )
         logger.debug( "graphite identifier: #{@graphite_identifier}" )
 
         [ ip, short, fqdn ]
@@ -139,9 +142,10 @@ class CMGrafana
 
         logger.info( 'Create Overview Template' )
 
-        slug   = @slug
+        slug                = @slug
+        uuid                = format( '%s-overview', @uuid )
         graphite_identifier = @graphite_identifier
-        short_hostname     = @short_hostname
+        short_hostname      = @short_hostname
 
         logger.debug("services: #{services}")
         logger.debug("service_dashboard_data: #{service_dashboard_data}")
@@ -249,9 +253,10 @@ class CMGrafana
 
         end
 
-        slug = @slug
+        slug                = @slug
+        uuid                = format( '%s-licenses', @uuid )
         graphite_identifier = @graphite_identifier
-        short_hostname = @short_hostname
+        short_hostname      = @short_hostname
 
         logger.debug(content_srv_data)
 
@@ -354,6 +359,7 @@ class CMGrafana
           {
             "dashboard": {
               "id": null,
+              "uid": "<%= uuid %>",
               "title": "<%= slug %> - Licenses",
               "originalTitle": "<%= slug %> - Licenses",
               "tags": [ "<%= short_hostname %>", "licenses" ],
@@ -772,9 +778,9 @@ class CMGrafana
 
           logger.debug( "host: #{s}" )
 
-          ip, short, fqdn = self.ns_lookup(s)
-          short_hostname     = short  # (%HOST%)
-          slug   = fqdn   # name for the grafana title (%SHORTNAME%)
+          ip, short, fqdn     = self.ns_lookup(s)
+          short_hostname      = short  # (%HOST%)
+          slug                = fqdn   # name for the grafana title (%SHORTNAME%)
           graphite_identifier = fqdn   # identifier for an storage path (<%= graphite_identifier %>) (useful for cloud stack on aws with changing hostnames)
 
           # read the configuration for an customized display name
@@ -814,6 +820,7 @@ class CMGrafana
           {
             "dashboard": {
               "id": null,
+              "uid": null,
               "title": "= Overview",
               "originalTitle": "= Overview",
               "tags": [ "overview" ],

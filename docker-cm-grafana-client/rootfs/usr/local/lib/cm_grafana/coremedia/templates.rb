@@ -60,6 +60,7 @@ class CMGrafana
         icinga_identifier        = graphite_identifier.gsub('.','_')
         short_hostname           = @short_hostname
         grafana_title            = format('%s - %s', slug, description )
+        uuid                     = format( '%s-%s', @uuid, service_name )
 
         ## -------------------------------------------------------
         #logger.debug( sprintf( '  service_name       \'%s\'', service_name ) )
@@ -226,16 +227,17 @@ class CMGrafana
 
         logger.debug("normalize_template(params = {})")
 
-        template           = params.dig(:template)
-        service_name       = params.dig(:service_name)
-        description        = params.dig(:description)
-        normalized_name    = params.dig(:normalized_name)
-        slug               = params.dig(:slug)
-        graphite_identifier = params.dig(:graphite_identifier)
-        short_hostname     = params.dig(:short_hostname)
-        mls_identifier     = params.dig(:mls_identifier)
+        template             = params.dig(:template)
+        service_name         = params.dig(:service_name)
+        description          = params.dig(:description)
+        normalized_name      = params.dig(:normalized_name)
+        slug                 = params.dig(:slug)
+        graphite_identifier  = params.dig(:graphite_identifier)
+        short_hostname       = params.dig(:short_hostname)
+        mls_identifier       = params.dig(:mls_identifier)
         tomcat_dashboard_url = params.dig(:tomcat_dashboard_url)
-        icinga_identifier  = graphite_identifier.gsub('.','_')
+        icinga_identifier    = graphite_identifier.gsub('.','_')
+        uuid                 = format( '%s-%s', @uuid, service_name )
 
         grafana_title = format('%s - %s', slug, description )
 
