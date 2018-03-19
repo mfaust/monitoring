@@ -10,6 +10,8 @@ module Storage
 
   class MySQL
 
+    attr_accessor :debug
+    attr_accessor :logger
 #    include Logging
 
     OFFLINE  = 0
@@ -26,34 +28,27 @@ module Storage
       @read_timeout    = params.dig(:mysql, :timeout, :read)    || 15
       @write_timeout   = params.dig(:mysql, :timeout, :write)   || 15
       @connect_timeout = params.dig(:mysql, :timeout, :connect) || 25
+      @connect_max_retries   = params.dig(:mysql, :max_retries) || 5
+      @connect_sleep_retries = params.dig(:mysql, :sleep_retries) || 5
 
-#       logger.level = Logger::INFO
+      $stdout.sync     = true
+      @logger ||= Logger.new($stdout)
+      @logger.level    = Logger::UNKNOWN
 
       @client          = connect
-
-      # SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = 'DBName'
-      @client.query('SET storage_engine=InnoDB')
-      @client.query("CREATE DATABASE if not exists #{@schema}")
-
-      self.prepare
-    end
-
-
-    def self.logger
-      @@logger ||= Logger.new(STDOUT)
     end
 
 
     def self.logger=(logger)
-      @@logger = logger
+      @logger = logger
     end
 
 
     def connect
 
-      begin
+      times_retried = 0
 
-        retries ||= 0
+      begin
 
         client = Mysql2::Client.new(
           :host            => @host,
@@ -67,24 +62,28 @@ module Storage
           :reconnect       => true
         )
 
-      rescue
+        @logger.info( 'database connection established' )
 
-#         logger.debug(format('try to create the database connection (%d)', retries))
-#         logger.error(e)
+      rescue => error
 
-        if( retries < 20 )
-          retries += 1
-          sleep( 5 )
+        if( times_retried < @connect_max_retries )
+
+          times_retried += 1
+          @logger.debug('try to create the database connection')
+          @logger.warn( format( '   retry %s/%s', times_retried, @connect_max_retries ) )
+
+          sleep( @connect_sleep_retries )
           retry
         end
       end
 
-#       logger.info( 'database connection established' )
       client
     end
 
 
     def prepare
+
+      @client = connect
 
       @client.query( "USE #{@schema}" )
 
@@ -96,33 +95,35 @@ module Storage
           fqdn       varchar(255) not null,
           status     enum('offline','online','delete','prepare','unknown') default 'unknown',
           creation   DATETIME DEFAULT   CURRENT_TIMESTAMP,
+          changed    DATETIME ON UPDATE CURRENT_TIMESTAMP,
           PRIMARY KEY (`ID`),
-          key(`ip`),
-          unique( ip, name, fqdn, status )
+          key(`ip`)
         )"
       )
 
       @client.query('CREATE TABLE IF NOT EXISTS config (
           `key`      varchar(128) not null,
-          `value`    varchar(255) not null,
+          `value`    text not null,
           dns_ip     varchar(16),
           creation   DATETIME DEFAULT   CURRENT_TIMESTAMP,
+          changed    DATETIME ON UPDATE CURRENT_TIMESTAMP,
           KEY(`key`),
-          unique( `key`, `value`, dns_ip ),
-          FOREIGN KEY (`dns_ip`) REFERENCES dns(`ip`)
+          FOREIGN KEY (`dns_ip`)
+          REFERENCES dns(`ip`)
           ON DELETE CASCADE
         )'
       )
 
       @client.query('CREATE TABLE IF NOT EXISTS discovery (
           service    varchar(128) not null,
-          port       int(4)       not null,
-          data       text         not null,
+          port       int(4) not null,
+          data       text not null,
           dns_ip     varchar(16),
           creation   DATETIME DEFAULT   CURRENT_TIMESTAMP,
-          KEY(`service`,`port`),
-          unique( service, port, dns_ip ),
-          FOREIGN KEY (`dns_ip`) REFERENCES dns(`ip`)
+          changed    DATETIME ON UPDATE CURRENT_TIMESTAMP,
+          KEY(`service`),
+          FOREIGN KEY (`dns_ip`)
+          REFERENCES dns(`ip`)
           ON DELETE CASCADE
         )'
       )
@@ -934,7 +935,7 @@ module Storage
 
     def exec( statement )
 
-#       logger.debug( "exec( #{statement} )" )
+      @logger.debug( "exec( #{statement} )" )
 
       result = nil
 
@@ -943,23 +944,28 @@ module Storage
 
         result = @client.query( statement, :as => :hash )
 
-#         logger.debug( sprintf( ' %d try to execute statement', retries ) )
-      rescue
+        @logger.debug( sprintf( ' %d try to execute statement', retries ) )
+
+      rescue => error
+
+        @logger.error(error)
 
         if( retries < 5 )
-
+          @logger.debug( "retry: #{retries}/5" )
           sleep( 2 )
           retries += 1
           retry
         end
       end
 
-#       logger.debug( result.class.to_s )
-#       logger.debug( result.inspect )
-#       logger.debug( result.size )
+      unless(result.nil?)
+        @logger.debug("result: #{result}")
+        @logger.debug( result.class.to_s )
+        @logger.debug( result.inspect )
+        @logger.debug( result.size )
+      end
 
       result
-
     end
 
     #
