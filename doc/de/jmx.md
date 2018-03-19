@@ -1,5 +1,4 @@
-JMX Beans
-=========
+# JMX Beans
 
 ## Beschreibung
 

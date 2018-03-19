@@ -45,9 +45,6 @@ services:
     build: ../../docker-cm-jolokia
     container_name: jolokia
     hostname: jolokia
-#    ports:
-#      - 8080:8080
-#      - 8088:8088
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:
@@ -252,29 +249,17 @@ services:
 
   markdown-service:
     restart: always
-    image: bodsch/docker-markdown-service:1.2.0
+    image: bodsch/docker-markdownd
     container_name: markdown-service
     hostname: markdown-service
+    ports:
+      - 8080
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ../../docker-cm-data/rootfs/data/www/markdown-service:/var/www
+      - ../../docker-cm-data/rootfs/data/www/markdown-service:/data
+      - ../../doc:/data
     networks:
       - mon
-
-
-#  allmark:
-#    restart: always
-#    image: andreaskoch/allmark
-#    container_name: allmark
-#    hostname: allmark
-#    ports:
-#      - 8088:33001
-#    volumes:
-#      - /etc/localtime:/etc/localtime:ro
-#      - ../../docker-cm-data/rootfs/data/www/markdown-service:/data
-#    networks:
-#      - mon
-
 
   cm-dashing:
     restart: always
@@ -363,7 +348,7 @@ services:
     container_name: cm-data-collector
     hostname: cm-data-collector
     environment:
-      LOG_LEVEL: debug
+      LOG_LEVEL: info
     depends_on:
       - jolokia
       - beanstalkd
@@ -411,7 +396,7 @@ services:
     container_name: cm-grafana-client
     hostname: cm-grafana-client
     environment:
-      LOG_LEVEL: info
+      LOG_LEVEL: debug
       GRAFANA_VERSION: 5
       GRAFANA_HOST: nginx
     depends_on:

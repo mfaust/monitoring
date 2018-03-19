@@ -20,7 +20,7 @@ Die Monitoring-Toolbox lässt sich über eine API manuell nutzen oder in einer C
 2. [Konfiguration](./de/konfiguration.md)
 3. [API](./de/api.md)
 4. [JMX](./de/jmx.md)
-5. [Bereitschaft](./de/operations.md)
+5. [Bereitschaft](./de/bereitschaft.md)
 6. [Service Discovery](./de/service-discovery.md)
 7. [Screenshots](./de/screenshots.md)
 
