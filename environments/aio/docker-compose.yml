@@ -107,7 +107,7 @@ services:
 
   carbon:
     restart: always
-    image: bodsch/docker-go-carbon:0.12.0-rc1
+    image: bodsch/docker-go-carbon:0.12.0-r1
     container_name: carbon
     hostname: carbon
     ports:
@@ -204,7 +204,7 @@ services:
       - 8080
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - icinga:/srv
+      # - icinga:/srv
       - icinga:/var/lib/icinga2
     networks:
       - mon
