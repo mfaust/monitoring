@@ -22,6 +22,15 @@ http {
     "ELB-HealthChecker/2.0" 0;
   }
 
+  # Expires map
+  map $sent_http_content_type $expires {
+    default                    off;
+    text/html                  epoch;
+    text/css                   max;
+    application/javascript     max;
+    ~image/                    max;
+  }
+
   access_log  /dev/stdout  main;
 
   sendfile        on;
@@ -45,6 +54,8 @@ http {
     access_log          off;
     error_log           off;
 
+    expires             $expires;
+
     # we want an permantent redirect to https
     #
 #    if ($http_x_forwarded_proto != "https") {
@@ -65,6 +76,8 @@ http {
     ssl_certificate     /etc/nginx/secure/localhost/cert.pem;
     ssl_certificate_key /etc/nginx/secure/localhost/key.pem;
     ssl_dhparam         /etc/nginx/secure/localhost/dh.pem;
+
+    expires             $expires;
 
     # only this domain
     add_header Strict-Transport-Security "max-age=31536000";

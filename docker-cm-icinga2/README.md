@@ -1,14 +1,12 @@
 
-CoreMedia icinga2
-========================
+# CoreMedia icinga2
 
-# short Description
 
-A small and powerful dashboard system.
+## short Description
 
-Bases on [bodsch/docker-icinga2](https://hub.docker.com/r/bodsch/docker-icinga2/)
+Based on [bodsch/docker-icinga2](https://hub.docker.com/r/bodsch/docker-icinga2/)
 
-# Environment Variables
+## Environment Variables
 
 | Environmental Variable             | Default Value        | Description                                                     |
 | :--------------------------------- | :-------------       | :-----------                                                    |

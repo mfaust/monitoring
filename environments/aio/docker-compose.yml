@@ -89,13 +89,13 @@ services:
       - grafana
       - icingaweb2
       - cm-rest-service
-      - markdown-service
+      - documentation
     links:
       - grafana
       - icingaweb2
       - cm-icinga2-master:icinga2-master
       - cm-rest-service
-      - markdown-service
+      - documentation
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ../../docker-cm-data/rootfs/data/www/entry-page:/var/www/entry-page
@@ -136,7 +136,7 @@ services:
 
   grafana:
     restart: always
-    image: bodsch/docker-grafana:5.0.2
+    image: bodsch/docker-grafana:5.0.2-r1
     container_name: grafana
     hostname: grafana
     environment:
@@ -247,19 +247,31 @@ services:
     networks:
       - mon
 
-  markdown-service:
+  documentation:
     restart: always
-    image: bodsch/docker-markdownd
-    container_name: markdown-service
-    hostname: markdown-service
+    build: ../../docker-documentation
+    container_name: documentation
+    hostname: documentation
     ports:
       - 8080
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ../../docker-cm-data/rootfs/data/www/markdown-service:/data
-      - ../../doc:/data
     networks:
       - mon
+
+#  markdown-service:
+#    restart: always
+#    image: bodsch/docker-markdownd
+#    container_name: markdown-service
+#    hostname: markdown-service
+#    ports:
+#      - 8080
+#    volumes:
+#      - /etc/localtime:/etc/localtime:ro
+#      - ../../docker-cm-data/rootfs/data/www/markdown-service:/data
+#      - ../../doc:/data
+#    networks:
+#      - mon
 
   cm-dashing:
     restart: always
