@@ -1,6 +1,6 @@
 
 
-1801
+1803
 
   - environments
     - update data-visualisation environment
@@ -19,7 +19,7 @@
 
   - use new version for icinga2 certificate exchange (0.17.5)
 
-  - first step to fix #126
+  - fix timing problems for RLS (#126)
 
   - icinga2-master / icinga2-satellite / icinga-client
     - update the complete icinga suite
