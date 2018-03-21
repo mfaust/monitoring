@@ -209,7 +209,7 @@ jolokia:
       description: Workflow Server
       metrics:
       - mbean: com.coremedia:type=CapConnection,application=*
-        attribute: BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open
+        attribute: BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open,WorkflowRepositoryAvailable
 
     elastic-worker:
       description: The Elastic Worker
@@ -233,7 +233,7 @@ jolokia:
         attribute: State,Uptime,CurrentPendingDocuments,IndexAverageBatchSendingTime,IndexDocuments,IndexContentDocuments,IndexBytes,PendingEvents,PendingFolders
       - name: CapConnection
         mbean: com.coremedia:type=CapConnection,application=*
-        attribute: BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open
+        attribute: BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open,ContentRepositoryAvailable,WorkflowRepositoryAvailable
 
     caefeeder:
       description: The CAE Feeder (Live and Preview)
@@ -250,7 +250,7 @@ jolokia:
         mbean: com.coremedia:type=Health,application=*
       - description: the management interface for the CapConnection to allow its configuration and profiling
         mbean: com.coremedia:type=CapConnection,application=*
-        attribute: BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open
+        attribute: BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open,ContentRepositoryAvailable
       - description: Provided statistics for the persistent blob cache
         mbean: com.coremedia:type=TransformedBlobCacheManager,application=*
         attribute: AccessCount,CacheSize,FaultCount,FaultSizeSum,InitialLevel,Level,NewGenerationCacheSize,NewGenerationInitialLevel,NewGenerationLevel,OldGenerationInitialLevel,OldGenerationLevel,RecallCount,RecallSizeSum,RotateCount
@@ -285,7 +285,7 @@ jolokia:
       metrics:
       - name: CapConnection
         mbean: com.coremedia:type=CapConnection,application=*
-        attribute: BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open,Url
+        attribute: BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open,Url,ContentRepositoryAvailable
       - mbean: com.coremedia:type=DataViewFactory,application=*
         attribute: ActiveTimeOfComputedDataViews,NumberOfCachedDataViews,NumberOfComputedDataViews,NumberOfDataViewLookups,NumberOfEvictedDataViews,NumberOfInvalidatedDataViews,TotalTimeOfComputedDataViews
       # currently disabled
@@ -298,7 +298,7 @@ jolokia:
       metrics:
       - name: CapConnection for Studio
         mbean: com.coremedia:type=CapConnection,application=*
-        attribute: BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open
+        attribute: BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open,ContentRepositoryAvailable,WorkflowRepositoryAvailable
 
     solr:
       description: Solr Standard Checks for Core %CORE%
