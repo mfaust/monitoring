@@ -23,7 +23,9 @@ module CarbonData
       #   0: false
       #   1: true
       #  -1: N/A
-      open             = -1
+      open               = -1
+      content_repository = -1
+      workflow_repository = -1
 
       if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil )
 
@@ -43,6 +45,13 @@ module CarbonData
 
         open_connections   = value.dig('Open')
         open_connections   = open_connections ? 1 : 0 if( open_connections != nil )
+
+        content_repository = value.dig('ContentRepositoryAvailable')
+        content_repository = content_repository ? 1 : 0 if( content_repository != nil )
+
+        workflow_repository = value.dig('WorkflowRepositoryAvailable')
+        workflow_repository = workflow_repository ? 1 : 0 if( workflow_repository != nil )
+
       end
 
 
@@ -77,6 +86,19 @@ module CarbonData
         key: format( '%s.%s.%s.%s'      , @identifier, @normalized_service_name, mbean, 'open' ),
         value: open_connections
       }
+
+      unless( content_repository == -1 )
+        result << {
+          key: format( '%s.%s.%s.%s'      , @identifier, @normalized_service_name, mbean, 'content_repository' ),
+          value: content_repository
+        }
+      end
+      unless( workflow_repository == -1 )
+        result << {
+          key: format( '%s.%s.%s.%s'      , @identifier, @normalized_service_name, mbean, 'workflow_repository' ),
+          value: workflow_repository
+        }
+      end
 
       result
     end
