@@ -6,6 +6,12 @@
 
 ----
 
+Die Kommunikation im CoreMedia-Umfeld findet bidirektional zwischen allen Contentservern sowie zwischen CAE und RLS statt.
+
+Der "Client" fragt seinen "Server" über eine IOR-URI an und bekommt eine URI zurück, über der die weiter Kommunikation stattfindet.
+
+----
+
 Online-Tool zum parsen einer IOR: [ILU IOR Parser](http://www2.parc.com/istl/projects/ILU/parseIOR/)
 
 Die IOR wird von Content-Servern zur Verfügung gestellt und kann über HTTP abgerufen werden:
@@ -22,4 +28,3 @@ Die IOR wird von Content-Servern zur Verfügung gestellt und kann über HTTP abg
 | Fehler  | ToDo      |
 | :------ | :-------- |
 | IOR steht nicht zur Verfügung | den Service kontrollieren und ggf. neu starten |
-
