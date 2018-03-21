@@ -4,8 +4,8 @@ FROM alpine:3.7
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
-  VERSION="1802" \
-  BUILD_DATE="2018-02-26" \
+  VERSION="1803" \
+  BUILD_DATE="2018-03-21" \
   TERM=xterm \
   TZ='Europe/Berlin' \
   GRAFANA_GEM_TYPE="local" \

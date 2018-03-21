@@ -739,7 +739,7 @@ class CMGrafana
 
         params[:overview] = true if(overview_dashboard)
 
-        unless(overview_dashboard.nil? )
+        unless(overview_dashboard.nil?)
 
           logger.debug( "overview_dashboard: #{overview_dashboard}" )
 
@@ -751,13 +751,15 @@ class CMGrafana
             status = response.dig('status')
           end
 
-          licenses_dashboard.each do |d|
-            logger.debug( format( '  - %s :: %s', host, d ) )
-            response = delete_dashboard( d )
-            # logger.debug( response )
-            status = response.dig('status')
-          end
+          unless(licenses_dashboard.nil? )
 
+            licenses_dashboard.each do |d|
+              logger.debug( format( '  - %s :: %s', host, d ) )
+              response = delete_dashboard( d )
+              # logger.debug( response )
+              status = response.dig('status')
+            end
+          end
         end
 
         create_dashboard_for_host( params )

@@ -5,27 +5,23 @@ MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
   VERSION="1803" \
-  BUILD_DATE="2018-03-01" \
+  BUILD_DATE="2018-03-21" \
   TERM=xterm \
   TZ='Europe/Berlin'
 
 # ---------------------------------------------------------------------------------------
 
-RUN \
-  apk --quiet --no-cache update && \
-  apk --quiet --no-cache upgrade && \
-  apk add --quiet --no-cache --virtual .build-deps tzdata && \
-  cp /usr/share/zoneinfo/$TZ /etc/localtime && \
-  echo $TZ > /etc/timezone && \
-  apk del --quiet .build-deps
-
 COPY build /build
 
 RUN \
+  apk --quiet --no-cache update && \
+  apk --quiet --no-cache upgrade && \
   apk add --quiet --no-cache --virtual .build-deps \
-    build-base imagemagick-dev mariadb-dev ruby-dev ruby-rdoc zlib-dev && \
+    build-base imagemagick-dev mariadb-dev ruby-dev ruby-rdoc tzdata zlib-dev && \
   apk add --quiet --no-cache \
     bind-tools drill mariadb-client-libs  ruby-irb zlib && \
+  cp /usr/share/zoneinfo/$TZ /etc/localtime && \
+  echo $TZ > /etc/timezone && \
   echo 'gem: --no-document' >> /etc/gemrc && \
   gem install --quiet --no-rdoc --no-ri \
     io-console bundler && \

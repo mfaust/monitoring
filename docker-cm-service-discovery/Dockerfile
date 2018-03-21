@@ -4,8 +4,8 @@ FROM alpine:3.7
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
-  VERSION="1712" \
-  BUILD_DATE="2017-12-04" \
+  VERSION="1803" \
+  BUILD_DATE="2018-03-21" \
   TERM=xterm \
   TZ='Europe/Berlin'
 
@@ -50,6 +50,6 @@ HEALTHCHECK \
   --interval=5s \
   --timeout=2s \
   --retries=12 \
-  CMD ps ax | grep -c service-discovery.rb || exit 1
+  CMD ps ax | grep -v grep | grep -c service-discovery.rb || exit 1
 
 CMD [ "/usr/local/bin/service-discovery.rb" ]

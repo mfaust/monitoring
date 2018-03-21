@@ -2,7 +2,7 @@
 FROM bodsch/docker-dashing:1801-r1
 
 ENV \
-  BUILD_DATE="2018-02-06" \
+  BUILD_DATE="2018-03-21" \
   TZ='Europe/Berlin' \
   DASHBOARD="coremedia" \
   ICINGA2_GEM_VERSION="0.9"
@@ -10,7 +10,7 @@ ENV \
 EXPOSE 3030
 
 LABEL \
-  version="1802" \
+  version="1803" \
   maintainer="Bodo Schulz <bodo@coremedia.com>" \
   org.label-schema.build-date=${BUILD_DATE}
 

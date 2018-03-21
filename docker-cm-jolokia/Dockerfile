@@ -22,14 +22,14 @@ RUN \
 FROM bodsch/docker-jolokia:1.4.0-r1
 
 ENV \
-  VERSION="1802" \
-  BUILD_DATE="2018-03-10" \
+  VERSION="1803" \
+  BUILD_DATE="2018-03-21" \
   TZ='Europe/Berlin'
 
 EXPOSE 8080 8088
 
 LABEL \
-  version="1802" \
+  version="1803" \
   maintainer="Bodo Schulz <bodo.schulz@coremedia.com>" \
   org.label-schema.build-date=${BUILD_DATE}
 

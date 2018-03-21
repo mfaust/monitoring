@@ -259,20 +259,6 @@ services:
     networks:
       - mon
 
-#  markdown-service:
-#    restart: always
-#    image: bodsch/docker-markdownd
-#    container_name: markdown-service
-#    hostname: markdown-service
-#    ports:
-#      - 8080
-#    volumes:
-#      - /etc/localtime:/etc/localtime:ro
-#      - ../../docker-cm-data/rootfs/data/www/markdown-service:/data
-#      - ../../doc:/data
-#    networks:
-#      - mon
-
   cm-dashing:
     restart: always
     build: ../../docker-cm-dashing
@@ -408,7 +394,7 @@ services:
     container_name: cm-grafana-client
     hostname: cm-grafana-client
     environment:
-      LOG_LEVEL: debug
+      LOG_LEVEL: info
       GRAFANA_VERSION: 5
       GRAFANA_HOST: nginx
     depends_on:

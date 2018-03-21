@@ -4,31 +4,27 @@ FROM alpine:3.7
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
-  VERSION="1712" \
-  BUILD_DATE="2017-12-06" \
+  VERSION="1803" \
+  BUILD_DATE="2018-03-21" \
   TERM=xterm \
   TZ='Europe/Berlin'
 
 # ---------------------------------------------------------------------------------------
 
-RUN \
-  apk --quiet --no-cache update && \
-  apk --quiet --no-cache upgrade && \
-  apk add --quiet --no-cache --virtual .build-deps tzdata && \
-  cp /usr/share/zoneinfo/$TZ /etc/localtime && \
-  echo $TZ > /etc/timezone && \
-  apk del --quiet .build-deps
-
 COPY build /build
 
 RUN \
+  apk --quiet --no-cache update && \
+  apk --quiet --no-cache upgrade && \
   apk add --quiet --no-cache --virtual .build-deps \
     build-base imagemagick-dev mariadb-dev ruby-dev ruby-io-console zlib-dev && \
   apk add --quiet --no-cache \
-    bind-tools curl drill ipcalc jq mariadb-client mariadb-client-libs ruby-irb ruby-io-console ruby-rdoc zlib && \
+    bind-tools curl drill ipcalc jq mariadb-client mariadb-client-libs ruby-irb ruby-io-console ruby-rdoc tzdata zlib && \
   echo 'gem: --no-document' >> /etc/gemrc && \
   gem install --quiet --no-rdoc --no-ri \
     io-console bundler && \
+  cp /usr/share/zoneinfo/$TZ /etc/localtime && \
+  echo $TZ > /etc/timezone && \
   cd /build && \
   bundle install --quiet && \
   for g in $(ls -1 /build/*.gem 2> /dev/null) ; do echo $g; gem install --no-rdoc --no-ri ${g} ; done && \
