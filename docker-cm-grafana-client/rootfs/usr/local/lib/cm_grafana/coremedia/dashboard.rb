@@ -413,6 +413,7 @@ class CMGrafana
 
         json = normalize_template(
           template: template,
+          service_name: 'licenses',
           slug: @slug,
           graphite_identifier: @graphite_identifier,
           short_hostname: @short_hostname
@@ -524,6 +525,7 @@ class CMGrafana
 
           json = normalize_template(
             template: template_json,
+            service_name: template,
             slug: @slug,
             graphite_identifier: @graphite_identifier,
             short_hostname: @short_hostname

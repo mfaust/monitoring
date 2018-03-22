@@ -77,11 +77,11 @@ class CMGrafana
         #logger.debug( sprintf( '  grafana_title      \'%s\'', grafana_title ) )
         ## -------------------------------------------------------
 
-        logger.info( sprintf( 'Creating dashboard for \'%s\'', service_name ) )
+        logger.info( sprintf( '  - creating dashboard for \'%s\'', service_name ) )
 
         if( service_name == 'replication-live-server' )
 
-          logger.info( '  search Master Live Server IOR for the Replication Live Server' )
+          logger.info( '    search Master Live Server IOR for the Replication Live Server' )
 
           # 'Server'
           ip, short, fqdn = ns_lookup(@short_hostname)
@@ -112,14 +112,14 @@ class CMGrafana
                   real_fqdn  = dns.dig('fqdn')
 
                   if( @short_hostname == real_short )
-                    logger.info( '  the Master Live Server runs on the same host as the Replication Live Server' )
+                    logger.info( '    the Master Live Server runs on the same host as the Replication Live Server' )
                   else
                     identifier  = @database.config( ip: real_ip, short: real_short, fqdn: real_fqdn, key: 'graphite_identifier' )
                     mls_identifier = identifier.dig( 'graphite_identifier' )
 
                     unless( mls_identifier.nil? )
                       mls_identifier.to_s
-                      logger.info( "  use custom storage identifier from config: '#{mls_identifier}'" )
+                      logger.info( "    use custom storage identifier from config: '#{mls_identifier}'" )
                     end
                   end
 
@@ -242,16 +242,17 @@ class CMGrafana
         grafana_title = format('%s - %s', slug, description )
 
         ## -------------------------------------------------------
-        #logger.debug( sprintf( '  service_name       \'%s\'', service_name ) )
-        #logger.debug( sprintf( '  description        \'%s\'', description ) )
-        #logger.debug( sprintf( '  normalized_name    \'%s\'', normalized_name ) )
-        #logger.debug( sprintf( '  slug               \'%s\'', slug ) )
-        #logger.debug( sprintf( '  graphite_identifier \'%s\'', graphite_identifier ) )
-        #logger.debug( sprintf( '  short_hostname     \'%s\'', short_hostname ) )
-        #logger.debug( sprintf( '  mls_identifier     \'%s\'', mls_identifier ) )
+        #logger.debug( sprintf( '  service_name         \'%s\'', service_name ) )
+        #logger.debug( sprintf( '  description          \'%s\'', description ) )
+        #logger.debug( sprintf( '  normalized_name      \'%s\'', normalized_name ) )
+        #logger.debug( sprintf( '  slug                 \'%s\'', slug ) )
+        #logger.debug( sprintf( '  uuid                 \'%s\'', uuid ) )
+        #logger.debug( sprintf( '  graphite_identifier  \'%s\'', graphite_identifier ) )
+        #logger.debug( sprintf( '  short_hostname       \'%s\'', short_hostname ) )
+        #logger.debug( sprintf( '  mls_identifier       \'%s\'', mls_identifier ) )
         #logger.debug( sprintf( '  tomcat_dashboard_url \'%s\'', tomcat_dashboard_url ) )
-        #logger.debug( sprintf( '  icinga_identifier  \'%s\'', icinga_identifier ) )
-        #logger.debug( sprintf( '  grafana_title      \'%s\'', grafana_title ) )
+        #logger.debug( sprintf( '  icinga_identifier    \'%s\'', icinga_identifier ) )
+        #logger.debug( sprintf( '  grafana_title        \'%s\'', grafana_title ) )
         ## -------------------------------------------------------
 
         return false if( template.nil? )

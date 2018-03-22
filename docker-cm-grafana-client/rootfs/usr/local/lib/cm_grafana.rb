@@ -39,8 +39,6 @@ class CMGrafana
 
   def initialize( settings )
 
-    logger.debug(settings)
-
     host                 = settings.dig(:grafana, :host)
     port                 = settings.dig(:grafana, :port)          || 80
     @user                = settings.dig(:grafana, :user)          || 'admin'

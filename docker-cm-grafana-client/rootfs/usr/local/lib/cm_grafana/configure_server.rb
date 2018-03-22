@@ -13,7 +13,7 @@ class CMGrafana < Grafana::Client
       raise ArgumentError.new(format('only Hash are allowed (%s given)', params.class.to_s )) unless( params.is_a?(Hash) )
       raise ArgumentError.new('missing settings') if( params.size.zero? )
 
-      logger.debug( "read_config_file( #{params} )" )
+#       logger.debug( "read_config_file( #{params} )" )
 
       config_file = params.dig(:config_file)
       config_file = File.expand_path( config_file )
@@ -45,7 +45,7 @@ class CMGrafana < Grafana::Client
       begin
         @logged_in = login( username: @user, password: @password )
 
-        logger.debug("logged in: #{@logged_in} (#{@logged_in.class.to_s})")
+#         logger.debug("logged in: #{@logged_in} (#{@logged_in.class.to_s})")
 
         ping_session
       rescue => error
@@ -204,7 +204,7 @@ class CMGrafana < Grafana::Client
           login_name    = user_name if( login_name.nil? )
           email         = format( '%s@domain.tld', user_name ) if( email.nil? || email.empty? )
 
-          logger.debug( format('user: %s', user_name ) )
+#           logger.debug( format('user: %s', user_name ) )
 
           next if( user_name.nil? )
 
@@ -278,7 +278,6 @@ class CMGrafana < Grafana::Client
                     role: role
                   )
                 end
-
               end
             end
 
@@ -360,18 +359,16 @@ class CMGrafana < Grafana::Client
               port = 8080 if( type == 'influxdb' )
             end
 
-            logger.debug( format('datasource: %s :: %s', type, name ) )
+#             logger.debug( format('datasource: %s :: %s', type, name ) )
 
             # TODO
             # strange bug ??
             # issue: https://github.com/cm-xlabs/monitoring/issues/123
             begin
               data_src = datasource( name )
-              logger.debug("data_src: #{data_src} (#{data_src.class.to_s})")
+#               logger.debug("data_src: #{data_src} (#{data_src.class.to_s})")
               status = data_src.dig('status') || 500
-
             rescue => error
-
               status = 500
               logger.error error
             end
@@ -423,12 +420,9 @@ class CMGrafana < Grafana::Client
 
               result = update_datasource( config )
 
-              logger.debug( result )
-
+#               logger.debug( result )
             end
-
           end
-
         end
       end
     end
@@ -472,12 +466,11 @@ class CMGrafana < Grafana::Client
         theme_white_list = %w[dark light]
 
         unless( admin_theme.nil? || admin_theme.empty? )
-
           unless( theme_white_list.include?(admin_theme) )
             logger.error( format( 'wrong theme \'%s\'', admin_theme ) )
-            logger.debug( 'remove theme' )
-
-            params.delete('theme')
+#            logger.debug( 'remove theme' )
+#            params.delete('theme')
+            admin_theme = 'dark'
           end
         end
 

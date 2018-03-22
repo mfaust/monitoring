@@ -1,5 +1,14 @@
 {
   "dashboard": {
+    "version": 0,
+    "schemaVersion": 12,
+    "title": "<%= slug %> - Operating System",
+    "tags": [ "<%= short_hostname %>", "os" ],
+    "id": null,
+    "uid": "<%= uuid %>",
+    "annotations": {
+      "list": []
+    },
     "rows": [
       {
         "height": "150",
@@ -463,11 +472,6 @@
       }
     ],
     "links": [],
-    "annotations": {
-      "list": []
-    },
-    "version": 1,
-    "title": "<%= slug %> - Operating System",
     "templating": {
       "list": [
         {
@@ -495,8 +499,6 @@
       "to": "now",
       "from": "now-3h"
     },
-    "schemaVersion": 12,
-    "id": null,
     "timezone": "browser",
     "sharedCrosshair": true,
     "style": "dark",
@@ -522,11 +524,6 @@
         "30d"
       ]
     },
-    "hideControls": false,
-    "uid": "<%= uuid %>",
-    "tags": [
-      "<%= short_hostname %>",
-      "os"
-    ]
+    "hideControls": false
   }
 }

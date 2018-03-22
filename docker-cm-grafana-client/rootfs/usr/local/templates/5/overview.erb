@@ -14,6 +14,9 @@
   id = 10;
   y = 0;
   count = 0;
+  widget_width = 2;
+  max_widget_width = 18;
+
   size = service_dashboard_data.size;
 
   key = 'node-exporter'
@@ -27,7 +30,7 @@
       {
         "content": "<h3><center><bold><a href=\"<%= url %>\">Operating System</a></bold></center></h3>",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "links": [],
         "mode": "html",
@@ -38,7 +41,7 @@
       {
         "title": "Uptime",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -46,11 +49,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.NODE_EXPORTER.uptime.uptime",
-            "refId": "A",
-            "textEditor": false
-          }
+          { "refId": "A", "target": "carbon-writer.$host.NODE_EXPORTER.uptime.uptime" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -68,17 +67,13 @@
         "colorValue": false,
         "decimals": 0,
         "valueMaps": [
-          {
-            "value": "0",
-            "op": "=",
-            "text": "OFFLINE"
-          }
+          { "op": "=", "value": "0", "text": "OFFLINE" }
         ]
       },
       {
         "title": "used RAM",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "cacheTimeout": null,
         "colorBackground": true,
@@ -101,14 +96,8 @@
         "links": [],
         "mappingType": 1,
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "maxDataPoints": 100,
         "nullPointMode": "connected",
@@ -132,10 +121,7 @@
           "show": false
         },
         "targets": [
-          {
-            "refId": "A",
-            "target": "carbon-writer.$host.NODE_EXPORTER.memory.used_percent"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.NODE_EXPORTER.memory.used_percent" }
         ],
         "thresholds": "80,90",
         "type": "singlestat",
@@ -152,7 +138,7 @@
       {
         "title": "used SWAP",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "cacheTimeout": null,
         "colorBackground": true,
@@ -175,14 +161,8 @@
         "links": [],
         "mappingType": 1,
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "maxDataPoints": 100,
         "nullPointMode": "connected",
@@ -206,10 +186,7 @@
           "show": false
         },
         "targets": [
-          {
-            "refId": "A",
-            "target": "carbon-writer.$host.NODE_EXPORTER.swap.used_percent"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.NODE_EXPORTER.swap.used_percent" }
         ],
         "thresholds": "80,90",
         "type": "singlestat",
@@ -226,7 +203,7 @@
       {
         "title": "used Filesystem",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "cacheTimeout": null,
         "colorBackground": true,
@@ -249,14 +226,8 @@
         "links": [],
         "mappingType": 1,
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "maxDataPoints": 100,
         "nullPointMode": "connected",
@@ -280,10 +251,7 @@
           "show": false
         },
         "targets": [
-          {
-            "refId": "A",
-            "target": "carbon-writer.$host.NODE_EXPORTER.filesystem.rootfs.used_percent"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.NODE_EXPORTER.filesystem.rootfs.used_percent" }
         ],
         "thresholds": "80,90",
         "type": "singlestat",
@@ -300,7 +268,7 @@
       {
         "title": "load",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "cacheTimeout": null,
         "colorBackground": true,
@@ -323,14 +291,8 @@
         "links": [],
         "mappingType": 1,
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "maxDataPoints": 100,
         "nullPointMode": "connected",
@@ -355,10 +317,7 @@
         },
         "tableColumn": "",
         "targets": [
-          {
-            "refId": "A",
-            "target": "carbon-writer.$host.NODE_EXPORTER.load.shortterm"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.NODE_EXPORTER.load.shortterm" }
         ],
         "thresholds": "1,2",
         "type": "singlestat",
@@ -380,7 +339,7 @@
       {
         "title": "CPU Cores",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "cacheTimeout": null,
         "colorBackground": false,
@@ -403,14 +362,8 @@
         "links": [],
         "mappingType": 1,
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "maxDataPoints": 100,
         "nullPointMode": "connected",
@@ -435,11 +388,7 @@
         },
         "tableColumn": "",
         "targets": [
-          {
-            "refId": "A",
-            "target": "countSeries(carbon-writer.$host.NODE_EXPORTER.cpu.*.iowait)",
-            "textEditor": false
-          }
+          { "refId": "A", "target": "countSeries(carbon-writer.$host.NODE_EXPORTER.cpu.*.iowait)" }
         ],
         "thresholds": "",
         "type": "singlestat",
@@ -461,7 +410,7 @@
       {
         "content": "",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= max_widget_width + widget_width - x %>, "h": 3 },
         "transparent": true,
         "mode": "html",
         "title": "",
@@ -482,7 +431,7 @@
       {
         "content": "<h3><center><bold><a href=\"<%= url %>\">HTTP</a></bold></center></h3>",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "links": [],
         "mode": "html",
@@ -493,7 +442,7 @@
       {
         "title": "Service Uptime",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -501,11 +450,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.HTTP_STATUS.uptime",
-            "refId": "A",
-            "textEditor": false
-          }
+          { "refId": "A", "target": "carbon-writer.$host.HTTP_STATUS.uptime" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -533,7 +478,7 @@
       {
         "title": "workers busy",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -541,11 +486,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.HTTP_STATUS.workers.busy",
-            "refId": "A",
-            "textEditor": false
-          }
+          { "refId": "A", "target": "carbon-writer.$host.HTTP_STATUS.workers.busy" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -567,7 +508,7 @@
       {
         "title": "workers idle",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -575,11 +516,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.HTTP_STATUS.workers.idle",
-            "refId": "A",
-            "textEditor": false
-          }
+          { "refId": "A", "target": "carbon-writer.$host.HTTP_STATUS.workers.idle" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -601,7 +538,7 @@
       {
         "content": "",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 8, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= max_widget_width + widget_width - x %>, "h": 3 },
         "transparent": true,
         "mode": "html",
         "title": "",
@@ -622,7 +559,7 @@
       {
         "content": "<h3><center><bold><a href=\"<%= url %>\">CMS</a></bold></center></h3>",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "links": [],
         "mode": "html",
@@ -633,7 +570,7 @@
       {
         "title": "Service Uptime",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -641,11 +578,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.CMS.Runtime.uptime",
-            "refId": "A",
-            "textEditor": false
-          }
+          { "refId": "A", "target": "carbon-writer.$host.CMS.Runtime.uptime" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -673,7 +606,7 @@
       {
         "title": "used Heap Memory",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "type": "singlestat",
         "span": 1,
@@ -684,10 +617,7 @@
         "postfix": " %",
         "postfixFontSize": "80%",
         "targets": [
-          {
-            "refId": "A",
-            "target": "carbon-writer.$host.CMS.Memory.heap_memory.used_percent"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.CMS.Memory.heap_memory.used_percent" }
         ],
         "thresholds": "85,95",
         "valueFontSize": "100%",
@@ -696,7 +626,7 @@
       {
         "title": "Runlevel",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -704,10 +634,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.CMS.Server.runlevel",
-            "refId": "A"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.CMS.Server.runlevel" }
         ],
         "links": [],
         "datasource": null,
@@ -741,14 +668,8 @@
           }
         ],
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "mappingType": 1,
         "nullPointMode": "connected",
@@ -766,7 +687,7 @@
       {
         "title": "License [days]",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -774,10 +695,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.CMS.Server.license.until.hard.days",
-            "refId": "A"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.CMS.Server.license.until.hard.days" }
         ],
         "thresholds": "20,10",
         "links": [],
@@ -798,7 +716,7 @@
       {
         "content": "",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 6, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= max_widget_width + widget_width - x %>, "h": 3 },
         "transparent": true,
         "mode": "html",
         "title": "",
@@ -819,7 +737,7 @@
       {
         "content": "<h3><center><bold><a href=\"<%= url %>\">MLS</a></bold></center></h3>",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "links": [],
         "mode": "html",
@@ -830,7 +748,7 @@
       {
         "title": "Service Uptime",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -838,11 +756,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.MLS.Runtime.uptime",
-            "refId": "A",
-            "textEditor": false
-          }
+          { "refId": "A", "target": "carbon-writer.$host.MLS.Runtime.uptime" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -870,7 +784,7 @@
       {
         "title": "used Heap Memory",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "cacheTimeout": null,
         "colorBackground": true,
@@ -896,14 +810,8 @@
         "links": [],
         "mappingType": 1,
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "maxDataPoints": 100,
         "nullPointMode": "connected",
@@ -927,10 +835,7 @@
           "show": false
         },
         "targets": [
-          {
-            "refId": "A",
-            "target": "carbon-writer.$host.MLS.Memory.heap_memory.used_percent"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.MLS.Memory.heap_memory.used_percent" }
         ],
         "thresholds": "85,95",
         "type": "singlestat",
@@ -947,7 +852,7 @@
       {
         "title": "Runlevel",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -955,10 +860,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.MLS.Server.runlevel",
-            "refId": "A"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.MLS.Server.runlevel" }
         ],
         "links": [],
         "datasource": null,
@@ -992,14 +894,8 @@
           }
         ],
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "mappingType": 1,
         "nullPointMode": "connected",
@@ -1017,7 +913,7 @@
       {
         "title": "License [days]",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -1025,10 +921,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.MLS.Server.license.until.hard.days",
-            "refId": "A"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.MLS.Server.license.until.hard.days" }
         ],
         "thresholds": "20,10",
         "links": [],
@@ -1049,7 +942,7 @@
       {
         "title": "Sequence Number",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -1057,11 +950,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.MLS.Server.Repository.SequenceNumber",
-            "refId": "A",
-            "hide": false
-          }
+          { "refId": "A", "target": "carbon-writer.$host.MLS.Server.Repository.SequenceNumber" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -1080,14 +969,8 @@
           }
         ],
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "rangeMaps": [
           {
@@ -1127,7 +1010,7 @@
       {
         "content": "",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 4, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= max_widget_width + widget_width - x %>, "h": 3 },
         "transparent": true,
         "mode": "html",
         "title": "",
@@ -1148,7 +1031,7 @@
       {
         "content": "<h3><center><bold><a href=\"<%= url %>\">RLS</a></bold></center></h3>",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "links": [],
         "mode": "html",
@@ -1159,7 +1042,7 @@
       {
         "title": "Service Uptime",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -1167,11 +1050,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.RLS.Runtime.uptime",
-            "refId": "A",
-            "textEditor": false
-          }
+          { "refId": "A", "target": "carbon-writer.$host.RLS.Runtime.uptime" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -1199,7 +1078,7 @@
       {
         "title": "used Heap Memory",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "cacheTimeout": null,
         "colorBackground": true,
@@ -1225,14 +1104,8 @@
         "links": [],
         "mappingType": 1,
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "maxDataPoints": 100,
         "nullPointMode": "connected",
@@ -1256,10 +1129,7 @@
           "show": false
         },
         "targets": [
-          {
-            "refId": "A",
-            "target": "carbon-writer.$host.RLS.Memory.heap_memory.used_percent"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.RLS.Memory.heap_memory.used_percent" }
         ],
         "thresholds": "85,95",
         "type": "singlestat",
@@ -1276,7 +1146,7 @@
       {
         "title": "Runlevel",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -1284,10 +1154,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.RLS.Server.runlevel",
-            "refId": "A"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.RLS.Server.runlevel" }
         ],
         "links": [],
         "datasource": null,
@@ -1321,14 +1188,8 @@
           }
         ],
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "mappingType": 1,
         "nullPointMode": "connected",
@@ -1346,7 +1207,7 @@
       {
         "title": "License [days]",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -1354,10 +1215,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.RLS.Server.license.until.hard.days",
-            "refId": "A"
-          }
+          { "refId": "A",  "target": "carbon-writer.$host.RLS.Server.license.until.hard.days" }
         ],
         "thresholds": "20,10",
         "links": [],
@@ -1378,7 +1236,7 @@
       {
         "title": "Sequence Number",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -1386,11 +1244,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.RLS.Replicator.completedSequenceNumber",
-            "refId": "A",
-            "hide": false
-          }
+          { "refId": "A", "target": "carbon-writer.$host.RLS.Replicator.completedSequenceNumber" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -1409,14 +1263,8 @@
           }
         ],
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "rangeMaps": [
           {
@@ -1456,7 +1304,7 @@
       {
         "title": "diff Sequence Numbers",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -1464,11 +1312,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "hide": false,
-            "refId": "A",
-            "target": "carbon-writer.$host.RLS.SequenceNumber.diffToMLS"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.RLS.SequenceNumber.diffToMLS" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -1487,14 +1331,8 @@
           }
         ],
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "rangeMaps": [
           {
@@ -1534,7 +1372,7 @@
       {
         "content": "",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= max_widget_width + widget_width - x %>, "h": 3 },
         "transparent": true,
         "mode": "html",
         "title": "",
@@ -1555,7 +1393,7 @@
       {
         "content": "<h3><center><bold><a href=\"<%= url %>\">WFS</a></bold></center></h3>",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "links": [],
         "mode": "html",
@@ -1566,7 +1404,7 @@
       {
         "title": "Service Uptime",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -1574,11 +1412,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.WFS.Runtime.uptime",
-            "refId": "A",
-            "textEditor": false
-          }
+          { "refId": "A", "target": "carbon-writer.$host.WFS.Runtime.uptime" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -1606,7 +1440,7 @@
       {
         "title": "used Heap Memory",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "cacheTimeout": null,
         "colorBackground": true,
@@ -1632,14 +1466,8 @@
         "links": [],
         "mappingType": 1,
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "maxDataPoints": 100,
         "nullPointMode": "connected",
@@ -1663,10 +1491,7 @@
           "show": false
         },
         "targets": [
-          {
-            "refId": "A",
-            "target": "carbon-writer.$host.WFS.Memory.heap_memory.used_percent"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.WFS.Memory.heap_memory.used_percent" }
         ],
         "thresholds": "85,95",
         "type": "singlestat",
@@ -1683,7 +1508,7 @@
       {
         "title": "CapConnection",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "cacheTimeout": null,
         "colorBackground": true,
@@ -1709,14 +1534,8 @@
         "links": [],
         "mappingType": 1,
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "maxDataPoints": 100,
         "nullPointMode": "connected",
@@ -1740,10 +1559,7 @@
           "show": false
         },
         "targets": [
-          {
-            "refId": "A",
-            "target": "carbon-writer.$host.WFS.CapConnection.open"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.WFS.CapConnection.open" }
         ],
         "thresholds": "0,1",
         "type": "singlestat",
@@ -1770,7 +1586,7 @@
       {
         "title": "used UAPI Cache",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -1778,10 +1594,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.WFS.CapConnection.heap.cache.used_percent",
-            "refId": "A"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.WFS.CapConnection.heap.cache.used_percent" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -1800,14 +1613,8 @@
           }
         ],
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "rangeMaps": [
           {
@@ -1847,7 +1654,7 @@
       {
         "title": "used Blob Cache",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -1855,10 +1662,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.WFS.CapConnection.blob.cache.used_percent",
-            "refId": "A"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.WFS.CapConnection.blob.cache.used_percent" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -1877,14 +1681,8 @@
           }
         ],
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "rangeMaps": [
           {
@@ -1924,7 +1722,7 @@
       {
         "title": "Lightweight Sessions",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -1932,10 +1730,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.WFS.CapConnection.su_sessions.sessions",
-            "refId": "A"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.WFS.CapConnection.su_sessions.sessions" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -1954,14 +1749,8 @@
           }
         ],
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "rangeMaps": [
           {
@@ -1999,9 +1788,39 @@
         }
       },
       {
+        "title": "Workflow Repository",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "error": false,
+        "span": 1,
+        "editable": true,
+        "type": "singlestat",
+        "isNew": true,
+        "datasource": "graphite",
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.WFS.CapConnection.WorkflowRepository.available" }
+        ],
+        "colorBackground": true,
+        "colorValue": false,
+        "colors": [
+          "rgba(82, 82, 82, 0.9)",
+          "rgba(245, 54, 54, 0.9)",
+          "rgba(50, 172, 45, 0.97)"
+        ],
+        "nullPointMode": "connected",
+        "valueFontSize": "70%",
+        "thresholds": "1,0",
+        "valueMaps": [
+          { "op": "=", "value": "-1", "text": "N/A" },
+          { "op": "=", "value": "0",  "text": "not available" },
+          { "op": "=", "value": "1",  "text": "available" }
+        ]
+      },
+      {
         "content": "",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= max_widget_width + widget_width - x %>, "h": 3 },
         "transparent": true,
         "mode": "html",
         "title": "",
@@ -2022,7 +1841,7 @@
       {
         "content": "<h3><center><bold><a href=\"<%= url %>\">Solr Master</a></bold></center></h3>",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "links": [],
         "mode": "html",
@@ -2033,7 +1852,7 @@
       {
         "title": "Service Uptime",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -2041,11 +1860,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.SOLR_MASTER.Runtime.uptime",
-            "refId": "A",
-            "textEditor": false
-          }
+          { "refId": "A", "target": "carbon-writer.$host.SOLR_MASTER.Runtime.uptime" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -2073,7 +1888,7 @@
       {
         "title": "used Heap Memory",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "cacheTimeout": null,
         "colorBackground": true,
@@ -2099,14 +1914,8 @@
         "links": [],
         "mappingType": 1,
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "maxDataPoints": 100,
         "nullPointMode": "connected",
@@ -2130,10 +1939,7 @@
           "show": false
         },
         "targets": [
-          {
-            "refId": "A",
-            "target": "carbon-writer.$host.SOLR_MASTER.Memory.heap_memory.used_percent"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.SOLR_MASTER.Memory.heap_memory.used_percent" }
         ],
         "thresholds": "85,95",
         "type": "singlestat",
@@ -2150,7 +1956,7 @@
       {
         "content": "",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 10, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= max_widget_width + widget_width - x %>, "h": 3 },
         "transparent": true,
         "mode": "html",
         "title": "",
@@ -2171,7 +1977,7 @@
       {
         "content": "<h3><center><bold><a href=\"<%= url %>\">Content Feeder</a></bold></center></h3>",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "links": [],
         "mode": "html",
@@ -2182,7 +1988,7 @@
       {
         "title": "Service Uptime",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -2190,11 +1996,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.FEEDER_CONTENT.Runtime.uptime",
-            "refId": "A",
-            "textEditor": false
-          }
+          { "refId": "A", "target": "carbon-writer.$host.FEEDER_CONTENT.Runtime.uptime" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -2222,7 +2024,7 @@
       {
         "title": "used Heap Memory",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "cacheTimeout": null,
         "colorBackground": true,
@@ -2248,14 +2050,8 @@
         "links": [],
         "mappingType": 1,
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "maxDataPoints": 100,
         "nullPointMode": "connected",
@@ -2279,10 +2075,7 @@
           "show": false
         },
         "targets": [
-          {
-            "refId": "A",
-            "target": "carbon-writer.$host.FEEDER_CONTENT.Memory.heap_memory.used_percent"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.FEEDER_CONTENT.Memory.heap_memory.used_percent" }
         ],
         "thresholds": "85,95",
         "type": "singlestat",
@@ -2299,7 +2092,7 @@
       {
         "title": "CapConnection",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "cacheTimeout": null,
         "colorBackground": true,
@@ -2325,14 +2118,8 @@
         "links": [],
         "mappingType": 1,
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "maxDataPoints": 100,
         "nullPointMode": "connected",
@@ -2356,10 +2143,7 @@
           "show": false
         },
         "targets": [
-          {
-            "refId": "A",
-            "target": "carbon-writer.$host.FEEDER_CONTENT.CapConnection.open"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.FEEDER_CONTENT.CapConnection.open" }
         ],
         "thresholds": "0,1",
         "type": "singlestat",
@@ -2386,7 +2170,7 @@
       {
         "title": "used UAPI Cache",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -2394,10 +2178,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.FEEDER_CONTENT.CapConnection.heap.cache.used_percent",
-            "refId": "A"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.FEEDER_CONTENT.CapConnection.heap.cache.used_percent" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -2416,14 +2197,8 @@
           }
         ],
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "rangeMaps": [
           {
@@ -2463,7 +2238,7 @@
       {
         "title": "Pending Events",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -2471,10 +2246,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.FEEDER_CONTENT.Feeder.pending_events",
-            "refId": "A"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.FEEDER_CONTENT.Feeder.pending_events" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -2493,14 +2265,8 @@
           }
         ],
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "rangeMaps": [
           {
@@ -2540,7 +2306,7 @@
       {
         "title": "Pending Documents",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -2548,10 +2314,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.FEEDER_CONTENT.Feeder.current_pending_documents",
-            "refId": "A"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.FEEDER_CONTENT.Feeder.current_pending_documents" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -2570,14 +2333,8 @@
           }
         ],
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "rangeMaps": [
           {
@@ -2615,9 +2372,39 @@
         }
       },
       {
+        "title": "Content Repository",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "error": false,
+        "span": 1,
+        "editable": true,
+        "type": "singlestat",
+        "isNew": true,
+        "datasource": "graphite",
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.FEEDER_CONTENT.CapConnection.ContentRepository.available" }
+        ],
+        "colorBackground": true,
+        "colorValue": false,
+        "colors": [
+          "rgba(82, 82, 82, 0.9)",
+          "rgba(245, 54, 54, 0.9)",
+          "rgba(50, 172, 45, 0.97)"
+        ],
+        "nullPointMode": "connected",
+        "valueFontSize": "70%",
+        "thresholds": "1,0",
+        "valueMaps": [
+          { "op": "=", "value": "-1", "text": "N/A" },
+          { "op": "=", "value": "0",  "text": "not available" },
+          { "op": "=", "value": "1",  "text": "available" }
+        ]
+      },
+      {
         "content": "",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= max_widget_width + widget_width - x %>, "h": 3 },
         "transparent": true,
         "mode": "html",
         "title": "",
@@ -2638,7 +2425,7 @@
       {
         "content": "<h3><center><bold><a href=\"<%= url %>\">Feeder Live</a></bold></center></h3>",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "links": [],
         "mode": "html",
@@ -2649,7 +2436,7 @@
       {
         "title": "Service Uptime",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -2657,11 +2444,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.FEEDER_LIVE.Runtime.uptime",
-            "refId": "A",
-            "textEditor": false
-          }
+          { "refId": "A", "target": "carbon-writer.$host.FEEDER_LIVE.Runtime.uptime" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -2689,7 +2472,7 @@
       {
         "title": "used Heap Memory",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "cacheTimeout": null,
         "colorBackground": true,
@@ -2715,14 +2498,8 @@
         "links": [],
         "mappingType": 1,
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "maxDataPoints": 100,
         "nullPointMode": "connected",
@@ -2746,10 +2523,7 @@
           "show": false
         },
         "targets": [
-          {
-            "refId": "A",
-            "target": "carbon-writer.$host.FEEDER_LIVE.Memory.heap_memory.used_percent"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.FEEDER_LIVE.Memory.heap_memory.used_percent" }
         ],
         "thresholds": "85,95",
         "type": "singlestat",
@@ -2766,7 +2540,7 @@
       {
         "title": "CapConnection",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "cacheTimeout": null,
         "colorBackground": true,
@@ -2792,14 +2566,8 @@
         "links": [],
         "mappingType": 1,
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "maxDataPoints": 100,
         "nullPointMode": "connected",
@@ -2823,10 +2591,7 @@
           "show": false
         },
         "targets": [
-          {
-            "refId": "A",
-            "target": "carbon-writer.$host.FEEDER_LIVE.CapConnection.open"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.FEEDER_LIVE.CapConnection.open" }
         ],
         "thresholds": "0,1",
         "type": "singlestat",
@@ -2853,7 +2618,7 @@
       {
         "title": "used UAPI Cache",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -2861,10 +2626,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.FEEDER_LIVE.CapConnection.heap.cache.used_percent",
-            "refId": "A"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.FEEDER_LIVE.CapConnection.heap.cache.used_percent" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -2883,14 +2645,8 @@
           }
         ],
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "rangeMaps": [
           {
@@ -2930,7 +2686,7 @@
       {
         "title": "Feeder Elements",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -2938,10 +2694,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.FEEDER_LIVE.ProactiveEngine.feeder.entries.diff",
-            "refId": "A"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.FEEDER_LIVE.ProactiveEngine.feeder.entries.diff" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -2960,14 +2713,8 @@
           }
         ],
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "rangeMaps": [
           {
@@ -3007,7 +2754,7 @@
       {
         "title": "State",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -3015,10 +2762,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.FEEDER_LIVE.Health.healthy",
-            "refId": "A"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.FEEDER_LIVE.Health.healthy" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -3042,14 +2786,8 @@
           }
         ],
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "valueFontSize": "70%",
         "mappingType": 1,
@@ -3067,7 +2805,7 @@
       {
         "title": "HeartBeat",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -3075,11 +2813,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.FEEDER_LIVE.ProactiveEngine.feeder.heartbeat",
-            "refId": "A",
-            "textEditor": false
-          }
+          { "refId": "A", "target": "carbon-writer.$host.FEEDER_LIVE.ProactiveEngine.feeder.heartbeat" }
         ],
         "links": [],
         "datasource": null,
@@ -3098,14 +2832,8 @@
           }
         ],
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "rangeMaps": [
           {
@@ -3142,6 +2870,45 @@
           "thresholdLabels": false
         },
         "decimals": 0
+      },
+      {
+        "title": "Content Repository",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "error": false,
+        "span": 1,
+        "editable": true,
+        "type": "singlestat",
+        "isNew": true,
+        "datasource": "graphite",
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.FEEDER_LIVE.CapConnection.ContentRepository.available" }
+        ],
+        "colorBackground": true,
+        "colorValue": false,
+        "colors": [
+          "rgba(82, 82, 82, 0.9)",
+          "rgba(245, 54, 54, 0.9)",
+          "rgba(50, 172, 45, 0.97)"
+        ],
+        "nullPointMode": "connected",
+        "valueFontSize": "70%",
+        "thresholds": "1,0",
+        "valueMaps": [
+          { "op": "=", "value": "-1", "text": "N/A" },
+          { "op": "=", "value": "0",  "text": "not available" },
+          { "op": "=", "value": "1",  "text": "available" }
+        ]
+      },
+      {
+        "content": "",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= max_widget_width + widget_width - x %>, "h": 3 },
+        "transparent": true,
+        "mode": "html",
+        "title": "",
+        "type": "text"
       }<%= ',' unless(size == 0) %>
 <%-
     y += 3
@@ -3158,7 +2925,7 @@
       {
         "content": "<h3><center><bold><a href=\"<%= url %>\">Feeder Preview</a></bold></center></h3>",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "links": [],
         "mode": "html",
@@ -3169,7 +2936,7 @@
       {
         "title": "Service Uptime",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -3177,11 +2944,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.FEEDER_PREV.Runtime.uptime",
-            "refId": "A",
-            "textEditor": false
-          }
+          { "refId": "A", "target": "carbon-writer.$host.FEEDER_PREV.Runtime.uptime" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -3209,7 +2972,7 @@
       {
         "title": "used Heap Memory",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "cacheTimeout": null,
         "colorBackground": true,
@@ -3235,14 +2998,8 @@
         "links": [],
         "mappingType": 1,
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "maxDataPoints": 100,
         "nullPointMode": "connected",
@@ -3266,10 +3023,7 @@
           "show": false
         },
         "targets": [
-          {
-            "refId": "A",
-            "target": "carbon-writer.$host.FEEDER_PREV.Memory.heap_memory.used_percent"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.FEEDER_PREV.Memory.heap_memory.used_percent" }
         ],
         "thresholds": "85,95",
         "type": "singlestat",
@@ -3286,7 +3040,7 @@
       {
         "title": "CapConnection",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "cacheTimeout": null,
         "colorBackground": true,
@@ -3312,14 +3066,8 @@
         "links": [],
         "mappingType": 1,
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "maxDataPoints": 100,
         "nullPointMode": "connected",
@@ -3343,10 +3091,7 @@
           "show": false
         },
         "targets": [
-          {
-            "refId": "A",
-            "target": "carbon-writer.$host.FEEDER_PREV.CapConnection.open"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.FEEDER_PREV.CapConnection.open" }
         ],
         "thresholds": "0,1",
         "type": "singlestat",
@@ -3373,7 +3118,7 @@
       {
         "title": "used UAPI Cache",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -3381,10 +3126,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.FEEDER_PREV.CapConnection.heap.cache.used_percent",
-            "refId": "A"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.FEEDER_PREV.CapConnection.heap.cache.used_percent" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -3403,14 +3145,8 @@
           }
         ],
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "rangeMaps": [
           {
@@ -3450,7 +3186,7 @@
       {
         "title": "Feeder Elements",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -3458,10 +3194,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.FEEDER_PREV.ProactiveEngine.feeder.entries.diff",
-            "refId": "A"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.FEEDER_PREV.ProactiveEngine.feeder.entries.diff" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -3480,14 +3213,8 @@
           }
         ],
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "rangeMaps": [
           {
@@ -3527,7 +3254,7 @@
       {
         "title": "State",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -3535,10 +3262,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.FEEDER_PREV.Health.healthy",
-            "refId": "A"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.FEEDER_PREV.Health.healthy" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -3562,14 +3286,8 @@
           }
         ],
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "valueFontSize": "70%",
         "mappingType": 1,
@@ -3587,7 +3305,7 @@
       {
         "title": "HeartBeat",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -3595,11 +3313,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.FEEDER_PREV.ProactiveEngine.feeder.heartbeat",
-            "refId": "A",
-            "textEditor": false
-          }
+          { "refId": "A", "target": "carbon-writer.$host.FEEDER_PREV.ProactiveEngine.feeder.heartbeat" }
         ],
         "links": [],
         "datasource": null,
@@ -3618,14 +3332,8 @@
           }
         ],
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "rangeMaps": [
           {
@@ -3662,6 +3370,45 @@
           "thresholdLabels": false
         },
         "decimals": 0
+      },
+      {
+        "title": "Content Repository",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "error": false,
+        "span": 1,
+        "editable": true,
+        "type": "singlestat",
+        "isNew": true,
+        "datasource": "graphite",
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.FEEDER_PREV.CapConnection.ContentRepository.available" }
+        ],
+        "colorBackground": true,
+        "colorValue": false,
+        "colors": [
+          "rgba(82, 82, 82, 0.9)",
+          "rgba(245, 54, 54, 0.9)",
+          "rgba(50, 172, 45, 0.97)"
+        ],
+        "nullPointMode": "connected",
+        "valueFontSize": "70%",
+        "thresholds": "1,0",
+        "valueMaps": [
+          { "op": "=", "value": "-1", "text": "N/A" },
+          { "op": "=", "value": "0",  "text": "not available" },
+          { "op": "=", "value": "1",  "text": "available" }
+        ]
+      },
+      {
+        "content": "",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= max_widget_width + widget_width - x %>, "h": 3 },
+        "transparent": true,
+        "mode": "html",
+        "title": "",
+        "type": "text"
       }<%= ',' unless(size == 0) %>
 <%-
     y += 3
@@ -3678,7 +3425,7 @@
       {
         "content": "<h3><center><bold><a href=\"<%= url %>\">CAE Live</a></bold></center></h3>",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "links": [],
         "mode": "html",
@@ -3689,7 +3436,7 @@
       {
         "title": "Service Uptime",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -3697,11 +3444,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.CAE_LIVE.Runtime.uptime",
-            "refId": "A",
-            "textEditor": false
-          }
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE.Runtime.uptime" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -3729,7 +3472,7 @@
       {
         "title": "used Heap Memory",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "cacheTimeout": null,
         "colorBackground": true,
@@ -3755,14 +3498,8 @@
         "links": [],
         "mappingType": 1,
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "maxDataPoints": 100,
         "nullPointMode": "connected",
@@ -3786,10 +3523,7 @@
           "show": false
         },
         "targets": [
-          {
-            "refId": "A",
-            "target": "carbon-writer.$host.CAE_LIVE.Memory.heap_memory.used_percent"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE.Memory.heap_memory.used_percent" }
         ],
         "thresholds": "85,95",
         "type": "singlestat",
@@ -3806,7 +3540,7 @@
       {
         "title": "CapConnection",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "cacheTimeout": null,
         "colorBackground": true,
@@ -3832,14 +3566,8 @@
         "links": [],
         "mappingType": 1,
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "maxDataPoints": 100,
         "nullPointMode": "connected",
@@ -3863,10 +3591,7 @@
           "show": false
         },
         "targets": [
-          {
-            "refId": "A",
-            "target": "carbon-writer.$host.CAE_LIVE.CapConnection.open"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE.CapConnection.open" }
         ],
         "thresholds": "0,1",
         "type": "singlestat",
@@ -3893,7 +3618,7 @@
       {
         "title": "used UAPI Cache",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -3901,10 +3626,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.CAE_LIVE.CapConnection.heap.cache.used_percent",
-            "refId": "A"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE.CapConnection.heap.cache.used_percent" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -3923,14 +3645,8 @@
           }
         ],
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "rangeMaps": [
           {
@@ -3970,7 +3686,7 @@
       {
         "title": "used Blob Cache",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -3978,10 +3694,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.CAE_LIVE.CapConnection.blob.cache.used_percent",
-            "refId": "A"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE.CapConnection.blob.cache.used_percent" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -4000,14 +3713,8 @@
           }
         ],
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "rangeMaps": [
           {
@@ -4047,7 +3754,7 @@
       {
         "title": "Lightweight Sessions",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -4055,10 +3762,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.CAE_LIVE.CapConnection.su_sessions.sessions",
-            "refId": "A"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE.CapConnection.su_sessions.sessions" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -4077,14 +3781,8 @@
           }
         ],
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "rangeMaps": [
           {
@@ -4122,9 +3820,39 @@
         }
       },
       {
+        "title": "Content Repository",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "error": false,
+        "span": 1,
+        "editable": true,
+        "type": "singlestat",
+        "isNew": true,
+        "datasource": "graphite",
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE.CapConnection.ContentRepository.available" }
+        ],
+        "colorBackground": true,
+        "colorValue": false,
+        "colors": [
+          "rgba(82, 82, 82, 0.9)",
+          "rgba(245, 54, 54, 0.9)",
+          "rgba(50, 172, 45, 0.97)"
+        ],
+        "nullPointMode": "connected",
+        "valueFontSize": "70%",
+        "thresholds": "1,0",
+        "valueMaps": [
+          { "op": "=", "value": "-1", "text": "N/A" },
+          { "op": "=", "value": "0",  "text": "not available" },
+          { "op": "=", "value": "1",  "text": "available" }
+        ]
+      },
+      {
         "content": "",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= max_widget_width + widget_width - x %>, "h": 3 },
         "transparent": true,
         "mode": "html",
         "title": "",
@@ -4145,7 +3873,7 @@
       {
         "content": "<h3><center><bold><a href=\"<%= url %>\">CAE Preview</a></bold></center></h3>",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "links": [],
         "mode": "html",
@@ -4156,7 +3884,7 @@
       {
         "title": "Service Uptime",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -4164,11 +3892,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.CAE_PREV.Runtime.uptime",
-            "refId": "A",
-            "textEditor": false
-          }
+          { "refId": "A", "target": "carbon-writer.$host.CAE_PREV.Runtime.uptime" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -4196,7 +3920,7 @@
       {
         "title": "used Heap Memory",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "cacheTimeout": null,
         "colorBackground": true,
@@ -4222,14 +3946,8 @@
         "links": [],
         "mappingType": 1,
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "maxDataPoints": 100,
         "nullPointMode": "connected",
@@ -4253,10 +3971,7 @@
           "show": false
         },
         "targets": [
-          {
-            "refId": "A",
-            "target": "carbon-writer.$host.CAE_PREV.Memory.heap_memory.used_percent"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.CAE_PREV.Memory.heap_memory.used_percent" }
         ],
         "thresholds": "85,95",
         "type": "singlestat",
@@ -4273,7 +3988,7 @@
       {
         "title": "CapConnection",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "cacheTimeout": null,
         "colorBackground": true,
@@ -4299,14 +4014,8 @@
         "links": [],
         "mappingType": 1,
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "maxDataPoints": 100,
         "nullPointMode": "connected",
@@ -4330,10 +4039,7 @@
           "show": false
         },
         "targets": [
-          {
-            "refId": "A",
-            "target": "carbon-writer.$host.CAE_PREV.CapConnection.open"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.CAE_PREV.CapConnection.open" }
         ],
         "thresholds": "0,1",
         "type": "singlestat",
@@ -4360,7 +4066,7 @@
       {
         "title": "used UAPI Cache",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -4368,10 +4074,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.CAE_PREV.CapConnection.heap.cache.used_percent",
-            "refId": "A"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.CAE_PREV.CapConnection.heap.cache.used_percent" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -4390,14 +4093,8 @@
           }
         ],
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "rangeMaps": [
           {
@@ -4437,7 +4134,7 @@
       {
         "title": "used Blob Cache",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -4445,10 +4142,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.CAE_PREV.CapConnection.blob.cache.used_percent",
-            "refId": "A"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.CAE_PREV.CapConnection.blob.cache.used_percent"  }
         ],
         "links": [],
         "datasource": "graphite",
@@ -4467,14 +4161,8 @@
           }
         ],
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "rangeMaps": [
           {
@@ -4514,7 +4202,7 @@
       {
         "title": "Lightweight Sessions",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -4522,10 +4210,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.CAE_PREV.CapConnection.su_sessions.sessions",
-            "refId": "A"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.CAE_PREV.CapConnection.su_sessions.sessions" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -4544,14 +4229,8 @@
           }
         ],
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "rangeMaps": [
           {
@@ -4589,9 +4268,39 @@
         }
       },
       {
+        "title": "Content Repository",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "error": false,
+        "span": 1,
+        "editable": true,
+        "type": "singlestat",
+        "isNew": true,
+        "datasource": "graphite",
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_PREV.CapConnection.ContentRepository.available" }
+        ],
+        "colorBackground": true,
+        "colorValue": false,
+        "colors": [
+          "rgba(82, 82, 82, 0.9)",
+          "rgba(245, 54, 54, 0.9)",
+          "rgba(50, 172, 45, 0.97)"
+        ],
+        "nullPointMode": "connected",
+        "valueFontSize": "70%",
+        "thresholds": "1,0",
+        "valueMaps": [
+          { "op": "=", "value": "-1", "text": "N/A" },
+          { "op": "=", "value": "0",  "text": "not available" },
+          { "op": "=", "value": "1",  "text": "available" }
+        ]
+      },
+      {
         "content": "",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= max_widget_width + widget_width - x %>, "h": 3 },
         "transparent": true,
         "mode": "html",
         "title": "",
@@ -4612,7 +4321,7 @@
       {
         "content": "<h3><center><bold><a href=\"<%= url %>\">Elastic Worker</a></bold></center></h3>",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "links": [],
         "mode": "html",
@@ -4623,7 +4332,7 @@
       {
         "title": "Service Uptime",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -4631,11 +4340,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.ELASTIC_WORKER.Runtime.uptime",
-            "refId": "A",
-            "textEditor": false
-          }
+          { "refId": "A", "target": "carbon-writer.$host.ELASTIC_WORKER.Runtime.uptime" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -4663,7 +4368,7 @@
       {
         "title": "used Heap Memory",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "cacheTimeout": null,
         "colorBackground": true,
@@ -4689,14 +4394,8 @@
         "links": [],
         "mappingType": 1,
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "maxDataPoints": 100,
         "nullPointMode": "connected",
@@ -4720,10 +4419,7 @@
           "show": false
         },
         "targets": [
-          {
-            "refId": "A",
-            "target": "carbon-writer.$host.ELASTIC_WORKER.Memory.heap_memory.used_percent"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.ELASTIC_WORKER.Memory.heap_memory.used_percent" }
         ],
         "thresholds": "85,95",
         "type": "singlestat",
@@ -4740,7 +4436,7 @@
       {
         "title": "CapConnection",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "cacheTimeout": null,
         "colorBackground": true,
@@ -4766,14 +4462,8 @@
         "links": [],
         "mappingType": 1,
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "maxDataPoints": 100,
         "nullPointMode": "connected",
@@ -4797,10 +4487,7 @@
           "show": false
         },
         "targets": [
-          {
-            "refId": "A",
-            "target": "carbon-writer.$host.ELASTIC_WORKER.CapConnection.open"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.ELASTIC_WORKER.CapConnection.open" }
         ],
         "thresholds": "0,1",
         "type": "singlestat",
@@ -4827,7 +4514,7 @@
       {
         "title": "used UAPI Cache",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -4835,10 +4522,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.ELASTIC_WORKER.CapConnection.heap.cache.used_percent",
-            "refId": "A"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.ELASTIC_WORKER.CapConnection.heap.cache.used_percent" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -4857,14 +4541,8 @@
           }
         ],
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "rangeMaps": [
           {
@@ -4904,7 +4582,7 @@
       {
         "title": "used Blob Cache",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -4912,10 +4590,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.ELASTIC_WORKER.CapConnection.blob.cache.used_percent",
-            "refId": "A"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.ELASTIC_WORKER.CapConnection.blob.cache.used_percent" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -4934,14 +4609,8 @@
           }
         ],
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "rangeMaps": [
           {
@@ -4981,7 +4650,7 @@
       {
         "content": "",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 4, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= max_widget_width + widget_width - x %>, "h": 3 },
         "transparent": true,
         "mode": "html",
         "title": "",
@@ -5002,7 +4671,7 @@
       {
         "content": "<h3><center><bold><a href=\"<%= url %>\">Adobe Drive</a></bold></center></h3>",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "links": [],
         "mode": "html",
@@ -5013,7 +4682,7 @@
       {
         "title": "Service Uptime",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -5021,11 +4690,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.ADOBE_DRIVE_SERVER.Runtime.uptime",
-            "refId": "A",
-            "textEditor": false
-          }
+          { "refId": "A", "target": "carbon-writer.$host.ADOBE_DRIVE_SERVER.Runtime.uptime" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -5053,7 +4718,7 @@
       {
         "title": "used Heap Memory",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "cacheTimeout": null,
         "colorBackground": true,
@@ -5079,14 +4744,8 @@
         "links": [],
         "mappingType": 1,
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "maxDataPoints": 100,
         "nullPointMode": "connected",
@@ -5110,10 +4769,7 @@
           "show": false
         },
         "targets": [
-          {
-            "refId": "A",
-            "target": "carbon-writer.$host.ADOBE_DRIVE_SERVER.Memory.heap_memory.used_percent"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.ADOBE_DRIVE_SERVER.Memory.heap_memory.used_percent" }
         ],
         "thresholds": "85,95",
         "type": "singlestat",
@@ -5130,7 +4786,7 @@
       {
         "title": "CapConnection",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "cacheTimeout": null,
         "colorBackground": true,
@@ -5156,14 +4812,8 @@
         "links": [],
         "mappingType": 1,
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "maxDataPoints": 100,
         "nullPointMode": "connected",
@@ -5187,10 +4837,7 @@
           "show": false
         },
         "targets": [
-          {
-            "refId": "A",
-            "target": "carbon-writer.$host.ADOBE_DRIVE_SERVER.CapConnection.open"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.ADOBE_DRIVE_SERVER.CapConnection.open" }
         ],
         "thresholds": "0,1",
         "type": "singlestat",
@@ -5217,7 +4864,7 @@
       {
         "title": "used UAPI Cache",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -5225,10 +4872,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.ADOBE_DRIVE_SERVER.CapConnection.heap.cache.used_percent",
-            "refId": "A"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.ADOBE_DRIVE_SERVER.CapConnection.heap.cache.used_percent" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -5247,14 +4891,8 @@
           }
         ],
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "rangeMaps": [
           {
@@ -5294,7 +4932,7 @@
       {
         "title": "used Blob Cache",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -5302,10 +4940,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.ADOBE_DRIVE_SERVER.CapConnection.blob.cache.used_percent",
-            "refId": "A"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.ADOBE_DRIVE_SERVER.CapConnection.blob.cache.used_percent" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -5324,14 +4959,8 @@
           }
         ],
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "rangeMaps": [
           {
@@ -5371,7 +5000,7 @@
       {
         "title": "Lightweight Sessions",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -5379,10 +5008,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.ADOBE_DRIVE_SERVER.CapConnection.su_sessions.sessions",
-            "refId": "A"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.ADOBE_DRIVE_SERVER.CapConnection.su_sessions.sessions" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -5401,14 +5027,8 @@
           }
         ],
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "rangeMaps": [
           {
@@ -5448,7 +5068,7 @@
       {
         "content": "",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= max_widget_width + widget_width - x %>, "h": 3 },
         "transparent": true,
         "mode": "html",
         "title": "",
@@ -5469,7 +5089,7 @@
       {
         "content": "<h3><center><bold><a href=\"<%= url %>\">User Changes</a></bold></center></h3>",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "links": [],
         "mode": "html",
@@ -5480,7 +5100,7 @@
       {
         "title": "Service Uptime",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -5488,11 +5108,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.USER_CHANGES.Runtime.uptime",
-            "refId": "A",
-            "textEditor": false
-          }
+          { "refId": "A", "target": "carbon-writer.$host.USER_CHANGES.Runtime.uptime" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -5520,7 +5136,7 @@
       {
         "title": "used Heap Memory",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "cacheTimeout": null,
         "colorBackground": true,
@@ -5546,14 +5162,8 @@
         "links": [],
         "mappingType": 1,
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "maxDataPoints": 100,
         "nullPointMode": "connected",
@@ -5577,10 +5187,7 @@
           "show": false
         },
         "targets": [
-          {
-            "refId": "A",
-            "target": "carbon-writer.$host.USER_CHANGES.Memory.heap_memory.used_percent"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.USER_CHANGES.Memory.heap_memory.used_percent" }
         ],
         "thresholds": "85,95",
         "type": "singlestat",
@@ -5597,7 +5204,7 @@
       {
         "title": "CapConnection",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "cacheTimeout": null,
         "colorBackground": true,
@@ -5623,14 +5230,8 @@
         "links": [],
         "mappingType": 1,
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "maxDataPoints": 100,
         "nullPointMode": "connected",
@@ -5654,10 +5255,7 @@
           "show": false
         },
         "targets": [
-          {
-            "refId": "A",
-            "target": "carbon-writer.$host.USER_CHANGES.CapConnection.open"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.USER_CHANGES.CapConnection.open" }
         ],
         "thresholds": "0,1",
         "type": "singlestat",
@@ -5684,7 +5282,7 @@
       {
         "title": "used UAPI Cache",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -5692,10 +5290,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.USER_CHANGES.CapConnection.heap.cache.used_percent",
-            "refId": "A"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.USER_CHANGES.CapConnection.heap.cache.used_percent" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -5714,14 +5309,8 @@
           }
         ],
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "rangeMaps": [
           {
@@ -5761,7 +5350,7 @@
       {
         "title": "used Blob Cache",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -5769,10 +5358,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.USER_CHANGES.CapConnection.blob.cache.used_percent",
-            "refId": "A"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.USER_CHANGES.CapConnection.blob.cache.used_percent" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -5791,14 +5377,8 @@
           }
         ],
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "rangeMaps": [
           {
@@ -5838,7 +5418,7 @@
       {
         "title": "Lightweight Sessions",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -5846,10 +5426,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.USER_CHANGES.CapConnection.su_sessions.sessions",
-            "refId": "A"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.USER_CHANGES.CapConnection.su_sessions.sessions" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -5868,14 +5445,8 @@
           }
         ],
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "rangeMaps": [
           {
@@ -5915,7 +5486,7 @@
       {
         "content": "",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= max_widget_width + widget_width - x %>, "h": 3 },
         "transparent": true,
         "mode": "html",
         "title": "",
@@ -5936,7 +5507,7 @@
       {
         "content": "<h3><center><bold><a href=\"<%= url %>\">Studio</a></bold></center></h3>",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "links": [],
         "mode": "html",
@@ -5947,7 +5518,7 @@
       {
         "title": "Service Uptime",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -5955,11 +5526,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.STUDIO.Runtime.uptime",
-            "refId": "A",
-            "textEditor": false
-          }
+          { "refId": "A", "target": "carbon-writer.$host.STUDIO.Runtime.uptime" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -5987,7 +5554,7 @@
       {
         "title": "used Heap Memory",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "cacheTimeout": null,
         "colorBackground": true,
@@ -6013,14 +5580,8 @@
         "links": [],
         "mappingType": 1,
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "maxDataPoints": 100,
         "nullPointMode": "connected",
@@ -6044,10 +5605,7 @@
           "show": false
         },
         "targets": [
-          {
-            "refId": "A",
-            "target": "carbon-writer.$host.STUDIO.Memory.heap_memory.used_percent"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.STUDIO.Memory.heap_memory.used_percent" }
         ],
         "thresholds": "85,95",
         "type": "singlestat",
@@ -6064,7 +5622,7 @@
       {
         "title": "CapConnection",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "cacheTimeout": null,
         "colorBackground": true,
@@ -6090,14 +5648,8 @@
         "links": [],
         "mappingType": 1,
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "maxDataPoints": 100,
         "nullPointMode": "connected",
@@ -6121,10 +5673,7 @@
           "show": false
         },
         "targets": [
-          {
-            "refId": "A",
-            "target": "carbon-writer.$host.STUDIO.CapConnection.open"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.STUDIO.CapConnection.open" }
         ],
         "thresholds": "0,1",
         "type": "singlestat",
@@ -6151,7 +5700,7 @@
       {
         "title": "used UAPI Cache",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -6159,10 +5708,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.STUDIO.CapConnection.heap.cache.used_percent",
-            "refId": "A"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.STUDIO.CapConnection.heap.cache.used_percent" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -6181,14 +5727,8 @@
           }
         ],
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "rangeMaps": [
           {
@@ -6228,7 +5768,7 @@
       {
         "title": "used Blob Cache",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -6236,10 +5776,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.STUDIO.CapConnection.blob.cache.used_percent",
-            "refId": "A"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.STUDIO.CapConnection.blob.cache.used_percent" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -6258,14 +5795,8 @@
           }
         ],
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "rangeMaps": [
           {
@@ -6305,7 +5836,7 @@
       {
         "title": "Lightweight Sessions",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -6313,10 +5844,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.STUDIO.CapConnection.su_sessions.sessions",
-            "refId": "A"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.STUDIO.CapConnection.su_sessions.sessions" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -6335,14 +5863,8 @@
           }
         ],
         "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
         ],
         "rangeMaps": [
           {
@@ -6380,9 +5902,69 @@
         }
       },
       {
+        "title": "Workflow Repository",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "error": false,
+        "span": 1,
+        "editable": true,
+        "type": "singlestat",
+        "isNew": true,
+        "datasource": "graphite",
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.STUDIO.CapConnection.WorkflowRepository.available" }
+        ],
+        "colorBackground": true,
+        "colorValue": false,
+        "colors": [
+          "rgba(82, 82, 82, 0.9)",
+          "rgba(245, 54, 54, 0.9)",
+          "rgba(50, 172, 45, 0.97)"
+        ],
+        "nullPointMode": "connected",
+        "valueFontSize": "70%",
+        "thresholds": "1,0",
+        "valueMaps": [
+          { "op": "=", "value": "-1", "text": "N/A" },
+          { "op": "=", "value": "0",  "text": "not available" },
+          { "op": "=", "value": "1",  "text": "available" }
+        ]
+      },
+      {
+        "title": "Content Repository",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "error": false,
+        "span": 1,
+        "editable": true,
+        "type": "singlestat",
+        "isNew": true,
+        "datasource": "graphite",
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.STUDIO.CapConnection.ContentRepository.available" }
+        ],
+        "colorBackground": true,
+        "colorValue": false,
+        "colors": [
+          "rgba(82, 82, 82, 0.9)",
+          "rgba(245, 54, 54, 0.9)",
+          "rgba(50, 172, 45, 0.97)"
+        ],
+        "nullPointMode": "connected",
+        "valueFontSize": "70%",
+        "thresholds": "1,0",
+        "valueMaps": [
+          { "op": "=", "value": "-1", "text": "N/A" },
+          { "op": "=", "value": "0",  "text": "not available" },
+          { "op": "=", "value": "1",  "text": "available" }
+        ]
+      },
+      {
         "content": "",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= max_widget_width + widget_width - x %>, "h": 3 },
         "transparent": true,
         "mode": "html",
         "title": "",
@@ -6403,7 +5985,7 @@
       {
         "content": "<h3><center><bold><a href=\"<%= url %>\">MongoDB</a></bold></center></h3>",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "links": [],
         "mode": "html",
@@ -6414,7 +5996,7 @@
       {
         "title": "Service Uptime",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "error": false,
         "span": 1,
@@ -6422,11 +6004,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          {
-            "target": "carbon-writer.$host.MONGODB.uptime",
-            "refId": "A",
-            "textEditor": false
-          }
+          { "refId": "A", "target": "carbon-writer.$host.MONGODB.uptime" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -6454,7 +6032,7 @@
       {
         "title": "used Heap Memory",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "type": "singlestat",
         "span": 1,
@@ -6465,10 +6043,7 @@
         "postfix": " %",
         "postfixFontSize": "80%",
         "targets": [
-          {
-            "refId": "A",
-            "target": "carbon-writer.$host.MONGODB.memory.heap.used_percent"
-          }
+          { "refId": "A", "target": "carbon-writer.$host.MONGODB.memory.heap.used_percent" }
         ],
         "thresholds": "85,95",
         "valueFontSize": "100%",
@@ -6477,7 +6052,7 @@
       {
         "content": "",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 10, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= max_widget_width + widget_width - x %>, "h": 3 },
         "transparent": true,
         "mode": "html",
         "title": "",
@@ -6498,7 +6073,7 @@
       {
         "content": "<h3><center><bold><a href=\"<%= url %>\">MySQL</a></bold></center></h3>",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "links": [],
         "mode": "html",
@@ -6509,16 +6084,12 @@
       {
         "title": "Service Uptime",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 2, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
         "span": 1,
         "type": "singlestat",
         "targets": [
-          {
-            "target": "carbon-writer.$host.MYSQL.uptime",
-            "refId": "A",
-            "textEditor": false
-          }
+          { "refId": "A", "target": "carbon-writer.$host.MYSQL.uptime" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -6546,7 +6117,7 @@
       {
         "content": "",
         "id": <%= id += 1 %>,
-        "gridPos": { "x": <%= x += 2 %>, "y": <%= y %>, "w": 12, "h": 3 },
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= max_widget_width + widget_width - x %>, "h": 3 },
         "transparent": true,
         "mode": "html",
         "title": "",
