@@ -44,13 +44,13 @@ module CarbonData
         su_sessions        = value.dig('NumberOfSUSessions')
 
         open_connections   = value.dig('Open')
-        open_connections   = open_connections ? 1 : 0 if( open_connections != nil )
+        open_connections   = open_connections ? 1 : 0 unless( open_connections.nil? )
 
         content_repository = value.dig('ContentRepositoryAvailable')
-        content_repository = content_repository ? 1 : 0 if( content_repository != nil )
+        content_repository = content_repository ? 1 : 0 unless( content_repository.nil? )
 
         workflow_repository = value.dig('WorkflowRepositoryAvailable')
-        workflow_repository = workflow_repository ? 1 : 0 if( workflow_repository != nil )
+        workflow_repository = workflow_repository ? 1 : 0 unless( workflow_repository.nil? )
 
       end
 
@@ -89,13 +89,13 @@ module CarbonData
 
       unless( content_repository == -1 )
         result << {
-          key: format( '%s.%s.%s.%s'      , @identifier, @normalized_service_name, mbean, 'content_repository' ),
+          key: format( '%s.%s.%s.%s.%s'      , @identifier, @normalized_service_name, mbean, 'ContentRepository', 'available' ),
           value: content_repository
         }
       end
       unless( workflow_repository == -1 )
         result << {
-          key: format( '%s.%s.%s.%s'      , @identifier, @normalized_service_name, mbean, 'workflow_repository' ),
+          key: format( '%s.%s.%s.%s.%s'      , @identifier, @normalized_service_name, mbean, 'WorkflowRepository', 'available' ),
           value: workflow_repository
         }
       end
