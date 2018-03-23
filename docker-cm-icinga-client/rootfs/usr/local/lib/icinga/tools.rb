@@ -90,7 +90,7 @@ class CMIcinga2 < Icinga2::Client
 
     def node_information( params )
 
-      logger.debug( "node_information( #{params} )" )
+#       logger.debug( "node_information( #{params} )" )
 
       ip      = params.dig(:ip)
       short   = params.dig(:short)
@@ -132,7 +132,7 @@ class CMIcinga2 < Icinga2::Client
 
       payload = {}
 
-      logger.debug( JSON.pretty_generate(services) )
+#       logger.debug( JSON.pretty_generate(services) )
 
       unless( services.nil?  )
 
@@ -147,11 +147,13 @@ class CMIcinga2 < Icinga2::Client
             master_live_server_port = replicator_value.dig('MasterLiveServer','port')
 
             if( Utils::Network.is_running?( master_live_server ) && Utils::Network.port_open?( master_live_server, master_live_server_port ) )
-#               logger.debug( "content server for replication-live-server: #{master_live_server}" )
+
               unless( master_live_server.nil? )
                 services['replication-live-server']['master_live_server'] = master_live_server
                 services['replication-live-server']['sequencenumbers'] = true
               end
+
+              logger.debug( "content server for replication-live-server: #{master_live_server}" )
             else
               # TODO
               # create an job, when we found no MLS to update this host

@@ -143,6 +143,8 @@ class CMIcinga2 < Icinga2::Client
         result = add_host(params)    if( command == 'add' )
         result = modify_host(params) if( command == 'rescan' )
 
+        return { status: status } if( result.nil? )
+
         status = result.dig('code') || 500
 
         logger.debug( result )
@@ -153,7 +155,7 @@ class CMIcinga2 < Icinga2::Client
         logger.debug( ' => restart_process' ) if( command == 'add' )
         logger.debug( ' => shutdown_process' ) if( command == 'rescan' )
 
-#         restart_process if( command == 'add' )
+        restart_process if( command == 'add' )
 #         shutdown_process if( command == 'rescan' )
 
         @jobs.del( job_option )
