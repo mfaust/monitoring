@@ -41,7 +41,7 @@ RUN \
 
 # ---------------------------------------------------------------------------------------
 
-FROM bodsch/docker-icinga2:2.8.1-master-r2
+FROM bodsch/docker-icinga2:2.8.2-master-r2
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
