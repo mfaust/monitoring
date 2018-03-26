@@ -1,24 +1,25 @@
 # JMX - Standard Tomcat
 
-Standard Tomcat Mbeans findet man unterhalb von `java.lang`.
 
-
-- `Memory`
+- `java.lang:type=Memory`
     * `HeapMemoryUsage`
     * `NonHeapMemoryUsage`
 
-- `Threading`
+
+- `java.lang:type=Threading`
     * `TotalStartedThreadCount`
     * `ThreadCount`
     * `DaemonThreadCount`
     * `PeakThreadCount`
 
-- `ClassLoading`
+
+- `java.lang:type=ClassLoading`
     * `TotalLoadedClassCount`
     * `LoadedClassCount`
     * `UnloadedClassCount`
 
-- `GarbageCollector,name=ParNew`
+
+- `java.lang:type=GarbageCollector,name=ParNew`
     * `CollectionCount`
     * `CollectionTime`
     * `LastGcInfo`
@@ -27,7 +28,8 @@ Standard Tomcat Mbeans findet man unterhalb von `java.lang`.
         - `endTime`
         - `startTime`
 
-- `GarbageCollector,name=ConcurrentMarkSweep`
+
+- `java.lang:type=GarbageCollector,name=ConcurrentMarkSweep`
     * `CollectionCount`
     * `CollectionTime`
     * `LastGcInfo`
@@ -36,9 +38,8 @@ Standard Tomcat Mbeans findet man unterhalb von `java.lang`.
         - `endTime`
         - `startTime`
 
-Weiterführende mbeans findet man unterhalb von `Catalina`
 
-- `Executor,name=tomcatThreadPool`
+- `Catalina:type=Executor,name=tomcatThreadPool`
     * `activeCount`
     * `completedTaskCount`
     * `corePoolSize`

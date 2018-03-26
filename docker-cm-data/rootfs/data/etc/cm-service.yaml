@@ -167,6 +167,7 @@ services:
     port: 40999
     cap_connection: true
     uapi_cache: true
+    blob_cache: true
     heap_cache: true
     content_repository: true
     application:

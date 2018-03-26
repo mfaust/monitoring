@@ -57,30 +57,32 @@ jolokia:
       - description: Query Pool for DBA Connections
         mbean: com.coremedia:application=*,bean=QueryPool,type=Store
         attribute: IdleExecutors,RunningExecutors,WaitingQueries,MaxQueries
-      - description: Statistics about BlobStore
-        mbean: com.coremedia:application=*,type=Statistics,module=BlobStore,pool=BlobStoreMethods
-      - description: Statistics about Publisher
-        mbean: com.coremedia:application=*,type=Statistics,module=Publisher,pool=PublisherMethods
-      - description: Statistics about Repository
-        mbean: com.coremedia:application=*,type=Statistics,module=RepositoryStatistics,pool=Resource
-      - description: Statistics about ResourceCache
-        mbean: com.coremedia:application=*,type=Statistics,module=ResourceCacheStatistics,pool=ResourceCache
-      - description: Statistics about Store
-        mbean: com.coremedia:application=*,type=Statistics,module=Store,pool=StoreMethods
-      - description: Statistics pool StoreStatistics Job Execution
-        mbean: com.coremedia:application=*,type=Statistics,module=StoreStatistics,pool=Job Execution
-      - description: Statistics pool StoreStatistics Job Failed
-        mbean: com.coremedia:application=*,type=Statistics,module=StoreStatistics,pool=Job Failed
-      - description: Statistics pool StoreStatistics Job Latency
-        mbean: com.coremedia:application=*,type=Statistics,module=StoreStatistics,pool=Job Latency
-      - description: Statistics pool StoreStatistics Job Result
-        mbean: com.coremedia:application=*,type=Statistics,module=StoreStatistics,pool=Job Result
-      - description: Statistics pool StoreStatistics Job Successful
-        mbean: com.coremedia:application=*,type=Statistics,module=StoreStatistics,pool=Job Successful
-      - description: Statistics pool StoreStatistics Job Unrecoverable
-        mbean: com.coremedia:application=*,type=Statistics,module=StoreStatistics,pool=Job Unrecoverable
-      - description: Statistics about TextStore
-        mbean: com.coremedia:application=*,type=Statistics,module=TextStore,pool=TextStoreMethods
+# disabled at 2018-03-26
+#
+#      - description: Statistics about BlobStore
+#        mbean: com.coremedia:application=*,type=Statistics,module=BlobStore,pool=BlobStoreMethods
+#      - description: Statistics about Publisher
+#        mbean: com.coremedia:application=*,type=Statistics,module=Publisher,pool=PublisherMethods
+#      - description: Statistics about Repository
+#        mbean: com.coremedia:application=*,type=Statistics,module=RepositoryStatistics,pool=Resource
+#      - description: Statistics about ResourceCache
+#        mbean: com.coremedia:application=*,type=Statistics,module=ResourceCacheStatistics,pool=ResourceCache
+#      - description: Statistics about Store
+#        mbean: com.coremedia:application=*,type=Statistics,module=Store,pool=StoreMethods
+#      - description: Statistics pool StoreStatistics Job Execution
+#        mbean: com.coremedia:application=*,type=Statistics,module=StoreStatistics,pool=Job Execution
+#      - description: Statistics pool StoreStatistics Job Failed
+#        mbean: com.coremedia:application=*,type=Statistics,module=StoreStatistics,pool=Job Failed
+#      - description: Statistics pool StoreStatistics Job Latency
+#        mbean: com.coremedia:application=*,type=Statistics,module=StoreStatistics,pool=Job Latency
+#      - description: Statistics pool StoreStatistics Job Result
+#        mbean: com.coremedia:application=*,type=Statistics,module=StoreStatistics,pool=Job Result
+#      - description: Statistics pool StoreStatistics Job Successful
+#        mbean: com.coremedia:application=*,type=Statistics,module=StoreStatistics,pool=Job Successful
+#      - description: Statistics pool StoreStatistics Job Unrecoverable
+#        mbean: com.coremedia:application=*,type=Statistics,module=StoreStatistics,pool=Job Unrecoverable
+#      - description: Statistics about TextStore
+#        mbean: com.coremedia:application=*,type=Statistics,module=TextStore,pool=TextStoreMethods
 
     caches:
       description: CAE or Studio Caches
@@ -190,9 +192,11 @@ jolokia:
 
     content-management-server:
       description: Content Management Server
-      metrics:
-      - description: Statistics about Publisher
-        mbean: com.coremedia:module=Publisher,pool=PublisherMethods,type=Statistics,application=*
+      metrics: []
+# disabled at 2018-03-26
+#
+#      - description: Statistics about Publisher
+#        mbean: com.coremedia:module=Publisher,pool=PublisherMethods,type=Statistics,application=*
 
     master-live-server:
       description: Master Live Server
@@ -203,7 +207,7 @@ jolokia:
       metrics:
       - description: Information about Replication between MLS and RLS
         mbean: com.coremedia:type=Replicator,application=*
-        attribute: ConnectionUp,ControllerState,Enabled,PipelineUp,IncomingCount,CompletedCount,UncompletedCount,LatestCompletedSequenceNumber,LatestCompletedArrival,LatestCompletionDuration,LatestIncomingSequenceNumber,LatestIncomingArrival,MasterLiveServerIORUrl
+        attribute: ConnectionUp,ControllerState,Enabled,PipelineUp,IncomingCount,CompletedCount,UncompletedCount,LatestCompletedSequenceNumber,LatestCompletedArrival,LatestCompletionDuration,LatestIncomingSequenceNumber,LatestIncomingArrival,LatestCompletedStampedNumber,LatestIncomingStampedNumber,MasterLiveServerIORUrl
 
     workflow-server:
       description: Workflow Server
@@ -230,7 +234,22 @@ jolokia:
       metrics:
       - name: feeder
         mbean: com.coremedia:type=Feeder,application=*
-        attribute: State,Uptime,CurrentPendingDocuments,IndexAverageBatchSendingTime,IndexDocuments,IndexContentDocuments,IndexBytes,PendingEvents,PendingFolders
+        attribute: State,Uptime,CurrentPendingDocuments,IndexDocuments,IndexContentDocuments,IndexBytes,PersistedEvents,PendingEvents,PendingFolders
+      - name: AdminBackgroundFeed
+        mbean: com.coremedia:type=AdminBackgroundFeed,application=content-feeder
+        attribute: NumberOfPendingContents
+      - name: AssetTaxonomyIdsBackgroundFeed
+        mbean: com.coremedia:type=AssetTaxonomyIdsBackgroundFeed,application=content-feeder
+        attribute: CurrentPendingContents
+      - name: LocationTaxonomyIdsBackgroundFeed
+        mbean: com.coremedia:type=LocationTaxonomyIdsBackgroundFeed,application=content-feeder
+        attribute: CurrentPendingContents
+      - name: SubjectTaxonomyIdsBackgroundFeed
+        mbean: com.coremedia:type=SubjectTaxonomyIdsBackgroundFeed,application=content-feeder
+        attribute: CurrentPendingContents
+      - name: UpdateGroupsBackgroundFeed
+        mbean: com.coremedia:type=UpdateGroupsBackgroundFeed,application=content-feeder
+        attribute: CurrentPendingContents
       - name: CapConnection
         mbean: com.coremedia:type=CapConnection,application=*
         attribute: BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open,ContentRepositoryAvailable,WorkflowRepositoryAvailable
@@ -253,7 +272,7 @@ jolokia:
         attribute: BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open,ContentRepositoryAvailable
       - description: Provided statistics for the persistent blob cache
         mbean: com.coremedia:type=TransformedBlobCacheManager,application=*
-        attribute: AccessCount,CacheSize,FaultCount,FaultSizeSum,InitialLevel,Level,NewGenerationCacheSize,NewGenerationInitialLevel,NewGenerationLevel,OldGenerationInitialLevel,OldGenerationLevel,RecallCount,RecallSizeSum,RotateCount
+        attribute: AccessCount,CacheSize,FaultCount,FaultSizeSum,InitialLevel,Level,NewGenerationCacheSize,NewGenerationInitialLevel,NewGenerationLevel,OldGenerationInitialLevel,OldGenerationLevel,RecallCount,RecallSizeSum,RotateCount,Uptime
       - description: Receiver that is connected to the feeder
         mbean: com.coremedia:type=Receiver,application=*
         attribute: AddProcessedCount,AddReceivedCount,InitializeProcessedCount,InitializeReceivedCount,ProcessedCount,ReceivedCount,RemoveProcessedCount,RemoveReceivedCount,UpdateProcessedCount,UpdateReceivedCount
