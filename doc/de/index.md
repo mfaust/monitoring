@@ -16,13 +16,13 @@ Alle im weiteren Verlauf erwähnten Meßpunkte werden durch eine *Service-Discov
 Die Monitoring-Toolbox lässt sich über eine API manuell nutzen oder in einer CI Umgebung integrieren.
 
 
-1. [Installation](./de/installation.md)
-2. [Konfiguration](./de/konfiguration.md)
-3. [API](./de/api.md)
-4. [JMX](./de/jmx.md)
-5. [Bereitschaft](./de/bereitschaft.md)
-6. [Service Discovery](./de/service-discovery.md)
-7. [Screenshots](./de/screenshots.md)
+1. [Installation](./installation.md)
+2. [Konfiguration](./konfiguration.md)
+3. [API](./api.md)
+4. [JMX](./jmx.md)
+5. [Bereitschaft](./bereitschaft.md)
+6. [Service Discovery](./service-discovery.md)
+7. [Screenshots](./screenshots.md)
 
 
 ## CoreMedia Applikationen

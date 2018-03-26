@@ -57,32 +57,30 @@ jolokia:
       - description: Query Pool for DBA Connections
         mbean: com.coremedia:application=*,bean=QueryPool,type=Store
         attribute: IdleExecutors,RunningExecutors,WaitingQueries,MaxQueries
-# disabled at 2018-03-26
-#
-#      - description: Statistics about BlobStore
-#        mbean: com.coremedia:application=*,type=Statistics,module=BlobStore,pool=BlobStoreMethods
-#      - description: Statistics about Publisher
-#        mbean: com.coremedia:application=*,type=Statistics,module=Publisher,pool=PublisherMethods
-#      - description: Statistics about Repository
-#        mbean: com.coremedia:application=*,type=Statistics,module=RepositoryStatistics,pool=Resource
-#      - description: Statistics about ResourceCache
-#        mbean: com.coremedia:application=*,type=Statistics,module=ResourceCacheStatistics,pool=ResourceCache
-#      - description: Statistics about Store
-#        mbean: com.coremedia:application=*,type=Statistics,module=Store,pool=StoreMethods
-#      - description: Statistics pool StoreStatistics Job Execution
-#        mbean: com.coremedia:application=*,type=Statistics,module=StoreStatistics,pool=Job Execution
-#      - description: Statistics pool StoreStatistics Job Failed
-#        mbean: com.coremedia:application=*,type=Statistics,module=StoreStatistics,pool=Job Failed
-#      - description: Statistics pool StoreStatistics Job Latency
-#        mbean: com.coremedia:application=*,type=Statistics,module=StoreStatistics,pool=Job Latency
-#      - description: Statistics pool StoreStatistics Job Result
-#        mbean: com.coremedia:application=*,type=Statistics,module=StoreStatistics,pool=Job Result
-#      - description: Statistics pool StoreStatistics Job Successful
-#        mbean: com.coremedia:application=*,type=Statistics,module=StoreStatistics,pool=Job Successful
-#      - description: Statistics pool StoreStatistics Job Unrecoverable
-#        mbean: com.coremedia:application=*,type=Statistics,module=StoreStatistics,pool=Job Unrecoverable
-#      - description: Statistics about TextStore
-#        mbean: com.coremedia:application=*,type=Statistics,module=TextStore,pool=TextStoreMethods
+      - description: Statistics about BlobStore
+        mbean: com.coremedia:application=*,type=Statistics,module=BlobStore,pool=BlobStoreMethods
+      - description: Statistics about Publisher
+        mbean: com.coremedia:application=*,type=Statistics,module=Publisher,pool=PublisherMethods
+      - description: Statistics about Repository
+        mbean: com.coremedia:application=*,type=Statistics,module=RepositoryStatistics,pool=Resource
+      - description: Statistics about ResourceCache
+        mbean: com.coremedia:application=*,type=Statistics,module=ResourceCacheStatistics,pool=ResourceCache
+      - description: Statistics about Store
+        mbean: com.coremedia:application=*,type=Statistics,module=Store,pool=StoreMethods
+      - description: Statistics pool StoreStatistics Job Execution
+        mbean: com.coremedia:application=*,type=Statistics,module=StoreStatistics,pool=Job Execution
+      - description: Statistics pool StoreStatistics Job Failed
+        mbean: com.coremedia:application=*,type=Statistics,module=StoreStatistics,pool=Job Failed
+      - description: Statistics pool StoreStatistics Job Latency
+        mbean: com.coremedia:application=*,type=Statistics,module=StoreStatistics,pool=Job Latency
+      - description: Statistics pool StoreStatistics Job Result
+        mbean: com.coremedia:application=*,type=Statistics,module=StoreStatistics,pool=Job Result
+      - description: Statistics pool StoreStatistics Job Successful
+        mbean: com.coremedia:application=*,type=Statistics,module=StoreStatistics,pool=Job Successful
+      - description: Statistics pool StoreStatistics Job Unrecoverable
+        mbean: com.coremedia:application=*,type=Statistics,module=StoreStatistics,pool=Job Unrecoverable
+      - description: Statistics about TextStore
+        mbean: com.coremedia:application=*,type=Statistics,module=TextStore,pool=TextStoreMethods
 
     caches:
       description: CAE or Studio Caches
@@ -192,11 +190,9 @@ jolokia:
 
     content-management-server:
       description: Content Management Server
-      metrics: []
-# disabled at 2018-03-26
-#
-#      - description: Statistics about Publisher
-#        mbean: com.coremedia:module=Publisher,pool=PublisherMethods,type=Statistics,application=*
+      metrics:
+      - description: Statistics about Publisher
+        mbean: com.coremedia:module=Publisher,pool=PublisherMethods,type=Statistics,application=*
 
     master-live-server:
       description: Master Live Server

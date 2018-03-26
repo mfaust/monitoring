@@ -1,6 +1,6 @@
 # Base Measurement Points for ALL Content Servers
 
-## Server
+## <a name="Server"></a>Server
 
 Alle Content Server (CMS, MLS, RLS) stellen die unten aufgeführten Beans zur Verfügung.
 
@@ -43,7 +43,7 @@ Alle Content Server (CMS, MLS, RLS) stellen die unten aufgeführten Beans zur Ve
 - `LicenseValidUntilSoft` (validity of the server license (`valid until soft`))
 
 
-## ConnectionPool
+## <a name="ConnectionPool"></a>ConnectionPool
 
 The connection pool holds the database connections and schedules all incoming shared or exclusive transactions.
 
@@ -56,7 +56,7 @@ The connection pool holds the database connections and schedules all incoming sh
 - `MinConnections` (the minimum number of pooled connections)
 
 
-## QueryPool
+## <a name="QueryPool"></a>QueryPool
 
 A pool of threads evaluating queries.
 

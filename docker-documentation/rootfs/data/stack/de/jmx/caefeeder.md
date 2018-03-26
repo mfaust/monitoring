@@ -8,7 +8,7 @@ The management interface for the CapConnection to allow its configuration and pr
 [siehe](./capconnection.md)
 
 
-## ProactiveEngine
+## <a name="ProactiveEngine"></a>ProactiveEngine
 
 ProactiveEngine management component.
 
@@ -27,7 +27,7 @@ The "heart" of the Proactive Persistent Cache. It consists of these building blo
 - `QueueMaxSize` (Maximum number of items which had been waiting in the queue)
 - `QueueProcessedPerSecond` (Number of processed queue items per second since startup)
 
-## ContentDependencyInvalidator
+## <a name="ContentDependencyInvalidator"></a>ContentDependencyInvalidator
 
 An invalidator for content dependencies.
 
@@ -39,7 +39,7 @@ It maintains the current value of the DependencyClock for content dependencies.
 - `LastProcessedTimestamp` (The timestamp of the latest content event which has been processed by the invalidator)
 
 
-## Health
+## <a name="Health"></a>Health
 
 Health management component
 

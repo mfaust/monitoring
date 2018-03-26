@@ -10,13 +10,9 @@ cd ~/cm-monitoring-toolbox/monitoring/docker-cm-data/rootfs/data/etc/
 ```
 
  - `cm-application.yaml`
- 
  - `cm-monitoring.yaml`
- 
  - `cm-service.yaml`
-
  - `grafana_config.yaml`
- 
  - `cm-icinga2.yaml`
 
 
@@ -35,6 +31,7 @@ Alle Services werden als Liste ausgeführt und haben folgenden Aufbau:
     cap_connection: true
     uapi_cache: true
     blob_cache: true
+    content_repository: true
     application:
     - cae
     - caches
@@ -54,6 +51,8 @@ Alle Services werden als Liste ausgeführt und haben folgenden Aufbau:
 | `ior`            | wird auf `true` gesetzt, wenn dieser Service eine *IOR* besitzt |
 | `runlevel`       | wird auf `true` gesetzt, wenn dieser Service ein *Runlevel* besitzt (alle Contentserver) |
 | `license`        | wird auf `true` gesetzt, wenn dieser Service eine *Lizenz* benötigt (alle Contentserver) |
+| `workflow_repository` | wird auf `true` gesetzt, wenn dieser Service ein Workflow Repository nutzt. |
+| `content_repository` | wird auf `true` gesetzt, wenn dieser Service ein Content Repository nutzt. |
 | `application`    | Eine Liste mit *application beans*.<br>Diese Liste wird nach dem Service Discovery mit Daten aus `cm-application.yaml` zusammengeführt. |
 | `template`       | Sollte eine Applikation gefunden werden, die vom Standard CoreMedia Namensschema abweicht, kann hier ein alternatives Template angegeben werden. |
 
@@ -84,7 +83,9 @@ Der Service `solr-master` (bzw. `solr-slave`) besitzt zudem eine zusätzliche An
     - solr
 ```
 
-Die Solr-Cores können beliebig erweitert werden. Im Beispiel wurden nur die Standardcores angegeben.
+**Die Solr-Cores können beliebig erweitert werden.**
+
+Im Beispiel wurden nur die Standardcores angegeben.
 
 
 ### *`cm-application.yaml`*
@@ -109,14 +110,14 @@ Der Aufbau ist einfach gehalten und entspricht folgenden Schema:
 | :---------       | :----------- |
 | `tomcat`         | Der Service Name |
 | `description`    | Eine kurze Beschreibung des Service Names |
-| `metrics`        | |
+| `metrics`        | ein Array mit Metriken |
 | `description`    | Eine kurze Beschreibung des folgenen mbeans |
 | `mbean`          | der komplette mbean Name |
-| `attribute`      | Eine Liste mit mbean Attributen. Wenn `attribute` nicht angegeben wird, werden alle Attribute ausgelesen  |
+| `attribute`      | Eine Liste mit mbean Attributen. Sollte `attribute` nicht angegeben sein, werden alle ausgelesen  |
 
 
 Es können wir eigene Gruppierungen von mbeans Vorgenommen werden. Diese können dann in der `cm-service.yml` unter `application` angegeben werden.
- 
+
 
 Während der Service `tomcat` mit allen (Java) Services explizit zusammen geführt wird, werden nur die konfigurierten Services,
 welche unter `application` in der `cm-service.yml` angegeben wurden zusammen geführt.
@@ -147,23 +148,13 @@ Eine spezielle Besonderheit gibt es bei den `solr` Services.
 Die Variable `%CORE%` wird mir den Cores aus `cm-service.yml` erweitert.
 
 
-### *`cm-icinga2.yaml`*
-
-Hier können Schwellwerte für eine Alarmierung hinterlegt werden
-
-```bash
-blob-cache:
-  usePercent: true
-  warning: 95
-  critical: 98
-```
-
-
 ### *`grafana_config.yml`*
 
 Über diese Konfigurationsdatei wird Grafana über dessen API konfiguriert.
-Das betrift das anlegen von lokalen Benutzern bzw. von Datasources. Ebenso kann hier über der Organisation 
+
+Das betrift das anlegen von lokalen Benutzern bzw. von Datasources. Ebenso kann hier über der Organisation
 oder die Zugangsdaten des Admin-Users geändert werden.
+
 Desweiteren kann man darüber statische Dashboards importieren lassen.
 
 

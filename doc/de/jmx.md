@@ -24,17 +24,17 @@ Alle verwendeten JMX Beans werden in der Konfigurationsdatei `cm-application.yml
 
 | Type                           | CMS | MLS | RLS | WFS | CAE | Studio | Elastic-Worker | User-Changes | Content-Feeder | CAE-Feeder | Adobe-Drive |
 | :----------------------------- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| CapConnection                  |    |    |    | x  | x  | x | x | x |   |   | x |
-| Server                         | x  | x  | x  | x  |    |   |   |   |   |   |   |
-| Store (Connection-, QueryPool) | x  | x  | x  |    |    |   |   |   |   |   |   |
+| [CapConnection](./jmx/capconnection.md)                  |    |    |    | x  | x  | x | x | x |   |   | x |
+| [Server](./jmx/content-servers.md#Server)                         | x  | x  | x  | x  |    |   |   |   |   |   |   |
+| Store ([Connection-](./jmx/content-servers.md#ConnectionPool), [QueryPool](./jmx/content-servers.md#QueryPool)) | x  | x  | x  |    |    |   |   |   |   |   |   |
 | Statistics                     | x  | x  | x  |    |    |   |   |   |   |   |   |
 | WFS Statistics                 |    |    |    | x  |    |   |   |   |   |   |   |
-| Cache                          |    |    |    |    | x  |   |   |   |   |   |   |
-| Replicator                     |    |    | x  |    |    |   |   |   |   |   |   |
-| Feeder                         |    |    |    |    |    |   |   |   | x |   |   |
-| ContentDependencyInvalidator   |    |    |    |    |    |   |   |   |   | x |   |
-| ProactiveEngine                |    |    |    |    |    |   |   |   |   | x |   |
-| Health                         |    |    |    |    |    |   |   |   |   | x |   |
+| [Cache](./jmx/caches.md)                          |    |    |    |    | x  |   |   |   |   |   |   |
+| [Replicator](./jmx/replication-live-server.md)                     |    |    | x  |    |    |   |   |   |   |   |   |
+| [Feeder](./jmx/content-feeder.md)                         |    |    |    |    |    |   |   |   | x |   |   |
+| [ContentDependencyInvalidator](./jmx/caefeeder.md#ContentDependencyInvalidator)   |    |    |    |    |    |   |   |   |   | x |   |
+| [ProactiveEngine](./jmx/caefeeder.md#ContentDependencyInvalidator)                |    |    |    |    |    |   |   |   |   | x |   |
+| [Health](./jmx/caefeeder.md#Health)                         |    |    |    |    |    |   |   |   |   | x |   |
 
 <br>
 
@@ -47,3 +47,4 @@ Alle verwendeten JMX Beans werden in der Konfigurationsdatei `cm-application.yml
 - [Content Feeder](./jmx/content-feeder.md)
 - [CAE Feeder](./jmx/caefeeder.md)
 - [CAE](./jmx/cae)
+- [Statistics](./jmx/statistics.md)
