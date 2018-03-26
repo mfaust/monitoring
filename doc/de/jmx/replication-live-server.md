@@ -2,11 +2,10 @@
 
 ## Replicator
 
- * The replicator is an active service that repeats the actions it
- * receives from a publication server via the RepositoryListener interface.
- *
- * It's an object living in the server process and accesses internal server
- * interfaces.
+The replicator is an active service that repeats the actions it
+receives from a publication server via the RepositoryListener interface.
+
+It's an object living in the server process and accesses internal server interfaces.
 
 
 `com.coremedia:type=Replicator,application=*`
