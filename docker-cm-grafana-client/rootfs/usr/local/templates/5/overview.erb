@@ -388,7 +388,7 @@
         },
         "tableColumn": "",
         "targets": [
-          { "refId": "A", "target": "countSeries(carbon-writer.$host.NODE_EXPORTER.cpu.*.iowait)" }
+          { "refId": "A", "target": "sumSeries(offset(scale(carbon-writer.$host.NODE_EXPORTER.cpu.cpu*.system, 0), 1))" }
         ],
         "thresholds": "",
         "type": "singlestat",
