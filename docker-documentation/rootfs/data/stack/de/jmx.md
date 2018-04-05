@@ -33,7 +33,7 @@ Alle verwendeten JMX Beans werden in der Konfigurationsdatei `cm-application.yml
 | [Replicator](./jmx/replication-live-server.md)                     |    |    | x  |    |    |   |   |   |   |   |   |
 | [Feeder](./jmx/content-feeder.md)                         |    |    |    |    |    |   |   |   | x |   |   |
 | [ContentDependencyInvalidator](./jmx/caefeeder.md#ContentDependencyInvalidator)   |    |    |    |    |    |   |   |   |   | x |   |
-| [ProactiveEngine](./jmx/caefeeder.md#ContentDependencyInvalidator)                |    |    |    |    |    |   |   |   |   | x |   |
+| [ProactiveEngine](./jmx/caefeeder.md#ProactiveEngine)                |    |    |    |    |    |   |   |   |   | x |   |
 | [Health](./jmx/caefeeder.md#Health)                         |    |    |    |    |    |   |   |   |   | x |   |
 
 <br>
@@ -46,5 +46,5 @@ Alle verwendeten JMX Beans werden in der Konfigurationsdatei `cm-application.yml
 - [Replication Live Server](./jmx/replication-live-server.md)
 - [Content Feeder](./jmx/content-feeder.md)
 - [CAE Feeder](./jmx/caefeeder.md)
-- [CAE](./jmx/cae)
+- [CAE](./jmx/cae.md)
 - [Statistics](./jmx/statistics.md)
