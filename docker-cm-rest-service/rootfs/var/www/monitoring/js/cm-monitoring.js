@@ -10,19 +10,25 @@ $(document).ready(function() {
 
   $.each($data, function(index, elem) {
 
-    console.debug(elem);
+    console.debug('index ' + index);
+    console.debug('elem  ' + elem);
+
+    if(index === 'status') {
+      // return false; //this is equivalent of 'break' for jQuery loop
+      return; //this is equivalent of 'continue' for jQuery loop
+    }
 
     if(elem === undefined) {
       console.debug('elem are undef')
+      return;
     }
     if(elem.dns === undefined) {
       console.debug('elem.dns are undef')
+      console.debug(elem)
+      return;
     }
-//     var hostname = elem.dns.short;
-//     var created = elem.status.created;
-//     var status = elem.status.status;
 
-    trHTML += '<tr>';
+    trHTML += '<tr data-hostname="'+elem.dns.short+'">';
     trHTML += '<td><span class="uk-icon-button" uk-icon="laptop"></span></td>';
     trHTML += '<td>' + elem.dns.short + '</td>';
     trHTML += '<td>' + toDate(elem.status.created) + '</td>';
@@ -73,6 +79,20 @@ $(function() {
 });
 
 $(function() {
+
+  var $table = $('#monitoring-hosts');
+
+  $table.on('click', '.add-annotation', function() {
+
+    var $t = $(this)
+    var $b = $t.closest('tr');
+    var $hostname = $b.data('hostname');
+    //var $m = $t.find( '.msg-wrap' );
+    //var $e = $t.find( '.msg-edit' );
+
+    console.debug($t);
+    console.debug($hostname);
+  });
 
   $('.add-annotation').on('click', function(event) {
 
