@@ -130,11 +130,11 @@ module Sinatra
       send_file File.join( settings.public_folder, 'help' )
     end
 
-    # currently not supported
-    get '/' do
-      redirect '/v2/help'
-      # send_file File.join( settings.public_folder, 'help' )
-    end
+#    # currently not supported
+#    get '/' do
+#      redirect '/v2/help'
+#      # send_file File.join( settings.public_folder, 'help' )
+#    end
 
     # -----------------------------------------------------------------------------
     # CONFIGURE
@@ -271,7 +271,39 @@ module Sinatra
 
     # -----------------------------------------------------------------------------
 
+    #
+    # Webinterface
+    #
 
+    get '/' do
+
+      content_type 'text/html'
+      erb( :index )
+    end
+
+    post '/ajax/add-host/:host' do
+
+      puts params[:host]
+      puts @request_paylod
+
+      status 200
+
+      JSON.pretty_generate({}) + "\n"
+
+#      host            = params[:host]
+#      payload         = @request_paylod
+#      @request_paylod = nil
+#
+#      result = m.add_host( host, payload )
+#
+#      r = JSON.parse( result ) if( result.is_a?( String ) )
+#
+#      result_status = r.dig('status').to_i
+#
+#      status result_status
+#
+#      JSON.pretty_generate(r) + "\n"
+    end
 
     # -----------------------------------------------------------------------------
     run! if app_file == $0
