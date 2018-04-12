@@ -1,26 +1,34 @@
 $(document).ready(function() {
 
   var $data = monitoring_hosts();
-  console.debug($data);
   var $table = $('#monitoring-hosts');
+  var trHTML = '';
 
   $("#monitoring-hosts > tbody").html("");
 
-  var trHTML = '';
+  console.debug($data);
 
   $.each($data, function(index, elem) {
 
-    var hostname = elem.dns.short;
-    var created = elem.status.created;
-    var status = elem.status.status;
+    console.debug(elem);
+
+    if(elem === undefined) {
+      console.debug('elem are undef')
+    }
+    if(elem.dns === undefined) {
+      console.debug('elem.dns are undef')
+    }
+//     var hostname = elem.dns.short;
+//     var created = elem.status.created;
+//     var status = elem.status.status;
 
     trHTML += '<tr>';
     trHTML += '<td><span class="uk-icon-button" uk-icon="laptop"></span></td>';
-    trHTML += '<td>' + hostname + '</td>';
-    trHTML += '<td>' + toDate(created) + '</td>';
+    trHTML += '<td>' + elem.dns.short + '</td>';
+    trHTML += '<td>' + toDate(elem.status.created) + '</td>';
     trHTML += '<td>';
-    trHTML += ' <a href="#" class="uk-icon-link" uk-icon="commenting" uk-tooltip="add annotation"></a>';
-    trHTML += ' <a href="#" class="uk-icon-link uk-text-danger uk-padding-small" uk-icon="trash" uk-tooltip="delete host"></a>';
+    trHTML += ' <a href="#" class="uk-icon-link add-annotation" uk-icon="commenting" uk-tooltip="add annotation"></a>';
+    trHTML += ' <a href="#" class="uk-icon-link delete-host uk-text-danger uk-padding-small" uk-icon="trash" uk-tooltip="delete host"></a>';
     trHTML += '</td>';
     trHTML += '</tr>';
 
@@ -28,7 +36,7 @@ $(document).ready(function() {
   });
 });
 
-$(function () {
+$(function() {
 
   $('#add-host-text').focus();
   $("#add-host-button").on("click", function(event) {
@@ -64,6 +72,14 @@ $(function () {
   });
 });
 
+$(function() {
+
+  $('.add-annotation').on('click', function(event) {
+
+    UIkit.modal('#modal-overflow').show();
+  });
+});
+
 function notification( message, status ) {
 
   UIkit.notification({
@@ -80,7 +96,7 @@ function monitoring_hosts() {
 
   $.ajax({
     type: 'get',
-    cache: false,
+//    cache: false,
     async: false,
     dataType: 'json',
     url: '/api/v2/host',
