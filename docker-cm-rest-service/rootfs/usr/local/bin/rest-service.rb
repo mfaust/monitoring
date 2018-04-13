@@ -197,6 +197,10 @@ module Sinatra
 
       host            = params[:host]
       payload         = @request_paylod
+
+#       puts "host   : #{host} - #{host.class}"
+#       puts "payload: #{payload} - #{payload.class}"
+
       @request_paylod = nil
 
       result = m.add_host( host, payload )
@@ -283,15 +287,12 @@ module Sinatra
 
     post '/ajax/add-host/:host' do
 
-#      puts params[:host]
-#      puts @request_paylod
-#
-#      status 200
-#
-#      JSON.pretty_generate({}) + "\n"
+#       host            = params[:host]
+#       payload         = '' #@request_paylod
 
-      host            = params[:host]
-      payload         = @request_paylod
+      puts "host   : #{host} - #{host.class}"
+      puts "payload: #{payload} - #{payload.class}"
+
       @request_paylod = nil
 
       result = m.add_host( host, payload )
