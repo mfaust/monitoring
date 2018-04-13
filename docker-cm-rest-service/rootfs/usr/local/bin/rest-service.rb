@@ -283,26 +283,26 @@ module Sinatra
 
     post '/ajax/add-host/:host' do
 
-      puts params[:host]
-      puts @request_paylod
+#      puts params[:host]
+#      puts @request_paylod
+#
+#      status 200
+#
+#      JSON.pretty_generate({}) + "\n"
 
-      status 200
+      host            = params[:host]
+      payload         = @request_paylod
+      @request_paylod = nil
 
-      JSON.pretty_generate({}) + "\n"
+      result = m.add_host( host, payload )
 
-#      host            = params[:host]
-#      payload         = @request_paylod
-#      @request_paylod = nil
-#
-#      result = m.add_host( host, payload )
-#
-#      r = JSON.parse( result ) if( result.is_a?( String ) )
-#
-#      result_status = r.dig('status').to_i
-#
-#      status result_status
-#
-#      JSON.pretty_generate(r) + "\n"
+      r = JSON.parse( result ) if( result.is_a?( String ) )
+
+      result_status = r.dig('status').to_i
+
+      status result_status
+
+      JSON.pretty_generate(r) + "\n"
     end
 
     # -----------------------------------------------------------------------------

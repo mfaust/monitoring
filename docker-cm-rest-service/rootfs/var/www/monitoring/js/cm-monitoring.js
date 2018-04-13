@@ -1,45 +1,13 @@
+
 $(document).ready(function() {
 
-  var $data = monitoring_hosts();
-  var $table = $('#monitoring-hosts');
-  var trHTML = '';
+  load_monitoring_hosts();
 
-  $("#monitoring-hosts > tbody").html("");
+  setInterval(function() {
 
-  console.debug($data);
+    load_monitoring_hosts();
+  }, 60000 ); // - 30000 = 30 sek.! ( 120000 == 2 minuten) ziel sollte sein zwischen 1 und 3 minuten
 
-  $.each($data, function(index, elem) {
-
-    console.debug('index ' + index);
-    console.debug('elem  ' + elem);
-
-    if(index === 'status') {
-      // return false; //this is equivalent of 'break' for jQuery loop
-      return; //this is equivalent of 'continue' for jQuery loop
-    }
-
-    if(elem === undefined) {
-      console.debug('elem are undef')
-      return;
-    }
-    if(elem.dns === undefined) {
-      console.debug('elem.dns are undef')
-      console.debug(elem)
-      return;
-    }
-
-    trHTML += '<tr data-hostname="'+elem.dns.short+'">';
-    trHTML += '<td><span class="uk-icon-button" uk-icon="laptop"></span></td>';
-    trHTML += '<td>' + elem.dns.short + '</td>';
-    trHTML += '<td>' + toDate(elem.status.created) + '</td>';
-    trHTML += '<td>';
-    trHTML += ' <a href="#" class="uk-icon-link add-annotation-for-host" uk-icon="commenting" uk-tooltip="add annotation"></a>';
-    trHTML += ' <a href="#" class="uk-icon-link delete-host uk-text-danger uk-padding-small" uk-icon="trash" uk-tooltip="delete host"></a>';
-    trHTML += '</td>';
-    trHTML += '</tr>';
-
-    $table.append(trHTML);
-  });
 });
 
 $(function() {
@@ -50,6 +18,12 @@ $(function() {
     event.preventDefault();
 
     var $a = $('#add-host-text').val();
+
+    if($a == '') {
+      return;
+    }
+
+    var message = '';
 //     var params = { host: $a }
 
 //     console.debug($a);
@@ -57,30 +31,36 @@ $(function() {
 
     $.ajax({
       type: 'post',
+      dataType: 'json',
       url: '/web/ajax/add-host/' + $a,
 //       data: params,
-      statusCode: {
-        200: function() {
-          notification( 'successful', 'success' )
-        },
-        409: function() {
-          notification( 'already exists', 'primary' )
-        },
-        401: function() {
-          notification( 'error (401)', 'danger' )
-        },
-        404: function() {
-          notification( 'error (404)', 'danger' )
-        }
+      success: function(data) {
+
+        console.debug(data)
+        message = data.message
+      },
+      complete: function(xhr, textStatus) {
+        status  = xhr.responseJSON.status;
+        message = xhr.responseJSON.message;
+        console.log(xhr.responseJSON);
+
+        if(status == 200) { notification( 'success', message ) }
+        else if(status == 400) { notification( 'primary', message ) }
+        else if(status == 401) { notification( 'danger', message ) }
+        else if(status == 404) { notification( 'danger', message ) }
+        else if(status == 409) { notification( 'warning', message ) }
+        else { notification( 'primary', message ) }
       }
     });
     //$('#add-host-text').text(( $(this).serialize() ));
+    $('#add-host-text').val('');
   });
 });
 
 $(function() {
 
   $('#monitoring-hosts').on('click', '.add-annotation-for-host', function(e) {
+
     e.preventDefault();
     e.target.blur();
 
@@ -171,7 +151,7 @@ $(function() {
   });
 });
 
-function notification( message, status ) {
+function notification( status, message ) {
 
   UIkit.notification({
     message: message,
@@ -181,6 +161,66 @@ function notification( message, status ) {
   });
 }
 
+
+function load_monitoring_hosts() {
+
+    var $table = $('#monitoring-hosts');
+    var trHTML = '';
+
+    $.ajax({
+      type: 'get',
+//      cache: false,
+      async: true,
+      dataType: 'json',
+      url: '/api/v2/host',
+      success: function(data) {
+
+        $("#monitoring-hosts > tbody").html('');
+
+        $.each(data, function(index, elem) {
+
+          console.debug('index ' + index);
+          console.debug('elem  ' + elem);
+
+          if(index === 'status') {
+            // return false; //this is equivalent of 'break' for jQuery loop
+            return; //this is equivalent of 'continue' for jQuery loop
+          }
+
+          if(elem === undefined) {
+            console.debug('elem are undef')
+            return;
+          }
+          if(elem.dns === undefined) {
+            console.debug('elem.dns are undef')
+            console.debug(elem)
+            return;
+          }
+
+          trHTML += '<tr data-hostname="'+elem.dns.short+'">';
+          trHTML += '<td><span class="uk-icon-button" uk-icon="laptop"></span></td>';
+          trHTML += '<td>' + elem.dns.short + '</td>';
+          trHTML += '<td>' + toDate(elem.status.created) + '</td>';
+          trHTML += '<td>';
+          trHTML += ' <a href="#" class="uk-icon-link add-annotation-for-host" uk-icon="commenting" uk-tooltip="add annotation"></a>';
+          trHTML += ' <a href="#" class="uk-icon-link delete-host uk-text-danger uk-padding-small" uk-icon="trash" uk-tooltip="delete host"></a>';
+          trHTML += '</td>';
+          trHTML += '</tr>';
+
+          $table.append(trHTML);
+        });
+
+      },
+      statusCode: {
+        200: function() { /*console.debug('200')*/ },
+        401: function() { /*console.debug('401')*/ },
+        404: function() { /*console.debug('404')*/ }
+      }
+    });
+
+}
+
+/*
 function monitoring_hosts() {
 
   var json = '';
@@ -195,25 +235,28 @@ function monitoring_hosts() {
       json = d;
     },
     statusCode: {
-      200: function() { /*console.debug('200')*/ },
-      401: function() { /*console.debug('401')*/ },
-      404: function() { /*console.debug('404')*/ }
+      200: function() { console.debug('200') },
+      401: function() { console.debug('401') },
+      404: function() { console.debug('404') }
     }
   });
 
   return json;
 }
+*/
 
 function toDate(dateStr) {
 
   const [date, time] = dateStr.split(" ")
   const [year, month, day] = date.split("-")
 
+  console.debug(time)
+
   d = new Date(year, month, day)
 
-  return pad(d.getDate()) + '.' + pad(d.getMonth()) + '.' + d.getFullYear();
+  return pad(d.getDate()) + '.' + pad(d.getMonth()) + '.' + d.getFullYear() + '  ' + time;
 }
 
-function pad(n){return n<10 ? '0'+n : n}
+function pad(n){ return n<10 ? '0'+n : n }
 
 
