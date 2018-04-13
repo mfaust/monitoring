@@ -104,7 +104,7 @@ module Monitoring
       short = host_data.dig(:short)
       fqdn  = host_data.dig(:fqdn)
 
-      return JSON.pretty_generate( status: 200, message: "Host '#{host}' is already in monitoring" ) if( force == false && in_monitoring == true )
+      return JSON.pretty_generate( status: 409, message: "Host '#{host}' is already in monitoring" ) if( force == false && in_monitoring == true )
 
       # --------------------------------------------------------------------
 
