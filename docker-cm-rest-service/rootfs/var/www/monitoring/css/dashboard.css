@@ -1,3 +1,35 @@
+
+/**
+ *  overwrites for CoreMedia specific Style
+ */
+.uk-background-primary {
+  background-color: #0a4282;
+}
+
+.uk-card-default {
+  background-color: #f1f1f1;
+}
+
+.uk-card-default.uk-card-hover:hover {
+  background-color: #f1f1f1;
+}
+
+.uk-table-hover tbody tr:hover, .uk-table-hover > tr:hover {
+  background: #e6e6e6;
+}
+
+.uk-button-primary {
+  background-color: #0a4282;
+}
+
+.uk-modal-dialog, .uk-modal-footer {
+   background-color: #f1f1f1;
+}
+
+.uk-button-default {
+  border: 1px solid #3d4242;
+}
+
 #top-head {
   z-index: 9;
   top: 0;
@@ -12,6 +44,7 @@
   display: block;
   height: 80px;
   margin-top: 0px;
+  margin-left: 45px;
 }
 
 #cm_headline {
@@ -25,11 +58,11 @@
   position: fixed;
   left: 0;
   /* Height of the navbar default */
-  top:80px;
+  top:90px;
   bottom:0;
   overflow-x: hidden;
   overflow-y: auto;
-  background-color: #222;
+  background-color: #0a4282;
   width: 280px;
   z-index:1;
 }
@@ -37,7 +70,7 @@
   margin-left: 280px;
   margin-top: 80px;
   padding: 30px 0 0 0;
-  background-color: #f7f7f7;
+  background-color: #f1f1f1;
   margin-left: 0;
   -webkit-transition: margin 0.3s cubic-bezier(.4,0,.2,1);
   transition: margin 0.3s cubic-bezier(.4,0,.2,1);
@@ -102,15 +135,18 @@
   background-repeat: no-repeat;
   height: 130px;
   background-size: 100%;
+  margin-top:1.2em;
 }
 
 .button_icinga {
-  background-image: url('/web/img/icinga_logo4.png');
+  background-image: url('/web/img/icinga2_logo.png');
 /*   background-size: 100%; */
+  height:100px;
 }
 .button_grafana {
   background-image: url('/web/img/grafana_logo_200.png');
 /*   background-size: 100%; */
+  height:100px;
 }
 .button_documentation {
   background-image: url('/web/img/opguide_logo_200.png');

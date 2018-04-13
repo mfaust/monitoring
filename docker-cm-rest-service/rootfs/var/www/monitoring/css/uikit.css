@@ -377,11 +377,13 @@ pre code {
 }
 /* Selection pseudo-element
  ========================================================================== */
+/*
 ::-moz-selection {
   background: #39f;
   color: #fff;
   text-shadow: none;
 }
+*/
 ::selection {
   background: #39f;
   color: #fff;
