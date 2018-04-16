@@ -189,38 +189,44 @@ module Monitoring
 
       request = payload.dig('rack.request.query_hash')
       short   = request.keys.include?('short')
-      data    = host_informations()
+      fqdn    = host
 
-      logger.debug( data )
-      logger.debug( data.class.to_s )
+      unless(host.nil?)
+        short         = false
+        in_monitoring = host_exists?( host )
+        host_data     = host_avail?( host )
+        fqdn          = host_data.dig(:fqdn)
+      end
+
+      data = host_informations()
+
+#       logger.debug( "in_monitoring:  #{in_monitoring} - #{in_monitoring.class}" )
+#       logger.debug( "short        :  #{short} - #{short.class}" )
+#       logger.debug( "host_data    :  #{JSON.pretty_generate( host_data )}" )
+#       logger.debug( "data         :  #{data} - #{data.count} - #{data.class.to_s}" )
 
       result  = {}
 
-      return JSON.pretty_generate( status: 204 ) if( data.nil? || data.count == 0 )
+      return JSON.pretty_generate( status: 204 ) if( data.count == 0 )
 
-      if( host.to_s != '' )
+      if(host.nil?)
+        unless( data.nil? )
+          result         = data if(short == false)
+          result[:hosts] = data.keys if(short == true)
 
-        h = data.dig( host.to_s )
+          status = 200
+        end
+      else
+        h = data.dig(fqdn)
 
-        if ( h != nil )
+        status = 204
 
+        unless(h.nil?)
           if( short == true )
             result[:host] = host
           else
             result[host.to_s] ||= {}
             result[host.to_s] = h
-          end
-          status = 200
-        else
-          status = 204
-        end
-
-      else
-        if( data != nil )
-          if( short == true )
-            result[:hosts] = data.keys
-          else
-            result = data
           end
           status = 200
         end
