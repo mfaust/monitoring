@@ -48,3 +48,14 @@
   - https support for webservice
 
   - more documentations
+
+
+1804
+
+- add more documentations
+- bugfix for icinga2 memory check
+- update to grafana 5.0.4
+- update icingaweb2
+- set warning and critical values in some icinga2 checks
+- add max feeder elements for CAE Feeders
+- add this web UI

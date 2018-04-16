@@ -1,8 +1,8 @@
 #!/bin/bash
 
-HOST="master-17-tomcat.coremedia.vm"
-HOST="192.168.252.100.xip.io"
-HOST="pandora-17-02.coremedia.vm"
+HOST="moebius-ci-02-moebius-tomcat-0-cms.coremedia.vm"
+#HOST="192.168.252.100.xip.io"
+#HOST="pandora-17-02.coremedia.vm"
 
 rm -v *.urls
 

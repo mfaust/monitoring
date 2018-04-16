@@ -304,7 +304,34 @@ module Sinatra
 
     get '/ajax/CHANGELOG' do
       status 200
-      send_file File.join( settings.public_folder, 'CHANGELOG' )
+
+      changelog = {
+        "0001": {
+          "version": "0001",
+          "date": "01.01.1970",
+          "changes": [
+            "initial"
+          ]
+        }
+      }
+
+      file = format('%s/CHANGELOG', settings.public_folder)
+
+      if(File.exist?(file))
+        a = File.read(file)
+        begin
+          a = JSON.parse(a) if(a.is_a?(String))
+          a = a.delete_if { |k, v| v.empty? }
+          a = a.delete_if { |k, v| v.dig('date') == '' }
+          sorted = a.keys.sort
+#          puts "last: #{sorted.last}"
+          changelog = a[sorted.last]
+        rescue => error
+          logger.error(error)
+        end
+      end
+
+      JSON.pretty_generate(changelog) + "\n"
     end
 
 

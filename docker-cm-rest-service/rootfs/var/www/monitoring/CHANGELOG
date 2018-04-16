@@ -5,9 +5,22 @@
     "changes": [
       "add more documentations",
       "update to grafana 5.0.4",
+      "update icingaweb2",
+      "set warning and critical values in some icinga2 checks",
+      "bugfix for icinga2 memory check",
       "add max feeder elements for CAE Feeders",
       "add this web UI"
     ]
+  },
+  "1806": {
+    "version": "1806",
+    "date": "",
+    "changes": []
+  },
+  "1808": {
+    "version": "1808",
+    "date": "",
+    "changes": []
   }
 }
 
