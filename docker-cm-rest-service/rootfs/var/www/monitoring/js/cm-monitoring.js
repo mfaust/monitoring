@@ -2,6 +2,9 @@
 $(document).ready(function() {
 
   var $spinner = $('#spinner');
+  var $dialog = $('#modal-overflow');
+  var $table = $('#monitoring-hosts');
+
   $spinner.hide();
 
   // initial load of our monitored hosts
@@ -57,11 +60,9 @@ $(document).ready(function() {
     $('#add-host-text').val('');
   });
 
-  var $table = $('#monitoring-hosts');
 
   $table.on('click', '.delete-host', function() {
 
-    var $dialog = $('#modal-overflow');
     var $t = $(this)
     var $b = $t.closest('tr');
     var $hostname = $b.data('hostname');
@@ -123,6 +124,130 @@ $(document).ready(function() {
       console.log('Rejected.')
     });
   });
+
+  $table.on('click', '.host-information', function() {
+
+    var $t = $(this)
+    var $b = $t.closest('tr');
+    var $hostname = $b.data('hostname');
+
+    console.debug($hostname);
+
+    $.ajax({
+      type: 'get',
+      async: true,
+      dataType: 'json',
+      url: '/api/v2/host/' + $hostname,
+      complete: function(xhr, textStatus) {
+        var json   = xhr.responseJSON
+        var status = json.status;
+
+        if(status == 200) {
+
+          var d = {}
+          var s = {}
+          var services = []
+
+          var li = '';
+
+          $.each(json, function (k,v) {
+            if(v['dns'] !== undefined) { d = v['dns'] }
+            if(v['services'] !== undefined) { s = v['services'] }
+            services = Object.keys(s).sort();
+          });
+
+          var ul = $('<ul>');
+          var ul_dns = '';
+          var ul_services = '';
+
+          $.each(d, function(k,v,) {
+            ul_dns = ul.append($("<li>").text(k + ': ' +v));
+          });
+          ul_services = $('<ul>').append(
+            services.map(c => $("<li>").text(c) )
+          );
+
+          var dialogHTML = '';
+
+          dialogHTML += '<div class="uk-modal-dialog">';
+          dialogHTML += '  <button class="uk-modal-close-default" type="button" uk-close></button>';
+          dialogHTML += '  <div class="uk-modal-header"><h2 class="uk-modal-title">information about Host ' + $hostname + '</h2></div>';
+          dialogHTML += '  <div class="uk-modal-body" uk-overflow-auto>';
+          dialogHTML += '    <span><strong>DNS:</strong></span>';
+          dialogHTML += ul_dns.html();
+          dialogHTML += '    <span><strong>Services:</strong></span>';
+          dialogHTML += ul_services.html();
+          dialogHTML += '  </div>';
+          dialogHTML += '  <div class="uk-modal-footer uk-text-right">';
+          dialogHTML += '    <button class="uk-button uk-button-default uk-modal-close" type="button">Close</button>';
+          dialogHTML += '  </div>';
+          dialogHTML += '</div>';
+
+          $dialog.html(dialogHTML);
+          UIkit.modal($dialog).show();
+        }
+        else {}
+      }
+    });
+  });
+
+
+  $('#about').on('click', function(event) {
+
+    event.preventDefault();
+    event.target.blur();
+
+    $.ajax({
+      type: 'get',
+      async: true,
+      dataType: 'json',
+      url: '/web/ajax/CHANGELOG',
+      complete: function(xhr, textStatus) {
+        var json   = xhr.responseJSON
+        var status = xhr.status;
+
+        if(status == 200) {
+
+          var version = '';
+          var date = '';
+          var chnages = '';
+
+          $.each(json, function (k,v) {
+            if(v['version'] !== undefined) { version = v['version'] }
+            if(v['date'] !== undefined) { date = v['date'] }
+            if(v['changes'] !== undefined) { changes = v['changes'] }
+          });
+
+          ul_services = $('<ul>').append(
+            changes.map(c => $("<li>").text(c) )
+          );
+
+          var dialogHTML = '';
+
+          dialogHTML += '<div class="uk-modal-dialog">';
+          dialogHTML += '  <button class="uk-modal-close-default" type="button" uk-close></button>';
+          dialogHTML += '  <div class="uk-modal-header"><h2 class="uk-modal-title">CoreMedia Monitoring Toolbox</h2></div>';
+          dialogHTML += '  <div class="uk-modal-body" uk-overflow-auto>';
+          dialogHTML += '    <p>Version <strong>' + version + '</strong> (' + date + ')</p>';
+          dialogHTML += '    <p>Changelog</p>';
+          dialogHTML += $('<ul>').append(
+            changes.map(c => $("<li>").text(c) )
+          ).html();
+          dialogHTML += '  </div>';
+          dialogHTML += '  <div class="uk-modal-footer uk-text-right">';
+          dialogHTML += '    <button class="uk-button uk-button-default uk-modal-close uk-button-primary" type="button">Close</button>';
+          dialogHTML += '  </div>';
+          dialogHTML += '</div>';
+
+          $dialog.html(dialogHTML);
+
+          UIkit.modal($dialog).show();
+
+        }
+      }
+    });
+  });
+
 });
 
 
@@ -138,7 +263,6 @@ $(function() {
     e.preventDefault();
     e.target.blur();
 
-    var $dialog = $('#modal-overflow');
     var $t = $(this)
     var $b = $t.closest('tr');
     var $hostname = $b.data('hostname');
@@ -236,6 +360,7 @@ function load_monitoring_hosts() {
         trHTML += '<td>' + toDate(elem.status.created) + '</td>';
         trHTML += '<td>';
         trHTML += ' <!-- <a href="#" class="uk-icon-link add-annotation-for-host" uk-icon="commenting" uk-tooltip="add annotation"></a> -->';
+        trHTML += ' <a href="#" class="uk-icon-link host-information uk-padding-small" uk-icon="info" uk-tooltip="information"></a>';
         trHTML += ' <a href="#" class="uk-icon-link delete-host uk-text-danger uk-padding-small" uk-icon="trash" uk-tooltip="delete host"></a>';
         trHTML += '</td>';
         trHTML += '</tr>';
@@ -258,7 +383,7 @@ function toDate(dateStr) {
   const [date, time] = dateStr.split(" ")
   const [year, month, day] = date.split("-")
 
-  console.debug(time)
+//   console.debug(time)
 
   d = new Date(year, month, day)
 

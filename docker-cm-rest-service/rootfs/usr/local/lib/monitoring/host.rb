@@ -185,7 +185,7 @@ module Monitoring
     #
     def list_host( host = nil, payload = nil )
 
-      logger.debug( "list_host( #{host}, #{payload} )" )
+#       logger.debug( "list_host( #{host}, #{payload} )" )
 
       request = payload.dig('rack.request.query_hash')
       short   = request.keys.include?('short')

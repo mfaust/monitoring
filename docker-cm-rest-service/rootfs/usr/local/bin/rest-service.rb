@@ -280,22 +280,16 @@ module Sinatra
     #
 
     get '/' do
-
       content_type 'text/html'
       erb( :index )
     end
 
     post '/ajax/add-host/:host' do
 
-#       host            = params[:host]
-#       payload         = '' #@request_paylod
-
-      puts "host   : #{host} - #{host.class}"
-      puts "payload: #{payload} - #{payload.class}"
-
-      @request_paylod = nil
-
-      result = m.add_host( host, payload )
+#       puts "host   : #{host} - #{host.class}"
+#       puts "payload: #{payload} - #{payload.class}"
+#      @request_paylod = nil
+      result = m.add_host( host, '' )
 
       r = JSON.parse( result ) if( result.is_a?( String ) )
 
@@ -305,6 +299,14 @@ module Sinatra
 
       JSON.pretty_generate(r) + "\n"
     end
+
+    get '/ajax/CHANGELOG' do
+      status 200
+      send_file File.join( settings.public_folder, 'CHANGELOG' )
+    end
+
+
+
 
     # -----------------------------------------------------------------------------
     run! if app_file == $0

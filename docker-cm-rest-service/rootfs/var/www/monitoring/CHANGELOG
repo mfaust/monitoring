@@ -1,0 +1,13 @@
+{
+  "1804": {
+    "version": "1804",
+    "date": "16.04.2018",
+    "changes": [
+      "add more documentations",
+      "update to grafana 5.0.4",
+      "add max feeder elements for CAE Feeders",
+      "add this web UI"
+    ]
+  }
+}
+
