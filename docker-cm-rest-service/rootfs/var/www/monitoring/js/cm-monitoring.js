@@ -229,7 +229,7 @@ $(document).ready(function() {
           dialogHTML += '  <div class="uk-modal-header"><h2 class="uk-modal-title">CoreMedia Monitoring Toolbox</h2></div>';
           dialogHTML += '  <div class="uk-modal-body" uk-overflow-auto>';
           dialogHTML += '    <p>Version <strong>' + version + '</strong> (' + date + ')</p>';
-          dialogHTML += '    <p>Changelog</p>';
+          dialogHTML += '    <span><strong>Changelog</strong></span>';
           dialogHTML += $('<ul>').append(
             changes.map(c => $("<li>").text(c) )
           ).html();
