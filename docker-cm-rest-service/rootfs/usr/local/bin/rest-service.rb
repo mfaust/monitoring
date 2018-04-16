@@ -97,9 +97,10 @@ module Sinatra
     # -----------------------------------------------------------------------------
 
     error do
-      msg = "ERROR\n\nThe monitoring-rest-service has nasty error - " + env['sinatra.error']
-
-      msg.message
+      err = env['sinatra.error']
+      msg = "ERROR\n\nThe monitoring-rest-service has nasty error - #{err}"
+      logger.error(msg)
+      # msg.message
     end
 
     # -----------------------------------------------------------------------------
@@ -286,6 +287,7 @@ module Sinatra
 
     post '/ajax/add-host/:host' do
 
+      host   = params[:host]
 #       puts "host   : #{host} - #{host.class}"
 #       puts "payload: #{payload} - #{payload.class}"
 #      @request_paylod = nil
