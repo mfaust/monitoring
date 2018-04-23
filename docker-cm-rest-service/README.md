@@ -24,3 +24,63 @@ For more Information, please read the [API Doku](https://github.com/cm-xlabs/mon
 | `DISCOVERY_DATABASE_NAME`          | `discovery`          | database schema name for the discovery service                  |
 | `DISCOVERY_DATABASE_USER`          | `discovery`          | database user for the discovery service                         |
 | `DISCOVERY_DATABASE_PASS`          | `discovery`          | database password for the discovery service                     |
+
+* **`create`**
+
+```bash
+HOSTNAME=blueprintbox.local
+
+curl \
+  --silent \
+  --request POST \
+  --data '{ "command": "create" }' \
+  http://localhost/api/v2/annotation/${HOSTNAME} | \
+  json_reformat
+```
+
+* **`destroy`**
+
+```bash
+HOSTNAME=blueprintbox.local
+
+curl \
+  --silent \
+  --request POST \
+  --data '{ "command": "destroy" }' \
+  http://localhost/api/v2/annotation/${HOSTNAME} | \
+  json_reformat
+```
+
+* **`loadtest`**
+
+```bash
+HOSTNAME=blueprintbox.local
+
+curl \
+  --silent \
+  --request POST \
+  --data '{ "command": "loadtest", "argument": "start" }' \
+  http://localhost/api/v2/annotation/${HOSTNAME} | \
+  json_reformat
+
+
+curl \
+  --silent \
+  --request POST \
+  --data '{ "command": "loadtest", "argument": "stop" }' \
+  http://localhost/api/v2/annotation/${HOSTNAME} | \
+  json_reformat
+```
+
+* **`deployment`**
+
+```bash
+HOSTNAME=blueprintbox.local
+
+curl \
+  --silent \
+  --request POST \
+  --data '{ "command": "deployment", "message": "version 7.1.50", "tags": ["7.1.50"] }' \
+  http://localhost/api/v2/annotation/${HOSTNAME} | \
+  json_reformat
+```

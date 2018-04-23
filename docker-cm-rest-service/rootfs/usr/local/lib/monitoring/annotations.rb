@@ -10,38 +10,35 @@ module Monitoring
     #
     def annotation( params )
 
-      logger.debug( "annotation( #{params} )" )
+      logger.debug( "annotation()" )
 
-      dns   =  params.dig(:dns )
-
-      ip    = dns.dig(:ip) unless( dns.nil? )
-      short = dns.dig(:short) unless( dns.nil? )
-      fqdn  = dns.dig(:fqdn) unless( dns.nil? )
-
+      dns     = params.dig(:dns )
       host    = params.dig(:host)
       payload = params.dig(:payload)
 
       payload = JSON.parse(payload) if( payload.is_a?(String) )
       payload = payload.deep_symbolize_keys
 
-      logger.debug( "payload: #{payload}" )
+      logger.debug("payload: #{payload}")
 
-      ip, short, fqdn = ns_lookup( host ) if( dns.nil? )
+      if(dns.nil?)
+        ip, short, fqdn = ns_lookup(host)
+      else
+        ip    = dns.dig(:ip)
+        short = dns.dig(:short)
+        fqdn  = dns.dig(:fqdn)
+      end
 
       logger.debug( "ip  : #{ip}" )
       logger.debug( "fqdn: #{fqdn}" )
 
-      status  = 500
-      message = 'initialize error'
+#       result  = Hash.new
+#       hash    = Hash.new
 
-      result  = Hash.new
-      hash    = Hash.new
+      return JSON.pretty_generate( status: 404, message: 'missing arguments for annotations' ) if( host.size.zero? && payload.size.zero? )
 
-      return JSON.pretty_generate( status: 404, message: 'missing arguments for annotations' ) if( host.size == 0 && payload.size == 0 )
-
-      payload      = JSON.parse( payload ) if( payload.is_a?( String ) )
-
-#       logger.debug( JSON.pretty_generate( payload ) )
+#       payload      = JSON.parse( payload ) if( payload.is_a?( String ) )
+      logger.debug( JSON.pretty_generate(payload) )
 
       command      = payload.dig(:command)
       argument     = payload.dig(:argument)
@@ -60,6 +57,7 @@ module Monitoring
           payload: {
             annotation: true,
             timestamp: timestamp,
+            data: payload,
             type: command,
             message: message,
             argument: argument,

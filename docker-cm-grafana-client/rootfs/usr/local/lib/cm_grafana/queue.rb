@@ -70,7 +70,7 @@ class CMGrafana < Grafana::Client
         return { :status  => 500, :message => 'missing payload' } if( payload.nil? )
       end
 
-      payload  = JSON.parse( payload ) if( payload.is_a?( String ) == true && payload.to_s != '' )
+      payload  = JSON.parse( payload ) if( payload.is_a?( String ) && payload.to_s != '' )
 
       logger.debug( JSON.pretty_generate payload )
 
@@ -84,7 +84,7 @@ class CMGrafana < Grafana::Client
       message    = payload.dig('message')
       tags       = payload.dig('tags')
 
-      logger.info( format( '%s host \'%s\'', command , node ) )
+      logger.info( format( '%s%s host \'%s\'', command, command == 'annotation' ? ' for' : '', node ) )
 
       if( dns.is_a?(Hash) )
         ip = dns.dig('ip')
@@ -147,7 +147,7 @@ class CMGrafana < Grafana::Client
             what: format( 'loadtest %s', argument ),
             when: timestamp,
             tags: [ identifier, 'loadtest', argument ],
-            text: sprintf( 'Loadtest for Node <b>%s</b> %sed (%s)', node, argument, time )
+            text: sprintf( 'Loadtest for Host <b>%s</b> %sed (%s)', node, argument, time )
           }
         end
 
@@ -167,7 +167,7 @@ class CMGrafana < Grafana::Client
             what: format( 'Deployment %s', message ),
             when: timestamp,
             tags: tag,
-            text: sprintf( 'Deployment on Node <b>%s</b> started (%s)', node, time )
+            text: sprintf( 'Deployment on Host <b>%s</b> started (%s)', node, time )
           }
         end
 
@@ -176,10 +176,10 @@ class CMGrafana < Grafana::Client
           logger.debug( 'create annotation' )
 
           params = {
-            what: 'node created',
+            what: 'host created',
             when: timestamp,
             tags: [ identifier, 'created' ],
-            text: format( 'Node <b>%s</b> created (%s)', node, time )
+            text: format( 'Host <b>%s</b> created (%s)', node, time )
           }
         end
 
@@ -188,10 +188,10 @@ class CMGrafana < Grafana::Client
           logger.debug( 'destroy annotation' )
 
           params = {
-            what: 'node destroyed',
+            what: 'host destroyed',
             when: timestamp,
             tags: [ identifier, 'destroyed' ],
-            text: format( 'Node <b>%s</b> destroyed (%s)', node, time )
+            text: format( 'Host <b>%s</b> destroyed (%s)', node, time )
           }
         end
 
@@ -216,7 +216,7 @@ class CMGrafana < Grafana::Client
       end
 
 
-      # add Node
+      # add Host
       #
       if( command == 'add' )
 
@@ -226,10 +226,10 @@ class CMGrafana < Grafana::Client
           time     = Time.at( timestamp ).strftime( '%Y-%m-%d %H:%M:%S' )  #unless( timestamp.nil? )
 
           params = {
-            what: 'node created',
+            what: 'host created',
             when: timestamp,
             tags: [ identifier, 'created' ], # TODO add custom tags?
-            text: format( 'Node <b>%s</b> created (%s)', node, time )
+            text: format( 'Host <b>%s</b> created (%s)', node, time )
           }
 
           begin
@@ -276,7 +276,7 @@ class CMGrafana < Grafana::Client
         return { status: 200, message: result }
       end
 
-      # remove Node
+      # remove Host
       #
       if( command == 'remove' )
 
@@ -286,10 +286,10 @@ class CMGrafana < Grafana::Client
           time     = Time.at( timestamp ).strftime( '%Y-%m-%d %H:%M:%S' )  #unless( timestamp.nil? )
 
           params = {
-            what: 'node destroyed',
+            what: 'host destroyed',
             when: timestamp,
             tags: [ identifier, 'destroyed' ],
-            text: format( 'Node <b>%s</b> destroyed (%s)', node, time )
+            text: format( 'Host <b>%s</b> destroyed (%s)', node, time )
           }
 
           begin
@@ -309,7 +309,7 @@ class CMGrafana < Grafana::Client
         return { status: 200, message: result }
       end
 
-      # information about Node
+      # information about Host
       #
       if( command == 'info' )
 
