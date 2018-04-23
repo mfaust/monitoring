@@ -97,7 +97,7 @@ module CarbonData
 
       result = []
       mbean  = 'Feeder'
-      value       = data.dig('value')
+      value  = data.dig('value')
 
       # defaults
       pending_events            = 0
@@ -221,5 +221,36 @@ module CarbonData
 
       result
     end
+
+
+    def feeder_background_feed( data = {} )
+
+      result    = []
+      mbean     = 'BackgroundFeed'
+      value     = data.dig('value')
+
+      parts     = data.dig('request','mbean').match( /.*type=(?<feed>(.*))/ )
+      mbean     = parts['feed']
+      mbean     = mbean.to_s.strip
+
+      if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil )
+
+        case mbean
+        when /Admin.*/
+          result << {
+            key: format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'pending_contents' ),
+            value: value.dig('NumberOfPendingContents')
+          }
+        else
+          result << {
+            key: format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, mbean, 'pending_contents' ),
+            value: value.dig('CurrentPendingContents')
+          }
+        end
+      end
+
+      result
+    end
+
   end
 end

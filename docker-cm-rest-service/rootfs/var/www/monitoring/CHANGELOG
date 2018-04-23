@@ -1,7 +1,7 @@
 {
   "1804": {
     "version": "1804",
-    "date": "16.04.2018",
+    "date": "23.04.2018",
     "changes": [
       "add more documentations",
       "update to grafana 5.0.4",
@@ -9,7 +9,9 @@
       "set warning and critical values in some icinga2 checks",
       "bugfix for icinga2 memory check",
       "add max feeder elements for CAE Feeders",
-      "add this web UI"
+      "add this web UI",
+      "add Background Feeder graphs for Content Feeder",
+      "remove 'used UAPI Cache' from Grafana Overview"
     ]
   },
   "1806": {

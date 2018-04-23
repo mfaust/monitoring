@@ -214,7 +214,7 @@ services:
 
   icingaweb2:
     restart: always
-    image: bodsch/docker-icingaweb2:2.5.1-r4
+    image: bodsch/docker-icingaweb2:2.5.1-r5
     container_name: icingaweb2
     hostname: icingaweb2
     environment:

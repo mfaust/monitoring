@@ -103,6 +103,8 @@ module CarbonData
 
     def create_graphite_output( key, values )
 
+#       logger.debug("create_graphite_output( #{key}, values )")
+
       graphite_output = []
 
       case key
@@ -158,10 +160,10 @@ module CarbonData
         graphite_output.push( feeder_proactive_engine( values ) )
       when 'Feeder'
         graphite_output.push( feeder_feeder( values ) )
-      # currently disabled
-      # need information or discusion about it
       when 'TransformedBlobCacheManager'
         graphite_output.push( feeder_transformed_blobcache_manager( values ) )
+      when /.*BackgroundFeed/
+        graphite_output.push( feeder_background_feed( values ) )
 
         # Solr
       when /^Solr.*Replication/

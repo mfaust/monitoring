@@ -38,6 +38,8 @@
     },
     "rows": [
       {
+        "title": "",
+        "height": "10px",
         "showTitle": false,
         "titleSize": "h6",
         "collapse": false,
@@ -55,15 +57,13 @@
             "span": 12
           }
         ],
-        "title": "",
-        "repeatRowId": null,
-        "height": 42
+        "repeatRowId": null
       },
       {
+        "title": "Headline",
+        "height": "10px",
         "collapse": false,
         "editable": true,
-        "height": "25px",
-        "title": "New row",
         "panels": [
           {
             "span": 12,
@@ -187,6 +187,9 @@
         "title": "statistics",
         "panels": [
           {
+            "title": "Indexed Documents",
+            "id": 13,
+            "span": 12,
             "links": [],
             "type": "graph",
             "grid": {
@@ -212,7 +215,6 @@
             "points": false,
             "error": false,
             "timeShift": null,
-            "id": 13,
             "nullPointMode": "connected",
             "decimals": 0,
             "yaxes": [
@@ -245,8 +247,6 @@
             ],
             "fill": 3,
             "timeFrom": null,
-            "span": 12,
-            "title": "Indexed Documents",
             "renderer": "flot",
             "steppedLine": false,
             "percentage": false,
@@ -267,6 +267,9 @@
             "pointradius": 5
           },
           {
+            "title": "Pending Documents / Events",
+            "id": 14,
+            "span": 12,
             "legend": {
               "current": true,
               "alignAsTable": true,
@@ -305,7 +308,6 @@
             ],
             "decimals": 0,
             "linewidth": 1,
-            "id": 14,
             "nullPointMode": "connected",
             "timeShift": null,
             "error": false,
@@ -316,9 +318,7 @@
             "percentage": false,
             "steppedLine": false,
             "renderer": "flot",
-            "title": "Pending Documents / Events",
             "timeFrom": null,
-            "span": 12,
             "fill": 3,
             "targets": [
               {
@@ -350,6 +350,106 @@
         "collapse": false,
         "height": "150px",
         "editable": true
+      },
+      {
+        "title": "Background Feeds",
+        "height": "170px",
+        "collapse": false,
+        "editable": true,
+        "panels": [
+          {
+            "title": "Pending Background Feeds",
+            "id": 20,
+            "span": 12,
+            "legend": {
+              "current": true,
+              "alignAsTable": true,
+              "values": true,
+              "total": false,
+              "show": true,
+              "rightSide": true,
+              "max": false,
+              "min": false,
+              "avg": false
+            },
+            "grid": {
+              "threshold1": null,
+              "threshold2Color": "rgba(234, 112, 112, 0.22)",
+              "threshold2": null,
+              "threshold1Color": "rgba(216, 200, 27, 0.27)"
+            },
+            "type": "graph",
+            "links": [],
+            "editable": true,
+            "yaxes": [
+              {
+                "min": 0,
+                "format": "none",
+                "max": null,
+                "show": true,
+                "logBase": 1
+              },
+              {
+                "min": 0,
+                "max": null,
+                "format": "short",
+                "logBase": 1,
+                "show": true
+              }
+            ],
+            "decimals": 0,
+            "linewidth": 1,
+            "nullPointMode": "connected",
+            "timeShift": null,
+            "error": false,
+            "points": false,
+            "datasource": "graphite",
+            "stack": false,
+            "seriesOverrides": [],
+            "percentage": false,
+            "steppedLine": false,
+            "renderer": "flot",
+            "timeFrom": null,
+            "fill": 3,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "alias(aliasSub(carbon-writer.$host.FEEDER_CONTENT.AdminBackgroundFeed.pending_contents, '.*-', ''), 'Admin Background Feed')"
+              },
+              {
+                "refId": "B",
+                "target": "alias(aliasSub(carbon-writer.$host.FEEDER_CONTENT.AssetTaxonomyIdsBackgroundFeed.pending_contents, '.*-', ''), 'Asset Taxonomy Background Feed')"
+              },
+              {
+                "refId": "C",
+                "target": "alias(aliasSub(carbon-writer.$host.FEEDER_CONTENT.LocationTaxonomyIdsBackgroundFeed.pending_contents, '.*-', ''), 'Location Taxonomy Background Feed')"
+              },
+              {
+                "refId": "D",
+                "target": "alias(aliasSub(carbon-writer.$host.FEEDER_CONTENT.SubjectTaxonomyIdsBackgroundFeed.pending_contents, '.*-', ''), 'Subject Taxonomy Background Feed')"
+              },
+              {
+                "refId": "E",
+                "target": "alias(aliasSub(carbon-writer.$host.FEEDER_CONTENT.UpdateGroupsBackgroundFeed.pending_contents, '.*-', ''), 'Update Groups Background Feed')"
+              }
+            ],
+            "isNew": true,
+            "pointradius": 5,
+            "lines": true,
+            "tooltip": {
+              "sort": 0,
+              "shared": true,
+              "value_type": "cumulative",
+              "msResolution": false,
+              "ordering": "alphabetical"
+            },
+            "xaxis": {
+              "show": true
+            },
+            "aliasColors": {},
+            "bars": false
+          }
+        ]
       },
       {
         "editable": true,

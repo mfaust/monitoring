@@ -4,10 +4,10 @@ Screenshots
 
 
 ## Landingpage
-![landingpage](../assets/monitoring_1.png)
+![landingpage](../assets/monitoring-toolbox.gif)
 
 ## Grafana Overview
-![Overview](../assets/monitoring_2.png)
+![Overview](../assets/grafana.gif)
 
 ## Dashboard
 ![dashboard](../assets/monitoring_3.png)
@@ -16,7 +16,7 @@ Screenshots
 ![grouped-dashboard](../assets/overview_grouped_by.png)
 
 ## Icinga2
-![icinga2](../assets/monitoring_4.png)
+![icinga2](../assets/icinga2.gif)
 
 ## Grafana Time Ranges
 ![Time Ranges](../assets/21-time-ranges.png)

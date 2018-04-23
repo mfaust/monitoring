@@ -91,8 +91,9 @@ module CarbonWriter
 
 
     def metric( metric = {} )
-
+#      logger.debug("#{metric} - #{metric.class}")
       return if( metric.nil? )
+      return unless( metric.is_a?(Hash) )
 
       key   = metric.dig(:key)
       value = metric.dig(:value)

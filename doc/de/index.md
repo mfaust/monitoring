@@ -30,13 +30,13 @@ Die Monitoring-Toolbox lässt sich über eine API manuell nutzen oder in einer C
 Bei CoreMedia Applikationen lassen sich folgende Systmparameter überwachen:
 
   - Tomcat interne Speicher (Heap-Memory, Perm-Memory, Caches)
-  - Contentserver Lizenzen (Gültigkeit und verbrauchte (concurrent / named) Lizenzen)
+  - [Contentserver Lizenzen](./screenshots/license.md) (Gültigkeit und verbrauchte (concurrent / named) Lizenzen)
   - Runlevel der Contentserver
-  - Sequenznummern von MLS & RLS, sowie eine automatisch berechnete Differenz der Sequenznummern
+  - [Sequenznummern von MLS & RLS](./screenshots/sequencenumbers.md), sowie eine automatisch berechnete Differenz der Sequenznummern
   - Gültigkeit von CapConnections
   - Auslastung der UAPI Caches
   - Auslastung der Blob Caches
-  - zu feedende Elemete der CAEFeeder
+  - [zu feedende Elemete der CAEFeeder](./screenshots/caefeeder.md)
   - Genutzte Lightweight Session von Clients
   - Auslastung der CAE Caches
   - Auslastung der eCommerce Caches
@@ -55,6 +55,8 @@ Dazu muß der entsprechende Service [installiert und gestartet](./de/node_export
 ## Webserver
 
 Wenn der Apache Webserver `mod_status` aktiviert hat, können die darüber zur Verfügung stehenden Daten in das Monitoring integriert werden.
+
 Wenn im default vhost eine `vhosts.json` Datein vorhanden ist, dann werden alle dort integrierten VHosts in das Monitoring aufgenommen.
+
 Alternativ kann auch ein eigener VHost mit entsprechenden Port definiert werden.
 

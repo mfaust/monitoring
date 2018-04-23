@@ -59,3 +59,5 @@
 - set warning and critical values in some icinga2 checks
 - add max feeder elements for CAE Feeders
 - add this web UI
+- add Background Feeder graphs for Content Feeder
+- remove 'used UAPI Cache' from Grafana Overview

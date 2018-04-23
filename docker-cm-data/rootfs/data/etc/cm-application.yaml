@@ -232,19 +232,19 @@ jolokia:
         mbean: com.coremedia:type=Feeder,application=*
         attribute: State,Uptime,CurrentPendingDocuments,IndexDocuments,IndexContentDocuments,IndexBytes,PersistedEvents,PendingEvents,PendingFolders
       - name: AdminBackgroundFeed
-        mbean: com.coremedia:type=AdminBackgroundFeed,application=content-feeder
+        mbean: com.coremedia:type=AdminBackgroundFeed,application=contentfeeder
         attribute: NumberOfPendingContents
       - name: AssetTaxonomyIdsBackgroundFeed
-        mbean: com.coremedia:type=AssetTaxonomyIdsBackgroundFeed,application=content-feeder
+        mbean: com.coremedia:type=AssetTaxonomyIdsBackgroundFeed,application=contentfeeder
         attribute: CurrentPendingContents
       - name: LocationTaxonomyIdsBackgroundFeed
-        mbean: com.coremedia:type=LocationTaxonomyIdsBackgroundFeed,application=content-feeder
+        mbean: com.coremedia:type=LocationTaxonomyIdsBackgroundFeed,application=contentfeeder
         attribute: CurrentPendingContents
       - name: SubjectTaxonomyIdsBackgroundFeed
-        mbean: com.coremedia:type=SubjectTaxonomyIdsBackgroundFeed,application=content-feeder
+        mbean: com.coremedia:type=SubjectTaxonomyIdsBackgroundFeed,application=contentfeeder
         attribute: CurrentPendingContents
       - name: UpdateGroupsBackgroundFeed
-        mbean: com.coremedia:type=UpdateGroupsBackgroundFeed,application=content-feeder
+        mbean: com.coremedia:type=UpdateGroupsBackgroundFeed,application=contentfeeder
         attribute: CurrentPendingContents
       - name: CapConnection
         mbean: com.coremedia:type=CapConnection,application=*

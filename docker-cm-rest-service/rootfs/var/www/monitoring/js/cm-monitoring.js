@@ -210,12 +210,12 @@ $(document).ready(function() {
 
           var version = '';
           var date = '';
-          var chnages = '';
+          var changes = '';
 
           $.each(json, function (k,v) {
-            if(v['version'] !== undefined) { version = v['version'] }
-            if(v['date'] !== undefined) { date = v['date'] }
-            if(v['changes'] !== undefined) { changes = v['changes'] }
+            if(k !== undefined && k === 'version' && v !== undefined) { version = v }
+            if(k !== undefined && k === 'date' && v !== undefined) { date = v }
+            if(k !== undefined && k === 'changes' && v !== undefined) { changes = v }
           });
 
           ul_services = $('<ul>').append(
