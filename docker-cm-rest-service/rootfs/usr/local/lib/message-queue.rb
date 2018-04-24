@@ -65,7 +65,7 @@ module MessageQueue
 
         # check if job already in the queue
         #
-        return { status: 404, message: 'job is already in queue ..' } if( job_exists?( tube.to_s, job ) == true )
+        return if( job_exists?( tube.to_s, job ) == true )
 
         response = @b.tubes[ tube.to_s ].put( job , :prio => prio, :ttr => ttr, :delay => delay )
         logger.debug( response )
