@@ -51,8 +51,8 @@ contentimport
  - start
  - end
 
-{ "monitoring": "start", "message": "version 7.1.50", "tags": ["7.1.50"] }
-{ "monitoring": "end"  , "message": "version 7.1.50", "tags": ["7.1.50"] }
+{ "contentimport": "start", "message": "version 7.1.50", "tags": ["7.1.50"] }
+{ "contentimport": "end"  , "message": "version 7.1.50", "tags": ["7.1.50"] }
 
 
 loadtest

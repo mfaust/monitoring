@@ -62,7 +62,7 @@ class CMGrafana < Grafana::Client
       payload  = data.dig( :body, 'payload' )
       tags     = []
       overview = true
-      dns = nil
+      dns      = nil
 
       if( command.nil? || node.nil? || payload.nil? )
         return { :status  => 500, :message => 'missing command' } if( command.nil? )
@@ -71,8 +71,10 @@ class CMGrafana < Grafana::Client
       end
 
       payload  = JSON.parse( payload ) if( payload.is_a?( String ) && payload.to_s != '' )
+      hash     = Digest::MD5.hexdigest(payload.to_s)
 
-      logger.debug( JSON.pretty_generate payload )
+      logger.debug( JSON.pretty_generate( payload ))
+      logger.debug( "hash: #{hash}")
 
       tags       = payload.dig('tags')
       overview   = payload.dig('overview') || true
@@ -83,13 +85,14 @@ class CMGrafana < Grafana::Client
       argument   = payload.dig('argument')
       message    = payload.dig('message')
       tags       = payload.dig('tags')
+      data       = payload.dig('data')
 
       logger.info( format( '%s%s host \'%s\'', command, command == 'annotation' ? ' for' : '', node ) )
 
       if( dns.is_a?(Hash) )
-        ip = dns.dig('ip')
+        ip    = dns.dig('ip')
         short = dns.dig('short')
-        fqdn = dns.dig('fqdn')
+        fqdn  = dns.dig('fqdn')
       end
 
       ip, short, fqdn = ns_lookup(node) if( ip.nil? && short.nil? && fqdn.nil? )
@@ -107,7 +110,7 @@ class CMGrafana < Grafana::Client
         return { status: 500, message: 'no dns data found' }
       end
 
-      job_option = { command: command, ip: ip, short: short, fqdn: fqdn }
+      job_option = { command: command, hash: hash } #, ip: ip, short: short, fqdn: fqdn }
 
       return { status: 409, message: 'we are working on this job' } if( @jobs.jobs( job_option ) == true )
 
@@ -131,6 +134,133 @@ class CMGrafana < Grafana::Client
 
         # params = {}
         time   = Time.at( timestamp ).strftime( '%Y-%m-%d %H:%M:%S' )
+
+        unless(data.nil?)
+
+          data  = JSON.parse(data) if(data.is_a?( String ))
+          logger.debug( JSON.pretty_generate(data) )
+
+          annotation_message  = data.dig('message')
+          annotation_tags     = data.dig('tags') || []
+          annotation_type     = data.dig('command')   # old style
+          annotation_argument = data.dig('argument')  # old style
+
+          c = data.reject { |k,v| k == 'message' || k == 'tags' }
+
+          # old style annotation
+          if(c.count != 0 && !c.include?('command'))
+            annotation_type     = c.keys.first
+            annotation_argument = c.values.first
+          end
+
+          # free style annotation
+          #
+          if(annotation_type.nil? && annotation_argument.nil? && c.count == 0)
+            annotation_type = 'free'
+            annotation_tags = ['free']
+          end
+
+          if( %w[create destroy].include?(annotation_type) )
+            annotation_argument = annotation_type
+            annotation_type = 'host'
+          end
+
+          if( %w[add remove].include?(annotation_type) )
+            annotation_argument = annotation_type
+            annotation_type = 'monitoring'
+          end
+
+          logger.debug("type    : #{annotation_type}")
+          logger.debug("argument: #{annotation_argument}")
+          logger.debug("message : #{annotation_message}")
+          logger.debug("tags    : #{annotation_tags}")
+
+          logger.debug( JSON.pretty_generate(c) )
+
+          annotation_what = nil
+          annotation_data = nil
+
+          if( annotation_type == 'loadtest' )
+            logger.debug( 'loadtest annotation' )
+
+            if( %w[start stop end].include?(annotation_argument) )
+              annotation_what = format( 'loadtest %s', annotation_argument )
+              annotation_tags += [ identifier, 'loadtest', annotation_argument ]
+              annotation_data = sprintf( 'Loadtest for Host <b>%s</b> %sed', node, annotation_argument)
+            end
+
+          elsif( annotation_type == 'contentimport' )
+            logger.debug( 'contentimport annotation' )
+
+            if( %w[start stop end].include?(annotation_argument) )
+              annotation_what = format( 'contentimport %s', annotation_argument )
+              annotation_tags += [ identifier, 'contentimport', annotation_argument ]
+              annotation_data = sprintf( 'Contentimport for Host <b>%s</b> %sed', node, annotation_argument)
+            end
+
+          elsif( annotation_type == 'deployment' )
+            logger.debug( 'deployment annotation' )
+
+            if( %w[start stop end].include?(annotation_argument) )
+              annotation_what = format( 'deployment %s', annotation_argument )
+            else
+              annotation_what = format( 'deployment %s', annotation_message )
+            end
+
+            annotation_tags += [ identifier, 'deployment', annotation_argument]
+            annotation_data = sprintf( 'Contentimport for Host <b>%s</b> %sed', node, annotation_argument)
+
+          elsif( annotation_type == 'host' )
+            logger.debug( 'host annotation' )
+
+            if( %w[create destroy].include?(annotation_argument) )
+
+              txt = 'created'   if(annotation_argument == 'create')
+              txt = 'destroyed' if(annotation_argument == 'destroy')
+
+              annotation_what = format( 'host %s', txt )
+              annotation_tags = [ identifier, 'host', annotation_argument ]
+              annotation_data = sprintf( 'Host <b>%s</b> %s', node, txt)
+            end
+
+          elsif( annotation_type == 'monitoring' )
+            logger.debug( 'monitoring annotation' )
+
+            if( %w[add remove].include?(annotation_argument) )
+
+              txt = 'added to'     if(annotation_argument == 'add')
+              txt = 'removed from' if(annotation_argument == 'remove')
+
+              annotation_what = format( 'host %s monitoring', txt )
+              annotation_tags = [ identifier, 'monitoring', annotation_argument ]
+              annotation_data = sprintf( 'Host <b>%s</b> %s monitoring', node, txt)
+            end
+          else
+            logger.debug( 'other annotation' )
+
+            annotation_what = annotation_message
+            annotation_tags = [ identifier, 'free' ]
+            annotation_tags += [ annotation_argument ] if(annotation_argument.is_a?(String) && !annotation_argument.size.zero?)
+            annotation_data = sprintf( 'Host <b>%s</b>', node)
+          end
+
+          unless( annotation_what.nil? && annotation_tags.nil? && annotation_data.nil? )
+
+            params = {
+              what: annotation_what,
+              when: timestamp,
+              tags: annotation_tags,
+              text: annotation_data
+            }
+
+            logger.debug( JSON.pretty_generate(params) )
+          end
+
+          @jobs.del( job_option )
+
+          return { status: 200, message: 'test' }
+        end
+
 
         unless( %w[loadtest deployment].include?(type) )
           # TODO

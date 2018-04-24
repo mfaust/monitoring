@@ -67,6 +67,7 @@ module Monitoring
           },
           prio: 0
         }
+        params.reject!{ |_, v| v.nil? }
 
         # send to grafana
         return message_queue(params)
