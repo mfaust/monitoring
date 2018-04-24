@@ -203,12 +203,14 @@ class CMGrafana < Grafana::Client
 
             if( %w[start stop end].include?(annotation_argument) )
               annotation_what = format( 'deployment %s', annotation_argument )
+              annotation_data = sprintf( 'Deployment on Host <b>%s</b> %sed', node, annotation_argument)
             else
               annotation_what = format( 'deployment %s', annotation_message )
+              annotation_data = sprintf( 'Deployment on Host <b>%s</b> started', node)
             end
 
-            annotation_tags += [ identifier, 'deployment', annotation_argument]
-            annotation_data = sprintf( 'Contentimport for Host <b>%s</b> %sed', node, annotation_argument)
+            annotation_tags += [ identifier, 'deployment' ]
+            annotation_tags += [annotation_argument] if(annotation_argument.is_a?(String) && !annotation_argument.size.zero?)
 
           elsif( annotation_type == 'host' )
             logger.debug( 'host annotation' )

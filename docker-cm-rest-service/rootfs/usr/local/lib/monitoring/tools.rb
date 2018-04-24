@@ -116,13 +116,14 @@ module Monitoring
         node: node,
         timestamp: Time.now().strftime( '%Y-%m-%d %H:%M:%S' ),
         from: 'rest-service',
+        uid: Digest::MD5.hexdigest(data.to_s),
         payload: data
       }.to_json
 
       result = @mq_producer.add_job( queue, job, prio, ttr, delay )
       result = JSON.parse( result ) if( result.is_a?( String ) )
 
-      return { status: 404, message: 'can\'t get status.' } if(result.nil?)
+      return { status: 404, message: 'job is already in the queue ..' } if(result.nil?)
 
       status = result.dig(:status)
       id = result.dig(:id)
