@@ -1,15 +1,15 @@
 
-FROM alpine:3.7
+FROM alpine:latest
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
-  VERSION="1803" \
-  BUILD_DATE="2018-04-06" \
+  VERSION="1805" \
+  BUILD_DATE="2018-05-18" \
   TERM=xterm \
   TZ='Europe/Berlin' \
-  GRAFANA_GEM_TYPE="local" \
-  GRAFANA_GEM_VERSION="0.9"
+  GRAFANA_GEM_TYPE="stable" \
+  GRAFANA_GEM_VERSION="0.10.0"
 
 # ---------------------------------------------------------------------------------------
 
@@ -27,11 +27,12 @@ RUN \
   gem install --quiet --no-rdoc --no-ri \
     io-console bundler && \
   cd /build && \
-  for g in $(ls -1 /build/*.gem 2> /dev/null) ; do echo $g; gem install --quiet --no-rdoc --no-ri ${g} ; done && \
-  if [ "${GRAFANA_GEM_TYPE}" == "stable" ] ; then \
-    if [ $(gem list | grep -c grafana) -eq 1 ] ; then \
-      gem uninstall --quiet grafana ; \
-    fi ; \
+  if [ "${GRAFANA_GEM_TYPE}" == "local" ] ; then \
+    for g in $(ls -1 /build/*.gem 2> /dev/null) ; do \
+      echo "install local gem '${g}'" && \
+      gem install --quiet --no-rdoc --no-ri ${g} ; \
+    done ; \
+  elif [ "${GRAFANA_GEM_TYPE}" == "stable" ] ; then \
     echo "gem 'grafana', '~> ${GRAFANA_GEM_VERSION}'" >> Gemfile ; \
   fi && \
   bundle install --quiet && \
@@ -53,6 +54,6 @@ HEALTHCHECK \
   --interval=5s \
   --timeout=2s \
   --retries=12 \
-  CMD ps ax | grep -c grafana-client.rb || exit 1
+  CMD ps ax | grep -v grep | grep -c grafana-client.rb || exit 1
 
 CMD [ "/usr/local/bin/grafana-client.rb" ]
