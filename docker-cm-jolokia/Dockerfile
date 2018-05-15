@@ -1,5 +1,5 @@
 
-FROM alpine:3.7 as builder
+FROM golang:1-alpine as builder
 
 COPY build/ /build
 
@@ -9,9 +9,8 @@ RUN \
   apk update --quiet --no-cache && \
   apk upgrade --quiet --no-cache && \
   apk add --quiet --virtual .build-deps \
-    g++ git go make && \
+    g++ git make && \
   export GOPATH=/build && \
-  export GOROOT=/usr/lib/go && \
   cd ${GOPATH}/src && \
   go get github.com/gorilla/mux && \
   go build -ldflags="-s -w" -o service-discovery && \
@@ -19,17 +18,17 @@ RUN \
 
 # ---------------------------------------------------------------------------------------
 
-FROM bodsch/docker-jolokia:1.4.0-r1
+FROM bodsch/docker-jolokia:1.5.0
 
 ENV \
-  VERSION="1803" \
-  BUILD_DATE="2018-03-21" \
+  VERSION="1805" \
+  BUILD_DATE="2018-05-15" \
   TZ='Europe/Berlin'
 
 EXPOSE 8080 8088
 
 LABEL \
-  version="1803" \
+  version="1805" \
   maintainer="Bodo Schulz <bodo.schulz@coremedia.com>" \
   org.label-schema.build-date=${BUILD_DATE}
 

@@ -110,7 +110,7 @@ class CMGrafana < Grafana::Client
         return { status: 500, message: 'no dns data found' }
       end
 
-      job_option = { command: command, hash: hash } #, ip: ip, short: short, fqdn: fqdn }
+      job_option = { command: command, hash: hash }
 
       return { status: 409, message: 'we are working on this job' } if( @jobs.jobs( job_option ) == true )
 
@@ -129,11 +129,11 @@ class CMGrafana < Grafana::Client
 
       # use grafana annotations
       #
-      #
       if( command == 'annotation' )
 
-        # params = {}
         time   = Time.at( timestamp ).strftime( '%Y-%m-%d %H:%M:%S' )
+        status  = 500
+        message = 'internal server error'
 
         unless(data.nil?)
 
@@ -167,7 +167,7 @@ class CMGrafana < Grafana::Client
 
           if( %w[add remove].include?(annotation_type) )
             annotation_argument = annotation_type
-            annotation_type = 'monitoring'
+            annotation_type     = 'monitoring'
           end
 
           logger.debug("type    : #{annotation_type}")
@@ -175,7 +175,7 @@ class CMGrafana < Grafana::Client
           logger.debug("message : #{annotation_message}")
           logger.debug("tags    : #{annotation_tags}")
 
-          logger.debug( JSON.pretty_generate(c) )
+#           logger.debug( JSON.pretty_generate(c) )
 
           annotation_what = nil
           annotation_data = nil
@@ -252,99 +252,26 @@ class CMGrafana < Grafana::Client
               what: annotation_what,
               when: timestamp,
               tags: annotation_tags,
-              text: annotation_data
+              data: annotation_data
             }
 
             logger.debug( JSON.pretty_generate(params) )
+
+
+            begin
+              result = create_annotation_graphite( params )
+              logger.debug(result)
+              status  = result.dig('status')
+              message = result.dig('message')
+            rescue => error
+              logger.error(error)
+            end
           end
 
           @jobs.del( job_option )
 
-          return { status: 200, message: 'test' }
+          return { status: status, message: message }
         end
-
-
-        unless( %w[loadtest deployment].include?(type) )
-          # TODO
-          # general and free-text annotation ...
-          params = {}
-        end
-
-        # loadtest start / stop
-        if( type == 'loadtest' )
-
-          logger.debug( 'loadtest annotation' )
-
-          params = {
-            what: format( 'loadtest %s', argument ),
-            when: timestamp,
-            tags: [ identifier, 'loadtest', argument ],
-            text: sprintf( 'Loadtest for Host <b>%s</b> %sed (%s)', node, argument, time )
-          }
-        end
-
-        # deployment
-        if( type == 'deployment' )
-
-          logger.debug( 'deployment annotation' )
-
-          tag = [ identifier, 'deployment' ]
-
-          if( tags.count != 0 )
-            tag << tags
-            tag.flatten!
-          end
-
-          params = {
-            what: format( 'Deployment %s', message ),
-            when: timestamp,
-            tags: tag,
-            text: sprintf( 'Deployment on Host <b>%s</b> started (%s)', node, time )
-          }
-        end
-
-        if( type == 'create' )
-
-          logger.debug( 'create annotation' )
-
-          params = {
-            what: 'host created',
-            when: timestamp,
-            tags: [ identifier, 'created' ],
-            text: format( 'Host <b>%s</b> created (%s)', node, time )
-          }
-        end
-
-        if( type == 'destroy' )
-
-          logger.debug( 'destroy annotation' )
-
-          params = {
-            what: 'host destroyed',
-            when: timestamp,
-            tags: [ identifier, 'destroyed' ],
-            text: format( 'Host <b>%s</b> destroyed (%s)', node, time )
-          }
-        end
-
-        logger.debug(params)
-
-        if( params.count.zero? )
-          logger.debug( 'nothing to do ...' )
-          return { status: 200, message: 'nothing to do ...' }
-        end
-
-        begin
-          result = create_annotation_graphite( params )
-          logger.debug(params)
-          logger.debug(result)
-        rescue => error
-          logger.error(error)
-        end
-
-        @jobs.del( job_option )
-
-        return { status: 200, message: result }
       end
 
 
@@ -355,13 +282,17 @@ class CMGrafana < Grafana::Client
         # add annotation
         if(annotation == true)
 
-          time     = Time.at( timestamp ).strftime( '%Y-%m-%d %H:%M:%S' )  #unless( timestamp.nil? )
+          annotation_argument = 'create'
+          txt                 = 'created'
+          annotation_what = format( 'host %s', txt )
+          annotation_tags = [ identifier, 'host', annotation_argument ]
+          annotation_data = sprintf( 'Host <b>%s</b> %s', node, txt)
 
           params = {
-            what: 'host created',
+            what: annotation_what,
             when: timestamp,
-            tags: [ identifier, 'created' ], # TODO add custom tags?
-            text: format( 'Host <b>%s</b> created (%s)', node, time )
+            tags: annotation_tags,
+            data: annotation_data
           }
 
           begin
@@ -415,13 +346,18 @@ class CMGrafana < Grafana::Client
         # add annotation
         if( annotation == true )
 
-          time     = Time.at( timestamp ).strftime( '%Y-%m-%d %H:%M:%S' )  #unless( timestamp.nil? )
+          annotation_argument = 'destroy'
+          txt                 = 'destroyed'
+
+          annotation_what = format( 'host %s', txt )
+          annotation_tags = [ identifier, 'host', annotation_argument ]
+          annotation_data = sprintf( 'Host <b>%s</b> %s', node, txt)
 
           params = {
-            what: 'host destroyed',
+            what: annotation_what,
             when: timestamp,
-            tags: [ identifier, 'destroyed' ],
-            text: format( 'Host <b>%s</b> destroyed (%s)', node, time )
+            tags: annotation_tags,
+            data: annotation_data
           }
 
           begin

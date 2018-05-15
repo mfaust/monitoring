@@ -10,6 +10,14 @@ class CMGrafana
       #
       def add_annotations(template_json)
 
+        # color-picker: https://www.w3schools.com/colors/colors_picker.asp
+        #
+        # - host (created / destroyed)   : green     #33cc33
+        # - monitoring (added / removed) : yellow    #e6e600
+        # - loadtest                     : orange    #ff9933
+        # - deployment                   :           #8080ff
+        # - contentimport                : blue      #0099ff
+
         # add or overwrite annotations
         annotations = %(
           {
@@ -18,29 +26,29 @@ class CMGrafana
                 "datasource": "-- Grafana --",
                 "enable": true,
                 "hide": false,
-                "iconColor": "rgb(93, 227, 12)",
+                "iconColor": "#33cc33",
                 "limit": 10,
-                "name": "created",
+                "name": "Host created / destroyed",
                 "showIn": 0,
-                "tags": [ "<%= short_hostname %>", "created" ],
+                "tags": [ "<%= short_hostname %>", "host" ],
                 "type": "tags"
               },
               {
                 "datasource": "-- Grafana --",
                 "enable": true,
                 "hide": false,
-                "iconColor": "rgb(227, 57, 12)",
+                "iconColor": "#e6e600",
                 "limit": 10,
-                "name": "destroyed",
+                "name": "Monitoring added / removed",
                 "showIn": 0,
-                "tags": [ "<%= short_hostname %>", "destroyed" ],
+                "tags": [ "<%= short_hostname %>", "monitoring" ],
                 "type": "tags"
               },
               {
                 "datasource": "-- Grafana --",
                 "enable": true,
                 "hide": false,
-                "iconColor": "rgb(26, 196, 220)",
+                "iconColor": "#ff9933",
                 "limit": 10,
                 "name": "Load Tests",
                 "showIn": 0,
@@ -51,11 +59,22 @@ class CMGrafana
                 "datasource": "-- Grafana --",
                 "enable": true,
                 "hide": false,
-                "iconColor": "rgb(176, 40, 253)",
+                "iconColor": "#8080ff",
                 "limit": 10,
                 "name": "Deployments",
                 "showIn": 0,
                 "tags": [ "<%= short_hostname %>", "deployment" ],
+                "type": "tags"
+              },
+              {
+                "datasource": "-- Grafana --",
+                "enable": true,
+                "hide": false,
+                "iconColor": "#0099ff",
+                "limit": 10,
+                "name": "Content Import",
+                "showIn": 0,
+                "tags": [ "<%= short_hostname %>", "contentimport" ],
                 "type": "tags"
               }
             ]

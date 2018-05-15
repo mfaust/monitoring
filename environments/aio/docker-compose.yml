@@ -55,7 +55,7 @@ services:
 
   memcached:
     restart: always
-    image: memcached:1.5.4-alpine
+    image: memcached:1-alpine
     container_name: memcached
     hostname: memcached
     volumes:
@@ -107,7 +107,7 @@ services:
 
   carbon:
     restart: always
-    image: bodsch/docker-go-carbon:0.12.0-r1
+    image: bodsch/docker-go-carbon:0.12.0
     container_name: carbon
     hostname: carbon
     ports:
@@ -121,7 +121,7 @@ services:
 
   graphite:
     restart: always
-    image: bodsch/docker-graphite:1.1.2-r1
+    image: bodsch/docker-graphite:1.1.3
     container_name: graphite
     hostname: graphite
     environment:
@@ -136,7 +136,7 @@ services:
 
   grafana:
     restart: always
-    image: bodsch/docker-grafana:5.0.4
+    image: bodsch/docker-grafana:5.1.2
     container_name: grafana
     hostname: grafana
     environment:
@@ -214,7 +214,7 @@ services:
 
   icingaweb2:
     restart: always
-    image: bodsch/docker-icingaweb2:2.5.1-r5
+    image: bodsch/docker-icingaweb2:2.5.3
     container_name: icingaweb2
     hostname: icingaweb2
     environment:
@@ -394,8 +394,7 @@ services:
     container_name: cm-grafana-client
     hostname: cm-grafana-client
     environment:
-      LOG_LEVEL: debug
-      GRAFANA_VERSION: 5
+      LOG_LEVEL: info
       GRAFANA_HOST: nginx
     depends_on:
       - beanstalkd

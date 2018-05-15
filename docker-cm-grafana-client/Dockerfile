@@ -9,7 +9,7 @@ ENV \
   TERM=xterm \
   TZ='Europe/Berlin' \
   GRAFANA_GEM_TYPE="stable" \
-  GRAFANA_GEM_VERSION="0.10.0"
+  GRAFANA_GEM_VERSION="0.10.1"
 
 # ---------------------------------------------------------------------------------------
 

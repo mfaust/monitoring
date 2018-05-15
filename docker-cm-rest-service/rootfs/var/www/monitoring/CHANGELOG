@@ -17,7 +17,12 @@
   "1806": {
     "version": "1806",
     "date": "",
-    "changes": []
+    "changes": [
+      "use new grafana gem (0.10.1)",
+      "set grafana 5 as default",
+      "split annotations into more types",
+      "update some docker container (icinga stack, jolokia, grafana)"
+    ]
   },
   "1808": {
     "version": "1808",

@@ -288,9 +288,7 @@ module Sinatra
     post '/ajax/add-host/:host' do
 
       host   = params[:host]
-#       puts "host   : #{host} - #{host.class}"
-#       puts "payload: #{payload} - #{payload.class}"
-#      @request_paylod = nil
+
       result = m.add_host( host, '' )
 
       r = JSON.parse( result ) if( result.is_a?( String ) )

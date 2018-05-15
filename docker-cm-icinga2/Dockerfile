@@ -1,20 +1,31 @@
 
-FROM alpine:latest as builder
+FROM bitnami/minideb:latest as builder
+
+ENV \
+  TERM=xterm \
+  DEBIAN_FRONTEND=noninteractive
 
 RUN \
-  apk --no-cache update && \
-  apk --no-cache upgrade
-
-RUN \
-  apk add --quiet --no-cache \
+  DIST=$(awk -F"[)(]+" '/VERSION=/ {print $2}' /etc/os-release) && \
+  chsh -s /bin/bash && \
+  ln -sf /bin/bash /bin/sh && \
+  ln -s  /sbin/killall5 /sbin/killall && \
+  apt-get update  --quiet --quiet > /dev/null && \
+  apt-get dist-upgrade --quiet --quiet > /dev/null && \
+  apt-get install --quiet --quiet --assume-yes --no-install-recommends \
     bash \
-    build-base \
-    bison \
-    cmake \
+    bzip2 \
     curl \
-    flex \
+    ca-certificates \
+    cmake \
+    file \
     git \
-    hiredis-dev libev-dev
+    g++ \
+    gnupg2 \
+    make \
+    libhiredis-dev \
+    libev-dev \
+    > /dev/null
 
 RUN \
   cd /tmp/ && \
@@ -41,14 +52,15 @@ RUN \
 
 # ---------------------------------------------------------------------------------------
 
-FROM bodsch/docker-icinga2:2.8.1-master-r3
+FROM bodsch/docker-icinga2:2.8.4-master-r1
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
-  VERSION="1803" \
-  BUILD_DATE="2018-03-21" \
+  VERSION="1805" \
+  BUILD_DATE="2018-05-14" \
   TERM=xterm \
+  DEBIAN_FRONTEND=noninteractive \
   TZ='Europe/Berlin'
 
 # ---------------------------------------------------------------------------------------
@@ -56,15 +68,15 @@ ENV \
 COPY build /build
 
 RUN \
-  apk --quiet --no-cache update && \
-  apk add --quiet --no-cache --virtual .build-deps \
-    g++ make ruby-dev tzdata && \
-  apk add --quiet --no-cache \
-    libev hiredis && \
+  apt-get update --quiet --quiet > /dev/null && \
+  apt-get install --quiet --quiet --assume-yes --no-install-recommends \
+    g++ make ruby-dev && \
+  echo 'gem: --no-document' >> /etc/gemrc && \
   gem install --quiet --no-rdoc --no-ri \
     io-console bundler && \
-  cp /usr/share/zoneinfo/${TZ} /etc/localtime && \
-  echo ${TZ} > /etc/timezone && \
+  apt-get install --quiet --quiet --assume-yes --no-install-recommends \
+    libhiredis0.13 libev4 && \
+  /usr/sbin/icinga2 feature enable command checker mainlog notification && \
   cd /build && \
   bundle install --quiet && \
   for g in $(ls -1 /build/*.gem 2> /dev/null) ; \
@@ -74,13 +86,13 @@ RUN \
   done && \
   gem uninstall --quiet \
     io-console bundler && \
-  apk del --quiet .build-deps && \
+  apt-get clean --quiet --quiet > /dev/null && \
   rm -rf \
     /tmp/* \
-    /build  \
-    /root/.bundle \
+    /var/cache/debconf/* \
+    /usr/share/doc/* \
     /root/.gem \
-    /var/cache/apk/*
+    /root/.bundle
 
 COPY --from=builder /tmp/coremedia_icinga2_checks/build/check_*  /usr/lib/monitoring-plugins/
 COPY --from=builder /usr/local/lib64 /usr/local/lib64
