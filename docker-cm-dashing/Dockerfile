@@ -2,15 +2,17 @@
 FROM bodsch/docker-dashing:1801-r1
 
 ENV \
-  BUILD_DATE="2018-03-21" \
+  VERSION="1805" \
+  BUILD_DATE="2018-05-16" \
   TZ='Europe/Berlin' \
   DASHBOARD="coremedia" \
-  ICINGA2_GEM_VERSION="0.9"
+  ICINGA2_GEM_TYPE="stable" \
+  ICINGA2_GEM_VERSION="1.0.0"
 
 EXPOSE 3030
 
 LABEL \
-  version="1803" \
+  version="${VERSION}" \
   maintainer="Bodo Schulz <bodo@coremedia.com>" \
   org.label-schema.build-date=${BUILD_DATE}
 
@@ -32,13 +34,14 @@ RUN \
   rm -f /opt/${DASHBOARD}/jobs/twitter* && \
   rm -f /opt/${DASHBOARD}/dashboards/* && \
   cd ${DASHBOARD} && \
-  bundle config local.icinga2 /build && \
   sed -i "/gem 'twitter'/d" Gemfile && \
   echo "gem 'puma', '~> 3.10'" >> Gemfile && \
-  count=$(ls -1 /build/*.gem 2> /dev/null | tail -n1) && \
-  if [ ! -z ${count} ] ; then \
-    gem install --no-rdoc --no-ri ${count} ; \
-  else \
+  if [ "${ICINGA2_GEM_TYPE}" == "local" ] ; then \
+    for g in $(ls -1 /build/*.gem 2> /dev/null) ; do \
+      echo "install local gem '${g}'" && \
+      gem install --quiet --no-rdoc --no-ri ${g} ; \
+    done ; \
+  elif [ "${ICINGA2_GEM_TYPE}" == "stable" ] ; then \
     echo "gem 'icinga2', '~> ${ICINGA2_GEM_VERSION}'" >> Gemfile ; \
   fi && \
   bundle update --quiet && \

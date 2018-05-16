@@ -58,7 +58,7 @@ MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
   VERSION="1805" \
-  BUILD_DATE="2018-05-14" \
+  BUILD_DATE="2018-05-16" \
   TERM=xterm \
   DEBIAN_FRONTEND=noninteractive \
   TZ='Europe/Berlin'

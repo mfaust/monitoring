@@ -5,7 +5,7 @@ MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
   VERSION="1805" \
-  BUILD_DATE="2018-05-18" \
+  BUILD_DATE="2018-05-16" \
   TERM=xterm \
   TZ='Europe/Berlin' \
   GRAFANA_GEM_TYPE="stable" \
