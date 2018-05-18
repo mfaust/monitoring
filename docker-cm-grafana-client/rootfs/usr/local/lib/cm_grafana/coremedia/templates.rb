@@ -60,7 +60,7 @@ class CMGrafana
         icinga_identifier        = graphite_identifier.gsub('.','_')
         short_hostname           = @short_hostname
         grafana_title            = format('%s - %s', slug, description )
-        uuid                     = format( '%s-%s', @uuid, service_name )
+        uuid                     = format('%s-%s', @dashboard_uuid, service_name )
 
         ## -------------------------------------------------------
         #logger.debug( sprintf( '  service_name       \'%s\'', service_name ) )
@@ -162,7 +162,7 @@ class CMGrafana
         json = JSON.parse( json ) if( json.is_a?(String) )
         title = json.dig('dashboard','title')
 
-        response = create_dashboard( title: title, dashboard: json )
+        response = create_dashboard( title: title, dashboard: json, folderId: @folder_uuid )
         response_status  = response.dig('status').to_i
         response_message = response.dig('message')
 
@@ -237,7 +237,7 @@ class CMGrafana
         mls_identifier       = params.dig(:mls_identifier)
         tomcat_dashboard_url = params.dig(:tomcat_dashboard_url)
         icinga_identifier    = graphite_identifier.gsub('.','_')
-        uuid                 = format( '%s-%s', @uuid, service_name )
+        uuid                 = format( '%s-%s', @dashboard_uuid, service_name )
 
         grafana_title = format('%s - %s', slug, description )
 

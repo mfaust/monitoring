@@ -33,14 +33,21 @@ class CMGrafana
 
         @slug  = slug( @slug ).gsub( '.', '-' )
 
-        @uuid  = @slug.gsub(/-\w{1,2}-\d{1,2}-(.*)-tomcat-/, '-')
+        @dashboard_uuid  = @slug.gsub(/-\w{1,2}-\d{1,2}-(.*)-tomcat-/, '-')
+        @folder_uuid     = @slug.scan(/(\w+-\w{1,2}-\d{1,2}-.*)-tomcat(-\d{1,2})-.*/).last
+        if(@folder_uuid.nil?)
+          @folder_uuid   = @slug
+        else
+          @folder_uuid   = @folder_uuid.join
+        end
 
         logger.debug( format('ip   : %s', ip))
         logger.debug( format('short: %s', short))
         logger.debug( format('fqdn : %s', fqdn))
         logger.debug( "short hostname     : #{@short_hostname}" )
         logger.debug( "slug               : #{@slug}" )
-        logger.debug( "uuid               : #{@uuid}" )
+        logger.debug( "dashboard uuid     : #{@dashboard_uuid}" )
+        logger.debug( "folder uuid        : #{@folder_uuid}" )
         logger.debug( "graphite identifier: #{@graphite_identifier}" )
 
         [ ip, short, fqdn ]
@@ -98,14 +105,17 @@ class CMGrafana
           end
         end
 
+        # create folder for every host
+        create_host_folder(@folder_uuid)
+
         # create service dashboards
         #
         service_dasboard_result = create_service_dashboard( dns: { ip: ip, short: short, fqdn: fqdn }, discovery: discovery )
 
         # create license dashboard
         #
-        #create_license_dashboard( dns: { ip: ip, short: short, fqdn: fqdn }, services: services )
-        create_license_dashboard_nxt( dns: { ip: ip, short: short, fqdn: fqdn }, services: services )
+        #create_license_dashboard_OBSOLETE( dns: { ip: ip, short: short, fqdn: fqdn }, services: services )
+        create_license_dashboard( dns: { ip: ip, short: short, fqdn: fqdn }, services: services )
 
         # we want an Services Overview for this Host
         #
@@ -143,7 +153,7 @@ class CMGrafana
         logger.info( 'Create Overview Template' )
 
         slug                = @slug
-        uuid                = format( '%s-overview', @uuid )
+        uuid                = format( '%s-overview', @dashboard_uuid )
         graphite_identifier = @graphite_identifier
         short_hostname      = @short_hostname
 
@@ -167,8 +177,7 @@ class CMGrafana
 
           logger.debug("title: #{title}")
 
-
-          response = create_dashboard( title: title, dashboard: content )
+          response = create_dashboard( title: title, dashboard: content, folderId: @folder_uuid )
           response_status  = response.dig('status').to_i
           response_message = response.dig('message')
 
@@ -179,7 +188,7 @@ class CMGrafana
       end
 
 
-      def create_license_dashboard_nxt(params = {})
+      def create_license_dashboard(params = {})
 
         logger.info( 'create License Dashboard' )
 
@@ -254,7 +263,7 @@ class CMGrafana
         end
 
         slug                = @slug
-        uuid                = format( '%s-licenses', @uuid )
+        uuid                = format( '%s-licenses', @dashboard_uuid )
         graphite_identifier = @graphite_identifier
         short_hostname      = @short_hostname
 
@@ -276,7 +285,7 @@ class CMGrafana
           content = JSON.parse( content ) if( content.is_a?(String) )
           title = content.dig('dashboard','title')
 
-          response = create_dashboard( title: title, dashboard: content )
+          response = create_dashboard( title: title, dashboard: content, folderId: @folder_uuid )
           response_status  = response.dig('status').to_i
           response_message = response.dig('message')
 
@@ -285,14 +294,13 @@ class CMGrafana
       end
 
 
-
       # creates a license dashboard if the information is available
       #
       # @param [Hash, #read] params
       # @option params [Hash, #read] dns
       # @option params [Array, #read] services
       #
-      def create_license_dashboard(params = {})
+      def create_license_dashboard_OBSOLETE(params = {})
 
         logger.info( 'create License Dashboard' )
 
@@ -535,7 +543,7 @@ class CMGrafana
           title = json.dig('dashboard','title')
           logger.debug( title )
 
-          response = create_dashboard( title: title, dashboard: json )
+          response = create_dashboard( title: title, dashboard: json, folderId: @folder_uuid )
           response_status  = response.dig('status').to_i
           response_message = response.dig('message')
 
@@ -719,6 +727,8 @@ class CMGrafana
 
           logger.info( format( '%d dashboards deleted', delete_count ) )
 
+          delete_host_folder(@folder_uuid)
+
           return { status: 200, name: host, message: format( '%d dashboards deleted', delete_count ) }
         end
 
@@ -865,7 +875,7 @@ class CMGrafana
         template = regenerate_template_ids( template )
         template = JSON.parse( template ) if( template.is_a?(String) )
 
-        response         = create_dashboard( dashboard: template )
+        response         = create_dashboard( dashboard: template, folderId: @folder_uuid )
         response_status  = response.dig('status').to_i
         response_message = response.dig('message')
 
@@ -875,7 +885,6 @@ class CMGrafana
       end
 
     end
-
   end
 end
 

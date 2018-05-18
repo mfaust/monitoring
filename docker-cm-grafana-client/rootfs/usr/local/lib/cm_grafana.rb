@@ -21,6 +21,7 @@ require_relative 'cm_grafana/configure_server'
 require_relative 'cm_grafana/queue'
 require_relative 'cm_grafana/coremedia/tools'
 require_relative 'cm_grafana/coremedia/dashboard'
+require_relative 'cm_grafana/coremedia/folder'
 require_relative 'cm_grafana/coremedia/templates'
 require_relative 'cm_grafana/coremedia/annotations'
 
@@ -34,6 +35,7 @@ class CMGrafana
   include CMGrafana::Queue
   include CMGrafana::CoreMedia::Tools
   include CMGrafana::CoreMedia::Dashboard
+  include CMGrafana::CoreMedia::Folder
   include CMGrafana::CoreMedia::Templates
   include CMGrafana::CoreMedia::Annotations
 
