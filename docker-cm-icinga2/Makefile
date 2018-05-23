@@ -10,7 +10,6 @@ build:
 	docker build \
 		--compress \
 		--force-rm \
-		--no-cache \
 		--tag=$(IMAGE_NAME) .
 	@echo Image tag: ${IMAGE_NAME}
 

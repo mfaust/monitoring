@@ -1,15 +1,15 @@
 
-FROM alpine:3.7
+FROM alpine:latest
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
-  VERSION="1803" \
-  BUILD_DATE="2018-04-06" \
+  VERSION="1805" \
+  BUILD_DATE="2018-05-16" \
   TERM=xterm \
   TZ='Europe/Berlin' \
   ICINGA2_GEM_TYPE="stable" \
-  ICINGA2_GEM_VERSION="1.0"
+  ICINGA2_GEM_VERSION="1.0.0"
 
 # ---------------------------------------------------------------------------------------
 
@@ -28,11 +28,15 @@ RUN \
   gem install --quiet --no-rdoc --no-ri \
     io-console bundler && \
   cd /build && \
-  bundle install --quiet && \
-  for g in $(ls -1 /build/*.gem 2> /dev/null) ; do echo $g; gem install --quiet --no-rdoc --no-ri ${g} ; done && \
-  if [ "${ICINGA2_GEM_TYPE}" == "stable" ] ; then \
+  if [ "${ICINGA2_GEM_TYPE}" == "local" ] ; then \
+    for g in $(ls -1 /build/*.gem 2> /dev/null) ; do \
+      echo "install local gem '${g}'" && \
+      gem install --quiet --no-rdoc --no-ri ${g} ; \
+    done ; \
+  elif [ "${ICINGA2_GEM_TYPE}" == "stable" ] ; then \
     echo "gem 'icinga2', '~> ${ICINGA2_GEM_VERSION}'" >> Gemfile ; \
   fi && \
+  bundle install --quiet && \
   gem uninstall --quiet \
     io-console bundler && \
   apk del --quiet .build-deps && \
