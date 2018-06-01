@@ -28,7 +28,7 @@ services:
 
   database:
     restart: always
-    image: bodsch/docker-mysql:10.1.28-r1
+    image: bodsch/docker-mysql
     container_name: database
     hostname: database
     environment:
