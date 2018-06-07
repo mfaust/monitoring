@@ -98,9 +98,9 @@ services:
       - documentation
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ../../docker-cm-data/rootfs/data/www/entry-page:/var/www/entry-page
-      - ../../docker-cm-data/rootfs/data/etc/nginx/sites-enabled/01-all-in-one.conf:/etc/nginx/sites-enabled/01-all-in-one.conf:ro
-      - ../../docker-cm-data/rootfs/data/etc/nginx/nginx.conf-aio:/etc/nginx/nginx.conf:ro
+      # - ../../docker-cm-data/rootfs/data/www/entry-page:/var/www/entry-page
+      - ../config/nginx/etc/nginx/sites-enabled/01-all-in-one.conf:/etc/nginx/sites-enabled/01-all-in-one.conf:ro
+      - ../config/nginx/etc/nginx/nginx.conf-aio:/etc/nginx/nginx.conf:ro
       - ./ssl:/etc/nginx/secure/localhost:ro
     networks:
       - mon
@@ -204,7 +204,6 @@ services:
       - 8080
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      # - icinga:/srv
       - icinga:/var/lib/icinga2
     networks:
       - mon
@@ -330,8 +329,8 @@ services:
       - redis
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ../../docker-cm-data/rootfs/data/etc/cm-service.yaml:/etc/cm-service.yaml
-      - ../../docker-cm-data/rootfs/data/etc/cm-application.yaml:/etc/cm-application.yaml
+      - ../config/service-discovery/etc/cm-service.yaml:/etc/cm-service.yaml
+      - ../config/service-discovery/etc/cm-application.yaml:/etc/cm-application.yaml
     networks:
       - mon
     extra_hosts:
@@ -358,8 +357,8 @@ services:
       - redis
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ../../docker-cm-data/rootfs/data/etc/cm-service.yaml:/etc/cm-service.yaml
-      - ../../docker-cm-data/rootfs/data/etc/cm-application.yaml:/etc/cm-application.yaml
+      - ../config/data-collector/etc/cm-service.yaml:/etc/cm-service.yaml
+      - ../config/data-collector/etc/cm-application.yaml:/etc/cm-application.yaml
     networks:
       - mon
     extra_hosts:
@@ -435,7 +434,7 @@ services:
       - nginx
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ../../docker-cm-data/rootfs/data/etc/icinga_server_config.yml:/etc/icinga_server_config.yml
+      # - ../../docker-cm-data/rootfs/data/etc/icinga_server_config.yml:/etc/icinga_server_config.yml
     networks:
       - mon
     extra_hosts:
