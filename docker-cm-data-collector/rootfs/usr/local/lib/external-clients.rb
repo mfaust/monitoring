@@ -110,7 +110,7 @@ module ExternalClients
 
     def toJson( data )
 
-      h = Hash.new()
+      h = {}
 
       data.each do |k|
         # "Variable_name"=>"Innodb_buffer_pool_pages_free", "Value"=>"1"
@@ -389,7 +389,7 @@ module ExternalClients
 
     def collect_uptime( data )
 
-      result    = Hash.new()
+      result    = {}
       parts    = data.last.split( ' ' )
       boot_time = parts[1].to_f.to_i
       # boot_time = sprintf( "%f", parts[1].to_s ).sub(/\.?0*$/, "" )
@@ -401,7 +401,7 @@ module ExternalClients
 
     def collect_cpu( data )
 
-      result  = Hash.new()
+      result  = {}
       tmpCore = nil
       regex   = /(.*){cpu="(?<core>(.*))",mode="(?<mode>(.*))"}(?<mes>(.*))/x
 
@@ -413,6 +413,8 @@ module ExternalClients
 
           mes = mes.to_s.strip.to_f.to_i # sprintf( "%f", mes.to_s.strip ).sub(/\.?0*$/, "" )
 
+          core = "cpu#{core}" unless core =~ /^cpu/
+
           if( core != tmpCore )
             result[core] = { mode => mes }
             tmpCore = core
@@ -422,13 +424,15 @@ module ExternalClients
         end
       end
 
+      result['count'] = result.count
+
       result
     end
 
 
     def collect_load( data )
 
-      result = Hash.new()
+      result = {}
       regex = /(?<load>(.*)) (?<mes>(.*))/x
 
       data.each do |c|
@@ -454,7 +458,7 @@ module ExternalClients
 
     def collect_memory( data )
 
-      result = Hash.new()
+      result = {}
       data   = data.select { |name| name =~ /^node_memory_Swap|node_memory_Mem/ }
       regex  = /(?<load>(.*)) (?<mes>(.*))/x
 
@@ -520,12 +524,12 @@ module ExternalClients
 
     def collect_network( data )
 
-      result = Hash.new()
-      r      = Array.new
+      result = {}
+      r      = []
 
-      existing_devices = Array.new()
+      existing_devices = []
 
-      regex = /(.*)receive_bytes{device="(?<device>(.*))"}(.*)/
+      regex = /(.*){device="(?<device>(.*))"}(.*)/
 
       d = data.select { |name| name.match( regex ) }
 
@@ -535,23 +539,26 @@ module ExternalClients
         end
       end
 
-      regex = /(.*)_(?<direction>(.*))_(?<type>(.*)){device="(?<device>(.*))"}(?<mes>(.*))/x
+      # regex = /^(?<direction>(.*))_(?<type>(.*)){device="(?<device>(.*))"}(?<mes>(.*))/x
+      regex = /^node_network_(?<direction>(.*))_(?<type>(.*))_(.*){device="(?<device>(.*))"}(?<mes>(.*))/x
 
       existing_devices.each do |d|
 
         selected = data.select { |name| name.match( /(.*)device="#{d}(.*)/ ) }
+        selected = selected.select { |name| name =~ /bytes|packets|err|drop/ }
 
         hash = {}
 
         selected.each do |s|
-
           if( parts = s.match( regex ) )
             direction, type, device, mes = parts.captures
 
-            hash[ d.to_s ] ||= {}
-            hash[ d.to_s ][ direction.to_s ] ||= {}
-            hash[ d.to_s ][ direction.to_s ][ type.to_s ] ||= {}
-            hash[ d.to_s ][ direction.to_s ][ type.to_s ] = mes.to_f.to_i # sprintf( "%f", mes.to_s ).sub(/\.?0*$/, "" )
+            direction = direction.gsub('node_network_','')
+
+            hash[d.to_s] ||= {}
+            hash[d.to_s][direction.to_s] ||= {}
+            hash[d.to_s][direction.to_s][type.to_s] ||= {}
+            hash[d.to_s][direction.to_s][type.to_s] = mes.to_f.to_i # sprintf( "%f", mes.to_s ).sub(/\.?0*$/, "" )
           end
         end
 
@@ -564,10 +571,10 @@ module ExternalClients
 
     def collect_disk( data )
 
-      result = Hash.new()
-      r      = Array.new
+      result = {}
+      r      = []
 
-      existing_devices = Array.new()
+      existing_devices = []
 
       regex = /(.*){device="(?<device>(.*))"}(.*)/
 
@@ -580,12 +587,12 @@ module ExternalClients
 
       existing_devices.uniq!
 
-      regex = /(.*)_(?<type>(.*))_(?<direction>(.*)){device="(?<device>(.*))"}(?<mes>(.*))/x
+      regex = /^(?<type>(.*))_(?<direction>(.*)){device="(?<device>(.*))"}(?<mes>(.*))/x
 
       existing_devices.each do |d|
 
         selected = data.select     { |name| name.match( /(.*)device="#{d}(.*)/ ) }
-        selected = selected.select { |name| name =~ /bytes_read|bytes_written|io_now/ }
+        selected = selected.select { |name| name =~ /bytes_read|bytes_written|read_bytes|written_bytes|io_now/ }
 
         hash = {}
 
@@ -595,10 +602,12 @@ module ExternalClients
 
             type, direction, device, mes = parts.captures
 
-            hash[ d.to_s ] ||= {}
-            hash[ d.to_s ][ type.to_s ] ||= {}
-            hash[ d.to_s ][ type.to_s ][ direction.to_s ] ||= {}
-            hash[ d.to_s ][ type.to_s ][ direction.to_s ] = mes.to_f.to_i # sprintf( "%f", mes.to_s ).sub(/\.?0*$/, "" )
+            type = type.gsub('node_disk_','').gsub('_bytes','')
+
+            hash[d.to_s] ||= {}
+            hash[d.to_s][type.to_s] ||= {}
+            hash[d.to_s][type.to_s][direction.to_s] ||= {}
+            hash[d.to_s][type.to_s][direction.to_s] = mes.to_f.to_i # sprintf( "%f", mes.to_s ).sub(/\.?0*$/, "" )
 
           end
         end
@@ -612,10 +621,11 @@ module ExternalClients
 
     def collect_filesystem( data )
 
-      result = Hash.new()
-      r      = Array.new
+      result = {}
+      r      = []
 
       # blacklist | mount | egrep -v "(cgroup|none|sysfs|devtmpfs|tmpfs|devpts|proc)"
+      data.reject! { |t| t[/-hosts/] }
       data.reject! { |t| t[/etc/] }
       data.reject! { |t| t[/iso9660/] }
       data.reject! { |t| t[/tmpfs/] }
@@ -640,7 +650,7 @@ module ExternalClients
       data.reject! { |t| t[/\/var\/lib\/docker/] }
       data.flatten!
 
-      existing_devices = Array.new()
+      existing_devices = []
 
       regex = /(.*){device="(?<device>(.*))"}(.*)/
 
@@ -654,7 +664,7 @@ module ExternalClients
 
       existing_devices.uniq!
 
-      regex = /(.*)_(?<type>(.*)){device="(?<device>(.*))",fstype="(?<fstype>(.*))",mountpoint="(?<mountpoint>(.*))"}(?<mes>(.*))/x
+      regex = /^(?<type>(.*)){device="(?<device>(.*))",fstype="(?<fstype>(.*))",mountpoint="(?<mountpoint>(.*))"}(?<mes>(.*))/x
 
       existing_devices.each do |d|
 
@@ -667,6 +677,8 @@ module ExternalClients
           if( parts = s.match( regex ) )
 
             type, device, fstype, mountpoint, mes = parts.captures
+            # fix breaking changes in node_exporter v0.16.x
+            type = type.gsub('node_filesystem_','').gsub('_bytes','')
 
             device.gsub!( '/dev/', '' )
 
@@ -677,10 +689,10 @@ module ExternalClients
             # skip
             next if( mountpoint =~ /^\/rootfs/ )
 
-            hash[ device.to_s ] ||= {}
-            hash[ device.to_s ][ type.to_s ] ||= {}
-            hash[ device.to_s ][ type.to_s ]  = mes.to_f.to_i # sprintf( "%f", mes.to_s ).sub(/\.?0*$/, "" )
-            hash[ device.to_s ]['mountpoint'] = mountpoint
+            hash[device.to_s] ||= {}
+            hash[device.to_s][type.to_s] ||= {}
+            hash[device.to_s][type.to_s]  = mes.to_f.to_i # sprintf( "%f", mes.to_s ).sub(/\.?0*$/, "" )
+            hash[device.to_s]['mountpoint'] = mountpoint
           end
         end
 
@@ -790,7 +802,7 @@ module ExternalClients
 
     def collect_load( data )
 
-      result = Hash.new()
+      result = {}
       regex = /(?<load>(.*)) (?<mes>(.*))/x
 
       data = self.network( 'load-avg' )
@@ -913,7 +925,7 @@ module ExternalClients
 
     def tick
 
-      a = Array.new
+      a = []
 
       response = fetch( format('http://%s:%d/server-status', @host, @port), 2 )
 

@@ -161,6 +161,8 @@ module CarbonData
 
               avail = d.dig('avail')
               size  = d.dig('size')
+              used  = d.dig('used')
+              used_percent = d.dig('used_percent')
 
               if( size.to_i == 0 )
                 logger.debug( 'zero size' )
@@ -168,11 +170,11 @@ module CarbonData
                 next
               end
 
-              used         = ( size.to_i - avail.to_i )
-              used_percent  = ( 100 * used.to_i / size.to_i ).to_i
+              #used         = ( size.to_i - avail.to_i )
+              #used_percent = ( 100 * used.to_i / size.to_i ).to_i
 
               result << {
-                key: format( '%s.%s.%s.%s.%s'         , @identifier, @normalized_service_name, 'filesystem', f, 'total' ),
+                key: format( '%s.%s.%s.%s.%s'         , @identifier, @normalized_service_name, 'filesystem', f, 'size' ),
                 value: size
               } << {
                 key: format( '%s.%s.%s.%s.%s'         , @identifier, @normalized_service_name, 'filesystem', f, 'free' ),
