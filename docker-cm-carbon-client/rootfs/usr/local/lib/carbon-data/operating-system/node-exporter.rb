@@ -42,7 +42,7 @@ module CarbonData
 
             count = cpu.count
 
-            r << {
+            result << {
               key: format( '%s.%s.%s.%s'         , @identifier, @normalized_service_name, 'cpu', 'count' ),
               value: count
             }
