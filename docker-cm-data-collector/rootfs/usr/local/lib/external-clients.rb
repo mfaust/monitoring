@@ -465,7 +465,7 @@ module ExternalClients
           c.gsub!('node_memory_', ' ' )
 
           parts = c.split( ' ' )
-          result[parts[0]] = sprintf( "%f", parts[1].to_s ).sub(/\.?0*$/, "")
+          result[parts[0].to_s.gsub('_bytes', '')] = sprintf( "%f", parts[1].to_s ).sub(/\.?0*$/, "").to_i
         end
       end
 
@@ -473,19 +473,19 @@ module ExternalClients
         c.gsub!('node_memory_', ' ' )
         if( parts = c.match( regex ) )
           parts = c.split( ' ' )
-          key   = parts[0].downcase
+          key   = parts[0].downcase.gsub('_bytes', '')
           value = parts[1].to_f.to_i
 
           if( key =~ /^mem/ )
             _key = key.gsub('mem','')
-            result["memory"] ||= {}
-            result["memory"][_key] = value
+            result['memory'] ||= {}
+            result['memory'][_key] = value
           end
 
           if( key =~ /^swap/ )
             _key = key.gsub('swap','')
-            result["swap"] ||= {}
-            result["swap"][_key] = value
+            result['swap'] ||= {}
+            result['swap'][_key] = value
           end
         end
       end
@@ -496,8 +496,8 @@ module ExternalClients
         mem_used         = ( mem_total.to_i - mem_available.to_i )
         mem_used_percent = ( 100 * mem_used.to_i / mem_total.to_i ).to_i
 
-        result["memory"]["used"] = mem_used
-        result["memory"]["used_percent"] = mem_used_percent
+        result['memory']['used'] = mem_used
+        result['memory']['used_percent'] = mem_used_percent
       end
 
       if(result.dig('swap','total') && result.dig('swap','free'))
@@ -509,8 +509,8 @@ module ExternalClients
           swap_used_percent = 0
           swap_used_percent = ( 100 * swap_used.to_i / swap_total.to_i ).to_i if( swap_used.to_i > 0 && swap_total.to_i > 0 )
 
-          result["swap"]["used"] = swap_used
-          result["swap"]["used_percent"] = swap_used_percent
+          result['swap']['used'] = swap_used
+          result['swap']['used_percent'] = swap_used_percent
         end
       end
 

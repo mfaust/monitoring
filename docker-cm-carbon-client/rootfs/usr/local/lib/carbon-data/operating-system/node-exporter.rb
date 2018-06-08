@@ -76,26 +76,48 @@ module CarbonData
             end
           end
 
-
+#  "memory": {
+#    "MemAvailable": "3167305728",
+#    "MemFree": "149008384",
+#    "MemTotal": "10316279808",
+#    "SwapCached": "2129920",
+#    "SwapFree": "4290932736",
+#    "SwapTotal": "4294963200",
+#    "memory": {
+#      "available": 3167305728,
+#      "free": 149008384,
+#      "total": 10316279808,
+#      "used": 7148974080,
+#      "used_percent": 69
+#    },
+#    "swap": {
+#      "cached": 2129920,
+#      "free": 4290932736,
+#      "total": 4294963200,
+#      "used": 4030464,
+#      "used_percent": 0
+#    }
+#  }
+#
           unless( memory.nil? )
 
-            memory_available    = memory.dig('MemAvailable')
-            memory_free         = memory.dig('MemFree')
-            memory_total        = memory.dig('MemTotal')
-            memory_used         = ( memory_total.to_i - memory_available.to_i )
-            memory_used_percent = ( 100 * memory_used.to_i / memory_total.to_i ).to_i
+            memory_available    = memory.dig('memory','available')
+            memory_free         = memory.dig('memory','free')
+            memory_total        = memory.dig('memory','total')
+            memory_used         = memory.dig('memory','used')         # ( memory_total.to_i - memory_available.to_i )
+            memory_used_percent = memory.dig('memory','used_percent') # ( 100 * memory_used.to_i / memory_total.to_i ).to_i
 
-            swap_total          = memory.dig('SwapTotal')
+            swap_total          = memory.dig('swap','total')
             swap_cached         = 0
             swap_free           = 0
             swap_used           = 0
             swap_used_percent   = 0
 
             if( swap_total != 0 )
-              swap_cached       = memory.dig('SwapCached')
-              swap_free         = memory.dig('SwapFree')
-              swap_used         = ( swap_total.to_i - swap_free.to_i )
-              swap_used_percent = ( 100 * swap_used.to_i / swap_total.to_i ).to_i if( swap_used.to_i > 0 && swap_total.to_i > 0 )
+              swap_cached       = memory.dig('swap','cached')
+              swap_free         = memory.dig('swap','free')
+              swap_used         = memory.dig('swap','used')         # ( swap_total.to_i - swap_free.to_i )
+              swap_used_percent = memory.dig('swap','used_percent') # ( 100 * swap_used.to_i / swap_total.to_i ).to_i if( swap_used.to_i > 0 && swap_total.to_i > 0 )
             end
 
             result << {
