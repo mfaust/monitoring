@@ -42,7 +42,8 @@ services:
 
   jolokia:
     restart: always
-    build: ../../docker-cm-jolokia
+    image: moebius-registry.coremedia.vm/docker-cm-jolokia:latest
+    # build: ../../docker-cm-jolokia
     container_name: jolokia
     hostname: jolokia
     volumes:
