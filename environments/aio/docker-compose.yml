@@ -329,8 +329,6 @@ services:
       - redis
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ../config/service-discovery/etc/cm-service.yaml:/etc/cm-service.yaml
-      - ../config/service-discovery/etc/cm-application.yaml:/etc/cm-application.yaml
     networks:
       - mon
     extra_hosts:
@@ -357,8 +355,6 @@ services:
       - redis
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ../config/data-collector/etc/cm-service.yaml:/etc/cm-service.yaml
-      - ../config/data-collector/etc/cm-application.yaml:/etc/cm-application.yaml
     networks:
       - mon
     extra_hosts:
