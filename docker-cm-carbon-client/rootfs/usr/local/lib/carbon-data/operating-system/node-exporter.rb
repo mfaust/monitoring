@@ -40,7 +40,12 @@ module CarbonData
 
           unless( cpu.nil? )
 
-            n = cpu.values.inject { |m, el| m.merge( el ) { |k, old_v, new_v| old_v.to_i + new_v.to_i } }
+            count = cpu.count
+
+            r << {
+              key: format( '%s.%s.%s.%s'         , @identifier, @normalized_service_name, 'cpu', 'count' ),
+              value: count
+            }
 
             cpu.each do |c,d|
 
