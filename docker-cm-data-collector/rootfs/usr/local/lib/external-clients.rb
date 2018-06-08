@@ -424,8 +424,6 @@ module ExternalClients
         end
       end
 
-      result['count'] = result.count
-
       result
     end
 
