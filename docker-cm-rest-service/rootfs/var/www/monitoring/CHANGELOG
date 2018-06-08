@@ -16,7 +16,7 @@
   },
   "1806": {
     "version": "1806",
-    "date": "06.06.2018",
+    "date": "08.06.2018",
     "changes": [
       "update to grafana 5.1.3",
       "grafana folder support",
@@ -31,7 +31,7 @@
       "update to icinga2 gem 1.0.0",
       "add new documentations container",
       "including the stack documentation and a operation guide",
-      "use new grafana gem (0.10.1)"
+      "support node_exporter v0.16.x"
     ]
   },
   "1808": {
