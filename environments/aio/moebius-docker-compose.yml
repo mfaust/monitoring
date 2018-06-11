@@ -395,8 +395,8 @@ services:
   # use MQ to process data
   cm-grafana-client:
     restart: always
-    # image: moebius-registry.coremedia.vm/docker-cm-grafana-client
-    build: ../../docker-cm-grafana-client
+    image: moebius-registry.coremedia.vm/docker-cm-grafana-client
+    # build: ../../docker-cm-grafana-client
     container_name: cm-grafana-client
     hostname: cm-grafana-client
     environment:
