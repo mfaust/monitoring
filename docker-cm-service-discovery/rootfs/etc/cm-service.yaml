@@ -109,7 +109,7 @@ services:
     description: ContentServer WFS
     port: 49099
     cap_connection: true
-    uapi_cache: true
+    uapi_cache: false
     blob_cache: true
     heap_cache: true
     workflow_repository: true
@@ -119,7 +119,7 @@ services:
     port: 40499
     feeder: content
     cap_connection: true
-    uapi_cache: true
+    uapi_cache: false
     heap_cache: true
     content_repository: true
 
@@ -127,14 +127,14 @@ services:
     description: User Changes
     port: 40599
     cap_connection: true
-    uapi_cache: true
+    uapi_cache: false
     heap_cache: true
 
   elastic-worker:
     description: Elastic Worker
     port: 40699
     cap_connection: true
-    uapi_cache: true
+    uapi_cache: false
     blob_cache: true
     heap_cache: true
 
@@ -143,7 +143,7 @@ services:
     port: 40799
     feeder: preview
     cap_connection: true
-    uapi_cache: true
+    uapi_cache: false
     heap_cache: true
     content_repository: true
     application:
@@ -155,7 +155,7 @@ services:
     port: 40899
     feeder: live
     cap_connection: true
-    uapi_cache: true
+    uapi_cache: false
     heap_cache: true
     content_repository: true
     application:
@@ -166,7 +166,7 @@ services:
     description: CAE Preview
     port: 40999
     cap_connection: true
-    uapi_cache: true
+    uapi_cache: false
     blob_cache: true
     heap_cache: true
     content_repository: true
@@ -180,7 +180,7 @@ services:
     description: Studio
     port: 41099
     cap_connection: true
-    uapi_cache: true
+    uapi_cache: false
     blob_cache: true
     heap_cache: true
     content_repository: true
@@ -193,14 +193,14 @@ services:
     description: Adobe Drive
     port: 41199
     cap_connection: true
-    uapi_cache: true
+    uapi_cache: false
     blob_cache: true
 
   adobe-drive-server:
     description: Adobe Drive Server
     port: 41199
     cap_connection: true
-    uapi_cache: true
+    uapi_cache: false
     blob_cache: true
     heap_cache: true
 
@@ -228,7 +228,7 @@ services:
     description: CAE Live
     port: 42199
     cap_connection: true
-    uapi_cache: true
+    uapi_cache: false
     blob_cache: true
     heap_cache: true
     content_repository: true
@@ -242,7 +242,7 @@ services:
     description: CAE Live 1
     port: 42199
     cap_connection: true
-    uapi_cache: true
+    uapi_cache: false
     blob_cache: true
     heap_cache: true
     content_repository: true
@@ -256,7 +256,7 @@ services:
     description: CAE Live 2
     port: 42299
     cap_connection: true
-    uapi_cache: true
+    uapi_cache: false
     blob_cache: true
     heap_cache: true
     content_repository: true
@@ -270,7 +270,7 @@ services:
     description: CAE Live 3
     port: 42399
     cap_connection: true
-    uapi_cache: true
+    uapi_cache: false
     blob_cache: true
     heap_cache: true
     content_repository: true
