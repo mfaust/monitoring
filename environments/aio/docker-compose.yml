@@ -272,6 +272,7 @@ services:
       ICINGA_CERT_SERVICE_SERVER: nginx
       ICINGA_CERT_SERVICE_PORT: 80
       ICINGA_CERT_SERVICE_PATH: /cert-service
+      ICINGAWEB_URL: /icinga
     depends_on:
       - cm-icinga2-master
       - nginx

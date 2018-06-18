@@ -70,6 +70,10 @@ $moreinfo-color:    rgba(255, 255, 255, 0.7);
     font-size: 60px;
     color: $value-color;
   }
+
+  .content {
+    cursor: pointer;
+  }
 }
 
 .widget-simplemon.color-green {
