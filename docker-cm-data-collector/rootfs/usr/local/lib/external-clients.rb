@@ -460,6 +460,9 @@ module ExternalClients
       data   = data.select { |name| name =~ /^node_memory_Swap|node_memory_Mem/ }
       regex  = /(?<load>(.*)) (?<mes>(.*))/x
 
+      # OBSOLETE
+      # remove in release > 1806!
+      #
       data.each do |c|
 
         if( parts = c.match( regex ) )
@@ -470,6 +473,7 @@ module ExternalClients
           result[parts[0].to_s.gsub('_bytes', '')] = sprintf( "%f", parts[1].to_s ).sub(/\.?0*$/, "").to_i
         end
       end
+      # ---------------------------------------------
 
       data.each do |c|
         c.gsub!('node_memory_', ' ' )
