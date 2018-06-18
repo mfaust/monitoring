@@ -1,7 +1,7 @@
 // ----------------------------------------------------------------------------
 // Sass declarations
 // ----------------------------------------------------------------------------
-$background-color:  #47bbb3;
+// $background-color:  #47bbb3;
 $value-color:       #fff;
 $label-color:       rgba(255, 255, 255, 0.7);
 
@@ -76,7 +76,7 @@ $moreinfo-color:    rgba(255, 255, 255, 0.7);
 
   ul.list-nostyle div {
     padding: 0 4px 2px 4px;
-    border-radius: 3px
+    /*border-radius: 3px*/
   }
 
   ul.list-nostyle div.green {
@@ -124,7 +124,7 @@ $moreinfo-color:    rgba(255, 255, 255, 0.7);
   .value {
     float: right;
     margin-left: 50px;
-    margin-top: 2px;
+    margin-top: 1px;
     font-weight: 500;
     color: $value-color;
   }
@@ -133,9 +133,9 @@ $moreinfo-color:    rgba(255, 255, 255, 0.7);
     content: "/ ";
   }
 
-  .value .v, .value .h {
+  /*.value .v, .value .h {
     padding: 0 4px 0 4px;
-  }
+  }*/
 
   .value .h {
     display: none

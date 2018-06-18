@@ -1,7 +1,7 @@
 // ----------------------------------------------------------------------------
 // Sass declarations
 // ----------------------------------------------------------------------------
-$background-color:  #47bbb3;
+// $background-color:  #47bbb3;
 $value-color:       #fff;
 
 $background-color-green:  #44bb77;
@@ -63,15 +63,15 @@ $moreinfo-color:    rgba(255, 255, 255, 0.7);
 // ----------------------------------------------------------------------------
 .widget-simplemon {
 
-  background-color: $background-color;
+  // background-color: $background-color;
 
   .value {
     margin-top: 20px;
     font-size: 60px;
     color: $value-color;
   }
-
 }
+
 .widget-simplemon.color-green {
     background-color: $background-color-green;
     .value { color: $value-color-green; }
