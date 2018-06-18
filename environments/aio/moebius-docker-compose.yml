@@ -42,7 +42,8 @@ services:
 
   jolokia:
     restart: always
-    build: ../../docker-cm-jolokia
+    image: moebius-registry.coremedia.vm/docker-cm-jolokia:1806
+    # build: ../../docker-cm-jolokia
     container_name: jolokia
     hostname: jolokia
     volumes:
@@ -172,7 +173,8 @@ services:
 
   cm-icinga2-master:
     restart: always
-    build: ../../docker-cm-icinga2
+    image: moebius-registry.coremedia.vm/docker-cm-icinga2:1806
+    # build: ../../docker-cm-icinga2
     container_name: cm-icinga2-master
     hostname: cm-icinga2-master
     depends_on:
@@ -248,7 +250,8 @@ services:
 
   documentation:
     restart: always
-    build: ../../docker-documentation
+    image: moebius-registry.coremedia.vm/docker-documentation:1806
+    # build: ../../docker-documentation
     container_name: documentation
     hostname: documentation
     ports:
@@ -260,7 +263,8 @@ services:
 
   cm-dashing:
     restart: always
-    build: ../../docker-cm-dashing
+    image: moebius-registry.coremedia.vm/docker-cm-dashing:1806
+    # build: ../../docker-cm-dashing
     container_name: cm-dashing
     hostname: cm-dashing
     environment:
@@ -289,7 +293,8 @@ services:
   #
   cm-rest-service:
     restart: always
-    build: ../../docker-cm-rest-service
+    image: moebius-registry.coremedia.vm/docker-cm-rest-service:1806
+    # build: ../../docker-cm-rest-service
     container_name: cm-rest-service
     hostname: cm-rest-service
     environment:
@@ -313,7 +318,8 @@ services:
   # use MQ to process data
   cm-service-discovery:
     restart: always
-    build: ../../docker-cm-service-discovery
+    image: moebius-registry.coremedia.vm/docker-cm-service-discovery:1806
+    # build: ../../docker-cm-service-discovery
     container_name: cm-service-discover
     hostname: cm-service-discover
     environment:
@@ -330,6 +336,8 @@ services:
       - redis
     volumes:
       - /etc/localtime:/etc/localtime:ro
+      #- ../config/service-discovery/etc/cm-service.yaml:/etc/cm-service.yaml
+      #- ../config/service-discovery/etc/cm-application.yaml:/etc/cm-application.yaml
     networks:
       - mon
     extra_hosts:
@@ -340,7 +348,8 @@ services:
   # use MQ to process data
   cm-data-collector:
     restart: always
-    build: ../../docker-cm-data-collector
+    image: moebius-registry.coremedia.vm/docker-cm-data-collector:1806
+    # build: ../../docker-cm-data-collector
     container_name: cm-data-collector
     hostname: cm-data-collector
     environment:
@@ -366,7 +375,8 @@ services:
   # use MQ to process data
   cm-carbon-client:
     restart: always
-    build: ../../docker-cm-carbon-client
+    image: moebius-registry.coremedia.vm/docker-cm-carbon-client:1806
+    # build: ../../docker-cm-carbon-client
     container_name: cm-carbon-client
     hostname: cm-carbon-client
     environment:
@@ -386,7 +396,8 @@ services:
   # use MQ to process data
   cm-grafana-client:
     restart: always
-    build: ../../docker-cm-grafana-client
+    image: moebius-registry.coremedia.vm/docker-cm-grafana-client:1806
+    # build: ../../docker-cm-grafana-client
     container_name: cm-grafana-client
     hostname: cm-grafana-client
     environment:
@@ -410,7 +421,8 @@ services:
   # use MQ to process data
   cm-icinga-client:
     restart: always
-    build: ../../docker-cm-icinga-client
+    image: moebius-registry.coremedia.vm/docker-cm-icinga-client:1806
+    # build: ../../docker-cm-icinga-client
     container_name: cm-icinga-client
     hostname: cm-icinga-client
     environment:

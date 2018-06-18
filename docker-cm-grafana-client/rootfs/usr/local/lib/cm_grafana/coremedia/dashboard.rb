@@ -64,9 +64,11 @@ class CMGrafana
       #
       def create_dashboard_for_host(params)
 
-        host            = params.dig(:host)
-        @additional_tags = params.dig(:tags)     || []
-        create_overview  = params.dig(:overview) || false
+        logger.debug("create_dashboard_for_host(#{params})")
+
+        host                = params.dig(:host)
+        @additional_tags    = params.dig(:tags)     || []
+        create_overview     = params.dig(:overview) || false
         overview_grouped_by = params.dig(:overview_grouped_by) || []
 
         if( host.nil? )
@@ -150,7 +152,7 @@ class CMGrafana
       #
       def create_overview_dashboard(services, service_dashboard_data)
 
-        logger.info( 'Create Overview Template' )
+        logger.info( 'create Overview dashboard' )
 
         slug                = @slug
         uuid                = format( '%s-overview', @dashboard_uuid )

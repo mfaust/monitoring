@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
 module CarbonData
-  VERSION = '2.4.2'
-  DATE    = '2018-03-23'
+  VERSION = '2.5.0'
+  DATE    = '2018-06-08'
 end

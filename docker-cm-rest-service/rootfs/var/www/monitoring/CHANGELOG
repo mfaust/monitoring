@@ -16,13 +16,22 @@
   },
   "1806": {
     "version": "1806",
-    "date": "",
+    "date": "18.06.2018",
     "changes": [
-      "use new grafana gem (0.10.1)",
+      "update to grafana 5.1.3",
       "grafana folder support",
       "set grafana 5 as default",
       "split annotations into more types",
-      "update some docker container (icinga stack, jolokia, grafana)"
+      "update to icinga2 2.8.4",
+      "update to icingaweb2 2.5.3",
+      "update to jolokia 1.5.0",
+      "update to graphite 1.1.3",
+      "jolokia supports now authentication",
+      "update to grafana gem 0.10.1",
+      "update to icinga2 gem 1.0.0",
+      "add new documentations container",
+      "including the stack documentation and a operation guide",
+      "support node_exporter v0.16.x"
     ]
   },
   "1808": {
@@ -31,4 +40,3 @@
     "changes": []
   }
 }
-

@@ -1,5 +1,5 @@
 module DataCollector
 
-  VERSION = '1.14.0'
-  DATE = '2018-03-10'
+  VERSION = '1.15.1'
+  DATE = '2018-06-08'
 end
