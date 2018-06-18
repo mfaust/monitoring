@@ -23,4 +23,4 @@ class Dashing.Simplemon extends Dashing.Widget
   redirect: ->
     link = $(@node).data("url")
     console.log("found url: " + link )
-    window.open(@link, '_blank' );
+    window.open(link, '_blank' );
