@@ -1,87 +1,95 @@
+<%-
+  title = 'Content Feeder'; descr = 'Content Feeder'; app = 'FEEDER_CONTENT'; id = 10;
+%>
 {
   "dashboard": {
-    "editable": true,
+    "uid": "<%= uuid %>",
     "id": null,
+    "title": "<%= slug %> - <%= title %>",
+    "tags": [ "<%= short_hostname %>", "feeder" ],
+    "schemaVersion": 12,
+    "version": 1,
+    "style": "dark",
+    "refresh": "1m",
+    "time": { "from": "now/d", "to": "now/d" },
+    "timepicker": {
+      "time_options": [
+        "5m",
+        "15m",
+        "1h",
+        "6h",
+        "12h",
+        "24h",
+        "2d",
+        "7d",
+        "30d"
+      ],
+      "now": true,
+      "refresh_intervals": [
+        "30s",
+        "1m",
+        "2m",
+        "4m",
+        "10m"
+      ]
+    },
+    "timezone": "browser",
+    "annotations": {
+      "list": []
+    },
     "templating": {
       "list": [
         {
-          "query": "<%= graphite_identifier %>",
-          "name": "host",
-          "options": [
-            {
-              "text": "<%= slug %>",
-              "value": "<%= graphite_identifier %>"
-            }
-          ],
-          "hide": 2,
           "current": {
             "text": "<%= slug %>",
             "value": "<%= graphite_identifier %>"
           },
+          "options": [
+            {
+              "value": "<%= graphite_identifier %>",
+              "text": "<%= slug %>"
+            }
+          ],
+          "hide": 2,
           "label": null,
+          "name": "host",
+          "query": "<%= graphite_identifier %>",
           "type": "constant"
         }
       ]
     },
+    "sharedCrosshair": true,
+    "editable": true,
     "hideControls": false,
-    "timezone": "browser",
-    "version": 1,
-    "links": [],
-    "refresh": "1m",
-    "uid": "<%= uuid %>",
-    "annotations": {
-      "list": []
-    },
-    "time": {
-      "to": "now",
-      "from": "now-3h"
-    },
+
     "rows": [
       {
         "title": "",
         "height": "10px",
-        "showTitle": false,
-        "titleSize": "h6",
-        "collapse": false,
-        "repeatIteration": null,
-        "repeat": null,
         "panels": [
           {
-            "id": 10,
-            "mode": "html",
+            "id": <%= id += 1 %>,
             "title": "",
             "type": "text",
-            "links": [],
-            "content": "<h3><center><a href=\"<%= tomcat_dashboard_url %>?var-Application=FEEDER_CONTENT\">Tomcat</a></center></h3>",
+            "span": 5,
+            "mode": "html",
             "transparent": true,
-            "span": 12
-          }
-        ],
-        "repeatRowId": null
-      },
-      {
-        "title": "Headline",
-        "height": "10px",
-        "collapse": false,
-        "editable": true,
-        "panels": [
+            "content": "<h2 style=\"text-align:center; font-weight:500\"><%= descr %></h2>"
+          },
           {
-            "span": 12,
-            "content": "<h2><center>Content Feeder</center></h2>",
-            "links": [],
-            "type": "text",
+            "id": <%= id += 1 %>,
             "title": "",
-            "transparent": true,
+            "type": "text",
+            "span": 7,
             "mode": "html",
-            "error": false,
-            "isNew": true,
-            "editable": true,
-            "id": 11
+            "transparent": true,
+            "content": "<div style=\"text-align:center; font-size: 1.8em\">\n<div style=\"width:49%; float:left\"><a style=\"text-decoration:none\" href=\"<%= tomcat_dashboard_url %>?var-Application=<%= app %>\">Tomcat</a></div>\n  <div style=\"width:49%; float:left\"><a style=\"text-decoration:none\" href=\"<%= memorypools_dashboard_url %>?var-Application=<%= app %>\">Memory Pools</a></div>\n</div>\n"
           }
         ]
       },
       {
         "title": "UAPI Cache",
+        "height": "150px",
         "panels": [
           {
             "type": "graph",
@@ -178,13 +186,11 @@
               "shared": true
             }
           }
-        ],
-        "collapse": false,
-        "height": "150px",
-        "editable": true
+        ]
       },
       {
-        "title": "statistics",
+        "title": "Statistics",
+        "height": "150px",
         "panels": [
           {
             "title": "Indexed Documents",
@@ -346,16 +352,11 @@
             "aliasColors": {},
             "bars": false
           }
-        ],
-        "collapse": false,
-        "height": "150px",
-        "editable": true
+        ]
       },
       {
         "title": "Background Feeds",
         "height": "170px",
-        "collapse": false,
-        "editable": true,
         "panels": [
           {
             "title": "Pending Background Feeds",
@@ -452,9 +453,8 @@
         ]
       },
       {
-        "editable": true,
+        "title": "Lightweight Sessions",
         "height": "150px",
-        "collapse": false,
         "panels": [
           {
             "xaxis": {
@@ -524,7 +524,7 @@
               "alignAsTable": true,
               "values": true,
               "min": false,
-              "max": true,
+              "max": false,
               "avg": false
             },
             "grid": {
@@ -534,39 +534,8 @@
               "threshold2": null
             }
           }
-        ],
-        "title": "Lightweight Sessions"
+        ]
       }
-    ],
-    "sharedCrosshair": true,
-    "title": "<%= slug %> - Content Feeder",
-    "style": "dark",
-    "tags": [
-      "<%= short_hostname %>",
-      "feeder"
-    ],
-    "schemaVersion": 12,
-    "timepicker": {
-      "time_options": [
-        "5m",
-        "15m",
-        "1h",
-        "6h",
-        "12h",
-        "24h",
-        "2d",
-        "7d",
-        "30d"
-      ],
-      "refresh_intervals": [
-        "10s",
-        "30s",
-        "1m",
-        "2m",
-        "4m",
-        "10m"
-      ],
-      "now": true
-    }
+    ]
   }
 }

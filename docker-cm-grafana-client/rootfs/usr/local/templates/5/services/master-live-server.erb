@@ -1,58 +1,95 @@
+<%-
+  title = 'MLS'; descr = 'MLS'; app = 'MLS'; id = 10;
+%>
 {
   "dashboard": {
-    "time": {
-      "to": "now",
-      "from": "now-3h"
-    },
+    "uid": "<%= uuid %>",
+    "id": null,
+    "title": "<%= slug %> - <%= title %>",
+    "tags": [ "<%= short_hostname %>", "content-server" ],
+    "schemaVersion": 12,
     "version": 1,
+    "style": "dark",
+    "refresh": "1m",
+    "time": { "from": "now/d", "to": "now/d" },
+    "timepicker": {
+      "time_options": [
+        "5m",
+        "15m",
+        "1h",
+        "6h",
+        "12h",
+        "24h",
+        "2d",
+        "7d",
+        "30d"
+      ],
+      "now": true,
+      "refresh_intervals": [
+        "30s",
+        "1m",
+        "2m",
+        "4m",
+        "10m"
+      ]
+    },
+    "timezone": "browser",
+    "annotations": {
+      "list": []
+    },
+    "templating": {
+      "list": [
+        {
+          "current": {
+            "text": "<%= slug %>",
+            "value": "<%= graphite_identifier %>"
+          },
+          "options": [
+            {
+              "value": "<%= graphite_identifier %>",
+              "text": "<%= slug %>"
+            }
+          ],
+          "hide": 2,
+          "label": null,
+          "name": "host",
+          "query": "<%= graphite_identifier %>",
+          "type": "constant"
+        }
+      ]
+    },
+    "sharedCrosshair": true,
+    "editable": true,
+    "hideControls": false,
+
     "rows": [
       {
-        "collapse": false,
-        "showTitle": false,
-        "repeatIteration": null,
         "title": "",
-        "repeat": null,
-        "height": 42,
+        "height": "10px",
         "panels": [
           {
-            "content": "<h3><center><a href=\"<%= tomcat_dashboard_url %>?var-Application=MLS\">Tomcat</a></center></h3>",
-            "transparent": true,
-            "span": 12,
-            "mode": "html",
-            "id": 10,
-            "type": "text",
-            "links": [],
-            "title": ""
-          }
-        ],
-        "titleSize": "h6",
-        "repeatRowId": null
-      },
-      {
-        "editable": true,
-        "panels": [
-          {
+            "id": <%= id += 1 %>,
             "title": "",
-            "id": 11,
-            "transparent": true,
-            "content": "<h2><center>MLS</center></h2>",
-            "span": 12,
-            "isNew": true,
-            "links": [],
             "type": "text",
-            "error": false,
+            "span": 5,
             "mode": "html",
-            "editable": true
+            "transparent": true,
+            "content": "<h2 style=\"text-align:center; font-weight:500\"><%= descr %></h2>"
+          },
+          {
+            "id": <%= id += 1 %>,
+            "title": "",
+            "type": "text",
+            "span": 7,
+            "mode": "html",
+            "transparent": true,
+            "content": "<div style=\"text-align:center; font-size: 1.8em\">\n<div style=\"width:49%; float:left\"><a style=\"text-decoration:none\" href=\"<%= tomcat_dashboard_url %>?var-Application=<%= app %>\">Tomcat</a></div>\n  <div style=\"width:49%; float:left\"><a style=\"text-decoration:none\" href=\"<%= memorypools_dashboard_url %>?var-Application=<%= app %>\">Memory Pools</a></div>\n</div>\n"
           }
-        ],
-        "title": "New row",
-        "collapse": false,
-        "height": "25px"
+        ]
       },
       {
-        "editable": true,
-        "collapse": false,
-        "height": "150px",
+        "title": "Query Pool",
+        "height": "170px",
         "panels": [
           {
             "timeFrom": null,
@@ -81,7 +118,7 @@
             "pointradius": 5,
             "isNew": true,
             "nullPointMode": "connected",
-            "id": 12,
+            "id": <%= id += 1 %>,
             "fill": 3,
             "grid": {
               "threshold1": null,
@@ -100,7 +137,6 @@
               "alignAsTable": true,
               "max": false,
               "show": true,
-              "sideWidth": 200,
               "values": true
             },
             "xaxis": {
@@ -148,13 +184,11 @@
             "seriesOverrides": [],
             "title": "Query Pool"
           }
-        ],
-        "title": "Query Pool"
+        ]
       },
       {
-        "height": "200px",
-        "collapse": false,
         "title": "Statistic Resource Cache",
+        "height": "200px",
         "panels": [
           {
             "steppedLine": false,
@@ -181,7 +215,7 @@
               }
             ],
             "points": false,
-            "id": 13,
+            "id": <%= id += 1 %>,
             "fill": 3,
             "isNew": true,
             "nullPointMode": "connected",
@@ -194,7 +228,6 @@
             },
             "legend": {
               "show": true,
-              "sideWidth": 200,
               "values": true,
               "alignAsTable": true,
               "max": false,
@@ -233,19 +266,16 @@
             },
             "stack": false
           }
-        ],
-        "editable": true
+        ]
       },
       {
-        "editable": true,
-        "height": "150px",
-        "collapse": false,
         "title": "Statistic Jobresult",
+        "height": "150px",
         "panels": [
           {
             "nullPointMode": "connected",
             "isNew": true,
-            "id": 14,
+            "id": <%= id += 1 %>,
             "fill": 3,
             "yaxes": [
               {
@@ -304,7 +334,6 @@
               "alignAsTable": true,
               "show": true,
               "values": true,
-              "sideWidth": 200,
               "total": false,
               "rightSide": true,
               "current": true,
@@ -322,9 +351,11 @@
         ]
       },
       {
+        "title": "Server Resource Cache",
+        "height": "200px",
         "panels": [
           {
-            "id": 15,
+            "id": <%= id += 1 %>,
             "fill": 3,
             "isNew": true,
             "nullPointMode": "connected",
@@ -390,7 +421,6 @@
               "total": false,
               "rightSide": true,
               "values": true,
-              "sideWidth": 200,
               "show": true,
               "alignAsTable": true,
               "max": false
@@ -401,73 +431,8 @@
             "aliasColors": {},
             "error": false
           }
-        ],
-        "title": "Server Resource Cache",
-        "collapse": false,
-        "height": "200px",
-        "editable": true
+        ]
       }
-    ],
-    "timepicker": {
-      "refresh_intervals": [
-        "10s",
-        "30s",
-        "1m",
-        "2m",
-        "4m",
-        "10m"
-      ],
-      "now": true,
-      "time_options": [
-        "5m",
-        "15m",
-        "1h",
-        "6h",
-        "12h",
-        "24h",
-        "2d",
-        "7d",
-        "30d"
-      ]
-    },
-    "title": "<%= slug %> - MLS",
-    "uid": "<%= uuid %>",
-    "links": [],
-    "style": "dark",
-    "templating": {
-      "list": [
-        {
-          "current": {
-            "value": "<%= graphite_identifier %>",
-            "text": "<%= slug %>"
-          },
-          "options": [
-            {
-              "text": "<%= slug %>",
-              "value": "<%= graphite_identifier %>"
-            }
-          ],
-          "label": null,
-          "hide": 2,
-          "query": "<%= graphite_identifier %>",
-          "type": "constant",
-          "name": "host"
-        }
-      ]
-    },
-    "schemaVersion": 12,
-    "refresh": "1m",
-    "sharedCrosshair": true,
-    "tags": [
-      "<%= short_hostname %>",
-      "content-server"
-    ],
-    "timezone": "browser",
-    "id": null,
-    "hideControls": false,
-    "annotations": {
-      "list": []
-    },
-    "editable": true
+    ]
   }
 }

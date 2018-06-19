@@ -1,8 +1,39 @@
 {
   "dashboard": {
-    "schemaVersion": 12,
-    "tags": [ "<%= short_hostname %>", "http" ],
+    "uid": "<%= uuid %>",
+    "id": null,
     "title": "<%= slug %> - HTTP Server Status",
+    "tags": [ "<%= short_hostname %>", "http" ],
+    "schemaVersion": 12,
+    "version": 1,
+    "style": "dark",
+    "refresh": "1m",
+    "time": { "from": "now/d", "to": "now/d" },
+    "timepicker": {
+      "time_options": [
+        "5m",
+        "15m",
+        "1h",
+        "6h",
+        "12h",
+        "24h",
+        "2d",
+        "7d",
+        "30d"
+      ],
+      "now": true,
+      "refresh_intervals": [
+        "30s",
+        "1m",
+        "2m",
+        "4m",
+        "10m"
+      ]
+    },
+    "timezone": "browser",
+    "annotations": {
+      "list": []
+    },
     "templating": {
       "list": [
         {
@@ -41,38 +72,11 @@
         }
       ]
     },
-    "links": [],
-    "version": 1,
-    "editable": true,
-    "timepicker": {
-      "now": true,
-      "refresh_intervals": [
-        "10s",
-        "30s",
-        "1m",
-        "2m",
-        "4m",
-        "10m"
-      ],
-      "time_options": [
-        "5m",
-        "15m",
-        "1h",
-        "6h",
-        "12h",
-        "24h",
-        "2d",
-        "7d",
-        "30d"
-      ]
-    },
-    "id": null,
-    "style": "dark",
-    "uid": "<%= uuid %>",
+
     "rows": [
       {
-        "title": "New row",
-        "height": "25px",
+        "title": "",
+        "height": "10px",
         "panels": [
           {
             "type": "text",
@@ -87,11 +91,11 @@
             "title": "",
             "transparent": true
           }
-        ],
-        "collapse": false,
-        "editable": true
+        ]
       },
       {
+        "title": "Apache Workers",
+        "height": "350px",
         "panels": [
           {
             "timeFrom": null,
@@ -210,21 +214,11 @@
             "linewidth": 1,
             "type": "graph"
           }
-        ],
-        "repeatIteration": null,
-        "height": "350px",
-        "repeatRowId": null,
-        "collapse": false,
-        "title": "Apache Workers",
-        "repeat": null,
-        "titleSize": "h6",
-        "showTitle": false
+        ]
       },
       {
         "title": "Apache Requests",
-        "titleSize": "h6",
-        "showTitle": false,
-        "repeat": null,
+        "height": "150px",
         "panels": [
           {
             "yaxes": [
@@ -313,17 +307,11 @@
             "percentage": false,
             "steppedLine": false
           }
-        ],
-        "repeatIteration": null,
-        "height": "150",
-        "collapse": false,
-        "repeatRowId": null
+        ]
       },
       {
-        "repeatRowId": null,
-        "collapse": false,
-        "height": "150",
-        "repeatIteration": null,
+        "title": "Apache Workers",
+        "height": "150px",
         "panels": [
           {
             "fill": 1,
@@ -404,14 +392,11 @@
             "linewidth": 1,
             "type": "graph"
           }
-        ],
-        "showTitle": false,
-        "titleSize": "h6",
-        "repeat": null,
-        "title": "Apache Workers"
+        ]
       },
       {
-        "height": 174,
+        "title": "Icinga Performance Data",
+        "height": "170px",
         "panels": [
           {
             "lines": true,
@@ -492,26 +477,8 @@
               "values": true
             }
           }
-        ],
-        "repeatIteration": null,
-        "collapse": false,
-        "repeatRowId": null,
-        "title": "Dashboard Row",
-        "repeat": null,
-        "titleSize": "h6",
-        "showTitle": false
+        ]
       }
-    ],
-    "sharedCrosshair": true,
-    "time": {
-      "from": "now-3h",
-      "to": "now"
-    },
-    "refresh": "1m",
-    "hideControls": false,
-    "timezone": "browser",
-    "annotations": {
-      "list": []
-    }
+    ]
   }
 }

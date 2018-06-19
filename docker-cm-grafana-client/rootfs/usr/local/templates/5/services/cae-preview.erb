@@ -1,10 +1,17 @@
+<%-
+  title = 'Preview CAE'; descr = 'CAE Preview'; app = 'CAE_PREV'; id = 10;
+%>
 {
   "dashboard": {
+    "uid": "<%= uuid %>",
+    "id": null,
+    "title": "<%= slug %> - <%= title %>",
+    "tags": [ "<%= short_hostname %>", "cae" ],
     "schemaVersion": 12,
     "version": 1,
-    "title": "<%= slug %> - Preview CAE",
     "style": "dark",
     "refresh": "1m",
+    "time": { "from": "now/d", "to": "now/d" },
     "timepicker": {
       "time_options": [
         "5m",
@@ -19,7 +26,6 @@
       ],
       "now": true,
       "refresh_intervals": [
-        "10s",
         "30s",
         "1m",
         "2m",
@@ -27,12 +33,10 @@
         "10m"
       ]
     },
-    "id": null,
+    "timezone": "browser",
     "annotations": {
       "list": []
     },
-    "uid": "<%= uuid %>",
-    "originalTitle": "<%= graphite_identifier %> Preview CAE",
     "templating": {
       "list": [
         {
@@ -56,52 +60,40 @@
     },
     "sharedCrosshair": true,
     "editable": true,
+    "hideControls": false,
+
     "rows": [
       {
-        "repeatRowId": null,
         "title": "",
-        "repeatIteration": null,
-        "titleSize": "h6",
-        "showTitle": false,
-        "repeat": null,
+        "height": "10px",
         "collapse": false,
-        "height": 42,
+        "editable": true,
         "panels": [
           {
-            "span": 12,
-            "type": "text",
+            "id": <%= id += 1 %>,
             "title": "",
-            "links": [],
-            "id": 10,
+            "type": "text",
+            "span": 5,
             "mode": "html",
-            "content": "<h3><center><a href=\"<%= tomcat_dashboard_url %>?var-Application=CAE_PREV\">Tomcat</a></center></h3>",
-            "transparent": true
+            "transparent": true,
+            "content": "<h2 style=\"text-align:center; font-weight:500\"><%= descr %></h2>"
+          },
+          {
+            "id": <%= id += 1 %>,
+            "title": "",
+            "type": "text",
+            "span": 7,
+            "mode": "html",
+            "transparent": true,
+            "content": "<div style=\"text-align:center; font-size: 1.8em\">\n<div style=\"width:49%; float:left\"><a style=\"text-decoration:none\" href=\"<%= tomcat_dashboard_url %>?var-Application=<%= app %>\">Tomcat</a></div>\n  <div style=\"width:49%; float:left\"><a style=\"text-decoration:none\" href=\"<%= memorypools_dashboard_url %>?var-Application=<%= app %>\">Memory Pools</a></div>\n</div>\n"
           }
         ]
       },
       {
-        "height": "25px",
-        "title": "New row",
-        "panels": [
-          {
-            "editable": true,
-            "transparent": true,
-            "isNew": true,
-            "title": "",
-            "error": false,
-            "span": 12,
-            "links": [],
-            "type": "text",
-            "id": 11,
-            "mode": "html",
-            "content": "<h2><center>CAE Preview</center></h2>"
-          }
-        ],
-        "editable": true,
-        "collapse": false
-      },
-      {
         "title": "UAPI Cache",
+        "height": "150px",
+        "collapse": false,
+        "editable": true,
         "panels": [
           {
             "bars": false,
@@ -198,12 +190,11 @@
             "span": 12,
             "decimals": 1
           }
-        ],
-        "height": "150px",
-        "collapse": false,
-        "editable": true
+        ]
       },
       {
+        "title": "Blob Cache",
+        "height": "150px",
         "collapse": false,
         "editable": true,
         "panels": [
@@ -301,11 +292,11 @@
             "id": 13,
             "stack": false
           }
-        ],
-        "title": "Blob Cache",
-        "height": "150px"
+        ]
       },
       {
+        "title": "Lightweight Sessions",
+        "height": "150px",
         "collapse": false,
         "editable": true,
         "panels": [
@@ -320,7 +311,7 @@
               "shared": true,
               "msResolution": false
             },
-            "id": 14,
+            "id": <%= id += 1 %>,
             "stack": false,
             "lines": true,
             "nullPointMode": "connected",
@@ -344,7 +335,7 @@
             "steppedLine": false,
             "legend": {
               "min": false,
-              "max": true,
+              "max": false,
               "values": true,
               "rightSide": true,
               "avg": false,
@@ -387,14 +378,13 @@
             "fill": 3,
             "span": 12
           }
-        ],
-        "title": "Lightweight Sessions",
-        "height": "150px"
+        ]
       },
       {
+        "title": "DataView Factory",
+        "height": "250px",
         "editable": true,
         "collapse": false,
-        "height": "250px",
         "panels": [
           {
             "bars": false,
@@ -407,7 +397,7 @@
               "shared": true,
               "msResolution": false
             },
-            "id": 15,
+            "id": <%= id += 1 %>,
             "stack": false,
             "lines": true,
             "nullPointMode": "connected",
@@ -474,20 +464,8 @@
             "aliasColors": {},
             "span": 12
           }
-        ],
-        "title": "DataView Factory"
+        ]
       }
-    ],
-    "tags": [
-      "<%= short_hostname %>",
-      "cae"
-    ],
-    "timezone": "browser",
-    "hideControls": false,
-    "links": [],
-    "time": {
-      "to": "now",
-      "from": "now-3h"
-    }
+    ]
   }
 }

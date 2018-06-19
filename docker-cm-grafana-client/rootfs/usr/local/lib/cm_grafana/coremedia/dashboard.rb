@@ -515,7 +515,14 @@ class CMGrafana
           service_dashboards_result['mongodb'] = { 'normalized_name' => 'MONGODB' }
         end
 
+        # since grafana 5, all dashboards has an UUID for linkbuilding
+        # we need also the real link to our tomcat dashboard
 
+        tomcat_dashboard_url = dashboad_url('tomcats')
+        memorypools_dashboard_url = dashboad_url('memory-pools')
+
+        # add named templates for static templates
+        #
         named_template_array.each do |template|
 
           logger.debug( format( '  search template for: \'%s\'', template ) )
@@ -529,52 +536,17 @@ class CMGrafana
           logger.debug( format( '  use template file: \'%s\'', File.basename( filename ).strip ) )
 #           logger.debug("service_dashboards_result: #{service_dashboards_result}")
 
-          # TODO
-          # switch to gem
-          template_json = add_annotations(File.read(filename))
+          unless( template.to_s.empty? )
+            r = create_service_template(
+              service_name: template,
+              normalized_name: normalize_service(template),
+              service_template: filename,
+              tomcat_dashboard_url: tomcat_dashboard_url,
+              memorypools_dashboard_url: memorypools_dashboard_url
+            )
 
-          json = normalize_template(
-            template: template_json,
-            service_name: template,
-            slug: @slug,
-            graphite_identifier: @graphite_identifier,
-            short_hostname: @short_hostname
-          )
-
-          json  = JSON.parse( json ) if( json.is_a?(String) )
-          title = json.dig('dashboard','title')
-          logger.debug( title )
-
-          response = create_dashboard( title: title, dashboard: json, folderId: @folder_uuid )
-          response_status  = response.dig('status').to_i
-          response_message = response.dig('message')
-
-#           logger.debug("response: (#{filename}) #{response}")
-#           logger.debug("response_status: #{response_status}")
-#           logger.debug("response_message: #{response_message}")
-
-          if( response_status == 200 )
-            srv_name = template.gsub('cm-','').gsub('.erb','')
-            service_dashboards_result[srv_name].merge!(response) if( service_dashboards_result.include?( srv_name ) )
-          else
-            logger.warn( format('template can\'t be add: [%s] %s', response_status, response_message ) )
           end
-
-#           logger.debug("result: (#{srv_name}) #{service_dashboards_result[srv_name]}")
         end
-
-        # since grafana 5, all dashboards has an UUID for linkbuilding
-        # we need also the real link to our tomcat dashboard
-
-        data = search_dashboards( tags: ['tomcats', @short_hostname ] )
-        data = JSON.parse(data) if(data.is_a?(String))
-
-        # "url"=>"/grafana/d/eZ01Vmqkk/osmc-local-tomcats"
-        data = data.dig('message') unless( data.nil? )
-        tomcat_dashboard_url = data.first.dig('url') if(data.is_a?(Array) && data.count != 0 )
-
-        # helpful for backward compatibility (grafana4)
-        tomcat_dashboard_url = format('/grafana/dashboard/db/%s-tomcats', @slug ) if( tomcat_dashboard_url.nil? )
 
         discovery.each do |service,service_data|
 
@@ -612,6 +584,7 @@ class CMGrafana
               normalized_name: normalized_name,
               service_template: service_template,
               tomcat_dashboard_url: tomcat_dashboard_url,
+              memorypools_dashboard_url: memorypools_dashboard_url,
               additional_template_paths: additional_template_paths
             )
 
@@ -884,6 +857,22 @@ class CMGrafana
         logger.warn( format('template can\'t be add: [%s] %s', response_status, response_message ) ) if( response_status != 200 )
 
         response
+      end
+
+
+
+      def dashboad_url(tag)
+
+        data = search_dashboards( tags: [tag, @short_hostname ] )
+        data = JSON.parse(data) if(data.is_a?(String))
+
+        # "url"=>"/grafana/d/eZ01Vmqkk/osmc-local-memory-pools"
+        data = data.dig('message') unless( data.nil? )
+        url = data.first.dig('url') if(data.is_a?(Array) && data.count != 0 )
+        # helpful for backward compatibility (grafana4)
+        url = format('/grafana/dashboard/db/%s-%s', @slug, tag ) if( url.nil? )
+
+        url
       end
 
     end

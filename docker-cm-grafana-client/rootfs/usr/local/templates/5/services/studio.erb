@@ -1,62 +1,93 @@
+<%-
+  title = 'Studio'; descr = 'Studio'; app = 'STUDIO'; id = 10;
+%>
 {
   "dashboard": {
+    "uid": "<%= uuid %>",
+    "id": null,
+    "title": "<%= slug %> - <%= title %>",
+    "tags": [ "<%= short_hostname %>","studio" ],
     "schemaVersion": 12,
+    "version": 1,
+    "style": "dark",
+    "refresh": "1m",
+    "time": { "from": "now/d", "to": "now/d" },
+    "timepicker": {
+      "time_options": [
+        "5m",
+        "15m",
+        "1h",
+        "6h",
+        "12h",
+        "24h",
+        "2d",
+        "7d",
+        "30d"
+      ],
+      "now": true,
+      "refresh_intervals": [
+        "30s",
+        "1m",
+        "2m",
+        "4m",
+        "10m"
+      ]
+    },
+    "timezone": "browser",
     "annotations": {
       "list": []
     },
-    "tags": [ "<%= short_hostname %>","studio" ],
-    "time": {
-      "to": "now",
-      "from": "now-3h"
+    "templating": {
+      "list": [
+        {
+          "query": "<%= graphite_identifier %>",
+          "name": "host",
+          "hide": 2,
+          "current": {
+            "text": "<%= slug %>",
+            "value": "<%= graphite_identifier %>"
+          },
+          "options": [
+            {
+              "value": "<%= graphite_identifier %>",
+              "text": "<%= slug %>"
+            }
+          ],
+          "type": "constant",
+          "label": null
+        }
+      ]
     },
-    "links": [],
-    "uid": "<%= uuid %>",
-    "style": "dark",
-    "refresh": "1m",
+    "sharedCrosshair": true,
+    "editable": true,
+    "hideControls": false,
+
     "rows": [
       {
-        "repeatIteration": null,
-        "collapse": false,
-        "repeat": null,
-        "titleSize": "h6",
-        "showTitle": false,
-        "repeatRowId": null,
-        "height": 42,
+        "title": "",
+        "height": "10px",
         "panels": [
           {
+            "id": <%= id += 1 %>,
             "title": "",
-            "span": 12,
-            "id": 10,
-            "mode": "html",
-            "content": "<h3><center><a href=\"<%= tomcat_dashboard_url %>?var-Application=STUDIO\">Tomcat</a></center></h3>",
-            "transparent": true,
             "type": "text",
-            "links": []
-          }
-        ],
-        "title": ""
-      },
-      {
-        "collapse": false,
-        "height": "25px",
-        "panels": [
+            "span": 5,
+            "mode": "html",
+            "transparent": true,
+            "content": "<h2 style=\"text-align:center; font-weight:500\"><%= descr %></h2>"
+          },
           {
-            "editable": true,
-            "links": [],
-            "span": 12,
-            "isNew": true,
-            "mode": "html",
-            "type": "text",
-            "transparent": true,
-            "error": false,
+            "id": <%= id += 1 %>,
             "title": "",
-            "id": 11,
-            "content": "<h2><center>Studio</center></h2>"
+            "type": "text",
+            "span": 7,
+            "mode": "html",
+            "transparent": true,
+            "content": "<div style=\"text-align:center; font-size: 1.8em\">\n<div style=\"width:49%; float:left\"><a style=\"text-decoration:none\" href=\"<%= tomcat_dashboard_url %>?var-Application=<%= app %>\">Tomcat</a></div>\n  <div style=\"width:49%; float:left\"><a style=\"text-decoration:none\" href=\"<%= memorypools_dashboard_url %>?var-Application=<%= app %>\">Memory Pools</a></div>\n</div>\n"
           }
-        ],
-        "editable": true,
-        "title": "New row"
+        ]
       },
+
       {
         "title": "UAPI Cache",
         "height": "150px",
@@ -152,19 +183,18 @@
             "renderer": "flot",
             "aliasColors": {},
             "timeShift": null,
-            "id": 12,
+            "id": <%= id += 1 %>,
             "bars": false,
             "title": "UAPI Cache"
           }
-        ],
-        "editable": true,
-        "collapse": false
+        ]
       },
       {
-        "collapse": false,
+        "title": "Blob Cache",
+        "height": "150px",
         "panels": [
           {
-            "id": 13,
+            "id": <%= id += 1 %>,
             "title": "BlobCache",
             "bars": false,
             "aliasColors": {},
@@ -257,15 +287,11 @@
             "pointradius": 5,
             "percentage": false
           }
-        ],
-        "height": "150px",
-        "editable": true,
-        "title": "Blob Cache"
+        ]
       },
       {
-        "title": "New row",
-        "collapse": false,
-        "editable": true,
+        "title": "Lightweight Sessions",
+        "height": "150px",
         "panels": [
           {
             "nullPointMode": "connected",
@@ -287,7 +313,7 @@
             "aliasColors": {},
             "title": "Lightweight Sessions",
             "bars": false,
-            "id": 14,
+            "id": <%= id += 1 %>,
             "datasource": "graphite",
             "percentage": false,
             "pointradius": 5,
@@ -345,59 +371,8 @@
             ],
             "steppedLine": false
           }
-        ],
-        "height": "150px"
+        ]
       }
-    ],
-    "sharedCrosshair": true,
-    "id": null,
-    "timezone": "browser",
-    "hideControls": false,
-    "title": "<%= slug %> - Studio",
-    "templating": {
-      "list": [
-        {
-          "current": {
-            "value": "<%= graphite_identifier %>",
-            "text": "<%= slug %>"
-          },
-          "query": "<%= graphite_identifier %>",
-          "label": null,
-          "options": [
-            {
-              "text": "<%= slug %>",
-              "value": "<%= graphite_identifier %>"
-            }
-          ],
-          "name": "host",
-          "type": "constant",
-          "hide": 2
-        }
-      ]
-    },
-    "editable": true,
-    "timepicker": {
-      "now": true,
-      "refresh_intervals": [
-        "10s",
-        "30s",
-        "1m",
-        "2m",
-        "4m",
-        "10m"
-      ],
-      "time_options": [
-        "5m",
-        "15m",
-        "1h",
-        "6h",
-        "12h",
-        "24h",
-        "2d",
-        "7d",
-        "30d"
-      ]
-    },
-    "version": 1
+    ]
   }
 }

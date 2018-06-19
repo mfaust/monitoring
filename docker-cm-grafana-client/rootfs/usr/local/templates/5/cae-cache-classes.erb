@@ -1,7 +1,39 @@
 {
   "dashboard": {
-    "graphTooltip": 1,
     "uid": "<%= uuid %>",
+    "id": null,
+    "title": "<%= slug %> - Cache Classes (CM)",
+    "tags": [ "<%= short_hostname %>" ],
+    "schemaVersion": 16,
+    "version": 2,
+    "style": "dark",
+    "refresh": "1m",
+    "time": { "from": "now/d", "to": "now/d" },
+    "timepicker": {
+      "time_options": [
+        "5m",
+        "15m",
+        "1h",
+        "6h",
+        "12h",
+        "24h",
+        "2d",
+        "7d",
+        "30d"
+      ],
+      "now": true,
+      "refresh_intervals": [
+        "30s",
+        "1m",
+        "2m",
+        "4m",
+        "10m"
+      ]
+    },
+    "timezone": "browser",
+    "annotations": {
+      "list": []
+    },
     "templating": {
       "list": [
         {
@@ -58,78 +90,7 @@
         }
       ]
     },
-    "annotations": {
-      "list": [
-        {
-          "iconColor": "rgba(0, 211, 255, 1)",
-          "datasource": "-- Grafana --",
-          "hide": true,
-          "builtIn": 1,
-          "enable": true,
-          "name": "Annotations & Alerts",
-          "type": "dashboard"
-        },
-        {
-          "enable": true,
-          "name": "created",
-          "tags": [
-            "<%= slug %>",
-            "created"
-          ],
-          "datasource": "-- Grafana --",
-          "iconColor": "rgb(93, 227, 12)",
-          "type": "tags",
-          "hide": false,
-          "showIn": 0,
-          "limit": 10
-        },
-        {
-          "enable": true,
-          "name": "destoyed",
-          "tags": [
-            "<%= slug %>",
-            "destoyed"
-          ],
-          "datasource": "-- Grafana --",
-          "iconColor": "rgb(227, 57, 12)",
-          "type": "tags",
-          "hide": false,
-          "showIn": 0,
-          "limit": 10
-        },
-        {
-          "limit": 10,
-          "showIn": 0,
-          "hide": false,
-          "type": "tags",
-          "datasource": "-- Grafana --",
-          "tags": [
-            "<%= slug %>",
-            "loadtest"
-          ],
-          "iconColor": "rgb(26, 196, 220)",
-          "enable": true,
-          "name": "Load Tests"
-        },
-        {
-          "iconColor": "rgb(176, 40, 253)",
-          "tags": [
-            "<%= slug %>",
-            "deployment"
-          ],
-          "datasource": "-- Grafana --",
-          "name": "Deployments",
-          "enable": true,
-          "limit": 10,
-          "type": "tags",
-          "hide": false,
-          "showIn": 0
-        }
-      ]
-    },
-    "tags": [
-      "<%= short_hostname %>"
-    ],
+
     "panels": [
       {
         "bars": false,
@@ -211,8 +172,7 @@
           "rightSide": true,
           "min": false,
           "max": false,
-          "avg": false,
-          "sideWidth": 200
+          "avg": false
         },
         "targets": [
           {
@@ -264,7 +224,6 @@
           "min": false,
           "avg": false,
           "max": false,
-          "sideWidth": 200,
           "current": true,
           "show": true,
           "values": true,
@@ -383,7 +342,6 @@
           "current": true,
           "avg": false,
           "max": false,
-          "sideWidth": 200,
           "rightSide": true,
           "min": false
         },
@@ -572,7 +530,6 @@
         "grid": {},
         "decimals": 0,
         "legend": {
-          "sideWidth": 200,
           "max": false,
           "avg": false,
           "min": false,
@@ -701,8 +658,7 @@
           "rightSide": true,
           "min": false,
           "max": false,
-          "avg": false,
-          "sideWidth": 200
+          "avg": false
         },
         "tooltip": {
           "sort": 0,
@@ -754,7 +710,6 @@
           "show": true,
           "min": false,
           "rightSide": true,
-          "sideWidth": 200,
           "avg": false,
           "max": false
         },
@@ -873,7 +828,6 @@
         "legend": {
           "min": false,
           "rightSide": true,
-          "sideWidth": 200,
           "avg": false,
           "max": false,
           "current": true,
@@ -958,7 +912,6 @@
         "legend": {
           "avg": false,
           "max": false,
-          "sideWidth": 200,
           "rightSide": true,
           "min": false,
           "show": true,
@@ -1076,7 +1029,6 @@
           "min": false,
           "avg": false,
           "max": false,
-          "sideWidth": 200,
           "current": true,
           "show": true,
           "total": false,
@@ -1201,7 +1153,6 @@
         "legend": {
           "min": false,
           "rightSide": true,
-          "sideWidth": 200,
           "max": false,
           "avg": false,
           "current": true,
@@ -1382,7 +1333,6 @@
           }
         ],
         "legend": {
-          "sideWidth": 200,
           "avg": false,
           "max": false,
           "min": false,
@@ -1433,7 +1383,6 @@
           "show": true,
           "min": false,
           "rightSide": true,
-          "sideWidth": 200,
           "avg": false,
           "max": false
         },
@@ -1585,7 +1534,6 @@
         "legend": {
           "min": false,
           "rightSide": true,
-          "sideWidth": 200,
           "avg": false,
           "max": false,
           "current": true,
@@ -1735,7 +1683,6 @@
           "total": false,
           "show": true,
           "current": true,
-          "sideWidth": 200,
           "avg": false,
           "max": false,
           "min": false,
@@ -1831,7 +1778,6 @@
           "current": true,
           "avg": false,
           "max": false,
-          "sideWidth": 200,
           "rightSide": true,
           "min": false
         },
@@ -1871,42 +1817,6 @@
           }
         ]
       }
-    ],
-    "timepicker": {
-      "now": true,
-      "refresh_intervals": [
-        "10s",
-        "30s",
-        "1m",
-        "2m",
-        "4m",
-        "10m"
-      ],
-      "time_options": [
-        "5m",
-        "15m",
-        "1h",
-        "6h",
-        "12h",
-        "24h",
-        "2d",
-        "7d",
-        "30d"
-      ]
-    },
-    "schemaVersion": 16,
-    "time": {
-      "from": "now-3h",
-      "to": "now"
-    },
-    "gnetId": null,
-    "title": "<%= slug %> - Cache Classes (CM)",
-    "version": 2,
-    "timezone": "browser",
-    "refresh": "1m",
-    "links": [],
-    "id": null,
-    "style": "dark",
-    "editable": true
+    ]
   }
 }

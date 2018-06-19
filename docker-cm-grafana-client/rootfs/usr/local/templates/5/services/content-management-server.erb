@@ -1,463 +1,18 @@
+<%-
+  title = 'CMS'; descr = 'CMS'; app = 'CMS'; id = 10;
+%>
 {
   "dashboard": {
-    "templating": {
-      "list": [
-        {
-          "name": "host",
-          "current": {
-            "value": "<%= graphite_identifier %>",
-            "text": "<%= slug %>"
-          },
-          "query": "<%= graphite_identifier %>",
-          "label": null,
-          "type": "constant",
-          "hide": 2,
-          "options": [
-            {
-              "text": "<%= slug %>",
-              "value": "<%= graphite_identifier %>"
-            }
-          ]
-        }
-      ]
-    },
-    "rows": [
-      {
-        "gridPos": { "x": 0, "y": 0, "w": 24, "h": 3 },
-        "repeatRowId": null,
-        "titleSize": "h6",
-        "panels": [
-          {
-            "span": 12,
-            "links": [],
-            "mode": "html",
-            "content": "<h3><center><a href=\"<%= tomcat_dashboard_url %>?var-Application=CMS\">Tomcat</a></center></h3>",
-            "transparent": true,
-            "type": "text",
-            "id": 10,
-            "title": ""
-          }
-        ],
-        "showTitle": false,
-        "title": "",
-        "repeatIteration": null,
-        "repeat": null,
-        "collapse": false,
-        "height": 42
-      },
-      {
-        "gridPos": { "x": 0, "y": 3, "w": 24, "h": 3 },
-        "height": "25px",
-        "collapse": false,
-        "editable": true,
-        "title": "New row",
-        "panels": [
-          {
-            "error": false,
-            "links": [],
-            "editable": true,
-            "isNew": true,
-            "content": "<h2><center>CMS</center></h2>",
-            "type": "text",
-            "id": 11,
-            "transparent": true,
-            "title": "",
-            "span": 12,
-            "mode": "html"
-          }
-        ]
-      },
-      {
-        "gridPos": { "x": 0, "y": 6, "w": 24, "h": 5 },
-        "collapse": false,
-        "editable": true,
-        "height": "150px",
-        "panels": [
-          {
-            "timeFrom": null,
-            "span": 12,
-            "nullPointMode": "connected",
-            "id": 12,
-            "targets": [
-              {
-                "textEditor": false,
-                "target": "alias(carbon-writer.$host.CMS.QueryPool.queries.max, 'queries max')",
-                "refId": "A"
-              },
-              {
-                "refId": "B",
-                "textEditor": false,
-                "target": "alias(carbon-writer.$host.CMS.QueryPool.queries.waiting, 'queries waiting')"
-              },
-              {
-                "target": "alias(carbon-writer.$host.CMS.QueryPool.executors.idle, 'executors idle')",
-                "textEditor": false,
-                "refId": "C"
-              },
-              {
-                "target": "alias(carbon-writer.$host.CMS.QueryPool.executors.running, 'executors running')",
-                "textEditor": false,
-                "refId": "D"
-              }
-            ],
-            "title": "Query Pool",
-            "points": false,
-            "stack": false,
-            "seriesOverrides": [],
-            "type": "graph",
-            "bars": false,
-            "pointradius": 5,
-            "error": false,
-            "steppedLine": false,
-            "tooltip": {
-              "sort": 0,
-              "msResolution": false,
-              "value_type": "cumulative",
-              "shared": true,
-              "ordering": "alphabetical"
-            },
-            "aliasColors": {},
-            "lines": true,
-            "percentage": false,
-            "timeShift": null,
-            "grid": {
-              "thresholdLine": false,
-              "threshold1Color": "rgba(216, 200, 27, 0.27)",
-              "threshold2Color": "rgba(234, 112, 112, 0.22)",
-              "threshold1": null,
-              "threshold2": null
-            },
-            "datasource": "graphite",
-            "yaxes": [
-              {
-                "min": 0,
-                "format": "none",
-                "max": null,
-                "show": true,
-                "logBase": 1
-              },
-              {
-                "format": "short",
-                "min": 0,
-                "max": null,
-                "show": false,
-                "logBase": 1
-              }
-            ],
-            "editable": true,
-            "isNew": true,
-            "fill": 3,
-            "links": [],
-            "legend": {
-              "total": false,
-              "alignAsTable": true,
-              "show": true,
-              "current": true,
-              "rightSide": true,
-              "min": false,
-              "avg": false,
-              "max": false,
-              "values": true
-            },
-            "xaxis": {
-              "show": true
-            },
-            "renderer": "flot",
-            "linewidth": 1,
-            "decimals": 0
-          }
-        ],
-        "title": "Query Pool"
-      },
-      {
-        "gridPos": { "x": 0, "y": 11, "w": 24, "h": 5 },
-        "panels": [
-          {
-            "linewidth": 1,
-            "renderer": "flot",
-            "xaxis": {
-              "show": true
-            },
-            "legend": {
-              "alignAsTable": true,
-              "show": true,
-              "total": false,
-              "avg": false,
-              "max": false,
-              "values": true,
-              "rightSide": true,
-              "current": true,
-              "min": false
-            },
-            "fill": 3,
-            "links": [],
-            "editable": true,
-            "isNew": true,
-            "yaxes": [
-              {
-                "format": "none",
-                "min": 0,
-                "max": null,
-                "show": true,
-                "logBase": 1
-              },
-              {
-                "max": null,
-                "show": true,
-                "logBase": 1,
-                "format": "short",
-                "min": null
-              }
-            ],
-            "datasource": "graphite",
-            "grid": {
-              "threshold2": null,
-              "threshold1": null,
-              "threshold2Color": "rgba(234, 112, 112, 0.22)",
-              "threshold1Color": "rgba(216, 200, 27, 0.27)"
-            },
-            "timeShift": null,
-            "lines": true,
-            "percentage": false,
-            "aliasColors": {},
-            "tooltip": {
-              "shared": true,
-              "ordering": "alphabetical",
-              "value_type": "cumulative",
-              "msResolution": false,
-              "sort": 0
-            },
-            "steppedLine": false,
-            "pointradius": 5,
-            "bars": false,
-            "error": false,
-            "type": "graph",
-            "seriesOverrides": [],
-            "stack": false,
-            "points": false,
-            "title": "Statistic Resource Cache",
-            "targets": [
-              {
-                "refId": "A",
-                "textEditor": false,
-                "target": "aliasByMetric(perSecond(carbon-writer.$host.CMS.StatisticsResourceCache.cache.*))"
-              }
-            ],
-            "nullPointMode": "connected",
-            "id": 13,
-            "span": 12,
-            "timeFrom": null
-          }
-        ],
-        "title": "Statistic Resource Cache",
-        "collapse": false,
-        "editable": true,
-        "height": "200px"
-      },
-      {
-        "gridPos": { "x": 0, "y": 16, "w": 24, "h": 4 },
-        "title": "Statistic Jobresult",
-        "panels": [
-          {
-            "lines": true,
-            "percentage": false,
-            "timeShift": null,
-            "tooltip": {
-              "msResolution": false,
-              "sort": 0,
-              "ordering": "alphabetical",
-              "shared": true,
-              "value_type": "cumulative"
-            },
-            "aliasColors": {},
-            "yaxes": [
-              {
-                "max": null,
-                "logBase": 1,
-                "show": true,
-                "format": "none",
-                "min": 0
-              },
-              {
-                "format": "short",
-                "min": 0,
-                "logBase": 1,
-                "show": true,
-                "max": null
-              }
-            ],
-            "grid": {
-              "threshold1": null,
-              "threshold2": null,
-              "threshold2Color": "rgba(234, 112, 112, 0.22)",
-              "threshold1Color": "rgba(216, 200, 27, 0.27)"
-            },
-            "datasource": "graphite",
-            "legend": {
-              "show": true,
-              "alignAsTable": true,
-              "total": false,
-              "values": true,
-              "max": false,
-              "avg": false,
-              "min": false,
-              "current": true,
-              "rightSide": true
-            },
-            "isNew": true,
-            "editable": true,
-            "links": [],
-            "fill": 3,
-            "xaxis": {
-              "show": true
-            },
-            "renderer": "flot",
-            "linewidth": 1,
-            "timeFrom": null,
-            "span": 12,
-            "targets": [
-              {
-                "target": "aliasByMetric(perSecond(carbon-writer.$host.CMS.StatisticsJobResult.*))",
-                "textEditor": false,
-                "refId": "A"
-              }
-            ],
-            "title": "Statistic Jobresult",
-            "nullPointMode": "connected",
-            "id": 14,
-            "type": "graph",
-            "points": false,
-            "stack": false,
-            "seriesOverrides": [],
-            "steppedLine": false,
-            "error": false,
-            "pointradius": 5,
-            "bars": false
-          }
-        ],
-        "height": "150px",
-        "editable": true,
-        "collapse": false
-      },
-      {
-        "gridPos": { "x": 0, "y": 20, "w": 24, "h": 5 },
-        "height": "200px",
-        "collapse": false,
-        "editable": true,
-        "title": "Server Resource Cache",
-        "panels": [
-          {
-            "aliasColors": {},
-            "tooltip": {
-              "msResolution": false,
-              "sort": 0,
-              "shared": true,
-              "value_type": "cumulative"
-            },
-            "timeShift": null,
-            "lines": true,
-            "percentage": false,
-            "datasource": "graphite",
-            "grid": {
-              "threshold2Color": "rgba(234, 112, 112, 0.22)",
-              "threshold1Color": "rgba(216, 200, 27, 0.27)",
-              "threshold2": null,
-              "threshold1": null
-            },
-            "yaxes": [
-              {
-                "max": null,
-                "show": true,
-                "logBase": 1,
-                "min": 0,
-                "format": "none",
-                "label": null
-              },
-              {
-                "show": false,
-                "logBase": 1,
-                "max": null,
-                "label": null,
-                "format": "short",
-                "min": null
-              }
-            ],
-            "links": [],
-            "fill": 3,
-            "isNew": true,
-            "editable": true,
-            "legend": {
-              "alignAsTable": true,
-              "show": true,
-              "total": false,
-              "avg": false,
-              "max": false,
-              "values": true,
-              "rightSide": true,
-              "current": true,
-              "min": false
-            },
-            "linewidth": 1,
-            "xaxis": {
-              "show": true
-            },
-            "renderer": "flot",
-            "span": 12,
-            "timeFrom": null,
-            "nullPointMode": "connected",
-            "id": 15,
-            "title": "Server Resource Cache",
-            "targets": [
-              {
-                "refId": "A",
-                "target": "aliasByMetric(aliasSub(carbon-writer.$host.CMS.Server.ResourceCache.*, '(.*)-', ''))",
-                "textEditor": false
-              }
-            ],
-            "seriesOverrides": [],
-            "stack": false,
-            "points": false,
-            "type": "graph",
-            "bars": false,
-            "pointradius": 5,
-            "error": false,
-            "steppedLine": false
-          }
-        ]
-      }
-    ],
-    "tags": [
-      "<%= short_hostname %>",
-      "content-server"
-    ],
     "uid": "<%= uuid %>",
-    "style": "dark",
-    "links": [],
-    "editable": true,
-    "time": {
-      "to": "now",
-      "from": "now-3h"
-    },
-    "refresh": "1m",
-    "annotations": {
-      "list": []
-    },
-    "timezone": "browser",
-    "hideControls": false,
     "id": null,
-    "title": "<%= slug %> - CMS",
+    "title": "<%= slug %> - <%= title %>",
+    "tags": [ "<%= short_hostname %>", "content-server" ],
+    "schemaVersion": 12,
     "version": 1,
-    "sharedCrosshair": true,
+    "style": "dark",
+    "refresh": "1m",
+    "time": { "from": "now/d", "to": "now/d" },
     "timepicker": {
-      "refresh_intervals": [
-        "10s",
-        "30s",
-        "1m",
-        "2m",
-        "4m",
-        "10m"
-      ],
-      "now": true,
       "time_options": [
         "5m",
         "15m",
@@ -468,8 +23,416 @@
         "2d",
         "7d",
         "30d"
+      ],
+      "now": true,
+      "refresh_intervals": [
+        "30s",
+        "1m",
+        "2m",
+        "4m",
+        "10m"
       ]
     },
-    "schemaVersion": 12
+    "timezone": "browser",
+    "annotations": {
+      "list": []
+    },
+    "templating": {
+      "list": [
+        {
+          "current": {
+            "text": "<%= slug %>",
+            "value": "<%= graphite_identifier %>"
+          },
+          "options": [
+            {
+              "value": "<%= graphite_identifier %>",
+              "text": "<%= slug %>"
+            }
+          ],
+          "hide": 2,
+          "label": null,
+          "name": "host",
+          "query": "<%= graphite_identifier %>",
+          "type": "constant"
+        }
+      ]
+    },
+    "sharedCrosshair": true,
+    "editable": true,
+    "hideControls": false,
+
+    "rows": [
+      {
+        "title": "",
+        "height": "10px",
+        "panels": [
+          {
+            "id": <%= id += 1 %>,
+            "title": "",
+            "type": "text",
+            "span": 5,
+            "mode": "html",
+            "transparent": true,
+            "content": "<h2 style=\"text-align:center; font-weight:500\"><%= descr %></h2>"
+          },
+          {
+            "id": <%= id += 1 %>,
+            "title": "",
+            "type": "text",
+            "span": 7,
+            "mode": "html",
+            "transparent": true,
+            "content": "<div style=\"text-align:center; font-size: 1.8em\">\n<div style=\"width:49%; float:left\"><a style=\"text-decoration:none\" href=\"<%= tomcat_dashboard_url %>?var-Application=<%= app %>\">Tomcat</a></div>\n  <div style=\"width:49%; float:left\"><a style=\"text-decoration:none\" href=\"<%= memorypools_dashboard_url %>?var-Application=<%= app %>\">Memory Pools</a></div>\n</div>\n"
+          }
+        ]
+      },
+      {
+        "title": "Query Pool",
+        "height": "170px",
+        "panels": [
+          {
+            "timeFrom": null,
+            "lines": true,
+            "editable": true,
+            "renderer": "flot",
+            "yaxes": [
+              {
+                "max": null,
+                "logBase": 1,
+                "show": true,
+                "min": 0,
+                "format": "none"
+              },
+              {
+                "format": "short",
+                "min": 0,
+                "logBase": 1,
+                "show": false,
+                "max": null
+              }
+            ],
+            "points": false,
+            "steppedLine": false,
+            "type": "graph",
+            "pointradius": 5,
+            "isNew": true,
+            "nullPointMode": "connected",
+            "id": <%= id += 1 %>,
+            "fill": 3,
+            "grid": {
+              "threshold1": null,
+              "thresholdLine": false,
+              "threshold2Color": "rgba(234, 112, 112, 0.22)",
+              "threshold2": null,
+              "threshold1Color": "rgba(216, 200, 27, 0.27)"
+            },
+            "timeShift": null,
+            "legend": {
+              "rightSide": true,
+              "total": false,
+              "current": true,
+              "avg": false,
+              "min": false,
+              "alignAsTable": true,
+              "max": false,
+              "show": true,
+              "values": true
+            },
+            "xaxis": {
+              "show": true
+            },
+            "aliasColors": {},
+            "error": false,
+            "links": [],
+            "datasource": "graphite",
+            "percentage": false,
+            "span": 12,
+            "decimals": 0,
+            "tooltip": {
+              "ordering": "alphabetical",
+              "msResolution": false,
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "stack": false,
+            "linewidth": 1,
+            "bars": false,
+            "targets": [
+              {
+                "textEditor": false,
+                "target": "alias(carbon-writer.$host.CMS.QueryPool.queries.max, 'queries max')",
+                "refId": "A"
+              },
+              {
+                "refId": "B",
+                "target": "alias(carbon-writer.$host.CMS.QueryPool.queries.waiting, 'queries waiting')",
+                "textEditor": false
+              },
+              {
+                "refId": "C",
+                "textEditor": false,
+                "target": "alias(carbon-writer.$host.CMS.QueryPool.executors.idle, 'executors idle')"
+              },
+              {
+                "refId": "D",
+                "textEditor": false,
+                "target": "alias(carbon-writer.$host.CMS.QueryPool.executors.running, 'executors running')"
+              }
+            ],
+            "seriesOverrides": [],
+            "title": "Query Pool"
+          }
+        ]
+      },
+      {
+        "title": "Statistic Resource Cache",
+        "height": "200px",
+        "panels": [
+          {
+            "steppedLine": false,
+            "type": "graph",
+            "pointradius": 5,
+            "timeFrom": null,
+            "lines": true,
+            "editable": true,
+            "renderer": "flot",
+            "yaxes": [
+              {
+                "max": null,
+                "min": 0,
+                "format": "none",
+                "logBase": 1,
+                "show": true
+              },
+              {
+                "show": true,
+                "logBase": 1,
+                "min": 0,
+                "format": "short",
+                "max": null
+              }
+            ],
+            "points": false,
+            "id": <%= id += 1 %>,
+            "fill": 3,
+            "isNew": true,
+            "nullPointMode": "connected",
+            "links": [],
+            "grid": {
+              "threshold1": null,
+              "threshold2Color": "rgba(234, 112, 112, 0.22)",
+              "threshold2": null,
+              "threshold1Color": "rgba(216, 200, 27, 0.27)"
+            },
+            "legend": {
+              "show": true,
+              "values": true,
+              "alignAsTable": true,
+              "max": false,
+              "avg": false,
+              "min": false,
+              "rightSide": true,
+              "total": false,
+              "current": true
+            },
+            "timeShift": null,
+            "aliasColors": {},
+            "xaxis": {
+              "show": true
+            },
+            "error": false,
+            "linewidth": 1,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "aliasByMetric(perSecond(carbon-writer.$host.CMS.StatisticsResourceCache.cache.*))",
+                "textEditor": false
+              }
+            ],
+            "bars": false,
+            "title": "Statistic Resource Cache",
+            "seriesOverrides": [],
+            "datasource": "graphite",
+            "percentage": false,
+            "span": 12,
+            "tooltip": {
+              "ordering": "alphabetical",
+              "msResolution": false,
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "stack": false
+          }
+        ]
+      },
+      {
+        "title": "Statistic Jobresult",
+        "height": "150px",
+        "panels": [
+          {
+            "nullPointMode": "connected",
+            "isNew": true,
+            "id": <%= id += 1 %>,
+            "fill": 3,
+            "yaxes": [
+              {
+                "max": null,
+                "logBase": 1,
+                "show": true,
+                "min": 0,
+                "format": "none"
+              },
+              {
+                "format": "short",
+                "min": 0,
+                "logBase": 1,
+                "show": true,
+                "max": null
+              }
+            ],
+            "points": false,
+            "renderer": "flot",
+            "editable": true,
+            "lines": true,
+            "timeFrom": null,
+            "pointradius": 5,
+            "type": "graph",
+            "steppedLine": false,
+            "tooltip": {
+              "value_type": "cumulative",
+              "sort": 0,
+              "msResolution": false,
+              "shared": true,
+              "ordering": "alphabetical"
+            },
+            "stack": false,
+            "percentage": false,
+            "span": 12,
+            "datasource": "graphite",
+            "seriesOverrides": [],
+            "title": "Statistic Jobresult",
+            "targets": [
+              {
+                "textEditor": false,
+                "target": "aliasByMetric(perSecond(carbon-writer.$host.CMS.StatisticsJobResult.*))",
+                "refId": "A"
+              }
+            ],
+            "bars": false,
+            "linewidth": 1,
+            "error": false,
+            "aliasColors": {},
+            "xaxis": {
+              "show": true
+            },
+            "timeShift": null,
+            "legend": {
+              "max": false,
+              "alignAsTable": true,
+              "show": true,
+              "values": true,
+              "total": false,
+              "rightSide": true,
+              "current": true,
+              "min": false,
+              "avg": false
+            },
+            "grid": {
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2": null,
+              "threshold2Color": "rgba(234, 112, 112, 0.22)",
+              "threshold1": null
+            },
+            "links": []
+          }
+        ]
+      },
+      {
+        "title": "Server Resource Cache",
+        "height": "200px",
+        "panels": [
+          {
+            "id": <%= id += 1 %>,
+            "fill": 3,
+            "isNew": true,
+            "nullPointMode": "connected",
+            "steppedLine": false,
+            "type": "graph",
+            "pointradius": 5,
+            "timeFrom": null,
+            "lines": true,
+            "editable": true,
+            "renderer": "flot",
+            "points": false,
+            "yaxes": [
+              {
+                "min": 0,
+                "format": "none",
+                "logBase": 1,
+                "show": true,
+                "label": null,
+                "max": null
+              },
+              {
+                "label": null,
+                "max": null,
+                "show": false,
+                "logBase": 1,
+                "format": "short",
+                "min": null
+              }
+            ],
+            "linewidth": 1,
+            "targets": [
+              {
+                "refId": "A",
+                "textEditor": false,
+                "target": "aliasByMetric(aliasSub(carbon-writer.$host.CMS.Server.ResourceCache.*, '(.*)-', ''))"
+              }
+            ],
+            "bars": false,
+            "title": "Server Resource Cache",
+            "seriesOverrides": [],
+            "datasource": "graphite",
+            "percentage": false,
+            "span": 12,
+            "stack": false,
+            "tooltip": {
+              "sort": 0,
+              "value_type": "cumulative",
+              "msResolution": false,
+              "shared": true
+            },
+            "links": [],
+            "grid": {
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2Color": "rgba(234, 112, 112, 0.22)",
+              "threshold1": null,
+              "threshold2": null
+            },
+            "timeShift": null,
+            "legend": {
+              "min": false,
+              "avg": false,
+              "current": true,
+              "total": false,
+              "rightSide": true,
+              "values": true,
+              "show": true,
+              "alignAsTable": true,
+              "max": false
+            },
+            "xaxis": {
+              "show": true
+            },
+            "aliasColors": {},
+            "error": false
+          }
+        ]
+      }
+    ]
   }
 }

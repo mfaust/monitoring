@@ -1,14 +1,81 @@
 {
   "dashboard": {
-    "version": 0,
-    "schemaVersion": 12,
+    "uid": "<%= uuid %>",
+    "id": null,
     "title": "<%= slug %> - Overview",
     "tags": [ "<%= short_hostname %>", "overview" ],
-    "id": null,
-    "uid": "<%= uuid %>",
+    "schemaVersion": 12,
+    "version": 0,
+    "style": "dark",
+    "refresh": "1m",
+    "time": { "from": "now-2m", "to": "now" },
+    "timepicker": {
+      "refresh_intervals": [ "30s", "1m", "2m" ],
+      "time_options": [ "1m", "3m", "5m", "15m" ]
+    },
+    "timezone": "browser",
+    "hideControls": true,
     "annotations": {
       "list": []
     },
+    "templating": {
+      "list": [
+        {
+          "label": null,
+          "current": {
+            "text": "<%= slug %>",
+            "value": "<%= graphite_identifier %>"
+          },
+          "type": "constant",
+          "name": "host",
+          "options": [
+              {
+              "text": "<%= slug %>",
+              "value": "<%= graphite_identifier %>"
+            }
+          ],
+          "query": "<%= graphite_identifier %>",
+          "hide": 2
+        },
+        {
+          "hide": 2,
+          "query": "<%= slug %>",
+          "options": [
+              {
+              "value": "<%= graphite_identifier %>",
+              "selected": true,
+              "text": "<%= slug %>"
+            }
+          ],
+          "name": "RLS",
+          "type": "constant",
+          "current": {
+            "text": "<%= slug %>",
+            "value": "<%= graphite_identifier %>"
+          },
+          "label": null
+        },
+        {
+          "name": "MLS",
+          "type": "constant",
+          "current": {
+            "value": "<%= graphite_identifier %>",
+            "text": "<%= slug %>"
+          },
+          "label": null,
+          "hide": 2,
+          "query": "<%= slug %>",
+          "options": [
+              {
+              "selected": true,
+              "value": "<%= graphite_identifier %>",
+              "text": "<%= slug %>"
+            }
+          ]
+        }
+      ]
+    },
+
     "panels": [
 <%-
   id = 10;
@@ -5642,75 +5709,6 @@
 <%-
   end
 -%>
-    ],
-    "refresh": "1m",
-    "timezone": "browser",
-    "timepicker": {
-      "refresh_intervals": [ "30s", "1m", "2m" ],
-      "time_options": [ "1m", "3m", "5m", "15m" ]
-    },
-    "time": {
-      "from": "now-2m",
-      "to": "now"
-    },
-    "hideControls": true,
-    "style": "dark",
-    "templating": {
-      "list": [
-        {
-          "label": null,
-          "current": {
-            "text": "<%= slug %>",
-            "value": "<%= graphite_identifier %>"
-          },
-          "type": "constant",
-          "name": "host",
-          "options": [
-              {
-              "text": "<%= slug %>",
-              "value": "<%= graphite_identifier %>"
-            }
-          ],
-          "query": "<%= graphite_identifier %>",
-          "hide": 2
-        },
-        {
-          "hide": 2,
-          "query": "<%= slug %>",
-          "options": [
-              {
-              "value": "<%= graphite_identifier %>",
-              "selected": true,
-              "text": "<%= slug %>"
-            }
-          ],
-          "name": "RLS",
-          "type": "constant",
-          "current": {
-            "text": "<%= slug %>",
-            "value": "<%= graphite_identifier %>"
-          },
-          "label": null
-        },
-        {
-          "name": "MLS",
-          "type": "constant",
-          "current": {
-            "value": "<%= graphite_identifier %>",
-            "text": "<%= slug %>"
-          },
-          "label": null,
-          "hide": 2,
-          "query": "<%= slug %>",
-          "options": [
-              {
-              "selected": true,
-              "value": "<%= graphite_identifier %>",
-              "text": "<%= slug %>"
-            }
-          ]
-        }
-      ]
-    }
+    ]
   }
 }

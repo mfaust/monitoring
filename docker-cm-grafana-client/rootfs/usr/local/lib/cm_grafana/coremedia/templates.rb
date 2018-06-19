@@ -48,19 +48,20 @@ class CMGrafana
 
         logger.debug("create_service_template( #{params} )")
 
-        description              = params.dig(:description)
-        service_name             = params.dig(:service_name)
-        normalized_name          = params.dig(:normalized_name)
-        service_template         = params.dig(:service_template)
+        description               = params.dig(:description)
+        service_name              = params.dig(:service_name)
+        normalized_name           = params.dig(:normalized_name)
+        service_template          = params.dig(:service_template)
         additional_template_paths = params.dig(:additional_template_paths) || []
-        tomcat_dashboard_url     = params.dig(:tomcat_dashboard_url)
-        mls_identifier           = @graphite_identifier
-        slug                     = @slug
-        graphite_identifier      = @graphite_identifier
-        icinga_identifier        = graphite_identifier.gsub('.','_')
-        short_hostname           = @short_hostname
-        grafana_title            = format('%s - %s', slug, description )
-        uuid                     = format('%s-%s', @dashboard_uuid, service_name )
+        tomcat_dashboard_url      = params.dig(:tomcat_dashboard_url)
+        memorypools_dashboard_url = params.dig(:memorypools_dashboard_url)
+        mls_identifier            = @graphite_identifier
+        slug                      = @slug
+        graphite_identifier       = @graphite_identifier
+        icinga_identifier         = graphite_identifier.gsub('.','_')
+        short_hostname            = @short_hostname
+        grafana_title             = format('%s - %s', slug, description )
+        uuid                      = format('%s-%s', @dashboard_uuid, service_name )
 
         ## -------------------------------------------------------
         #logger.debug( sprintf( '  service_name       \'%s\'', service_name ) )
@@ -227,17 +228,18 @@ class CMGrafana
 
         logger.debug("normalize_template(params = {})")
 
-        template             = params.dig(:template)
-        service_name         = params.dig(:service_name)
-        description          = params.dig(:description)
-        normalized_name      = params.dig(:normalized_name)
-        slug                 = params.dig(:slug)
-        graphite_identifier  = params.dig(:graphite_identifier)
-        short_hostname       = params.dig(:short_hostname)
-        mls_identifier       = params.dig(:mls_identifier)
-        tomcat_dashboard_url = params.dig(:tomcat_dashboard_url)
-        icinga_identifier    = graphite_identifier.gsub('.','_')
-        uuid                 = format( '%s-%s', @dashboard_uuid, service_name )
+        template                  = params.dig(:template)
+        service_name              = params.dig(:service_name)
+        description               = params.dig(:description)
+        normalized_name           = params.dig(:normalized_name)
+        slug                      = params.dig(:slug)
+        graphite_identifier       = params.dig(:graphite_identifier)
+        short_hostname            = params.dig(:short_hostname)
+        mls_identifier            = params.dig(:mls_identifier)
+        tomcat_dashboard_url      = params.dig(:tomcat_dashboard_url)
+        memorypools_dashboard_url = params.dig(:memorypools_dashboard_url)
+        icinga_identifier         = graphite_identifier.gsub('.','_')
+        uuid                      = format( '%s-%s', @dashboard_uuid, service_name )
 
         grafana_title = format('%s - %s', slug, description )
 

@@ -1,19 +1,17 @@
+<%-
+  title = 'CAE Feeder Preview'; descr = 'CAE Preview Feeder'; app = 'FEEDER_PREV'; id = 10;
+%>
 {
   "dashboard": {
-    "hideControls": false,
-    "refresh": "1m",
-    "title": "<%= slug %> - CAE Feeder Preview",
-    "schemaVersion": 12,
-    "time": {
-      "to": "now",
-      "from": "now-3h"
-    },
+    "uid": "<%= uuid %>",
     "id": null,
-    "tags": [
-      "<%= short_hostname %>",
-      "feeder"
-    ],
-    "timezone": "browser",
+    "title": "<%= slug %> - <%= title %>",
+    "tags": [ "<%= short_hostname %>", "feeder" ],
+    "schemaVersion": 12,
+    "version": 1,
+    "style": "dark",
+    "refresh": "1m",
+    "time": { "from": "now/d", "to": "now/d" },
     "timepicker": {
       "time_options": [
         "5m",
@@ -28,7 +26,6 @@
       ],
       "now": true,
       "refresh_intervals": [
-        "10s",
         "30s",
         "1m",
         "2m",
@@ -36,59 +33,62 @@
         "10m"
       ]
     },
+    "timezone": "browser",
+    "annotations": {
+      "list": []
+    },
+    "templating": {
+      "list": [
+        {
+          "query": "<%= graphite_identifier %>",
+          "name": "host",
+          "hide": 2,
+          "current": {
+            "text": "<%= slug %>",
+            "value": "<%= graphite_identifier %>"
+          },
+          "options": [
+            {
+              "value": "<%= graphite_identifier %>",
+              "text": "<%= slug %>"
+            }
+          ],
+          "type": "constant",
+          "label": null
+        }
+      ]
+    },
     "sharedCrosshair": true,
     "editable": true,
-    "style": "dark",
-    "version": 1,
-    "gnetId": null,
+    "hideControls": false,
+
     "rows": [
       {
-        "collapse": false,
-        "height": 24,
+        "title": "",
+        "height": "10px",
         "panels": [
           {
-            "mode": "html",
+            "id": <%= id += 1 %>,
             "title": "",
-            "span": 12,
-            "links": [],
-            "content": "<h3><center><a href=\"<%= tomcat_dashboard_url %>?var-Application=FEEDER_PREV\">Tomcat</a></center></h3>",
-            "transparent": true,
             "type": "text",
-            "id": 10
-          }
-        ],
-        "repeatIteration": null,
-        "showTitle": false,
-        "title": "",
-        "repeat": null,
-        "titleSize": "h6",
-        "repeatRowId": null
-      },
-      {
-        "title": "",
-        "collapse": false,
-        "editable": true,
-        "height": 24,
-        "panels": [
-          {
+            "span": 5,
             "mode": "html",
-            "span": 12,
-            "isNew": true,
-            "content": "<h2><center>CAE Preview Feeder</center></h2>",
-            "links": [],
-            "id": 11,
-            "editable": true,
-            "title": "",
             "transparent": true,
-            "error": false,
-            "type": "text"
+            "content": "<h2 style=\"text-align:center; font-weight:500\"><%= descr %></h2>"
+          },
+          {
+            "id": <%= id += 1 %>,
+            "title": "",
+            "type": "text",
+            "span": 7,
+            "mode": "html",
+            "transparent": true,
+            "content": "<div style=\"text-align:center; font-size: 1.8em\">\n<div style=\"width:49%; float:left\"><a style=\"text-decoration:none\" href=\"<%= tomcat_dashboard_url %>?var-Application=<%= app %>\">Tomcat</a></div>\n  <div style=\"width:49%; float:left\"><a style=\"text-decoration:none\" href=\"<%= memorypools_dashboard_url %>?var-Application=<%= app %>\">Memory Pools</a></div>\n</div>\n"
           }
         ]
       },
       {
         "title": "Feeder Elements",
-        "collapse": false,
-        "editable": true,
         "height": "150px",
         "panels": [
           {
@@ -149,7 +149,7 @@
             "lines": true,
             "timeFrom": null,
             "title": "Feeder Elements",
-            "id": 12,
+            "id": <%= id += 1 %>,
             "renderer": "flot",
             "xaxis": {
               "show": true
@@ -185,7 +185,7 @@
               "rightSide": true,
               "total": false,
               "min": false,
-              "max": true,
+              "max": false,
               "alignAsTable": true,
               "avg": false,
               "show": true,
@@ -199,6 +199,8 @@
         ]
       },
       {
+        "title": "UAPI Cache",
+        "height": "150px",
         "panels": [
           {
             "linewidth": 1,
@@ -210,7 +212,7 @@
             "xaxis": {
               "show": true
             },
-            "id": 13,
+            "id": <%= id += 1 %>,
             "renderer": "flot",
             "yaxes": [
               {
@@ -241,7 +243,7 @@
               "shared": true
             },
             "legend": {
-              "max": true,
+              "max": false,
               "min": false,
               "total": false,
               "rightSide": true,
@@ -295,38 +297,8 @@
             "isNew": true,
             "nullPointMode": "connected"
           }
-        ],
-        "height": "150px",
-        "editable": true,
-        "title": "UAPI Cache",
-        "collapse": false
+        ]
       }
-    ],
-    "annotations": {
-      "list": []
-    },
-    "uid": "<%= uuid %>",
-    "links": [],
-    "templating": {
-      "list": [
-        {
-          "options": [
-            {
-              "value": "<%= graphite_identifier %>",
-              "text": "<%= slug %>"
-            }
-          ],
-          "name": "host",
-          "current": {
-            "text": "<%= slug %>",
-            "value": "<%= graphite_identifier %>"
-          },
-          "hide": 2,
-          "label": null,
-          "query": "<%= graphite_identifier %>",
-          "type": "constant"
-        }
-      ]
-    }
+    ]
   }
 }
