@@ -114,7 +114,7 @@ module DataCollector
       logger.debug( "mongodb_data( #{params} )" )
 
       host = params.dig(:host)
-      port = params.dig(:port) || 28017
+      port = params.dig(:port) || 27017
 
       return { status: 500, message: 'no host name for mongodb_data data' } if( host.nil? )
 
@@ -123,7 +123,7 @@ module DataCollector
         return JSON.parse( JSON.generate( status: 500 ) )
       end
 
-      ExternalClients::MongoDb.new( host: host, port: port ).get()
+      ExternalClients::MongoDb::Instance.new( host: host, port: port ).get()
     end
 
 

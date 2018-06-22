@@ -7,9 +7,12 @@ require 'pg'
 
 require_relative 'logging'
 
+require_relative 'external-clients/mongodb'
 
 
 module ExternalClients
+
+  include MongoDB
 
   class MySQL
 

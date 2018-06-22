@@ -79,3 +79,11 @@
   - including the stack documentation and a operation guide
 - support node_exporter v0.16.x
 
+
+1808
+
+- updates for mongodb 3.6
+  - MongoDB 3.6 removes the deprecated HTTP interface and REST API to MongoDB
+    we support now the official ruby client
+-
+

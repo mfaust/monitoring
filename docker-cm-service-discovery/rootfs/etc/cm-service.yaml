@@ -40,7 +40,7 @@ services:
 
   mongodb:
     description: MongoDB
-    port: 28017
+    port: 27017
 
   resourced:
     description: Resourced
