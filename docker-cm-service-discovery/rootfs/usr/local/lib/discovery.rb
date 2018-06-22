@@ -48,7 +48,8 @@ module ServiceDiscovery
         8081,     # Apache mod_status
         9100,     # node_exporter (standard port)
         19100,    # node_exporter (CoreMedia internal)
-        28017,    # mongodb
+        27017,    # mongodb
+        28017,    # mongodb http (obsolete)
         38099,
         40099,
         40199,

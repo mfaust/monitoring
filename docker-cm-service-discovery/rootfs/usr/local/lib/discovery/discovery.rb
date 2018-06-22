@@ -10,7 +10,7 @@ module ServiceDiscovery
       host = params.dig(:fqdn)
       port = params.dig(:port)
 
-      fixed_ports = [80, 443, 8081, 3306, 5432, 6379, 9100, 19100, 28017, 55555]
+      fixed_ports = [80, 443, 8081, 3306, 5432, 6379, 9100, 19100, 27017, 28017, 55555]
       services   = Array.new
 
       if( fixed_ports.include?( port ) )
@@ -30,7 +30,7 @@ module ServiceDiscovery
           services.push('redis')
         when 9100, 19100
           services.push('node-exporter')
-        when 28017
+        when 27017, 28017
           services.push('mongodb')
         when 55555
           services.push('resourced')
@@ -404,20 +404,23 @@ module ServiceDiscovery
 
         if( pd.isAvailable?() )
 
+          logger.debug("check ports: #{ports}")
+
           open_ports = pd.post( host: fqdn, ports: ports )
 
           if( open_ports.nil? )
             logger.error( format( 'can\'t detect open ports for %s', fqdn ) )
           else
 
+            logger.info("open ports found: #{open_ports}")
+
             open_ports.each do |p|
 
               names = discover_application( fqdn: fqdn, port: p )
 
-              # logger.debug("discovered services: #{names}")
+              logger.debug("discovered services: #{names}")
 
               unless( names.nil? )
-
                 names.each do |name|
                   discovered_services.merge!( { name => { 'port' => p } } )
                 end
