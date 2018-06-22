@@ -15,7 +15,7 @@ module ExternalClients
         @host       = config.dig(:host)  || 'localhost'
 
         # @fields_to_ignore = %w(host version process pid uptimeMillis localTime extra_info.note backgroundFlushing.last_finished repl.setName repl.hosts repl.arbiters repl.primary repl.me ok)
-        @white_list = %w(uptime asserts) # connections network opcounters tcmalloc storageEngine metrics mem extra_info wiredTiger globalLock)
+        @white_list = %w(uptime asserts connections network opcounters tcmalloc storageEngine metrics mem extra_info wiredTiger globalLock)
         # @prefix_callback = nil
         @replacements = { /locks\.\.\./ => 'locks.global.' }
 

@@ -36,7 +36,10 @@
   },
   "1808": {
     "version": "1808",
-    "date": "",
-    "changes": []
+    "date": "22.06.2018",
+    "changes": [
+      "updates for mongodb 3.6",
+      "MongoDB 3.6 removes the deprecated HTTP interface and REST API to MongoDB"
+    ]
   }
 }
