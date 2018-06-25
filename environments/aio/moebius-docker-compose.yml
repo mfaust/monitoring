@@ -2,7 +2,9 @@
 version: '3.3'
 
 networks:
-  mon:
+  frontend:
+  backend:
+  database:
 
 volumes:
   database:
@@ -24,7 +26,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:
-      - mon
+      - database
 
   database:
     restart: always
@@ -38,7 +40,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - database:/srv
     networks:
-      - mon
+      - database
 
   jolokia:
     restart: always
@@ -49,7 +51,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:
-      - mon
+      - backend
     extra_hosts:
       osmc.local: 192.168.122.60
       blueprint-box: 192.168.252.100
@@ -63,7 +65,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
     command: "--listen=0.0.0.0 --memory-limit=8"
     networks:
-      - mon
+      - database
 
   redis:
     restart: always
@@ -76,7 +78,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - redis:/data
     networks:
-      - mon
+      - database
 
   nginx:
     restart: always
@@ -104,7 +106,8 @@ services:
       - ../config/nginx/etc/nginx/nginx.conf-aio:/etc/nginx/nginx.conf:ro
       - ./ssl:/etc/nginx/secure/localhost:ro
     networks:
-      - mon
+      - frontend
+      - backend
 
   carbon:
     restart: always
@@ -118,7 +121,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - carbon:/srv
     networks:
-      - mon
+      - backend
 
   graphite:
     restart: always
@@ -133,7 +136,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - carbon:/srv
     networks:
-      - mon
+      - backend
 
   grafana:
     restart: always
@@ -169,7 +172,9 @@ services:
       - /etc/localtime:/etc/localtime:ro
       # - /share/opt/grafana/dashboards:/opt/grafana/dashboards
     networks:
-      - mon
+      - frontend
+      - backend
+      - database
 
   cm-icinga2-master:
     restart: always
@@ -208,7 +213,8 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - icinga:/var/lib/icinga2
     networks:
-      - mon
+      - backend
+      - database
     extra_hosts:
       osmc.local: 192.168.122.60
       blueprint-box: 192.168.252.100
@@ -246,7 +252,9 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:
-      - mon
+      - frontend
+      - backend
+      - database
 
   documentation:
     restart: always
@@ -259,7 +267,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:
-      - mon
+      - frontend
 
   cm-dashing:
     restart: always
@@ -286,8 +294,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:
-      - mon
-
+      - frontend
 
   # CoreMedia Glue and Logic
   #
@@ -309,7 +316,9 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:
-      - mon
+      - frontend
+      - backend
+      - database
     extra_hosts:
       osmc.local: 192.168.122.60
       blueprint-box: 192.168.252.100
@@ -339,7 +348,8 @@ services:
       #- ../config/service-discovery/etc/cm-service.yaml:/etc/cm-service.yaml
       #- ../config/service-discovery/etc/cm-application.yaml:/etc/cm-application.yaml
     networks:
-      - mon
+      - backend
+      - database
     extra_hosts:
       osmc.local: 192.168.122.60
       blueprint-box: 192.168.252.100
@@ -366,7 +376,8 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:
-      - mon
+      - backend
+      - database
     extra_hosts:
       osmc.local: 192.168.122.60
       blueprint-box: 192.168.252.100
@@ -390,7 +401,8 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:
-      - mon
+      - backend
+      - database
 
   # single service
   # use MQ to process data
@@ -415,7 +427,9 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:
-      - mon
+      - frontend
+      - backend
+      - database
 
   # single service
   # use MQ to process data
@@ -445,7 +459,9 @@ services:
       - /etc/localtime:/etc/localtime:ro
       # - ../../docker-cm-data/rootfs/data/etc/icinga_server_config.yml:/etc/icinga_server_config.yml
     networks:
-      - mon
+      - frontend
+      - backend
+      - database
     extra_hosts:
       osmc.local: 192.168.122.60
       blueprint-box: 192.168.252.100
