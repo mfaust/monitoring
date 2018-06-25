@@ -1,24 +1,71 @@
+<%-
+  title = 'Operating System'; id = 10;
+%>
 {
   "dashboard": {
-    "version": 0,
-    "schemaVersion": 12,
-    "title": "<%= slug %> - Operating System",
-    "tags": [ "<%= short_hostname %>", "os" ],
-    "id": null,
     "uid": "<%= uuid %>",
+    "id": null,
+    "title": "<%= slug %> - <%= title %>",
+    "tags": [ "<%= short_hostname %>", "os" ],
+    "schemaVersion": 12,
+    "version": 0,
+    "style": "dark",
+    "refresh": "1m",
+    "time": { "from": "now/d", "to": "now/d" },
+    "timepicker": {
+      "time_options": [
+        "5m",
+        "15m",
+        "1h",
+        "6h",
+        "12h",
+        "24h",
+        "2d",
+        "7d",
+        "30d"
+      ],
+      "now": true,
+      "refresh_intervals": [
+        "30s",
+        "1m",
+        "2m",
+        "4m",
+        "10m"
+      ]
+    },
+    "timezone": "browser",
     "annotations": {
       "list": []
     },
+    "templating": {
+      "list": [
+        {
+          "current": {
+            "value": "<%= graphite_identifier %>",
+            "text": "<%= slug %>"
+          },
+          "type": "constant",
+          "query": "<%= slug %>",
+          "options": [
+            {
+              "value": "<%= graphite_identifier %>",
+              "text": "<%= slug %>"
+            }
+          ],
+          "name": "host",
+          "label": null,
+          "hide": 2
+        }
+      ]
+    },
+    "sharedCrosshair": true,
+    "editable": true,
+    "hideControls": false,
+
     "rows": [
       {
-        "height": "150",
-        "repeatIteration": null,
-        "titleSize": "h6",
-        "showTitle": false,
-        "collapse": false,
-        "repeat": null,
-        "title": "Dashboard Row",
-        "repeatRowId": null,
+        "title": "Load",
+        "height": "150px",
         "panels": [
           {
             "steppedLine": false,
@@ -29,13 +76,13 @@
               "avg": false,
               "rightSide": true,
               "show": true,
-              "max": true,
+              "max": false,
               "alignAsTable": true,
               "current": true,
               "values": true
             },
             "aliasColors": {},
-            "id": 10,
+            "id": <%= id += 1 %>,
             "decimals": 1,
             "span": 12,
             "thresholds": [],
@@ -95,14 +142,8 @@
         ]
       },
       {
-        "showTitle": false,
-        "titleSize": "h6",
-        "height": "150",
-        "repeatIteration": null,
-        "collapse": false,
-        "repeat": null,
-        "title": "Dashboard Row",
-        "repeatRowId": null,
+        "title": "root Filesystem",
+        "height": "150px",
         "panels": [
           {
             "datasource": "graphite",
@@ -174,7 +215,7 @@
               "total": false,
               "values": true,
               "current": true,
-              "max": true,
+              "max": false,
               "show": true,
               "alignAsTable": true
             },
@@ -192,14 +233,8 @@
         ]
       },
       {
+        "title": "Memory  usage",
         "height": "150px",
-        "repeatIteration": null,
-        "titleSize": "h6",
-        "showTitle": false,
-        "collapse": false,
-        "title": "Dashboard Row",
-        "repeat": null,
-        "repeatRowId": null,
         "panels": [
           {
             "renderer": "flot",
@@ -219,17 +254,15 @@
             "bars": false,
             "targets": [
               {
-                "target": "alias(carbon-writer.$host.NODE_EXPORTER.memory.total, 'total')",
-                "refId": "A"
+                "refId": "A",
+                "target": "alias(carbon-writer.$host.NODE_EXPORTER.memory.total, 'total')"
               },
               {
-                "refId": "C",
-                "textEditor": false,
+                "refId": "B",
                 "target": "alias(carbon-writer.$host.NODE_EXPORTER.memory.used, 'used')"
               },
               {
-                "refId": "D",
-                "textEditor": false,
+                "refId": "C",
                 "target": "alias(carbon-writer.$host.NODE_EXPORTER.memory.used_percent, 'percent')"
               }
             ],
@@ -272,13 +305,13 @@
             "linewidth": 1,
             "thresholds": [],
             "decimals": 1,
-            "id": 12,
+            "id": <%= id += 1 %>,
             "type": "graph",
             "legend": {
               "values": true,
               "current": true,
               "show": true,
-              "max": true,
+              "max": false,
               "alignAsTable": true,
               "avg": false,
               "min": false,
@@ -291,11 +324,8 @@
         ]
       },
       {
-        "collapse": false,
-        "titleSize": "h6",
-        "showTitle": false,
-        "height": "150",
-        "repeatIteration": null,
+        "title": "Swap usage",
+        "height": "150px",
         "panels": [
           {
             "timeShift": null,
@@ -325,16 +355,16 @@
             "bars": false,
             "targets": [
               {
-                "target": "alias(carbon-writer.$host.NODE_EXPORTER.swap.total, 'total')",
-                "refId": "A"
+                "refId": "A",
+                "target": "alias(carbon-writer.$host.NODE_EXPORTER.swap.total, 'total')"
               },
               {
                 "refId": "B",
                 "target": "alias(carbon-writer.$host.NODE_EXPORTER.swap.used, 'used')"
               },
               {
-                "target": "alias(carbon-writer.$host.NODE_EXPORTER.swap.used_percent, 'percent')",
-                "refId": "C"
+                "refId": "C",
+                "target": "alias(carbon-writer.$host.NODE_EXPORTER.swap.used_percent, 'percent')"
               }
             ],
             "datasource": "graphite",
@@ -374,28 +404,19 @@
               "min": false,
               "alignAsTable": true,
               "show": true,
-              "max": true,
+              "max": false,
               "values": true,
               "current": true
             },
             "aliasColors": {},
-            "id": 13,
+            "id": <%= id += 1 %>,
             "steppedLine": false
           }
-        ],
-        "title": "Dashboard Row",
-        "repeatRowId": null,
-        "repeat": null
+        ]
       },
       {
-        "titleSize": "h6",
-        "showTitle": false,
-        "height": 180,
-        "repeatIteration": null,
-        "collapse": false,
         "title": "CPU",
-        "repeat": null,
-        "repeatRowId": null,
+        "height": "150px",
         "panels": [
           {
             "percentage": false,
@@ -430,13 +451,25 @@
             "pointradius": 5,
             "title": "CPU",
             "seriesOverrides": [],
-            "fill": 2,
+            "fill": 4,
             "bars": false,
             "targets": [
               {
                 "refId": "A",
-                "textEditor": false,
+                "hide": true,
                 "target": "aliasByMetric(averageSeriesWithWildcards(sumSeriesWithWildcards(perSecond(carbon-writer.$host.NODE_EXPORTER.cpu.cpu[0-9].*), 4), 5))"
+              },
+              {
+                "refId": "B",
+                "target": "aliasByMetric(averageSeriesWithWildcards(sumSeriesWithWildcards(perSecond(carbon-writer.$host.NODE_EXPORTER.cpu.cpu[0-9].iowait), 4), 5))"
+              },
+              {
+                "refId": "C",
+                "target": "aliasByMetric(averageSeriesWithWildcards(sumSeriesWithWildcards(perSecond(carbon-writer.$host.NODE_EXPORTER.cpu.cpu[0-9].system), 4), 5))"
+              },
+              {
+                "refId": "D",
+                "target": "aliasByMetric(averageSeriesWithWildcards(sumSeriesWithWildcards(perSecond(carbon-writer.$host.NODE_EXPORTER.cpu.cpu[0-9].user), 4), 5))"
               }
             ],
             "xaxis": {
@@ -448,7 +481,7 @@
             "aliasColors": {},
             "legend": {
               "alignAsTable": true,
-              "max": true,
+              "max": false,
               "show": true,
               "current": true,
               "values": true,
@@ -458,7 +491,7 @@
               "avg": false
             },
             "type": "graph",
-            "id": 14,
+            "id": <%= id += 1 %>,
             "steppedLine": false,
             "nullPointMode": "connected",
             "lines": true,
@@ -470,60 +503,6 @@
           }
         ]
       }
-    ],
-    "links": [],
-    "templating": {
-      "list": [
-        {
-          "current": {
-            "value": "<%= graphite_identifier %>",
-            "text": "<%= slug %>"
-          },
-          "type": "constant",
-          "query": "<%= slug %>",
-          "options": [
-            {
-              "value": "<%= graphite_identifier %>",
-              "text": "<%= slug %>"
-            }
-          ],
-          "name": "host",
-          "label": null,
-          "hide": 2
-        }
-      ]
-    },
-    "editable": true,
-    "refresh": "1m",
-    "time": {
-      "to": "now",
-      "from": "now-3h"
-    },
-    "timezone": "browser",
-    "sharedCrosshair": true,
-    "style": "dark",
-    "timepicker": {
-      "now": true,
-      "refresh_intervals": [
-        "10s",
-        "30s",
-        "1m",
-        "2m",
-        "4m",
-        "10m"
-      ],
-      "time_options": [
-        "5m",
-        "15m",
-        "1h",
-        "6h",
-        "12h",
-        "24h",
-        "2d",
-        "7d",
-        "30d"
-      ]
-    },
-    "hideControls": false
+    ]
   }
 }

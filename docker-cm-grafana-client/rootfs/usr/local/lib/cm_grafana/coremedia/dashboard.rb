@@ -112,7 +112,7 @@ class CMGrafana
 
         # create service dashboards
         #
-        service_dasboard_result = create_service_dashboard( dns: { ip: ip, short: short, fqdn: fqdn }, discovery: discovery )
+        service_dasboard_result = create_service_dashboards( dns: { ip: ip, short: short, fqdn: fqdn }, discovery: discovery )
 
         # create license dashboard
         #
@@ -141,6 +141,7 @@ class CMGrafana
         end
 
         finish = Time.now
+        logger.info(message)
         logger.info( format( 'finished in %s seconds', (finish - start).round(2) ) )
 
         { status: status, name: host, message: message  }
@@ -159,8 +160,17 @@ class CMGrafana
         graphite_identifier = @graphite_identifier
         short_hostname      = @short_hostname
 
+        # remove services , they need no overview
+        #
+        service_dashboard_data.delete( 'memory-pool' )
+        service_dashboard_data.delete( 'tomcat' )
+        service_dashboard_data.delete( 'cae-cache-classes' )
+        service_dashboard_data.delete( 'cae-cache-classes-ecommerce' )
+
         logger.debug("services: #{services}")
         logger.debug("service_dashboard_data: #{service_dashboard_data}")
+        logger.debug("service_dashboard_data size: #{service_dashboard_data.size}")
+        logger.debug("service_dashboard_data keys: #{service_dashboard_data.keys}")
 
         # ---------------------------------------------------------
 
@@ -179,7 +189,7 @@ class CMGrafana
 
           logger.debug("title: #{title}")
 
-          response = create_dashboard( title: title, dashboard: content, folderId: @folder_uuid )
+          response         = create_dashboard( title: title, dashboard: content, folderId: @folder_uuid )
           response_status  = response.dig('status').to_i
           response_message = response.dig('message')
 
@@ -446,7 +456,7 @@ class CMGrafana
       # @option params [Hash, #read] dns
       # @option params [Hash, #read] discovery
       #
-      def create_service_dashboard(params = {})
+      def create_service_dashboards(params = {})
 
         logger.info( 'add service dashboards' )
 
@@ -475,51 +485,58 @@ class CMGrafana
         # MemoryPools for many Services
         #
         named_template_array.push( 'memory-pool' )
+        service_dashboards_result['memory-pool'] = { 'normalized_name' => 'MEMORY_POOL', 'url' => nil, 'uid' => nil }
 
         # unique Tomcat Dashboard
         #
         named_template_array.push( 'tomcat' )
+        service_dashboards_result['tomcat'] = { 'normalized_name' => 'TOMCAT', 'url' => nil, 'uid' => nil }
 
         # CAE Caches
         #
         if( services.include?( 'cae-preview' ) || services.include?( 'cae-live' ) )
           named_template_array.push( 'cae-cache-classes' )
+          service_dashboards_result['cae-cache-classes'] = { 'normalized_name' => 'CAE_CACHE_CLASSES', 'url' => nil, 'uid' => nil }
+
           named_template_array.push( 'cae-cache-classes-ecommerce' ) if(@mbean.beanAvailable?( fqdn, 'cae-preview', 'CacheClassesECommerceAvailability'))
+          service_dashboards_result['cae-cache-classes-ecommerce'] = { 'normalized_name' => 'CAE_CACHE_CLASSES_ECOMMERCE', 'url' => nil, 'uid' => nil }
         end
 
         # add Operation Datas for NodeExporter
         #
         if( services.include?('node-exporter') )
           named_template_array.push( 'node-exporter' )
-          service_dashboards_result['node-exporter'] = { 'normalized_name' => 'NODE_EXPORTER' }
+          service_dashboards_result['node-exporter'] = { 'normalized_name' => 'NODE_EXPORTER', 'url' => nil, 'uid' => nil }
         end
 
         # add HTTP dashboard
         #
         if( services.include?('http-status') )
           named_template_array.push( 'http-status' )
-          service_dashboards_result['http-status'] = { 'normalized_name' => 'HTTP_STATUS' }
+          service_dashboards_result['http-status'] = { 'normalized_name' => 'HTTP_STATUS', 'url' => nil, 'uid' => nil }
         end
 
         # add mysql dashboad
         #
         if( services.include?('mysql') )
           named_template_array.push( 'mysql' )
-          service_dashboards_result['mysql'] = { 'normalized_name' => 'MYSQL' }
+          service_dashboards_result['mysql'] = { 'normalized_name' => 'MYSQL', 'url' => nil, 'uid' => nil }
         end
 
         # add mongodb dashboad
         #
         if( services.include?('mongodb') )
           named_template_array.push( 'mongodb' )
-          service_dashboards_result['mongodb'] = { 'normalized_name' => 'MONGODB' }
+          service_dashboards_result['mongodb'] = { 'normalized_name' => 'MONGODB', 'url' => nil, 'uid' => nil }
         end
+
+        logger.debug("service_dashboards_result: #{service_dashboards_result}")
 
         # since grafana 5, all dashboards has an UUID for linkbuilding
         # we need also the real link to our tomcat dashboard
 
-        tomcat_dashboard_url = dashboad_url('tomcats')
-        memorypools_dashboard_url = dashboad_url('memory-pools')
+#         tomcat_dashboard_url      = dashboad_url('tomcats')
+#         memorypools_dashboard_url = dashboad_url('memory-pools')
 
         # add named templates for static templates
         #
@@ -530,24 +547,59 @@ class CMGrafana
           filename = template_for_service(template)
 
           next if( filename.nil? )
-
           next unless( File.exist?( filename ) )
 
           logger.debug( format( '  use template file: \'%s\'', File.basename( filename ).strip ) )
-#           logger.debug("service_dashboards_result: #{service_dashboards_result}")
+          logger.debug(service_dashboards_result[template])
 
           unless( template.to_s.empty? )
             r = create_service_template(
               service_name: template,
               normalized_name: normalize_service(template),
               service_template: filename,
-              tomcat_dashboard_url: tomcat_dashboard_url,
-              memorypools_dashboard_url: memorypools_dashboard_url
+              tomcat_dashboard_url: nil,
+              memorypools_dashboard_url: nil
             )
 
+            # result:
+            # {
+            #  :status=>200, :message=>{"id"=>46, "slug"=>"moebius-ci-02-moebius-tomcat-0-cms-memory-pools",
+            # "status"=>200, "uid"=>"moebius-0-cms-memory-pool",
+            # "url"=>"/grafana/d/moebius-0-cms-memory-pool/moebius-ci-02-moebius-tomcat-0-cms-memory-pools", "version"=>1,
+            # "message"=>"success"},
+            # :slug=>"moebius-ci-02-moebius-tomcat-0-cms-memory-pools",
+            # :uid=>"moebius-0-cms-memory-pool",
+            # :url=>"/grafana/d/moebius-0-cms-memory-pool/moebius-ci-02-moebius-tomcat-0-cms-memory-pools"
+            #  }
+            logger.debug("result: #{r} (#{r.class})")
+
+            r = JSON.parse(r) if( r.is_a?( String ) )
+
+            logger.debug(JSON.pretty_generate(r))
+
+            if( service_dashboards_result[template] )
+              status = r.dig(:status)
+              if( status== 200 )
+                url = r.dig(:url)
+                uid = r.dig(:uid)
+                service_dashboards_result[template]['url'] ||= url
+                service_dashboards_result[template]['uid'] ||= uid
+              end
+
+            end
+
+            logger.debug(service_dashboards_result[template])
           end
         end
 
+        # since grafana 5, all dashboards has an UUID for linkbuilding
+        # we need also the real link to our tomcat dashboard
+
+        tomcat_dashboard_url      = dashboad_url('tomcats')
+        memorypools_dashboard_url = dashboad_url('memory-pools')
+
+        # add dashboards for detected services
+        #
         discovery.each do |service,service_data|
 
           additional_template_paths = []

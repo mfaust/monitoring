@@ -1,9 +1,12 @@
+<%-
+  title = 'Cache Classes (CM)'; id = 10;
+%>
 {
   "dashboard": {
     "uid": "<%= uuid %>",
     "id": null,
-    "title": "<%= slug %> - Cache Classes (CM)",
-    "tags": [ "<%= short_hostname %>" ],
+    "title": "<%= slug %> - <%= title %>",
+    "tags": [ "<%= short_hostname %>", "caches" ],
     "schemaVersion": 16,
     "version": 2,
     "style": "dark",
@@ -202,7 +205,7 @@
           }
         ],
         "thresholds": [],
-        "id": 10,
+        "id": <%= id += 1 %>,
         "links": [],
         "datasource": "graphite",
         "aliasColors": {}
@@ -211,7 +214,7 @@
         "datasource": "graphite",
         "aliasColors": {},
         "links": [],
-        "id": 11,
+        "id": <%= id += 1 %>,
         "thresholds": [],
         "tooltip": {
           "msResolution": false,
@@ -326,7 +329,7 @@
         "datasource": "graphite",
         "aliasColors": {},
         "links": [],
-        "id": 12,
+        "id": <%= id += 1 %>,
         "thresholds": [],
         "tooltip": {
           "shared": true,
@@ -547,7 +550,7 @@
           "value_type": "cumulative"
         },
         "thresholds": [],
-        "id": 13,
+        "id": <%= id += 1 %>,
         "links": [],
         "aliasColors": {},
         "datasource": "graphite"
@@ -607,7 +610,7 @@
         "timeFrom": null,
         "bars": false,
         "thresholds": [],
-        "id": 14,
+        "id": <%= id += 1 %>,
         "links": [],
         "aliasColors": {},
         "datasource": "graphite",
@@ -672,7 +675,7 @@
         "aliasColors": {},
         "datasource": "graphite",
         "thresholds": [],
-        "id": 15,
+        "id": <%= id += 1 %>,
         "targets": [
           {
             "refId": "A",
@@ -838,7 +841,7 @@
         },
         "grid": {},
         "decimals": 0,
-        "id": 16,
+        "id": <%= id += 1 %>,
         "thresholds": [],
         "datasource": "graphite",
         "aliasColors": {},
@@ -901,7 +904,7 @@
         "datasource": "graphite",
         "aliasColors": {},
         "links": [],
-        "id": 17,
+        "id": <%= id += 1 %>,
         "thresholds": [],
         "tooltip": {
           "sort": 0,
@@ -1069,7 +1072,7 @@
           }
         ],
         "thresholds": [],
-        "id": 18,
+        "id": <%= id += 1 %>,
         "links": [],
         "aliasColors": {},
         "datasource": "graphite",
@@ -1129,7 +1132,7 @@
       },
       {
         "thresholds": [],
-        "id": 19,
+        "id": <%= id += 1 %>,
         "links": [],
         "datasource": "graphite",
         "aliasColors": {},
@@ -1351,7 +1354,7 @@
         },
         "grid": {},
         "decimals": 0,
-        "id": 20,
+        "id": <%= id += 1 %>,
         "thresholds": [],
         "aliasColors": {},
         "datasource": "graphite",
@@ -1414,7 +1417,7 @@
           }
         ],
         "thresholds": [],
-        "id": 21,
+        "id": <%= id += 1 %>,
         "links": [],
         "datasource": "graphite",
         "aliasColors": {},
@@ -1529,7 +1532,7 @@
         "aliasColors": {},
         "datasource": "graphite",
         "links": [],
-        "id": 22,
+        "id": <%= id += 1 %>,
         "thresholds": [],
         "legend": {
           "min": false,
@@ -1696,7 +1699,7 @@
         },
         "grid": {},
         "decimals": 0,
-        "id": 23,
+        "id": <%= id += 1 %>,
         "thresholds": [],
         "aliasColors": {},
         "datasource": "graphite",
@@ -1756,7 +1759,7 @@
             "max": null
           }
         ],
-        "id": 24,
+        "id": <%= id += 1 %>,
         "thresholds": [],
         "aliasColors": {},
         "datasource": "graphite",
