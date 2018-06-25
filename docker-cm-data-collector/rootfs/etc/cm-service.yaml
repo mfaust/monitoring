@@ -42,6 +42,10 @@ services:
     description: MongoDB
     port: 27017
 
+  mongodb-http:
+    description: MongoDB HTTP (obsolete)
+    port: 28017
+
   resourced:
     description: Resourced
     port: 55555

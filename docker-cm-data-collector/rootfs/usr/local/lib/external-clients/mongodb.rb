@@ -7,6 +7,8 @@ module ExternalClients
 
     class Instance
 
+      include Logging
+
       def initialize(config)
 #         @config = config
 
@@ -45,8 +47,9 @@ module ExternalClients
           end
         end
 
-        result
+        @connection.close
 
+        result
 
         #with_prefix = Hash.new
         #@stats.each do |k,v|
@@ -84,6 +87,7 @@ module ExternalClients
       end
 
       def connection
+        logger.debug( "use mongodb: #{@host}:#{@port}" )
         @connection ||= Mongo::Client.new([ "#{@host}:#{@port}" ] , connect_timeout: 5)
       end
 
@@ -97,8 +101,14 @@ module ExternalClients
       end
 
       def stats
-        db = connection.use("test")
-        db.command({'serverStatus' => 1})
+
+        begin
+          db = connection.use("test")
+          return db.command({'serverStatus' => 1})
+        rescue => error
+          logger.error("error: #{error}")
+          return {}
+        end
       end
 
       def to_hash
@@ -127,6 +137,10 @@ module ExternalClients
             { key.join('.') => v }
           end
         end
+      end
+
+      def close
+        @connection.close
       end
     end
   end

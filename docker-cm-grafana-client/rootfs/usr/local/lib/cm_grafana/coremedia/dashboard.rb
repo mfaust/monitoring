@@ -170,7 +170,7 @@ class CMGrafana
         logger.debug("services: #{services}")
         logger.debug("service_dashboard_data: #{service_dashboard_data}")
         logger.debug("service_dashboard_data size: #{service_dashboard_data.size}")
-        logger.debug("service_dashboard_data keys: #{service_dashboard_data.keys}")
+        logger.debug("service_dashboard_data keys: #{service_dashboard_data.keys}") # we have 18 rows ...
 
         # ---------------------------------------------------------
 
@@ -209,13 +209,13 @@ class CMGrafana
         services        = params.dig(:services) || []
         content_servers = %w(content-management-server master-live-server replication-live-server)
 
-        logger.debug("services: #{services}")
+        # logger.debug("services: #{services}")
 
         begin
-          (1..30).each { |y|
+          (1..10).each { |y|
+            logger.debug(format('wait for measurements data for node \'%s\' ... %d', short, y))
             if( @redis.measurements( short: short, fqdn: fqdn ).nil? )
-              logger.debug(format('wait for measurements data for node \'%s\' ... %d', short, y))
-              sleep(4)
+              sleep(3)
             else
               break
             end
@@ -228,33 +228,32 @@ class CMGrafana
 
         intersect       = content_servers & services
 
-        logger.debug("intersect: #{intersect}")
+#         logger.debug("intersect: #{intersect}")
 
         content_srv_data = {}
 
         intersect.each do |service|
+
+#          begin
+#            (1..3).each { |y|
+#              logger.debug(format('wait for measurements data for service \'%s\' ... %d', service, y))
+#              r = @mbean.beanAvailable?( fqdn, service, 'Server', 'LicenseValidUntilHard')
+#
+#              logger.debug("debug: #{r} (#{r.class})")
+#
+#              if( r.nil? || r.is_a?(FalseClass) )
+#                sleep(2)
+#              else
+#                break
+#              end
+#            }
+#          rescue => error
+#            logger.error( error )
+#          end
+
           logger.debug( format( 'Search License Information for Service %s', service ) )
 
-          begin
-            (1..30).each { |y|
-
-              r = @mbean.beanAvailable?( fqdn, service, 'Server', 'LicenseValidUntilHard')
-
-              logger.debug(r)
-
-              if( r.nil? )
-                logger.debug(format('wait for measurements data for service \'%s\' ... %d', service, y))
-                sleep(4)
-              else
-                break
-              end
-            }
-          rescue => e
-            logger.error( e )
-          end
-
           if( @mbean.beanAvailable?( fqdn, service, 'Server', 'LicenseValidUntilHard') )
-
             logger.info( format( '  - found License Information for Service %s', service ) )
             content_srv_data[service] = {}
             content_srv_data[service]['normalized_name'] = normalize_service(service)
@@ -267,11 +266,12 @@ class CMGrafana
 
             content_srv_data[service]['service_info'] = 'publisher'
             content_srv_data[service]['service_info_title'] = 'Publisher'
-            content_srv_data[service]['service_info'] = 'webserver' if( service == 'replication-live-server' )
-            content_srv_data[service]['service_info_title'] = 'Webserver' if( service == 'replication-live-server' )
 
+            if( service == 'replication-live-server' )
+              content_srv_data[service]['service_info'] = 'webserver'
+              content_srv_data[service]['service_info_title'] = 'Webserver'
+            end
           end
-
         end
 
         slug                = @slug
@@ -280,6 +280,11 @@ class CMGrafana
         short_hostname      = @short_hostname
 
         logger.debug(content_srv_data)
+
+        if( content_srv_data.is_a?(Hash) && content_srv_data.count == 0 )
+          logger.warn( 'no license information found!' )
+          return
+        end
 
         template = "#{@template_directory}/licenses.erb"
 

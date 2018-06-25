@@ -154,7 +154,7 @@ module MBean
 
       (1..15).each { |x|
 
-        redis_data = @redis.get( cacheKey )
+        redis_data = @redis.get(cacheKey)
 
         if( redis_data.nil? )
           logger.debug(sprintf('wait for discovery data for node \'%s\' ... %d', host, x))
