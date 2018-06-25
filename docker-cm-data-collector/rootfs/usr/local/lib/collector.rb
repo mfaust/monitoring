@@ -198,6 +198,8 @@ module DataCollector
         data       = JSON.parse( mysql_data )
       end
 
+      m.close
+
       data
     end
 

@@ -145,6 +145,7 @@ module ExternalClients
           rs = @client.query( @mysqlQuery )
 
           if( rs )
+            @client.close
 
             rows = self.toJson( rs )
             rows = self.valuesToNumeric( rows )
