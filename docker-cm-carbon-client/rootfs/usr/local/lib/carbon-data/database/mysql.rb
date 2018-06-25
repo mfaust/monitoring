@@ -15,7 +15,7 @@ module CarbonData
 
           bytesReceived                   = value.dig('Bytes_received')
           bytesSent                       = value.dig('Bytes_sent')
-          connections                     = value.dig('Connections')
+          connections                     = value.dig('Connections')        # The number of connection attempts (successful or not) to the MySQL server.
           createdTmpDiskTables            = value.dig('Created_tmp_disk_tables')
           createdTmpFiles                 = value.dig('Created_tmp_files')
           createdTmpTables                = value.dig('Created_tmp_tables')

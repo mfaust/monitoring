@@ -5731,9 +5731,9 @@
         "postfix": "",
         "postfixFontSize": "80%",
         "targets": [
-          { "refId": "A", "target": "carbon-writer.$host.MYSQL.connections" }
+          { "refId": "A", "target": "carbon-writer.$host.MYSQL.threads.connected" }
         ],
-        "thresholds": "200,300",
+        "thresholds": "20,30",
         "valueFontSize": "100%",
         "valueName": "current"
       },
