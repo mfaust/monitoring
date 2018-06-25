@@ -5613,6 +5613,26 @@
         ]
       },
       {
+        "title": "Connections",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "type": "singlestat",
+        "span": 1,
+        "colorBackground": true,
+        "colors": [ "rgba(50, 172, 45, 0.97)", "rgba(237, 129, 40, 0.89)", "rgba(245, 54, 54, 0.9)" ],
+        "datasource": "graphite",
+        "format": "none",
+        "postfix": "",
+        "postfixFontSize": "80%",
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.MONGODB.connections.current" }
+        ],
+        "thresholds": "85,95",
+        "valueFontSize": "100%",
+        "valueName": "current"
+      },
+      {
         "title": "used Heap Memory",
         "id": <%= id += 1 %>,
         "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
@@ -5696,6 +5716,26 @@
             "text": "OFFLINE"
           }
         ]
+      },
+      {
+        "title": "Connections",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "type": "singlestat",
+        "span": 1,
+        "colorBackground": true,
+        "colors": [ "rgba(50, 172, 45, 0.97)", "rgba(237, 129, 40, 0.89)", "rgba(245, 54, 54, 0.9)" ],
+        "datasource": "graphite",
+        "format": "none",
+        "postfix": "",
+        "postfixFontSize": "80%",
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.MYSQL.connections" }
+        ],
+        "thresholds": "200,300",
+        "valueFontSize": "100%",
+        "valueName": "current"
       },
       {
         "content": "",

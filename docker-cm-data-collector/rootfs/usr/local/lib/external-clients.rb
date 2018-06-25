@@ -32,21 +32,32 @@ module ExternalClients
       @relative   = false
       @client     = nil
 
+      connect
+
+      self
+    end
+
+
+    def connect
+
+      logger.debug("connect to #{@mysqlHost}:#{@mysqlPort}")
+
+#       logger.debug(@client.inspect)
+
       begin
         @client = Mysql2::Client.new(
           host: @mysqlHost,
           username: @mysqlUser,
           password: @mysqlPass,
           encoding: 'utf8',
-          reconnect: true,
+          reconnect: false,
           read_timeout: 5,
           connect_timeout: 5
         )
-      rescue => e
-        logger.error( "An error occurred for connection: #{e}" )
+      rescue => error
+        logger.error( "An error occurred for connection: #{error}" )
         return nil
       end
-      self
     end
 
 
@@ -138,29 +149,40 @@ module ExternalClients
 
     def get()
 
-      if( @client )
+      rows = false
+      rs   = nil
 
+#       logger.debug( 'get mysql data' )
+
+      connect if(@client.nil?)
+      return false if(@client.nil?)
+
+#       logger.debug(@client.inspect)
+
+      if(@client.is_a?(Mysql2::Client))
         begin
-
           rs = @client.query( @mysqlQuery )
-
-          if( rs )
-            @client.close
-
-            rows = self.toJson( rs )
-            rows = self.valuesToNumeric( rows )
-            rows = self.scaleValues( rows )
-
-            return rows.to_json
-          else
-            return false
-          end
-
-        rescue Exception => e
-          logger.error( "An error occurred for query: #{e}" )
-          return false
+        rescue Exception => error
+          logger.error( "An error occurred for query: #{error}" )
         end
+
+        @client.close
+        @client = nil
       end
+
+      logger.debug(@client.inspect)
+
+      # logger.debug(rs.inspect)
+
+      if(rs.is_a?(Mysql2::Result))
+        rows = toJson( rs )
+        rows = valuesToNumeric( rows )
+        rows = scaleValues( rows ).to_json
+        # logger.debug( JSON.pretty_generate( rows ) )
+      end
+
+#       logger.debug( "rows: #{rows} (#{rows.class})" )
+      rows
     end
 
   end

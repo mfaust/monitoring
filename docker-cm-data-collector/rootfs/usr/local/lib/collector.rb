@@ -160,8 +160,9 @@ module DataCollector
         return JSON.parse( JSON.generate( status: 500 ) )
       end
 
-
       m = ExternalClients::MySQL.new( settings )
+
+      logger.debug(m.inspect)
 
       if( m.client.nil? )
 
@@ -197,8 +198,6 @@ module DataCollector
 
         data       = JSON.parse( mysql_data )
       end
-
-      m.close
 
       data
     end
