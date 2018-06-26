@@ -166,6 +166,8 @@ class CMGrafana
         service_dashboard_data.delete( 'tomcat' )
         service_dashboard_data.delete( 'cae-cache-classes' )
         service_dashboard_data.delete( 'cae-cache-classes-ecommerce' )
+        service_dashboard_data.delete( 'cache-classes' )
+        service_dashboard_data.delete( 'cache-classes-ecommerce' )
 
         logger.debug("services: #{services}")
         logger.debug("service_dashboard_data: #{service_dashboard_data}")
@@ -500,11 +502,19 @@ class CMGrafana
         # CAE Caches
         #
         if( services.include?( 'cae-preview' ) || services.include?( 'cae-live' ) )
-          named_template_array.push( 'cae-cache-classes' )
-          service_dashboards_result['cae-cache-classes'] = { 'normalized_name' => 'CAE_CACHE_CLASSES', 'url' => nil, 'uid' => nil }
+          named_template_array.push( 'cache-classes' )
+          service_dashboards_result['cache-classes'] = { 'normalized_name' => 'CACHE_CLASSES', 'url' => nil, 'uid' => nil }
 
-          named_template_array.push( 'cae-cache-classes-ecommerce' ) if(@mbean.beanAvailable?( fqdn, 'cae-preview', 'CacheClassesECommerceAvailability'))
-          service_dashboards_result['cae-cache-classes-ecommerce'] = { 'normalized_name' => 'CAE_CACHE_CLASSES_ECOMMERCE', 'url' => nil, 'uid' => nil }
+          sleep 4
+#          if( @mbean.beanAvailable?( fqdn, service, 'Server', 'LicenseValidUntilHard') )
+          ecommerce = @mbean.beanAvailable?( fqdn, 'cae-preview', 'CacheClassesECommerceAvailability')
+
+          logger.debug( "ecommerce available: #{ecommerce} (#{ecommerce.class})")
+
+          if(ecommerce == true)
+            named_template_array.push( 'cache-classes-ecommerce' )
+            service_dashboards_result['cache-classes-ecommerce'] = { 'normalized_name' => 'CACHE_CLASSES_ECOMMERCE', 'url' => nil, 'uid' => nil }
+          end
         end
 
         # add Operation Datas for NodeExporter

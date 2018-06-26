@@ -64,18 +64,19 @@ class CMGrafana
         uuid                      = format('%s-%s', @dashboard_uuid, service_name )
 
         ## -------------------------------------------------------
-        #logger.debug( sprintf( '  service_name       \'%s\'', service_name ) )
-        #logger.debug( sprintf( '  description        \'%s\'', description ) )
-        #logger.debug( sprintf( '  normalized_name    \'%s\'', normalized_name ) )
-        #logger.debug( sprintf( '  service_template    \'%s\'', service_template ) )
-        #logger.debug( sprintf( '  additional_template_paths    \'%s\'', additional_template_paths ) )
-        #logger.debug( sprintf( '  slug               \'%s\'', slug ) )
-        #logger.debug( sprintf( '  graphite_identifier \'%s\'', graphite_identifier ) )
-        #logger.debug( sprintf( '  short_hostname     \'%s\'', short_hostname ) )
-        #logger.debug( sprintf( '  mls_identifier     \'%s\'', mls_identifier ) )
-        #logger.debug( sprintf( '  tomcat_dashboard_url \'%s\'', tomcat_dashboard_url ) )
-        #logger.debug( sprintf( '  icinga_identifier  \'%s\'', icinga_identifier ) )
-        #logger.debug( sprintf( '  grafana_title      \'%s\'', grafana_title ) )
+        logger.debug( sprintf( '  service_name         \'%s\'', service_name ) )
+        logger.debug( sprintf( '  description          \'%s\'', description ) )
+        logger.debug( sprintf( '  normalized_name      \'%s\'', normalized_name ) )
+        logger.debug( sprintf( '  service_template     \'%s\'', service_template ) )
+        logger.debug( sprintf( '  additional_template_paths    \'%s\'', additional_template_paths ) )
+        logger.debug( sprintf( '  slug                 \'%s\'', slug ) )
+        logger.debug( sprintf( '  graphite_identifier  \'%s\'', graphite_identifier ) )
+        logger.debug( sprintf( '  short_hostname       \'%s\'', short_hostname ) )
+        logger.debug( sprintf( '  mls_identifier       \'%s\'', mls_identifier ) )
+        logger.debug( sprintf( '  tomcat_dashboard_url \'%s\'', tomcat_dashboard_url ) )
+        logger.debug( sprintf( '  icinga_identifier    \'%s\'', icinga_identifier ) )
+        logger.debug( sprintf( '  grafana_title        \'%s\'', grafana_title ) )
+        logger.debug( sprintf( '  uuid                 \'%s\'', uuid ) )
         ## -------------------------------------------------------
 
         logger.info( sprintf( '  - creating dashboard for \'%s\'', service_name ) )
@@ -159,11 +160,23 @@ class CMGrafana
 
         # TODO
         # switch to gem
-        json = add_annotations(template_json)
-        json = JSON.parse( json ) if( json.is_a?(String) )
+        json  = add_annotations(template_json)
+        json  = JSON.parse( json ) if( json.is_a?(String) )
         title = json.dig('dashboard','title')
 
-        response = create_dashboard( title: title, dashboard: json, folderId: @folder_uuid )
+        logger.debug( "create dashboard: #{title} / #{json.class} / #{@folder_uuid}" )
+
+        response = {}
+        begin
+          response         = create_dashboard( title: title, dashboard: json, folderId: @folder_uuid )
+        rescue => error
+          logger.error("")
+          logger.error(error)
+          logger.error("")
+          logger.debug(JSON.pretty_generate(json))
+          logger.error("")
+        end
+
         response_status  = response.dig('status').to_i
         response_message = response.dig('message')
 
