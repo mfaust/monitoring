@@ -6,7 +6,6 @@ networks:
   backend:
   database:
 
-
 volumes:
   database:
     driver: local
