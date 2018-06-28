@@ -295,6 +295,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
     networks:
       - frontend
+      - backend
 
   # CoreMedia Glue and Logic
   #

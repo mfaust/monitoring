@@ -294,7 +294,6 @@ services:
       - frontend
       - backend
 
-
   # CoreMedia Glue and Logic
   #
   cm-rest-service:
@@ -405,7 +404,7 @@ services:
     container_name: cm-grafana-client
     hostname: cm-grafana-client
     environment:
-      LOG_LEVEL: debug
+      LOG_LEVEL: info
       GRAFANA_HOST: nginx
     depends_on:
       - beanstalkd
