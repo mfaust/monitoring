@@ -1,48 +1,18 @@
+<%-
+  title = 'WFS'; descr = 'WFS'; app = 'WFS'; id = 10;
+%>
 {
   "dashboard": {
-    "links": [],
-    "title": "<%= slug %> - WFS",
+    "uid": "<%= uuid %>",
+    "id": null,
+    "title": "<%= slug %> - <%= title %>",
+    "tags": [ "<%= short_hostname %>", "content-server" ],
     "schemaVersion": 12,
-    "hideControls": false,
-    "editable": true,
+    "version": 1,
     "style": "dark",
     "refresh": "1m",
-    "templating": {
-      "list": [
-        {
-          "current": {
-            "value": "<%= graphite_identifier %>",
-            "text": "<%= slug %>"
-          },
-          "options": [
-            {
-              "value": "<%= graphite_identifier %>",
-              "text": "<%= slug %>"
-            }
-          ],
-          "query": "<%= graphite_identifier %>",
-          "hide": 2,
-          "name": "host",
-          "type": "constant",
-          "label": null
-        }
-      ]
-    },
-    "tags": [
-      "<%= short_hostname %>",
-      "content-server"
-    ],
-    "timezone": "browser",
+    "time": { "from": "now/d", "to": "now/d" },
     "timepicker": {
-      "refresh_intervals": [
-        "10s",
-        "30s",
-        "1m",
-        "2m",
-        "4m",
-        "10m"
-      ],
-      "now": true,
       "time_options": [
         "5m",
         "15m",
@@ -53,63 +23,73 @@
         "2d",
         "7d",
         "30d"
+      ],
+      "now": true,
+      "refresh_intervals": [
+        "30s",
+        "1m",
+        "2m",
+        "4m",
+        "10m"
       ]
     },
-    "uid": "<%= uuid %>",
-    "version": 1,
-    "sharedCrosshair": true,
+    "timezone": "browser",
     "annotations": {
       "list": []
     },
+    "templating": {
+      "list": [
+        {
+          "query": "<%= graphite_identifier %>",
+          "name": "host",
+          "hide": 2,
+          "current": {
+            "text": "<%= slug %>",
+            "value": "<%= graphite_identifier %>"
+          },
+          "options": [
+            {
+              "value": "<%= graphite_identifier %>",
+              "text": "<%= slug %>"
+            }
+          ],
+          "type": "constant",
+          "label": null
+        }
+      ]
+    },
+    "sharedCrosshair": true,
+    "editable": true,
+    "hideControls": false,
+
     "rows": [
       {
-        "height": 42,
-        "repeatIteration": null,
-        "repeat": null,
-        "showTitle": false,
         "title": "",
-        "titleSize": "h6",
+        "height": "10px",
         "panels": [
           {
-            "mode": "html",
+            "id": <%= id += 1 %>,
             "title": "",
-            "content": "<h3><center><a href=\"<%= tomcat_dashboard_url %>?var-Application=WFS\">Tomcat</a></center></h3>",
-            "transparent": true,
             "type": "text",
-            "span": 12,
-            "links": [],
-            "id": 10
-          }
-        ],
-        "repeatRowId": null,
-        "collapse": false
-      },
-      {
-        "panels": [
+            "span": 5,
+            "mode": "html",
+            "transparent": true,
+            "content": "<h2 style=\"text-align:center; font-weight:500\"><%= descr %></h2>"
+          },
           {
-            "id": 11,
-            "transparent": true,
-            "span": 12,
-            "type": "text",
-            "mode": "html",
-            "editable": true,
-            "isNew": true,
-            "content": "<h2><center>WFS</center></h2>",
+            "id": <%= id += 1 %>,
             "title": "",
-            "links": [],
-            "error": false
+            "type": "text",
+            "span": 7,
+            "mode": "html",
+            "transparent": true,
+            "content": "<div style=\"text-align:center; font-size: 1.8em\">\n<div style=\"width:49%; float:left\"><a style=\"text-decoration:none\" href=\"<%= tomcat_dashboard_url %>?var-Application=<%= app %>\">Tomcat</a></div>\n  <div style=\"width:49%; float:left\"><a style=\"text-decoration:none\" href=\"<%= memorypools_dashboard_url %>?var-Application=<%= app %>\">Memory Pools</a></div>\n</div>\n"
           }
-        ],
-        "collapse": false,
-        "height": "25px",
-        "title": "New row",
-        "editable": true
+        ]
       },
       {
-        "editable": true,
         "title": "UAPI Cache",
         "height": "150px",
-        "collapse": false,
         "panels": [
           {
             "steppedLine": false,
@@ -143,7 +123,7 @@
                 "color": "#BF1B00"
               }
             ],
-            "id": 12,
+            "id": <%= id += 1 %>,
             "fill": 3,
             "timeFrom": null,
             "isNew": true,
@@ -209,7 +189,8 @@
         ]
       },
       {
-        "collapse": false,
+        "title": "Blob Cache",
+        "height": "150px",
         "panels": [
           {
             "xaxis": {
@@ -278,7 +259,7 @@
                 "yaxis": 2
               }
             ],
-            "id": 13,
+            "id": <%= id += 1 %>,
             "fill": 3,
             "timeFrom": null,
             "renderer": "flot",
@@ -305,16 +286,11 @@
             ],
             "title": "BlobCache"
           }
-        ],
-        "title": "Blob Cache",
-        "height": "150px",
-        "editable": true
+        ]
       },
       {
-        "height": "150px",
         "title": "Lightweight Sessions",
-        "editable": true,
-        "collapse": false,
+        "height": "150px",
         "panels": [
           {
             "datasource": "graphite",
@@ -352,7 +328,7 @@
               "avg": false,
               "total": false,
               "rightSide": true,
-              "max": true,
+              "max": false,
               "current": true
             },
             "links": [],
@@ -377,7 +353,7 @@
             "error": false,
             "nullPointMode": "connected",
             "seriesOverrides": [],
-            "id": 14,
+            "id": <%= id += 1 %>,
             "fill": 3,
             "timeFrom": null,
             "renderer": "flot",
@@ -396,11 +372,6 @@
           }
         ]
       }
-    ],
-    "time": {
-      "to": "now",
-      "from": "now-3h"
-    },
-    "id": null
+    ]
   }
 }

@@ -1,21 +1,61 @@
 {
   "dashboard": {
-    "version": 4,
-    "schemaVersion": 12,
-    "tags": [ "<%= short_hostname %>", "licenses" ],
-    "title": "<%= slug %> - Licenses",
     "uid": "<%= uuid %>",
     "id": null,
-    "gnetId": null,
-    "time": {
-      "from": "now-2m",
-      "to": "now"
-    },
-    "graphTooltip": 0,
+    "title": "<%= slug %> - Licenses",
+    "tags": [ "<%= short_hostname %>", "licenses" ],
+    "schemaVersion": 12,
+    "version": 4,
     "style": "dark",
-    "links": [],
     "refresh": "2m",
+    "time": { "from": "now/d", "to": "now/d" },
+    "timepicker": {
+      "time_options": [
+        "5m",
+        "15m",
+        "1h",
+        "6h",
+        "12h",
+        "24h",
+        "2d",
+        "7d",
+        "30d"
+      ],
+      "now": true,
+      "refresh_intervals": [
+        "30s",
+        "1m",
+        "2m",
+        "4m",
+        "10m"
+      ]
+    },
     "timezone": "browser",
+    "annotations": {
+      "list": []
+    },
+    "templating": {
+      "list": [
+        {
+          "query": "<%= slug %>",
+          "name": "host",
+          "options": [
+            {
+              "text": "<%= slug %>",
+              "value": "<%= graphite_identifier %>"
+            }
+          ],
+          "label": null,
+          "type": "constant",
+          "current": {
+            "text": "<%= slug %>",
+            "value": "<%= graphite_identifier %>"
+          },
+          "hide": 2
+        }
+      ]
+    },
+
     "rows": [
 <%- id = 10; y = 0; count = 0; size = content_srv_data.size;
   content_srv_data.each do |key,value|
@@ -698,43 +738,6 @@
         ]
       }<%= ',' if (count != size) %>
 <%- y =+ 1; end; -%>
-    ],
-    "templating": {
-      "list": [
-        {
-          "query": "<%= slug %>",
-          "name": "host",
-          "options": [
-            {
-              "text": "<%= slug %>",
-              "value": "<%= graphite_identifier %>"
-            }
-          ],
-          "label": null,
-          "type": "constant",
-          "current": {
-            "text": "<%= slug %>",
-            "value": "<%= graphite_identifier %>"
-          },
-          "hide": 2
-        }
-      ]
-    },
-    "annotations": {
-      "list": []
-    },
-    "timepicker": {
-      "now": true,
-      "refresh_intervals": [
-        "1m",
-        "2m"
-      ],
-      "time_options": [
-        "3m",
-        "5m",
-        "15m"
-      ]
-    },
-    "editable": true
+    ]
   }
 }

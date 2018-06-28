@@ -7,9 +7,12 @@ require 'pg'
 
 require_relative 'logging'
 
+require_relative 'external-clients/mongodb'
 
 
 module ExternalClients
+
+  include MongoDb
 
   class MySQL
 
@@ -29,21 +32,32 @@ module ExternalClients
       @relative   = false
       @client     = nil
 
+      connect
+
+      self
+    end
+
+
+    def connect
+
+      logger.debug("connect to #{@mysqlHost}:#{@mysqlPort}")
+
+#       logger.debug(@client.inspect)
+
       begin
         @client = Mysql2::Client.new(
           host: @mysqlHost,
           username: @mysqlUser,
           password: @mysqlPass,
           encoding: 'utf8',
-          reconnect: true,
+          reconnect: false,
           read_timeout: 5,
           connect_timeout: 5
         )
-      rescue => e
-        logger.error( "An error occurred for connection: #{e}" )
+      rescue => error
+        logger.error( "An error occurred for connection: #{error}" )
         return nil
       end
-      self
     end
 
 
@@ -135,28 +149,40 @@ module ExternalClients
 
     def get()
 
-      if( @client )
+      rows = false
+      rs   = nil
 
+#       logger.debug( 'get mysql data' )
+
+      connect if(@client.nil?)
+      return false if(@client.nil?)
+
+#       logger.debug(@client.inspect)
+
+      if(@client.is_a?(Mysql2::Client))
         begin
-
           rs = @client.query( @mysqlQuery )
-
-          if( rs )
-
-            rows = self.toJson( rs )
-            rows = self.valuesToNumeric( rows )
-            rows = self.scaleValues( rows )
-
-            return rows.to_json
-          else
-            return false
-          end
-
-        rescue Exception => e
-          logger.error( "An error occurred for query: #{e}" )
-          return false
+        rescue Exception => error
+          logger.error( "An error occurred for query: #{error}" )
         end
+
+        @client.close
+        @client = nil
       end
+
+      logger.debug(@client.inspect)
+
+      # logger.debug(rs.inspect)
+
+      if(rs.is_a?(Mysql2::Result))
+        rows = toJson( rs )
+        rows = valuesToNumeric( rows )
+        rows = scaleValues( rows ).to_json
+        # logger.debug( JSON.pretty_generate( rows ) )
+      end
+
+#       logger.debug( "rows: #{rows} (#{rows.class})" )
+      rows
     end
 
   end
@@ -270,62 +296,62 @@ module ExternalClients
   end
 
 
-  class MongoDb
-
-    include Logging
-
-    def initialize( params = {} )
-
-      @host = params[:host] ? params[:host] : 'localhost'
-      @port = params[:port] ? params[:port] : 28017
-
-    end
-
-    def get()
-
-      result = {}
-
-      if( @port != nil )
-
-        serverUrl  = sprintf( 'http://%s:%s/serverStatus', @host, @port )
-
-        uri        = URI.parse( serverUrl )
-        http       = Net::HTTP.new( uri.host, uri.port )
-        request    = Net::HTTP::Get.new( uri.request_uri )
-        request.add_field('Content-Type', 'application/json')
-
-        begin
-
-          response     = http.request( request )
-
-        rescue Timeout::Error, Errno::EHOSTUNREACH, Errno::ECONNREFUSED, Errno::EINVAL, Errno::ECONNRESET, EOFError, Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError => error
-
-          logger.error( error )
-
-          case error
-          when Errno::EHOSTUNREACH
-            logger.error( 'Host unreachable' )
-          when Errno::ECONNREFUSED
-            logger.error( 'Connection refused' )
-          when Errno::ECONNRESET
-            logger.error( 'Connection reset' )
-          end
-        rescue Exception => e
-
-          logger.error( "An error occurred for connection: #{e}" )
-
-        else
-
-          return JSON.parse( response.body )
-        end
-
-      end
-
-      return result
-
-    end
-
-  end
+#  class MongoDb
+#
+#    include Logging
+#
+#    def initialize( params = {} )
+#
+#      @host = params[:host] ? params[:host] : 'localhost'
+#      @port = params[:port] ? params[:port] : 28017
+#
+#    end
+#
+#    def get()
+#
+#      result = {}
+#
+#      if( @port != nil )
+#
+#        serverUrl  = sprintf( 'http://%s:%s/serverStatus', @host, @port )
+#
+#        uri        = URI.parse( serverUrl )
+#        http       = Net::HTTP.new( uri.host, uri.port )
+#        request    = Net::HTTP::Get.new( uri.request_uri )
+#        request.add_field('Content-Type', 'application/json')
+#
+#        begin
+#
+#          response     = http.request( request )
+#
+#        rescue Timeout::Error, Errno::EHOSTUNREACH, Errno::ECONNREFUSED, Errno::EINVAL, Errno::ECONNRESET, EOFError, Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError => error
+#
+#          logger.error( error )
+#
+#          case error
+#          when Errno::EHOSTUNREACH
+#            logger.error( 'Host unreachable' )
+#          when Errno::ECONNREFUSED
+#            logger.error( 'Connection refused' )
+#          when Errno::ECONNRESET
+#            logger.error( 'Connection reset' )
+#          end
+#        rescue Exception => e
+#
+#          logger.error( "An error occurred for connection: #{e}" )
+#
+#        else
+#
+#          return JSON.parse( response.body )
+#        end
+#
+#      end
+#
+#      return result
+#
+#    end
+#
+#  end
 
 
   class NodeExporter
@@ -460,6 +486,9 @@ module ExternalClients
       data   = data.select { |name| name =~ /^node_memory_Swap|node_memory_Mem/ }
       regex  = /(?<load>(.*)) (?<mes>(.*))/x
 
+      # OBSOLETE
+      # remove in release > 1806!
+      #
       data.each do |c|
 
         if( parts = c.match( regex ) )
@@ -470,6 +499,7 @@ module ExternalClients
           result[parts[0].to_s.gsub('_bytes', '')] = sprintf( "%f", parts[1].to_s ).sub(/\.?0*$/, "").to_i
         end
       end
+      # ---------------------------------------------
 
       data.each do |c|
         c.gsub!('node_memory_', ' ' )

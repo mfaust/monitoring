@@ -23,19 +23,8 @@ services:
     image: bodsch/docker-beanstalkd:1.10
     container_name: beanstalkd
     hostname: beanstalkd
-    depends_on:
-      - fluentd
-    links:
-      - fluentd
-    logging:
-      driver: fluentd
-      options:
-        tag: docker.{{.Name}}
-        labels: mq
-        env: SERVICE_NAME, SERVICE_TAGS
     networks:
       - database
-      - backend
 
   database:
     restart: always
@@ -48,37 +37,17 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - database:/srv
-    depends_on:
-      - fluentd
-      - elk
-    links:
-      - fluentd
-    logging:
-      driver: fluentd
-      options:
-        tag: docker.{{.Name}}
-        env: SERVICE_NAME, SERVICE_TAGS
     networks:
       - database
-      - backend
 
   jolokia:
     restart: always
-    image: moebius-registry.coremedia.vm/docker-cm-jolokia:latest
+    image: moebius-registry.coremedia.vm/docker-cm-jolokia:1806
     # build: ../../docker-cm-jolokia
     container_name: jolokia
     hostname: jolokia
     volumes:
       - /etc/localtime:/etc/localtime:ro
-    depends_on:
-      - fluentd
-    links:
-      - fluentd
-    logging:
-      driver: fluentd
-      options:
-        tag: docker.{{.Name}}
-        env: SERVICE_NAME, SERVICE_TAGS
     networks:
       - backend
     extra_hosts:
@@ -93,19 +62,9 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
     command: "--listen=0.0.0.0 --memory-limit=8"
-    depends_on:
-      - fluentd
-    links:
-      - fluentd
-    logging:
-      driver: fluentd
-      options:
-        tag: docker.{{.Name}}
-        env: SERVICE_NAME, SERVICE_TAGS
     command: "--listen=0.0.0.0 --memory-limit=8"
     networks:
       - database
-      - backend
 
   redis:
     restart: always
@@ -117,18 +76,8 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - redis:/data
-    depends_on:
-      - fluentd
-    links:
-      - fluentd
-    logging:
-      driver: fluentd
-      options:
-        tag: docker.{{.Name}}
-        env: SERVICE_NAME, SERVICE_TAGS
     networks:
       - database
-      - backend
 
   nginx:
     restart: always
@@ -139,15 +88,11 @@ services:
       - 80:80
       - 443:443
     depends_on:
-      - fluentd
-      - elk
       - grafana
       - icingaweb2
       - cm-rest-service
       - documentation
     links:
-      - fluentd
-      - elk
       - grafana
       - icingaweb2
       - cm-icinga2-master:icinga2-master
@@ -159,11 +104,6 @@ services:
       - ../config/nginx/etc/nginx/sites-enabled/01-all-in-one.conf:/etc/nginx/sites-enabled/01-all-in-one.conf:ro
       - ../config/nginx/etc/nginx/nginx.conf-aio:/etc/nginx/nginx.conf:ro
       - ./ssl:/etc/nginx/secure/localhost:ro
-    logging:
-      driver: fluentd
-      options:
-        tag: docker.{{.Name}}
-        env: SERVICE_NAME, SERVICE_TAGS
     networks:
       - frontend
       - backend
@@ -179,15 +119,6 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - carbon:/srv
-    depends_on:
-      - fluentd
-    links:
-      - fluentd
-    logging:
-      driver: fluentd
-      options:
-        tag: docker.{{.Name}}
-        env: SERVICE_NAME, SERVICE_TAGS
     networks:
       - backend
 
@@ -203,15 +134,6 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - carbon:/srv
-    depends_on:
-      - fluentd
-    links:
-      - fluentd
-    logging:
-      driver: fluentd
-      options:
-        tag: docker.{{.Name}}
-        env: SERVICE_NAME, SERVICE_TAGS
     networks:
       - backend
 
@@ -240,21 +162,14 @@ services:
       # LDAP_GROUP_DN: ${LDAP_GROUP_DN}
       # LDAP_SEARCH_FILTER: ${LDAP_SEARCH_FILTER}
     depends_on:
-      - fluentd
       - database
       - memcached
     links:
-      - fluentd
       - database
       - memcached
     volumes:
       - /etc/localtime:/etc/localtime:ro
       # - /share/opt/grafana/dashboards:/opt/grafana/dashboards
-    logging:
-      driver: fluentd
-      options:
-        tag: docker.{{.Name}}
-        env: SERVICE_NAME, SERVICE_TAGS
     networks:
       - frontend
       - backend
@@ -267,11 +182,9 @@ services:
     container_name: cm-icinga2-master
     hostname: cm-icinga2-master
     depends_on:
-      - fluentd
       - database
       - redis
     links:
-      - fluentd
       - database
       - redis
     environment:
@@ -298,11 +211,6 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - icinga:/var/lib/icinga2
-    logging:
-      driver: fluentd
-      options:
-        tag: docker.{{.Name}}
-        env: SERVICE_NAME, SERVICE_TAGS
     networks:
       - backend
       - database
@@ -335,20 +243,13 @@ services:
       # LDAP_FILTER: ${LDAP_FILTER}
       # LDAP_ROLE_GROUPS: cm-common
     depends_on:
-      - fluentd
       - database
       - cm-icinga2-master
     links:
-      - fluentd
       - database
       - cm-icinga2-master:cm-icinga2-master
     volumes:
       - /etc/localtime:/etc/localtime:ro
-    logging:
-      driver: fluentd
-      options:
-        tag: docker.{{.Name}}
-        env: SERVICE_NAME, SERVICE_TAGS
     networks:
       - frontend
       - backend
@@ -364,18 +265,8 @@ services:
       - 8080
     volumes:
       - /etc/localtime:/etc/localtime:ro
-    depends_on:
-      - fluentd
-    links:
-      - fluentd
-    logging:
-      driver: fluentd
-      options:
-        tag: docker.{{.Name}}
-        env: SERVICE_NAME, SERVICE_TAGS
     networks:
       - frontend
-      - backend
 
   cm-dashing:
     restart: always
@@ -392,25 +283,18 @@ services:
       ICINGA_CERT_SERVICE_SERVER: nginx
       ICINGA_CERT_SERVICE_PORT: 80
       ICINGA_CERT_SERVICE_PATH: /cert-service
+      ICINGAWEB_URL: /icinga
     depends_on:
-      - fluentd
       - cm-icinga2-master
       - nginx
     links:
-      - fluentd
       - cm-icinga2-master
       - nginx
     volumes:
       - /etc/localtime:/etc/localtime:ro
-    logging:
-      driver: fluentd
-      options:
-        tag: docker.{{.Name}}
-        env: SERVICE_NAME, SERVICE_TAGS
     networks:
       - frontend
       - backend
-
 
   # CoreMedia Glue and Logic
   #
@@ -424,20 +308,13 @@ services:
       LOG_LEVEL: info
       MYSQL_ROOT_PASS: ${MYSQL_ROOT_PASSWORD}
     depends_on:
-      - fluentd
       - redis
       - database
     links:
-      - fluentd
       - redis
       - database
     volumes:
       - /etc/localtime:/etc/localtime:ro
-    logging:
-      driver: fluentd
-      options:
-        tag: docker.{{.Name}}
-        env: SERVICE_NAME, SERVICE_TAGS
     networks:
       - frontend
       - backend
@@ -458,23 +335,16 @@ services:
       LOG_LEVEL: info
       REFRESH_ENABLED: 'true'
     depends_on:
-      - fluentd
       - jolokia
       - beanstalkd
       - redis
       - database
     links:
-      - fluentd
       - jolokia
       - beanstalkd
       - redis
     volumes:
       - /etc/localtime:/etc/localtime:ro
-    logging:
-      driver: fluentd
-      options:
-        tag: docker.{{.Name}}
-        env: SERVICE_NAME, SERVICE_TAGS
     networks:
       - backend
       - database
@@ -493,23 +363,16 @@ services:
     environment:
       LOG_LEVEL: info
     depends_on:
-      - fluentd
       - jolokia
       - beanstalkd
       - redis
       - database
     links:
-      - fluentd
       - jolokia
       - beanstalkd
       - redis
     volumes:
       - /etc/localtime:/etc/localtime:ro
-    logging:
-      driver: fluentd
-      options:
-        tag: docker.{{.Name}}
-        env: SERVICE_NAME, SERVICE_TAGS
     networks:
       - backend
       - database
@@ -530,18 +393,11 @@ services:
       # USE ONLY WITH AND EXTERNAL CARBON-WRITER!
       GRAPHITE_HOST: carbon
     depends_on:
-      - fluentd
       - redis
     links:
-      - fluentd
       - redis
     volumes:
       - /etc/localtime:/etc/localtime:ro
-    logging:
-      driver: fluentd
-      options:
-        tag: docker.{{.Name}}
-        env: SERVICE_NAME, SERVICE_TAGS
     networks:
       - backend
       - database
@@ -555,26 +411,19 @@ services:
     container_name: cm-grafana-client
     hostname: cm-grafana-client
     environment:
-      LOG_LEVEL: debug
+      LOG_LEVEL: info
       GRAFANA_HOST: nginx
     depends_on:
-      - fluentd
       - beanstalkd
       - redis
       - database
     links:
-      - fluentd
       - nginx
       - beanstalkd
       - redis
       - database
     volumes:
       - /etc/localtime:/etc/localtime:ro
-    logging:
-      driver: fluentd
-      options:
-        tag: docker.{{.Name}}
-        env: SERVICE_NAME, SERVICE_TAGS
     networks:
       - frontend
       - backend
@@ -600,20 +449,13 @@ services:
       ICINGA_CERT_SERVICE_PATH: /cert-service
       # ENABLE_NOTIFICATIONS: 'true'
     depends_on:
-      - fluentd
       - beanstalkd
     links:
-      - fluentd
       - beanstalkd
       - nginx
     volumes:
       - /etc/localtime:/etc/localtime:ro
       # - ../../docker-cm-data/rootfs/data/etc/icinga_server_config.yml:/etc/icinga_server_config.yml
-    logging:
-      driver: fluentd
-      options:
-        tag: docker.{{.Name}}
-        env: SERVICE_NAME, SERVICE_TAGS
     networks:
       - frontend
       - backend
@@ -622,6 +464,12 @@ services:
       osmc.local: 192.168.122.60
       blueprint-box: 192.168.252.100
 
+
+  # centralized logging
+  #
+  # elasticsearch needs some tweeks:
+  # echo 262144 | sudo tee /proc/sys/vm/max_map_count
+  #
   elk:
     restart: always
     image: sebp/elk:latest

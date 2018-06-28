@@ -6,11 +6,11 @@ module ServiceDiscovery
 
     def refresh_host_data
 
-      monitoredServer = @database.nodes( status: [ Storage::MySQL::ONLINE ] )
+      monitored_server = @database.nodes( status: [ Storage::MySQL::ONLINE ] )
 
-      return { status: 204,  message: 'no online server found' } if( monitoredServer.nil? || monitoredServer.is_a?( FalseClass ) || monitoredServer.count == 0 )
+      return { status: 204,  message: 'no online server found' } if( monitored_server.nil? || monitored_server.is_a?( FalseClass ) || monitored_server.count == 0 )
 
-      monitoredServer.each do |h|
+      monitored_server.each do |h|
 
         # get a DNS record
         #
@@ -23,68 +23,70 @@ module ServiceDiscovery
 
         logger.info(format('refresh services for host \'%s\'', fqdn))
 
-        known_services_count, known_services_array       = known_services( ip: ip, short: short, fqdn: fqdn ).values
+        known_services_count, known_services_array             = known_services( ip: ip, short: short, fqdn: fqdn ).values
         actually_services_count, actually_services_array, data = actually_services( ip: ip, short: short, fqdn: fqdn ).values
+        identical_services                                     = known_services_array & actually_services_array
 
-        # TODO
-        # compare both arrays
-        # identicalEntries      = known_services_array & actually_services_array
-        # removedEntries        = actually_services_array - known_services_array
-        # newEntries            = known_services_array - identicalEntries
+        # only for debugging:
         #
-        # known_dataCount       = known_services_array.count
-        # actually_dataCount    = actually_services_array.count
-        # identicalEntriesCount = identicalEntries.count
-        # removedEntriesCount   = removedEntries.count
-        # newEntriesCount       = newEntries.count
 
-        # logger.info( format( 'currently there are %s services', services_count ) )
-        # logger.debug( services.to_s )
+        # new_entries             = actually_services_array - known_services_array
+        # removed_entries         = known_services_array - identical_services
         #
-        # logger.info( format( 'i known %d services', services_count ) )
-        # logger.debug( services.to_s )
-
+        # known_data_count        = known_services_array.count
+        # actually_data_count     = actually_services_array.count
+        # identical_services_count = identical_services.count
+        # removed_entries_count   = removed_entries.count
+        # new_entries_count       = new_entries.count
+        #
         # logger.debug( '------------------------------------------------------------' )
-        # logger.info( format( 'known entries %d', known_dataCount ) )
-        # logger.info( format( 'actually entries %d', actually_dataCount ) )
+        # logger.info( format( 'identical entries %d', identical_services_count ) )
+        # logger.debug(  "  #{identical_services}" )
         # logger.debug( '------------------------------------------------------------' )
-        # logger.info( format( 'identical entries %d', identicalEntriesCount ) )
-        # #logger.debug(  "  #{identicalEntries}" )
-        # logger.info( format( 'new entries %d', newEntriesCount ) )
-        # #logger.debug(  "  #{newEntries}" )
-        # logger.info( format( 'removed entries %d', removedEntriesCount ) )
-        # #logger.debug(  "  #{removedEntries}" )
+        # logger.info( format( 'new entries %d', new_entries_count ) )
+        # logger.debug(  "  #{new_entries}" )
+        # logger.debug( '------------------------------------------------------------' )
+        # logger.info( format( 'removed entries %d', removed_entries_count ) )
+        # logger.debug(  "  #{removed_entries}" )
+        # logger.debug( '------------------------------------------------------------' )
+        # logger.info( format( 'known_services_count    %d', known_services_count ) )
+        # logger.info( format( 'actually_services_count %d', actually_services_count ) )
         # logger.debug( '------------------------------------------------------------' )
 
-        if( known_services_count < actually_services_count )
-
-          logger.info( format( '%d new service detected', known_services_count.to_i - actually_services_count.to_i ) )
-
-          # step 1
-          # update our database
-#           result    = @database.createDiscovery( ip: ip, short: short, fqdn: fqdn, data: data )
-          result    = @database.create_discovery( ip: ip, short: short, fqdn: fqdn, data: data )
-
-          options = { dns: { ip: ip, short: short, fqdn: fqdn } }
-          host    = fqdn
-
-          # step 2
-          # create a job for update icinga
-          logger.info( 'create message for grafana to create or update dashboards' )
-          send_message( cmd: 'update', node: host, queue: 'mq-grafana', payload: options, prio: 10, ttr: 15, delay: 25 )
-
-          # step 3
-          # create a job for update grafana
-          logger.info( 'create message for icinga to update host and apply checks and notifications' )
-          send_message( cmd: 'update', node: host, queue: 'mq-icinga', payload: options, prio: 10, ttr: 15, delay: 25 )
-
-        elsif( known_services_count > actually_services_count )
-          logger.info( 'less services (will be ignored)' )
-        else
-          # reduce logging
+        if( actually_services_count == known_services_count )
           logger.debug( 'equal services' )
-        end
+        else
 
+          if( known_services_count < actually_services_count )
+
+            new_entries            = actually_services_array - known_services_array
+
+            logger.info( format( '%d new service detected (%s)', actually_services_count.to_i - known_services_count.to_i, new_entries.join(', ') ) )
+
+            # step 1
+            # update our database
+            result    = @database.create_discovery( ip: ip, short: short, fqdn: fqdn, data: data )
+
+            options = { dns: { ip: ip, short: short, fqdn: fqdn } }
+#             host    = fqdn
+
+            # step 2
+            # create a job for update icinga
+            logger.info( 'create message for grafana to create or update dashboards' )
+            send_message( cmd: 'update', node: fqdn, queue: 'mq-grafana', payload: options, prio: 10, ttr: 15, delay: 25 )
+
+            # step 3
+            # create a job for update grafana
+            logger.info( 'create message for icinga to update host and apply checks and notifications' )
+            send_message( cmd: 'update', node: fqdn, queue: 'mq-icinga', payload: options, prio: 10, ttr: 15, delay: 25 )
+
+          elsif( known_services_count > actually_services_count )
+
+            removed_entries        = known_services_array - identical_services
+            logger.warn( format( '%d less services (will be ignored) (%s)', removed_entries.count, removed_entries.join(', ') ) )
+          end
+
+        end
       end
     end
 

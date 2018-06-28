@@ -245,7 +245,7 @@ module CarbonData
 
         logger.debug( format( '  - \'%s\' (%s)', service, @normalized_service_name ) )
 
-	cache_key = { host: fqdn, pre: 'result', service: service }
+        cache_key = { host: fqdn, pre: 'result', service: service }
 
         logger.debug( "plain cache_key: #{cache_key}" )
 

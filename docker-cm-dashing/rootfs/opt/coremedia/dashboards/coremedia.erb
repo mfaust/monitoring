@@ -31,16 +31,16 @@ $(function() {
     <!-- Down, Critical, Warning, Unknown -->
 
     <li data-row="2" data-col="1" data-sizex="1" data-sizey="1">
-      <div data-id="icinga-host-problems-down" data-view="Simplemon" data-title="Unhandled Hosts"></div>
+      <div data-id="icinga-host-problems-down" data-view="Simplemon" data-title="Unhandled Hosts" data-event-click="redirect" data-url="%ICINGAWEB_URL%/monitoring/list/hosts?host_problem=1&amp;sort=host_severity&amp;dir=desc"></div>
     </li>
     <li data-row="2" data-col="2" data-sizex="1" data-sizey="1">
-      <div data-id="icinga-service-problems-critical" data-view="Simplemon" data-title="Unhandled Services"></div>
+      <div data-id="icinga-service-problems-critical" data-view="Simplemon" data-title="Unhandled Services" data-event-click="redirect" data-url="%ICINGAWEB_URL%/monitoring/list/services?service_problem=1&amp;sort=service_severity&amp;dir=desc"></div>
     </li>
     <li data-row="2" data-col="3" data-sizex="1" data-sizey="1">
-      <div data-id="icinga-service-problems-warning" data-view="Simplemon" data-title="Unhandled Services"></div>
+      <div data-id="icinga-service-problems-warning" data-view="Simplemon" data-title="Unhandled Services" data-event-click="redirect" data-url="%ICINGAWEB_URL%/monitoring/list/services?service_problem=1&amp;sort=service_severity&amp;dir=desc"></div>
     </li>
     <li data-row="2" data-col="4" data-sizex="1" data-sizey="1">
-      <div data-id="icinga-service-problems-unknown" data-view="Simplemon" data-title="Unhandled Services"></div>
+      <div data-id="icinga-service-problems-unknown" data-view="Simplemon" data-title="Unhandled Services" data-event-click="redirect" data-url="%ICINGAWEB_URL%/monitoring/list/services?service_problem=1&amp;sort=service_severity&amp;dir=desc"></div>
     </li>
 
     <li data-row="3" data-col="1" data-sizex="1" data-sizey="1">
@@ -55,7 +55,7 @@ $(function() {
     <!-- Takes two rows for all service problems by severity -->
 
     <li data-row="2" data-col="5" data-sizex="1" data-sizey="2">
-      <div data-id="icinga-severity" data-view="List" data-unordered="true" data-title="Problems" style="background-color: #0095bf;"></div>
+      <div data-id="icinga-severity" data-view="List" data-unordered="true" data-title="Problems"></div>
     </li>
 
 
@@ -63,10 +63,10 @@ $(function() {
     <!-- Icinga Web 2 iFrame -->
 <!--
     <li data-row="3" data-col="1" data-sizex="2" data-sizey="2">
-      <div data-id="iframe" data-view="Iframe" data-url="%ICINGAWEB_URL%/monitoring/list/hosts?host_problem=1&sort=host_severity&showFullscreen&showCompact"></div>
+      <div data-id="iframe" data-view="Iframe" data-url="%ICINGAWEB_URL%/monitoring/list/hosts?host_problem=1&amp;sort=host_severity&showFullscreen&showCompact"></div>
     </li>
     <li data-row="3" data-col="3" data-sizex="2" data-sizey="2">
-      <div data-id="iframe" data-view="Iframe" data-url="%ICINGAWEB_URL%/monitoring/list/services?service_problem=1&sort=service_severity&dir=desc&showFullscreen&showCompact"></div>
+      <div data-id="iframe" data-view="Iframe" data-url="%ICINGAWEB_URL%/monitoring/list/services?service_problem=1&amp;sort=service_severity&amp;dir=desc&showFullscreen&showCompact"></div>
     </li>
 -->
   </ul>

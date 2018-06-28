@@ -1,15 +1,17 @@
+<%-
+  title = 'Elastic Worker'; descr = 'Elastic Worker'; app = 'ELASTIC_WORKER'; id = 10;
+-%>
 {
   "dashboard": {
-    "title": "<%= slug %> - Elastic Worker",
-    "refresh": "1m",
-    "time": {
-      "to": "now",
-      "from": "now-3h"
-    },
-    "tags": [
-      "<%= short_hostname %>"
-    ],
+    "uid": "<%= uuid %>",
+    "id": null,
+    "title": "<%= slug %> - <%= title %>",
+    "tags": [ "<%= short_hostname %>" ],
+    "schemaVersion": 12,
     "version": 1,
+    "style": "dark",
+    "refresh": "1m",
+    "time": { "from": "now/d", "to": "now/d" },
     "timepicker": {
       "time_options": [
         "5m",
@@ -22,68 +24,72 @@
         "7d",
         "30d"
       ],
+      "now": true,
       "refresh_intervals": [
-        "10s",
         "30s",
         "1m",
         "2m",
         "4m",
         "10m"
-      ],
-      "now": true
+      ]
     },
+    "timezone": "browser",
     "annotations": {
       "list": []
     },
-    "schemaVersion": 12,
+    "templating": {
+      "list": [
+        {
+          "current": {
+            "text": "<%= slug %>",
+            "value": "<%= graphite_identifier %>"
+          },
+          "options": [
+            {
+              "value": "<%= graphite_identifier %>",
+              "text": "<%= slug %>"
+            }
+          ],
+          "hide": 2,
+          "label": null,
+          "name": "host",
+          "query": "<%= graphite_identifier %>",
+          "type": "constant"
+        }
+      ]
+    },
+    "sharedCrosshair": true,
     "editable": true,
+    "hideControls": false,
+
     "rows": [
       {
-        "repeat": null,
-        "repeatIteration": null,
         "title": "",
-        "showTitle": false,
-        "titleSize": "h6",
+        "height": "10px",
         "panels": [
           {
-            "id": 10,
-            "content": "<h3><center><a href=\"<%= tomcat_dashboard_url %>?var-Application=ELASTIC_WORKER\">Tomcat</a></center></h3>",
-            "transparent": true,
-            "links": [],
+            "id": <%= id += 1 %>,
             "title": "",
             "type": "text",
-            "span": 12,
-            "mode": "html"
-          }
-        ],
-        "collapse": false,
-        "repeatRowId": null,
-        "height": 42
-      },
-      {
-        "panels": [
-          {
-            "type": "text",
+            "span": 5,
             "mode": "html",
-            "content": "<h2><center>Elastic Worker</center></h2>",
-            "editable": true,
-            "title": "",
-            "span": 12,
-            "error": false,
             "transparent": true,
-            "id": 11,
-            "links": [],
-            "isNew": true
+            "content": "<h2 style=\"text-align:center; font-weight:500\"><%= descr %></h2>"
+          },
+          {
+            "id": <%= id += 1 %>,
+            "title": "",
+            "type": "text",
+            "span": 7,
+            "mode": "html",
+            "transparent": true,
+            "content": "<div style=\"text-align:center; font-size: 1.8em\">\n<div style=\"width:49%; float:left\"><a style=\"text-decoration:none\" href=\"<%= tomcat_dashboard_url %>?var-Application=<%= app %>\">Tomcat</a></div>\n  <div style=\"width:49%; float:left\"><a style=\"text-decoration:none\" href=\"<%= memorypools_dashboard_url %>?var-Application=<%= app %>\">Memory Pools</a></div>\n</div>\n"
           }
-        ],
-        "collapse": false,
-        "editable": true,
-        "title": "New row",
-        "height": "25px"
+        ]
       },
       {
-        "editable": true,
         "title": "UAPI Cache",
+        "height": "150px",
         "panels": [
           {
             "title": "UAPI Cache",
@@ -102,7 +108,7 @@
             "decimals": 1,
             "timeShift": null,
             "links": [],
-            "id": 12,
+            "id": <%= id += 1 %>,
             "grid": {
               "threshold1": null,
               "threshold2": null,
@@ -180,15 +186,11 @@
               }
             ]
           }
-        ],
-        "collapse": false,
-        "height": "150px"
+        ]
       },
       {
-        "height": "150px",
         "title": "Blob Cache",
-        "editable": true,
-        "collapse": false,
+        "height": "150px",
         "panels": [
           {
             "aliasColors": {},
@@ -277,7 +279,7 @@
             "timeShift": null,
             "links": [],
             "isNew": true,
-            "id": 13,
+            "id": <%= id += 1 %>,
             "type": "graph",
             "bars": false,
             "title": "BlobCache",
@@ -287,8 +289,8 @@
         ]
       },
       {
+        "title": "Lightweight Sessions",
         "height": "150px",
-        "collapse": false,
         "panels": [
           {
             "stack": false,
@@ -337,7 +339,7 @@
               "alignAsTable": true,
               "avg": false,
               "show": true,
-              "max": true,
+              "max": false,
               "min": false,
               "rightSide": true,
               "total": false,
@@ -351,7 +353,7 @@
               "threshold1Color": "rgba(216, 200, 27, 0.27)"
             },
             "error": false,
-            "id": 14,
+            "id": <%= id += 1 %>,
             "isNew": true,
             "tooltip": {
               "value_type": "cumulative",
@@ -368,38 +370,8 @@
             "title": "Lightweight Sessions",
             "bars": false
           }
-        ],
-        "editable": true,
-        "title": "Lightweight Sessions"
+        ]
       }
-    ],
-    "sharedCrosshair": true,
-    "id": null,
-    "timezone": "browser",
-    "links": [],
-    "hideControls": false,
-    "uid": "<%= uuid %>",
-    "templating": {
-      "list": [
-        {
-          "label": null,
-          "options": [
-            {
-              "text": "<%= slug %>",
-              "value": "<%= graphite_identifier %>"
-            }
-          ],
-          "hide": 2,
-          "type": "constant",
-          "name": "host",
-          "query": "<%= graphite_identifier %>",
-          "current": {
-            "text": "<%= slug %>",
-            "value": "<%= graphite_identifier %>"
-          }
-        }
-      ]
-    },
-    "style": "dark"
+    ]
   }
 }

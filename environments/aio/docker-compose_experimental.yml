@@ -15,8 +15,6 @@ volumes:
     driver: local
   icinga:
     driver: local
-  es-data:
-    driver: local
 
 services:
 
@@ -29,6 +27,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
     networks:
       - database
+      - backend
 
   database:
     restart: always
@@ -43,6 +42,7 @@ services:
       - database:/srv
     networks:
       - database
+      - backend
 
   jolokia:
     restart: always
@@ -67,6 +67,7 @@ services:
     command: "--listen=0.0.0.0 --memory-limit=8"
     networks:
       - database
+      - backend
 
   redis:
     restart: always
@@ -80,6 +81,7 @@ services:
       - redis:/data
     networks:
       - database
+      - backend
 
   nginx:
     restart: always
@@ -102,7 +104,6 @@ services:
       - documentation
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      # - ../../docker-cm-data/rootfs/data/www/entry-page:/var/www/entry-page
       - ../config/nginx/etc/nginx/sites-enabled/01-all-in-one.conf:/etc/nginx/sites-enabled/01-all-in-one.conf:ro
       - ../config/nginx/etc/nginx/nginx.conf-aio:/etc/nginx/nginx.conf:ro
       - ./ssl:/etc/nginx/secure/localhost:ro
@@ -283,7 +284,6 @@ services:
       ICINGA_CERT_SERVICE_SERVER: nginx
       ICINGA_CERT_SERVICE_PORT: 80
       ICINGA_CERT_SERVICE_PATH: /cert-service
-      ICINGAWEB_URL: /icinga
     depends_on:
       - cm-icinga2-master
       - nginx
@@ -295,6 +295,7 @@ services:
     networks:
       - frontend
       - backend
+
 
   # CoreMedia Glue and Logic
   #
@@ -406,7 +407,7 @@ services:
     container_name: cm-grafana-client
     hostname: cm-grafana-client
     environment:
-      LOG_LEVEL: info
+      LOG_LEVEL: debug
       GRAFANA_HOST: nginx
     depends_on:
       - beanstalkd
@@ -449,7 +450,6 @@ services:
       - nginx
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      # - ../../docker-cm-data/rootfs/data/etc/icinga_server_config.yml:/etc/icinga_server_config.yml
     networks:
       - frontend
       - backend
@@ -457,39 +457,3 @@ services:
     extra_hosts:
       osmc.local: 192.168.122.60
       blueprint-box: 192.168.252.100
-
-
-
-  # centralized logging
-  #
-  # elasticsearch needs some tweeks:
-  # echo 262144 | sudo tee /proc/sys/vm/max_map_count
-  #
-  elk:
-    restart: always
-    image: sebp/elk:latest
-    container_name: elk
-    ports:
-    - 5044:5044
-    - 5601:5601
-    - 9200:9200
-    networks:
-      - backend
-    volumes:
-    - es-data:/var/lib/elasticsearch
-
-  fluentd:
-    restart: always
-    hostname: fluentd
-    build: ../../docker-cm-fluentd
-    container_name: fluentd
-    depends_on:
-      - elk
-    links:
-      - elk
-    networks:
-      - backend
-    ports:
-    - 24224:24224/tcp
-    - 24224:24224/udp
-

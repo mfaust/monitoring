@@ -1,42 +1,136 @@
-<%- id = 10; -%>
+<%-
+  title = 'Solr Master'; descr = 'Solr Master'; app = 'SOLR_MASTER'; id = 10;
+-%>
 {
   "dashboard": {
-    "id": null,
     "uid": "<%= uuid %>",
-    "title": "<%= slug %> - Solr Master",
+    "id": null,
+    "title": "<%= slug %> - <%= title %>",
     "tags": ["<%= short_hostname %>"],
+    "schemaVersion": 12,
+    "version": 1,
     "style": "dark",
+    "refresh": "1m",
+    "time": { "from": "now/d", "to": "now/d" },
+    "timepicker": {
+      "time_options": [
+        "5m",
+        "15m",
+        "1h",
+        "6h",
+        "12h",
+        "24h",
+        "2d",
+        "7d",
+        "30d"
+      ],
+      "now": true,
+      "refresh_intervals": [
+        "30s",
+        "1m",
+        "2m",
+        "4m",
+        "10m"
+      ]
+    },
     "timezone": "browser",
+    "annotations": {
+      "list": []
+    },
+    "templating": {
+      "list": [
+        {
+          "current": {
+            "value": "<%= graphite_identifier %>",
+            "text": "<%= slug %>"
+          },
+          "hide": 2,
+          "label": null,
+          "name": "host",
+          "options": [
+            {
+              "value": "<%= graphite_identifier %>",
+              "text": "<%= slug %>"
+            }
+          ],
+          "query": "<%= graphite_identifier %>",
+          "type": "constant"
+        },
+        {
+          "allValue": null,
+          "current": {
+            "text": "live",
+            "value": "live",
+            "selected": true,
+            "tags": []
+          },
+          "datasource": "graphite",
+          "hide": 0,
+          "includeAll": false,
+          "label": null,
+          "multi": false,
+          "name": "core",
+          "options": [
+            {
+              "text": "live",
+              "value": "live",
+              "selected": true
+            },
+            {
+              "text": "preview",
+              "value": "preview",
+              "selected": false
+            },
+            {
+              "text": "studio",
+              "value": "studio",
+              "selected": false
+            }
+          ],
+          "query": "carbon-writer.$host.SOLR*.*",
+          "refresh": 1,
+          "regex": "/.*core_(.*).*$/",
+          "sort": 0,
+          "tagValuesQuery": null,
+          "tagsQuery": null,
+          "type": "query",
+          "useTags": false
+        }
+      ]
+    },
+    "sharedCrosshair": true,
     "editable": true,
     "hideControls": false,
-    "sharedCrosshair": true,
+
     "rows": [
       {
-        "collapse": false,
-        "editable": true,
-        "height": "25px",
+        "title": "",
+        "height": "10px",
         "panels": [
           {
-            "content": "<h3><center>Solr Master</center></h3>",
-            "editable": true,
-            "error": false,
             "id": <%= id += 1 %>,
-            "isNew": true,
-            "links": [],
-            "mode": "html",
-            "span": 12,
             "title": "",
+            "type": "text",
+            "span": 5,
+            "mode": "html",
             "transparent": true,
-            "type": "text"
+            "content": "<h2 style=\"text-align:center; font-weight:500\"><%= descr %></h2>"
+          },
+          {
+            "id": <%= id += 1 %>,
+            "title": "",
+            "type": "text",
+            "span": 7,
+            "mode": "html",
+            "transparent": true,
+            "content": "<div style=\"text-align:center; font-size: 1.8em\">\n<div style=\"width:49%; float:left\"><a style=\"text-decoration:none\" href=\"<%= tomcat_dashboard_url %>?var-Application=<%= app %>\">Tomcat</a></div>\n  <div style=\"width:49%; float:left\"><a style=\"text-decoration:none\" href=\"<%= memorypools_dashboard_url %>?var-Application=<%= app %>\">Memory Pools</a></div>\n</div>\n"
           }
-        ],
-        "title": "New row"
+        ]
+
       },
       {
         "title": "Query Result Cache",
         "height": "200px",
-        "editable": true,
-        "collapse": false,
         "panels": [
           {
             "title": "Query Result Cache",
@@ -139,8 +233,6 @@
       {
         "title": "Document Cache",
         "height": "200px",
-        "editable": true,
-        "collapse": false,
         "panels": [
           {
             "title": "Document Cache",
@@ -241,8 +333,7 @@
         ]
       },
       {
-        "collapse": false,
-        "editable": true,
+        "title": "Solr Select",
         "height": "200px",
         "panels": [
           {
@@ -342,103 +433,9 @@
               }
             ]
           }
-        ],
-        "title": "Solr Select"
+        ]
       }
-    ],
-    "time": {
-      "from": "now-3h",
-      "to": "now"
-    },
-    "timepicker": {
-      "now": true,
-      "refresh_intervals": [
-        "10s",
-        "30s",
-        "1m",
-        "2m",
-        "4m",
-        "10m"
-      ],
-      "time_options": [
-        "5m",
-        "15m",
-        "1h",
-        "6h",
-        "12h",
-        "24h",
-        "2d",
-        "7d",
-        "30d"
-      ]
-    },
-    "templating": {
-      "list": [
-        {
-          "current": {
-            "value": "<%= graphite_identifier %>",
-            "text": "<%= slug %>"
-          },
-          "hide": 2,
-          "label": null,
-          "name": "host",
-          "options": [
-            {
-              "value": "<%= graphite_identifier %>",
-              "text": "<%= slug %>"
-            }
-          ],
-          "query": "<%= graphite_identifier %>",
-          "type": "constant"
-        },
-        {
-          "allValue": null,
-          "current": {
-            "text": "live",
-            "value": "live",
-            "selected": true,
-            "tags": []
-          },
-          "datasource": "graphite",
-          "hide": 0,
-          "includeAll": false,
-          "label": null,
-          "multi": false,
-          "name": "core",
-          "options": [
-            {
-              "text": "live",
-              "value": "live",
-              "selected": true
-            },
-            {
-              "text": "preview",
-              "value": "preview",
-              "selected": false
-            },
-            {
-              "text": "studio",
-              "value": "studio",
-              "selected": false
-            }
-          ],
-          "query": "carbon-writer.$host.SOLR*.*",
-          "refresh": 1,
-          "regex": "/.*core_(.*).*$/",
-          "sort": 0,
-          "tagValuesQuery": null,
-          "tagsQuery": null,
-          "type": "query",
-          "useTags": false
-        }
-      ]
-    },
-    "annotations": {
-      "list": []
-    },
-    "refresh": "1m",
-    "schemaVersion": 12,
-    "version": 4,
-    "links": []
+    ]
+
   }
 }

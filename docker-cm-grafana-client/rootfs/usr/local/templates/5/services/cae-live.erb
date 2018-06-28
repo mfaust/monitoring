@@ -1,47 +1,18 @@
+<%-
+  title = 'Delivery CAE'; descr = 'CAE Live'; app = 'CAE_LIVE'; id = 10;
+%>
 {
   "dashboard": {
-    "id": null,
     "uid": "<%= uuid %>",
-    "title": "<%= slug %> - Delivery CAE",
+    "id": null,
+    "title": "<%= slug %> - <%= title %>",
     "tags": [ "<%= short_hostname %>", "cae" ],
-    "version": 1,
-    "editable": true,
-    "style": "dark",
     "schemaVersion": 12,
-    "sharedCrosshair": true,
-    "hideControls": false,
+    "version": 1,
+    "style": "dark",
     "refresh": "1m",
-    "annotations": {
-      "list": []
-    },
-    "timezone": "browser",
-    "time": {
-      "to": "now",
-      "from": "now-3h"
-    },
-    "templating": {
-      "list": [
-        {
-          "options": [
-            {
-              "value": "<%= graphite_identifier %>",
-              "text": "<%= slug %>"
-            }
-          ],
-          "type": "constant",
-          "query": "<%= graphite_identifier %>",
-          "name": "host",
-          "label": null,
-          "current": {
-            "text": "<%= slug %>",
-            "value": "<%= graphite_identifier %>"
-          },
-          "hide": 2
-        }
-      ]
-    },
+    "time": { "from": "now/d", "to": "now/d" },
     "timepicker": {
-      "now": true,
       "time_options": [
         "5m",
         "15m",
@@ -53,8 +24,8 @@
         "7d",
         "30d"
       ],
+      "now": true,
       "refresh_intervals": [
-        "10s",
         "30s",
         "1m",
         "2m",
@@ -62,51 +33,67 @@
         "10m"
       ]
     },
+    "timezone": "browser",
+    "annotations": {
+      "list": []
+    },
+    "templating": {
+      "list": [
+        {
+          "query": "<%= graphite_identifier %>",
+          "name": "host",
+          "hide": 2,
+          "current": {
+            "text": "<%= slug %>",
+            "value": "<%= graphite_identifier %>"
+          },
+          "options": [
+            {
+              "value": "<%= graphite_identifier %>",
+              "text": "<%= slug %>"
+            }
+          ],
+          "type": "constant",
+          "label": null
+        }
+      ]
+    },
+    "sharedCrosshair": true,
+    "editable": true,
+    "hideControls": false,
+
     "rows": [
       {
-        "panels": [
-          {
-            "links": [],
-            "title": "",
-            "content": "<h3><center><a href=\"<%= tomcat_dashboard_url %>?var-Application=CAE_LIVE\">Tomcat</a></center></h3>",
-            "transparent": true,
-            "id": 10,
-            "mode": "html",
-            "type": "text",
-            "span": 12
-          }
-        ],
         "title": "",
-        "showTitle": false,
-        "repeat": null,
-        "height": 42,
-        "titleSize": "h6",
-        "repeatIteration": null,
+        "height": "10px",
         "collapse": false,
-        "repeatRowId": null
-      },
-      {
-        "height": "25px",
-        "title": "New row",
         "editable": true,
-        "collapse": false,
         "panels": [
           {
-            "id": 11,
-            "links": [],
+            "id": <%= id += 1 %>,
             "title": "",
-            "content": "<h2><center>CAE Live</center></h2>",
-            "span": 12,
-            "isNew": true,
+            "type": "text",
+            "span": 5,
             "mode": "html",
             "transparent": true,
-            "editable": true,
+            "content": "<h2 style=\"text-align:center; font-weight:500\"><%= descr %></h2>"
+          },
+          {
+            "id": <%= id += 1 %>,
+            "title": "",
             "type": "text",
-            "error": false
+            "span": 7,
+            "mode": "html",
+            "transparent": true,
+            "content": "<div style=\"text-align:center; font-size: 1.8em\">\n<div style=\"width:49%; float:left\"><a style=\"text-decoration:none\" href=\"<%= tomcat_dashboard_url %>?var-Application=<%= app %>\">Tomcat</a></div>\n  <div style=\"width:49%; float:left\"><a style=\"text-decoration:none\" href=\"<%= memorypools_dashboard_url %>?var-Application=<%= app %>\">Memory Pools</a></div>\n</div>\n"
           }
         ]
       },
       {
+        "title": "UAPI Cache",
+        "height": "150px",
+        "collapse": false,
+        "editable": true,
         "panels": [
           {
             "title": "UAPI Cache",
@@ -130,7 +117,7 @@
                 "max": "110"
               }
             ],
-            "id": 12,
+            "id": <%= id += 1 %>,
             "xaxis": {
               "show": true
             },
@@ -203,13 +190,13 @@
               "msResolution": false
             }
           }
-        ],
-        "editable": true,
-        "title": "UAPI Cache",
-        "collapse": false,
-        "height": "150px"
+        ]
       },
       {
+        "title": "Blob Cache",
+        "height": "150px",
+        "collapse": false,
+        "editable": true,
         "panels": [
           {
             "timeShift": null,
@@ -260,7 +247,7 @@
               "min": false
             },
             "fill": 3,
-            "id": 13,
+            "id": <%= id += 1 %>,
             "lines": true,
             "yaxes": [
               {
@@ -305,16 +292,12 @@
             "decimals": 1,
             "timeFrom": null
           }
-        ],
-        "height": "150px",
-        "editable": true,
-        "title": "Blob Cache",
-        "collapse": false
+        ]
       },
       {
+        "title": "Lightweight Sessions",
         "height": "150px",
         "collapse": false,
-        "title": "Lightweight Sessions",
         "editable": true,
         "panels": [
           {
@@ -350,7 +333,7 @@
               }
             ],
             "lines": true,
-            "id": 14,
+            "id": <%= id += 1 %>,
             "timeFrom": null,
             "error": false,
             "seriesOverrides": [],
@@ -375,7 +358,7 @@
               "min": false,
               "avg": false,
               "rightSide": true,
-              "max": true,
+              "max": false,
               "alignAsTable": true,
               "values": true,
               "current": true,
@@ -398,6 +381,10 @@
         ]
       },
       {
+        "title": "DataView Factory",
+        "height": "250px",
+        "collapse": false,
+        "editable": true,
         "panels": [
           {
             "xaxis": {
@@ -432,7 +419,7 @@
                 "min": null
               }
             ],
-            "id": 15,
+            "id": <%= id += 1 %>,
             "timeFrom": null,
             "decimals": 0,
             "seriesOverrides": [],
@@ -477,11 +464,7 @@
             "editable": true,
             "aliasColors": {}
           }
-        ],
-        "collapse": false,
-        "title": "DataView Factory",
-        "editable": true,
-        "height": "250px"
+        ]
       }
     ]
   }

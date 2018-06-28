@@ -1,18 +1,70 @@
+<%-
+  title = 'MongoDB'; descr = 'MongoDB'; id = 10;
+%>
 {
   "dashboard": {
-    "id": null,
     "uid": "<%= uuid %>",
-    "title": "<%= slug %> - MongoDB",
+    "id": null,
+    "title": "<%= slug %> - <%= title %>",
     "tags": [ "<%= short_hostname %>", "database", "mongodb" ],
+    "schemaVersion": 12,
+    "version": 1,
     "style": "dark",
+    "refresh": "1m",
+    "time": { "from": "now/d", "to": "now/d" },
+    "timepicker": {
+      "time_options": [
+        "5m",
+        "15m",
+        "1h",
+        "6h",
+        "12h",
+        "24h",
+        "2d",
+        "7d",
+        "30d"
+      ],
+      "now": true,
+      "refresh_intervals": [
+        "30s",
+        "1m",
+        "2m",
+        "4m",
+        "10m"
+      ]
+    },
     "timezone": "browser",
+    "annotations": {
+      "list": []
+    },
+    "templating": {
+      "list": [
+        {
+          "query": "<%= graphite_identifier %>",
+          "name": "host",
+          "hide": 2,
+          "current": {
+            "text": "<%= slug %>",
+            "value": "<%= graphite_identifier %>"
+          },
+          "options": [
+            {
+              "value": "<%= graphite_identifier %>",
+              "text": "<%= slug %>"
+            }
+          ],
+          "type": "constant",
+          "label": null
+        }
+      ]
+    },
+    "sharedCrosshair": true,
     "editable": true,
     "hideControls": false,
-    "sharedCrosshair": true,
+
     "rows": [
       {
-        "collapse": false,
-        "editable": true,
+        "title": "I/O",
         "height": "150px",
         "panels": [
           {
@@ -28,7 +80,7 @@
               "threshold2": null,
               "threshold2Color": "rgba(234, 112, 112, 0.22)"
             },
-            "id": 1,
+            "id": <%= id += 1 %>,
             "isNew": true,
             "legend": {
               "alignAsTable": true,
@@ -104,12 +156,10 @@
             ],
             "decimals": 2
           }
-        ],
-        "title": "I/O"
+        ]
       },
       {
-        "collapse": false,
-        "editable": true,
+        "title": "Network",
         "height": "150px",
         "panels": [
           {
@@ -125,13 +175,13 @@
               "threshold2": null,
               "threshold2Color": "rgba(234, 112, 112, 0.22)"
             },
-            "id": 2,
+            "id": <%= id += 1 %>,
             "isNew": true,
             "legend": {
               "alignAsTable": true,
               "avg": false,
               "current": true,
-              "max": true,
+              "max": false,
               "min": false,
               "rightSide": true,
               "show": true,
@@ -207,12 +257,10 @@
               }
             ]
           }
-        ],
-        "title": "traffic"
+        ]
       },
       {
-        "collapse": false,
-        "editable": true,
+        "title": "Commands",
         "height": "200px",
         "panels": [
           {
@@ -228,7 +276,7 @@
               "threshold2": null,
               "threshold2Color": "rgba(234, 112, 112, 0.22)"
             },
-            "id": 3,
+            "id": <%= id += 1 %>,
             "isNew": true,
             "legend": {
               "alignAsTable": true,
@@ -323,12 +371,10 @@
               }
             ]
           }
-        ],
-        "title": "commands"
+        ]
       },
       {
-        "collapse": false,
-        "editable": true,
+        "title": "Connections",
         "height": "150px",
         "panels": [
           {
@@ -344,7 +390,7 @@
               "threshold2": null,
               "threshold2Color": "rgba(234, 112, 112, 0.22)"
             },
-            "id": 4,
+            "id": <%= id += 1 %>,
             "isNew": true,
             "legend": {
               "alignAsTable": true,
@@ -409,86 +455,8 @@
               }
             ]
           }
-        ],
-        "title": "connections"
+        ]
       }
-    ],
-    "time": {
-      "from": "now-3h",
-      "to": "now"
-    },
-    "timepicker": {
-      "refresh_intervals": [
-        "10s",
-        "30s",
-        "1m",
-        "2m",
-        "4m",
-        "10m"
-      ],
-      "time_options": [
-        "5m",
-        "15m",
-        "1h",
-        "3h",
-        "6h",
-        "12h",
-        "24h",
-        "2d",
-        "5d",
-        "7d",
-        "30d"
-      ]
-    },
-    "templating": {
-      "list": [
-        {
-          "current": {
-            "value": "<%= graphite_identifier %>",
-            "text": "<%= slug %>"
-          },
-          "hide": 2,
-          "label": null,
-          "name": "host",
-          "options": [
-            {
-              "value": "<%= graphite_identifier %>",
-              "text": "<%= slug %>"
-            }
-          ],
-          "query": "<%= graphite_identifier %>",
-          "type": "constant"
-        }
-      ]
-    },
-    "annotations": {
-      "list": [
-        {
-          "name": "created",
-          "enable": true,
-          "iconColor": "rgb(93, 227, 12)",
-          "datasource": "events",
-          "tags": "$host created&set=intersection"
-        },
-        {
-          "name": "Load Tests",
-          "enable": true,
-          "iconColor": "rgb(26, 196, 220)",
-          "datasource": "events",
-          "tags": "$host loadtest&set=intersection"
-        },
-        {
-          "name": "Deployments",
-          "enable": true,
-          "iconColor": "rgb(176, 40, 253)",
-          "datasource": "events",
-          "tags": "$host deployment&set=intersection"
-        }
-      ]
-    },
-    "refresh": "1m",
-    "schemaVersion": 12,
-    "version": 0,
-    "links": []
+    ]
   }
 }

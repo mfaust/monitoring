@@ -1,16 +1,41 @@
+<%-
+  title = 'Tomcats'; id = 10;
+%>
 {
   "dashboard": {
-    "id": null,
     "uid": "<%= uuid %>",
+    "id": null,
+    "title": "<%= slug %> - <%= title %>",
     "tags": [ "<%= short_hostname %>", "tomcats" ],
-    "title": "<%= slug %> - Tomcats",
-    "version": 1,
     "schemaVersion": 12,
-    "editable": true,
+    "version": 1,
     "style": "dark",
-    "time": {
-      "from": "now-3h",
-      "to": "now"
+    "refresh": "1m",
+    "time": { "from": "now/d", "to": "now/d" },
+    "timepicker": {
+      "time_options": [
+        "5m",
+        "15m",
+        "1h",
+        "6h",
+        "12h",
+        "24h",
+        "2d",
+        "7d",
+        "30d"
+      ],
+      "now": true,
+      "refresh_intervals": [
+        "30s",
+        "1m",
+        "2m",
+        "4m",
+        "10m"
+      ]
+    },
+    "timezone": "browser",
+    "annotations": {
+      "list": []
     },
     "templating": {
       "list": [
@@ -45,35 +70,11 @@
         }
       ]
     },
+
     "rows": [
       {
-        "repeat": null,
-        "showTitle": false,
-        "titleSize": "h6",
-        "repeatIteration": null,
-        "panels": [
-          {
-            "error": false,
-            "title": "",
-            "links": [],
-            "type": "text",
-            "id": 10,
-            "content": "<h2><center>Tomcat</center></h2>",
-            "span": 12,
-            "transparent": true,
-            "mode": "html",
-            "editable": true
-          }
-        ],
-        "repeatRowId": null,
-        "title": "Row title",
-        "collapse": false,
-        "height": "25px"
-      },
-      {
-        "showTitle": false,
-        "repeat": null,
-        "repeatIteration": null,
+        "title": "Heap Memory",
+        "height": "200px",
         "panels": [
           {
             "seriesOverrides": [
@@ -154,7 +155,7 @@
             "thresholds": [],
             "lines": true,
             "span": 12,
-            "id": 11,
+            "id": <%= id += 1 %>,
             "percentage": false,
             "fill": 3,
             "datasource": "graphite",
@@ -187,16 +188,11 @@
             "links": [],
             "bars": false
           }
-        ],
-        "titleSize": "h6",
-        "repeatRowId": null,
-        "title": "Heap Memory",
-        "collapse": false,
-        "height": "200px"
+        ]
       },
       {
-        "showTitle": false,
-        "repeat": null,
+        "title": "Perm Memory",
+        "height": "150px",
         "panels": [
           {
             "lines": true,
@@ -299,25 +295,14 @@
             "datasource": "graphite",
             "fill": 1,
             "percentage": false,
-            "id": 12,
+            "id": <%= id += 1 %>,
             "span": 12
           }
-        ],
-        "repeatIteration": null,
-        "titleSize": "h6",
-        "collapse": false,
-        "repeatRowId": null,
-        "title": "Perm Memory",
-        "height": "150px"
+        ]
       },
       {
-        "repeatRowId": null,
         "title": "Garbage Collector",
-        "collapse": false,
         "height": "150px",
-        "showTitle": false,
-        "repeat": null,
-        "repeatIteration": null,
         "panels": [
           {
             "tooltip": {
@@ -350,7 +335,7 @@
             },
             "thresholds": [],
             "timeShift": null,
-            "id": 13,
+            "id": <%= id += 1 %>,
             "percentage": false,
             "yaxes": [
               {
@@ -413,18 +398,11 @@
             "type": "graph",
             "points": false
           }
-        ],
-        "titleSize": "h6"
+        ]
       },
       {
-        "repeatRowId": null,
         "title": "Threads",
-        "collapse": false,
         "height": "150px",
-        "repeat": null,
-        "showTitle": false,
-        "titleSize": "h6",
-        "repeatIteration": null,
         "panels": [
           {
             "tooltip": {
@@ -457,7 +435,7 @@
             "aliasColors": {},
             "timeShift": null,
             "thresholds": [],
-            "id": 14,
+            "id": <%= id += 1 %>,
             "percentage": false,
             "nullPointMode": "connected",
             "steppedLine": false,
@@ -523,13 +501,8 @@
         ]
       },
       {
-        "collapse": false,
         "title": "Tomcat Sessions",
-        "repeatRowId": null,
         "height": "330px",
-        "repeat": null,
-        "showTitle": false,
-        "titleSize": "h6",
         "panels": [
           {
             "editable": true,
@@ -558,7 +531,7 @@
             },
             "aliasColors": {},
             "percentage": false,
-            "id": 15,
+            "id": <%= id += 1 %>,
             "stack": false,
             "bars": false,
             "nullPointMode": "connected",
@@ -620,39 +593,8 @@
             "title": "Tomcat Sessions",
             "error": false
           }
-        ],
-        "repeatIteration": null
+        ]
       }
-    ],
-    "timezone": "browser",
-    "timepicker": {
-      "refresh_intervals": [
-        "10s",
-        "30s",
-        "1m",
-        "2m",
-        "4m",
-        "10m"
-      ],
-      "time_options": [
-        "5m",
-        "15m",
-        "1h",
-        "6h",
-        "12h",
-        "24h",
-        "2d",
-        "7d",
-        "30d"
-      ],
-      "now": true
-    },
-    "annotations": {
-      "list": []
-    },
-    "hideControls": false,
-    "refresh": "1m",
-    "sharedCrosshair": true,
-    "links": []
+    ]
   }
 }

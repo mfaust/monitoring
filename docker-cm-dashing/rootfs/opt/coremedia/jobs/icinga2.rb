@@ -101,12 +101,30 @@ SCHEDULER.every interval, :first_in => delay do |job|
       services_in_downtime  = service_statistics.dig(:in_downtime)
       services_acknowledged = service_statistics.dig(:acknowledged)
 
-      services_handled = icinga.service_problems_handled
+      services_handled                  = icinga.service_problems
       puts "services_handled: #{services_handled}" if(debug)
-      service_problems_handled_all      = services_handled.dig(:all)
-      service_problems_handled_warning  = services_handled.dig(:warning)
-      service_problems_handled_critical = services_handled.dig(:critical)
-      service_problems_handled_unknown  = services_handled.dig(:unknown)
+      # service_problems_handled_all      = services_handled.dig(:ok)
+      service_problems_handled_warning  = services_handled.dig(:handled_warning)
+      service_problems_handled_critical = services_handled.dig(:handled_critical)
+      service_problems_handled_unknown  = services_handled.dig(:handled_unknown)
+
+#      a = @icinga2.service_problems
+#      expect(a).to be_a(Hash)
+#      expect(a.count).to be == 14
+#      expect(a.dig(:ok)).to be_a(Integer)
+#      expect(a.dig(:warning)).to be_a(Integer)
+#      expect(a.dig(:critical)).to be_a(Integer)
+#      expect(a.dig(:unknown)).to be_a(Integer)
+#      expect(a.dig(:pending)).to be_a(Integer)
+#      expect(a.dig(:in_downtime)).to be_a(Integer)
+#      expect(a.dig(:acknowledged)).to be_a(Integer)
+#      expect(a.dig(:adjusted_warning)).to be_a(Integer)
+#      expect(a.dig(:adjusted_critical)).to be_a(Integer)
+#      expect(a.dig(:adjusted_unknown)).to be_a(Integer)
+#      expect(a.dig(:handled_all)).to be_a(Integer)
+#      expect(a.dig(:handled_warning)).to be_a(Integer)
+#      expect(a.dig(:handled_critical)).to be_a(Integer)
+#      expect(a.dig(:handled_unknown)).to be_a(Integer)
 
       version, revision = icinga.version.values
 

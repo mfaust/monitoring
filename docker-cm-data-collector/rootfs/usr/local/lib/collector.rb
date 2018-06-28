@@ -114,7 +114,7 @@ module DataCollector
       logger.debug( "mongodb_data( #{params} )" )
 
       host = params.dig(:host)
-      port = params.dig(:port) || 28017
+      port = params.dig(:port) || 27017
 
       return { status: 500, message: 'no host name for mongodb_data data' } if( host.nil? )
 
@@ -123,7 +123,11 @@ module DataCollector
         return JSON.parse( JSON.generate( status: 500 ) )
       end
 
-      ExternalClients::MongoDb.new( host: host, port: port ).get()
+      m    = ExternalClients::MongoDb::Instance.new( host: host, port: port )
+      data = m.get()
+      # m.close
+
+      data
     end
 
 
@@ -156,8 +160,9 @@ module DataCollector
         return JSON.parse( JSON.generate( status: 500 ) )
       end
 
-
       m = ExternalClients::MySQL.new( settings )
+
+      logger.debug(m.inspect)
 
       if( m.client.nil? )
 
@@ -587,14 +592,14 @@ module DataCollector
             when 'mysql'
               # MySQL
 
-              port = config_data( host: hostname, service: v, value: 'port', default: 3306 )
+              port     = config_data( host: hostname, service: v, value: 'port', default: 3306 )
               username = config_data( host: hostname, service: v, value: 'monitoring_user', default: 'monitoring' )
               password = config_data( host: hostname, service: v, value: 'monitoring_password', default: 'monitoring' )
 
               d = mysql_data( host: fqdn, port: port, username: username, password: password )
             when 'mongodb'
               # MongoDB
-              port = config_data( host: hostname, service: v, value: 'port', default: 28017 )
+              port = config_data( host: hostname, service: v, value: 'port', default: 27017 )
               d = mongodb_data( host: fqdn, port: port )
             when 'postgres'
               # Postgres

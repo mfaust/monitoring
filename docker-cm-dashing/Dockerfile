@@ -3,7 +3,7 @@ FROM bodsch/docker-dashing:1806
 
 ENV \
   VERSION="1806" \
-  BUILD_DATE="2018-06-18" \
+  BUILD_DATE="2018-06-28" \
   TZ='Europe/Berlin' \
   DASHBOARD="coremedia" \
   ICINGA2_GEM_TYPE="stable" \

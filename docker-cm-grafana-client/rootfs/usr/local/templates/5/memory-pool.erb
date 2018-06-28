@@ -1,23 +1,18 @@
+<%-
+  id = 10;
+%>
 {
   "dashboard": {
-    "id": null,
     "uid": "<%= uuid %>",
+    "id": null,
     "title": "<%= slug %> - Memory Pools",
-    "tags": [ "<%= short_hostname %>" ],
-    "editable": true,
-    "annotations": {
-      "list": []
-    },
+    "tags": [ "<%= short_hostname %>", "memory-pools" ],
+    "schemaVersion": 12,
+    "version": 1,
+    "style": "dark",
+    "refresh": "1m",
+    "time": { "from": "now/d", "to": "now/d" },
     "timepicker": {
-      "now": true,
-      "refresh_intervals": [
-        "10s",
-        "30s",
-        "1m",
-        "2m",
-        "4m",
-        "10m"
-      ],
       "time_options": [
         "5m",
         "15m",
@@ -28,10 +23,20 @@
         "2d",
         "7d",
         "30d"
+      ],
+      "now": true,
+      "refresh_intervals": [
+        "30s",
+        "1m",
+        "2m",
+        "4m",
+        "10m"
       ]
     },
-    "links": [],
-    "schemaVersion": 12,
+    "timezone": "browser",
+    "annotations": {
+      "list": []
+    },
     "templating": {
       "list": [
         {
@@ -150,12 +155,11 @@
         }
       ]
     },
+
     "rows": [
       {
-        "height": "160px",
-        "collapse": false,
         "title": "Par Eden Space",
-        "editable": true,
+        "height": "160px",
         "panels": [
           {
             "datasource": "graphite",
@@ -272,9 +276,8 @@
         ]
       },
       {
-        "height": "160px",
-        "collapse": false,
         "title": "Par Survivor Space",
+        "height": "160px",
         "panels": [
           {
             "id": 11,
@@ -388,12 +391,11 @@
             "points": false,
             "timeShift": null
           }
-        ],
-        "editable": true
+        ]
       },
       {
         "title": "CMS Old Gen",
-        "editable": true,
+        "height": "160px",
         "panels": [
           {
             "span": 12,
@@ -502,18 +504,15 @@
               "min": false,
               "avg": false,
               "show": true,
-              "alignAsTable": true,
-              "sideWidth": 200
+              "alignAsTable": true
             },
             "id": 12,
             "nullPointMode": "connected"
           }
-        ],
-        "height": "160px",
-        "collapse": false
+        ]
       },
       {
-        "collapse": false,
+        "title": "Metaspace",
         "height": "150px",
         "panels": [
           {
@@ -629,13 +628,11 @@
               }
             ]
           }
-        ],
-        "editable": true,
-        "title": "Metaspace"
+        ]
       },
       {
         "title": "Code Cache",
-        "editable": true,
+        "height": "160px",
         "panels": [
           {
             "error": false,
@@ -749,14 +746,11 @@
               }
             ]
           }
-        ],
-        "height": "160px",
-        "collapse": false
+        ]
       },
       {
-        "collapse": false,
+        "title": "Compressed Class Space",
         "height": "160px",
-        "editable": true,
         "panels": [
           {
             "timeFrom": null,
@@ -870,19 +864,8 @@
               "threshold1": null
             }
           }
-        ],
-        "title": "Compressed Class Space"
+        ]
       }
-    ],
-    "version": 1,
-    "time": {
-      "from": "now-3h",
-      "to": "now"
-    },
-    "timezone": "browser",
-    "style": "dark",
-    "hideControls": false,
-    "sharedCrosshair": true,
-    "refresh": "1m"
+    ]
   }
 }

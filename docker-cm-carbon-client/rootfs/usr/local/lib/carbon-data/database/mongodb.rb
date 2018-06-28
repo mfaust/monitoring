@@ -5,7 +5,6 @@ module CarbonData
 
     module MongoDB
 
-
       def database_mongodb( value = {} )
 
         result = []
@@ -63,7 +62,7 @@ module CarbonData
             current        = connections.dig( 'current' )
             available      = connections.dig( 'available' )
             total_created  = connections.dig( 'totalCreated' )
-            total_created  = connections.dig( 'totalCreated', '$numberLong' ) if( total_created.is_a?( Hash ) )
+            #total_created  = connections.dig( 'totalCreated', '$numberLong' ) if( total_created.is_a?( Hash ) )
 
             result << {
               key: format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'connections', 'current' ),
@@ -83,9 +82,9 @@ module CarbonData
             bytes_out  = network.dig('bytesOut')
             requests   = network.dig('numRequests')
 
-            bytes_in   = bytes_in.dig('$numberLong')    # RX - Receive TO this server
-            bytes_out  = bytes_out.dig('$numberLong')   # TX - Transmit FROM this server
-            requests   = requests.dig('$numberLong')
+#             bytes_in   = bytes_in.dig('$numberLong')    # RX - Receive TO this server
+#             bytes_out  = bytes_out.dig('$numberLong')   # TX - Transmit FROM this server
+#             requests   = requests.dig('$numberLong')
 
             result << {
               key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'network', 'bytes', 'tx' ),
@@ -228,7 +227,7 @@ module CarbonData
                 cmd = commands.dig( m )
 
                 unless( cmd.nil? )
-                  d  = cmd.dig( 'total', '$numberLong' )
+                  d  = cmd.dig( 'total')#, '$numberLong' )
 
                   result << {
                     key: format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'commands', m ),
@@ -242,8 +241,8 @@ module CarbonData
 
               unless(current_operation.nil?)
 
-                total  = current_operation.dig('total' , '$numberLong')
-                failed = current_operation.dig('failed', '$numberLong')
+                total  = current_operation.dig('total')#, '$numberLong')
+                failed = current_operation.dig('failed')#, '$numberLong')
 
                 result << {
                   key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'commands', 'currentOp', 'total' ),
@@ -265,9 +264,9 @@ module CarbonData
 
               unless( cursor_open.nil? && cursor_timed_out.nil? )
 
-                open_no_timeout = cursor_open.dig( 'noTimeout', '$numberLong' )
-                open_total     = cursor_open.dig( 'total'    , '$numberLong' )
-                timed_out      = cursor_timed_out.dig( '$numberLong' )
+                open_no_timeout = cursor_open.dig( 'noTimeout')#, '$numberLong' )
+                open_total      = cursor_open.dig( 'total')#    , '$numberLong' )
+                #timed_out       = cursor_timed_out.dig( '$numberLong' )
 
                 result << {
                   key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, 'cursor', 'open', 'total' ),
@@ -277,7 +276,7 @@ module CarbonData
                   value: open_no_timeout
                 } << {
                   key: format( '%s.%s.%s.%s'   , @identifier, @normalized_service_name, 'cursor', 'timed-out' ),
-                  value: timed_out
+                  value: cursor_timed_out
                 }
               end
 
