@@ -414,7 +414,7 @@ services:
     container_name: cm-grafana-client
     hostname: cm-grafana-client
     environment:
-      LOG_LEVEL: info
+      LOG_LEVEL: debug
       GRAFANA_HOST: nginx
     depends_on:
       - beanstalkd

@@ -311,6 +311,7 @@ class CMGrafana < Grafana::Client
 
         # disable the general overview site, when a 'group_by' is ordered
         #
+        overview = true
         overview = false if(group_by.is_a?(Hash))
 
         # TODO

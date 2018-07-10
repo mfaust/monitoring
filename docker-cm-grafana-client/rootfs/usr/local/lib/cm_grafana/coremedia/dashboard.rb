@@ -68,7 +68,7 @@ class CMGrafana
 
         host                = params.dig(:host)
         @additional_tags    = params.dig(:tags)     || []
-        create_overview     = params.dig(:overview) || false
+        create_overview     = params.dig(:overview) || true
         overview_grouped_by = params.dig(:overview_grouped_by) || []
 
         if( host.nil? )
