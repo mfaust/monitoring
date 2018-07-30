@@ -1,11 +1,11 @@
 
-FROM alpine:3.7
+FROM alpine:3.8
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
-  VERSION="1805" \
-  BUILD_DATE="2018-05-16" \
+  VERSION="1807" \
+  BUILD_DATE="2018-07-30" \
   TERM=xterm \
   TZ='Europe/Berlin'
 
@@ -19,15 +19,15 @@ RUN \
   apk add --quiet --no-cache --virtual .build-deps \
     build-base imagemagick-dev mariadb-dev ruby-dev ruby-io-console zlib-dev && \
   apk add --quiet --no-cache \
-    bind-tools curl drill ipcalc jq mariadb-client mariadb-client-libs ruby-irb ruby-io-console ruby-rdoc tzdata zlib && \
+    bind-tools curl drill ipcalc jq mariadb-connector-c mariadb-client ruby-irb ruby-io-console ruby-rdoc tzdata zlib && \
   echo 'gem: --no-document' >> /etc/gemrc && \
   gem install --quiet --no-rdoc --no-ri \
-    io-console bundler && \
+    io-console bundler json && \
   cp /usr/share/zoneinfo/$TZ /etc/localtime && \
   echo $TZ > /etc/timezone && \
   cd /build && \
-  bundle install --quiet && \
   for g in $(ls -1 /build/*.gem 2> /dev/null) ; do echo $g; gem install --no-rdoc --no-ri ${g} ; done && \
+  bundle install --quiet && \
   gem uninstall --quiet \
     io-console bundler && \
   apk del --quiet .build-deps && \

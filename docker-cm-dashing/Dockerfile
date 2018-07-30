@@ -1,9 +1,9 @@
 
-FROM bodsch/docker-dashing:1806
+FROM bodsch/docker-dashing:1807
 
 ENV \
-  VERSION="1806" \
-  BUILD_DATE="2018-06-12" \
+  VERSION="1807" \
+  BUILD_DATE="2018-07-30" \
   TZ='Europe/Berlin' \
   DASHBOARD="coremedia" \
   ICINGA2_GEM_TYPE="stable" \
@@ -44,6 +44,8 @@ RUN \
   elif [ "${ICINGA2_GEM_TYPE}" == "stable" ] ; then \
     echo "gem 'icinga2', '~> ${ICINGA2_GEM_VERSION}'" >> Gemfile ; \
   fi && \
+  gem install --quiet --no-rdoc --no-ri \
+    etc && \
   bundle update --quiet && \
   apk del --quiet --purge .build-deps && \
   rm -rf \

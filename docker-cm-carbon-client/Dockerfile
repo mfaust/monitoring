@@ -19,15 +19,15 @@ RUN \
   apk add --quiet --no-cache --virtual .build-deps \
     build-base imagemagick-dev mariadb-dev ruby-dev ruby-rdoc tzdata zlib-dev && \
   apk add --quiet --no-cache \
-    bind-tools drill mariadb-client ruby-irb zlib && \
+    bind-tools drill mariadb-connector-c ruby-irb zlib && \
   cp /usr/share/zoneinfo/$TZ /etc/localtime && \
   echo $TZ > /etc/timezone && \
   echo 'gem: --no-document' >> /etc/gemrc && \
   gem install --quiet --no-rdoc --no-ri \
-    io-console bundler && \
+    io-console bundler json && \
   cd /build && \
-  bundle install --quiet && \
-  for g in $(ls -1 /build/*.gem 2> /dev/null) ; do echo $g; gem install --quiet --no-rdoc --no-ri ${g} ; done && \
+  for g in $(ls -1 /build/*.gem 2> /dev/null) ; do echo $g; gem install --no-rdoc --no-ri ${g} ; done && \
+  bundler install --quiet && \
   gem uninstall --quiet \
     io-console bundler && \
   apk del --quiet .build-deps && \

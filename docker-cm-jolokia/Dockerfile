@@ -22,7 +22,7 @@ FROM bodsch/docker-jolokia:1.6.0
 
 ENV \
   VERSION="1807" \
-  BUILD_DATE="2018-07-26" \
+  BUILD_DATE="2018-07-30" \
   TZ='Europe/Berlin'
 
 EXPOSE 8080 8088

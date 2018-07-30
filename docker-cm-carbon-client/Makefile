@@ -28,7 +28,8 @@ shell:
 		--tty \
 		--hostname=${IMAGE_NAME} \
 		--name=${IMAGE_NAME} \
-		$(IMAGE_NAME)
+		$(IMAGE_NAME) \
+		sh
 
 exec:
 	docker exec \

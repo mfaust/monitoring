@@ -1,11 +1,11 @@
 
-FROM alpine:latest
+FROM alpine:3.8
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
-  VERSION="1805" \
-  BUILD_DATE="2018-05-16" \
+  VERSION="1807" \
+  BUILD_DATE="2018-07-30" \
   TERM=xterm \
   TZ='Europe/Berlin' \
   ICINGA2_GEM_TYPE="stable" \
@@ -21,12 +21,12 @@ RUN \
   apk add --quiet --no-cache --virtual .build-deps \
     build-base git ruby-dev ruby-rdoc tzdata && \
   apk --quiet --no-cache add \
-    bind-tools curl drill mariadb-dev mariadb-client-libs jq libressl-dev ruby-irb yajl-tools && \
+    bind-tools curl drill mariadb-dev mariadb-connector-c jq libressl-dev ruby-irb yajl-tools && \
   cp /usr/share/zoneinfo/${TZ} /etc/localtime && \
   echo ${TZ} > /etc/timezone && \
   echo 'gem: --no-document' >> /etc/gemrc && \
   gem install --quiet --no-rdoc --no-ri \
-    io-console bundler && \
+    io-console bundler json && \
   cd /build && \
   if [ "${ICINGA2_GEM_TYPE}" == "local" ] ; then \
     for g in $(ls -1 /build/*.gem 2> /dev/null) ; do \

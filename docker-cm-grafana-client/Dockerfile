@@ -1,11 +1,11 @@
 
-FROM alpine:latest
+FROM alpine:3.8
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
   VERSION="1807" \
-  BUILD_DATE="2018-07-10" \
+  BUILD_DATE="2018-07-30" \
   TERM=xterm \
   TZ='Europe/Berlin' \
   GRAFANA_GEM_TYPE="stable" \
@@ -21,11 +21,11 @@ RUN \
   apk add --quiet --no-cache --virtual .build-deps \
     build-base imagemagick-dev ruby-dev mariadb-dev tzdata && \
   apk add --quiet --no-cache \
-    bind-tools drill mariadb-client mariadb-client-libs ruby-irb && \
+    bind-tools drill mariadb-connector-c mariadb-connector-c ruby-irb && \
   cp /usr/share/zoneinfo/$TZ /etc/localtime && \
   echo $TZ > /etc/timezone && \
   gem install --quiet --no-rdoc --no-ri \
-    io-console bundler && \
+    io-console bundler json && \
   cd /build && \
   if [ "${GRAFANA_GEM_TYPE}" == "local" ] ; then \
     for g in $(ls -1 /build/*.gem 2> /dev/null) ; do \

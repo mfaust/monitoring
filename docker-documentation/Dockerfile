@@ -2,8 +2,8 @@
 FROM bodsch/docker-markdownd
 
 ENV \
-  VERSION="1805" \
-  BUILD_DATE="2018-05-16" \
+  VERSION="1807" \
+  BUILD_DATE="2018-07-30" \
   TZ='Europe/Berlin'
 
 EXPOSE 8080 8088

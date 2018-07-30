@@ -1,11 +1,11 @@
 
-FROM alpine:3.7
+FROM alpine:3.8
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
-  VERSION="1805" \
-  BUILD_DATE="2018-05-16" \
+  VERSION="1807" \
+  BUILD_DATE="2018-07-30" \
   TERM=xterm \
   TZ='Europe/Berlin'
 
@@ -25,13 +25,13 @@ RUN \
   apk add --quiet --no-cache --virtual .build-deps \
     build-base imagemagick-dev mariadb-dev ruby-dev ruby-io-console zlib-dev && \
   apk --quiet --no-cache add \
-    bind-tools drill mariadb-client mariadb-client-libs jq libressl-dev ruby &&\
+    bind-tools drill mariadb-connector-c mariadb-connector-c jq libressl-dev ruby &&\
   echo 'gem: --no-document' >> /etc/gemrc && \
   gem install --quiet --no-rdoc --no-ri \
-    io-console bundler && \
+    io-console bundler json && \
   cd /build && \
-  bundle install --quiet && \
   for g in $(ls -1 /build/*.gem 2> /dev/null) ; do echo $g; gem install --quiet --no-rdoc --no-ri ${g} ; done && \
+  bundle install --quiet && \
   gem uninstall --quiet \
     io-console bundler && \
   apk del --quiet .build-deps && \

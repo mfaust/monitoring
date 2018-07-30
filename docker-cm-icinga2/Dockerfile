@@ -57,8 +57,8 @@ FROM bodsch/docker-icinga2:2.8.4-master
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
-  VERSION="1806" \
-  BUILD_DATE="2018-06-01" \
+  VERSION="1807" \
+  BUILD_DATE="2018-07-30" \
   TERM=xterm \
   DEBIAN_FRONTEND=noninteractive \
   TZ='Europe/Berlin'
