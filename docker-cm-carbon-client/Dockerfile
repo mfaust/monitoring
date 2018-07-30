@@ -1,11 +1,11 @@
 
-FROM alpine:3.7
+FROM alpine:3.8
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
-  VERSION="1805" \
-  BUILD_DATE="2018-05-16" \
+  VERSION="1807" \
+  BUILD_DATE="2018-07-30" \
   TERM=xterm \
   TZ='Europe/Berlin'
 
@@ -19,7 +19,7 @@ RUN \
   apk add --quiet --no-cache --virtual .build-deps \
     build-base imagemagick-dev mariadb-dev ruby-dev ruby-rdoc tzdata zlib-dev && \
   apk add --quiet --no-cache \
-    bind-tools drill mariadb-client-libs  ruby-irb zlib && \
+    bind-tools drill mariadb-client ruby-irb zlib && \
   cp /usr/share/zoneinfo/$TZ /etc/localtime && \
   echo $TZ > /etc/timezone && \
   echo 'gem: --no-document' >> /etc/gemrc && \
