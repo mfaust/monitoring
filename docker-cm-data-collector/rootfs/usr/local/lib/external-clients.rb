@@ -296,63 +296,6 @@ module ExternalClients
   end
 
 
-#  class MongoDb
-#
-#    include Logging
-#
-#    def initialize( params = {} )
-#
-#      @host = params[:host] ? params[:host] : 'localhost'
-#      @port = params[:port] ? params[:port] : 28017
-#
-#    end
-#
-#    def get()
-#
-#      result = {}
-#
-#      if( @port != nil )
-#
-#        serverUrl  = sprintf( 'http://%s:%s/serverStatus', @host, @port )
-#
-#        uri        = URI.parse( serverUrl )
-#        http       = Net::HTTP.new( uri.host, uri.port )
-#        request    = Net::HTTP::Get.new( uri.request_uri )
-#        request.add_field('Content-Type', 'application/json')
-#
-#        begin
-#
-#          response     = http.request( request )
-#
-#        rescue Timeout::Error, Errno::EHOSTUNREACH, Errno::ECONNREFUSED, Errno::EINVAL, Errno::ECONNRESET, EOFError, Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError => error
-#
-#          logger.error( error )
-#
-#          case error
-#          when Errno::EHOSTUNREACH
-#            logger.error( 'Host unreachable' )
-#          when Errno::ECONNREFUSED
-#            logger.error( 'Connection refused' )
-#          when Errno::ECONNRESET
-#            logger.error( 'Connection reset' )
-#          end
-#        rescue Exception => e
-#
-#          logger.error( "An error occurred for connection: #{e}" )
-#
-#        else
-#
-#          return JSON.parse( response.body )
-#        end
-#
-#      end
-#
-#      return result
-#
-#    end
-#
-#  end
-
 
   class NodeExporter
 

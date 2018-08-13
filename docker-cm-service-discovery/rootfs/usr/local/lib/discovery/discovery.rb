@@ -10,7 +10,7 @@ module ServiceDiscovery
       host = params.dig(:fqdn)
       port = params.dig(:port)
 
-      fixed_ports = [80, 443, 8081, 3306, 5432, 6379, 9100, 19100, 27017, 28017, 55555]
+      fixed_ports = [80, 443, 8081, 3306, 5432, 6379, 9100, 19100, 27017, 55555]
       services   = Array.new
 
       if( fixed_ports.include?( port ) )
@@ -30,7 +30,7 @@ module ServiceDiscovery
           services.push('redis')
         when 9100, 19100
           services.push('node-exporter')
-        when 27017, 28017
+        when 27017
           services.push('mongodb')
         when 55555
           services.push('resourced')

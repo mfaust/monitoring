@@ -88,7 +88,7 @@ module ExternalClients
 
       def connection
         logger.debug( "use mongodb: #{@host}:#{@port}" )
-        @connection ||= Mongo::Client.new([ "#{@host}:#{@port}" ] , connect_timeout: 5)
+        @connection ||= Mongo::Client.new([ "#{@host}:#{@port}" ] , connect_timeout: 2)
       end
 
       def database_names
@@ -114,7 +114,9 @@ module ExternalClients
       def to_hash
         s = stats
 
-        if s.ok?
+        return {} if( s.is_a?(Hash) )
+
+        if( s.ok? )
           @process = s.documents.first['process']
   #        pp s.documents.first.class
           p = json_descent([], s.documents.first) # .flatten

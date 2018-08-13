@@ -49,7 +49,6 @@ module ServiceDiscovery
         9100,     # node_exporter (standard port)
         19100,    # node_exporter (CoreMedia internal)
         27017,    # mongodb
-        28017,    # mongodb http (obsolete)
         38099,
         40099,
         40199,
@@ -353,6 +352,11 @@ module ServiceDiscovery
         if( status.nil? )
           logger.warn( 'host not found' )
           return { status: 404, message: 'Host not found' }
+        end
+
+        if( status == false )
+          logger.warn( 'no valid database connection' )
+          return { status: 404, message: 'no valid database connection' }
         end
 
         status = status.dig(:status)

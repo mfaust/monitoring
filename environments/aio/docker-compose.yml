@@ -187,6 +187,7 @@ services:
       - database
       - redis
     environment:
+      LOG_LEVEL: info
       ICINGA2_MASTER: cm-icinga2-master
       ICINGA2_API_USERS: root:icinga,icingaweb:icingaweb,dashing:dashing,cert:foo-bar
       BASIC_AUTH_USER: ${CERT_SERVICE_BA_USER}
@@ -219,7 +220,7 @@ services:
 
   icingaweb2:
     restart: always
-    image: bodsch/docker-icingaweb2:2.5.3
+    image: bodsch/docker-icingaweb2:2.6.1
     container_name: icingaweb2
     hostname: icingaweb2
     environment:

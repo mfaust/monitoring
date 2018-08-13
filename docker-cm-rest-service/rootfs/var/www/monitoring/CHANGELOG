@@ -18,17 +18,17 @@
     "version": "1806",
     "date": "18.06.2018",
     "changes": [
+      "update to icinga2 2.8.4",
+      "update to icingaweb2 2.5.3",
+      "update to graphite 1.1.3",
+      "update to grafana gem 0.10.1",
+      "update to icinga2 gem 1.0.0",
       "update to grafana 5.1.3",
       "grafana folder support",
       "set grafana 5 as default",
       "split annotations into more types",
-      "update to icinga2 2.8.4",
-      "update to icingaweb2 2.5.3",
       "update to jolokia 1.5.0",
-      "update to graphite 1.1.3",
       "jolokia supports now authentication",
-      "update to grafana gem 0.10.1",
-      "update to icinga2 gem 1.0.0",
       "add new documentations container",
       "including the stack documentation and a operation guide",
       "support node_exporter v0.16.x"
@@ -36,10 +36,14 @@
   },
   "1808": {
     "version": "1808",
-    "date": "22.06.2018",
+    "date": "13.08.2018",
     "changes": [
-      "updates for mongodb 3.6",
-      "MongoDB 3.6 removes the deprecated HTTP interface and REST API to MongoDB"
+      "support alpine 3.8",
+      "update to grafana 5.2.2",
+      "update to icinga2 2.9.1",
+      "update to icingaweb2 1.6.1",
+      "update to jolokia 1.6.0",
+      "updates for mongodb 3.6 (remove deprecated HTTP interface and REST API)"
     ]
   }
 }
