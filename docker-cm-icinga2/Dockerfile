@@ -1,18 +1,14 @@
 
-FROM bitnami/minideb:latest as builder
+FROM debian:9-slim as builder
 
 ENV \
   TERM=xterm \
   DEBIAN_FRONTEND=noninteractive
 
 RUN \
-  DIST=$(awk -F"[)(]+" '/VERSION=/ {print $2}' /etc/os-release) && \
-  chsh -s /bin/bash && \
-  ln -sf /bin/bash /bin/sh && \
-  ln -s  /sbin/killall5 /sbin/killall && \
-  apt-get update  --quiet --quiet > /dev/null && \
-  apt-get dist-upgrade --quiet --quiet > /dev/null && \
-  apt-get install --quiet --quiet --assume-yes --no-install-recommends \
+  apt-get update > /dev/null && \
+  apt-get dist-upgrade > /dev/null && \
+  apt-get install --assume-yes --no-install-recommends \
     bash \
     bzip2 \
     curl \
@@ -52,31 +48,29 @@ RUN \
 
 # ---------------------------------------------------------------------------------------
 
-FROM bodsch/docker-icinga2:2.8.4-master
+FROM bodsch/docker-icinga2:2.9.1-master
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
-  VERSION="1807" \
-  BUILD_DATE="2018-07-30" \
+  VERSION="1808" \
+  BUILD_DATE="2018-08-13" \
   TERM=xterm \
-  DEBIAN_FRONTEND=noninteractive \
-  TZ='Europe/Berlin'
+  DEBIAN_FRONTEND=noninteractive
 
 # ---------------------------------------------------------------------------------------
 
 COPY build /build
 
 RUN \
-  apt-get update --quiet --quiet > /dev/null && \
-  apt-get install --quiet --quiet --assume-yes --no-install-recommends \
-    g++ make ruby-dev && \
+  apt-get update > /dev/null && \
+  apt-get install --assume-yes --no-install-recommends \
+    g++ make ruby-dev \
+    libhiredis0.13 libev4 \
+    > /dev/null && \
   echo 'gem: --no-document' >> /etc/gemrc && \
   gem install --quiet --no-rdoc --no-ri \
     io-console bundler && \
-  apt-get install --quiet --quiet --assume-yes --no-install-recommends \
-    libhiredis0.13 libev4 && \
-  /usr/sbin/icinga2 feature enable command checker mainlog notification && \
   cd /build && \
   bundle install --quiet && \
   for g in $(ls -1 /build/*.gem 2> /dev/null) ; \
@@ -86,7 +80,8 @@ RUN \
   done && \
   gem uninstall --quiet \
     io-console bundler && \
-  apt-get clean --quiet --quiet > /dev/null && \
+  apt-get clean > /dev/null && \
+  apt autoremove --assume-yes > /dev/null && \
   rm -rf \
     /tmp/* \
     /var/cache/debconf/* \
