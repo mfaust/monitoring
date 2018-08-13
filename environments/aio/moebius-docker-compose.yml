@@ -44,7 +44,7 @@ services:
 
   jolokia:
     restart: always
-    image: moebius-registry.coremedia.vm/docker-cm-jolokia:1806
+    image: moebius-registry.coremedia.vm/docker-cm-jolokia:latest
     # build: ../../docker-cm-jolokia
     container_name: jolokia
     hostname: jolokia
@@ -82,7 +82,7 @@ services:
 
   nginx:
     restart: always
-    image: bodsch/docker-nginx:1.12.2-r1
+    image: bodsch/docker-nginx:1.14.0
     container_name: nginx
     hostname: nginx
     ports:
@@ -178,7 +178,7 @@ services:
 
   cm-icinga2-master:
     restart: always
-    image: moebius-registry.coremedia.vm/docker-cm-icinga2:1806
+    image: moebius-registry.coremedia.vm/docker-cm-icinga2:latest
     # build: ../../docker-cm-icinga2
     container_name: cm-icinga2-master
     hostname: cm-icinga2-master
@@ -221,7 +221,7 @@ services:
 
   icingaweb2:
     restart: always
-    image: bodsch/docker-icingaweb2:2.5.3
+    image: bodsch/docker-icingaweb2:2.6.1
     container_name: icingaweb2
     hostname: icingaweb2
     environment:
@@ -258,7 +258,7 @@ services:
 
   documentation:
     restart: always
-    image: moebius-registry.coremedia.vm/docker-documentation:1806
+    image: moebius-registry.coremedia.vm/docker-documentation:latest
     # build: ../../docker-documentation
     container_name: documentation
     hostname: documentation
@@ -271,7 +271,7 @@ services:
 
   cm-dashing:
     restart: always
-    image: moebius-registry.coremedia.vm/docker-cm-dashing:1806
+    image: moebius-registry.coremedia.vm/docker-cm-dashing:latest
     # build: ../../docker-cm-dashing
     container_name: cm-dashing
     hostname: cm-dashing
@@ -301,7 +301,7 @@ services:
   #
   cm-rest-service:
     restart: always
-    image: moebius-registry.coremedia.vm/docker-cm-rest-service:1806
+    image: moebius-registry.coremedia.vm/docker-cm-rest-service:latest
     # build: ../../docker-cm-rest-service
     container_name: cm-rest-service
     hostname: cm-rest-service
@@ -328,7 +328,7 @@ services:
   # use MQ to process data
   cm-service-discovery:
     restart: always
-    image: moebius-registry.coremedia.vm/docker-cm-service-discovery:1806
+    image: moebius-registry.coremedia.vm/docker-cm-service-discovery:latest
     # build: ../../docker-cm-service-discovery
     container_name: cm-service-discover
     hostname: cm-service-discover
@@ -359,7 +359,7 @@ services:
   # use MQ to process data
   cm-data-collector:
     restart: always
-    image: moebius-registry.coremedia.vm/docker-cm-data-collector:1806
+    image: moebius-registry.coremedia.vm/docker-cm-data-collector:latest
     # build: ../../docker-cm-data-collector
     container_name: cm-data-collector
     hostname: cm-data-collector
@@ -387,7 +387,7 @@ services:
   # use MQ to process data
   cm-carbon-client:
     restart: always
-    image: moebius-registry.coremedia.vm/docker-cm-carbon-client:1806
+    image: moebius-registry.coremedia.vm/docker-cm-carbon-client:latest
     # build: ../../docker-cm-carbon-client
     container_name: cm-carbon-client
     hostname: cm-carbon-client
@@ -409,7 +409,7 @@ services:
   # use MQ to process data
   cm-grafana-client:
     restart: always
-    image: moebius-registry.coremedia.vm/docker-cm-grafana-client:1807
+    image: moebius-registry.coremedia.vm/docker-cm-grafana-client:latest
     # build: ../../docker-cm-grafana-client
     container_name: cm-grafana-client
     hostname: cm-grafana-client
@@ -436,7 +436,7 @@ services:
   # use MQ to process data
   cm-icinga-client:
     restart: always
-    image: moebius-registry.coremedia.vm/docker-cm-icinga-client:1806
+    image: moebius-registry.coremedia.vm/docker-cm-icinga-client:latest
     # build: ../../docker-cm-icinga-client
     container_name: cm-icinga-client
     hostname: cm-icinga-client
