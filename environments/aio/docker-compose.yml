@@ -23,8 +23,6 @@ services:
     image: bodsch/docker-beanstalkd:1.10
     container_name: beanstalkd
     hostname: beanstalkd
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
     networks:
       - database
 
@@ -37,7 +35,6 @@ services:
       MYSQL_SYSTEM_USER: root
       MYSQL_ROOT_PASS: ${MYSQL_ROOT_PASSWORD}
     volumes:
-      - /etc/localtime:/etc/localtime:ro
       - database:/srv
     networks:
       - database
@@ -47,8 +44,6 @@ services:
     build: ../../docker-cm-jolokia
     container_name: jolokia
     hostname: jolokia
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
     networks:
       - backend
     extra_hosts:
@@ -60,8 +55,6 @@ services:
     image: memcached:1-alpine
     container_name: memcached
     hostname: memcached
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
     command: "--listen=0.0.0.0 --memory-limit=8"
     networks:
       - database
@@ -74,7 +67,6 @@ services:
     ports:
       - 6379:6379
     volumes:
-      - /etc/localtime:/etc/localtime:ro
       - redis:/data
     networks:
       - database
@@ -99,7 +91,6 @@ services:
       - cm-rest-service
       - documentation
     volumes:
-      - /etc/localtime:/etc/localtime:ro
       # - ../../docker-cm-data/rootfs/data/www/entry-page:/var/www/entry-page
       - ../config/nginx/etc/nginx/sites-enabled/01-all-in-one.conf:/etc/nginx/sites-enabled/01-all-in-one.conf:ro
       - ../config/nginx/etc/nginx/nginx.conf-aio:/etc/nginx/nginx.conf:ro
@@ -117,7 +108,6 @@ services:
       - 2003:2003
       - 2003:2003/udp
     volumes:
-      - /etc/localtime:/etc/localtime:ro
       - carbon:/srv
     networks:
       - backend
@@ -132,7 +122,6 @@ services:
       # USE THIS ONLY WITH AN OTHER CARBON-WRITER (e.g. bodsch/docker-go-carbon)
       USE_EXTERNAL_CARBON: 'true'
     volumes:
-      - /etc/localtime:/etc/localtime:ro
       - carbon:/srv
     networks:
       - backend
@@ -167,9 +156,6 @@ services:
     links:
       - database
       - memcached
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      # - /share/opt/grafana/dashboards:/opt/grafana/dashboards
     networks:
       - frontend
       - backend
@@ -209,7 +195,6 @@ services:
       - 5665:5665
       - 8080
     volumes:
-      - /etc/localtime:/etc/localtime:ro
       - icinga:/var/lib/icinga2
     networks:
       - backend
@@ -248,8 +233,6 @@ services:
     links:
       - database
       - cm-icinga2-master:cm-icinga2-master
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
     networks:
       - frontend
       - backend
@@ -262,8 +245,6 @@ services:
     hostname: documentation
     ports:
       - 8080
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
     networks:
       - frontend
       - backend
@@ -289,8 +270,6 @@ services:
     links:
       - cm-icinga2-master
       - nginx
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
     networks:
       - frontend
       - backend
@@ -311,8 +290,6 @@ services:
     links:
       - redis
       - database
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
     networks:
       - frontend
       - backend
@@ -340,8 +317,6 @@ services:
       - jolokia
       - beanstalkd
       - redis
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
     networks:
       - backend
       - database
@@ -367,8 +342,6 @@ services:
       - jolokia
       - beanstalkd
       - redis
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
     networks:
       - backend
       - database
@@ -391,8 +364,6 @@ services:
       - redis
     links:
       - redis
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
     networks:
       - backend
       - database
@@ -416,8 +387,6 @@ services:
       - beanstalkd
       - redis
       - database
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
     networks:
       - frontend
       - backend
@@ -446,9 +415,6 @@ services:
     links:
       - beanstalkd
       - nginx
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      # - ../../docker-cm-data/rootfs/data/etc/icinga_server_config.yml:/etc/icinga_server_config.yml
     networks:
       - frontend
       - backend

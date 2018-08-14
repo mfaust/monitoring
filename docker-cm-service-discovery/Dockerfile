@@ -4,28 +4,26 @@ FROM alpine:3.8
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
-  VERSION="1807" \
-  BUILD_DATE="2018-07-30" \
+  VERSION="1808" \
+  BUILD_DATE="2018-08-14" \
   TERM=xterm \
   TZ='Europe/Berlin'
 
 # ---------------------------------------------------------------------------------------
 
+COPY build /build
+
 RUN \
   apk --quiet --no-cache update && \
   apk --quiet --no-cache upgrade && \
   apk add --quiet --no-cache --virtual .build-deps tzdata && \
-  cp /usr/share/zoneinfo/$TZ /etc/localtime && \
-  echo $TZ > /etc/timezone && \
-  apk del --quiet .build-deps
-
-COPY build /build
-
-RUN \
+  cp /usr/share/zoneinfo/${TZ} /etc/localtime && \
+  echo ${TZ} > /etc/timezone && \
+  apk del --quiet .build-deps && \
   apk add --quiet --no-cache --virtual .build-deps \
     build-base imagemagick-dev mariadb-dev ruby-dev ruby-io-console zlib-dev && \
   apk --quiet --no-cache add \
-    bind-tools drill mariadb-connector-c mariadb-connector-c jq libressl-dev ruby &&\
+    bind-tools drill mariadb-connector-c mariadb-connector-c jq libressl-dev ruby && \
   echo 'gem: --no-document' >> /etc/gemrc && \
   gem install --quiet --no-rdoc --no-ri \
     io-console bundler json && \

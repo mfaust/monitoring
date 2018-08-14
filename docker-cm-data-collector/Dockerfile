@@ -22,8 +22,8 @@ RUN \
     bind-tools drill mariadb-connector-c mariadb-connector-c postgresql-client nano ruby-irb zlib && \
   gem install --quiet --no-rdoc --no-ri \
     io-console bundler json && \
-  cp /usr/share/zoneinfo/$TZ /etc/localtime && \
-  echo $TZ > /etc/timezone && \
+  cp /usr/share/zoneinfo/${TZ} /etc/localtime && \
+  echo ${TZ} > /etc/timezone && \
   cd /build && \
   for g in $(ls -1 /build/*.gem 2> /dev/null) ; do echo $g; gem install --quiet --no-rdoc --no-ri ${g} ; done && \
   bundle install --quiet && \

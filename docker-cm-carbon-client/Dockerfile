@@ -4,8 +4,8 @@ FROM alpine:3.8
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
 ENV \
-  VERSION="1807" \
-  BUILD_DATE="2018-07-30" \
+  VERSION="1808" \
+  BUILD_DATE="2018-08-14" \
   TERM=xterm \
   TZ='Europe/Berlin'
 
@@ -20,8 +20,8 @@ RUN \
     build-base imagemagick-dev mariadb-dev ruby-dev ruby-rdoc tzdata zlib-dev && \
   apk add --quiet --no-cache \
     bind-tools drill mariadb-connector-c ruby-irb zlib && \
-  cp /usr/share/zoneinfo/$TZ /etc/localtime && \
-  echo $TZ > /etc/timezone && \
+  cp /usr/share/zoneinfo/${TZ} /etc/localtime && \
+  echo ${TZ} > /etc/timezone && \
   echo 'gem: --no-document' >> /etc/gemrc && \
   gem install --quiet --no-rdoc --no-ri \
     io-console bundler json && \

@@ -1,9 +1,9 @@
 
-FROM bodsch/docker-dashing:1807
+FROM bodsch/docker-dashing:1808
 
 ENV \
-  VERSION="1807" \
-  BUILD_DATE="2018-07-30" \
+  VERSION="1808" \
+  BUILD_DATE="2018-08-14" \
   TZ='Europe/Berlin' \
   DASHBOARD="coremedia" \
   ICINGA2_GEM_TYPE="stable" \
