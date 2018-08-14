@@ -307,7 +307,6 @@ services:
     hostname: cm-service-discover
     environment:
       LOG_LEVEL: info
-      REFRESH_ENABLED: 'true'
     depends_on:
       - jolokia
       - beanstalkd
