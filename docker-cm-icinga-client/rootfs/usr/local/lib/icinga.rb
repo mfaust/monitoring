@@ -64,7 +64,7 @@ class CMIcinga2
     logger.info( '-----------------------------------------------------------------' )
     logger.info( " CoreMedia - Icinga2 Client - gem Version #{Icinga2::VERSION}" )
     logger.info( "  Version #{version} (#{date})" )
-    logger.info( '  Copyright 2017 CoreMedia' )
+    logger.info( '  Copyright 2017-2018 CoreMedia' )
     logger.info( "  Backendsystem #{@icinga_api_url_base}" )
 #    logger.info( format( '    cluster enabled: %s', @icinga_cluster ? 'true' : 'false' ) )
     unless( @icinga_satellite.nil? )

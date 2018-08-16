@@ -3,12 +3,12 @@ class CMGrafana < Grafana::Client
 
   module Version
 
-    VERSION = '2.3.82'
+    VERSION = '2.3.83'
   end
 
   module Date
 
-    DATE = '2018-07-10'
+    DATE = '2018-08-14'
   end
 
 end

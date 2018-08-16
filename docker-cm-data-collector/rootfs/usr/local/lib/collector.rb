@@ -67,7 +67,7 @@ module DataCollector
       logger.info( '-----------------------------------------------------------------' )
       logger.info( ' CoreMedia - DataCollector' )
       logger.info( "  Version #{version} (#{date})" )
-      logger.info( '  Copyright 2016-2017 CoreMedia' )
+      logger.info( '  Copyright 2016-2018 CoreMedia' )
       logger.info( '  used Services:' )
       logger.info( "    - jolokia      : #{jolokia_host}:#{jolokia_port}" )
       logger.info( "    - redis        : #{redis_host}:#{redis_port}" )
