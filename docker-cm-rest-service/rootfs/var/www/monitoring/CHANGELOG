@@ -36,14 +36,20 @@
   },
   "1808": {
     "version": "1808",
-    "date": "13.08.2018",
+    "date": "17.08.2018",
     "changes": [
       "support alpine 3.8",
       "update to grafana 5.2.2",
       "update to icinga2 2.9.1",
       "update to icingaweb2 1.6.1",
       "update to jolokia 1.6.0",
-      "updates for mongodb 3.6 (remove deprecated HTTP interface and REST API)"
+      "updates for mongodb 3.6 (remove deprecated HTTP interface and REST API)",
+      "updates for more than one node deployment",
+      "enable the refresh task in the service-discovery per default",
+      "fix bug with ecommerce cache dashboard",
+      "fix some grafana 5 dashboards",
+      "create team prefixed docker-compose files",
+      "fix bug for content server detection when the hostname was 'localhost'"
     ]
   }
 }
