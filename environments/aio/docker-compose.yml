@@ -73,7 +73,7 @@ services:
 
   nginx:
     restart: always
-    image: bodsch/docker-nginx:1.12.2-r1
+    image: bodsch/docker-nginx:1.14.0
     container_name: nginx
     hostname: nginx
     ports:

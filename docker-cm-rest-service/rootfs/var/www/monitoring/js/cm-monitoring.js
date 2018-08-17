@@ -355,7 +355,7 @@ function load_monitoring_hosts() {
         }
 
         trHTML  = '<tr data-hostname="'+elem.dns.short+'">';
-        trHTML += '<td><span class="uk-icon-button" uk-icon="laptop"></span></td>';
+        trHTML += '<td><!--<span class="uk-icon-button" uk-icon="laptop"></span>--></td>';
         trHTML += '<td>' + elem.dns.short + '</td>';
         trHTML += '<td>' + toDate(elem.status.created) + '</td>';
         trHTML += '<td>';

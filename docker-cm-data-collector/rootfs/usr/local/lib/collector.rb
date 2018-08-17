@@ -690,7 +690,7 @@ module DataCollector
       status = replicator.dig('status')
 
       if( status.to_i != 200 )
-        logger.error( format( '  [%s] - Contentserver are not available!', status ) )
+        logger.error( format( '  [%s] - content server are not available!', status ) )
         return data
       end
 
@@ -713,6 +713,8 @@ module DataCollector
         host   = uri.host
         port   = uri.port
         path   = uri.path
+
+        host = fqdn if(host == 'localhost')
 
         logger.debug( format('search dns entry for \'%s\'', host) )
 
@@ -761,7 +763,7 @@ module DataCollector
       data    = params.dig(:data)
       content_server = fqdn
 
-      logger.info( format( '  search Content Server for this CAE (%s)', service ) )
+      logger.info( format( '  search content server for this CAE (%s)', service ) )
 
       d = data.select {|d| d.dig('CapConnection') }
 
@@ -806,6 +808,8 @@ module DataCollector
           host   = uri.host
           port   = uri.port
           path   = uri.path
+
+          host = fqdn if(host == 'localhost')
 
           logger.debug( format('search dns entry for \'%s\'', host) )
 

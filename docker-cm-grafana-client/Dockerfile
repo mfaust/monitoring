@@ -21,7 +21,7 @@ RUN \
   apk add --quiet --no-cache --virtual .build-deps \
     build-base imagemagick-dev ruby-dev mariadb-dev tzdata && \
   apk add --quiet --no-cache \
-    bind-tools drill mariadb-connector-c mariadb-connector-c ruby-irb && \
+    bind-tools drill mariadb-connector-c ruby-irb && \
   cp /usr/share/zoneinfo/${TZ} /etc/localtime && \
   echo ${TZ} > /etc/timezone && \
   gem install --quiet --no-rdoc --no-ri \
