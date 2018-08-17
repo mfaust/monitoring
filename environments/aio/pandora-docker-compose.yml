@@ -241,8 +241,6 @@ services:
     hostname: documentation
     ports:
       - 8080
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
     networks:
       - frontend
 
@@ -372,7 +370,7 @@ services:
     container_name: cm-grafana-client
     hostname: cm-grafana-client
     environment:
-      LOG_LEVEL: debug
+      LOG_LEVEL: info
       GRAFANA_HOST: nginx
     depends_on:
       - beanstalkd

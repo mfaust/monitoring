@@ -247,7 +247,6 @@ services:
       - 8080
     networks:
       - frontend
-      - backend
 
   cm-dashing:
     restart: always
