@@ -116,15 +116,20 @@ class CMGrafana
                   if( @short_hostname == real_short )
                     logger.info( '    the Master Live Server runs on the same host as the Replication Live Server' )
                   else
-                    identifier  = @database.config( ip: real_ip, short: real_short, fqdn: real_fqdn, key: 'graphite_identifier' )
-                    mls_identifier = identifier.dig( 'graphite_identifier' )
+                    mls_identifier = real_fqdn
 
-                    unless( mls_identifier.nil? )
-                      mls_identifier.to_s
-                      logger.info( "    use custom storage identifier from config: '#{mls_identifier}'" )
+                    identifier     = @database.config( ip: real_ip, short: real_short, fqdn: real_fqdn, key: 'graphite_identifier' )
+
+                    # found custom config
+                    unless( identifier.nil? )
+                      mls_identifier = identifier.dig( 'graphite_identifier' )
+
+                      unless( mls_identifier.nil? )
+                        mls_identifier.to_s
+                        logger.info( "    use custom storage identifier from config: '#{mls_identifier}'" )
+                      end
                     end
                   end
-
                 end
               end
             end
