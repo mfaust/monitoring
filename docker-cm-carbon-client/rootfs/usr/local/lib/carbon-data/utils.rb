@@ -47,7 +47,7 @@ module CarbonData
         else
           s
       end
-      service.gsub!('iew','') if( service =~ /^cae-preview/ )
+      service = service.gsub('iew','') if( service =~ /^cae-preview/ )
       service.tr('-', '_').upcase
     end
 
