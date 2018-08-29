@@ -205,39 +205,40 @@ module DataCollector
 
     def postgres_data( params )
 
-      # WiP and nore sure
-      # return
-
       logger.debug( "postgres_data( #{params} )" )
+      # WiP and nore sure
+      return {}
 
-      host = params.dig(:host)
-      port = params.dig(:port) || 5432
-      user = params.dig(:username) || 'cm_management'
-      pass = params.dig(:password) || 'cm_management'
-      dbname = params.dig(:database) || 'coremedia'
-
-      return { status: 500, message: 'no host name for mysql_data data' } if( host.nil? )
-
-      unless( port.nil? )
-
-        settings = {
-          'postgresHost'   => host,
-          'postgresUser'   => user,
-          'postgresPass'   => pass,
-          'postgresPort'   => port,
-          'postgresDBName' => dbname
-        }
-      end
-
-      result = Utils::Network.port_open?( host, port )
-
-      if( result == false )
-        logger.warn( format( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
-        return JSON.parse( JSON.generate( status: 500 ) )
-      else
-        pgsql = ExternalClients::PostgresStatus.new( settings )
-        data = pgsql.run()
-      end
+      #logger.debug( "postgres_data( #{params} )" )
+      #
+      #host = params.dig(:host)
+      #port = params.dig(:port) || 5432
+      #user = params.dig(:username) || 'cm_management'
+      #pass = params.dig(:password) || 'cm_management'
+      #dbname = params.dig(:database) || 'coremedia'
+      #
+      #return { status: 500, message: 'no host name for mysql_data data' } if( host.nil? )
+      #
+      #unless( port.nil? )
+      #
+      #  settings = {
+      #    'postgresHost'   => host,
+      #    'postgresUser'   => user,
+      #    'postgresPass'   => pass,
+      #    'postgresPort'   => port,
+      #    'postgresDBName' => dbname
+      #  }
+      #end
+      #
+      #result = Utils::Network.port_open?( host, port )
+      #
+      #if( result == false )
+      #  logger.warn( format( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
+      #  return JSON.parse( JSON.generate( status: 500 ) )
+      #else
+      #  pgsql = ExternalClients::PostgresStatus.new( settings )
+      #  data = pgsql.run()
+      #end
     end
 
 
@@ -545,10 +546,10 @@ module DataCollector
           result[v] ||= []
 
           cache_key = { host: fqdn, pre: 'result', service: v }
-          logger.debug( "plain cache_key: #{cache_key}" )
+#           logger.debug( "plain cache_key: #{cache_key}" )
 
           cacheKey = Storage::RedisClient.cacheKey( cache_key )
-          logger.debug( "redis cache_key: #{cacheKey}" )
+#           logger.debug( "redis cache_key: #{cacheKey}" )
 
           #cacheKey = Storage::RedisClient.cacheKey( host: fqdn, pre: 'result', service: v )
 
@@ -1060,8 +1061,8 @@ module DataCollector
           next
         end
 
-        logger.debug( 'block this job:' )
-        logger.debug( short: short, fqdn: fqdn )
+#         logger.debug( 'block this job:' )
+#         logger.debug( short: short, fqdn: fqdn )
         @jobs.add( short: short, fqdn: fqdn )
 
         start = Time.now
@@ -1074,6 +1075,8 @@ module DataCollector
         #
         begin
           discovery_data    = @database.discoveryData( ip: ip, short: short, fqdn: fqdn )
+
+          logger.debug("discovery_data: #{discovery_data} (#{discovery_data.class})")
 
           discovery_keys   = discovery_data.keys.sort
           discovery_count  = discovery_keys.count
@@ -1123,8 +1126,8 @@ module DataCollector
         finish = Time.now
         logger.info( format( 'collect data in %s seconds', (finish - start).round(2) ) )
 
-        logger.debug( 'give job free:' )
-        logger.debug( short: short, fqdn: fqdn )
+#         logger.debug( 'give job free:' )
+#         logger.debug( short: short, fqdn: fqdn )
         @jobs.del( short: short, fqdn: fqdn )
 
       end

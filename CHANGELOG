@@ -99,3 +99,8 @@
 - fix bug for content server detection when the hostname was 'localhost'
 
 
+1810
+
+- remove postgres support in data-collector
+- support multiple installations of CAE(Live) on one host
+

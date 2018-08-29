@@ -1,11 +1,11 @@
 <%-
-  title = 'Delivery CAE'; descr = 'CAE Live'; app = 'CAE_LIVE'; id = 10;
+  title = 'Delivery CAE'; descr = 'CAE Live'; id = 10;
 %>
 {
   "dashboard": {
     "uid": "<%= uuid %>",
     "id": null,
-    "title": "<%= slug %> - <%= title %>",
+    "title": "<%= grafana_title %>",
     "tags": [ "<%= short_hostname %>", "cae" ],
     "schemaVersion": 12,
     "version": 1,
@@ -85,7 +85,7 @@
             "span": 7,
             "mode": "html",
             "transparent": true,
-            "content": "<div style=\"text-align:center; font-size: 1.8em\">\n<div style=\"width:49%; float:left\"><a style=\"text-decoration:none\" href=\"<%= tomcat_dashboard_url %>?var-Application=<%= app %>\">Tomcat</a></div>\n  <div style=\"width:49%; float:left\"><a style=\"text-decoration:none\" href=\"<%= memorypools_dashboard_url %>?var-Application=<%= app %>\">Memory Pools</a></div>\n</div>\n"
+            "content": "<div style=\"text-align:center; font-size: 1.8em\">\n<div style=\"width:49%; float:left\"><a style=\"text-decoration:none\" href=\"<%= tomcat_dashboard_url %>?var-Application=<%= normalized_name %>\">Tomcat</a></div>\n  <div style=\"width:49%; float:left\"><a style=\"text-decoration:none\" href=\"<%= memorypools_dashboard_url %>?var-Application=<%= normalized_name %>\">Memory Pools</a></div>\n</div>\n"
           }
         ]
       },

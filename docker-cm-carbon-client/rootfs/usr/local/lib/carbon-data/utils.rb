@@ -32,10 +32,6 @@ module CarbonData
           'RLS'
         when 'workflow-server'
           'WFS'
-        when /^cae-live/
-          'CAE_LIVE'
-        when /^cae-preview/
-          'CAE_PREV'
         when 'solr-master'
           'SOLR_MASTER'
         when 'content-feeder'
@@ -51,7 +47,7 @@ module CarbonData
         else
           s
       end
-
+      service.gsub!('iew','') if( service =~ /^cae-preview/ )
       service.tr('-', '_').upcase
     end
 

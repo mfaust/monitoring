@@ -238,7 +238,7 @@ module DataCollector
 
       { count: 0, checksum: '', keys: '' } if( data.nil? )
 
-#       logger.debug( "valid_data: #{data} (#{data.class.to_s})" )
+      logger.debug( "valid_data: #{data} (#{data.class.to_s})" )
 
       count = 0
       checksum = ''

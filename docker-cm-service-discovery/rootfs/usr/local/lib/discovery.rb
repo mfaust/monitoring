@@ -394,16 +394,22 @@ module ServiceDiscovery
       logger.debug( "additional services: #{services}" )
 
       # use our new external function
-      discovered_services = discover( ip: ip, short: short, fqdn: fqdn, ports: ports )
+      discovered_services = discover( ip: ip, short: short, fqdn: fqdn, ports: ports, known_services: @service_config )
+
+#       logger.debug( "discovered_services #1 : #{discovered_services}" )
+
       discovered_services = merge_services( discovered_services, services )
+
+#       logger.debug( "discovered_services #2 : #{discovered_services}" )
+
       discovered_services = create_host_config( ip: ip, short: short, fqdn: fqdn, data: discovered_services )
 
-#       result    = @database.createDiscovery( ip: ip, short: short, fqdn: fqdn, data: discovered_services )
+#       logger.debug( "discovered_services #3 : #{discovered_services}" )
+
       result    = @database.create_discovery( ip: ip, short: short, fqdn: fqdn, data: discovered_services )
 #       logger.debug( "createDiscovery : #{result}" )
 
       logger.debug( 'set host status to ONLINE' )
-#      result    = @database.setStatus( ip: ip, short: short, fqdn: fqdn, status: Storage::MySQL::ONLINE )
       result    = @database.set_status( ip: ip, short: short, fqdn: fqdn, status: Storage::MySQL::ONLINE )
 
       finish = Time.now

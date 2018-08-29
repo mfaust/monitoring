@@ -1,6 +1,6 @@
 
 module ServiceDiscovery
 
-  VERSION = '1.12.7'
-  DATE = '2018-08-14'
+  VERSION = '1.13.0'
+  DATE = '2018-08-29'
 end

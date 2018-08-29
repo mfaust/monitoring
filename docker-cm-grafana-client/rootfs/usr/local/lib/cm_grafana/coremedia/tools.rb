@@ -93,10 +93,11 @@ class CMGrafana
             'RLS'
           when 'workflow-server'
             'WFS'
-          when /^cae-live/
-            'CAE_LIVE'
-          when /^cae-preview/
-            'CAE_PREV'
+#          when /^cae-live/
+#            tr('-', '_').upcase
+#            'CAE_LIVE'
+#          when /^cae-preview/
+#            'CAE_PREV'
           when 'solr-master'
             'SOLR_MASTER'
       #    when 'solr-slave'
@@ -111,8 +112,9 @@ class CMGrafana
             service
         end
 
-        service.tr('-', '_').upcase
+        service.gsub!('iew','') if( service =~ /^cae-preview/ )
 
+        service.tr('-', '_').upcase
       end
 
 

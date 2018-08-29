@@ -7,6 +7,8 @@ module ServiceDiscovery
     #
     def discover_application( params = {} )
 
+      logger.debug("discover_application( #{params} )")
+
       host = params.dig(:fqdn)
       port = params.dig(:port)
 
@@ -130,14 +132,36 @@ module ServiceDiscovery
 
             if( status == 200 )
 
+#               logger.debug("information for #{port} : #{information}")
+
               value = information.dig('value')
               value = value.values.first
               value = value.dig('ServiceType')
 
               if( value != 'to be defined' )
-                # logger.debug( "Application are '#{value}'" )
+
+                # special handling for more than one CAE
+                if(value =~ /cae-(live|preview)/ )
+
+                  known_services = @service_config.clone
+
+                  #logger.debug("service_config: #{@service_config} (#{@service_config})")
+
+                  if(known_services.nil?)
+                    value = "#{value}_#{port}"
+                  else
+                    # TODO test for 'services'
+                    name = known_services['services'].select { |x,y| y['port'] == port }
+
+#                     logger.debug( "detected name: #{name}")
+#                     logger.debug( "detected name: #{name.keys.last}")
+
+                    value = name.keys.last.to_s
+                  end
+                end
+#                 logger.debug( "Application are '#{value}'" )
                 services.push( value )
-                # clear othe results
+                # clear other results
                 #
                 runtime = nil
                 manager = nil

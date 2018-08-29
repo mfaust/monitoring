@@ -116,7 +116,6 @@ class CMGrafana
 
         # create license dashboard
         #
-        #create_license_dashboard_OBSOLETE( dns: { ip: ip, short: short, fqdn: fqdn }, services: services )
         create_license_dashboard( dns: { ip: ip, short: short, fqdn: fqdn }, services: services )
 
         # we want an Services Overview for this Host
@@ -180,8 +179,13 @@ class CMGrafana
 
         if( File.exist?( template ) )
           template = File.read( template )
-          renderer = ERB.new( template, nil, '-' )
-          content = renderer.result(binding)
+
+          begin
+            renderer = ERB.new( template, nil, '-' )
+            content = renderer.result(binding)
+          rescue => error
+            logger.error(error)
+          end
 
           content = JSON.parse(content) if(content.is_a?(String))
           content = regenerate_template_ids( content )
@@ -201,7 +205,12 @@ class CMGrafana
         end
       end
 
-
+      # creates a license dashboard if the information is available
+      #
+      # @param [Hash, #read] params
+      # @option params [Hash, #read] dns
+      # @option params [Array, #read] services
+      #
       def create_license_dashboard(params = {})
 
         logger.info( 'create License Dashboard' )
@@ -311,151 +320,6 @@ class CMGrafana
           logger.warn( format('template can\'t be add: [%s] %s', response_status, response_message ) ) if( response_status != 200 )
         end
       end
-
-
-      # creates a license dashboard if the information is available
-      #
-      # @param [Hash, #read] params
-      # @option params [Hash, #read] dns
-      # @option params [Array, #read] services
-      #
-      def create_license_dashboard_OBSOLETE(params = {})
-
-        logger.info( 'create License Dashboard' )
-
-        fqdn            = params.dig(:dns, :fqdn)
-        short           = params.dig(:dns, :short)
-        services        = params.dig(:services) || []
-        content_servers = %w(content-management-server master-live-server replication-live-server)
-
-        begin
-          (1..30).each { |y|
-            if( @redis.measurements( short: short, fqdn: fqdn ).nil? )
-              logger.debug(format('wait for measurements data for node \'%s\' ... %d', short, y))
-              sleep(4)
-            else
-              break
-            end
-          }
-        rescue => e
-          logger.error( e )
-        end
-
-        return { status: 204, message: 'no content-server available' } unless( services.sort.any? {|x| content_servers.sort.include?(x) } )
-
-        rows            = []
-        intersect       = content_servers & services
-
-        # license_template = format( '%s/licenses/licenses-template.erb' , @template_directory )
-        license_head     = format( '%s/licenses/licenses-head.erb' , @template_directory )
-        license_until    = format( '%s/licenses/licenses-until.erb', @template_directory )
-        license_part     = format( '%s/licenses/licenses-part.erb' , @template_directory )
-
-        intersect.each do |service|
-          logger.debug( format( 'Search License Information for Service %s', service ) )
-          if( @mbean.beanAvailable?( fqdn, service, 'Server', 'LicenseValidUntilHard') )
-            logger.info( format( '  - found License Information for Service %s', service ) )
-
-            rows << File.read(license_until).gsub!( '<%= normalized_name %>', normalize_service(service) ) if( File.exist?(license_until) )
-          end
-        end
-
-        rows << File.read( license_head )  if( File.exist?( license_head ) )
-
-        intersect.each do |service|
-          logger.debug( format( 'Search Service Information for Service %s', service ) )
-          if( @mbean.beanAvailable?( fqdn, service, 'Server', 'ServiceInfos') )
-            logger.info( format( '  - found Service Information for Service %s', service ) )
-            if( File.exist?( license_part ) )
-              tpl = File.read( license_part )
-              tpl.gsub!( '<%= normalized_name %>', normalize_service(service) )
-              tpl.gsub!( 'Server.ServiceInfo.publisher' , 'Server.ServiceInfo.webserver' ).gsub!( 'Publisher', 'Webserver' ) if( service == 'replication-live-server' )
-
-              rows << tpl
-            end
-          end
-        end
-
-        # only the license Head is into the array
-        #
-        return { status: 204, message: 'we have no information about licenses' } if( rows.count == 1 )
-
-        rows = rows.join(',')
-
-        template = %(
-          {
-            "dashboard": {
-              "id": null,
-              "uid": "<%= uuid %>",
-              "title": "<%= slug %> - Licenses",
-              "originalTitle": "<%= slug %> - Licenses",
-              "tags": [ "<%= short_hostname %>", "licenses" ],
-              "style": "dark",
-              "timezone": "browser",
-              "editable": true,
-              "hideControls": false,
-              "sharedCrosshair": false,
-              "rows": [
-                #{rows}
-              ],
-              "time": {
-                "from": "now-2m",
-                "to": "now"
-              },
-              "timepicker": {
-                "refresh_intervals": [ "1m", "2m", "10m" ],
-                "time_options": [ "2m", "15m" ]
-              },
-              "templating": {
-                "list": [
-                  {
-                    "current": {
-                      "value": "<%= graphite_identifier %>",
-                      "text": "<%= graphite_identifier %>"
-                    },
-                    "hide": 2,
-                    "label": null,
-                    "name": "host",
-                    "options": [
-                      {
-                        "value": "<%= graphite_identifier %>",
-                        "text": "<%= graphite_identifier %>"
-                      }
-                    ],
-                    "query": "<%= graphite_identifier %>",
-                    "type": "constant"
-                  }
-                ]
-              },
-              "annotations": {
-                "list": []
-              },
-              "refresh": "2m",
-              "schemaVersion": 12,
-              "version": 0,
-              "links": []
-            }
-          }
-        )
-
-        json = normalize_template(
-          template: template,
-          service_name: 'licenses',
-          slug: @slug,
-          graphite_identifier: @graphite_identifier,
-          short_hostname: @short_hostname
-        )
-
-        json = JSON.parse( json ) if( json.is_a?(String) )
-        title = json.dig('dashboard','title')
-
-        response = create_dashboard( title: title, dashboard: json )
-        response_status  = response.dig('status').to_i
-        response_message = response.dig('message')
-
-        logger.warn( format('template can\'t be add: [%s] %s', response_status, response_message ) ) if( response_status != 200 )
-      end
-
 
       # creates service dashboards
       #
@@ -627,9 +491,9 @@ class CMGrafana
           end
 
           # cae-live-1 -> cae-live
-          service_name     = remove_postfix( service )
+          service_name     = service # remove_postfix( service )
           normalized_name  = normalize_service( service )
-          template_name    = template != nil ? template : service_name
+          template_name    = template != nil ? template : remove_postfix( service ) # service_name
           service_template = template_for_service( template_name )
 
           # logger.debug( format( '  service_name  %s', service_name ) )

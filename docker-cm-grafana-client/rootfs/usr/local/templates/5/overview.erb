@@ -3381,7 +3381,7 @@
     y += 3
   end
   # ----------------------------------------------------------------------------------------------
-  key = 'cae-live'
+  key = 'cae-live-1'
   if(service_dashboard_data.keys.include?(key))
     size -= 1
     x = -2
@@ -3390,7 +3390,7 @@
     name = d['normalized_name']
 -%>
       {
-        "content": "<h3><center><bold><a href=\"<%= url %>\">CAE Live</a></bold></center></h3>",
+        "content": "<h3><center><bold><a href=\"<%= url %>\">CAE Live 1</a></bold></center></h3>",
         "id": <%= id += 1 %>,
         "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
         "transparent": true,
@@ -3411,7 +3411,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE.Runtime.uptime" }
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_1.Runtime.uptime" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -3490,7 +3490,7 @@
           "show": false
         },
         "targets": [
-          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE.Memory.heap_memory.used_percent" }
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_1.Memory.heap_memory.used_percent" }
         ],
         "thresholds": "85,95",
         "type": "singlestat",
@@ -3558,7 +3558,7 @@
           "show": false
         },
         "targets": [
-          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE.CapConnection.open" }
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_1.CapConnection.open" }
         ],
         "thresholds": "0,1",
         "type": "singlestat",
@@ -3593,7 +3593,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE.CapConnection.blob.cache.used_percent" }
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_1.CapConnection.blob.cache.used_percent" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -3661,7 +3661,7 @@
         "type": "singlestat",
         "isNew": true,
         "targets": [
-          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE.CapConnection.su_sessions.sessions" }
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_1.CapConnection.su_sessions.sessions" }
         ],
         "links": [],
         "datasource": "graphite",
@@ -3730,7 +3730,3135 @@
         "isNew": true,
         "datasource": "graphite",
         "targets": [
-          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE.CapConnection.ContentRepository.available" }
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_1.CapConnection.ContentRepository.available" }
+        ],
+        "colorBackground": true,
+        "colorValue": false,
+        "colors": [
+          "rgba(82, 82, 82, 0.9)",
+          "rgba(245, 54, 54, 0.9)",
+          "rgba(50, 172, 45, 0.97)"
+        ],
+        "nullPointMode": "connected",
+        "valueName": "current",
+        "valueFontSize": "70%",
+        "thresholds": "0,1",
+        "mappingType": 2,
+        "mappingTypes": [
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
+        ],
+        "valueMaps": [
+          { "op": "=", "value": "-1", "text": "N/A" },
+          { "op": "=", "value": "0",  "text": "not available" },
+          { "op": "=", "value": "1",  "text": "available" }
+        ],
+        "rangeMaps": [
+          { "from": "-1", "to": "null", "text": "N/A" },
+          { "from": "0" , "to": "0"   , "text": "not available" },
+          { "from": "1" , "to": "1"   , "text": "available" }
+        ]
+      },
+      {
+        "content": "",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= max_widget_width + widget_width - x %>, "h": 3 },
+        "transparent": true,
+        "mode": "html",
+        "title": "",
+        "type": "text"
+      }<%= ',' unless(size == 0) %>
+<%-
+    y += 3
+  end
+  # ----------------------------------------------------------------------------------------------
+  key = 'cae-live-2'
+  if(service_dashboard_data.keys.include?(key))
+    size -= 1
+    x = -2
+    d = service_dashboard_data[key]
+    url = d['url']
+    name = d['normalized_name']
+-%>
+      {
+        "content": "<h3><center><bold><a href=\"<%= url %>\">CAE Live 2</a></bold></center></h3>",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "links": [],
+        "mode": "html",
+        "span": 1,
+        "title": "",
+        "type": "text"
+      },
+      {
+        "title": "Service Uptime",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "error": false,
+        "span": 1,
+        "editable": true,
+        "type": "singlestat",
+        "isNew": true,
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_2.Runtime.uptime" }
+        ],
+        "links": [],
+        "datasource": "graphite",
+        "maxDataPoints": 100,
+        "interval": null,
+        "cacheTimeout": null,
+        "format": "ms",
+        "nullText": null,
+        "mappingType": 1,
+        "nullPointMode": "connected",
+        "valueName": "current",
+        "valueFontSize": "70%",
+        "thresholds": "",
+        "colorBackground": false,
+        "colorValue": false,
+        "decimals": 0,
+        "valueMaps": [
+          {
+            "value": "0",
+            "op": "=",
+            "text": "OFFLINE"
+          }
+        ]
+      },
+      {
+        "title": "used Heap Memory",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "cacheTimeout": null,
+        "colorBackground": true,
+        "colorValue": false,
+        "colors": [
+          "rgba(50, 172, 45, 0.97)",
+          "rgba(237, 129, 40, 0.89)",
+          "rgba(245, 54, 54, 0.9)"
+        ],
+        "datasource": "graphite",
+        "editable": true,
+        "error": false,
+        "format": "none",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "interval": null,
+        "isNew": true,
+        "links": [],
+        "mappingType": 1,
+        "mappingTypes": [
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "postfix": " %",
+        "postfixFontSize": "80%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "span": 1,
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": false
+        },
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_2.Memory.heap_memory.used_percent" }
+        ],
+        "thresholds": "85,95",
+        "type": "singlestat",
+        "valueFontSize": "100%",
+        "valueMaps": [
+          {
+            "op": "=",
+            "text": "N/A",
+            "value": "null"
+          }
+        ],
+        "valueName": "current"
+      },
+      {
+        "title": "CapConnection",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "cacheTimeout": null,
+        "colorBackground": true,
+        "colorValue": false,
+        "colors": [
+          "rgba(245, 54, 54, 0.9)",
+          "rgba(245, 54, 54, 0.9)",
+          "rgba(50, 172, 45, 0.97)"
+        ],
+        "datasource": "graphite",
+        "editable": true,
+        "error": false,
+        "format": "none",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "interval": null,
+        "isNew": true,
+        "links": [],
+        "mappingType": 1,
+        "mappingTypes": [
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "postfix": "",
+        "postfixFontSize": "70%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "span": 1,
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": false
+        },
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_2.CapConnection.open" }
+        ],
+        "thresholds": "0,1",
+        "type": "singlestat",
+        "valueFontSize": "80%",
+        "valueMaps": [
+          {
+            "op": "=",
+            "text": "closed",
+            "value": "0"
+          },
+          {
+            "value": "1",
+            "op": "=",
+            "text": "open"
+          },
+          {
+            "value": "-1",
+            "op": "=",
+            "text": "N/A"
+          }
+        ],
+        "valueName": "current"
+      },
+      {
+        "title": "used Blob Cache",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "error": false,
+        "span": 1,
+        "editable": true,
+        "type": "singlestat",
+        "isNew": true,
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_2.CapConnection.blob.cache.used_percent" }
+        ],
+        "links": [],
+        "datasource": "graphite",
+        "maxDataPoints": 100,
+        "interval": null,
+        "cacheTimeout": null,
+        "format": "none",
+        "prefix": "",
+        "postfix": " %",
+        "nullText": null,
+        "valueMaps": [
+          {
+            "value": "null",
+            "op": "=",
+            "text": "N/A"
+          }
+        ],
+        "mappingTypes": [
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
+        ],
+        "rangeMaps": [
+          {
+            "from": "null",
+            "to": "null",
+            "text": "N/A"
+          }
+        ],
+        "mappingType": 1,
+        "nullPointMode": "connected",
+        "valueName": "current",
+        "prefixFontSize": "50%",
+        "valueFontSize": "80%",
+        "postfixFontSize": "70%",
+        "thresholds": "90,95",
+        "colorBackground": true,
+        "colorValue": false,
+        "colors": [
+          "rgba(50, 172, 45, 0.97)",
+          "rgba(237, 129, 40, 0.89)",
+          "rgba(245, 54, 54, 0.9)"
+        ],
+        "sparkline": {
+          "show": false,
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "fillColor": "rgba(31, 118, 189, 0.18)"
+        },
+        "gauge": {
+          "show": false,
+          "minValue": 0,
+          "maxValue": 100,
+          "thresholdMarkers": true,
+          "thresholdLabels": false
+        }
+      },
+      {
+        "title": "Lightweight Sessions",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "error": false,
+        "span": 1,
+        "editable": true,
+        "type": "singlestat",
+        "isNew": true,
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_2.CapConnection.su_sessions.sessions" }
+        ],
+        "links": [],
+        "datasource": "graphite",
+        "maxDataPoints": 100,
+        "interval": null,
+        "cacheTimeout": null,
+        "format": "none",
+        "prefix": "",
+        "postfix": "",
+        "nullText": null,
+        "valueMaps": [
+          {
+            "value": "null",
+            "op": "=",
+            "text": "N/A"
+          }
+        ],
+        "mappingTypes": [
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
+        ],
+        "rangeMaps": [
+          {
+            "from": "null",
+            "to": "null",
+            "text": "N/A"
+          }
+        ],
+        "mappingType": 1,
+        "nullPointMode": "connected",
+        "valueName": "current",
+        "prefixFontSize": "50%",
+        "valueFontSize": "80%",
+        "postfixFontSize": "70%",
+        "thresholds": "",
+        "colorBackground": false,
+        "colorValue": false,
+        "colors": [
+          "rgba(50, 172, 45, 0.97)",
+          "rgba(237, 129, 40, 0.89)",
+          "rgba(245, 54, 54, 0.9)"
+        ],
+        "sparkline": {
+          "show": false,
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "fillColor": "rgba(31, 118, 189, 0.18)"
+        },
+        "gauge": {
+          "show": false,
+          "minValue": 0,
+          "maxValue": 100,
+          "thresholdMarkers": true,
+          "thresholdLabels": false
+        }
+      },
+      {
+        "title": "Content Repository",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "error": false,
+        "span": 1,
+        "editable": true,
+        "type": "singlestat",
+        "isNew": true,
+        "datasource": "graphite",
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_2.CapConnection.ContentRepository.available" }
+        ],
+        "colorBackground": true,
+        "colorValue": false,
+        "colors": [
+          "rgba(82, 82, 82, 0.9)",
+          "rgba(245, 54, 54, 0.9)",
+          "rgba(50, 172, 45, 0.97)"
+        ],
+        "nullPointMode": "connected",
+        "valueName": "current",
+        "valueFontSize": "70%",
+        "thresholds": "0,1",
+        "mappingType": 2,
+        "mappingTypes": [
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
+        ],
+        "valueMaps": [
+          { "op": "=", "value": "-1", "text": "N/A" },
+          { "op": "=", "value": "0",  "text": "not available" },
+          { "op": "=", "value": "1",  "text": "available" }
+        ],
+        "rangeMaps": [
+          { "from": "-1", "to": "null", "text": "N/A" },
+          { "from": "0" , "to": "0"   , "text": "not available" },
+          { "from": "1" , "to": "1"   , "text": "available" }
+        ]
+      },
+      {
+        "content": "",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= max_widget_width + widget_width - x %>, "h": 3 },
+        "transparent": true,
+        "mode": "html",
+        "title": "",
+        "type": "text"
+      }<%= ',' unless(size == 0) %>
+<%-
+    y += 3
+  end
+  # ----------------------------------------------------------------------------------------------
+  key = 'cae-live-3'
+  if(service_dashboard_data.keys.include?(key))
+    size -= 1
+    x = -2
+    d = service_dashboard_data[key]
+    url = d['url']
+    name = d['normalized_name']
+-%>
+      {
+        "content": "<h3><center><bold><a href=\"<%= url %>\">CAE Live 3</a></bold></center></h3>",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "links": [],
+        "mode": "html",
+        "span": 1,
+        "title": "",
+        "type": "text"
+      },
+      {
+        "title": "Service Uptime",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "error": false,
+        "span": 1,
+        "editable": true,
+        "type": "singlestat",
+        "isNew": true,
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_3.Runtime.uptime" }
+        ],
+        "links": [],
+        "datasource": "graphite",
+        "maxDataPoints": 100,
+        "interval": null,
+        "cacheTimeout": null,
+        "format": "ms",
+        "nullText": null,
+        "mappingType": 1,
+        "nullPointMode": "connected",
+        "valueName": "current",
+        "valueFontSize": "70%",
+        "thresholds": "",
+        "colorBackground": false,
+        "colorValue": false,
+        "decimals": 0,
+        "valueMaps": [
+          {
+            "value": "0",
+            "op": "=",
+            "text": "OFFLINE"
+          }
+        ]
+      },
+      {
+        "title": "used Heap Memory",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "cacheTimeout": null,
+        "colorBackground": true,
+        "colorValue": false,
+        "colors": [
+          "rgba(50, 172, 45, 0.97)",
+          "rgba(237, 129, 40, 0.89)",
+          "rgba(245, 54, 54, 0.9)"
+        ],
+        "datasource": "graphite",
+        "editable": true,
+        "error": false,
+        "format": "none",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "interval": null,
+        "isNew": true,
+        "links": [],
+        "mappingType": 1,
+        "mappingTypes": [
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "postfix": " %",
+        "postfixFontSize": "80%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "span": 1,
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": false
+        },
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_3.Memory.heap_memory.used_percent" }
+        ],
+        "thresholds": "85,95",
+        "type": "singlestat",
+        "valueFontSize": "100%",
+        "valueMaps": [
+          {
+            "op": "=",
+            "text": "N/A",
+            "value": "null"
+          }
+        ],
+        "valueName": "current"
+      },
+      {
+        "title": "CapConnection",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "cacheTimeout": null,
+        "colorBackground": true,
+        "colorValue": false,
+        "colors": [
+          "rgba(245, 54, 54, 0.9)",
+          "rgba(245, 54, 54, 0.9)",
+          "rgba(50, 172, 45, 0.97)"
+        ],
+        "datasource": "graphite",
+        "editable": true,
+        "error": false,
+        "format": "none",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "interval": null,
+        "isNew": true,
+        "links": [],
+        "mappingType": 1,
+        "mappingTypes": [
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "postfix": "",
+        "postfixFontSize": "70%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "span": 1,
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": false
+        },
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_3.CapConnection.open" }
+        ],
+        "thresholds": "0,1",
+        "type": "singlestat",
+        "valueFontSize": "80%",
+        "valueMaps": [
+          {
+            "op": "=",
+            "text": "closed",
+            "value": "0"
+          },
+          {
+            "value": "1",
+            "op": "=",
+            "text": "open"
+          },
+          {
+            "value": "-1",
+            "op": "=",
+            "text": "N/A"
+          }
+        ],
+        "valueName": "current"
+      },
+      {
+        "title": "used Blob Cache",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "error": false,
+        "span": 1,
+        "editable": true,
+        "type": "singlestat",
+        "isNew": true,
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_3.CapConnection.blob.cache.used_percent" }
+        ],
+        "links": [],
+        "datasource": "graphite",
+        "maxDataPoints": 100,
+        "interval": null,
+        "cacheTimeout": null,
+        "format": "none",
+        "prefix": "",
+        "postfix": " %",
+        "nullText": null,
+        "valueMaps": [
+          {
+            "value": "null",
+            "op": "=",
+            "text": "N/A"
+          }
+        ],
+        "mappingTypes": [
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
+        ],
+        "rangeMaps": [
+          {
+            "from": "null",
+            "to": "null",
+            "text": "N/A"
+          }
+        ],
+        "mappingType": 1,
+        "nullPointMode": "connected",
+        "valueName": "current",
+        "prefixFontSize": "50%",
+        "valueFontSize": "80%",
+        "postfixFontSize": "70%",
+        "thresholds": "90,95",
+        "colorBackground": true,
+        "colorValue": false,
+        "colors": [
+          "rgba(50, 172, 45, 0.97)",
+          "rgba(237, 129, 40, 0.89)",
+          "rgba(245, 54, 54, 0.9)"
+        ],
+        "sparkline": {
+          "show": false,
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "fillColor": "rgba(31, 118, 189, 0.18)"
+        },
+        "gauge": {
+          "show": false,
+          "minValue": 0,
+          "maxValue": 100,
+          "thresholdMarkers": true,
+          "thresholdLabels": false
+        }
+      },
+      {
+        "title": "Lightweight Sessions",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "error": false,
+        "span": 1,
+        "editable": true,
+        "type": "singlestat",
+        "isNew": true,
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_3.CapConnection.su_sessions.sessions" }
+        ],
+        "links": [],
+        "datasource": "graphite",
+        "maxDataPoints": 100,
+        "interval": null,
+        "cacheTimeout": null,
+        "format": "none",
+        "prefix": "",
+        "postfix": "",
+        "nullText": null,
+        "valueMaps": [
+          {
+            "value": "null",
+            "op": "=",
+            "text": "N/A"
+          }
+        ],
+        "mappingTypes": [
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
+        ],
+        "rangeMaps": [
+          {
+            "from": "null",
+            "to": "null",
+            "text": "N/A"
+          }
+        ],
+        "mappingType": 1,
+        "nullPointMode": "connected",
+        "valueName": "current",
+        "prefixFontSize": "50%",
+        "valueFontSize": "80%",
+        "postfixFontSize": "70%",
+        "thresholds": "",
+        "colorBackground": false,
+        "colorValue": false,
+        "colors": [
+          "rgba(50, 172, 45, 0.97)",
+          "rgba(237, 129, 40, 0.89)",
+          "rgba(245, 54, 54, 0.9)"
+        ],
+        "sparkline": {
+          "show": false,
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "fillColor": "rgba(31, 118, 189, 0.18)"
+        },
+        "gauge": {
+          "show": false,
+          "minValue": 0,
+          "maxValue": 100,
+          "thresholdMarkers": true,
+          "thresholdLabels": false
+        }
+      },
+      {
+        "title": "Content Repository",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "error": false,
+        "span": 1,
+        "editable": true,
+        "type": "singlestat",
+        "isNew": true,
+        "datasource": "graphite",
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_3.CapConnection.ContentRepository.available" }
+        ],
+        "colorBackground": true,
+        "colorValue": false,
+        "colors": [
+          "rgba(82, 82, 82, 0.9)",
+          "rgba(245, 54, 54, 0.9)",
+          "rgba(50, 172, 45, 0.97)"
+        ],
+        "nullPointMode": "connected",
+        "valueName": "current",
+        "valueFontSize": "70%",
+        "thresholds": "0,1",
+        "mappingType": 2,
+        "mappingTypes": [
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
+        ],
+        "valueMaps": [
+          { "op": "=", "value": "-1", "text": "N/A" },
+          { "op": "=", "value": "0",  "text": "not available" },
+          { "op": "=", "value": "1",  "text": "available" }
+        ],
+        "rangeMaps": [
+          { "from": "-1", "to": "null", "text": "N/A" },
+          { "from": "0" , "to": "0"   , "text": "not available" },
+          { "from": "1" , "to": "1"   , "text": "available" }
+        ]
+      },
+      {
+        "content": "",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= max_widget_width + widget_width - x %>, "h": 3 },
+        "transparent": true,
+        "mode": "html",
+        "title": "",
+        "type": "text"
+      }<%= ',' unless(size == 0) %>
+<%-
+    y += 3
+  end
+  # ----------------------------------------------------------------------------------------------
+  key = 'cae-live-4'
+  if(service_dashboard_data.keys.include?(key))
+    size -= 1
+    x = -2
+    d = service_dashboard_data[key]
+    url = d['url']
+    name = d['normalized_name']
+-%>
+      {
+        "content": "<h3><center><bold><a href=\"<%= url %>\">CAE Live 4</a></bold></center></h3>",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "links": [],
+        "mode": "html",
+        "span": 1,
+        "title": "",
+        "type": "text"
+      },
+      {
+        "title": "Service Uptime",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "error": false,
+        "span": 1,
+        "editable": true,
+        "type": "singlestat",
+        "isNew": true,
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_4.Runtime.uptime" }
+        ],
+        "links": [],
+        "datasource": "graphite",
+        "maxDataPoints": 100,
+        "interval": null,
+        "cacheTimeout": null,
+        "format": "ms",
+        "nullText": null,
+        "mappingType": 1,
+        "nullPointMode": "connected",
+        "valueName": "current",
+        "valueFontSize": "70%",
+        "thresholds": "",
+        "colorBackground": false,
+        "colorValue": false,
+        "decimals": 0,
+        "valueMaps": [
+          {
+            "value": "0",
+            "op": "=",
+            "text": "OFFLINE"
+          }
+        ]
+      },
+      {
+        "title": "used Heap Memory",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "cacheTimeout": null,
+        "colorBackground": true,
+        "colorValue": false,
+        "colors": [
+          "rgba(50, 172, 45, 0.97)",
+          "rgba(237, 129, 40, 0.89)",
+          "rgba(245, 54, 54, 0.9)"
+        ],
+        "datasource": "graphite",
+        "editable": true,
+        "error": false,
+        "format": "none",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "interval": null,
+        "isNew": true,
+        "links": [],
+        "mappingType": 1,
+        "mappingTypes": [
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "postfix": " %",
+        "postfixFontSize": "80%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "span": 1,
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": false
+        },
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_4.Memory.heap_memory.used_percent" }
+        ],
+        "thresholds": "85,95",
+        "type": "singlestat",
+        "valueFontSize": "100%",
+        "valueMaps": [
+          {
+            "op": "=",
+            "text": "N/A",
+            "value": "null"
+          }
+        ],
+        "valueName": "current"
+      },
+      {
+        "title": "CapConnection",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "cacheTimeout": null,
+        "colorBackground": true,
+        "colorValue": false,
+        "colors": [
+          "rgba(245, 54, 54, 0.9)",
+          "rgba(245, 54, 54, 0.9)",
+          "rgba(50, 172, 45, 0.97)"
+        ],
+        "datasource": "graphite",
+        "editable": true,
+        "error": false,
+        "format": "none",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "interval": null,
+        "isNew": true,
+        "links": [],
+        "mappingType": 1,
+        "mappingTypes": [
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "postfix": "",
+        "postfixFontSize": "70%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "span": 1,
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": false
+        },
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_4.CapConnection.open" }
+        ],
+        "thresholds": "0,1",
+        "type": "singlestat",
+        "valueFontSize": "80%",
+        "valueMaps": [
+          {
+            "op": "=",
+            "text": "closed",
+            "value": "0"
+          },
+          {
+            "value": "1",
+            "op": "=",
+            "text": "open"
+          },
+          {
+            "value": "-1",
+            "op": "=",
+            "text": "N/A"
+          }
+        ],
+        "valueName": "current"
+      },
+      {
+        "title": "used Blob Cache",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "error": false,
+        "span": 1,
+        "editable": true,
+        "type": "singlestat",
+        "isNew": true,
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_4.CapConnection.blob.cache.used_percent" }
+        ],
+        "links": [],
+        "datasource": "graphite",
+        "maxDataPoints": 100,
+        "interval": null,
+        "cacheTimeout": null,
+        "format": "none",
+        "prefix": "",
+        "postfix": " %",
+        "nullText": null,
+        "valueMaps": [
+          {
+            "value": "null",
+            "op": "=",
+            "text": "N/A"
+          }
+        ],
+        "mappingTypes": [
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
+        ],
+        "rangeMaps": [
+          {
+            "from": "null",
+            "to": "null",
+            "text": "N/A"
+          }
+        ],
+        "mappingType": 1,
+        "nullPointMode": "connected",
+        "valueName": "current",
+        "prefixFontSize": "50%",
+        "valueFontSize": "80%",
+        "postfixFontSize": "70%",
+        "thresholds": "90,95",
+        "colorBackground": true,
+        "colorValue": false,
+        "colors": [
+          "rgba(50, 172, 45, 0.97)",
+          "rgba(237, 129, 40, 0.89)",
+          "rgba(245, 54, 54, 0.9)"
+        ],
+        "sparkline": {
+          "show": false,
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "fillColor": "rgba(31, 118, 189, 0.18)"
+        },
+        "gauge": {
+          "show": false,
+          "minValue": 0,
+          "maxValue": 100,
+          "thresholdMarkers": true,
+          "thresholdLabels": false
+        }
+      },
+      {
+        "title": "Lightweight Sessions",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "error": false,
+        "span": 1,
+        "editable": true,
+        "type": "singlestat",
+        "isNew": true,
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_4.CapConnection.su_sessions.sessions" }
+        ],
+        "links": [],
+        "datasource": "graphite",
+        "maxDataPoints": 100,
+        "interval": null,
+        "cacheTimeout": null,
+        "format": "none",
+        "prefix": "",
+        "postfix": "",
+        "nullText": null,
+        "valueMaps": [
+          {
+            "value": "null",
+            "op": "=",
+            "text": "N/A"
+          }
+        ],
+        "mappingTypes": [
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
+        ],
+        "rangeMaps": [
+          {
+            "from": "null",
+            "to": "null",
+            "text": "N/A"
+          }
+        ],
+        "mappingType": 1,
+        "nullPointMode": "connected",
+        "valueName": "current",
+        "prefixFontSize": "50%",
+        "valueFontSize": "80%",
+        "postfixFontSize": "70%",
+        "thresholds": "",
+        "colorBackground": false,
+        "colorValue": false,
+        "colors": [
+          "rgba(50, 172, 45, 0.97)",
+          "rgba(237, 129, 40, 0.89)",
+          "rgba(245, 54, 54, 0.9)"
+        ],
+        "sparkline": {
+          "show": false,
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "fillColor": "rgba(31, 118, 189, 0.18)"
+        },
+        "gauge": {
+          "show": false,
+          "minValue": 0,
+          "maxValue": 100,
+          "thresholdMarkers": true,
+          "thresholdLabels": false
+        }
+      },
+      {
+        "title": "Content Repository",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "error": false,
+        "span": 1,
+        "editable": true,
+        "type": "singlestat",
+        "isNew": true,
+        "datasource": "graphite",
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_4.CapConnection.ContentRepository.available" }
+        ],
+        "colorBackground": true,
+        "colorValue": false,
+        "colors": [
+          "rgba(82, 82, 82, 0.9)",
+          "rgba(245, 54, 54, 0.9)",
+          "rgba(50, 172, 45, 0.97)"
+        ],
+        "nullPointMode": "connected",
+        "valueName": "current",
+        "valueFontSize": "70%",
+        "thresholds": "0,1",
+        "mappingType": 2,
+        "mappingTypes": [
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
+        ],
+        "valueMaps": [
+          { "op": "=", "value": "-1", "text": "N/A" },
+          { "op": "=", "value": "0",  "text": "not available" },
+          { "op": "=", "value": "1",  "text": "available" }
+        ],
+        "rangeMaps": [
+          { "from": "-1", "to": "null", "text": "N/A" },
+          { "from": "0" , "to": "0"   , "text": "not available" },
+          { "from": "1" , "to": "1"   , "text": "available" }
+        ]
+      },
+      {
+        "content": "",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= max_widget_width + widget_width - x %>, "h": 3 },
+        "transparent": true,
+        "mode": "html",
+        "title": "",
+        "type": "text"
+      }<%= ',' unless(size == 0) %>
+<%-
+    y += 3
+  end
+  # ----------------------------------------------------------------------------------------------
+  key = 'cae-live-5'
+  if(service_dashboard_data.keys.include?(key))
+    size -= 1
+    x = -2
+    d = service_dashboard_data[key]
+    url = d['url']
+    name = d['normalized_name']
+-%>
+      {
+        "content": "<h3><center><bold><a href=\"<%= url %>\">CAE Live 5</a></bold></center></h3>",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "links": [],
+        "mode": "html",
+        "span": 1,
+        "title": "",
+        "type": "text"
+      },
+      {
+        "title": "Service Uptime",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "error": false,
+        "span": 1,
+        "editable": true,
+        "type": "singlestat",
+        "isNew": true,
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_5.Runtime.uptime" }
+        ],
+        "links": [],
+        "datasource": "graphite",
+        "maxDataPoints": 100,
+        "interval": null,
+        "cacheTimeout": null,
+        "format": "ms",
+        "nullText": null,
+        "mappingType": 1,
+        "nullPointMode": "connected",
+        "valueName": "current",
+        "valueFontSize": "70%",
+        "thresholds": "",
+        "colorBackground": false,
+        "colorValue": false,
+        "decimals": 0,
+        "valueMaps": [
+          {
+            "value": "0",
+            "op": "=",
+            "text": "OFFLINE"
+          }
+        ]
+      },
+      {
+        "title": "used Heap Memory",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "cacheTimeout": null,
+        "colorBackground": true,
+        "colorValue": false,
+        "colors": [
+          "rgba(50, 172, 45, 0.97)",
+          "rgba(237, 129, 40, 0.89)",
+          "rgba(245, 54, 54, 0.9)"
+        ],
+        "datasource": "graphite",
+        "editable": true,
+        "error": false,
+        "format": "none",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "interval": null,
+        "isNew": true,
+        "links": [],
+        "mappingType": 1,
+        "mappingTypes": [
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "postfix": " %",
+        "postfixFontSize": "80%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "span": 1,
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": false
+        },
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_5.Memory.heap_memory.used_percent" }
+        ],
+        "thresholds": "85,95",
+        "type": "singlestat",
+        "valueFontSize": "100%",
+        "valueMaps": [
+          {
+            "op": "=",
+            "text": "N/A",
+            "value": "null"
+          }
+        ],
+        "valueName": "current"
+      },
+      {
+        "title": "CapConnection",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "cacheTimeout": null,
+        "colorBackground": true,
+        "colorValue": false,
+        "colors": [
+          "rgba(245, 54, 54, 0.9)",
+          "rgba(245, 54, 54, 0.9)",
+          "rgba(50, 172, 45, 0.97)"
+        ],
+        "datasource": "graphite",
+        "editable": true,
+        "error": false,
+        "format": "none",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "interval": null,
+        "isNew": true,
+        "links": [],
+        "mappingType": 1,
+        "mappingTypes": [
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "postfix": "",
+        "postfixFontSize": "70%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "span": 1,
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": false
+        },
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_5.CapConnection.open" }
+        ],
+        "thresholds": "0,1",
+        "type": "singlestat",
+        "valueFontSize": "80%",
+        "valueMaps": [
+          {
+            "op": "=",
+            "text": "closed",
+            "value": "0"
+          },
+          {
+            "value": "1",
+            "op": "=",
+            "text": "open"
+          },
+          {
+            "value": "-1",
+            "op": "=",
+            "text": "N/A"
+          }
+        ],
+        "valueName": "current"
+      },
+      {
+        "title": "used Blob Cache",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "error": false,
+        "span": 1,
+        "editable": true,
+        "type": "singlestat",
+        "isNew": true,
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_5.CapConnection.blob.cache.used_percent" }
+        ],
+        "links": [],
+        "datasource": "graphite",
+        "maxDataPoints": 100,
+        "interval": null,
+        "cacheTimeout": null,
+        "format": "none",
+        "prefix": "",
+        "postfix": " %",
+        "nullText": null,
+        "valueMaps": [
+          {
+            "value": "null",
+            "op": "=",
+            "text": "N/A"
+          }
+        ],
+        "mappingTypes": [
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
+        ],
+        "rangeMaps": [
+          {
+            "from": "null",
+            "to": "null",
+            "text": "N/A"
+          }
+        ],
+        "mappingType": 1,
+        "nullPointMode": "connected",
+        "valueName": "current",
+        "prefixFontSize": "50%",
+        "valueFontSize": "80%",
+        "postfixFontSize": "70%",
+        "thresholds": "90,95",
+        "colorBackground": true,
+        "colorValue": false,
+        "colors": [
+          "rgba(50, 172, 45, 0.97)",
+          "rgba(237, 129, 40, 0.89)",
+          "rgba(245, 54, 54, 0.9)"
+        ],
+        "sparkline": {
+          "show": false,
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "fillColor": "rgba(31, 118, 189, 0.18)"
+        },
+        "gauge": {
+          "show": false,
+          "minValue": 0,
+          "maxValue": 100,
+          "thresholdMarkers": true,
+          "thresholdLabels": false
+        }
+      },
+      {
+        "title": "Lightweight Sessions",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "error": false,
+        "span": 1,
+        "editable": true,
+        "type": "singlestat",
+        "isNew": true,
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_5.CapConnection.su_sessions.sessions" }
+        ],
+        "links": [],
+        "datasource": "graphite",
+        "maxDataPoints": 100,
+        "interval": null,
+        "cacheTimeout": null,
+        "format": "none",
+        "prefix": "",
+        "postfix": "",
+        "nullText": null,
+        "valueMaps": [
+          {
+            "value": "null",
+            "op": "=",
+            "text": "N/A"
+          }
+        ],
+        "mappingTypes": [
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
+        ],
+        "rangeMaps": [
+          {
+            "from": "null",
+            "to": "null",
+            "text": "N/A"
+          }
+        ],
+        "mappingType": 1,
+        "nullPointMode": "connected",
+        "valueName": "current",
+        "prefixFontSize": "50%",
+        "valueFontSize": "80%",
+        "postfixFontSize": "70%",
+        "thresholds": "",
+        "colorBackground": false,
+        "colorValue": false,
+        "colors": [
+          "rgba(50, 172, 45, 0.97)",
+          "rgba(237, 129, 40, 0.89)",
+          "rgba(245, 54, 54, 0.9)"
+        ],
+        "sparkline": {
+          "show": false,
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "fillColor": "rgba(31, 118, 189, 0.18)"
+        },
+        "gauge": {
+          "show": false,
+          "minValue": 0,
+          "maxValue": 100,
+          "thresholdMarkers": true,
+          "thresholdLabels": false
+        }
+      },
+      {
+        "title": "Content Repository",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "error": false,
+        "span": 1,
+        "editable": true,
+        "type": "singlestat",
+        "isNew": true,
+        "datasource": "graphite",
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_5.CapConnection.ContentRepository.available" }
+        ],
+        "colorBackground": true,
+        "colorValue": false,
+        "colors": [
+          "rgba(82, 82, 82, 0.9)",
+          "rgba(245, 54, 54, 0.9)",
+          "rgba(50, 172, 45, 0.97)"
+        ],
+        "nullPointMode": "connected",
+        "valueName": "current",
+        "valueFontSize": "70%",
+        "thresholds": "0,1",
+        "mappingType": 2,
+        "mappingTypes": [
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
+        ],
+        "valueMaps": [
+          { "op": "=", "value": "-1", "text": "N/A" },
+          { "op": "=", "value": "0",  "text": "not available" },
+          { "op": "=", "value": "1",  "text": "available" }
+        ],
+        "rangeMaps": [
+          { "from": "-1", "to": "null", "text": "N/A" },
+          { "from": "0" , "to": "0"   , "text": "not available" },
+          { "from": "1" , "to": "1"   , "text": "available" }
+        ]
+      },
+      {
+        "content": "",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= max_widget_width + widget_width - x %>, "h": 3 },
+        "transparent": true,
+        "mode": "html",
+        "title": "",
+        "type": "text"
+      }<%= ',' unless(size == 0) %>
+<%-
+    y += 3
+  end
+  # ----------------------------------------------------------------------------------------------
+  key = 'cae-live-6'
+  if(service_dashboard_data.keys.include?(key))
+    size -= 1
+    x = -2
+    d = service_dashboard_data[key]
+    url = d['url']
+    name = d['normalized_name']
+-%>
+      {
+        "content": "<h3><center><bold><a href=\"<%= url %>\">CAE Live 6</a></bold></center></h3>",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "links": [],
+        "mode": "html",
+        "span": 1,
+        "title": "",
+        "type": "text"
+      },
+      {
+        "title": "Service Uptime",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "error": false,
+        "span": 1,
+        "editable": true,
+        "type": "singlestat",
+        "isNew": true,
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_6.Runtime.uptime" }
+        ],
+        "links": [],
+        "datasource": "graphite",
+        "maxDataPoints": 100,
+        "interval": null,
+        "cacheTimeout": null,
+        "format": "ms",
+        "nullText": null,
+        "mappingType": 1,
+        "nullPointMode": "connected",
+        "valueName": "current",
+        "valueFontSize": "70%",
+        "thresholds": "",
+        "colorBackground": false,
+        "colorValue": false,
+        "decimals": 0,
+        "valueMaps": [
+          {
+            "value": "0",
+            "op": "=",
+            "text": "OFFLINE"
+          }
+        ]
+      },
+      {
+        "title": "used Heap Memory",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "cacheTimeout": null,
+        "colorBackground": true,
+        "colorValue": false,
+        "colors": [
+          "rgba(50, 172, 45, 0.97)",
+          "rgba(237, 129, 40, 0.89)",
+          "rgba(245, 54, 54, 0.9)"
+        ],
+        "datasource": "graphite",
+        "editable": true,
+        "error": false,
+        "format": "none",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "interval": null,
+        "isNew": true,
+        "links": [],
+        "mappingType": 1,
+        "mappingTypes": [
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "postfix": " %",
+        "postfixFontSize": "80%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "span": 1,
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": false
+        },
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_6.Memory.heap_memory.used_percent" }
+        ],
+        "thresholds": "85,95",
+        "type": "singlestat",
+        "valueFontSize": "100%",
+        "valueMaps": [
+          {
+            "op": "=",
+            "text": "N/A",
+            "value": "null"
+          }
+        ],
+        "valueName": "current"
+      },
+      {
+        "title": "CapConnection",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "cacheTimeout": null,
+        "colorBackground": true,
+        "colorValue": false,
+        "colors": [
+          "rgba(245, 54, 54, 0.9)",
+          "rgba(245, 54, 54, 0.9)",
+          "rgba(50, 172, 45, 0.97)"
+        ],
+        "datasource": "graphite",
+        "editable": true,
+        "error": false,
+        "format": "none",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "interval": null,
+        "isNew": true,
+        "links": [],
+        "mappingType": 1,
+        "mappingTypes": [
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "postfix": "",
+        "postfixFontSize": "70%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "span": 1,
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": false
+        },
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_6.CapConnection.open" }
+        ],
+        "thresholds": "0,1",
+        "type": "singlestat",
+        "valueFontSize": "80%",
+        "valueMaps": [
+          {
+            "op": "=",
+            "text": "closed",
+            "value": "0"
+          },
+          {
+            "value": "1",
+            "op": "=",
+            "text": "open"
+          },
+          {
+            "value": "-1",
+            "op": "=",
+            "text": "N/A"
+          }
+        ],
+        "valueName": "current"
+      },
+      {
+        "title": "used Blob Cache",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "error": false,
+        "span": 1,
+        "editable": true,
+        "type": "singlestat",
+        "isNew": true,
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_6.CapConnection.blob.cache.used_percent" }
+        ],
+        "links": [],
+        "datasource": "graphite",
+        "maxDataPoints": 100,
+        "interval": null,
+        "cacheTimeout": null,
+        "format": "none",
+        "prefix": "",
+        "postfix": " %",
+        "nullText": null,
+        "valueMaps": [
+          {
+            "value": "null",
+            "op": "=",
+            "text": "N/A"
+          }
+        ],
+        "mappingTypes": [
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
+        ],
+        "rangeMaps": [
+          {
+            "from": "null",
+            "to": "null",
+            "text": "N/A"
+          }
+        ],
+        "mappingType": 1,
+        "nullPointMode": "connected",
+        "valueName": "current",
+        "prefixFontSize": "50%",
+        "valueFontSize": "80%",
+        "postfixFontSize": "70%",
+        "thresholds": "90,95",
+        "colorBackground": true,
+        "colorValue": false,
+        "colors": [
+          "rgba(50, 172, 45, 0.97)",
+          "rgba(237, 129, 40, 0.89)",
+          "rgba(245, 54, 54, 0.9)"
+        ],
+        "sparkline": {
+          "show": false,
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "fillColor": "rgba(31, 118, 189, 0.18)"
+        },
+        "gauge": {
+          "show": false,
+          "minValue": 0,
+          "maxValue": 100,
+          "thresholdMarkers": true,
+          "thresholdLabels": false
+        }
+      },
+      {
+        "title": "Lightweight Sessions",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "error": false,
+        "span": 1,
+        "editable": true,
+        "type": "singlestat",
+        "isNew": true,
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_6.CapConnection.su_sessions.sessions" }
+        ],
+        "links": [],
+        "datasource": "graphite",
+        "maxDataPoints": 100,
+        "interval": null,
+        "cacheTimeout": null,
+        "format": "none",
+        "prefix": "",
+        "postfix": "",
+        "nullText": null,
+        "valueMaps": [
+          {
+            "value": "null",
+            "op": "=",
+            "text": "N/A"
+          }
+        ],
+        "mappingTypes": [
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
+        ],
+        "rangeMaps": [
+          {
+            "from": "null",
+            "to": "null",
+            "text": "N/A"
+          }
+        ],
+        "mappingType": 1,
+        "nullPointMode": "connected",
+        "valueName": "current",
+        "prefixFontSize": "50%",
+        "valueFontSize": "80%",
+        "postfixFontSize": "70%",
+        "thresholds": "",
+        "colorBackground": false,
+        "colorValue": false,
+        "colors": [
+          "rgba(50, 172, 45, 0.97)",
+          "rgba(237, 129, 40, 0.89)",
+          "rgba(245, 54, 54, 0.9)"
+        ],
+        "sparkline": {
+          "show": false,
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "fillColor": "rgba(31, 118, 189, 0.18)"
+        },
+        "gauge": {
+          "show": false,
+          "minValue": 0,
+          "maxValue": 100,
+          "thresholdMarkers": true,
+          "thresholdLabels": false
+        }
+      },
+      {
+        "title": "Content Repository",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "error": false,
+        "span": 1,
+        "editable": true,
+        "type": "singlestat",
+        "isNew": true,
+        "datasource": "graphite",
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_6.CapConnection.ContentRepository.available" }
+        ],
+        "colorBackground": true,
+        "colorValue": false,
+        "colors": [
+          "rgba(82, 82, 82, 0.9)",
+          "rgba(245, 54, 54, 0.9)",
+          "rgba(50, 172, 45, 0.97)"
+        ],
+        "nullPointMode": "connected",
+        "valueName": "current",
+        "valueFontSize": "70%",
+        "thresholds": "0,1",
+        "mappingType": 2,
+        "mappingTypes": [
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
+        ],
+        "valueMaps": [
+          { "op": "=", "value": "-1", "text": "N/A" },
+          { "op": "=", "value": "0",  "text": "not available" },
+          { "op": "=", "value": "1",  "text": "available" }
+        ],
+        "rangeMaps": [
+          { "from": "-1", "to": "null", "text": "N/A" },
+          { "from": "0" , "to": "0"   , "text": "not available" },
+          { "from": "1" , "to": "1"   , "text": "available" }
+        ]
+      },
+      {
+        "content": "",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= max_widget_width + widget_width - x %>, "h": 3 },
+        "transparent": true,
+        "mode": "html",
+        "title": "",
+        "type": "text"
+      }<%= ',' unless(size == 0) %>
+<%-
+    y += 3
+  end
+  # ----------------------------------------------------------------------------------------------
+  key = 'cae-live-7'
+  if(service_dashboard_data.keys.include?(key))
+    size -= 1
+    x = -2
+    d = service_dashboard_data[key]
+    url = d['url']
+    name = d['normalized_name']
+-%>
+      {
+        "content": "<h3><center><bold><a href=\"<%= url %>\">CAE Live 7</a></bold></center></h3>",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "links": [],
+        "mode": "html",
+        "span": 1,
+        "title": "",
+        "type": "text"
+      },
+      {
+        "title": "Service Uptime",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "error": false,
+        "span": 1,
+        "editable": true,
+        "type": "singlestat",
+        "isNew": true,
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_7.Runtime.uptime" }
+        ],
+        "links": [],
+        "datasource": "graphite",
+        "maxDataPoints": 100,
+        "interval": null,
+        "cacheTimeout": null,
+        "format": "ms",
+        "nullText": null,
+        "mappingType": 1,
+        "nullPointMode": "connected",
+        "valueName": "current",
+        "valueFontSize": "70%",
+        "thresholds": "",
+        "colorBackground": false,
+        "colorValue": false,
+        "decimals": 0,
+        "valueMaps": [
+          {
+            "value": "0",
+            "op": "=",
+            "text": "OFFLINE"
+          }
+        ]
+      },
+      {
+        "title": "used Heap Memory",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "cacheTimeout": null,
+        "colorBackground": true,
+        "colorValue": false,
+        "colors": [
+          "rgba(50, 172, 45, 0.97)",
+          "rgba(237, 129, 40, 0.89)",
+          "rgba(245, 54, 54, 0.9)"
+        ],
+        "datasource": "graphite",
+        "editable": true,
+        "error": false,
+        "format": "none",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "interval": null,
+        "isNew": true,
+        "links": [],
+        "mappingType": 1,
+        "mappingTypes": [
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "postfix": " %",
+        "postfixFontSize": "80%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "span": 1,
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": false
+        },
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_7.Memory.heap_memory.used_percent" }
+        ],
+        "thresholds": "85,95",
+        "type": "singlestat",
+        "valueFontSize": "100%",
+        "valueMaps": [
+          {
+            "op": "=",
+            "text": "N/A",
+            "value": "null"
+          }
+        ],
+        "valueName": "current"
+      },
+      {
+        "title": "CapConnection",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "cacheTimeout": null,
+        "colorBackground": true,
+        "colorValue": false,
+        "colors": [
+          "rgba(245, 54, 54, 0.9)",
+          "rgba(245, 54, 54, 0.9)",
+          "rgba(50, 172, 45, 0.97)"
+        ],
+        "datasource": "graphite",
+        "editable": true,
+        "error": false,
+        "format": "none",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "interval": null,
+        "isNew": true,
+        "links": [],
+        "mappingType": 1,
+        "mappingTypes": [
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "postfix": "",
+        "postfixFontSize": "70%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "span": 1,
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": false
+        },
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_7.CapConnection.open" }
+        ],
+        "thresholds": "0,1",
+        "type": "singlestat",
+        "valueFontSize": "80%",
+        "valueMaps": [
+          {
+            "op": "=",
+            "text": "closed",
+            "value": "0"
+          },
+          {
+            "value": "1",
+            "op": "=",
+            "text": "open"
+          },
+          {
+            "value": "-1",
+            "op": "=",
+            "text": "N/A"
+          }
+        ],
+        "valueName": "current"
+      },
+      {
+        "title": "used Blob Cache",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "error": false,
+        "span": 1,
+        "editable": true,
+        "type": "singlestat",
+        "isNew": true,
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_7.CapConnection.blob.cache.used_percent" }
+        ],
+        "links": [],
+        "datasource": "graphite",
+        "maxDataPoints": 100,
+        "interval": null,
+        "cacheTimeout": null,
+        "format": "none",
+        "prefix": "",
+        "postfix": " %",
+        "nullText": null,
+        "valueMaps": [
+          {
+            "value": "null",
+            "op": "=",
+            "text": "N/A"
+          }
+        ],
+        "mappingTypes": [
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
+        ],
+        "rangeMaps": [
+          {
+            "from": "null",
+            "to": "null",
+            "text": "N/A"
+          }
+        ],
+        "mappingType": 1,
+        "nullPointMode": "connected",
+        "valueName": "current",
+        "prefixFontSize": "50%",
+        "valueFontSize": "80%",
+        "postfixFontSize": "70%",
+        "thresholds": "90,95",
+        "colorBackground": true,
+        "colorValue": false,
+        "colors": [
+          "rgba(50, 172, 45, 0.97)",
+          "rgba(237, 129, 40, 0.89)",
+          "rgba(245, 54, 54, 0.9)"
+        ],
+        "sparkline": {
+          "show": false,
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "fillColor": "rgba(31, 118, 189, 0.18)"
+        },
+        "gauge": {
+          "show": false,
+          "minValue": 0,
+          "maxValue": 100,
+          "thresholdMarkers": true,
+          "thresholdLabels": false
+        }
+      },
+      {
+        "title": "Lightweight Sessions",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "error": false,
+        "span": 1,
+        "editable": true,
+        "type": "singlestat",
+        "isNew": true,
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_7.CapConnection.su_sessions.sessions" }
+        ],
+        "links": [],
+        "datasource": "graphite",
+        "maxDataPoints": 100,
+        "interval": null,
+        "cacheTimeout": null,
+        "format": "none",
+        "prefix": "",
+        "postfix": "",
+        "nullText": null,
+        "valueMaps": [
+          {
+            "value": "null",
+            "op": "=",
+            "text": "N/A"
+          }
+        ],
+        "mappingTypes": [
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
+        ],
+        "rangeMaps": [
+          {
+            "from": "null",
+            "to": "null",
+            "text": "N/A"
+          }
+        ],
+        "mappingType": 1,
+        "nullPointMode": "connected",
+        "valueName": "current",
+        "prefixFontSize": "50%",
+        "valueFontSize": "80%",
+        "postfixFontSize": "70%",
+        "thresholds": "",
+        "colorBackground": false,
+        "colorValue": false,
+        "colors": [
+          "rgba(50, 172, 45, 0.97)",
+          "rgba(237, 129, 40, 0.89)",
+          "rgba(245, 54, 54, 0.9)"
+        ],
+        "sparkline": {
+          "show": false,
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "fillColor": "rgba(31, 118, 189, 0.18)"
+        },
+        "gauge": {
+          "show": false,
+          "minValue": 0,
+          "maxValue": 100,
+          "thresholdMarkers": true,
+          "thresholdLabels": false
+        }
+      },
+      {
+        "title": "Content Repository",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "error": false,
+        "span": 1,
+        "editable": true,
+        "type": "singlestat",
+        "isNew": true,
+        "datasource": "graphite",
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_7.CapConnection.ContentRepository.available" }
+        ],
+        "colorBackground": true,
+        "colorValue": false,
+        "colors": [
+          "rgba(82, 82, 82, 0.9)",
+          "rgba(245, 54, 54, 0.9)",
+          "rgba(50, 172, 45, 0.97)"
+        ],
+        "nullPointMode": "connected",
+        "valueName": "current",
+        "valueFontSize": "70%",
+        "thresholds": "0,1",
+        "mappingType": 2,
+        "mappingTypes": [
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
+        ],
+        "valueMaps": [
+          { "op": "=", "value": "-1", "text": "N/A" },
+          { "op": "=", "value": "0",  "text": "not available" },
+          { "op": "=", "value": "1",  "text": "available" }
+        ],
+        "rangeMaps": [
+          { "from": "-1", "to": "null", "text": "N/A" },
+          { "from": "0" , "to": "0"   , "text": "not available" },
+          { "from": "1" , "to": "1"   , "text": "available" }
+        ]
+      },
+      {
+        "content": "",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= max_widget_width + widget_width - x %>, "h": 3 },
+        "transparent": true,
+        "mode": "html",
+        "title": "",
+        "type": "text"
+      }<%= ',' unless(size == 0) %>
+<%-
+    y += 3
+  end
+  # ----------------------------------------------------------------------------------------------
+  key = 'cae-live-8'
+  if(service_dashboard_data.keys.include?(key))
+    size -= 1
+    x = -2
+    d = service_dashboard_data[key]
+    url = d['url']
+    name = d['normalized_name']
+-%>
+      {
+        "content": "<h3><center><bold><a href=\"<%= url %>\">CAE Live 8</a></bold></center></h3>",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "links": [],
+        "mode": "html",
+        "span": 1,
+        "title": "",
+        "type": "text"
+      },
+      {
+        "title": "Service Uptime",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "error": false,
+        "span": 1,
+        "editable": true,
+        "type": "singlestat",
+        "isNew": true,
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_8.Runtime.uptime" }
+        ],
+        "links": [],
+        "datasource": "graphite",
+        "maxDataPoints": 100,
+        "interval": null,
+        "cacheTimeout": null,
+        "format": "ms",
+        "nullText": null,
+        "mappingType": 1,
+        "nullPointMode": "connected",
+        "valueName": "current",
+        "valueFontSize": "70%",
+        "thresholds": "",
+        "colorBackground": false,
+        "colorValue": false,
+        "decimals": 0,
+        "valueMaps": [
+          {
+            "value": "0",
+            "op": "=",
+            "text": "OFFLINE"
+          }
+        ]
+      },
+      {
+        "title": "used Heap Memory",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "cacheTimeout": null,
+        "colorBackground": true,
+        "colorValue": false,
+        "colors": [
+          "rgba(50, 172, 45, 0.97)",
+          "rgba(237, 129, 40, 0.89)",
+          "rgba(245, 54, 54, 0.9)"
+        ],
+        "datasource": "graphite",
+        "editable": true,
+        "error": false,
+        "format": "none",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "interval": null,
+        "isNew": true,
+        "links": [],
+        "mappingType": 1,
+        "mappingTypes": [
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "postfix": " %",
+        "postfixFontSize": "80%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "span": 1,
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": false
+        },
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_8.Memory.heap_memory.used_percent" }
+        ],
+        "thresholds": "85,95",
+        "type": "singlestat",
+        "valueFontSize": "100%",
+        "valueMaps": [
+          {
+            "op": "=",
+            "text": "N/A",
+            "value": "null"
+          }
+        ],
+        "valueName": "current"
+      },
+      {
+        "title": "CapConnection",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "cacheTimeout": null,
+        "colorBackground": true,
+        "colorValue": false,
+        "colors": [
+          "rgba(245, 54, 54, 0.9)",
+          "rgba(245, 54, 54, 0.9)",
+          "rgba(50, 172, 45, 0.97)"
+        ],
+        "datasource": "graphite",
+        "editable": true,
+        "error": false,
+        "format": "none",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "interval": null,
+        "isNew": true,
+        "links": [],
+        "mappingType": 1,
+        "mappingTypes": [
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "postfix": "",
+        "postfixFontSize": "70%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "span": 1,
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": false
+        },
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_8.CapConnection.open" }
+        ],
+        "thresholds": "0,1",
+        "type": "singlestat",
+        "valueFontSize": "80%",
+        "valueMaps": [
+          {
+            "op": "=",
+            "text": "closed",
+            "value": "0"
+          },
+          {
+            "value": "1",
+            "op": "=",
+            "text": "open"
+          },
+          {
+            "value": "-1",
+            "op": "=",
+            "text": "N/A"
+          }
+        ],
+        "valueName": "current"
+      },
+      {
+        "title": "used Blob Cache",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "error": false,
+        "span": 1,
+        "editable": true,
+        "type": "singlestat",
+        "isNew": true,
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_8.CapConnection.blob.cache.used_percent" }
+        ],
+        "links": [],
+        "datasource": "graphite",
+        "maxDataPoints": 100,
+        "interval": null,
+        "cacheTimeout": null,
+        "format": "none",
+        "prefix": "",
+        "postfix": " %",
+        "nullText": null,
+        "valueMaps": [
+          {
+            "value": "null",
+            "op": "=",
+            "text": "N/A"
+          }
+        ],
+        "mappingTypes": [
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
+        ],
+        "rangeMaps": [
+          {
+            "from": "null",
+            "to": "null",
+            "text": "N/A"
+          }
+        ],
+        "mappingType": 1,
+        "nullPointMode": "connected",
+        "valueName": "current",
+        "prefixFontSize": "50%",
+        "valueFontSize": "80%",
+        "postfixFontSize": "70%",
+        "thresholds": "90,95",
+        "colorBackground": true,
+        "colorValue": false,
+        "colors": [
+          "rgba(50, 172, 45, 0.97)",
+          "rgba(237, 129, 40, 0.89)",
+          "rgba(245, 54, 54, 0.9)"
+        ],
+        "sparkline": {
+          "show": false,
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "fillColor": "rgba(31, 118, 189, 0.18)"
+        },
+        "gauge": {
+          "show": false,
+          "minValue": 0,
+          "maxValue": 100,
+          "thresholdMarkers": true,
+          "thresholdLabels": false
+        }
+      },
+      {
+        "title": "Lightweight Sessions",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "error": false,
+        "span": 1,
+        "editable": true,
+        "type": "singlestat",
+        "isNew": true,
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_8.CapConnection.su_sessions.sessions" }
+        ],
+        "links": [],
+        "datasource": "graphite",
+        "maxDataPoints": 100,
+        "interval": null,
+        "cacheTimeout": null,
+        "format": "none",
+        "prefix": "",
+        "postfix": "",
+        "nullText": null,
+        "valueMaps": [
+          {
+            "value": "null",
+            "op": "=",
+            "text": "N/A"
+          }
+        ],
+        "mappingTypes": [
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
+        ],
+        "rangeMaps": [
+          {
+            "from": "null",
+            "to": "null",
+            "text": "N/A"
+          }
+        ],
+        "mappingType": 1,
+        "nullPointMode": "connected",
+        "valueName": "current",
+        "prefixFontSize": "50%",
+        "valueFontSize": "80%",
+        "postfixFontSize": "70%",
+        "thresholds": "",
+        "colorBackground": false,
+        "colorValue": false,
+        "colors": [
+          "rgba(50, 172, 45, 0.97)",
+          "rgba(237, 129, 40, 0.89)",
+          "rgba(245, 54, 54, 0.9)"
+        ],
+        "sparkline": {
+          "show": false,
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "fillColor": "rgba(31, 118, 189, 0.18)"
+        },
+        "gauge": {
+          "show": false,
+          "minValue": 0,
+          "maxValue": 100,
+          "thresholdMarkers": true,
+          "thresholdLabels": false
+        }
+      },
+      {
+        "title": "Content Repository",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "error": false,
+        "span": 1,
+        "editable": true,
+        "type": "singlestat",
+        "isNew": true,
+        "datasource": "graphite",
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_8.CapConnection.ContentRepository.available" }
+        ],
+        "colorBackground": true,
+        "colorValue": false,
+        "colors": [
+          "rgba(82, 82, 82, 0.9)",
+          "rgba(245, 54, 54, 0.9)",
+          "rgba(50, 172, 45, 0.97)"
+        ],
+        "nullPointMode": "connected",
+        "valueName": "current",
+        "valueFontSize": "70%",
+        "thresholds": "0,1",
+        "mappingType": 2,
+        "mappingTypes": [
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
+        ],
+        "valueMaps": [
+          { "op": "=", "value": "-1", "text": "N/A" },
+          { "op": "=", "value": "0",  "text": "not available" },
+          { "op": "=", "value": "1",  "text": "available" }
+        ],
+        "rangeMaps": [
+          { "from": "-1", "to": "null", "text": "N/A" },
+          { "from": "0" , "to": "0"   , "text": "not available" },
+          { "from": "1" , "to": "1"   , "text": "available" }
+        ]
+      },
+      {
+        "content": "",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= max_widget_width + widget_width - x %>, "h": 3 },
+        "transparent": true,
+        "mode": "html",
+        "title": "",
+        "type": "text"
+      }<%= ',' unless(size == 0) %>
+<%-
+    y += 3
+  end
+  # ----------------------------------------------------------------------------------------------
+  key = 'cae-live-9'
+  if(service_dashboard_data.keys.include?(key))
+    size -= 1
+    x = -2
+    d = service_dashboard_data[key]
+    url = d['url']
+    name = d['normalized_name']
+-%>
+      {
+        "content": "<h3><center><bold><a href=\"<%= url %>\">CAE Live 9</a></bold></center></h3>",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "links": [],
+        "mode": "html",
+        "span": 1,
+        "title": "",
+        "type": "text"
+      },
+      {
+        "title": "Service Uptime",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "error": false,
+        "span": 1,
+        "editable": true,
+        "type": "singlestat",
+        "isNew": true,
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_9.Runtime.uptime" }
+        ],
+        "links": [],
+        "datasource": "graphite",
+        "maxDataPoints": 100,
+        "interval": null,
+        "cacheTimeout": null,
+        "format": "ms",
+        "nullText": null,
+        "mappingType": 1,
+        "nullPointMode": "connected",
+        "valueName": "current",
+        "valueFontSize": "70%",
+        "thresholds": "",
+        "colorBackground": false,
+        "colorValue": false,
+        "decimals": 0,
+        "valueMaps": [
+          {
+            "value": "0",
+            "op": "=",
+            "text": "OFFLINE"
+          }
+        ]
+      },
+      {
+        "title": "used Heap Memory",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "cacheTimeout": null,
+        "colorBackground": true,
+        "colorValue": false,
+        "colors": [
+          "rgba(50, 172, 45, 0.97)",
+          "rgba(237, 129, 40, 0.89)",
+          "rgba(245, 54, 54, 0.9)"
+        ],
+        "datasource": "graphite",
+        "editable": true,
+        "error": false,
+        "format": "none",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "interval": null,
+        "isNew": true,
+        "links": [],
+        "mappingType": 1,
+        "mappingTypes": [
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "postfix": " %",
+        "postfixFontSize": "80%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "span": 1,
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": false
+        },
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_9.Memory.heap_memory.used_percent" }
+        ],
+        "thresholds": "85,95",
+        "type": "singlestat",
+        "valueFontSize": "100%",
+        "valueMaps": [
+          {
+            "op": "=",
+            "text": "N/A",
+            "value": "null"
+          }
+        ],
+        "valueName": "current"
+      },
+      {
+        "title": "CapConnection",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "cacheTimeout": null,
+        "colorBackground": true,
+        "colorValue": false,
+        "colors": [
+          "rgba(245, 54, 54, 0.9)",
+          "rgba(245, 54, 54, 0.9)",
+          "rgba(50, 172, 45, 0.97)"
+        ],
+        "datasource": "graphite",
+        "editable": true,
+        "error": false,
+        "format": "none",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "interval": null,
+        "isNew": true,
+        "links": [],
+        "mappingType": 1,
+        "mappingTypes": [
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "postfix": "",
+        "postfixFontSize": "70%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "span": 1,
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": false
+        },
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_9.CapConnection.open" }
+        ],
+        "thresholds": "0,1",
+        "type": "singlestat",
+        "valueFontSize": "80%",
+        "valueMaps": [
+          {
+            "op": "=",
+            "text": "closed",
+            "value": "0"
+          },
+          {
+            "value": "1",
+            "op": "=",
+            "text": "open"
+          },
+          {
+            "value": "-1",
+            "op": "=",
+            "text": "N/A"
+          }
+        ],
+        "valueName": "current"
+      },
+      {
+        "title": "used Blob Cache",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "error": false,
+        "span": 1,
+        "editable": true,
+        "type": "singlestat",
+        "isNew": true,
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_9.CapConnection.blob.cache.used_percent" }
+        ],
+        "links": [],
+        "datasource": "graphite",
+        "maxDataPoints": 100,
+        "interval": null,
+        "cacheTimeout": null,
+        "format": "none",
+        "prefix": "",
+        "postfix": " %",
+        "nullText": null,
+        "valueMaps": [
+          {
+            "value": "null",
+            "op": "=",
+            "text": "N/A"
+          }
+        ],
+        "mappingTypes": [
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
+        ],
+        "rangeMaps": [
+          {
+            "from": "null",
+            "to": "null",
+            "text": "N/A"
+          }
+        ],
+        "mappingType": 1,
+        "nullPointMode": "connected",
+        "valueName": "current",
+        "prefixFontSize": "50%",
+        "valueFontSize": "80%",
+        "postfixFontSize": "70%",
+        "thresholds": "90,95",
+        "colorBackground": true,
+        "colorValue": false,
+        "colors": [
+          "rgba(50, 172, 45, 0.97)",
+          "rgba(237, 129, 40, 0.89)",
+          "rgba(245, 54, 54, 0.9)"
+        ],
+        "sparkline": {
+          "show": false,
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "fillColor": "rgba(31, 118, 189, 0.18)"
+        },
+        "gauge": {
+          "show": false,
+          "minValue": 0,
+          "maxValue": 100,
+          "thresholdMarkers": true,
+          "thresholdLabels": false
+        }
+      },
+      {
+        "title": "Lightweight Sessions",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "error": false,
+        "span": 1,
+        "editable": true,
+        "type": "singlestat",
+        "isNew": true,
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_9.CapConnection.su_sessions.sessions" }
+        ],
+        "links": [],
+        "datasource": "graphite",
+        "maxDataPoints": 100,
+        "interval": null,
+        "cacheTimeout": null,
+        "format": "none",
+        "prefix": "",
+        "postfix": "",
+        "nullText": null,
+        "valueMaps": [
+          {
+            "value": "null",
+            "op": "=",
+            "text": "N/A"
+          }
+        ],
+        "mappingTypes": [
+          { "value": 1, "name": "value to text" },
+          { "value": 2, "name": "range to text" }
+        ],
+        "rangeMaps": [
+          {
+            "from": "null",
+            "to": "null",
+            "text": "N/A"
+          }
+        ],
+        "mappingType": 1,
+        "nullPointMode": "connected",
+        "valueName": "current",
+        "prefixFontSize": "50%",
+        "valueFontSize": "80%",
+        "postfixFontSize": "70%",
+        "thresholds": "",
+        "colorBackground": false,
+        "colorValue": false,
+        "colors": [
+          "rgba(50, 172, 45, 0.97)",
+          "rgba(237, 129, 40, 0.89)",
+          "rgba(245, 54, 54, 0.9)"
+        ],
+        "sparkline": {
+          "show": false,
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "fillColor": "rgba(31, 118, 189, 0.18)"
+        },
+        "gauge": {
+          "show": false,
+          "minValue": 0,
+          "maxValue": 100,
+          "thresholdMarkers": true,
+          "thresholdLabels": false
+        }
+      },
+      {
+        "title": "Content Repository",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "error": false,
+        "span": 1,
+        "editable": true,
+        "type": "singlestat",
+        "isNew": true,
+        "datasource": "graphite",
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_9.CapConnection.ContentRepository.available" }
         ],
         "colorBackground": true,
         "colorValue": false,
