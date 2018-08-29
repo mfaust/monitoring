@@ -147,17 +147,17 @@
               {
                 "textEditor": false,
                 "refId": "A",
-                "target": "alias(aliasSub(carbon-writer.$host.CAE_LIVE.CapConnection.heap.cache.size, '(.*)-', ''), 'max')"
+                "target": "alias(aliasSub(carbon-writer.$host.<%= normalized_name %>.CapConnection.heap.cache.size, '(.*)-', ''), 'max')"
               },
               {
-                "target": "alias(aliasSub(carbon-writer.$host.CAE_LIVE.CapConnection.heap.cache.used, '(.*)-', ''), 'used')",
+                "target": "alias(aliasSub(carbon-writer.$host.<%= normalized_name %>.CapConnection.heap.cache.used, '(.*)-', ''), 'used')",
                 "textEditor": false,
                 "refId": "B"
               },
               {
                 "textEditor": false,
                 "refId": "C",
-                "target": "alias(carbon-writer.$host.CAE_LIVE.CapConnection.heap.cache.used_percent, 'percent')"
+                "target": "alias(carbon-writer.$host.<%= normalized_name %>.CapConnection.heap.cache.used_percent, 'percent')"
               }
             ],
             "span": 12,
@@ -205,15 +205,15 @@
               {
                 "textEditor": false,
                 "refId": "A",
-                "target": "alias(carbon-writer.$host.CAE_LIVE.CapConnection.blob.cache.size, 'max')"
+                "target": "alias(carbon-writer.$host.<%= normalized_name %>.CapConnection.blob.cache.size, 'max')"
               },
               {
-                "target": "alias(carbon-writer.$host.CAE_LIVE.CapConnection.blob.cache.used, 'used')",
+                "target": "alias(carbon-writer.$host.<%= normalized_name %>.CapConnection.blob.cache.used, 'used')",
                 "textEditor": false,
                 "refId": "B"
               },
               {
-                "target": "alias(carbon-writer.$host.CAE_LIVE.CapConnection.blob.cache.used_percent, 'percent')",
+                "target": "alias(carbon-writer.$host.<%= normalized_name %>.CapConnection.blob.cache.used_percent, 'percent')",
                 "refId": "C",
                 "textEditor": false
               }
@@ -343,7 +343,7 @@
             "span": 12,
             "targets": [
               {
-                "target": "aliasByMetric(aliasSub(carbon-writer.$host.CAE_LIVE.CapConnection.su_sessions.sessions, '(.*)-', ''))",
+                "target": "aliasByMetric(aliasSub(carbon-writer.$host.<%= normalized_name %>.CapConnection.su_sessions.sessions, '(.*)-', ''))",
                 "refId": "A",
                 "textEditor": false
               }
@@ -431,7 +431,7 @@
               {
                 "textEditor": false,
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(carbon-writer.$host.CAE_LIVE.DataViewFactory.*, '(.*)-', ''))"
+                "target": "aliasByMetric(aliasSub(carbon-writer.$host.<%= normalized_name %>.DataViewFactory.*, '(.*)-', ''))"
               }
             ],
             "isNew": true,
