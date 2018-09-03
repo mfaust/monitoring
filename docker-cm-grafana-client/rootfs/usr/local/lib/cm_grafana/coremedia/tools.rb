@@ -112,8 +112,7 @@ class CMGrafana
             service
         end
 
-        service.gsub!('iew','') if( service =~ /^cae-preview/ )
-
+        service = service.gsub('iew','') if( service =~ /^cae-preview/ )
         service.tr('-', '_').upcase
       end
 
