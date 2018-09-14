@@ -353,15 +353,22 @@ class CMGrafana
         # like Memory-Pools, Tomcat or simple Grafana-Templates
         named_template_array = []
 
-        # MemoryPools for many Services
-        #
-        named_template_array.push( 'memory-pool' )
-        service_dashboards_result['memory-pool'] = { 'normalized_name' => 'MEMORY_POOL', 'url' => nil, 'uid' => nil }
+        # when tomcat services will be added, then we need the next templates too
+        tomcat_services  = ['cae-live-1', 'cae-live-2', 'cae-live-3', 'cae-live-4', 'cae-live-5', 'cae-live-6', 'cae-live-7', 'cae-live-8', 'cae-live-9' ]
+        tomcat_services += ['cae-preview', 'caefeeder-live', 'caefeeder-preview', 'content-feeder', 'content-management-server', 'elastic-worker' ]
+        tomcat_services += ['master-live-server', 'replication-live-server', 'sitemanager', 'solr-master', 'studio', 'user-changes', 'workflow-server']
 
-        # unique Tomcat Dashboard
-        #
-        named_template_array.push( 'tomcat' )
-        service_dashboards_result['tomcat'] = { 'normalized_name' => 'TOMCAT', 'url' => nil, 'uid' => nil }
+        if( (tomcat_services & services).count != 0 )
+          # MemoryPools for many Services
+          #
+          named_template_array.push( 'memory-pool' )
+          service_dashboards_result['memory-pool'] = { 'normalized_name' => 'MEMORY_POOL', 'url' => nil, 'uid' => nil }
+
+          # unique Tomcat Dashboard
+          #
+          named_template_array.push( 'tomcat' )
+          service_dashboards_result['tomcat'] = { 'normalized_name' => 'TOMCAT', 'url' => nil, 'uid' => nil }
+        end
 
         # CAE Caches
         #
