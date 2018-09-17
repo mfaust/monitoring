@@ -4,13 +4,13 @@
 
 This Parts could be support the Operating Team with Information about outages or problems.
 
- - [BLOB Cache](blob-cache.html)
- - [UAPI Cache](uapi-cache.html)
- - [CAP Connection](cap-connection.html)
- - [Runlevel](runlevel.html)
- - [IOR](ior.html)
- - [CAE Feeder](cae-feeder.html)
- - [Content Feeder](content-feeder.html)
- - [License](license.html)
- - [Heap Memory](heap-memory.html)
- - [Operating System](operating-system.html)
+ - [BLOB Cache](blob-cache.md)
+ - [UAPI Cache](uapi-cache.md)
+ - [CAP Connection](cap-connection.md)
+ - [Runlevel](runlevel.md)
+ - [IOR](ior.md)
+ - [CAE Feeder](cae-feeder.md)
+ - [Content Feeder](content-feeder.md)
+ - [License](license.md)
+ - [Heap Memory](heap-memory.md)
+ - [Operating System](operating-system.md)

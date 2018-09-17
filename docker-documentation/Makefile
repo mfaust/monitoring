@@ -58,6 +58,7 @@ exec:
 
 start:
 	docker run \
+		--rm \
 		--detach \
 		--name $(NAME)-$(INSTANCE) \
 		$(PORTS) \

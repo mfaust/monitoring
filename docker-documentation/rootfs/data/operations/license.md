@@ -39,7 +39,9 @@ grep "cap.server.license" $logfile
 Sollten die CoreMedia Tools installiert worden sein, kann man auch hierüber die Lizendaten ausgeben:
 
 ```bash
-${RLS_TOOLS_INSTALL_DIRECTORY}/bin/cm license -u admin
+/opt/coremedia/content-management-server-tools/bin/cm license -u admin
+/opt/coremedia/master-live-server-tools/bin/cm license -u admin
+/opt/coremedia/replication-live-server-tools/bin/cm license -u admin
 ```
 
 Oder über den lokalen Check:

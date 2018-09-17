@@ -1,8 +1,4 @@
 
-FROM bodsch/docker-markdownd
+FROM bodsch/docker-algernon:1.11.0
 
-EXPOSE 8080
-
-COPY rootfs/ /
-
-WORKDIR /data
+COPY rootfs/data /data/localhost
