@@ -61,7 +61,7 @@ class CMGrafana
         icinga_identifier         = graphite_identifier.gsub('.','_')
         short_hostname            = @short_hostname
         grafana_title             = format('%s - %s', slug, description )
-        uuid                      = format('%s-%s', @dashboard_uuid, service_name )
+        uuid                      = format('%s-%s', @dashboard_uuid, normalized_name ).downcase
 
         ## -------------------------------------------------------
         logger.debug( sprintf( '  service_name         \'%s\'', service_name ) )
@@ -175,11 +175,11 @@ class CMGrafana
         begin
           response         = create_dashboard( title: title, dashboard: json, folderId: @folder_uuid )
         rescue => error
-          logger.error("")
+          logger.error("------------------------------------------------")
           logger.error(error)
-          logger.error("")
+          logger.error("------------------------------------------------")
           logger.debug(JSON.pretty_generate(json))
-          logger.error("")
+          logger.error("------------------------------------------------")
         end
 
         response_status  = response.dig('status').to_i

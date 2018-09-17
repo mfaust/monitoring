@@ -102,5 +102,10 @@
 1810
 
 - remove postgres support in data-collector
-- support multiple installations of CAE(Live) on one host
+- enhanced support of moebius' multi-node-deployment
+  - import only the really needed Grafana templates
+  - support multiple installations of CAE(Live) on one host
+- better errorhandling at importing of grafana dashboards
+
+
 

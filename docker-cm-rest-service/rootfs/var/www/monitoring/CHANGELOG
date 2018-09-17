@@ -54,10 +54,13 @@
   },
   "1810": {
     "version": "1810",
-    "date": "29.08.2018",
+    "date": "17.09.2018",
     "changes": [
       "remove postgres support in data collector",
-      "support multiple installations of delivery CAEs on one host"
+      "enhanced support of moebius' multi-node-deployment",
+      "import only the really needed Grafana templates",
+      "support multiple installations of CAE(Live) on one host",
+      "better errorhandling at importing of grafana dashboards"
     ]
   }
 }

@@ -239,28 +239,9 @@ class CMGrafana
 
         intersect       = content_servers & services
 
-#         logger.debug("intersect: #{intersect}")
-
         content_srv_data = {}
 
         intersect.each do |service|
-
-#          begin
-#            (1..3).each { |y|
-#              logger.debug(format('wait for measurements data for service \'%s\' ... %d', service, y))
-#              r = @mbean.beanAvailable?( fqdn, service, 'Server', 'LicenseValidUntilHard')
-#
-#              logger.debug("debug: #{r} (#{r.class})")
-#
-#              if( r.nil? || r.is_a?(FalseClass) )
-#                sleep(2)
-#              else
-#                break
-#              end
-#            }
-#          rescue => error
-#            logger.error( error )
-#          end
 
           logger.debug( format( 'Search License Information for Service %s', service ) )
 
@@ -372,12 +353,14 @@ class CMGrafana
 
         # CAE Caches
         #
-        if( services.include?( 'cae-preview' ) || services.include?( 'cae-live' ) )
+        tomcat_services  = ['cae-live-1', 'cae-live-2', 'cae-live-3', 'cae-live-4', 'cae-live-5', 'cae-live-6', 'cae-live-7', 'cae-live-8', 'cae-live-9' ]
+        tomcat_services += ['cae-preview' ]
+
+        if( (tomcat_services & services).count != 0 )
           named_template_array.push( 'cache-classes' )
           service_dashboards_result['cache-classes'] = { 'normalized_name' => 'CACHE_CLASSES', 'url' => nil, 'uid' => nil }
 
           sleep 4
-#          if( @mbean.beanAvailable?( fqdn, service, 'Server', 'LicenseValidUntilHard') )
           ecommerce = @mbean.beanAvailable?( fqdn, 'cae-preview', 'CacheClassesECommerceAvailability')
 
           logger.debug( "ecommerce available: #{ecommerce} (#{ecommerce.class})")
@@ -791,6 +774,9 @@ class CMGrafana
         response         = create_dashboard( dashboard: template, folderId: @folder_uuid )
         response_status  = response.dig('status').to_i
         response_message = response.dig('message')
+
+        #logger.debug(response_message)
+        # add a star for 'admin' to the overview dashboard ?
 
         logger.warn( format('template can\'t be add: [%s] %s', response_status, response_message ) ) if( response_status != 200 )
 
