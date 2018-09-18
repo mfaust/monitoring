@@ -4,16 +4,33 @@
 
 Die Beschreibung der JMX Beans finden Sie in der Dokumentation (siehe entsprechende Links) oder mit dem CoreMedia Tool `jmxdump`.
 
-Beispiel
+### Beispiele
+
 ```bash
-HOSTNAME=monitoring-16-01.coremedia.vm
+HOSTNAME=127.0.0.1
 
 cm \
   jmxdump \
-  --url service:jmx:rmi://${HOSTNAME}:40198/jndi/rmi://${HOSTNAME}:40199/jmxrmi \
+  --url service:jmx:rmi:///jndi/rmi://${HOSTNAME}:${PORT}/jmxrmi \
   -b com.coremedia:*type=Server* \
   -v
 ```
+
+```bash
+cm \
+  jmxdump \
+  --mbean 'com.coremedia:application=coremedia,type=Server#RepositorySequenceNumber' \
+  --url service:jmx:rmi:///jndi/rmi://${HOSTNAME}:${PORT}/jmxrmi \
+  com.coremedia:application=coremedia,type=Server
+```
+
+```bash
+cm \
+  jmxdump \
+  --mbean 'com.coremedia:application=coremedia,type=Replicator' \
+  --url service:jmx:rmi:///jndi/rmi://${HOSTNAME}:${PORT}/jmxrmi
+```
+
 
 Alle verwendeten JMX Beans werden in der Konfigurationsdatei `cm-application.yml` aufgeführt (siehe auch unter [Konfiguration](./konfiguration.md))
 
@@ -26,6 +43,7 @@ Alle verwendeten JMX Beans werden in der Konfigurationsdatei `cm-application.yml
 | :----------------------------- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | [CapConnection](./jmx/capconnection.md)                  |    |    |    | x  | x  | x | x | x |   |   | x |
 | [Server](./jmx/content-servers.md#Server)                         | x  | x  | x  | x  |    |   |   |   |   |   |   |
+| [Publisher](./jmx/content-servers.md#Publisher)                         | x |    |    |    |    |   |   |   |   |  |   |
 | Store ([Connection-](./jmx/content-servers.md#ConnectionPool), [QueryPool](./jmx/content-servers.md#QueryPool)) | x  | x  | x  |    |    |   |   |   |   |   |   |
 | Statistics                     | x  | x  | x  |    |    |   |   |   |   |   |   |
 | WFS Statistics                 |    |    |    | x  |    |   |   |   |   |   |   |

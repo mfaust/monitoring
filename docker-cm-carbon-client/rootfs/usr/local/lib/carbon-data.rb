@@ -103,7 +103,7 @@ module CarbonData
 
     def create_graphite_output( key, values )
 
-#       logger.debug("create_graphite_output( #{key}, values )")
+      logger.debug("create_graphite_output( #{key}, values )")
 
       graphite_output = []
 
@@ -146,6 +146,9 @@ module CarbonData
         graphite_output.push( contentserver_statistics_job_result( values ) )
       when 'StatisticsResourceCache'
         graphite_output.push( contentserver_statistics_resource_cache( values ) )
+        # special content-management-server / publisher
+      when 'Publisher'
+        graphite_output.push( contentserver_publisher( values ) )
 
         # Clients
       when 'CapConnection'

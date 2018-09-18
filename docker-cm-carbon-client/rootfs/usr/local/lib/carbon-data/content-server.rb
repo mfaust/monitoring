@@ -268,6 +268,74 @@ module CarbonData
     end
 
 
+    def contentserver_publisher( data = {} )
+
+      result    = []
+      mbean     = 'Publisher'
+      value     = data.dig('value')
+
+      connected                   = 55 # boolean: 10 == connected / 55 == N/A / 90 == not connected
+      queue_size                  = 0
+      publications                = 0
+      publications_preview        = 0
+      failed_publications         = 0
+      failed_publications_preview = 0
+      last_publications_result    = 55 # string: 10 == success / 55 == N/A / 90 == failure
+
+      if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil )
+
+        value = value.values.first
+
+#         logger.debug(JSON.pretty_generate(value))
+
+        connected                   = value.dig('Connected')           || false
+        queue_size                  = value.dig('QueueSize')           || 0
+        publications                = value.dig('PublCount')           || 0
+        publications_preview        = value.dig('PublPrevCount')       || 0
+        failed_publications         = value.dig('FailedPublCount')     || 0
+        failed_publications_preview = value.dig('FailedPublPrevCount') || 0
+        last_publications_result    = value.dig('LastPublResult')
+
+#         logger.debug("connected: #{connected} (#{connected.class})")
+
+        connected                   = 90   if(connected.is_a?(FalseClass))  # false
+        connected                   = 10   if(connected.is_a?(TrueClass))   # true
+        last_publications_result    = 55   if(last_publications_result.nil?)
+        last_publications_result    = 10   if(last_publications_result == 'success') # true
+        last_publications_result    = 90   if(last_publications_result == 'failure') # false
+
+#         logger.debug("connected: #{connected} (#{connected.class})")
+      end
+
+      result << {
+        key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'connected' ),
+        value: connected
+      } << {
+        key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'queue_size' ),
+        value: queue_size
+      } << {
+        key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'publications' ),
+        value: publications_preview
+      } << {
+        key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'publications_preview' ),
+        value: publications_preview
+      } << {
+        key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'failed_publications' ),
+        value: failed_publications
+      } << {
+        key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'failed_publications_preview' ),
+        value: failed_publications_preview
+      } << {
+        key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'last_publications_result' ),
+        value: last_publications_result
+      }
+
+#       logger.debug(JSON.pretty_generate(result))
+
+      result
+    end
+
+
     def contentserver_statistics_job_result( data = {} )
 
       result    = []

@@ -189,10 +189,11 @@ jolokia:
         attribute: Updated,Evaluated,Evicted,Removed,AverageEvaluationTime,Utilization,Capacity,Level,Inserted,MissRate
 
     content-management-server:
-      description: Content Management Server
+      description: Content Management Server - Publisher
       metrics:
-      - description: Statistics about Publisher
-        mbean: com.coremedia:module=Publisher,pool=PublisherMethods,type=Statistics,application=*
+      - description: Publisher target
+        mbean: com.coremedia:type=Publisher,target=*,application=coremedia
+        attribute: Connected,IorUrl,QueueSize,PublCount,PublPrevCount,FailedPublCount,FailedPublPrevCount,LastPublTime,LastPublSize,LastPublResult
 
     master-live-server:
       description: Master Live Server

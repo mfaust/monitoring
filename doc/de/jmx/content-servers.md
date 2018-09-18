@@ -72,3 +72,21 @@ timeouts.
 - `WaitingQueries` (the number of queries in the queue)
 - `MaxQueries` (the maximum number of allowed queries)
 
+## <a name="Publisher"></a>Publisher
+
+The publisher component managing configurations and statistics related to publishing content.
+All statistics are repeatedly reset after a configurable time period typically 5 minutes.
+That means that counters cannot be expected to be rising monotonously.
+
+`com.coremedia:type=Publisher,target=*,application=coremedia`
+
+- `Connected` (returns whether we have currently an open and usable remote connection for the named publication target.)
+- `IorUrl`
+- `QueueSize` (the number of publication and publication preview operations that are queued for execution, but not yet started)
+- `PublCount` (the number of publications since the last statistics reset)
+- `PublPrevCount` (the number of publication previews since the last statistics reset)
+- `FailedPublCount` (the number of failed publications since the last statistics reset)
+- `FailedPublPrevCount` (the number for failed publication previews since the last statistics reset)
+- `LastPublTime` (the time needed for executing the last completed publication excluding wait time, in milliseconds)
+- `LastPublSize` (the size of the initial publication set of the last publication)
+- `LastPublResult` (either 'success' or 'failure' depending on whether the last completed publication was successful)

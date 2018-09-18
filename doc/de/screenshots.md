@@ -2,12 +2,8 @@ Screenshots
 ===========
 
 
-
 ## Landingpage
 ![landingpage](../assets/monitoring-toolbox.gif)
-
-## Grafana
-![Overview](../assets/grafana.gif)
 
 ## Icinga2
 ![icinga2](../assets/icinga2.gif)
@@ -15,12 +11,15 @@ Screenshots
 ## Dashboard
 ![dashboard](../assets/monitoring_3.png)
 
-## Gruppiertes Dashboard
+## Grafana
+![Overview](../assets/grafana.gif)
+
+### Gruppiertes Dashboards in Grafana
 ![grouped-dashboard](../assets/overview_grouped_by.png)
 
-## Grafana Time Ranges
+### Grafana Time Ranges
 ![Time Ranges](../assets/21-time-ranges.png)
 
-## Grafana Annotations
+### Grafana Annotations
 ![Annotation](../assets/22-annotations.png)
 
