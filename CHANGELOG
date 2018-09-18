@@ -106,6 +106,7 @@
   - import only the really needed Grafana templates
   - support multiple installations of CAE(Live) on one host
 - better errorhandling at importing of grafana dashboards
+- support for the Publisher mbean (used in the content-management-server application)
 
 
 
