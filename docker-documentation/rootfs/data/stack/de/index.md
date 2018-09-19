@@ -6,10 +6,10 @@ Das Monitoring arbeitet passiv und es werden - bis auf kleinere Ausnahmen - kein
 
 Aktuell sind folgende Services im Monitoring integriert:
 
-  - Langzeitgraphen mittels Grafana
-  - Alarmierungen mit Icinga2
-  - einfaches Dashboard mit Dashing
-  - Demonstration einer Bereitschaftsdokumentation mit Integration in das Webinterface von Icinga2
+  - [Langzeitgraphen](./screenshots/longterm-graph.md) mittels Grafana
+  - [Alarmierungen](./screenshots/alarming.md) mit Icinga2
+  - einfaches [Dashboard](./screenshots/dashing.md) mit Dashing
+  - Demonstration einer Bereitschafts[dokumentation](./screenshots/included_documentation.md) mit Integration in das Webinterface von Icinga2
 
 Alle im weiteren Verlauf erwähnten Meßpunkte werden durch eine *Service-Discovery* detektiert und dem Monitoring zur Verfügung gestellt.
 

@@ -1,4 +1,4 @@
-# Standard Tomcat
+# JMX - Standard Tomcat
 
 
 - `java.lang:type=Memory`
