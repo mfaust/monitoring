@@ -351,6 +351,89 @@
         ]
       },
       {
+        "title": "Publisher Queue Size",
+        "height": "150px",
+        "panels": [
+          {
+            "id": <%= id += 1 %>,
+            "fill": 3,
+            "isNew": true,
+            "nullPointMode": "connected",
+            "steppedLine": false,
+            "type": "graph",
+            "pointradius": 5,
+            "timeFrom": null,
+            "lines": true,
+            "editable": true,
+            "renderer": "flot",
+            "points": false,
+            "yaxes": [
+              {
+                "min": 0,
+                "format": "none",
+                "logBase": 1,
+                "show": true,
+                "label": null,
+                "max": null
+              },
+              {
+                "label": null,
+                "max": null,
+                "show": false,
+                "logBase": 1,
+                "format": "short",
+                "min": null
+              }
+            ],
+            "linewidth": 1,
+            "targets": [
+              {
+                "refId": "A",
+                "textEditor": false,
+                "target": "alias(carbon-writer.$host.CMS.Publisher.queue_size, 'Queue Size')"
+              }
+            ],
+            "bars": false,
+            "title": "Publisher Queue Size",
+            "seriesOverrides": [],
+            "datasource": "graphite",
+            "percentage": false,
+            "span": 12,
+            "stack": false,
+            "tooltip": {
+              "sort": 0,
+              "value_type": "cumulative",
+              "msResolution": false,
+              "shared": true
+            },
+            "links": [],
+            "grid": {
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2Color": "rgba(234, 112, 112, 0.22)",
+              "threshold1": null,
+              "threshold2": null
+            },
+            "timeShift": null,
+            "legend": {
+              "min": false,
+              "avg": false,
+              "current": true,
+              "total": false,
+              "rightSide": true,
+              "values": true,
+              "show": true,
+              "alignAsTable": true,
+              "max": false
+            },
+            "xaxis": {
+              "show": true
+            },
+            "aliasColors": {},
+            "error": false
+          }
+        ]
+      },
+      {
         "title": "Server Resource Cache",
         "height": "200px",
         "panels": [

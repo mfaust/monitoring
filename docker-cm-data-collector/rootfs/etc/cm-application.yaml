@@ -191,9 +191,11 @@ jolokia:
     content-management-server:
       description: Content Management Server - Publisher
       metrics:
+#      - description: Publisher summary
+#        mbean: com.coremedia:type=Publisher,application=*
       - description: Publisher target
-        mbean: com.coremedia:type=Publisher,target=*,application=coremedia
-        attribute: Connected,IorUrl,QueueSize,PublCount,PublPrevCount,FailedPublCount,FailedPublPrevCount,LastPublTime,LastPublSize,LastPublResult
+        mbean: com.coremedia:type=Publisher,target=*,application=*
+
 
     master-live-server:
       description: Master Live Server

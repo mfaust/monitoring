@@ -22,4 +22,3 @@ Screenshots
 
 ### Grafana Annotations
 ![Annotation](../assets/22-annotations.png)
-

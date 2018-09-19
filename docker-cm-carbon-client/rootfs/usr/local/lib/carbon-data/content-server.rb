@@ -274,6 +274,8 @@ module CarbonData
       mbean     = 'Publisher'
       value     = data.dig('value')
 
+      name                        = nil
+
       connected                   = 55 # boolean: 10 == connected / 55 == N/A / 90 == not connected
       queue_size                  = 0
       publications                = 0
@@ -281,13 +283,18 @@ module CarbonData
       failed_publications         = 0
       failed_publications_preview = 0
       last_publications_result    = 55 # string: 10 == success / 55 == N/A / 90 == failure
+      last_publications_date      = 0
+      last_publications_size      = 0
+      last_publications_time      = 0
+      last_publications_wait_time = 0
 
       if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil )
 
-        value = value.values.first
-
 #         logger.debug(JSON.pretty_generate(value))
 
+        value = value.values.first
+
+        # name                        = value.dig('Name')
         connected                   = value.dig('Connected')           || false
         queue_size                  = value.dig('QueueSize')           || 0
         publications                = value.dig('PublCount')           || 0
@@ -295,40 +302,91 @@ module CarbonData
         failed_publications         = value.dig('FailedPublCount')     || 0
         failed_publications_preview = value.dig('FailedPublPrevCount') || 0
         last_publications_result    = value.dig('LastPublResult')
-
-#         logger.debug("connected: #{connected} (#{connected.class})")
+        last_publications_date      = value.dig('LastPublDate')
+        last_publications_size      = value.dig('LastPublSize')
+        last_publications_time      = value.dig('LastPublTime')
+        last_publications_wait_time = value.dig('LastPublWaitTime')
 
         connected                   = 90   if(connected.is_a?(FalseClass))  # false
         connected                   = 10   if(connected.is_a?(TrueClass))   # true
         last_publications_result    = 55   if(last_publications_result.nil?)
         last_publications_result    = 10   if(last_publications_result == 'success') # true
         last_publications_result    = 90   if(last_publications_result == 'failure') # false
-
-#         logger.debug("connected: #{connected} (#{connected.class})")
       end
 
-      result << {
-        key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'connected' ),
-        value: connected
-      } << {
-        key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'queue_size' ),
-        value: queue_size
-      } << {
-        key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'publications' ),
-        value: publications_preview
-      } << {
-        key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'publications_preview' ),
-        value: publications_preview
-      } << {
-        key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'failed_publications' ),
-        value: failed_publications
-      } << {
-        key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'failed_publications_preview' ),
-        value: failed_publications_preview
-      } << {
-        key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'last_publications_result' ),
-        value: last_publications_result
-      }
+      if(name.nil?)
+
+        result << {
+          key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'connected' ),
+          value: connected
+        } << {
+          key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'queue_size' ),
+          value: queue_size
+        } << {
+          key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'publications' ),
+          value: publications_preview
+        } << {
+          key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'publications_preview' ),
+          value: publications_preview
+        } << {
+          key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'failed_publications' ),
+          value: failed_publications
+        } << {
+          key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'failed_publications_preview' ),
+          value: failed_publications_preview
+        } << {
+          key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'last_publications_result' ),
+          value: last_publications_result
+        } << {
+          key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'last_publications_date' ),
+          value: last_publications_date
+        } << {
+          key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'last_publications_time' ),
+          value: last_publications_time
+        } << {
+          key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'last_publications_wait_time' ),
+          value: last_publications_wait_time
+        } << {
+          key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'last_publications_date' ),
+          value: last_publications_date
+        }
+
+      else
+        result << {
+          key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, name, 'connected' ),
+          value: connected
+        } << {
+          key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, name, 'queue_size' ),
+          value: queue_size
+        } << {
+          key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, name, 'publications' ),
+          value: publications_preview
+        } << {
+          key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, name, 'publications_preview' ),
+          value: publications_preview
+        } << {
+          key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, name, 'failed_publications' ),
+          value: failed_publications
+        } << {
+          key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, name, 'failed_publications_preview' ),
+          value: failed_publications_preview
+        } << {
+          key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, name, 'last_publications_result' ),
+          value: last_publications_result
+        } << {
+          key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, name, 'last_publications_date' ),
+          value: last_publications_date
+        } << {
+          key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, name, 'last_publications_time' ),
+          value: last_publications_time
+        } << {
+          key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, name, 'last_publications_wait_time' ),
+          value: last_publications_wait_time
+        } << {
+          key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, name, 'last_publications_date' ),
+          value: last_publications_date
+        }
+      end
 
 #       logger.debug(JSON.pretty_generate(result))
 
