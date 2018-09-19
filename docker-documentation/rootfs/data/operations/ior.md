@@ -12,14 +12,24 @@ Der "Client" fragt seinen "Server" über eine IOR-URI an und bekommt eine URI zu
 
 ----
 
-Online-Tool zum parsen einer IOR: [ILU IOR Parser](http://www2.parc.com/istl/projects/ILU/parseIOR/)
-
 Die IOR wird von Content-Servern zur Verfügung gestellt und kann über HTTP abgerufen werden:
 
  - **CMS** `curl http://${SERVER}:40180/coremedia/ior`
  - **MLS** `curl http://${SERVER}:40280/coremedia/ior`
  - **WFS** `curl http://${SERVER}:40380/workflow/ior`
  - **RLS** `curl http://${SERVER}:42180/coremedia/ior`
+
+ ----
+
+Online-Tool zum parsen einer IOR: [ILU IOR Parser](http://www2.parc.com/istl/projects/ILU/parseIOR/)
+
+Die CoreMedia Tools bieten ebenfalls einen IOR Parser:
+```bash
+bin/cm ior $(curl --silent localhost:40280/coremedia/ior)
+IOR<IDL:hox/corem/corba/LoginServiceWithProtocolVersion:1.0><IIOP:1.2:moebius-ci-02-moebius-tomcat-0-cms.coremedia.vm:40283>
+  { TAG_CODE_SETS: {ForCharData={native_code_set="ISO 8859-1", conversion_code_sets=[UTF-8, "ISO 646:1991 IRV"]}, ForWcharData={native_code_set=UTF-16, conversion_code_sets=["ISO/IEC 10646-1:1993, UCS-2, Level 1"]}} },
+  { TAG_RMI_CUSTOM_MAX_STREAM_FORMAT: 2 }
+```
 
 ----
 
