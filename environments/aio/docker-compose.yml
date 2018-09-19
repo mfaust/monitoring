@@ -243,7 +243,11 @@ services:
     build: ../../docker-documentation
     container_name: documentation
     hostname: documentation
-    entrypoint: '/usr/bin/algernon --domain --server --cachesize 67108864 --dev --debug --httponly --nodb --addr=:8080 --dir=/data'
+    entrypoint: '/usr/bin/algernon'
+    command:
+      - '--simple'
+      - '--addr=:8080'
+      - '--dir=/data'
     ports:
       - 8080
     networks:

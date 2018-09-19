@@ -241,6 +241,11 @@ services:
     image: moebius-registry.coremedia.vm/docker-documentation:latest
     container_name: documentation
     hostname: documentation
+    entrypoint: '/usr/bin/algernon'
+    command:
+      - '--simple'
+      - '--addr=:8080'
+      - '--dir=/data'
     ports:
       - 8080
     networks:
