@@ -107,6 +107,7 @@
   - support multiple installations of CAE(Live) on one host
 - better errorhandling at importing of grafana dashboards
 - support for the Publisher mbean (used in the content-management-server application)
+- add check_publisher for icinga2
 
 
 

@@ -54,13 +54,15 @@
   },
   "1810": {
     "version": "1810",
-    "date": "17.09.2018",
+    "date": "20.09.2018",
     "changes": [
       "remove postgres support in data collector",
       "enhanced support of moebius' multi-node-deployment",
       "import only the really needed Grafana templates",
       "support multiple installations of CAE(Live) on one host",
-      "better errorhandling at importing of grafana dashboards"
+      "better errorhandling at importing of grafana dashboards",
+      "support for the Publisher mbean (used in the content-management-server application)",
+      "add check_publisher for icinga2"
     ]
   }
 }
