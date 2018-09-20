@@ -95,6 +95,7 @@ services:
     runlevel: true
     license: true
     heap_cache: true
+    publisher: true
     application:
     - contentserver
 
