@@ -276,8 +276,12 @@ module DataCollector
         return JSON.parse( JSON.generate( status: 500 ) )
       end
 
-      result   = JSON.generate( ExternalClients::NodeExporter.new( host: host, port: port ).get() )
-      JSON.parse( result )
+      m = ExternalClients::NodeExporter::Instance.new( host: host, port: port )
+      data = m.get()
+
+      data
+      #result   = JSON.generate( m.get() )
+      #JSON.parse( result )
     end
 
 
