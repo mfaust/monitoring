@@ -4,6 +4,9 @@ jolokia:
     tomcat:
       description: standard checks for all tomcats
       metrics:
+      - description: Operating System
+        mbean: java.lang:type=OperatingSystem
+        attribute: OpenFileDescriptorCount, MaxFileDescriptorCount, SystemCpuLoad, CommittedVirtualMemorySize
       - description: Heap Memory Usage
         mbean: java.lang:type=Memory
       - description: Thread Count
