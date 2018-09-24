@@ -112,8 +112,8 @@ module CarbonData
       when 'Runtime'
         graphite_output.push( tomcat_runtime( values ) )
       # really not a good idea
-#      when 'OperatingSystem'
-#        graphite_output.push( tomcatOperatingSystem( values ) )
+      when 'OperatingSystem'
+        graphite_output.push( tomcat_operating_system( values ) )
       when 'Manager'
         graphite_output.push( tomcat_manager( values ) )
       when 'Memory'

@@ -30,6 +30,45 @@ module CarbonData
     end
 
 
+    def tomcat_operating_system( data = {} )
+
+      result    = []
+      mbean     = 'OperatingSystem'
+      value     = data.dig('value')
+
+      # defaults
+      open_file_descriptor  = 0
+      max_file_descriptor   = 0
+      system_cpu_load       = 0
+      committed_virt_mem_size = 0
+
+      # OpenFileDescriptorCount, MaxFileDescriptorCount, SystemCpuLoad, CommittedVirtualMemorySize
+
+      if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil )
+        open_file_descriptor    = value.dig('OpenFileDescriptorCount')
+        max_file_descriptor     = value.dig('MaxFileDescriptorCount')
+        system_cpu_load         = value.dig('SystemCpuLoad')
+        committed_virt_mem_size = value.dig('CommittedVirtualMemorySize')
+      end
+
+      result << {
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'file_descriptor', 'open' ),
+        value: open_file_descriptor
+      } << {
+        key: format( '%s.%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'file_descriptor', 'max' ),
+        value: max_file_descriptor
+      } << {
+        key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'system_cpu_load' ),
+        value: system_cpu_load
+      } << {
+        key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'commited_virtual_memory_size' ),
+        value: committed_virt_mem_size
+      }
+
+      result
+    end
+
+
     def tomcat_manager( data = {} )
 
       result    = []

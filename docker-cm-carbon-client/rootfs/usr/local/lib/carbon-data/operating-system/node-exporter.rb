@@ -16,6 +16,7 @@ module CarbonData
           load       = value.dig('load')
           memory     = value.dig('memory')
           filesystem = value.dig('filesystem')
+          filefd     = value.dig('filefd')
 
           unless( uptime.nil? )
 
@@ -62,6 +63,28 @@ module CarbonData
                 end
               end
             end
+          end
+
+
+          unless( filefd.nil? )
+
+            allocated = filefd.dig('allocated')
+            maximum   = filefd.dig('maximum')
+
+            unless( allocated.nil? )
+              result << {
+                key: format( '%s.%s.%s.%s'         , @identifier, @normalized_service_name, 'file_descriptor', 'allocated' ),
+                value: allocated
+              }
+            end
+
+            unless( maximum.nil? )
+              result << {
+                key: format( '%s.%s.%s.%s'         , @identifier, @normalized_service_name, 'file_descriptor', 'maximum' ),
+                value: maximum
+              }
+            end
+
           end
 
 
