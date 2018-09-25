@@ -160,7 +160,8 @@ module DataCollector
         return JSON.parse( JSON.generate( status: 500 ) )
       end
 
-      m = ExternalClients::MySQL.new( settings )
+      #m = ExternalClients::MySQL.new( settings )
+      m = ExternalClients::MySQL::Instance.new( settings )
 
       logger.debug(m.inspect)
 
@@ -179,7 +180,7 @@ module DataCollector
 
           settings = { host: host, username: u, password: p }
 
-          m = ExternalClients::MySQL.new( settings )
+          m = ExternalClients::MySQL::Instance.new( settings )
 
           unless( m.client.nil? )
             user = u.clone
