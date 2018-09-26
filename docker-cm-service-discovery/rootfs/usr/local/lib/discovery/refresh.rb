@@ -16,6 +16,10 @@ module ServiceDiscovery
         #
         ip, short, fqdn = self.ns_lookup( h )
 
+        # no dns entries found
+        #
+        return { status: 503,  message: format( 'Host %s are unavailable', h ) } if( ip.nil? || short.nil? || fqdn.nil? )
+
         # if the destination host available (simple check with ping)
         #
         # 503 Service Unavailable
@@ -102,9 +106,15 @@ module ServiceDiscovery
 #       discovery_data   = @database.discoveryData( ip: ip, short: short, fqdn: fqdn )
       discovery_data   = @database.discovery_data( ip: ip, short: short, fqdn: fqdn )
 
-      services = discovery_data.keys.sort
+      logger.debug("discovery_data: #{discovery_data} (#{discovery_data.class})")
 
+      return { count: 0, services: [] } unless( discovery_data.is_a?(Hash) )
+      return { count: 0, services: [] } if( discovery_data.count == 0 )
+
+      services = discovery_data.keys.sort
       services_count   = services.count
+
+      logger.debug({ count: services_count, services: services, type: services.class })
 
       { count: services_count, services: services }
     end
