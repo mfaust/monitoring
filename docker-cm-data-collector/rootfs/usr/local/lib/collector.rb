@@ -384,13 +384,13 @@ module DataCollector
 
       data.each do |s,d|
 
-        port    = d.dig( 'port' )    || -1
-        metrics = d.dig( 'metrics' ) || []
+        port    = d.dig('port')    || -1
+        metrics = d.dig('metrics') || []
         bulk    = []
 
         # only to see which service
         #
-        # logger.debug( format( '    %s with port %d', s, port ) )
+        logger.debug( format( '    %-25s with port %d', s, port ) )
 
         if( metrics != nil && metrics.count == 0 )
           case s
@@ -431,12 +431,14 @@ module DataCollector
             target = {
               'type'   => 'read',
               'mbean'  => mbean.to_s,
-              'target' => { 'url' => format( "service:jmx:rmi:///jndi/rmi://%s:%s/jmxrmi", fqdn, port ) },
-              'config' => { 'ignoreErrors' => true, 'ifModifiedSince' => true, 'canonicalNaming' => true }
+              'config' => { 'ignoreErrors' => true, 'ifModifiedSince' => true, 'canonicalNaming' => true },
+              'target' => { 'url' => format( 'service:jmx:rmi:///jndi/rmi://%s:%s/jmxrmi', fqdn, port ) }
             }
 
             attributes = []
             attributes = attribute.split(',') unless( attribute.nil? )
+
+            # logger.debug("target: #{target}")
 
             bulk.push( target )
           end
@@ -1056,6 +1058,8 @@ module DataCollector
 
         discovery_data = nil
 
+        next if( ip.nil? || short.nil? || fqdn.nil? )
+
         # add hostname to an blocking cache
         #
         if( @jobs.jobs( short: short, fqdn: fqdn ) == true )
@@ -1098,8 +1102,8 @@ module DataCollector
         begin
           prepared_count, prepared_checksum, prepared_keys = @prepare.valid_data(fqdn).values
 
-          logger.debug( "current : #{discovery_count} services / checksum: #{discovery_checksum}" )
-          logger.debug( "cached  : #{prepared_count} services / checksum: #{prepared_checksum}" )
+          logger.debug( format('current : %2d services / checksum: %s', discovery_count, discovery_checksum ) )
+          logger.debug( format('cached  : %2d services / checksum: %s', prepared_count , prepared_checksum ) )
 
           options = { hostname: short, fqdn: fqdn, data: discovery_data }
 
@@ -1115,7 +1119,7 @@ module DataCollector
           end
 
           result = @prepare.build_merged_data( options )
-          logger.debug( result )
+#           logger.debug( "merged_data: #{result}" )
         rescue => e
           logger.error(e)
         end

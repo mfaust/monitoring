@@ -88,21 +88,20 @@ module DataCollector
 
     def config_data( params )
 
-      logger.debug("config_data( #{params} )")
+#       logger.debug("config_data( #{params} )")
 
-
-      host = params.dig(:host)
+      host    = params.dig(:host)
       service = params.dig(:service)
-      value = params.dig(:value)
+      value   = params.dig(:value)
       default = params.dig(:default)
 
       begin
         d = @redis.measurements( short: host, application: service )
 
-        logger.debug( d )
-        logger.debug( d.class.to_s )
+#         logger.debug( d )
+#         logger.debug( d.class.to_s )
 
-        data = d.dig( service, value ) unless( d.nil? )
+        data    = d.dig( service, value ) unless( d.nil? )
         default = data unless( data.nil? )
 
       rescue => e

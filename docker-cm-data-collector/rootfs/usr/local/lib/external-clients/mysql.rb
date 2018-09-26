@@ -250,7 +250,7 @@ module ExternalClients
           @client = nil
         end
 
-        logger.debug(rs.inspect)
+#         logger.debug(rs.inspect)
 
         if(rs.is_a?(Mysql2::Result))
           rows = to_json( rs )
@@ -259,7 +259,7 @@ module ExternalClients
           # logger.debug( JSON.pretty_generate( rows ) )
         end
 
-        logger.debug( "rows: #{rows} (#{rows.class})" )
+#         logger.debug( "rows: #{rows} (#{rows.class})" )
 
         rows
       end

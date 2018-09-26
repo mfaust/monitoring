@@ -214,20 +214,24 @@ jolokia:
     workflow-server:
       description: Workflow Server
       metrics:
-      - mbean: com.coremedia:type=CapConnection,application=*
+      - description: CapConnection
+        name: CapConnection
+        mbean: com.coremedia:type=CapConnection,application=*
         attribute: BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open,WorkflowRepositoryAvailable
 
     elastic-worker:
       description: The Elastic Worker
       metrics:
-      - name: CapConnection
+      - description: CapConnection
+        name: CapConnection
         mbean: com.coremedia:type=CapConnection,application=*
         attribute: BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open
 
     user-changes:
       description: The User Changes Webapp
       metrics:
-      - name: CapConnection
+      - description: CapConnection
+        name: CapConnection
         mbean: com.coremedia:type=CapConnection,application=*
         attribute: BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open
 
@@ -282,14 +286,16 @@ jolokia:
     adobe-drive:
       description: Adobe Drive Server
       metrics:
-      - name: CapConnection
+      - description: CapConnection
+        name: CapConnection
         mbean: com.coremedia:type=CapConnection,application=*
         attribute: BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open
 
     adobe-drive-server:
       description: Adobe Drive Server
       metrics:
-      - name: CapConnection
+      - description: CapConnection
+        name: CapConnection
         mbean: com.coremedia:type=CapConnection,application=*
         attribute: BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open
 
@@ -304,7 +310,8 @@ jolokia:
     cae:
       description: checks for all CAE Services
       metrics:
-      - name: CapConnection
+      - description: CapConnection
+        name: CapConnection
         mbean: com.coremedia:type=CapConnection,application=*
         attribute: BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open,Url,ContentRepositoryAvailable
       - mbean: com.coremedia:type=DataViewFactory,application=*
@@ -317,7 +324,8 @@ jolokia:
     studio:
       description: check for the CM Studio
       metrics:
-      - name: CapConnection for Studio
+      - description: CapConnection
+        name: CapConnection for Studio
         mbean: com.coremedia:type=CapConnection,application=*
         attribute: BlobCacheSize,BlobCacheLevel,BlobCacheFaults,HeapCacheSize,HeapCacheLevel,HeapCacheFaults,NumberOfSUSessions,Open,ContentRepositoryAvailable,WorkflowRepositoryAvailable
 

@@ -41,7 +41,7 @@ module DataCollector
     # creates mergedHostData.json for every Node
     def build_merged_data( params )
 
-#      logger.debug( "build_merged_data( #{params} )" )
+      #logger.debug( "build_merged_data( #{params} )" )
 
       short = params.dig(:hostname)
       fqdn  = params.dig(:fqdn)
@@ -111,144 +111,101 @@ module DataCollector
 
     def merge_data( service, applications, data = {} )
 
-      logger.debug( "merge_data( #{service} )" )
+      logger.debug( "merge_data( '#{service}', applications, data )" )
 
       metrics_tomcat     = applications.dig('tomcat')      # standard metrics for Tomcat
 
       return {} if( metrics_tomcat.nil? )
 
-      configured_application = applications.keys
+      configured_application = applications.keys.sort
 
-      logger.debug( '----------------------------------------------------------------------')
-      logger.debug( "look for service: '#{service}'" )
-      logger.debug( "configured Applications: #{configured_application}" )
-#       logger.debug( data )
+      # configured applications in cm-application.yaml
+      # logger.debug( "configured applications: #{configured_application} (#{configured_application.class})" )
+      # application configuration in cm-service.yaml
+      # logger.debug( "data                   : #{data} (#{data.class})")
 
-      data_source = nil
-
-      # logger.debug( 'no data to merge' )
       return {} if( data.nil? || data.count() == 0 )
 
       if( data.dig(:data).nil? )
-
         application = data.dig('application')
         solr_cores  = data.dig('cores')
         metrics     = data.dig('metrics')
-
-        data_source  = 'redis'
-      else
-
-        application = data.dig(:data, 'application')
-        solr_cores  = data.dig(:data, 'cores')
-        metrics     = data.dig(:data, 'metrics')
-
-        data_source  = 'sqlite'
       end
 
-      logger.debug( "data source: '#{data_source}'" )
       logger.debug( "application: '#{application}'" )
-# logger.debug( "solr_cores : '#{solr_cores}'" )
-# logger.debug( "metrics    : '#{metrics}'" )
-      logger.debug( '----------------------------------------------------------------------')
 
-      if( data_source == 'redis' )
-        data['metrics'] ||= []
-      else
-        data[:data]            ||= {}
-        data[:data]['metrics'] ||= []
-      end
-
-#       logger.debug( data )
+      data['metrics'] ||= []
 
       if( configured_application.include?( service ) )
 
-        logger.debug( "found #{service} in tomcat application" )
+        # found entry in cm-service.yml
+        #
+        logger.debug( "found '#{service}' in cm-service.yml" )
 
-        if( data_source == 'redis' )
-          data['metrics'].push( metrics_tomcat.dig('metrics') )
-          data['metrics'].push( applications.dig( service, 'metrics' ) )
-        else
-          data[:data]['metrics'].push( metrics_tomcat.dig('metrics') )
-          data[:data]['metrics'].push( applications.dig( service, 'metrics' ) )
-        end
+        _tomcat      = metrics_tomcat.dig('metrics')
+        _application = applications.dig( service, 'metrics' )
+
+        logger.debug( format( '  add %2d tomcat metrics from cm-application.yml', _tomcat.count ) )
+        logger.debug( format( '  add %2d application metrics from cm-application.yml', _application.count ) )
+
+        data['metrics'].push( _tomcat )
+        data['metrics'].push( _application )
       end
 
+      unless( application.nil? )
 
-      if( application != nil )
+        _tomcat      = metrics_tomcat.dig('metrics')
+        logger.debug( format( '  add %2d tomcat metrics from cm-application.yml', _tomcat.count ) )
 
-        if( data_source == 'redis' )
-          data['metrics'].push( metrics_tomcat.dig( 'metrics' ) )
-        else
-          data[:data]['metrics'].push( metrics_tomcat.dig( 'metrics' ) )
-        end
+        data['metrics'].push( _tomcat )
 
         application.each do |a|
 
-          if( applications.dig( a ) != nil )
+          unless( applications.dig( a ).nil? )
 
-            logger.debug( "  add application metrics for #{a}" )
+            application_metrics = applications.dig( a, 'metrics' )
 
-            applicationMetrics = applications.dig( a, 'metrics' )
+            logger.debug( format( '  add %2d additional application metrics for %s', application_metrics.count, a ) )
 
-            if( solr_cores != nil )
-
-              if( data_source == 'redis' )
-                data['metrics'].push( self.merge_solr_cores( applicationMetrics , solr_cores ) )
-              else
-                data[:data]['metrics'].push( self.merge_solr_cores( applicationMetrics , solr_cores ) )
-              end
-            end
+            data['metrics'].push( self.merge_solr_cores( application_metrics , solr_cores ) ) if( solr_cores != nil )
 
             # remove unneeded Templates
             applications[a]['metrics'].delete_if {|key| key['mbean'].match( '%CORE%' ) }
 
 #            data[:data]['metrics'].push( metrics_tomcat['metrics'] )
-            if( data_source == 'redis' )
-              data['metrics'].push( applicationMetrics )
-            else
 
-              data[:data]['metrics'].push( applicationMetrics )
-            end
+            data['metrics'].push( application_metrics )
           end
         end
 
       end
 
+      data['metrics'].compact!   # remove 'nil' from array
+      data['metrics'].flatten!   # clean up and reduce depth
+      data['metrics'].uniq!      # remove doubles
 
-      if( data_source == 'redis' )
+#      mbeans = data['metrics'].map {|x| x['mbean'] }
 
-        data['metrics'].compact!   # remove 'nil' from array
-        data['metrics'].flatten!   # clean up and reduce depth
+      logger.debug( '----------------------------------------------------------------------')
 
-        return data
-
-      else
-        data[:data]['metrics'].compact!   # remove 'nil' from array
-        data[:data]['metrics'].flatten!   # clean up and reduce depth
-
-        return data[:data]
-      end
-
+      return data
     end
 
 
     def valid_data( fqdn )
 
+      logger.debug( "valid_data( #{fqdn} )" )
+
+      return { count: 0, checksum: '', keys: '' } if( !fqdn.is_a?(String) || fqdn.nil? )
+
       data  = @cache.get( format( '%s-validate', fqdn ) ) || nil
+      #logger.debug( "valid_data: '#{data}' (#{data.class})" )
 
-      { count: 0, checksum: '', keys: '' } if( data.nil? )
+      return { count: 0, checksum: '', keys: '' } if( data.nil? )
 
-      logger.debug( "valid_data: #{data} (#{data.class.to_s})" )
-
-      count = 0
-      checksum = ''
-      keys = ''
-
-      unless( data.nil? )
-        count    = data.dig(:count)
-        checksum = data.dig(:checksum)
-        keys     = data.dig(:keys)
-      end
+      count    = data.dig(:count)    || 0
+      checksum = data.dig(:checksum) || ''
+      keys     = data.dig(:keys)     || ''
 
       { count: count, checksum: checksum, keys: keys }
     end
