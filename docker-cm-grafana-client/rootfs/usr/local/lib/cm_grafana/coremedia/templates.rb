@@ -88,6 +88,8 @@ class CMGrafana
           # 'Server'
           ip, short, fqdn = ns_lookup(@short_hostname)
 
+          logger.debug("RLS: #{@short_hostname} - #{ip} | #{short} | #{fqdn}")
+
           bean = @mbean.bean( fqdn, service_name, 'Replicator' )
 
           if( bean != nil && bean != false )
