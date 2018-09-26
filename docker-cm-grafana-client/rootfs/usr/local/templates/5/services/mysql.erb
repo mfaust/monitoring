@@ -616,7 +616,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(aliasSub(perSecond(aliasSub(carbon-writer.$host.MYSQL.handler.*, '(.*)-', '')), '^perSecond\((.*)\)$', '\1'), 'pages_(.*)', '\1'))"
+                "target": "aliasByMetric(perSecond(carbon-writer.$host.MYSQL.handler.*))"
               }
             ],
             "timeFrom": null,
