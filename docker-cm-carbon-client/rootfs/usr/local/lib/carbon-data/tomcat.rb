@@ -37,18 +37,20 @@ module CarbonData
       value     = data.dig('value')
 
       # defaults
-      open_file_descriptor  = 0
-      max_file_descriptor   = 0
-      system_cpu_load       = 0
+      open_file_descriptor    = 0
+      max_file_descriptor     = 0
+      system_cpu_load         = 0
       committed_virt_mem_size = 0
+      system_cpu_load         = 0
 
-      # OpenFileDescriptorCount, MaxFileDescriptorCount, SystemCpuLoad, CommittedVirtualMemorySize
+#      logger.info(JSON.pretty_generate value) if( @normalized_service_name == 'CMS' )
 
       if( @mbean.checkBeanConsistency( mbean, data ) == true && value != nil )
         open_file_descriptor    = value.dig('OpenFileDescriptorCount')
         max_file_descriptor     = value.dig('MaxFileDescriptorCount')
         system_cpu_load         = value.dig('SystemCpuLoad')
         committed_virt_mem_size = value.dig('CommittedVirtualMemorySize')
+        process_cpu_load        = value.dig('ProcessCpuLoad')
       end
 
       result << {
@@ -61,9 +63,16 @@ module CarbonData
         key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'system_cpu_load' ),
         value: system_cpu_load
       } << {
+        key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'process_cpu_load' ),
+        value: process_cpu_load
+      } << {
         key: format( '%s.%s.%s.%s', @identifier, @normalized_service_name, mbean, 'commited_virtual_memory_size' ),
         value: committed_virt_mem_size
       }
+
+      result.reject! { |k| k[:value].nil? }
+
+#      logger.info(JSON.pretty_generate result) if( @normalized_service_name == 'CMS' )
 
       result
     end
