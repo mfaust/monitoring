@@ -92,7 +92,7 @@
             "lines": true,
             "yaxes": [
               {
-                "min": null,
+                "min": 0,
                 "show": true,
                 "max": null,
                 "logBase": 1,
@@ -100,7 +100,7 @@
                 "label": null
               },
               {
-                "min": null,
+                "min": 0,
                 "format": "short",
                 "logBase": 1,
                 "label": null,
@@ -155,10 +155,10 @@
                 "logBase": 1,
                 "format": "bytes",
                 "label": null,
-                "min": null
+                "min": 0
               },
               {
-                "min": null,
+                "min": 0,
                 "label": "percent",
                 "logBase": 1,
                 "format": "none",
@@ -286,10 +286,10 @@
                 "format": "bytes",
                 "logBase": 1,
                 "label": null,
-                "min": null
+                "min": 0
               },
               {
-                "min": null,
+                "min": 0,
                 "show": true,
                 "max": "110",
                 "logBase": 1,
@@ -371,7 +371,7 @@
             "percentage": false,
             "yaxes": [
               {
-                "min": null,
+                "min": 0,
                 "show": true,
                 "max": null,
                 "label": null,
@@ -384,7 +384,7 @@
                 "label": "percent",
                 "max": "110",
                 "show": true,
-                "min": null
+                "min": 0
               }
             ],
             "links": [],
@@ -411,6 +411,82 @@
             "aliasColors": {},
             "id": <%= id += 1 %>,
             "steppedLine": false
+          }
+        ]
+      },
+      {
+        "title": "Open Files",
+        "height": "150px",
+        "panels": [
+          {
+            "percentage": false,
+            "datasource": "graphite",
+            "yaxes": [
+              {
+                "min": 0,
+                "show": true,
+                "max": null,
+                "label": null,
+                "logBase": 1,
+                "format": "none"
+              },
+              {
+                "logBase": 1,
+                "format": "none",
+                "label": "percent",
+                "max": "110",
+                "show": false,
+                "min": 0
+              }
+            ],
+            "xaxis": {
+              "values": [],
+              "mode": "time",
+              "name": null,
+              "show": true
+            },
+            "stack": false,
+            "timeShift": null,
+            "points": false,
+            "renderer": "flot",
+            "tooltip": {
+              "value_type": "individual",
+              "shared": true,
+              "sort": 0
+            },
+            "pointradius": 5,
+            "title": "Open Files",
+            "seriesOverrides": [],
+            "fill": 4,
+            "bars": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "alias(carbon-writer.$host.NODE_EXPORTER.file_descriptor.allocated, 'open files')"
+              }
+            ],
+            "aliasColors": {},
+            "legend": {
+              "alignAsTable": true,
+              "max": false,
+              "show": true,
+              "current": true,
+              "values": true,
+              "total": false,
+              "rightSide": true,
+              "min": false,
+              "avg": false
+            },
+            "type": "graph",
+            "id": <%= id += 1 %>,
+            "steppedLine": false,
+            "nullPointMode": "connected",
+            "lines": true,
+            "timeFrom": null,
+            "decimals": 0,
+            "linewidth": 1,
+            "thresholds": [],
+            "span": 12
           }
         ]
       },
@@ -450,7 +526,9 @@
             },
             "pointradius": 5,
             "title": "CPU",
-            "seriesOverrides": [],
+            "seriesOverrides": [
+              { "alias": "iowait", "color": "#bf1b00" }
+            ],
             "fill": 4,
             "bars": false,
             "targets": [

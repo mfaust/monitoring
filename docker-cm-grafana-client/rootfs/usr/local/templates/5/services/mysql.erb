@@ -142,7 +142,7 @@
                 "label": null,
                 "logBase": 1,
                 "max": null,
-                "min": 0,
+                "min": null,
                 "show": true
               },
               {
@@ -544,6 +544,84 @@
             "timeFrom": null,
             "timeShift": null,
             "title": "InnoDB Buffer Pool Count Pages",
+            "tooltip": {
+              "msResolution": false,
+              "shared": true,
+              "sort": 0,
+              "value_type": "individual"
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "none",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": 0,
+                "show": true
+              },
+              {
+                "format": "bytes",
+                "label": "",
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ],
+            "thresholds": []
+          }
+        ]
+      },
+      {
+        "title": "Handler",
+        "height": "240px",
+        "panels": [
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "editable": true,
+            "error": false,
+            "fill": 3,
+            "grid": {},
+            "id": <%= id += 1 %>,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "span": 12,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "aliasByMetric(aliasSub(perSecond(carbon-writer.$host.MYSQL.handler.*), '^perSecond\((.*)\)$', '\1'))"
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "Handler",
             "tooltip": {
               "msResolution": false,
               "shared": true,

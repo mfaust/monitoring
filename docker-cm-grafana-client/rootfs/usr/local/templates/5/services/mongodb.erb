@@ -142,7 +142,7 @@
                 "label": null,
                 "logBase": 1,
                 "max": null,
-                "min": null,
+                "min": 0,
                 "show": true
               },
               {
@@ -150,7 +150,7 @@
                 "label": null,
                 "logBase": 1,
                 "max": null,
-                "min": null,
+                "min": 0,
                 "show": false
               }
             ],
@@ -244,7 +244,7 @@
                 "label": null,
                 "logBase": 1,
                 "max": null,
-                "min": null,
+                "min": 0,
                 "show": true
               },
               {
@@ -358,7 +358,7 @@
                 "label": null,
                 "logBase": 1,
                 "max": null,
-                "min": null,
+                "min": 0,
                 "show": true
               },
               {
@@ -366,7 +366,7 @@
                 "label": null,
                 "logBase": 1,
                 "max": null,
-                "min": null,
+                "min": 0,
                 "show": true
               }
             ]
@@ -442,7 +442,7 @@
                 "label": null,
                 "logBase": 1,
                 "max": null,
-                "min": null,
+                "min": 0,
                 "show": true
               },
               {
@@ -450,7 +450,90 @@
                 "label": null,
                 "logBase": 1,
                 "max": null,
-                "min": null,
+                "min": 0,
+                "show": false
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "open files",
+        "height": "150px",
+        "panels": [
+          {
+            "aliasColors": {},
+            "bars": false,
+            "datasource": "graphite",
+            "editable": true,
+            "error": false,
+            "fill": 2,
+            "grid": {
+              "threshold1": null,
+              "threshold1Color": "rgba(216, 200, 27, 0.27)",
+              "threshold2": null,
+              "threshold2Color": "rgba(234, 112, 112, 0.22)"
+            },
+            "id": <%= id += 1 %>,
+            "isNew": true,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "connected",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "span": 12,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "refId": "A",
+                "target": "alias(carbon-writer.$host.MONGODB.storage-engine.wiredTiger.connection.files.open, 'open files')"
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "open files",
+            "tooltip": {
+              "msResolution": false,
+              "ordering": "alphabetical",
+              "shared": true,
+              "value_type": "cumulative",
+              "sort": 0
+            },
+            "type": "graph",
+            "xaxis": {
+              "show": true
+            },
+            "yaxes": [
+              {
+                "format": "none",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": 0,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": 0,
                 "show": false
               }
             ]
