@@ -138,6 +138,43 @@
         ]
       },
       {
+        "title": "Open Files",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "colorBackground": true,
+        "colorValue": false,
+        "colors": [
+          "rgba(50, 172, 45, 0.97)",
+          "rgba(237, 129, 40, 0.89)",
+          "rgba(245, 54, 54, 0.9)"
+        ],
+        "error": false,
+        "span": 1,
+        "editable": true,
+        "type": "singlestat",
+        "isNew": true,
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.NODE_EXPORTER.file_descriptor.allocated" }
+        ],
+        "links": [],
+        "datasource": "graphite",
+        "maxDataPoints": 100,
+        "interval": null,
+        "cacheTimeout": null,
+        "format": "s",
+        "nullText": null,
+        "mappingType": 1,
+        "nullPointMode": "connected",
+        "valueName": "current",
+        "valueFontSize": "70%",
+        "thresholds": "3000,4000",
+        "colorBackground": false,
+        "colorValue": false,
+        "decimals": 0,
+        "valueMaps": []
+      },
+      {
         "title": "used RAM",
         "id": <%= id += 1 %>,
         "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
@@ -152,13 +189,6 @@
         ],
         "datasource": "graphite",
         "format": "none",
-        "gauge": {
-          "maxValue": 100,
-          "minValue": 0,
-          "show": false,
-          "thresholdLabels": false,
-          "thresholdMarkers": true
-        },
         "interval": null,
         "links": [],
         "mappingType": 1,
@@ -246,16 +276,10 @@
           }
         ],
         "span": 1,
-        "sparkline": {
-          "fillColor": "rgba(31, 118, 189, 0.18)",
-          "full": false,
-          "lineColor": "rgb(31, 120, 193)",
-          "show": false
-        },
         "targets": [
           { "refId": "A", "target": "carbon-writer.$host.NODE_EXPORTER.swap.used_percent" }
         ],
-        "thresholds": "80,90",
+        "thresholds": "40,50",
         "type": "singlestat",
         "valueFontSize": "80%",
         "valueMaps": [
@@ -671,6 +695,26 @@
         ]
       },
       {
+        "title": "Open Files",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "type": "singlestat",
+        "span": 1,
+        "colorBackground": true,
+        "colors": [ "rgba(50, 172, 45, 0.97)", "rgba(237, 129, 40, 0.89)", "rgba(245, 54, 54, 0.9)" ],
+        "datasource": "graphite",
+        "format": "none",
+        "postfix": "",
+        "postfixFontSize": "80%",
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CMS.OperatingSystem.file_descriptor.open" }
+        ],
+        "thresholds": "150,200",
+        "valueFontSize": "100%",
+        "valueName": "current"
+      },
+      {
         "title": "used Heap Memory",
         "id": <%= id += 1 %>,
         "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
@@ -923,6 +967,26 @@
             "text": "OFFLINE"
           }
         ]
+      },
+      {
+        "title": "Open Files",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "type": "singlestat",
+        "span": 1,
+        "colorBackground": true,
+        "colors": [ "rgba(50, 172, 45, 0.97)", "rgba(237, 129, 40, 0.89)", "rgba(245, 54, 54, 0.9)" ],
+        "datasource": "graphite",
+        "format": "none",
+        "postfix": "",
+        "postfixFontSize": "80%",
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.MLS.OperatingSystem.file_descriptor.open" }
+        ],
+        "thresholds": "150,200",
+        "valueFontSize": "100%",
+        "valueName": "current"
       },
       {
         "title": "used Heap Memory",
@@ -1217,6 +1281,26 @@
             "text": "OFFLINE"
           }
         ]
+      },
+      {
+        "title": "Open Files",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "type": "singlestat",
+        "span": 1,
+        "colorBackground": true,
+        "colors": [ "rgba(50, 172, 45, 0.97)", "rgba(237, 129, 40, 0.89)", "rgba(245, 54, 54, 0.9)" ],
+        "datasource": "graphite",
+        "format": "none",
+        "postfix": "",
+        "postfixFontSize": "80%",
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.RLS.OperatingSystem.file_descriptor.open" }
+        ],
+        "thresholds": "150,200",
+        "valueFontSize": "100%",
+        "valueName": "current"
       },
       {
         "title": "used Heap Memory",
@@ -1579,6 +1663,26 @@
             "text": "OFFLINE"
           }
         ]
+      },
+      {
+        "title": "Open Files",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "type": "singlestat",
+        "span": 1,
+        "colorBackground": true,
+        "colors": [ "rgba(50, 172, 45, 0.97)", "rgba(237, 129, 40, 0.89)", "rgba(245, 54, 54, 0.9)" ],
+        "datasource": "graphite",
+        "format": "none",
+        "postfix": "",
+        "postfixFontSize": "80%",
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.WFS.OperatingSystem.file_descriptor.open" }
+        ],
+        "thresholds": "150,200",
+        "valueFontSize": "100%",
+        "valueName": "current"
       },
       {
         "title": "used Heap Memory",
@@ -1972,6 +2076,26 @@
         ]
       },
       {
+        "title": "Open Files",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "type": "singlestat",
+        "span": 1,
+        "colorBackground": true,
+        "colors": [ "rgba(50, 172, 45, 0.97)", "rgba(237, 129, 40, 0.89)", "rgba(245, 54, 54, 0.9)" ],
+        "datasource": "graphite",
+        "format": "none",
+        "postfix": "",
+        "postfixFontSize": "80%",
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.SOLR_MASTER.OperatingSystem.file_descriptor.open" }
+        ],
+        "thresholds": "150,200",
+        "valueFontSize": "100%",
+        "valueName": "current"
+      },
+      {
         "title": "used Heap Memory",
         "id": <%= id += 1 %>,
         "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
@@ -2106,6 +2230,26 @@
             "text": "OFFLINE"
           }
         ]
+      },
+      {
+        "title": "Open Files",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "type": "singlestat",
+        "span": 1,
+        "colorBackground": true,
+        "colors": [ "rgba(50, 172, 45, 0.97)", "rgba(237, 129, 40, 0.89)", "rgba(245, 54, 54, 0.9)" ],
+        "datasource": "graphite",
+        "format": "none",
+        "postfix": "",
+        "postfixFontSize": "80%",
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.FEEDER_CONTENT.OperatingSystem.file_descriptor.open" }
+        ],
+        "thresholds": "150,200",
+        "valueFontSize": "100%",
+        "valueName": "current"
       },
       {
         "title": "used Heap Memory",
@@ -2497,6 +2641,26 @@
             "text": "OFFLINE"
           }
         ]
+      },
+      {
+        "title": "Open Files",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "type": "singlestat",
+        "span": 1,
+        "colorBackground": true,
+        "colors": [ "rgba(50, 172, 45, 0.97)", "rgba(237, 129, 40, 0.89)", "rgba(245, 54, 54, 0.9)" ],
+        "datasource": "graphite",
+        "format": "none",
+        "postfix": "",
+        "postfixFontSize": "80%",
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.FEEDER_LIVE.OperatingSystem.file_descriptor.open" }
+        ],
+        "thresholds": "150,200",
+        "valueFontSize": "100%",
+        "valueName": "current"
       },
       {
         "title": "used Heap Memory",
@@ -3006,6 +3170,26 @@
         ]
       },
       {
+        "title": "Open Files",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "type": "singlestat",
+        "span": 1,
+        "colorBackground": true,
+        "colors": [ "rgba(50, 172, 45, 0.97)", "rgba(237, 129, 40, 0.89)", "rgba(245, 54, 54, 0.9)" ],
+        "datasource": "graphite",
+        "format": "none",
+        "postfix": "",
+        "postfixFontSize": "80%",
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.FEEDER_PREV.OperatingSystem.file_descriptor.open" }
+        ],
+        "thresholds": "150,200",
+        "valueFontSize": "100%",
+        "valueName": "current"
+      },
+      {
         "title": "used Heap Memory",
         "id": <%= id += 1 %>,
         "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
@@ -3513,6 +3697,26 @@
         ]
       },
       {
+        "title": "Open Files",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "type": "singlestat",
+        "span": 1,
+        "colorBackground": true,
+        "colors": [ "rgba(50, 172, 45, 0.97)", "rgba(237, 129, 40, 0.89)", "rgba(245, 54, 54, 0.9)" ],
+        "datasource": "graphite",
+        "format": "none",
+        "postfix": "",
+        "postfixFontSize": "80%",
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_1.OperatingSystem.file_descriptor.open" }
+        ],
+        "thresholds": "150,200",
+        "valueFontSize": "100%",
+        "valueName": "current"
+      },
+      {
         "title": "used Heap Memory",
         "id": <%= id += 1 %>,
         "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
@@ -3902,6 +4106,26 @@
             "text": "OFFLINE"
           }
         ]
+      },
+      {
+        "title": "Open Files",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "type": "singlestat",
+        "span": 1,
+        "colorBackground": true,
+        "colors": [ "rgba(50, 172, 45, 0.97)", "rgba(237, 129, 40, 0.89)", "rgba(245, 54, 54, 0.9)" ],
+        "datasource": "graphite",
+        "format": "none",
+        "postfix": "",
+        "postfixFontSize": "80%",
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_2.OperatingSystem.file_descriptor.open" }
+        ],
+        "thresholds": "150,200",
+        "valueFontSize": "100%",
+        "valueName": "current"
       },
       {
         "title": "used Heap Memory",
@@ -4295,6 +4519,26 @@
         ]
       },
       {
+        "title": "Open Files",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "type": "singlestat",
+        "span": 1,
+        "colorBackground": true,
+        "colors": [ "rgba(50, 172, 45, 0.97)", "rgba(237, 129, 40, 0.89)", "rgba(245, 54, 54, 0.9)" ],
+        "datasource": "graphite",
+        "format": "none",
+        "postfix": "",
+        "postfixFontSize": "80%",
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_3.OperatingSystem.file_descriptor.open" }
+        ],
+        "thresholds": "150,200",
+        "valueFontSize": "100%",
+        "valueName": "current"
+      },
+      {
         "title": "used Heap Memory",
         "id": <%= id += 1 %>,
         "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
@@ -4684,6 +4928,26 @@
             "text": "OFFLINE"
           }
         ]
+      },
+      {
+        "title": "Open Files",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "type": "singlestat",
+        "span": 1,
+        "colorBackground": true,
+        "colors": [ "rgba(50, 172, 45, 0.97)", "rgba(237, 129, 40, 0.89)", "rgba(245, 54, 54, 0.9)" ],
+        "datasource": "graphite",
+        "format": "none",
+        "postfix": "",
+        "postfixFontSize": "80%",
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_4.OperatingSystem.file_descriptor.open" }
+        ],
+        "thresholds": "150,200",
+        "valueFontSize": "100%",
+        "valueName": "current"
       },
       {
         "title": "used Heap Memory",
@@ -5077,6 +5341,26 @@
         ]
       },
       {
+        "title": "Open Files",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "type": "singlestat",
+        "span": 1,
+        "colorBackground": true,
+        "colors": [ "rgba(50, 172, 45, 0.97)", "rgba(237, 129, 40, 0.89)", "rgba(245, 54, 54, 0.9)" ],
+        "datasource": "graphite",
+        "format": "none",
+        "postfix": "",
+        "postfixFontSize": "80%",
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_5.OperatingSystem.file_descriptor.open" }
+        ],
+        "thresholds": "150,200",
+        "valueFontSize": "100%",
+        "valueName": "current"
+      },
+      {
         "title": "used Heap Memory",
         "id": <%= id += 1 %>,
         "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
@@ -5466,6 +5750,26 @@
             "text": "OFFLINE"
           }
         ]
+      },
+      {
+        "title": "Open Files",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "type": "singlestat",
+        "span": 1,
+        "colorBackground": true,
+        "colors": [ "rgba(50, 172, 45, 0.97)", "rgba(237, 129, 40, 0.89)", "rgba(245, 54, 54, 0.9)" ],
+        "datasource": "graphite",
+        "format": "none",
+        "postfix": "",
+        "postfixFontSize": "80%",
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_6.OperatingSystem.file_descriptor.open" }
+        ],
+        "thresholds": "150,200",
+        "valueFontSize": "100%",
+        "valueName": "current"
       },
       {
         "title": "used Heap Memory",
@@ -5859,6 +6163,26 @@
         ]
       },
       {
+        "title": "Open Files",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "type": "singlestat",
+        "span": 1,
+        "colorBackground": true,
+        "colors": [ "rgba(50, 172, 45, 0.97)", "rgba(237, 129, 40, 0.89)", "rgba(245, 54, 54, 0.9)" ],
+        "datasource": "graphite",
+        "format": "none",
+        "postfix": "",
+        "postfixFontSize": "80%",
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_7.OperatingSystem.file_descriptor.open" }
+        ],
+        "thresholds": "150,200",
+        "valueFontSize": "100%",
+        "valueName": "current"
+      },
+      {
         "title": "used Heap Memory",
         "id": <%= id += 1 %>,
         "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
@@ -6248,6 +6572,26 @@
             "text": "OFFLINE"
           }
         ]
+      },
+      {
+        "title": "Open Files",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "type": "singlestat",
+        "span": 1,
+        "colorBackground": true,
+        "colors": [ "rgba(50, 172, 45, 0.97)", "rgba(237, 129, 40, 0.89)", "rgba(245, 54, 54, 0.9)" ],
+        "datasource": "graphite",
+        "format": "none",
+        "postfix": "",
+        "postfixFontSize": "80%",
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_8.OperatingSystem.file_descriptor.open" }
+        ],
+        "thresholds": "150,200",
+        "valueFontSize": "100%",
+        "valueName": "current"
       },
       {
         "title": "used Heap Memory",
@@ -6641,6 +6985,26 @@
         ]
       },
       {
+        "title": "Open Files",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "type": "singlestat",
+        "span": 1,
+        "colorBackground": true,
+        "colors": [ "rgba(50, 172, 45, 0.97)", "rgba(237, 129, 40, 0.89)", "rgba(245, 54, 54, 0.9)" ],
+        "datasource": "graphite",
+        "format": "none",
+        "postfix": "",
+        "postfixFontSize": "80%",
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_LIVE_9.OperatingSystem.file_descriptor.open" }
+        ],
+        "thresholds": "150,200",
+        "valueFontSize": "100%",
+        "valueName": "current"
+      },
+      {
         "title": "used Heap Memory",
         "id": <%= id += 1 %>,
         "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
@@ -7030,6 +7394,26 @@
             "text": "OFFLINE"
           }
         ]
+      },
+      {
+        "title": "Open Files",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "type": "singlestat",
+        "span": 1,
+        "colorBackground": true,
+        "colors": [ "rgba(50, 172, 45, 0.97)", "rgba(237, 129, 40, 0.89)", "rgba(245, 54, 54, 0.9)" ],
+        "datasource": "graphite",
+        "format": "none",
+        "postfix": "",
+        "postfixFontSize": "80%",
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.CAE_PREV.OperatingSystem.file_descriptor.open" }
+        ],
+        "thresholds": "150,200",
+        "valueFontSize": "100%",
+        "valueName": "current"
       },
       {
         "title": "used Heap Memory",
@@ -7423,6 +7807,26 @@
         ]
       },
       {
+        "title": "Open Files",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "type": "singlestat",
+        "span": 1,
+        "colorBackground": true,
+        "colors": [ "rgba(50, 172, 45, 0.97)", "rgba(237, 129, 40, 0.89)", "rgba(245, 54, 54, 0.9)" ],
+        "datasource": "graphite",
+        "format": "none",
+        "postfix": "",
+        "postfixFontSize": "80%",
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.ELASTIC_WORKER.OperatingSystem.file_descriptor.open" }
+        ],
+        "thresholds": "150,200",
+        "valueFontSize": "100%",
+        "valueName": "current"
+      },
+      {
         "title": "used Heap Memory",
         "id": <%= id += 1 %>,
         "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
@@ -7771,6 +8175,26 @@
             "text": "OFFLINE"
           }
         ]
+      },
+      {
+        "title": "Open Files",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "type": "singlestat",
+        "span": 1,
+        "colorBackground": true,
+        "colors": [ "rgba(50, 172, 45, 0.97)", "rgba(237, 129, 40, 0.89)", "rgba(245, 54, 54, 0.9)" ],
+        "datasource": "graphite",
+        "format": "none",
+        "postfix": "",
+        "postfixFontSize": "80%",
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.ADOBE_DRIVE_SERVER.OperatingSystem.file_descriptor.open" }
+        ],
+        "thresholds": "150,200",
+        "valueFontSize": "100%",
+        "valueName": "current"
       },
       {
         "title": "used Heap Memory",
@@ -8123,6 +8547,26 @@
         ]
       },
       {
+        "title": "Open Files",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "type": "singlestat",
+        "span": 1,
+        "colorBackground": true,
+        "colors": [ "rgba(50, 172, 45, 0.97)", "rgba(237, 129, 40, 0.89)", "rgba(245, 54, 54, 0.9)" ],
+        "datasource": "graphite",
+        "format": "none",
+        "postfix": "",
+        "postfixFontSize": "80%",
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.USER_CHANGES.OperatingSystem.file_descriptor.open" }
+        ],
+        "thresholds": "150,200",
+        "valueFontSize": "100%",
+        "valueName": "current"
+      },
+      {
         "title": "used Heap Memory",
         "id": <%= id += 1 %>,
         "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
@@ -8471,6 +8915,26 @@
             "text": "OFFLINE"
           }
         ]
+      },
+      {
+        "title": "Open Files",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "type": "singlestat",
+        "span": 1,
+        "colorBackground": true,
+        "colors": [ "rgba(50, 172, 45, 0.97)", "rgba(237, 129, 40, 0.89)", "rgba(245, 54, 54, 0.9)" ],
+        "datasource": "graphite",
+        "format": "none",
+        "postfix": "",
+        "postfixFontSize": "80%",
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.STUDIO.OperatingSystem.file_descriptor.open" }
+        ],
+        "thresholds": "150,200",
+        "valueFontSize": "100%",
+        "valueName": "current"
       },
       {
         "title": "used Heap Memory",
@@ -8905,6 +9369,26 @@
         ]
       },
       {
+        "title": "Open Files",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "type": "singlestat",
+        "span": 1,
+        "colorBackground": true,
+        "colors": [ "rgba(50, 172, 45, 0.97)", "rgba(237, 129, 40, 0.89)", "rgba(245, 54, 54, 0.9)" ],
+        "datasource": "graphite",
+        "format": "none",
+        "postfix": "",
+        "postfixFontSize": "80%",
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.MONGODB.storage-engine.wiredTiger.connection.files.open" }
+        ],
+        "thresholds": "150,200",
+        "valueFontSize": "100%",
+        "valueName": "current"
+      },
+      {
         "title": "Connections",
         "id": <%= id += 1 %>,
         "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
@@ -9008,6 +9492,26 @@
             "text": "OFFLINE"
           }
         ]
+      },
+      {
+        "title": "Open Files",
+        "id": <%= id += 1 %>,
+        "gridPos": { "x": <%= x += widget_width %>, "y": <%= y %>, "w": <%= widget_width %>, "h": 3 },
+        "transparent": true,
+        "type": "singlestat",
+        "span": 1,
+        "colorBackground": true,
+        "colors": [ "rgba(50, 172, 45, 0.97)", "rgba(237, 129, 40, 0.89)", "rgba(245, 54, 54, 0.9)" ],
+        "datasource": "graphite",
+        "format": "none",
+        "postfix": "",
+        "postfixFontSize": "80%",
+        "targets": [
+          { "refId": "A", "target": "carbon-writer.$host.MYSQL.innodb.num.open_files" }
+        ],
+        "thresholds": "300,350",
+        "valueFontSize": "100%",
+        "valueName": "current"
       },
       {
         "title": "Connections",

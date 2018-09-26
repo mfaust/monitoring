@@ -11,8 +11,6 @@ module CarbonData
 
         unless( value.nil? )
 
-          logger.debug(JSON.pretty_generate value)
-
           result += innodb_values(value.select { |k| k[/Innodb.*/] })
           result += thread_values(value.select { |k| k[/Threads.*/] })
           result += qcache_values(value.select { |k| k[/Qcache.*/] })

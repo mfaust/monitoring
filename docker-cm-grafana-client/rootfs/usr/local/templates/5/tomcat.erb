@@ -501,6 +501,89 @@
         ]
       },
       {
+        "title": "Open File Descriptors",
+        "height": "150px",
+        "panels": [
+          {
+            "tooltip": {
+              "shared": true,
+              "value_type": "cumulative",
+              "sort": 0,
+              "ordering": "alphabetical",
+              "msResolution": false
+            },
+            "targets": [
+              {
+                "refId": "A",
+                "target": "alias(carbon-writer.$host.$Application.OperatingSystem.file_descriptor.open, 'Open Files')"
+              }
+            ],
+            "editable": true,
+            "pointradius": 5,
+            "xaxis": {
+              "name": null,
+              "show": true,
+              "values": [],
+              "mode": "time"
+            },
+            "aliasColors": {},
+            "timeShift": null,
+            "thresholds": [],
+            "id": <%= id += 1 %>,
+            "percentage": false,
+            "nullPointMode": "connected",
+            "steppedLine": false,
+            "yaxes": [
+              {
+                "show": true,
+                "max": null,
+                "logBase": 1,
+                "min": 0,
+                "format": "none"
+              },
+              {
+                "logBase": 1,
+                "min": null,
+                "format": "none",
+                "show": false,
+                "label": "percent",
+                "max": "110"
+              }
+            ],
+            "stack": false,
+            "bars": false,
+            "seriesOverrides": [],
+            "decimals": 0,
+            "renderer": "flot",
+            "legend": {
+              "avg": false,
+              "current": true,
+              "min": false,
+              "show": true,
+              "values": true,
+              "max": false,
+              "alignAsTable": true,
+              "total": false,
+              "rightSide": true
+            },
+            "grid": {},
+            "lines": true,
+            "cacheTimeout": "",
+            "span": 12,
+            "maxDataPoints": "",
+            "fill": 3,
+            "datasource": "graphite",
+            "timeFrom": null,
+            "title": "Open File Descriptors",
+            "error": false,
+            "type": "graph",
+            "points": false,
+            "links": [],
+            "linewidth": 1
+          }
+        ]
+      },
+      {
         "title": "Tomcat Sessions",
         "height": "330px",
         "panels": [
