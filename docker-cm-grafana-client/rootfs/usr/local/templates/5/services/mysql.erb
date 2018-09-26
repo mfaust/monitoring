@@ -586,7 +586,7 @@
             "datasource": "graphite",
             "editable": true,
             "error": false,
-            "fill": 3,
+            "fill": 4,
             "grid": {},
             "id": <%= id += 1 %>,
             "isNew": true,
@@ -616,7 +616,7 @@
             "targets": [
               {
                 "refId": "A",
-                "target": "aliasByMetric(aliasSub(perSecond(carbon-writer.$host.MYSQL.handler.*), '^perSecond\((.*)\)$', '\1'))"
+                "target": "aliasByMetric(aliasSub(aliasSub(perSecond(aliasSub(carbon-writer.$host.MYSQL.handler.*, '(.*)-', '')), '^perSecond\((.*)\)$', '\1'), 'pages_(.*)', '\1'))"
               }
             ],
             "timeFrom": null,
@@ -634,6 +634,7 @@
             },
             "yaxes": [
               {
+                "decimals": 0,
                 "format": "none",
                 "label": null,
                 "logBase": 1,
@@ -650,6 +651,7 @@
                 "show": true
               }
             ],
+            "decimals": 0,
             "thresholds": []
           }
         ]
