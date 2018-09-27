@@ -20,14 +20,20 @@ module DataCollector
 
     def merge_solr_cores( metrics, cores = [] )
 
+#       logger.debug("merge_solr_cores( #{metrics}, #{cores} )")
+
       work = []
+
+      logger.error( "metrics or cores are empty!?" ) unless( metrics.is_a?(Array) || cores.is_a?(Array) || metrics.count == 0 || cores.count == 0 )
+
+      return work unless( metrics.is_a?(Array) || cores.is_a?(Array) || metrics.count == 0 || cores.count == 0 )
 
       cores.each do |core|
 
         metric = Marshal.load( Marshal.dump( metrics ) )
 
         metric.each do |m|
-          mb = m['mbean']
+          mb = m.dig('mbean')
           mb.sub!( '%CORE%', core )
         end
 
@@ -64,18 +70,18 @@ module DataCollector
       start = Time.now
 
       #
-      applications = @cfg.jolokiaApplications.clone
+      known_applications = @cfg.known_applications.clone
 
       redis_data = []
 
       data.each do |service,payload|
 
-        if( !payload.is_a?( Hash ) )
+        unless( payload.is_a?( Hash ) )
           logger.error( " => #{service} - wrong format for payload!" )
           next
         end
 
-        result      = self.merge_data( service.to_s, applications, payload )
+        result      = merge_data( service.to_s, known_applications, payload )
 
         redis_data << { service.to_s => result }
       end
@@ -111,7 +117,7 @@ module DataCollector
 
     def merge_data( service, applications, data = {} )
 
-      logger.debug( "merge_data( '#{service}', applications, data )" )
+#       logger.debug( "merge_data( '#{service}', applications (#{applications.class} | #{applications.size}), data (#{data.class} | #{data.size}) )" )
 
       metrics_tomcat     = applications.dig('tomcat')      # standard metrics for Tomcat
 
@@ -128,11 +134,13 @@ module DataCollector
 
       if( data.dig(:data).nil? )
         application = data.dig('application')
-        solr_cores  = data.dig('cores')
+        solr_cores  = data.dig('cores') || []
         metrics     = data.dig('metrics')
       end
 
-      logger.debug( "application: '#{application}'" )
+      logger.debug( "service: '#{service}'" )
+#       logger.debug( "application: '#{application}'" )
+#       logger.debug( "solr_cores : '#{solr_cores}'" )
 
       data['metrics'] ||= []
 
@@ -165,15 +173,16 @@ module DataCollector
 
             application_metrics = applications.dig( a, 'metrics' )
 
-            logger.debug( format( '  add %2d additional application metrics for %s', application_metrics.count, a ) )
+            if( solr_cores.is_a?(Array) && solr_cores.count != 0 )
 
-            data['metrics'].push( self.merge_solr_cores( application_metrics , solr_cores ) ) if( solr_cores != nil )
+              solr_cores_metrics = merge_solr_cores( application_metrics , solr_cores )
 
-            # remove unneeded Templates
-            applications[a]['metrics'].delete_if {|key| key['mbean'].match( '%CORE%' ) }
+              logger.debug( format( '  add %2d solr core metrics', solr_cores_metrics.count ) )
 
-#            data[:data]['metrics'].push( metrics_tomcat['metrics'] )
+              data['metrics'].push( solr_cores_metrics )
+            end
 
+            logger.debug( format( '  add %2d additional application metrics: %s', application_metrics.count, a ) )
             data['metrics'].push( application_metrics )
           end
         end
@@ -182,11 +191,14 @@ module DataCollector
 
       data['metrics'].compact!   # remove 'nil' from array
       data['metrics'].flatten!   # clean up and reduce depth
+      # remove unneeded solr templates
+      data['metrics'].delete_if { |key| key['mbean'].match( '%CORE%' ) } if( service =~ /solr-/ )
       data['metrics'].uniq!      # remove doubles
 
-#      mbeans = data['metrics'].map {|x| x['mbean'] }
-
-      logger.debug( '----------------------------------------------------------------------')
+      # mbeans = data['metrics'].map {|x| x['mbean'] }
+      # logger.debug( JSON.pretty_generate mbeans )
+      # logger.debug( data['metrics'].count )
+#       logger.debug( '----------------------------------------------------------------------')
 
       return data
     end
