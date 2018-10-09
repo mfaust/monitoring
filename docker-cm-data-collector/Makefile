@@ -2,40 +2,33 @@
 TYPE := cm-data-collector
 IMAGE_NAME := docker-${TYPE}
 
-.PHONY: build clean run  shell exec stop package-info history
+.PHONY: build clean run shell exec stop
 
 default: build
 
 build:
-	docker \
-		build \
-		--rm --tag=$(IMAGE_NAME) .
+	docker build \
+		--rm \
+		--tag=$(IMAGE_NAME) .
 	@echo Image tag: ${IMAGE_NAME}
-
-clean:
-	docker rmi \
-		${IMAGE_NAME}
 
 run:
 	docker run \
 		--detach \
 		--interactive \
 		--tty \
-		--hostname=${IMAGE_NAME} \
 		--name=${IMAGE_NAME} \
-		$(IMAGE_NAME) \
-		/usr/local/bin/external-discover.rb
+		$(IMAGE_NAME)
 
 shell:
 	docker run \
 		--rm \
 		--interactive \
 		--tty \
-		--volume /etc/localtime:/etc/localtime:ro \
 		--hostname=${IMAGE_NAME} \
 		--name=${IMAGE_NAME} \
 		$(IMAGE_NAME) \
-		/bin/sh
+		sh
 
 exec:
 	docker exec \
@@ -48,16 +41,8 @@ stop:
 	docker kill \
 		${IMAGE_NAME}
 
-package-info:
-	docker run \
-		--rm \
-		--interactive \
-		--tty \
-		--hostname=${IMAGE_NAME} \
-		--name=${IMAGE_NAME} \
-		$(IMAGE_NAME) \
-		apk -v info | sort
-
-history:
-	docker \
-		history ${IMAGE_NAME}
+clean:
+	did=$$(docker images -q ${IMAGE_NAME} | uniq); \
+	if [ $$did ] ; then \
+		docker rmi -f "$$did"; \
+	fi

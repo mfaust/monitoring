@@ -2,10 +2,9 @@
 TYPE := cm-carbon-client
 IMAGE_NAME := docker-${TYPE}
 
-.PHONY: build clean run  shell exec stop package-info history
+.PHONY: build clean run shell exec stop
 
 default: build
-
 
 build:
 	docker build \
@@ -42,16 +41,8 @@ stop:
 	docker kill \
 		${IMAGE_NAME}
 
-package-info:
-	docker run \
-		--rm \
-		--interactive \
-		--tty \
-		--hostname=${IMAGE_NAME} \
-		--name=${IMAGE_NAME} \
-		$(IMAGE_NAME) \
-		apk -v info | sort
-
-history:
-	docker \
-		history ${IMAGE_NAME}
+clean:
+	did=$$(docker images -q ${IMAGE_NAME} | uniq); \
+	if [ $$did ] ; then \
+		docker rmi -f "$$did"; \
+	fi

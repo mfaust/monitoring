@@ -1,80 +1,48 @@
 
-include env_make
+TYPE := documentation
+IMAGE_NAME := docker-${TYPE}
 
-NS       = bodsch
-VERSION ?= latest
+.PHONY: build clean run shell exec stop
 
-REPO     = docker-documentation
-NAME     = documentation
-INSTANCE = default
-
-.PHONY: build push shell run start stop rm release
-
+default: build
 
 build:
 	docker build \
 		--rm \
-		--tag $(NS)/$(REPO):$(VERSION) .
+		--tag=$(IMAGE_NAME) .
+	@echo Image tag: ${IMAGE_NAME}
 
-clean:
-	docker rmi \
-		--force \
-		$(NS)/$(REPO):$(VERSION)
-
-history:
-	docker history \
-		$(NS)/$(REPO):$(VERSION)
-
-push:
-	docker push \
-		$(NS)/$(REPO):$(VERSION)
+run:
+	docker run \
+		--detach \
+		--interactive \
+		--tty \
+		--name=${IMAGE_NAME} \
+		$(IMAGE_NAME)
 
 shell:
 	docker run \
 		--rm \
-		--name $(NAME)-$(INSTANCE) \
 		--interactive \
 		--tty \
-		$(VOLUMES) \
-		$(ENV) \
-		$(NS)/$(REPO):$(VERSION) \
-		/bin/sh
-
-run:
-	docker run \
-		--rm \
-		--name $(NAME)-$(INSTANCE) \
-		$(PORTS) \
-		$(VOLUMES) \
-		$(ENV) \
-		$(NS)/$(REPO):$(VERSION)
+		--hostname=${IMAGE_NAME} \
+		--name=${IMAGE_NAME} \
+		$(IMAGE_NAME) \
+		sh
 
 exec:
 	docker exec \
 		--interactive \
 		--tty \
-		$(NAME)-$(INSTANCE) \
+		${IMAGE_NAME} \
 		/bin/sh
 
-start:
-	docker run \
-		--rm \
-		--detach \
-		--name $(NAME)-$(INSTANCE) \
-		$(PORTS) \
-		$(VOLUMES) \
-		$(ENV) \
-		$(NS)/$(REPO):$(VERSION)
-
 stop:
-	docker stop \
-		$(NAME)-$(INSTANCE)
+	docker kill \
+		${IMAGE_NAME}
 
-rm:
-	docker rm \
-		$(NAME)-$(INSTANCE)
-
-release: build
-	make push -e VERSION=$(VERSION)
-
-default: build
+clean:
+	did=$$(docker images -q ${IMAGE_NAME} | uniq); \
+	if [ $$did ] ; then \
+		docker rmi -f "$$did"; \
+	fi
