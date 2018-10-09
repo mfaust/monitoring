@@ -28,12 +28,12 @@ services:
 
   database:
     restart: always
-    image: bodsch/docker-mysql
+    image: bodsch/docker-mariadb
     container_name: database
     hostname: database
     environment:
-      MYSQL_SYSTEM_USER: root
-      MYSQL_ROOT_PASS: ${MYSQL_ROOT_PASSWORD}
+      MARIADB_SYSTEM_USER: root
+      MARIADB_ROOT_PASSWORD: ${DATABASE_ROOT_PASSWORD}
     volumes:
       - database:/srv
     networks:
@@ -41,7 +41,12 @@ services:
 
   jolokia:
     restart: always
-    build: ../../docker-cm-jolokia
+    build:
+      context: ../../docker-cm-jolokia
+      dockerfile: Dockerfile
+      args:
+        - BUILD_DATE=${BUILD_DATE}
+        - BUILD_VERSION=${BUILD_VERSION}
     container_name: jolokia
     hostname: jolokia
     networks:
@@ -128,7 +133,7 @@ services:
 
   grafana:
     restart: always
-    image: bodsch/docker-grafana:5.2.2
+    image: bodsch/docker-grafana:5.2.4
     container_name: grafana
     hostname: grafana
     environment:
@@ -136,7 +141,7 @@ services:
       ORGANISATION: CoreMedia
       DATABASE_TYPE: mysql
       MYSQL_HOST: database
-      MYSQL_ROOT_PASS: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_ROOT_PASS: ${DATABASE_ROOT_PASSWORD}
       GRAPHITE_HOST: graphite
       # WE USE AN SEPERATE CARBON SERVICE
       # IF NOT, THEN SET THEN TO $GRAPHITE_HOST
@@ -163,7 +168,12 @@ services:
 
   cm-icinga2-master:
     restart: always
-    build: ../../docker-cm-icinga2
+    build:
+      context: ../../docker-cm-icinga2
+      dockerfile: Dockerfile
+      args:
+        - BUILD_DATE=${BUILD_DATE}
+        - BUILD_VERSION=${BUILD_VERSION}
     container_name: cm-icinga2-master
     hostname: cm-icinga2-master
     depends_on:
@@ -186,7 +196,7 @@ services:
       ICINGA_CERT_SERVICE_PORT: 8080
       ICINGA_CERT_SERVICE_PATH: /
       MYSQL_HOST: database
-      MYSQL_ROOT_PASS: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_ROOT_PASS: ${DATABASE_ROOT_PASSWORD}
       IDO_PASSWORD: ${IDO_PASSWORD}
       IDO_DATABASE_NAME: icinga2core
       CARBON_HOST: carbon
@@ -210,7 +220,7 @@ services:
     hostname: icingaweb2
     environment:
       MYSQL_HOST: database
-      MYSQL_ROOT_PASS: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_ROOT_PASS: ${DATABASE_ROOT_PASSWORD}
       IDO_PASSWORD: ${IDO_PASSWORD}
       IDO_DATABASE_NAME: icinga2core
       ICINGA2_HOST: cm-icinga2-master
@@ -240,7 +250,12 @@ services:
 
   documentation:
     restart: always
-    build: ../../docker-documentation
+    build:
+      context: ../../docker-documentation
+      dockerfile: Dockerfile
+      args:
+        - BUILD_DATE=${BUILD_DATE}
+        - BUILD_VERSION=${BUILD_VERSION}
     container_name: documentation
     hostname: documentation
     entrypoint: '/usr/bin/algernon'
@@ -255,7 +270,12 @@ services:
 
   cm-dashing:
     restart: always
-    build: ../../docker-cm-dashing
+    build:
+      context: ../../docker-cm-dashing
+      dockerfile: Dockerfile
+      args:
+        - BUILD_DATE=${BUILD_DATE}
+        - BUILD_VERSION=${BUILD_VERSION}
     container_name: cm-dashing
     hostname: cm-dashing
     environment:
@@ -282,12 +302,17 @@ services:
   #
   cm-rest-service:
     restart: always
-    build: ../../docker-cm-rest-service
+    build:
+      context: ../../docker-cm-rest-service
+      dockerfile: Dockerfile
+      args:
+        - BUILD_DATE=${BUILD_DATE}
+        - BUILD_VERSION=${BUILD_VERSION}
     container_name: cm-rest-service
     hostname: cm-rest-service
     environment:
       LOG_LEVEL: info
-      MYSQL_ROOT_PASS: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_ROOT_PASS: ${DATABASE_ROOT_PASSWORD}
     depends_on:
       - redis
       - database
@@ -306,7 +331,12 @@ services:
   # use MQ to process data
   cm-service-discovery:
     restart: always
-    build: ../../docker-cm-service-discovery
+    build:
+      context: ../../docker-cm-service-discovery
+      dockerfile: Dockerfile
+      args:
+        - BUILD_DATE=${BUILD_DATE}
+        - BUILD_VERSION=${BUILD_VERSION}
     container_name: cm-service-discover
     hostname: cm-service-discover
     environment:
@@ -331,11 +361,16 @@ services:
   # use MQ to process data
   cm-data-collector:
     restart: always
-    build: ../../docker-cm-data-collector
+    build:
+      context: ../../docker-cm-data-collector
+      dockerfile: Dockerfile
+      args:
+        - BUILD_DATE=${BUILD_DATE}
+        - BUILD_VERSION=${BUILD_VERSION}
     container_name: cm-data-collector
     hostname: cm-data-collector
     environment:
-      LOG_LEVEL: info
+      LOG_LEVEL: debug
     depends_on:
       - jolokia
       - beanstalkd
@@ -356,7 +391,12 @@ services:
   # use MQ to process data
   cm-carbon-client:
     restart: always
-    build: ../../docker-cm-carbon-client
+    build:
+      context: ../../docker-cm-carbon-client
+      dockerfile: Dockerfile
+      args:
+        - BUILD_DATE=${BUILD_DATE}
+        - BUILD_VERSION=${BUILD_VERSION}
     container_name: cm-carbon-client
     hostname: cm-carbon-client
     environment:
@@ -375,7 +415,12 @@ services:
   # use MQ to process data
   cm-grafana-client:
     restart: always
-    build: ../../docker-cm-grafana-client
+    build:
+      context: ../../docker-cm-grafana-client
+      dockerfile: Dockerfile
+      args:
+        - BUILD_DATE=${BUILD_DATE}
+        - BUILD_VERSION=${BUILD_VERSION}
     container_name: cm-grafana-client
     hostname: cm-grafana-client
     environment:
@@ -399,7 +444,12 @@ services:
   # use MQ to process data
   cm-icinga-client:
     restart: always
-    build: ../../docker-cm-icinga-client
+    build:
+      context: ../../docker-cm-icinga-client
+      dockerfile: Dockerfile
+      args:
+        - BUILD_DATE=${BUILD_DATE}
+        - BUILD_VERSION=${BUILD_VERSION}
     container_name: cm-icinga-client
     hostname: cm-icinga-client
     environment:
