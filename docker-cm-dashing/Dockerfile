@@ -1,20 +1,18 @@
 
 FROM bodsch/docker-dashing:1808
 
+ARG BUILD_DATE
+ARG BUILD_VERSION
+
 ENV \
-  VERSION="1808" \
-  BUILD_DATE="2018-08-14" \
+  VERSION="${BUILD_VERSION}" \
+  BUILD_DATE="${BUILD_DATE}" \
   TZ='Europe/Berlin' \
   DASHBOARD="coremedia" \
   ICINGA2_GEM_TYPE="stable" \
   ICINGA2_GEM_VERSION="1.0.0"
 
 EXPOSE 3030
-
-LABEL \
-  version="${VERSION}" \
-  maintainer="Bodo Schulz <bodo@coremedia.com>" \
-  org.label-schema.build-date=${BUILD_DATE}
 
 # ---------------------------------------------------------------------------------------
 
@@ -67,5 +65,12 @@ HEALTHCHECK \
   CMD curl --silent --fail http://localhost:3030/dashing/${DASHBOARD} || exit 1
 
 CMD [ "/init/run.sh" ]
+
+# ---------------------------------------------------------------------------------------
+
+LABEL \
+  version="${BUILD_VERSION}" \
+  maintainer="Bodo Schulz <bodo@coremedia.com>" \
+  org.label-schema.build-date=${BUILD_DATE}
 
 # ---------------------------------------------------------------------------------------

@@ -1,11 +1,12 @@
 
 FROM alpine:3.8
 
-MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
+ARG BUILD_DATE
+ARG BUILD_VERSION
 
 ENV \
-  VERSION="1807" \
-  BUILD_DATE="2018-07-30" \
+  VERSION="${BUILD_VERSION}" \
+  BUILD_DATE="${BUILD_DATE}" \
   TERM=xterm \
   TZ='Europe/Berlin'
 
@@ -49,3 +50,12 @@ HEALTHCHECK \
   CMD curl --silent --fail http://localhost:8080/health || exit 1
 
 CMD [ "/init/run.sh" ]
+
+# ---------------------------------------------------------------------------------------
+
+LABEL \
+  version="${BUILD_VERSION}" \
+  maintainer="Bodo Schulz <bodo@coremedia.com>" \
+  org.label-schema.build-date=${BUILD_DATE}
+
+# ---------------------------------------------------------------------------------------

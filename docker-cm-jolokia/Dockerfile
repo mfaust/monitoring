@@ -20,17 +20,15 @@ RUN \
 
 FROM bodsch/docker-jolokia:1.6.0
 
+ARG BUILD_DATE
+ARG BUILD_VERSION
+
 ENV \
-  VERSION="1807" \
-  BUILD_DATE="2018-07-30" \
+  VERSION="${BUILD_VERSION}" \
+  BUILD_DATE="${BUILD_DATE}" \
   TZ='Europe/Berlin'
 
 EXPOSE 8080 8088
-
-LABEL \
-  version="${VERSION}" \
-  maintainer="Bodo Schulz <bodo.schulz@coremedia.com>" \
-  org.label-schema.build-date=${BUILD_DATE}
 
 RUN \
   apk --quiet --no-cache update && \
@@ -47,3 +45,12 @@ COPY --from=builder /service-discovery /usr/bin/
 COPY rootfs/ /
 
 WORKDIR /
+
+# ---------------------------------------------------------------------------------------
+
+LABEL \
+  version="${BUILD_VERSION}" \
+  maintainer="Bodo Schulz <bodo@coremedia.com>" \
+  org.label-schema.build-date=${BUILD_DATE}
+
+# ---------------------------------------------------------------------------------------

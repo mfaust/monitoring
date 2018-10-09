@@ -1,11 +1,12 @@
 
 FROM alpine:3.8
 
-MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
+ARG BUILD_DATE
+ARG BUILD_VERSION
 
 ENV \
-  VERSION="1807" \
-  BUILD_DATE="2018-07-30" \
+  VERSION="${BUILD_VERSION}" \
+  BUILD_DATE="${BUILD_DATE}" \
   TERM=xterm \
   TZ='Europe/Berlin' \
   ICINGA2_GEM_TYPE="stable" \
@@ -61,3 +62,12 @@ HEALTHCHECK \
 ENTRYPOINT [ "/init/run.sh" ]
 
 CMD [ "/usr/local/bin/icinga-client.rb" ]
+
+# ---------------------------------------------------------------------------------------
+
+LABEL \
+  version="${BUILD_VERSION}" \
+  maintainer="Bodo Schulz <bodo@coremedia.com>" \
+  org.label-schema.build-date=${BUILD_DATE}
+
+# ---------------------------------------------------------------------------------------

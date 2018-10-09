@@ -3,9 +3,12 @@ FROM alpine:3.8
 
 MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
 
+ARG BUILD_DATE
+ARG BUILD_VERSION
+
 ENV \
-  VERSION="1808" \
-  BUILD_DATE="2018-08-14" \
+  VERSION="${BUILD_VERSION}" \
+  BUILD_DATE="${BUILD_DATE}" \
   TERM=xterm \
   TZ='Europe/Berlin'
 
@@ -49,3 +52,12 @@ HEALTHCHECK \
   CMD ps ax | grep -c carbon-data.rb || exit 1
 
 CMD [ "/usr/local/bin/carbon-data.rb" ]
+
+# ---------------------------------------------------------------------------------------
+
+LABEL \
+  version="${BUILD_VERSION}" \
+  maintainer="Bodo Schulz <bodo@coremedia.com>" \
+  org.label-schema.build-date=${BUILD_DATE}
+
+# ---------------------------------------------------------------------------------------

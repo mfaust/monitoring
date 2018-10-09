@@ -48,13 +48,14 @@ RUN \
 
 # ---------------------------------------------------------------------------------------
 
-FROM bodsch/docker-icinga2:2.9.1-master
+FROM bodsch/docker-icinga2:2.9.2-master
 
-MAINTAINER Bodo Schulz <bodo.schulz@coremedia.com>
+ARG BUILD_DATE
+ARG BUILD_VERSION
 
 ENV \
-  VERSION="1808" \
-  BUILD_DATE="2018-08-13" \
+  VERSION="${BUILD_VERSION}" \
+  BUILD_DATE="${BUILD_DATE}" \
   TERM=xterm \
   DEBIAN_FRONTEND=noninteractive
 
@@ -92,3 +93,12 @@ RUN \
 COPY --from=builder /tmp/coremedia_icinga2_checks/build/check_*  /usr/lib/monitoring-plugins/
 COPY --from=builder /usr/local/lib64 /usr/local/lib64
 COPY rootfs/ /
+
+# ---------------------------------------------------------------------------------------
+
+LABEL \
+  version="${BUILD_VERSION}" \
+  maintainer="Bodo Schulz <bodo@coremedia.com>" \
+  org.label-schema.build-date=${BUILD_DATE}
+
+# ---------------------------------------------------------------------------------------
