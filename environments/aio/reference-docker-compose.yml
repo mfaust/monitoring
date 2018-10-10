@@ -32,8 +32,8 @@ services:
     container_name: database
     hostname: database
     environment:
-      MYSQL_SYSTEM_USER: root
-      MYSQL_ROOT_PASS: ${DATABASE_ROOT_PASSWORD}
+      MARIADB_SYSTEM_USER: root
+      MARIADB_ROOT_PASSWORD: ${DATABASE_ROOT_PASSWORD}
     volumes:
       - database:/srv
     networks:
