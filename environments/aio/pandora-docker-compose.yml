@@ -28,7 +28,7 @@ services:
 
   database:
     restart: always
-    image: bodsch/docker-mysql
+    image: bodsch/docker-mariadb
     container_name: database
     hostname: database
     environment:
