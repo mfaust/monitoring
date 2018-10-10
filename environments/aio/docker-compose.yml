@@ -370,7 +370,7 @@ services:
     container_name: cm-data-collector
     hostname: cm-data-collector
     environment:
-      LOG_LEVEL: debug
+      LOG_LEVEL: info
     depends_on:
       - jolokia
       - beanstalkd
