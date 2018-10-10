@@ -101,6 +101,8 @@
 
 1810
 
+- update to grafana 5.2.4
+- update to icinga2 2.9.2
 - remove postgres support in data-collector
 - enhanced support of moebius' multi-node-deployment
   - import only the really needed Grafana templates
@@ -108,6 +110,13 @@
 - better errorhandling at importing of grafana dashboards
 - support for the Publisher mbean (used in the content-management-server application)
 - add check_publisher for icinga2
+- add open file descriptors monitoring to icinga and grafana
+- fix double entries in the prepared service cache
+- more measuring points for mysql / mariadb monitoring
+- change markdown browser backend to algernon
+- remove postgres support
+- enable cors for external integration
+- remove obsolete code
 
 
 
