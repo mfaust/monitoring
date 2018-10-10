@@ -28,12 +28,12 @@ services:
 
   database:
     restart: always
-    image: bodsch/docker-mysql
+    image: bodsch/docker-mariadb
     container_name: database
     hostname: database
     environment:
       MYSQL_SYSTEM_USER: root
-      MYSQL_ROOT_PASS: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_ROOT_PASS: ${DATABASE_ROOT_PASSWORD}
     volumes:
       - database:/srv
     networks:
@@ -127,7 +127,7 @@ services:
 
   grafana:
     restart: always
-    image: bodsch/docker-grafana:5.2.2
+    image: bodsch/docker-grafana:5.2.4
     container_name: grafana
     hostname: grafana
     environment:
@@ -135,7 +135,7 @@ services:
       ORGANISATION: CoreMedia
       DATABASE_TYPE: mysql
       MYSQL_HOST: database
-      MYSQL_ROOT_PASS: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_ROOT_PASS: ${DATABASE_ROOT_PASSWORD}
       GRAPHITE_HOST: graphite
       # WE USE AN SEPERATE CARBON SERVICE
       # IF NOT, THEN SET THEN TO $GRAPHITE_HOST
@@ -184,7 +184,7 @@ services:
       ICINGA_CERT_SERVICE_PORT: 8080
       ICINGA_CERT_SERVICE_PATH: /
       MYSQL_HOST: database
-      MYSQL_ROOT_PASS: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_ROOT_PASS: ${DATABASE_ROOT_PASSWORD}
       IDO_PASSWORD: ${IDO_PASSWORD}
       IDO_DATABASE_NAME: icinga2core
       CARBON_HOST: carbon
@@ -208,7 +208,7 @@ services:
     hostname: icingaweb2
     environment:
       MYSQL_HOST: database
-      MYSQL_ROOT_PASS: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_ROOT_PASS: ${DATABASE_ROOT_PASSWORD}
       IDO_PASSWORD: ${IDO_PASSWORD}
       IDO_DATABASE_NAME: icinga2core
       ICINGA2_HOST: cm-icinga2-master
@@ -285,7 +285,7 @@ services:
     hostname: cm-rest-service
     environment:
       LOG_LEVEL: info
-      MYSQL_ROOT_PASS: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_ROOT_PASS: ${DATABASE_ROOT_PASSWORD}
     depends_on:
       - redis
       - database
