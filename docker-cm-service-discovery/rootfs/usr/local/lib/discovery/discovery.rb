@@ -51,7 +51,7 @@ module ServiceDiscovery
         array << {
           type: 'read',
           mbean: 'java.lang:type=Runtime',
-          attribute: ['ClassPath'],
+          attribute: ['ClassPath','InputArguments'],
           target: {url: target_url},
           config: {'ignoreErrors' => true, 'ifModifiedSince' => true, 'canonicalNaming' => true}
         } << {
@@ -179,7 +179,11 @@ module ServiceDiscovery
 
                 if( value != nil )
 
-                  class_path  = value.dig('ClassPath')
+                  class_path      = value.dig('ClassPath')
+                  input_arguments = value.dig('InputArguments')
+
+                  logger.debug("class_path     : #{class_path}")
+                  logger.debug("input_arguments: #{input_arguments}")
 
                   # CoreMedia 7.x == classPath 'cm7-tomcat-installation'
                   # Solr 6.5      == classPath 'solr-6'
@@ -280,7 +284,7 @@ module ServiceDiscovery
 
                   # Solr - Standalone Support
                   #
-                  elsif( class_path.include?('solr-6' ) || class_path.include?('solr/server') )
+                  elsif( class_path.include?('solr-6' ) || class_path.include?('solr/server') || input_arguments.any? { |s| s.include?('solr') } )
 
                     services.push( 'solr' )
 
@@ -289,6 +293,11 @@ module ServiceDiscovery
                   elsif( class_path.include?('solr/server') )
 
                     services.push( 'solr' )
+
+                  # solr 7.x
+                  #
+#                  elsif( class_path.include?('start.jar') )
+#                    services.push( 'solr' )
 
                   # CoreMedia on Cloud / SpringBoot
                   #
@@ -299,7 +308,7 @@ module ServiceDiscovery
                       \/(?<service>.+[a-zA-Z0-9-])\.war$
                     /x
 
-                    parts = class_path.match(regex )
+                    parts = class_path.match(regex)
 
                     if( parts )
                       service = parts['service'].to_s.strip
@@ -314,6 +323,8 @@ module ServiceDiscovery
                   #
                   else
 
+                    logger.debug('detect other services ...')
+
                     regex = /
                       ^                           # Starting at the front of the string
                       (.*)                        #
@@ -324,7 +335,9 @@ module ServiceDiscovery
                       $
                     /x
 
-                    parts = class_path.match(regex )
+                    parts = class_path.match(regex)
+
+                    logger.debug("parts: #{parts}")
 
                     if( parts )
                       service = parts['service'].to_s.strip.tr('. ', '')

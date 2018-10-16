@@ -863,9 +863,11 @@ module DataCollector
 
       #  logger.error( "      no data for reorganize" )
       #  logger.error( "      skip" )
-      { status: 500, message: 'no data for reorganize' } if( data.nil? )
+      return { status: 500, message: 'no data for reorganize' } if( data.nil? )
 
       result  = []
+
+      # logger.debug("data: #{data} (#{data.class})")
 
       data.each do |c|
 
@@ -881,6 +883,9 @@ module DataCollector
         timestamp  = c.dig('timestamp')
         status     = c.dig('status')
 
+#         logger.debug("request: #{request} (#{request.class})")
+#         logger.debug("mbean  : #{mbean} (#{mbean.class})")
+#         logger.debug("value  : #{value} (#{value.class})")
 
         # "service:jmx:rmi:///jndi/rmi://moebius-16-tomcat:2222/jmxrmi"
         regex = /
@@ -896,10 +901,15 @@ module DataCollector
         host  = parts['host'].to_s.strip
         port  = parts['port'].to_s.strip
 
+#         logger.debug(" port  : #{port} (#{port.class})")
+
+        #if(port == '40099')
+        #  logger.debug("request: #{request} (#{request.class})")
+        #  logger.debug("mbean  : #{mbean} (#{mbean.class})")
+        #  logger.debug("value  : #{value} (#{value.class})")
+        #end
 
         if( mbean.include?( 'Cache.Classes' ) )
-
-#           logger.debug( mbean )
 
           regex = /
             CacheClass=
@@ -954,7 +964,81 @@ module DataCollector
           mbean_type      = parts['type'].to_s.strip.tr( '. ', '' )
           mbean_type      = format( '%s%s', mbean_type, mbean_bean )
 
+        elsif( mbean.include?( 'solr') )
+#           logger.debug("solr")
+
+# solr/live:id=org.apache.solr.handler.ReplicationHandler,type=/replication (String)
+# solr/live:id=org.apache.solr.search.LRUCache,type=queryResultCache (String)
+# solr/live:id=org.apache.solr.search.LRUCache,type=documentCache (String)
+# solr/live:id=org.apache.solr.handler.component.SearchHandler,type=/select (String)
+
+# solr/preview:id=org.apache.solr.handler.ReplicationHandler,type=/replication (String)
+# solr/preview:id=org.apache.solr.search.LRUCache,type=queryResultCache (String)
+# solr/preview:id=org.apache.solr.search.LRUCache,type=documentCache (String)
+# solr/preview:id=org.apache.solr.handler.component.SearchHandler,type=/select (String)
+
+# solr/studio:id=org.apache.solr.handler.ReplicationHandler,type=/replication (String)
+# solr/studio:id=org.apache.solr.search.LRUCache,type=queryResultCache (String)
+# solr/studio:id=org.apache.solr.search.LRUCache,type=documentCache (String)
+# solr/studio:id=org.apache.solr.handler.component.SearchHandler,type=/select (String)
+
+## "solr/studio:id=org.apache.solr.search.LRUCache,type=queryResultCache" -> "core: studio | type: queryResultCache"
+
+
+# solr:category=REPLICATION,dom1=core,dom2=live,name=*,scope=/replication (String)
+# solr:category=QUERY,dom1=core,dom2=live,name=*,scope=/select (String)
+# solr:category=CACHE,dom1=core,dom2=live,name=*,scope=searcher (String)
+# solr:category=INDEX,dom1=core,dom2=live,name=* (String)
+
+# solr:category=REPLICATION,dom1=core,dom2=preview,name=*,scope=/replication (String)
+# solr:category=QUERY,dom1=core,dom2=preview,name=*,scope=/select (String)
+# solr:category=CACHE,dom1=core,dom2=preview,name=*,scope=searcher (String)
+# solr:category=INDEX,dom1=core,dom2=preview,name=* (String)
+
+# solr:category=REPLICATION,dom1=core,dom2=studio,name=*,scope=/replication (String)
+# solr:category=QUERY,dom1=core,dom2=studio,name=*,scope=/select (String)
+# solr:category=CACHE,dom1=core,dom2=studio,name=*,scope=searcher (String)
+# solr:category=INDEX,dom1=core,dom2=studio,name=* (String)
+
+#
+
+          if(mbean.include?('dom1=core'))
+            logger.warn("unsupported solr mbeans (for solr 7) detected!")
+            #  logger.debug("request: #{request} (#{request.class})")
+#             logger.debug("mbean  : #{mbean} (#{mbean.class})")
+#             logger.debug("value  : #{value} (#{value.class})")
+          else
+
+#             logger.debug("mbean  : #{mbean} (#{mbean.class})")
+#             logger.debug("value  : #{value} (#{value.class})")
+
+            regex = /
+              ^                     # Starting at the front of the string
+              solr\/                #
+              (?<core>.+[a-zA-Z0-9]):  #
+              (.*)                  #
+              type=                 #
+              (?<type>.+[a-zA-Z])   #
+              $
+            /x
+
+            parts           = mbean.match( regex )
+            if(parts.nil?)
+
+            else
+              mbean_core      = parts['core'].to_s.strip.tr( '. ', '' )
+              mbean_core[0]   = mbean_core[0].to_s.capitalize
+              mbean_type      = parts['type'].to_s.tr( '. /', '' )
+              mbean_type[0]   = mbean_type[0].to_s.capitalize
+              mbean_type      = format( 'Solr%s%s', mbean_core, mbean_type )
+            end
+
+          end
+
+#           logger.debug("mbean_type  : #{mbean_type} (#{mbean_type.class})")
+
         elsif( mbean.include?( 'name=' ) )
+
           regex = /
             ^                     # Starting at the front of the string
             (.*)                  #
@@ -966,29 +1050,15 @@ module DataCollector
             $
           /x
 
-          parts           = mbean.match( regex )
-          mbean_name      = parts['name'].to_s.strip.tr( '. ', '' )
-          mbean_type      = parts['type'].to_s.strip.tr( '. ', '' )
-          mbean_type      = format( '%s%s', mbean_type, mbean_name )
+          parts           = mbean.match(regex)
 
-        elsif( mbean.include?( 'solr') )
+          if(parts.nil?)
 
-          regex = /
-            ^                     # Starting at the front of the string
-            solr\/                #
-            (?<core>.+[a-zA-Z0-9]):  #
-            (.*)                  #
-            type=                 #
-            (?<type>.+[a-zA-Z])   #
-            $
-          /x
-
-          parts           = mbean.match( regex )
-          mbean_core      = parts['core'].to_s.strip.tr( '. ', '' )
-          mbean_core[0]   = mbean_core[0].to_s.capitalize
-          mbean_type      = parts['type'].to_s.tr( '. /', '' )
-          mbean_type[0]   = mbean_type[0].to_s.capitalize
-          mbean_type      = format( 'Solr%s%s', mbean_core, mbean_type )
+          else
+            mbean_name      = parts['name'].to_s.strip.tr( '. ', '' )
+            mbean_type      = parts['type'].to_s.strip.tr( '. ', '' )
+            mbean_type      = format( '%s%s', mbean_type, mbean_name )
+          end
 
         else
           regex = /
@@ -1018,7 +1088,9 @@ module DataCollector
 
       end
 
-      { status: 204, message: 'no data' } if( result.count == 0 )
+      return { status: 204, message: 'no data' } if( result.count == 0 )
+
+      #logger.debug(result) # if(port == '40099')
 
       result
     end

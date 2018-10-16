@@ -195,10 +195,10 @@ module DataCollector
       data['metrics'].delete_if { |key| key['mbean'].match( '%CORE%' ) } if( service =~ /solr-/ )
       data['metrics'].uniq!      # remove doubles
 
-      # mbeans = data['metrics'].map {|x| x['mbean'] }
-      # logger.debug( JSON.pretty_generate mbeans )
+      #mbeans = data['metrics'].map {|x| x['mbean'] }
+      #logger.debug( JSON.pretty_generate mbeans ) if( service =~ /solr-/ )
       # logger.debug( data['metrics'].count )
-#       logger.debug( '----------------------------------------------------------------------')
+      # logger.debug( '----------------------------------------------------------------------')
 
       return data
     end
