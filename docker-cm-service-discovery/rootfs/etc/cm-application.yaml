@@ -324,12 +324,21 @@ jolokia:
       metrics:
       - mbean: solr/%CORE%:type=/replication,id=org.apache.solr.handler.ReplicationHandler
         attribute: errors,isMaster,isSlave,requests,medianRequestTime,indexVersion,indexSize,generation
+
       - mbean: solr/%CORE%:type=queryResultCache,id=org.apache.solr.search.LRUCache
         attribute: cumulative_evictions,cumulative_hitratio,cumulative_hits,cumulative_inserts,cumulative_lookups,description,evictions,hitratio,hits,inserts,lookups,size,warmupTime
+
       - mbean: solr/%CORE%:type=documentCache,id=org.apache.solr.search.LRUCache
         attribute: cumulative_evictions,cumulative_hitratio,cumulative_hits,cumulative_inserts,cumulative_lookups,description,evictions,hitratio,hits,inserts,lookups,size,warmupTime
+
       - mbean: solr/%CORE%:type=/select,id=org.apache.solr.handler.component.SearchHandler
         attribute: avgRequestsPerSecond,avgTimePerRequest,medianRequestTime,requests,timeouts,errors
+
+      - mbean: solr:dom1=core,dom2=%CORE%,category=REPLICATION,scope=/replication,name=*
+      - mbean: solr:dom1=core,dom2=%CORE%,category=QUERY,scope=/select,name=*
+      - mbean: solr:dom1=core,dom2=%CORE%,category=CACHE,scope=searcher,name=*
+      - mbean: solr:dom1=core,dom2=%CORE%,category=INDEX,name=*
+
 
     webdav:
       description: Webdav
