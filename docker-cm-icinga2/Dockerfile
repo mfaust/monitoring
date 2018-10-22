@@ -7,7 +7,7 @@ ENV \
 
 RUN \
   apt-get update > /dev/null && \
-  apt-get dist-upgrade > /dev/null && \
+  apt-get dist-upgrade --assume-yes > /dev/null && \
   apt-get install --assume-yes --no-install-recommends \
     bash \
     bzip2 \
