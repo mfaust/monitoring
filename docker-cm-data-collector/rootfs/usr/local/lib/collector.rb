@@ -118,16 +118,14 @@ module DataCollector
 
       return { status: 500, message: 'no host name for mongodb_data data' } if( host.nil? )
 
-      if( Utils::Network.port_open?( host, port ) == false )
-        logger.warn( format( 'The Port %s on Host %s is not open, skip sending data', port, host ) )
-        return JSON.parse( JSON.generate( status: 500 ) )
+      begin
+        m    = ExternalClients::MongoDb::Instance.new( host: host, port: port )
+        return m.statistics_data()
+
+      rescue => error
+        logger.error("error: #{error} (file #{__FILE__} :: line #{__LINE__})")
+        return JSON.parse( JSON.generate( status: 500, message: error.to_s ) )
       end
-
-      m    = ExternalClients::MongoDb::Instance.new( host: host, port: port )
-      data = m.get()
-      # m.close
-
-      data
     end
 
 
