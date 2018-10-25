@@ -1,0 +1,12 @@
+---
+version: '3.3'
+
+volumes:
+  database:
+    driver: local
+  redis:
+    driver: local
+  carbon:
+    driver: local
+  icinga:
+    driver: local

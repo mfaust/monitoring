@@ -39,6 +39,18 @@ services:
     networks:
       - database
 
+  consul-master:
+    restart: always
+    image: bodsch/docker-consul
+    container_name: consul-master
+    hostname: consul-master
+    ports:
+      - 8400
+      - 8500
+    command: 'agent -data-dir /data -server -client=0.0.0.0'
+    networks:
+      - backend
+
   jolokia:
     restart: always
     build:

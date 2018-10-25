@@ -1,0 +1,73 @@
+---
+version: '3.3'
+
+services:
+
+  beanstalkd:
+    restart: always
+    image: bodsch/docker-beanstalkd:1.10
+    container_name: beanstalkd
+    hostname: beanstalkd
+    networks:
+      - database
+
+  database:
+    restart: always
+    image: bodsch/docker-mariadb
+    container_name: database
+    hostname: database
+    environment:
+      MARIADB_SYSTEM_USER: root
+      MARIADB_ROOT_PASSWORD: ${DATABASE_ROOT_PASSWORD}
+    volumes:
+      - database:/srv
+    networks:
+      - database
+
+  memcached:
+    restart: always
+    image: memcached:1-alpine
+    container_name: memcached
+    hostname: memcached
+    command: "--listen=0.0.0.0 --memory-limit=8"
+    networks:
+      - database
+
+  redis:
+    restart: always
+    image: redis:4-alpine
+    container_name: redis
+    hostname: redis
+    ports:
+      - 6379:6379
+    volumes:
+      - redis:/data
+    networks:
+      - database
+
+  graphite:
+    restart: always
+    image: bodsch/docker-graphite:1.1.4
+    container_name: graphite
+    hostname: graphite
+    environment:
+      # THIS TURN OFF THE INTERNAL CARBON!
+      # USE THIS ONLY WITH AN OTHER CARBON-WRITER (e.g. bodsch/docker-go-carbon)
+      USE_EXTERNAL_CARBON: 'true'
+    volumes:
+      - carbon:/srv
+    networks:
+      - database
+
+  carbon:
+    restart: always
+    image: bodsch/docker-go-carbon:0.13.0
+    container_name: carbon
+    hostname: carbon
+    ports:
+      - 2003:2003
+      - 2003:2003/udp
+    volumes:
+      - carbon:/srv
+    networks:
+      - database

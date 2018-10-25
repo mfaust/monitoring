@@ -1,7 +1,7 @@
 
 CURRENT_DIRECTORY := $(shell pwd)
 
-.PHONY: build up start stop status restart clean down pull build tail
+.PHONY: build up start stop status restart clean down pull build tail compose
 
 # help:
 # 	@echo "Docker Compose Help"
@@ -49,3 +49,12 @@ build:
 
 tail:
 	@docker-compose logs -f
+
+compose:
+	docker-compose \
+		--file compose/head.yml \
+		--file compose/volumes.yml \
+		--file compose/databases.yml \
+		--file compose/backend.yml \
+		--file compose/frontend.yml \
+		config > docker-compose_file.yml

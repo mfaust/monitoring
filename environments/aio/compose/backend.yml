@@ -1,0 +1,228 @@
+---
+version: '3.3'
+
+services:
+
+  consul-master:
+    restart: always
+    image: bodsch/docker-consul
+    container_name: consul-master
+    hostname: consul-master
+    ports:
+      - 8400
+      - 8500
+    command: 'agent -data-dir /data -server -client=0.0.0.0'
+    networks:
+      - backend
+
+  jolokia:
+    restart: always
+    build:
+      context: ../../../docker-cm-jolokia
+      dockerfile: Dockerfile
+      args:
+        - BUILD_DATE=${BUILD_DATE}
+        - BUILD_VERSION=${BUILD_VERSION}
+    container_name: jolokia
+    hostname: jolokia
+    networks:
+      - backend
+    extra_hosts:
+      osmc.local: 192.168.122.60
+      blueprint-box: 192.168.252.100
+
+  cm-icinga2-master:
+    restart: always
+    build:
+      context: ../../../docker-cm-icinga2
+      dockerfile: Dockerfile
+      args:
+        - BUILD_DATE=${BUILD_DATE}
+        - BUILD_VERSION=${BUILD_VERSION}
+    container_name: cm-icinga2-master
+    hostname: cm-icinga2-master
+    depends_on:
+      - database
+      - redis
+    links:
+      - database
+      - redis
+    environment:
+      LOG_LEVEL: info
+      ICINGA2_MASTER: cm-icinga2-master
+      ICINGA2_API_USERS: root:icinga,icingaweb:icingaweb,dashing:dashing,cert:foo-bar
+      BASIC_AUTH_USER: ${CERT_SERVICE_BA_USER}
+      BASIC_AUTH_PASS: ${CERT_SERVICE_BA_PASSWORD}
+#      ICINGA_CERT_SERVICE_BA_USER: admin
+#      ICINGA_CERT_SERVICE_BA_PASSWORD: admin
+      ICINGA_CERT_SERVICE_API_USER: root
+      ICINGA_CERT_SERVICE_API_PASSWORD: icinga
+      ICINGA_CERT_SERVICE_SERVER: icinga2-master
+      ICINGA_CERT_SERVICE_PORT: 8080
+      ICINGA_CERT_SERVICE_PATH: /
+      MYSQL_HOST: database
+      MYSQL_ROOT_PASS: ${DATABASE_ROOT_PASSWORD}
+      IDO_PASSWORD: ${IDO_PASSWORD}
+      IDO_DATABASE_NAME: icinga2core
+      CARBON_HOST: carbon
+      REDIS_HOST: redis
+    ports:
+      - 5665:5665
+      - 8080
+    volumes:
+      - icinga:/var/lib/icinga2
+    networks:
+      - backend
+      - database
+    extra_hosts:
+      osmc.local: 192.168.122.60
+      blueprint-box: 192.168.252.100
+
+  # single service
+  # use MQ to process data
+  cm-service-discovery:
+    restart: always
+    build:
+      context: ../../../docker-cm-service-discovery
+      dockerfile: Dockerfile
+      args:
+        - BUILD_DATE=${BUILD_DATE}
+        - BUILD_VERSION=${BUILD_VERSION}
+    container_name: cm-service-discover
+    hostname: cm-service-discover
+    environment:
+      LOG_LEVEL: info
+    depends_on:
+      - jolokia
+      - beanstalkd
+      - redis
+      - database
+    links:
+      - jolokia
+      - beanstalkd
+      - redis
+    networks:
+      - backend
+      - database
+    extra_hosts:
+      osmc.local: 192.168.122.60
+      blueprint-box: 192.168.252.100
+
+  # single service
+  # use MQ to process data
+  cm-data-collector:
+    restart: always
+    build:
+      context: ../../../docker-cm-data-collector
+      dockerfile: Dockerfile
+      args:
+        - BUILD_DATE=${BUILD_DATE}
+        - BUILD_VERSION=${BUILD_VERSION}
+    container_name: cm-data-collector
+    hostname: cm-data-collector
+    environment:
+      LOG_LEVEL: debug
+    depends_on:
+      - jolokia
+      - beanstalkd
+      - redis
+      - database
+    links:
+      - jolokia
+      - beanstalkd
+      - redis
+    networks:
+      - backend
+      - database
+    extra_hosts:
+      osmc.local: 192.168.122.60
+      blueprint-box: 192.168.252.100
+
+  # single service
+  # use MQ to process data
+  cm-carbon-client:
+    restart: always
+    build:
+      context: ../../../docker-cm-carbon-client
+      dockerfile: Dockerfile
+      args:
+        - BUILD_DATE=${BUILD_DATE}
+        - BUILD_VERSION=${BUILD_VERSION}
+    container_name: cm-carbon-client
+    hostname: cm-carbon-client
+    environment:
+      LOG_LEVEL: info
+      # USE ONLY WITH AND EXTERNAL CARBON-WRITER!
+      GRAPHITE_HOST: carbon
+    depends_on:
+      - redis
+    links:
+      - redis
+    networks:
+      - backend
+      - database
+
+  # single service
+  # use MQ to process data
+  cm-grafana-client:
+    restart: always
+    build:
+      context: ../../../docker-cm-grafana-client
+      dockerfile: Dockerfile
+      args:
+        - BUILD_DATE=${BUILD_DATE}
+        - BUILD_VERSION=${BUILD_VERSION}
+    container_name: cm-grafana-client
+    hostname: cm-grafana-client
+    environment:
+      LOG_LEVEL: info
+      GRAFANA_HOST: nginx
+    depends_on:
+      - beanstalkd
+      - redis
+      - database
+    links:
+      - nginx
+      - beanstalkd
+      - redis
+      - database
+    networks:
+      - frontend
+      - backend
+      - database
+
+  # single service
+  # use MQ to process data
+  cm-icinga-client:
+    restart: always
+    build:
+      context: ../../../docker-cm-icinga-client
+      dockerfile: Dockerfile
+      args:
+        - BUILD_DATE=${BUILD_DATE}
+        - BUILD_VERSION=${BUILD_VERSION}
+    container_name: cm-icinga-client
+    hostname: cm-icinga-client
+    environment:
+      LOG_LEVEL: info
+      ICINGA_MASTER: cm-icinga2-master
+      ICINGA_CERT_SERVICE_BA_USER: ${CERT_SERVICE_BA_USER}
+      ICINGA_CERT_SERVICE_BA_PASSWORD: ${CERT_SERVICE_BA_PASSWORD}
+      ICINGA_CERT_SERVICE_API_USER: dashing
+      ICINGA_CERT_SERVICE_API_PASSWORD: dashing
+      ICINGA_CERT_SERVICE_SERVER: nginx
+      ICINGA_CERT_SERVICE_PORT: 80
+      ICINGA_CERT_SERVICE_PATH: /cert-service
+      # ENABLE_NOTIFICATIONS: 'true'
+    depends_on:
+      - beanstalkd
+    links:
+      - beanstalkd
+      - nginx
+    networks:
+      - frontend
+      - backend
+      - database
+    extra_hosts:
+      osmc.local: 192.168.122.60
+      blueprint-box: 192.168.252.100

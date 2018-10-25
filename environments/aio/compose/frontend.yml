@@ -1,0 +1,181 @@
+---
+version: '3.3'
+
+services:
+
+  nginx:
+    restart: always
+    image: bodsch/docker-nginx:1.14.0
+    container_name: nginx
+    hostname: nginx
+    ports:
+      - 80:80
+      - 443:443
+    depends_on:
+      - grafana
+      - icingaweb2
+      - cm-rest-service
+      - documentation
+    links:
+      - grafana
+      - icingaweb2
+      - cm-icinga2-master:icinga2-master
+      - cm-rest-service
+      - documentation
+    volumes:
+      # - ../../docker-cm-data/rootfs/data/www/entry-page:/var/www/entry-page
+      - ../../config/nginx/etc/nginx/sites-enabled/01-all-in-one.conf:/etc/nginx/sites-enabled/01-all-in-one.conf:ro
+      - ../../config/nginx/etc/nginx/nginx.conf-aio:/etc/nginx/nginx.conf:ro
+      - ./../ssl:/etc/nginx/secure/localhost:ro
+    networks:
+      - frontend
+      - backend
+
+  grafana:
+    restart: always
+    image: bodsch/docker-grafana:5.3.1-debian
+    container_name: grafana
+    hostname: grafana
+    environment:
+      URL_PATH: /grafana/
+      ORGANISATION: CoreMedia
+      DATABASE_TYPE: mysql
+      MYSQL_HOST: database
+      MYSQL_ROOT_PASS: ${DATABASE_ROOT_PASSWORD}
+      GRAPHITE_HOST: graphite
+      # WE USE AN SEPERATE CARBON SERVICE
+      # IF NOT, THEN SET THEN TO $GRAPHITE_HOST
+      # (see above in this configuration part!)
+      CARBON_HOST: carbon
+      MEMCACHE_HOST: memcached
+      # LDAP_SERVER: ${LDAP_SERVER}
+      # LDAP_PORT: 389
+      # LDAP_BIND_DN: ${LDAP_BIND_DN}
+      # LDAP_BIND_PASSWORD: ${LDAP_BIND_PASSWORD}
+      # LDAP_BASE_DN: ${LDAP_BASE_DN}
+      # LDAP_GROUP_DN: ${LDAP_GROUP_DN}
+      # LDAP_SEARCH_FILTER: ${LDAP_SEARCH_FILTER}
+    depends_on:
+      - database
+      - memcached
+    links:
+      - database
+      - memcached
+    networks:
+      - frontend
+      - backend
+      - database
+
+  icingaweb2:
+    restart: always
+    image: bodsch/docker-icingaweb2:2.6.1
+    container_name: icingaweb2
+    hostname: icingaweb2
+    environment:
+      MYSQL_HOST: database
+      MYSQL_ROOT_PASS: ${DATABASE_ROOT_PASSWORD}
+      IDO_PASSWORD: ${IDO_PASSWORD}
+      IDO_DATABASE_NAME: icinga2core
+      ICINGA2_HOST: cm-icinga2-master
+      ICINGA2_MASTER: cm-icinga2-master
+      ICINGA2_CMD_API_USER: icingaweb
+      ICINGA2_CMD_API_PASS: icingaweb
+      GRAPHITE_HOST: graphite
+      ICINGAWEB2_USERS: coremedia:coremedia,icinga:icinga
+      # LDAP_AD: 'true'
+      # LDAP_SERVER: ${LDAP_SERVER}
+      # LDAP_PORT: 389
+      # LDAP_BIND_DN: ${LDAP_BIND_DN}
+      # LDAP_BIND_PASSWORD: ${LDAP_BIND_PASSWORD}
+      # LDAP_BASE_DN: ${LDAP_BASE_DN}
+      # LDAP_FILTER: ${LDAP_FILTER}
+      # LDAP_ROLE_GROUPS: cm-common
+    depends_on:
+      - database
+      - cm-icinga2-master
+    links:
+      - database
+      - cm-icinga2-master:cm-icinga2-master
+    networks:
+      - frontend
+      - backend
+      - database
+
+  documentation:
+    restart: always
+    build:
+      context: ../../../docker-documentation
+      dockerfile: Dockerfile
+      args:
+        - BUILD_DATE=${BUILD_DATE}
+        - BUILD_VERSION=${BUILD_VERSION}
+    container_name: documentation
+    hostname: documentation
+    entrypoint: '/usr/bin/algernon'
+    command:
+      - '--simple'
+      - '--addr=:8080'
+      - '--dir=/data'
+    ports:
+      - 8080
+    networks:
+      - frontend
+
+  cm-dashing:
+    restart: always
+    build:
+      context: ../../../docker-cm-dashing
+      dockerfile: Dockerfile
+      args:
+        - BUILD_DATE=${BUILD_DATE}
+        - BUILD_VERSION=${BUILD_VERSION}
+    container_name: cm-dashing
+    hostname: cm-dashing
+    environment:
+      ICINGA_MASTER: cm-icinga2-master
+      ICINGA_CERT_SERVICE_BA_USER: ${CERT_SERVICE_BA_USER}
+      ICINGA_CERT_SERVICE_BA_PASSWORD: ${CERT_SERVICE_BA_PASSWORD}
+      ICINGA_CERT_SERVICE_API_USER: dashing
+      ICINGA_CERT_SERVICE_API_PASSWORD: dashing
+      ICINGA_CERT_SERVICE_SERVER: nginx
+      ICINGA_CERT_SERVICE_PORT: 80
+      ICINGA_CERT_SERVICE_PATH: /cert-service
+      ICINGAWEB_URL: /icinga
+    depends_on:
+      - cm-icinga2-master
+      - nginx
+    links:
+      - cm-icinga2-master
+      - nginx
+    networks:
+      - frontend
+      - backend
+
+  # CoreMedia Glue and Logic
+  #
+  cm-rest-service:
+    restart: always
+    build:
+      context: ../../../docker-cm-rest-service
+      dockerfile: Dockerfile
+      args:
+        - BUILD_DATE=${BUILD_DATE}
+        - BUILD_VERSION=${BUILD_VERSION}
+    container_name: cm-rest-service
+    hostname: cm-rest-service
+    environment:
+      LOG_LEVEL: info
+      MYSQL_ROOT_PASS: ${DATABASE_ROOT_PASSWORD}
+    depends_on:
+      - redis
+      - database
+    links:
+      - redis
+      - database
+    networks:
+      - frontend
+      - backend
+      - database
+    extra_hosts:
+      osmc.local: 192.168.122.60
+      blueprint-box: 192.168.252.100

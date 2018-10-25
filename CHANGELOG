@@ -118,5 +118,8 @@
 - enable cors for external integration
 - remove obsolete code
 
+181x
 
+- update to grafana 5.3.1
+- update to icinga2 2.10.1
 
