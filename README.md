@@ -1,7 +1,3 @@
-![Status: Active](https://documentation.coremedia.com/badges/badge_status_active.png "Status: Active")
-![CoreMedia Labs Logo](https://documentation.coremedia.com/badges/banner_coremedia_labs_wide.png "CoreMedia Labs Logo Title Text")
-
-
 # CoreMedia Monitoring Toolbox
 
 ## Einleitung
